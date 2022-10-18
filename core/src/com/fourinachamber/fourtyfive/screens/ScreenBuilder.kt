@@ -1,4 +1,4 @@
-package com.blueuserred.testgame
+package com.fourinachamber.fourtyfive.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
@@ -28,9 +28,10 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.utils.Either
+import com.fourinachamber.fourtyfive.utils.Utils
 import onj.*
 import kotlin.system.measureTimeMillis
-import com.blueuserred.testgame.OnjReaderUtils.Animation
 
 
 interface ScreenBuilder {
@@ -49,7 +50,6 @@ interface ScreenDataProvider {
     val stage: Stage
     var postProcessor: PostProcessor?
     val screen: Screen
-    var screenController: ScreenController?
 
     fun afterMs(ms: Int, callback: () -> Unit)
 }
@@ -58,7 +58,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
     private lateinit var textures: Map<String, TextureRegion>
     private lateinit var fonts: Map<String, BitmapFont>
-    private lateinit var animations: Map<String, Animation>
+    private lateinit var animations: Map<String, OnjReaderUtils.Animation>
     private lateinit var earlyRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var lateRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var behavioursToBind: MutableList<Behaviour>
@@ -145,10 +145,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             namedCells,
             namedActors
         )
-
-        onjScreen.screenController = onj.getOr<OnjNamedObject?>("controller", null)?.let {
-            ScreenControllerFactory.controllerOrError(it.name, onjScreen)
-        }
 
         val cursorOnj = options.get<OnjObject>("defaultCursor")
         onjScreen.defaultCursor = MouseHoverBehaviour.loadCursor(
@@ -406,7 +402,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         return fonts[name] ?: throw RuntimeException("Unknown font: $name")
     }
 
-    private fun animationOrError(name: String): Animation {
+    private fun animationOrError(name: String): OnjReaderUtils.Animation {
         return animations[name] ?: throw RuntimeException("Unknown animation: $name")
     }
 
@@ -446,13 +442,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         override val stage: Stage = Stage(viewport, batch).apply {
             children.forEach { addActor(it) }
         }
-
-        override var screenController: ScreenController? = null
-            set(value) {
-                field?.end()
-                field = value
-                value?.setup()
-            }
 
         override fun afterMs(ms: Int, callback: () -> Unit) {
             callbacks.add((TimeUtils.millis() + ms) to callback)

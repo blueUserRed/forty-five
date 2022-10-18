@@ -1,10 +1,13 @@
-package com.blueuserred.testgame
+package com.fourinachamber.fourtyfive.screens
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.fourinachamber.fourtyfive.utils.Either
+import com.fourinachamber.fourtyfive.utils.eitherLeft
+import com.fourinachamber.fourtyfive.utils.eitherRight
 import onj.OnjNamedObject
 
 object DragAndDropBehaviourFactory {
