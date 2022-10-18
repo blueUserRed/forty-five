@@ -1,4 +1,4 @@
-package com.blueuserred.testgame
+package com.fourinachamber.fourtyfive.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor

@@ -1,4 +1,4 @@
-package com.blueuserred.testgame
+package com.fourinachamber.fourtyfive.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.blueuserred.testgame.OnjReaderUtils.Animation
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
@@ -19,6 +18,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.utils.Utils
+import com.fourinachamber.fourtyfive.utils.minus
+import com.fourinachamber.fourtyfive.utils.xy
 import ktx.actors.onTouchEvent
 import onj.OnjArray
 import onj.OnjFloat
@@ -232,7 +234,7 @@ class RotatableImageActor(
 }
 
 class AnimatedImage(
-    private val animation: Animation
+    private val animation: OnjReaderUtils.Animation
 ) : CustomImageActor(animation.frames[animation.initialFrame]) {
 
     override var fixedZIndex: Int = 0

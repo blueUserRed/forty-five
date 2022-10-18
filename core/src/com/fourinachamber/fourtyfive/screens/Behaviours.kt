@@ -1,4 +1,4 @@
-package com.blueuserred.testgame
+package com.fourinachamber.fourtyfive.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
@@ -9,6 +9,10 @@ import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
+import com.fourinachamber.fourtyfive.utils.Either
+import com.fourinachamber.fourtyfive.utils.Utils
+import com.fourinachamber.fourtyfive.utils.eitherLeft
+import com.fourinachamber.fourtyfive.utils.eitherRight
 import ktx.actors.onClick
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -22,7 +26,6 @@ object BehaviourFactory {
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
-        "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnClickShootBehaviour" to { onj, actor -> OnClickShootBehaviour(onj, actor) },
         "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
@@ -215,15 +218,6 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
             cell.table.invalidate()
         }
 
-    }
-}
-
-class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    private val screenPath = onj.get<String>("screenPath")
-
-    override val onCLick: BehaviourCallback = {
-        TestGame.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(screenPath)).build()
     }
 }
 
