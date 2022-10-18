@@ -1,0 +1,22 @@
+
+$Font [
+
+    $BitmapFont {
+        name: string
+        file: string
+    }
+
+    $FreeTypeFont {
+        name: string
+        file: string
+        size: int
+    }
+
+    $DistanceFieldFont {
+        name: string
+        fontFile: string
+        imageFile: string
+        useMipMapLinearLinear?: boolean
+    }
+
+]
