@@ -1,0 +1,41 @@
+
+export !textureDeclaration = {
+    name: string
+    file: string
+}
+
+export !textureAtlasDeclaration = {
+    file: string
+    defines: string[*]
+}
+
+export !cursorDeclaration = {
+    name: string
+    file: string
+    hotspotX: int
+    hotspotY: int
+}
+
+export !postProcessorDeclaration = {
+    name: string
+    vertexShader: string
+    fragmentShader: string
+    timeOffset?: int
+    uniforms: string[*]
+    args: ?{
+        ...*
+    }
+}
+
+export !pixmapDeclaration = {
+    name: string
+    file: string
+}
+
+export !animationDeclaration = {
+    name: string
+    atlasFile: string
+    frames?: string[*]
+    initialFrame: int
+    frameTime: int
+}

@@ -1,0 +1,251 @@
+
+import "imports/asset_definitions.onjschema" as _
+import "imports/font_group.onjschema" as _
+
+!tableCell = {
+    width?: float
+    height?: float
+    colspan?: int
+    align?: string
+    padTop?: float
+    padBottom?: float
+    padLeft?: float
+    padRight?: float
+    cellName?: string
+    element: $Widget
+}
+
+!tableRow = {
+    width?: float
+    height?: float
+    cells: !tableCell[*]
+}
+
+!viewportSharedKeys = {
+    backgroundTexture?: string
+}
+
+$Viewport [
+
+    $FitViewport {
+        worldWidth: float
+        worldHeight: float
+        ...!viewportSharedKeys
+    }
+
+    $ExtendViewport {
+        minWidth: float
+        minHeight: float
+        ...!viewportSharedKeys
+    }
+
+]
+
+!widgetSharedKeys = {
+    debug?: boolean
+    behaviours?: $Behaviour[*]
+    width?: float
+    height?: float
+    dragAndDrop?: $DragAndDropBehaviour
+    zIndex?: int
+    x?: float
+    y?: float
+    visible?: boolean
+    name?: string
+}
+
+$Widget [
+
+    $Label {
+        text: string
+        font: string
+        color: string
+        fontScale: float
+        backgroundTexture?: string
+        backgroundNinepatch?: string
+        align?: string
+        ...!widgetSharedKeys
+    }
+
+    $Image {
+        textureName: string
+        scaleX: float
+        scaleY: float
+        ...!widgetSharedKeys
+    }
+
+    $AnimatedImage {
+        animationName: string
+        scaleX: float
+        scaleY: float
+        ...!widgetSharedKeys
+    }
+
+    $Table {
+        fillX?: boolean
+        fillY?: boolean
+        align?: string
+        rows: !tableRow[*]
+        applyZIndices?: boolean
+        ...!widgetSharedKeys
+    }
+
+    $HorizontalGroup {
+        children: $Widget[*]
+        align: string
+        spacing?: float
+        expand?: boolean
+        wrap?: boolean
+        ...!widgetSharedKeys
+    }
+
+    $VerticalGroup {
+        children: $Widget[*]
+        align: string
+        spacing?: float
+        expand?: boolean
+        wrap?: boolean
+        ...!widgetSharedKeys
+    }
+
+    $RotatableImageActor {
+        textureName: string
+        slowdownRate: float
+        velocityMultiplier: float
+        startVelocity?: float
+        snap: ?{
+            rotations: float[*]
+            deactivateAt: float
+            strengthMultiplier: float
+            deactivateWhileDragging: boolean
+        }
+        ...!widgetSharedKeys
+    }
+
+    $VBox {
+        fillX?: boolean
+        fillY?: boolean
+        children: $Widget[*]
+        ...!widgetSharedKeys
+    }
+
+    $HBox {
+        fillX?: boolean
+        fillY?: boolean
+        children: $Widget[*]
+        ...!widgetSharedKeys
+    }
+
+]
+
+$Behaviour [
+
+    $MouseHoverBehaviour {
+        useSystemCursor: boolean
+        cursorName: string
+    }
+
+    $OnClickExitBehaviour { }
+
+    $OnHoverChangeSizeBehaviour {
+        cellName?: string
+        enterDuration: float
+        exitDuration: float
+        baseX: float
+        baseY: float
+        targetX: float
+        targetY: float
+        enterInterpolation: string?
+        exitInterpolation: string?
+    }
+
+    $OnClickChangeScreenBehaviour {
+        screenPath: string
+    }
+
+    $OnClickShootBehaviour {
+        maskTexture: string
+        invert?: boolean
+        maskScaleX?: float
+        maskScaleY?: float
+        maskOffsetX?: float
+        maskOffsetY?: float
+    }
+
+    $OnClickParticleEffectBehaviour {
+        file: string
+        textureDir: string
+        effectScale?: float
+        useCursorPos?: boolean
+    }
+
+    $OnClickChangePostProcessorBehaviour {
+        postProcessor: string?
+        duration: int?
+        setOnlyIfNoPostProcessorIsSet: boolean
+    }
+
+    $OnHoverPopupBehaviour {
+        popupName: string
+        setPopupPosition: boolean
+        xOffset?: float
+        yOffset?: float
+    }
+
+]
+
+!dragAndDropBehaviourSharedKeys = {
+    group: string
+}
+
+$DragAndDropBehaviour [
+
+    $SimpleDragSource {
+        useDimensionsOfCell?: string
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
+    $TestDropTarget {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
+
+    $SlotDragSource {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
+    $SlotDropTarget {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
+]
+
+$ScreenController [
+
+    $GameScreenController { }
+
+]
+
+viewport: $Viewport
+controller?: $ScreenController
+
+assets: {
+    textures: !textureDeclaration[*]
+    fonts: $Font[*]
+    textureAtlases: !textureAtlasDeclaration[*]
+    cursors: !cursorDeclaration[*]
+    postProcessors: !postProcessorDeclaration[*]
+    animations: !animationDeclaration[*]
+}
+
+options: {
+    setFillParentOnRoot: boolean
+    defaultCursor: {
+        useSystemCursor: boolean
+        cursorName: string
+    }
+    postProcessor: string?
+}
+
+children: $Widget[*]
+unmanagedChildren?: $Widget[*]
