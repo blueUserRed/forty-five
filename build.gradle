@@ -50,11 +50,15 @@ project(":desktop") {
     }
 }
 
+project(":onj") {
+    apply plugin: "kotlin"
+}
+
 project(":core") {
     apply plugin: "kotlin"
 
-
     dependencies {
+        implementation project(":onj")
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api 'io.github.libktx:ktx-actors:1.11.0-rc2'

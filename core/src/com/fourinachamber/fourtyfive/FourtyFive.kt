@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 class FourtyFive : ApplicationAdapter() {
     var batch: SpriteBatch? = null
     var img: Texture? = null
+
     override fun create() {
         batch = SpriteBatch()
         img = Texture("badlogic.jpg")
@@ -15,9 +16,10 @@ class FourtyFive : ApplicationAdapter() {
 
     override fun render() {
         ScreenUtils.clear(1f, 0f, 0f, 1f)
-        batch!!.begin()
-        batch!!.draw(img, 0f, 0f)
-        batch!!.end()
+        val batch = batch!!
+        batch.begin()
+        batch.draw(img, 0f, 0f)
+        batch.end()
     }
 
     override fun dispose() {
