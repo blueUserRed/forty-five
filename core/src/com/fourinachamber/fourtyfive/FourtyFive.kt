@@ -5,8 +5,14 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.fourinachamber.fourtyfive.screens.ScreenBuilderFromOnj
 
+/**
+ * main game object
+ */
 object FourtyFive : Game() {
 
+    /**
+     * setting this variable will change the current screen and dispose the previous
+     */
     var curScreen: Screen? = null
         set(value) {
             field?.dispose()

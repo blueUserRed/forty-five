@@ -220,14 +220,7 @@ $DragAndDropBehaviour [
 
 ]
 
-$ScreenController [
-
-    $GameScreenController { }
-
-]
-
 viewport: $Viewport
-controller?: $ScreenController
 
 assets: {
     textures: !textureDeclaration[*]

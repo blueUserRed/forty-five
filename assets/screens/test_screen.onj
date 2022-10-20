@@ -19,8 +19,7 @@ assets: {
         }
 
     ]
-    textures: [
-    ]
+    textures: []
     textureAtlases: []
     cursors: []
     postProcessors: []
@@ -48,9 +47,6 @@ options: {
                 fontScale: 0.15
                 color: !color.white
                 align: "center"
-                dragAndDrop: $SlotDragSource {
-                    group: "test"
-                }
                 zIndex: !sourceZIndex
             }
         }
