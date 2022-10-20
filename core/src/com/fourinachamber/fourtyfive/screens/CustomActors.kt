@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
@@ -18,9 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.utils.Utils
-import com.fourinachamber.fourtyfive.utils.minus
-import com.fourinachamber.fourtyfive.utils.xy
+import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.onTouchEvent
 import onj.OnjArray
 import onj.OnjFloat
@@ -28,23 +25,73 @@ import onj.OnjNamedObject
 import onj.OnjObject
 import kotlin.math.abs
 
+/**
+ * an object which is rendered and to which a mask can be applied
+ */
 interface Maskable {
+
+    /**
+     * the mask to apply
+     */
     var mask: Texture?
+
+    /**
+     * by default only parts where the mask is opaque will be rendered, but if invert is set to true, only parts where
+     * the mask is not opaque are rendered
+     */
     var invert: Boolean
+
+    /**
+     * scales the mask horizontally
+     */
     var maskScaleX: Float
+
+    /**
+     * scales the mask vertically
+     */
     var maskScaleY: Float
+
+    /**
+     * offsets the mask horizontally
+     */
     var maskOffsetX: Float
+
+    /**
+     * offsets the mask vertically
+     */
     var maskOffsetY: Float
 }
 
+/**
+ * The default implementation of z-indices in libgdx is really bad, so here is my own.
+ * Actors that implement this interface can have z-indices applied.
+ * Only works when the actor is in a [ZIndexGroup]
+ */
 interface ZIndexActor {
+
+    /**
+     * the actor with the higher z-index is rendered on top
+     */
     var fixedZIndex: Int
 }
 
+/**
+ * A group that supports [ZIndexActor]. [resortZIndices] must be called after an actor is added for the z-indices to
+ * work correctly
+ */
 interface ZIndexGroup {
+
+    /**
+     * resorts the children according to their z-indices; has to be called after adding an actor
+     */
     fun resortZIndices()
 }
 
+/**
+ * Label that uses a custom shader to render distance-field fonts correctly
+ * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
+ *  label
+ */
 class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
@@ -82,6 +129,9 @@ class CustomLabel(
 
 }
 
+/**
+ * custom Image that implements functionality for z-indices and masking
+ */
 open class CustomImageActor(private val region: TextureRegion) : Image(region), Maskable, ZIndexActor {
 
     override var fixedZIndex: Int = 0
@@ -136,6 +186,12 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
 
 }
 
+/**
+ * an image that can be turned with the cursor and supports snapping
+ * @param textureRegion the region that is rendered
+ * @param viewport the viewport of the screen
+ * @param onj the onj-object containing the configuration
+ */
 class RotatableImageActor(
     textureRegion: TextureRegion,
     private val viewport: Viewport,
@@ -233,8 +289,12 @@ class RotatableImageActor(
     }
 }
 
+/**
+ * An animated image
+ * @param animation the animation; contains the frames and data such as the frameTime
+ */
 class AnimatedImage(
-    private val animation: OnjReaderUtils.Animation
+    private val animation: Animation
 ) : CustomImageActor(animation.frames[animation.initialFrame]) {
 
     override var fixedZIndex: Int = 0
@@ -249,6 +309,9 @@ class AnimatedImage(
     }
 }
 
+/**
+ * custom table, that implements [ZIndexActor] and [ZIndexGroup]
+ */
 class CustomTable : Table(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
@@ -262,6 +325,9 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
 
 }
 
+/**
+ * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
+ */
 class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
@@ -275,6 +341,9 @@ class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 
 }
 
+/**
+ * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
+ */
 class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
@@ -287,48 +356,3 @@ class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
     }
 
 }
-
-class VBox : Table(), ZIndexActor, ZIndexGroup {
-
-    override var fixedZIndex: Int = 0
-
-    override fun resortZIndices() {
-        children.sort { el1, el2 ->
-            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-            (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-        }
-    }
-
-    override fun row(): Cell<*>? = null
-
-    fun addVBox(actor: Actor): Cell<Actor> {
-        super.row()
-        return super.add(actor)
-    }
-
-}
-
-class HBox : Table(), ZIndexActor, ZIndexGroup {
-
-    override var fixedZIndex: Int = 0
-
-    init {
-        super.row()
-    }
-
-    override fun resortZIndices() {
-        children.sort { el1, el2 ->
-            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-            (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-        }
-    }
-
-    override fun row(): Cell<*>? = null
-
-    fun addHBox(actor: Actor): Cell<Actor> {
-        return super.add(actor)
-    }
-
-}
-
-
