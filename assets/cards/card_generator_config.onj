@@ -1,0 +1,97 @@
+baseImage: "base"
+outputFile: "cards/generated/cards.atlas"
+
+packer: {
+    pageWidth: 4_000
+    pageHeight: 8_000
+    padding: 20
+}
+
+assets: {
+    pixmaps: [
+
+        {
+            name: "base"
+            file: "textures/cards/base.png"
+        }
+        {
+            name: "obsidian_bullet"
+            file: "textures/cards/obsidian_bullet.png"
+        }
+
+    ]
+    fonts: [
+        {
+            name: "arial"
+            file: "fonts/arial.fnt"
+        }
+    ]
+}
+
+!testElements = [
+
+    $TextElement {
+        x: 50
+        y: 50
+        text: "Test \nKarte"
+        font: "arial"
+        fontScale: 3.0
+    }
+
+    $ImageElement {
+        x: 200
+        y: 300
+        textureName: "obsidian_bullet"
+        scaleX: 1.0
+        scaleY: 1.0
+    }
+
+]
+
+cards: [
+
+    {
+        name: "test_card"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card2"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card3"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card4"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card5"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card6"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card7"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card8"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card9"
+        elements: !testElements
+    }
+]

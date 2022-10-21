@@ -1,0 +1,55 @@
+
+import "imports/asset_definitions.onjschema" as _
+
+!cardElementSharedKeys = {
+    x: int
+    y: int
+}
+
+baseImage: string
+outputFile: string
+
+$CardElement [
+
+    $TextElement {
+        text: string
+        font: string
+        fontScale: float
+        ...!cardElementSharedKeys
+    }
+
+    $ImageElement {
+        textureName: string
+        scaleX: float
+        scaleY: float
+        ...!cardElementSharedKeys
+    }
+
+]
+
+!cardDeclaration = {
+    name: string
+    elements: $CardElement[*]
+}
+
+cards: !cardDeclaration[*]
+
+!customFontDeclaration = {
+    name: string
+    file: string
+}
+
+assets: {
+
+//    textures: !textureDeclaration[*]
+//    textureAtlases: !textureAtlasDeclaration[*]
+    fonts: !customFontDeclaration[*]
+    pixmaps: !pixmapDeclaration[*]
+
+}
+
+packer: {
+    pageWidth: int
+    pageHeight: int
+    padding: int
+}
