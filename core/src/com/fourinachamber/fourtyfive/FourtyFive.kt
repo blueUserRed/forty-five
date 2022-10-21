@@ -23,7 +23,7 @@ object FourtyFive : Game() {
     private lateinit var menuScreen: Screen
 
     override fun create() {
-        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/test_screen.onj")).build()
+        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen.onj")).build()
         curScreen = menuScreen
     }
 

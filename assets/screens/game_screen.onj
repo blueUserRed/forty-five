@@ -1,12 +1,13 @@
 
 import "imports/colors.onj" as color
 
-!sourceZIndex = 2
-!targetZIndex = 1
+!worldWidth = 160.0
+!worldHeight = 90.0
 
 viewport: $FitViewport {
-    worldWidth: 100.0
-    worldHeight: 50.0
+    worldWidth: !worldWidth
+    worldHeight: !worldHeight
+    backgroundTexture: "background"
 }
 
 assets: {
@@ -20,7 +21,14 @@ assets: {
 
     ]
     textures: []
-    textureAtlases: []
+    textureAtlases: [
+
+        {
+            file: "textures/packed/game_screen/game_screen.atlas"
+            defines: [ "background" ]
+        }
+
+    ]
     cursors: []
     postProcessors: []
     animations: []
@@ -47,7 +55,6 @@ options: {
                 fontScale: 0.15
                 color: !color.white
                 align: "center"
-                zIndex: !sourceZIndex
             }
         }
 
@@ -61,7 +68,6 @@ children: [
         fillX: true
         fillY: true
         rows: [ !row1 ]
-        applyZIndices: true
     }
 
 ]
