@@ -220,6 +220,12 @@ $DragAndDropBehaviour [
 
 ]
 
+$ScreenController [
+
+    $GameScreenController { }
+
+]
+
 viewport: $Viewport
 
 assets: {
@@ -238,6 +244,7 @@ options: {
         cursorName: string
     }
     postProcessor: string?
+    controller: $ScreenController?
 }
 
 children: $Widget[*]
