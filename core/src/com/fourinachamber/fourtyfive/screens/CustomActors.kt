@@ -88,6 +88,18 @@ interface ZIndexGroup {
 }
 
 /**
+ * An Actor that needs to be initialised after screen is built
+ */
+interface InitialiseableActor {
+
+    /**
+     * automatically called by the screenBuilder
+     * @see InitialiseableActor
+     */
+    fun init(screenDataProvider: ScreenDataProvider)
+}
+
+/**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
  *  label
@@ -353,6 +365,18 @@ class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
             (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
+    }
+
+}
+
+class CardHand : Widget(), ZIndexActor, InitialiseableActor {
+
+    private lateinit var screenDataProvider: ScreenDataProvider
+
+    override var fixedZIndex: Int = 0
+
+    override fun init(screenDataProvider: ScreenDataProvider) {
+        this.screenDataProvider = screenDataProvider
     }
 
 }

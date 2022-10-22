@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -91,6 +92,11 @@ interface ScreenDataProvider {
     var postProcessor: PostProcessor?
 
     val screen: Screen
+
+    /**
+     * the current screen controller
+     */
+    var screenController: ScreenController?
 
     /**
      * executes a callback after [ms] time has passed
@@ -207,13 +213,26 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             }
         } else null
 
+        onjScreen.screenController = if (!options["controller"]!!.isNull()) {
+            val controller = options.get<OnjNamedObject>("controller")
+            ScreenControllerFactory.controllerOrError(controller.name, controller)
+        } else null
+
         onjScreen.dragAndDrop = doDragAndDrop(onjScreen).toMap()
 
         behavioursToBind.forEach { it.bindCallbacks(onjScreen) }
         children.forEach {
             if (it is Layout) it.invalidate()
         }
+        initialiseInitialiseableActors(children, onjScreen)
         return onjScreen
+    }
+
+    private fun initialiseInitialiseableActors(actors: Iterable<Actor>, screenDataProvider: ScreenDataProvider) {
+        for (actor in actors) {
+            if (actor is Group) initialiseInitialiseableActors(actor.children, screenDataProvider)
+            if (actor is InitialiseableActor) actor.init(screenDataProvider)
+        }
     }
 
     private fun doUnmanagedActors(children: OnjArray) = children
@@ -474,6 +493,13 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         override val stage: Stage = Stage(viewport, batch).apply {
             children.forEach { addActor(it) }
         }
+
+        override var screenController: ScreenController? = null
+            set(value) {
+                field?.end()
+                field = value
+                value?.init(this)
+            }
 
         override fun afterMs(ms: Int, callback: () -> Unit) {
             callbacks.add((TimeUtils.millis() + ms) to callback)

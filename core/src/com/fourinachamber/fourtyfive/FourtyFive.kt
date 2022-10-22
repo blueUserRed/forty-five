@@ -24,9 +24,9 @@ object FourtyFive : Game() {
     private lateinit var menuScreen: Screen
 
     override fun create() {
-        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-        cardGenerator.prepare()
-        cardGenerator.generateCards()
+//        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+//        cardGenerator.prepare()
+//        cardGenerator.generateCards()
         menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen.onj")).build()
         curScreen = menuScreen
     }

@@ -1,9 +1,9 @@
-baseImage: "base"
+baseImage: "obsidian_bullet"
 outputFile: "cards/generated/cards.atlas"
 
 packer: {
-    pageWidth: 4_000
-    pageHeight: 8_000
+    pageWidth: 2_000
+    pageHeight: 2_000
     padding: 20
 }
 
@@ -31,20 +31,20 @@ assets: {
 !testElements = [
 
     $TextElement {
-        x: 50
-        y: 50
+        x: 10
+        y: 10
         text: "Test \nKarte"
         font: "arial"
-        fontScale: 3.0
+        fontScale: 1.0
     }
 
-    $ImageElement {
-        x: 200
-        y: 300
-        textureName: "obsidian_bullet"
-        scaleX: 1.0
-        scaleY: 1.0
-    }
+//    $ImageElement {
+//        x: 200
+//        y: 300
+//        textureName: "obsidian_bullet"
+//        scaleX: 1.0
+//        scaleY: 1.0
+//    }
 
 ]
 

@@ -41,6 +41,7 @@ options: {
         cursorName: "arrow"
     }
     postProcessor: null
+    controller: $GameScreenController { }
 }
 
 
