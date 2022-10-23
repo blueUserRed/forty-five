@@ -136,6 +136,10 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+    $CardHand {
+        ...!widgetSharedKeys
+    }
+
 ]
 
 $Behaviour [
@@ -222,7 +226,11 @@ $DragAndDropBehaviour [
 
 $ScreenController [
 
-    $GameScreenController { }
+    $GameScreenController {
+        cardsFile: string
+        cardAtlasFile: string
+        cardHandName: string
+    }
 
 ]
 

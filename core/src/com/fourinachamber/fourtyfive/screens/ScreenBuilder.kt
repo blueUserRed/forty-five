@@ -102,6 +102,17 @@ interface ScreenDataProvider {
      * executes a callback after [ms] time has passed
      */
     fun afterMs(ms: Int, callback: () -> Unit)
+
+    /**
+     * adds a new texture to the screen that can be retrieved from [textures]. If a texture with [name] already exists,
+     * it will be swapped. The textures are not owned by the screen and will not be disposed when the screen is disposed
+     */
+    fun addTexture(name: String, texture: TextureRegion)
+
+    /**
+     * adds a disposable, that will be disposed automatically when teh screen is disposed
+     */
+    fun addDisposable(disposable: Disposable)
 }
 
 /**
@@ -185,7 +196,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         val onjScreen = OnjScreen(
-            this.textures,
+            this.textures.toMutableMap(),
             cursors,
             fonts,
             postProcessors,
@@ -371,6 +382,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             applyImageKeys(this, widgetOnj)
         }
 
+        "CardHand" -> CardHand()
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
     }.apply {
         applySharedWidgetKeys(this, widgetOnj)
@@ -459,7 +472,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
      * a screen that was build from an onj file. also implements [ScreenDataProvider]
      */
     private class OnjScreen(
-        override val textures: Map<String, TextureRegion>,
+        override val textures: MutableMap<String, TextureRegion>,
         override val cursors: Map<String, Cursor>,
         override val fonts: Map<String, BitmapFont>,
         override val postProcessors: Map<String, PostProcessor>,
@@ -480,6 +493,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         private val createTime: Long = TimeUtils.millis()
         private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
+        private val additionalDisposables: MutableList<Disposable> = mutableListOf()
 
         override lateinit var defaultCursor: Either<Cursor, SystemCursor>
         override val screen: Screen = this
@@ -503,6 +517,14 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         override fun afterMs(ms: Int, callback: () -> Unit) {
             callbacks.add((TimeUtils.millis() + ms) to callback)
+        }
+
+        override fun addTexture(name: String, texture: TextureRegion) {
+            textures[name] = texture
+        }
+
+        override fun addDisposable(disposable: Disposable) {
+            additionalDisposables.add(disposable)
         }
 
         private fun updateCallbacks() {
@@ -596,6 +618,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             stage.dispose()
             postProcessor?.dispose()
             toDispose.forEach(Disposable::dispose)
+            additionalDisposables.forEach(Disposable::dispose)
         }
 
     }
