@@ -229,7 +229,12 @@ $ScreenController [
     $GameScreenController {
         cardsFile: string
         cardAtlasFile: string
-        cardHandName: string
+        cardHand: {
+            actorName: string
+            cardScaling: float
+            cardSpacing: float
+        }
+        cardDragAndDropBehaviour: $DragAndDropBehaviour
     }
 
 ]

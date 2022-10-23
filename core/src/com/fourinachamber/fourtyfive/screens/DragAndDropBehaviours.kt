@@ -187,7 +187,12 @@ class SlotDragSource(
             "resetPosition" to (actor.x to actor.y)
         ))
 
-        dragAndDrop.setDragActorPosition(actor.width / 2, -actor.height / 2)
+        dragAndDrop.setDragActorPosition(
+            actor.width - (actor.width * actor.scaleX / 2),
+            -(actor.height * actor.scaleY) / 2
+//            (actor.width * actor.scaleX) / 2,
+//            -(actor.height * actor.scaleY) / 2
+        )
         return payload
     }
 

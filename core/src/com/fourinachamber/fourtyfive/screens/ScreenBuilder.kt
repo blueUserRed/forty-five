@@ -113,6 +113,16 @@ interface ScreenDataProvider {
      * adds a disposable, that will be disposed automatically when teh screen is disposed
      */
     fun addDisposable(disposable: Disposable)
+
+    /**
+     * adds an actor to the root of the screen
+     */
+    fun addActorToRoot(actor: Actor)
+
+    /**
+     * removes an actor from the root of the screen
+     */
+    fun removeActorFromRoot(actor: Actor)
 }
 
 /**
@@ -178,10 +188,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         val options = onj.get<OnjObject>("options")
 
         if (options.get<Boolean>("setFillParentOnRoot")) {
-            if (children.size != 1) {
+            if (children.isEmpty()) {
                 throw RuntimeException(
-                    "'setFillParentOnRoot' is set to true, but there is no or more than one " +
-                            "direct child of the scene"
+                    "'setFillParentOnRoot' is set to true, but there is no direct child of the scene"
                 )
             }
             val root = children[0]
@@ -217,6 +226,15 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             onjScreen
         )
 
+        onjScreen.dragAndDrop = doDragAndDrop(onjScreen).toMap()
+
+        behavioursToBind.forEach { it.bindCallbacks(onjScreen) }
+
+        children.forEach {
+            if (it is Layout) it.invalidate()
+        }
+        initialiseInitialiseableActors(children, onjScreen)
+
         onjScreen.postProcessor = if (!options["postProcessor"]!!.isNull()) {
             val name = options.get<String>("postProcessor")
             postProcessors[name] ?: run {
@@ -229,13 +247,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             ScreenControllerFactory.controllerOrError(controller.name, controller)
         } else null
 
-        onjScreen.dragAndDrop = doDragAndDrop(onjScreen).toMap()
-
-        behavioursToBind.forEach { it.bindCallbacks(onjScreen) }
-        children.forEach {
-            if (it is Layout) it.invalidate()
-        }
-        initialiseInitialiseableActors(children, onjScreen)
         return onjScreen
     }
 
@@ -525,6 +536,14 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         override fun addDisposable(disposable: Disposable) {
             additionalDisposables.add(disposable)
+        }
+
+        override fun addActorToRoot(actor: Actor) {
+            stage.addActor(actor)
+        }
+
+        override fun removeActorFromRoot(actor: Actor) {
+            stage.root.removeActor(actor)
         }
 
         private fun updateCallbacks() {

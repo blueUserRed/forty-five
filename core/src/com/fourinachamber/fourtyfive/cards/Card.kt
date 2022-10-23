@@ -1,6 +1,8 @@
 package com.fourinachamber.fourtyfive.cards
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.ui.Image
+import com.fourinachamber.fourtyfive.screens.CardActor
 import onj.OnjArray
 import onj.OnjObject
 
@@ -8,6 +10,8 @@ class Card(
     val name: String,
     val texture: TextureRegion
 ) {
+
+    val actor = CardActor(this)
 
     companion object {
 

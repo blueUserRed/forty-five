@@ -44,7 +44,14 @@ options: {
     controller: $GameScreenController {
         cardsFile: "cards/cards.onj"
         cardAtlasFile: "cards/generated/cards.atlas"
-        cardHandName: "card_hand"
+        cardHand: {
+            actorName: "card_hand"
+            cardScaling: 0.1
+            cardSpacing: 1.0
+        }
+        cardDragAndDropBehaviour: $SlotDragSource {
+            group: "card"
+        }
     }
 }
 
