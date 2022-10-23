@@ -1,0 +1,6 @@
+
+!card = {
+    name: string
+}
+
+cards: !card[*]
