@@ -1,0 +1,93 @@
+
+import "imports/colors.onj" as color
+
+!worldWidth = 160.0
+!worldHeight = 90.0
+
+viewport: $FitViewport {
+    worldWidth: !worldWidth
+    worldHeight: !worldHeight
+    backgroundTexture: "background"
+}
+
+assets: {
+    fonts: [
+
+        $DistanceFieldFont {
+            name: "distance_field"
+            fontFile: "fonts/distanceField.fnt"
+            imageFile: "fonts/distanceField.png"
+        }
+
+    ]
+    textures: []
+    textureAtlases: [
+
+        {
+            file: "textures/packed/game_screen/game_screen.atlas"
+            defines: [ "background" ]
+        }
+
+    ]
+    cursors: []
+    postProcessors: []
+    animations: []
+}
+
+options: {
+    setFillParentOnRoot: true
+    defaultCursor: {
+        useSystemCursor: true
+        cursorName: "arrow"
+    }
+    postProcessor: null
+    controller: $GameScreenController {
+        cardsFile: "cards/cards.onj"
+        cardAtlasFile: "cards/generated/cards.atlas"
+        cardHand: {
+            actorName: "card_hand"
+            cardScaling: 0.1
+            cardSpacing: 1.0
+        }
+        cardDragAndDropBehaviour: $SlotDragSource {
+            group: "card"
+        }
+    }
+}
+
+
+
+!row1 = {
+    cells: [
+
+//        {
+//            element: $Label {
+//                text: "Welcome to .fourty-five"
+//                font: "distance_field"
+//                fontScale: 0.15
+//                color: !color.white
+//                align: "center"
+//            }
+//        }
+
+        {
+            element: $CardHand {
+                name: "card_hand"
+                debug: true
+            }
+        }
+
+    ]
+}
+
+children: [
+
+
+    $Table {
+        fillX: true
+        fillY: true
+        debug: true
+        rows: [ !row1 ]
+    }
+
+]

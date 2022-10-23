@@ -136,6 +136,10 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+    $CardHand {
+        ...!widgetSharedKeys
+    }
+
 ]
 
 $Behaviour [
@@ -222,12 +226,20 @@ $DragAndDropBehaviour [
 
 $ScreenController [
 
-    $GameScreenController { }
+    $GameScreenController {
+        cardsFile: string
+        cardAtlasFile: string
+        cardHand: {
+            actorName: string
+            cardScaling: float
+            cardSpacing: float
+        }
+        cardDragAndDropBehaviour: $DragAndDropBehaviour
+    }
 
 ]
 
 viewport: $Viewport
-controller?: $ScreenController
 
 assets: {
     textures: !textureDeclaration[*]
@@ -245,6 +257,7 @@ options: {
         cursorName: string
     }
     postProcessor: string?
+    controller: $ScreenController?
 }
 
 children: $Widget[*]

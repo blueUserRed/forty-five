@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screens
+package com.fourinachamber.fourtyfive.utils
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
@@ -9,11 +9,17 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.badlogic.gdx.utils.Disposable
+import com.fourinachamber.fourtyfive.screens.PostProcessor
 import onj.*
 
+/**
+ * object containing utilities for reading onj files
+ */
 object OnjReaderUtils {
 
+    /**
+     * reads an array of textures with names
+     */
     fun readTextures(onj: OnjArray): Map<String, TextureRegion> = onj
         .value
         .map { it as OnjObject }
@@ -21,6 +27,9 @@ object OnjReaderUtils {
         .associate { it.first to TextureRegion(it.second) }
 
 
+    /**
+     * reads an array of cursors with names
+     */
     fun readCursors(onj: OnjArray): Map<String, Cursor> {
         val cursors = mutableMapOf<String, Cursor>()
         onj.value.forEach {
@@ -35,6 +44,10 @@ object OnjReaderUtils {
         return cursors
     }
 
+    /**
+     * reads an array of atlases and their texture-regions
+     * @return a map of the textureRegions of every atlas and a list of all atlases
+     */
     fun readAtlases(onj: OnjArray): Pair<Map<String, TextureRegion>, List<TextureAtlas>> {
         val atlases = mutableListOf<TextureAtlas>()
         val textures = mutableMapOf<String, TextureRegion>()
@@ -57,6 +70,9 @@ object OnjReaderUtils {
         return textures to atlases
     }
 
+    /**
+     * reads an array of fonts with names
+     */
     fun readFonts(onj: OnjArray): Map<String, BitmapFont> = onj
         .value
         .map { it as OnjNamedObject }
@@ -69,6 +85,9 @@ object OnjReaderUtils {
             }
         }
 
+    /**
+     * reads an array of postProcessors with names
+     */
     fun readPostProcessors(onj: OnjArray): Map<String, PostProcessor> = onj
         .value
         .map { it as OnjObject }
@@ -76,12 +95,18 @@ object OnjReaderUtils {
             it.get<String>("name") to readPostProcessor(it)
         }
 
+    /**
+     * reads a single BitmapFont
+     */
     fun readBitmapFont(it: OnjNamedObject): BitmapFont {
         val font = BitmapFont(Gdx.files.internal(it.get<String>("file")))
         font.setUseIntegerPositions(false)
         return font
     }
 
+    /**
+     * reads a single FreeTypeFont
+     */
     fun readFreeTypeFont(fontOnj: OnjNamedObject): BitmapFont {
         val generator = FreeTypeFontGenerator(Gdx.files.internal(fontOnj.get<String>("file")))
         val parameter = FreeTypeFontGenerator.FreeTypeFontParameter()
@@ -92,6 +117,9 @@ object OnjReaderUtils {
         return font
     }
 
+    /**
+     * reads a single distanceFieldFont
+     */
     fun readDistanceFieldFont(fontOnj: OnjNamedObject): BitmapFont {
         val texture = Texture(Gdx.files.internal(fontOnj.get<String>("imageFile")), true)
         val useMipMapLinearLinear = fontOnj.getOr("useMipMapLinearLinear", false)
@@ -104,11 +132,17 @@ object OnjReaderUtils {
         return font
     }
 
+    /**
+     * reads an array of pixmaps with names
+     */
     fun readPixmaps(onj: OnjArray): Map<String, Pixmap> = onj
         .value
         .map { it as OnjObject }
         .associate { it.get<String>("name") to Pixmap(Gdx.files.internal(it.get<String>("file"))) }
 
+    /**
+     * reads a single postProcessor
+     */
     fun readPostProcessor(onj: OnjObject): PostProcessor {
         val shader = ShaderProgram(
             Gdx.files.internal(onj.get<String>("vertexShader")),
@@ -140,6 +174,9 @@ object OnjReaderUtils {
         return PostProcessor(shader, uniformsToBind, args, timeOffset)
     }
 
+    /**
+     * reads an array of animations with names
+     */
     fun readAnimations(anims: OnjArray): Map<String, Animation> = anims
         .value
         .associate {
@@ -148,6 +185,9 @@ object OnjReaderUtils {
             name to readAnimation(it)
         }
 
+    /**
+     * reads a single animation
+     */
     fun readAnimation(onj: OnjObject): Animation {
         val atlas = TextureAtlas(Gdx.files.internal(onj.get<String>("atlasFile")))
 
@@ -176,23 +216,6 @@ object OnjReaderUtils {
         val frameTime = onj.get<Long>("frameTime").toInt()
         if (frameTime == 0) throw RuntimeException("frameTime can not be zero")
         return Animation(frames, atlas.textures, initialFrame, frameTime)
-    }
-
-    data class Animation(
-        val frames: Array<TextureRegion>,
-        val textures: Iterable<Texture>,
-        val initialFrame: Int,
-        val frameTime: Int
-    ) : Disposable {
-
-        init {
-            if (initialFrame !in frames.indices) throw RuntimeException("frameOffset must be a valid index into frames")
-        }
-
-        override fun dispose() {
-            textures.forEach(Disposable::dispose)
-        }
-
     }
 
 }

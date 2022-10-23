@@ -1,0 +1,14 @@
+
+cards: [
+
+    {
+        name: "test_card"
+    }
+    {
+        name: "test_card2"
+    }
+    {
+        name: "test_card3"
+    }
+
+]

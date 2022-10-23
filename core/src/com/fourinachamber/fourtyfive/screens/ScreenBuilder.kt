@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -28,8 +29,10 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.utils.Animation
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
+import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import onj.*
 import kotlin.system.measureTimeMillis
 
@@ -38,27 +41,98 @@ interface ScreenBuilder {
     fun build(): Screen
 }
 
+/**
+ * used for interfacing with a screen; provides data and functions
+ */
 interface ScreenDataProvider {
 
+    /**
+     * the default-cursor of the screen
+     */
     val defaultCursor: Either<Cursor, SystemCursor>
+
+    /**
+     * map of all table-cells with a name attribute
+     */
     val namedCells: Map<String, Cell<*>>
+
+    /**
+     * map of all actors with a name attribute
+     */
     val namedActors: Map<String, Actor>
+
+    /**
+     * map of all textures and their names
+     */
     val textures: Map<String, TextureRegion>
+
+    /**
+     * map of all post-processors and their names
+     */
     val postProcessors: Map<String, PostProcessor>
+
+    /**
+     * map of all fonts and their names
+     */
     val fonts: Map<String, BitmapFont>
+
+    /**
+     * map of all cursors and their names
+     */
     val cursors: Map<String, Cursor>
+
+    /**
+     * the stage containing the actors
+     */
     val stage: Stage
+
+    /**
+     * the currently applied Postprocessor; null if none
+     */
     var postProcessor: PostProcessor?
+
     val screen: Screen
 
+    /**
+     * the current screen controller
+     */
+    var screenController: ScreenController?
+
+    /**
+     * executes a callback after [ms] time has passed
+     */
     fun afterMs(ms: Int, callback: () -> Unit)
+
+    /**
+     * adds a new texture to the screen that can be retrieved from [textures]. If a texture with [name] already exists,
+     * it will be swapped. The textures are not owned by the screen and will not be disposed when the screen is disposed
+     */
+    fun addTexture(name: String, texture: TextureRegion)
+
+    /**
+     * adds a disposable, that will be disposed automatically when teh screen is disposed
+     */
+    fun addDisposable(disposable: Disposable)
+
+    /**
+     * adds an actor to the root of the screen
+     */
+    fun addActorToRoot(actor: Actor)
+
+    /**
+     * removes an actor from the root of the screen
+     */
+    fun removeActorFromRoot(actor: Actor)
 }
 
+/**
+ * builds a screen from an Onj file
+ */
 class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
     private lateinit var textures: Map<String, TextureRegion>
     private lateinit var fonts: Map<String, BitmapFont>
-    private lateinit var animations: Map<String, OnjReaderUtils.Animation>
+    private lateinit var animations: Map<String, Animation>
     private lateinit var earlyRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var lateRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var behavioursToBind: MutableList<Behaviour>
@@ -114,10 +188,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         val options = onj.get<OnjObject>("options")
 
         if (options.get<Boolean>("setFillParentOnRoot")) {
-            if (children.size != 1) {
+            if (children.isEmpty()) {
                 throw RuntimeException(
-                    "'setFillParentOnRoot' is set to true, but there is no or more than one " +
-                            "direct child of the scene"
+                    "'setFillParentOnRoot' is set to true, but there is no direct child of the scene"
                 )
             }
             val root = children[0]
@@ -132,7 +205,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         val onjScreen = OnjScreen(
-            this.textures,
+            this.textures.toMutableMap(),
             cursors,
             fonts,
             postProcessors,
@@ -147,11 +220,20 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         )
 
         val cursorOnj = options.get<OnjObject>("defaultCursor")
-        onjScreen.defaultCursor = MouseHoverBehaviour.loadCursor(
+        onjScreen.defaultCursor = Utils.loadCursor(
             cursorOnj.get<Boolean>("useSystemCursor"),
             cursorOnj.get<String>("cursorName"),
             onjScreen
         )
+
+        onjScreen.dragAndDrop = doDragAndDrop(onjScreen).toMap()
+
+        behavioursToBind.forEach { it.bindCallbacks(onjScreen) }
+
+        children.forEach {
+            if (it is Layout) it.invalidate()
+        }
+        initialiseInitialiseableActors(children, onjScreen)
 
         onjScreen.postProcessor = if (!options["postProcessor"]!!.isNull()) {
             val name = options.get<String>("postProcessor")
@@ -160,13 +242,19 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             }
         } else null
 
-        onjScreen.dragAndDrop = doDragAndDrop(onjScreen).toMap()
+        onjScreen.screenController = if (!options["controller"]!!.isNull()) {
+            val controller = options.get<OnjNamedObject>("controller")
+            ScreenControllerFactory.controllerOrError(controller.name, controller)
+        } else null
 
-        behavioursToBind.forEach { it.bindCallbacks(onjScreen) }
-        children.forEach {
-            if (it is Layout) it.invalidate()
-        }
         return onjScreen
+    }
+
+    private fun initialiseInitialiseableActors(actors: Iterable<Actor>, screenDataProvider: ScreenDataProvider) {
+        for (actor in actors) {
+            if (actor is Group) initialiseInitialiseableActors(actor.children, screenDataProvider)
+            if (actor is InitialiseableActor) actor.init(screenDataProvider)
+        }
     }
 
     private fun doUnmanagedActors(children: OnjArray) = children
@@ -301,27 +389,11 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj
         )
 
-        "VBox" -> VBox().apply {
-            if (widgetOnj.getOr("fillX", false)) defaults().expandX().fillX()
-            if (widgetOnj.getOr("fillY", false)) defaults().expandY().fillY()
-            val children = getChildren(widgetOnj.get<OnjArray>("children"))
-            children.forEach {
-                addVBox(it)
-            }
-        }
-
-        "HBox" -> HBox().apply {
-            if (widgetOnj.getOr("fillX", false)) defaults().expandX().fillX()
-            if (widgetOnj.getOr("fillY", false)) defaults().expandY().fillY()
-            val children = getChildren(widgetOnj.get<OnjArray>("children"))
-            children.forEach {
-                addHBox(it)
-            }
-        }
-
         "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"))).apply {
             applyImageKeys(this, widgetOnj)
         }
+
+        "CardHand" -> CardHand()
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
     }.apply {
@@ -402,13 +474,16 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         return fonts[name] ?: throw RuntimeException("Unknown font: $name")
     }
 
-    private fun animationOrError(name: String): OnjReaderUtils.Animation {
+    private fun animationOrError(name: String): Animation {
         return animations[name] ?: throw RuntimeException("Unknown animation: $name")
     }
 
 
+    /**
+     * a screen that was build from an onj file. also implements [ScreenDataProvider]
+     */
     private class OnjScreen(
-        override val textures: Map<String, TextureRegion>,
+        override val textures: MutableMap<String, TextureRegion>,
         override val cursors: Map<String, Cursor>,
         override val fonts: Map<String, BitmapFont>,
         override val postProcessors: Map<String, PostProcessor>,
@@ -429,6 +504,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         private val createTime: Long = TimeUtils.millis()
         private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
+        private val additionalDisposables: MutableList<Disposable> = mutableListOf()
 
         override lateinit var defaultCursor: Either<Cursor, SystemCursor>
         override val screen: Screen = this
@@ -443,8 +519,31 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             children.forEach { addActor(it) }
         }
 
+        override var screenController: ScreenController? = null
+            set(value) {
+                field?.end()
+                field = value
+                value?.init(this)
+            }
+
         override fun afterMs(ms: Int, callback: () -> Unit) {
             callbacks.add((TimeUtils.millis() + ms) to callback)
+        }
+
+        override fun addTexture(name: String, texture: TextureRegion) {
+            textures[name] = texture
+        }
+
+        override fun addDisposable(disposable: Disposable) {
+            additionalDisposables.add(disposable)
+        }
+
+        override fun addActorToRoot(actor: Actor) {
+            stage.addActor(actor)
+        }
+
+        override fun removeActorFromRoot(actor: Actor) {
+            stage.root.removeActor(actor)
         }
 
         private fun updateCallbacks() {
@@ -538,6 +637,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             stage.dispose()
             postProcessor?.dispose()
             toDispose.forEach(Disposable::dispose)
+            additionalDisposables.forEach(Disposable::dispose)
         }
 
     }
@@ -554,6 +654,13 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
 }
 
+/**
+ * a postProcessor that is applied to the whole screen
+ * @param shader the shader that is applied to the screen
+ * @param uniformsToBind the names of the uniforms used by the shader (without prefix)
+ * @param arguments additional uniforms to bind
+ * @param timeOffset if the shader has a time-uniform, the time will be offset by [timeOffset] ms
+ */
 data class PostProcessor(
     val shader: ShaderProgram,
     val uniformsToBind: List<String>,
@@ -564,12 +671,18 @@ data class PostProcessor(
     private val creationTime = TimeUtils.millis()
     private var referenceTime = creationTime + timeOffset
 
+    /**
+     * resets the point relative to which the time is calculated to now (+[timeOffset])
+     */
     fun resetReferenceTime() {
         referenceTime = TimeUtils.millis() + timeOffset
     }
 
     override fun dispose() = shader.dispose()
 
+    /**
+     * binds the uniforms specified in [uniformsToBind] to the shader
+     */
     fun bindUniforms() {
         for (uniform in uniformsToBind) when (uniform) {
 
@@ -599,6 +712,9 @@ data class PostProcessor(
         }
     }
 
+    /**
+     * binds the arguments specified in [arguments] to the shader
+     */
     fun bindArgUniforms() {
         for ((key, value) in arguments) when (value) {
 

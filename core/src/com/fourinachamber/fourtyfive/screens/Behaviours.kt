@@ -20,6 +20,9 @@ import onj.OnjNamedObject
 import onj.OnjObject
 
 
+/**
+ * creates behaviours
+ */
 object BehaviourFactory {
 
     private val behaviours: MutableMap<String, BehaviourCreator> = mutableMapOf(
@@ -32,6 +35,11 @@ object BehaviourFactory {
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) }
     )
 
+    /**
+     * will return an instance of the behaviour with name [name]
+     * @throws RuntimeException when no behaviour with that name exists
+     * @param onj the onjObject containing the configuration of the behaviour
+     */
     fun behaviorOrError(name: String, onj: OnjNamedObject, actor: Actor): Behaviour {
         val behaviourCreator = behaviours[name] ?: throw RuntimeException("Unknown behaviour: $name")
         return behaviourCreator(onj, actor)
@@ -39,14 +47,34 @@ object BehaviourFactory {
 
 }
 
+/**
+ * represents a behaviour of an [Actor]
+ */
 abstract class Behaviour(val actor: Actor) {
 
+    /**
+     * the screenDataProvider; only available after [bindCallbacks] has been called
+     */
     lateinit var screenDataProvider: ScreenDataProvider
 
+    /**
+     * called when a hover is started
+     */
     protected open val onHoverEnter: BehaviourCallback? = null
+
+    /**
+     * called when the hover has ended
+     */
     protected open val onHoverExit: BehaviourCallback? = null
+
+    /**
+     * called when the actor is clicked
+     */
     protected open val onCLick: BehaviourCallback? = null
 
+    /**
+     * binds the callbacks to the actor and sets the [screenDataProvider]
+     */
     fun bindCallbacks(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
         onHoverEnter?.let { actor.onEnter(it) }
@@ -56,7 +84,9 @@ abstract class Behaviour(val actor: Actor) {
 
 }
 
-
+/**
+ * changes the mouse when hovering over an actor
+ */
 class MouseHoverBehaviour(
     onj: OnjNamedObject,
     actor: Actor
@@ -66,7 +96,7 @@ class MouseHoverBehaviour(
     private val useSystemCursor = onj.get<Boolean>("useSystemCursor")
 
     private val cursor: Either<Cursor, SystemCursor> by lazy {
-        loadCursor(useSystemCursor, cursorName, screenDataProvider)
+        Utils.loadCursor(useSystemCursor, cursorName, screenDataProvider)
     }
 
     override val onHoverEnter: BehaviourCallback = {
@@ -76,45 +106,11 @@ class MouseHoverBehaviour(
     override val onHoverExit: BehaviourCallback = {
         Utils.setCursor(screenDataProvider.defaultCursor)
     }
-
-    companion object {
-
-        fun loadCursor(
-            useSystemCursor: Boolean,
-            cursorName: String,
-            screenDataProvider: ScreenDataProvider
-        ): Either<Cursor, SystemCursor> {
-
-            if (useSystemCursor) {
-
-                return when (cursorName) {
-
-                    "hand" -> SystemCursor.Hand
-                    "arrow" -> SystemCursor.Arrow
-                    "ibeam" -> SystemCursor.Ibeam
-                    "crosshair" -> SystemCursor.Crosshair
-                    "horizontal resize" -> SystemCursor.HorizontalResize
-                    "vertical resize" -> SystemCursor.VerticalResize
-                    "nw se resize" -> SystemCursor.NWSEResize
-                    "ne sw resize" -> SystemCursor.NESWResize
-                    "all resize" -> SystemCursor.AllResize
-                    "not allowed" -> SystemCursor.NotAllowed
-                    "none" -> SystemCursor.None
-                    else -> throw RuntimeException("unknown system cursor: $cursorName")
-
-                }.eitherRight()
-
-            } else {
-                return (screenDataProvider.cursors[cursorName] ?: run {
-                    throw RuntimeException("unknown custom cursor: $cursorName")
-                }).eitherLeft()
-            }
-        }
-
-    }
-
 }
 
+/**
+ * exits the application when the actor is clicked
+ */
 class OnClickExitBehaviour(actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
@@ -122,6 +118,9 @@ class OnClickExitBehaviour(actor: Actor) : Behaviour(actor) {
     }
 }
 
+/**
+ * changes the size of the actor (or of a named cell) when the actor is hovered over
+ */
 class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     private val cellName: String? = onj.getOr("cellName", null)
@@ -200,6 +199,9 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
         }
     }
 
+    /**
+     * Action that grows a cell
+     */
     private class GrowCellAction(
         private val cell: Cell<*>,
         private val targetX: Float,
@@ -221,6 +223,10 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
     }
 }
 
+
+/**
+ * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
+ */
 class OnClickShootBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     private val maskTextureName = onj.get<String>("maskTexture")
@@ -253,6 +259,9 @@ class OnClickShootBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor
 
 }
 
+/**
+ * starts a particle effect when the actor is clicked
+ */
 class OnClickParticleEffectBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     private val particlePath = onj.get<String>("file")
@@ -290,6 +299,9 @@ class OnClickParticleEffectBehaviour(onj: OnjNamedObject, actor: Actor) : Behavi
 
 }
 
+/**
+ * when clicked, will change the PostProcessor of the whole screen
+ */
 class OnClickChangePostProcessorBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
 
     private val time: Int? = if (!onj["duration"]!!.isNull()) {
@@ -322,6 +334,9 @@ class OnClickChangePostProcessorBehaviour(onj: OnjObject, actor: Actor) : Behavi
 
 }
 
+/**
+ * sets the visibility of another actor when this actor is hovered over
+ */
 class OnHoverPopupBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
 
     private val popupActorName = onj.get<String>("popupName")
