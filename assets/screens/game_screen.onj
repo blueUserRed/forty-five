@@ -41,7 +41,11 @@ options: {
         cursorName: "arrow"
     }
     postProcessor: null
-    controller: $GameScreenController { }
+    controller: $GameScreenController {
+        cardsFile: "cards/cards.onj"
+        cardAtlasFile: "cards/generated/cards.atlas"
+        cardHandName: "card_hand"
+    }
 }
 
 
@@ -49,13 +53,20 @@ options: {
 !row1 = {
     cells: [
 
+//        {
+//            element: $Label {
+//                text: "Welcome to .fourty-five"
+//                font: "distance_field"
+//                fontScale: 0.15
+//                color: !color.white
+//                align: "center"
+//            }
+//        }
+
         {
-            element: $Label {
-                text: "Welcome to .fourty-five"
-                font: "distance_field"
-                fontScale: 0.15
-                color: !color.white
-                align: "center"
+            element: $CardHand {
+                name: "card_hand"
+                debug: true
             }
         }
 
@@ -68,6 +79,7 @@ children: [
     $Table {
         fillX: true
         fillY: true
+        debug: true
         rows: [ !row1 ]
     }
 
