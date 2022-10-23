@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.cards.Card
 import onj.*
 
@@ -46,10 +47,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private val cardConfigFile = onj.get<String>("cardsFile")
     private val cardAtlasFile = onj.get<String>("cardAtlasFile")
-    private val cardHandName = onj.get<String>("cardHandName")
+    private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragAndDropBehaviour")
+    private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private var curScreen: ScreenDataProvider? = null
     private var cardHand: CardHand? = null
     private var cards: List<Card> = mutableListOf()
+
+    private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
@@ -66,10 +70,36 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         for (texture in cardAtlas.textures) screenDataProvider.addDisposable(texture)
         cards = Card.getFrom(onj.get<OnjArray>("cards"), screenDataProvider.textures)
 
-        val cardHand = screenDataProvider.namedActors[cardHandName] ?:
-            throw RuntimeException("no named actor with name $cardHandName")
+        for (card in cards) {
+            val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
+                cardDragAndDropBehaviour.name,
+                cardDragAndDrop,
+                screenDataProvider,
+                card.actor,
+                cardDragAndDropBehaviour
+            )
+            cardDragAndDrop.addSource(behaviour)
+        }
+
+        initCardHand()
+    }
+
+    private fun initCardHand() {
+        val curScreen = curScreen!!
+
+        val cardHandName = cardHandOnj.get<String>("actorName")
+        val cardHand = curScreen.namedActors[cardHandName]
+            ?: throw RuntimeException("no named actor with name $cardHandName")
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
+
+        cardHand.cardScale = cardHandOnj.get<Double>("cardScaling").toFloat()
+        cardHand.cardSpacing = cardHandOnj.get<Double>("cardSpacing").toFloat()
+        cardHand.debug = true
+
+        cardHand.addCard(cards[0])
+        cardHand.addCard(cards[1])
+        cardHand.addCard(cards[2])
     }
 
     override fun end() {
