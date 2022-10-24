@@ -49,7 +49,7 @@ options: {
             cardScaling: 0.1
             cardSpacing: 1.0
         }
-        cardDragAndDropBehaviour: $SlotDragSource {
+        cardDragAndDropBehaviour: $CardDragSource {
             group: "card"
         }
     }
@@ -71,6 +71,7 @@ options: {
 //        }
 
         {
+            sizeToActor: true
             element: $CardHand {
                 name: "card_hand"
                 debug: true
@@ -86,7 +87,7 @@ children: [
     $Table {
         fillX: true
         fillY: true
-        debug: true
+//        debug: true
         rows: [ !row1 ]
     }
 
