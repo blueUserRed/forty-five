@@ -1,44 +1,14 @@
-package com.fourinachamber.fourtyfive.screens
+package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fourtyfive.cards.Card
+import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.screen.DragAndDropBehaviourFactory
+import com.fourinachamber.fourtyfive.screen.ScreenController
+import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import onj.*
 
-object ScreenControllerFactory {
-
-    private val controllers: MutableMap<String, (OnjNamedObject) -> ScreenController> = mutableMapOf(
-        "GameScreenController" to { onj -> GameScreenController(onj) }
-    )
-
-    /**
-     * will return an instance of the ScreenController with name [name]
-     * @throws RuntimeException when no controller with that name exists
-     * @param onj the onjObject containing the configuration of the controller
-     */
-    fun controllerOrError(name: String, onj: OnjNamedObject): ScreenController {
-        val behaviourCreator = controllers[name] ?: throw RuntimeException("Unknown behaviour: $name")
-        return behaviourCreator(onj)
-    }
-}
-
-/**
- * ScreenControllers can be used to add advanced functionality to a screen
- */
-abstract class ScreenController {
-
-    /**
-     * called when this is set as a controller for a screen
-     */
-    open fun init(screenDataProvider: ScreenDataProvider) { }
-
-    /**
-     * called before the controller is changed to different one
-     */
-    open fun end() { }
-
-}
 
 /**
  * the Controller for the main game screen
@@ -95,6 +65,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         cardHand.cardScale = cardHandOnj.get<Double>("cardScaling").toFloat()
         cardHand.cardSpacing = cardHandOnj.get<Double>("cardSpacing").toFloat()
+        cardHand.cardZIndex = cardHandOnj.get<Long>("cardZIndex").toInt()
+        cardHand.draggedCardZIndex = cardHandOnj.get<Long>("draggedCardZIndex").toInt()
         cardHand.debug = true
 
         cardHand.addCard(cards[0])

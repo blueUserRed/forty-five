@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screens
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
@@ -11,8 +11,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
-import com.fourinachamber.fourtyfive.utils.eitherLeft
-import com.fourinachamber.fourtyfive.utils.eitherRight
 import ktx.actors.onClick
 import ktx.actors.onEnter
 import ktx.actors.onExit

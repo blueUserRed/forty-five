@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screens
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
@@ -17,7 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.cards.Card
+import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.contains
 import ktx.actors.onTouchEvent
@@ -369,77 +369,4 @@ class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
         }
     }
 
-}
-
-/**
- * displays the cards
- */
-class CardHand : Widget(), ZIndexActor, InitialiseableActor {
-
-    private lateinit var screenDataProvider: ScreenDataProvider
-
-    override var fixedZIndex: Int = 0
-    var cardScale: Float = 1.0f
-    var cardSpacing: Float = 0.0f
-
-    private var cards: MutableList<Card> = mutableListOf()
-    private var neededWidth: Float = 0f
-    private var neededHeight: Float = 0f
-
-    override fun init(screenDataProvider: ScreenDataProvider) {
-        debug = true
-        this.screenDataProvider = screenDataProvider
-    }
-
-    fun addCard(card: Card) {
-        cards.add(card)
-        if (card.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(card.actor)
-        updateCards()
-    }
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-        updateCards()
-    }
-
-    private fun updateCards() {
-
-        if (cards.isEmpty()) return
-        val neededWidth = cards.size * (cardSpacing + (cards[0].actor.width * cards[0].actor.scaleX))
-
-        var curX = if (width <= neededWidth) x else x + ((width - neededWidth) / 2)
-        val curY = y
-
-        for (card in cards) {
-            if (!card.actor.isDragged) {
-                card.actor.setPosition(curX, curY)
-                card.actor.setScale(cardScale)
-            }
-            curX += card.actor.width * cardScale + cardSpacing
-        }
-
-        this.neededWidth = neededWidth
-        this.neededHeight = cards[0].actor.height * cards[0].actor.scaleY
-    }
-
-
-    override fun getPrefWidth(): Float {
-        return neededWidth
-    }
-
-    override fun getMinWidth(): Float {
-        return neededWidth
-    }
-
-    override fun getMinHeight(): Float {
-        return neededHeight
-    }
-
-    override fun getPrefHeight(): Float {
-        return neededHeight
-    }
-}
-
-class CardActor(val card: Card) : Image(card.texture) {
-    var isDragged: Boolean = false
 }
