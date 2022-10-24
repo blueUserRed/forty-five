@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.fourinachamber.fourtyfive.screens.PostProcessor
+import com.fourinachamber.fourtyfive.screen.PostProcessor
 import onj.*
 
 /**

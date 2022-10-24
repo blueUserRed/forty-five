@@ -237,6 +237,8 @@ $ScreenController [
             actorName: string
             cardScaling: float
             cardSpacing: float
+            cardZIndex: int
+            draggedCardZIndex: int
         }
         cardDragAndDropBehaviour: $DragAndDropBehaviour
     }

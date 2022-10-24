@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screens
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
@@ -29,6 +29,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.game.CardHand
 import com.fourinachamber.fourtyfive.utils.Animation
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -123,6 +124,11 @@ interface ScreenDataProvider {
      * removes an actor from the root of the screen
      */
     fun removeActorFromRoot(actor: Actor)
+
+    /**
+     * resorts all children of the root of the stage, if they implement [ZIndexActor]
+     */
+    fun resortRootZIndices()
 }
 
 /**
@@ -549,6 +555,13 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         override fun removeActorFromRoot(actor: Actor) {
             stage.root.removeActor(actor)
+        }
+
+        override fun resortRootZIndices() {
+            stage.root.children.sort { el1, el2 ->
+                (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+            }
         }
 
         private fun updateCallbacks() {

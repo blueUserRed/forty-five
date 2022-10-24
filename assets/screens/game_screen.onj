@@ -48,6 +48,8 @@ options: {
             actorName: "card_hand"
             cardScaling: 0.1
             cardSpacing: 1.0
+            cardZIndex: 2
+            draggedCardZIndex: 3
         }
         cardDragAndDropBehaviour: $CardDragSource {
             group: "card"

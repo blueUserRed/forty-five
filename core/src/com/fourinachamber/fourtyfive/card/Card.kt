@@ -1,8 +1,7 @@
-package com.fourinachamber.fourtyfive.cards
+package com.fourinachamber.fourtyfive.card
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.fourinachamber.fourtyfive.screens.CardActor
+import com.fourinachamber.fourtyfive.game.CardActor
 import onj.OnjArray
 import onj.OnjObject
 

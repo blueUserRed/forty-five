@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.screens.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
