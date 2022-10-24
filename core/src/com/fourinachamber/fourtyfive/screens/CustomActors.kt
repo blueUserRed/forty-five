@@ -383,8 +383,11 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
     var cardSpacing: Float = 0.0f
 
     private var cards: MutableList<Card> = mutableListOf()
+    private var neededWidth: Float = 0f
+    private var neededHeight: Float = 0f
 
     override fun init(screenDataProvider: ScreenDataProvider) {
+        debug = true
         this.screenDataProvider = screenDataProvider
     }
 
@@ -394,17 +397,49 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
         updateCards()
     }
 
-    private fun updateCards() {
-        if (cards.isEmpty()) return
-        val neededWidth = cards.size * (cardSpacing + (cards[0].actor.width * cards[0].actor.scaleX))
-        var curX = if (width <= neededWidth) x else x + ((width - neededWidth) / 2)
-        for (card in cards) {
-            card.actor.setPosition(curX, y)
-            card.actor.setScale(cardScale)
-            curX += card.actor.width * cardScale + cardSpacing
-        }
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        super.draw(batch, parentAlpha)
+        updateCards()
     }
 
+    private fun updateCards() {
+
+        if (cards.isEmpty()) return
+        val neededWidth = cards.size * (cardSpacing + (cards[0].actor.width * cards[0].actor.scaleX))
+
+        var curX = if (width <= neededWidth) x else x + ((width - neededWidth) / 2)
+        val curY = y
+
+        for (card in cards) {
+            if (!card.actor.isDragged) {
+                card.actor.setPosition(curX, curY)
+                card.actor.setScale(cardScale)
+            }
+            curX += card.actor.width * cardScale + cardSpacing
+        }
+
+        this.neededWidth = neededWidth
+        this.neededHeight = cards[0].actor.height * cards[0].actor.scaleY
+    }
+
+
+    override fun getPrefWidth(): Float {
+        return neededWidth
+    }
+
+    override fun getMinWidth(): Float {
+        return neededWidth
+    }
+
+    override fun getMinHeight(): Float {
+        return neededHeight
+    }
+
+    override fun getPrefHeight(): Float {
+        return neededHeight
+    }
 }
 
-class CardActor(val card: Card) : Image(card.texture)
+class CardActor(val card: Card) : Image(card.texture) {
+    var isDragged: Boolean = false
+}

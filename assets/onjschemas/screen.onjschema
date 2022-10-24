@@ -2,25 +2,6 @@
 import "imports/asset_definitions.onjschema" as _
 import "imports/font_group.onjschema" as _
 
-!tableCell = {
-    width?: float
-    height?: float
-    colspan?: int
-    align?: string
-    padTop?: float
-    padBottom?: float
-    padLeft?: float
-    padRight?: float
-    cellName?: string
-    element: $Widget
-}
-
-!tableRow = {
-    width?: float
-    height?: float
-    cells: !tableCell[*]
-}
-
 !viewportSharedKeys = {
     backgroundTexture?: string
 }
@@ -40,6 +21,25 @@ $Viewport [
     }
 
 ]
+!tableCell = {
+    width?: float
+    height?: float
+    colspan?: int
+    align?: string
+    padTop?: float
+    padBottom?: float
+    padLeft?: float
+    padRight?: float
+    cellName?: string
+    sizeToActor?: boolean
+    element: $Widget
+}
+
+!tableRow = {
+    width?: float
+    height?: float
+    cells: !tableCell[*]
+}
 
 !widgetSharedKeys = {
     debug?: boolean
@@ -219,6 +219,10 @@ $DragAndDropBehaviour [
     }
 
     $SlotDropTarget {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
+    $CardDragSource {
         ...!dragAndDropBehaviourSharedKeys
     }
 

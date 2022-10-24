@@ -412,6 +412,11 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         cellOnj.ifHas<Double>("padRight") { cell.padRight(it.toFloat()) }
 
         cellOnj.ifHas<String>("cellName") { namedCells[it] = cell }
+
+        if (cellOnj.getOr("sizeToActor", false)) {
+            cell.width(Value.prefWidth)
+            cell.height(Value.prefHeight)
+        }
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {
