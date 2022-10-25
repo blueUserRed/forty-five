@@ -25,7 +25,7 @@ assets: {
 
         {
             file: "textures/packed/game_screen/game_screen.atlas"
-            defines: [ "background" ]
+            defines: [ "background", "revolver_slot" ]
         }
 
     ]
@@ -51,32 +51,47 @@ options: {
             cardZIndex: 2
             draggedCardZIndex: 3
         }
+        revolver: {
+            actorName: "revolver"
+        }
         cardDragAndDropBehaviour: $CardDragSource {
             group: "card"
         }
     }
 }
 
-
-
-!row1 = {
+!topRow = {
     cells: [
 
-//        {
-//            element: $Label {
-//                text: "Welcome to .fourty-five"
-//                font: "distance_field"
-//                fontScale: 0.15
-//                color: !color.white
-//                align: "center"
-//            }
-//        }
+        {
+//            sizeToActor: true
+            height: <!worldHeight * (6.0 / 8.0)>
+            padLeft: 2.0
+            element: $Revolver {
+                name: "revolver"
+                slotTexture: "revolver_slot"
+                font: "distance_field"
+                fontColor: !color.white
+                fontScale: 0.25
+                slotSize: 10.0
+                debug: true
+            }
+        }
+
+    ]
+}
+
+!bottomRow = {
+    cells: [
 
         {
-            sizeToActor: true
+//            sizeToActor: true
+            height: <!worldHeight * (2.0 / 8.0)>
+            padBottom: 2.0
+            align: "center"
             element: $CardHand {
                 name: "card_hand"
-                debug: true
+//                debug: true
             }
         }
 
@@ -88,9 +103,9 @@ children: [
 
     $Table {
         fillX: true
-        fillY: true
+//        fillY: true
 //        debug: true
-        rows: [ !row1 ]
+        rows: [ !topRow, !bottomRow ]
     }
 
 ]

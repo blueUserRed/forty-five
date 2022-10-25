@@ -19,10 +19,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardAtlasFile = onj.get<String>("cardAtlasFile")
     private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragAndDropBehaviour")
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
+    private val revolverOnj = onj.get<OnjObject>("revolver")
     private var curScreen: ScreenDataProvider? = null
-    private var cardHand: CardHand? = null
-    private var cards: List<Card> = mutableListOf()
 
+    private var cardHand: CardHand? = null
+    private var revolver: Revolver? = null
+
+    private var cards: List<Card> = mutableListOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     override fun init(screenDataProvider: ScreenDataProvider) {
@@ -52,6 +55,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         }
 
         initCardHand()
+        initRevolver()
     }
 
     private fun initCardHand() {
@@ -72,6 +76,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         cardHand.addCard(cards[0])
         cardHand.addCard(cards[1])
         cardHand.addCard(cards[2])
+    }
+
+    private fun initRevolver() {
+        val curScreen = curScreen!!
+
+        val revolverName = revolverOnj.get<String>("actorName")
+        val revolver = curScreen.namedActors[revolverName]
+            ?: throw RuntimeException("no named actor with name $revolverName")
+        if (revolver !is Revolver) throw RuntimeException("actor named $revolverName must be a Revolver")
+        this.revolver = revolver
     }
 
     override fun end() {

@@ -18,9 +18,25 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
     private lateinit var screenDataProvider: ScreenDataProvider
 
     override var fixedZIndex: Int = 0
+
+    /**
+     * the scale of the card-Actors
+     */
     var cardScale: Float = 1.0f
+
+    /**
+     * the spacing between the cards
+     */
     var cardSpacing: Float = 0.0f
+
+    /**
+     * the z-index of the card-actors while held in the hand
+     */
     var cardZIndex: Int = 0
+
+    /**
+     * the z-index of the card-actors while dragged
+     */
     var draggedCardZIndex: Int = 0
 
     private var cards: MutableList<Card> = mutableListOf()
@@ -31,6 +47,9 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
         this.screenDataProvider = screenDataProvider
     }
 
+    /**
+     * adds a card to the hand
+     */
     fun addCard(card: Card) {
         cards.add(card)
         if (card.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(card.actor)
@@ -54,9 +73,9 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
             if (!card.actor.isDragged) {
                 card.actor.setPosition(curX, curY)
                 card.actor.setScale(cardScale)
-                card.actor.zIndex = cardZIndex
+                card.actor.fixedZIndex = cardZIndex
             } else {
-                card.actor.zIndex = draggedCardZIndex
+                card.actor.fixedZIndex = draggedCardZIndex
             }
             curX += card.actor.width * cardScale + cardSpacing
         }
@@ -84,7 +103,14 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
     }
 }
 
+/**
+ * the actor representing a card
+ */
 class CardActor(val card: Card) : Image(card.texture), ZIndexActor {
     override var fixedZIndex: Int = 0
+
+    /**
+     * true when the card is dragged
+     */
     var isDragged: Boolean = false
 }

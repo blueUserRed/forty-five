@@ -32,6 +32,7 @@ $Viewport [
     padRight?: float
     cellName?: string
     sizeToActor?: boolean
+    align?: string
     element: $Widget
 }
 
@@ -140,6 +141,15 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+    $Revolver {
+        slotTexture: string
+        font: string
+        fontColor: string
+        fontScale: float
+        slotSize: float
+        ...!widgetSharedKeys
+    }
+
 ]
 
 $Behaviour [
@@ -239,6 +249,9 @@ $ScreenController [
             cardSpacing: float
             cardZIndex: int
             draggedCardZIndex: int
+        }
+        revolver: {
+            actorName: string
         }
         cardDragAndDropBehaviour: $DragAndDropBehaviour
     }
