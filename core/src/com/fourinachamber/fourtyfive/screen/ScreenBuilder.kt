@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
@@ -30,6 +31,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.CardHand
+import com.fourinachamber.fourtyfive.game.Revolver
 import com.fourinachamber.fourtyfive.utils.Animation
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -387,6 +389,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             if (widgetOnj.getOr("applyZIndices", false)) {
                 resortZIndices()
             }
+            touchable = Touchable.disabled //TODO: fix
         }
 
         "RotatableImageActor" -> RotatableImageActor(
@@ -400,6 +403,14 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         "CardHand" -> CardHand()
+
+        "Revolver" -> Revolver().apply {
+            slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
+            slotFont = fontOrError(widgetOnj.get<String>("font"))
+            fontColor = Color.valueOf(widgetOnj.get<String>("fontColor"))
+            fontScale = widgetOnj.get<Double>("fontScale").toFloat()
+            slotSize = widgetOnj.get<Double>("slotSize").toFloat()
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
     }.apply {
@@ -416,6 +427,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         cellOnj.ifHas<Double>("padBottom") { cell.padBottom(it.toFloat()) }
         cellOnj.ifHas<Double>("padLeft") { cell.padLeft(it.toFloat()) }
         cellOnj.ifHas<Double>("padRight") { cell.padRight(it.toFloat()) }
+        cellOnj.ifHas<String>("align") { cell.align(alignmentOrError(it)) }
 
         cellOnj.ifHas<String>("cellName") { namedCells[it] = cell }
 
@@ -550,7 +562,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun addActorToRoot(actor: Actor) {
-            stage.addActor(actor)
+            stage.root.addActor(actor)
         }
 
         override fun removeActorFromRoot(actor: Actor) {

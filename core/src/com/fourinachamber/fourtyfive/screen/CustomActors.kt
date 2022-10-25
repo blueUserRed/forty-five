@@ -106,7 +106,7 @@ interface InitialiseableActor {
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
  *  label
  */
-class CustomLabel(
+open class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
     var background: Drawable? = null
