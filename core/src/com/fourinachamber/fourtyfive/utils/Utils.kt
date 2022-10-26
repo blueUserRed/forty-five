@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 
@@ -20,6 +21,15 @@ sealed class Either<out T, out U>  {
     class Right<out U>(val value: U) : Either<Nothing, U>()
 
 }
+
+/**
+ * redirects to [Payload.object] because `object` is a keyword in kotlin
+ */
+var Payload.obj: Any?
+    get() = this.`object`
+    set(value) {
+        this.`object` = value
+    }
 
 /**
  * @see Either
