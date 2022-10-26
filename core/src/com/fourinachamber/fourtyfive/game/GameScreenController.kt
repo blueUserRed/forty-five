@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.card.GameCardDragSource
 import com.fourinachamber.fourtyfive.screen.DragAndDropBehaviourFactory
 import com.fourinachamber.fourtyfive.screen.ScreenController
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
@@ -17,7 +18,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private val cardConfigFile = onj.get<String>("cardsFile")
     private val cardAtlasFile = onj.get<String>("cardAtlasFile")
-    private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragAndDropBehaviour")
+    private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private var curScreen: ScreenDataProvider? = null
@@ -51,6 +52,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 card.actor,
                 cardDragAndDropBehaviour
             )
+            if (behaviour is GameCardDragSource) behaviour.gameScreenController = this
             cardDragAndDrop.addSource(behaviour)
         }
 
@@ -67,7 +69,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
 
-        cardHand.cardScale = cardHandOnj.get<Double>("cardScaling").toFloat()
+        cardHand.cardScale = cardHandOnj.get<Double>("cardScale").toFloat()
         cardHand.cardSpacing = cardHandOnj.get<Double>("cardSpacing").toFloat()
         cardHand.cardZIndex = cardHandOnj.get<Long>("cardZIndex").toInt()
         cardHand.draggedCardZIndex = cardHandOnj.get<Long>("draggedCardZIndex").toInt()
@@ -85,7 +87,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val revolver = curScreen.namedActors[revolverName]
             ?: throw RuntimeException("no named actor with name $revolverName")
         if (revolver !is Revolver) throw RuntimeException("actor named $revolverName must be a Revolver")
+
+        val dropOnj = revolverOnj.get<OnjNamedObject>("dropBehaviour")
+        revolver.slotDropConfig = cardDragAndDrop to dropOnj
+
         this.revolver = revolver
+    }
+
+    fun moveCardFromHandToRevolver(card: Card, slot: Int) {
+        cardHand!!.removeCard(card)
+        revolver!!.setCard(slot, card)
     }
 
     override fun end() {

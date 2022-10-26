@@ -56,6 +56,15 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
         updateCards()
     }
 
+    /**
+     * removes a card from the hand (will not be removed from the stage)
+     */
+    fun removeCard(card: Card) {
+        cards.remove(card)
+//        screenDataProvider.removeActorFromRoot(card.actor)
+        updateCards()
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         updateCards()

@@ -146,7 +146,8 @@ $Widget [
         font: string
         fontColor: string
         fontScale: float
-        slotSize: float
+        slotScale: float
+        cardScale: float
         ...!widgetSharedKeys
     }
 
@@ -236,6 +237,10 @@ $DragAndDropBehaviour [
         ...!dragAndDropBehaviourSharedKeys
     }
 
+    $RevolverDropTarget {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
 ]
 
 $ScreenController [
@@ -245,15 +250,16 @@ $ScreenController [
         cardAtlasFile: string
         cardHand: {
             actorName: string
-            cardScaling: float
+            cardScale: float
             cardSpacing: float
             cardZIndex: int
             draggedCardZIndex: int
         }
         revolver: {
             actorName: string
+            dropBehaviour: $DragAndDropBehaviour
         }
-        cardDragAndDropBehaviour: $DragAndDropBehaviour
+        cardDragBehaviour: $DragAndDropBehaviour
     }
 
 ]

@@ -46,15 +46,18 @@ options: {
         cardAtlasFile: "cards/generated/cards.atlas"
         cardHand: {
             actorName: "card_hand"
-            cardScaling: 0.1
+            cardScale: 0.1
             cardSpacing: 1.0
             cardZIndex: 2
             draggedCardZIndex: 3
         }
         revolver: {
             actorName: "revolver"
+            dropBehaviour: $RevolverDropTarget {
+                group: "card"
+            }
         }
-        cardDragAndDropBehaviour: $CardDragSource {
+        cardDragBehaviour: $CardDragSource {
             group: "card"
         }
     }
@@ -73,8 +76,9 @@ options: {
                 font: "distance_field"
                 fontColor: !color.white
                 fontScale: 0.25
-                slotSize: 10.0
-                debug: true
+                slotScale: 0.1
+                cardScale: 0.07
+//                debug: true
             }
         }
 

@@ -389,7 +389,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             if (widgetOnj.getOr("applyZIndices", false)) {
                 resortZIndices()
             }
-            touchable = Touchable.disabled //TODO: fix
         }
 
         "RotatableImageActor" -> RotatableImageActor(
@@ -409,7 +408,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             slotFont = fontOrError(widgetOnj.get<String>("font"))
             fontColor = Color.valueOf(widgetOnj.get<String>("fontColor"))
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
-            slotSize = widgetOnj.get<Double>("slotSize").toFloat()
+            slotScale = widgetOnj.get<Double>("slotScale").toFloat()
+            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
         }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
