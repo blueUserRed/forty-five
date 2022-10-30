@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.card
 import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.PixmapPacker
 import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
@@ -128,6 +129,21 @@ class CardGenerator(private val config: FileHandle) : Disposable {
                 (pixmapToDraw.width * scaleX).toInt(),
                 (pixmapToDraw.height * scaleY).toInt(),
             )
+        }
+
+        "RectangleElement" -> {
+            val width = element.get<Long>("width").toInt()
+            val height = element.get<Long>("height").toInt()
+            val x = element.get<Long>("x").toInt()
+            val y = element.get<Long>("y").toInt()
+            val color = Color.valueOf(element.get<String>("color"))
+            val strokeSize = element.get<Long>("strokeSize").toInt()
+
+            pixmap.setColor(color)
+            pixmap.fillRectangle(x, y, width, strokeSize)
+            pixmap.fillRectangle(x + width - strokeSize, y, strokeSize, height)
+            pixmap.fillRectangle(x, y + height - strokeSize, width, strokeSize)
+            pixmap.fillRectangle(x, y, strokeSize, height)
         }
 
         else -> throw RuntimeException("unknown element: ${element.name}")

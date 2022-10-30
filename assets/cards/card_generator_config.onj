@@ -1,5 +1,11 @@
+
+import "imports/colors.onj" as color
+
 baseImage: "obsidian_bullet"
 outputFile: "cards/generated/cards.atlas"
+
+!baseWidth = 200
+!baseHeight = 200
 
 packer: {
     pageWidth: 2_000
@@ -50,6 +56,16 @@ assets: {
 //        scaleY: 1.0
 //    }
 
+    $RectangleElement {
+        x: 0
+        y: 0
+        width: !baseWidth
+        height: !baseHeight
+        strokeSize: 5
+        color: !color.black
+    }
+
+
 ]
 
 !testElements2 = [
@@ -68,6 +84,15 @@ assets: {
         textureName: "bullet"
         scaleX: 0.8
         scaleY: 0.8
+    }
+
+    $RectangleElement {
+        x: 0
+        y: 0
+        width: !baseWidth
+        height: !baseHeight
+        strokeSize: 5
+        color: !color.black
     }
 
 ]
