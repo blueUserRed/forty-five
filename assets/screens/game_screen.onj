@@ -10,7 +10,7 @@ import "imports/colors.onj" as color
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
-//    backgroundTexture: "background"
+    backgroundTexture: "background"
 }
 
 assets: {
