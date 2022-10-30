@@ -1,6 +1,8 @@
 package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Graphics.DisplayMode
+import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.files.FileHandle
@@ -401,7 +403,13 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             applyImageKeys(this, widgetOnj)
         }
 
-        "CardHand" -> CardHand()
+        "CardHand" -> CardHand().apply {
+            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+            cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
+            startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
+            hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()
+            draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()
+        }
 
         "Revolver" -> Revolver().apply {
             slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
@@ -594,6 +602,13 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun render(delta: Float) {
+            if (Gdx.input.isKeyJustPressed(Keys.F)) {
+                if (!Gdx.graphics.isFullscreen) {
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                } else {
+                    Gdx.graphics.setWindowedMode(600, 400)
+                }
+            }
             updateCallbacks()
             lastRenderTime = measureTimeMillis {
                 stage.act(Gdx.graphics.deltaTime)

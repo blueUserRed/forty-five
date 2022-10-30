@@ -138,6 +138,11 @@ $Widget [
     }
 
     $CardHand {
+        cardScale: float
+        cardSpacing: float
+        startCardZIndicesAt: int
+        hoveredCardZIndex: int
+        draggedCardZIndex: int
         ...!widgetSharedKeys
     }
 
@@ -250,10 +255,6 @@ $ScreenController [
         cardAtlasFile: string
         cardHand: {
             actorName: string
-            cardScale: float
-            cardSpacing: float
-            cardZIndex: int
-            draggedCardZIndex: int
         }
         revolver: {
             actorName: string

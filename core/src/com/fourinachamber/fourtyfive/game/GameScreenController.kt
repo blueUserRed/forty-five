@@ -69,15 +69,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
 
-        cardHand.cardScale = cardHandOnj.get<Double>("cardScale").toFloat()
-        cardHand.cardSpacing = cardHandOnj.get<Double>("cardSpacing").toFloat()
-        cardHand.cardZIndex = cardHandOnj.get<Long>("cardZIndex").toInt()
-        cardHand.draggedCardZIndex = cardHandOnj.get<Long>("draggedCardZIndex").toInt()
-        cardHand.debug = true
-
-        cardHand.addCard(cards[0])
-        cardHand.addCard(cards[1])
-        cardHand.addCard(cards[2])
+        for (i in 0..14) cardHand.addCard(cards[i])
     }
 
     private fun initRevolver() {
