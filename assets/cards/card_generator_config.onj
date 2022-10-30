@@ -18,6 +18,10 @@ assets: {
             name: "obsidian_bullet"
             file: "textures/cards/obsidian_bullet.png"
         }
+        {
+            name: "bullet"
+            file: "textures/cards/normal_bullet.png"
+        }
 
     ]
     fonts: [
@@ -48,10 +52,30 @@ assets: {
 
 ]
 
+!testElements2 = [
+
+    $TextElement {
+        x: 10
+        y: 10
+        text: "Test \nKarte"
+        font: "arial"
+        fontScale: 1.0
+    }
+
+    $ImageElement {
+        x: 50
+        y: 50
+        textureName: "bullet"
+        scaleX: 0.8
+        scaleY: 0.8
+    }
+
+]
+
 cards: [
 
     {
-        name: "test_card"
+        name: "test_card1"
         elements: !testElements
     }
 
@@ -92,6 +116,36 @@ cards: [
 
     {
         name: "test_card9"
+        elements: !testElements2
+    }
+
+    {
+        name: "test_card10"
+        elements: !testElements2
+    }
+
+    {
+        name: "test_card11"
         elements: !testElements
+    }
+
+    {
+        name: "test_card12"
+        elements: !testElements2
+    }
+
+    {
+        name: "test_card13"
+        elements: !testElements
+    }
+
+    {
+        name: "test_card14"
+        elements: !testElements2
+    }
+
+    {
+        name: "test_card15"
+        elements: !testElements2
     }
 ]

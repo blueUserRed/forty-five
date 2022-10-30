@@ -4,10 +4,13 @@ import "imports/colors.onj" as color
 !worldWidth = 160.0
 !worldHeight = 90.0
 
+!cardZIndicesStart = 100
+!cardZIndicesEnd = <!cardZIndicesStart + 100>
+
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
-    backgroundTexture: "background"
+//    backgroundTexture: "background"
 }
 
 assets: {
@@ -46,10 +49,6 @@ options: {
         cardAtlasFile: "cards/generated/cards.atlas"
         cardHand: {
             actorName: "card_hand"
-            cardScale: 0.1
-            cardSpacing: 1.0
-            cardZIndex: 2
-            draggedCardZIndex: 3
         }
         revolver: {
             actorName: "revolver"
@@ -76,8 +75,8 @@ options: {
                 font: "distance_field"
                 fontColor: !color.white
                 fontScale: 0.25
-                slotScale: 0.1
-                cardScale: 0.07
+                slotScale: 0.07
+                cardScale: 0.045
 //                debug: true
             }
         }
@@ -95,7 +94,11 @@ options: {
             align: "center"
             element: $CardHand {
                 name: "card_hand"
-//                debug: true
+                cardScale: 0.07
+                cardSpacing: 0.5
+                startCardZIndicesAt: !cardZIndicesStart
+                hoveredCardZIndex: <!cardZIndicesEnd - 1>
+                draggedCardZIndex: !cardZIndicesEnd
             }
         }
 

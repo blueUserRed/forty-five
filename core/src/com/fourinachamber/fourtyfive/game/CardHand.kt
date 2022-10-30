@@ -8,6 +8,9 @@ import com.fourinachamber.fourtyfive.screen.InitialiseableActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import ktx.actors.contains
+import ktx.actors.onEnter
+import ktx.actors.onExit
+import kotlin.math.min
 
 
 /**
@@ -30,9 +33,15 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
     var cardSpacing: Float = 0.0f
 
     /**
-     * the z-index of the card-actors while held in the hand
+     * the z-index of any card in the hand that is not hovered over
+     * will be startCardZIndicesAt + the number of the card
      */
-    var cardZIndex: Int = 0
+    var startCardZIndicesAt: Int = 0
+
+    /**
+     * the z-index of a card that is hovered over
+     */
+    var hoveredCardZIndex: Int = 0
 
     /**
      * the z-index of the card-actors while dragged
@@ -78,15 +87,20 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
         var curX = if (width <= neededWidth) x else x + ((width - neededWidth) / 2)
         val curY = y
 
-        for (card in cards) {
+        val xDistanceOffset = if (width < neededWidth) {
+            -(neededWidth - width) / cards.size
+        } else 0f
+
+        for (i in cards.indices) {
+            val card = cards[i]
             if (!card.actor.isDragged) {
                 card.actor.setPosition(curX, curY)
                 card.actor.setScale(cardScale)
-                card.actor.fixedZIndex = cardZIndex
+                card.actor.fixedZIndex = if (card.actor.isHoveredOver) hoveredCardZIndex else startCardZIndicesAt + i
             } else {
                 card.actor.fixedZIndex = draggedCardZIndex
             }
-            curX += card.actor.width * cardScale + cardSpacing
+            curX += card.actor.width * cardScale + cardSpacing + xDistanceOffset
         }
         screenDataProvider.resortRootZIndices()
 
@@ -96,11 +110,13 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
 
 
     override fun getPrefWidth(): Float {
-        return neededWidth
+//        return neededWidth
+        return min(screenDataProvider.stage.viewport.worldWidth, neededWidth)
     }
 
     override fun getMinWidth(): Float {
-        return neededWidth
+//        return neededWidth
+        return min(screenDataProvider.stage.viewport.worldWidth, neededWidth)
     }
 
     override fun getMinHeight(): Float {
@@ -119,7 +135,18 @@ class CardActor(val card: Card) : Image(card.texture), ZIndexActor {
     override var fixedZIndex: Int = 0
 
     /**
-     * true when the card is dragged
+     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.card.CardDragSource]
      */
     var isDragged: Boolean = false
+
+    /**
+     * true when the actor is hovered over
+     */
+    var isHoveredOver: Boolean = false
+        private set
+
+    init {
+        onEnter { isHoveredOver = true }
+        onExit { isHoveredOver = false }
+    }
 }
