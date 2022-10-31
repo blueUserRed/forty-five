@@ -65,7 +65,6 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
                     )
                     dragAndDrop.addTarget(dropBehaviour)
                 }
-                slot.debug = true
                 slot
             }
             updateCardPositions()

@@ -3,48 +3,63 @@ cards: [
 
     {
         name: "test_card1"
+        title: "test \ncard 1"
     }
     {
         name: "test_card2"
+        title: "test \ncard 2"
     }
     {
         name: "test_card3"
+        title: "test \ncard 3"
     }
     {
         name: "test_card4"
+        title: "test \ncard 4"
     }
     {
         name: "test_card5"
+        title: "test \ncard 5"
     }
     {
         name: "test_card6"
+        title: "test \ncard 6"
     }
     {
         name: "test_card7"
+        title: "test \ncard 7"
     }
     {
         name: "test_card8"
+        title: "test \ncard 8"
     }
     {
         name: "test_card9"
+        title: "test \ncard 9"
     }
     {
         name: "test_card10"
+        title: "test \ncard 10"
     }
     {
         name: "test_card11"
+        title: "test \ncard 11"
     }
     {
         name: "test_card12"
+        title: "test \ncard 12"
     }
     {
         name: "test_card13"
+        title: "test \ncard 13"
     }
     {
         name: "test_card14"
+        title: "test \ncard 14"
     }
     {
         name: "test_card15"
+        title: "test \ncard 15"
     }
 
 ]
