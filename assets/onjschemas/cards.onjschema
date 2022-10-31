@@ -1,6 +1,7 @@
 
 !card = {
     name: string
+    title: string
 }
 
 cards: !card[*]

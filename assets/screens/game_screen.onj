@@ -95,10 +95,11 @@ options: {
             element: $CardHand {
                 name: "card_hand"
                 cardScale: 0.07
-                cardSpacing: 0.5
+                cardSpacing: 1.0
                 startCardZIndicesAt: !cardZIndicesStart
                 hoveredCardZIndex: <!cardZIndicesEnd - 1>
                 draggedCardZIndex: !cardZIndicesEnd
+                debug: true
             }
         }
 

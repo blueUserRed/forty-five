@@ -49,8 +49,8 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
     var draggedCardZIndex: Int = 0
 
     private var cards: MutableList<Card> = mutableListOf()
-    private var neededWidth: Float = 0f
-    private var neededHeight: Float = 0f
+    private var currentWidth: Float = 0f
+    private var currentHeight: Float = 0f
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
@@ -76,20 +76,27 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        updateCards()
+        updateCards() //TODO: calling this every frame is unnecessary
     }
 
     private fun updateCards() {
 
         if (cards.isEmpty()) return
-        val neededWidth = cards.size * (cardSpacing + (cards[0].actor.width * cards[0].actor.scaleX))
 
-        var curX = if (width <= neededWidth) x else x + ((width - neededWidth) / 2)
-        val curY = y
+        val cardWidth = cards[0].actor.width * cardScale
+
+        var neededWidth = cards.size * (cardSpacing + cardWidth) - cardSpacing
 
         val xDistanceOffset = if (width < neededWidth) {
-            -(neededWidth - width) / cards.size
+            -(neededWidth - width + cardWidth) / cards.size
         } else 0f
+
+        neededWidth = cards.size * (xDistanceOffset + cardSpacing + cardWidth) - cardSpacing - xDistanceOffset
+
+        var curX = if (width > neededWidth) {
+            x + ((width - neededWidth) / 2)
+        } else x
+        val curY = y
 
         for (i in cards.indices) {
             val card = cards[i]
@@ -100,31 +107,31 @@ class CardHand : Widget(), ZIndexActor, InitialiseableActor {
             } else {
                 card.actor.fixedZIndex = draggedCardZIndex
             }
-            curX += card.actor.width * cardScale + cardSpacing + xDistanceOffset
+            curX += cardWidth + cardSpacing + xDistanceOffset
         }
         screenDataProvider.resortRootZIndices()
 
-        this.neededWidth = neededWidth
-        this.neededHeight = cards[0].actor.height * cards[0].actor.scaleY
+        this.currentWidth = neededWidth
+        this.currentHeight = cards[0].actor.height * cardScale
     }
 
 
     override fun getPrefWidth(): Float {
 //        return neededWidth
-        return min(screenDataProvider.stage.viewport.worldWidth, neededWidth)
+        return min(screenDataProvider.stage.viewport.worldWidth, currentWidth)
     }
 
     override fun getMinWidth(): Float {
 //        return neededWidth
-        return min(screenDataProvider.stage.viewport.worldWidth, neededWidth)
+        return min(screenDataProvider.stage.viewport.worldWidth, currentWidth)
     }
 
     override fun getMinHeight(): Float {
-        return neededHeight
+        return currentHeight
     }
 
     override fun getPrefHeight(): Float {
-        return neededHeight
+        return currentHeight
     }
 }
 
