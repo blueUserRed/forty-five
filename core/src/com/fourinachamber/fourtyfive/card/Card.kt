@@ -7,7 +7,8 @@ import onj.OnjObject
 
 class Card(
     val name: String,
-    val texture: TextureRegion
+    val texture: TextureRegion,
+    val description: String
 ) {
 
     val actor = CardActor(this)
@@ -25,7 +26,8 @@ class Card(
                 Card(
                     name,
                     regions["$cardTexturePrefix$name"] ?:
-                        throw RuntimeException("cannot find texture for card $name")
+                        throw RuntimeException("cannot find texture for card $name"),
+                    it.get<String>("description")
                 )
             }
 

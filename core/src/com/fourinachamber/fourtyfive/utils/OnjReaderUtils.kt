@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.utils
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -172,6 +173,24 @@ object OnjReaderUtils {
         } else mutableMapOf()
 
         return PostProcessor(shader, uniformsToBind, args, timeOffset)
+    }
+
+    /**
+     * reads an array of single-color textures with names
+     */
+    fun readColorTextures(textureArr: OnjArray): Map<String, TextureRegion> {
+        val textures = mutableMapOf<String, TextureRegion>()
+        textureArr
+            .value
+            .forEach {
+                it as OnjObject
+                val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+                colorPixmap.setColor(Color.valueOf(it.get<String>("color")))
+                colorPixmap.fill()
+                textures[it.get<String>("name")] = TextureRegion(Texture(colorPixmap))
+//                colorPixmap.dispose()
+            }
+        return textures
     }
 
     /**
