@@ -143,6 +143,13 @@ $Widget [
         startCardZIndicesAt: int
         hoveredCardZIndex: int
         draggedCardZIndex: int
+        detailFont: string
+        detailFontColor: string
+        detailBackgroundTexture: string
+        detailFontScale: float
+        detailOffsetX: float
+        detailOffsetY: float
+        detailPadding: float
         ...!widgetSharedKeys
     }
 
@@ -274,6 +281,7 @@ assets: {
     cursors: !cursorDeclaration[*]
     postProcessors: !postProcessorDeclaration[*]
     animations: !animationDeclaration[*]
+    colorTextures: !colorTextureDeclaration[*]
 }
 
 options: {

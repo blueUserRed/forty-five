@@ -57,6 +57,15 @@ operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
 fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
 
+/**
+ * makes sure that [this] is between [min] and [max] (inclusive)
+ */
+fun Float.between(min: Float, max: Float): Float {
+    if (this < min) return min
+    if (this > max) return max
+    return this
+}
+
 object Utils {
 
     /**

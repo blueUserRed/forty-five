@@ -177,8 +177,12 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         textures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
 
         val (textureRegions, atlases) = OnjReaderUtils.readAtlases(onjAssets.get<OnjArray>("textureAtlases"))
-        this.textures = textures + textureRegions
         toDispose.addAll(atlases)
+
+        val colorTextures = OnjReaderUtils.readColorTextures(onjAssets.get<OnjArray>("colorTextures"))
+        colorTextures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
+
+        this.textures = textures + textureRegions + colorTextures
 
         fonts = OnjReaderUtils.readFonts(onjAssets.get<OnjArray>("fonts"))
         toDispose.addAll(fonts.values)
@@ -403,7 +407,17 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             applyImageKeys(this, widgetOnj)
         }
 
-        "CardHand" -> CardHand().apply {
+        "CardHand" -> CardHand(
+            fontOrError(widgetOnj.get<String>("detailFont")),
+            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            widgetOnj.get<Double>("detailFontScale").toFloat(),
+            Vector2(
+                widgetOnj.get<Double>("detailOffsetX").toFloat(),
+                widgetOnj.get<Double>("detailOffsetY").toFloat(),
+            ),
+            widgetOnj.get<Double>("detailPadding").toFloat()
+        ).apply {
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
