@@ -21,13 +21,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
+    private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
+    private val enemiesOnj = onj.get<OnjArray>("enemies")
     private var curScreen: ScreenDataProvider? = null
 
     private var cardHand: CardHand? = null
     private var revolver: Revolver? = null
+    private var enemyArea: EnemyArea? = null
 
-    private var cards: List<Card> = mutableListOf()
+    private var cards: List<Card> = listOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
+
+    private var enemies: List<Enemy> = listOf()
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
@@ -56,8 +61,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             cardDragAndDrop.addSource(behaviour)
         }
 
+        enemies = Enemy.getFrom(enemiesOnj, screenDataProvider.textures, screenDataProvider.fonts)
+
         initCardHand()
         initRevolver()
+        initEnemyArea()
     }
 
     private fun initCardHand() {
@@ -84,6 +92,27 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         revolver.slotDropConfig = cardDragAndDrop to dropOnj
 
         this.revolver = revolver
+    }
+
+    private fun initEnemyArea() {
+        val curScreen = curScreen!!
+
+        val enemyAreaName = enemyAreaOnj.get<String>("actorName")
+        val enemyArea = curScreen.namedActors[enemyAreaName] ?:
+            throw RuntimeException("no named actor with name $enemyAreaName")
+        if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
+
+        enemyAreaOnj
+            .get<OnjArray>("enemies")
+            .value
+            .forEach { nameOnj ->
+                val name = nameOnj.value as String
+                enemyArea.addEnemy(
+                    enemies.firstOrNull { it.name ==  name} ?: throw RuntimeException("no enemy with name $name")
+                )
+            }
+
+        this.enemyArea = enemyArea
     }
 
     fun moveCardFromHandToRevolver(card: Card, slot: Int) {

@@ -358,7 +358,7 @@ class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 /**
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
 

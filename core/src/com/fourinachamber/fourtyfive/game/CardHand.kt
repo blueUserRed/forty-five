@@ -197,26 +197,3 @@ class CardHand(
         return currentHeight
     }
 }
-
-/**
- * the actor representing a card
- */
-class CardActor(val card: Card) : Image(card.texture), ZIndexActor {
-    override var fixedZIndex: Int = 0
-
-    /**
-     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.card.CardDragSource]
-     */
-    var isDragged: Boolean = false
-
-    /**
-     * true when the actor is hovered over
-     */
-    var isHoveredOver: Boolean = false
-        private set
-
-    init {
-        onEnter { isHoveredOver = true }
-        onExit { isHoveredOver = false }
-    }
-}
