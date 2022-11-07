@@ -7,8 +7,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
-import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
 import onj.OnjNamedObject
@@ -23,7 +21,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     var slotScale: Float? = null
     var cardScale: Float = 1f
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
-    private var wasInitialised: Boolean = false
+    private var dirty: Boolean = true
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
     private var cards: Array<Card?> = Array(5) { null }
@@ -46,12 +44,19 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        width = prefWidth
+        height = prefHeight
         super.draw(batch, parentAlpha)
-        if (!wasInitialised) {
+        if (dirty) {
             calcOffsets()
             slots = Array(5) {
                 val slot = RevolverSlot(it + 1, slotTexture!!, slotFont!!, fontColor!!, slotScale!!)
-                slot.setPosition(slotOffsets[it].x + x + prefWidth / 2, slotOffsets[it].y + y + prefHeight / 2)
+
+                slot.setPosition(
+                    slotOffsets[it].x + x + prefWidth / 2,
+                    slotOffsets[it].y + y + prefHeight / 2
+                )
+
                 screenDataProvider.addActorToRoot(slot)
 
                 if (slotDropConfig != null) {
@@ -68,8 +73,13 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
                 slot
             }
             updateCardPositions()
-            wasInitialised = true
+            dirty = false
         }
+    }
+
+    override fun positionChanged() {
+        super.positionChanged()
+        dirty = true
     }
 
     private fun updateCardPositions() {
@@ -81,6 +91,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
             )
             card.actor.setScale(cardScale)
         }
+        dirty = true
     }
 
     private fun calcOffsets() {
@@ -98,6 +109,14 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
             Vector2(-slotWidth * 2f, 0f)
         )
     }
+
+//    override fun drawDebug(shapes: ShapeRenderer?) {
+//        super.drawDebug(shapes)
+//        println(x)
+//        println(y)
+//        println(width)
+//        println(height)
+//    }
 
     override fun getMinWidth(): Float = prefWidth
     override fun getMinHeight(): Float = prefHeight

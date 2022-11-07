@@ -63,7 +63,6 @@ $Widget [
         color: string
         fontScale: float
         backgroundTexture?: string
-        backgroundNinepatch?: string
         align?: string
         ...!widgetSharedKeys
     }
