@@ -1,7 +1,10 @@
 package com.fourinachamber.fourtyfive.card
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.fourinachamber.fourtyfive.game.CardActor
+import com.badlogic.gdx.scenes.scene2d.ui.Image
+import com.fourinachamber.fourtyfive.screen.ZIndexActor
+import ktx.actors.onEnter
+import ktx.actors.onExit
 import onj.OnjArray
 import onj.OnjObject
 
@@ -33,4 +36,27 @@ class Card(
 
     }
 
+}
+
+/**
+ * the actor representing a card
+ */
+class CardActor(val card: Card) : Image(card.texture), ZIndexActor {
+    override var fixedZIndex: Int = 0
+
+    /**
+     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.card.CardDragSource]
+     */
+    var isDragged: Boolean = false
+
+    /**
+     * true when the actor is hovered over
+     */
+    var isHoveredOver: Boolean = false
+        private set
+
+    init {
+        onEnter { isHoveredOver = true }
+        onExit { isHoveredOver = false }
+    }
 }

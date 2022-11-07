@@ -163,6 +163,10 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+    $EnemyArea {
+        ...!widgetSharedKeys
+    }
+
 ]
 
 $Behaviour [
@@ -255,6 +259,19 @@ $DragAndDropBehaviour [
 
 ]
 
+!enemy = {
+    name: string
+    texture: string
+    lives: int
+    offsetX: float
+    offsetY: float
+    scaleX: float
+    scaleY: float
+    detailFont: string
+    detailFontScale: float
+    detailFontColor: string
+}
+
 $ScreenController [
 
     $GameScreenController {
@@ -267,7 +284,12 @@ $ScreenController [
             actorName: string
             dropBehaviour: $DragAndDropBehaviour
         }
+        enemyArea: {
+            actorName: string
+            enemies: string[*]
+        }
         cardDragBehaviour: $DragAndDropBehaviour
+        enemies: !enemy[*]
     }
 
 ]

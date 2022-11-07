@@ -33,6 +33,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.CardHand
+import com.fourinachamber.fourtyfive.game.EnemyActor
+import com.fourinachamber.fourtyfive.game.EnemyArea
 import com.fourinachamber.fourtyfive.game.Revolver
 import com.fourinachamber.fourtyfive.utils.Animation
 import com.fourinachamber.fourtyfive.utils.Either
@@ -432,6 +434,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+        }
+
+        "EnemyArea" -> EnemyArea().apply {
         }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")

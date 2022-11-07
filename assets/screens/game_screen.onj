@@ -28,7 +28,7 @@ assets: {
 
         {
             file: "textures/packed/game_screen/game_screen.atlas"
-            defines: [ "background", "background2" "revolver_slot" ]
+            defines: [ "background", "background2" "revolver_slot", "enemy" ]
         }
 
     ]
@@ -65,11 +65,32 @@ options: {
                 group: "card"
             }
         }
+        enemyArea: {
+            actorName: "enemy_area"
+            enemies: [ "enemy" ]
+        }
         cardDragBehaviour: $CardDragSource {
             group: "card"
         }
+        enemies: [
+            {
+                name: "enemy"
+                lives: 1234
+                texture: "enemy"
+                offsetX: 60.0
+                offsetY: 40.0
+                scaleX: 0.03
+                scaleY: 0.03
+                detailFont: "distance_field"
+                detailFontScale: 2.0
+                detailFontColor: !color.blue
+            }
+        ]
     }
 }
+
+!slotScale = 0.07
+!revolverWidth = <128.0 * !slotScale * 4.0>
 
 !topRow = {
     cells: [
@@ -78,7 +99,7 @@ options: {
             sizeToActor: true
 //            height: <!worldHeight * (6.0 / 8.0)>
             padLeft: 4.0
-            padBottom: -16.0
+            padBottom: 15.0
             align: "top"
             element: $Revolver {
                 name: "revolver"
@@ -86,9 +107,18 @@ options: {
                 font: "distance_field"
                 fontColor: !color.white
                 fontScale: 0.25
-                slotScale: 0.07
+                slotScale: !slotScale
                 cardScale: 0.045
 //                debug: true
+            }
+        }
+
+        {
+            width: <!worldWidth - !revolverWidth - 20.0>
+            height: 60.0
+            element: $EnemyArea {
+                name: "enemy_area"
+                debug: true
             }
         }
 
@@ -103,6 +133,7 @@ options: {
 //            height: <!worldHeight * (2.0 / 8.0)>
             padBottom: 2.0
             align: "bottom"
+            colspan: 2
             element: $CardHand {
                 name: "card_hand"
                 cardScale: 0.07
@@ -130,7 +161,7 @@ children: [
     $Table {
         fillX: true
         fillY: true
-//        debug: true
+        debug: true
 //        debug: true
         rows: [ !topRow, !bottomRow ]
     }
