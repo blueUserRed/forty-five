@@ -6,8 +6,9 @@ import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.screens.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
@@ -20,6 +21,15 @@ sealed class Either<out T, out U>  {
     class Right<out U>(val value: U) : Either<Nothing, U>()
 
 }
+
+/**
+ * redirects to [Payload.object] because `object` is a keyword in kotlin
+ */
+var Payload.obj: Any?
+    get() = this.`object`
+    set(value) {
+        this.`object` = value
+    }
 
 /**
  * @see Either
@@ -46,6 +56,15 @@ operator fun Vector2.minus(other: Vector2) = Vector2(x - other.x, y - other.y)
 operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
 fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
+
+/**
+ * makes sure that [this] is between [min] and [max] (inclusive)
+ */
+fun Float.between(min: Float, max: Float): Float {
+    if (this < min) return min
+    if (this > max) return max
+    return this
+}
 
 object Utils {
 

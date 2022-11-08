@@ -1,3 +1,11 @@
+
+import "imports/colors.onj" as color
+import "cards/cards.onj" as cards_obj
+
+!cards = !cards_obj.cards
+!baseWidth = 200
+!baseHeight = 200
+
 baseImage: "obsidian_bullet"
 outputFile: "cards/generated/cards.atlas"
 
@@ -18,6 +26,10 @@ assets: {
             name: "obsidian_bullet"
             file: "textures/cards/obsidian_bullet.png"
         }
+        {
+            name: "bullet"
+            file: "textures/cards/normal_bullet.png"
+        }
 
     ]
     fonts: [
@@ -28,15 +40,14 @@ assets: {
     ]
 }
 
-!testElements = [
+!titleElementSharedKeys = {
+    x: 10
+    y: 10
+    font: "arial"
+    fontScale: 1.0
+}
 
-    $TextElement {
-        x: 10
-        y: 10
-        text: "Test \nKarte"
-        font: "arial"
-        fontScale: 1.0
-    }
+!sharedElements = [
 
 //    $ImageElement {
 //        x: 200
@@ -46,52 +57,182 @@ assets: {
 //        scaleY: 1.0
 //    }
 
+    $RectangleElement {
+        x: 0
+        y: 0
+        width: !baseWidth
+        height: !baseHeight
+        strokeSize: 5
+        color: !color.black
+    }
+
+
 ]
 
 cards: [
 
     {
-        name: "test_card"
-        elements: !testElements
+        name: !cards.0.name
+        elements: [
+            $TextElement {
+                text: !cards.0.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card2"
-        elements: !testElements
+        name: !cards.1.name
+        elements: [
+            $TextElement {
+                text: !cards.1.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card3"
-        elements: !testElements
+        name: !cards.2.name
+        elements: [
+            $TextElement {
+                text: !cards.2.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card4"
-        elements: !testElements
+        name: !cards.3.name
+        elements: [
+            $TextElement {
+                text: !cards.3.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card5"
-        elements: !testElements
+        name: !cards.4.name
+        elements: [
+            $TextElement {
+                text: !cards.4.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card6"
-        elements: !testElements
+        name: !cards.5.name
+        elements: [
+            $TextElement {
+                text: !cards.5.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card7"
-        elements: !testElements
+        name: !cards.6.name
+        elements: [
+            $TextElement {
+                text: !cards.6.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card8"
-        elements: !testElements
+        name: !cards.7.name
+        elements: [
+            $TextElement {
+                text: !cards.7.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 
     {
-        name: "test_card9"
-        elements: !testElements
+        name: !cards.8.name
+        elements: [
+            $TextElement {
+                text: !cards.8.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
+    }
+
+    {
+        name: !cards.9.name
+        elements: [
+            $TextElement {
+                text: !cards.9.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
+    }
+
+    {
+        name: !cards.10.name
+        elements: [
+            $TextElement {
+                text: !cards.10.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
+    }
+
+    {
+        name: !cards.11.name
+        elements: [
+            $TextElement {
+                text: !cards.11.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
+    }
+
+    {
+        name: !cards.12.name
+        elements: [
+            $TextElement {
+                text: !cards.12.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
+    }
+
+    {
+        name: !cards.13.name
+        elements: [
+            $TextElement {
+                text: !cards.13.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
+    }
+
+    {
+        name: !cards.14.name
+        elements: [
+            $TextElement {
+                text: !cards.14.title
+                ...!titleElementSharedKeys
+            }
+            ...!sharedElements
+        ]
     }
 ]

@@ -1,13 +1,14 @@
 
 import "imports/asset_definitions.onjschema" as _
 
+
+baseImage: string
+outputFile: string
+
 !cardElementSharedKeys = {
     x: int
     y: int
 }
-
-baseImage: string
-outputFile: string
 
 $CardElement [
 
@@ -22,6 +23,14 @@ $CardElement [
         textureName: string
         scaleX: float
         scaleY: float
+        ...!cardElementSharedKeys
+    }
+
+    $RectangleElement {
+        width: int
+        height: int
+        color: string
+        strokeSize: int
         ...!cardElementSharedKeys
     }
 
