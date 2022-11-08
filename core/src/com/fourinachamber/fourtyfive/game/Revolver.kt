@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.rotate
 import onj.OnjNamedObject
 
 class Revolver : Widget(), ZIndexActor, InitialiseableActor {
@@ -102,21 +103,18 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         prefHeight = slotHeight * 3.5f
         prefWidth = slotWidth * 4f
         slotOffsets = arrayOf(
-            Vector2(-slotWidth / 2, slotHeight),
             Vector2(slotWidth, 0f),
             Vector2(slotWidth / 2, -slotHeight * 1.5f),
             Vector2(-slotWidth * 1.5f, -slotHeight * 1.5f),
-            Vector2(-slotWidth * 2f, 0f)
+            Vector2(-slotWidth * 2f, 0f),
+            Vector2(-slotWidth / 2, slotHeight)
         )
     }
 
-//    override fun drawDebug(shapes: ShapeRenderer?) {
-//        super.drawDebug(shapes)
-//        println(x)
-//        println(y)
-//        println(width)
-//        println(height)
-//    }
+    fun rotate() {
+        cards = cards.rotate(1)
+        dirty = true
+    }
 
     override fun getMinWidth(): Float = prefWidth
     override fun getMinHeight(): Float = prefHeight

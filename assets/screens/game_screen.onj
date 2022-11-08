@@ -7,6 +7,11 @@ import "imports/colors.onj" as color
 !cardZIndicesStart = 100
 !cardZIndicesEnd = <!cardZIndicesStart + 100>
 
+!buttonHoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true
+    cursorName: "hand"
+}
+
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
@@ -164,6 +169,7 @@ options: {
                                     fontScale: 0.15
                                     color: !color.white
                                     backgroundTexture: "black"
+                                    behaviours: [ $ShootButtonBehaviour { }, !buttonHoverBehaviour ]
                                 }
                             }
                         ]

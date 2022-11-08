@@ -13,7 +13,7 @@ import com.fourinachamber.fourtyfive.utils.obj
 import onj.OnjNamedObject
 
 
-interface GameCardDragSource {
+interface GameScreenControllerDragAndDrop {
     var gameScreenController: GameScreenController
 }
 
@@ -22,7 +22,7 @@ class CardDragSource(
     screenDataProvider: ScreenDataProvider,
     actor: Actor,
     onj: OnjNamedObject
-) : DragBehaviour(dragAndDrop, screenDataProvider, actor, onj), GameCardDragSource {
+) : DragBehaviour(dragAndDrop, screenDataProvider, actor, onj), GameScreenControllerDragAndDrop {
 
     override lateinit var gameScreenController: GameScreenController
 

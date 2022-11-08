@@ -66,6 +66,10 @@ fun Float.between(min: Float, max: Float): Float {
     return this
 }
 
+inline fun <reified T> Array<T>.rotate(by: Int): Array<T> {
+    return Array(this.size) { this[(it + by) % this.size] }
+}
+
 object Utils {
 
     /**

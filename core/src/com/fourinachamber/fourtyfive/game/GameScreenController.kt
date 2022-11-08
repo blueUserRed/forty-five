@@ -4,8 +4,9 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.card.GameCardDragSource
+import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.screen.DragAndDropBehaviourFactory
+import com.fourinachamber.fourtyfive.screen.GameScreenBehaviour
 import com.fourinachamber.fourtyfive.screen.ScreenController
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import onj.*
@@ -57,7 +58,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 card.actor,
                 cardDragAndDropBehaviour
             )
-            if (behaviour is GameCardDragSource) behaviour.gameScreenController = this
+            if (behaviour is GameScreenControllerDragAndDrop) behaviour.gameScreenController = this
             cardDragAndDrop.addSource(behaviour)
         }
 
@@ -66,6 +67,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         initCardHand()
         initRevolver()
         initEnemyArea()
+
+        for (behaviour in screenDataProvider.behaviours) if (behaviour is GameScreenBehaviour) {
+            behaviour.gameScreenController = this
+        }
     }
 
     private fun initCardHand() {
@@ -122,6 +127,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     override fun end() {
         curScreen = null
+    }
+
+    fun shoot() {
+        revolver!!.rotate()
     }
 
     companion object {
