@@ -3,8 +3,8 @@ package com.fourinachamber.fourtyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
-import com.fourinachamber.fourtyfive.cards.CardGenerator
-import com.fourinachamber.fourtyfive.screens.ScreenBuilderFromOnj
+import com.fourinachamber.fourtyfive.card.CardGenerator
+import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 
 /**
  * main game object

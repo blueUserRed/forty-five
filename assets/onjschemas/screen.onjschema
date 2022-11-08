@@ -2,25 +2,6 @@
 import "imports/asset_definitions.onjschema" as _
 import "imports/font_group.onjschema" as _
 
-!tableCell = {
-    width?: float
-    height?: float
-    colspan?: int
-    align?: string
-    padTop?: float
-    padBottom?: float
-    padLeft?: float
-    padRight?: float
-    cellName?: string
-    element: $Widget
-}
-
-!tableRow = {
-    width?: float
-    height?: float
-    cells: !tableCell[*]
-}
-
 !viewportSharedKeys = {
     backgroundTexture?: string
 }
@@ -40,6 +21,26 @@ $Viewport [
     }
 
 ]
+!tableCell = {
+    width?: float
+    height?: float
+    colspan?: int
+    align?: string
+    padTop?: float
+    padBottom?: float
+    padLeft?: float
+    padRight?: float
+    cellName?: string
+    sizeToActor?: boolean
+    align?: string
+    element: $Widget
+}
+
+!tableRow = {
+    width?: float
+    height?: float
+    cells: !tableCell[*]
+}
 
 !widgetSharedKeys = {
     debug?: boolean
@@ -137,6 +138,32 @@ $Widget [
     }
 
     $CardHand {
+        cardScale: float
+        cardSpacing: float
+        startCardZIndicesAt: int
+        hoveredCardZIndex: int
+        draggedCardZIndex: int
+        detailFont: string
+        detailFontColor: string
+        detailBackgroundTexture: string
+        detailFontScale: float
+        detailOffsetX: float
+        detailOffsetY: float
+        detailPadding: float
+        ...!widgetSharedKeys
+    }
+
+    $Revolver {
+        slotTexture: string
+        font: string
+        fontColor: string
+        fontScale: float
+        slotScale: float
+        cardScale: float
+        ...!widgetSharedKeys
+    }
+
+    $EnemyArea {
         ...!widgetSharedKeys
     }
 
@@ -222,7 +249,28 @@ $DragAndDropBehaviour [
         ...!dragAndDropBehaviourSharedKeys
     }
 
+    $CardDragSource {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
+    $RevolverDropTarget {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
 ]
+
+!enemy = {
+    name: string
+    texture: string
+    lives: int
+    offsetX: float
+    offsetY: float
+    scaleX: float
+    scaleY: float
+    detailFont: string
+    detailFontScale: float
+    detailFontColor: string
+}
 
 $ScreenController [
 
@@ -231,10 +279,17 @@ $ScreenController [
         cardAtlasFile: string
         cardHand: {
             actorName: string
-            cardScaling: float
-            cardSpacing: float
         }
-        cardDragAndDropBehaviour: $DragAndDropBehaviour
+        revolver: {
+            actorName: string
+            dropBehaviour: $DragAndDropBehaviour
+        }
+        enemyArea: {
+            actorName: string
+            enemies: string[*]
+        }
+        cardDragBehaviour: $DragAndDropBehaviour
+        enemies: !enemy[*]
     }
 
 ]
@@ -248,6 +303,7 @@ assets: {
     cursors: !cursorDeclaration[*]
     postProcessors: !postProcessorDeclaration[*]
     animations: !animationDeclaration[*]
+    colorTextures: !colorTextureDeclaration[*]
 }
 
 options: {

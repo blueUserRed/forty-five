@@ -39,3 +39,8 @@ export !animationDeclaration = {
     initialFrame: int
     frameTime: int
 }
+
+export !colorTextureDeclaration = {
+    name: string
+    color: string
+}

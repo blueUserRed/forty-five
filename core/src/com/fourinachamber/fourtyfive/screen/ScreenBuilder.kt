@@ -1,6 +1,8 @@
-package com.fourinachamber.fourtyfive.screens
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Graphics.DisplayMode
+import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.files.FileHandle
@@ -18,6 +20,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
@@ -29,6 +32,10 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.game.CardHand
+import com.fourinachamber.fourtyfive.game.EnemyActor
+import com.fourinachamber.fourtyfive.game.EnemyArea
+import com.fourinachamber.fourtyfive.game.Revolver
 import com.fourinachamber.fourtyfive.utils.Animation
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -123,6 +130,11 @@ interface ScreenDataProvider {
      * removes an actor from the root of the screen
      */
     fun removeActorFromRoot(actor: Actor)
+
+    /**
+     * resorts all children of the root of the stage, if they implement [ZIndexActor]
+     */
+    fun resortRootZIndices()
 }
 
 /**
@@ -167,8 +179,12 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         textures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
 
         val (textureRegions, atlases) = OnjReaderUtils.readAtlases(onjAssets.get<OnjArray>("textureAtlases"))
-        this.textures = textures + textureRegions
         toDispose.addAll(atlases)
+
+        val colorTextures = OnjReaderUtils.readColorTextures(onjAssets.get<OnjArray>("colorTextures"))
+        colorTextures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
+
+        this.textures = textures + textureRegions + colorTextures
 
         fonts = OnjReaderUtils.readFonts(onjAssets.get<OnjArray>("fonts"))
         toDispose.addAll(fonts.values)
@@ -393,7 +409,35 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             applyImageKeys(this, widgetOnj)
         }
 
-        "CardHand" -> CardHand()
+        "CardHand" -> CardHand(
+            fontOrError(widgetOnj.get<String>("detailFont")),
+            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            widgetOnj.get<Double>("detailFontScale").toFloat(),
+            Vector2(
+                widgetOnj.get<Double>("detailOffsetX").toFloat(),
+                widgetOnj.get<Double>("detailOffsetY").toFloat(),
+            ),
+            widgetOnj.get<Double>("detailPadding").toFloat()
+        ).apply {
+            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+            cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
+            startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
+            hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()
+            draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()
+        }
+
+        "Revolver" -> Revolver().apply {
+            slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
+            slotFont = fontOrError(widgetOnj.get<String>("font"))
+            fontColor = Color.valueOf(widgetOnj.get<String>("fontColor"))
+            fontScale = widgetOnj.get<Double>("fontScale").toFloat()
+            slotScale = widgetOnj.get<Double>("slotScale").toFloat()
+            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+        }
+
+        "EnemyArea" -> EnemyArea().apply {
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
     }.apply {
@@ -410,8 +454,14 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         cellOnj.ifHas<Double>("padBottom") { cell.padBottom(it.toFloat()) }
         cellOnj.ifHas<Double>("padLeft") { cell.padLeft(it.toFloat()) }
         cellOnj.ifHas<Double>("padRight") { cell.padRight(it.toFloat()) }
+        cellOnj.ifHas<String>("align") { cell.align(alignmentOrError(it)) }
 
         cellOnj.ifHas<String>("cellName") { namedCells[it] = cell }
+
+        if (cellOnj.getOr("sizeToActor", false)) {
+            cell.width(Value.prefWidth)
+            cell.height(Value.prefHeight)
+        }
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {
@@ -539,11 +589,18 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun addActorToRoot(actor: Actor) {
-            stage.addActor(actor)
+            stage.root.addActor(actor)
         }
 
         override fun removeActorFromRoot(actor: Actor) {
             stage.root.removeActor(actor)
+        }
+
+        override fun resortRootZIndices() {
+            stage.root.children.sort { el1, el2 ->
+                (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+            }
         }
 
         private fun updateCallbacks() {
@@ -564,6 +621,13 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun render(delta: Float) {
+            if (Gdx.input.isKeyJustPressed(Keys.F)) {
+                if (!Gdx.graphics.isFullscreen) {
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                } else {
+                    Gdx.graphics.setWindowedMode(600, 400)
+                }
+            }
             updateCallbacks()
             lastRenderTime = measureTimeMillis {
                 stage.act(Gdx.graphics.deltaTime)
