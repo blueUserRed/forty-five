@@ -106,6 +106,11 @@ interface ScreenDataProvider {
     var screenController: ScreenController?
 
     /**
+     * list of all behaviours that actors in the scene have
+     */
+    val behaviours: List<Behaviour>
+
+    /**
      * executes a callback after [ms] time has passed
      */
     fun afterMs(ms: Int, callback: () -> Unit)
@@ -232,7 +237,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             earlyRenderTasks.toList(),
             lateRenderTasks.toList(),
             namedCells,
-            namedActors
+            namedActors,
+            behavioursToBind
         )
 
         val cursorOnj = options.get<OnjObject>("defaultCursor")
@@ -544,7 +550,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
         private val lateRenderTasks: List<OnjScreen.() -> Unit>,
         override val namedCells: Map<String, Cell<*>>,
-        override val namedActors: Map<String, Actor>
+        override val namedActors: Map<String, Actor>,
+        override val behaviours: List<Behaviour>
     ) : ScreenAdapter(), ScreenDataProvider {
 
         var dragAndDrop: Map<String, DragAndDrop> = mapOf()

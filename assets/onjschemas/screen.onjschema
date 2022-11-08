@@ -193,7 +193,7 @@ $Behaviour [
         screenPath: string
     }
 
-    $OnClickShootBehaviour {
+    $OnClickMaskBehaviour {
         maskTexture: string
         invert?: boolean
         maskScaleX?: float
@@ -220,6 +220,9 @@ $Behaviour [
         setPopupPosition: boolean
         xOffset?: float
         yOffset?: float
+    }
+
+    $ShootButtonBehaviour {
     }
 
 ]

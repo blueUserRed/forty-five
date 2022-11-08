@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
+import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
 import ktx.actors.onClick
@@ -27,10 +28,11 @@ object BehaviourFactory {
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
-        "OnClickShootBehaviour" to { onj, actor -> OnClickShootBehaviour(onj, actor) },
+        "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
-        "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) }
+        "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
+        "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) }
     )
 
     /**
@@ -43,6 +45,10 @@ object BehaviourFactory {
         return behaviourCreator(onj, actor)
     }
 
+}
+
+interface GameScreenBehaviour {
+    var gameScreenController: GameScreenController
 }
 
 /**
@@ -225,7 +231,7 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 /**
  * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
  */
-class OnClickShootBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     private val maskTextureName = onj.get<String>("maskTexture")
     private val invert = onj.getOr("invert", false)
@@ -235,7 +241,7 @@ class OnClickShootBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor
     private val maskOffsetY = onj.getOr("maskOffsetY", 0.0).toFloat()
 
     init {
-        if (actor !is Maskable) throw RuntimeException("OnClickShootBehaviour can only be used on a maskable actor")
+        if (actor !is Maskable) throw RuntimeException("OnClickMaskBehaviour can only be used on a maskable actor")
     }
 
     override val onCLick: BehaviourCallback = {
@@ -360,6 +366,16 @@ class OnHoverPopupBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
     override val onHoverExit: BehaviourCallback = {
         popupActor.isVisible = false
     }
+}
+
+class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.shoot()
+    }
+
 }
 
 typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor) -> Behaviour
