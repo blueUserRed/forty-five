@@ -7,6 +7,11 @@ cards: [
         description: "It's a bullet!"
     }
     {
+        name: "test_card1"
+        title: "test \ncard 1"
+        description: "It's a bullet!"
+    }
+    {
         name: "test_card2"
         title: "test \ncard 2"
         description: "It's a bullet!"

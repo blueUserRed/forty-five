@@ -65,6 +65,17 @@ interface Maskable {
 }
 
 /**
+ * an actor that can be disabled
+ */
+interface DisableActor {
+
+    /**
+     * true if the actor is disabled
+     */
+    var isDisabled: Boolean
+}
+
+/**
  * The default implementation of z-indices in libgdx is really bad, so here is my own.
  * Actors that implement this interface can have z-indices applied.
  * Only works when the actor is in a [ZIndexGroup]
@@ -110,9 +121,11 @@ open class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
     var background: Drawable? = null
-) : Label(text, labelStyle), ZIndexActor {
+) : Label(text, labelStyle), ZIndexActor, DisableActor {
 
     override var fixedZIndex: Int = 0
+
+    override var isDisabled: Boolean = false
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {

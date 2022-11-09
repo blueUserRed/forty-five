@@ -387,6 +387,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         "Table" -> CustomTable().apply {
             if (widgetOnj.getOr("fillX", false)) defaults().expandX().fillX()
             if (widgetOnj.getOr("fillY", false)) defaults().expandY().fillY()
+            widgetOnj.ifHas<String>("backgroundTexture") {
+                background = TextureRegionDrawable(textureOrError(it))
+            }
             widgetOnj.ifHas<String>("align") { align(alignmentOrError(it)) }
             widgetOnj.get<OnjArray>("rows").value.forEach { row ->
                 row as OnjObject

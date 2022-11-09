@@ -2,13 +2,12 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
-import com.fourinachamber.fourtyfive.screen.DragAndDropBehaviourFactory
-import com.fourinachamber.fourtyfive.screen.GameScreenBehaviour
-import com.fourinachamber.fourtyfive.screen.ScreenController
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.*
 import onj.*
 
 
@@ -24,16 +23,23 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
     private val enemiesOnj = onj.get<OnjArray>("enemies")
+    private val cardDrawActorName = onj.get<String>("cardDrawActor")
+    private val shootButtonName = onj.get<String>("shootButtonName")
     private var curScreen: ScreenDataProvider? = null
 
     private var cardHand: CardHand? = null
     private var revolver: Revolver? = null
     private var enemyArea: EnemyArea? = null
+    private var cardDrawActor: Actor? = null
+    private var shootButton: CustomLabel? = null
 
     private var cards: List<Card> = listOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     private var enemies: List<Enemy> = listOf()
+
+    var currentPhase: Gamephase = Gamephase.DRAW
+        private set
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
@@ -64,6 +70,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         enemies = Enemy.getFrom(enemiesOnj, screenDataProvider.textures, screenDataProvider.fonts)
 
+        cardDrawActor = screenDataProvider.namedActors[cardDrawActorName] ?: throw RuntimeException(
+            "no actor with name $cardDrawActorName"
+        )
+
+        val shootButton = screenDataProvider.namedActors[shootButtonName] ?: throw RuntimeException(
+            "no actor with name $shootButtonName"
+        )
+        if (shootButton !is CustomLabel) throw RuntimeException("actor named $shootButtonName must be a Label")
+        this.shootButton = shootButton
+
         initCardHand()
         initRevolver()
         initEnemyArea()
@@ -71,6 +87,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         for (behaviour in screenDataProvider.behaviours) if (behaviour is GameScreenBehaviour) {
             behaviour.gameScreenController = this
         }
+
+        startDrawPhase()
     }
 
     private fun initCardHand() {
@@ -82,7 +100,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
 
-        for (i in 0..14) cardHand.addCard(cards[i])
+        for (i in 0..3) cardHand.addCard(cards[i])
     }
 
     private fun initRevolver() {
@@ -130,7 +148,35 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun shoot() {
+        if (currentPhase != Gamephase.FREE) return
         revolver!!.rotate()
+    }
+
+    private fun freezeUI() {
+        shootButton!!.isDisabled = true
+    }
+
+    private fun unfreezeUI() {
+        shootButton!!.isDisabled = false
+    }
+
+    private fun freezeCards() {
+        for (card in cardHand!!.cards) card.isDraggable = false
+    }
+
+    private fun unfreezeCards() {
+        for (card in cardHand!!.cards) card.isDraggable = true
+    }
+
+    private fun startDrawPhase() {
+        currentPhase = Gamephase.DRAW
+        freezeCards()
+        freezeUI()
+        val viewport = curScreen!!.stage.viewport
+        val cardDrawActor = cardDrawActor!!
+        cardDrawActor.isVisible = true
+//        cardDrawActor.setPosition(0f, 0f)
+        cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
     }
 
     companion object {
@@ -139,5 +185,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
         }
 
+    }
+
+    enum class Gamephase {
+        DRAW, ENEMY_REVEAL, FREE, ENEMY_ACTION
     }
 }

@@ -1,17 +1,12 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.CustomLabel
@@ -20,8 +15,6 @@ import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.between
 import ktx.actors.contains
-import ktx.actors.onEnter
-import ktx.actors.onExit
 import kotlin.math.min
 
 
@@ -67,7 +60,10 @@ class CardHand(
      */
     var draggedCardZIndex: Int = 0
 
-    private var cards: MutableList<Card> = mutableListOf()
+    val cards: List<Card>
+        get() = _cards
+
+    private var _cards: MutableList<Card> = mutableListOf()
     private var currentWidth: Float = 0f
     private var currentHeight: Float = 0f
 
@@ -88,7 +84,7 @@ class CardHand(
      * adds a card to the hand
      */
     fun addCard(card: Card) {
-        cards.add(card)
+        _cards.add(card)
         if (card.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(card.actor)
         updateCards()
     }
@@ -97,7 +93,7 @@ class CardHand(
      * removes a card from the hand (will not be removed from the stage)
      */
     fun removeCard(card: Card) {
-        cards.remove(card)
+        _cards.remove(card)
 //        screenDataProvider.removeActorFromRoot(card.actor)
         updateCards()
     }
@@ -111,18 +107,18 @@ class CardHand(
 
     private fun updateCards() {
 
-        if (cards.isEmpty()) return
+        if (_cards.isEmpty()) return
 
-        val cardWidth = cards[0].actor.width * cardScale
+        val cardWidth = _cards[0].actor.width * cardScale
 
-        var neededWidth = cards.size * (cardSpacing + cardWidth) - cardSpacing
+        var neededWidth = _cards.size * (cardSpacing + cardWidth) - cardSpacing
         this.currentWidth = neededWidth
 
         val xDistanceOffset = if (width < neededWidth) {
-            -(neededWidth - width + cardWidth) / cards.size
+            -(neededWidth - width + cardWidth) / _cards.size
         } else 0f
 
-        neededWidth = cards.size * (xDistanceOffset + cardSpacing + cardWidth) - cardSpacing - xDistanceOffset
+        neededWidth = _cards.size * (xDistanceOffset + cardSpacing + cardWidth) - cardSpacing - xDistanceOffset
 
         var curX = if (width > neededWidth) {
             x + ((width - neededWidth) / 2)
@@ -130,8 +126,8 @@ class CardHand(
         val curY = y
 
         var isCardHoveredOver = false
-        for (i in cards.indices) {
-            val card = cards[i]
+        for (i in _cards.indices) {
+            val card = _cards[i]
             if (!card.actor.isDragged) {
                 card.actor.setPosition(curX, curY)
                 card.actor.setScale(cardScale)
@@ -155,7 +151,7 @@ class CardHand(
         screenDataProvider.resortRootZIndices()
 
 //        this.currentWidth = neededWidth
-        this.currentHeight = cards[0].actor.height * cardScale
+        this.currentHeight = _cards[0].actor.height * cardScale
     }
 
     private fun displayHoverDetail(card: Card) {
