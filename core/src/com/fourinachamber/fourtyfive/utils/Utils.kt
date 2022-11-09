@@ -71,7 +71,9 @@ fun Float.between(min: Float, max: Float): Float {
  */
 inline fun <reified T> Array<T>.rotate(by: Int): Array<T> {
     return Array(this.size) {
-        val newIndex = if (by > 0) (it + by) % this.size else (it - by) % this.size
+        var newIndex = it + by
+        if (newIndex > this.size) newIndex %= this.size
+        if (newIndex < 0) newIndex += this.size
         this[newIndex]
     }
 }

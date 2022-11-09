@@ -32,7 +32,9 @@ object BehaviourFactory {
         "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
-        "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) }
+        "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
+        "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
+        "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) }
     )
 
     /**
@@ -406,6 +408,26 @@ class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), Gam
 
     override val onCLick: BehaviourCallback = {
         gameScreenController.shoot()
+    }
+
+}
+
+class DrawBulletButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.drawBullet()
+    }
+
+}
+
+class DrawCoverCardButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.drawCover()
     }
 
 }

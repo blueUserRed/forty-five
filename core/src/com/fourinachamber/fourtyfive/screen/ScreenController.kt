@@ -31,6 +31,11 @@ abstract class ScreenController {
     open fun init(screenDataProvider: ScreenDataProvider) { }
 
     /**
+     * called every frame
+     */
+    open fun update() { }
+
+    /**
      * called before the controller is changed to different one
      */
     open fun end() { }

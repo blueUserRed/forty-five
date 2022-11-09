@@ -631,6 +631,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun render(delta: Float) {
+            screenController?.update()
             if (Gdx.input.isKeyJustPressed(Keys.F)) {
                 if (!Gdx.graphics.isFullscreen) {
                     Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)

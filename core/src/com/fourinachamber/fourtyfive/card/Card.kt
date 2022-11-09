@@ -6,12 +6,14 @@ import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.OnjArray
+import onj.OnjNamedObject
 import onj.OnjObject
 
 class Card(
     val name: String,
     val texture: TextureRegion,
-    val description: String
+    val description: String,
+    val type: Type
 ) {
 
     val actor = CardActor(this)
@@ -30,10 +32,20 @@ class Card(
                     name,
                     regions["$cardTexturePrefix$name"] ?:
                         throw RuntimeException("cannot find texture for card $name"),
-                    it.get<String>("description")
+                    it.get<String>("description"),
+                    when (val type = it.get<OnjNamedObject>("type").name) {
+                        "Bullet" -> Type.BULLET
+                        "Cover" -> Type.COVER
+                        "OneShot" -> Type.ONE_SHOT
+                        else -> throw RuntimeException("unknown Card type: $type")
+                    }
                 )
             }
 
+    }
+
+    enum class Type {
+        BULLET, COVER, ONE_SHOT
     }
 
 }

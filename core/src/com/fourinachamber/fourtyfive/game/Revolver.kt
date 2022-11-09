@@ -23,6 +23,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     var cardScale: Float = 1f
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
     private var dirty: Boolean = true
+    private var isInitialised: Boolean = false
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
     private var cards: Array<Card?> = Array(5) { null }
@@ -41,14 +42,14 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         card.isDraggable = false
         cards[slot - 1] = card
-        updateCardPositions()
+        dirty = true
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         width = prefWidth
         height = prefHeight
         super.draw(batch, parentAlpha)
-        if (dirty) {
+        if (!isInitialised) {
             calcOffsets()
             slots = Array(5) {
                 val slot = RevolverSlot(it + 1, slotTexture!!, slotFont!!, fontColor!!, slotScale!!)
@@ -73,6 +74,11 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
                 }
                 slot
             }
+            isInitialised = true
+        }
+        if (dirty) {
+            calcOffsets()
+            updateSlotPositions()
             updateCardPositions()
             dirty = false
         }
@@ -81,6 +87,16 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     override fun positionChanged() {
         super.positionChanged()
         dirty = true
+    }
+
+    private fun updateSlotPositions() {
+        for (i in slots.indices) {
+            val slot = slots[i]
+            slot.setPosition(
+                slotOffsets[i].x + x + prefWidth / 2,
+                slotOffsets[i].y + y + prefHeight / 2
+            )
+        }
     }
 
     private fun updateCardPositions() {
@@ -92,7 +108,6 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
             )
             card.actor.setScale(cardScale)
         }
-        dirty = true
     }
 
     private fun calcOffsets() {
