@@ -6,10 +6,15 @@ import "imports/colors.onj" as color
 
 !cardZIndicesStart = 100
 !cardZIndicesEnd = <!cardZIndicesStart + 100>
+!overlayZIndex = 500
 
 !buttonHoverBehaviour = $MouseHoverBehaviour {
     useSystemCursor: true
     cursorName: "hand"
+    disabled: {
+        useSystemCursor: true
+        cursorName: "not allowed"
+    }
 }
 
 viewport: $FitViewport {
@@ -103,6 +108,8 @@ options: {
                 detailFontColor: !color.blue
             }
         ]
+        cardDrawActor: "card_draw_table"
+        shootButtonName: "shoot_button"
     }
 }
 
@@ -164,6 +171,7 @@ options: {
                             {
                                 sizeToActor: true
                                 element: $Label {
+                                    name: "shoot_button"
                                     font: "distance_field"
                                     text: "shoot"
                                     fontScale: 0.15
@@ -203,6 +211,55 @@ options: {
     ]
 }
 
+!cardDrawTable = $Table {
+    visible: false
+    name: "card_draw_table"
+    debug: true
+    fillX: true
+    fillY: true
+    zIndex: !overlayZIndex
+    backgroundTexture: "card_detail_background"
+    rows: [
+
+
+        {
+            cells: [
+
+                {
+                    element: $Label {
+                        font: "distance_field"
+                        text: "stack 1"
+                        fontScale: 0.15
+                        align: "center"
+                        color: !color.white
+                    }
+                }
+
+                {
+                    element: $Label {
+                        font: "distance_field"
+                        text: "stack 2"
+                        fontScale: 0.15
+                        align: "center"
+                        color: !color.white
+                    }
+                }
+                {
+                    element: $Label {
+                        font: "distance_field"
+                        text: "stack 3"
+                        fontScale: 0.15
+                        align: "center"
+                        color: !color.white
+                    }
+                }
+
+            ]
+        }
+
+    ]
+}
+
 children: [
 
 
@@ -212,5 +269,7 @@ children: [
 //        debug: true
         rows: [ !topRow, !bottomRow ]
     }
+
+    !cardDrawTable
 
 ]

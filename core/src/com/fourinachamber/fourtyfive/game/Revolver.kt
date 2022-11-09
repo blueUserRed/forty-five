@@ -112,7 +112,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     }
 
     fun rotate() {
-        cards = cards.rotate(1)
+        cards = cards.rotate(-1)
         dirty = true
     }
 

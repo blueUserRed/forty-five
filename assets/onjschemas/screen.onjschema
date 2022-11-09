@@ -87,6 +87,7 @@ $Widget [
         align?: string
         rows: !tableRow[*]
         applyZIndices?: boolean
+        backgroundTexture?: string
         ...!widgetSharedKeys
     }
 
@@ -173,6 +174,10 @@ $Behaviour [
     $MouseHoverBehaviour {
         useSystemCursor: boolean
         cursorName: string
+        disabled: ?{
+            useSystemCursor: boolean
+            cursorName: string
+        }
     }
 
     $OnClickExitBehaviour { }
@@ -292,6 +297,8 @@ $ScreenController [
         }
         cardDragBehaviour: $DragAndDropBehaviour
         enemies: !enemy[*]
+        cardDrawActor: string
+        shootButtonName: string
     }
 
 ]

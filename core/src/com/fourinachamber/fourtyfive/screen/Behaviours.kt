@@ -72,9 +72,15 @@ abstract class Behaviour(val actor: Actor) {
     protected open val onHoverExit: BehaviourCallback? = null
 
     /**
-     * called when the actor is clicked
+     * called when the actor is clicked. If the actor is a [DisableActor] and [DisableActor.isDisabled] is set to false,
+     * this will not be called
      */
     protected open val onCLick: BehaviourCallback? = null
+
+    /**
+     * called when the actor is a [DisableActor], [DisableActor.isDisabled] is set to true and the actor is clicked
+     */
+    protected open val onDisabledCLick: BehaviourCallback? = null
 
     /**
      * binds the callbacks to the actor and sets the [screenDataProvider]
@@ -83,7 +89,12 @@ abstract class Behaviour(val actor: Actor) {
         this.screenDataProvider = screenDataProvider
         onHoverEnter?.let { actor.onEnter(it) }
         onHoverExit?.let { actor.onExit(it) }
-        onCLick?.let { actor.onClick(it) }
+        actor.onClick {
+            if (actor is DisableActor) {
+                if (actor.isDisabled) onDisabledCLick?.let { it() }
+                else onCLick?.let { it() }
+            } else onCLick?.let { it() }
+        }
     }
 
 }
@@ -99,11 +110,32 @@ class MouseHoverBehaviour(
     private val cursorName = onj.get<String>("cursorName")
     private val useSystemCursor = onj.get<Boolean>("useSystemCursor")
 
+    private var disabledCursorName: String? = null
+    private var disabledUseSystemCursor: Boolean? = null
+
+    init {
+        if (onj.hasKey<OnjObject>("disabled")) {
+            val disabledOnj = onj.get<OnjObject>("disabled")
+            disabledCursorName = disabledOnj.get<String>("cursorName")
+            disabledUseSystemCursor = disabledOnj.get<Boolean>("useSystemCursor")
+        }
+    }
+
     private val cursor: Either<Cursor, SystemCursor> by lazy {
         Utils.loadCursor(useSystemCursor, cursorName, screenDataProvider)
     }
 
-    override val onHoverEnter: BehaviourCallback = {
+    private val disabledCursor: Either<Cursor, SystemCursor>? by lazy {
+        if (disabledUseSystemCursor != null) {
+            Utils.loadCursor(disabledUseSystemCursor!!, disabledCursorName!!, screenDataProvider)
+        } else null
+    }
+
+    override val onHoverEnter: BehaviourCallback = callback@ {
+        if (disabledCursor != null && actor is DisableActor && actor.isDisabled) {
+            Utils.setCursor(disabledCursor!!)
+            return@callback
+        }
         Utils.setCursor(cursor)
     }
 

@@ -66,8 +66,14 @@ fun Float.between(min: Float, max: Float): Float {
     return this
 }
 
+/**
+ * rotates an array by [by]. Can be negative
+ */
 inline fun <reified T> Array<T>.rotate(by: Int): Array<T> {
-    return Array(this.size) { this[(it + by) % this.size] }
+    return Array(this.size) {
+        val newIndex = if (by > 0) (it + by) % this.size else (it - by) % this.size
+        this[newIndex]
+    }
 }
 
 object Utils {
