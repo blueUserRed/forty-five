@@ -34,12 +34,17 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var shootButton: CustomLabel? = null
 
     private var cards: List<Card> = listOf()
+    private var bulletStack: MutableList<Card> = mutableListOf()
+    private var coverCardStack: MutableList<Card> = mutableListOf()
+    private var oneShotStack: MutableList<Card> = mutableListOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     private var enemies: List<Enemy> = listOf()
 
-    var currentPhase: Gamephase = Gamephase.DRAW
-        private set
+    private var cardsToDraw: Int? = null
+
+//    var currentPhase: Gamephase = Gamephase.DRAW
+//        private set
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
@@ -55,6 +60,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         for (texture in cardAtlas.textures) screenDataProvider.addDisposable(texture)
         cards = Card.getFrom(onj.get<OnjArray>("cards"), screenDataProvider.textures)
+        bulletStack = cards.filter { it.type == Card.Type.BULLET }.shuffled().toMutableList()
+        coverCardStack = cards.filter { it.type == Card.Type.COVER }.shuffled().toMutableList()
+        oneShotStack = cards.filter { it.type == Card.Type.ONE_SHOT }.shuffled().toMutableList()
 
         for (card in cards) {
             val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
@@ -88,7 +96,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             behaviour.gameScreenController = this
         }
 
-        startDrawPhase()
+        screenDataProvider.afterMs(1) { screenDataProvider.resortRootZIndices() } //TODO: this is not good
+        startDrawPhase(6)
+    }
+
+    override fun update() {
     }
 
     private fun initCardHand() {
@@ -99,8 +111,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             ?: throw RuntimeException("no named actor with name $cardHandName")
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
-
-        for (i in 0..3) cardHand.addCard(cards[i])
     }
 
     private fun initRevolver() {
@@ -143,12 +153,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         revolver!!.setCard(slot, card)
     }
 
-    override fun end() {
-        curScreen = null
-    }
-
     fun shoot() {
-        if (currentPhase != Gamephase.FREE) return
+//        if (currentPhase != Gamephase.FREE) return
         revolver!!.rotate()
     }
 
@@ -168,15 +174,44 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         for (card in cardHand!!.cards) card.isDraggable = true
     }
 
-    private fun startDrawPhase() {
-        currentPhase = Gamephase.DRAW
+    private fun startDrawPhase(cardsToDraw: Int) {
+//        currentPhase = Gamephase.DRAW
         freezeCards()
         freezeUI()
         val viewport = curScreen!!.stage.viewport
         val cardDrawActor = cardDrawActor!!
         cardDrawActor.isVisible = true
-//        cardDrawActor.setPosition(0f, 0f)
         cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
+        this.cardsToDraw = cardsToDraw
+    }
+
+    private fun endDrawPhase() {
+        unfreezeCards()
+        unfreezeUI()
+        cardDrawActor!!.isVisible = false
+        cardsToDraw = null
+    }
+
+    fun drawBullet() {
+        var cardsToDraw = cardsToDraw ?: return
+        //TODO: default card when stack is empty
+        cardHand!!.addCard(bulletStack.removeFirst())
+        cardsToDraw--
+        this.cardsToDraw = cardsToDraw
+        if (cardsToDraw <= 0) endDrawPhase()
+    }
+
+    fun drawCover() {
+        var cardsToDraw = cardsToDraw ?: return
+        //TODO: default card when stack is empty
+        cardHand!!.addCard(coverCardStack.removeFirst())
+        cardsToDraw--
+        this.cardsToDraw = cardsToDraw
+        if (cardsToDraw <= 0) endDrawPhase()
+    }
+
+    override fun end() {
+        curScreen = null
     }
 
     companion object {
@@ -187,7 +222,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     }
 
-    enum class Gamephase {
-        DRAW, ENEMY_REVEAL, FREE, ENEMY_ACTION
-    }
+//    enum class Gamephase {
+//        DRAW, ENEMY_REVEAL, FREE, ENEMY_ACTION
+//    }
 }

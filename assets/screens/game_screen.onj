@@ -228,31 +228,33 @@ options: {
                 {
                     element: $Label {
                         font: "distance_field"
-                        text: "stack 1"
+                        text: "Bullets"
                         fontScale: 0.15
                         align: "center"
                         color: !color.white
+                        behaviours: [ $DrawBulletButtonBehaviour { }, !buttonHoverBehaviour ]
                     }
                 }
 
                 {
                     element: $Label {
                         font: "distance_field"
-                        text: "stack 2"
+                        text: "Cover Cards"
                         fontScale: 0.15
                         align: "center"
                         color: !color.white
+                        behaviours: [ $DrawCoverCardButtonBehaviour { }, !buttonHoverBehaviour ]
                     }
                 }
-                {
-                    element: $Label {
-                        font: "distance_field"
-                        text: "stack 3"
-                        fontScale: 0.15
-                        align: "center"
-                        color: !color.white
-                    }
-                }
+//                {
+//                    element: $Label {
+//                        font: "distance_field"
+//                        text: "stack 3"
+//                        fontScale: 0.15
+//                        align: "center"
+//                        color: !color.white
+//                    }
+//                }
 
             ]
         }

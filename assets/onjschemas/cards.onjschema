@@ -1,8 +1,17 @@
 
+$CardType [
+
+    $Bullet { }
+    $Cover { }
+    $OneShot { }
+
+]
+
 !card = {
     name: string
     title: string
     description: string
+    type: $CardType
 }
 
 cards: !card[*]

@@ -227,8 +227,11 @@ $Behaviour [
         yOffset?: float
     }
 
-    $ShootButtonBehaviour {
-    }
+    $ShootButtonBehaviour { }
+
+    $DrawBulletButtonBehaviour { }
+
+    $DrawCoverCardButtonBehaviour { }
 
 ]
 
