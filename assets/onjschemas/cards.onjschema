@@ -11,6 +11,7 @@ $CardType [
     name: string
     title: string
     description: string
+    baseDamage: int
     type: $CardType
 }
 

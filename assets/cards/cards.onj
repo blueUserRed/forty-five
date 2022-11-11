@@ -7,90 +7,105 @@ cards: [
         name: "test_card1"
         title: "test \ncard 1"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 1
         name: "test_card2"
         title: "test \ncard 2"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 2
         name: "test_card3"
         title: "test \ncard 3"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 3
         name: "test_card4"
         title: "test \ncard 4"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 4
         name: "test_card5"
         title: "test \ncard 5"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 5
         name: "test_card6"
         title: "test \ncard 6"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 6
         name: "test_card7"
         title: "test \ncard 7"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 7
         name: "test_card8"
         title: "test \ncard 8"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 8
         name: "test_card9"
         title: "test \ncard 9"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 9
         name: "test_card10"
         title: "test \ncard 10"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 10
         name: "test_card11"
         title: "test \ncard 11"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 11
         name: "test_card12"
         title: "test \ncard 12"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 12
         name: "test_card13"
         title: "test \ncard 13"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 13
         name: "test_card14"
         title: "test \ncard 14"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
     { // 14
         name: "test_card15"
         title: "test \ncard 15"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
 
@@ -100,6 +115,7 @@ cards: [
         name: "test_cover1"
         title: "test \ncover 1"
         description: "It's a Cover!"
+        baseDamage: 0
         type: $Cover { }
     }
 
@@ -107,6 +123,7 @@ cards: [
         name: "test_cover2"
         title: "test \ncover 2"
         description: "It's a Cover!"
+        baseDamage: 0
         type: $Cover { }
     }
 
@@ -116,6 +133,7 @@ cards: [
         name: "test_card1"
         title: "test \ncard 1"
         description: "It's a bullet!"
+        baseDamage: 20
         type: $Bullet { }
     }
 
@@ -123,6 +141,7 @@ cards: [
         name: "test_cover2"
         title: "test \ncover 2"
         description: "It's a Cover!"
+        baseDamage: 0
         type: $Cover { }
     }
 

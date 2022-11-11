@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.rotate
+import ktx.actors.contains
 import onj.OnjNamedObject
 
 class Revolver : Widget(), ZIndexActor, InitialiseableActor {
@@ -40,11 +41,23 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     /**
      * assigns a card to a slot in the revolver
      */
-    fun setCard(slot: Int, card: Card) {
+    fun setCard(slot: Int, card: Card?) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
-        card.isDraggable = false
+        card?.isDraggable = false
         cards[slot - 1] = card
         dirty = true
+    }
+
+    fun removeCard(slot: Int) {
+        if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
+        val card = getCardInSlot(slot) ?: return
+        if (card.actor in stage.root) screenDataProvider.removeActorFromRoot(card.actor)
+        setCard(slot, null)
+    }
+
+    fun getCardInSlot(slot: Int): Card? {
+        if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
+        return cards[slot - 1]
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
