@@ -33,6 +33,11 @@ class Enemy(
         actor.setScale(scaleX, scaleY)
     }
 
+    fun damage(damage: Int) {
+        currentLives -= damage
+        actor.updateText()
+    }
+
     companion object {
 
         fun getFrom(

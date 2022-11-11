@@ -13,7 +13,8 @@ class Card(
     val name: String,
     val texture: TextureRegion,
     val description: String,
-    val type: Type
+    val type: Type,
+    val baseDamage: Int
 ) {
 
     val actor = CardActor(this)
@@ -39,7 +40,8 @@ class Card(
                         "Cover" -> Type.COVER
                         "OneShot" -> Type.ONE_SHOT
                         else -> throw RuntimeException("unknown Card type: $type")
-                    }
+                    },
+                    it.get<Long>("baseDamage").toInt()
                 )
             }
 

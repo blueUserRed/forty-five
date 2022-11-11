@@ -11,7 +11,8 @@ class EnemyArea : Widget(), ZIndexActor, InitialiseableActor {
 
     private lateinit var screenDataProvider: ScreenDataProvider
     override var fixedZIndex: Int = 0
-    private var enemies: MutableList<Enemy> = mutableListOf()
+    var enemies: MutableList<Enemy> = mutableListOf()
+        private set
     private var isInitialised: Boolean = false
 
     override fun init(screenDataProvider: ScreenDataProvider) {
