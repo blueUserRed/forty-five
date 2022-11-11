@@ -112,7 +112,7 @@ class CardDragAndDropPayload(val card: Card, val gameScreenController: GameScree
     }
 
     fun loadIntoRevolver(slot: Int) = tasks.add {
-        gameScreenController.moveCardFromHandToRevolver(card, slot)
+        gameScreenController.loadBulletInRevolver(card, slot)
     }
 
     fun onDragStop() {

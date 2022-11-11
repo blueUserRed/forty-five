@@ -17,6 +17,47 @@ import "imports/colors.onj" as color
     }
 }
 
+!enemies = [
+    {
+        name: "enemy"
+        lives: 1234
+        texture: "enemy"
+        offsetX: 60.0
+        offsetY: 40.0
+        scaleX: 0.03
+        scaleY: 0.03
+        detailFont: "distance_field"
+        detailFontScale: 2.0
+        detailFontColor: !color.blue
+    }
+]
+
+!controller = $GameScreenController {
+    cardsFile: "cards/cards.onj"
+    cardAtlasFile: "cards/generated/cards.atlas"
+    cardHand: {
+        actorName: "card_hand"
+    }
+    revolver: {
+        actorName: "revolver"
+        dropBehaviour: $RevolverDropTarget {
+          group: "card"
+        }
+    }
+    enemyArea: {
+        actorName: "enemy_area"
+        enemies: [ "enemy" ]
+    }
+    cardDragBehaviour: $CardDragSource {
+        group: "card"
+    }
+    enemies: !enemies
+    cardDrawActor: "card_draw_table"
+    shootButtonName: "shoot_button"
+    cardsToDrawInFirstRound: 6
+    cardsToDraw: 1
+}
+
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
@@ -75,42 +116,7 @@ options: {
         cursorName: "cursor"
     }
     postProcessor: null
-    controller: $GameScreenController {
-        cardsFile: "cards/cards.onj"
-        cardAtlasFile: "cards/generated/cards.atlas"
-        cardHand: {
-            actorName: "card_hand"
-        }
-        revolver: {
-            actorName: "revolver"
-            dropBehaviour: $RevolverDropTarget {
-                group: "card"
-            }
-        }
-        enemyArea: {
-            actorName: "enemy_area"
-            enemies: [ "enemy" ]
-        }
-        cardDragBehaviour: $CardDragSource {
-            group: "card"
-        }
-        enemies: [
-            {
-                name: "enemy"
-                lives: 1234
-                texture: "enemy"
-                offsetX: 60.0
-                offsetY: 40.0
-                scaleX: 0.03
-                scaleY: 0.03
-                detailFont: "distance_field"
-                detailFontScale: 2.0
-                detailFontColor: !color.blue
-            }
-        ]
-        cardDrawActor: "card_draw_table"
-        shootButtonName: "shoot_button"
-    }
+    controller: !controller
 }
 
 !slotScale = 0.07
@@ -124,6 +130,7 @@ options: {
     fontScale: 0.25
     slotScale: !slotScale
     cardScale: 0.045
+    animationDuration: 0.2
 }
 
 !cardHand = $CardHand {

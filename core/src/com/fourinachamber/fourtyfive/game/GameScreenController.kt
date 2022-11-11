@@ -1,9 +1,9 @@
 package com.fourinachamber.fourtyfive.game
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
@@ -25,6 +25,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val enemiesOnj = onj.get<OnjArray>("enemies")
     private val cardDrawActorName = onj.get<String>("cardDrawActor")
     private val shootButtonName = onj.get<String>("shootButtonName")
+    private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
+    private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
     private var curScreen: ScreenDataProvider? = null
 
     private var cardHand: CardHand? = null
@@ -41,10 +43,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var enemies: List<Enemy> = listOf()
 
-    private var cardsToDraw: Int? = null
+    private var remainingCardsToDraw: Int? = null
 
-//    var currentPhase: Gamephase = Gamephase.DRAW
-//        private set
+    var currentPhase: Gamephase = Gamephase.FREE
+        private set
+
+    var roundCounter: Int = 0
+        private set
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
@@ -96,8 +101,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             behaviour.gameScreenController = this
         }
 
-        screenDataProvider.afterMs(1) { screenDataProvider.resortRootZIndices() } //TODO: this is not good
-        startDrawPhase(6)
+        screenDataProvider.afterMs(2) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
+        changePhase(Gamephase.INITIAL_DRAW)
+    }
+
+    private fun changePhase(next: Gamephase) {
+        if (next == currentPhase) return
+        currentPhase.transitionAway(this)
+        currentPhase = next
+        currentPhase.transitionTo(this)
     }
 
     override fun update() {
@@ -148,13 +160,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         this.enemyArea = enemyArea
     }
 
-    fun moveCardFromHandToRevolver(card: Card, slot: Int) {
+    fun loadBulletInRevolver(card: Card, slot: Int) {
+        if (card.type != Card.Type.BULLET) return
         cardHand!!.removeCard(card)
         revolver!!.setCard(slot, card)
     }
 
     fun shoot() {
-//        if (currentPhase != Gamephase.FREE) return
         revolver!!.rotate()
     }
 
@@ -174,44 +186,88 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         for (card in cardHand!!.cards) card.isDraggable = true
     }
 
-    private fun startDrawPhase(cardsToDraw: Int) {
-//        currentPhase = Gamephase.DRAW
-        freezeCards()
-        freezeUI()
+    private fun showCardDrawActor() {
         val viewport = curScreen!!.stage.viewport
         val cardDrawActor = cardDrawActor!!
         cardDrawActor.isVisible = true
         cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
-        this.cardsToDraw = cardsToDraw
     }
 
-    private fun endDrawPhase() {
-        unfreezeCards()
-        unfreezeUI()
+    private fun hideCardDrawActor() {
         cardDrawActor!!.isVisible = false
-        cardsToDraw = null
     }
 
     fun drawBullet() {
-        var cardsToDraw = cardsToDraw ?: return
+        var cardsToDraw = remainingCardsToDraw ?: return
         //TODO: default card when stack is empty
         cardHand!!.addCard(bulletStack.removeFirst())
         cardsToDraw--
-        this.cardsToDraw = cardsToDraw
-        if (cardsToDraw <= 0) endDrawPhase()
+        this.remainingCardsToDraw = cardsToDraw
+        if (cardsToDraw <= 0) onAllCardsDrawn()
     }
 
     fun drawCover() {
-        var cardsToDraw = cardsToDraw ?: return
+        var cardsToDraw = remainingCardsToDraw ?: return
         //TODO: default card when stack is empty
         cardHand!!.addCard(coverCardStack.removeFirst())
         cardsToDraw--
-        this.cardsToDraw = cardsToDraw
-        if (cardsToDraw <= 0) endDrawPhase()
+        this.remainingCardsToDraw = cardsToDraw
+        if (cardsToDraw <= 0) onAllCardsDrawn()
     }
 
     override fun end() {
         curScreen = null
+    }
+
+    private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())
+
+
+    enum class Gamephase {
+
+        INITIAL_DRAW {
+
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                freezeCards()
+                freezeUI()
+                showCardDrawActor()
+                this.remainingCardsToDraw = if (roundCounter == 0) cardsToDrawInFirstRound else cardsToDraw
+            }
+
+            override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
+                unfreezeCards()
+                unfreezeUI()
+                hideCardDrawActor()
+                remainingCardsToDraw = null
+            }
+
+            override fun onAllCardsDrawn(): Gamephase = FREE
+        },
+
+        ENEMY_REVEAL {
+            override fun transitionTo(gameScreenController: GameScreenController) {}
+            override fun transitionAway(gameScreenController: GameScreenController) {}
+            override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
+        },
+
+        FREE {
+            override fun transitionTo(gameScreenController: GameScreenController) {}
+            override fun transitionAway(gameScreenController: GameScreenController) {}
+            override fun onAllCardsDrawn(): Gamephase = FREE
+        },
+
+        ENEMY_ACTION {
+            override fun transitionTo(gameScreenController: GameScreenController) {}
+            override fun transitionAway(gameScreenController: GameScreenController) {}
+            override fun onAllCardsDrawn(): Gamephase = ENEMY_ACTION
+        }
+
+        ;
+
+        abstract fun transitionTo(gameScreenController: GameScreenController)
+        abstract fun transitionAway(gameScreenController: GameScreenController)
+
+        abstract fun onAllCardsDrawn(): Gamephase
+
     }
 
     companion object {
@@ -222,7 +278,4 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     }
 
-//    enum class Gamephase {
-//        DRAW, ENEMY_REVEAL, FREE, ENEMY_ACTION
-//    }
 }
