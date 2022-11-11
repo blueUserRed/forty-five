@@ -160,6 +160,7 @@ $Widget [
         fontScale: float
         slotScale: float
         cardScale: float
+        animationDuration: float
         ...!widgetSharedKeys
     }
 
@@ -302,6 +303,8 @@ $ScreenController [
         enemies: !enemy[*]
         cardDrawActor: string
         shootButtonName: string
+        cardsToDrawInFirstRound: int
+        cardsToDraw: int
     }
 
 ]

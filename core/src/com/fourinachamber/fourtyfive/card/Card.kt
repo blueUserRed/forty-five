@@ -18,6 +18,7 @@ class Card(
 
     val actor = CardActor(this)
     var isDraggable: Boolean = true
+    var inAnimation: Boolean = false
 
     companion object {
 

@@ -443,6 +443,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+            animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
         }
 
         "EnemyArea" -> EnemyArea().apply {

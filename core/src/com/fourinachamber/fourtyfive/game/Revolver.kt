@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
@@ -21,6 +22,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     var fontScale: Float? = null
     var slotScale: Float? = null
     var cardScale: Float = 1f
+    var animationDuration: Float = 1f
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
     private var dirty: Boolean = true
     private var isInitialised: Boolean = false
@@ -50,30 +52,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         height = prefHeight
         super.draw(batch, parentAlpha)
         if (!isInitialised) {
-            calcOffsets()
-            slots = Array(5) {
-                val slot = RevolverSlot(it + 1, slotTexture!!, slotFont!!, fontColor!!, slotScale!!)
-
-                slot.setPosition(
-                    slotOffsets[it].x + x + prefWidth / 2,
-                    slotOffsets[it].y + y + prefHeight / 2
-                )
-
-                screenDataProvider.addActorToRoot(slot)
-
-                if (slotDropConfig != null) {
-                    val (dragAndDrop, dropOnj) = slotDropConfig!!
-                    val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-                        dropOnj.name,
-                        dragAndDrop,
-                        screenDataProvider,
-                        slot,
-                        dropOnj
-                    )
-                    dragAndDrop.addTarget(dropBehaviour)
-                }
-                slot
-            }
+            initialise()
             isInitialised = true
         }
         if (dirty) {
@@ -81,6 +60,33 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
             updateSlotPositions()
             updateCardPositions()
             dirty = false
+        }
+    }
+
+    private fun initialise() {
+        calcOffsets()
+        slots = Array(5) {
+            val slot = RevolverSlot(it + 1, this, slotTexture!!, slotScale!!, animationDuration)
+
+            slot.setPosition(
+                slotOffsets[it].x + x + prefWidth / 2,
+                slotOffsets[it].y + y + prefHeight / 2
+            )
+
+            screenDataProvider.addActorToRoot(slot)
+
+            if (slotDropConfig != null) {
+                val (dragAndDrop, dropOnj) = slotDropConfig!!
+                val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+                    dropOnj.name,
+                    dragAndDrop,
+                    screenDataProvider,
+                    slot,
+                    dropOnj
+                )
+                dragAndDrop.addTarget(dropBehaviour)
+            }
+            slot
         }
     }
 
@@ -92,6 +98,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     private fun updateSlotPositions() {
         for (i in slots.indices) {
             val slot = slots[i]
+            if (slot.inAnimation) continue
             slot.setPosition(
                 slotOffsets[i].x + x + prefWidth / 2,
                 slotOffsets[i].y + y + prefHeight / 2
@@ -102,6 +109,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     private fun updateCardPositions() {
         for (i in cards.indices) if (cards[i] != null) {
             val card = cards[i]!!
+            if (card.inAnimation) continue
             card.actor.setPosition(
                 slotOffsets[i].x + x + prefWidth / 2,
                 slotOffsets[i].y + y + prefHeight / 2
@@ -128,6 +136,18 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 
     fun rotate() {
         cards = cards.rotate(-1)
+        for (i in slots.indices) {
+            val slot = slots[i]
+            val nextOffset = (i + 1) % slots.size
+            slot.cardToMoveAlong = cards[nextOffset]
+            slot.animateTo(
+                slotOffsets[nextOffset].x + x + prefWidth / 2,
+                slotOffsets[nextOffset].y + y + prefHeight
+            )
+        }
+    }
+
+    fun markDirty() {
         dirty = true
     }
 
@@ -140,24 +160,43 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 
 class RevolverSlot(
     val num: Int,
+    val revolver: Revolver,
     private val texture: TextureRegion,
-    font: BitmapFont,
-    fontColor: Color,
-    private val scale: Float
+    private val scale: Float,
+    private var animationDuration: Float
 ) : CustomImageActor(texture) {
-//) : CustomLabel(num.toString(), LabelStyle(font, fontColor), TextureRegionDrawable(texture)) {
+
+    var inAnimation: Boolean = false
+        private set
+
+    var cardToMoveAlong: Card? = null
+
+    private var action: MoveToAction = MoveToAction()
 
     init {
-//        setAlignment(Align.center)
         setScale(scale)
     }
 
-//    override fun getWidth(): Float = texture.regionWidth
-//    override fun getHeight(): Float = texture.regionHeight
-//    override fun setWidth(width: Float) { }
-//    override fun setHeight(height: Float) { }
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        super.draw(batch, parentAlpha)
+        if (inAnimation && action.isComplete) {
+            removeAction(action)
+            inAnimation = false
+            cardToMoveAlong?.inAnimation = false
+            revolver.markDirty()
+        }
+        if (inAnimation) cardToMoveAlong?.actor?.setPosition(x, y)
+    }
 
-//    override fun getMaxWidth(): Float = slotWidth
-//
-//    override fun getMaxHeight(): Float = slotHeight
+    fun animateTo(x: Float, y: Float) {
+        if (inAnimation) return
+        action = MoveToAction()
+        action.setPosition(x, y)
+        action.actor = this
+        action.duration = animationDuration
+        addAction(action)
+        cardToMoveAlong?.inAnimation = true
+        inAnimation = true
+    }
+
 }
