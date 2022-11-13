@@ -1,6 +1,5 @@
 package com.fourinachamber.fourtyfive.game
 
-import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -45,9 +44,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var remainingCardsToDraw: Int? = null
 
+    /**
+     * the current phase of the game
+     */
     var currentPhase: Gamephase = Gamephase.FREE
         private set
 
+    /**
+     * counts up every round; starts at 0
+     */
     var roundCounter: Int = 0
         private set
 
@@ -160,17 +165,22 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         this.enemyArea = enemyArea
     }
 
+    /**
+     * puts [card] in [slot] of the revolver
+     */
     fun loadBulletInRevolver(card: Card, slot: Int) {
         if (card.type != Card.Type.BULLET) return
         cardHand!!.removeCard(card)
         revolver!!.setCard(slot, card)
     }
 
+    /**
+     * shoots the revolver
+     */
     fun shoot() {
         val cardToShoot = revolver!!.getCardInSlot(5)
         revolver!!.rotate()
         cardToShoot ?: return
-        println("shot")
         val enemy = enemyArea!!.enemies[0]
         enemy.damage(cardToShoot.baseDamage)
         revolver!!.removeCard(1)
@@ -203,6 +213,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         cardDrawActor!!.isVisible = false
     }
 
+    /**
+     * draws a bullet from the stack
+     */
     fun drawBullet() {
         var cardsToDraw = remainingCardsToDraw ?: return
         //TODO: default card when stack is empty
@@ -212,6 +225,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (cardsToDraw <= 0) onAllCardsDrawn()
     }
 
+
+    /**
+     * draws a cover from the stack
+     */
     fun drawCover() {
         var cardsToDraw = remainingCardsToDraw ?: return
         //TODO: default card when stack is empty
@@ -228,8 +245,14 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())
 
 
+    /**
+     * the phases of the game
+     */
     enum class Gamephase {
 
+        /**
+         * draws cards at the beginning of the round
+         */
         INITIAL_DRAW {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
@@ -249,18 +272,27 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun onAllCardsDrawn(): Gamephase = FREE
         },
 
+        /**
+         * enemy reveals it's action
+         */
         ENEMY_REVEAL {
             override fun transitionTo(gameScreenController: GameScreenController) {}
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
         },
 
+        /**
+         * main game phase
+         */
         FREE {
             override fun transitionTo(gameScreenController: GameScreenController) {}
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = FREE
         },
 
+        /**
+         * enemy does it's action
+         */
         ENEMY_ACTION {
             override fun transitionTo(gameScreenController: GameScreenController) {}
             override fun transitionAway(gameScreenController: GameScreenController) {}
@@ -269,9 +301,20 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         ;
 
+        /**
+         * transitions the game to this phase
+         */
         abstract fun transitionTo(gameScreenController: GameScreenController)
+
+        /**
+         * transitions the game away from this phase
+         */
         abstract fun transitionAway(gameScreenController: GameScreenController)
 
+        /**
+         * executed when all cards where drawn
+         * @return the next phase
+         */
         abstract fun onAllCardsDrawn(): Gamephase
 
     }

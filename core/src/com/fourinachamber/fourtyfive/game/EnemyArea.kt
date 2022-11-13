@@ -7,20 +7,34 @@ import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import ktx.actors.contains
 
+/**
+ * actor representing the area in which enemies can appear on the screen
+ */
 class EnemyArea : Widget(), ZIndexActor, InitialiseableActor {
 
     private lateinit var screenDataProvider: ScreenDataProvider
+
     override var fixedZIndex: Int = 0
-    var enemies: MutableList<Enemy> = mutableListOf()
-        private set
+
+    private var _enemies: MutableList<Enemy> = mutableListOf()
+
+    /**
+     * all enemies in this area
+     */
+    val enemies: List<Enemy>
+        get() = _enemies
+
     private var isInitialised: Boolean = false
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
     }
 
+    /**
+     * adds a new enemy to this area
+     */
     fun addEnemy(enemy: Enemy) {
-        enemies.add(enemy)
+        _enemies.add(enemy)
         if (enemy.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(enemy.actor)
         updateEnemyPositions()
     }
@@ -34,7 +48,7 @@ class EnemyArea : Widget(), ZIndexActor, InitialiseableActor {
     }
 
     private fun updateEnemyPositions() {
-        for (enemy in enemies) enemy.actor.setPosition(x + enemy.offsetX, y + enemy.offsetY)
+        for (enemy in _enemies) enemy.actor.setPosition(x + enemy.offsetX, y + enemy.offsetY)
     }
 
 }

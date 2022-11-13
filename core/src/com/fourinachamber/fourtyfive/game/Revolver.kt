@@ -14,16 +14,36 @@ import com.fourinachamber.fourtyfive.utils.rotate
 import ktx.actors.contains
 import onj.OnjNamedObject
 
+/**
+ * actor representing the revolver
+ */
 class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 
     override var fixedZIndex: Int = 0
+
+    /**
+     * the texture for a revolver-slot
+     */
     var slotTexture: TextureRegion? = null
+
     var slotFont: BitmapFont? = null
     var fontColor: Color? = null
     var fontScale: Float? = null
     var slotScale: Float? = null
+
+    /**
+     * the scale of a card placed into the revolver
+     */
     var cardScale: Float = 1f
+
+    /**
+     * the duration of the revolver spin animation
+     */
     var animationDuration: Float = 1f
+
+    /**
+     * the [DragAndDrop] used for the slots and the [OnjNamedObject] containing the config for drag and drop
+     */
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
     private var dirty: Boolean = true
     private var isInitialised: Boolean = false
@@ -39,7 +59,8 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     }
 
     /**
-     * assigns a card to a slot in the revolver
+     * assigns a card to a slot in the revolver; [card] can be set to null, but consider using [removeCard] instead to
+     * remove a card
      */
     fun setCard(slot: Int, card: Card?) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
@@ -48,6 +69,9 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         dirty = true
     }
 
+    /**
+     * removes a card from the revolver
+     */
     fun removeCard(slot: Int) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         val card = getCardInSlot(slot) ?: return
@@ -55,6 +79,9 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         setCard(slot, null)
     }
 
+    /**
+     * @return the card in [slot]
+     */
     fun getCardInSlot(slot: Int): Card? {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         return cards[slot - 1]
@@ -171,6 +198,13 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 
 }
 
+/**
+ * a slot of the revolver
+ * @param num the number of the slot (1..5)
+ * @param revolver the revolver to which this slot belongs
+ * @param texture the texture for this slot
+ * @param animationDuration the duration of the spin animation
+ */
 class RevolverSlot(
     val num: Int,
     val revolver: Revolver,
@@ -179,9 +213,15 @@ class RevolverSlot(
     private var animationDuration: Float
 ) : CustomImageActor(texture) {
 
+    /**
+     * true if this is in a animation
+     */
     var inAnimation: Boolean = false
         private set
 
+    /**
+     * if set to a card, the card will be moved along with the spin animation
+     */
     var cardToMoveAlong: Card? = null
 
     private var action: MoveToAction = MoveToAction()
@@ -201,6 +241,9 @@ class RevolverSlot(
         if (inAnimation) cardToMoveAlong?.actor?.setPosition(x, y)
     }
 
+    /**
+     * animates the slot to a [x] [y]
+     */
     fun animateTo(x: Float, y: Float) {
         if (inAnimation) return
         action = MoveToAction()
