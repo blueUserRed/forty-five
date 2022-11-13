@@ -9,6 +9,14 @@ import onj.OnjArray
 import onj.OnjNamedObject
 import onj.OnjObject
 
+/**
+ * represents a card
+ * @param name the name of the card
+ * @param texture the texture for displaying the card
+ * @param description the description of the card
+ * @param type the CardType
+ * @param baseDamage the base-damage of the card, before things like effects are applied
+ */
 class Card(
     val name: String,
     val texture: TextureRegion,
@@ -17,14 +25,31 @@ class Card(
     val baseDamage: Int
 ) {
 
+    /**
+     * the actor for representing the card on the screen
+     */
     val actor = CardActor(this)
+
+    /**
+     * true when the card can be dragged
+     */
     var isDraggable: Boolean = true
+
+    /**
+     * true when [actor] is in a animation
+     */
     var inAnimation: Boolean = false
 
     companion object {
 
+        /**
+         * all textures of cards are prefixed with this string
+         */
         const val cardTexturePrefix = "card%%"
 
+        /**
+         * gets an array of cards from an OnjArray
+         */
         fun getFrom(cards: OnjArray, regions: Map<String, TextureRegion>): List<Card> = cards
             .value
             .map {

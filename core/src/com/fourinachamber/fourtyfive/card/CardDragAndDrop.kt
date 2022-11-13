@@ -13,10 +13,16 @@ import com.fourinachamber.fourtyfive.utils.obj
 import onj.OnjNamedObject
 
 
+/**
+ * when used by [GameScreenController] [gameScreenController] will be set to it
+ */
 interface GameScreenControllerDragAndDrop {
     var gameScreenController: GameScreenController
 }
 
+/**
+ * the DragSource used for dragging a card to the revolver
+ */
 class CardDragSource(
     dragAndDrop: DragAndDrop,
     screenDataProvider: ScreenDataProvider,
@@ -71,6 +77,9 @@ class CardDragSource(
 
 }
 
+/**
+ * used for dropping a card into the revolver
+ */
 class RevolverDropTarget(
     dragAndDrop: DragAndDrop,
     screenDataProvider: ScreenDataProvider,
@@ -103,18 +112,32 @@ class RevolverDropTarget(
     }
 
 }
+
+/**
+ * used as a payload for [CardDragSource] and [RevolverDropTarget].
+ * Automatically resets cards, loads into revolver, etc.
+ */
 class CardDragAndDropPayload(val card: Card, val gameScreenController: GameScreenController) {
 
     private val tasks: MutableList<() -> Unit> = mutableListOf()
 
+    /**
+     * when the drag is stopped, the card will be reset to [pos]
+     */
     fun resetTo(pos: Vector2) = tasks.add {
         card.actor.setPosition(pos.x, pos.y)
     }
 
+    /**
+     * when the drag is stopped, the card will be loaded into the revolver in [slot]
+     */
     fun loadIntoRevolver(slot: Int) = tasks.add {
         gameScreenController.loadBulletInRevolver(card, slot)
     }
 
+    /**
+     * called when the drag is stopped
+     */
     fun onDragStop() {
         for (task in tasks) task()
     }
