@@ -131,11 +131,13 @@ options: {
     slotScale: !slotScale
     cardScale: 0.045
     animationDuration: 0.2
+    debug: true
 }
 
 !cardHand = $CardHand {
     name: "card_hand"
     cardScale: 0.07
+    hoveredCardScale: 0.085
     cardSpacing: 1.0
     startCardZIndicesAt: !cardZIndicesStart
     hoveredCardZIndex: <!cardZIndicesEnd - 1>
@@ -145,14 +147,14 @@ options: {
     detailBackgroundTexture: "card_detail_background"
     detailFontScale: 0.1
     detailOffsetX: 0.0
-    detailOffsetY: 1.0
+    detailOffsetY: 1.5
     detailPadding: 1.0
-//  debug: true
+    debug: true
 }
 
 !enemyArea = $EnemyArea {
      name: "enemy_area"
-//     debug: true
+     debug: true
  }
 
 !topRow = {

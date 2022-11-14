@@ -359,6 +359,13 @@ class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
+    var background: Drawable? = null
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        background?.draw(batch, x, y, width, height)
+        super.draw(batch, parentAlpha)
+    }
+
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
@@ -374,6 +381,13 @@ class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
+
+    var background: Drawable? = null
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        background?.draw(batch, x, y, width, height)
+        super.draw(batch, parentAlpha)
+    }
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->

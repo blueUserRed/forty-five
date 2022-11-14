@@ -26,6 +26,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val shootButtonName = onj.get<String>("shootButtonName")
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
+
     private var curScreen: ScreenDataProvider? = null
 
     private var cardHand: CardHand? = null
