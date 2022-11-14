@@ -169,6 +169,16 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+    $CoverArea {
+        numStacks: int
+        maxCards: int
+        detailFont: string
+        detailFontColor: string
+        detailFontScale: float
+        stackBackgroundTexture: string
+        ...!widgetSharedKeys
+    }
+
 ]
 
 $Behaviour [
