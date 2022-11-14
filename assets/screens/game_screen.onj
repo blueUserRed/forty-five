@@ -131,7 +131,7 @@ options: {
     slotScale: !slotScale
     cardScale: 0.045
     animationDuration: 0.2
-    debug: true
+//    debug: true
 }
 
 !cardHand = $CardHand {
@@ -149,18 +149,29 @@ options: {
     detailOffsetX: 0.0
     detailOffsetY: 1.5
     detailPadding: 1.0
-    debug: true
+//    debug: true
 }
 
 !enemyArea = $EnemyArea {
      name: "enemy_area"
-     debug: true
+//     debug: true
  }
+
+!coverArea = $CoverArea {
+    numStacks: 2
+    maxCards: 2
+    detailFont: "distance_field"
+    detailFontColor: !color.white
+    detailFontScale: 0.1
+    stackBackgroundTexture: "card_detail_background"
+    debug: true
+}
 
 !topRow = {
     cells: [
 
         {
+            padBottom: 3.0
             element: $Table {
                 align: "bottom"
                 rows: [
@@ -197,8 +208,15 @@ options: {
             }
         }
 
+
         {
-            width: <!worldWidth - !revolverWidth - 20.0>
+            width: <!worldWidth / 3>
+            element: !coverArea
+        }
+
+        {
+//            width: <!worldWidth - !revolverWidth - 100.0>
+            width: <!worldWidth / 3>
             height: 60.0
             element: !enemyArea
         }
@@ -213,7 +231,7 @@ options: {
             sizeToActor: true
             padBottom: 2.0
             align: "bottom"
-            colspan: 2
+            colspan: 3
             element: !cardHand
         }
 
@@ -223,7 +241,7 @@ options: {
 !cardDrawTable = $Table {
     visible: false
     name: "card_draw_table"
-    debug: true
+//    debug: true
     fillX: true
     fillY: true
     zIndex: !overlayZIndex
@@ -255,15 +273,6 @@ options: {
                         behaviours: [ $DrawCoverCardButtonBehaviour { }, !buttonHoverBehaviour ]
                     }
                 }
-//                {
-//                    element: $Label {
-//                        font: "distance_field"
-//                        text: "stack 3"
-//                        fontScale: 0.15
-//                        align: "center"
-//                        color: !color.white
-//                    }
-//                }
 
             ]
         }
@@ -277,6 +286,7 @@ children: [
     $Table {
         fillX: true
         fillY: true
+        debug: true
 //        debug: true
         rows: [ !topRow, !bottomRow ]
     }

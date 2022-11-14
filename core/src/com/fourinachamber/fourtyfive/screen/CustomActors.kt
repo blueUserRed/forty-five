@@ -355,7 +355,7 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
 /**
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
