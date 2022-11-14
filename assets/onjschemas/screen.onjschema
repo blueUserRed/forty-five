@@ -150,6 +150,7 @@ $Widget [
         detailOffsetX: float
         detailOffsetY: float
         detailPadding: float
+        hoveredCardScale: float
         ...!widgetSharedKeys
     }
 

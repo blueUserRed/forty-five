@@ -430,6 +430,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("detailPadding").toFloat()
         ).apply {
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+            hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
             cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
             hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()

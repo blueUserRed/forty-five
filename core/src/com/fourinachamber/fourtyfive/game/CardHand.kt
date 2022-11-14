@@ -40,6 +40,11 @@ class CardHand(
     var cardScale: Float = 1.0f
 
     /**
+     * scaling applied to the card when hovered over
+     */
+    var hoveredCardScale = 1.0f
+
+    /**
      * the spacing between the cards
      */
     var cardSpacing: Float = 0.0f
@@ -128,6 +133,7 @@ class CardHand(
         var isCardHoveredOver = false
         for (i in _cards.indices) {
             val card = _cards[i]
+            card.actor.setScale(cardScale)
             if (!card.actor.isDragged) {
                 card.actor.setPosition(curX, curY)
                 card.actor.setScale(cardScale)
@@ -135,6 +141,11 @@ class CardHand(
                 if (card.actor.isHoveredOver) {
                     isCardHoveredOver = true
                     displayHoverDetail(card)
+                    card.actor.setScale(hoveredCardScale)
+                    card.actor.setPosition(
+                        curX + ((card.actor.width * cardScale) - (card.actor.width * hoveredCardScale)) / 2,
+                        curY + ((card.actor.height * cardScale) - (card.actor.height * hoveredCardScale)) / 2
+                    )
                     card.actor.fixedZIndex = hoveredCardZIndex
                 } else {
                     card.actor.fixedZIndex = startCardZIndicesAt + i

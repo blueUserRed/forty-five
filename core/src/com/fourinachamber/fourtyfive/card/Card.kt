@@ -22,7 +22,8 @@ class Card(
     val texture: TextureRegion,
     val description: String,
     val type: Type,
-    val baseDamage: Int
+    val baseDamage: Int,
+    val coverValue: Int
 ) {
 
     /**
@@ -36,7 +37,7 @@ class Card(
     var isDraggable: Boolean = true
 
     /**
-     * true when [actor] is in a animation
+     * true when [actor] is in an animation
      */
     var inAnimation: Boolean = false
 
@@ -66,7 +67,8 @@ class Card(
                         "OneShot" -> Type.ONE_SHOT
                         else -> throw RuntimeException("unknown Card type: $type")
                     },
-                    it.get<Long>("baseDamage").toInt()
+                    it.get<Long>("baseDamage").toInt(),
+                    it.get<Long>("coverValue").toInt()
                 )
             }
 
@@ -82,6 +84,7 @@ class Card(
  * the actor representing a card
  */
 class CardActor(val card: Card) : Image(card.texture), ZIndexActor {
+
     override var fixedZIndex: Int = 0
 
     /**
