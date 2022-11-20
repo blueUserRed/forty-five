@@ -57,6 +57,9 @@ operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
 fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
 
+operator fun Vector2.component1(): Float = this.x
+operator fun Vector2.component2(): Float = this.y
+
 /**
  * makes sure that [this] is between [min] and [max] (inclusive)
  */

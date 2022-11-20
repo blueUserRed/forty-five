@@ -21,6 +21,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
+    private val coverAreaOnj = onj.get<OnjObject>("coverArea")
     private val enemiesOnj = onj.get<OnjArray>("enemies")
     private val cardDrawActorName = onj.get<String>("cardDrawActor")
     private val shootButtonName = onj.get<String>("shootButtonName")
@@ -32,6 +33,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var cardHand: CardHand? = null
     private var revolver: Revolver? = null
     private var enemyArea: EnemyArea? = null
+    private var coverArea: CoverArea? = null
     private var cardDrawActor: Actor? = null
     private var shootButton: CustomLabel? = null
 
@@ -102,12 +104,14 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         initCardHand()
         initRevolver()
         initEnemyArea()
+        initCoverArea()
 
         for (behaviour in screenDataProvider.behaviours) if (behaviour is GameScreenBehaviour) {
             behaviour.gameScreenController = this
         }
 
         screenDataProvider.afterMs(2) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
+//        changePhase(Gamephase.FREE)
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
@@ -129,6 +133,19 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             ?: throw RuntimeException("no named actor with name $cardHandName")
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
+    }
+
+    private fun initCoverArea() {
+        val curScreen = curScreen!!
+
+        val coverAreaName = coverAreaOnj.get<String>("actorName")
+        val coverArea = curScreen.namedActors[coverAreaName]
+            ?: throw RuntimeException("no named actor with name $coverAreaName")
+        if (coverArea !is CoverArea) throw RuntimeException("actor named $coverAreaName must be a CoverArea")
+        this.coverArea = coverArea
+
+        val dropOnj = coverAreaOnj.get<OnjNamedObject>("dropBehaviour")
+        coverArea.slotDropConfig = cardDragAndDrop to dropOnj
     }
 
     private fun initRevolver() {
@@ -167,12 +184,21 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     /**
-     * puts [card] in [slot] of the revolver
+     * puts [card] in [slot] of the revolver (checks if the card is a bullet)
      */
     fun loadBulletInRevolver(card: Card, slot: Int) {
         if (card.type != Card.Type.BULLET) return
         cardHand!!.removeCard(card)
         revolver!!.setCard(slot, card)
+    }
+
+    /**
+     * adds a new cover to a slot in the cover area (checks if the card is a cover)
+     */
+    fun addCover(card: Card, slot: Int) {
+        if (card.type != Card.Type.COVER) return
+        cardHand!!.removeCard(card)
+        coverArea!!.addCover(card, slot)
     }
 
     /**

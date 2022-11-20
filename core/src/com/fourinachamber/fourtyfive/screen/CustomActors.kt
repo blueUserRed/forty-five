@@ -170,11 +170,24 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
 
+    /**
+     * if set to true, the scale of the image will be ignored when drawing
+     */
+    var ignoreScaling: Boolean = false
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
 
-        if (batch == null || mask == null) {
+        if (batch == null) {
             super.draw(batch, parentAlpha)
+            return
+        }
+
+        val width = if (ignoreScaling) width else width * scaleX
+        val height = if (ignoreScaling) height else height * scaleY
+
+        if (mask == null) {
+            batch.draw(region, x, y, width, height)
             return
         }
 
@@ -362,6 +375,7 @@ open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
     var background: Drawable? = null
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }
@@ -385,6 +399,7 @@ open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
     var background: Drawable? = null
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }

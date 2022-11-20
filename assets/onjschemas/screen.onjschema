@@ -279,6 +279,10 @@ $DragAndDropBehaviour [
         ...!dragAndDropBehaviourSharedKeys
     }
 
+    $CoverAreaDropTarget {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
 ]
 
 !enemy = {
@@ -309,6 +313,10 @@ $ScreenController [
         enemyArea: {
             actorName: string
             enemies: string[*]
+        }
+        coverArea: {
+            actorName: string
+            dropBehaviour: $DragAndDropBehaviour
         }
         cardDragBehaviour: $DragAndDropBehaviour
         enemies: !enemy[*]
