@@ -22,7 +22,7 @@ import "imports/colors.onj" as color
         name: "enemy"
         lives: 1234
         texture: "enemy"
-        offsetX: 60.0
+        offsetX: 30.0
         offsetY: 40.0
         scaleX: 0.03
         scaleY: 0.03
@@ -47,6 +47,12 @@ import "imports/colors.onj" as color
     enemyArea: {
         actorName: "enemy_area"
         enemies: [ "enemy" ]
+    }
+    coverArea: {
+        actorName: "cover_area"
+        dropBehaviour: $CoverAreaDropTarget {
+            group: "card"
+        }
     }
     cardDragBehaviour: $CardDragSource {
         group: "card"
@@ -158,8 +164,9 @@ options: {
  }
 
 !coverArea = $CoverArea {
+    name: "cover_area"
     numStacks: 2
-    maxCards: 2
+    maxCards: 3
     detailFont: "distance_field"
     detailFontColor: !color.white
     detailFontScale: 0.1
@@ -286,7 +293,6 @@ children: [
     $Table {
         fillX: true
         fillY: true
-        debug: true
 //        debug: true
         rows: [ !topRow, !bottomRow ]
     }
