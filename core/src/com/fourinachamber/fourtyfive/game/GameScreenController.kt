@@ -96,7 +96,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             cardDragAndDrop.addSource(behaviour)
         }
 
-        enemies = Enemy.getFrom(enemiesOnj, screenDataProvider.textures, screenDataProvider.fonts)
+        enemies = Enemy.getFrom(enemiesOnj, screenDataProvider)
 
         cardDrawActor = screenDataProvider.namedActors[cardDrawActorName] ?: throw RuntimeException(
             "no actor with name $cardDrawActorName"
@@ -229,6 +229,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val enemy = enemyArea!!.enemies[0]
         enemy.damage(cardToShoot.baseDamage)
         revolver!!.removeCard(4)
+    }
+
+    fun damagePlayer(damage: Int) {
+        curPlayerLives -= coverArea!!.damage(damage)
     }
 
     private fun updatePlayerLivesText() {

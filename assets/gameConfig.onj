@@ -1,12 +1,24 @@
 
 import "imports/colors.onj" as color
 
+!defaultEnemyBrain = {
+    actions: [
+        $DamagePlayerEnemyAction {
+            weight: 1
+            min: 10
+            max: 100
+            indicatorTexture: "normal_bullet"
+        }
+    ]
+}
+
 enemyConfig: {
 
     enemies: [
         {
             name: "enemy"
             lives: 1234
+            brain: !defaultEnemyBrain
             texture: "enemy"
             offsetX: 30.0
             offsetY: 40.0
