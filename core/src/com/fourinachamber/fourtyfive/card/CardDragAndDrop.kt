@@ -139,7 +139,6 @@ class CoverAreaDropTarget(
     }
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        println("Hi")
         if (payload == null || source == null) return
 
         val obj = payload.obj!! as CardDragAndDropPayload

@@ -10,6 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import com.fourinachamber.fourtyfive.utils.rotate
 import ktx.actors.contains
 import onj.OnjNamedObject
@@ -105,6 +107,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 
     private fun initialise() {
         calcOffsets()
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         slots = Array(5) {
             val slot = RevolverSlot(it + 1, this, slotTexture!!, slotScale!!, animationDuration)
 
@@ -136,6 +139,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     }
 
     private fun updateSlotPositions() {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         for (i in slots.indices) {
             val slot = slots[i]
             if (slot.inAnimation) continue
@@ -147,6 +151,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     }
 
     private fun updateCardPositions() {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         for (i in cards.indices) if (cards[i] != null) {
             val card = cards[i]!!
             if (card.inAnimation) continue
@@ -176,6 +181,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 
     fun rotate() {
         cards = cards.rotate(-1)
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         for (i in slots.indices) {
             val slot = slots[i]
             val nextOffset = (i + 1) % slots.size

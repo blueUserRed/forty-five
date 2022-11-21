@@ -5,31 +5,28 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.card.CardActor
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
-import ktx.actors.onEnter
 import onj.OnjNamedObject
-import java.lang.Float.max
-import java.lang.Float.min
 
 
 class CoverArea(
     val numStacks: Int,
-    maxCards: Int,
+    val maxCards: Int,
     detailFont: BitmapFont,
     detailFontColor: Color,
     stackBackgroundTexture: TextureRegion,
-    detailFontScale: Float
+    detailFontScale: Float,
+    private val stackSpacing: Float,
+    private val areaSpacing: Float,
+    private val cardScale: Float
 ) : Widget(), InitialiseableActor {
 
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
@@ -37,7 +34,16 @@ class CoverArea(
     private lateinit var screenDataProvider: ScreenDataProvider
 
     private val stacks: Array<CoverStack> = Array(numStacks) {
-        CoverStack(maxCards, detailFont, detailFontColor, stackBackgroundTexture, detailFontScale, 1f, it)
+        CoverStack(
+            maxCards,
+            detailFont,
+            detailFontColor,
+            stackBackgroundTexture,
+            detailFontScale,
+            stackSpacing,
+            cardScale,
+            it
+        )
     }
 
     override fun init(screenDataProvider: ScreenDataProvider) {
@@ -47,13 +53,12 @@ class CoverArea(
     /**
      * adds a new cover to the area, in a specific slot
      */
-    fun addCover(card: Card, slot: Int) {
+    fun addCover(card: Card, slot: Int): Boolean {
         if (slot !in stacks.indices) throw RuntimeException("slot $slot is out of bounds for coverArea")
+        if (stacks[slot].numCards >= maxCards) return false
         stacks[slot].addCard(card)
-//        val stack = stacks[slot]
-//        card.actor.setScale(0.045f)
-//        card.actor.setPosition(stack.x, stack.y)
-//        screenDataProvider.addActorToRoot(card.actor)
+        card.isDraggable = false
+        return true
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -62,13 +67,21 @@ class CoverArea(
             initialise()
             isInitialised = true
         }
+
+        var contentHeight = 0f
+        for (stack in stacks) contentHeight += stack.height
+        contentHeight += areaSpacing * stacks.size - areaSpacing
+
         var (curX, curY) = localToStageCoordinates(Vector2(0f, 0f))
-        curY += height
+        curY += height / 2
+        curY += contentHeight / 2
+
         for (stack in stacks) {
             curY -= stack.height
             stack.width = stack.prefWidth
             stack.height = stack.prefHeight
-            stack.setPosition(curX, curY)
+            stack.setPosition(curX + width / 2 - stack.width / 2, curY)
+            curY -= areaSpacing
         }
     }
 
@@ -82,13 +95,10 @@ class CoverArea(
                 stack,
                 dropOnj
             )
-            println("init")
             dragAndDrop.addTarget(dropBehaviour)
             stack.init(screenDataProvider)
             screenDataProvider.addActorToRoot(stack)
-            stack.debug = true
             stack.parentWidth = width
-            stack.onEnter { println("hi") }
         }
     }
 
@@ -96,11 +106,12 @@ class CoverArea(
 
 class CoverStack(
     val maxCards: Int,
-    val detailFont: BitmapFont,
-    val detailFontColor: Color,
-    val backgroundTexture: TextureRegion,
-    val detailFontScale: Float,
-    val minSize: Float,
+    private val detailFont: BitmapFont,
+    private val detailFontColor: Color,
+    private val backgroundTexture: TextureRegion,
+    private val detailFontScale: Float,
+    private val spacing: Float,
+    private val cardScale: Float,
     val num: Int
 ) : CustomHorizontalGroup(), ZIndexActor, InitialiseableActor {
 
@@ -116,6 +127,9 @@ class CoverStack(
 
     var parentWidth: Float = Float.MAX_VALUE
 
+    val numCards: Int
+        get() = cards.size
+
     var isActive: Boolean = false
         set(value) {
             field = value
@@ -128,7 +142,7 @@ class CoverStack(
         addActor(detailText)
         background = TextureRegionDrawable(backgroundTexture)
         align(Align.left)
-        space(1f)
+        space(spacing)
     }
 
     override fun init(screenDataProvider: ScreenDataProvider) {
@@ -144,7 +158,7 @@ class CoverStack(
             throw RuntimeException("cannot add another cover because max stack size is $maxCards")
         }
         cards.add(card)
-        card.actor.setScale(0.05f)
+        card.actor.setScale(cardScale)
         // this workaround is needed because HorizontalGroup doesn't consider scaling when calculating the preferred
         // dimensions, causing the layout to break
         card.actor.reportDimensionsWithScaling = true

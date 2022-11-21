@@ -115,7 +115,6 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
     init {
         onEnter { isHoveredOver = true }
         onExit { isHoveredOver = false }
-        debug = true
     }
 
     override fun getMinWidth(): Float =

@@ -197,8 +197,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun addCover(card: Card, slot: Int) {
         if (card.type != Card.Type.COVER) return
-        cardHand!!.removeCard(card)
-        coverArea!!.addCover(card, slot)
+        val addedCard = coverArea!!.addCover(card, slot)
+        if (addedCard) cardHand!!.removeCard(card)
     }
 
     /**

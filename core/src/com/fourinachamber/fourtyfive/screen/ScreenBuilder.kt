@@ -453,7 +453,10 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             fontOrError(widgetOnj.get<String>("detailFont")),
             Color.valueOf(widgetOnj.get<String>("detailFontColor")),
             textureOrError(widgetOnj.get<String>("stackBackgroundTexture")),
-            widgetOnj.get<Double>("detailFontScale").toFloat()
+            widgetOnj.get<Double>("detailFontScale").toFloat(),
+            widgetOnj.get<Double>("stackSpacing").toFloat(),
+            widgetOnj.get<Double>("areaSpacing").toFloat(),
+            widgetOnj.get<Double>("cardScale").toFloat(),
         )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
