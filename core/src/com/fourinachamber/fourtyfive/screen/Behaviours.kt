@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
+import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
 import ktx.actors.onClick
@@ -27,10 +29,14 @@ object BehaviourFactory {
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
-        "OnClickShootBehaviour" to { onj, actor -> OnClickShootBehaviour(onj, actor) },
+        "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
+        "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
-        "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) }
+        "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
+        "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
+        "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
+        "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) }
     )
 
     /**
@@ -43,6 +49,10 @@ object BehaviourFactory {
         return behaviourCreator(onj, actor)
     }
 
+}
+
+interface GameScreenBehaviour {
+    var gameScreenController: GameScreenController
 }
 
 /**
@@ -66,9 +76,15 @@ abstract class Behaviour(val actor: Actor) {
     protected open val onHoverExit: BehaviourCallback? = null
 
     /**
-     * called when the actor is clicked
+     * called when the actor is clicked. If the actor is a [DisableActor] and [DisableActor.isDisabled] is set to false,
+     * this will not be called
      */
     protected open val onCLick: BehaviourCallback? = null
+
+    /**
+     * called when the actor is a [DisableActor], [DisableActor.isDisabled] is set to true and the actor is clicked
+     */
+    protected open val onDisabledCLick: BehaviourCallback? = null
 
     /**
      * binds the callbacks to the actor and sets the [screenDataProvider]
@@ -77,7 +93,12 @@ abstract class Behaviour(val actor: Actor) {
         this.screenDataProvider = screenDataProvider
         onHoverEnter?.let { actor.onEnter(it) }
         onHoverExit?.let { actor.onExit(it) }
-        onCLick?.let { actor.onClick(it) }
+        actor.onClick {
+            if (actor is DisableActor) {
+                if (actor.isDisabled) onDisabledCLick?.let { it() }
+                else onCLick?.let { it() }
+            } else onCLick?.let { it() }
+        }
     }
 
 }
@@ -93,16 +114,49 @@ class MouseHoverBehaviour(
     private val cursorName = onj.get<String>("cursorName")
     private val useSystemCursor = onj.get<Boolean>("useSystemCursor")
 
+    private var disabledCursorName: String? = null
+    private var disabledUseSystemCursor: Boolean? = null
+
+    init {
+        if (onj.hasKey<OnjObject>("disabled")) {
+            val disabledOnj = onj.get<OnjObject>("disabled")
+            disabledCursorName = disabledOnj.get<String>("cursorName")
+            disabledUseSystemCursor = disabledOnj.get<Boolean>("useSystemCursor")
+        }
+    }
+
     private val cursor: Either<Cursor, SystemCursor> by lazy {
         Utils.loadCursor(useSystemCursor, cursorName, screenDataProvider)
     }
 
-    override val onHoverEnter: BehaviourCallback = {
+    private val disabledCursor: Either<Cursor, SystemCursor>? by lazy {
+        if (disabledUseSystemCursor != null) {
+            Utils.loadCursor(disabledUseSystemCursor!!, disabledCursorName!!, screenDataProvider)
+        } else null
+    }
+
+    override val onHoverEnter: BehaviourCallback = callback@ {
+        if (disabledCursor != null && actor is DisableActor && actor.isDisabled) {
+            Utils.setCursor(disabledCursor!!)
+            return@callback
+        }
         Utils.setCursor(cursor)
     }
 
     override val onHoverExit: BehaviourCallback = {
         Utils.setCursor(screenDataProvider.defaultCursor)
+    }
+}
+
+/**
+ * changes the screen when clicked
+ */
+class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val screenPath = onj.get<String>("screenPath")
+
+    override val onCLick: BehaviourCallback = {
+        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(screenPath)).build()
     }
 }
 
@@ -225,7 +279,7 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 /**
  * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
  */
-class OnClickShootBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     private val maskTextureName = onj.get<String>("maskTexture")
     private val invert = onj.getOr("invert", false)
@@ -235,7 +289,7 @@ class OnClickShootBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor
     private val maskOffsetY = onj.getOr("maskOffsetY", 0.0).toFloat()
 
     init {
-        if (actor !is Maskable) throw RuntimeException("OnClickShootBehaviour can only be used on a maskable actor")
+        if (actor !is Maskable) throw RuntimeException("OnClickMaskBehaviour can only be used on a maskable actor")
     }
 
     override val onCLick: BehaviourCallback = {
@@ -360,6 +414,36 @@ class OnHoverPopupBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
     override val onHoverExit: BehaviourCallback = {
         popupActor.isVisible = false
     }
+}
+
+class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.shoot()
+    }
+
+}
+
+class DrawBulletButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.drawBullet()
+    }
+
+}
+
+class DrawCoverCardButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.drawCover()
+    }
+
 }
 
 typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor) -> Behaviour

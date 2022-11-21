@@ -63,7 +63,6 @@ $Widget [
         color: string
         fontScale: float
         backgroundTexture?: string
-        backgroundNinepatch?: string
         align?: string
         ...!widgetSharedKeys
     }
@@ -88,6 +87,7 @@ $Widget [
         align?: string
         rows: !tableRow[*]
         applyZIndices?: boolean
+        backgroundTexture?: string
         ...!widgetSharedKeys
     }
 
@@ -150,6 +150,7 @@ $Widget [
         detailOffsetX: float
         detailOffsetY: float
         detailPadding: float
+        hoveredCardScale: float
         ...!widgetSharedKeys
     }
 
@@ -160,10 +161,24 @@ $Widget [
         fontScale: float
         slotScale: float
         cardScale: float
+        animationDuration: float
         ...!widgetSharedKeys
     }
 
     $EnemyArea {
+        ...!widgetSharedKeys
+    }
+
+    $CoverArea {
+        numStacks: int
+        maxCards: int
+        detailFont: string
+        detailFontColor: string
+        detailFontScale: float
+        stackBackgroundTexture: string
+        stackSpacing: float
+        areaSpacing: float
+        cardScale: float
         ...!widgetSharedKeys
     }
 
@@ -174,6 +189,10 @@ $Behaviour [
     $MouseHoverBehaviour {
         useSystemCursor: boolean
         cursorName: string
+        disabled: ?{
+            useSystemCursor: boolean
+            cursorName: string
+        }
     }
 
     $OnClickExitBehaviour { }
@@ -194,7 +213,7 @@ $Behaviour [
         screenPath: string
     }
 
-    $OnClickShootBehaviour {
+    $OnClickMaskBehaviour {
         maskTexture: string
         invert?: boolean
         maskScaleX?: float
@@ -222,6 +241,12 @@ $Behaviour [
         xOffset?: float
         yOffset?: float
     }
+
+    $ShootButtonBehaviour { }
+
+    $DrawBulletButtonBehaviour { }
+
+    $DrawCoverCardButtonBehaviour { }
 
 ]
 
@@ -257,6 +282,10 @@ $DragAndDropBehaviour [
         ...!dragAndDropBehaviourSharedKeys
     }
 
+    $CoverAreaDropTarget {
+        ...!dragAndDropBehaviourSharedKeys
+    }
+
 ]
 
 !enemy = {
@@ -288,8 +317,16 @@ $ScreenController [
             actorName: string
             enemies: string[*]
         }
+        coverArea: {
+            actorName: string
+            dropBehaviour: $DragAndDropBehaviour
+        }
         cardDragBehaviour: $DragAndDropBehaviour
         enemies: !enemy[*]
+        cardDrawActor: string
+        shootButtonName: string
+        cardsToDrawInFirstRound: int
+        cardsToDraw: int
     }
 
 ]
