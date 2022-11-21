@@ -49,6 +49,10 @@ class Card(
      */
     var inAnimation: Boolean = false
 
+    override fun toString(): String {
+        return "card: $name"
+    }
+
     companion object {
 
         /**

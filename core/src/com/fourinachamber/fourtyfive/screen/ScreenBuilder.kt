@@ -442,6 +442,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
+            radius = widgetOnj.get<Double>("radius").toFloat()
+            rotationOff = widgetOnj.get<Double>("rotationOff")
         }
 
         "EnemyArea" -> EnemyArea().apply {
@@ -457,6 +459,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("stackSpacing").toFloat(),
             widgetOnj.get<Double>("areaSpacing").toFloat(),
             widgetOnj.get<Double>("cardScale").toFloat(),
+            widgetOnj.get<Double>("stackMinSize").toFloat(),
         )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")

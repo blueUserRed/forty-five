@@ -1,6 +1,8 @@
 
 import "imports/colors.onj" as color
 
+!pi = 3.141
+
 !worldWidth = 160.0
 !worldHeight = 90.0
 
@@ -137,7 +139,9 @@ options: {
     slotScale: !slotScale
     cardScale: 0.045
     animationDuration: 0.2
-    debug: true
+    radius: 15.0
+    rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
+//    debug: true
 }
 
 !cardHand = $CardHand {
@@ -174,6 +178,7 @@ options: {
     stackSpacing: 2.0
     areaSpacing: 4.0
     cardScale: 0.05
+    stackMinSize: 20.0
 //    debug: true
 }
 
@@ -182,7 +187,9 @@ options: {
 
         {
             padBottom: 3.0
+            width: <!worldWidth / 3>
             element: $Table {
+//                debug: true
                 align: "bottom"
                 rows: [
 
@@ -190,7 +197,7 @@ options: {
                         cells: [
                             {
                                 sizeToActor: true
-                                padRight: 34.0
+                                padRight: 48.0
                                 element: !revolver
                             }
                         ]
@@ -251,7 +258,6 @@ options: {
 !cardDrawTable = $Table {
     visible: false
     name: "card_draw_table"
-//    debug: true
     fillX: true
     fillY: true
     zIndex: !overlayZIndex
