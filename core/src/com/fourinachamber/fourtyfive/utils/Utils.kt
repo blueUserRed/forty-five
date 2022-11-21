@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import kotlin.random.Random
+import kotlin.random.asKotlinRandom
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or

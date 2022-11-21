@@ -1,6 +1,7 @@
 
 import "imports/asset_definitions.onjschema" as _
 import "imports/font_group.onjschema" as _
+import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys
 
 !viewportSharedKeys = {
     backgroundTexture?: string
@@ -261,87 +262,10 @@ $Behaviour [
 
 ]
 
-!dragAndDropBehaviourSharedKeys = {
-    group: string
-}
-
-$DragAndDropBehaviour [
-
-    $SimpleDragSource {
-        useDimensionsOfCell?: string
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $TestDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-
-    $SlotDragSource {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $SlotDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $CardDragSource {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $RevolverDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $CoverAreaDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-]
-
-!enemy = {
-    name: string
-    texture: string
-    lives: int
-    offsetX: float
-    offsetY: float
-    scaleX: float
-    scaleY: float
-    detailFont: string
-    detailFontScale: float
-    detailFontColor: string
-}
-
 $ScreenController [
 
     $GameScreenController {
-        cardsFile: string
-        cardAtlasFile: string
-        cardHand: {
-            actorName: string
-        }
-        revolver: {
-            actorName: string
-            dropBehaviour: $DragAndDropBehaviour
-        }
-        enemyArea: {
-            actorName: string
-            enemies: string[*]
-        }
-        coverArea: {
-            actorName: string
-            dropBehaviour: $DragAndDropBehaviour
-        }
-        playerLivesLabel: {
-            actorName: string
-        }
-        cardDragBehaviour: $DragAndDropBehaviour
-        enemies: !enemy[*]
-        cardDrawActor: string
-        shootButtonName: string
-        cardsToDrawInFirstRound: int
-        cardsToDraw: int
-        playerLives: int
+        ...!gameScreenControllerKeys
     }
 
 ]

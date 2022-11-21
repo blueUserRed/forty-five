@@ -55,6 +55,13 @@ class CoverArea(
         this.screenDataProvider = screenDataProvider
     }
 
+    fun damage(damage: Int): Int {
+        for (stack in stacks) {
+            if (stack.isActive) return stack.damage(damage)
+        }
+        return damage
+    }
+
     /**
      * activates a stack and deactivates all others
      */
@@ -172,6 +179,21 @@ class CoverStack(
         onClick {
             coverArea.makeActive(num)
         }
+    }
+
+    fun damage(damage: Int): Int {
+        currentHealth -= damage
+        if (currentHealth > 0) return 0
+        val remaining = -currentHealth
+        destroy()
+        return remaining
+    }
+
+    fun destroy() {
+        currentHealth = 0
+        for (card in cards) removeActor(card.actor)
+        cards.clear()
+        updateText()
     }
 
     override fun init(screenDataProvider: ScreenDataProvider) {

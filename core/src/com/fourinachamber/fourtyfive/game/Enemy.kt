@@ -23,6 +23,7 @@ import onj.OnjObject
  */
 class Enemy(
     val name: String,
+    val brain: EnemyBrain,
     val texture: TextureRegion,
     val lives: Int,
     val offsetX: Float,
@@ -67,18 +68,18 @@ class Enemy(
          */
         fun getFrom(
             enemiesOnj: OnjArray,
-            regions: Map<String, TextureRegion>,
-            fonts: Map<String, BitmapFont>
+            screenDataProvider: ScreenDataProvider
         ): List<Enemy> = enemiesOnj
             .value
             .map {
                 it as OnjObject
-                val texture = regions[it.get<String>("texture")] ?:
+                val texture = screenDataProvider.textures[it.get<String>("texture")] ?:
                     throw RuntimeException("unknown texture ${it.get<String>("texture")}")
-                val detailFont = fonts[it.get<String>("detailFont")] ?:
+                val detailFont = screenDataProvider.fonts[it.get<String>("detailFont")] ?:
                     throw RuntimeException("unknown font ${it.get<String>("detailFont")}")
                 Enemy(
                     it.get<String>("name"),
+                    EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider),
                     texture,
                     it.get<Long>("lives").toInt(),
                     it.get<Double>("offsetX").toFloat(),
@@ -102,6 +103,13 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
     private var image: CustomImageActor = CustomImageActor(enemy.texture)
+    private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup()
+
+    private val actionIndicatorText: CustomLabel = CustomLabel(
+        "",
+        Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
+    )
+
     private var detail: CustomLabel = CustomLabel(
         "",
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
@@ -109,6 +117,8 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
 
     init {
         detail.setFontScale(enemy.detailFontScale)
+        actionIndicator.addActor(actionIndicatorText)
+        addActor(actionIndicator)
         addActor(image)
         addActor(detail)
         updateText()
