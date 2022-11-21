@@ -176,6 +176,9 @@ $Widget [
         detailFontColor: string
         detailFontScale: float
         stackBackgroundTexture: string
+        stackSpacing: float
+        areaSpacing: float
+        cardScale: float
         ...!widgetSharedKeys
     }
 

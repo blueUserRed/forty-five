@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -29,6 +30,7 @@ object BehaviourFactory {
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
         "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
+        "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
@@ -143,6 +145,18 @@ class MouseHoverBehaviour(
 
     override val onHoverExit: BehaviourCallback = {
         Utils.setCursor(screenDataProvider.defaultCursor)
+    }
+}
+
+/**
+ * changes the screen when clicked
+ */
+class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val screenPath = onj.get<String>("screenPath")
+
+    override val onCLick: BehaviourCallback = {
+        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(screenPath)).build()
     }
 }
 
