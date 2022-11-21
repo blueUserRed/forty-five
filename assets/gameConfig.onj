@@ -1,0 +1,31 @@
+
+import "imports/colors.onj" as color
+
+enemyConfig: {
+
+    enemies: [
+        {
+            name: "enemy"
+            lives: 1234
+            texture: "enemy"
+            offsetX: 30.0
+            offsetY: 40.0
+            scaleX: 0.03
+            scaleY: 0.03
+            detailFont: "distance_field"
+            detailFontScale: 2.0
+            detailFontColor: !color.blue
+        }
+    ]
+
+    startEnemy: "enemy"
+}
+
+cardDrawConfig: {
+    firstRound: 6
+    roundStart: 1
+}
+
+playerConfig: {
+    lives: 1234
+}

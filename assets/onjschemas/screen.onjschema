@@ -137,6 +137,14 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+//    $ProgressBar {
+//        min: float
+//        max: float
+//        stepSize: float
+//        vertical: boolean
+//        initialValue: float
+//    }
+
     $CardHand {
         cardScale: float
         cardSpacing: float
@@ -324,12 +332,16 @@ $ScreenController [
             actorName: string
             dropBehaviour: $DragAndDropBehaviour
         }
+        playerLivesLabel: {
+            actorName: string
+        }
         cardDragBehaviour: $DragAndDropBehaviour
         enemies: !enemy[*]
         cardDrawActor: string
         shootButtonName: string
         cardsToDrawInFirstRound: int
         cardsToDraw: int
+        playerLives: int
     }
 
 ]

@@ -14,6 +14,7 @@ import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
+import ktx.actors.onClick
 import onj.OnjNamedObject
 import java.lang.Float.max
 
@@ -38,6 +39,7 @@ class CoverArea(
     private val stacks: Array<CoverStack> = Array(numStacks) {
         CoverStack(
             maxCards,
+            this,
             detailFont,
             detailFontColor,
             stackBackgroundTexture,
@@ -51,6 +53,20 @@ class CoverArea(
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
+    }
+
+    /**
+     * activates a stack and deactivates all others
+     */
+    fun makeActive(stackNum: Int) {
+        for (stack in stacks) {
+            if (stack.num == stackNum) {
+                if (stack.isActive) break // stack was already active
+                stack.isActive = true
+            } else {
+                if (stack.isActive) stack.isActive = false
+            }
+        }
     }
 
     /**
@@ -114,6 +130,7 @@ class CoverArea(
 
 class CoverStack(
     val maxCards: Int,
+    private val coverArea: CoverArea,
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
     private val backgroundTexture: TextureRegion,
@@ -152,6 +169,9 @@ class CoverStack(
         background = TextureRegionDrawable(backgroundTexture)
         align(Align.left)
         space(spacing)
+        onClick {
+            coverArea.makeActive(num)
+        }
     }
 
     override fun init(screenDataProvider: ScreenDataProvider) {
