@@ -1,5 +1,6 @@
 
 import "imports/colors.onj" as color
+import "gameConfig.onj" as gameConfig
 
 !pi = 3.141
 
@@ -19,21 +20,6 @@ import "imports/colors.onj" as color
     }
 }
 
-!enemies = [
-    {
-        name: "enemy"
-        lives: 1234
-        texture: "enemy"
-        offsetX: 30.0
-        offsetY: 40.0
-        scaleX: 0.03
-        scaleY: 0.03
-        detailFont: "distance_field"
-        detailFontScale: 2.0
-        detailFontColor: !color.blue
-    }
-]
-
 !controller = $GameScreenController {
     cardsFile: "cards/cards.onj"
     cardAtlasFile: "cards/generated/cards.atlas"
@@ -48,7 +34,7 @@ import "imports/colors.onj" as color
     }
     enemyArea: {
         actorName: "enemy_area"
-        enemies: [ "enemy" ]
+        enemies: [ !gameConfig.enemyConfig.startEnemy ]
     }
     coverArea: {
         actorName: "cover_area"
@@ -56,14 +42,18 @@ import "imports/colors.onj" as color
             group: "card"
         }
     }
+    playerLivesLabel: {
+        actorName: "player_lives_label"
+    }
     cardDragBehaviour: $CardDragSource {
         group: "card"
     }
-    enemies: !enemies
+    enemies: !gameConfig.enemyConfig.enemies
     cardDrawActor: "card_draw_table"
     shootButtonName: "shoot_button"
-    cardsToDrawInFirstRound: 6
-    cardsToDraw: 1
+    cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
+    cardsToDraw: !gameConfig.cardDrawConfig.roundStart
+    playerLives: !gameConfig.playerConfig.lives
 }
 
 viewport: $FitViewport {
@@ -196,8 +186,9 @@ options: {
                     {
                         cells: [
                             {
+                                colspan: 2
                                 sizeToActor: true
-                                padRight: 48.0
+                                padRight: 50.0
                                 element: !revolver
                             }
                         ]
@@ -215,6 +206,42 @@ options: {
                                     color: !color.white
                                     backgroundTexture: "black"
                                     behaviours: [ $ShootButtonBehaviour { }, !buttonHoverBehaviour ]
+                                }
+                            }
+                            {
+                                sizeToActor: true
+                                element: $Label {
+                                    name: "end_turn_button"
+                                    font: "distance_field"
+                                    text: "end turn"
+                                    fontScale: 0.15
+                                    color: !color.white
+                                    backgroundTexture: "black"
+                                    behaviours: [ $ShootButtonBehaviour { }, !buttonHoverBehaviour ]
+                                }
+                            }
+                        ]
+                    }
+
+                    {
+                        cells: [
+                            {
+                                colspan: 2
+//                                sizeToActor: true
+//                                element: $ProgressBar {
+//                                    min: 0.0
+//                                    max: 100.0
+//                                    stepSize: 1.0
+//                                    vertical: false
+//                                    initialValue: 50.0
+//                                }
+                                element: $Label {
+                                    name: "player_lives_label"
+                                    font: "distance_field"
+                                    text: ""
+                                    fontScale: 0.09
+                                    color: !color.white
+                                    backgroundTexture: "black"
                                 }
                             }
                         ]
@@ -302,7 +329,7 @@ children: [
     $Table {
         fillX: true
         fillY: true
-//        debug: true
+        debug: true
         rows: [ !topRow, !bottomRow ]
     }
 

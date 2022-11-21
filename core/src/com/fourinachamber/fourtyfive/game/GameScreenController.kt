@@ -24,9 +24,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val coverAreaOnj = onj.get<OnjObject>("coverArea")
     private val enemiesOnj = onj.get<OnjArray>("enemies")
     private val cardDrawActorName = onj.get<String>("cardDrawActor")
+    private val playerLivesLabelName = onj.get<OnjObject>("playerLivesLabel").get<String>("actorName")
     private val shootButtonName = onj.get<String>("shootButtonName")
+
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
+    private val basePlayerLives = onj.get<Long>("playerLives").toInt()
 
     private var curScreen: ScreenDataProvider? = null
 
@@ -36,6 +39,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var coverArea: CoverArea? = null
     private var cardDrawActor: Actor? = null
     private var shootButton: CustomLabel? = null
+    private var playerLivesLabel: CustomLabel? = null
 
     private var cards: List<Card> = listOf()
     private var bulletStack: MutableList<Card> = mutableListOf()
@@ -46,6 +50,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var enemies: List<Enemy> = listOf()
 
     private var remainingCardsToDraw: Int? = null
+
+    var curPlayerLives: Int = basePlayerLives
+        private set
 
     /**
      * the current phase of the game
@@ -102,6 +109,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         this.shootButton = shootButton
 
         initCardHand()
+        initPlayerLivesLabel()
         initRevolver()
         initEnemyArea()
         initCoverArea()
@@ -133,6 +141,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             ?: throw RuntimeException("no named actor with name $cardHandName")
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
+    }
+
+    private fun initPlayerLivesLabel() {
+        val curScreen = curScreen!!
+
+        val playerLives = curScreen.namedActors[playerLivesLabelName]
+            ?: throw RuntimeException("no named actor with name $playerLivesLabelName")
+        if (playerLives !is CustomLabel) throw RuntimeException("actor named $playerLivesLabelName must be a Label")
+        playerLivesLabel = playerLives
+        updatePlayerLivesText()
     }
 
     private fun initCoverArea() {
@@ -211,6 +229,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val enemy = enemyArea!!.enemies[0]
         enemy.damage(cardToShoot.baseDamage)
         revolver!!.removeCard(4)
+    }
+
+    private fun updatePlayerLivesText() {
+        playerLivesLabel!!.setText("lives: $curPlayerLives/$basePlayerLives")
     }
 
     private fun freezeUI() {

@@ -415,6 +415,16 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             applyImageKeys(this, widgetOnj)
         }
 
+//        "ProgressBar" -> ProgressBar(
+//            widgetOnj.get<Double>("min").toFloat(),
+//            widgetOnj.get<Double>("max").toFloat(),
+//            widgetOnj.get<Double>("stepSize").toFloat(),
+//            widgetOnj.get<Boolean>("vertical"),
+//            ProgressBar.ProgressBarStyle(TextureRegionDrawable(textureOrError("black")), null)
+//        ).apply {
+//            value = widgetOnj.get<Double>("initialValue").toFloat()
+//        }
+
         "CardHand" -> CardHand(
             fontOrError(widgetOnj.get<String>("detailFont")),
             Color.valueOf(widgetOnj.get<String>("detailFontColor")),
