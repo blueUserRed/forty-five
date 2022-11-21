@@ -210,7 +210,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         cardToShoot ?: return
         val enemy = enemyArea!!.enemies[0]
         enemy.damage(cardToShoot.baseDamage)
-        revolver!!.removeCard(1)
+        revolver!!.removeCard(4)
     }
 
     private fun freezeUI() {

@@ -162,6 +162,8 @@ $Widget [
         slotScale: float
         cardScale: float
         animationDuration: float
+        radius: float
+        rotationOff: float
         ...!widgetSharedKeys
     }
 
@@ -179,6 +181,7 @@ $Widget [
         stackSpacing: float
         areaSpacing: float
         cardScale: float
+        stackMinSize: float
         ...!widgetSharedKeys
     }
 

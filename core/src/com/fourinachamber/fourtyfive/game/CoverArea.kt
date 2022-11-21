@@ -15,6 +15,7 @@ import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import onj.OnjNamedObject
+import java.lang.Float.max
 
 
 class CoverArea(
@@ -26,7 +27,8 @@ class CoverArea(
     detailFontScale: Float,
     private val stackSpacing: Float,
     private val areaSpacing: Float,
-    private val cardScale: Float
+    private val cardScale: Float,
+    private val stackMinSize: Float
 ) : Widget(), InitialiseableActor {
 
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
@@ -42,6 +44,7 @@ class CoverArea(
             detailFontScale,
             stackSpacing,
             cardScale,
+            stackMinSize,
             it
         )
     }
@@ -78,7 +81,7 @@ class CoverArea(
 
         for (stack in stacks) {
             curY -= stack.height
-            stack.width = stack.prefWidth
+            stack.width = max(stack.prefWidth, stack.minWidth)
             stack.height = stack.prefHeight
             stack.setPosition(curX + width / 2 - stack.width / 2, curY)
             curY -= areaSpacing
@@ -86,6 +89,7 @@ class CoverArea(
     }
 
     private fun initialise() {
+        var isFirst = true
         for (stack in stacks) {
             val (dragAndDrop, dropOnj) = slotDropConfig!!
             val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
@@ -95,6 +99,10 @@ class CoverArea(
                 stack,
                 dropOnj
             )
+            if (isFirst) {
+                stack.isActive = true
+                isFirst = false
+            }
             dragAndDrop.addTarget(dropBehaviour)
             stack.init(screenDataProvider)
             screenDataProvider.addActorToRoot(stack)
@@ -112,6 +120,7 @@ class CoverStack(
     private val detailFontScale: Float,
     private val spacing: Float,
     private val cardScale: Float,
+    private val minSize: Float,
     val num: Int
 ) : CustomHorizontalGroup(), ZIndexActor, InitialiseableActor {
 
@@ -174,4 +183,7 @@ class CoverStack(
         detailText.setText("${if (isActive) "active" else "not active"}\n${currentHealth}/${baseHealth}")
     }
 
+    override fun getMinWidth(): Float {
+        return minSize
+    }
 }
