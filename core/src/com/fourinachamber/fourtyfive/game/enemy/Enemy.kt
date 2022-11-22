@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.*
 import onj.OnjArray
 import onj.OnjObject
@@ -58,14 +59,16 @@ class Enemy(
     }
 
     fun chooseNewAction() {
+        println("choosing action")
         curAction = brain.chooseAction()
         actor.displayAction(curAction!!)
     }
 
-    fun doAction(gameScreenController: GameScreenController) {
-        curAction?.execute(gameScreenController)
+    fun doAction(gameScreenController: GameScreenController): Timeline {
+        val timeline = curAction!!.execute(gameScreenController)
         curAction = null
         actor.resetAction()
+        return timeline
     }
 
     /**

@@ -5,8 +5,8 @@ import "imports/colors.onj" as color
     actions: [
         $DamagePlayerEnemyAction {
             weight: 1
-            min: 10
-            max: 19
+            min: 20
+            max: 30
             indicatorTexture: "normal_bullet"
         }
     ]

@@ -10,6 +10,7 @@ import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.*
 
 
@@ -37,14 +38,14 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var curScreen: ScreenDataProvider? = null
 
-    private var cardHand: CardHand? = null
-    private var revolver: Revolver? = null
-    private var enemyArea: EnemyArea? = null
-    private var coverArea: CoverArea? = null
-    private var cardDrawActor: Actor? = null
-    private var shootButton: Widget? = null
-    private var endTurnButton: Widget? = null
-    private var playerLivesLabel: CustomLabel? = null
+    var cardHand: CardHand? = null
+    var revolver: Revolver? = null
+    var enemyArea: EnemyArea? = null
+    var coverArea: CoverArea? = null
+    var cardDrawActor: Actor? = null
+    var shootButton: Widget? = null
+    var endTurnButton: Widget? = null
+    var playerLivesLabel: CustomLabel? = null
 
     private var cards: List<Card> = listOf()
     private var bulletStack: MutableList<Card> = mutableListOf()
@@ -58,6 +59,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     var curPlayerLives: Int = basePlayerLives
         private set
+
+    private var timeline: Timeline? = null
+        set(value) {
+            field = value
+            value?.start()
+        }
 
     /**
      * the current phase of the game
@@ -108,18 +115,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         )
         screenDataProvider.removeActorFromRoot(cardDrawActor!!)
 
-//        val shootButton = screenDataProvider.namedActors[shootButtonName] ?: throw RuntimeException(
-//            "no actor with name $shootButtonName"
-//        )
-//        if (shootButton !is Widget) throw RuntimeException("actor named $shootButtonName must be a Widget")
-//        this.shootButton = shootButton
-//
-//        val endTurnButton = screenDataProvider.namedActors[endTurnButtonName] ?: throw RuntimeException(
-//            "no actor with name $shootButtonName"
-//        )
-//        if (endTurnButton !is Widget) throw RuntimeException("actor named $endTurnButtonName must be a Widget")
-//        this.endTurnButton = endTurnButton
-
         initCardHand()
         initPlayerLivesLabel()
         initRevolver()
@@ -143,7 +138,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun update() {
-//        updatePlayerLivesText()
+        timeline?.let {
+            it.update()
+            if (it.isFinished) timeline = null
+        }
     }
 
     private fun initCardHand() {
@@ -249,7 +247,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun damagePlayer(damage: Int) {
-        curPlayerLives -= coverArea!!.damage(damage)
+        curPlayerLives -= damage
         updatePlayerLivesText()
     }
 
@@ -376,10 +374,23 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
          * enemy does it's action
          */
         ENEMY_ACTION {
+
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
-                enemies[0].doAction(this)
-                changePhase(INITIAL_DRAW)
+
+                // TODO: put these numbers in onj file somewhere
+                val shakeAction = ShakeActorAction(1.2f, 0f, 0.3f, 0f)
+                shakeAction.duration = 1f
+
+                timeline = Timeline.timeline {
+                    action { enemies[0].actor.addAction(shakeAction) }
+                    delayUntil { shakeAction.isComplete }
+                    action { enemies[0].actor.removeAction(shakeAction) }
+                    include(enemies[0].doAction(gameScreenController))
+                    delay(500)
+                    action { changePhase(INITIAL_DRAW) }
+                }
             }
+
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_ACTION
             override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
