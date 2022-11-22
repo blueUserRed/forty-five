@@ -1,16 +1,8 @@
 package com.fourinachamber.fourtyfive.card
 
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.fourinachamber.fourtyfive.screen.CustomHorizontalGroup
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.OnjArray

@@ -76,6 +76,11 @@ class CoverArea(
         }
     }
 
+    fun getActive(): CoverStack? {
+        for (stack in stacks) if (stack.isActive) return stack
+        return null
+    }
+
     /**
      * adds a new cover to the area, in a specific slot
      */
@@ -107,7 +112,7 @@ class CoverArea(
             curY -= stack.height
             stack.width = max(stack.prefWidth, stack.minWidth)
             stack.height = stack.prefHeight
-            stack.setPosition(curX + width / 2 - stack.width / 2, curY)
+            if (!stack.inAnimation) stack.setPosition(curX + width / 2 - stack.width / 2, curY)
             curY -= areaSpacing
         }
     }
@@ -147,7 +152,9 @@ class CoverStack(
     private val cardScale: Float,
     private val minSize: Float,
     val num: Int
-) : CustomHorizontalGroup(), ZIndexActor, InitialiseableActor {
+) : CustomHorizontalGroup(), ZIndexActor, InitialiseableActor, AnimationActor {
+
+    override var inAnimation: Boolean = false
 
     var baseHealth: Int = 0
         private set

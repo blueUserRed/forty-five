@@ -197,13 +197,9 @@ class RevolverSlot(
     private val textureRegion: TextureRegion,
     private val scale: Float,
     private var animationDuration: Float
-) : CustomImageActor(textureRegion) {
+) : CustomImageActor(textureRegion), AnimationActor {
 
-    /**
-     * true if this is in an animation
-     */
-    var inAnimation: Boolean = false
-        private set
+    override var inAnimation: Boolean = false
 
     /**
      * if set to a card, the card will be moved along with the spin animation

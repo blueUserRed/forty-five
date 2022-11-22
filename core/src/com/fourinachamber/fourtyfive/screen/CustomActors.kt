@@ -112,6 +112,17 @@ interface InitialiseableActor {
 }
 
 /**
+ * an actor that can be in an animation
+ */
+interface AnimationActor {
+
+    /**
+     * true if the actor is in an animation. If so, it should be treated differently, e.g. by not setting its position
+     */
+    var inAnimation: Boolean
+}
+
+/**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
  *  label
