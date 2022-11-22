@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
@@ -26,7 +27,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val coverAreaOnj = onj.get<OnjObject>("coverArea")
     private val enemiesOnj = onj.get<OnjArray>("enemies")
     private val cardDrawActorName = onj.get<String>("cardDrawActor")
-    private val playerLivesLabelName = onj.get<OnjObject>("playerLivesLabel").get<String>("actorName")
+    private val playerLivesLabelName = onj.get<String>("playerLivesLabelName")
+    private val endTurnButtonName = onj.get<String>("playerLivesLabelName")
     private val shootButtonName = onj.get<String>("shootButtonName")
 
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
@@ -40,7 +42,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var enemyArea: EnemyArea? = null
     private var coverArea: CoverArea? = null
     private var cardDrawActor: Actor? = null
-    private var shootButton: CustomLabel? = null
+    private var shootButton: Widget? = null
+    private var endTurnButton: Widget? = null
     private var playerLivesLabel: CustomLabel? = null
 
     private var cards: List<Card> = listOf()
@@ -103,12 +106,19 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         cardDrawActor = screenDataProvider.namedActors[cardDrawActorName] ?: throw RuntimeException(
             "no actor with name $cardDrawActorName"
         )
+        screenDataProvider.removeActorFromRoot(cardDrawActor!!)
 
-        val shootButton = screenDataProvider.namedActors[shootButtonName] ?: throw RuntimeException(
-            "no actor with name $shootButtonName"
-        )
-        if (shootButton !is CustomLabel) throw RuntimeException("actor named $shootButtonName must be a Label")
-        this.shootButton = shootButton
+//        val shootButton = screenDataProvider.namedActors[shootButtonName] ?: throw RuntimeException(
+//            "no actor with name $shootButtonName"
+//        )
+//        if (shootButton !is Widget) throw RuntimeException("actor named $shootButtonName must be a Widget")
+//        this.shootButton = shootButton
+//
+//        val endTurnButton = screenDataProvider.namedActors[endTurnButtonName] ?: throw RuntimeException(
+//            "no actor with name $shootButtonName"
+//        )
+//        if (endTurnButton !is Widget) throw RuntimeException("actor named $endTurnButtonName must be a Widget")
+//        this.endTurnButton = endTurnButton
 
         initCardHand()
         initPlayerLivesLabel()
@@ -120,7 +130,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             behaviour.gameScreenController = this
         }
 
-        screenDataProvider.afterMs(2) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
+        screenDataProvider.afterMs(5) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
 //        changePhase(Gamephase.FREE)
         changePhase(Gamephase.INITIAL_DRAW)
     }
@@ -133,6 +143,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun update() {
+//        updatePlayerLivesText()
     }
 
     private fun initCardHand() {
@@ -217,7 +228,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun addCover(card: Card, slot: Int) {
         if (card.type != Card.Type.COVER) return
-        val addedCard = coverArea!!.addCover(card, slot)
+        val addedCard = coverArea!!.addCover(card, slot, roundCounter)
         if (addedCard) cardHand!!.removeCard(card)
     }
 
@@ -233,8 +244,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         revolver!!.removeCard(4)
     }
 
+    fun endTurn() {
+        onEndTurnButtonClicked()
+    }
+
     fun damagePlayer(damage: Int) {
         curPlayerLives -= coverArea!!.damage(damage)
+        updatePlayerLivesText()
     }
 
     private fun updatePlayerLivesText() {
@@ -242,11 +258,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun freezeUI() {
-        shootButton!!.isDisabled = true
+//        shootButton!!.isDisabled = true
     }
 
     private fun unfreezeUI() {
-        shootButton!!.isDisabled = false
+//        shootButton!!.isDisabled = false
     }
 
     private fun freezeCards() {
@@ -260,11 +276,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private fun showCardDrawActor() {
         val viewport = curScreen!!.stage.viewport
         val cardDrawActor = cardDrawActor!!
+        curScreen!!.addActorToRoot(cardDrawActor)
         cardDrawActor.isVisible = true
         cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
     }
 
     private fun hideCardDrawActor() {
+        curScreen!!.removeActorFromRoot(cardDrawActor!!)
         cardDrawActor!!.isVisible = false
     }
 
@@ -299,6 +317,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())
 
+    private fun onEndTurnButtonClicked()  = changePhase(currentPhase.onEndTurnButtonClicked())
+
 
     /**
      * the phases of the game
@@ -311,10 +331,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         INITIAL_DRAW {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                roundCounter++
                 freezeCards()
                 freezeUI()
                 showCardDrawActor()
-                this.remainingCardsToDraw = if (roundCounter == 0) cardsToDrawInFirstRound else cardsToDraw
+                this.remainingCardsToDraw = if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
@@ -325,6 +346,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             }
 
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
+            override fun onEndTurnButtonClicked(): Gamephase = INITIAL_DRAW
         },
 
         /**
@@ -337,6 +359,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             }
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
+            override fun onEndTurnButtonClicked(): Gamephase = ENEMY_REVEAL
         },
 
         /**
@@ -346,15 +369,20 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameScreenController: GameScreenController) {}
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = FREE
+            override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
         },
 
         /**
          * enemy does it's action
          */
         ENEMY_ACTION {
-            override fun transitionTo(gameScreenController: GameScreenController) {}
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                enemies[0].doAction(this)
+                changePhase(INITIAL_DRAW)
+            }
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_ACTION
+            override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
         }
 
         ;
@@ -374,6 +402,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
          * @return the next phase
          */
         abstract fun onAllCardsDrawn(): Gamephase
+
+        abstract fun onEndTurnButtonClicked(): Gamephase
 
     }
 

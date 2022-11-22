@@ -6,7 +6,7 @@ import "imports/colors.onj" as color
         $DamagePlayerEnemyAction {
             weight: 1
             min: 10
-            max: 100
+            max: 19
             indicatorTexture: "normal_bullet"
         }
     ]
@@ -21,7 +21,7 @@ enemyConfig: {
             brain: !defaultEnemyBrain
             texture: "enemy"
             offsetX: 30.0
-            offsetY: 40.0
+            offsetY: 20.0
             scaleX: 0.03
             scaleY: 0.03
             detailFont: "distance_field"

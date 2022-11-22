@@ -108,6 +108,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
             initialise()
             updateSlotsAndCars()
             isInitialised = true
+            invalidateHierarchy()
         }
         if (dirty) {
             updateSlotsAndCars()
@@ -193,10 +194,10 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 class RevolverSlot(
     val num: Int,
     val revolver: Revolver,
-    private val texture: TextureRegion,
+    private val textureRegion: TextureRegion,
     private val scale: Float,
     private var animationDuration: Float
-) : CustomImageActor(texture) {
+) : CustomImageActor(textureRegion) {
 
     /**
      * true if this is in an animation

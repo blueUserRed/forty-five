@@ -51,12 +51,11 @@ coverArea: {
     actorName: string
     dropBehaviour: $DragAndDropBehaviour
 }
-playerLivesLabel: {
-    actorName: string
-}
 cardDragBehaviour: $DragAndDropBehaviour
 enemies: !enemy[*]
 cardDrawActor: string
+playerLivesLabelName: string
+endTurnButtonName: string
 shootButtonName: string
 cardsToDrawInFirstRound: int
 cardsToDraw: int

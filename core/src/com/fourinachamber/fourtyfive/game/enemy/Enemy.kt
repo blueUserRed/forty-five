@@ -65,6 +65,7 @@ class Enemy(
     fun doAction(gameScreenController: GameScreenController) {
         curAction?.execute(gameScreenController)
         curAction = null
+        actor.resetAction()
     }
 
     /**
@@ -143,8 +144,11 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
         val image = CustomImageActor(action.indicatorTexture)
         actionIndicatorText.setText(action.descriptionText)
         actionIndicator.addActorAt(0, image)
-        image.setScale(1f)
-        actionIndicator.debug = true
+    }
+
+    fun resetAction() {
+        actionIndicatorText.setText("")
+        actionIndicator.removeActorAt(0, true)
     }
 
     /**

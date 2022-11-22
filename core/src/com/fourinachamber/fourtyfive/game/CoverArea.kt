@@ -79,10 +79,10 @@ class CoverArea(
     /**
      * adds a new cover to the area, in a specific slot
      */
-    fun addCover(card: Card, slot: Int): Boolean {
+    fun addCover(card: Card, slot: Int, turnNum: Int): Boolean {
         if (slot !in stacks.indices) throw RuntimeException("slot $slot is out of bounds for coverArea")
-        if (stacks[slot].numCards >= maxCards) return false
-        stacks[slot].addCard(card)
+        if (!stacks[slot].acceptsCard(turnNum)) return false
+        stacks[slot].addCard(card, turnNum)
         card.isDraggable = false
         return true
     }
@@ -92,6 +92,7 @@ class CoverArea(
         if (!isInitialised) {
             initialise()
             isInitialised = true
+            invalidateHierarchy()
         }
 
         var contentHeight = 0f
@@ -156,6 +157,7 @@ class CoverStack(
 
     private lateinit var screenDataProvider: ScreenDataProvider
     private val cards: MutableList<Card> = mutableListOf()
+    private var lockedTurnNum: Int? = null
     var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
 
     var parentWidth: Float = Float.MAX_VALUE
@@ -183,6 +185,7 @@ class CoverStack(
 
     fun damage(damage: Int): Int {
         currentHealth -= damage
+        updateText()
         if (currentHealth > 0) return 0
         val remaining = -currentHealth
         destroy()
@@ -193,6 +196,7 @@ class CoverStack(
         currentHealth = 0
         for (card in cards) removeActor(card.actor)
         cards.clear()
+        lockedTurnNum = null
         updateText()
     }
 
@@ -204,16 +208,26 @@ class CoverStack(
         super.draw(batch, parentAlpha)
     }
 
-    fun addCard(card: Card) {
+    fun acceptsCard(turnNum: Int): Boolean {
+        if (cards.size >= maxCards) return false
+        if (lockedTurnNum != null && turnNum != lockedTurnNum) return false
+        return true
+    }
+
+    fun addCard(card: Card, turnNum: Int) {
         if (cards.size >= maxCards) {
             throw RuntimeException("cannot add another cover because max stack size is $maxCards")
         }
+        if (lockedTurnNum != null && turnNum != lockedTurnNum) {
+            throw RuntimeException("cannot add another cover because stack is locked")
+        }
+        if (cards.isEmpty()) lockedTurnNum = turnNum
         cards.add(card)
         card.actor.setScale(cardScale)
         // this workaround is needed because HorizontalGroup doesn't consider scaling when calculating the preferred
         // dimensions, causing the layout to break
         card.actor.reportDimensionsWithScaling = true
-        card.actor.ignoreScaling = true
+        card.actor.ignoreScalingWhenDrawing = true
         baseHealth += card.coverValue
         currentHealth += card.coverValue
         updateText()
