@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.game.enemy
 
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import onj.OnjArray
