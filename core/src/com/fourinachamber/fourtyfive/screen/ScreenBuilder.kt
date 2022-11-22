@@ -36,6 +36,7 @@ import com.fourinachamber.fourtyfive.utils.Animation
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
+import ktx.actors.onEnter
 import onj.*
 import kotlin.system.measureTimeMillis
 
@@ -349,6 +350,10 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
     private fun getWidget(widgetOnj: OnjNamedObject): Actor = when (widgetOnj.name) {
 
         "Image" -> CustomImageActor(textureOrError(widgetOnj.get<String>("textureName"))).apply {
+            if (widgetOnj.getOr("reportDimensionsWithScaling", false)) {
+                reportDimensionsWithScaling = true
+                ignoreScalingWhenDrawing = true
+            }
             applyImageKeys(this, widgetOnj)
         }
 
@@ -497,8 +502,10 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {
-        image.height *= widgetOnj.get<Double>("scaleY").toFloat()
-        image.width *= widgetOnj.get<Double>("scaleX").toFloat()
+//        image.height *= widgetOnj.get<Double>("scaleY").toFloat()
+//        image.width *= widgetOnj.get<Double>("scaleX").toFloat()
+        image.scaleX = widgetOnj.get<Double>("scaleX").toFloat()
+        image.scaleY = widgetOnj.get<Double>("scaleY").toFloat()
     }
 
     private fun applySharedWidgetKeys(actor: Actor, widgetOnj: OnjNamedObject) = with(actor) {

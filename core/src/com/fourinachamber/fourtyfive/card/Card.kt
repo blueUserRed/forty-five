@@ -110,27 +110,9 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
     var isHoveredOver: Boolean = false
         private set
 
-    /**
-     * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
-     * already applied
-     */
-    var reportDimensionsWithScaling: Boolean = false
-
     init {
         onEnter { isHoveredOver = true }
         onExit { isHoveredOver = false }
     }
 
-    override fun getMinWidth(): Float =
-        if (reportDimensionsWithScaling) super.getMinWidth() * scaleX else super.getMinWidth()
-    override fun getPrefWidth(): Float =
-        if (reportDimensionsWithScaling) super.getPrefWidth() * scaleX else super.getPrefWidth()
-    override fun getMaxWidth(): Float =
-        if (reportDimensionsWithScaling) super.getMaxWidth() * scaleX else super.getMaxWidth()
-    override fun getMinHeight(): Float =
-        if (reportDimensionsWithScaling) super.getMinHeight() * scaleY else super.getMinHeight()
-    override fun getPrefHeight(): Float =
-        if (reportDimensionsWithScaling) super.getPrefHeight() * scaleY else super.getPrefHeight()
-    override fun getMaxHeight(): Float =
-        if (reportDimensionsWithScaling) super.getMaxHeight() * scaleY else super.getMaxHeight()
 }

@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.screen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
@@ -31,10 +32,12 @@ object BehaviourFactory {
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
         "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
+        "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
         "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
         "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
+        "EndTurnButtonBehaviour" to { onj, actor -> EndTurnButtonBehaviour(onj, actor) },
         "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
         "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) }
     )
@@ -276,6 +279,36 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 }
 
 
+class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val hoverTextureName = onj.get<String>("hoverTexture")
+    private val baseTexture: TextureRegion
+    private val image: CustomImageActor
+
+    private val hoverTexture: TextureRegion by lazy {
+        screenDataProvider.textures[hoverTextureName] ?:
+            throw RuntimeException("no texture with name $hoverTextureName")
+    }
+
+    init {
+        if (actor !is CustomImageActor) {
+            throw RuntimeException("OnHoverChangeTextureBehaviour can only be used on an Image")
+        }
+        image = actor
+        baseTexture = actor.texture
+    }
+
+    override val onHoverEnter: BehaviourCallback = {
+        image.texture = hoverTexture
+    }
+
+
+    override val onHoverExit: BehaviourCallback = {
+        image.texture = baseTexture
+    }
+
+}
+
 /**
  * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
  */
@@ -422,6 +455,15 @@ class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), Gam
 
     override val onCLick: BehaviourCallback = {
         gameScreenController.shoot()
+    }
+
+}
+class EndTurnButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.endTurn()
     }
 
 }

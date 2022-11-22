@@ -42,15 +42,14 @@ import "gameConfig.onj" as gameConfig
             group: "card"
         }
     }
-    playerLivesLabel: {
-        actorName: "player_lives_label"
-    }
     cardDragBehaviour: $CardDragSource {
         group: "card"
     }
     enemies: !gameConfig.enemyConfig.enemies
     cardDrawActor: "card_draw_table"
+    playerLivesLabelName: "player_lives_label"
     shootButtonName: "shoot_button"
+    endTurnButtonName: "end_turn_button"
     cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
     cardsToDraw: !gameConfig.cardDrawConfig.roundStart
     playerLives: !gameConfig.playerConfig.lives
@@ -77,7 +76,10 @@ assets: {
 
         {
             file: "textures/packed/game_screen/game_screen.atlas"
-            defines: [ "background", "background2" "revolver_slot", "enemy", "normal_bullet" ]
+            defines: [
+                "background", "background2" "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
+                "shoot", "shoot_hover"
+            ]
         }
 
     ]
@@ -89,7 +91,16 @@ assets: {
             hotspotY: 0
         }
     ]
-    postProcessors: []
+    postProcessors: [
+        {
+            name: "earthquake"
+            vertexShader: "shaders/earthquake/earthquake.vert"
+            fragmentShader: "shaders/earthquake/earthquake.frag"
+            timeOffset: 2_000
+            uniforms: [ "time" ]
+            args: null
+        }
+    ]
     animations: []
     colorTextures: [
 
@@ -176,8 +187,9 @@ options: {
     cells: [
 
         {
-            padBottom: 3.0
+//            padBottom: 3.0
             width: <!worldWidth / 3>
+            padBottom: 5.0
             element: $Table {
 //                debug: true
                 align: "bottom"
@@ -188,7 +200,7 @@ options: {
                             {
                                 colspan: 2
                                 sizeToActor: true
-                                padRight: 50.0
+//                                padRight: 50.0
                                 element: !revolver
                             }
                         ]
@@ -198,26 +210,41 @@ options: {
                         cells: [
                             {
                                 sizeToActor: true
-                                element: $Label {
+                                element: $Image {
                                     name: "shoot_button"
-                                    font: "distance_field"
-                                    text: "shoot"
-                                    fontScale: 0.15
-                                    color: !color.white
-                                    backgroundTexture: "black"
-                                    behaviours: [ $ShootButtonBehaviour { }, !buttonHoverBehaviour ]
+                                    textureName: "shoot"
+                                    reportDimensionsWithScaling: true
+                                    scaleX: 0.03
+                                    scaleY: 0.03
+                                    behaviours: [
+                                        $OnClickChangePostProcessorBehaviour {
+                                            postProcessor: "earthquake"
+                                            duration: 70
+                                            setOnlyIfNoPostProcessorIsSet: false
+                                        }
+                                        $ShootButtonBehaviour { },
+                                        !buttonHoverBehaviour
+                                        $OnHoverChangeTextureBehaviour {
+                                            hoverTexture: "shoot_hover"
+                                        }
+                                    ]
                                 }
                             }
                             {
                                 sizeToActor: true
-                                element: $Label {
+                                element: $Image {
                                     name: "end_turn_button"
-                                    font: "distance_field"
-                                    text: "end turn"
-                                    fontScale: 0.15
-                                    color: !color.white
-                                    backgroundTexture: "black"
-                                    behaviours: [ $ShootButtonBehaviour { }, !buttonHoverBehaviour ]
+                                    textureName: "end_turn"
+                                    reportDimensionsWithScaling: true
+                                    scaleX: 0.03
+                                    scaleY: 0.03
+                                    behaviours: [
+                                        $EndTurnButtonBehaviour { },
+                                        !buttonHoverBehaviour,
+                                        $OnHoverChangeTextureBehaviour {
+                                            hoverTexture: "end_turn_hover"
+                                        }
+                                    ]
                                 }
                             }
                         ]
@@ -227,14 +254,6 @@ options: {
                         cells: [
                             {
                                 colspan: 2
-//                                sizeToActor: true
-//                                element: $ProgressBar {
-//                                    min: 0.0
-//                                    max: 100.0
-//                                    stepSize: 1.0
-//                                    vertical: false
-//                                    initialValue: 50.0
-//                                }
                                 element: $Label {
                                     name: "player_lives_label"
                                     font: "distance_field"
@@ -261,7 +280,7 @@ options: {
         {
 //            width: <!worldWidth - !revolverWidth - 100.0>
             width: <!worldWidth / 3>
-            height: 60.0
+//            height: 60.0
             element: !enemyArea
         }
 
@@ -274,6 +293,7 @@ options: {
         {
             sizeToActor: true
             padBottom: 2.0
+            padTop: 2.0
             align: "bottom"
             colspan: 3
             element: !cardHand
@@ -329,7 +349,7 @@ children: [
     $Table {
         fillX: true
         fillY: true
-        debug: true
+//        debug: true
         rows: [ !topRow, !bottomRow ]
     }
 

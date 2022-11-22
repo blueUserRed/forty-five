@@ -72,6 +72,7 @@ $Widget [
         textureName: string
         scaleX: float
         scaleY: float
+        reportDimensionsWithScaling?: boolean
         ...!widgetSharedKeys
     }
 
@@ -254,7 +255,13 @@ $Behaviour [
         yOffset?: float
     }
 
+    $OnHoverChangeTextureBehaviour {
+        hoverTexture: string
+    }
+
     $ShootButtonBehaviour { }
+
+    $EndTurnButtonBehaviour { }
 
     $DrawBulletButtonBehaviour { }
 
