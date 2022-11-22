@@ -35,7 +35,10 @@ object OnjReaderUtils {
         val cursors = mutableMapOf<String, Cursor>()
         onj.value.forEach {
             it as OnjObject
-            val pixmap = Pixmap(Gdx.files.internal(it.get<String>("file")))
+            val cursorPixmap = Pixmap(Gdx.files.internal(it.get<String>("file")))
+            val pixmap = Pixmap(cursorPixmap.width, cursorPixmap.height, Pixmap.Format.RGBA8888)
+            pixmap.drawPixmap(cursorPixmap, 0, 0)
+            cursorPixmap.dispose()
             val hotspotX = it.get<Long>("hotspotX").toInt()
             val hotspotY = it.get<Long>("hotspotY").toInt()
             val cursor = Gdx.graphics.newCursor(pixmap, hotspotX, hotspotY)
