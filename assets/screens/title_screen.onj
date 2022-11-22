@@ -6,14 +6,31 @@ import "imports/colors.onj" as color
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
-    backgroundTexture: "background2"
+    backgroundTexture: "background3"
 }
 
 !topRow = {
     cells: [
         {
+            width: <!worldHeight/5>
+            height: <!worldHeight/3>
             align: "right"
-            width: <!worldWidth/5>
+            element: $Label {
+                        name: "d"
+                        text: "Logo hier"
+                        font: "distance_field"
+                        color: !color.black
+                        fontScale: 0.2
+            }
+        }
+    ]
+}
+
+!middleRow = {
+    cells: [
+        {
+            width: <2*(!worldHeight/5)>
+            align: "right"
             height: <!worldHeight/5>
             element: $Label {
                 name: "play"
@@ -21,9 +38,11 @@ viewport: $FitViewport {
                 font: "distance_field"
                 color: !color.black
                 fontScale: 0.3
-                $OnClickChangeScreenBehaviour {
-                    screenPath: ".\screens\game_screen"
-                }
+                behaviours: [
+                    $OnClickChangeScreenBehaviour {
+                        screenPath: "./screens/game_screen.onj"
+                    }
+                ]
             }
         }
     ]
@@ -32,7 +51,8 @@ viewport: $FitViewport {
 !bottomRow = {
     cells : [
     {
-            width: <!worldWidth/5>
+            align: "right"
+            width: <2*(!worldHeight/5)>
             height: <!worldHeight/5>
             element: $Label {
                 name: "sf"
@@ -47,11 +67,11 @@ viewport: $FitViewport {
 
 children: [
     $Table {
-        fillX: false
-        fillY: false
+        fillX: true
+        fillY: true
         debug: true
 //        debug: true
-        rows: [ !topRow, !bottomRow ]
+        rows: [ !topRow, !middleRow, !bottomRow ]
     }
 ]
 
@@ -66,8 +86,8 @@ assets: {
     ]
     textureAtlases: [
         {
-            file: "textures/packed/game_screen/game_screen.atlas"
-            defines: [ "background", "background2" "revolver_slot", "enemy" ]
+            file: "textures/packed/title_screen/title_screen.atlas"
+            defines: [ "background3"]
         }
     ]
     cursors: []
