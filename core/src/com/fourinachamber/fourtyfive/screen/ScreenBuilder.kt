@@ -32,10 +32,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.game.CardHand
-import com.fourinachamber.fourtyfive.game.EnemyActor
-import com.fourinachamber.fourtyfive.game.EnemyArea
-import com.fourinachamber.fourtyfive.game.Revolver
+import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.utils.Animation
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -104,6 +101,11 @@ interface ScreenDataProvider {
      * the current screen controller
      */
     var screenController: ScreenController?
+
+    /**
+     * list of all behaviours that actors in the scene have
+     */
+    val behaviours: List<Behaviour>
 
     /**
      * executes a callback after [ms] time has passed
@@ -232,7 +234,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             earlyRenderTasks.toList(),
             lateRenderTasks.toList(),
             namedCells,
-            namedActors
+            namedActors,
+            behavioursToBind
         )
 
         val cursorOnj = options.get<OnjObject>("defaultCursor")
@@ -381,6 +384,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         "Table" -> CustomTable().apply {
             if (widgetOnj.getOr("fillX", false)) defaults().expandX().fillX()
             if (widgetOnj.getOr("fillY", false)) defaults().expandY().fillY()
+            widgetOnj.ifHas<String>("backgroundTexture") {
+                background = TextureRegionDrawable(textureOrError(it))
+            }
             widgetOnj.ifHas<String>("align") { align(alignmentOrError(it)) }
             widgetOnj.get<OnjArray>("rows").value.forEach { row ->
                 row as OnjObject
@@ -421,6 +427,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("detailPadding").toFloat()
         ).apply {
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+            hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
             cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
             hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()
@@ -434,10 +441,23 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
+            animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
         }
 
         "EnemyArea" -> EnemyArea().apply {
         }
+
+        "CoverArea" -> CoverArea(
+            widgetOnj.get<Long>("numStacks").toInt(),
+            widgetOnj.get<Long>("maxCards").toInt(),
+            fontOrError(widgetOnj.get<String>("detailFont")),
+            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            textureOrError(widgetOnj.get<String>("stackBackgroundTexture")),
+            widgetOnj.get<Double>("detailFontScale").toFloat(),
+            widgetOnj.get<Double>("stackSpacing").toFloat(),
+            widgetOnj.get<Double>("areaSpacing").toFloat(),
+            widgetOnj.get<Double>("cardScale").toFloat(),
+        )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
     }.apply {
@@ -544,7 +564,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
         private val lateRenderTasks: List<OnjScreen.() -> Unit>,
         override val namedCells: Map<String, Cell<*>>,
-        override val namedActors: Map<String, Actor>
+        override val namedActors: Map<String, Actor>,
+        override val behaviours: List<Behaviour>
     ) : ScreenAdapter(), ScreenDataProvider {
 
         var dragAndDrop: Map<String, DragAndDrop> = mapOf()
@@ -621,6 +642,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun render(delta: Float) {
+            screenController?.update()
             if (Gdx.input.isKeyJustPressed(Keys.F)) {
                 if (!Gdx.graphics.isFullscreen) {
                     Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)

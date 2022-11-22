@@ -65,6 +65,17 @@ interface Maskable {
 }
 
 /**
+ * an actor that can be disabled
+ */
+interface DisableActor {
+
+    /**
+     * true if the actor is disabled
+     */
+    var isDisabled: Boolean
+}
+
+/**
  * The default implementation of z-indices in libgdx is really bad, so here is my own.
  * Actors that implement this interface can have z-indices applied.
  * Only works when the actor is in a [ZIndexGroup]
@@ -110,9 +121,11 @@ open class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
     var background: Drawable? = null
-) : Label(text, labelStyle), ZIndexActor {
+) : Label(text, labelStyle), ZIndexActor, DisableActor {
 
     override var fixedZIndex: Int = 0
+
+    override var isDisabled: Boolean = false
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {
@@ -157,11 +170,24 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
 
+    /**
+     * if set to true, the scale of the image will be ignored when drawing
+     */
+    var ignoreScaling: Boolean = false
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
 
-        if (batch == null || mask == null) {
+        if (batch == null) {
             super.draw(batch, parentAlpha)
+            return
+        }
+
+        val width = if (ignoreScaling) width else width * scaleX
+        val height = if (ignoreScaling) height else height * scaleY
+
+        if (mask == null) {
+            batch.draw(region, x, y, width, height)
             return
         }
 
@@ -342,9 +368,17 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
 /**
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
+
+    var background: Drawable? = null
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        background?.draw(batch, x, y, width, height)
+        super.draw(batch, parentAlpha)
+    }
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->
@@ -361,6 +395,14 @@ class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
 
     override var fixedZIndex: Int = 0
+
+    var background: Drawable? = null
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        background?.draw(batch, x, y, width, height)
+        super.draw(batch, parentAlpha)
+    }
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->

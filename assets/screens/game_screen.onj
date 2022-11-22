@@ -6,6 +6,63 @@ import "imports/colors.onj" as color
 
 !cardZIndicesStart = 100
 !cardZIndicesEnd = <!cardZIndicesStart + 100>
+!overlayZIndex = 500
+
+!buttonHoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true
+    cursorName: "hand"
+    disabled: {
+        useSystemCursor: true
+        cursorName: "not allowed"
+    }
+}
+
+!enemies = [
+    {
+        name: "enemy"
+        lives: 1234
+        texture: "enemy"
+        offsetX: 30.0
+        offsetY: 40.0
+        scaleX: 0.03
+        scaleY: 0.03
+        detailFont: "distance_field"
+        detailFontScale: 2.0
+        detailFontColor: !color.blue
+    }
+]
+
+!controller = $GameScreenController {
+    cardsFile: "cards/cards.onj"
+    cardAtlasFile: "cards/generated/cards.atlas"
+    cardHand: {
+        actorName: "card_hand"
+    }
+    revolver: {
+        actorName: "revolver"
+        dropBehaviour: $RevolverDropTarget {
+          group: "card"
+        }
+    }
+    enemyArea: {
+        actorName: "enemy_area"
+        enemies: [ "enemy" ]
+    }
+    coverArea: {
+        actorName: "cover_area"
+        dropBehaviour: $CoverAreaDropTarget {
+            group: "card"
+        }
+    }
+    cardDragBehaviour: $CardDragSource {
+        group: "card"
+    }
+    enemies: !enemies
+    cardDrawActor: "card_draw_table"
+    shootButtonName: "shoot_button"
+    cardsToDrawInFirstRound: 6
+    cardsToDraw: 1
+}
 
 viewport: $FitViewport {
     worldWidth: !worldWidth
@@ -32,7 +89,14 @@ assets: {
         }
 
     ]
-    cursors: []
+    cursors: [
+        {
+            name: "cursor"
+            file: "textures/cursors/revolver.png"
+            hotspotX: 0
+            hotspotY: 0
+        }
+    ]
     postProcessors: []
     animations: []
     colorTextures: [
@@ -40,7 +104,10 @@ assets: {
         {
             name: "card_detail_background"
             color: "04040488"
-//            color: !color.blue
+        }
+        {
+            name: "black"
+            color: !color.black
         }
 
     ]
@@ -49,77 +116,119 @@ assets: {
 options: {
     setFillParentOnRoot: true
     defaultCursor: {
-        useSystemCursor: true
-        cursorName: "arrow"
+//        useSystemCursor: true
+//        cursorName: "arrow"
+        useSystemCursor: false
+        cursorName: "cursor"
     }
     postProcessor: null
-    controller: $GameScreenController {
-        cardsFile: "cards/cards.onj"
-        cardAtlasFile: "cards/generated/cards.atlas"
-        cardHand: {
-            actorName: "card_hand"
-        }
-        revolver: {
-            actorName: "revolver"
-            dropBehaviour: $RevolverDropTarget {
-                group: "card"
-            }
-        }
-        enemyArea: {
-            actorName: "enemy_area"
-            enemies: [ "enemy" ]
-        }
-        cardDragBehaviour: $CardDragSource {
-            group: "card"
-        }
-        enemies: [
-            {
-                name: "enemy"
-                lives: 1234
-                texture: "enemy"
-                offsetX: 60.0
-                offsetY: 40.0
-                scaleX: 0.03
-                scaleY: 0.03
-                detailFont: "distance_field"
-                detailFontScale: 2.0
-                detailFontColor: !color.blue
-            }
-        ]
-    }
+    controller: !controller
 }
 
 !slotScale = 0.07
 !revolverWidth = <128.0 * !slotScale * 4.0>
 
+!revolver = $Revolver {
+    name: "revolver"
+    slotTexture: "revolver_slot"
+    font: "distance_field"
+    fontColor: !color.white
+    fontScale: 0.25
+    slotScale: !slotScale
+    cardScale: 0.045
+    animationDuration: 0.2
+    debug: true
+}
+
+!cardHand = $CardHand {
+    name: "card_hand"
+    cardScale: 0.07
+    hoveredCardScale: 0.085
+    cardSpacing: 1.0
+    startCardZIndicesAt: !cardZIndicesStart
+    hoveredCardZIndex: <!cardZIndicesEnd - 1>
+    draggedCardZIndex: !cardZIndicesEnd
+    detailFont: "distance_field"
+    detailFontColor: !color.white
+    detailBackgroundTexture: "card_detail_background"
+    detailFontScale: 0.1
+    detailOffsetX: 0.0
+    detailOffsetY: 1.5
+    detailPadding: 1.0
+//    debug: true
+}
+
+!enemyArea = $EnemyArea {
+     name: "enemy_area"
+//     debug: true
+ }
+
+!coverArea = $CoverArea {
+    name: "cover_area"
+    numStacks: 2
+    maxCards: 3
+    detailFont: "distance_field"
+    detailFontColor: !color.white
+    detailFontScale: 0.1
+    stackBackgroundTexture: "card_detail_background"
+    stackSpacing: 2.0
+    areaSpacing: 4.0
+    cardScale: 0.05
+//    debug: true
+}
+
 !topRow = {
     cells: [
 
         {
-            sizeToActor: true
-//            height: <!worldHeight * (6.0 / 8.0)>
-            padLeft: 4.0
-            padBottom: 15.0
-            align: "top"
-            element: $Revolver {
-                name: "revolver"
-                slotTexture: "revolver_slot"
-                font: "distance_field"
-                fontColor: !color.white
-                fontScale: 0.25
-                slotScale: !slotScale
-                cardScale: 0.045
-//                debug: true
+            padBottom: 3.0
+            element: $Table {
+                align: "bottom"
+                rows: [
+
+                    {
+                        cells: [
+                            {
+                                sizeToActor: true
+                                padRight: 34.0
+                                element: !revolver
+                            }
+                        ]
+                    }
+
+                    {
+                        cells: [
+                            {
+                                sizeToActor: true
+                                element: $Label {
+                                    name: "shoot_button"
+                                    font: "distance_field"
+                                    text: "shoot"
+                                    fontScale: 0.15
+                                    color: !color.white
+                                    backgroundTexture: "black"
+                                    behaviours: [ $ShootButtonBehaviour { }, !buttonHoverBehaviour ]
+                                }
+                            }
+                        ]
+                    }
+
+                ]
+
             }
         }
 
+
         {
-            width: <!worldWidth - !revolverWidth - 20.0>
+            width: <!worldWidth / 3>
+            element: !coverArea
+        }
+
+        {
+//            width: <!worldWidth - !revolverWidth - 100.0>
+            width: <!worldWidth / 3>
             height: 60.0
-            element: $EnemyArea {
-                name: "enemy_area"
-                debug: true
-            }
+            element: !enemyArea
         }
 
     ]
@@ -130,26 +239,52 @@ options: {
 
         {
             sizeToActor: true
-//            height: <!worldHeight * (2.0 / 8.0)>
             padBottom: 2.0
             align: "bottom"
-            colspan: 2
-            element: $CardHand {
-                name: "card_hand"
-                cardScale: 0.07
-                cardSpacing: 1.0
-                startCardZIndicesAt: !cardZIndicesStart
-                hoveredCardZIndex: <!cardZIndicesEnd - 1>
-                draggedCardZIndex: !cardZIndicesEnd
-                detailFont: "distance_field"
-                detailFontColor: !color.white
-                detailBackgroundTexture: "card_detail_background"
-                detailFontScale: 0.1
-                detailOffsetX: 0.0
-                detailOffsetY: 1.0
-                detailPadding: 1.0
-//                debug: true
-            }
+            colspan: 3
+            element: !cardHand
+        }
+
+    ]
+}
+
+!cardDrawTable = $Table {
+    visible: false
+    name: "card_draw_table"
+//    debug: true
+    fillX: true
+    fillY: true
+    zIndex: !overlayZIndex
+    backgroundTexture: "card_detail_background"
+    rows: [
+
+
+        {
+            cells: [
+
+                {
+                    element: $Label {
+                        font: "distance_field"
+                        text: "Bullets"
+                        fontScale: 0.15
+                        align: "center"
+                        color: !color.white
+                        behaviours: [ $DrawBulletButtonBehaviour { }, !buttonHoverBehaviour ]
+                    }
+                }
+
+                {
+                    element: $Label {
+                        font: "distance_field"
+                        text: "Cover Cards"
+                        fontScale: 0.15
+                        align: "center"
+                        color: !color.white
+                        behaviours: [ $DrawCoverCardButtonBehaviour { }, !buttonHoverBehaviour ]
+                    }
+                }
+
+            ]
         }
 
     ]
@@ -161,9 +296,10 @@ children: [
     $Table {
         fillX: true
         fillY: true
-        debug: true
 //        debug: true
         rows: [ !topRow, !bottomRow ]
     }
+
+    !cardDrawTable
 
 ]
