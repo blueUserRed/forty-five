@@ -12,15 +12,13 @@ viewport: $FitViewport {
 !topRow = {
     cells: [
         {
-            width: <!worldHeight/5>
+            width: <!worldHeight>
             height: <!worldHeight/3>
             align: "right"
-            element: $Label {
-                        name: "d"
-                        text: "Logo hier"
-                        font: "distance_field"
-                        color: !color.black
-                        fontScale: 0.2
+            element: $Image {
+                textureName: "logo"
+                scaleX: 1.0
+                scaleY: 1.0
             }
         }
     ]
@@ -48,6 +46,23 @@ viewport: $FitViewport {
     ]
 }
 
+!middle2Row = {
+    cells: [
+        {
+            align: "right"
+            width: <2*(!worldHeight/5)>
+            height: <!worldHeight/5>
+            element: $Label {
+                name: "load_game"
+                text: "Continue"
+                font: "distance_field"
+                 color: !color.black
+                 fontScale: 0.2
+            }
+        }
+    ]
+}
+
 !bottomRow = {
     cells : [
     {
@@ -55,11 +70,14 @@ viewport: $FitViewport {
             width: <2*(!worldHeight/5)>
             height: <!worldHeight/5>
             element: $Label {
-                name: "sf"
-                text: "sf"
+                name: "quit"
+                text: "Quit"
                 font: "distance_field"
                 color: !color.black
                 fontScale: 0.2
+                behaviours : [
+                    $OnClickExitBehaviour{}
+                ]
             }
         }
     ]
@@ -70,8 +88,7 @@ children: [
         fillX: true
         fillY: true
         debug: true
-//        debug: true
-        rows: [ !topRow, !middleRow, !bottomRow ]
+        rows: [ !topRow, !middleRow, !middle2Row, !bottomRow ]
     }
 ]
 
@@ -87,7 +104,7 @@ assets: {
     textureAtlases: [
         {
             file: "textures/packed/title_screen/title_screen.atlas"
-            defines: [ "background3"]
+            defines: [ "background3" "logo"]
         }
     ]
     cursors: []
