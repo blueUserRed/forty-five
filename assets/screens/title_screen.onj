@@ -12,20 +12,28 @@ viewport: $FitViewport {
 !topRow = {
     cells: [
         {
+            align: "right"
+            width: <!worldWidth/5>
+            height: <!worldHeight/5>
             element: $Label {
                 name: "play"
                 text: "Play"
                 font: "distance_field"
                 color: !color.black
                 fontScale: 0.3
-                x: 6.0
-                y: 2.0
-                //$OnClickChangeScreenBehaviour {
-                //    screenPath: ".\screens\game_screen"
-                //}
+                $OnClickChangeScreenBehaviour {
+                    screenPath: ".\screens\game_screen"
+                }
             }
-        },
-        {
+        }
+    ]
+}
+
+!bottomRow = {
+    cells : [
+    {
+            width: <!worldWidth/5>
+            height: <!worldHeight/5>
             element: $Label {
                 name: "sf"
                 text: "sf"
@@ -43,7 +51,7 @@ children: [
         fillY: false
         debug: true
 //        debug: true
-        rows: [ !topRow ]
+        rows: [ !topRow, !bottomRow ]
     }
 ]
 
