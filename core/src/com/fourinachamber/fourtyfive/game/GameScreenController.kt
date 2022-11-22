@@ -6,6 +6,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
+import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
 import onj.*
 
@@ -322,14 +324,17 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 remainingCardsToDraw = null
             }
 
-            override fun onAllCardsDrawn(): Gamephase = FREE
+            override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
         },
 
         /**
          * enemy reveals it's action
          */
         ENEMY_REVEAL {
-            override fun transitionTo(gameScreenController: GameScreenController) {}
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                enemies[0].chooseNewAction()
+                changePhase(FREE)
+            }
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
         },

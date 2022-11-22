@@ -77,7 +77,7 @@ assets: {
 
         {
             file: "textures/packed/game_screen/game_screen.atlas"
-            defines: [ "background", "background2" "revolver_slot", "enemy" ]
+            defines: [ "background", "background2" "revolver_slot", "enemy", "normal_bullet" ]
         }
 
     ]

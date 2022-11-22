@@ -1,9 +1,10 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.screen.*
 import onj.OnjArray
 import onj.OnjObject
@@ -48,9 +49,22 @@ class Enemy(
     var currentLives: Int = lives
         private set
 
+    var curAction: EnemyAction? = null
+        private set
+
     init {
         actor = EnemyActor(this)
         actor.setScale(scaleX, scaleY)
+    }
+
+    fun chooseNewAction() {
+        curAction = brain.chooseAction()
+        actor.displayAction(curAction!!)
+    }
+
+    fun doAction(gameScreenController: GameScreenController) {
+        curAction?.execute(gameScreenController)
+        curAction = null
     }
 
     /**
@@ -117,11 +131,20 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
 
     init {
         detail.setFontScale(enemy.detailFontScale)
+        actionIndicatorText.setFontScale(enemy.detailFontScale)
         actionIndicator.addActor(actionIndicatorText)
         addActor(actionIndicator)
         addActor(image)
         addActor(detail)
         updateText()
+    }
+
+    fun displayAction(action: EnemyAction) {
+        val image = CustomImageActor(action.indicatorTexture)
+        actionIndicatorText.setText(action.descriptionText)
+        actionIndicator.addActorAt(0, image)
+        image.setScale(1f)
+        actionIndicator.debug = true
     }
 
     /**
