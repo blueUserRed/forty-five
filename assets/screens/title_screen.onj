@@ -1,0 +1,79 @@
+import "imports/colors.onj" as color
+
+!worldWidth = 160.0
+!worldHeight = 90.0
+
+viewport: $FitViewport {
+    worldWidth: !worldWidth
+    worldHeight: !worldHeight
+    backgroundTexture: "background2"
+}
+
+!topRow = {
+    cells: [
+        {
+            element: $Label {
+                name: "play"
+                text: "Play"
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.3
+                x: 6.0
+                y: 2.0
+                //$OnClickChangeScreenBehaviour {
+                //    screenPath: ".\screens\game_screen"
+                //}
+            }
+        },
+        {
+            element: $Label {
+                name: "sf"
+                text: "sf"
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+    ]
+}
+
+children: [
+    $Table {
+        fillX: false
+        fillY: false
+        debug: true
+//        debug: true
+        rows: [ !topRow ]
+    }
+]
+
+assets: {
+    textures: []
+    fonts: [
+        $DistanceFieldFont {
+            name: "distance_field"
+            fontFile: "fonts/distanceField.fnt"
+            imageFile: "fonts/distanceField.png"
+        }
+    ]
+    textureAtlases: [
+        {
+            file: "textures/packed/game_screen/game_screen.atlas"
+            defines: [ "background", "background2" "revolver_slot", "enemy" ]
+        }
+    ]
+    cursors: []
+    postProcessors: []
+    animations: []
+    colorTextures: []
+}
+
+options: {
+    setFillParentOnRoot: true
+    defaultCursor: {
+        useSystemCursor: true
+        cursorName: "arrow"
+    }
+    postProcessor: null
+    controller: null
+}
