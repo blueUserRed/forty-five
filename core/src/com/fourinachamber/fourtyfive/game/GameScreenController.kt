@@ -36,7 +36,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
     private val basePlayerLives = onj.get<Long>("playerLives").toInt()
 
-    private var curScreen: ScreenDataProvider? = null
+    var curScreen: ScreenDataProvider? = null
+        private set
 
     var cardHand: CardHand? = null
     var revolver: Revolver? = null
@@ -205,7 +206,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             .forEach { nameOnj ->
                 val name = nameOnj.value as String
                 enemyArea.addEnemy(
-                    enemies.firstOrNull { it.name ==  name} ?: throw RuntimeException("no enemy with name $name")
+                    enemies.firstOrNull { it.name == name} ?: throw RuntimeException("no enemy with name $name")
                 )
             }
 
@@ -371,7 +372,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         },
 
         /**
-         * enemy does it's action
+         * enemy does its action
          */
         ENEMY_ACTION {
 
@@ -387,7 +388,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                     action { enemies[0].actor.removeAction(shakeAction) }
                     include(enemies[0].doAction(gameScreenController))
                     delay(500)
-                    action { changePhase(INITIAL_DRAW) }
+                    action {
+                        enemies[0].resetAction()
+                        changePhase(INITIAL_DRAW)
+                    }
                 }
             }
 

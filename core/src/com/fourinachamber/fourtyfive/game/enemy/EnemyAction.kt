@@ -1,10 +1,15 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
+import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.game.CoverStack
 import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
+import com.fourinachamber.fourtyfive.utils.Utils
 
 abstract class EnemyAction {
 
@@ -18,14 +23,11 @@ abstract class EnemyAction {
 
 class DamagePlayerEnemyAction(
     val damage: Int,
-    override val indicatorTexture: TextureRegion
+    override val indicatorTexture: TextureRegion,
+    private val coverStackDamagedParticles: ParticleEffect
 ) : EnemyAction() {
 
     override val descriptionText: String = damage.toString()
-
-//    override fun execute(gameScreenController: GameScreenController) {
-//        gameScreenController.damagePlayer(damage)
-//    }
 
     override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
         // TODO: put these numbers in onj file somewhere
@@ -39,7 +41,10 @@ class DamagePlayerEnemyAction(
             remaining = gameScreenController.coverArea!!.damage(damage)
             wasDamageAbsorbed = remaining != damage
             if (wasDamageAbsorbed) activeStack = gameScreenController.coverArea!!.getActive()
-            activeStack?.addAction(shakeAction)
+            activeStack?.let {
+                it.addAction(shakeAction)
+                spawnParticlesForStack(it, gameScreenController.curScreen!!)
+            }
         }
         delayUntil { !wasDamageAbsorbed || shakeAction.isComplete }
         delay(200)
@@ -53,6 +58,18 @@ class DamagePlayerEnemyAction(
         action {
             if (remaining != 0) gameScreenController.playerLivesLabel!!.removeAction(shakeAction)
         }
+    }
+
+    private fun spawnParticlesForStack(coverStack: CoverStack, screenDataProvider: ScreenDataProvider) {
+        val particleActor = ParticleEffectActor(coverStackDamagedParticles, true)
+        particleActor.isAutoRemove = true
+        val width = coverStackDamagedParticles.emitters[0].spawnWidth.highMax
+        particleActor.setPosition(
+            coverStack.x + coverStack.width / 2 - width / 2,
+            coverStack.y
+        )
+        screenDataProvider.addActorToRoot(particleActor)
+        particleActor.start()
     }
 
 }

@@ -44,3 +44,10 @@ export !colorTextureDeclaration = {
     name: string
     color: string
 }
+
+export !particleDeclaration = {
+    name: string
+    particlePath: string
+    textureDir: string
+    scale: float
+}

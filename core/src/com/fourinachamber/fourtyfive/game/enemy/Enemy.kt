@@ -59,16 +59,17 @@ class Enemy(
     }
 
     fun chooseNewAction() {
-        println("choosing action")
         curAction = brain.chooseAction()
         actor.displayAction(curAction!!)
     }
 
     fun doAction(gameScreenController: GameScreenController): Timeline {
-        val timeline = curAction!!.execute(gameScreenController)
+        return curAction!!.execute(gameScreenController)
+    }
+
+    fun resetAction() {
         curAction = null
         actor.resetAction()
-        return timeline
     }
 
     /**
