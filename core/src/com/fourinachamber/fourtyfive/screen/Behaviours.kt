@@ -33,7 +33,7 @@ object BehaviourFactory {
         "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
-        "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
+//        "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
         "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
@@ -344,45 +344,36 @@ class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor)
 
 }
 
-/**
- * starts a particle effect when the actor is clicked
- */
-class OnClickParticleEffectBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    private val particlePath = onj.get<String>("file")
-    private val textureDir = onj.get<String>("textureDir")
-
-    private val effectScale = onj.getOr("effectScale", 1.0).toFloat()
-    private val useCursorPosition = onj.getOr("useCursorPos", false)
-
-    override val onCLick: BehaviourCallback = {
-        val particleActor =
-
-            object : ParticleEffectActor(Gdx.files.internal(particlePath), Gdx.files.internal(textureDir)) {
-
-                override fun remove(): Boolean {
-                    // Why does ParticleActor not do this automatically?
-                    this.dispose()
-                    return super.remove()
-                }
-
-            }
-
-        particleActor.isAutoRemove = true
-        screenDataProvider.stage.addActor(particleActor)
-
-        if (useCursorPosition) {
-            val cursorPos = Utils.getCursorPos(screenDataProvider.stage.viewport)
-            particleActor.setPosition(cursorPos.x, cursorPos.y)
-        } else {
-            particleActor.setPosition(actor.x + actor.width / 2, actor.y + actor.height / 2)
-        }
-
-        particleActor.effect.scaleEffect(effectScale)
-        particleActor.start()
-    }
-
-}
+///**
+// * starts a particle effect when the actor is clicked
+// */
+//class OnClickParticleEffectBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+//
+//    private val particlePath = onj.get<String>("file")
+//    private val textureDir = onj.get<String>("textureDir")
+//
+//    private val effectScale = onj.getOr("effectScale", 1.0).toFloat()
+//    private val useCursorPosition = onj.getOr("useCursorPos", false)
+//
+//    override val onCLick: BehaviourCallback = {
+//
+//        val x: Float
+//        val y: Float
+//
+//        if (useCursorPosition) {
+//            val cursorPos = Utils.getCursorPos(screenDataProvider.stage.viewport)
+//            x = cursorPos.x
+//            y = cursorPos.y
+//        } else {
+//            x = actor.x + actor.width / 2
+//            y = actor.y + actor.height / 2
+//        }
+//
+//        Utils.spawnParticle(screenDataProvider, particlePath, textureDir, x, y, effectScale)
+//
+//    }
+//
+//}
 
 /**
  * when clicked, will change the PostProcessor of the whole screen

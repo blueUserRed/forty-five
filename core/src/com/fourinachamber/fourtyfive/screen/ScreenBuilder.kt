@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
@@ -69,6 +70,11 @@ interface ScreenDataProvider {
      * map of all textures and their names
      */
     val textures: Map<String, TextureRegion>
+
+    /**
+     * map of all particles and their names
+     */
+    val particles: Map<String, ParticleEffect>
 
     /**
      * map of all post-processors and their names
@@ -194,6 +200,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         val cursors = OnjReaderUtils.readCursors(onjAssets.get<OnjArray>("cursors"))
         toDispose.addAll(cursors.values)
 
+        val particles = OnjReaderUtils.readParticles(onjAssets.get<OnjArray>("particles"))
+        toDispose.addAll(particles.values)
+
         val postProcessors = OnjReaderUtils.readPostProcessors(onjAssets.get<OnjArray>("postProcessors"))
         toDispose.addAll(postProcessors.values)
 
@@ -226,6 +235,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             this.textures.toMutableMap(),
             cursors,
             fonts,
+            particles,
             postProcessors,
             children,
             viewport,
@@ -575,6 +585,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         override val textures: MutableMap<String, TextureRegion>,
         override val cursors: Map<String, Cursor>,
         override val fonts: Map<String, BitmapFont>,
+        override val particles: Map<String, ParticleEffect>,
         override val postProcessors: Map<String, PostProcessor>,
         children: List<Actor>,
         val viewport: Viewport,

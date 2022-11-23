@@ -6,7 +6,9 @@ import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import kotlin.random.Random
@@ -135,5 +137,35 @@ object Utils {
             }).eitherLeft()
         }
     }
+
+//    fun spawnParticle(
+//        screenDataProvider: ScreenDataProvider,
+//        particleFile: String,
+//        textureDir: String,
+//        x: Float,
+//        y: Float,
+//        effectScale: Float,
+//        align: Int = Align.bottomLeft
+//    ) {
+//
+//        val particleActor =
+//
+//            object : ParticleEffectActor(Gdx.files.internal(particleFile), Gdx.files.internal(textureDir)) {
+//
+//                override fun remove(): Boolean {
+//                    // Why does ParticleActor not do this automatically?
+//                    this.dispose()
+//                    return super.remove()
+//                }
+//
+//            }
+//
+//        particleActor.isAutoRemove = true
+//        screenDataProvider.addActorToRoot(particleActor)
+//        particleActor.setPosition(x, y, align)
+//
+//        particleActor.effect.scaleEffect(effectScale)
+//        particleActor.start()
+//    }
 
 }

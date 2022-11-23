@@ -103,7 +103,6 @@ assets: {
     ]
     animations: []
     colorTextures: [
-
         {
             name: "card_detail_background"
             color: "04040488"
@@ -112,7 +111,14 @@ assets: {
             name: "black"
             color: !color.black
         }
-
+    ]
+    particles: [
+        {
+            name: "dust"
+            particlePath: "particles/dust.particle"
+            textureDir: "textures/particles"
+            scale: 0.1
+        }
     ]
 }
 
