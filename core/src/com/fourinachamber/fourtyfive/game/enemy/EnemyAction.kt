@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
-import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.game.CoverStack
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
@@ -39,6 +38,10 @@ class DamagePlayerEnemyAction(
     private val coverStackDamagedParticles: ParticleEffect =
         screenDataProvider.particles[onj.get<String>("coverStackDamagedParticles")]
         ?: throw RuntimeException("unknown particle: ${onj.get<String>("coverStackDamagedParticles")}")
+
+    private val coverStackDestroyedParticles: ParticleEffect =
+        screenDataProvider.particles[onj.get<String>("coverStackDestroyedParticles")]
+        ?: throw RuntimeException("unknown particle: ${onj.get<String>("coverStackDestroyedParticles")}")
 
     override val descriptionText: String = damage.toString()
 
@@ -83,7 +86,7 @@ class DamagePlayerEnemyAction(
 
         var activeStack: CoverStack? = null
         var remaining = 0
-        var wasDamageAbsorbed = false
+        var doingCoverAreaAnim = false
 
         action { enemy.actor.addAction(moveByAction) }
         delayUntil { moveByAction.isComplete }
@@ -99,17 +102,18 @@ class DamagePlayerEnemyAction(
         delay(bufferTime)
         action {
             remaining = gameScreenController.coverArea!!.damage(damage)
-            wasDamageAbsorbed = remaining != damage
-            if (wasDamageAbsorbed) activeStack = gameScreenController.coverArea!!.getActive()
+            if (remaining != damage) activeStack = gameScreenController.coverArea!!.getActive()
+            val wasDestroyed = activeStack?.currentHealth == 0
             activeStack?.let {
-                it.addAction(shakeAction)
-                spawnParticlesForStack(it, gameScreenController.curScreen!!)
+                if (!wasDestroyed) it.addAction(shakeAction)
+                spawnParticlesForStack(it, gameScreenController.curScreen!!, wasDestroyed)
             }
+            doingCoverAreaAnim = remaining != damage && !wasDestroyed
         }
-        delayUntil { !wasDamageAbsorbed || shakeAction.isComplete }
+        delayUntil { !doingCoverAreaAnim || shakeAction.isComplete }
         delay(bufferTime)
         action {
-            if (wasDamageAbsorbed) activeStack?.removeAction(shakeAction)
+            if (doingCoverAreaAnim) activeStack?.removeAction(shakeAction)
             shakeAction.reset()
             gameScreenController.damagePlayer(remaining)
             if (remaining != 0) gameScreenController.playerLivesLabel!!.addAction(shakeAction)
@@ -120,14 +124,29 @@ class DamagePlayerEnemyAction(
         }
     }
 
-    private fun spawnParticlesForStack(coverStack: CoverStack, screenDataProvider: ScreenDataProvider) {
-        val particleActor = ParticleEffectActor(coverStackDamagedParticles, true)
+    private fun spawnParticlesForStack(
+        coverStack: CoverStack,
+        screenDataProvider: ScreenDataProvider,
+        wasDestroyed: Boolean
+    ) {
+        val particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
+
+        val particleActor = ParticleEffectActor(particle, true)
         particleActor.isAutoRemove = true
-        val width = coverStackDamagedParticles.emitters[0].spawnWidth.highMax
-        particleActor.setPosition(
-            coverStack.x + coverStack.width / 2 - width / 2,
-            coverStack.y
-        )
+
+        if (wasDestroyed) {
+            particleActor.setPosition(
+                coverStack.x + coverStack.width / 2,
+                coverStack.y + coverStack.height / 2
+            )
+        } else {
+            val width = particle.emitters[0].spawnWidth.highMax
+            particleActor.setPosition(
+                coverStack.x + coverStack.width / 2 - width / 2,
+                coverStack.y
+            )
+        }
+
         screenDataProvider.addActorToRoot(particleActor)
         particleActor.start()
     }

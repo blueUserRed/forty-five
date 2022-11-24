@@ -28,7 +28,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val enemiesOnj = onj.get<OnjArray>("enemies")
     private val cardDrawActorName = onj.get<String>("cardDrawActor")
     private val playerLivesLabelName = onj.get<String>("playerLivesLabelName")
-    private val endTurnButtonName = onj.get<String>("playerLivesLabelName")
+    private val endTurnButtonName = onj.get<String>("endTurnButtonName")
     private val shootButtonName = onj.get<String>("shootButtonName")
 
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
@@ -80,6 +80,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
 
+    private lateinit var defaultBulletCreator: () -> Card
+    private lateinit var defaultCoverCreator: () -> Card
+
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
         val onj = OnjParser.parseFile(cardConfigFile)
@@ -97,18 +100,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         bulletStack = cards.filter { it.type == Card.Type.BULLET }.shuffled().toMutableList()
         coverCardStack = cards.filter { it.type == Card.Type.COVER }.shuffled().toMutableList()
         oneShotStack = cards.filter { it.type == Card.Type.ONE_SHOT }.shuffled().toMutableList()
+        initDefaultCards(onj)
 
-        for (card in cards) {
-            val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
-                cardDragAndDropBehaviour.name,
-                cardDragAndDrop,
-                screenDataProvider,
-                card.actor,
-                cardDragAndDropBehaviour
-            )
-            if (behaviour is GameScreenControllerDragAndDrop) behaviour.gameScreenController = this
-            cardDragAndDrop.addSource(behaviour)
-        }
+        for (card in cards) doDragAndDropFor(card)
 
         enemies = Enemy.getFrom(enemiesOnj, screenDataProvider)
 
@@ -130,6 +124,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         screenDataProvider.afterMs(5) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
         changePhase(Gamephase.INITIAL_DRAW)
+    }
+
+    private fun doDragAndDropFor(card: Card) {
+        val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
+            cardDragAndDropBehaviour.name,
+            cardDragAndDrop,
+            curScreen!!,
+            card.actor,
+            cardDragAndDropBehaviour
+        )
+        if (behaviour is GameScreenControllerDragAndDrop) behaviour.gameScreenController = this
+        cardDragAndDrop.addSource(behaviour)
     }
 
     private fun changePhase(next: Gamephase) {
@@ -158,6 +164,47 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     fun playGameAnimation(anim: GameAnimation) {
         anim.start()
         curGameAnims.add(anim)
+    }
+
+    private fun initDefaultCards(onj: OnjObject) {
+
+        val bulletOnj = onj.get<OnjObject>("defaultBullet")
+        val bulletName = bulletOnj.get<String>("name")
+        val bulletDescription = bulletOnj.get<String>("description")
+        val bulletDamage = bulletOnj.get<Long>("baseDamage").toInt()
+
+        defaultBulletCreator = {
+            val card = Card(
+                bulletName,
+                curScreen!!.textures["${Card.cardTexturePrefix}$bulletName"] ?:
+                    throw RuntimeException("no texture found for default card: $bulletName"),
+                bulletDescription,
+                Card.Type.BULLET,
+                bulletDamage,
+                0
+            )
+            doDragAndDropFor(card)
+            card
+        }
+
+        val coverOnj = onj.get<OnjObject>("defaultCover")
+        val coverName = coverOnj.get<String>("name")
+        val coverDescription = coverOnj.get<String>("description")
+        val coverValue = coverOnj.get<Long>("coverValue").toInt()
+
+        defaultCoverCreator = {
+            val card = Card(
+                coverName,
+                curScreen!!.textures["${Card.cardTexturePrefix}$coverName"] ?:
+                throw RuntimeException("no texture found for default card: $coverName"),
+                coverDescription,
+                Card.Type.COVER,
+                0,
+                coverValue
+            )
+            doDragAndDropFor(card)
+            card
+        }
     }
 
     private fun initButtons() {
@@ -312,8 +359,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawBullet() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        //TODO: default card when stack is empty
-        cardHand!!.addCard(bulletStack.removeFirst())
+        cardHand!!.addCard(bulletStack.removeFirstOrNull() ?: defaultBulletCreator())
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
         if (cardsToDraw <= 0) onAllCardsDrawn()
@@ -325,8 +371,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawCover() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        //TODO: default card when stack is empty
-        cardHand!!.addCard(coverCardStack.removeFirst())
+        cardHand!!.addCard(coverCardStack.removeFirstOrNull() ?: defaultCoverCreator())
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
         if (cardsToDraw <= 0) onAllCardsDrawn()

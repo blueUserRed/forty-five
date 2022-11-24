@@ -12,6 +12,7 @@ $EnemyAction [
         max: int
         indicatorTexture: string
         coverStackDamagedParticles: string
+        coverStackDestroyedParticles: string
         effects: {
             xShake: float
             yShake: float

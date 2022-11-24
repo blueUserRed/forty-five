@@ -16,4 +16,18 @@ $CardType [
     type: $CardType
 }
 
+defaultBullet: {
+    name: string
+    title: string
+    description: string
+    baseDamage: int
+}
+
+defaultCover: {
+    name: string
+    title: string
+    description: string
+    coverValue: int
+}
+
 cards: !card[*]

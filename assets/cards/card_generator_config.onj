@@ -267,4 +267,27 @@ cards: [
             }
         ]
     }
+
+    {
+        name: !cards_obj.defaultBullet.name
+        elements: [
+            ...!bulletSharedElements
+            $TextElement {
+                text: !cards_obj.defaultBullet.title
+                ...!titleElementSharedKeys
+            }
+        ]
+    }
+
+    {
+        name: !cards_obj.defaultCover.name
+        elements: [
+            ...!coverSharedElements
+            $TextElement {
+                text: !cards_obj.defaultCover.title
+                ...!titleElementSharedKeys
+            }
+        ]
+    }
+
 ]

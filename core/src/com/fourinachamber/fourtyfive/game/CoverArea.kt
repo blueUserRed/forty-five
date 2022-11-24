@@ -42,7 +42,8 @@ class CoverArea(
             this,
             detailFont,
             detailFontColor,
-            stackBackgroundTexture,
+            null,
+//            stackBackgroundTexture,
             detailFontScale,
             stackSpacing,
             cardScale,
@@ -146,7 +147,7 @@ class CoverStack(
     private val coverArea: CoverArea,
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
-    private val backgroundTexture: TextureRegion,
+    private val backgroundTexture: TextureRegion?,
     private val detailFontScale: Float,
     private val spacing: Float,
     private val cardScale: Float,
@@ -182,7 +183,7 @@ class CoverStack(
         detailText.setFontScale(detailFontScale)
         updateText()
         addActor(detailText)
-        background = TextureRegionDrawable(backgroundTexture)
+        backgroundTexture?.let { background = TextureRegionDrawable(it) }
         align(Align.left)
         space(spacing)
         onClick {
@@ -201,6 +202,7 @@ class CoverStack(
 
     fun destroy() {
         currentHealth = 0
+        baseHealth = 0
         for (card in cards) removeActor(card.actor)
         cards.clear()
         lockedTurnNum = null
@@ -209,10 +211,6 @@ class CoverStack(
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
-    }
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
     }
 
     fun acceptsCard(turnNum: Int): Boolean {
