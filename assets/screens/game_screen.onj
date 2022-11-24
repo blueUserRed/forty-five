@@ -119,6 +119,12 @@ assets: {
             textureDir: "textures/particles"
             scale: 0.1
         }
+        {
+            name: "dust_explosion"
+            particlePath: "particles/dust_explosion.particle"
+            textureDir: "textures/particles"
+            scale: 0.1
+        }
     ]
 }
 
@@ -180,7 +186,7 @@ options: {
     numStacks: 2
     maxCards: 3
     detailFont: "distance_field"
-    detailFontColor: !color.white
+    detailFontColor: !color.black
     detailFontScale: 0.1
     stackBackgroundTexture: "card_detail_background"
     stackSpacing: 2.0

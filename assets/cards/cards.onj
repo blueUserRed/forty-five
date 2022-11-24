@@ -1,4 +1,18 @@
 
+defaultBullet: {
+    name: "bullet"
+    title: "bullet"
+    description: "It's the default bullet!\nYou ran out of bullets!"
+    baseDamage: 5
+}
+
+defaultCover: {
+    name: "crate"
+    title: "crate"
+    description: "It's the default cover!\nYou ran out of cover cards!"
+    coverValue: 5
+}
+
 cards: [
 
     // Bullets ----------------------------------

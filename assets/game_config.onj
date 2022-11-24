@@ -8,6 +8,7 @@ import "imports/colors.onj" as color
             min: 20
             max: 30
             coverStackDamagedParticles: "dust"
+            coverStackDestroyedParticles: "dust_explosion"
             indicatorTexture: "normal_bullet"
             effects: {
                 xShake: 1.2
