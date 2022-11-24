@@ -78,7 +78,7 @@ assets: {
             file: "textures/packed/game_screen/game_screen.atlas"
             defines: [
                 "background", "background2" "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
-                "shoot", "shoot_hover"
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner"
             ]
         }
 
@@ -147,6 +147,7 @@ options: {
     cardScale: 0.045
     animationDuration: 0.2
     radius: 15.0
+    cardZIndex: !cardZIndicesStart
     rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
 //    debug: true
 }
