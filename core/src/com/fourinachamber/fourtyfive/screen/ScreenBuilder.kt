@@ -143,6 +143,11 @@ interface ScreenDataProvider {
      * resorts all children of the root of the stage, if they implement [ZIndexActor]
      */
     fun resortRootZIndices()
+
+    fun addLateRenderTask(task: (Batch) -> Unit)
+    fun removeLateRenderTask(task: (Batch) -> Unit)
+    fun addEarlyRenderTask(task: (Batch) -> Unit)
+    fun removeEarlyRenderTask(task: (Batch) -> Unit)
 }
 
 /**
@@ -241,8 +246,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             viewport,
             SpriteBatch(),
             toDispose,
-            earlyRenderTasks.toList(),
-            lateRenderTasks.toList(),
+            earlyRenderTasks,
+            lateRenderTasks,
             namedCells,
             namedActors,
             behavioursToBind
@@ -468,6 +473,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
             radius = widgetOnj.get<Double>("radius").toFloat()
             rotationOff = widgetOnj.get<Double>("rotationOff")
+            cardZIndex = widgetOnj.get<Long>("cardZIndex").toInt()
         }
 
         "EnemyArea" -> EnemyArea().apply {
@@ -607,6 +613,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
         private val additionalDisposables: MutableList<Disposable> = mutableListOf()
 
+        private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
+        private val additionalEarlyRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
+
         override lateinit var defaultCursor: Either<Cursor, SystemCursor>
         override val screen: Screen = this
 
@@ -654,6 +663,11 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             }
         }
 
+        override fun addLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
+        override fun addEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
+        override fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
+        override fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
+
         private fun updateCallbacks() {
             val curTime = TimeUtils.millis()
             val iterator = callbacks.iterator()
@@ -685,18 +699,19 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
                 stage.act(Gdx.graphics.deltaTime)
                 if (postProcessor == null) {
                     ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-                    doRenderTasks(earlyRenderTasks)
+                    doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
                     stage.draw()
-                    doRenderTasks(lateRenderTasks)
+                    doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
                 } else {
                     renderWithPostProcessing()
                 }
             }
         }
 
-        private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>) {
+        private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
             stage.batch.begin()
             tasks.forEach { it(this) }
+            additionalTasks.forEach { it(stage.batch) }
             stage.batch.end()
         }
 
@@ -712,9 +727,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             fbo.begin()
             ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             viewport.apply()
-            doRenderTasks(earlyRenderTasks)
+            doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
-            doRenderTasks(lateRenderTasks)
+            doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
             fbo.end()
 
             val batch = SpriteBatch()

@@ -34,6 +34,8 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     var fontScale: Float? = null
     var slotScale: Float? = null
 
+    var cardZIndex: Int = 0
+
     /**
      * the scale of a card placed into the revolver
      */
@@ -79,6 +81,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         card?.isDraggable = false
         slots[slot - 1].card = card
         card?.actor?.setScale(cardScale)
+        card?.actor?.fixedZIndex = cardZIndex
         dirty = true
     }
 

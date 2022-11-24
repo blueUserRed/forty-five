@@ -3,7 +3,6 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
@@ -44,8 +43,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var enemyArea: EnemyArea? = null
     var coverArea: CoverArea? = null
     var cardDrawActor: Actor? = null
-    var shootButton: Widget? = null
-    var endTurnButton: Widget? = null
+    var shootButton: Actor? = null
+    var endTurnButton: Actor? = null
     var playerLivesLabel: CustomLabel? = null
 
     private var cards: List<Card> = listOf()
@@ -78,6 +77,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     var roundCounter: Int = 0
         private set
+
+    private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
@@ -116,6 +117,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         )
         screenDataProvider.removeActorFromRoot(cardDrawActor!!)
 
+        initButtons()
         initCardHand()
         initPlayerLivesLabel()
         initRevolver()
@@ -127,7 +129,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         }
 
         screenDataProvider.afterMs(5) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
-//        changePhase(Gamephase.FREE)
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
@@ -143,6 +144,27 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             it.update()
             if (it.isFinished) timeline = null
         }
+        val iterator = curGameAnims.iterator()
+        while (iterator.hasNext()) {
+            val anim = iterator.next()
+            if (anim.isFinished()) {
+                anim.end()
+                iterator.remove()
+            }
+            anim.update()
+        }
+    }
+
+    fun playGameAnimation(anim: GameAnimation) {
+        anim.start()
+        curGameAnims.add(anim)
+    }
+
+    private fun initButtons() {
+        shootButton = curScreen!!.namedActors[shootButtonName]
+            ?: throw RuntimeException("no actor named $shootButtonName")
+        endTurnButton = curScreen!!.namedActors[endTurnButtonName]
+            ?: throw RuntimeException("no actor named $endTurnButton")
     }
 
     private fun initCardHand() {
@@ -257,18 +279,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun freezeUI() {
-//        shootButton!!.isDisabled = true
-    }
-
-    private fun unfreezeUI() {
-//        shootButton!!.isDisabled = false
-    }
-
-    private fun freezeCards() {
+        val shootButton = shootButton
+        val endTurnButton = endTurnButton
+        if (shootButton is DisableActor) shootButton.isDisabled = true
+        if (endTurnButton is DisableActor) endTurnButton.isDisabled = true
         for (card in cardHand!!.cards) card.isDraggable = false
     }
 
-    private fun unfreezeCards() {
+    private fun unfreezeUI() {
+        val shootButton = shootButton
+        val endTurnButton = endTurnButton
+        if (shootButton is DisableActor) shootButton.isDisabled = false
+        if (endTurnButton is DisableActor) endTurnButton.isDisabled = false
         for (card in cardHand!!.cards) card.isDraggable = true
     }
 
@@ -331,14 +353,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 roundCounter++
-                freezeCards()
                 freezeUI()
                 showCardDrawActor()
                 this.remainingCardsToDraw = if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
-                unfreezeCards()
                 unfreezeUI()
                 hideCardDrawActor()
                 remainingCardsToDraw = null
@@ -378,10 +398,40 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 timeline = Timeline.timeline {
+
+                    val enemyBannerAnim = BannerAnimation(
+                        curScreen!!.textures["enemy_turn_banner"]!!,
+                        curScreen!!,
+                        1500,
+                        900,
+                        0.12f,
+                        0.09f
+                    )
+                    val playerBannerAnim = BannerAnimation(
+                        curScreen!!.textures["player_turn_banner"]!!,
+                        curScreen!!,
+                        1500,
+                        900,
+                        0.12f,
+                        0.09f
+                    )
+
+                    action {
+                        freezeUI()
+                        playGameAnimation(enemyBannerAnim)
+                    }
+                    delayUntil { enemyBannerAnim.isFinished() }
+                    delay(800)
                     include(enemies[0].doAction(gameScreenController))
                     delay(500)
                     action {
                         enemies[0].resetAction()
+                        playGameAnimation(playerBannerAnim)
+                    }
+                    delayUntil { playerBannerAnim.isFinished() }
+                    delay(500)
+                    action {
+                        unfreezeUI()
                         changePhase(INITIAL_DRAW)
                     }
                 }
