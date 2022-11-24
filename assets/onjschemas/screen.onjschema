@@ -1,6 +1,7 @@
 
 import "imports/asset_definitions.onjschema" as _
 import "imports/font_group.onjschema" as _
+import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys
 
 !viewportSharedKeys = {
     backgroundTexture?: string
@@ -71,6 +72,7 @@ $Widget [
         textureName: string
         scaleX: float
         scaleY: float
+        reportDimensionsWithScaling?: boolean
         ...!widgetSharedKeys
     }
 
@@ -137,6 +139,14 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+//    $ProgressBar {
+//        min: float
+//        max: float
+//        stepSize: float
+//        vertical: boolean
+//        initialValue: float
+//    }
+
     $CardHand {
         cardScale: float
         cardSpacing: float
@@ -162,6 +172,9 @@ $Widget [
         slotScale: float
         cardScale: float
         animationDuration: float
+        radius: float
+        rotationOff: float
+        cardZIndex: int
         ...!widgetSharedKeys
     }
 
@@ -179,6 +192,7 @@ $Widget [
         stackSpacing: float
         areaSpacing: float
         cardScale: float
+        stackMinSize: float
         ...!widgetSharedKeys
     }
 
@@ -242,7 +256,13 @@ $Behaviour [
         yOffset?: float
     }
 
+    $OnHoverChangeTextureBehaviour {
+        hoverTexture: string
+    }
+
     $ShootButtonBehaviour { }
+
+    $EndTurnButtonBehaviour { }
 
     $DrawBulletButtonBehaviour { }
 
@@ -250,83 +270,10 @@ $Behaviour [
 
 ]
 
-!dragAndDropBehaviourSharedKeys = {
-    group: string
-}
-
-$DragAndDropBehaviour [
-
-    $SimpleDragSource {
-        useDimensionsOfCell?: string
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $TestDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-
-    $SlotDragSource {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $SlotDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $CardDragSource {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $RevolverDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $CoverAreaDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-]
-
-!enemy = {
-    name: string
-    texture: string
-    lives: int
-    offsetX: float
-    offsetY: float
-    scaleX: float
-    scaleY: float
-    detailFont: string
-    detailFontScale: float
-    detailFontColor: string
-}
-
 $ScreenController [
 
     $GameScreenController {
-        cardsFile: string
-        cardAtlasFile: string
-        cardHand: {
-            actorName: string
-        }
-        revolver: {
-            actorName: string
-            dropBehaviour: $DragAndDropBehaviour
-        }
-        enemyArea: {
-            actorName: string
-            enemies: string[*]
-        }
-        coverArea: {
-            actorName: string
-            dropBehaviour: $DragAndDropBehaviour
-        }
-        cardDragBehaviour: $DragAndDropBehaviour
-        enemies: !enemy[*]
-        cardDrawActor: string
-        shootButtonName: string
-        cardsToDrawInFirstRound: int
-        cardsToDraw: int
+        ...!gameScreenControllerKeys
     }
 
 ]
@@ -341,6 +288,7 @@ assets: {
     postProcessors: !postProcessorDeclaration[*]
     animations: !animationDeclaration[*]
     colorTextures: !colorTextureDeclaration[*]
+    particles: !particleDeclaration[*]
 }
 
 options: {

@@ -1,16 +1,8 @@
 package com.fourinachamber.fourtyfive.card
 
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.fourinachamber.fourtyfive.screen.CustomHorizontalGroup
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.OnjArray
@@ -48,6 +40,10 @@ class Card(
      * true when [actor] is in an animation
      */
     var inAnimation: Boolean = false
+
+    override fun toString(): String {
+        return "card: $name"
+    }
 
     companion object {
 
@@ -106,27 +102,9 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
     var isHoveredOver: Boolean = false
         private set
 
-    /**
-     * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
-     * already applied
-     */
-    var reportDimensionsWithScaling: Boolean = false
-
     init {
         onEnter { isHoveredOver = true }
         onExit { isHoveredOver = false }
     }
 
-    override fun getMinWidth(): Float =
-        if (reportDimensionsWithScaling) super.getMinWidth() * scaleX else super.getMinWidth()
-    override fun getPrefWidth(): Float =
-        if (reportDimensionsWithScaling) super.getPrefWidth() * scaleX else super.getPrefWidth()
-    override fun getMaxWidth(): Float =
-        if (reportDimensionsWithScaling) super.getMaxWidth() * scaleX else super.getMaxWidth()
-    override fun getMinHeight(): Float =
-        if (reportDimensionsWithScaling) super.getMinHeight() * scaleY else super.getMinHeight()
-    override fun getPrefHeight(): Float =
-        if (reportDimensionsWithScaling) super.getPrefHeight() * scaleY else super.getPrefHeight()
-    override fun getMaxHeight(): Float =
-        if (reportDimensionsWithScaling) super.getMaxHeight() * scaleY else super.getMaxHeight()
 }
