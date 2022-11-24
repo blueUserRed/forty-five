@@ -5,16 +5,17 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
+import com.fourinachamber.fourtyfive.utils.plus
 import com.fourinachamber.fourtyfive.utils.rotate
 import ktx.actors.contains
 import onj.OnjNamedObject
+import java.lang.Math.cos
+import java.lang.Math.sin
 
 /**
  * actor representing the revolver
@@ -33,6 +34,8 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     var fontScale: Float? = null
     var slotScale: Float? = null
 
+    var cardZIndex: Int = 0
+
     /**
      * the scale of a card placed into the revolver
      */
@@ -47,14 +50,23 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
      * the [DragAndDrop] used for the slots and the [OnjNamedObject] containing the config for drag and drop
      */
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
+
+    /**
+     * the radius of the circle in which the slots are laid out
+     */
+    var radius: Float = 1f
+
+    /**
+     * the rotation of all slots is offset by this
+     */
+    var rotationOff: Double = (Math.PI / 2) + slotAngleOff
+
     private var dirty: Boolean = true
     private var isInitialised: Boolean = false
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
-    private var cards: Array<Card?> = Array(5) { null }
     private lateinit var screenDataProvider: ScreenDataProvider
     private lateinit var slots: Array<RevolverSlot>
-    private lateinit var slotOffsets: Array<Vector2>
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
@@ -67,7 +79,9 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     fun setCard(slot: Int, card: Card?) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         card?.isDraggable = false
-        cards[slot - 1] = card
+        slots[slot - 1].card = card
+        card?.actor?.setScale(cardScale)
+        card?.actor?.fixedZIndex = cardZIndex
         dirty = true
     }
 
@@ -86,7 +100,7 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
      */
     fun getCardInSlot(slot: Int): Card? {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
-        return cards[slot - 1]
+        return slots[slot - 1].card
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -95,26 +109,19 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         super.draw(batch, parentAlpha)
         if (!isInitialised) {
             initialise()
+            updateSlotsAndCars()
             isInitialised = true
+            invalidateHierarchy()
         }
         if (dirty) {
-            calcOffsets()
-            updateSlotPositions()
-            updateCardPositions()
+            updateSlotsAndCars()
             dirty = false
         }
     }
 
     private fun initialise() {
-        calcOffsets()
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         slots = Array(5) {
             val slot = RevolverSlot(it + 1, this, slotTexture!!, slotScale!!, animationDuration)
-
-            slot.setPosition(
-                slotOffsets[it].x + x + prefWidth / 2,
-                slotOffsets[it].y + y + prefHeight / 2
-            )
 
             screenDataProvider.addActorToRoot(slot)
 
@@ -138,58 +145,28 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         dirty = true
     }
 
-    private fun updateSlotPositions() {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+    private fun updateSlotsAndCars() {
+        val size = 2 * radius + 2 * slotTexture!!.regionWidth * slotScale!!
+        prefWidth = size
+        prefHeight = size
+        width = prefWidth
+        height = prefHeight
+        val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
         for (i in slots.indices) {
             val slot = slots[i]
-            if (slot.inAnimation) continue
-            slot.setPosition(
-                slotOffsets[i].x + x + prefWidth / 2,
-                slotOffsets[i].y + y + prefHeight / 2
-            )
+            val angle = angleForIndex(i)
+            slot.position(basePos, radius, angle)
         }
-    }
-
-    private fun updateCardPositions() {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        for (i in cards.indices) if (cards[i] != null) {
-            val card = cards[i]!!
-            if (card.inAnimation) continue
-            card.actor.setPosition(
-                slotOffsets[i].x + x + prefWidth / 2,
-                slotOffsets[i].y + y + prefHeight / 2
-            )
-            card.actor.setScale(cardScale)
-        }
-    }
-
-    private fun calcOffsets() {
-        val slotTexture = slotTexture!!
-        val slotScale = slotScale!!
-        val slotWidth = slotTexture.regionWidth * slotScale
-        val slotHeight = slotTexture.regionHeight * slotScale
-        prefHeight = slotHeight * 3.5f
-        prefWidth = slotWidth * 4f
-        slotOffsets = arrayOf(
-            Vector2(slotWidth, 0f),
-            Vector2(slotWidth / 2, -slotHeight * 1.5f),
-            Vector2(-slotWidth * 1.5f, -slotHeight * 1.5f),
-            Vector2(-slotWidth * 2f, 0f),
-            Vector2(-slotWidth / 2, slotHeight)
-        )
     }
 
     fun rotate() {
-        cards = cards.rotate(-1)
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
+        val firstCard = if (slots.isNotEmpty()) slots[0].card else null
         for (i in slots.indices) {
             val slot = slots[i]
             val nextOffset = (i + 1) % slots.size
-            slot.cardToMoveAlong = cards[nextOffset]
-            slot.animateTo(
-                slotOffsets[nextOffset].x + x + prefWidth / 2,
-                slotOffsets[nextOffset].y + y + prefHeight
-            )
+            slot.card = if (nextOffset == 0) firstCard else slots[nextOffset].card
+            slot.animateTo(basePos, radius, angleForIndex(i), angleForIndex(nextOffset))
         }
     }
 
@@ -197,10 +174,16 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
         dirty = true
     }
 
+    private fun angleForIndex(i: Int): Double = slotAngleOff * i + rotationOff
+
     override fun getMinWidth(): Float = prefWidth
     override fun getMinHeight(): Float = prefHeight
     override fun getPrefWidth(): Float = prefWidth
     override fun getPrefHeight(): Float = prefHeight
+
+    companion object {
+        private const val slotAngleOff: Double = ((2 * Math.PI) / 5)
+    }
 
 }
 
@@ -214,23 +197,20 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
 class RevolverSlot(
     val num: Int,
     val revolver: Revolver,
-    private val texture: TextureRegion,
+    private val textureRegion: TextureRegion,
     private val scale: Float,
     private var animationDuration: Float
-) : CustomImageActor(texture) {
+) : CustomImageActor(textureRegion), AnimationActor {
 
-    /**
-     * true if this is in a animation
-     */
-    var inAnimation: Boolean = false
-        private set
+    override var inAnimation: Boolean = false
 
     /**
      * if set to a card, the card will be moved along with the spin animation
      */
-    var cardToMoveAlong: Card? = null
+    var card: Card? = null
 
-    private var action: MoveToAction = MoveToAction()
+    private var action: RevolverSlotRotationAction? = null
+    private var curAngle: Double = 0.0
 
     init {
         setScale(scale)
@@ -238,27 +218,56 @@ class RevolverSlot(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        if (inAnimation && action.isComplete) {
+        if (inAnimation && action?.isComplete ?: false) {
             removeAction(action)
             inAnimation = false
-            cardToMoveAlong?.inAnimation = false
+            card?.inAnimation = false
             revolver.markDirty()
         }
-        if (inAnimation) cardToMoveAlong?.actor?.setPosition(x, y)
+        if (inAnimation) card?.actor?.setPosition(x, y)
+    }
+
+    fun position(base: Vector2, r: Float, angle: Double) {
+        val slotSize = texture.regionWidth * scaleX
+        val dx = cos(angle) * r
+        val dy = sin(angle) * r
+        setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
+        curAngle = angle
+        card?.actor?.setPosition(x, y)
     }
 
     /**
-     * animates the slot to a [x] [y]
+     * animates the slot to an angle
      */
-    fun animateTo(x: Float, y: Float) {
+    fun animateTo(base: Vector2, radius: Float, from: Double, to: Double) {
         if (inAnimation) return
-        action = MoveToAction()
-        action.setPosition(x, y)
-        action.actor = this
+        val action = RevolverSlotRotationAction(base, radius, this, from, to)
+        action.isReverse = true
         action.duration = animationDuration
         addAction(action)
-        cardToMoveAlong?.inAnimation = true
+        card?.inAnimation = true
         inAnimation = true
+        this.action = action
+    }
+
+    override fun toString(): String {
+        return "revolverSlot: $num with card $card"
+    }
+
+    class RevolverSlotRotationAction(
+        val base: Vector2,
+        val radius: Float,
+        val slot: RevolverSlot,
+        val from : Double,
+        val to: Double
+    ) : TemporalAction() {
+
+        override fun update(percent: Float) {
+            val to = if (to < from) to + (2 * Math.PI) else to
+            val newAngle = (to - from) * percent + from
+            slot.position(base, radius, newAngle)
+        }
+
     }
 
 }

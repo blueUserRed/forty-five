@@ -3,12 +3,17 @@ package com.fourinachamber.fourtyfive.utils
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import kotlin.random.Random
+import kotlin.random.asKotlinRandom
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
@@ -132,6 +137,24 @@ object Utils {
                 throw RuntimeException("unknown custom cursor: $cursorName")
             }).eitherLeft()
         }
+    }
+
+    fun interpolationOrError(name: String): Interpolation = when (name) {
+
+        "swing" -> Interpolation.swing
+        "swing in" -> Interpolation.swingIn
+        "swing out" -> Interpolation.swingOut
+        "bounce" -> Interpolation.bounce
+        "bounce in" -> Interpolation.bounceIn
+        "bounce out" -> Interpolation.bounceOut
+        "elastic" -> Interpolation.elastic
+        "elastic in" -> Interpolation.elasticIn
+        "elastic out" -> Interpolation.elasticOut
+        "circle" -> Interpolation.circle
+        "circle in" -> Interpolation.circleIn
+        "circle out" -> Interpolation.circleOut
+
+        else -> throw RuntimeException("Unknown interpolation: $name")
     }
 
 }

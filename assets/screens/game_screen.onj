@@ -1,5 +1,8 @@
 
 import "imports/colors.onj" as color
+import "game_config.onj" as gameConfig
+
+!pi = 3.141
 
 !worldWidth = 160.0
 !worldHeight = 90.0
@@ -17,21 +20,6 @@ import "imports/colors.onj" as color
     }
 }
 
-!enemies = [
-    {
-        name: "enemy"
-        lives: 1234
-        texture: "enemy"
-        offsetX: 30.0
-        offsetY: 40.0
-        scaleX: 0.03
-        scaleY: 0.03
-        detailFont: "distance_field"
-        detailFontScale: 2.0
-        detailFontColor: !color.blue
-    }
-]
-
 !controller = $GameScreenController {
     cardsFile: "cards/cards.onj"
     cardAtlasFile: "cards/generated/cards.atlas"
@@ -46,7 +34,7 @@ import "imports/colors.onj" as color
     }
     enemyArea: {
         actorName: "enemy_area"
-        enemies: [ "enemy" ]
+        enemies: [ !gameConfig.enemyConfig.startEnemy ]
     }
     coverArea: {
         actorName: "cover_area"
@@ -57,11 +45,14 @@ import "imports/colors.onj" as color
     cardDragBehaviour: $CardDragSource {
         group: "card"
     }
-    enemies: !enemies
+    enemies: !gameConfig.enemyConfig.enemies
     cardDrawActor: "card_draw_table"
+    playerLivesLabelName: "player_lives_label"
     shootButtonName: "shoot_button"
-    cardsToDrawInFirstRound: 6
-    cardsToDraw: 1
+    endTurnButtonName: "end_turn_button"
+    cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
+    cardsToDraw: !gameConfig.cardDrawConfig.roundStart
+    playerLives: !gameConfig.playerConfig.lives
 }
 
 viewport: $FitViewport {
@@ -85,7 +76,10 @@ assets: {
 
         {
             file: "textures/packed/game_screen/game_screen.atlas"
-            defines: [ "background", "background2" "revolver_slot", "enemy" ]
+            defines: [
+                "background", "background2" "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner"
+            ]
         }
 
     ]
@@ -97,10 +91,18 @@ assets: {
             hotspotY: 0
         }
     ]
-    postProcessors: []
+    postProcessors: [
+        {
+            name: "earthquake"
+            vertexShader: "shaders/earthquake/earthquake.vert"
+            fragmentShader: "shaders/earthquake/earthquake.frag"
+            timeOffset: 2_000
+            uniforms: [ "time" ]
+            args: null
+        }
+    ]
     animations: []
     colorTextures: [
-
         {
             name: "card_detail_background"
             color: "04040488"
@@ -109,7 +111,14 @@ assets: {
             name: "black"
             color: !color.black
         }
-
+    ]
+    particles: [
+        {
+            name: "dust"
+            particlePath: "particles/dust.particle"
+            textureDir: "textures/particles"
+            scale: 0.1
+        }
     ]
 }
 
@@ -137,7 +146,10 @@ options: {
     slotScale: !slotScale
     cardScale: 0.045
     animationDuration: 0.2
-    debug: true
+    radius: 15.0
+    cardZIndex: !cardZIndicesStart
+    rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
+//    debug: true
 }
 
 !cardHand = $CardHand {
@@ -174,6 +186,7 @@ options: {
     stackSpacing: 2.0
     areaSpacing: 4.0
     cardScale: 0.05
+    stackMinSize: 20.0
 //    debug: true
 }
 
@@ -181,16 +194,20 @@ options: {
     cells: [
 
         {
-            padBottom: 3.0
+//            padBottom: 3.0
+            width: <!worldWidth / 3>
+            padBottom: 5.0
             element: $Table {
+//                debug: true
                 align: "bottom"
                 rows: [
 
                     {
                         cells: [
                             {
+                                colspan: 2
                                 sizeToActor: true
-                                padRight: 34.0
+//                                padRight: 50.0
                                 element: !revolver
                             }
                         ]
@@ -200,14 +217,57 @@ options: {
                         cells: [
                             {
                                 sizeToActor: true
-                                element: $Label {
+                                element: $Image {
                                     name: "shoot_button"
+                                    textureName: "shoot"
+                                    reportDimensionsWithScaling: true
+                                    scaleX: 0.03
+                                    scaleY: 0.03
+                                    behaviours: [
+                                        $OnClickChangePostProcessorBehaviour {
+                                            postProcessor: "earthquake"
+                                            duration: 70
+                                            setOnlyIfNoPostProcessorIsSet: false
+                                        }
+                                        $ShootButtonBehaviour { },
+                                        !buttonHoverBehaviour
+                                        $OnHoverChangeTextureBehaviour {
+                                            hoverTexture: "shoot_hover"
+                                        }
+                                    ]
+                                }
+                            }
+                            {
+                                sizeToActor: true
+                                element: $Image {
+                                    name: "end_turn_button"
+                                    textureName: "end_turn"
+                                    reportDimensionsWithScaling: true
+                                    scaleX: 0.03
+                                    scaleY: 0.03
+                                    behaviours: [
+                                        $EndTurnButtonBehaviour { },
+                                        !buttonHoverBehaviour,
+                                        $OnHoverChangeTextureBehaviour {
+                                            hoverTexture: "end_turn_hover"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+
+                    {
+                        cells: [
+                            {
+                                colspan: 2
+                                element: $Label {
+                                    name: "player_lives_label"
                                     font: "distance_field"
-                                    text: "shoot"
-                                    fontScale: 0.15
+                                    text: ""
+                                    fontScale: 0.09
                                     color: !color.white
                                     backgroundTexture: "black"
-                                    behaviours: [ $ShootButtonBehaviour { }, !buttonHoverBehaviour ]
                                 }
                             }
                         ]
@@ -227,7 +287,7 @@ options: {
         {
 //            width: <!worldWidth - !revolverWidth - 100.0>
             width: <!worldWidth / 3>
-            height: 60.0
+//            height: 60.0
             element: !enemyArea
         }
 
@@ -240,6 +300,7 @@ options: {
         {
             sizeToActor: true
             padBottom: 2.0
+            padTop: 2.0
             align: "bottom"
             colspan: 3
             element: !cardHand
@@ -251,7 +312,6 @@ options: {
 !cardDrawTable = $Table {
     visible: false
     name: "card_draw_table"
-//    debug: true
     fillX: true
     fillY: true
     zIndex: !overlayZIndex

@@ -1,0 +1,58 @@
+
+import "imports/colors.onj" as color
+
+!defaultEnemyBrain = {
+    actions: [
+        $DamagePlayerEnemyAction {
+            weight: 1
+            min: 20
+            max: 30
+            coverStackDamagedParticles: "dust"
+            indicatorTexture: "normal_bullet"
+            effects: {
+                xShake: 1.2
+                yShake: 0.0
+                xShakeSpeed: 0.3
+                yShakeSpeed: 0.0
+                shakeDuration: 1.5
+
+                xCharge: -7.0
+                yCharge: 0.0
+                chargeDuration: 0.5
+                chargeInterpolation: "swing"
+
+                bufferTime: 0.2
+            }
+        }
+    ]
+}
+
+enemyConfig: {
+
+    enemies: [
+        {
+            name: "enemy"
+            lives: 1234
+            brain: !defaultEnemyBrain
+            texture: "enemy"
+            offsetX: 30.0
+            offsetY: 20.0
+            scaleX: 0.03
+            scaleY: 0.03
+            detailFont: "distance_field"
+            detailFontScale: 2.0
+            detailFontColor: !color.blue
+        }
+    ]
+
+    startEnemy: "enemy"
+}
+
+cardDrawConfig: {
+    firstRound: 6
+    roundStart: 1
+}
+
+playerConfig: {
+    lives: 1234
+}

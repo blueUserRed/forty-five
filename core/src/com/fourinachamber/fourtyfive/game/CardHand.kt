@@ -92,6 +92,7 @@ class CardHand(
         _cards.add(card)
         if (card.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(card.actor)
         updateCards()
+        invalidateHierarchy()
     }
 
     /**
@@ -101,6 +102,7 @@ class CardHand(
         _cards.remove(card)
 //        screenDataProvider.removeActorFromRoot(card.actor)
         updateCards()
+        invalidateHierarchy()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -162,7 +164,7 @@ class CardHand(
         screenDataProvider.resortRootZIndices()
 
 //        this.currentWidth = neededWidth
-        this.currentHeight = _cards[0].actor.height * cardScale
+//        this.currentHeight = _cards[0].actor.height * cardScale
     }
 
     private fun displayHoverDetail(card: Card) {
@@ -196,11 +198,11 @@ class CardHand(
         return min(screenDataProvider.stage.viewport.worldWidth, currentWidth)
     }
 
-    override fun getMinHeight(): Float {
-        return currentHeight
-    }
-
-    override fun getPrefHeight(): Float {
-        return currentHeight
-    }
+//    override fun getMinHeight(): Float {
+//        return currentHeight
+//    }
+//
+//    override fun getPrefHeight(): Float {
+//        return currentHeight
+//    }
 }
