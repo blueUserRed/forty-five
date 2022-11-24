@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.utils
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
@@ -138,34 +139,22 @@ object Utils {
         }
     }
 
-//    fun spawnParticle(
-//        screenDataProvider: ScreenDataProvider,
-//        particleFile: String,
-//        textureDir: String,
-//        x: Float,
-//        y: Float,
-//        effectScale: Float,
-//        align: Int = Align.bottomLeft
-//    ) {
-//
-//        val particleActor =
-//
-//            object : ParticleEffectActor(Gdx.files.internal(particleFile), Gdx.files.internal(textureDir)) {
-//
-//                override fun remove(): Boolean {
-//                    // Why does ParticleActor not do this automatically?
-//                    this.dispose()
-//                    return super.remove()
-//                }
-//
-//            }
-//
-//        particleActor.isAutoRemove = true
-//        screenDataProvider.addActorToRoot(particleActor)
-//        particleActor.setPosition(x, y, align)
-//
-//        particleActor.effect.scaleEffect(effectScale)
-//        particleActor.start()
-//    }
+    fun interpolationOrError(name: String): Interpolation = when (name) {
+
+        "swing" -> Interpolation.swing
+        "swing in" -> Interpolation.swingIn
+        "swing out" -> Interpolation.swingOut
+        "bounce" -> Interpolation.bounce
+        "bounce in" -> Interpolation.bounceIn
+        "bounce out" -> Interpolation.bounceOut
+        "elastic" -> Interpolation.elastic
+        "elastic in" -> Interpolation.elasticIn
+        "elastic out" -> Interpolation.elasticOut
+        "circle" -> Interpolation.circle
+        "circle in" -> Interpolation.circleIn
+        "circle out" -> Interpolation.circleOut
+
+        else -> throw RuntimeException("Unknown interpolation: $name")
+    }
 
 }

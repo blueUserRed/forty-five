@@ -12,6 +12,20 @@ $EnemyAction [
         max: int
         indicatorTexture: string
         coverStackDamagedParticles: string
+        effects: {
+            xShake: float
+            yShake: float
+            xShakeSpeed: float
+            yShakeSpeed: float
+            shakeDuration: float
+
+            xCharge: float
+            yCharge: float
+            chargeDuration: float
+            chargeInterpolation: string
+
+            bufferTime: float
+        }
         ...!enemyActionSharedKeys
     }
 

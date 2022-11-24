@@ -377,15 +377,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         ENEMY_ACTION {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
-
-                // TODO: put these numbers in onj file somewhere
-                val shakeAction = ShakeActorAction(1.2f, 0f, 0.3f, 0f)
-                shakeAction.duration = 1f
-
                 timeline = Timeline.timeline {
-                    action { enemies[0].actor.addAction(shakeAction) }
-                    delayUntil { shakeAction.isComplete }
-                    action { enemies[0].actor.removeAction(shakeAction) }
                     include(enemies[0].doAction(gameScreenController))
                     delay(500)
                     action {
