@@ -190,30 +190,12 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 
     init {
         enterInterpolation = if (!onj["enterInterpolation"]!!.isNull()) {
-            interpolationOrError(onj.get<String>("enterInterpolation"))
+            Utils.interpolationOrError(onj.get<String>("enterInterpolation"))
         } else null
 
         exitInterpolation = if (!onj["exitInterpolation"]!!.isNull()) {
-            interpolationOrError(onj.get<String>("exitInterpolation"))
+            Utils.interpolationOrError(onj.get<String>("exitInterpolation"))
         } else null
-    }
-
-    private fun interpolationOrError(name: String): Interpolation = when (name) {
-
-        "swing" -> Interpolation.swing
-        "swing in" -> Interpolation.swingIn
-        "swing out" -> Interpolation.swingOut
-        "bounce" -> Interpolation.bounce
-        "bounce in" -> Interpolation.bounceIn
-        "bounce out" -> Interpolation.bounceOut
-        "elastic" -> Interpolation.elastic
-        "elastic in" -> Interpolation.elasticIn
-        "elastic out" -> Interpolation.elasticOut
-        "circle" -> Interpolation.circle
-        "circle in" -> Interpolation.circleIn
-        "circle out" -> Interpolation.circleOut
-
-        else -> throw RuntimeException("Unknown interpolation: $name")
     }
 
     override val onHoverEnter: BehaviourCallback = {

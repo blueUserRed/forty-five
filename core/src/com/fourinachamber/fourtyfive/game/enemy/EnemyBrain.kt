@@ -32,30 +32,25 @@ class EnemyBrain(
 
     companion object {
 
-        fun fromOnj(onj: OnjObject, screenDataProvider: ScreenDataProvider): EnemyBrain = EnemyBrain(
-            onj.get<OnjArray>("actions").value.map { actionFromOnj(it as OnjNamedObject, screenDataProvider) }
+        fun fromOnj(onj: OnjObject, screenDataProvider: ScreenDataProvider, enemy: Enemy): EnemyBrain = EnemyBrain(
+            onj.get<OnjArray>("actions").value.map { actionFromOnj(it as OnjNamedObject, screenDataProvider, enemy) }
         )
 
         private fun actionFromOnj(
             onj: OnjNamedObject,
-            screenDataProvider: ScreenDataProvider
+            screenDataProvider: ScreenDataProvider,
+            enemy: Enemy
         ): Pair<Int, () -> EnemyAction> = when (onj.name) {
 
             "DamagePlayerEnemyAction" -> ({
                 val min = onj.get<Long>("min").toInt()
                 val max = onj.get<Long>("max").toInt()
 
-                val indicatorTexture = screenDataProvider.textures[onj.get<String>("indicatorTexture")]
-                    ?: throw RuntimeException("unknown texture: ${onj.get<String>("indicatorTexture")}")
-
-                val coverStackDamagedParticles =
-                    screenDataProvider.particles[onj.get<String>("coverStackDamagedParticles")] ?:
-                    throw RuntimeException("unknown particle: ${onj.get<String>("coverStackDamagedParticles")}")
-
                 DamagePlayerEnemyAction(
+                    enemy,
+                    onj,
+                    screenDataProvider,
                     (min..max).random(),
-                    indicatorTexture,
-                    coverStackDamagedParticles
                 )
             })
 

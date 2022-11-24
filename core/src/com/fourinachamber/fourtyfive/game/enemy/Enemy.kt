@@ -25,7 +25,6 @@ import onj.OnjObject
  */
 class Enemy(
     val name: String,
-    val brain: EnemyBrain,
     val texture: TextureRegion,
     val lives: Int,
     val offsetX: Float,
@@ -52,6 +51,8 @@ class Enemy(
 
     var curAction: EnemyAction? = null
         private set
+
+    private lateinit var brain: EnemyBrain
 
     init {
         actor = EnemyActor(this)
@@ -96,9 +97,8 @@ class Enemy(
                     throw RuntimeException("unknown texture ${it.get<String>("texture")}")
                 val detailFont = screenDataProvider.fonts[it.get<String>("detailFont")] ?:
                     throw RuntimeException("unknown font ${it.get<String>("detailFont")}")
-                Enemy(
+                val enemy = Enemy(
                     it.get<String>("name"),
-                    EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider),
                     texture,
                     it.get<Long>("lives").toInt(),
                     it.get<Double>("offsetX").toFloat(),
@@ -109,6 +109,8 @@ class Enemy(
                     it.get<Double>("detailFontScale").toFloat(),
                     Color.valueOf(it.get<String>("detailFontColor"))
                 )
+                enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider, enemy)
+                enemy
             }
 
     }

@@ -9,6 +9,20 @@ import "imports/colors.onj" as color
             max: 30
             coverStackDamagedParticles: "dust"
             indicatorTexture: "normal_bullet"
+            effects: {
+                xShake: 1.2
+                yShake: 0.0
+                xShakeSpeed: 0.3
+                yShakeSpeed: 0.0
+                shakeDuration: 1.5
+
+                xCharge: -7.0
+                yCharge: 0.0
+                chargeDuration: 0.5
+                chargeInterpolation: "swing"
+
+                bufferTime: 0.2
+            }
         }
     ]
 }
