@@ -11,16 +11,23 @@ import "imports/colors.onj" as color
             coverStackDestroyedParticles: "dust_explosion"
             indicatorTexture: "normal_bullet"
             effects: {
-                xShake: 1.2
+                xShake: 1.0
                 yShake: 0.0
-                xShakeSpeed: 0.3
+                xShakeSpeed: 0.2
                 yShakeSpeed: 0.0
-                shakeDuration: 1.5
+                shakeDuration: 0.8
 
                 xCharge: -7.0
                 yCharge: 0.0
                 chargeDuration: 0.5
                 chargeInterpolation: "swing"
+
+                dmgFont: "distance_field"
+                dmgFontColor: !color.red
+                dmgFontScale: 0.2
+                dmgDuration: 1.5
+                dmgStartFadeoutAt: 1.0
+                dmgRaiseHeight: 20.0
 
                 bufferTime: 0.2
             }
