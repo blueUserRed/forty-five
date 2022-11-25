@@ -134,6 +134,7 @@ object OnjReaderUtils {
         )
         val font = BitmapFont(Gdx.files.internal(fontOnj.get<String>("fontFile")), TextureRegion(texture), false)
         font.setUseIntegerPositions(false)
+        font.color = Color.valueOf(fontOnj.getOr("color", "0000ff"))
         return font
     }
 

@@ -25,6 +25,13 @@ $EnemyAction [
             chargeDuration: float
             chargeInterpolation: string
 
+            dmgFont: string
+            dmgFontColor: string
+            dmgFontScale: float
+            dmgDuration: float
+            dmgStartFadeoutAt: float
+            dmgRaiseHeight: float
+
             bufferTime: float
         }
         ...!enemyActionSharedKeys

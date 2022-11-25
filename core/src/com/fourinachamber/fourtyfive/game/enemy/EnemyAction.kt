@@ -1,16 +1,21 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.fourinachamber.fourtyfive.game.CoverStack
 import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.game.TextAnimation
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.Utils
+import com.fourinachamber.fourtyfive.utils.plus
 import onj.OnjNamedObject
 import onj.OnjObject
 
@@ -56,6 +61,13 @@ class DamagePlayerEnemyAction(
     private val chargeDuration: Float
     private val chargeInterpolation: Interpolation
 
+    private val dmgFont: BitmapFont
+    private val dmgFontColor: Color
+    private val dmgFontScale: Float
+    private val dmgDuration: Int
+    private val dmgRaiseHeight: Float
+    private val dmgStartFadeoutAt: Int
+
     private val bufferTime: Int
 
     init {
@@ -72,6 +84,14 @@ class DamagePlayerEnemyAction(
         chargeDuration = effects.get<Double>("chargeDuration").toFloat() / 2f // divide by two because anim is played twice
         chargeInterpolation = Utils.interpolationOrError(effects.get<String>("chargeInterpolation"))
 
+        dmgFont = screenDataProvider.fonts[effects.get<String>("dmgFont")] ?:
+            throw RuntimeException("unknown font ${effects.get<String>("dmgFont")}")
+        dmgFontScale = effects.get<Double>("dmgFontScale").toFloat()
+        dmgDuration = (effects.get<Double>("dmgDuration") * 1000).toInt()
+        dmgRaiseHeight = effects.get<Double>("dmgRaiseHeight").toFloat()
+        dmgStartFadeoutAt = (effects.get<Double>("dmgStartFadeoutAt") * 1000).toInt()
+        dmgFontColor = Color.valueOf(effects.get<String>("dmgFontColor"))
+
         bufferTime = (effects.get<Double>("bufferTime") * 1000).toInt()
     }
 
@@ -84,12 +104,33 @@ class DamagePlayerEnemyAction(
         moveByAction.duration = chargeDuration
         moveByAction.interpolation = chargeInterpolation
 
+        val playerLivesLabel = gameScreenController.playerLivesLabel!!
+        var playerLivesPos = playerLivesLabel.localToStageCoordinates(Vector2(0f, 0f))
+        playerLivesPos += Vector2(playerLivesLabel.width / 2f, 0f)
+
+        val textAnimation = TextAnimation(
+            playerLivesPos.x,
+            playerLivesPos.y,
+            "If you see this something went wrong",
+            dmgFontColor,
+            dmgFontScale,
+            dmgFont,
+            dmgRaiseHeight,
+            dmgStartFadeoutAt,
+            gameScreenController.curScreen!!,
+            dmgDuration
+        )
+
         var activeStack: CoverStack? = null
         var remaining = 0
         var doingCoverAreaAnim = false
 
+        //TODO: improve timeline
+
         action { enemy.actor.addAction(moveByAction) }
+
         delayUntil { moveByAction.isComplete }
+
         action {
             enemy.actor.removeAction(moveByAction)
             moveByAction.reset()
@@ -97,9 +138,13 @@ class DamagePlayerEnemyAction(
             moveByAction.amountY = -moveByAction.amountY
             enemy.actor.addAction(moveByAction)
         }
+
         delayUntil { moveByAction.isComplete }
+
         action { enemy.actor.removeAction(moveByAction) }
+
         delay(bufferTime)
+
         action {
             remaining = gameScreenController.coverArea!!.damage(damage)
             if (remaining != damage) activeStack = gameScreenController.coverArea!!.getActive()
@@ -110,17 +155,26 @@ class DamagePlayerEnemyAction(
             }
             doingCoverAreaAnim = remaining != damage && !wasDestroyed
         }
+
         delayUntil { !doingCoverAreaAnim || shakeAction.isComplete }
-        delay(bufferTime)
+
+        delay(bufferTime * 3)
+
         action {
             if (doingCoverAreaAnim) activeStack?.removeAction(shakeAction)
             shakeAction.reset()
             gameScreenController.damagePlayer(remaining)
-            if (remaining != 0) gameScreenController.playerLivesLabel!!.addAction(shakeAction)
+            if (remaining != 0) {
+                playerLivesLabel.addAction(shakeAction)
+                textAnimation.text = "-$remaining"
+                gameScreenController.playGameAnimation(textAnimation)
+            }
         }
-        delayUntil { remaining == 0 || shakeAction.isComplete }
+
+        delayUntil { remaining == 0 || (shakeAction.isComplete && textAnimation.isFinished()) }
+
         action {
-            if (remaining != 0) gameScreenController.playerLivesLabel!!.removeAction(shakeAction)
+            if (remaining != 0) playerLivesLabel.removeAction(shakeAction)
         }
     }
 
