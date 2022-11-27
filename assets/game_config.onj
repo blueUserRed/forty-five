@@ -64,3 +64,7 @@ cardDrawConfig: {
 playerConfig: {
     lives: 1234
 }
+
+reservesConfig: {
+    roundStart: 3
+}

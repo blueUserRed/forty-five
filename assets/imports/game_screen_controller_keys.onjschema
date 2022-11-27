@@ -80,6 +80,8 @@ cardDrawActor: string
 playerLivesLabelName: string
 endTurnButtonName: string
 shootButtonName: string
+reservesLabelName: string
 cardsToDrawInFirstRound: int
 cardsToDraw: int
 playerLives: int
+reservesAtRoundBegin: int
