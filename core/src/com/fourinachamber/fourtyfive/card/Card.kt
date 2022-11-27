@@ -21,7 +21,7 @@ import onj.OnjObject
 class Card(
     val name: String,
     val texture: TextureRegion,
-    val description: String,
+    val shortDescription: String,
     val type: Type,
     val baseDamage: Int,
     val coverValue: Int,
@@ -43,16 +43,50 @@ class Card(
      */
     var inAnimation: Boolean = false
 
+    var curDamage: Int = baseDamage
+        private set(value) {
+            if (value < 0) return
+            field = value
+            updateText()
+        }
+
+    var description = ""
+        private set
+
     private var isEverlasting: Boolean = false
     private var isUndead: Boolean = false
+    private var isRotten: Boolean = false
 
     val shouldRemoveAfterShot: Boolean
         get() = !isEverlasting
+
+    init {
+        updateText()
+    }
 
     fun afterShot(gameScreenController: GameScreenController) {
         if (isUndead) {
             gameScreenController.cardHand!!.addCard(this)
         }
+    }
+
+    fun onRevolverTurn(toBeShot: Boolean) {
+        if (isRotten && !toBeShot) curDamage--
+    }
+
+    private fun updateText() {
+        description = """
+            $shortDescription
+            
+            cost: $cost
+            ${
+                if (type == Type.BULLET) {
+                    "damage: $curDamage/$baseDamage"
+                } else {
+                    "cover value: $coverValue"
+                }
+            }
+        """.trimIndent()
     }
 
     override fun toString(): String {
@@ -108,6 +142,7 @@ class Card(
 
                 "everlasting" -> card.isEverlasting = true
                 "undead" -> card.isUndead = true
+                "rotten" -> card.isRotten = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }

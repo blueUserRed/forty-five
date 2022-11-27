@@ -2,7 +2,7 @@
 defaultBullet: {
     name: "bullet"
     title: "bullet"
-    description: "It's the default bullet!\nYou ran out of bullets!"
+    description: "It's the default bullet! You ran out of bullets!"
     traitEffects: []
     cost: 1
     baseDamage: 5
@@ -11,7 +11,7 @@ defaultBullet: {
 defaultCover: {
     name: "crate"
     title: "crate"
-    description: "It's the default cover!\nYou ran out of cover cards!"
+    description: "It's the default cover! You ran out of cover cards!"
     cost: 1
     coverValue: 5
 }
@@ -61,12 +61,12 @@ cards: [
         type: $Bullet { }
     }
     { // 4
-        name: "test_card5"
-        title: "test \ncard 5"
-        description: "It's a bullet!"
-        baseDamage: 20
+        name: "rotten_bullet"
+        title: "rotten bullet"
+        description: "Looses damage"
+        baseDamage: 16
         coverValue: 0
-        traitEffects: []
+        traitEffects: [ "rotten" ]
         cost: 1
         type: $Bullet { }
     }
@@ -120,60 +120,10 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 10
-        name: "test_card11"
-        title: "test \ncard 11"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        cost: 1
-        type: $Bullet { }
-    }
-    { // 11
-        name: "test_card12"
-        title: "test \ncard 12"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        cost: 1
-        type: $Bullet { }
-    }
-    { // 12
-        name: "test_card13"
-        title: "test \ncard 13"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        cost: 1
-        type: $Bullet { }
-    }
-    { // 13
-        name: "test_card14"
-        title: "test \ncard 14"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        cost: 1
-        type: $Bullet { }
-    }
-    { // 14
-        name: "test_card15"
-        title: "test \ncard 15"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        cost: 1
-        type: $Bullet { }
-    }
 
     // Cover ----------------------------------
 
-    { // 15
+    { // 10
         name: "test_cover1"
         title: "test \ncover 1"
         description: "It's a Cover!"
@@ -184,31 +134,7 @@ cards: [
         type: $Cover { }
     }
 
-    { // 16
-        name: "test_cover2"
-        title: "test \ncover 2"
-        description: "It's a Cover!"
-        baseDamage: 0
-        coverValue: 20
-        traitEffects: []
-        cost: 1
-        type: $Cover { }
-    }
-
-    // duplicate cards ----------------------------------
-
-    { // 17
-        name: "test_card1"
-        title: "test \ncard 1"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        cost: 1
-        type: $Bullet { }
-    }
-
-    { // 18
+    { // 11
         name: "test_cover2"
         title: "test \ncover 2"
         description: "It's a Cover!"
