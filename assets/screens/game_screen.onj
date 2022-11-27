@@ -20,6 +20,14 @@ import "game_config.onj" as gameConfig
     }
 }
 
+!sharedDetailTextKeys = {
+    detailFont: "distance_field"
+    detailFontColor: !color.white
+    detailBackgroundTexture: "card_detail_background"
+    detailFontScale: 0.07
+    detailWidth: 25.0
+}
+
 !controller = $GameScreenController {
     cardsFile: "cards/cards.onj"
     cardAtlasFile: "cards/generated/cards.atlas"
@@ -157,6 +165,9 @@ options: {
     radius: 15.0
     cardZIndex: !cardZIndicesStart
     rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
+    ...!sharedDetailTextKeys
+    detailOffsetX: 0.0
+    detailOffsetY: 0.0
 //    debug: true
 }
 
@@ -168,13 +179,9 @@ options: {
     startCardZIndicesAt: !cardZIndicesStart
     hoveredCardZIndex: <!cardZIndicesEnd - 1>
     draggedCardZIndex: !cardZIndicesEnd
-    detailFont: "distance_field"
-    detailFontColor: !color.white
-    detailBackgroundTexture: "card_detail_background"
-    detailFontScale: 0.07
     detailOffsetX: 0.0
     detailOffsetY: 1.5
-    detailPadding: 1.0
+    ...!sharedDetailTextKeys
 //    debug: true
 }
 
@@ -187,14 +194,17 @@ options: {
     name: "cover_area"
     numStacks: 2
     maxCards: 3
-    detailFont: "distance_field"
-    detailFontColor: !color.black
-    detailFontScale: 0.1
+    infoFont: "distance_field"
+    infoFontColor: !color.black
+    infoFontScale: 0.1
     stackBackgroundTexture: "card_detail_background"
     stackSpacing: 2.0
     areaSpacing: 4.0
     cardScale: 0.05
     stackMinSize: 20.0
+    ...!sharedDetailTextKeys
+    detailOffsetX: 0.0
+    detailOffsetY: 0.0
 //    debug: true
 }
 

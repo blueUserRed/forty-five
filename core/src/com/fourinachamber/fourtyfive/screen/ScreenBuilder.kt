@@ -453,7 +453,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
                 widgetOnj.get<Double>("detailOffsetY").toFloat(),
             ),
-            widgetOnj.get<Double>("detailPadding").toFloat()
+            widgetOnj.get<Double>("detailWidth").toFloat()
         ).apply {
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
@@ -463,7 +463,17 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()
         }
 
-        "Revolver" -> Revolver().apply {
+        "Revolver" -> Revolver(
+            fontOrError(widgetOnj.get<String>("detailFont")),
+            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            widgetOnj.get<Double>("detailFontScale").toFloat(),
+            Vector2(
+                widgetOnj.get<Double>("detailOffsetX").toFloat(),
+                widgetOnj.get<Double>("detailOffsetY").toFloat(),
+            ),
+            widgetOnj.get<Double>("detailWidth").toFloat()
+        ).apply {
             slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
             slotFont = fontOrError(widgetOnj.get<String>("font"))
             fontColor = Color.valueOf(widgetOnj.get<String>("fontColor"))
@@ -490,6 +500,15 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("areaSpacing").toFloat(),
             widgetOnj.get<Double>("cardScale").toFloat(),
             widgetOnj.get<Double>("stackMinSize").toFloat(),
+            fontOrError(widgetOnj.get<String>("detailFont")),
+            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            widgetOnj.get<Double>("detailFontScale").toFloat(),
+            Vector2(
+                widgetOnj.get<Double>("detailOffsetX").toFloat(),
+                widgetOnj.get<Double>("detailOffsetY").toFloat(),
+            ),
+            widgetOnj.get<Double>("detailWidth").toFloat()
         )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")

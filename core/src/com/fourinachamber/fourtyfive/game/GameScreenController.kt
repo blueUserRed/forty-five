@@ -331,9 +331,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     fun shoot() {
         val cardToShoot = revolver!!.getCardInSlot(5)
         revolver!!.rotate()
+
+        revolver!!
+            .slots
+            .mapNotNull { it.card }
+            .forEach { it.onRevolverTurn(it === cardToShoot) }
+
         cardToShoot ?: return
+
         val enemy = enemyArea!!.enemies[0]
-        enemy.damage(cardToShoot.baseDamage)
+        enemy.damage(cardToShoot.curDamage)
         if (cardToShoot.shouldRemoveAfterShot) revolver!!.removeCard(4)
         cardToShoot.afterShot(this)
     }

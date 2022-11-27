@@ -188,11 +188,13 @@ cards: [
             }
         ]
     }
-
+    
+    // Cover --------------------------
+    
     {
         name: !cards.10.name
         elements: [
-            ...!bulletSharedElements
+            ...!coverSharedElements
             $TextElement {
                 text: !cards.10.title
                 ...!titleElementSharedKeys
@@ -203,7 +205,7 @@ cards: [
     {
         name: !cards.11.name
         elements: [
-            ...!bulletSharedElements
+            ...!coverSharedElements
             $TextElement {
                 text: !cards.11.title
                 ...!titleElementSharedKeys
@@ -211,62 +213,7 @@ cards: [
         ]
     }
 
-    {
-        name: !cards.12.name
-        elements: [
-            ...!bulletSharedElements
-            $TextElement {
-                text: !cards.12.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
-
-    {
-        name: !cards.13.name
-        elements: [
-            ...!bulletSharedElements
-            $TextElement {
-                text: !cards.13.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
-
-    {
-        name: !cards.14.name
-        elements: [
-            ...!bulletSharedElements
-            $TextElement {
-                text: !cards.14.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
-    
-    // Cover --------------------------
-    
-    {
-        name: !cards.15.name
-        elements: [
-            ...!coverSharedElements
-            $TextElement {
-                text: !cards.15.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
-
-    {
-        name: !cards.16.name
-        elements: [
-            ...!coverSharedElements
-            $TextElement {
-                text: !cards.16.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
+    // default cards
 
     {
         name: !cards_obj.defaultBullet.name

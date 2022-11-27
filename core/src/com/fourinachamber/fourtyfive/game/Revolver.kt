@@ -6,21 +6,32 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
+import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.plus
-import com.fourinachamber.fourtyfive.utils.rotate
 import ktx.actors.contains
 import onj.OnjNamedObject
 import java.lang.Math.cos
 import java.lang.Math.sin
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 
 /**
  * actor representing the revolver
  */
-class Revolver : Widget(), ZIndexActor, InitialiseableActor {
+class Revolver(
+    detailFont: BitmapFont,
+    detailFontColor: Color,
+    detailBackground: Drawable,
+    detailFontScale: Float,
+    val detailOffset: Vector2,
+    val detailWidth: Float
+) : Widget(), ZIndexActor, InitialiseableActor {
 
     override var fixedZIndex: Int = 0
 
@@ -66,10 +77,24 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
     private lateinit var screenDataProvider: ScreenDataProvider
-    private lateinit var slots: Array<RevolverSlot>
+
+    lateinit var slots: Array<RevolverSlot>
+        private set
+
+    private val hoverDetailActor: CustomLabel =
+        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
+
+    init {
+        hoverDetailActor.setFontScale(detailFontScale)
+        hoverDetailActor.setAlignment(Align.center)
+        hoverDetailActor.isVisible = false
+        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
+        hoverDetailActor.wrap = true
+    }
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
+        screenDataProvider.addActorToRoot(hoverDetailActor)
     }
 
     /**
@@ -117,6 +142,27 @@ class Revolver : Widget(), ZIndexActor, InitialiseableActor {
             updateSlotsAndCars()
             dirty = false
         }
+
+        var isCardHoveredOver = false
+        for (slot in slots) if (slot.card?.actor?.isHoveredOver ?: false) {
+            isCardHoveredOver = true
+            updateHoverDetailActor(slot.card!!)
+        }
+        hoverDetailActor.isVisible = isCardHoveredOver
+    }
+
+    private fun updateHoverDetailActor(card: Card) {
+        hoverDetailActor.setText(card.description)
+
+        hoverDetailActor.width = detailWidth
+        hoverDetailActor.height = hoverDetailActor.prefHeight
+
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+
+        hoverDetailActor.setPosition(
+            x + prefWidth + detailOffset.x,
+            y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
+        )
     }
 
     private fun initialise() {
