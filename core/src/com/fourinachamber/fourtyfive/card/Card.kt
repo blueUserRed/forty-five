@@ -24,7 +24,8 @@ class Card(
     val description: String,
     val type: Type,
     val baseDamage: Int,
-    val coverValue: Int
+    val coverValue: Int,
+    val cost: Int
 ) {
 
     /**
@@ -89,7 +90,8 @@ class Card(
                     },
 
                     it.get<Long>("baseDamage").toInt(),
-                    it.get<Long>("coverValue").toInt()
+                    it.get<Long>("coverValue").toInt(),
+                    it.get<Long>("cost").toInt()
                 )
 
                 applyTraitEffects(card, it)

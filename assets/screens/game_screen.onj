@@ -50,9 +50,11 @@ import "game_config.onj" as gameConfig
     playerLivesLabelName: "player_lives_label"
     shootButtonName: "shoot_button"
     endTurnButtonName: "end_turn_button"
+    reservesLabelName: "reserves_label"
     cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
     cardsToDraw: !gameConfig.cardDrawConfig.roundStart
     playerLives: !gameConfig.playerConfig.lives
+    reservesAtRoundBegin: !gameConfig.reservesConfig.roundStart
 }
 
 viewport: $FitViewport {
@@ -169,7 +171,7 @@ options: {
     detailFont: "distance_field"
     detailFontColor: !color.white
     detailBackgroundTexture: "card_detail_background"
-    detailFontScale: 0.7
+    detailFontScale: 0.07
     detailOffsetX: 0.0
     detailOffsetY: 1.5
     detailPadding: 1.0
@@ -269,6 +271,22 @@ options: {
                                 colspan: 2
                                 element: $Label {
                                     name: "player_lives_label"
+                                    font: "distance_field"
+                                    text: ""
+                                    fontScale: 0.09
+                                    color: !color.white
+                                    backgroundTexture: "black"
+                                }
+                            }
+                        ]
+                    }
+
+                    {
+                        cells: [
+                            {
+                                colspan: 2
+                                element: $Label {
+                                    name: "reserves_label"
                                     font: "distance_field"
                                     text: ""
                                     fontScale: 0.09
