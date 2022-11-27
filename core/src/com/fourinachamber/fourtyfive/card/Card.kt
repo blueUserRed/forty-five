@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.card
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import ktx.actors.onEnter
@@ -41,6 +42,18 @@ class Card(
      */
     var inAnimation: Boolean = false
 
+    private var isEverlasting: Boolean = false
+    private var isUndead: Boolean = false
+
+    val shouldRemoveAfterShot: Boolean
+        get() = !isEverlasting
+
+    fun afterShot(gameScreenController: GameScreenController) {
+        if (isUndead) {
+            gameScreenController.cardHand!!.addCard(this)
+        }
+    }
+
     override fun toString(): String {
         return "card: $name"
     }
@@ -60,21 +73,43 @@ class Card(
             .map {
                 it as OnjObject
                 val name = it.get<String>("name")
-                Card(
+
+                val card = Card(
                     name,
-                    regions["$cardTexturePrefix$name"] ?:
-                        throw RuntimeException("cannot find texture for card $name"),
+                    regions["$cardTexturePrefix$name"]
+                        ?: throw RuntimeException("cannot find texture for card $name"),
+
                     it.get<String>("description"),
+
                     when (val type = it.get<OnjNamedObject>("type").name) {
                         "Bullet" -> Type.BULLET
                         "Cover" -> Type.COVER
                         "OneShot" -> Type.ONE_SHOT
                         else -> throw RuntimeException("unknown Card type: $type")
                     },
+
                     it.get<Long>("baseDamage").toInt(),
                     it.get<Long>("coverValue").toInt()
                 )
+
+                applyTraitEffects(card, it)
+                card
             }
+
+        fun applyTraitEffects(card: Card, onj: OnjObject) {
+            val effects = onj
+                .get<OnjArray>("traitEffects")
+                .value
+                .map { it.value as String }
+
+            for (effect in effects) when (effect) {
+
+                "everlasting" -> card.isEverlasting = true
+                "undead" -> card.isUndead = true
+
+                else -> throw RuntimeException("unknown trait effect $effect")
+            }
+        }
 
     }
 

@@ -13,6 +13,7 @@ $CardType [
     description: string
     baseDamage: int
     coverValue: int
+    traitEffects: string[*]
     type: $CardType
 }
 
@@ -20,6 +21,7 @@ defaultBullet: {
     name: string
     title: string
     description: string
+    traitEffects: string[*]
     baseDamage: int
 }
 

@@ -18,6 +18,7 @@ import com.fourinachamber.fourtyfive.utils.Utils
 import com.fourinachamber.fourtyfive.utils.plus
 import onj.OnjNamedObject
 import onj.OnjObject
+import onj.OnjValue
 
 abstract class EnemyAction {
 
@@ -71,6 +72,9 @@ class DamagePlayerEnemyAction(
     private val bufferTime: Int
 
     init {
+
+        //TODO: find a better way to do this
+
         val effects = onj.get<OnjObject>("effects")
 
         xShake = effects.get<Double>("xShake").toFloat()
