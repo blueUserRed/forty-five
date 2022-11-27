@@ -169,7 +169,7 @@ options: {
     detailFont: "distance_field"
     detailFontColor: !color.white
     detailBackgroundTexture: "card_detail_background"
-    detailFontScale: 0.1
+    detailFontScale: 0.7
     detailOffsetX: 0.0
     detailOffsetY: 1.5
     detailPadding: 1.0

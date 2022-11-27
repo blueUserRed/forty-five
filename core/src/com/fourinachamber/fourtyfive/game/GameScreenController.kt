@@ -184,6 +184,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 0
             )
             doDragAndDropFor(card)
+            Card.applyTraitEffects(card, onj)
             card
         }
 
@@ -309,7 +310,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         cardToShoot ?: return
         val enemy = enemyArea!!.enemies[0]
         enemy.damage(cardToShoot.baseDamage)
-        revolver!!.removeCard(4)
+        if (!cardToShoot.shouldRemoveAfterShot) revolver!!.removeCard(4)
+        cardToShoot.afterShot(this)
     }
 
     fun endTurn() {
