@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.card
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import ktx.actors.onEnter
@@ -20,10 +21,11 @@ import onj.OnjObject
 class Card(
     val name: String,
     val texture: TextureRegion,
-    val description: String,
+    val shortDescription: String,
     val type: Type,
     val baseDamage: Int,
-    val coverValue: Int
+    val coverValue: Int,
+    val cost: Int
 ) {
 
     /**
@@ -40,6 +42,52 @@ class Card(
      * true when [actor] is in an animation
      */
     var inAnimation: Boolean = false
+
+    var curDamage: Int = baseDamage
+        private set(value) {
+            if (value < 0) return
+            field = value
+            updateText()
+        }
+
+    var description = ""
+        private set
+
+    private var isEverlasting: Boolean = false
+    private var isUndead: Boolean = false
+    private var isRotten: Boolean = false
+
+    val shouldRemoveAfterShot: Boolean
+        get() = !isEverlasting
+
+    init {
+        updateText()
+    }
+
+    fun afterShot(gameScreenController: GameScreenController) {
+        if (isUndead) {
+            gameScreenController.cardHand!!.addCard(this)
+        }
+    }
+
+    fun onRevolverTurn(toBeShot: Boolean) {
+        if (isRotten && !toBeShot) curDamage--
+    }
+
+    private fun updateText() {
+        description = """
+            $shortDescription
+            
+            cost: $cost
+            ${
+                if (type == Type.BULLET) {
+                    "damage: $curDamage/$baseDamage"
+                } else {
+                    "cover value: $coverValue"
+                }
+            }
+        """.trimIndent()
+    }
 
     override fun toString(): String {
         return "card: $name"
@@ -60,21 +108,45 @@ class Card(
             .map {
                 it as OnjObject
                 val name = it.get<String>("name")
-                Card(
+
+                val card = Card(
                     name,
-                    regions["$cardTexturePrefix$name"] ?:
-                        throw RuntimeException("cannot find texture for card $name"),
+                    regions["$cardTexturePrefix$name"]
+                        ?: throw RuntimeException("cannot find texture for card $name"),
+
                     it.get<String>("description"),
+
                     when (val type = it.get<OnjNamedObject>("type").name) {
                         "Bullet" -> Type.BULLET
                         "Cover" -> Type.COVER
                         "OneShot" -> Type.ONE_SHOT
                         else -> throw RuntimeException("unknown Card type: $type")
                     },
+
                     it.get<Long>("baseDamage").toInt(),
-                    it.get<Long>("coverValue").toInt()
+                    it.get<Long>("coverValue").toInt(),
+                    it.get<Long>("cost").toInt()
                 )
+
+                applyTraitEffects(card, it)
+                card
             }
+
+        fun applyTraitEffects(card: Card, onj: OnjObject) {
+            val effects = onj
+                .get<OnjArray>("traitEffects")
+                .value
+                .map { it.value as String }
+
+            for (effect in effects) when (effect) {
+
+                "everlasting" -> card.isEverlasting = true
+                "undead" -> card.isUndead = true
+                "rotten" -> card.isRotten = true
+
+                else -> throw RuntimeException("unknown trait effect $effect")
+            }
+        }
 
     }
 

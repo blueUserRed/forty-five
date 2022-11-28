@@ -14,6 +14,8 @@ import com.fourinachamber.fourtyfive.screen.InitialiseableActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.between
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.contains
 import kotlin.math.min
 
@@ -27,7 +29,7 @@ class CardHand(
     detailBackground: Drawable,
     detailFontScale: Float,
     val detailOffset: Vector2,
-    val hoverDetailPadding: Float
+    val detailWidth: Float
 ) : Widget(), ZIndexActor, InitialiseableActor {
 
     private lateinit var screenDataProvider: ScreenDataProvider
@@ -72,17 +74,20 @@ class CardHand(
     private var currentWidth: Float = 0f
     private var currentHeight: Float = 0f
 
-    private var hoverDetailActor: CustomLabel
+    private var hoverDetailActor: CustomLabel =
+        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
 
     init {
-        hoverDetailActor = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
         hoverDetailActor.setFontScale(detailFontScale)
         hoverDetailActor.setAlignment(Align.center)
+        hoverDetailActor.isVisible = false
+        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
+        hoverDetailActor.wrap = true
     }
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
-//        screenDataProvider.addActorToRoot(hoverDetailActor)
+        screenDataProvider.addActorToRoot(hoverDetailActor)
     }
 
     /**
@@ -100,7 +105,6 @@ class CardHand(
      */
     fun removeCard(card: Card) {
         _cards.remove(card)
-//        screenDataProvider.removeActorFromRoot(card.actor)
         updateCards()
         invalidateHierarchy()
     }
@@ -142,7 +146,7 @@ class CardHand(
 
                 if (card.actor.isHoveredOver) {
                     isCardHoveredOver = true
-                    displayHoverDetail(card)
+                    updateHoverDetailActor(card)
                     card.actor.setScale(hoveredCardScale)
                     card.actor.setPosition(
                         curX + ((card.actor.width * cardScale) - (card.actor.width * hoveredCardScale)) / 2,
@@ -159,20 +163,17 @@ class CardHand(
             curX += cardWidth + cardSpacing + xDistanceOffset
         }
 
-        if (!isCardHoveredOver && hoverDetailActor.isVisible) hideHoverDetailActor()
+        hoverDetailActor.isVisible = isCardHoveredOver
 
         screenDataProvider.resortRootZIndices()
 
-//        this.currentWidth = neededWidth
-//        this.currentHeight = _cards[0].actor.height * cardScale
     }
 
-    private fun displayHoverDetail(card: Card) {
-
-        hoverDetailActor.width = hoverDetailActor.prefWidth + hoverDetailPadding * 2
-        hoverDetailActor.height = hoverDetailActor.prefHeight + hoverDetailPadding * 2
-
+    private fun updateHoverDetailActor(card: Card) {
         hoverDetailActor.setText(card.description)
+
+        hoverDetailActor.width = detailWidth
+        hoverDetailActor.height = hoverDetailActor.prefHeight
 
         val worldWidth = screenDataProvider.stage.viewport.worldWidth
 
@@ -181,12 +182,8 @@ class CardHand(
                 .between(0f, worldWidth - hoverDetailActor.width),
             card.actor.y + card.actor.height * cardScale + detailOffset.y
         )
-        hoverDetailActor.isVisible = true
     }
 
-    private fun hideHoverDetailActor() {
-        hoverDetailActor.isVisible = false
-    }
 
     override fun getPrefWidth(): Float {
 //        return neededWidth

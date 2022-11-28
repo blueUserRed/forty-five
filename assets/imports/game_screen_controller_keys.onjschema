@@ -12,6 +12,7 @@ $EnemyAction [
         max: int
         indicatorTexture: string
         coverStackDamagedParticles: string
+        coverStackDestroyedParticles: string
         effects: {
             xShake: float
             yShake: float
@@ -23,6 +24,13 @@ $EnemyAction [
             yCharge: float
             chargeDuration: float
             chargeInterpolation: string
+
+            dmgFont: string
+            dmgFontColor: string
+            dmgFontScale: float
+            dmgDuration: float
+            dmgStartFadeoutAt: float
+            dmgRaiseHeight: float
 
             bufferTime: float
         }
@@ -72,6 +80,8 @@ cardDrawActor: string
 playerLivesLabelName: string
 endTurnButtonName: string
 shootButtonName: string
+reservesLabelName: string
 cardsToDrawInFirstRound: int
 cardsToDraw: int
 playerLives: int
+reservesAtRoundBegin: int

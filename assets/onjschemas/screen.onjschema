@@ -56,6 +56,16 @@ $Viewport [
     name?: string
 }
 
+!detailTextSharedKeys = {
+    detailFont: string
+    detailFontColor: string
+    detailBackgroundTexture: string
+    detailFontScale: float
+    detailOffsetX: float
+    detailOffsetY: float
+    detailWidth: float
+}
+
 $Widget [
 
     $Label {
@@ -153,14 +163,8 @@ $Widget [
         startCardZIndicesAt: int
         hoveredCardZIndex: int
         draggedCardZIndex: int
-        detailFont: string
-        detailFontColor: string
-        detailBackgroundTexture: string
-        detailFontScale: float
-        detailOffsetX: float
-        detailOffsetY: float
-        detailPadding: float
         hoveredCardScale: float
+        ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }
 
@@ -175,6 +179,7 @@ $Widget [
         radius: float
         rotationOff: float
         cardZIndex: int
+        ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }
 
@@ -185,14 +190,15 @@ $Widget [
     $CoverArea {
         numStacks: int
         maxCards: int
-        detailFont: string
-        detailFontColor: string
-        detailFontScale: float
+        infoFont: string
+        infoFontColor: string
+        infoFontScale: float
         stackBackgroundTexture: string
         stackSpacing: float
         areaSpacing: float
         cardScale: float
         stackMinSize: float
+        ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }
 

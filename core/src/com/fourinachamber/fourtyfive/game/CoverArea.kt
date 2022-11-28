@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.card.Card
@@ -22,14 +23,20 @@ import java.lang.Float.max
 class CoverArea(
     val numStacks: Int,
     val maxCards: Int,
-    detailFont: BitmapFont,
-    detailFontColor: Color,
+    infoFont: BitmapFont,
+    infoFontColor: Color,
     stackBackgroundTexture: TextureRegion,
-    detailFontScale: Float,
+    infoFontScale: Float,
     private val stackSpacing: Float,
     private val areaSpacing: Float,
     private val cardScale: Float,
-    private val stackMinSize: Float
+    private val stackMinSize: Float,
+    detailFont: BitmapFont,
+    detailFontColor: Color,
+    detailBackground: Drawable,
+    detailFontScale: Float,
+    val detailOffset: Vector2,
+    val detailWidth: Float
 ) : Widget(), InitialiseableActor {
 
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
@@ -40,10 +47,11 @@ class CoverArea(
         CoverStack(
             maxCards,
             this,
-            detailFont,
-            detailFontColor,
-            stackBackgroundTexture,
-            detailFontScale,
+            infoFont,
+            infoFontColor,
+            null,
+//            stackBackgroundTexture,
+            infoFontScale,
             stackSpacing,
             cardScale,
             stackMinSize,
@@ -51,8 +59,20 @@ class CoverArea(
         )
     }
 
+    private val hoverDetailActor: CustomLabel =
+        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
+
+    init {
+        hoverDetailActor.setFontScale(detailFontScale)
+        hoverDetailActor.setAlignment(Align.center)
+        hoverDetailActor.isVisible = false
+        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
+        hoverDetailActor.wrap = true
+    }
+
     override fun init(screenDataProvider: ScreenDataProvider) {
         this.screenDataProvider = screenDataProvider
+        screenDataProvider.addActorToRoot(hoverDetailActor)
     }
 
     fun damage(damage: Int): Int {
@@ -108,13 +128,22 @@ class CoverArea(
         curY += height / 2
         curY += contentHeight / 2
 
+        var isCardHoveredOver = false
+
         for (stack in stacks) {
             curY -= stack.height
             stack.width = max(stack.prefWidth, stack.minWidth)
             stack.height = stack.prefHeight
             if (!stack.inAnimation) stack.setPosition(curX + width / 2 - stack.width / 2, curY)
             curY -= areaSpacing
+
+            for (card in stack.cards) if (card.actor.isHoveredOver) {
+                isCardHoveredOver = true
+                updateHoverDetailActor(card, stack)
+            }
         }
+
+        hoverDetailActor.isVisible = isCardHoveredOver
     }
 
     private fun initialise() {
@@ -139,6 +168,20 @@ class CoverArea(
         }
     }
 
+    private fun updateHoverDetailActor(card: Card, stack: CoverStack) {
+        hoverDetailActor.setText(card.description)
+
+        hoverDetailActor.width = detailWidth
+        hoverDetailActor.height = hoverDetailActor.prefHeight
+
+        val (x, y) = stack.localToStageCoordinates(Vector2(card.actor.x, card.actor.y))
+
+        hoverDetailActor.setPosition(
+            x + card.actor.width + detailOffset.x,
+            y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
+        )
+    }
+
 }
 
 class CoverStack(
@@ -146,7 +189,7 @@ class CoverStack(
     private val coverArea: CoverArea,
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
-    private val backgroundTexture: TextureRegion,
+    private val backgroundTexture: TextureRegion?,
     private val detailFontScale: Float,
     private val spacing: Float,
     private val cardScale: Float,
@@ -163,14 +206,14 @@ class CoverStack(
         private set
 
     private lateinit var screenDataProvider: ScreenDataProvider
-    private val cards: MutableList<Card> = mutableListOf()
+    private val _cards: MutableList<Card> = mutableListOf()
     private var lockedTurnNum: Int? = null
     var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
 
     var parentWidth: Float = Float.MAX_VALUE
 
     val numCards: Int
-        get() = cards.size
+        get() = _cards.size
 
     var isActive: Boolean = false
         set(value) {
@@ -178,11 +221,14 @@ class CoverStack(
             updateText()
         }
 
+    val cards: List<Card>
+        get() = _cards
+
     init {
         detailText.setFontScale(detailFontScale)
         updateText()
         addActor(detailText)
-        background = TextureRegionDrawable(backgroundTexture)
+        backgroundTexture?.let { background = TextureRegionDrawable(it) }
         align(Align.left)
         space(spacing)
         onClick {
@@ -201,8 +247,9 @@ class CoverStack(
 
     fun destroy() {
         currentHealth = 0
-        for (card in cards) removeActor(card.actor)
-        cards.clear()
+        baseHealth = 0
+        for (card in _cards) removeActor(card.actor)
+        _cards.clear()
         lockedTurnNum = null
         updateText()
     }
@@ -211,25 +258,21 @@ class CoverStack(
         this.screenDataProvider = screenDataProvider
     }
 
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-    }
-
     fun acceptsCard(turnNum: Int): Boolean {
-        if (cards.size >= maxCards) return false
+        if (_cards.size >= maxCards) return false
         if (lockedTurnNum != null && turnNum != lockedTurnNum) return false
         return true
     }
 
     fun addCard(card: Card, turnNum: Int) {
-        if (cards.size >= maxCards) {
+        if (_cards.size >= maxCards) {
             throw RuntimeException("cannot add another cover because max stack size is $maxCards")
         }
         if (lockedTurnNum != null && turnNum != lockedTurnNum) {
             throw RuntimeException("cannot add another cover because stack is locked")
         }
-        if (cards.isEmpty()) lockedTurnNum = turnNum
-        cards.add(card)
+        if (_cards.isEmpty()) lockedTurnNum = turnNum
+        _cards.add(card)
         card.actor.setScale(cardScale)
         // this workaround is needed because HorizontalGroup doesn't consider scaling when calculating the preferred
         // dimensions, causing the layout to break
