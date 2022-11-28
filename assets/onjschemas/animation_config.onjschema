@@ -1,0 +1,36 @@
+
+bufferTime: float
+
+shakeAnimation: {
+    xShake: float
+    yShake: float
+    xSpeed: float
+    ySpeed: float
+    duration: float
+}
+
+enemyChargeAnimation: {
+    xCharge: float
+    yCharge: float
+    duration: float
+    interpolation: string
+}
+
+playerLivesAnimation: {
+    font: string
+    negativeFontColor: string
+    positiveFontColor: string
+    fontScale: float
+    duration: float
+    startFadeoutAt: float
+    raiseHeight: float
+}
+
+bannerAnimation: {
+     duration: float
+     scaleAnimDuration: float
+     beginScale: float
+     endScale: float
+     playerTurnBanner: string
+     enemyTurnBanner: string
+}

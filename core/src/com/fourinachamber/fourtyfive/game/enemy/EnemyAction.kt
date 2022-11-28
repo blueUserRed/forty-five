@@ -19,6 +19,7 @@ import com.fourinachamber.fourtyfive.utils.plus
 import onj.OnjNamedObject
 import onj.OnjObject
 import onj.OnjValue
+import kotlin.properties.Delegates
 
 abstract class EnemyAction {
 
@@ -27,6 +28,13 @@ abstract class EnemyAction {
     abstract val descriptionText: String
 
     abstract fun execute(gameScreenController: GameScreenController): Timeline
+
+    companion object {
+
+        fun init(config: OnjObject) {
+            DamagePlayerEnemyAction.init(config)
+        }
+    }
 
 }
 
@@ -49,55 +57,10 @@ class DamagePlayerEnemyAction(
         screenDataProvider.particles[onj.get<String>("coverStackDestroyedParticles")]
         ?: throw RuntimeException("unknown particle: ${onj.get<String>("coverStackDestroyedParticles")}")
 
+    private val dmgFont: BitmapFont = screenDataProvider.fonts[dmgFontName] ?:
+        throw RuntimeException("unknown font: $dmgFontName")
+
     override val descriptionText: String = damage.toString()
-
-    private val xShake: Float
-    private val yShake: Float
-    private val xSpeedMultiplier: Float
-    private val ySpeedMultiplier: Float
-    private val shakeDuration: Float
-
-    private val xCharge: Float
-    private val yCharge: Float
-    private val chargeDuration: Float
-    private val chargeInterpolation: Interpolation
-
-    private val dmgFont: BitmapFont
-    private val dmgFontColor: Color
-    private val dmgFontScale: Float
-    private val dmgDuration: Int
-    private val dmgRaiseHeight: Float
-    private val dmgStartFadeoutAt: Int
-
-    private val bufferTime: Int
-
-    init {
-
-        //TODO: find a better way to do this
-
-        val effects = onj.get<OnjObject>("effects")
-
-        xShake = effects.get<Double>("xShake").toFloat()
-        yShake = effects.get<Double>("yShake").toFloat()
-        xSpeedMultiplier = effects.get<Double>("xShakeSpeed").toFloat()
-        ySpeedMultiplier = effects.get<Double>("yShakeSpeed").toFloat()
-        shakeDuration = effects.get<Double>("shakeDuration").toFloat()
-
-        xCharge = effects.get<Double>("xCharge").toFloat()
-        yCharge = effects.get<Double>("yCharge").toFloat()
-        chargeDuration = effects.get<Double>("chargeDuration").toFloat() / 2f // divide by two because anim is played twice
-        chargeInterpolation = Utils.interpolationOrError(effects.get<String>("chargeInterpolation"))
-
-        dmgFont = screenDataProvider.fonts[effects.get<String>("dmgFont")] ?:
-            throw RuntimeException("unknown font ${effects.get<String>("dmgFont")}")
-        dmgFontScale = effects.get<Double>("dmgFontScale").toFloat()
-        dmgDuration = (effects.get<Double>("dmgDuration") * 1000).toInt()
-        dmgRaiseHeight = effects.get<Double>("dmgRaiseHeight").toFloat()
-        dmgStartFadeoutAt = (effects.get<Double>("dmgStartFadeoutAt") * 1000).toInt()
-        dmgFontColor = Color.valueOf(effects.get<String>("dmgFontColor"))
-
-        bufferTime = (effects.get<Double>("bufferTime") * 1000).toInt()
-    }
 
     override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
         val shakeAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
@@ -128,8 +91,6 @@ class DamagePlayerEnemyAction(
         var activeStack: CoverStack? = null
         var remaining = 0
 
-        //TODO: improve timeline
-
         action { enemy.actor.addAction(moveByAction) }
 
         delayUntil { moveByAction.isComplete }
@@ -151,7 +112,6 @@ class DamagePlayerEnemyAction(
         action {
             remaining = gameScreenController.coverArea!!.damage(damage)
             if (remaining != damage) activeStack = gameScreenController.coverArea!!.getActive()
-//            activeStack?.addAction(shakeAction)
         }
 
         includeLater(
@@ -160,13 +120,6 @@ class DamagePlayerEnemyAction(
             },
             { activeStack != null }
         )
-
-//        delayUntil { shakeAction.isComplete }
-
-        action {
-//            activeStack?.removeAction(shakeAction)
-//            shakeAction.reset()
-        }
 
         delay(bufferTime)
 
@@ -209,8 +162,6 @@ class DamagePlayerEnemyAction(
 
         return Timeline.timeline {
 
-            delay(bufferTime)
-
             action {
                 particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
 
@@ -237,6 +188,59 @@ class DamagePlayerEnemyAction(
             delayUntil { particle?.isComplete ?: true }
 
         }
+    }
+
+    companion object {
+
+        private var xShake by Delegates.notNull<Float>()
+        private var yShake by Delegates.notNull<Float>()
+        private var xSpeedMultiplier by Delegates.notNull<Float>()
+        private var ySpeedMultiplier by Delegates.notNull<Float>()
+        private var shakeDuration by Delegates.notNull<Float>()
+
+        private var xCharge by Delegates.notNull<Float>()
+        private var yCharge by Delegates.notNull<Float>()
+        private var chargeDuration by Delegates.notNull<Float>()
+        private lateinit var chargeInterpolation: Interpolation
+
+        private lateinit var dmgFontName: String
+        private lateinit var dmgFontColor: Color
+        private var dmgFontScale by Delegates.notNull<Float>()
+        private var dmgDuration by Delegates.notNull<Int>()
+        private var dmgRaiseHeight by Delegates.notNull<Float>()
+        private var dmgStartFadeoutAt by Delegates.notNull<Int>()
+
+        private var bufferTime by Delegates.notNull<Int>()
+
+        fun init(config: OnjObject) {
+
+            val shakeOnj = config.get<OnjObject>("shakeAnimation")
+
+            xShake = shakeOnj.get<Double>("xShake").toFloat()
+            yShake = shakeOnj.get<Double>("yShake").toFloat()
+            xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
+            ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
+            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
+
+            val chargeOnj = config.get<OnjObject>("enemyChargeAnimation")
+
+            xCharge = chargeOnj.get<Double>("xCharge").toFloat()
+            yCharge = chargeOnj.get<Double>("yCharge").toFloat()
+            chargeDuration = chargeOnj.get<Double>("duration").toFloat() / 2f // divide by two because anim is played twice
+            chargeInterpolation = Utils.interpolationOrError(chargeOnj.get<String>("interpolation"))
+
+            val dmgOnj = config.get<OnjObject>("playerLivesAnimation")
+
+            dmgFontName = dmgOnj.get<String>("font")
+            dmgFontScale = dmgOnj.get<Double>("fontScale").toFloat()
+            dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
+            dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
+            dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
+            dmgFontColor = Color.valueOf(dmgOnj.get<String>("negativeFontColor"))
+
+            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
+        }
+
     }
 
 }
