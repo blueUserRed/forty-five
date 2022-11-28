@@ -11,6 +11,7 @@ import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.*
+import kotlin.properties.Delegates
 
 
 /**
@@ -372,7 +373,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
-        card.checkEffects(trigger, this)?.let { executeTimelineImmediate(it) }
+        card.checkEffects(trigger, this)?.let { executeTimelineLater(it) }
     }
 
     private fun checkEffectsActiveCards(trigger: Trigger) {
@@ -382,7 +383,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 if (timeline != null) include(timeline)
             }
         }
-        executeTimelineImmediate(timeline)
+        executeTimelineLater(timeline)
     }
 
     private fun executeTimelineImmediate(timeline: Timeline) {
@@ -529,23 +530,21 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 val timeline = Timeline.timeline {
 
-                    //TODO: put these numbers in an onj file
-
                     val enemyBannerAnim = BannerAnimation(
-                        curScreen!!.textures["enemy_turn_banner"]!!,
+                        curScreen!!.textures[enemyTurnBannerName]!!,
                         curScreen!!,
-                        1500,
-                        900,
-                        0.12f,
-                        0.09f
+                        bannerAnimDuration,
+                        bannerScaleAnimDuration,
+                        bannerBeginScale,
+                        bannerEndScale
                     )
                     val playerBannerAnim = BannerAnimation(
-                        curScreen!!.textures["player_turn_banner"]!!,
+                        curScreen!!.textures[playerTurnBannerName]!!,
                         curScreen!!,
-                        1500,
-                        900,
-                        0.12f,
-                        0.09f
+                        bannerAnimDuration,
+                        bannerScaleAnimDuration,
+                        bannerBeginScale,
+                        bannerEndScale
                     )
 
                     action {
@@ -553,15 +552,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                         playGameAnimation(enemyBannerAnim)
                     }
                     delayUntil { enemyBannerAnim.isFinished() }
-                    delay(800)
+                    delay(bufferTime)
                     include(enemies[0].doAction(gameScreenController))
-                    delay(500)
+                    delay(bufferTime)
                     action {
                         enemies[0].resetAction()
                         playGameAnimation(playerBannerAnim)
                     }
                     delayUntil { playerBannerAnim.isFinished() }
-                    delay(500)
+                    delay(bufferTime)
                     action {
                         unfreezeUI()
                         changePhase(INITIAL_DRAW)
@@ -599,6 +598,32 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     companion object {
+
+        private var bufferTime by Delegates.notNull<Int>()
+
+        private var bannerAnimDuration by Delegates.notNull<Int>()
+        private var bannerScaleAnimDuration by Delegates.notNull<Int>()
+        private var bannerBeginScale by Delegates.notNull<Float>()
+        private var bannerEndScale by Delegates.notNull<Float>()
+
+        private lateinit var playerTurnBannerName: String
+        private lateinit var enemyTurnBannerName: String
+
+        fun init(config: OnjObject) {
+
+            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
+
+            val bannerOnj = config.get<OnjObject>("bannerAnimation")
+
+            bannerAnimDuration = (bannerOnj.get<Double>("duration") * 1000).toInt()
+            bannerScaleAnimDuration = (bannerOnj.get<Double>("scaleAnimDuration") * 1000).toInt()
+            bannerBeginScale = bannerOnj.get<Double>("beginScale").toFloat()
+            bannerEndScale = bannerOnj.get<Double>("endScale").toFloat()
+
+            playerTurnBannerName = bannerOnj.get<String>("playerTurnBanner")
+            enemyTurnBannerName = bannerOnj.get<String>("enemyTurnBanner")
+
+        }
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
