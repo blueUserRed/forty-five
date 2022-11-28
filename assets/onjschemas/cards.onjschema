@@ -16,6 +16,7 @@ $CardType [
     traitEffects: string[*]
     cost: int
     type: $CardType
+    effects: Effect[*]
 }
 
 defaultBullet: {
@@ -25,6 +26,7 @@ defaultBullet: {
     traitEffects: string[*]
     cost: int
     baseDamage: int
+    effects: Effect[*]
 }
 
 defaultCover: {
@@ -33,6 +35,7 @@ defaultCover: {
     description: string
     cost: int
     coverValue: int
+    effects: Effect[*]
 }
 
 cards: !card[*]

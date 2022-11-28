@@ -6,13 +6,16 @@ import com.badlogic.gdx.utils.TimeUtils
  * tool for timing (currently only sequential) tasks. can be created directly using a list of TimelineActions or using
  * [timeline]
  */
-class Timeline(private val actions: MutableList<TimelineAction>) {
+class Timeline(private val _actions: MutableList<TimelineAction>) {
 
     /**
      * true when the timeline has finished
      */
     var isFinished: Boolean = false
         private set
+
+    val actions: List<TimelineAction>
+        get() = _actions
 
     private var hasBeenStarted: Boolean = false
 
@@ -23,11 +26,11 @@ class Timeline(private val actions: MutableList<TimelineAction>) {
      */
     fun start() {
         hasBeenStarted = true
-        if (actions.isEmpty()) {
+        if (_actions.isEmpty()) {
             isFinished = true
             return
         }
-        actions.first().start(this)
+        _actions.first().start(this)
     }
 
     /**
@@ -36,22 +39,26 @@ class Timeline(private val actions: MutableList<TimelineAction>) {
     fun update() {
         if (isFinished || !hasBeenStarted) return
         while (true) {
-            val first = actions.first()
+            val first = _actions.first()
             first.update()
             if (first.isFinished()) {
                 first.end()
-                actions.removeFirst()
-                for (action in pushActionsBuffer) actions.add(0, action)
+                _actions.removeFirst()
+                for (action in pushActionsBuffer) _actions.add(0, action)
                 pushActionsBuffer.clear()
-                if (actions.isEmpty()) break
-                actions.first().start(this)
+                if (_actions.isEmpty()) break
+                _actions.first().start(this)
             } else break
         }
-        if (actions.isEmpty()) isFinished = true
+        if (_actions.isEmpty()) isFinished = true
     }
 
     fun pushAction(timelineAction: TimelineAction) {
-        pushActionsBuffer.add(0, timelineAction)
+        pushActionsBuffer.add(timelineAction)
+    }
+
+    fun appendAction(timelineAction: TimelineAction) {
+        _actions.add(timelineAction)
     }
 
     /**
@@ -111,7 +118,7 @@ class Timeline(private val actions: MutableList<TimelineAction>) {
          */
         fun include(timeline: Timeline) {
             if (timeline.hasBeenStarted) throw RuntimeException("cannot include a timeline which was started already")
-            timelineActions.addAll(timeline.actions)
+            timelineActions.addAll(timeline._actions)
         }
 
         fun includeLater(timelineCreator: () -> Timeline, condition: () -> Boolean) {
@@ -120,7 +127,7 @@ class Timeline(private val actions: MutableList<TimelineAction>) {
                 override fun start(timeline: Timeline) {
                     if (condition()) {
                         val timelineToInclude = timelineCreator()
-                        for (action in timelineToInclude.actions) timeline.pushAction(action)
+                        for (action in timelineToInclude._actions.reversed()) timeline.pushAction(action)
                     }
                 }
 

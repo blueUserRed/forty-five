@@ -1,9 +1,13 @@
 package com.fourinachamber.fourtyfive.card
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.game.OnjExtensions
+import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
+import com.fourinachamber.fourtyfive.utils.Timeline
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.OnjArray
@@ -25,7 +29,8 @@ class Card(
     val type: Type,
     val baseDamage: Int,
     val coverValue: Int,
-    val cost: Int
+    val cost: Int,
+    val effects: List<Effect>
 ) {
 
     /**
@@ -42,6 +47,9 @@ class Card(
      * true when [actor] is in an animation
      */
     var inAnimation: Boolean = false
+
+    var inGame: Boolean = false
+        private set
 
     var curDamage: Int = baseDamage
         private set(value) {
@@ -70,8 +78,29 @@ class Card(
         }
     }
 
+    fun onEnter(gameScreenController: GameScreenController) {
+        inGame = true
+    }
+
+    fun onRoundStart(gameScreenController: GameScreenController) {
+    }
+
     fun onRevolverTurn(toBeShot: Boolean) {
         if (isRotten && !toBeShot) curDamage--
+    }
+
+    fun checkEffects(trigger: Trigger, gameScreenController: GameScreenController): Timeline? {
+        var wasEffectWithTimelineTriggered = false
+        val timeline = Timeline.timeline {
+            for (effect in effects) {
+                val effectTimeline = effect.checkTrigger(trigger, gameScreenController)
+                if (effectTimeline != null) {
+                    include(effectTimeline)
+                    wasEffectWithTimelineTriggered = true
+                }
+            }
+        }
+        return if (wasEffectWithTimelineTriggered) timeline else null
     }
 
     private fun updateText() {
@@ -105,30 +134,35 @@ class Card(
          */
         fun getFrom(cards: OnjArray, regions: Map<String, TextureRegion>): List<Card> = cards
             .value
-            .map {
-                it as OnjObject
-                val name = it.get<String>("name")
+            .map { onj ->
+                onj as OnjObject
+                val name = onj.get<String>("name")
 
                 val card = Card(
                     name,
                     regions["$cardTexturePrefix$name"]
                         ?: throw RuntimeException("cannot find texture for card $name"),
 
-                    it.get<String>("description"),
+                    onj.get<String>("description"),
 
-                    when (val type = it.get<OnjNamedObject>("type").name) {
+                    when (val type = onj.get<OnjNamedObject>("type").name) {
                         "Bullet" -> Type.BULLET
                         "Cover" -> Type.COVER
                         "OneShot" -> Type.ONE_SHOT
                         else -> throw RuntimeException("unknown Card type: $type")
                     },
 
-                    it.get<Long>("baseDamage").toInt(),
-                    it.get<Long>("coverValue").toInt(),
-                    it.get<Long>("cost").toInt()
+                    onj.get<Long>("baseDamage").toInt(),
+                    onj.get<Long>("coverValue").toInt(),
+                    onj.get<Long>("cost").toInt(),
+
+                    onj.get<OnjArray>("effects")
+                        .value
+                        .map { (it as OnjExtensions.OnjEffect).value }
                 )
 
-                applyTraitEffects(card, it)
+                for (effect in card.effects) effect.card = card
+                applyTraitEffects(card, onj)
                 card
             }
 
