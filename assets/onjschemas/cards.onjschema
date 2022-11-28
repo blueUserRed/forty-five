@@ -13,7 +13,26 @@ $CardType [
     description: string
     baseDamage: int
     coverValue: int
+    traitEffects: string[*]
+    cost: int
     type: $CardType
+}
+
+defaultBullet: {
+    name: string
+    title: string
+    description: string
+    traitEffects: string[*]
+    cost: int
+    baseDamage: int
+}
+
+defaultCover: {
+    name: string
+    title: string
+    description: string
+    cost: int
+    coverValue: int
 }
 
 cards: !card[*]

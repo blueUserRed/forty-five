@@ -169,9 +169,10 @@ open class CustomLabel(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor(private val region: TextureRegion) : Image(region), Maskable, ZIndexActor {
+open class CustomImageActor(private val region: TextureRegion) : Image(region), Maskable, ZIndexActor, DisableActor {
 
     override var fixedZIndex: Int = 0
+    override var isDisabled: Boolean = false
 
     override var mask: Texture? = null
     override var invert: Boolean = false
