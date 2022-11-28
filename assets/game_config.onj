@@ -22,7 +22,7 @@ import "imports/colors.onj" as color
                 chargeDuration: 0.5
                 chargeInterpolation: "swing"
 
-                dmgFont: "distance_field"
+                dmgFont: "vanilla_whale"
                 dmgFontColor: !color.red
                 dmgFontScale: 0.2
                 dmgDuration: 1.5
@@ -47,7 +47,7 @@ enemyConfig: {
             offsetY: 20.0
             scaleX: 0.03
             scaleY: 0.03
-            detailFont: "distance_field"
+            detailFont: "vanilla_whale"
             detailFontScale: 2.0
             detailFontColor: !color.blue
         }

@@ -11,7 +11,7 @@ defaultBullet: {
 defaultCover: {
     name: "crate"
     title: "crate"
-    description: "It's the default cover! You ran out of cover cards!"
+    description: "ITS THE DEFAULT COVER! YOU RAN OUT OF COVER CARDS!"
     cost: 1
     coverValue: 5
 }

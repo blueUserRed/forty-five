@@ -21,7 +21,7 @@ import "game_config.onj" as gameConfig
 }
 
 !sharedDetailTextKeys = {
-    detailFont: "distance_field"
+    detailFont: "vanilla_whale"
     detailFontColor: !color.white
     detailBackgroundTexture: "card_detail_background"
     detailFontScale: 0.07
@@ -78,6 +78,12 @@ assets: {
             name: "distance_field"
             fontFile: "fonts/distanceField.fnt"
             imageFile: "fonts/distanceField.png"
+        }
+
+        $DistanceFieldFont {
+            name: "vanilla_whale"
+            fontFile: "fonts/vanilla_whale.fnt"
+            imageFile: "fonts/vanilla_whale.png"
         }
 
     ]
@@ -156,7 +162,7 @@ options: {
 !revolver = $Revolver {
     name: "revolver"
     slotTexture: "revolver_slot"
-    font: "distance_field"
+    font: "vanilla_whale"
     fontColor: !color.white
     fontScale: 0.25
     slotScale: !slotScale
@@ -194,7 +200,7 @@ options: {
     name: "cover_area"
     numStacks: 2
     maxCards: 3
-    infoFont: "distance_field"
+    infoFont: "vanilla_whale"
     infoFontColor: !color.black
     infoFontScale: 0.1
     stackBackgroundTexture: "card_detail_background"
@@ -281,7 +287,7 @@ options: {
                                 colspan: 2
                                 element: $Label {
                                     name: "player_lives_label"
-                                    font: "distance_field"
+                                    font: "vanilla_whale"
                                     text: ""
                                     fontScale: 0.09
                                     color: !color.white
@@ -297,7 +303,7 @@ options: {
                                 colspan: 2
                                 element: $Label {
                                     name: "reserves_label"
-                                    font: "distance_field"
+                                    font: "vanilla_whale"
                                     text: ""
                                     fontScale: 0.09
                                     color: !color.white
@@ -358,8 +364,8 @@ options: {
 
                 {
                     element: $Label {
-                        font: "distance_field"
-                        text: "Bullets"
+                        font: "vanilla_whale"
+                        text: "BULLETS"
                         fontScale: 0.15
                         align: "center"
                         color: !color.white
@@ -369,8 +375,8 @@ options: {
 
                 {
                     element: $Label {
-                        font: "distance_field"
-                        text: "Cover Cards"
+                        font: "vanilla_whale"
+                        text: "COVER CARDS"
                         fontScale: 0.15
                         align: "center"
                         color: !color.white
