@@ -35,6 +35,10 @@ assets: {
         {
             name: "arial"
             file: "fonts/arial.fnt"
+        },
+        {
+            name: "card_character"
+            file: "fonts/card_character.fnt"
         }
     ]
 }
@@ -42,7 +46,7 @@ assets: {
 !titleElementSharedKeys = {
     x: 10
     y: 10
-    font: "arial"
+    font: "card_character"
     fontScale: 1.0
 }
 
