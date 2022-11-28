@@ -161,7 +161,7 @@ class Revolver(
 
         hoverDetailActor.setPosition(
             x + prefWidth + detailOffset.x,
-            y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
+            y + prefHeight / 2 - hoverDetailActor.height / 2 + detailOffset.y
         )
     }
 

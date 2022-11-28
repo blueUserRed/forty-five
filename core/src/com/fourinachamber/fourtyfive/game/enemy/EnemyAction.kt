@@ -127,7 +127,6 @@ class DamagePlayerEnemyAction(
 
         var activeStack: CoverStack? = null
         var remaining = 0
-        var doingCoverAreaAnim = false
 
         //TODO: improve timeline
 
@@ -152,61 +151,92 @@ class DamagePlayerEnemyAction(
         action {
             remaining = gameScreenController.coverArea!!.damage(damage)
             if (remaining != damage) activeStack = gameScreenController.coverArea!!.getActive()
-            val wasDestroyed = activeStack?.currentHealth == 0
-            activeStack?.let {
-                if (!wasDestroyed) it.addAction(shakeAction)
-                spawnParticlesForStack(it, gameScreenController.curScreen!!, wasDestroyed)
-            }
-            doingCoverAreaAnim = remaining != damage && !wasDestroyed
+//            activeStack?.addAction(shakeAction)
         }
 
-        delayUntil { !doingCoverAreaAnim || shakeAction.isComplete }
+        includeLater(
+            {
+                getStackParticlesTimeline(activeStack!!, screenDataProvider, activeStack!!.currentHealth == 0)
+            },
+            { activeStack != null }
+        )
 
-        delay(bufferTime * 3)
+//        delayUntil { shakeAction.isComplete }
 
         action {
-            if (doingCoverAreaAnim) activeStack?.removeAction(shakeAction)
-            shakeAction.reset()
-            gameScreenController.damagePlayer(remaining)
-            if (remaining != 0) {
+//            activeStack?.removeAction(shakeAction)
+//            shakeAction.reset()
+        }
+
+        delay(bufferTime)
+
+        includeLater(
+            { getPlayerDamagedTimeline(remaining, shakeAction, gameScreenController, textAnimation) },
+            { remaining != 0 }
+        )
+    }
+
+    private fun getPlayerDamagedTimeline(
+        damage: Int,
+        shakeAction: ShakeActorAction,
+        gameScreenController: GameScreenController,
+        textAnimation: TextAnimation
+    ): Timeline {
+
+        val playerLivesLabel = gameScreenController.playerLivesLabel!!
+
+        return Timeline.timeline {
+
+            action {
+                gameScreenController.damagePlayer(damage)
                 playerLivesLabel.addAction(shakeAction)
-                textAnimation.text = "-$remaining"
+                textAnimation.text = "-$damage"
                 gameScreenController.playGameAnimation(textAnimation)
             }
-        }
 
-        delayUntil { remaining == 0 || (shakeAction.isComplete && textAnimation.isFinished()) }
+            delayUntil { textAnimation.isFinished() }
 
-        action {
-            if (remaining != 0) playerLivesLabel.removeAction(shakeAction)
         }
     }
 
-    private fun spawnParticlesForStack(
+    private fun getStackParticlesTimeline(
         coverStack: CoverStack,
         screenDataProvider: ScreenDataProvider,
         wasDestroyed: Boolean
-    ) {
-        val particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
+    ): Timeline {
 
-        val particleActor = ParticleEffectActor(particle, true)
-        particleActor.isAutoRemove = true
+        var particle: ParticleEffect? = null
 
-        if (wasDestroyed) {
-            particleActor.setPosition(
-                coverStack.x + coverStack.width / 2,
-                coverStack.y + coverStack.height / 2
-            )
-        } else {
-            val width = particle.emitters[0].spawnWidth.highMax
-            particleActor.setPosition(
-                coverStack.x + coverStack.width / 2 - width / 2,
-                coverStack.y
-            )
+        return Timeline.timeline {
+
+            delay(bufferTime)
+
+            action {
+                particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
+
+                val particleActor = ParticleEffectActor(particle, true)
+                particleActor.isAutoRemove = true
+
+                if (wasDestroyed) {
+                    particleActor.setPosition(
+                        coverStack.x + coverStack.width / 2,
+                        coverStack.y + coverStack.height / 2
+                    )
+                } else {
+                    val width = particle!!.emitters[0].spawnWidth.highMax
+                    particleActor.setPosition(
+                        coverStack.x + coverStack.width / 2 - width / 2,
+                        coverStack.y
+                    )
+                }
+
+                screenDataProvider.addActorToRoot(particleActor)
+                particleActor.start()
+            }
+
+            delayUntil { particle?.isComplete ?: true }
+
         }
-
-        screenDataProvider.addActorToRoot(particleActor)
-        particleActor.start()
     }
 
 }
