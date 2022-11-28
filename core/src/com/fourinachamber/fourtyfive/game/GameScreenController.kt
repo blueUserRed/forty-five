@@ -195,8 +195,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 Card.Type.BULLET,
                 bulletDamage,
                 0,
-                bulletCost
+                bulletCost,
+                bulletOnj.get<OnjArray>("effects")
+                    .value
+                    .map { (it as OnjExtensions.OnjEffect).value }
             )
+            for (effect in card.effects) effect.card = card
             doDragAndDropFor(card)
             Card.applyTraitEffects(card, onj)
             card
@@ -217,8 +221,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 Card.Type.COVER,
                 0,
                 coverValue,
-                coverCost
+                coverCost,
+                coverOnj.get<OnjArray>("effects")
+                    .value
+                    .map { (it as OnjExtensions.OnjEffect).value }
             )
+            for (effect in card.effects) effect.card = card
             doDragAndDropFor(card)
             card
         }
@@ -313,6 +321,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (!cost(card.cost)) return
         cardHand!!.removeCard(card)
         revolver!!.setCard(slot, card)
+        card.onEnter(this)
+        checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }
 
     /**
@@ -323,6 +333,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (!cost(card.cost)) return
         val addedCard = coverArea!!.addCover(card, slot, roundCounter)
         if (addedCard) cardHand!!.removeCard(card)
+        card.onEnter(this)
+        checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }
 
     /**
@@ -343,6 +355,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         enemy.damage(cardToShoot.curDamage)
         if (cardToShoot.shouldRemoveAfterShot) revolver!!.removeCard(4)
         cardToShoot.afterShot(this)
+
+        checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
     }
 
     fun endTurn() {
@@ -351,6 +365,40 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     fun damagePlayer(damage: Int) {
         curPlayerLives -= damage
+    }
+
+    fun gainReserves(amount: Int) {
+        curReserves += amount
+    }
+
+    private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
+        card.checkEffects(trigger, this)?.let { executeTimelineImmediate(it) }
+    }
+
+    private fun checkEffectsActiveCards(trigger: Trigger) {
+        val timeline = Timeline.timeline {
+            for (card in cards) if (card.inGame) {
+                val timeline = card.checkEffects(trigger, this@GameScreenController)
+                if (timeline != null) include(timeline)
+            }
+        }
+        executeTimelineImmediate(timeline)
+    }
+
+    private fun executeTimelineImmediate(timeline: Timeline) {
+        if (this.timeline != null) {
+            for (action in timeline.actions.reversed()) this.timeline!!.pushAction(action)
+        } else {
+            this.timeline = timeline
+        }
+    }
+
+    private fun executeTimelineLater(timeline: Timeline) {
+        if (this.timeline != null) {
+            for (action in timeline.actions) this.timeline!!.appendAction(action)
+        } else {
+            this.timeline = timeline
+        }
     }
 
     private fun freezeUI() {
@@ -466,6 +514,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         FREE {
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 curReserves = baseReserves
+                checkEffectsActiveCards(Trigger.ON_ROUND_START)
             }
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = FREE
@@ -478,7 +527,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         ENEMY_ACTION {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
-                timeline = Timeline.timeline {
+                val timeline = Timeline.timeline {
+
+                    //TODO: put these numbers in an onj file
 
                     val enemyBannerAnim = BannerAnimation(
                         curScreen!!.textures["enemy_turn_banner"]!!,
@@ -516,6 +567,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                         changePhase(INITIAL_DRAW)
                     }
                 }
+
+                executeTimelineLater(timeline)
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) {}

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.fourinachamber.fourtyfive.card.CardGenerator
+import com.fourinachamber.fourtyfive.game.OnjExtensions
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 
 /**
@@ -24,9 +25,10 @@ object FourtyFive : Game() {
     private lateinit var menuScreen: Screen
 
     override fun create() {
-        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-        cardGenerator.prepare()
-        cardGenerator.generateCards()
+        OnjExtensions.init()
+//        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+//        cardGenerator.prepare()
+//        cardGenerator.generateCards()
         menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen.onj")).build()
         curScreen = menuScreen
     }
