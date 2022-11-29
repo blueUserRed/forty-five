@@ -15,6 +15,13 @@ object OnjExtensions {
                 triggerOrError(it[0].value as String),
                 (it[1].value as Long).toInt()
             ))
+        },
+
+        OnjFunction("draw", listOf(OnjString::class, OnjInt::class)) {
+            OnjEffect(Effect.Draw(
+                triggerOrError(it[0].value as String),
+                (it[1].value as Long).toInt()
+            ))
         }
 
     )
