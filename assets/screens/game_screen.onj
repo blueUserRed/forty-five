@@ -251,7 +251,7 @@ options: {
                                         $OnClickChangePostProcessorBehaviour {
                                             postProcessor: "earthquake"
                                             duration: 70
-                                            setOnlyIfNoPostProcessorIsSet: false
+                                            setOnlyIfNoPostProcessorIsSet: true
                                         }
                                         $ShootButtonBehaviour { },
                                         !buttonHoverBehaviour
