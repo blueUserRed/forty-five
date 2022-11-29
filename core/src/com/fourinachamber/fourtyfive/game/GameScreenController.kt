@@ -228,7 +228,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             )
             for (effect in card.effects) effect.card = card
             doDragAndDropFor(card)
-            Card.applyTraitEffects(card, onj)
+            Card.applyTraitEffects(card, bulletOnj)
             card
         }
 
@@ -367,10 +367,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      * shoots the revolver
      */
     fun shoot() {
-        val cardToShoot = revolver!!.getCardInSlot(5)
-        revolver!!.rotate()
+        val revolver = revolver!!
 
-        revolver!!
+        val cardToShoot = revolver.getCardInSlot(5)
+        val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
+        if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
+
+        revolver
             .slots
             .mapNotNull { it.card }
             .forEach { it.onRevolverTurn(it === cardToShoot) }
@@ -379,7 +382,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         val enemy = enemyArea!!.enemies[0]
         enemy.damage(cardToShoot.curDamage)
-        if (cardToShoot.shouldRemoveAfterShot) revolver!!.removeCard(4)
+        if (cardToShoot.shouldRemoveAfterShot) {
+            revolver.removeCard(if (rotateLeft) 1 else 4)
+        }
         cardToShoot.afterShot(this)
 
         checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
@@ -556,6 +561,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         ENEMY_REVEAL {
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 enemies[0].chooseNewAction()
+                checkEffectsActiveCards(Trigger.ON_ROUND_START)
+                curReserves = baseReserves
                 changePhase(FREE)
             }
             override fun transitionAway(gameScreenController: GameScreenController) {}
@@ -567,10 +574,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
          * main game phase
          */
         FREE {
-            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
-                curReserves = baseReserves
-                checkEffectsActiveCards(Trigger.ON_ROUND_START)
-            }
+            override fun transitionTo(gameScreenController: GameScreenController) {}
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = FREE
             override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
