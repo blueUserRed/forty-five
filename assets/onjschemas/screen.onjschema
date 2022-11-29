@@ -204,7 +204,7 @@ $Widget [
 
 ]
 
-$Behaviour [
+    $Behaviour [
 
     $MouseHoverBehaviour {
         useSystemCursor: boolean

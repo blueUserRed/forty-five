@@ -22,6 +22,8 @@ object FourtyFive : Game() {
         }
 
     private lateinit var menuScreen: Screen
+    private lateinit var gameScreen: Screen
+
 
     override fun create() {
         val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))

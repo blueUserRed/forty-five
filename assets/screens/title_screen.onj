@@ -1,0 +1,160 @@
+import "imports/colors.onj" as color
+
+!worldWidth = 160.0
+!worldHeight = 90.0
+
+viewport: $FitViewport {
+    worldWidth: !worldWidth
+    worldHeight: !worldHeight
+    backgroundTexture: "background3"
+}
+
+!topRow = {
+    width: <!worldWidth>
+    cells: [
+        /*{
+            width: <!worldWidth / 3>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }*/
+        {
+            height: <!worldHeight/3>
+            align: "right"
+            element: $Image {
+                textureName: "logo"
+                scaleX: 0.25
+                scaleY: 0.25
+            }
+        }
+    ]
+}
+
+!middleRow = {
+    cells: [
+        {
+            width: <!worldWidth - (2*(!worldWidth/5))>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+        {
+            width: <2*(!worldWidth/5)>
+            align: "right"
+            height: <!worldHeight/5>
+            element: $Label {
+                name: "load_game"
+                text: "Continue"
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+    ]
+}
+
+!middle2Row = {
+    cells: [
+        {
+            width: <!worldWidth - (2*(!worldWidth/5))>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+        {
+            align: "right"
+            width: <2*(!worldWidth/5)>
+            height: <!worldHeight/5>
+            element: $Label {
+                name: "play"
+                text: "Play"
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.5
+                behaviours: [
+                    $OnClickChangeScreenBehaviour {
+                        screenPath: "./screens/game_screen.onj"
+                    }
+                ]
+            }
+        }
+    ]
+}
+
+!bottomRow = {
+    cells : [
+        {
+            width: <!worldWidth - (2*(!worldWidth/5))>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+        {
+            align: "right"
+            width: <2*(!worldWidth/5)>
+            height: <!worldHeight/5>
+            element: $Label {
+                name: "quit"
+                text: "Quit"
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+                behaviours : [
+                    $OnClickExitBehaviour{}
+                ]
+            }
+        }
+    ]
+}
+
+children: [
+    $Table {
+//        fillX: true
+//        fillY: true
+        debug: true
+        rows: [ !topRow, !middleRow, !middle2Row, !bottomRow ]
+    }
+]
+
+assets: {
+    textures: []
+    fonts: [
+        $DistanceFieldFont {
+            name: "distance_field"
+            fontFile: "fonts/distanceField.fnt"
+            imageFile: "fonts/distanceField.png"
+        }
+    ]
+    textureAtlases: [
+        {
+            file: "textures/packed/title_screen/title_screen.atlas"
+            defines: [ "background3" "logo"]
+        }
+    ]
+    cursors: []
+    postProcessors: []
+    animations: []
+    colorTextures: []
+}
+
+options: {
+    setFillParentOnRoot: true
+    defaultCursor: {
+        useSystemCursor: true
+        cursorName: "arrow"
+    }
+    postProcessor: null
+    controller: null
+}
