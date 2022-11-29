@@ -7,7 +7,9 @@ import com.fourinachamber.fourtyfive.game.OnjExtensions
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
+import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
+import com.fourinachamber.fourtyfive.utils.toBuilder
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.OnjArray
@@ -52,10 +54,14 @@ class Card(
         private set
 
     var curDamage: Int = baseDamage
-        private set(value) {
-            if (value < 0) return
-            field = value
-            updateText()
+        private set
+        get() {
+            if (!isDamageDirty) return field
+            var cur = baseDamage
+            for (modifier in modifiers) cur += modifier.damage
+            field = cur
+            isDamageDirty = false
+            return cur
         }
 
     var description = ""
@@ -68,14 +74,56 @@ class Card(
     val shouldRemoveAfterShot: Boolean
         get() = !isEverlasting
 
+    private lateinit var rottenModifier: CardModifier
+
+    private val modifiers: MutableList<CardModifier> = mutableListOf()
+
+    private var isDamageDirty: Boolean = true
+
     init {
         updateText()
+    }
+
+    private fun initRottenModifier() {
+        rottenModifier = CardModifier(0, null) { true }
+        modifiers.add(rottenModifier)
+        updateText()
+    }
+
+    private fun updateRottenModifier(newDamage: Int) {
+        modifiers.remove(rottenModifier)
+        rottenModifier = CardModifier(
+            newDamage,
+            TemplateString(rottenDetailTextRawString, mapOf("damageLost" to { newDamage }))
+        ) { true }
+        modifiers.add(rottenModifier)
+        isDamageDirty = true
+        updateText()
+    }
+
+    fun checkModifierValidity() {
+        val iterator = modifiers.iterator()
+        while (iterator.hasNext()) {
+            val modifier = iterator.next()
+            if (!modifier.validityChecker()) {
+                iterator.remove()
+                isDamageDirty = true
+            }
+        }
+        if (isDamageDirty) updateText()
     }
 
     fun afterShot(gameScreenController: GameScreenController) {
         if (isUndead) {
             gameScreenController.cardHand!!.addCard(this)
         }
+        inGame = false
+    }
+
+    fun addModifier(modifier: CardModifier) {
+        modifiers.add(modifier)
+        isDamageDirty = true
+        updateText()
     }
 
     fun onEnter(gameScreenController: GameScreenController) {
@@ -86,7 +134,7 @@ class Card(
     }
 
     fun onRevolverTurn(toBeShot: Boolean) {
-        if (isRotten && !toBeShot) curDamage--
+        if (isRotten && !toBeShot) updateRottenModifier(rottenModifier.damage - 1)
     }
 
     fun checkEffects(trigger: Trigger, gameScreenController: GameScreenController): Timeline? {
@@ -104,7 +152,8 @@ class Card(
     }
 
     private fun updateText() {
-        description = """
+        val builder = """
+            
             $shortDescription
             
             cost: $cost
@@ -115,7 +164,15 @@ class Card(
                     "cover value: $coverValue"
                 }
             }
-        """.trimIndent()
+            
+            
+        """.trimIndent().toBuilder()
+
+        for (modifier in modifiers) if (modifier.description != null) {
+            builder.append(modifier.description.string).append("\n")
+        }
+
+        description = builder.toString()
     }
 
     override fun toString(): String {
@@ -176,10 +233,20 @@ class Card(
 
                 "everlasting" -> card.isEverlasting = true
                 "undead" -> card.isUndead = true
-                "rotten" -> card.isRotten = true
+                "rotten" -> {
+                    card.isRotten = true
+                    card.initRottenModifier()
+                }
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
+        }
+
+        private lateinit var rottenDetailTextRawString: String
+
+        fun init(config: OnjObject) {
+            val tmplOnj = config.get<OnjObject>("stringTemplates")
+            rottenDetailTextRawString = tmplOnj.get<String>("rottenDetailText")
         }
 
     }
@@ -187,6 +254,12 @@ class Card(
     enum class Type {
         BULLET, COVER, ONE_SHOT
     }
+
+    data class CardModifier(
+        val damage: Int,
+        val description: TemplateString?,
+        val validityChecker: () -> Boolean
+    )
 
 }
 

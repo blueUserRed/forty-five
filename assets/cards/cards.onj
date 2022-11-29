@@ -5,7 +5,7 @@ defaultBullet: {
     description: "It's the default bullet! You ran out of bullets!"
     traitEffects: []
     cost: 1
-    baseDamage: 5,
+    baseDamage: 6,
     effects: []
 }
 
@@ -23,53 +23,42 @@ cards: [
     // Bullets ----------------------------------
 
     { // 0
-        name: "test_card1"
-        title: "test \ncard 1"
+        name: "placeholder1"
+        title: "placeholder 1"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 1
+        coverValue: 0
+        traitEffects: []
+        effects: []
+        cost: 1
+        type: $Bullet { }
+    }
+    { // 1
+        name: "workerBullet"
+        title: "worker Bullet"
+        description: "It's a bullet!"
+        baseDamage: 5
         coverValue: 0
         traitEffects: []
         effects: [ reserveGain("round start", 1) ]
         cost: 1
         type: $Bullet { }
     }
-    { // 1
-        name: "test_card2"
-        title: "test \ncard 2"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 1
-        type: $Bullet { }
-    }
     { // 2
-        name: "test_card3"
-        title: "test \ncard 3"
+        name: "bigBullet"
+        title: "big Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 16
         coverValue: 0
         traitEffects: []
         effects: []
-        cost: 1
+        cost: 2
         type: $Bullet { }
     }
     { // 3
-        name: "test_card4"
-        title: "test \ncard 4"
+        name: "rottenBullet"
+        title: "rotten Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 1
-        type: $Bullet { }
-    }
-    { // 4
-        name: "rotten_bullet"
-        title: "rotten bullet"
-        description: "Looses damage"
         baseDamage: 16
         coverValue: 0
         traitEffects: [ "rotten" ]
@@ -77,11 +66,22 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 5
-        name: "test_card6"
-        title: "test \ncard 6"
+    { // 4
+        name: "placeholder2"
+        title: "placeholder 2"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 1
+        coverValue: 0
+        traitEffects: []
+        effects: []
+        cost: 1
+        type: $Bullet { }
+    }
+    { // 5
+        name: "placeholder3"
+        title: "placeholder 3"
+        description: "It's a bullet!"
+        baseDamage: 1
         coverValue: 0
         traitEffects: []
         effects: []
@@ -89,10 +89,10 @@ cards: [
         type: $Bullet { }
     }
     { // 6
-        name: "test_card7"
-        title: "test \ncard 7"
+        name: "placeholder4"
+        title: "placeholder 4"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 1
         coverValue: 0
         traitEffects: []
         effects: []
@@ -100,32 +100,21 @@ cards: [
         type: $Bullet { }
     }
     { // 7
-        name: "test_card8"
-        title: "test \ncard 8"
+        name: "leadersBullet"
+        title: "leaders Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 15
         coverValue: 0
         traitEffects: []
-        effects: []
-        cost: 1
+        effects: [ buffDmg("enter", 4) ]
+        cost: 2
         type: $Bullet { }
     }
     { // 8
-        name: "test_card9"
-        title: "test \ncard 9"
+        name: "placeholder5"
+        title: "placeholder 5"
         description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 1
-        type: $Bullet { }
-    }
-    { // 9
-        name: "test_card10"
-        title: "test \ncard 10"
-        description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 1
         coverValue: 0
         traitEffects: []
         effects: []
@@ -135,7 +124,7 @@ cards: [
 
     // Cover ----------------------------------
 
-    { // 10
+    { // 9
         name: "test_cover1"
         title: "test \ncover 1"
         description: "It's a Cover!"
@@ -147,7 +136,7 @@ cards: [
         type: $Cover { }
     }
 
-    { // 11
+    { // 10
         name: "test_cover2"
         title: "test \ncover 2"
         description: "It's a Cover!"

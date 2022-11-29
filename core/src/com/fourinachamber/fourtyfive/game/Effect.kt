@@ -3,8 +3,8 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.game.enemy.DamagePlayerEnemyAction
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
+import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
@@ -22,6 +22,8 @@ abstract class Effect(val trigger: Trigger) {
         return null
     }
 
+
+
     class ReserveGain(trigger: Trigger, val amount: Int) : Effect(trigger) {
 
         private val shakeActorAction = ShakeActorAction(
@@ -33,7 +35,6 @@ abstract class Effect(val trigger: Trigger) {
         }
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline {
-
             val reservesLabel = gameScreenController.reservesLabel!!
             val (x, y) = reservesLabel.localToStageCoordinates(Vector2(0f, 0f))
 
@@ -66,12 +67,6 @@ abstract class Effect(val trigger: Trigger) {
 
         companion object {
 
-            private var xShake by Delegates.notNull<Float>()
-            private var yShake by Delegates.notNull<Float>()
-            private var xSpeedMultiplier by Delegates.notNull<Float>()
-            private var ySpeedMultiplier by Delegates.notNull<Float>()
-            private var shakeDuration by Delegates.notNull<Float>()
-
             private lateinit var fontName: String
             private lateinit var fontColor: Color
             private var fontScale by Delegates.notNull<Float>()
@@ -83,35 +78,77 @@ abstract class Effect(val trigger: Trigger) {
 
             fun init(config: OnjObject) {
 
-                val shakeOnj = config.get<OnjObject>("shakeAnimation")
+                val plOnj = config.get<OnjObject>("playerLivesAnimation")
 
-                xShake = shakeOnj.get<Double>("xShake").toFloat()
-                yShake = shakeOnj.get<Double>("yShake").toFloat()
-                xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
-                ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
-                shakeDuration = shakeOnj.get<Double>("duration").toFloat()
-
-                val dmgOnj = config.get<OnjObject>("playerLivesAnimation")
-
-                fontName = dmgOnj.get<String>("font")
-                fontScale = dmgOnj.get<Double>("fontScale").toFloat()
-                duration = (dmgOnj.get<Double>("duration") * 1000).toInt()
-                raiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
-                startFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-                fontColor = Color.valueOf(dmgOnj.get<String>("positiveFontColor"))
+                fontName = plOnj.get<String>("font")
+                fontScale = plOnj.get<Double>("fontScale").toFloat()
+                duration = (plOnj.get<Double>("duration") * 1000).toInt()
+                raiseHeight = plOnj.get<Double>("raiseHeight").toFloat()
+                startFadeoutAt = (plOnj.get<Double>("startFadeoutAt") * 1000).toInt()
+                fontColor = Color.valueOf(plOnj.get<String>("positiveFontColor"))
 
                 bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
-
             }
 
         }
 
     }
 
+    class BuffDamage(trigger: Trigger, val amount: Int) : Effect(trigger) {
+//    class BuffDamage(trigger: Trigger, private val targets: Array<Int>, val amount: Int) : Effect(trigger) {
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+            val modifier = Card.CardModifier(
+                amount,
+                TemplateString(
+                    buffDetailTextRawString,
+                    mapOf(
+                        "text" to { if (amount > 0) "buff" else "debuff" },
+                        "amount" to { amount },
+                        "source" to { card.name }
+                    )
+                ),
+            ) { card.inGame }
+
+            for (i in 1..5) {
+                val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
+                if (card !== this.card) card.addModifier(modifier)
+            }
+            return null
+        }
+
+        companion object {
+
+            private lateinit var buffDetailTextRawString: String
+
+            fun init(config: OnjObject) {
+                val tmplOnj = config.get<OnjObject>("stringTemplates")
+                buffDetailTextRawString = tmplOnj.get<String>("buffDetailText")
+            }
+        }
+
+    }
+
     companion object {
 
+        private var xShake by Delegates.notNull<Float>()
+        private var yShake by Delegates.notNull<Float>()
+        private var xSpeedMultiplier by Delegates.notNull<Float>()
+        private var ySpeedMultiplier by Delegates.notNull<Float>()
+        private var shakeDuration by Delegates.notNull<Float>()
+
         fun init(config: OnjObject) {
+
+            val shakeOnj = config.get<OnjObject>("shakeAnimation")
+
+            xShake = shakeOnj.get<Double>("xShake").toFloat()
+            yShake = shakeOnj.get<Double>("yShake").toFloat()
+            xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
+            ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
+            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
+
             ReserveGain.init(config)
+            BuffDamage.init(config)
         }
 
     }

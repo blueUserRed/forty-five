@@ -34,3 +34,10 @@ bannerAnimation: {
      playerTurnBanner: string
      enemyTurnBanner: string
 }
+
+stringTemplates:  {
+    playerLives: string
+    reserves: string
+    rottenDetailText: string
+    buffDetailText: string
+}

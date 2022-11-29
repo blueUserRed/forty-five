@@ -36,3 +36,10 @@ bannerAnimation: {
      playerTurnBanner: "player_turn_banner"
      enemyTurnBanner: "enemy_turn_banner"
 }
+
+stringTemplates:  {
+    playerLives: "LIVES: {curLives}/{baseLives}"
+    reserves: "RESERVES: {curReserves}/{baseReserves}"
+    rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!"
+    buffDetailText: "{source} applied a {text} of {amount}!"
+}

@@ -3,7 +3,7 @@ package com.fourinachamber.fourtyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
-import com.fourinachamber.fourtyfive.card.CardGenerator
+import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.OnjExtensions
@@ -42,18 +42,19 @@ object FourtyFive : Game() {
     private fun init() {
         OnjExtensions.init()
 
-        val animationConfig =
-            OnjParser.parseFile(Gdx.files.internal("config/animation_config.onj").file())
+        val graphicsConfig =
+            OnjParser.parseFile(Gdx.files.internal("config/graphics_config.onj").file())
         val animationConfigSchema =
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/animation_config.onjschema").file())
+            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/graphics_config.onjschema").file())
 
-        animationConfigSchema.assertMatches(animationConfig)
+        animationConfigSchema.assertMatches(graphicsConfig)
 
-        animationConfig as OnjObject
+        graphicsConfig as OnjObject
 
-        GameScreenController.init(animationConfig)
-        EnemyAction.init(animationConfig)
-        Effect.init(animationConfig)
+        GameScreenController.init(graphicsConfig)
+        EnemyAction.init(graphicsConfig)
+        Effect.init(graphicsConfig)
+        Card.init(graphicsConfig)
     }
 
     override fun dispose() {

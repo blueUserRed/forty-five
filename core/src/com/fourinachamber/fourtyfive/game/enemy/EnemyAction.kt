@@ -107,8 +107,6 @@ class DamagePlayerEnemyAction(
 
         action { enemy.actor.removeAction(moveByAction) }
 
-        delay(bufferTime)
-
         action {
             remaining = gameScreenController.coverArea!!.damage(damage)
             if (remaining != damage) activeStack = gameScreenController.coverArea!!.getActive()
@@ -161,6 +159,8 @@ class DamagePlayerEnemyAction(
         var particle: ParticleEffect? = null
 
         return Timeline.timeline {
+
+            delay(bufferTime)
 
             action {
                 particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
