@@ -78,12 +78,12 @@ cards: [
         type: $Bullet { }
     }
     { // 5
-        name: "placeholder3"
-        title: "placeholder 3"
+        name: "bewitchedBullet"
+        title: "bewitched Bullet"
         description: "It's a bullet!"
-        baseDamage: 1
+        baseDamage: 7
         coverValue: 0
-        traitEffects: []
+        traitEffects: [ "leftRotating"]
         effects: []
         cost: 1
         type: $Bullet { }

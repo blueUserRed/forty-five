@@ -70,9 +70,13 @@ class Card(
     private var isEverlasting: Boolean = false
     private var isUndead: Boolean = false
     private var isRotten: Boolean = false
+    private var isLeftRotating: Boolean = false
 
     val shouldRemoveAfterShot: Boolean
         get() = !isEverlasting
+
+    val shouldRotateLeft: Boolean
+        get() = isLeftRotating
 
     private lateinit var rottenModifier: CardModifier
 
@@ -237,6 +241,7 @@ class Card(
                     card.isRotten = true
                     card.initRottenModifier()
                 }
+                "leftRotating" -> card.isLeftRotating = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
