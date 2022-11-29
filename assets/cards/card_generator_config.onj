@@ -35,6 +35,10 @@ assets: {
         {
             name: "arial"
             file: "fonts/arial.fnt"
+        },
+        {
+            name: "card_character"
+            file: "fonts/card_character.fnt"
         }
     ]
 }
@@ -42,7 +46,7 @@ assets: {
 !titleElementSharedKeys = {
     x: 10
     y: 10
-    font: "arial"
+    font: "card_character"
     fontScale: 1.0
 }
 
@@ -188,11 +192,13 @@ cards: [
             }
         ]
     }
-
+    
+    // Cover --------------------------
+    
     {
         name: !cards.10.name
         elements: [
-            ...!bulletSharedElements
+            ...!coverSharedElements
             $TextElement {
                 text: !cards.10.title
                 ...!titleElementSharedKeys
@@ -203,7 +209,7 @@ cards: [
     {
         name: !cards.11.name
         elements: [
-            ...!bulletSharedElements
+            ...!coverSharedElements
             $TextElement {
                 text: !cards.11.title
                 ...!titleElementSharedKeys
@@ -211,60 +217,28 @@ cards: [
         ]
     }
 
+    // default cards
+
     {
-        name: !cards.12.name
+        name: !cards_obj.defaultBullet.name
         elements: [
             ...!bulletSharedElements
             $TextElement {
-                text: !cards.12.title
+                text: !cards_obj.defaultBullet.title
                 ...!titleElementSharedKeys
             }
         ]
     }
 
     {
-        name: !cards.13.name
-        elements: [
-            ...!bulletSharedElements
-            $TextElement {
-                text: !cards.13.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
-
-    {
-        name: !cards.14.name
-        elements: [
-            ...!bulletSharedElements
-            $TextElement {
-                text: !cards.14.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
-    
-    // Cover --------------------------
-    
-    {
-        name: !cards.15.name
+        name: !cards_obj.defaultCover.name
         elements: [
             ...!coverSharedElements
             $TextElement {
-                text: !cards.15.title
+                text: !cards_obj.defaultCover.title
                 ...!titleElementSharedKeys
             }
         ]
     }
 
-    {
-        name: !cards.16.name
-        elements: [
-            ...!coverSharedElements
-            $TextElement {
-                text: !cards.16.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
 ]

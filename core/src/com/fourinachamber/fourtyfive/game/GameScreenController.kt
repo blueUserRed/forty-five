@@ -6,7 +6,10 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
+import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.*
 
 
@@ -24,18 +27,28 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val coverAreaOnj = onj.get<OnjObject>("coverArea")
     private val enemiesOnj = onj.get<OnjArray>("enemies")
     private val cardDrawActorName = onj.get<String>("cardDrawActor")
+    private val playerLivesLabelName = onj.get<String>("playerLivesLabelName")
+    private val endTurnButtonName = onj.get<String>("endTurnButtonName")
     private val shootButtonName = onj.get<String>("shootButtonName")
+    private val reservesLabelName = onj.get<String>("reservesLabelName")
+
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
+    private val basePlayerLives = onj.get<Long>("playerLives").toInt()
+    private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
 
-    private var curScreen: ScreenDataProvider? = null
+    var curScreen: ScreenDataProvider? = null
+        private set
 
-    private var cardHand: CardHand? = null
-    private var revolver: Revolver? = null
-    private var enemyArea: EnemyArea? = null
-    private var coverArea: CoverArea? = null
-    private var cardDrawActor: Actor? = null
-    private var shootButton: CustomLabel? = null
+    var cardHand: CardHand? = null
+    var revolver: Revolver? = null
+    var enemyArea: EnemyArea? = null
+    var coverArea: CoverArea? = null
+    var cardDrawActor: Actor? = null
+    var shootButton: Actor? = null
+    var endTurnButton: Actor? = null
+    var playerLivesLabel: CustomLabel? = null
+    var reservesLabel: CustomLabel? = null
 
     private var cards: List<Card> = listOf()
     private var bulletStack: MutableList<Card> = mutableListOf()
@@ -46,6 +59,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var enemies: List<Enemy> = listOf()
 
     private var remainingCardsToDraw: Int? = null
+
+    var curPlayerLives: Int = basePlayerLives
+        private set(value) {
+            field = value
+            playerLivesLabel?.setText("lives: $value/$basePlayerLives")
+        }
+
+    private var timeline: Timeline? = null
+        set(value) {
+            field = value
+            value?.start()
+        }
 
     /**
      * the current phase of the game
@@ -58,6 +83,17 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     var roundCounter: Int = 0
         private set
+
+    var curReserves: Int = 0
+        private set(value) {
+            field = value
+            reservesLabel?.setText("reserves: $value/$baseReserves")
+        }
+
+    private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
+
+    private lateinit var defaultBulletCreator: () -> Card
+    private lateinit var defaultCoverCreator: () -> Card
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
@@ -76,32 +112,20 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         bulletStack = cards.filter { it.type == Card.Type.BULLET }.shuffled().toMutableList()
         coverCardStack = cards.filter { it.type == Card.Type.COVER }.shuffled().toMutableList()
         oneShotStack = cards.filter { it.type == Card.Type.ONE_SHOT }.shuffled().toMutableList()
+        initDefaultCards(onj)
 
-        for (card in cards) {
-            val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
-                cardDragAndDropBehaviour.name,
-                cardDragAndDrop,
-                screenDataProvider,
-                card.actor,
-                cardDragAndDropBehaviour
-            )
-            if (behaviour is GameScreenControllerDragAndDrop) behaviour.gameScreenController = this
-            cardDragAndDrop.addSource(behaviour)
-        }
+        for (card in cards) doDragAndDropFor(card)
 
-        enemies = Enemy.getFrom(enemiesOnj, screenDataProvider.textures, screenDataProvider.fonts)
+        enemies = Enemy.getFrom(enemiesOnj, screenDataProvider)
 
         cardDrawActor = screenDataProvider.namedActors[cardDrawActorName] ?: throw RuntimeException(
             "no actor with name $cardDrawActorName"
         )
+        screenDataProvider.removeActorFromRoot(cardDrawActor!!)
 
-        val shootButton = screenDataProvider.namedActors[shootButtonName] ?: throw RuntimeException(
-            "no actor with name $shootButtonName"
-        )
-        if (shootButton !is CustomLabel) throw RuntimeException("actor named $shootButtonName must be a Label")
-        this.shootButton = shootButton
-
+        initButtons()
         initCardHand()
+        initLabels()
         initRevolver()
         initEnemyArea()
         initCoverArea()
@@ -110,9 +134,20 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             behaviour.gameScreenController = this
         }
 
-        screenDataProvider.afterMs(2) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
-//        changePhase(Gamephase.FREE)
+        screenDataProvider.afterMs(5) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
         changePhase(Gamephase.INITIAL_DRAW)
+    }
+
+    private fun doDragAndDropFor(card: Card) {
+        val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
+            cardDragAndDropBehaviour.name,
+            cardDragAndDrop,
+            curScreen!!,
+            card.actor,
+            cardDragAndDropBehaviour
+        )
+        if (behaviour is GameScreenControllerDragAndDrop) behaviour.gameScreenController = this
+        cardDragAndDrop.addSource(behaviour)
     }
 
     private fun changePhase(next: Gamephase) {
@@ -123,6 +158,77 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun update() {
+        timeline?.let {
+            it.update()
+            if (it.isFinished) timeline = null
+        }
+        val iterator = curGameAnims.iterator()
+        while (iterator.hasNext()) {
+            val anim = iterator.next()
+            if (anim.isFinished()) {
+                anim.end()
+                iterator.remove()
+            }
+            anim.update()
+        }
+    }
+
+    fun playGameAnimation(anim: GameAnimation) {
+        anim.start()
+        curGameAnims.add(anim)
+    }
+
+    private fun initDefaultCards(onj: OnjObject) {
+
+        val bulletOnj = onj.get<OnjObject>("defaultBullet")
+        val bulletName = bulletOnj.get<String>("name")
+        val bulletDescription = bulletOnj.get<String>("description")
+        val bulletDamage = bulletOnj.get<Long>("baseDamage").toInt()
+        val bulletCost = bulletOnj.get<Long>("cost").toInt()
+
+        defaultBulletCreator = {
+            val card = Card(
+                bulletName,
+                curScreen!!.textures["${Card.cardTexturePrefix}$bulletName"] ?:
+                    throw RuntimeException("no texture found for default card: $bulletName"),
+                bulletDescription,
+                Card.Type.BULLET,
+                bulletDamage,
+                0,
+                bulletCost
+            )
+            doDragAndDropFor(card)
+            Card.applyTraitEffects(card, onj)
+            card
+        }
+
+        val coverOnj = onj.get<OnjObject>("defaultCover")
+        val coverName = coverOnj.get<String>("name")
+        val coverDescription = coverOnj.get<String>("description")
+        val coverValue = coverOnj.get<Long>("coverValue").toInt()
+        val coverCost = coverOnj.get<Long>("cost").toInt()
+
+        defaultCoverCreator = {
+            val card = Card(
+                coverName,
+                curScreen!!.textures["${Card.cardTexturePrefix}$coverName"] ?:
+                throw RuntimeException("no texture found for default card: $coverName"),
+                coverDescription,
+                Card.Type.COVER,
+                0,
+                coverValue,
+                coverCost
+            )
+            doDragAndDropFor(card)
+            card
+        }
+    }
+
+    private fun initButtons() {
+        shootButton = curScreen!!.namedActors[shootButtonName]
+            ?: throw RuntimeException("no actor named $shootButtonName")
+        endTurnButton = curScreen!!.namedActors[endTurnButtonName]
+            ?: throw RuntimeException("no actor named $endTurnButton")
     }
 
     private fun initCardHand() {
@@ -133,6 +239,22 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             ?: throw RuntimeException("no named actor with name $cardHandName")
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
+    }
+
+    private fun initLabels() {
+        val curScreen = curScreen!!
+
+        val playerLives = curScreen.namedActors[playerLivesLabelName]
+            ?: throw RuntimeException("no named actor with name $playerLivesLabelName")
+        if (playerLives !is CustomLabel) throw RuntimeException("actor named $playerLivesLabelName must be a Label")
+        playerLivesLabel = playerLives
+        curPlayerLives = curPlayerLives // inits label
+
+        val reserves = curScreen.namedActors[reservesLabelName]
+            ?: throw RuntimeException("no named actor with name $reservesLabelName")
+        if (reserves !is CustomLabel) throw RuntimeException("actor named $reservesLabelName must be a Label")
+        reservesLabel = reserves
+        curReserves = curReserves // inits label
     }
 
     private fun initCoverArea() {
@@ -176,7 +298,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             .forEach { nameOnj ->
                 val name = nameOnj.value as String
                 enemyArea.addEnemy(
-                    enemies.firstOrNull { it.name ==  name} ?: throw RuntimeException("no enemy with name $name")
+                    enemies.firstOrNull { it.name == name} ?: throw RuntimeException("no enemy with name $name")
                 )
             }
 
@@ -188,6 +310,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun loadBulletInRevolver(card: Card, slot: Int) {
         if (card.type != Card.Type.BULLET) return
+        if (!cost(card.cost)) return
         cardHand!!.removeCard(card)
         revolver!!.setCard(slot, card)
     }
@@ -197,7 +320,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun addCover(card: Card, slot: Int) {
         if (card.type != Card.Type.COVER) return
-        val addedCard = coverArea!!.addCover(card, slot)
+        if (!cost(card.cost)) return
+        val addedCard = coverArea!!.addCover(card, slot, roundCounter)
         if (addedCard) cardHand!!.removeCard(card)
     }
 
@@ -207,36 +331,54 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     fun shoot() {
         val cardToShoot = revolver!!.getCardInSlot(5)
         revolver!!.rotate()
+
+        revolver!!
+            .slots
+            .mapNotNull { it.card }
+            .forEach { it.onRevolverTurn(it === cardToShoot) }
+
         cardToShoot ?: return
+
         val enemy = enemyArea!!.enemies[0]
-        enemy.damage(cardToShoot.baseDamage)
-        revolver!!.removeCard(1)
+        enemy.damage(cardToShoot.curDamage)
+        if (cardToShoot.shouldRemoveAfterShot) revolver!!.removeCard(4)
+        cardToShoot.afterShot(this)
+    }
+
+    fun endTurn() {
+        onEndTurnButtonClicked()
+    }
+
+    fun damagePlayer(damage: Int) {
+        curPlayerLives -= damage
     }
 
     private fun freezeUI() {
-        shootButton!!.isDisabled = true
-    }
-
-    private fun unfreezeUI() {
-        shootButton!!.isDisabled = false
-    }
-
-    private fun freezeCards() {
+        val shootButton = shootButton
+        val endTurnButton = endTurnButton
+        if (shootButton is DisableActor) shootButton.isDisabled = true
+        if (endTurnButton is DisableActor) endTurnButton.isDisabled = true
         for (card in cardHand!!.cards) card.isDraggable = false
     }
 
-    private fun unfreezeCards() {
+    private fun unfreezeUI() {
+        val shootButton = shootButton
+        val endTurnButton = endTurnButton
+        if (shootButton is DisableActor) shootButton.isDisabled = false
+        if (endTurnButton is DisableActor) endTurnButton.isDisabled = false
         for (card in cardHand!!.cards) card.isDraggable = true
     }
 
     private fun showCardDrawActor() {
         val viewport = curScreen!!.stage.viewport
         val cardDrawActor = cardDrawActor!!
+        curScreen!!.addActorToRoot(cardDrawActor)
         cardDrawActor.isVisible = true
         cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
     }
 
     private fun hideCardDrawActor() {
+        curScreen!!.removeActorFromRoot(cardDrawActor!!)
         cardDrawActor!!.isVisible = false
     }
 
@@ -245,8 +387,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawBullet() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        //TODO: default card when stack is empty
-        cardHand!!.addCard(bulletStack.removeFirst())
+        cardHand!!.addCard(bulletStack.removeFirstOrNull() ?: defaultBulletCreator())
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
         if (cardsToDraw <= 0) onAllCardsDrawn()
@@ -258,11 +399,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawCover() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        //TODO: default card when stack is empty
-        cardHand!!.addCard(coverCardStack.removeFirst())
+        cardHand!!.addCard(coverCardStack.removeFirstOrNull() ?: defaultCoverCreator())
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
         if (cardsToDraw <= 0) onAllCardsDrawn()
+    }
+
+    private fun cost(cost: Int): Boolean {
+        if (cost > curReserves) return false
+        curReserves -= cost
+        return true
     }
 
     override fun end() {
@@ -270,6 +416,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())
+
+    private fun onEndTurnButtonClicked()  = changePhase(currentPhase.onEndTurnButtonClicked())
 
 
     /**
@@ -283,47 +431,96 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         INITIAL_DRAW {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
-                freezeCards()
+                roundCounter++
                 freezeUI()
                 showCardDrawActor()
-                this.remainingCardsToDraw = if (roundCounter == 0) cardsToDrawInFirstRound else cardsToDraw
+                this.remainingCardsToDraw = if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
-                unfreezeCards()
                 unfreezeUI()
                 hideCardDrawActor()
                 remainingCardsToDraw = null
             }
 
-            override fun onAllCardsDrawn(): Gamephase = FREE
+            override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
+            override fun onEndTurnButtonClicked(): Gamephase = INITIAL_DRAW
         },
 
         /**
          * enemy reveals it's action
          */
         ENEMY_REVEAL {
-            override fun transitionTo(gameScreenController: GameScreenController) {}
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                enemies[0].chooseNewAction()
+                changePhase(FREE)
+            }
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
+            override fun onEndTurnButtonClicked(): Gamephase = ENEMY_REVEAL
         },
 
         /**
          * main game phase
          */
         FREE {
-            override fun transitionTo(gameScreenController: GameScreenController) {}
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                curReserves = baseReserves
+            }
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = FREE
+            override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
         },
 
         /**
-         * enemy does it's action
+         * enemy does its action
          */
         ENEMY_ACTION {
-            override fun transitionTo(gameScreenController: GameScreenController) {}
+
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                timeline = Timeline.timeline {
+
+                    val enemyBannerAnim = BannerAnimation(
+                        curScreen!!.textures["enemy_turn_banner"]!!,
+                        curScreen!!,
+                        1500,
+                        900,
+                        0.12f,
+                        0.09f
+                    )
+                    val playerBannerAnim = BannerAnimation(
+                        curScreen!!.textures["player_turn_banner"]!!,
+                        curScreen!!,
+                        1500,
+                        900,
+                        0.12f,
+                        0.09f
+                    )
+
+                    action {
+                        freezeUI()
+                        playGameAnimation(enemyBannerAnim)
+                    }
+                    delayUntil { enemyBannerAnim.isFinished() }
+                    delay(800)
+                    include(enemies[0].doAction(gameScreenController))
+                    delay(500)
+                    action {
+                        enemies[0].resetAction()
+                        playGameAnimation(playerBannerAnim)
+                    }
+                    delayUntil { playerBannerAnim.isFinished() }
+                    delay(500)
+                    action {
+                        unfreezeUI()
+                        changePhase(INITIAL_DRAW)
+                    }
+                }
+            }
+
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_ACTION
+            override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
         }
 
         ;
@@ -343,6 +540,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
          * @return the next phase
          */
         abstract fun onAllCardsDrawn(): Gamephase
+
+        abstract fun onEndTurnButtonClicked(): Gamephase
 
     }
 

@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.screen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
@@ -31,10 +32,12 @@ object BehaviourFactory {
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
         "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
-        "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
+        "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
+//        "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
         "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
+        "EndTurnButtonBehaviour" to { onj, actor -> EndTurnButtonBehaviour(onj, actor) },
         "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
         "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) }
     )
@@ -187,30 +190,12 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 
     init {
         enterInterpolation = if (!onj["enterInterpolation"]!!.isNull()) {
-            interpolationOrError(onj.get<String>("enterInterpolation"))
+            Utils.interpolationOrError(onj.get<String>("enterInterpolation"))
         } else null
 
         exitInterpolation = if (!onj["exitInterpolation"]!!.isNull()) {
-            interpolationOrError(onj.get<String>("exitInterpolation"))
+            Utils.interpolationOrError(onj.get<String>("exitInterpolation"))
         } else null
-    }
-
-    private fun interpolationOrError(name: String): Interpolation = when (name) {
-
-        "swing" -> Interpolation.swing
-        "swing in" -> Interpolation.swingIn
-        "swing out" -> Interpolation.swingOut
-        "bounce" -> Interpolation.bounce
-        "bounce in" -> Interpolation.bounceIn
-        "bounce out" -> Interpolation.bounceOut
-        "elastic" -> Interpolation.elastic
-        "elastic in" -> Interpolation.elasticIn
-        "elastic out" -> Interpolation.elasticOut
-        "circle" -> Interpolation.circle
-        "circle in" -> Interpolation.circleIn
-        "circle out" -> Interpolation.circleOut
-
-        else -> throw RuntimeException("Unknown interpolation: $name")
     }
 
     override val onHoverEnter: BehaviourCallback = {
@@ -276,6 +261,36 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 }
 
 
+class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val hoverTextureName = onj.get<String>("hoverTexture")
+    private val baseTexture: TextureRegion
+    private val image: CustomImageActor
+
+    private val hoverTexture: TextureRegion by lazy {
+        screenDataProvider.textures[hoverTextureName] ?:
+            throw RuntimeException("no texture with name $hoverTextureName")
+    }
+
+    init {
+        if (actor !is CustomImageActor) {
+            throw RuntimeException("OnHoverChangeTextureBehaviour can only be used on an Image")
+        }
+        image = actor
+        baseTexture = actor.texture
+    }
+
+    override val onHoverEnter: BehaviourCallback = {
+        image.texture = hoverTexture
+    }
+
+
+    override val onHoverExit: BehaviourCallback = {
+        image.texture = baseTexture
+    }
+
+}
+
 /**
  * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
  */
@@ -311,45 +326,36 @@ class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor)
 
 }
 
-/**
- * starts a particle effect when the actor is clicked
- */
-class OnClickParticleEffectBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    private val particlePath = onj.get<String>("file")
-    private val textureDir = onj.get<String>("textureDir")
-
-    private val effectScale = onj.getOr("effectScale", 1.0).toFloat()
-    private val useCursorPosition = onj.getOr("useCursorPos", false)
-
-    override val onCLick: BehaviourCallback = {
-        val particleActor =
-
-            object : ParticleEffectActor(Gdx.files.internal(particlePath), Gdx.files.internal(textureDir)) {
-
-                override fun remove(): Boolean {
-                    // Why does ParticleActor not do this automatically?
-                    this.dispose()
-                    return super.remove()
-                }
-
-            }
-
-        particleActor.isAutoRemove = true
-        screenDataProvider.stage.addActor(particleActor)
-
-        if (useCursorPosition) {
-            val cursorPos = Utils.getCursorPos(screenDataProvider.stage.viewport)
-            particleActor.setPosition(cursorPos.x, cursorPos.y)
-        } else {
-            particleActor.setPosition(actor.x + actor.width / 2, actor.y + actor.height / 2)
-        }
-
-        particleActor.effect.scaleEffect(effectScale)
-        particleActor.start()
-    }
-
-}
+///**
+// * starts a particle effect when the actor is clicked
+// */
+//class OnClickParticleEffectBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+//
+//    private val particlePath = onj.get<String>("file")
+//    private val textureDir = onj.get<String>("textureDir")
+//
+//    private val effectScale = onj.getOr("effectScale", 1.0).toFloat()
+//    private val useCursorPosition = onj.getOr("useCursorPos", false)
+//
+//    override val onCLick: BehaviourCallback = {
+//
+//        val x: Float
+//        val y: Float
+//
+//        if (useCursorPosition) {
+//            val cursorPos = Utils.getCursorPos(screenDataProvider.stage.viewport)
+//            x = cursorPos.x
+//            y = cursorPos.y
+//        } else {
+//            x = actor.x + actor.width / 2
+//            y = actor.y + actor.height / 2
+//        }
+//
+//        Utils.spawnParticle(screenDataProvider, particlePath, textureDir, x, y, effectScale)
+//
+//    }
+//
+//}
 
 /**
  * when clicked, will change the PostProcessor of the whole screen
@@ -422,6 +428,15 @@ class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), Gam
 
     override val onCLick: BehaviourCallback = {
         gameScreenController.shoot()
+    }
+
+}
+class EndTurnButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
+
+    override lateinit var gameScreenController: GameScreenController
+
+    override val onCLick: BehaviourCallback = {
+        gameScreenController.endTurn()
     }
 
 }

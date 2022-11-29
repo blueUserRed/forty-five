@@ -1,6 +1,7 @@
 
 import "imports/asset_definitions.onjschema" as _
 import "imports/font_group.onjschema" as _
+import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys
 
 !viewportSharedKeys = {
     backgroundTexture?: string
@@ -55,6 +56,16 @@ $Viewport [
     name?: string
 }
 
+!detailTextSharedKeys = {
+    detailFont: string
+    detailFontColor: string
+    detailBackgroundTexture: string
+    detailFontScale: float
+    detailOffsetX: float
+    detailOffsetY: float
+    detailWidth: float
+}
+
 $Widget [
 
     $Label {
@@ -71,6 +82,7 @@ $Widget [
         textureName: string
         scaleX: float
         scaleY: float
+        reportDimensionsWithScaling?: boolean
         ...!widgetSharedKeys
     }
 
@@ -137,20 +149,22 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+//    $ProgressBar {
+//        min: float
+//        max: float
+//        stepSize: float
+//        vertical: boolean
+//        initialValue: float
+//    }
+
     $CardHand {
         cardScale: float
         cardSpacing: float
         startCardZIndicesAt: int
         hoveredCardZIndex: int
         draggedCardZIndex: int
-        detailFont: string
-        detailFontColor: string
-        detailBackgroundTexture: string
-        detailFontScale: float
-        detailOffsetX: float
-        detailOffsetY: float
-        detailPadding: float
         hoveredCardScale: float
+        ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }
 
@@ -162,6 +176,10 @@ $Widget [
         slotScale: float
         cardScale: float
         animationDuration: float
+        radius: float
+        rotationOff: float
+        cardZIndex: int
+        ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }
 
@@ -172,13 +190,15 @@ $Widget [
     $CoverArea {
         numStacks: int
         maxCards: int
-        detailFont: string
-        detailFontColor: string
-        detailFontScale: float
+        infoFont: string
+        infoFontColor: string
+        infoFontScale: float
         stackBackgroundTexture: string
         stackSpacing: float
         areaSpacing: float
         cardScale: float
+        stackMinSize: float
+        ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }
 
@@ -242,7 +262,13 @@ $Widget [
         yOffset?: float
     }
 
+    $OnHoverChangeTextureBehaviour {
+        hoverTexture: string
+    }
+
     $ShootButtonBehaviour { }
+
+    $EndTurnButtonBehaviour { }
 
     $DrawBulletButtonBehaviour { }
 
@@ -250,83 +276,10 @@ $Widget [
 
 ]
 
-!dragAndDropBehaviourSharedKeys = {
-    group: string
-}
-
-$DragAndDropBehaviour [
-
-    $SimpleDragSource {
-        useDimensionsOfCell?: string
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $TestDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-
-    $SlotDragSource {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $SlotDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $CardDragSource {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $RevolverDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-    $CoverAreaDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
-    }
-
-]
-
-!enemy = {
-    name: string
-    texture: string
-    lives: int
-    offsetX: float
-    offsetY: float
-    scaleX: float
-    scaleY: float
-    detailFont: string
-    detailFontScale: float
-    detailFontColor: string
-}
-
 $ScreenController [
 
     $GameScreenController {
-        cardsFile: string
-        cardAtlasFile: string
-        cardHand: {
-            actorName: string
-        }
-        revolver: {
-            actorName: string
-            dropBehaviour: $DragAndDropBehaviour
-        }
-        enemyArea: {
-            actorName: string
-            enemies: string[*]
-        }
-        coverArea: {
-            actorName: string
-            dropBehaviour: $DragAndDropBehaviour
-        }
-        cardDragBehaviour: $DragAndDropBehaviour
-        enemies: !enemy[*]
-        cardDrawActor: string
-        shootButtonName: string
-        cardsToDrawInFirstRound: int
-        cardsToDraw: int
+        ...!gameScreenControllerKeys
     }
 
 ]
@@ -341,6 +294,7 @@ assets: {
     postProcessors: !postProcessorDeclaration[*]
     animations: !animationDeclaration[*]
     colorTextures: !colorTextureDeclaration[*]
+    particles: !particleDeclaration[*]
 }
 
 options: {

@@ -1,9 +1,11 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.*
 import onj.OnjArray
 import onj.OnjObject
@@ -47,9 +49,28 @@ class Enemy(
     var currentLives: Int = lives
         private set
 
+    var curAction: EnemyAction? = null
+        private set
+
+    private lateinit var brain: EnemyBrain
+
     init {
         actor = EnemyActor(this)
         actor.setScale(scaleX, scaleY)
+    }
+
+    fun chooseNewAction() {
+        curAction = brain.chooseAction()
+        actor.displayAction(curAction!!)
+    }
+
+    fun doAction(gameScreenController: GameScreenController): Timeline {
+        return curAction!!.execute(gameScreenController)
+    }
+
+    fun resetAction() {
+        curAction = null
+        actor.resetAction()
     }
 
     /**
@@ -67,17 +88,16 @@ class Enemy(
          */
         fun getFrom(
             enemiesOnj: OnjArray,
-            regions: Map<String, TextureRegion>,
-            fonts: Map<String, BitmapFont>
+            screenDataProvider: ScreenDataProvider
         ): List<Enemy> = enemiesOnj
             .value
             .map {
                 it as OnjObject
-                val texture = regions[it.get<String>("texture")] ?:
+                val texture = screenDataProvider.textures[it.get<String>("texture")] ?:
                     throw RuntimeException("unknown texture ${it.get<String>("texture")}")
-                val detailFont = fonts[it.get<String>("detailFont")] ?:
+                val detailFont = screenDataProvider.fonts[it.get<String>("detailFont")] ?:
                     throw RuntimeException("unknown font ${it.get<String>("detailFont")}")
-                Enemy(
+                val enemy = Enemy(
                     it.get<String>("name"),
                     texture,
                     it.get<Long>("lives").toInt(),
@@ -89,6 +109,8 @@ class Enemy(
                     it.get<Double>("detailFontScale").toFloat(),
                     Color.valueOf(it.get<String>("detailFontColor"))
                 )
+                enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider, enemy)
+                enemy
             }
 
     }
@@ -102,6 +124,13 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
     private var image: CustomImageActor = CustomImageActor(enemy.texture)
+    private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup()
+
+    private val actionIndicatorText: CustomLabel = CustomLabel(
+        "",
+        Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
+    )
+
     private var detail: CustomLabel = CustomLabel(
         "",
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
@@ -109,9 +138,23 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
 
     init {
         detail.setFontScale(enemy.detailFontScale)
+        actionIndicatorText.setFontScale(enemy.detailFontScale)
+        actionIndicator.addActor(actionIndicatorText)
+        addActor(actionIndicator)
         addActor(image)
         addActor(detail)
         updateText()
+    }
+
+    fun displayAction(action: EnemyAction) {
+        val image = CustomImageActor(action.indicatorTexture)
+        actionIndicatorText.setText(action.descriptionText)
+        actionIndicator.addActorAt(0, image)
+    }
+
+    fun resetAction() {
+        actionIndicatorText.setText("")
+        actionIndicator.removeActorAt(0, true)
     }
 
     /**
