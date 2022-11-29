@@ -31,16 +31,11 @@ viewport: $FitViewport {
             align: "right"
             height: <!worldHeight/5>
             element: $Label {
-                name: "play"
-                text: "Play"
+                name: "load_game"
+                text: "Continue"
                 font: "distance_field"
                 color: !color.black
-                fontScale: 0.3
-                behaviours: [
-                    $OnClickChangeScreenBehaviour {
-                        screenPath: "./screens/game_screen.onj"
-                    }
-                ]
+                fontScale: 0.2
             }
         }
     ]
@@ -53,11 +48,16 @@ viewport: $FitViewport {
             width: <2*(!worldHeight/5)>
             height: <!worldHeight/5>
             element: $Label {
-                name: "load_game"
-                text: "Continue"
+                name: "play"
+                text: "Play"
                 font: "distance_field"
-                 color: !color.black
-                 fontScale: 0.2
+                color: !color.black
+                fontScale: 0.5
+                behaviours: [
+                    $OnClickChangeScreenBehaviour {
+                        screenPath: "./screens/game_screen.onj"
+                    }
+                ]
             }
         }
     ]
