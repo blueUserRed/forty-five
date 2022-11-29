@@ -53,11 +53,11 @@ abstract class Effect(val trigger: Trigger) {
 
             return Timeline.timeline {
                 delay(bufferTime)
-                action { card.actor.addAction(shakeActorAction) }
-                delayUntil { shakeActorAction.isComplete }
+                includeLater(
+                    { shakeCardTimeline(card, shakeActorAction) },
+                    { card.inGame }
+                )
                 action {
-                    shakeActorAction.reset()
-                    card.actor.removeAction(shakeActorAction)
                     gameScreenController.playGameAnimation(textAnimation)
                     gameScreenController.gainReserves(amount)
                 }
@@ -95,7 +95,6 @@ abstract class Effect(val trigger: Trigger) {
     }
 
     class BuffDamage(trigger: Trigger, val amount: Int) : Effect(trigger) {
-//    class BuffDamage(trigger: Trigger, private val targets: Array<Int>, val amount: Int) : Effect(trigger) {
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
             val modifier = Card.CardModifier(
@@ -129,6 +128,37 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    class Draw(trigger: Trigger, val amount: Int) : Effect(trigger) {
+
+        private val shakeActorAction = ShakeActorAction(
+            xShake, yShake, xSpeedMultiplier, ySpeedMultiplier
+        )
+
+        init {
+            shakeActorAction.duration = shakeDuration
+        }
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+            delay(bufferTime)
+            includeLater(
+                { shakeCardTimeline(card, shakeActorAction) },
+                { card.inGame }
+            )
+            action { gameScreenController.specialDraw(amount)}
+            delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.SPECIAL_DRAW }
+        }
+    }
+
+    protected fun shakeCardTimeline(card: Card, shakeActorAction: ShakeActorAction): Timeline = Timeline.timeline {
+        action { card.actor.addAction(shakeActorAction) }
+        delayUntil { shakeActorAction.isComplete }
+        action {
+            card.actor.removeAction(shakeActorAction)
+            shakeActorAction.reset()
+        }
+        delay(bufferTime)
+    }
+
     companion object {
 
         private var xShake by Delegates.notNull<Float>()
@@ -136,6 +166,8 @@ abstract class Effect(val trigger: Trigger) {
         private var xSpeedMultiplier by Delegates.notNull<Float>()
         private var ySpeedMultiplier by Delegates.notNull<Float>()
         private var shakeDuration by Delegates.notNull<Float>()
+
+        private var bufferTime by Delegates.notNull<Int>()
 
         fun init(config: OnjObject) {
 
@@ -146,6 +178,8 @@ abstract class Effect(val trigger: Trigger) {
             xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
             ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
             shakeDuration = shakeOnj.get<Double>("duration").toFloat()
+
+            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
 
             ReserveGain.init(config)
             BuffDamage.init(config)

@@ -67,14 +67,14 @@ cards: [
         type: $Bullet { }
     }
     { // 4
-        name: "placeholder2"
-        title: "placeholder 2"
+        name: "diamondBullet"
+        title: "diamond Bullet"
         description: "It's a bullet!"
-        baseDamage: 1
+        baseDamage: 23
         coverValue: 0
         traitEffects: []
-        effects: []
-        cost: 1
+        effects: [ draw("enter", 2), draw("shot", 1) ]
+        cost: 3
         type: $Bullet { }
     }
     { // 5
@@ -111,13 +111,13 @@ cards: [
         type: $Bullet { }
     }
     { // 8
-        name: "placeholder5"
-        title: "placeholder 5"
+        name: "silverBullet"
+        title: "silver Bullet"
         description: "It's a bullet!"
-        baseDamage: 1
+        baseDamage: 7
         coverValue: 0
         traitEffects: []
-        effects: []
+        effects: [ draw("enter", 1), draw("shot", 1) ]
         cost: 1
         type: $Bullet { }
     }

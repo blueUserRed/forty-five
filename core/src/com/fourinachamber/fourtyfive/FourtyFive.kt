@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.card.CardGenerator
 import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.OnjExtensions

@@ -94,6 +94,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var roundCounter: Int = 0
         private set
 
+    private var cardsToDrawDuringSpecialDraw: Int = 1
+
     private val reservesTemplate: TemplateString = TemplateString(
         reservesRawTemplateText,
         mapOf(
@@ -194,6 +196,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     fun playGameAnimation(anim: GameAnimation) {
         anim.start()
         curGameAnims.add(anim)
+    }
+
+    fun specialDraw(amount: Int) {
+        if (currentPhase != Gamephase.FREE) return
+        cardsToDrawDuringSpecialDraw = amount
+        changePhase(Gamephase.SPECIAL_DRAW)
     }
 
     private fun initDefaultCards(onj: OnjObject) {
@@ -384,6 +392,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun endTurn() {
+        if (timeline != null) return // don't let anyone change to Enemy phase while animations are still running
         onEndTurnButtonClicked()
     }
 
@@ -518,6 +527,27 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
             override fun onEndTurnButtonClicked(): Gamephase = INITIAL_DRAW
+        },
+
+        /**
+         * draws cards during the round, e.g. because of effects
+         */
+        SPECIAL_DRAW {
+
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                freezeUI()
+                showCardDrawActor()
+                this.remainingCardsToDraw = cardsToDrawDuringSpecialDraw
+            }
+
+            override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
+                unfreezeUI()
+                hideCardDrawActor()
+                remainingCardsToDraw = null
+            }
+
+            override fun onAllCardsDrawn(): Gamephase = FREE
+            override fun onEndTurnButtonClicked(): Gamephase = SPECIAL_DRAW
         },
 
         /**
