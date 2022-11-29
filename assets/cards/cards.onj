@@ -10,8 +10,8 @@ defaultBullet: {
 }
 
 defaultCover: {
-    name: "crate"
-    title: "crate"
+    name: "defaultCrate"
+    title: "defaultCrate"
     description: "ITS THE DEFAULT COVER! YOU RAN OUT OF COVER CARDS!"
     cost: 1
     coverValue: 5
@@ -125,11 +125,11 @@ cards: [
     // Cover ----------------------------------
 
     { // 9
-        name: "test_cover1"
-        title: "test \ncover 1"
+        name: "crate"
+        title: "Crate"
         description: "It's a Cover!"
         baseDamage: 0
-        coverValue: 20
+        coverValue: 3
         traitEffects: []
         effects: []
         cost: 1
@@ -137,14 +137,50 @@ cards: [
     }
 
     { // 10
-        name: "test_cover2"
-        title: "test \ncover 2"
+        name: "bigCrate"
+        title: "big Crate"
         description: "It's a Cover!"
         baseDamage: 0
-        coverValue: 20
+        coverValue: 5
+        traitEffects: []
+        effects: []
+        cost: 2
+        type: $Cover { }
+    }
+
+    { // 11
+        name: "placeholder5"
+        title: "placeholder 5"
+        description: "It's a Cover!"
+        baseDamage: 0
+        coverValue: 1
         traitEffects: []
         effects: []
         cost: 1
+        type: $Cover { }
+    }
+
+    { // 12
+        name: "jewelryBox"
+        title: "jewelry Box"
+        description: "It's a Cover!"
+        baseDamage: 0
+        coverValue: 3
+        traitEffects: []
+        effects: [ draw("enter", 1) ]
+        cost: 1
+        type: $Cover { }
+    }
+
+    { // 13
+        name: "treasureChest"
+        title: "treasure Chest"
+        description: "It's a Cover!"
+        baseDamage: 0
+        coverValue: 6
+        traitEffects: []
+        effects: [ draw("round start", 1) ]
+        cost: 3
         type: $Cover { }
     }
 
