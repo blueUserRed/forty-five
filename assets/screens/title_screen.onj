@@ -10,15 +10,24 @@ viewport: $FitViewport {
 }
 
 !topRow = {
+    width: <!worldWidth>
     cells: [
+        /*{
+            width: <!worldWidth / 3>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }*/
         {
-            width: <!worldHeight>
             height: <!worldHeight/3>
             align: "right"
             element: $Image {
                 textureName: "logo"
-                scaleX: 1.0
-                scaleY: 1.0
+                scaleX: 0.25
+                scaleY: 0.25
             }
         }
     ]
@@ -27,7 +36,16 @@ viewport: $FitViewport {
 !middleRow = {
     cells: [
         {
-            width: <2*(!worldHeight/5)>
+            width: <!worldWidth - (2*(!worldWidth/5))>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+        {
+            width: <2*(!worldWidth/5)>
             align: "right"
             height: <!worldHeight/5>
             element: $Label {
@@ -44,8 +62,17 @@ viewport: $FitViewport {
 !middle2Row = {
     cells: [
         {
+            width: <!worldWidth - (2*(!worldWidth/5))>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+        {
             align: "right"
-            width: <2*(!worldHeight/5)>
+            width: <2*(!worldWidth/5)>
             height: <!worldHeight/5>
             element: $Label {
                 name: "play"
@@ -65,9 +92,18 @@ viewport: $FitViewport {
 
 !bottomRow = {
     cells : [
-    {
+        {
+            width: <!worldWidth - (2*(!worldWidth/5))>
+            element: $Label {
+                text: ""
+                font: "distance_field"
+                color: !color.black
+                fontScale: 0.2
+            }
+        }
+        {
             align: "right"
-            width: <2*(!worldHeight/5)>
+            width: <2*(!worldWidth/5)>
             height: <!worldHeight/5>
             element: $Label {
                 name: "quit"
@@ -85,8 +121,8 @@ viewport: $FitViewport {
 
 children: [
     $Table {
-        fillX: true
-        fillY: true
+//        fillX: true
+//        fillY: true
         debug: true
         rows: [ !topRow, !middleRow, !middle2Row, !bottomRow ]
     }
