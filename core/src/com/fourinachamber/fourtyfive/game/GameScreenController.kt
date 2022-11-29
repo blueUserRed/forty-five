@@ -80,6 +80,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         set(value) {
             field = value
             value?.start()
+            freezeUI()
         }
 
     /**
@@ -180,7 +181,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     override fun update() {
         timeline?.let {
             it.update()
-            if (it.isFinished) timeline = null
+            if (it.isFinished) {
+                timeline = null
+                unfreezeUI()
+            }
         }
         val iterator = curGameAnims.iterator()
         while (iterator.hasNext()) {
@@ -397,7 +401,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun endTurn() {
-        if (timeline != null) return // don't let anyone change to Enemy phase while animations are still running
         onEndTurnButtonClicked()
     }
 

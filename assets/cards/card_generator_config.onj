@@ -206,6 +206,39 @@ cards: [
         ]
     }
 
+    {
+        name: !cards.11.name
+        elements: [
+            ...!coverSharedElements
+            $TextElement {
+                text: !cards.11.title
+                ...!titleElementSharedKeys
+            }
+        ]
+    }
+
+    {
+        name: !cards.12.name
+        elements: [
+            ...!coverSharedElements
+            $TextElement {
+                text: !cards.12.title
+                ...!titleElementSharedKeys
+            }
+        ]
+    }
+
+    {
+        name: !cards.13.name
+        elements: [
+            ...!coverSharedElements
+            $TextElement {
+                text: !cards.13.title
+                ...!titleElementSharedKeys
+            }
+        ]
+    }
+
     // default cards
 
     {
