@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.*
 import kotlin.properties.Delegates
@@ -61,10 +62,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var remainingCardsToDraw: Int? = null
 
+    private val playerLivesTemplate: TemplateString = TemplateString(
+        playerLivesRawTemplateText,
+        mapOf(
+            "curLives" to { curPlayerLives },
+            "baseLives" to { basePlayerLives }
+        )
+    )
+
     var curPlayerLives: Int = basePlayerLives
         private set(value) {
             field = value
-            playerLivesLabel?.setText("lives: $value/$basePlayerLives")
+            playerLivesLabel?.setText(playerLivesTemplate.string)
         }
 
     private var timeline: Timeline? = null
@@ -85,10 +94,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var roundCounter: Int = 0
         private set
 
+    private val reservesTemplate: TemplateString = TemplateString(
+        reservesRawTemplateText,
+        mapOf(
+            "curReserves" to { curReserves },
+            "baseReserves" to { baseReserves }
+        )
+    )
+
     var curReserves: Int = 0
         private set(value) {
             field = value
-            reservesLabel?.setText("reserves: $value/$baseReserves")
+            reservesLabel?.setText(reservesTemplate.string)
         }
 
     private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
@@ -358,6 +375,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         cardToShoot.afterShot(this)
 
         checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
+
+        checkCardModifiers()
+    }
+
+    private fun checkCardModifiers() {
+        for (card in cards) if (card.inGame) card.checkModifierValidity()
     }
 
     fun endTurn() {
@@ -490,6 +513,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 unfreezeUI()
                 hideCardDrawActor()
                 remainingCardsToDraw = null
+                checkCardModifiers()
             }
 
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
@@ -609,6 +633,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         private lateinit var playerTurnBannerName: String
         private lateinit var enemyTurnBannerName: String
 
+        private lateinit var playerLivesRawTemplateText: String
+        private lateinit var reservesRawTemplateText: String
+
         fun init(config: OnjObject) {
 
             bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
@@ -622,6 +649,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             playerTurnBannerName = bannerOnj.get<String>("playerTurnBanner")
             enemyTurnBannerName = bannerOnj.get<String>("enemyTurnBanner")
+
+            val tmplOnj = config.get<OnjObject>("stringTemplates")
+
+            playerLivesRawTemplateText = tmplOnj.get<String>("playerLives")
+            reservesRawTemplateText = tmplOnj.get<String>("reserves")
 
         }
 

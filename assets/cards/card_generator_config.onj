@@ -181,37 +181,26 @@ cards: [
             }
         ]
     }
-
+    
+    // Cover --------------------------
+    
     {
         name: !cards.9.name
         elements: [
-            ...!bulletSharedElements
+            ...!coverSharedElements
             $TextElement {
                 text: !cards.9.title
                 ...!titleElementSharedKeys
             }
         ]
     }
-    
-    // Cover --------------------------
-    
+
     {
         name: !cards.10.name
         elements: [
             ...!coverSharedElements
             $TextElement {
                 text: !cards.10.title
-                ...!titleElementSharedKeys
-            }
-        ]
-    }
-
-    {
-        name: !cards.11.name
-        elements: [
-            ...!coverSharedElements
-            $TextElement {
-                text: !cards.11.title
                 ...!titleElementSharedKeys
             }
         ]
