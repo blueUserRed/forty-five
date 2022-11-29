@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
@@ -133,6 +134,7 @@ object OnjReaderUtils {
         )
         val font = BitmapFont(Gdx.files.internal(fontOnj.get<String>("fontFile")), TextureRegion(texture), false)
         font.setUseIntegerPositions(false)
+        font.color = Color.valueOf(fontOnj.getOr("color", "0000ff"))
         return font
     }
 
@@ -239,5 +241,18 @@ object OnjReaderUtils {
         if (frameTime == 0) throw RuntimeException("frameTime can not be zero")
         return Animation(frames, atlas.textures, initialFrame, frameTime)
     }
+
+    fun readParticles(particles: OnjArray): Map<String, ParticleEffect> = particles
+        .value
+        .associate {
+            it as OnjObject
+            val effect = ParticleEffect()
+            effect.load(
+                Gdx.files.internal(it.get<String>("particlePath")),
+                Gdx.files.internal(it.get<String>("textureDir"))
+            )
+            effect.scaleEffect(it.get<Double>("scale").toFloat())
+            it.get<String>("name") to effect
+        }
 
 }

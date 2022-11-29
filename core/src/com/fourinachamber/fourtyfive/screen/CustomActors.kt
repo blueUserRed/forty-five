@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
@@ -17,9 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.utils.*
-import ktx.actors.contains
 import ktx.actors.onTouchEvent
 import onj.OnjArray
 import onj.OnjFloat
@@ -113,6 +112,17 @@ interface InitialiseableActor {
 }
 
 /**
+ * an actor that can be in an animation
+ */
+interface AnimationActor {
+
+    /**
+     * true if the actor is in an animation. If so, it should be treated differently, e.g. by not setting its position
+     */
+    var inAnimation: Boolean
+}
+
+/**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
  *  label
@@ -159,9 +169,10 @@ open class CustomLabel(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor(private val region: TextureRegion) : Image(region), Maskable, ZIndexActor {
+open class CustomImageActor(private val region: TextureRegion) : Image(region), Maskable, ZIndexActor, DisableActor {
 
     override var fixedZIndex: Int = 0
+    override var isDisabled: Boolean = false
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -171,9 +182,21 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
     override var maskOffsetY: Float = 0f
 
     /**
+     * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
+     * already applied
+     */
+    var reportDimensionsWithScaling: Boolean = false
+
+    /**
      * if set to true, the scale of the image will be ignored when drawing
      */
-    var ignoreScaling: Boolean = false
+    var ignoreScalingWhenDrawing: Boolean = false
+
+    var texture: TextureRegion = region
+        set(value) {
+            drawable = TextureRegionDrawable(value)
+            field = value
+        }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
@@ -183,11 +206,11 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
             return
         }
 
-        val width = if (ignoreScaling) width else width * scaleX
-        val height = if (ignoreScaling) height else height * scaleY
+        val width = if (ignoreScalingWhenDrawing) width else width * scaleX
+        val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
         if (mask == null) {
-            batch.draw(region, x, y, width, height)
+            batch.draw(texture, x, y, width, height)
             return
         }
 
@@ -203,10 +226,31 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
         mask.bind()
         Gdx.gl.glActiveTexture(GL_TEXTURE0)
 
-        batch.draw(region, x, y, width, height)
+        batch.draw(texture, x, y, width, height)
         batch.flush()
 
         batch.shader = prevShader
+    }
+
+    override fun getMinWidth(): Float =
+        if (reportDimensionsWithScaling) super.getMinWidth() * scaleX else super.getMinWidth()
+    override fun getPrefWidth(): Float =
+        if (reportDimensionsWithScaling) super.getPrefWidth() * scaleX else super.getPrefWidth()
+    override fun getMaxWidth(): Float =
+        if (reportDimensionsWithScaling) super.getMaxWidth() * scaleX else super.getMaxWidth()
+    override fun getMinHeight(): Float =
+        if (reportDimensionsWithScaling) super.getMinHeight() * scaleY else super.getMinHeight()
+    override fun getPrefHeight(): Float =
+        if (reportDimensionsWithScaling) super.getPrefHeight() * scaleY else super.getPrefHeight()
+    override fun getMaxHeight(): Float =
+        if (reportDimensionsWithScaling) super.getMaxHeight() * scaleY else super.getMaxHeight()
+
+    override fun hit(x: Float, y: Float, touchable: Boolean): Actor? { // workaround
+        if (!reportDimensionsWithScaling) return super.hit(x, y, touchable)
+        if (touchable && this.touchable != Touchable.enabled) return null
+        if (!isVisible) return null
+        val didHit = x >= 0 && x < width / scaleX && y >= 0 && y < height / scaleY
+        return if (didHit) this else null
     }
 
     companion object {
@@ -344,7 +388,7 @@ class AnimatedImage(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         curFrame = ((TimeUtils.timeSinceMillis(refTime) / animation.frameTime) % animation.frames.size).toInt()
-        drawable = TextureRegionDrawable(animation.frames[curFrame])
+        texture = animation.frames[curFrame]
         super.draw(batch, parentAlpha)
     }
 }

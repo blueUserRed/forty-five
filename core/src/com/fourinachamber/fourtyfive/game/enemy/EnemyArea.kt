@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.Widget

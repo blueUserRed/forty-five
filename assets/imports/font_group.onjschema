@@ -16,6 +16,7 @@ $Font [
         name: string
         fontFile: string
         imageFile: string
+        color?: string
         useMipMapLinearLinear?: boolean
     }
 
