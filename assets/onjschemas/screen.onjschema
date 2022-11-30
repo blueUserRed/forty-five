@@ -34,6 +34,8 @@ $Viewport [
     cellName?: string
     sizeToActor?: boolean
     align?: string
+    expandX?: boolean
+    expandY?: boolean
     element: $Widget
 }
 
@@ -164,6 +166,7 @@ $Widget [
         hoveredCardZIndex: int
         draggedCardZIndex: int
         hoveredCardScale: float
+        targetWidth: float
         ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }

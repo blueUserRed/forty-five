@@ -445,6 +445,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 //        }
 
         "CardHand" -> CardHand(
+            widgetOnj.get<Double>("targetWidth").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
             Color.valueOf(widgetOnj.get<String>("detailFontColor")),
             TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
@@ -534,6 +535,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             cell.width(Value.prefWidth)
             cell.height(Value.prefHeight)
         }
+        if (cellOnj.getOr("expandX", false)) cell.expandX()
+        if (cellOnj.getOr("expandY", false)) cell.expandY()
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {

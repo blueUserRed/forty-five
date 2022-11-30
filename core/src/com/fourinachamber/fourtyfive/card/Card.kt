@@ -126,6 +126,10 @@ class Card(
         inGame = false
     }
 
+    fun onDestroy() {
+        inGame = false
+    }
+
     fun addModifier(modifier: CardModifier) {
         modifiers.add(modifier)
         isDamageDirty = true

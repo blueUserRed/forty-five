@@ -248,7 +248,10 @@ class CoverStack(
     fun destroy() {
         currentHealth = 0
         baseHealth = 0
-        for (card in _cards) removeActor(card.actor)
+        for (card in _cards) {
+            card.onDestroy()
+            removeActor(card.actor)
+        }
         _cards.clear()
         lockedTurnNum = null
         updateText()
