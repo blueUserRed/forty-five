@@ -207,13 +207,32 @@ class Revolver(
 
     fun rotate() {
         val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
-        val firstCard = if (slots.isNotEmpty()) slots[0].card else null
+
         for (i in slots.indices) {
-            val slot = slots[i]
-            val nextOffset = (i + 1) % slots.size
-            slot.card = if (nextOffset == 0) firstCard else slots[nextOffset].card
-            slot.animateTo(basePos, radius, angleForIndex(i), angleForIndex(nextOffset))
+            slots[i].animateTo(basePos, radius, angleForIndex(i), angleForIndex((i + 1) % slots.size))
         }
+
+        val firstCard = slots[0].card
+        slots[0].card = slots[1].card
+        slots[1].card = slots[2].card
+        slots[2].card = slots[3].card
+        slots[3].card = slots[4].card
+        slots[4].card = firstCard
+    }
+
+    fun rotateLeft() {
+        val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
+
+        for (i in slots.indices) {
+            slots[i].animateToReversed(basePos, radius, angleForIndex(if (i == 0) 4 else i - 1), angleForIndex(i))
+        }
+
+        val firstCard = slots[4].card
+        slots[4].card = slots[3].card
+        slots[3].card = slots[2].card
+        slots[2].card = slots[1].card
+        slots[1].card = slots[0].card
+        slots[0].card = firstCard
     }
 
     fun markDirty() {
@@ -289,6 +308,17 @@ class RevolverSlot(
         if (inAnimation) return
         val action = RevolverSlotRotationAction(base, radius, this, from, to)
         action.isReverse = true
+        action.duration = animationDuration
+        addAction(action)
+        card?.inAnimation = true
+        inAnimation = true
+        this.action = action
+    }
+
+    fun animateToReversed(base: Vector2, radius: Float, from: Double, to: Double) {
+        if (inAnimation) return
+        val action = RevolverSlotRotationAction(base, radius, this, from, to)
+        action.isReverse = false
         action.duration = animationDuration
         addAction(action)
         card?.inAnimation = true
