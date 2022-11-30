@@ -104,7 +104,7 @@ abstract class Effect(val trigger: Trigger) {
                     mapOf(
                         "text" to { if (amount > 0) "buff" else "debuff" },
                         "amount" to { amount },
-                        "source" to { card.name }
+                        "source" to { card.title }
                     )
                 ),
             ) { card.inGame }

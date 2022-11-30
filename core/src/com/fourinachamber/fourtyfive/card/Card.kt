@@ -19,6 +19,7 @@ import onj.OnjObject
 /**
  * represents a card
  * @param name the name of the card
+ * @param title the properly formatted name of the card, used for displaying
  * @param texture the texture for displaying the card
  * @param description the description of the card
  * @param type the CardType
@@ -26,6 +27,7 @@ import onj.OnjObject
  */
 class Card(
     val name: String,
+    val title: String,
     val texture: TextureRegion,
     val shortDescription: String,
     val type: Type,
@@ -201,6 +203,7 @@ class Card(
 
                 val card = Card(
                     name,
+                    onj.get<String>("title"),
                     regions["$cardTexturePrefix$name"]
                         ?: throw RuntimeException("cannot find texture for card $name"),
 

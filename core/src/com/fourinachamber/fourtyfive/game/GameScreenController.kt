@@ -212,6 +212,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         val bulletOnj = onj.get<OnjObject>("defaultBullet")
         val bulletName = bulletOnj.get<String>("name")
+        val bulletTitle = bulletOnj.get<String>("title")
         val bulletDescription = bulletOnj.get<String>("description")
         val bulletDamage = bulletOnj.get<Long>("baseDamage").toInt()
         val bulletCost = bulletOnj.get<Long>("cost").toInt()
@@ -219,6 +220,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         defaultBulletCreator = {
             val card = Card(
                 bulletName,
+                bulletTitle,
                 curScreen!!.textures["${Card.cardTexturePrefix}$bulletName"] ?:
                     throw RuntimeException("no texture found for default card: $bulletName"),
                 bulletDescription,
@@ -238,6 +240,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         val coverOnj = onj.get<OnjObject>("defaultCover")
         val coverName = coverOnj.get<String>("name")
+        val coverTitle = coverOnj.get<String>("title")
         val coverDescription = coverOnj.get<String>("description")
         val coverValue = coverOnj.get<Long>("coverValue").toInt()
         val coverCost = coverOnj.get<Long>("cost").toInt()
@@ -245,6 +248,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         defaultCoverCreator = {
             val card = Card(
                 coverName,
+                coverTitle,
                 curScreen!!.textures["${Card.cardTexturePrefix}$coverName"] ?:
                 throw RuntimeException("no texture found for default card: $coverName"),
                 coverDescription,
