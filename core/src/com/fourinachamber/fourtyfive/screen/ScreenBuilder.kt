@@ -473,7 +473,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
                 widgetOnj.get<Double>("detailOffsetY").toFloat(),
             ),
-            widgetOnj.get<Double>("detailWidth").toFloat()
+            widgetOnj.get<Double>("detailWidth").toFloat(),
+            widgetOnj.getOr<String?>("background", null)?.let { TextureRegionDrawable(textureOrError(it)) }
         ).apply {
             slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
             slotFont = fontOrError(widgetOnj.get<String>("font"))

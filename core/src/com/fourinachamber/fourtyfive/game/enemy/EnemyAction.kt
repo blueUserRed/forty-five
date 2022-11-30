@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.fourinachamber.fourtyfive.game.CoverStack
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.TextAnimation
+import com.fourinachamber.fourtyfive.screen.CustomMoveByAction
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
@@ -66,7 +67,7 @@ class DamagePlayerEnemyAction(
         val shakeAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
         shakeAction.duration = shakeDuration
 
-        val moveByAction = MoveByAction()
+        val moveByAction = CustomMoveByAction()
         moveByAction.setAmount(xCharge, yCharge)
         moveByAction.duration = chargeDuration
         moveByAction.interpolation = chargeInterpolation
