@@ -97,7 +97,7 @@ assets: {
             file: "textures/packed/game_screen/game_screen.atlas"
             defines: [
                 "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
-                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner"
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum"
             ]
         }
 
@@ -159,8 +159,8 @@ options: {
     controller: !controller
 }
 
-!slotScale = 0.07
-!revolverWidth = <128.0 * !slotScale * 4.0>
+//!slotScale = 0.07
+//!revolverWidth = <128.0 * !slotScale * 4.0>
 
 !revolver = $Revolver {
     name: "revolver"
@@ -168,7 +168,7 @@ options: {
     font: "vanilla_whale"
     fontColor: !color.white
     fontScale: 0.25
-    slotScale: !slotScale
+    slotScale: 0.03
     cardScale: 0.045
     animationDuration: 0.2
     radius: 15.0
@@ -177,6 +177,7 @@ options: {
     ...!sharedDetailTextKeys
     detailOffsetX: 0.0
     detailOffsetY: 0.0
+    background: "revolver_drum"
 //    debug: true
 }
 

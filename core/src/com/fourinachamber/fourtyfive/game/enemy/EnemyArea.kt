@@ -1,7 +1,9 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.screen.InitialiseableActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.screen.ZIndexActor

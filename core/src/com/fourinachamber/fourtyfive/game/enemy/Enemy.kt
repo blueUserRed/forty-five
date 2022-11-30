@@ -1,8 +1,10 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.utils.Timeline
@@ -120,8 +122,9 @@ class Enemy(
 /**
  * used for representing an enemy on the screen
  */
-class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
+class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, AnimationActor {
 
+    override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
     private var image: CustomImageActor = CustomImageActor(enemy.texture)
     private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup()
@@ -158,7 +161,7 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
     }
 
     /**
-     * updates the desctiption text of the actor
+     * updates the description text of the actor
      */
     fun updateText() {
         detail.setText("${enemy.currentLives}/${enemy.lives}")
