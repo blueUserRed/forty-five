@@ -1,0 +1,45 @@
+
+import "imports/colors.onj" as color
+
+bufferTime: 0.8
+
+shakeAnimation: {
+    xShake: 1.0
+    yShake: 0.0
+    xSpeed: 0.2
+    ySpeed: 0.0
+    duration: 0.8
+}
+
+enemyChargeAnimation: {
+    xCharge: -7.0
+    yCharge: 0.0
+    duration: 0.5
+    interpolation: "swing"
+}
+
+playerLivesAnimation: {
+    font: "vanilla_whale"
+    negativeFontColor: !color.red
+    positiveFontColor: !color.green
+    fontScale: 0.2
+    duration: 1.5
+    startFadeoutAt: 1.0
+    raiseHeight: 20.0
+}
+
+bannerAnimation: {
+     duration: 1.5
+     scaleAnimDuration: 0.9
+     beginScale: 0.12
+     endScale: 0.09
+     playerTurnBanner: "player_turn_banner"
+     enemyTurnBanner: "enemy_turn_banner"
+}
+
+stringTemplates:  {
+    playerLives: "LIVES: {curLives}/{baseLives}"
+    reserves: "RESERVES: {curReserves}/{baseReserves}"
+    rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!"
+    buffDetailText: "{source} applied a {text} of {amount}!"
+}

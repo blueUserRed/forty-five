@@ -5,15 +5,17 @@ defaultBullet: {
     description: "It's the default bullet! You ran out of bullets!"
     traitEffects: []
     cost: 1
-    baseDamage: 5
+    baseDamage: 6,
+    effects: []
 }
 
 defaultCover: {
-    name: "crate"
-    title: "crate"
+    name: "defaultCrate"
+    title: "defaultCrate"
     description: "ITS THE DEFAULT COVER! YOU RAN OUT OF COVER CARDS!"
     cost: 1
     coverValue: 5
+    effects: []
 }
 
 cards: [
@@ -21,127 +23,164 @@ cards: [
     // Bullets ----------------------------------
 
     { // 0
-        name: "test_card1"
-        title: "test \ncard 1"
+        name: "placeholder1"
+        title: "placeholder 1"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 1
         coverValue: 0
         traitEffects: []
+        effects: []
         cost: 1
         type: $Bullet { }
     }
     { // 1
-        name: "test_card2"
-        title: "test \ncard 2"
+        name: "workerBullet"
+        title: "worker Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 5
         coverValue: 0
         traitEffects: []
+        effects: [ reserveGain("round start", 1) ]
         cost: 1
         type: $Bullet { }
     }
     { // 2
-        name: "test_card3"
-        title: "test \ncard 3"
+        name: "bigBullet"
+        title: "big Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 16
         coverValue: 0
         traitEffects: []
-        cost: 1
+        effects: []
+        cost: 2
         type: $Bullet { }
     }
     { // 3
-        name: "test_card4"
-        title: "test \ncard 4"
+        name: "rottenBullet"
+        title: "rotten Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 16
         coverValue: 0
-        traitEffects: []
+        traitEffects: [ "rotten" ]
+        effects: []
         cost: 1
         type: $Bullet { }
     }
     { // 4
-        name: "rotten_bullet"
-        title: "rotten bullet"
-        description: "Looses damage"
-        baseDamage: 16
+        name: "diamondBullet"
+        title: "diamond Bullet"
+        description: "It's a bullet!"
+        baseDamage: 23
         coverValue: 0
-        traitEffects: [ "rotten" ]
-        cost: 1
+        traitEffects: []
+        effects: [ draw("enter", 2), draw("shot", 1) ]
+        cost: 3
         type: $Bullet { }
     }
     { // 5
-        name: "test_card6"
-        title: "test \ncard 6"
+        name: "bewitchedBullet"
+        title: "bewitched Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 7
         coverValue: 0
-        traitEffects: []
+        traitEffects: [ "leftRotating"]
+        effects: []
         cost: 1
         type: $Bullet { }
     }
     { // 6
-        name: "test_card7"
-        title: "test \ncard 7"
+        name: "placeholder4"
+        title: "placeholder 4"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 1
         coverValue: 0
         traitEffects: []
+        effects: []
         cost: 1
         type: $Bullet { }
     }
     { // 7
-        name: "test_card8"
-        title: "test \ncard 8"
+        name: "leadersBullet"
+        title: "leaders Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 15
         coverValue: 0
         traitEffects: []
-        cost: 1
+        effects: [ buffDmg("enter", 4) ]
+        cost: 2
         type: $Bullet { }
     }
     { // 8
-        name: "test_card9"
-        title: "test \ncard 9"
+        name: "silverBullet"
+        title: "silver Bullet"
         description: "It's a bullet!"
-        baseDamage: 20
+        baseDamage: 7
         coverValue: 0
         traitEffects: []
-        cost: 1
-        type: $Bullet { }
-    }
-    { // 9
-        name: "test_card10"
-        title: "test \ncard 10"
-        description: "It's a bullet!"
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
+        effects: [ draw("enter", 1), draw("shot", 1) ]
         cost: 1
         type: $Bullet { }
     }
 
     // Cover ----------------------------------
 
-    { // 10
-        name: "test_cover1"
-        title: "test \ncover 1"
+    { // 9
+        name: "crate"
+        title: "Crate"
         description: "It's a Cover!"
         baseDamage: 0
-        coverValue: 20
+        coverValue: 3
         traitEffects: []
+        effects: []
         cost: 1
         type: $Cover { }
     }
 
-    { // 11
-        name: "test_cover2"
-        title: "test \ncover 2"
+    { // 10
+        name: "bigCrate"
+        title: "big Crate"
         description: "It's a Cover!"
         baseDamage: 0
-        coverValue: 20
+        coverValue: 5
         traitEffects: []
+        effects: []
+        cost: 2
+        type: $Cover { }
+    }
+
+    { // 11
+        name: "placeholder5"
+        title: "placeholder 5"
+        description: "It's a Cover!"
+        baseDamage: 0
+        coverValue: 1
+        traitEffects: []
+        effects: []
         cost: 1
+        type: $Cover { }
+    }
+
+    { // 12
+        name: "jewelryBox"
+        title: "jewelry Box"
+        description: "It's a Cover!"
+        baseDamage: 0
+        coverValue: 3
+        traitEffects: []
+        effects: [ draw("enter", 1) ]
+        cost: 1
+        type: $Cover { }
+    }
+
+    { // 13
+        name: "treasureChest"
+        title: "treasure Chest"
+        description: "It's a Cover!"
+        baseDamage: 0
+        coverValue: 6
+        traitEffects: []
+        effects: [ draw("round start", 1) ]
+        cost: 3
         type: $Cover { }
     }
 
