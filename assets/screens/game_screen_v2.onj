@@ -168,10 +168,11 @@ options: {
     font: "vanilla_whale"
     fontColor: !color.white
     fontScale: 0.25
-    slotScale: 0.03
+    slotScale: 0.029
     cardScale: 0.045
     animationDuration: 0.2
-    radius: 15.0
+    radius: 13.0
+    radiusExtension: 5.0
     cardZIndex: !cardZIndicesStart
     rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
     ...!sharedDetailTextKeys
@@ -348,9 +349,10 @@ options: {
             cells: [
 
                 {
-                    width: <!worldWidth / 3>
+                    width: <4 * (!worldWidth / 12)>
                     element: $VerticalGroup {
                         align: "center"
+                        spacing: 2.0
                         children: [
                             !revolver
                             !shootButton
@@ -359,12 +361,17 @@ options: {
                 }
 
                 {
-                    width: <!worldWidth / 3>
+                    expandX: true
+                    width: <4 * (!worldWidth / 12)>
+                    height: <!worldHeight / 3.0>
+                    align: "top right"
+                    padTop: 6.0
+                    padRight: 5.0
                     element: !coverArea
                 }
 
                 {
-                    width: <!worldWidth / 3>
+                    width: <2 * (!worldWidth / 12)>
                     element: !enemyArea
                 }
 

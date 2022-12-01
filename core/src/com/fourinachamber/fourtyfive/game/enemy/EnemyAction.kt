@@ -74,7 +74,7 @@ class DamagePlayerEnemyAction(
 
         val playerLivesLabel = gameScreenController.playerLivesLabel!!
         var playerLivesPos = playerLivesLabel.localToStageCoordinates(Vector2(0f, 0f))
-        playerLivesPos += Vector2(playerLivesLabel.width / 2f, 0f)
+        playerLivesPos += Vector2(playerLivesLabel.width / 2f, -playerLivesLabel.height)
 
         val textAnimation = TextAnimation(
             playerLivesPos.x,
