@@ -78,7 +78,7 @@ abstract class Effect(val trigger: Trigger) {
 
             fun init(config: OnjObject) {
 
-                val plOnj = config.get<OnjObject>("playerLivesAnimation")
+                val plOnj = config.get<OnjObject>("reservesAnimation")
 
                 fontName = plOnj.get<String>("font")
                 fontScale = plOnj.get<Double>("fontScale").toFloat()

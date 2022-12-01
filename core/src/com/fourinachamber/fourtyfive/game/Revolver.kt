@@ -31,7 +31,8 @@ class Revolver(
     detailFontScale: Float,
     val detailOffset: Vector2,
     val detailWidth: Float,
-    private val background: Drawable?
+    private val background: Drawable?,
+    private val radiusExtension: Float
 ) : Widget(), ZIndexActor, InitialiseableActor {
 
     override var fixedZIndex: Int = 0
@@ -194,7 +195,8 @@ class Revolver(
     }
 
     private fun updateSlotsAndCars() {
-        val size = 2 * radius + 2 * slotTexture!!.regionWidth * slotScale!!
+        val slotSize = slotTexture!!.regionWidth * slotScale!!
+        val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size
         prefHeight = size
         width = prefWidth

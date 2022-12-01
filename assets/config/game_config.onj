@@ -22,8 +22,8 @@ enemyConfig: {
             lives: 1234
             brain: !defaultEnemyBrain
             texture: "enemy"
-            offsetX: 26.0
-            offsetY: 0.0
+            offsetX: 6.0
+            offsetY: 18.0
             scaleX: 0.03
             scaleY: 0.03
             detailFont: "vanilla_whale"

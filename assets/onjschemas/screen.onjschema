@@ -183,6 +183,7 @@ $Widget [
         rotationOff: float
         cardZIndex: int
         background?: string
+        radiusExtension: float
         ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }

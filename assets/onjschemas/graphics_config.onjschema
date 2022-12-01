@@ -26,6 +26,16 @@ playerLivesAnimation: {
     raiseHeight: float
 }
 
+reservesAnimation: {
+    font: string
+    negativeFontColor: string
+    positiveFontColor: string
+    fontScale: float
+    duration: float
+    startFadeoutAt: float
+    raiseHeight: float
+}
+
 bannerAnimation: {
      duration: float
      scaleAnimDuration: float

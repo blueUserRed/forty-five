@@ -25,6 +25,16 @@ playerLivesAnimation: {
     fontScale: 0.2
     duration: 1.5
     startFadeoutAt: 1.0
+    raiseHeight: -20.0
+}
+
+reservesAnimation: {
+    font: "vanilla_whale"
+    negativeFontColor: !color.red
+    positiveFontColor: !color.green
+    fontScale: 0.2
+    duration: 1.5
+    startFadeoutAt: 1.0
     raiseHeight: 20.0
 }
 
