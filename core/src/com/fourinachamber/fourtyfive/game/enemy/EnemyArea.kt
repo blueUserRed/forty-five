@@ -39,7 +39,7 @@ class EnemyArea : Widget(), ZIndexActor, InitialiseableActor {
     fun addEnemy(enemy: Enemy) {
         _enemies.add(enemy)
         if (enemy.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(enemy.actor)
-        updateEnemyPositions()
+//        updateEnemyPositions()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -52,7 +52,9 @@ class EnemyArea : Widget(), ZIndexActor, InitialiseableActor {
 
     private fun updateEnemyPositions() {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        for (enemy in _enemies) enemy.actor.setPosition(x + enemy.offsetX, y + enemy.offsetY)
+        for (enemy in _enemies) {
+            enemy.actor.setPosition(x + enemy.offsetX, y + enemy.offsetY)
+        }
     }
 
 }

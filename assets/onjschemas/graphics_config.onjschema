@@ -45,6 +45,13 @@ bannerAnimation: {
      enemyTurnBanner: string
 }
 
+statusEffectIcons: {
+    burning: string
+    burningScale: float
+    poison: string
+    poisonScale: float
+}
+
 stringTemplates:  {
     playerLives: string
     reserves: string

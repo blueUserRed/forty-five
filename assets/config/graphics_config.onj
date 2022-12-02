@@ -47,6 +47,13 @@ bannerAnimation: {
      enemyTurnBanner: "enemy_turn_banner"
 }
 
+statusEffectIcons: {
+    burning: "burning_icon"
+    burningScale: 0.008
+    poison: "poison_icon"
+    poisonScale: 0.008
+}
+
 stringTemplates:  {
     playerLives: "LIVES: {curLives}/{baseLives}"
     reserves: "RESERVES: {curReserves}/{baseReserves}"
