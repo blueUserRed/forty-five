@@ -25,6 +25,16 @@ playerLivesAnimation: {
     fontScale: 0.2
     duration: 1.5
     startFadeoutAt: 1.0
+    raiseHeight: -20.0
+}
+
+reservesAnimation: {
+    font: "vanilla_whale"
+    negativeFontColor: !color.red
+    positiveFontColor: !color.green
+    fontScale: 0.2
+    duration: 1.5
+    startFadeoutAt: 1.0
     raiseHeight: 20.0
 }
 
@@ -35,6 +45,17 @@ bannerAnimation: {
      endScale: 0.09
      playerTurnBanner: "player_turn_banner"
      enemyTurnBanner: "enemy_turn_banner"
+}
+
+statusEffectIcons: {
+    burning: "burning_icon"
+    burningScale: 0.008
+    poison: "poison_icon"
+    poisonScale: 0.008
+}
+
+destroyCardPostProcessor: {
+    name: "vignette"
 }
 
 stringTemplates:  {

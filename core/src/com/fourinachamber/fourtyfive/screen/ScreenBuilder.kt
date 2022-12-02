@@ -445,6 +445,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 //        }
 
         "CardHand" -> CardHand(
+            widgetOnj.get<Double>("targetWidth").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
             Color.valueOf(widgetOnj.get<String>("detailFontColor")),
             TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
@@ -472,7 +473,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
                 widgetOnj.get<Double>("detailOffsetY").toFloat(),
             ),
-            widgetOnj.get<Double>("detailWidth").toFloat()
+            widgetOnj.get<Double>("detailWidth").toFloat(),
+            widgetOnj.getOr<String?>("background", null)?.let { TextureRegionDrawable(textureOrError(it)) },
+            widgetOnj.get<Double>("radiusExtension").toFloat()
         ).apply {
             slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
             slotFont = fontOrError(widgetOnj.get<String>("font"))
@@ -534,6 +537,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             cell.width(Value.prefWidth)
             cell.height(Value.prefHeight)
         }
+        if (cellOnj.getOr("expandX", false)) cell.expandX()
+        if (cellOnj.getOr("expandY", false)) cell.expandY()
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {
@@ -870,6 +875,10 @@ data class PostProcessor(
 
             is Float -> {
                 shader.setUniformf("u_arg_$key", value)
+            }
+
+            is Color -> {
+                shader.setUniformf("u_arg_$key", value.r,  value.g, value.b, value.a)
             }
 
             else -> throw RuntimeException("binding uniform arguments of type ${

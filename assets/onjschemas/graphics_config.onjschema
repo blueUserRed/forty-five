@@ -26,6 +26,16 @@ playerLivesAnimation: {
     raiseHeight: float
 }
 
+reservesAnimation: {
+    font: string
+    negativeFontColor: string
+    positiveFontColor: string
+    fontScale: float
+    duration: float
+    startFadeoutAt: float
+    raiseHeight: float
+}
+
 bannerAnimation: {
      duration: float
      scaleAnimDuration: float
@@ -33,6 +43,17 @@ bannerAnimation: {
      endScale: float
      playerTurnBanner: string
      enemyTurnBanner: string
+}
+
+statusEffectIcons: {
+    burning: string
+    burningScale: float
+    poison: string
+    poisonScale: float
+}
+
+destroyCardPostProcessor: {
+    name: string
 }
 
 stringTemplates:  {

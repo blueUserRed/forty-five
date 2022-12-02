@@ -50,6 +50,7 @@ class EnemyBrain(
                     enemy,
                     onj,
                     screenDataProvider,
+                    onj.get<Double>("indicatorTextureScale").toFloat(),
                     (min..max).random(),
                 )
             })

@@ -13,13 +13,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import com.fourinachamber.fourtyfive.utils.plus
 import ktx.actors.contains
 import onj.OnjNamedObject
 import java.lang.Math.cos
 import java.lang.Math.sin
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 
 /**
  * actor representing the revolver
@@ -30,7 +30,9 @@ class Revolver(
     detailBackground: Drawable,
     detailFontScale: Float,
     val detailOffset: Vector2,
-    val detailWidth: Float
+    val detailWidth: Float,
+    private val background: Drawable?,
+    private val radiusExtension: Float
 ) : Widget(), ZIndexActor, InitialiseableActor {
 
     override var fixedZIndex: Int = 0
@@ -120,6 +122,13 @@ class Revolver(
         setCard(slot, null)
     }
 
+    fun removeCard(card: Card) {
+        for (slot in slots) if (slot.card === card) {
+            if (card.actor in stage.root) screenDataProvider.removeActorFromRoot(card.actor)
+            setCard(slot.num, null)
+        }
+    }
+
     /**
      * @return the card in [slot]
      */
@@ -131,6 +140,7 @@ class Revolver(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         width = prefWidth
         height = prefHeight
+        background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
         if (!isInitialised) {
             initialise()
@@ -192,7 +202,8 @@ class Revolver(
     }
 
     private fun updateSlotsAndCars() {
-        val size = 2 * radius + 2 * slotTexture!!.regionWidth * slotScale!!
+        val slotSize = slotTexture!!.regionWidth * slotScale!!
+        val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size
         prefHeight = size
         width = prefWidth
@@ -289,7 +300,6 @@ class RevolverSlot(
             card?.inAnimation = false
             revolver.markDirty()
         }
-        if (inAnimation) card?.actor?.setPosition(x, y)
     }
 
     fun position(base: Vector2, r: Float, angle: Double) {
@@ -298,7 +308,12 @@ class RevolverSlot(
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
-        card?.actor?.setPosition(x, y)
+        card?.actor?.let {
+            it.setPosition(
+                x + slotSize / 2 - (it.width * it.scaleX) / 2,
+                y + slotSize / 2 - (it.height * it.scaleY) / 2
+            )
+        }
     }
 
     /**

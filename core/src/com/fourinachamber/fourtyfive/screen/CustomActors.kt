@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
@@ -455,4 +456,12 @@ open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
         }
     }
 
+}
+
+class CustomParticleActor(
+    particle: ParticleEffect,
+    resetOnStart: Boolean = true
+) : ParticleEffectActor(particle, resetOnStart), ZIndexActor {
+
+    override var fixedZIndex: Int = 0
 }

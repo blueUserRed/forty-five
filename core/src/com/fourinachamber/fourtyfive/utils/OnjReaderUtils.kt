@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.fourinachamber.fourtyfive.game.OnjExtensions
 import com.fourinachamber.fourtyfive.screen.PostProcessor
 import onj.*
 
@@ -159,23 +160,28 @@ object OnjReaderUtils {
 
         val timeOffset = onj.getOr<Long>("timeOffset", 0).toInt()
 
-        val args: MutableMap<String, Any?> = if (!onj["args"]!!.isNull()) {
+        val args: Map<String, Any?> = if (!onj["args"]!!.isNull()) {
             val map = mutableMapOf<String, Any?>()
 
             val argsOnj = onj.get<OnjObject>("args")
+//            onj.get<OnjObject>("args").value
 
+//            for ((key, value)  in argsOnj.value) {
+//                map[key] = value.value
+//            }
+//
             for ((key, value)  in argsOnj.value) when (value) {
 
                 is OnjFloat -> map[key] = value.value.toFloat()
-                is OnjInt -> map[key] = value.value.toFloat()
+                is OnjInt -> map[key] = value.value.toInt()
+                is OnjExtensions.OnjColor -> map[key] = value.value
 
                 else -> throw RuntimeException("binding type ${value::class.simpleName} as a uniform" +
                         " is currently not supported")
             }
 
             map
-
-        } else mutableMapOf()
+        } else mapOf()
 
         return PostProcessor(shader, uniformsToBind, args, timeOffset)
     }
