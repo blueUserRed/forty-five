@@ -62,6 +62,7 @@ import "config/game_config.onj" as gameConfig
     shootButtonName: "shoot_button"
     endTurnButtonName: "end_turn_button"
     reservesLabelName: "reserves_label"
+    destroyCardInstructionActor: "destroy_card_instruction_label"
     cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
     cardsToDraw: !gameConfig.cardDrawConfig.roundStart
     playerLives: !gameConfig.playerConfig.lives
@@ -118,6 +119,27 @@ assets: {
             timeOffset: 2_000
             uniforms: [ "time" ]
             args: null
+        }
+        {
+            name: "default"
+            vertexShader: "shaders/default/default.vert"
+            fragmentShader: "shaders/default/default.frag"
+            timeOffset: 0
+            uniforms: []
+            args: null
+        }
+        {
+            name: "vignette"
+            vertexShader: "shaders/vignette/vignette.vert"
+            fragmentShader: "shaders/vignette/vignette.frag"
+            timeOffset: 0
+            uniforms: [ "time", "resolution" ]
+            args: {
+                color: color("ff0000")
+                speed: 0.0
+                movement: 0.4
+                minMovement: 0.3
+            }
         }
     ]
     animations: []
@@ -323,18 +345,31 @@ options: {
 
                 {
                     padLeft: 2.0
+                    padBottom: 6.0
                     element: !playerLivesLabel
                 }
 
                 {
                     expandX: true
                     element: $Label {
+                        name: "destroy_card_instruction_label"
                         font: "vanilla_whale"
-                        text: ""
-                        fontScale: 0.1
-                        color: !color.white
+                        text: "Choose a card to destroy!"
+                        fontScale: 0.2
+                        align: "center"
+                        color: !color.black
                     }
                 }
+
+//                {
+//                    expandX: true
+//                    element: $Label {
+//                        font: "vanilla_whale"
+//                        text: ""
+//                        fontScale: 0.1
+//                        color: !color.white
+//                    }
+//                }
 
             ]
         }

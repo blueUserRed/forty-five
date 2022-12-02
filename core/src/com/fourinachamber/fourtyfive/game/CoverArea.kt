@@ -249,7 +249,7 @@ class CoverStack(
         currentHealth = 0
         baseHealth = 0
         for (card in _cards) {
-            card.onDestroy()
+            card.onCoverDestroy()
             removeActor(card.actor)
         }
         _cards.clear()

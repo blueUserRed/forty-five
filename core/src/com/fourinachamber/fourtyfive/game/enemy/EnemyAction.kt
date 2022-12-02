@@ -12,6 +12,7 @@ import com.fourinachamber.fourtyfive.game.CoverStack
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.TextAnimation
 import com.fourinachamber.fourtyfive.screen.CustomMoveByAction
+import com.fourinachamber.fourtyfive.screen.CustomParticleActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
@@ -168,8 +169,9 @@ class DamagePlayerEnemyAction(
             action {
                 particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
 
-                val particleActor = ParticleEffectActor(particle, true)
+                val particleActor = CustomParticleActor(particle!!)
                 particleActor.isAutoRemove = true
+                particleActor.fixedZIndex = Int.MAX_VALUE
 
                 if (wasDestroyed) {
                     particleActor.setPosition(

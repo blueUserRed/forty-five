@@ -149,13 +149,13 @@ cards: [
     }
 
     { // 11
-        name: "placeholder5"
-        title: "placeholder 5"
+        name: "casket"
+        title: "casket"
         description: "It's a Cover!"
         baseDamage: 0
-        coverValue: 1
+        coverValue: 5
         traitEffects: []
-        effects: []
+        effects: [ destroy("enter") ]
         cost: 1
         type: $Cover { }
     }

@@ -54,6 +54,10 @@ statusEffectIcons: {
     poisonScale: 0.008
 }
 
+destroyCardPostProcessor: {
+    name: "vignette"
+}
+
 stringTemplates:  {
     playerLives: "LIVES: {curLives}/{baseLives}"
     reserves: "RESERVES: {curReserves}/{baseReserves}"

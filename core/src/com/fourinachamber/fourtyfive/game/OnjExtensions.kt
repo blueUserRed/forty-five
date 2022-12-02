@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive.game
 
+import com.badlogic.gdx.graphics.Color
 import onj.*
 
 object OnjExtensions {
@@ -31,6 +32,11 @@ object OnjExtensions {
             ))
         },
 
+        OnjFunction("destroy", listOf(OnjString::class)) {
+            OnjEffect(Effect.Destroy(triggerOrError(it[0].value as String)))
+        },
+
+        /////////////////////////////////////////////////////////////////////////
 
         OnjFunction("poison", listOf(OnjInt::class, OnjInt::class)) {
             OnjStatusEffect(StatusEffect.Poison(
@@ -46,6 +52,12 @@ object OnjExtensions {
                 (it[1].value as Double).toFloat(),
                 StatusEffect.StatusEffectTarget.ENEMY
             ))
+        },
+
+        /////////////////////////////////////////////////////////////////////////
+
+        OnjFunction("color", listOf(OnjString::class)) {
+            OnjColor(Color.valueOf(it[0].value as String))
         }
 
     )
@@ -56,6 +68,7 @@ object OnjExtensions {
 
         OnjConfig.addCustomDataType("Effect", OnjEffect::class)
         OnjConfig.addCustomDataType("StatusEffect", OnjStatusEffect::class)
+        OnjConfig.addCustomDataType("Color", OnjStatusEffect::class)
     }
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
@@ -81,6 +94,18 @@ object OnjExtensions {
     ) : OnjValue() {
 
         override fun toString(): String = "'__status-effect__'"
+        override fun toString(indentationLevel: Int): String = toString()
+        override fun toJsonString(): String = toString()
+        override fun toJsonString(indentationLevel: Int): String = toString()
+
+    }
+
+    //TODO: swap all usages Color.valueOf with this
+    class OnjColor(
+        override val value: Color
+    ) : OnjValue() {
+
+        override fun toString(): String = "color($value)"
         override fun toString(indentationLevel: Int): String = toString()
         override fun toJsonString(): String = toString()
         override fun toJsonString(indentationLevel: Int): String = toString()

@@ -52,6 +52,10 @@ statusEffectIcons: {
     poisonScale: float
 }
 
+destroyCardPostProcessor: {
+    name: string
+}
+
 stringTemplates:  {
     playerLives: string
     reserves: string
