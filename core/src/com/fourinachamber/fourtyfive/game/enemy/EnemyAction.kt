@@ -25,6 +25,7 @@ import kotlin.properties.Delegates
 abstract class EnemyAction {
 
     abstract val indicatorTexture: TextureRegion
+    abstract val indicatorTextureScale: Float
 
     abstract val descriptionText: String
 
@@ -43,6 +44,7 @@ class DamagePlayerEnemyAction(
     val enemy: Enemy,
     onj: OnjNamedObject,
     private val screenDataProvider: ScreenDataProvider,
+    override val indicatorTextureScale: Float,
     val damage: Int
 ) : EnemyAction() {
 

@@ -11,6 +11,7 @@ $EnemyAction [
         min: int
         max: int
         indicatorTexture: string
+        indicatorTextureScale: float
         coverStackDamagedParticles: string
         coverStackDestroyedParticles: string
         ...!enemyActionSharedKeys

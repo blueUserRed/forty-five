@@ -149,6 +149,14 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    class GiveStatus(trigger: Trigger, val statusEffect: StatusEffect) : Effect(trigger) {
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+            gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)
+            return null
+        }
+    }
+
     protected fun shakeCardTimeline(card: Card, shakeActorAction: ShakeActorAction): Timeline = Timeline.timeline {
         action { card.actor.addAction(shakeActorAction) }
         delayUntil { shakeActorAction.isComplete }

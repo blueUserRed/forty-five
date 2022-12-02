@@ -116,6 +116,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBulletCreator: () -> Card
     private lateinit var defaultCoverCreator: () -> Card
 
+    private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
+
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
         val onj = OnjParser.parseFile(cardConfigFile)
@@ -137,7 +139,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         for (card in cards) doDragAndDropFor(card)
 
-        enemies = Enemy.getFrom(enemiesOnj, screenDataProvider)
+        enemies = Enemy.getFrom(enemiesOnj, this)
 
         cardDrawActor = screenDataProvider.namedActors[cardDrawActorName] ?: throw RuntimeException(
             "no actor with name $cardDrawActorName"
@@ -381,23 +383,28 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
         if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
 
+        if (cardToShoot != null) {
+            val enemy = enemyArea!!.enemies[0]
+            enemy.damage(cardToShoot.curDamage)
+            if (cardToShoot.shouldRemoveAfterShot) {
+                revolver.removeCard(if (rotateLeft) 1 else 4)
+            }
+            cardToShoot.afterShot(this)
+
+            val timeline = enemy.executeStatusEffectsAfterDamage(this, cardToShoot.curDamage)
+            if (timeline != null) executeTimelineLater(timeline)
+
+            checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
+        }
+
+        checkCardModifiers()
+
         revolver
             .slots
             .mapNotNull { it.card }
             .forEach { it.onRevolverTurn(it === cardToShoot) }
 
-        cardToShoot ?: return
-
-        val enemy = enemyArea!!.enemies[0]
-        enemy.damage(cardToShoot.curDamage)
-        if (cardToShoot.shouldRemoveAfterShot) {
-            revolver.removeCard(if (rotateLeft) 1 else 4)
-        }
-        cardToShoot.afterShot(this)
-
-        checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
-
-        checkCardModifiers()
+        enemies.forEach(Enemy::onRevolverTurn)
     }
 
     private fun checkCardModifiers() {
@@ -424,6 +431,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val timeline = Timeline.timeline {
             for (card in cards) if (card.inGame) {
                 val timeline = card.checkEffects(trigger, this@GameScreenController)
+                if (timeline != null) include(timeline)
+            }
+        }
+        executeTimelineLater(timeline)
+    }
+
+    private fun checkStatusEffects() {
+        val timeline = Timeline.timeline {
+            for (enemy in enemies) {
+                val timeline = enemy.executeStatusEffects(this@GameScreenController)
                 if (timeline != null) include(timeline)
             }
         }
@@ -534,6 +551,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 unfreezeUI()
                 hideCardDrawActor()
                 remainingCardsToDraw = null
+                checkStatusEffects()
                 checkCardModifiers()
             }
 

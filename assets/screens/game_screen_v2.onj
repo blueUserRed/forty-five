@@ -97,7 +97,7 @@ assets: {
             file: "textures/packed/game_screen/game_screen.atlas"
             defines: [
                 "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
-                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum"
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum", "burning_icon"
             ]
         }
 
