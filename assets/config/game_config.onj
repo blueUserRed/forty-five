@@ -7,6 +7,7 @@ import "imports/colors.onj" as color
             weight: 1
             min: 20
             max: 30
+            indicatorTextureScale: 0.03
             coverStackDamagedParticles: "dust"
             coverStackDestroyedParticles: "dust_explosion"
             indicatorTexture: "normal_bullet"
@@ -22,12 +23,12 @@ enemyConfig: {
             lives: 1234
             brain: !defaultEnemyBrain
             texture: "enemy"
-            offsetX: 30.0
-            offsetY: 20.0
+            offsetX: 0.0
+            offsetY: 15.0
             scaleX: 0.03
             scaleY: 0.03
             detailFont: "vanilla_whale"
-            detailFontScale: 2.0
+            detailFontScale: 0.06
             detailFontColor: !color.blue
         }
     ]

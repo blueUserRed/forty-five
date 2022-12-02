@@ -8,6 +8,7 @@ import com.fourinachamber.fourtyfive.card.CardGenerator
 import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.OnjExtensions
+import com.fourinachamber.fourtyfive.game.StatusEffect
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 import onj.OnjObject
@@ -38,7 +39,7 @@ object FourtyFive : Game() {
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
-        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen.onj")).build()
+        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen_v2.onj")).build()
         curScreen = menuScreen
     }
 
@@ -58,6 +59,7 @@ object FourtyFive : Game() {
         EnemyAction.init(graphicsConfig)
         Effect.init(graphicsConfig)
         Card.init(graphicsConfig)
+        StatusEffect.init(graphicsConfig)
     }
 
     override fun dispose() {

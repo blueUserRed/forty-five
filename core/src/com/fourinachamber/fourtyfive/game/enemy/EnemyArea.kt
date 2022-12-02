@@ -1,7 +1,10 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import com.fourinachamber.fourtyfive.screen.InitialiseableActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
@@ -36,7 +39,7 @@ class EnemyArea : Widget(), ZIndexActor, InitialiseableActor {
     fun addEnemy(enemy: Enemy) {
         _enemies.add(enemy)
         if (enemy.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(enemy.actor)
-        updateEnemyPositions()
+//        updateEnemyPositions()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -48,7 +51,10 @@ class EnemyArea : Widget(), ZIndexActor, InitialiseableActor {
     }
 
     private fun updateEnemyPositions() {
-        for (enemy in _enemies) enemy.actor.setPosition(x + enemy.offsetX, y + enemy.offsetY)
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        for (enemy in _enemies) {
+            enemy.actor.setPosition(x + enemy.offsetX, y + enemy.offsetY)
+        }
     }
 
 }

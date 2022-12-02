@@ -23,13 +23,13 @@ cards: [
     // Bullets ----------------------------------
 
     { // 0
-        name: "placeholder1"
-        title: "placeholder 1"
+        name: "incendiaryBullet"
+        title: "incendiary Bullet"
         description: "It's a bullet!"
-        baseDamage: 1
+        baseDamage: 7
         coverValue: 0
         traitEffects: []
-        effects: []
+        effects: [ giveStatus("shot", burning(3, 0.5)) ]
         cost: 1
         type: $Bullet { }
     }
@@ -149,13 +149,13 @@ cards: [
     }
 
     { // 11
-        name: "placeholder5"
-        title: "placeholder 5"
+        name: "casket"
+        title: "casket"
         description: "It's a Cover!"
         baseDamage: 0
-        coverValue: 1
+        coverValue: 5
         traitEffects: []
-        effects: []
+        effects: [ destroy("enter") ]
         cost: 1
         type: $Cover { }
     }

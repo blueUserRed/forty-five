@@ -1,0 +1,492 @@
+
+import "imports/colors.onj" as color
+import "config/game_config.onj" as gameConfig
+
+!pi = 3.141
+
+!worldWidth = 160.0
+!worldHeight = 90.0
+
+!cardZIndicesStart = 100
+!cardZIndicesEnd = <!cardZIndicesStart + 100>
+!overlayZIndex = 500
+
+!cardScale = 0.08
+!cardHeight = <200.0 * !cardScale>
+
+!buttonHoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true
+    cursorName: "hand"
+    disabled: {
+        useSystemCursor: true
+        cursorName: "not allowed"
+    }
+}
+
+!sharedDetailTextKeys = {
+    detailFont: "vanilla_whale"
+    detailFontColor: !color.white
+    detailBackgroundTexture: "card_detail_background"
+    detailFontScale: 0.07
+    detailWidth: 25.0
+}
+
+!controller = $GameScreenController {
+    cardsFile: "cards/cards.onj"
+    cardAtlasFile: "cards/generated/cards.atlas"
+    cardHand: {
+        actorName: "card_hand"
+    }
+    revolver: {
+        actorName: "revolver"
+        dropBehaviour: $RevolverDropTarget {
+          group: "card"
+        }
+    }
+    enemyArea: {
+        actorName: "enemy_area"
+        enemies: [ !gameConfig.enemyConfig.startEnemy ]
+    }
+    coverArea: {
+        actorName: "cover_area"
+        dropBehaviour: $CoverAreaDropTarget {
+            group: "card"
+        }
+    }
+    cardDragBehaviour: $CardDragSource {
+        group: "card"
+    }
+    enemies: !gameConfig.enemyConfig.enemies
+    cardDrawActor: "card_draw_table"
+    playerLivesLabelName: "player_lives_label"
+    shootButtonName: "shoot_button"
+    endTurnButtonName: "end_turn_button"
+    reservesLabelName: "reserves_label"
+    destroyCardInstructionActor: "destroy_card_instruction_label"
+    cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
+    cardsToDraw: !gameConfig.cardDrawConfig.roundStart
+    playerLives: !gameConfig.playerConfig.lives
+    reservesAtRoundBegin: !gameConfig.reservesConfig.roundStart
+}
+
+viewport: $FitViewport {
+    worldWidth: !worldWidth
+    worldHeight: !worldHeight
+    backgroundTexture: "background"
+}
+
+assets: {
+    fonts: [
+
+        $DistanceFieldFont {
+            name: "distance_field"
+            fontFile: "fonts/distanceField.fnt"
+            imageFile: "fonts/distanceField.png"
+        }
+
+        $DistanceFieldFont {
+            name: "vanilla_whale"
+            fontFile: "fonts/vanilla_whale.fnt"
+            imageFile: "fonts/vanilla_whale.png"
+        }
+
+    ]
+    textures: []
+    textureAtlases: [
+
+        {
+            file: "textures/packed/game_screen/game_screen.atlas"
+            defines: [
+                "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum", "burning_icon"
+            ]
+        }
+
+    ]
+    cursors: [
+        {
+            name: "cursor"
+            file: "textures/cursors/revolver.png"
+            hotspotX: 0
+            hotspotY: 0
+        }
+    ]
+    postProcessors: [
+        {
+            name: "earthquake"
+            vertexShader: "shaders/earthquake/earthquake.vert"
+            fragmentShader: "shaders/earthquake/earthquake.frag"
+            timeOffset: 2_000
+            uniforms: [ "time" ]
+            args: null
+        }
+        {
+            name: "default"
+            vertexShader: "shaders/default/default.vert"
+            fragmentShader: "shaders/default/default.frag"
+            timeOffset: 0
+            uniforms: []
+            args: null
+        }
+        {
+            name: "vignette"
+            vertexShader: "shaders/vignette/vignette.vert"
+            fragmentShader: "shaders/vignette/vignette.frag"
+            timeOffset: 0
+            uniforms: [ "time", "resolution" ]
+            args: {
+                color: color("ff0000")
+                speed: 0.0
+                movement: 0.4
+                minMovement: 0.3
+            }
+        }
+    ]
+    animations: []
+    colorTextures: [
+        {
+            name: "card_detail_background"
+            color: "04040488"
+        }
+        {
+            name: "black"
+            color: !color.black
+        }
+    ]
+    particles: [
+        {
+            name: "dust"
+            particlePath: "particles/dust.particle"
+            textureDir: "textures/particles"
+            scale: 0.1
+        }
+        {
+            name: "dust_explosion"
+            particlePath: "particles/dust_explosion.particle"
+            textureDir: "textures/particles"
+            scale: 0.1
+        }
+    ]
+}
+
+options: {
+    setFillParentOnRoot: true
+    defaultCursor: {
+//        useSystemCursor: true
+//        cursorName: "arrow"
+        useSystemCursor: false
+        cursorName: "cursor"
+    }
+    postProcessor: null
+    controller: !controller
+}
+
+//!slotScale = 0.07
+//!revolverWidth = <128.0 * !slotScale * 4.0>
+
+!revolver = $Revolver {
+    name: "revolver"
+    slotTexture: "revolver_slot"
+    font: "vanilla_whale"
+    fontColor: !color.white
+    fontScale: 0.25
+    slotScale: 0.029
+    cardScale: 0.045
+    animationDuration: 0.2
+    radius: 13.0
+    radiusExtension: 5.0
+    cardZIndex: !cardZIndicesStart
+    rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
+    ...!sharedDetailTextKeys
+    detailOffsetX: 0.0
+    detailOffsetY: 0.0
+    background: "revolver_drum"
+//    debug: true
+}
+
+!cardHand = $CardHand {
+    name: "card_hand"
+    cardScale: !cardScale
+    hoveredCardScale: 0.095
+    cardSpacing: 1.0
+    startCardZIndicesAt: !cardZIndicesStart
+    hoveredCardZIndex: <!cardZIndicesEnd - 1>
+    draggedCardZIndex: !cardZIndicesEnd
+    detailOffsetX: 0.0
+    detailOffsetY: 1.5
+    targetWidth: <!worldWidth * (7.0 / 10.0)>
+    ...!sharedDetailTextKeys
+//    debug: true
+}
+
+!enemyArea = $EnemyArea {
+     name: "enemy_area"
+//     debug: true
+ }
+
+!coverArea = $CoverArea {
+    name: "cover_area"
+    numStacks: 2
+    maxCards: 3
+    infoFont: "vanilla_whale"
+    infoFontColor: !color.black
+    infoFontScale: 0.1
+    stackBackgroundTexture: "card_detail_background"
+    stackSpacing: 2.0
+    areaSpacing: 4.0
+    cardScale: 0.05
+    stackMinSize: 20.0
+    ...!sharedDetailTextKeys
+    detailOffsetX: 0.0
+    detailOffsetY: 0.0
+//    debug: true
+}
+
+!shootButton = $Image {
+    name: "shoot_button"
+    textureName: "shoot"
+    reportDimensionsWithScaling: true
+    scaleX: 0.03
+    scaleY: 0.03
+    behaviours: [
+        $OnClickChangePostProcessorBehaviour {
+            postProcessor: "earthquake"
+            duration: 70
+            setOnlyIfNoPostProcessorIsSet: false
+        }
+        $ShootButtonBehaviour { },
+        !buttonHoverBehaviour
+        $OnHoverChangeTextureBehaviour {
+            hoverTexture: "shoot_hover"
+        }
+    ]
+}
+
+!endTurnButton = $Image {
+    name: "end_turn_button"
+    textureName: "end_turn"
+    reportDimensionsWithScaling: true
+    scaleX: 0.03
+    scaleY: 0.03
+    behaviours: [
+        $EndTurnButtonBehaviour { },
+        !buttonHoverBehaviour,
+        $OnHoverChangeTextureBehaviour {
+            hoverTexture: "end_turn_hover"
+        }
+    ]
+}
+
+!playerLivesLabel = $Label {
+    name: "player_lives_label"
+    font: "vanilla_whale"
+    text: ""
+    fontScale: 0.09
+    color: !color.white
+    backgroundTexture: "black"
+}
+
+!reservesLabel = $Label {
+    name: "reserves_label"
+    font: "vanilla_whale"
+    text: ""
+    fontScale: 0.09
+    color: !color.white
+    backgroundTexture: "black"
+}
+
+!cardDrawTable = $Table {
+    visible: false
+    name: "card_draw_table"
+    fillX: true
+    fillY: true
+    zIndex: !overlayZIndex
+    backgroundTexture: "card_detail_background"
+    rows: [
+
+
+        {
+            cells: [
+
+                {
+                    element: $Label {
+                        font: "vanilla_whale"
+                        text: "BULLETS"
+                        fontScale: 0.15
+                        align: "center"
+                        color: !color.white
+                        behaviours: [ $DrawBulletButtonBehaviour { }, !buttonHoverBehaviour ]
+                    }
+                }
+
+                {
+                    element: $Label {
+                        font: "vanilla_whale"
+                        text: "COVER CARDS"
+                        fontScale: 0.15
+                        align: "center"
+                        color: !color.white
+                        behaviours: [ $DrawCoverCardButtonBehaviour { }, !buttonHoverBehaviour ]
+                    }
+                }
+
+            ]
+        }
+
+    ]
+}
+
+!firstRow = $Table {
+
+    rows: [
+
+        {
+            cells: [
+
+                {
+                    padLeft: 2.0
+                    padBottom: 6.0
+                    element: !playerLivesLabel
+                }
+
+                {
+                    expandX: true
+                    element: $Label {
+                        name: "destroy_card_instruction_label"
+                        font: "vanilla_whale"
+                        text: "Choose a card to destroy!"
+                        fontScale: 0.2
+                        align: "center"
+                        color: !color.black
+                    }
+                }
+
+//                {
+//                    expandX: true
+//                    element: $Label {
+//                        font: "vanilla_whale"
+//                        text: ""
+//                        fontScale: 0.1
+//                        color: !color.white
+//                    }
+//                }
+
+            ]
+        }
+
+    ]
+}
+
+!middleRow = $Table {
+    rows: [
+
+        {
+            cells: [
+
+                {
+                    width: <4 * (!worldWidth / 12)>
+                    element: $VerticalGroup {
+                        align: "center"
+                        spacing: 2.0
+                        children: [
+                            !revolver
+                            !shootButton
+                        ]
+                    }
+                }
+
+                {
+                    expandX: true
+                    width: <4 * (!worldWidth / 12)>
+                    height: <!worldHeight / 3.0>
+                    align: "top right"
+                    padTop: 6.0
+                    padRight: 5.0
+                    element: !coverArea
+                }
+
+                {
+                    width: <2 * (!worldWidth / 12)>
+                    element: !enemyArea
+                }
+
+            ]
+        }
+
+    ]
+}
+
+!bottomRow = $Table {
+//    fillX: true
+//    debug: true
+    rows: [
+
+        {
+            cells: [
+
+                {
+                    padLeft: 2.0
+                    sizeToActor: true
+                    element: !reservesLabel
+                }
+
+                {
+                    expandX: true
+                    align: "bottom"
+                    height: !cardHeight
+                    element: !cardHand
+                }
+
+                {
+                    padRight: 1.0
+                    sizeToActor: true
+                    element: !endTurnButton
+                }
+
+            ]
+        }
+
+    ]
+}
+
+children: [
+
+    $Table {
+        align: "center"
+//        debug: true
+        fillX: true
+        fillY: true
+        rows: [
+
+            {
+                cells: [
+                    {
+                        element: !firstRow
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        padBottom: 5.0
+                        element: !middleRow
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        align: "bottom"
+                        element: !bottomRow
+                    }
+                ]
+            }
+
+        ]
+    }
+
+    !cardDrawTable
+
+]

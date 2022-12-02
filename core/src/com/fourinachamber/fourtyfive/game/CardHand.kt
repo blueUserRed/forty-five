@@ -24,6 +24,7 @@ import kotlin.math.min
  * displays the cards
  */
 class CardHand(
+    private val targetWidth: Float,
     detailFont: BitmapFont,
     detailFontColor: Color,
     detailBackground: Drawable,
@@ -125,13 +126,13 @@ class CardHand(
         var neededWidth = _cards.size * (cardSpacing + cardWidth) - cardSpacing
         this.currentWidth = neededWidth
 
-        val xDistanceOffset = if (width < neededWidth) {
-            -(neededWidth - width + cardWidth) / _cards.size
+        val xDistanceOffset = if (targetWidth < neededWidth) {
+            -(neededWidth - targetWidth + cardWidth) / _cards.size
         } else 0f
 
         neededWidth = _cards.size * (xDistanceOffset + cardSpacing + cardWidth) - cardSpacing - xDistanceOffset
 
-        var curX = if (width > neededWidth) {
+        var curX = if (targetWidth > neededWidth) {
             x + ((width - neededWidth) / 2)
         } else x
         val curY = y
@@ -187,12 +188,12 @@ class CardHand(
 
     override fun getPrefWidth(): Float {
 //        return neededWidth
-        return min(screenDataProvider.stage.viewport.worldWidth, currentWidth)
+        return min(targetWidth, currentWidth)
     }
 
     override fun getMinWidth(): Float {
 //        return neededWidth
-        return min(screenDataProvider.stage.viewport.worldWidth, currentWidth)
+        return min(targetWidth, currentWidth)
     }
 
 //    override fun getMinHeight(): Float {

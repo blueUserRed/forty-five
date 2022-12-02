@@ -11,6 +11,7 @@ $EnemyAction [
         min: int
         max: int
         indicatorTexture: string
+        indicatorTextureScale: float
         coverStackDamagedParticles: string
         coverStackDestroyedParticles: string
         ...!enemyActionSharedKeys
@@ -64,3 +65,4 @@ cardsToDrawInFirstRound: int
 cardsToDraw: int
 playerLives: int
 reservesAtRoundBegin: int
+destroyCardInstructionActor: string

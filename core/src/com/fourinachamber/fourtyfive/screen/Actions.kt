@@ -1,6 +1,8 @@
 package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import kotlin.math.cos
 import kotlin.math.sin
@@ -36,4 +38,17 @@ class ShakeActorAction(
         )
     }
 
+}
+
+class CustomMoveByAction : MoveByAction() {
+
+    override fun begin() {
+        super.begin()
+        if (target is AnimationActor) (target as AnimationActor).inAnimation = true
+    }
+
+    override fun end() {
+        super.end()
+        if (target is AnimationActor) (target as AnimationActor).inAnimation = false
+    }
 }

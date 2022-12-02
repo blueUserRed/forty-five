@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.game.StatusEffect
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.*
 import onj.OnjArray
@@ -33,7 +34,8 @@ class Enemy(
     val scaleY: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
-    val detailFontColor: Color
+    val detailFontColor: Color,
+    private val gameScreenController: GameScreenController
 ) {
 
     /**
@@ -52,11 +54,59 @@ class Enemy(
     var curAction: EnemyAction? = null
         private set
 
+    private val statusEffects: MutableList<StatusEffect> = mutableListOf()
+
     private lateinit var brain: EnemyBrain
 
     init {
         actor = EnemyActor(this)
-        actor.setScale(scaleX, scaleY)
+    }
+
+    fun applyEffect(effect: StatusEffect) {
+        effect.initIcon(gameScreenController)
+        statusEffects.add(effect)
+        actor.displayStatusEffect(effect)
+    }
+
+    fun executeStatusEffects(gameScreenController: GameScreenController): Timeline? {
+        var hadEffectTimeline = false
+        val timeline = Timeline.timeline {
+            for (effect in statusEffects) {
+                val timelineToInclude = effect.execute(gameScreenController)
+                if (timelineToInclude != null) {
+                    hadEffectTimeline = true
+                    include(timelineToInclude)
+                }
+            }
+        }
+        return if (hadEffectTimeline) timeline else null
+    }
+
+    fun executeStatusEffectsAfterDamage(gameScreenController: GameScreenController, damage: Int): Timeline? {
+        var hadEffectTimeline = false
+        val timeline = Timeline.timeline {
+            for (effect in statusEffects) {
+                val timelineToInclude = effect.executeAfterDamage(gameScreenController, damage)
+                if (timelineToInclude != null) {
+                    hadEffectTimeline = true
+                    include(timelineToInclude)
+                }
+            }
+        }
+        return if (hadEffectTimeline) timeline else null
+    }
+
+    fun onRevolverTurn() {
+        val iterator = statusEffects.iterator()
+        while (iterator.hasNext()) {
+            val effect = iterator.next()
+            effect.onRevolverTurn()
+            if (!effect.isStillValid()) {
+                actor.removeStatusEffect(effect)
+                iterator.remove()
+            }
+        }
+        actor.onRevolverTurn()
     }
 
     fun chooseNewAction() {
@@ -88,11 +138,12 @@ class Enemy(
          */
         fun getFrom(
             enemiesOnj: OnjArray,
-            screenDataProvider: ScreenDataProvider
+            gameScreenController: GameScreenController
         ): List<Enemy> = enemiesOnj
             .value
             .map {
                 it as OnjObject
+                val screenDataProvider = gameScreenController.curScreen!!
                 val texture = screenDataProvider.textures[it.get<String>("texture")] ?:
                     throw RuntimeException("unknown texture ${it.get<String>("texture")}")
                 val detailFont = screenDataProvider.fonts[it.get<String>("detailFont")] ?:
@@ -107,7 +158,8 @@ class Enemy(
                     it.get<Double>("scaleY").toFloat(),
                     detailFont,
                     it.get<Double>("detailFontScale").toFloat(),
-                    Color.valueOf(it.get<String>("detailFontColor"))
+                    Color.valueOf(it.get<String>("detailFontColor")),
+                    gameScreenController
                 )
                 enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider, enemy)
                 enemy
@@ -120,34 +172,47 @@ class Enemy(
 /**
  * used for representing an enemy on the screen
  */
-class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
+class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, AnimationActor {
 
+    override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
     private var image: CustomImageActor = CustomImageActor(enemy.texture)
     private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup()
+    private val statusEffectDisplay = StatusEffectDisplay(
+        enemy.detailFont,
+        enemy.detailFontColor,
+        enemy.detailFontScale
+    )
 
     private val actionIndicatorText: CustomLabel = CustomLabel(
         "",
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
-    private var detail: CustomLabel = CustomLabel(
+    val livesLabel: CustomLabel = CustomLabel(
         "",
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
     init {
-        detail.setFontScale(enemy.detailFontScale)
+        livesLabel.setFontScale(enemy.detailFontScale)
         actionIndicatorText.setFontScale(enemy.detailFontScale)
         actionIndicator.addActor(actionIndicatorText)
+        image.setScale(enemy.scaleX, enemy.scaleY)
+        image.reportDimensionsWithScaling = true
+        image.ignoreScalingWhenDrawing = true
         addActor(actionIndicator)
         addActor(image)
-        addActor(detail)
+        addActor(livesLabel)
+        addActor(statusEffectDisplay)
         updateText()
     }
 
     fun displayAction(action: EnemyAction) {
         val image = CustomImageActor(action.indicatorTexture)
+        image.reportDimensionsWithScaling = true
+        image.ignoreScalingWhenDrawing = true
+        image.setScale(action.indicatorTextureScale)
         actionIndicatorText.setText(action.descriptionText)
         actionIndicator.addActorAt(0, image)
     }
@@ -157,11 +222,15 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor {
         actionIndicator.removeActorAt(0, true)
     }
 
+    fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
+    fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
+    fun onRevolverTurn() = statusEffectDisplay.updateRemainingTurns()
+
     /**
-     * updates the desctiption text of the actor
+     * updates the description text of the actor
      */
     fun updateText() {
-        detail.setText("${enemy.currentLives}/${enemy.lives}")
+        livesLabel.setText("${enemy.currentLives}/${enemy.lives}")
     }
 
 }
