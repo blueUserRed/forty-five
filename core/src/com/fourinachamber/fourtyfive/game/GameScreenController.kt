@@ -29,6 +29,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val coverAreaOnj = onj.get<OnjObject>("coverArea")
     private val enemiesOnj = onj.get<OnjArray>("enemies")
     private val cardDrawActorName = onj.get<String>("cardDrawActor")
+    private val destroyCardInstructionActorName = onj.get<String>("destroyCardInstructionActor")
     private val playerLivesLabelName = onj.get<String>("playerLivesLabelName")
     private val endTurnButtonName = onj.get<String>("endTurnButtonName")
     private val shootButtonName = onj.get<String>("shootButtonName")
@@ -47,6 +48,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var enemyArea: EnemyArea? = null
     var coverArea: CoverArea? = null
     var cardDrawActor: Actor? = null
+    var destroyCardInstructionActor: Actor? = null
     var shootButton: Actor? = null
     var endTurnButton: Actor? = null
     var playerLivesLabel: CustomLabel? = null
@@ -145,6 +147,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             "no actor with name $cardDrawActorName"
         )
         screenDataProvider.removeActorFromRoot(cardDrawActor!!)
+
+        destroyCardInstructionActor = screenDataProvider.namedActors[destroyCardInstructionActorName]
+            ?: throw RuntimeException("no actor with name $destroyCardInstructionActorName")
+        destroyCardInstructionActor!!.isVisible = false
 
         initButtons()
         initCardHand()
@@ -353,7 +359,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      * puts [card] in [slot] of the revolver (checks if the card is a bullet)
      */
     fun loadBulletInRevolver(card: Card, slot: Int) {
-        if (card.type != Card.Type.BULLET) return
+        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this)) return
         if (!cost(card.cost)) return
         cardHand!!.removeCard(card)
         revolver!!.setCard(slot, card)
@@ -365,7 +371,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      * adds a new cover to a slot in the cover area (checks if the card is a cover)
      */
     fun addCover(card: Card, slot: Int) {
-        if (card.type != Card.Type.COVER) return
+        if (card.type != Card.Type.COVER || !card.allowsEnteringGame(this)) return
         if (!cost(card.cost)) return
         val addedCard = coverArea!!.addCover(card, slot, roundCounter)
         if (addedCard) cardHand!!.removeCard(card)
@@ -421,6 +427,22 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     fun gainReserves(amount: Int) {
         curReserves += amount
+    }
+
+    fun destroyCardPhase() = changePhase(Gamephase.CARD_DESTROY)
+
+    fun destroyCard(card: Card) {
+        card.onDestroy()
+        revolver!!.removeCard(card)
+//        coverArea!!.removeCard(card)
+        onCardDestroyed()
+    }
+
+    fun hasDestroyableCard(): Boolean {
+        for (card in cards) if (card.inGame && card.type == Card.Type.BULLET) {
+            return true
+        }
+        return false
     }
 
     private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
@@ -487,6 +509,14 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
     }
 
+    private fun showDestroyCardInstructionActor() {
+        destroyCardInstructionActor!!.isVisible = true
+    }
+
+    private fun hideDestroyCardInstructionActor() {
+        destroyCardInstructionActor!!.isVisible = false
+    }
+
     private fun hideCardDrawActor() {
         curScreen!!.removeActorFromRoot(cardDrawActor!!)
         cardDrawActor!!.isVisible = false
@@ -527,7 +557,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())
 
-    private fun onEndTurnButtonClicked()  = changePhase(currentPhase.onEndTurnButtonClicked())
+    private fun onEndTurnButtonClicked() = changePhase(currentPhase.onEndTurnButtonClicked())
+
+    private fun onCardDestroyed() = changePhase(currentPhase.onCardDestroyed())
 
 
     /**
@@ -557,6 +589,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
             override fun onEndTurnButtonClicked(): Gamephase = INITIAL_DRAW
+            override fun onCardDestroyed(): Gamephase = INITIAL_DRAW
         },
 
         /**
@@ -578,6 +611,46 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun onAllCardsDrawn(): Gamephase = FREE
             override fun onEndTurnButtonClicked(): Gamephase = SPECIAL_DRAW
+            override fun onCardDestroyed(): Gamephase = SPECIAL_DRAW
+        },
+
+        CARD_DESTROY {
+
+            private var postProcessor: PostProcessor? = null
+
+            private var previousPostProcessor: PostProcessor? = null
+
+            override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+
+                if (postProcessor == null) {
+                    postProcessor = curScreen!!.postProcessors[destroyCardsPostProcessorName]
+                        ?: throw RuntimeException("unknown postProcessor: $destroyCardsPostProcessorName")
+                }
+
+                freezeUI()
+                showDestroyCardInstructionActor()
+
+                previousPostProcessor = curScreen!!.postProcessor
+                curScreen!!.postProcessor = postProcessor
+
+                for (card in cards) if (card.inGame && card.type == Card.Type.BULLET) {
+                    card.enterDestroyMode(this)
+                }
+            }
+
+            override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
+                unfreezeUI()
+                hideDestroyCardInstructionActor()
+                curScreen!!.postProcessor = previousPostProcessor
+                for (card in cards) if (card.inGame && card.type == Card.Type.BULLET) {
+                    card.leaveDestroyMode()
+                }
+            }
+
+            override fun onAllCardsDrawn(): Gamephase = CARD_DESTROY
+            override fun onEndTurnButtonClicked(): Gamephase = CARD_DESTROY
+            override fun onCardDestroyed(): Gamephase = FREE
+
         },
 
         /**
@@ -593,6 +666,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
             override fun onEndTurnButtonClicked(): Gamephase = ENEMY_REVEAL
+            override fun onCardDestroyed(): Gamephase = ENEMY_REVEAL
         },
 
         /**
@@ -603,6 +677,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = FREE
             override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
+            override fun onCardDestroyed(): Gamephase = FREE
         },
 
         /**
@@ -656,6 +731,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionAway(gameScreenController: GameScreenController) {}
             override fun onAllCardsDrawn(): Gamephase = ENEMY_ACTION
             override fun onEndTurnButtonClicked(): Gamephase = ENEMY_ACTION
+            override fun onCardDestroyed(): Gamephase = ENEMY_ACTION
         }
 
         ;
@@ -677,6 +753,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         abstract fun onAllCardsDrawn(): Gamephase
 
         abstract fun onEndTurnButtonClicked(): Gamephase
+        abstract fun onCardDestroyed(): Gamephase
 
     }
 
@@ -691,6 +768,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         private lateinit var playerTurnBannerName: String
         private lateinit var enemyTurnBannerName: String
+
+        private lateinit var destroyCardsPostProcessorName: String
 
         private lateinit var playerLivesRawTemplateText: String
         private lateinit var reservesRawTemplateText: String
@@ -713,6 +792,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             playerLivesRawTemplateText = tmplOnj.get<String>("playerLives")
             reservesRawTemplateText = tmplOnj.get<String>("reserves")
+
+            destroyCardsPostProcessorName = config.get<OnjObject>("destroyCardPostProcessor").get<String>("name")
 
         }
 

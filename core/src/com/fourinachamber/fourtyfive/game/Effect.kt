@@ -8,6 +8,7 @@ import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
+import kotlinx.coroutines.awaitAll
 import onj.OnjObject
 import kotlin.properties.Delegates
 
@@ -154,6 +155,33 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
             gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)
             return null
+        }
+    }
+
+    class Destroy(trigger: Trigger) : Effect(trigger) {
+
+        private val shakeActorAction = ShakeActorAction(
+            xShake, yShake, xSpeedMultiplier, ySpeedMultiplier
+        )
+
+        init {
+            shakeActorAction.duration = shakeDuration
+        }
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+            if (!gameScreenController.hasDestroyableCard()) return null
+            return Timeline.timeline {
+                delay(bufferTime)
+                action { card.actor.addAction(shakeActorAction) }
+                delayUntil { shakeActorAction.isComplete }
+                action {
+                    card.actor.removeAction(shakeActorAction)
+                    shakeActorAction.reset()
+                }
+                delay(bufferTime)
+                action { gameScreenController.destroyCardPhase() }
+                delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.CARD_DESTROY }
+            }
         }
     }
 

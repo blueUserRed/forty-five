@@ -877,6 +877,10 @@ data class PostProcessor(
                 shader.setUniformf("u_arg_$key", value)
             }
 
+            is Color -> {
+                shader.setUniformf("u_arg_$key", value.r,  value.g, value.b, value.a)
+            }
+
             else -> throw RuntimeException("binding uniform arguments of type ${
                 value?.let { it::class.simpleName } ?: "null"
             } is currently not supported")

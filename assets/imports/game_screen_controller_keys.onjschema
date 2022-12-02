@@ -65,3 +65,4 @@ cardsToDrawInFirstRound: int
 cardsToDraw: int
 playerLives: int
 reservesAtRoundBegin: int
+destroyCardInstructionActor: string

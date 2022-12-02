@@ -1,6 +1,8 @@
 package com.fourinachamber.fourtyfive.card
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.EventListener
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.OnjExtensions
@@ -123,6 +125,22 @@ class Card(
         if (isUndead) {
             gameScreenController.cardHand!!.addCard(this)
         }
+        inGame = false
+    }
+
+    fun enterDestroyMode(gameScreenController: GameScreenController) = actor.enterDestroyMode(gameScreenController)
+
+    fun leaveDestroyMode() = actor.leaveDestroyMode()
+
+    fun allowsEnteringGame(gameScreenController: GameScreenController): Boolean {
+        // handles special case for Destroy effect
+        for (effect in effects) if (effect is Effect.Destroy) {
+            if (!gameScreenController.hasDestroyableCard()) return false
+        }
+        return true
+    }
+
+    fun onCoverDestroy() {
         inGame = false
     }
 
@@ -293,9 +311,28 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
     var isHoveredOver: Boolean = false
         private set
 
+    //TODO: fix
+    private lateinit var gameScreenController: GameScreenController
+
+    private val destroyModeOnClickListener: EventListener = EventListener { event ->
+        if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
+        println("hi")
+        gameScreenController.destroyCard(card)
+        true
+    }
+
     init {
         onEnter { isHoveredOver = true }
         onExit { isHoveredOver = false }
+    }
+
+    fun enterDestroyMode(gameScreenController: GameScreenController) {
+        this.gameScreenController = gameScreenController
+        addListener(destroyModeOnClickListener)
+    }
+
+    fun leaveDestroyMode() {
+        removeListener(destroyModeOnClickListener)
     }
 
 }
