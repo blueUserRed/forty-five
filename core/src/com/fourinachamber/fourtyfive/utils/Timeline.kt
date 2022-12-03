@@ -11,8 +11,8 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
     /**
      * true when the timeline has finished
      */
-    var isFinished: Boolean = false
-        private set
+    val isFinished: Boolean
+        get() = _actions.isEmpty()
 
     val actions: List<TimelineAction>
         get() = _actions
@@ -26,10 +26,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
      */
     fun start() {
         hasBeenStarted = true
-        if (_actions.isEmpty()) {
-            isFinished = true
-            return
-        }
+        if (_actions.isEmpty()) return
         _actions.first().start(this)
     }
 
@@ -40,6 +37,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         if (isFinished || !hasBeenStarted) return
         while (true) {
             val first = _actions.first()
+            if (!first.hasBeenStarted) first.start(this)
             first.update()
             if (first.isFinished()) {
                 first.end()
@@ -47,10 +45,8 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
                 for (action in pushActionsBuffer) _actions.add(0, action)
                 pushActionsBuffer.clear()
                 if (_actions.isEmpty()) break
-                _actions.first().start(this)
             } else break
         }
-        if (_actions.isEmpty()) isFinished = true
     }
 
     fun pushAction(timelineAction: TimelineAction) {
@@ -65,7 +61,14 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
      * an action that can be put in a timeline
      */
     abstract class TimelineAction {
-        open fun start(timeline: Timeline) { }
+
+        var hasBeenStarted: Boolean = false
+            protected set
+
+        open fun start(timeline: Timeline) {
+            hasBeenStarted = true
+        }
+
         open fun update() { }
         abstract fun isFinished(): Boolean
         open fun end() { }
@@ -84,7 +87,10 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         fun action(action: () -> Unit) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(): Boolean = true
-                override fun start(timeline: Timeline) = action()
+                override fun start(timeline: Timeline) {
+                    super.start(timeline)
+                    action()
+                }
             })
         }
 
@@ -106,6 +112,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
                 var finishedAt: Long = Long.MAX_VALUE
 
                 override fun start(timeline: Timeline) {
+                    super.start(timeline)
                     finishedAt = TimeUtils.millis() + millis
                 }
 
@@ -125,6 +132,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
             timelineActions.add(object : TimelineAction() {
 
                 override fun start(timeline: Timeline) {
+                    super.start(timeline)
                     if (condition()) {
                         val timelineToInclude = timelineCreator()
                         for (action in timelineToInclude._actions.reversed()) timeline.pushAction(action)

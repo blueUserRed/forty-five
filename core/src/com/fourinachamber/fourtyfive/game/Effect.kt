@@ -145,7 +145,7 @@ abstract class Effect(val trigger: Trigger) {
                 { shakeCardTimeline(card, shakeActorAction) },
                 { card.inGame }
             )
-            action { gameScreenController.specialDraw(amount)}
+            action { gameScreenController.specialDraw(amount) }
             delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.SPECIAL_DRAW }
         }
     }

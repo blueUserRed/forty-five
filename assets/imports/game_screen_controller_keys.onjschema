@@ -63,6 +63,7 @@ shootButtonName: string
 reservesLabelName: string
 cardsToDrawInFirstRound: int
 cardsToDraw: int
+maxCards: int
 playerLives: int
 reservesAtRoundBegin: int
 destroyCardInstructionActor: string
