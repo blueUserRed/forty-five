@@ -12,6 +12,7 @@ import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.*
+import java.lang.Integer.min
 import kotlin.properties.Delegates
 
 
@@ -39,6 +40,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
     private val basePlayerLives = onj.get<Long>("playerLives").toInt()
     private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
+    private val maxCards = onj.get<Long>("maxCards").toInt()
 
     var curScreen: ScreenDataProvider? = null
         private set
@@ -78,12 +80,14 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             playerLivesLabel?.setText(playerLivesTemplate.string)
         }
 
-    private var timeline: Timeline? = null
-        set(value) {
-            field = value
-            value?.start()
-            freezeUI()
-        }
+    private val timeline: Timeline = Timeline(mutableListOf()).apply {
+        start()
+    }
+//        set(value) {
+//            field = value
+//            value?.start()
+//            freezeUI()
+//        }
 
     /**
      * the current phase of the game
@@ -187,13 +191,14 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun update() {
-        timeline?.let {
-            it.update()
-            if (it.isFinished) {
-                timeline = null
-                unfreezeUI()
-            }
-        }
+//        timeline?.let {
+//            it.update()
+//            if (it.isFinished) {
+//                timeline = null
+//                unfreezeUI()
+//            }
+//        }
+        timeline.update()
         val iterator = curGameAnims.iterator()
         while (iterator.hasNext()) {
             val anim = iterator.next()
@@ -470,19 +475,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun executeTimelineImmediate(timeline: Timeline) {
-        if (this.timeline != null) {
-            for (action in timeline.actions.reversed()) this.timeline!!.pushAction(action)
-        } else {
-            this.timeline = timeline
-        }
+        for (action in timeline.actions.reversed()) this.timeline.pushAction(action)
     }
 
     private fun executeTimelineLater(timeline: Timeline) {
-        if (this.timeline != null) {
-            for (action in timeline.actions) this.timeline!!.appendAction(action)
-        } else {
-            this.timeline = timeline
-        }
+        for (action in timeline.actions) this.timeline.appendAction(action)
     }
 
     private fun freezeUI() {
@@ -574,9 +571,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 roundCounter++
+                remainingCardsToDraw =
+                    (if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw)
+                        .coerceAtMost(maxCards - cardHand!!.cards.size)
+                if (remainingCardsToDraw == 0) return //TODO: display this in some way
                 freezeUI()
                 showCardDrawActor()
-                this.remainingCardsToDraw = if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
@@ -659,8 +659,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         ENEMY_REVEAL {
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 enemies[0].chooseNewAction()
-                checkEffectsActiveCards(Trigger.ON_ROUND_START)
                 curReserves = baseReserves
+                checkEffectsActiveCards(Trigger.ON_ROUND_START)
                 changePhase(FREE)
             }
             override fun transitionAway(gameScreenController: GameScreenController) {}

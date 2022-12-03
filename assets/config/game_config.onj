@@ -39,6 +39,7 @@ enemyConfig: {
 cardDrawConfig: {
     firstRound: 6
     roundStart: 1
+    maxCards: 10
 }
 
 playerConfig: {
