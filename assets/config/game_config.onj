@@ -3,15 +3,25 @@ import "imports/colors.onj" as color
 
 !defaultEnemyBrain = {
     actions: [
+
         $DamagePlayerEnemyAction {
-            weight: 1
-            min: 20
-            max: 30
+            weight: 4
+            min: 5
+            max: 10
             indicatorTextureScale: 0.03
             coverStackDamagedParticles: "dust"
             coverStackDestroyedParticles: "dust_explosion"
             indicatorTexture: "normal_bullet"
         }
+
+        $AddCoverEnemyAction {
+            weight: 1
+            min: 1
+            max: 10
+            indicatorTextureScale: 0.008
+            indicatorTexture: "burning_icon"
+        }
+
     ]
 }
 
@@ -23,10 +33,12 @@ enemyConfig: {
             lives: 1234
             brain: !defaultEnemyBrain
             texture: "enemy"
+            coverIcon: "burning_icon"
             offsetX: 0.0
             offsetY: 15.0
             scaleX: 0.03
             scaleY: 0.03
+            coverIconScale: 0.008
             detailFont: "vanilla_whale"
             detailFontScale: 0.06
             detailFontColor: !color.blue

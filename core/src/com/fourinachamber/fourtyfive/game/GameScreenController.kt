@@ -167,7 +167,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             behaviour.gameScreenController = this
         }
 
-        screenDataProvider.afterMs(5) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
+        screenDataProvider.afterMs(10) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
@@ -416,14 +416,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                     if (cardToShoot.shouldRemoveAfterShot) {
                         revolver.removeCard(if (rotateLeft) 1 else 4)
                     }
+                    cardToShoot.afterShot(this@GameScreenController)
                     delay(bufferTime)
                     enemy.damage(cardToShoot.curDamage)
                     playGameAnimation(textAnimation)
                 }
                 delayUntil { textAnimation.isFinished() }
             }
-
-            cardToShoot.afterShot(this)
 
             statusEffectTimeline = enemy.executeStatusEffectsAfterDamage(this, cardToShoot.curDamage)
             effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT, this)
@@ -436,7 +435,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             effectTimeline?.let { include(it) }
 
             action {
-                checkCardModifiers()
+                checkCardModifierValidity()
 
                 revolver
                     .slots
@@ -449,7 +448,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         executeTimelineLater(timeline)
     }
 
-    private fun checkCardModifiers() {
+    private fun checkCardModifierValidity() {
         for (card in cards) if (card.inGame) card.checkModifierValidity()
     }
 
@@ -615,7 +614,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 hideCardDrawActor()
                 remainingCardsToDraw = null
                 checkStatusEffects()
-                checkCardModifiers()
+                checkCardModifierValidity()
             }
 
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
