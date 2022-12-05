@@ -3,6 +3,8 @@ import "imports/drag_and_drop_behaviour.onjschema" as _
 
 !enemyActionSharedKeys = {
     weight: int
+    indicatorTexture: string
+    indicatorTextureScale: float
 }
 
 $EnemyAction [
@@ -10,10 +12,14 @@ $EnemyAction [
     $DamagePlayerEnemyAction {
         min: int
         max: int
-        indicatorTexture: string
-        indicatorTextureScale: float
         coverStackDamagedParticles: string
         coverStackDestroyedParticles: string
+        ...!enemyActionSharedKeys
+    }
+
+    $AddCoverEnemyAction {
+        min: int
+        max: int
         ...!enemyActionSharedKeys
     }
 
@@ -26,11 +32,13 @@ $EnemyAction [
 !enemy = {
     name: string
     texture: string
+    coverIcon: string
     lives: int
     offsetX: float
     offsetY: float
     scaleX: float
     scaleY: float
+    coverIconScale: float
     detailFont: string
     detailFontScale: float
     detailFontColor: string

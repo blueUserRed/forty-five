@@ -27,11 +27,13 @@ import onj.OnjObject
 class Enemy(
     val name: String,
     val texture: TextureRegion,
+    val coverIcon: TextureRegion,
     val lives: Int,
     val offsetX: Float,
     val offsetY: Float,
     val scaleX: Float,
     val scaleY: Float,
+    val coverIconScale: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
@@ -50,6 +52,12 @@ class Enemy(
      */
     var currentLives: Int = lives
         private set
+
+    var currentCover: Int = 0
+        set(value) {
+            field = value
+            actor.updateText()
+        }
 
     var curAction: EnemyAction? = null
         private set
@@ -146,16 +154,20 @@ class Enemy(
                 val screenDataProvider = gameScreenController.curScreen!!
                 val texture = screenDataProvider.textures[it.get<String>("texture")] ?:
                     throw RuntimeException("unknown texture ${it.get<String>("texture")}")
+                val coverIcon = screenDataProvider.textures[it.get<String>("coverIcon")] ?:
+                    throw RuntimeException("unknown texture ${it.get<String>("coverIcon")}")
                 val detailFont = screenDataProvider.fonts[it.get<String>("detailFont")] ?:
                     throw RuntimeException("unknown font ${it.get<String>("detailFont")}")
                 val enemy = Enemy(
                     it.get<String>("name"),
                     texture,
+                    coverIcon,
                     it.get<Long>("lives").toInt(),
                     it.get<Double>("offsetX").toFloat(),
                     it.get<Double>("offsetY").toFloat(),
                     it.get<Double>("scaleX").toFloat(),
                     it.get<Double>("scaleY").toFloat(),
+                    it.get<Double>("coverIconScale").toFloat(),
                     detailFont,
                     it.get<Double>("detailFontScale").toFloat(),
                     Color.valueOf(it.get<String>("detailFontColor")),
@@ -176,7 +188,10 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, Animati
 
     override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
-    private var image: CustomImageActor = CustomImageActor(enemy.texture)
+    private val image: CustomImageActor = CustomImageActor(enemy.texture)
+    private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIcon)
+    val coverText: CustomLabel = CustomLabel("", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
+    private var enemyBox = CustomHorizontalGroup()
     private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup()
     private val statusEffectDisplay = StatusEffectDisplay(
         enemy.detailFont,
@@ -196,13 +211,26 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, Animati
 
     init {
         livesLabel.setFontScale(enemy.detailFontScale)
+        coverText.setFontScale(enemy.detailFontScale)
         actionIndicatorText.setFontScale(enemy.detailFontScale)
         actionIndicator.addActor(actionIndicatorText)
         image.setScale(enemy.scaleX, enemy.scaleY)
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
+        coverIcon.setScale(enemy.coverIconScale)
+        coverIcon.reportDimensionsWithScaling = true
+        coverIcon.ignoreScalingWhenDrawing = true
+
         addActor(actionIndicator)
-        addActor(image)
+
+        val coverInfoBox = CustomVerticalGroup()
+        coverInfoBox.addActor(coverIcon)
+        coverInfoBox.addActor(coverText)
+
+        enemyBox.addActor(coverInfoBox)
+        enemyBox.addActor(image)
+
+        addActor(enemyBox)
         addActor(livesLabel)
         addActor(statusEffectDisplay)
         updateText()
@@ -230,6 +258,7 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, Animati
      * updates the description text of the actor
      */
     fun updateText() {
+        coverText.setText("${enemy.currentCover}")
         livesLabel.setText("${enemy.currentLives}/${enemy.lives}")
     }
 
