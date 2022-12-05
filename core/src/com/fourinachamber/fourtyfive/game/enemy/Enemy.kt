@@ -3,13 +3,20 @@ package com.fourinachamber.fourtyfive.game.enemy
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.StatusEffect
+import com.fourinachamber.fourtyfive.game.TextAnimation
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import onj.OnjArray
 import onj.OnjObject
+import java.lang.Integer.max
+import java.lang.Integer.min
+import kotlin.properties.Delegates
 
 /**
  * represents an enemy
@@ -134,12 +141,91 @@ class Enemy(
     /**
      * reduces the enemies lives by [damage]
      */
-    fun damage(damage: Int) {
-        currentLives -= damage
-        actor.updateText()
+    fun damage(damage: Int, gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        val (livesX, livesY) = actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f))
+
+        val livesTextAnimation = TextAnimation(
+            livesX, livesY,
+            "-$damage",
+            dmgFontColor,
+            dmgFontScale,
+            gameScreenController.curScreen!!.fonts[dmgFontName] ?:
+                throw RuntimeException("unknown font $dmgFontName"),
+            dmgRaiseHeight,
+            dmgStartFadeoutAt,
+            gameScreenController.curScreen!!,
+            dmgDuration
+        )
+
+        val (coverX, coverY) = actor.coverText.localToStageCoordinates(Vector2(0f, 0f))
+
+        val coverTextAnimation = TextAnimation(
+            coverX, coverY,
+            "-$damage",
+            dmgFontColor,
+            dmgFontScale,
+            gameScreenController.curScreen!!.fonts[dmgFontName] ?:
+                throw RuntimeException("unknown font $dmgFontName"),
+            dmgRaiseHeight,
+            dmgStartFadeoutAt,
+            gameScreenController.curScreen!!,
+            dmgDuration
+        )
+
+        var remaining = 0
+
+        action {
+            remaining = max(damage - currentCover, 0)
+        }
+
+        includeLater(
+            { Timeline.timeline {
+                action {
+                    coverTextAnimation.text = "-${min(damage, currentCover)}"
+                    currentCover -= damage
+                    if (currentCover < 0) currentCover = 0
+                    actor.updateText()
+                    gameScreenController.playGameAnimation(coverTextAnimation)
+                }
+                delayUntil { coverTextAnimation.isFinished() }
+            } },
+            { currentCover != 0 }
+        )
+
+        includeLater(
+            { Timeline.timeline {
+                action {
+                    livesTextAnimation.text = "-$remaining"
+                    currentLives -= remaining
+                    actor.updateText()
+                    gameScreenController.playGameAnimation(livesTextAnimation)
+                }
+                delayUntil { livesTextAnimation.isFinished() }
+            } },
+            { remaining != 0 }
+        )
     }
 
     companion object {
+
+        private lateinit var dmgFontName: String
+        private lateinit var dmgFontColor: Color
+        private var dmgFontScale by Delegates.notNull<Float>()
+        private var dmgDuration by Delegates.notNull<Int>()
+        private var dmgRaiseHeight by Delegates.notNull<Float>()
+        private var dmgStartFadeoutAt by Delegates.notNull<Int>()
+
+
+        fun init(config: OnjObject) {
+            val dmgOnj = config.get<OnjObject>("playerLivesAnimation")
+
+            dmgFontName = dmgOnj.get<String>("font")
+            dmgFontScale = dmgOnj.get<Double>("fontScale").toFloat()
+            dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
+            dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
+            dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
+            dmgFontColor = Color.valueOf(dmgOnj.get<String>("negativeFontColor"))
+        }
 
         /**
          * reads an array of Enemies from on an OnjArray

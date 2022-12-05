@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.OnjExtensions
 import com.fourinachamber.fourtyfive.game.StatusEffect
+import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 import onj.OnjObject
@@ -60,6 +61,7 @@ object FourtyFive : Game() {
         Effect.init(graphicsConfig)
         Card.init(graphicsConfig)
         StatusEffect.init(graphicsConfig)
+        Enemy.init(graphicsConfig)
     }
 
     override fun dispose() {

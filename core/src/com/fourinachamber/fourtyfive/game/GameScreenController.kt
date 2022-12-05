@@ -411,17 +411,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 dmgDuration
             )
 
+
             enemyDamageTimeline = Timeline.timeline {
                 action {
                     if (cardToShoot.shouldRemoveAfterShot) {
                         revolver.removeCard(if (rotateLeft) 1 else 4)
                     }
-                    cardToShoot.afterShot(this@GameScreenController)
-                    delay(bufferTime)
-                    enemy.damage(cardToShoot.curDamage)
-                    playGameAnimation(textAnimation)
                 }
-                delayUntil { textAnimation.isFinished() }
+                include(enemy.damage(cardToShoot.curDamage, this@GameScreenController))
+                action { cardToShoot.afterShot(this@GameScreenController) }
             }
 
             statusEffectTimeline = enemy.executeStatusEffectsAfterDamage(this, cardToShoot.curDamage)

@@ -134,8 +134,8 @@ abstract class StatusEffect(
                 shakeActorAction.reset()
                 targetLivesActor.addAction(shakeActorAction)
                 gameScreenController.playGameAnimation(textAnimation)
-                target.damage(gameScreenController, additionalDamage)
             }
+            include(target.damage(gameScreenController, additionalDamage))
             delayUntil { shakeActorAction.isComplete }
             action {
                 targetLivesActor.removeAction(shakeActorAction)
@@ -206,8 +206,10 @@ abstract class StatusEffect(
             override fun getLivesActor(gameScreenController: GameScreenController): Actor {
                 return gameScreenController.playerLivesLabel!!
             }
-            override fun damage(gameScreenController: GameScreenController, damage: Int) {
-                gameScreenController.damagePlayer(damage)
+            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
+                return Timeline.timeline { //TODO: ??????????????
+                    action { gameScreenController.damagePlayer(damage) }
+                }
             }
         },
 
@@ -216,13 +218,13 @@ abstract class StatusEffect(
                 return gameScreenController.enemyArea!!.enemies[0].actor.livesLabel
             }
 
-            override fun damage(gameScreenController: GameScreenController, damage: Int) {
-                return gameScreenController.enemyArea!!.enemies[0].damage(damage)
+            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
+                return gameScreenController.enemyArea!!.enemies[0].damage(damage, gameScreenController)
             }
         }
         ;
         abstract fun getLivesActor(gameScreenController: GameScreenController): Actor
-        abstract fun damage(gameScreenController: GameScreenController, damage: Int)
+        abstract fun damage(gameScreenController: GameScreenController, damage: Int): Timeline
     }
 
 }
