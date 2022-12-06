@@ -46,10 +46,24 @@ class EnemyBrain(
                 val min = onj.get<Long>("min").toInt()
                 val max = onj.get<Long>("max").toInt()
 
-                DamagePlayerEnemyAction(
+                EnemyAction.DamagePlayer(
                     enemy,
                     onj,
                     screenDataProvider,
+                    onj.get<Double>("indicatorTextureScale").toFloat(),
+                    (min..max).random(),
+                )
+            })
+
+            "AddCoverEnemyAction" -> ({
+                val min = onj.get<Long>("min").toInt()
+                val max = onj.get<Long>("max").toInt()
+
+                EnemyAction.AddCover(
+                    enemy,
+                    onj,
+                    screenDataProvider,
+                    onj.get<Double>("indicatorTextureScale").toFloat(),
                     (min..max).random(),
                 )
             })

@@ -11,6 +11,9 @@ import "config/game_config.onj" as gameConfig
 !cardZIndicesEnd = <!cardZIndicesStart + 100>
 !overlayZIndex = 500
 
+!cardScale = 0.08
+!cardHeight = <200.0 * !cardScale>
+
 !buttonHoverBehaviour = $MouseHoverBehaviour {
     useSystemCursor: true
     cursorName: "hand"
@@ -59,8 +62,10 @@ import "config/game_config.onj" as gameConfig
     shootButtonName: "shoot_button"
     endTurnButtonName: "end_turn_button"
     reservesLabelName: "reserves_label"
+    destroyCardInstructionActor: "destroy_card_instruction_label"
     cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
     cardsToDraw: !gameConfig.cardDrawConfig.roundStart
+    maxCards: !gameConfig.cardDrawConfig.maxCards
     playerLives: !gameConfig.playerConfig.lives
     reservesAtRoundBegin: !gameConfig.reservesConfig.roundStart
 }
@@ -68,7 +73,7 @@ import "config/game_config.onj" as gameConfig
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
-    backgroundTexture: "background2"
+    backgroundTexture: "background"
 }
 
 assets: {
@@ -93,8 +98,8 @@ assets: {
         {
             file: "textures/packed/game_screen/game_screen.atlas"
             defines: [
-                "background", "background2" "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
-                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner"
+                "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum", "burning_icon"
             ]
         }
 
@@ -115,6 +120,27 @@ assets: {
             timeOffset: 2_000
             uniforms: [ "time" ]
             args: null
+        }
+        {
+            name: "default"
+            vertexShader: "shaders/default/default.vert"
+            fragmentShader: "shaders/default/default.frag"
+            timeOffset: 0
+            uniforms: []
+            args: null
+        }
+        {
+            name: "vignette"
+            vertexShader: "shaders/vignette/vignette.vert"
+            fragmentShader: "shaders/vignette/vignette.frag"
+            timeOffset: 0
+            uniforms: [ "time", "resolution" ]
+            args: {
+                color: color("ff0000")
+                speed: 0.0
+                movement: 0.4
+                minMovement: 0.3
+            }
         }
     ]
     animations: []
@@ -156,8 +182,8 @@ options: {
     controller: !controller
 }
 
-!slotScale = 0.07
-!revolverWidth = <128.0 * !slotScale * 4.0>
+//!slotScale = 0.07
+//!revolverWidth = <128.0 * !slotScale * 4.0>
 
 !revolver = $Revolver {
     name: "revolver"
@@ -165,28 +191,31 @@ options: {
     font: "vanilla_whale"
     fontColor: !color.white
     fontScale: 0.25
-    slotScale: !slotScale
+    slotScale: 0.029
     cardScale: 0.045
     animationDuration: 0.2
-    radius: 15.0
+    radius: 13.0
+    radiusExtension: 5.0
     cardZIndex: !cardZIndicesStart
     rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
     ...!sharedDetailTextKeys
     detailOffsetX: 0.0
     detailOffsetY: 0.0
+    background: "revolver_drum"
 //    debug: true
 }
 
 !cardHand = $CardHand {
     name: "card_hand"
-    cardScale: 0.07
-    hoveredCardScale: 0.085
+    cardScale: !cardScale
+    hoveredCardScale: 0.095
     cardSpacing: 1.0
     startCardZIndicesAt: !cardZIndicesStart
     hoveredCardZIndex: <!cardZIndicesEnd - 1>
     draggedCardZIndex: !cardZIndicesEnd
     detailOffsetX: 0.0
     detailOffsetY: 1.5
+    targetWidth: <!worldWidth * (7.0 / 10.0)>
     ...!sharedDetailTextKeys
 //    debug: true
 }
@@ -214,139 +243,57 @@ options: {
 //    debug: true
 }
 
-!topRow = {
-    cells: [
-
-        {
-//            padBottom: 3.0
-            width: <!worldWidth / 3>
-            padBottom: 5.0
-            element: $Table {
-//                debug: true
-                align: "bottom"
-                rows: [
-
-                    {
-                        cells: [
-                            {
-                                colspan: 2
-                                sizeToActor: true
-//                                padRight: 50.0
-                                element: !revolver
-                            }
-                        ]
-                    }
-
-                    {
-                        cells: [
-                            {
-                                sizeToActor: true
-                                element: $Image {
-                                    name: "shoot_button"
-                                    textureName: "shoot"
-                                    reportDimensionsWithScaling: true
-                                    scaleX: 0.03
-                                    scaleY: 0.03
-                                    behaviours: [
-                                        $OnClickChangePostProcessorBehaviour {
-                                            postProcessor: "earthquake"
-                                            duration: 70
-                                            setOnlyIfNoPostProcessorIsSet: true
-                                        }
-                                        $ShootButtonBehaviour { },
-                                        !buttonHoverBehaviour
-                                        $OnHoverChangeTextureBehaviour {
-                                            hoverTexture: "shoot_hover"
-                                        }
-                                    ]
-                                }
-                            }
-                            {
-                                sizeToActor: true
-                                element: $Image {
-                                    name: "end_turn_button"
-                                    textureName: "end_turn"
-                                    reportDimensionsWithScaling: true
-                                    scaleX: 0.03
-                                    scaleY: 0.03
-                                    behaviours: [
-                                        $EndTurnButtonBehaviour { },
-                                        !buttonHoverBehaviour,
-                                        $OnHoverChangeTextureBehaviour {
-                                            hoverTexture: "end_turn_hover"
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-
-                    {
-                        cells: [
-                            {
-                                colspan: 2
-                                element: $Label {
-                                    name: "player_lives_label"
-                                    font: "vanilla_whale"
-                                    text: ""
-                                    fontScale: 0.09
-                                    color: !color.white
-                                    backgroundTexture: "black"
-                                }
-                            }
-                        ]
-                    }
-
-                    {
-                        cells: [
-                            {
-                                colspan: 2
-                                element: $Label {
-                                    name: "reserves_label"
-                                    font: "vanilla_whale"
-                                    text: ""
-                                    fontScale: 0.09
-                                    color: !color.white
-                                    backgroundTexture: "black"
-                                }
-                            }
-                        ]
-                    }
-
-                ]
-
-            }
+!shootButton = $Image {
+    name: "shoot_button"
+    textureName: "shoot"
+    reportDimensionsWithScaling: true
+    scaleX: 0.03
+    scaleY: 0.03
+    behaviours: [
+        $OnClickChangePostProcessorBehaviour {
+            postProcessor: "earthquake"
+            duration: 70
+            setOnlyIfNoPostProcessorIsSet: false
         }
-
-
-        {
-            width: <!worldWidth / 3>
-            element: !coverArea
+        $ShootButtonBehaviour { },
+        !buttonHoverBehaviour
+        $OnHoverChangeTextureBehaviour {
+            hoverTexture: "shoot_hover"
         }
-
-        {
-//            width: <!worldWidth - !revolverWidth - 100.0>
-            width: <!worldWidth / 3>
-//            height: 60.0
-            element: !enemyArea
-        }
-
     ]
 }
 
-!bottomRow = {
-    cells: [
-
-        {
-            sizeToActor: true
-            padBottom: 2.0
-            padTop: 2.0
-            align: "bottom"
-            colspan: 3
-            element: !cardHand
+!endTurnButton = $Image {
+    name: "end_turn_button"
+    textureName: "end_turn"
+    reportDimensionsWithScaling: true
+    scaleX: 0.03
+    scaleY: 0.03
+    behaviours: [
+        $EndTurnButtonBehaviour { },
+        !buttonHoverBehaviour,
+        $OnHoverChangeTextureBehaviour {
+            hoverTexture: "end_turn_hover"
         }
-
     ]
+}
+
+!playerLivesLabel = $Label {
+    name: "player_lives_label"
+    font: "vanilla_whale"
+    text: ""
+    fontScale: 0.09
+    color: !color.white
+    backgroundTexture: "black"
+}
+
+!reservesLabel = $Label {
+    name: "reserves_label"
+    font: "vanilla_whale"
+    text: ""
+    fontScale: 0.09
+    color: !color.white
+    backgroundTexture: "black"
 }
 
 !cardDrawTable = $Table {
@@ -390,14 +337,155 @@ options: {
     ]
 }
 
+!firstRow = $Table {
+
+    rows: [
+
+        {
+            cells: [
+
+                {
+                    padLeft: 2.0
+                    padBottom: 6.0
+                    element: !playerLivesLabel
+                }
+
+                {
+                    expandX: true
+                    element: $Label {
+                        name: "destroy_card_instruction_label"
+                        font: "vanilla_whale"
+                        text: "Choose a card to destroy!"
+                        fontScale: 0.2
+                        align: "center"
+                        color: !color.black
+                    }
+                }
+
+//                {
+//                    expandX: true
+//                    element: $Label {
+//                        font: "vanilla_whale"
+//                        text: ""
+//                        fontScale: 0.1
+//                        color: !color.white
+//                    }
+//                }
+
+            ]
+        }
+
+    ]
+}
+
+!middleRow = $Table {
+    rows: [
+
+        {
+            cells: [
+
+                {
+                    width: <4 * (!worldWidth / 12)>
+                    element: $VerticalGroup {
+                        align: "center"
+                        spacing: 2.0
+                        children: [
+                            !revolver
+                            !shootButton
+                        ]
+                    }
+                }
+
+                {
+                    expandX: true
+                    width: <4 * (!worldWidth / 12)>
+                    height: <!worldHeight / 3.0>
+                    align: "top right"
+                    padTop: 6.0
+                    padRight: 5.0
+                    element: !coverArea
+                }
+
+                {
+                    width: <2 * (!worldWidth / 12)>
+                    element: !enemyArea
+                }
+
+            ]
+        }
+
+    ]
+}
+
+!bottomRow = $Table {
+//    fillX: true
+//    debug: true
+    rows: [
+
+        {
+            cells: [
+
+                {
+                    padLeft: 2.0
+                    sizeToActor: true
+                    element: !reservesLabel
+                }
+
+                {
+                    expandX: true
+                    align: "bottom"
+                    height: !cardHeight
+                    element: !cardHand
+                }
+
+                {
+                    padRight: 1.0
+                    sizeToActor: true
+                    element: !endTurnButton
+                }
+
+            ]
+        }
+
+    ]
+}
+
 children: [
 
-
     $Table {
+        align: "center"
+//        debug: true
         fillX: true
         fillY: true
-//        debug: true
-        rows: [ !topRow, !bottomRow ]
+        rows: [
+
+            {
+                cells: [
+                    {
+                        element: !firstRow
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        padBottom: 5.0
+                        element: !middleRow
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        align: "bottom"
+                        element: !bottomRow
+                    }
+                ]
+            }
+
+        ]
     }
 
     !cardDrawTable

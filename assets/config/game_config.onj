@@ -3,35 +3,25 @@ import "imports/colors.onj" as color
 
 !defaultEnemyBrain = {
     actions: [
+
         $DamagePlayerEnemyAction {
-            weight: 1
-            min: 20
-            max: 30
+            weight: 4
+            min: 5
+            max: 10
+            indicatorTextureScale: 0.03
             coverStackDamagedParticles: "dust"
             coverStackDestroyedParticles: "dust_explosion"
             indicatorTexture: "normal_bullet"
-            effects: {
-                xShake: 1.0
-                yShake: 0.0
-                xShakeSpeed: 0.2
-                yShakeSpeed: 0.0
-                shakeDuration: 0.8
-
-                xCharge: -7.0
-                yCharge: 0.0
-                chargeDuration: 0.5
-                chargeInterpolation: "swing"
-
-                dmgFont: "vanilla_whale"
-                dmgFontColor: !color.red
-                dmgFontScale: 0.2
-                dmgDuration: 1.5
-                dmgStartFadeoutAt: 1.0
-                dmgRaiseHeight: 20.0
-
-                bufferTime: 0.2
-            }
         }
+
+        $AddCoverEnemyAction {
+            weight: 1
+            min: 1
+            max: 10
+            indicatorTextureScale: 0.008
+            indicatorTexture: "burning_icon"
+        }
+
     ]
 }
 
@@ -43,12 +33,14 @@ enemyConfig: {
             lives: 1234
             brain: !defaultEnemyBrain
             texture: "enemy"
-            offsetX: 30.0
-            offsetY: 20.0
+            coverIcon: "burning_icon"
+            offsetX: 0.0
+            offsetY: 15.0
             scaleX: 0.03
             scaleY: 0.03
+            coverIconScale: 0.008
             detailFont: "vanilla_whale"
-            detailFontScale: 2.0
+            detailFontScale: 0.06
             detailFontColor: !color.blue
         }
     ]
@@ -59,6 +51,7 @@ enemyConfig: {
 cardDrawConfig: {
     firstRound: 6
     roundStart: 1
+    maxCards: 10
 }
 
 playerConfig: {
