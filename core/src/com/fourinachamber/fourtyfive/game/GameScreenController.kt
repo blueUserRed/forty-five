@@ -3,20 +3,19 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
-import com.fourinachamber.fourtyfive.utils.TemplateString
-import com.fourinachamber.fourtyfive.utils.Timeline
+import com.fourinachamber.fourtyfive.utils.*
 import onj.*
 import kotlin.properties.Delegates
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 
 
 /**
@@ -44,6 +43,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val basePlayerLives = onj.get<Long>("playerLives").toInt()
     private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
     private val maxCards = onj.get<Long>("maxCards").toInt()
+    private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
     var curScreen: ScreenDataProvider? = null
         private set
@@ -398,20 +398,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             val enemy = enemyArea!!.enemies[0]
             val (x, y) = enemy.actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f))
 
-            val textAnimation = TextAnimation(
-                x, y,
-                "-${cardToShoot.curDamage}",
-                dmgFontColor,
-                dmgFontScale,
-                curScreen!!.fonts[dmgFontName] ?:
-                    throw RuntimeException("unknown font $dmgFontName"),
-                dmgRaiseHeight,
-                dmgStartFadeoutAt,
-                curScreen!!,
-                dmgDuration
-            )
-
-
             enemyDamageTimeline = Timeline.timeline {
                 action {
                     if (cardToShoot.shouldRemoveAfterShot) {
@@ -427,6 +413,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         }
 
         val timeline = Timeline.timeline {
+
+            includeLater(
+                { getShotEmptyTimeline(enemies[0], shotEmptyDamage) },
+                { cardToShoot == null }
+            )
 
             enemyDamageTimeline?.let { include(it) }
             statusEffectTimeline?.let { include(it) }
@@ -444,6 +435,53 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             }
         }
         executeTimelineLater(timeline)
+    }
+
+    private fun getShotEmptyTimeline(enemy: Enemy, damage: Int): Timeline = Timeline.timeline {
+
+        val moveByAction = CustomMoveByAction()
+        moveByAction.setAmount(xQuickCharge, yQuickCharge)
+        moveByAction.duration = quickChargeDuration
+        moveByAction.interpolation = quickChargeInterpolation
+
+        val (x, y) = playerLivesLabel!!.localToStageCoordinates(Vector2(0f, 0f))
+        val textAnimation = TextAnimation(
+            x + playerLivesLabel!!.width / 2,
+            y - playerLivesLabel!!.height,
+            "-$damage",
+            dmgFontColor,
+            dmgFontScale,
+            curScreen!!.fonts[dmgFontName]
+                ?: throw RuntimeException("unknown font $dmgFontName"),
+            dmgRaiseHeight,
+            dmgStartFadeoutAt,
+            curScreen!!,
+            dmgDuration
+        )
+        val shakeAction = ShakeActorAction(xShake, yShake, xShakeSpeedMultiplier, yShakeSpeedMultiplier)
+        shakeAction.duration = shakeDuration
+
+        delay(bufferTime)
+        action { enemy.actor.addAction(moveByAction) }
+        delayUntil { moveByAction.isComplete }
+        action {
+            enemy.actor.removeAction(moveByAction)
+            moveByAction.reset()
+            moveByAction.amountX = -moveByAction.amountX
+            moveByAction.amountY = -moveByAction.amountY
+            enemy.actor.addAction(moveByAction)
+        }
+        delay(bufferTime)
+        action {
+            playGameAnimation(textAnimation)
+            playerLivesLabel!!.addAction(shakeAction)
+            damagePlayer(damage)
+        }
+        delayUntil { shakeAction.isComplete }
+        delayUntil { textAnimation.isFinished() }
+        action {
+            playerLivesLabel!!.removeAction(shakeAction)
+        }
     }
 
     private fun checkCardModifierValidity() {
@@ -784,12 +822,23 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         private var bannerBeginScale by Delegates.notNull<Float>()
         private var bannerEndScale by Delegates.notNull<Float>()
 
+        private var xShake by Delegates.notNull<Float>()
+        private var yShake by Delegates.notNull<Float>()
+        private var xShakeSpeedMultiplier by Delegates.notNull<Float>()
+        private var yShakeSpeedMultiplier by Delegates.notNull<Float>()
+        private var shakeDuration by Delegates.notNull<Float>()
+
         private lateinit var dmgFontName: String
         private lateinit var dmgFontColor: Color
         private var dmgFontScale by Delegates.notNull<Float>()
         private var dmgDuration by Delegates.notNull<Int>()
         private var dmgRaiseHeight by Delegates.notNull<Float>()
         private var dmgStartFadeoutAt by Delegates.notNull<Int>()
+
+        private var xQuickCharge by Delegates.notNull<Float>()
+        private var yQuickCharge by Delegates.notNull<Float>()
+        private var quickChargeDuration by Delegates.notNull<Float>()
+        private lateinit var quickChargeInterpolation: Interpolation
 
         private lateinit var playerTurnBannerName: String
         private lateinit var enemyTurnBannerName: String
@@ -826,6 +875,21 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             dmgRaiseHeight = plOnj.get<Double>("raiseHeight").toFloat()
             dmgStartFadeoutAt = (plOnj.get<Double>("startFadeoutAt") * 1000).toInt()
             dmgFontColor = Color.valueOf(plOnj.get<String>("negativeFontColor"))
+
+            val shakeOnj = config.get<OnjObject>("shakeAnimation")
+
+            xShake = shakeOnj.get<Double>("xShake").toFloat()
+            yShake = shakeOnj.get<Double>("yShake").toFloat()
+            xShakeSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
+            yShakeSpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
+            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
+
+            val chargeOnj = config.get<OnjObject>("enemyQuickChargeAnimation")
+
+            xQuickCharge = chargeOnj.get<Double>("xCharge").toFloat()
+            yQuickCharge = chargeOnj.get<Double>("yCharge").toFloat()
+            quickChargeDuration = chargeOnj.get<Double>("duration").toFloat() / 2f // divide by two because anim is played twice
+            quickChargeInterpolation = Utils.interpolationOrError(chargeOnj.get<String>("interpolation"))
 
             destroyCardsPostProcessorName = config.get<OnjObject>("destroyCardPostProcessor").get<String>("name")
 
