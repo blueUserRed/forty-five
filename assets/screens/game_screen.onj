@@ -21,8 +21,8 @@ import "config/game_config.onj" as gameConfig
 }
 
 !sharedDetailTextKeys = {
-    detailFont: "vanilla_whale"
-    detailFontColor: !color.white
+    detailFont: "red_wing"
+    detailFontColor: !color.red
     detailBackgroundTexture: "card_detail_background"
     detailFontScale: 0.07
     detailWidth: 25.0
@@ -84,6 +84,12 @@ assets: {
             name: "vanilla_whale"
             fontFile: "fonts/vanilla_whale.fnt"
             imageFile: "fonts/vanilla_whale.png"
+        }
+
+        $DistanceFieldFont {
+            name: "red_wing"
+            fontFile: "fonts/red_wing.fnt"
+            imageFile: "fonts/red_wing.png"
         }
 
     ]
