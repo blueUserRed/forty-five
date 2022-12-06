@@ -75,3 +75,4 @@ maxCards: int
 playerLives: int
 reservesAtRoundBegin: int
 destroyCardInstructionActor: string
+shotEmptyDamage: int

@@ -18,6 +18,13 @@ enemyChargeAnimation: {
     interpolation: "swing"
 }
 
+enemyQuickChargeAnimation: {
+    xCharge: -7.0
+    yCharge: 0.0
+    duration: 0.3
+    interpolation: "swing"
+}
+
 playerLivesAnimation: {
     font: "vanilla_whale"
     negativeFontColor: !color.red

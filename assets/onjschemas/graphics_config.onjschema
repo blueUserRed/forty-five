@@ -16,6 +16,13 @@ enemyChargeAnimation: {
     interpolation: string
 }
 
+enemyQuickChargeAnimation: {
+    xCharge: float
+    yCharge: float
+    duration: float
+    interpolation: string
+}
+
 playerLivesAnimation: {
     font: string
     negativeFontColor: string

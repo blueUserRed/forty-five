@@ -68,6 +68,7 @@ import "config/game_config.onj" as gameConfig
     maxCards: !gameConfig.cardDrawConfig.maxCards
     playerLives: !gameConfig.playerConfig.lives
     reservesAtRoundBegin: !gameConfig.reservesConfig.roundStart
+    shotEmptyDamage: !gameConfig.damageConfig.shotEmptyDamage
 }
 
 viewport: $FitViewport {
