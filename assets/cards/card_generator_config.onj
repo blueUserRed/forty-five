@@ -3,7 +3,7 @@ import "imports/colors.onj" as color
 import "cards/cards.onj" as cards_obj
 
 !cards = !cards_obj.cards
-!baseSize = 200
+!baseSize = 569
 
 baseImage: "base"
 outputFile: "cards/generated/cards.atlas"
@@ -11,7 +11,7 @@ outputFile: "cards/generated/cards.atlas"
 packer: {
     pageWidth: 2_000
     pageHeight: 2_000
-    padding: 20
+    padding: 0
 }
 
 assets: {
@@ -19,7 +19,7 @@ assets: {
 
         {
             name: "base"
-            file: "textures/cards/base.png"
+            file: "textures/cards/base_transparent.png"
         }
         {
             name: "obsidian_bullet"
@@ -28,6 +28,44 @@ assets: {
         {
             name: "bullet"
             file: "textures/cards/normal_bullet.png"
+        }
+
+        {
+            name: "bewitchedBullet"
+            file: "textures/cards/bewitchedBullet.png"
+        }
+        {
+            name: "explosiveBullet"
+            file: "textures/cards/explosiveBullet.png"
+        }
+        {
+            name: "incendiaryBullet"
+            file: "textures/cards/incendiaryBullet.png"
+        }
+        {
+            name: "leadersBullet"
+            file: "textures/cards/leadersBullet.png"
+        }
+        {
+            name: "rottenBullet"
+            file: "textures/cards/rottenBullet.png"
+        }
+
+        {
+            name: "workerBullet"
+            file: "textures/cards/incendiaryBullet.png"
+        }
+        {
+            name: "bigBullet"
+            file: "textures/cards/incendiaryBullet.png"
+        }
+        {
+            name: "diamondBullet"
+            file: "textures/cards/incendiaryBullet.png"
+        }
+        {
+            name: "silverBullet"
+            file: "textures/cards/incendiaryBullet.png"
         }
 
     ]
@@ -50,19 +88,26 @@ assets: {
     fontScale: 1.0
 }
 
+!imageElementSharedKeys = {
+    x: 0
+    y: 0
+    scaleX: 1.0
+    scaleY: 1.0
+}
+
 !normalBulletSize = 128
 !obsidianBulletSize = 200
 !obsidianBulletScale = 0.5
 
 !bulletSharedElements = [
-
-    $ImageElement {
-        x: <!baseSize / 2 - !normalBulletSize / 2>
-        y: <!baseSize / 2 - !normalBulletSize / 2>
-        textureName: "bullet"
-        scaleX: 1.0
-        scaleY: 1.0
-    }
+//
+//    $ImageElement {
+//        x: <!baseSize / 2 - !normalBulletSize / 2>
+//        y: <!baseSize / 2 - !normalBulletSize / 2>
+//        textureName: "bullet"
+//        scaleX: 1.0
+//        scaleY: 1.0
+//    }
 
 ]
 
@@ -91,6 +136,10 @@ cards: [
                 text: !cards.0.title
                 ...!titleElementSharedKeys
             }
+            $ImageElement {
+                textureName: !cards.0.name
+                ...!imageElementSharedKeys
+            }
         ]
     }
 
@@ -101,6 +150,10 @@ cards: [
             $TextElement {
                 text: !cards.1.title
                 ...!titleElementSharedKeys
+            }
+            $ImageElement {
+                textureName: !cards.1.name
+                ...!imageElementSharedKeys
             }
         ]
     }
@@ -113,6 +166,10 @@ cards: [
                 text: !cards.2.title
                 ...!titleElementSharedKeys
             }
+            $ImageElement {
+                textureName: !cards.2.name
+                ...!imageElementSharedKeys
+            }
         ]
     }
 
@@ -123,6 +180,10 @@ cards: [
             $TextElement {
                 text: !cards.3.title
                 ...!titleElementSharedKeys
+            }
+            $ImageElement {
+                textureName: !cards.3.name
+                ...!imageElementSharedKeys
             }
         ]
     }
@@ -135,6 +196,10 @@ cards: [
                 text: !cards.4.title
                 ...!titleElementSharedKeys
             }
+            $ImageElement {
+                textureName: !cards.4.name
+                ...!imageElementSharedKeys
+            }
         ]
     }
 
@@ -145,6 +210,10 @@ cards: [
             $TextElement {
                 text: !cards.5.title
                 ...!titleElementSharedKeys
+            }
+            $ImageElement {
+                textureName: !cards.5.name
+                ...!imageElementSharedKeys
             }
         ]
     }
@@ -157,6 +226,10 @@ cards: [
                 text: !cards.6.title
                 ...!titleElementSharedKeys
             }
+            $ImageElement {
+                textureName: !cards.6.name
+                ...!imageElementSharedKeys
+            }
         ]
     }
 
@@ -168,6 +241,10 @@ cards: [
                 text: !cards.7.title
                 ...!titleElementSharedKeys
             }
+            $ImageElement {
+                textureName: !cards.7.name
+                ...!imageElementSharedKeys
+            }
         ]
     }
 
@@ -178,6 +255,10 @@ cards: [
             $TextElement {
                 text: !cards.8.title
                 ...!titleElementSharedKeys
+            }
+            $ImageElement {
+                textureName: !cards.8.name
+                ...!imageElementSharedKeys
             }
         ]
     }

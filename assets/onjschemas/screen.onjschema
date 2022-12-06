@@ -85,6 +85,7 @@ $Widget [
         scaleX: float
         scaleY: float
         reportDimensionsWithScaling?: boolean
+        scalingWorkaround?: boolean
         ...!widgetSharedKeys
     }
 
@@ -209,7 +210,7 @@ $Widget [
 
 ]
 
-    $Behaviour [
+$Behaviour [
 
     $MouseHoverBehaviour {
         useSystemCursor: boolean
