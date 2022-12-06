@@ -62,3 +62,12 @@ stringTemplates:  {
     rottenDetailText: string
     buffDetailText: string
 }
+
+fadeInAndOutAnimation: {
+    fadeFontName: String
+    fadeFontColor: String
+    fadeFontScale: Float
+    fadeDuration: Float
+    fadeIn: Float
+    fadeOut: Float
+}

@@ -23,6 +23,11 @@ $EnemyAction [
         ...!enemyActionSharedKeys
     }
 
+    $DoNothingEnemyAction {
+        insults: string[*]
+        ...!enemyActionSharedKeys
+    }
+
 ]
 
 !enemyBrain = {
