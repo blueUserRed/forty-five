@@ -1,7 +1,9 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.card.Card
@@ -13,6 +15,8 @@ import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.*
 import kotlin.properties.Delegates
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 
 
 /**
@@ -39,6 +43,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
     private val basePlayerLives = onj.get<Long>("playerLives").toInt()
     private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
+    private val maxCards = onj.get<Long>("maxCards").toInt()
 
     var curScreen: ScreenDataProvider? = null
         private set
@@ -78,12 +83,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             playerLivesLabel?.setText(playerLivesTemplate.string)
         }
 
-    private var timeline: Timeline? = null
-        set(value) {
-            field = value
-            value?.start()
-            freezeUI()
-        }
+    private val timeline: Timeline = Timeline(mutableListOf()).apply {
+        start()
+    }
+
+    private var isUIFrozen: Boolean = false
 
     /**
      * the current phase of the game
@@ -163,7 +167,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             behaviour.gameScreenController = this
         }
 
-        screenDataProvider.afterMs(5) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
+        screenDataProvider.afterMs(10) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
@@ -187,13 +191,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun update() {
-        timeline?.let {
-            it.update()
-            if (it.isFinished) {
-                timeline = null
-                unfreezeUI()
-            }
-        }
+        timeline.update()
+        if (timeline.isFinished && isUIFrozen) unfreezeUI()
+        if (!timeline.isFinished && !isUIFrozen) freezeUI()
         val iterator = curGameAnims.iterator()
         while (iterator.hasNext()) {
             val anim = iterator.next()
@@ -389,31 +389,66 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
         if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
 
+        var enemyDamageTimeline: Timeline? = null
+        var statusEffectTimeline: Timeline? = null
+        var effectTimeline: Timeline? = null
+
         if (cardToShoot != null) {
+
             val enemy = enemyArea!!.enemies[0]
-            enemy.damage(cardToShoot.curDamage)
-            if (cardToShoot.shouldRemoveAfterShot) {
-                revolver.removeCard(if (rotateLeft) 1 else 4)
+            val (x, y) = enemy.actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f))
+
+            val textAnimation = TextAnimation(
+                x, y,
+                "-${cardToShoot.curDamage}",
+                dmgFontColor,
+                dmgFontScale,
+                curScreen!!.fonts[dmgFontName] ?:
+                    throw RuntimeException("unknown font $dmgFontName"),
+                dmgRaiseHeight,
+                dmgStartFadeoutAt,
+                curScreen!!,
+                dmgDuration
+            )
+
+            enemyDamageTimeline = Timeline.timeline {
+                action {
+                    if (cardToShoot.shouldRemoveAfterShot) {
+                        revolver.removeCard(if (rotateLeft) 1 else 4)
+                    }
+                    cardToShoot.afterShot(this@GameScreenController)
+                    delay(bufferTime)
+                    enemy.damage(cardToShoot.curDamage)
+                    playGameAnimation(textAnimation)
+                }
+                delayUntil { textAnimation.isFinished() }
             }
-            cardToShoot.afterShot(this)
 
-            val timeline = enemy.executeStatusEffectsAfterDamage(this, cardToShoot.curDamage)
-            if (timeline != null) executeTimelineLater(timeline)
-
-            checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
+            statusEffectTimeline = enemy.executeStatusEffectsAfterDamage(this, cardToShoot.curDamage)
+            effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT, this)
         }
 
-        checkCardModifiers()
+        val timeline = Timeline.timeline {
 
-        revolver
-            .slots
-            .mapNotNull { it.card }
-            .forEach { it.onRevolverTurn(it === cardToShoot) }
+            enemyDamageTimeline?.let { include(it) }
+            statusEffectTimeline?.let { include(it) }
+            effectTimeline?.let { include(it) }
 
-        enemies.forEach(Enemy::onRevolverTurn)
+            action {
+                checkCardModifierValidity()
+
+                revolver
+                    .slots
+                    .mapNotNull { it.card }
+                    .forEach { it.onRevolverTurn(it === cardToShoot) }
+
+                enemies.forEach(Enemy::onRevolverTurn)
+            }
+        }
+        executeTimelineLater(timeline)
     }
 
-    private fun checkCardModifiers() {
+    private fun checkCardModifierValidity() {
         for (card in cards) if (card.inGame) card.checkModifierValidity()
     }
 
@@ -470,22 +505,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun executeTimelineImmediate(timeline: Timeline) {
-        if (this.timeline != null) {
-            for (action in timeline.actions.reversed()) this.timeline!!.pushAction(action)
-        } else {
-            this.timeline = timeline
-        }
+        for (action in timeline.actions.reversed()) this.timeline.pushAction(action)
     }
 
     private fun executeTimelineLater(timeline: Timeline) {
-        if (this.timeline != null) {
-            for (action in timeline.actions) this.timeline!!.appendAction(action)
-        } else {
-            this.timeline = timeline
-        }
+        for (action in timeline.actions) this.timeline.appendAction(action)
     }
 
     private fun freezeUI() {
+        isUIFrozen = true
         val shootButton = shootButton
         val endTurnButton = endTurnButton
         if (shootButton is DisableActor) shootButton.isDisabled = true
@@ -494,6 +522,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun unfreezeUI() {
+        isUIFrozen = false
         val shootButton = shootButton
         val endTurnButton = endTurnButton
         if (shootButton is DisableActor) shootButton.isDisabled = false
@@ -574,17 +603,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 roundCounter++
-                freezeUI()
+                remainingCardsToDraw =
+                    (if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw)
+                        .coerceAtMost(maxCards - cardHand!!.cards.size)
+                if (remainingCardsToDraw == 0) return //TODO: display this in some way
                 showCardDrawActor()
-                this.remainingCardsToDraw = if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
-                unfreezeUI()
                 hideCardDrawActor()
                 remainingCardsToDraw = null
                 checkStatusEffects()
-                checkCardModifiers()
+                checkCardModifierValidity()
             }
 
             override fun onAllCardsDrawn(): Gamephase = ENEMY_REVEAL
@@ -598,13 +628,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         SPECIAL_DRAW {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
-                freezeUI()
                 showCardDrawActor()
                 this.remainingCardsToDraw = cardsToDrawDuringSpecialDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
-                unfreezeUI()
                 hideCardDrawActor()
                 remainingCardsToDraw = null
             }
@@ -627,7 +655,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                         ?: throw RuntimeException("unknown postProcessor: $destroyCardsPostProcessorName")
                 }
 
-                freezeUI()
                 showDestroyCardInstructionActor()
 
                 previousPostProcessor = curScreen!!.postProcessor
@@ -639,7 +666,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
-                unfreezeUI()
                 hideDestroyCardInstructionActor()
                 curScreen!!.postProcessor = previousPostProcessor
                 for (card in cards) if (card.inGame && card.type == Card.Type.BULLET) {
@@ -659,8 +685,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         ENEMY_REVEAL {
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 enemies[0].chooseNewAction()
-                checkEffectsActiveCards(Trigger.ON_ROUND_START)
                 curReserves = baseReserves
+                checkEffectsActiveCards(Trigger.ON_ROUND_START)
                 changePhase(FREE)
             }
             override fun transitionAway(gameScreenController: GameScreenController) {}
@@ -705,10 +731,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                         bannerEndScale
                     )
 
-                    action {
-                        freezeUI()
-                        playGameAnimation(enemyBannerAnim)
-                    }
+                    action { playGameAnimation(enemyBannerAnim) }
                     delayUntil { enemyBannerAnim.isFinished() }
                     delay(bufferTime)
                     include(enemies[0].doAction(gameScreenController))
@@ -719,10 +742,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                     }
                     delayUntil { playerBannerAnim.isFinished() }
                     delay(bufferTime)
-                    action {
-                        unfreezeUI()
-                        changePhase(INITIAL_DRAW)
-                    }
+                    action { changePhase(INITIAL_DRAW) }
                 }
 
                 executeTimelineLater(timeline)
@@ -766,6 +786,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         private var bannerBeginScale by Delegates.notNull<Float>()
         private var bannerEndScale by Delegates.notNull<Float>()
 
+        private lateinit var dmgFontName: String
+        private lateinit var dmgFontColor: Color
+        private var dmgFontScale by Delegates.notNull<Float>()
+        private var dmgDuration by Delegates.notNull<Int>()
+        private var dmgRaiseHeight by Delegates.notNull<Float>()
+        private var dmgStartFadeoutAt by Delegates.notNull<Int>()
+
         private lateinit var playerTurnBannerName: String
         private lateinit var enemyTurnBannerName: String
 
@@ -792,6 +819,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             playerLivesRawTemplateText = tmplOnj.get<String>("playerLives")
             reservesRawTemplateText = tmplOnj.get<String>("reserves")
+
+            val plOnj = config.get<OnjObject>("playerLivesAnimation")
+
+            dmgFontName = plOnj.get<String>("font")
+            dmgFontScale = plOnj.get<Double>("fontScale").toFloat()
+            dmgDuration = (plOnj.get<Double>("duration") * 1000).toInt()
+            dmgRaiseHeight = plOnj.get<Double>("raiseHeight").toFloat()
+            dmgStartFadeoutAt = (plOnj.get<Double>("startFadeoutAt") * 1000).toInt()
+            dmgFontColor = Color.valueOf(plOnj.get<String>("negativeFontColor"))
 
             destroyCardsPostProcessorName = config.get<OnjObject>("destroyCardPostProcessor").get<String>("name")
 
