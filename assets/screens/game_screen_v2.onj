@@ -65,6 +65,7 @@ import "config/game_config.onj" as gameConfig
     destroyCardInstructionActor: "destroy_card_instruction_label"
     cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
     cardsToDraw: !gameConfig.cardDrawConfig.roundStart
+    maxCards: !gameConfig.cardDrawConfig.maxCards
     playerLives: !gameConfig.playerConfig.lives
     reservesAtRoundBegin: !gameConfig.reservesConfig.roundStart
 }
