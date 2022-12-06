@@ -22,6 +22,13 @@ import "imports/colors.onj" as color
             indicatorTexture: "burning_icon"
         }
 
+        $DoNothingEnemyAction {
+            weight: 100
+            insults: ["Test insult", "another Test"]
+            indicatorTextureScale: 0.008
+            indicatorTexture: "burning_icon"
+        }
+
     ]
 }
 
