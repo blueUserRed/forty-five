@@ -89,13 +89,13 @@ cards: [
         type: $Bullet { }
     }
     { // 6
-        name: "placeholder4"
-        title: "placeholder 4"
+        name: "explosiveBullet"
+        title: "explosive Bullet"
         description: "It's a bullet!"
         baseDamage: 1
         coverValue: 0
         traitEffects: []
-        effects: []
+        effects: [ giveStatus("shot", burning(2, 0.5)) ]
         cost: 1
         type: $Bullet { }
     }

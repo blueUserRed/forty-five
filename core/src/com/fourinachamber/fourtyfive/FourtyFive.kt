@@ -31,8 +31,7 @@ object FourtyFive : Game() {
             setScreen(field)
         }
 
-    private lateinit var menuScreen: Screen
-    private lateinit var gameScreen: Screen
+//    private lateinit var gameScreen: Screen
 
 
     override fun create() {
@@ -40,8 +39,7 @@ object FourtyFive : Game() {
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
-        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen_v2.onj")).build()
-        curScreen = menuScreen
+        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/title_screen.onj")).build()
     }
 
     private fun init() {
@@ -64,7 +62,4 @@ object FourtyFive : Game() {
         Enemy.init(graphicsConfig)
     }
 
-    override fun dispose() {
-        menuScreen.dispose()
-    }
 }
