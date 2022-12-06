@@ -86,6 +86,8 @@ inline fun <reified T> Array<T>.rotate(by: Int): Array<T> {
     }
 }
 
+fun String.toBuilder(): StringBuilder = StringBuilder(this)
+
 object Utils {
 
     /**

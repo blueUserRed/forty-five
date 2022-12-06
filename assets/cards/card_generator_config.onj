@@ -181,20 +181,20 @@ cards: [
             }
         ]
     }
-
+    
+    // Cover --------------------------
+    
     {
         name: !cards.9.name
         elements: [
-            ...!bulletSharedElements
+            ...!coverSharedElements
             $TextElement {
                 text: !cards.9.title
                 ...!titleElementSharedKeys
             }
         ]
     }
-    
-    // Cover --------------------------
-    
+
     {
         name: !cards.10.name
         elements: [
@@ -212,6 +212,28 @@ cards: [
             ...!coverSharedElements
             $TextElement {
                 text: !cards.11.title
+                ...!titleElementSharedKeys
+            }
+        ]
+    }
+
+    {
+        name: !cards.12.name
+        elements: [
+            ...!coverSharedElements
+            $TextElement {
+                text: !cards.12.title
+                ...!titleElementSharedKeys
+            }
+        ]
+    }
+
+    {
+        name: !cards.13.name
+        elements: [
+            ...!coverSharedElements
+            $TextElement {
+                text: !cards.13.title
                 ...!titleElementSharedKeys
             }
         ]
