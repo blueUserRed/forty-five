@@ -147,6 +147,7 @@ assets: {
     postProcessors: []
     animations: []
     colorTextures: []
+    particles: []
 }
 
 options: {

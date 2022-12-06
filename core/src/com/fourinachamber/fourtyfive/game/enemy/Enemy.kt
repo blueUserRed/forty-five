@@ -122,7 +122,7 @@ class Enemy(
         actor.displayAction(curAction!!)
     }
 
-    fun doAction(gameScreenController: GameScreenController): Timeline {
+    fun doAction(gameScreenController: GameScreenController): Timeline? {
         return curAction!!.execute(gameScreenController)
     }
 

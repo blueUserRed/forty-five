@@ -128,3 +128,56 @@ class TextAnimation(
     }
 
 }
+
+class FadeInAndOutTextAnimation(
+    private val x: Float,
+    private val y: Float,
+    initialText: String,
+    private val fontColor: Color,
+    private val fontScale: Float,
+    private val font: BitmapFont,
+    private val screenDataProvider: ScreenDataProvider,
+    private val duration: Int,
+    private val fadeIn : Int,
+    private  val fadeOut : Int
+) : GameAnimation() {
+
+    private var startTime = 0L
+    private var runUntil = 0L
+    private val label = CustomLabel(initialText, Label.LabelStyle(font, fontColor))
+
+    var text: String = initialText
+        set(value) {
+            field = value
+            label.setText(value)
+        }
+
+    override fun start() {
+        startTime = TimeUtils.millis()
+        runUntil = startTime + duration
+        label.setFontScale(fontScale)
+        label.fixedZIndex = Int.MAX_VALUE // lol
+        screenDataProvider.addActorToRoot(label)
+        label.setAlignment(Align.center)
+        label.width = label.prefWidth
+        label.height = label.prefHeight
+        label.setPosition(x, y)
+    }
+
+    override fun isFinished(): Boolean = TimeUtils.millis() >= runUntil
+    override fun update() {
+        label.alpha = calcAlpha()
+    }
+
+    private fun calcAlpha(): Float {
+        val timeDiff: Float = (TimeUtils.millis() - startTime).toFloat()
+        return if (timeDiff <= fadeIn) (timeDiff / fadeIn)
+        else if (timeDiff >= duration - fadeOut) (1 - timeDiff / duration)
+        else 1f
+    }
+
+    override fun end() {
+        screenDataProvider.removeActorFromRoot(label)
+    }
+
+}

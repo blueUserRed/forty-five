@@ -64,3 +64,12 @@ stringTemplates:  {
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!"
     buffDetailText: "{source} applied a {text} of {amount}!"
 }
+
+fadeInAndOutAnimation: {
+    fadeFontName: "vanilla_whale"
+    fadeFontColor: !color.black
+    fadeFontScale: 0.2
+    fadeDuration: 3.0
+    fadeIn: 1.0
+    fadeOut: 1.0
+}

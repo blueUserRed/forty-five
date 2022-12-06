@@ -68,6 +68,17 @@ class EnemyBrain(
                 )
             })
 
+            "DoNothingEnemyAction" -> ({
+                EnemyAction.DoNothing(
+                    onj.get<OnjArray>("insults").value.map { it.value as String }.random(),
+                    enemy,
+                    onj,
+                    screenDataProvider,
+                    onj.get<Double>("indicatorTextureScale").toFloat(),
+                )
+            })
+
+
             else -> throw RuntimeException("unknown enemy action ${onj.name}")
 
         }.let {
