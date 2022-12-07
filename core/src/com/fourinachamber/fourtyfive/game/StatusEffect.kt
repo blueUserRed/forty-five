@@ -12,10 +12,13 @@ import kotlin.properties.Delegates
 
 abstract class StatusEffect(
     private val iconTextureName: String,
-    val turns: Int,
+    _turns: Int,
     protected val target: StatusEffectTarget,
     private val iconScale: Float
 ) {
+
+    var turns: Int = _turns
+        protected set
 
     private lateinit var gameScreenController: GameScreenController
 
@@ -50,6 +53,10 @@ abstract class StatusEffect(
     open fun isStillValid(): Boolean = remainingTurns > 0
 
     abstract fun execute(gameScreenController: GameScreenController): Timeline?
+
+    abstract fun canStackWith(effect: StatusEffect): Boolean
+
+    abstract fun stack(effect: StatusEffect)
 
     open fun executeAfterDamage(gameScreenController: GameScreenController, damage: Int): Timeline? = null
 
@@ -96,6 +103,15 @@ abstract class StatusEffect(
                 shakeActorAction.reset()
             }
 
+        }
+
+        override fun canStackWith(effect: StatusEffect): Boolean {
+            return effect is Poison && effect.damage == damage
+        }
+
+        override fun stack(effect: StatusEffect) {
+            effect as Poison
+            turns += effect.turns
         }
     }
 
@@ -149,6 +165,15 @@ abstract class StatusEffect(
                 shakeActorAction.reset()
             }
 
+        }
+
+        override fun canStackWith(effect: StatusEffect): Boolean {
+            return effect is Burning && effect.percent == percent
+        }
+
+        override fun stack(effect: StatusEffect) {
+            effect as Burning
+            turns += effect.turns
         }
 
     }
