@@ -25,7 +25,7 @@ cards: [
     { // 0
         name: "incendiaryBullet"
         title: "incendiary Bullet"
-        description: "It's a bullet!"
+        description: "(the real incendiary bullet)"
         baseDamage: 7
         coverValue: 0
         traitEffects: []

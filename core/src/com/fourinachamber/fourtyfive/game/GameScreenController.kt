@@ -101,6 +101,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var roundCounter: Int = 0
         private set
 
+    /**
+     * counts up every revolver turn; starts at 0
+     */
+    var turnCounter: Int = 0
+        private set
+
     private var cardsToDrawDuringSpecialDraw: Int = 1
 
     private val reservesTemplate: TemplateString = TemplateString(
@@ -384,6 +390,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun shoot() {
         val revolver = revolver!!
+        turnCounter++
 
         val cardToShoot = revolver.getCardInSlot(5)
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
@@ -396,7 +403,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (cardToShoot != null) {
 
             val enemy = enemyArea!!.enemies[0]
-            val (x, y) = enemy.actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f))
 
             enemyDamageTimeline = Timeline.timeline {
                 action {
@@ -415,7 +421,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val timeline = Timeline.timeline {
 
             includeLater(
-                { getShotEmptyTimeline(enemies[0], shotEmptyDamage) },
+                { enemies[0].damagePlayer(shotEmptyDamage, this@GameScreenController) },
                 { cardToShoot == null }
             )
 
@@ -435,53 +441,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             }
         }
         executeTimelineLater(timeline)
-    }
-
-    private fun getShotEmptyTimeline(enemy: Enemy, damage: Int): Timeline = Timeline.timeline {
-
-        val moveByAction = CustomMoveByAction()
-        moveByAction.setAmount(xQuickCharge, yQuickCharge)
-        moveByAction.duration = quickChargeDuration
-        moveByAction.interpolation = quickChargeInterpolation
-
-        val (x, y) = playerLivesLabel!!.localToStageCoordinates(Vector2(0f, 0f))
-        val textAnimation = TextAnimation(
-            x + playerLivesLabel!!.width / 2,
-            y - playerLivesLabel!!.height,
-            "-$damage",
-            dmgFontColor,
-            dmgFontScale,
-            curScreen!!.fonts[dmgFontName]
-                ?: throw RuntimeException("unknown font $dmgFontName"),
-            dmgRaiseHeight,
-            dmgStartFadeoutAt,
-            curScreen!!,
-            dmgDuration
-        )
-        val shakeAction = ShakeActorAction(xShake, yShake, xShakeSpeedMultiplier, yShakeSpeedMultiplier)
-        shakeAction.duration = shakeDuration
-
-        delay(bufferTime)
-        action { enemy.actor.addAction(moveByAction) }
-        delayUntil { moveByAction.isComplete }
-        action {
-            enemy.actor.removeAction(moveByAction)
-            moveByAction.reset()
-            moveByAction.amountX = -moveByAction.amountX
-            moveByAction.amountY = -moveByAction.amountY
-            enemy.actor.addAction(moveByAction)
-        }
-        delay(bufferTime)
-        action {
-            playGameAnimation(textAnimation)
-            playerLivesLabel!!.addAction(shakeAction)
-            damagePlayer(damage)
-        }
-        delayUntil { shakeAction.isComplete }
-        delayUntil { textAnimation.isFinished() }
-        action {
-            playerLivesLabel!!.removeAction(shakeAction)
-        }
     }
 
     private fun checkCardModifierValidity() {

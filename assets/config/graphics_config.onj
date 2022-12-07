@@ -65,6 +65,11 @@ destroyCardPostProcessor: {
     name: "vignette"
 }
 
+coverStackParticles: {
+    damaged: "dust"
+    destroyed: "dust_explosion"
+}
+
 stringTemplates:  {
     playerLives: "LIVES: {curLives}/{baseLives}"
     reserves: "RESERVES: {curReserves}/{baseReserves}"
