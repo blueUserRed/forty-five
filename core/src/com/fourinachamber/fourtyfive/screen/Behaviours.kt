@@ -8,8 +8,9 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
 import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
-import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
+import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.utils.Either
@@ -32,6 +33,7 @@ object BehaviourFactory {
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
         "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
+        "OnHoverChangeFontSizeBehaviour" to { onj, actor -> OnHoverChangeFontSizeBehaviour(onj, actor) },
         "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
 //        "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
@@ -260,6 +262,54 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
     }
 }
 
+class OnHoverChangeFontSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val enterDuration: Float =onj.get<Double>("enterDuration").toFloat()
+    private val exitDuration: Float = onj.get<Double>("exitDuration").toFloat()
+    private val targetFontScale: Float = onj.get<Double>("targetFontScale").toFloat()
+    private val baseFontScale: Float = onj.get<Double>("baseFontScale").toFloat()
+    private val enterInterpolation: Interpolation?
+    private val exitInterpolation: Interpolation?
+
+    private val label: Label
+
+    init {
+        enterInterpolation = if (!onj["enterInterpolation"]!!.isNull()) {
+            Utils.interpolationOrError(onj.get<String>("enterInterpolation"))
+        } else null
+
+        exitInterpolation = if (!onj["exitInterpolation"]!!.isNull()) {
+            Utils.interpolationOrError(onj.get<String>("exitInterpolation"))
+        } else null
+
+        if (actor !is Label) throw RuntimeException("OnHoverChangeFontSizeBehaviour can only be used on a label!")
+        label = actor
+    }
+
+    override val onHoverEnter: BehaviourCallback = {
+        val action = ChangeFontScaleAction(targetFontScale, label)
+        action.duration = enterDuration
+        enterInterpolation?.let { action.interpolation = it }
+        actor.addAction(action)
+    }
+
+    override val onHoverExit: BehaviourCallback = {
+        val action = ChangeFontScaleAction(baseFontScale, label)
+        action.duration = exitDuration
+        exitInterpolation?.let { action.interpolation = it }
+        actor.addAction(action)
+    }
+
+    private class ChangeFontScaleAction(val targetScale: Float, val label: Label) : TemporalAction() {
+
+        private val startScale = label.fontScaleX
+
+        override fun update(percent: Float) {
+            label.setFontScale((targetScale - startScale) * percent + startScale)
+        }
+    }
+
+}
 
 class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
