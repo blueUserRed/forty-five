@@ -63,6 +63,11 @@ destroyCardPostProcessor: {
     name: string
 }
 
+coverStackParticles: {
+    damaged: string
+    destroyed: string
+}
+
 stringTemplates:  {
     playerLives: string
     reserves: string

@@ -12,8 +12,6 @@ $EnemyAction [
     $DamagePlayerEnemyAction {
         min: int
         max: int
-        coverStackDamagedParticles: string
-        coverStackDestroyedParticles: string
         ...!enemyActionSharedKeys
     }
 

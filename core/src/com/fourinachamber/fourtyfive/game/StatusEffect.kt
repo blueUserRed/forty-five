@@ -17,8 +17,12 @@ abstract class StatusEffect(
     private val iconScale: Float
 ) {
 
-    var remainingTurns = turns
-        private set
+    private lateinit var gameScreenController: GameScreenController
+
+    val remainingTurns: Int
+        get() = (startTurn + turns) - gameScreenController.turnCounter
+
+    private var startTurn: Int = 0
 
     lateinit var icon: CustomImageActor
         private set
@@ -36,11 +40,14 @@ abstract class StatusEffect(
         isIconInitialised = true
     }
 
-    fun onRevolverTurn() {
-        remainingTurns--
+    open fun onRevolverTurn(gameScreenController: GameScreenController) { }
+
+    open fun start(gameScreenController: GameScreenController) {
+        this.gameScreenController = gameScreenController
+        startTurn = gameScreenController.turnCounter
     }
 
-    fun isStillValid(): Boolean = remainingTurns > 0
+    open fun isStillValid(): Boolean = remainingTurns > 0
 
     abstract fun execute(gameScreenController: GameScreenController): Timeline?
 

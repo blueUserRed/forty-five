@@ -9,8 +9,6 @@ import "imports/colors.onj" as color
             min: 5
             max: 10
             indicatorTextureScale: 0.03
-            coverStackDamagedParticles: "dust"
-            coverStackDestroyedParticles: "dust_explosion"
             indicatorTexture: "normal_bullet"
         }
 

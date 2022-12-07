@@ -2,16 +2,17 @@ package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.fourinachamber.fourtyfive.game.CoverStack
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.StatusEffect
 import com.fourinachamber.fourtyfive.game.TextAnimation
-import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.screen.*
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
+import com.fourinachamber.fourtyfive.utils.*
 import onj.OnjArray
 import onj.OnjObject
 import java.lang.Integer.max
@@ -73,11 +74,23 @@ class Enemy(
 
     private lateinit var brain: EnemyBrain
 
+    private val dmgFont: BitmapFont = gameScreenController.curScreen!!.fonts[dmgFontName]
+        ?: throw RuntimeException("unknown font $dmgFontName")
+
+    private val coverStackDamagedParticles: ParticleEffect =
+        gameScreenController.curScreen!!.particles[coverStackDamagedParticlesName]
+            ?: throw RuntimeException("unknown particle: $coverStackDamagedParticlesName")
+
+    private val coverStackDestroyedParticles: ParticleEffect =
+        gameScreenController.curScreen!!.particles[coverStackDestroyedParticlesName]
+            ?: throw RuntimeException("unknown particle: $coverStackDestroyedParticlesName")
+
     init {
         actor = EnemyActor(this)
     }
 
     fun applyEffect(effect: StatusEffect) {
+        effect.start(gameScreenController)
         effect.initIcon(gameScreenController)
         statusEffects.add(effect)
         actor.displayStatusEffect(effect)
@@ -115,7 +128,7 @@ class Enemy(
         val iterator = statusEffects.iterator()
         while (iterator.hasNext()) {
             val effect = iterator.next()
-            effect.onRevolverTurn()
+            effect.onRevolverTurn(gameScreenController)
             if (!effect.isStillValid()) {
                 actor.removeStatusEffect(effect)
                 iterator.remove()
@@ -137,6 +150,136 @@ class Enemy(
         curAction = null
         actor.resetAction()
     }
+
+    fun damagePlayer(damage: Int, gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        val shakeAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
+        shakeAction.duration = shakeDuration
+
+        val moveByAction = CustomMoveByAction()
+        moveByAction.setAmount(xCharge, yCharge)
+        moveByAction.duration = chargeDuration
+        moveByAction.interpolation = chargeInterpolation
+
+        val playerLivesLabel = gameScreenController.playerLivesLabel!!
+        var playerLivesPos = playerLivesLabel.localToStageCoordinates(Vector2(0f, 0f))
+        playerLivesPos += Vector2(playerLivesLabel.width / 2f, -playerLivesLabel.height)
+
+        val textAnimation = TextAnimation(
+            playerLivesPos.x,
+            playerLivesPos.y,
+            "If you see this something went wrong",
+            dmgFontColor,
+            dmgFontScale,
+            dmgFont,
+            dmgRaiseHeight,
+            dmgStartFadeoutAt,
+            gameScreenController.curScreen!!,
+            dmgDuration
+        )
+
+        val screenDataProvider = gameScreenController.curScreen!!
+
+        var activeStack: CoverStack? = null
+        var remaining = 0
+
+        action { actor.addAction(moveByAction) }
+
+        delayUntil { moveByAction.isComplete }
+
+        action {
+            actor.removeAction(moveByAction)
+            moveByAction.reset()
+            moveByAction.amountX = -moveByAction.amountX
+            moveByAction.amountY = -moveByAction.amountY
+            actor.addAction(moveByAction)
+        }
+
+        delayUntil { moveByAction.isComplete }
+
+        action { actor.removeAction(moveByAction) }
+
+        action {
+            remaining = gameScreenController.coverArea!!.damage(damage)
+            if (remaining != damage) activeStack = gameScreenController.coverArea!!.getActive()
+        }
+
+        includeLater(
+            {
+                getStackParticlesTimeline(activeStack!!, screenDataProvider, activeStack!!.currentHealth == 0)
+            },
+            { activeStack != null }
+        )
+
+        delay(bufferTime)
+
+        includeLater(
+            { getPlayerDamagedTimeline(remaining, shakeAction, gameScreenController, textAnimation) },
+            { remaining != 0 }
+        )
+    }
+
+
+    private fun getPlayerDamagedTimeline(
+        damage: Int,
+        shakeAction: ShakeActorAction,
+        gameScreenController: GameScreenController,
+        textAnimation: TextAnimation
+    ): Timeline {
+
+        val playerLivesLabel = gameScreenController.playerLivesLabel!!
+
+        return Timeline.timeline {
+
+            action {
+                gameScreenController.damagePlayer(damage)
+                playerLivesLabel.addAction(shakeAction)
+                textAnimation.text = "-$damage"
+                gameScreenController.playGameAnimation(textAnimation)
+            }
+
+            delayUntil { textAnimation.isFinished() }
+
+        }
+    }
+
+    private fun getStackParticlesTimeline(
+        coverStack: CoverStack,
+        screenDataProvider: ScreenDataProvider,
+        wasDestroyed: Boolean
+    ): Timeline = Timeline.timeline {
+
+        var particle: ParticleEffect? = null
+
+        delay(bufferTime)
+
+        action {
+            particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
+
+            val particleActor = CustomParticleActor(particle!!)
+            particleActor.isAutoRemove = true
+            particleActor.fixedZIndex = Int.MAX_VALUE
+
+            if (wasDestroyed) {
+                particleActor.setPosition(
+                    coverStack.x + coverStack.width / 2,
+                    coverStack.y + coverStack.height / 2
+                )
+            } else {
+                val width = particle!!.emitters[0].spawnWidth.highMax
+                particleActor.setPosition(
+                    coverStack.x + coverStack.width / 2 - width / 2,
+                    coverStack.y
+                )
+            }
+
+            screenDataProvider.addActorToRoot(particleActor)
+            particleActor.start()
+        }
+
+        delayUntil { particle?.isComplete ?: true }
+
+    }
+
 
     /**
      * reduces the enemies lives by [damage]
@@ -215,6 +358,21 @@ class Enemy(
         private var dmgRaiseHeight by Delegates.notNull<Float>()
         private var dmgStartFadeoutAt by Delegates.notNull<Int>()
 
+        private var xShake by Delegates.notNull<Float>()
+        private var yShake by Delegates.notNull<Float>()
+        private var xSpeedMultiplier by Delegates.notNull<Float>()
+        private var ySpeedMultiplier by Delegates.notNull<Float>()
+        private var shakeDuration by Delegates.notNull<Float>()
+
+        private var xCharge by Delegates.notNull<Float>()
+        private var yCharge by Delegates.notNull<Float>()
+        private var chargeDuration by Delegates.notNull<Float>()
+        private lateinit var chargeInterpolation: Interpolation
+
+        private lateinit var coverStackDestroyedParticlesName: String
+        private lateinit var coverStackDamagedParticlesName: String
+
+        private var bufferTime by Delegates.notNull<Int>()
 
         fun init(config: OnjObject) {
             val dmgOnj = config.get<OnjObject>("playerLivesAnimation")
@@ -225,6 +383,28 @@ class Enemy(
             dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
             dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
             dmgFontColor = Color.valueOf(dmgOnj.get<String>("negativeFontColor"))
+
+            val shakeOnj = config.get<OnjObject>("shakeAnimation")
+
+            xShake = shakeOnj.get<Double>("xShake").toFloat()
+            yShake = shakeOnj.get<Double>("yShake").toFloat()
+            xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
+            ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
+            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
+
+            val chargeOnj = config.get<OnjObject>("enemyChargeAnimation")
+
+            xCharge = chargeOnj.get<Double>("xCharge").toFloat()
+            yCharge = chargeOnj.get<Double>("yCharge").toFloat()
+            chargeDuration = chargeOnj.get<Double>("duration").toFloat() / 2f // divide by two because anim is played twice
+            chargeInterpolation = Utils.interpolationOrError(chargeOnj.get<String>("interpolation"))
+
+            val coverStackOnj = config.get<OnjObject>("coverStackParticles")
+
+            coverStackDamagedParticlesName = coverStackOnj.get<String>("damaged")
+            coverStackDestroyedParticlesName = coverStackOnj.get<String>("destroyed")
+
+            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
         }
 
         /**
