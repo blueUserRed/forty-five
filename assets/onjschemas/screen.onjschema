@@ -235,6 +235,15 @@ $Behaviour [
         exitInterpolation: string?
     }
 
+    $OnHoverChangeFontSizeBehaviour {
+        enterDuration: float
+        exitDuration: float
+        targetFontScale: float
+        baseFontScale: float
+        enterInterpolation: string?
+        exitInterpolation: string?
+    }
+
     $OnClickChangeScreenBehaviour {
         screenPath: string
     }

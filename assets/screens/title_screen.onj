@@ -3,6 +3,30 @@ import "imports/colors.onj" as color
 !worldWidth = 160.0
 !worldHeight = 90.0
 
+!buttonHeight = <!worldHeight / 8>
+
+!buttonBaseScale = 0.2
+!buttonHoverScale = 0.25
+
+!buttonBehaviours = [
+
+    $MouseHoverBehaviour {
+        useSystemCursor: true
+        cursorName: "hand"
+        disabled: null
+    }
+
+    $OnHoverChangeFontSizeBehaviour {
+        enterDuration: 0.1
+        exitDuration: 0.1
+        targetFontScale: !buttonHoverScale
+        baseFontScale: !buttonBaseScale
+        enterInterpolation: "elastic in"
+        exitInterpolation: "elastic out"
+    }
+
+]
+
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
@@ -23,13 +47,14 @@ viewport: $FitViewport {
         }
         {
             align: "right"
-            padTop: 3.0
-            padRight: 3.0
+            padTop: 8.0
+            padRight: 10.0
+            sizeToActor: true
             element: $Image {
                 scalingWorkaround: true
                 textureName: "logo"
-                scaleX: 0.08
-                scaleY: 0.08
+                scaleX: 0.07
+                scaleY: 0.07
             }
         }
     ]
@@ -39,6 +64,7 @@ viewport: $FitViewport {
     cells: [
         {
             colspan: 2
+            expandY: true
             element: $Label {
                 text: ""
                 font: "distance_field"
@@ -49,64 +75,40 @@ viewport: $FitViewport {
     ]
 }
 
-!middleRow = {
-    cells: [
-        {
-            expandX: true
-            element: $Label {
-                text: ""
-                font: "distance_field"
-                color: !color.black
-                fontScale: 0.2
-            }
-        }
-        {
-            align: "right"
-            padRight: 3.0
-            element: $Label {
-                name: "load_game"
-                text: "Continue"
-                font: "distance_field"
-                color: !color.black
-                fontScale: 0.15
-            }
-        }
-    ]
-}
+!buttonBox = $VerticalGroup {
 
-!middle2Row = {
-    cells: [
-        {
-            expandX: true
-            element: $Label {
-                text: ""
-                font: "distance_field"
-                color: !color.black
-                fontScale: 0.2
-            }
+    align: "center"
+    children: [
+        $Label {
+            text: "play"
+            font: "red_wing"
+            color: !color.black
+            fontScale: !buttonBaseScale
+            behaviours: [
+                $OnClickChangeScreenBehaviour {
+                    screenPath: "screens/game_screen.onj"
+                }
+                ...!buttonBehaviours
+            ]
         }
-        {
-            align: "right"
-            height: <!worldHeight/5>
-            padRight: 3.0
-            element: $Label {
-                name: "play"
-                text: "Play"
-                font: "distance_field"
-                color: !color.black
-                fontScale: 0.25
-                behaviours: [
-                    $OnClickChangeScreenBehaviour {
-                        screenPath: "./screens/game_screen.onj"
-                    }
-                ]
-            }
+        $Label {
+            text: "quit"
+            font: "red_wing"
+            color: !color.black
+            fontScale: !buttonBaseScale
+            behaviours: [
+                $OnClickExitBehaviour { }
+                ...!buttonBehaviours
+            ]
         }
     ]
+
 }
 
 !bottomRow = {
-    cells : [
+
+    cells: [
+
         {
             expandX: true
             element: $Label {
@@ -116,41 +118,44 @@ viewport: $FitViewport {
                 fontScale: 0.2
             }
         }
+
         {
             align: "right"
-            height: <!worldHeight/5>
+            padBottom: 10.0
             padRight: 3.0
-            element: $Label {
-                name: "quit"
-                text: "Quit"
-                font: "distance_field"
-                color: !color.black
-                fontScale: 0.15
-                behaviours : [
-                    $OnClickExitBehaviour { }
-                ]
-            }
+            sizeToActor: true
+            element: !buttonBox
         }
+
     ]
+
 }
 
 children: [
     $Table {
 //        fillX: true
-        fillY: true
-        debug: true
-        rows: [ !topRow, !spacerRow, !middleRow, !middle2Row, !bottomRow ]
+//        fillY: true
+//        debug: true
+        rows: [ !topRow, !spacerRow, !bottomRow ]
     }
 ]
 
 assets: {
     textures: []
     fonts: [
+
         $DistanceFieldFont {
             name: "distance_field"
             fontFile: "fonts/distanceField.fnt"
             imageFile: "fonts/distanceField.png"
         }
+
+        $DistanceFieldFont {
+            name: "red_wing"
+            fontFile: "fonts/red_wing.fnt"
+            imageFile: "fonts/red_wing.png"
+        }
+
     ]
     textureAtlases: [
         {
