@@ -90,6 +90,10 @@ class Enemy(
     }
 
     fun applyEffect(effect: StatusEffect) {
+        for (effectToTest in statusEffects) if (effectToTest.canStackWith(effect)) {
+            effectToTest.stack(effect)
+            return
+        }
         effect.start(gameScreenController)
         effect.initIcon(gameScreenController)
         statusEffects.add(effect)
@@ -100,11 +104,9 @@ class Enemy(
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
-                val timelineToInclude = effect.execute(gameScreenController)
-                if (timelineToInclude != null) {
-                    hadEffectTimeline = true
-                    include(timelineToInclude)
-                }
+                val timelineToInclude = effect.execute(gameScreenController) ?: continue
+                hadEffectTimeline = true
+                include(timelineToInclude)
             }
         }
         return if (hadEffectTimeline) timeline else null
@@ -114,11 +116,9 @@ class Enemy(
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterDamage(gameScreenController, damage)
-                if (timelineToInclude != null) {
-                    hadEffectTimeline = true
-                    include(timelineToInclude)
-                }
+                val timelineToInclude = effect.executeAfterDamage(gameScreenController, damage) ?: continue
+                hadEffectTimeline = true
+                include(timelineToInclude)
             }
         }
         return if (hadEffectTimeline) timeline else null
