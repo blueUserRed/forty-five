@@ -6,9 +6,7 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fourtyfive.game.CoverStack
-import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.TextAnimation
+import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.CustomMoveByAction
 import com.fourinachamber.fourtyfive.screen.CustomParticleActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
@@ -29,7 +27,7 @@ abstract class EnemyAction {
 
     abstract val descriptionText: String
 
-    abstract fun execute(gameScreenController: GameScreenController): Timeline
+    abstract fun execute(gameScreenController: GameScreenController): Timeline?
 
     class DamagePlayer(
         val enemy: Enemy,
@@ -89,6 +87,44 @@ abstract class EnemyAction {
 
     }
 
+    class DoNothing(
+            val insult: String,
+            val enemy: Enemy,
+            onj: OnjNamedObject,
+            private val screenDataProvider: ScreenDataProvider,
+            override val indicatorTextureScale: Float
+        ) : EnemyAction() {
+
+        override val indicatorTexture: TextureRegion = screenDataProvider.textures[onj.get<String>("indicatorTexture")]
+                ?: throw RuntimeException("unknown texture: ${onj.get<String>("indicatorTexture")}")
+
+        override val descriptionText: String  = ""
+
+        override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+            val (x, y) = enemy.actor.localToStageCoordinates(Vector2(0f, 0f))
+
+            val fadeAnimation = FadeInAndOutTextAnimation(
+                x - enemy.actor.prefWidth / 2, y,
+                insult,
+                fadeFontColor,
+                fadeFontScale,
+                gameScreenController.curScreen!!.fonts[resFontName]!!,
+                screenDataProvider,
+                fadeDuration,
+                fadeIn,
+                fadeOut
+            )
+
+            action {
+                gameScreenController.playGameAnimation(fadeAnimation)
+            }
+            delayUntil { fadeAnimation.isFinished() }
+
+            delay(bufferTime)
+        }
+
+    }
+
 
     companion object {
 
@@ -121,6 +157,14 @@ abstract class EnemyAction {
         private lateinit var coverStackDamagedParticlesName: String
 
         private var bufferTime by Delegates.notNull<Int>()
+
+        private lateinit var fadeFontName: String
+        private lateinit var fadeFontColor: Color
+        private var fadeFontScale by Delegates.notNull<Float>()
+        private var fadeDuration by Delegates.notNull<Int>()
+        private var fadeIn by Delegates.notNull<Int>()
+        private var fadeOut by Delegates.notNull<Int>()
+
 
         fun init(config: OnjObject) {
 
@@ -163,6 +207,14 @@ abstract class EnemyAction {
             coverStackDestroyedParticlesName = coverStackOnj.get<String>("destroyed")
 
             bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
+
+            val fadeOnj = config.get<OnjObject>("fadeInAndOutAnimation")
+            fadeFontColor = Color.valueOf(fadeOnj.get<String>("fadeFontColor"))
+            fadeFontName = fadeOnj.get<String>("fadeFontName")
+            fadeFontScale = fadeOnj.get<Double>("fadeFontScale"). toFloat()
+            fadeDuration = (fadeOnj.get<Double>("fadeDuration") * 1000).toInt()
+            fadeIn = (fadeOnj.get<Double>("fadeIn") * 1000).toInt()
+            fadeOut = (fadeOnj.get<Double>("fadeOut") * 1000).toInt()
         }
 
     }
