@@ -744,7 +744,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                     action { playGameAnimation(enemyBannerAnim) }
                     delayUntil { enemyBannerAnim.isFinished() }
                     delay(bufferTime)
-                    include(enemies[0].doAction(gameScreenController))
+                    enemies[0].doAction(gameScreenController)?.let { include(it) }
                     delay(bufferTime)
                     action {
                         enemies[0].resetAction()
