@@ -95,6 +95,20 @@ assets: {
     scaleY: 1.0
 }
 
+!valueElementSharedKeys = {
+    x: 10
+    y: 10
+    font: "card_character"
+    fontScale: 1.1
+}
+
+!costElementSharedKeys = {
+    x: 580
+    y: 580
+    font: "card_character"
+    fontScale: 1.1
+}
+
 !normalBulletSize = 128
 !obsidianBulletSize = 200
 !obsidianBulletScale = 0.5
@@ -132,13 +146,17 @@ cards: [
         name: !cards.0.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.0.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.0.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.0.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.0.cost#s>
             }
         ]
     }
@@ -147,13 +165,17 @@ cards: [
         name: !cards.1.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.1.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.1.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.1.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.1.cost#s>
             }
         ]
     }
@@ -162,13 +184,17 @@ cards: [
         name: !cards.2.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.2.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.2.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.2.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.2.cost#s>
             }
         ]
     }
@@ -177,13 +203,17 @@ cards: [
         name: !cards.3.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.3.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.3.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.3.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.3.cost#s>
             }
         ]
     }
@@ -192,13 +222,17 @@ cards: [
         name: !cards.4.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.4.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.4.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.4.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.4.cost#s>
             }
         ]
     }
@@ -207,13 +241,17 @@ cards: [
         name: !cards.5.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.5.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.5.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.5.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.5.cost#s>
             }
         ]
     }
@@ -222,13 +260,17 @@ cards: [
         name: !cards.6.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.6.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.6.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.6.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.6.cost#s>
             }
         ]
     }
@@ -237,13 +279,17 @@ cards: [
         name: !cards.7.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.7.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.7.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.7.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.7.cost#s>
             }
         ]
     }
@@ -252,13 +298,17 @@ cards: [
         name: !cards.8.name
         elements: [
             ...!bulletSharedElements
-            $TextElement {
-                text: !cards.8.title
-                ...!titleElementSharedKeys
-            }
             $ImageElement {
                 textureName: !cards.8.name
                 ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.8.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.8.cost#s>
             }
         ]
     }

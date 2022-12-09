@@ -106,7 +106,8 @@ assets: {
             file: "textures/packed/game_screen/game_screen.atlas"
             defines: [
                 "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
-                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum", "burning_icon"
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum", "burning_icon",
+                "heart", "reserves"
             ]
         }
 
@@ -354,7 +355,18 @@ options: {
                 {
                     padLeft: 2.0
                     padBottom: 6.0
-                    element: !playerLivesLabel
+                    element: $HorizontalGroup {
+                        align: "left"
+                        children : [
+                            $Image {
+                                reportDimensionsWithScaling: true
+                                textureName: "heart"
+                                scaleX: 0.006
+                                scaleY: 0.006
+                            }
+                            !playerLivesLabel
+                        ]
+                    }
                 }
 
                 {
@@ -435,7 +447,19 @@ options: {
                 {
                     padLeft: 2.0
                     sizeToActor: true
-                    element: !reservesLabel
+                    element: $HorizontalGroup {
+                        align: "center"
+                        spacing: 1.0
+                        children: [
+                            $Image {
+                                reportDimensionsWithScaling: true
+                                textureName: "reserves"
+                                scaleX: 0.05
+                                scaleY: 0.05
+                            }
+                            !reservesLabel
+                        ]
+                    }
                 }
 
                 {
