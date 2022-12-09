@@ -4,13 +4,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
-import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
@@ -37,6 +36,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val endTurnButtonName = onj.get<String>("endTurnButtonName")
     private val shootButtonName = onj.get<String>("shootButtonName")
     private val reservesLabelName = onj.get<String>("reservesLabelName")
+
+    private val winScreen = onj.get<String>("winScreen")
+    private val looseScreen = onj.get<String>("looseScreen")
 
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -453,6 +455,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     fun damagePlayer(damage: Int) {
         curPlayerLives -= damage
+        if (curPlayerLives <= 0) executeTimelineLater(Timeline.timeline {
+            action { loose() }
+        })
     }
 
     fun gainReserves(amount: Int) {
@@ -499,11 +504,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         executeTimelineLater(timeline)
     }
 
-    private fun executeTimelineImmediate(timeline: Timeline) {
+    fun executeTimelineImmediate(timeline: Timeline) {
         for (action in timeline.actions.reversed()) this.timeline.pushAction(action)
     }
 
-    private fun executeTimelineLater(timeline: Timeline) {
+    fun executeTimelineLater(timeline: Timeline) {
         for (action in timeline.actions) this.timeline.appendAction(action)
     }
 
@@ -577,6 +582,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     override fun end() {
         curScreen = null
+    }
+
+    fun enemyDefeated(enemy: Enemy): Unit = win()
+
+    private fun win() {
+        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(winScreen)).build()
+    }
+
+    private fun loose() {
+        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(looseScreen)).build()
     }
 
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())

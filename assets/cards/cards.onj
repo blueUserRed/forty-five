@@ -92,7 +92,7 @@ cards: [
         name: "explosiveBullet"
         title: "explosive Bullet"
         description: "It's a bullet!"
-        baseDamage: 1
+        baseDamage: 15
         coverValue: 0
         traitEffects: []
         effects: [ giveStatus("shot", burning(2, 0.5)) ]

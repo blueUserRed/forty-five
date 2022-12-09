@@ -156,6 +156,7 @@ abstract class StatusEffect(
                 icon.removeAction(shakeActorAction)
                 shakeActorAction.reset()
                 targetLivesActor.addAction(shakeActorAction)
+                target.damage(gameScreenController, additionalDamage)
                 gameScreenController.playGameAnimation(textAnimation)
             }
             include(target.damage(gameScreenController, additionalDamage))
