@@ -96,17 +96,17 @@ assets: {
 }
 
 !valueElementSharedKeys = {
-    x: 10
-    y: 10
+    x: 35
+    y: 480
     font: "card_character"
-    fontScale: 1.1
+    fontScale: 1.5
 }
 
 !costElementSharedKeys = {
-    x: 580
-    y: 580
+    x: 490
+    y: 28
     font: "card_character"
-    fontScale: 1.1
+    fontScale: 1.5
 }
 
 !normalBulletSize = 128

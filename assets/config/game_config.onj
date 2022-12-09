@@ -28,7 +28,7 @@ enemyConfig: {
     enemies: [
         {
             name: "enemy"
-            lives: 1234
+            lives: 12
             brain: !defaultEnemyBrain
             texture: "enemy"
             coverIcon: "burning_icon"
@@ -53,7 +53,7 @@ cardDrawConfig: {
 }
 
 playerConfig: {
-    lives: 1234
+    lives: 12
 }
 
 reservesConfig: {

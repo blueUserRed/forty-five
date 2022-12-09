@@ -74,3 +74,5 @@ playerLives: int
 reservesAtRoundBegin: int
 destroyCardInstructionActor: string
 shotEmptyDamage: int
+winScreen: string
+looseScreen: string

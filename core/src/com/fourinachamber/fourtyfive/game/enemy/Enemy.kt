@@ -59,7 +59,14 @@ class Enemy(
      * the current lives of this enemy
      */
     var currentLives: Int = lives
-        private set
+        private set(value) {
+            field = max(value, 0)
+            if (field == 0) gameScreenController.curScreen!!.afterMs(10) { //TODO: nooooo, not again
+                gameScreenController.executeTimelineLater(Timeline.timeline {
+                    action { gameScreenController.enemyDefeated(this@Enemy) }
+                })
+            }
+        }
 
     var currentCover: Int = 0
         set(value) {

@@ -63,6 +63,8 @@ import "config/game_config.onj" as gameConfig
     endTurnButtonName: "end_turn_button"
     reservesLabelName: "reserves_label"
     destroyCardInstructionActor: "destroy_card_instruction_label"
+    winScreen: "screens/win_screen.onj"
+    looseScreen: "screens/loose_screen.onj"
     cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
     cardsToDraw: !gameConfig.cardDrawConfig.roundStart
     maxCards: !gameConfig.cardDrawConfig.maxCards
@@ -146,7 +148,7 @@ assets: {
             args: {
                 color: color("ff0000")
                 speed: 0.0
-                movement: 0.4
+                movement: 1.0
                 minMovement: 0.3
             }
         }
