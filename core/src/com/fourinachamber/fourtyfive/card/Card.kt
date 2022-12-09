@@ -180,21 +180,14 @@ class Card(
     }
 
     private fun updateText() {
-        val builder = """
-            
-            $shortDescription
-            
-            cost: $cost
-            ${
-                if (type == Type.BULLET) {
-                    "damage: $curDamage/$baseDamage"
-                } else {
-                    "cover value: $coverValue"
-                }
-            }
-            
-            
-        """.trimIndent().toBuilder()
+        val builder = StringBuilder()
+        builder
+            .append("\n$shortDescription\n\ncost: $cost\n")
+
+        if (type == Type.BULLET) builder.append("damage: $curDamage/$baseDamage")
+        else builder.append("cover value: $coverValue")
+
+        builder.append("\n\n")
 
         for (modifier in modifiers) if (modifier.description != null) {
             builder.append(modifier.description.string).append("\n")

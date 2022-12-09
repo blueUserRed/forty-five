@@ -1,7 +1,7 @@
 
 import "imports/colors.onj" as color
 
-bufferTime: 0.8
+bufferTime: 0.5
 
 shakeAnimation: {
     xShake: 1.0
@@ -15,6 +15,13 @@ enemyChargeAnimation: {
     xCharge: -7.0
     yCharge: 0.0
     duration: 0.5
+    interpolation: "swing"
+}
+
+enemyQuickChargeAnimation: {
+    xCharge: -7.0
+    yCharge: 0.0
+    duration: 0.3
     interpolation: "swing"
 }
 
@@ -58,9 +65,14 @@ destroyCardPostProcessor: {
     name: "vignette"
 }
 
+coverStackParticles: {
+    damaged: "dust"
+    destroyed: "dust_explosion"
+}
+
 stringTemplates:  {
-    playerLives: "LIVES: {curLives}/{baseLives}"
-    reserves: "RESERVES: {curReserves}/{baseReserves}"
+    playerLives: "{curLives}/{baseLives}"
+    reserves: "{curReserves}/{baseReserves}"
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!"
     buffDetailText: "{source} applied a {text} of {amount}!"
 }
