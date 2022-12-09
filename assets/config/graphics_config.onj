@@ -71,8 +71,8 @@ coverStackParticles: {
 }
 
 stringTemplates:  {
-    playerLives: "LIVES: {curLives}/{baseLives}"
-    reserves: "RESERVES: {curReserves}/{baseReserves}"
+    playerLives: "{curLives}/{baseLives}"
+    reserves: "{curReserves}/{baseReserves}"
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!"
     buffDetailText: "{source} applied a {text} of {amount}!"
 }
