@@ -28,7 +28,7 @@ import "config/game_config.onj" as gameConfig
     detailFontColor: !color.white
     detailBackgroundTexture: "card_detail_background"
     detailFontScale: 0.07
-    detailWidth: 25.0
+    detailWidth: 50.0
 }
 
 !controller = $GameScreenController {
