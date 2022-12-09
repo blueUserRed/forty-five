@@ -1,0 +1,51 @@
+import "imports/colors.onj" as color
+
+!worldWidth = 160.0
+!worldHeight = 90.0
+
+
+viewport: $FitViewport {
+    worldWidth: !worldWidth
+    worldHeight: !worldHeight
+    backgroundTexture: "background"
+}
+
+children: [
+    $Table {
+        rows: []
+    }
+]
+
+assets: {
+    textures: [
+        {
+            name: "background"
+            file: "textures/screens/loose_screen.png"
+        }
+    ]
+    fonts: [
+
+        $DistanceFieldFont {
+            name: "red_wing"
+            fontFile: "fonts/red_wing.fnt"
+            imageFile: "fonts/red_wing.png"
+        }
+
+    ]
+    textureAtlases: []
+    cursors: []
+    postProcessors: []
+    animations: []
+    colorTextures: []
+    particles: []
+}
+
+options: {
+    setFillParentOnRoot: true
+    defaultCursor: {
+        useSystemCursor: true
+        cursorName: "arrow"
+    }
+    postProcessor: null
+    controller: null
+}

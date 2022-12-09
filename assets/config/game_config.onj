@@ -9,8 +9,6 @@ import "imports/colors.onj" as color
             min: 5
             max: 10
             indicatorTextureScale: 0.03
-            coverStackDamagedParticles: "dust"
-            coverStackDestroyedParticles: "dust_explosion"
             indicatorTexture: "normal_bullet"
         }
 
@@ -37,7 +35,7 @@ enemyConfig: {
     enemies: [
         {
             name: "enemy"
-            lives: 1234
+            lives: 12
             brain: !defaultEnemyBrain
             texture: "enemy"
             coverIcon: "burning_icon"
@@ -62,9 +60,13 @@ cardDrawConfig: {
 }
 
 playerConfig: {
-    lives: 1234
+    lives: 12
 }
 
 reservesConfig: {
     roundStart: 3
+}
+
+damageConfig: {
+    shotEmptyDamage: 5
 }

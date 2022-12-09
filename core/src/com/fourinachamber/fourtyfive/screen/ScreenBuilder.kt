@@ -546,6 +546,10 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 //        image.width *= widgetOnj.get<Double>("scaleX").toFloat()
         image.scaleX = widgetOnj.get<Double>("scaleX").toFloat()
         image.scaleY = widgetOnj.get<Double>("scaleY").toFloat()
+        if (widgetOnj.getOr("scalingWorkaround", false)) {
+            image.reportDimensionsWithScaling = true
+            image.ignoreScalingWhenDrawing = true
+        }
     }
 
     private fun applySharedWidgetKeys(actor: Actor, widgetOnj: OnjNamedObject) = with(actor) {
