@@ -184,4 +184,75 @@ cards: [
         type: $Cover { }
     }
 
+    // duplicate bullets
+
+    {
+        name: "bullet"
+        title: "bullet"
+        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
+        traitEffects: []
+        cost: 1
+        baseDamage: 6,
+        coverValue: 0
+        effects: []
+        type: $Bullet { }
+    }
+    {
+        name: "bullet"
+        title: "bullet"
+        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
+        traitEffects: []
+        cost: 1
+        baseDamage: 6,
+        coverValue: 0
+        effects: []
+        type: $Bullet { }
+    }
+    {
+        name: "bullet"
+        title: "bullet"
+        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
+        traitEffects: []
+        cost: 1
+        baseDamage: 6,
+        coverValue: 0
+        effects: []
+        type: $Bullet { }
+    }
+    {
+        name: "bullet"
+        title: "bullet"
+        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
+        traitEffects: []
+        cost: 1
+        baseDamage: 6,
+        coverValue: 0
+        effects: []
+        type: $Bullet { }
+    }
+
+    {
+        name: "incendiaryBullet"
+        title: "incendiary Bullet"
+        description: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime" \n \nIf this Bullet shoots: The enemy gets the status burning for 3 revolver turns'
+        baseDamage: 7
+        coverValue: 0
+        traitEffects: []
+        effects: [ giveStatus("shot", burning(3, 0.5)) ]
+        cost: 1
+        type: $Bullet { }
+    }
+
+    {
+        name: "bigBullet"
+        title: "big Bullet"
+        description: "bullet but like... idk bigger"
+        baseDamage: 16
+        coverValue: 0
+        traitEffects: []
+        effects: []
+        cost: 2
+        type: $Bullet { }
+    }
+
 ]

@@ -27,7 +27,7 @@ assets: {
         }
         {
             name: "bullet"
-            file: "textures/cards/normal_bullet.png"
+            file: "textures/cards/bullet.png"
         }
 
         {
@@ -376,9 +376,17 @@ cards: [
         name: !cards_obj.defaultBullet.name
         elements: [
             ...!bulletSharedElements
+            $ImageElement {
+                textureName: !cards_obj.defaultBullet.name
+                ...!imageElementSharedKeys
+            }
             $TextElement {
-                text: !cards_obj.defaultBullet.title
-                ...!titleElementSharedKeys
+                ...!valueElementSharedKeys
+                text: <!cards_obj.defaultBullet.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards_obj.defaultBullet.cost#s>
             }
         ]
     }
