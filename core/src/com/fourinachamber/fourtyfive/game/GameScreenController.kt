@@ -144,7 +144,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             screenDataProvider.addTexture("${Card.cardTexturePrefix}${region.name}", region)
         }
 
-        for (texture in cardAtlas.textures) screenDataProvider.addDisposable(texture)
+//        for (texture in cardAtlas.textures) screenDataProvider.addDisposable(texture)
+        screenDataProvider.addDisposable(cardAtlas)
         cards = Card.getFrom(onj.get<OnjArray>("cards"), screenDataProvider.textures)
         bulletStack = cards.filter { it.type == Card.Type.BULLET }.shuffled().toMutableList()
         coverCardStack = cards.filter { it.type == Card.Type.COVER }.shuffled().toMutableList()

@@ -10,9 +10,51 @@ viewport: $FitViewport {
     backgroundTexture: "background"
 }
 
+
+!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+    screenPath: "screens/title_screen.onj"
+}
+
+!hoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true
+    cursorName: "hand"
+    disabled: null
+}
+
 children: [
     $Table {
-        rows: []
+        rows: [
+
+            {
+                cells: [
+                    {
+                        expandY: true
+                        element: $Label {
+                            text: ""
+                            font: "red_wing"
+                            color: !color.black
+                            fontScale: 0.2
+                        }
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        element: $Label {
+                            align: "center"
+                            text: "Back to the main screen"
+                            font: "red_wing"
+                            color: !color.black
+                            fontScale: 0.2
+                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
+                        }
+                    }
+                ]
+            }
+
+        ]
     }
 ]
 

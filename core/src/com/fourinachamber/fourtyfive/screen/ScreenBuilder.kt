@@ -794,7 +794,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         override fun dispose() {
             stage.dispose()
-            postProcessor?.dispose()
             toDispose.forEach(Disposable::dispose)
             additionalDisposables.forEach(Disposable::dispose)
         }
