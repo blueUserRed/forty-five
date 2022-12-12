@@ -7,6 +7,7 @@ import onj.*
 object SaveState {
 
     const val saveFilePath: String = "saves/savefile.onj"
+    const val defaultSavefilePath: String = "saves/default_savefile.onj"
 
 
     private var _additionalCards: MutableMap<String, Int> = mutableMapOf()
@@ -38,12 +39,34 @@ object SaveState {
     }
 
     fun read() {
-        val obj = OnjParser.parseFile(Gdx.files.internal(saveFilePath).file())
-        savefileSchema.assertMatches(obj)
+        val file = Gdx.files.internal(saveFilePath).file()
+        if (!file.exists()) copyDefaultFile()
+
+        var obj = try {
+            OnjParser.parseFile(file)
+        } catch (e: OnjParserException) {
+            println("Savefile invalid:${e.message}")
+            copyDefaultFile()
+            OnjParser.parseFile(file)
+        }
+
+        val result = savefileSchema.check(obj)
+        if (result != null) {
+            println("Savefile invalid: $result")
+            copyDefaultFile()
+            obj = OnjParser.parseFile(Gdx.files.local(saveFilePath).file())
+            savefileSchema.assertMatches(obj)
+        }
+
         obj as OnjObject
 
         _additionalCards = readCardArray(obj.get<OnjArray>("additionalCards")).toMutableMap()
         _cardsToDraw = readCardArray(obj.get<OnjArray>("cardsToDraw")).toMutableMap()
+    }
+
+    fun copyDefaultFile() {
+        println("using default save...")
+        Gdx.files.local(defaultSavefilePath).copyTo(Gdx.files.local(saveFilePath))
     }
 
     private fun readCardArray(arr: OnjArray): Map<String, Int> = arr
