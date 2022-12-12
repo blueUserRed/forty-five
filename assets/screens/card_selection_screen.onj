@@ -10,8 +10,8 @@ viewport: $FitViewport {
     backgroundTexture: "background"
 }
 
-!toCardSelectionScreenBehaviour = $OnClickChangeScreenBehaviour {
-    screenPath: "screens/card_selection_screen.onj"
+!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+    screenPath: "screens/title_screen.onj"
 }
 
 !hoverBehaviour = $MouseHoverBehaviour {
@@ -43,11 +43,11 @@ children: [
                     {
                         element: $Label {
                             align: "center"
-                            text: "Select a new Card!"
+                            text: "Back to the main screen"
                             font: "red_wing"
                             color: !color.black
                             fontScale: 0.2
-                            behaviours: [ !toCardSelectionScreenBehaviour, !hoverBehaviour ]
+                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
                         }
                     }
                 ]

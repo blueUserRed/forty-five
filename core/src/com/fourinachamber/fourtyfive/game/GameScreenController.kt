@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.card.CardPrototype
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
@@ -61,7 +62,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var playerLivesLabel: CustomLabel? = null
     var reservesLabel: CustomLabel? = null
 
-    private var cards: List<Card> = listOf()
+    private var cardPrototypes: MutableList<CardPrototype> = mutableListOf()
+    private val createdCards: MutableList<Card> = mutableListOf()
     private var bulletStack: MutableList<Card> = mutableListOf()
     private var coverCardStack: MutableList<Card> = mutableListOf()
     private var oneShotStack: MutableList<Card> = mutableListOf()
@@ -127,32 +129,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
 
-    private lateinit var defaultBulletCreator: () -> Card
-    private lateinit var defaultCoverCreator: () -> Card
+    private lateinit var defaultBullet: CardPrototype
+    private lateinit var defaultCover: CardPrototype
 
     private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
 
     override fun init(screenDataProvider: ScreenDataProvider) {
         curScreen = screenDataProvider
-        val onj = OnjParser.parseFile(cardConfigFile)
-        cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
 
-        val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
-
-        for (region in cardAtlas.regions) {
-            screenDataProvider.addTexture("${Card.cardTexturePrefix}${region.name}", region)
-        }
-
-//        for (texture in cardAtlas.textures) screenDataProvider.addDisposable(texture)
-        screenDataProvider.addDisposable(cardAtlas)
-        cards = Card.getFrom(onj.get<OnjArray>("cards"), screenDataProvider.textures)
-        bulletStack = cards.filter { it.type == Card.Type.BULLET }.shuffled().toMutableList()
-        coverCardStack = cards.filter { it.type == Card.Type.COVER }.shuffled().toMutableList()
-        oneShotStack = cards.filter { it.type == Card.Type.ONE_SHOT }.shuffled().toMutableList()
-        initDefaultCards(onj)
-
-        for (card in cards) doDragAndDropFor(card)
+        initCards()
 
         enemies = Enemy.getFrom(enemiesOnj, this)
 
@@ -180,7 +165,57 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
-    private fun doDragAndDropFor(card: Card) {
+    private fun initCards() {
+        val screenDataProvider = curScreen!!
+
+        val onj = OnjParser.parseFile(cardConfigFile)
+        cardsFileSchema.assertMatches(onj)
+        onj as OnjObject
+
+        val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
+
+        for (region in cardAtlas.regions) {
+            screenDataProvider.addTexture("${Card.cardTexturePrefix}${region.name}", region)
+        }
+
+        screenDataProvider.addDisposable(cardAtlas)
+
+        cardPrototypes = Card
+            .getFrom(onj.get<OnjArray>("cards"), screenDataProvider.textures, ::initCard)
+            .toMutableList()
+
+        val startDeck: MutableList<Card> = mutableListOf()
+        onj.get<OnjArray>("startDeck").value.forEach { entry ->
+
+            entry as OnjObject
+            val entryName = entry.get<String>("name")
+
+            val card = cardPrototypes.firstOrNull { it.name == entryName }
+                ?: throw RuntimeException("unknown card name is start deck: $entryName")
+
+            repeat(entry.get<Long>("amount").toInt()) {
+                startDeck.add(card.create())
+            }
+        }
+        bulletStack = startDeck.filter { it.type == Card.Type.BULLET }.shuffled().toMutableList()
+        coverCardStack = startDeck.filter { it.type == Card.Type.COVER }.shuffled().toMutableList()
+
+        val defaultBulletName = onj.get<String>("defaultBullet")
+        val defaultCoverName = onj.get<String>("defaultCover")
+
+        defaultBullet = cardPrototypes
+            .filter { it.type == Card.Type.BULLET }
+            .firstOrNull { it.name == defaultBulletName }
+            ?: throw RuntimeException("unknown default bullet: $defaultBulletName")
+
+        defaultCover = cardPrototypes
+            .filter { it.type == Card.Type.COVER }
+            .firstOrNull { it.name == defaultCoverName }
+            ?: throw RuntimeException("unknown default cover: $defaultBulletName")
+
+    }
+
+    private fun initCard(card: Card) {
         val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
             cardDragAndDropBehaviour.name,
             cardDragAndDrop,
@@ -190,6 +225,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         )
         if (behaviour is GameScreenControllerDragAndDrop) behaviour.gameScreenController = this
         cardDragAndDrop.addSource(behaviour)
+        createdCards.add(card)
     }
 
     private fun changePhase(next: Gamephase) {
@@ -223,64 +259,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (currentPhase != Gamephase.FREE) return
         cardsToDrawDuringSpecialDraw = amount
         changePhase(Gamephase.SPECIAL_DRAW)
-    }
-
-    private fun initDefaultCards(onj: OnjObject) {
-
-        val bulletOnj = onj.get<OnjObject>("defaultBullet")
-        val bulletName = bulletOnj.get<String>("name")
-        val bulletTitle = bulletOnj.get<String>("title")
-        val bulletDescription = bulletOnj.get<String>("description")
-        val bulletDamage = bulletOnj.get<Long>("baseDamage").toInt()
-        val bulletCost = bulletOnj.get<Long>("cost").toInt()
-
-        defaultBulletCreator = {
-            val card = Card(
-                bulletName,
-                bulletTitle,
-                curScreen!!.textures["${Card.cardTexturePrefix}$bulletName"] ?:
-                    throw RuntimeException("no texture found for default card: $bulletName"),
-                bulletDescription,
-                Card.Type.BULLET,
-                bulletDamage,
-                0,
-                bulletCost,
-                bulletOnj.get<OnjArray>("effects")
-                    .value
-                    .map { (it as OnjExtensions.OnjEffect).value }
-            )
-            for (effect in card.effects) effect.card = card
-            doDragAndDropFor(card)
-            Card.applyTraitEffects(card, bulletOnj)
-            card
-        }
-
-        val coverOnj = onj.get<OnjObject>("defaultCover")
-        val coverName = coverOnj.get<String>("name")
-        val coverTitle = coverOnj.get<String>("title")
-        val coverDescription = coverOnj.get<String>("description")
-        val coverValue = coverOnj.get<Long>("coverValue").toInt()
-        val coverCost = coverOnj.get<Long>("cost").toInt()
-
-        defaultCoverCreator = {
-            val card = Card(
-                coverName,
-                coverTitle,
-                curScreen!!.textures["${Card.cardTexturePrefix}$coverName"] ?:
-                throw RuntimeException("no texture found for default card: $coverName"),
-                coverDescription,
-                Card.Type.COVER,
-                0,
-                coverValue,
-                coverCost,
-                coverOnj.get<OnjArray>("effects")
-                    .value
-                    .map { (it as OnjExtensions.OnjEffect).value }
-            )
-            for (effect in card.effects) effect.card = card
-            doDragAndDropFor(card)
-            card
-        }
     }
 
     private fun initButtons() {
@@ -447,7 +425,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun checkCardModifierValidity() {
-        for (card in cards) if (card.inGame) card.checkModifierValidity()
+        for (card in createdCards) if (card.inGame) card.checkModifierValidity()
     }
 
     fun endTurn() {
@@ -475,7 +453,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun hasDestroyableCard(): Boolean {
-        for (card in cards) if (card.inGame && card.type == Card.Type.BULLET) {
+        for (card in createdCards) if (card.inGame && card.type == Card.Type.BULLET) {
             return true
         }
         return false
@@ -487,7 +465,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private fun checkEffectsActiveCards(trigger: Trigger) {
         val timeline = Timeline.timeline {
-            for (card in cards) if (card.inGame) {
+            for (card in createdCards) if (card.inGame) {
                 val timeline = card.checkEffects(trigger, this@GameScreenController)
                 if (timeline != null) include(timeline)
             }
@@ -557,7 +535,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawBullet() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        cardHand!!.addCard(bulletStack.removeFirstOrNull() ?: defaultBulletCreator())
+        cardHand!!.addCard(bulletStack.removeFirstOrNull() ?: defaultBullet.create())
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
         if (cardsToDraw <= 0) onAllCardsDrawn()
@@ -569,7 +547,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawCover() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        cardHand!!.addCard(coverCardStack.removeFirstOrNull() ?: defaultCoverCreator())
+        cardHand!!.addCard(coverCardStack.removeFirstOrNull() ?: defaultCover.create())
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
         if (cardsToDraw <= 0) onAllCardsDrawn()
@@ -671,7 +649,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 previousPostProcessor = curScreen!!.postProcessor
                 curScreen!!.postProcessor = postProcessor
 
-                for (card in cards) if (card.inGame && card.type == Card.Type.BULLET) {
+                for (card in createdCards) if (card.inGame && card.type == Card.Type.BULLET) {
                     card.enterDestroyMode(this)
                 }
             }
@@ -679,7 +657,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
                 hideDestroyCardInstructionActor()
                 curScreen!!.postProcessor = previousPostProcessor
-                for (card in cards) if (card.inGame && card.type == Card.Type.BULLET) {
+                for (card in createdCards) if (card.inGame && card.type == Card.Type.BULLET) {
                     card.leaveDestroyMode()
                 }
             }

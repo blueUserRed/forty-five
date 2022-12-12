@@ -312,20 +312,28 @@ cards: [
             }
         ]
     }
-    
-    // Cover --------------------------
-    
+
     {
         name: !cards.9.name
         elements: [
-            ...!coverSharedElements
+            ...!bulletSharedElements
+            $ImageElement {
+                textureName: !cards.9.name
+                ...!imageElementSharedKeys
+            }
             $TextElement {
-                text: !cards.9.title
-                ...!titleElementSharedKeys
+                ...!valueElementSharedKeys
+                text: <!cards.9.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.9.cost#s>
             }
         ]
     }
-
+    
+    // Cover --------------------------
+    
     {
         name: !cards.10.name
         elements: [
@@ -370,33 +378,12 @@ cards: [
         ]
     }
 
-    // default cards
-
     {
-        name: !cards_obj.defaultBullet.name
-        elements: [
-            ...!bulletSharedElements
-            $ImageElement {
-                textureName: !cards_obj.defaultBullet.name
-                ...!imageElementSharedKeys
-            }
-            $TextElement {
-                ...!valueElementSharedKeys
-                text: <!cards_obj.defaultBullet.baseDamage#s>
-            }
-            $TextElement {
-                ...!costElementSharedKeys
-                text: <!cards_obj.defaultBullet.cost#s>
-            }
-        ]
-    }
-
-    {
-        name: !cards_obj.defaultCover.name
+        name: !cards.14.name
         elements: [
             ...!coverSharedElements
             $TextElement {
-                text: !cards_obj.defaultCover.title
+                text: !cards.14.title
                 ...!titleElementSharedKeys
             }
         ]

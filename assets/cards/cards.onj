@@ -1,23 +1,4 @@
 
-defaultBullet: {
-    name: "bullet"
-    title: "bullet"
-    description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
-    traitEffects: []
-    cost: 1
-    baseDamage: 6,
-    effects: []
-}
-
-defaultCover: {
-    name: "defaultCrate"
-    title: "defaultCrate"
-    description: "ITS THE DEFAULT COVER! YOU RAN OUT OF COVER CARDS!"
-    cost: 1
-    coverValue: 5
-    effects: []
-}
-
 cards: [
 
     // Bullets ----------------------------------
@@ -121,10 +102,21 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
+    { // 9
+        name: "bullet"
+        title: "bullet"
+        description: ""
+        baseDamage: 6
+        coverValue: 0
+        traitEffects: []
+        effects: []
+        cost: 1
+        type: $Bullet { }
+    }
 
     // Cover ----------------------------------
 
-    { // 9
+    { // 10
         name: "crate"
         title: "Crate"
         description: "It's a Cover!"
@@ -136,7 +128,7 @@ cards: [
         type: $Cover { }
     }
 
-    { // 10
+    { // 11
         name: "bigCrate"
         title: "big Crate"
         description: "It's a Cover!"
@@ -148,7 +140,7 @@ cards: [
         type: $Cover { }
     }
 
-    { // 11
+    { // 12
         name: "casket"
         title: "casket"
         description: "It's a Cover!"
@@ -160,7 +152,7 @@ cards: [
         type: $Cover { }
     }
 
-    { // 12
+    { // 13
         name: "jewelryBox"
         title: "jewelry Box"
         description: "It's a Cover!"
@@ -172,7 +164,7 @@ cards: [
         type: $Cover { }
     }
 
-    { // 13
+    { // 14
         name: "treasureChest"
         title: "treasure Chest"
         description: "It's a Cover!"
@@ -184,75 +176,52 @@ cards: [
         type: $Cover { }
     }
 
-    // duplicate bullets
+]
+
+defaultBullet: "bullet"
+defaultCover: "crate"
+
+startDeck: [
 
     {
         name: "bullet"
-        title: "bullet"
-        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
-        traitEffects: []
-        cost: 1
-        baseDamage: 6,
-        coverValue: 0
-        effects: []
-        type: $Bullet { }
+        amount: 4
     }
-    {
-        name: "bullet"
-        title: "bullet"
-        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
-        traitEffects: []
-        cost: 1
-        baseDamage: 6,
-        coverValue: 0
-        effects: []
-        type: $Bullet { }
-    }
-    {
-        name: "bullet"
-        title: "bullet"
-        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
-        traitEffects: []
-        cost: 1
-        baseDamage: 6,
-        coverValue: 0
-        effects: []
-        type: $Bullet { }
-    }
-    {
-        name: "bullet"
-        title: "bullet"
-        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
-        traitEffects: []
-        cost: 1
-        baseDamage: 6,
-        coverValue: 0
-        effects: []
-        type: $Bullet { }
-    }
-
     {
         name: "incendiaryBullet"
-        title: "incendiary Bullet"
-        description: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime" \n \nIf this Bullet shoots: The enemy gets the status burning for 3 revolver turns'
-        baseDamage: 7
-        coverValue: 0
-        traitEffects: []
-        effects: [ giveStatus("shot", burning(3, 0.5)) ]
-        cost: 1
-        type: $Bullet { }
+        amount: 2
     }
-
+    {
+        name: "workerBullet"
+        amount: 1
+    }
     {
         name: "bigBullet"
-        title: "big Bullet"
-        description: "bullet but like... idk bigger"
-        baseDamage: 16
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 2
-        type: $Bullet { }
+        amount: 2
+    }
+    {
+        name: "rottenBullet"
+        amount: 1
+    }
+    {
+        name: "diamondBullet"
+        amount: 1
+    }
+    {
+        name: "bewitchedBullet"
+        amount: 1
+    }
+    {
+        name: "explosiveBullet"
+        amount: 1
+    }
+    {
+        name: "leadersBullet"
+        amount: 1
+    }
+    {
+        name: "silverBullet"
+        amount: 1
     }
 
 ]
