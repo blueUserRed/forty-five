@@ -5,10 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.CardGenerator
-import com.fourinachamber.fourtyfive.game.Effect
-import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.OnjExtensions
-import com.fourinachamber.fourtyfive.game.StatusEffect
+import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
@@ -44,6 +41,7 @@ object FourtyFive : Game() {
 
     private fun init() {
         OnjExtensions.init()
+        SaveState.read()
 
         val graphicsConfig =
             OnjParser.parseFile(Gdx.files.internal("config/graphics_config.onj").file())

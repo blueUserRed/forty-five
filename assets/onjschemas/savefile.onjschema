@@ -1,0 +1,7 @@
+
+!cardDec = {
+    name: string
+    amount: int
+}
+
+additionalCards: !cardDec[*]
