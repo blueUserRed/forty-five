@@ -5,3 +5,4 @@
 }
 
 additionalCards: !cardDec[*]
+cardsToDraw: !cardDec[*]

@@ -1,3 +1,16 @@
-
 additionalCards: [
+    {
+        name: 'bigBullet'
+        amount: 2
+    }
+    {
+        name: 'workerBullet'
+        amount: 2
+    }
+]
+cardsToDraw: [
+    {
+        name: 'diamondBullet'
+        amount: 2
+    }
 ]
