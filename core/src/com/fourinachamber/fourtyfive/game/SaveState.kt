@@ -39,7 +39,7 @@ object SaveState {
     }
 
     fun read() {
-        val file = Gdx.files.internal(saveFilePath).file()
+        val file = Gdx.files.local(saveFilePath).file()
         if (!file.exists()) copyDefaultFile()
 
         var obj = try {
