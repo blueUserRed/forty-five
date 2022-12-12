@@ -105,7 +105,7 @@ cards: [
     { // 9
         name: "bullet"
         title: "bullet"
-        description: ""
+        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
         baseDamage: 6
         coverValue: 0
         traitEffects: []
@@ -215,10 +215,10 @@ startDeck: [
 //        name: "explosiveBullet"
 //        amount: 1
 //    }
-//    {
-//        name: "leadersBullet"
-//        amount: 1
-//    }
+    {
+        name: "leadersBullet"
+        amount: 1
+    }
     {
         name: "silverBullet"
         amount: 1

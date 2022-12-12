@@ -297,6 +297,17 @@ $ScreenController [
         ...!gameScreenControllerKeys
     }
 
+    $CardSelectionScreenController {
+        cardSelectionActorName: string
+        cardConfigFile: string
+        cardAtlasFile: string
+        cardsToSelect: int
+        cardScale: float
+        cardBehaviour: $Behaviour
+        nextScreen: string
+        ...!detailTextSharedKeys
+    }
+
 ]
 
 viewport: $Viewport
