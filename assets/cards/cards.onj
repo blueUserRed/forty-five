@@ -183,42 +183,42 @@ defaultCover: "crate"
 
 startDeck: [
 
-    {
-        name: "bullet"
-        amount: 4
-    }
-    {
-        name: "incendiaryBullet"
-        amount: 2
-    }
-    {
-        name: "workerBullet"
-        amount: 1
-    }
-    {
-        name: "bigBullet"
-        amount: 2
-    }
-    {
-        name: "rottenBullet"
-        amount: 1
-    }
-    {
-        name: "diamondBullet"
-        amount: 1
-    }
-    {
-        name: "bewitchedBullet"
-        amount: 1
-    }
-    {
-        name: "explosiveBullet"
-        amount: 1
-    }
-    {
-        name: "leadersBullet"
-        amount: 1
-    }
+//    {
+//        name: "bullet"
+//        amount: 4
+//    }
+//    {
+//        name: "incendiaryBullet"
+//        amount: 2
+//    }
+//    {
+//        name: "workerBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "bigBullet"
+//        amount: 2
+//    }
+//    {
+//        name: "rottenBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "diamondBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "bewitchedBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "explosiveBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "leadersBullet"
+//        amount: 1
+//    }
     {
         name: "silverBullet"
         amount: 1

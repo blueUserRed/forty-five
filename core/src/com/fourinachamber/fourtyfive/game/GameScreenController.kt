@@ -197,8 +197,24 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 startDeck.add(card.create())
             }
         }
-        bulletStack = startDeck.filter { it.type == Card.Type.BULLET }.shuffled().toMutableList()
-        coverCardStack = startDeck.filter { it.type == Card.Type.COVER }.shuffled().toMutableList()
+
+        bulletStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
+        coverCardStack = startDeck.filter { it.type == Card.Type.COVER }.toMutableList()
+
+        SaveState.additionalCards.forEach { entry ->
+            val (cardName, amount) = entry
+
+            val card = cardPrototypes.firstOrNull { it.name == cardName }
+                ?: throw RuntimeException("unknown card name in saveState: $cardName")
+
+            repeat(amount) {
+                if (card.type == Card.Type.BULLET) bulletStack.add(card.create())
+                else coverCardStack.add(card.create())
+            }
+        }
+
+        bulletStack.shuffle()
+        coverCardStack.shuffle()
 
         val defaultBulletName = onj.get<String>("defaultBullet")
         val defaultCoverName = onj.get<String>("defaultCover")
