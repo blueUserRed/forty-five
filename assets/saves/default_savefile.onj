@@ -1,0 +1,8 @@
+additionalCards: [
+]
+cardsToDraw: [
+    {
+        name: 'diamondBullet'
+        amount: 2
+    }
+]

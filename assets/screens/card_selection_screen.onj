@@ -43,16 +43,16 @@ children: [
 
             {
                 cells: [
-//                    {
-//                        element: $Label {
-//                            align: "center"
-//                            text: "Back to the main screen"
-//                            font: "red_wing"
-//                            color: !color.black
-//                            fontScale: 0.2
-//                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
-//                        }
-//                    }
+                    {
+                        element: $Label {
+                            align: "center"
+                            text: "Back to the main screen"
+                            font: "red_wing"
+                            color: !color.black
+                            fontScale: 0.2
+                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
+                        }
+                    }
                 ]
             }
 

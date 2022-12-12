@@ -19,6 +19,7 @@ import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onClick
 import onj.*
+import java.lang.Integer.min
 import kotlin.properties.Delegates
 
 class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenController() {
@@ -108,8 +109,8 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             repeat(amount) { cards.add(card) }
         }
         cards.shuffle()
-        //TODO: make sure cards is not empty
-        repeat(cardsToSelect) {
+
+        repeat(min(cardsToSelect, cards.size)) {
             val cardProto = cards.first()
             cards.removeFirst()
             val card = cardProto.create()
