@@ -82,7 +82,7 @@ viewport: $FitViewport {
                 fontScale: 0.5
                 behaviours: [
                     $OnClickChangeScreenBehaviour {
-                        screenPath: "./screens/game_screen.onj"
+                        screenPath: "./screens/game_screen_v2.onj"
                     }
                 ]
             }

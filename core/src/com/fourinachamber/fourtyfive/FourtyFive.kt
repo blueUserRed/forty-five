@@ -36,10 +36,12 @@ object FourtyFive : Game() {
 
     override fun create() {
         init()
-        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-        cardGenerator.prepare()
-        cardGenerator.generateCards()
-        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen_v2.onj")).build()
+//        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+//        cardGenerator.prepare()
+//        cardGenerator.generateCards()
+//        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/game_screen_v2.onj")).build()
+        menuScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/title_screen.onj")).build()
+
 
         curScreen = menuScreen
     }
