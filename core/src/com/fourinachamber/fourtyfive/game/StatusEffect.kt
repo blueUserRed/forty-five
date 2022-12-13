@@ -10,7 +10,7 @@ import onj.OnjObject
 import kotlin.math.floor
 import kotlin.properties.Delegates
 
-abstract class StatusEffect(
+abstract class      StatusEffect(
     private val iconTextureName: String,
     _turns: Int,
     protected val target: StatusEffectTarget,
