@@ -53,7 +53,7 @@ assets: {
 
         {
             name: "workerBullet"
-            file: "textures/cards/incendiaryBullet.png"
+            file: "textures/cards/workerBullet.png"
         }
         {
             name: "bigBullet"
