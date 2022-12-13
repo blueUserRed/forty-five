@@ -13,7 +13,7 @@ import "imports/colors.onj" as color
         }
 
         $AddCoverEnemyAction {
-            weight: 1
+            weight: 2
             min: 1
             max: 10
             indicatorTextureScale: 0.008
@@ -21,8 +21,8 @@ import "imports/colors.onj" as color
         }
 
         $DoNothingEnemyAction {
-            weight: 100
-            insults: ["Test insult", "another Test"]
+            weight: 1
+            insults: ["If all your brains were dynamite, there wouldnt be enough to blow your nose", "You wouldnt even be able to teach a hen to cuck", "Your brain cavity wouldnt even make a drinkin cup for a canary", "I hope you play the cards better than you shoot", "Your hat got a knit, you son of a bitch"]
             indicatorTextureScale: 0.008
             indicatorTexture: "burning_icon"
         }
