@@ -12,8 +12,6 @@ $EnemyAction [
     $DamagePlayerEnemyAction {
         min: int
         max: int
-        coverStackDamagedParticles: string
-        coverStackDestroyedParticles: string
         ...!enemyActionSharedKeys
     }
 
@@ -80,3 +78,6 @@ maxCards: int
 playerLives: int
 reservesAtRoundBegin: int
 destroyCardInstructionActor: string
+shotEmptyDamage: int
+winScreen: string
+looseScreen: string

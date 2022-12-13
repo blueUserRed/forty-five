@@ -12,13 +12,20 @@ import kotlin.properties.Delegates
 
 abstract class StatusEffect(
     private val iconTextureName: String,
-    val turns: Int,
+    _turns: Int,
     protected val target: StatusEffectTarget,
     private val iconScale: Float
 ) {
 
-    var remainingTurns = turns
-        private set
+    var turns: Int = _turns
+        protected set
+
+    private lateinit var gameScreenController: GameScreenController
+
+    val remainingTurns: Int
+        get() = (startTurn + turns) - gameScreenController.turnCounter
+
+    private var startTurn: Int = 0
 
     lateinit var icon: CustomImageActor
         private set
@@ -36,13 +43,20 @@ abstract class StatusEffect(
         isIconInitialised = true
     }
 
-    fun onRevolverTurn() {
-        remainingTurns--
+    open fun onRevolverTurn(gameScreenController: GameScreenController) { }
+
+    open fun start(gameScreenController: GameScreenController) {
+        this.gameScreenController = gameScreenController
+        startTurn = gameScreenController.turnCounter
     }
 
-    fun isStillValid(): Boolean = remainingTurns > 0
+    open fun isStillValid(): Boolean = remainingTurns > 0
 
     abstract fun execute(gameScreenController: GameScreenController): Timeline?
+
+    abstract fun canStackWith(effect: StatusEffect): Boolean
+
+    abstract fun stack(effect: StatusEffect)
 
     open fun executeAfterDamage(gameScreenController: GameScreenController, damage: Int): Timeline? = null
 
@@ -90,6 +104,15 @@ abstract class StatusEffect(
             }
 
         }
+
+        override fun canStackWith(effect: StatusEffect): Boolean {
+            return effect is Poison && effect.damage == damage
+        }
+
+        override fun stack(effect: StatusEffect) {
+            effect as Poison
+            turns += effect.turns
+        }
     }
 
     class Burning(
@@ -133,15 +156,25 @@ abstract class StatusEffect(
                 icon.removeAction(shakeActorAction)
                 shakeActorAction.reset()
                 targetLivesActor.addAction(shakeActorAction)
-                gameScreenController.playGameAnimation(textAnimation)
                 target.damage(gameScreenController, additionalDamage)
+                gameScreenController.playGameAnimation(textAnimation)
             }
+            include(target.damage(gameScreenController, additionalDamage))
             delayUntil { shakeActorAction.isComplete }
             action {
                 targetLivesActor.removeAction(shakeActorAction)
                 shakeActorAction.reset()
             }
 
+        }
+
+        override fun canStackWith(effect: StatusEffect): Boolean {
+            return effect is Burning && effect.percent == percent
+        }
+
+        override fun stack(effect: StatusEffect) {
+            effect as Burning
+            turns += effect.turns
         }
 
     }
@@ -206,8 +239,10 @@ abstract class StatusEffect(
             override fun getLivesActor(gameScreenController: GameScreenController): Actor {
                 return gameScreenController.playerLivesLabel!!
             }
-            override fun damage(gameScreenController: GameScreenController, damage: Int) {
-                gameScreenController.damagePlayer(damage)
+            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
+                return Timeline.timeline { //TODO: ??????????????
+                    action { gameScreenController.damagePlayer(damage) }
+                }
             }
         },
 
@@ -216,13 +251,13 @@ abstract class StatusEffect(
                 return gameScreenController.enemyArea!!.enemies[0].actor.livesLabel
             }
 
-            override fun damage(gameScreenController: GameScreenController, damage: Int) {
-                return gameScreenController.enemyArea!!.enemies[0].damage(damage)
+            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
+                return gameScreenController.enemyArea!!.enemies[0].damage(damage, gameScreenController)
             }
         }
         ;
         abstract fun getLivesActor(gameScreenController: GameScreenController): Actor
-        abstract fun damage(gameScreenController: GameScreenController, damage: Int)
+        abstract fun damage(gameScreenController: GameScreenController, damage: Int): Timeline
     }
 
 }

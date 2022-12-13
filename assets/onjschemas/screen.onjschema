@@ -85,6 +85,7 @@ $Widget [
         scaleX: float
         scaleY: float
         reportDimensionsWithScaling?: boolean
+        scalingWorkaround?: boolean
         ...!widgetSharedKeys
     }
 
@@ -209,7 +210,7 @@ $Widget [
 
 ]
 
-    $Behaviour [
+$Behaviour [
 
     $MouseHoverBehaviour {
         useSystemCursor: boolean
@@ -230,6 +231,15 @@ $Widget [
         baseY: float
         targetX: float
         targetY: float
+        enterInterpolation: string?
+        exitInterpolation: string?
+    }
+
+    $OnHoverChangeFontSizeBehaviour {
+        enterDuration: float
+        exitDuration: float
+        targetFontScale: float
+        baseFontScale: float
         enterInterpolation: string?
         exitInterpolation: string?
     }
@@ -285,6 +295,12 @@ $ScreenController [
 
     $GameScreenController {
         ...!gameScreenControllerKeys
+    }
+
+    $IntroScreenController {
+        cardAtlasFile: string
+        appearActor: string
+        nextScreen: string
     }
 
 ]
