@@ -6,11 +6,9 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.fourinachamber.fourtyfive.game.CoverStack
-import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.StatusEffect
-import com.fourinachamber.fourtyfive.game.TextAnimation
+import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.OnjArray
@@ -185,6 +183,17 @@ class Enemy(
         )
 
         val screenDataProvider = gameScreenController.curScreen!!
+        val overlayActor = CustomImageActor(screenDataProvider.textures["hit_overlay"]!!)
+        val viewport = screenDataProvider.stage.viewport
+
+        //TODO: put these magic numbers in an onj file somewhere
+        val overlayAnim = FadeInAndOutAnimation(
+            0f, 0f,
+            overlayActor,
+            screenDataProvider,
+            1500, 0, 500,
+            Vector2(viewport.worldWidth, viewport.worldHeight)
+        )
 
         var activeStack: CoverStack? = null
         var remaining = 0
@@ -215,6 +224,13 @@ class Enemy(
                 getStackParticlesTimeline(activeStack!!, screenDataProvider, activeStack!!.currentHealth == 0)
             },
             { activeStack != null }
+        )
+
+        includeLater(
+            { Timeline.timeline {
+                action { gameScreenController.playGameAnimation(overlayAnim) }
+            } },
+            { remaining != 0 }
         )
 
         delay(bufferTime)
