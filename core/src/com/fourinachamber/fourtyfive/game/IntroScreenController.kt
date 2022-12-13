@@ -53,7 +53,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             action { startTime = TimeUtils.millis() }
             delayUntil {
                 val timeSinceStart = TimeUtils.timeSinceMillis(startTime)
-                val amount = (Math.random() * 0.1 * (timeSinceStart / 800.0).pow(3)).toInt().coerceAtLeast(1)
+                val amount = (Math.random() * 0.08 * (timeSinceStart / 800.0).pow(3)).toInt().coerceAtLeast(1)
                 repeat(amount) { spawnRandomSprite() }
                 timeSinceStart > 4500
             }
