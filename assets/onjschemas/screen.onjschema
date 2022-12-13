@@ -297,6 +297,12 @@ $ScreenController [
         ...!gameScreenControllerKeys
     }
 
+    $IntroScreenController {
+        cardAtlasFile: string
+        appearActor: string
+        nextScreen: string
+    }
+
 ]
 
 viewport: $Viewport
