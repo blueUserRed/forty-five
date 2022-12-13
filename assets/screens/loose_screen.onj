@@ -1,0 +1,93 @@
+import "imports/colors.onj" as color
+
+!worldWidth = 160.0
+!worldHeight = 90.0
+
+
+viewport: $FitViewport {
+    worldWidth: !worldWidth
+    worldHeight: !worldHeight
+    backgroundTexture: "background"
+}
+
+
+!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+    screenPath: "screens/title_screen.onj"
+}
+
+!hoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true
+    cursorName: "hand"
+    disabled: null
+}
+
+children: [
+    $Table {
+        rows: [
+
+            {
+                cells: [
+                    {
+                        expandY: true
+                        element: $Label {
+                            text: ""
+                            font: "red_wing"
+                            color: !color.black
+                            fontScale: 0.2
+                        }
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        element: $Label {
+                            align: "center"
+                            text: "Back to the main screen"
+                            font: "red_wing"
+                            color: !color.black
+                            fontScale: 0.2
+                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
+                        }
+                    }
+                ]
+            }
+
+        ]
+    }
+]
+
+assets: {
+    textures: [
+        {
+            name: "background"
+            file: "textures/screens/loose_screen.png"
+        }
+    ]
+    fonts: [
+
+        $DistanceFieldFont {
+            name: "red_wing"
+            fontFile: "fonts/red_wing.fnt"
+            imageFile: "fonts/red_wing.png"
+        }
+
+    ]
+    textureAtlases: []
+    cursors: []
+    postProcessors: []
+    animations: []
+    colorTextures: []
+    particles: []
+}
+
+options: {
+    setFillParentOnRoot: true
+    defaultCursor: {
+        useSystemCursor: true
+        cursorName: "arrow"
+    }
+    postProcessor: null
+    controller: null
+}
