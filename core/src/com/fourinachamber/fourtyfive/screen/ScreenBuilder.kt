@@ -33,10 +33,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
-import com.fourinachamber.fourtyfive.utils.Animation
-import com.fourinachamber.fourtyfive.utils.Either
-import com.fourinachamber.fourtyfive.utils.Utils
-import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
+import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.onEnter
 import onj.*
 import kotlin.system.measureTimeMillis
@@ -513,6 +510,18 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             ),
             widgetOnj.get<Double>("detailWidth").toFloat()
         )
+
+        "TemplateLabel" -> TemplateStringLabel(
+            TemplateString(widgetOnj.get<String>("template")),
+            Label.LabelStyle(
+                fontOrError(widgetOnj.get<String>("font")),
+                Color.valueOf(widgetOnj.get<String>("color"))
+            )
+        ).apply {
+            setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
+            widgetOnj.ifHas<String>("backgroundTexture") { background = TextureRegionDrawable(textureOrError(it)) }
+            widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
     }.apply {
