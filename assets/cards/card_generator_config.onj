@@ -53,19 +53,19 @@ assets: {
 
         {
             name: "workerBullet"
-            file: "textures/cards/incendiaryBullet.png"
+            file: "textures/cards/workerBullet.png"
         }
         {
             name: "bigBullet"
-            file: "textures/cards/incendiaryBullet.png"
+            file: "textures/cards/BIGBULLET.png"
         }
         {
             name: "diamondBullet"
-            file: "textures/cards/incendiaryBullet.png"
+            file: "textures/cards/diamondBullet.png"
         }
         {
             name: "silverBullet"
-            file: "textures/cards/incendiaryBullet.png"
+            file: "textures/cards/silverBullet.png"
         }
 
     ]
