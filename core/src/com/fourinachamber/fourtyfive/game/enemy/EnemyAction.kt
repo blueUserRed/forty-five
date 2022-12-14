@@ -104,11 +104,11 @@ abstract class EnemyAction {
             val (x, y) = enemy.actor.localToStageCoordinates(Vector2(0f, 0f))
 
             val fadeAnimation = FadeInAndOutTextAnimation(
-                x - enemy.actor.prefWidth / 2, y,
+                x, y,
                 insult,
                 fadeFontColor,
                 fadeFontScale,
-                gameScreenController.curScreen!!.fonts[resFontName]!!,
+                gameScreenController.curScreen!!.fonts[fadeFontName]!!,
                 screenDataProvider,
                 fadeDuration,
                 fadeIn,
@@ -116,6 +116,7 @@ abstract class EnemyAction {
             )
 
             action {
+                println(insult)
                 gameScreenController.playGameAnimation(fadeAnimation)
             }
             delayUntil { fadeAnimation.isFinished() }
