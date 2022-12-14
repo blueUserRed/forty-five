@@ -78,7 +78,7 @@ stringTemplates:  {
 }
 
 fadeInAndOutAnimation: {
-    fadeFontName: "vanilla_whale"
+    fadeFontName: "red_wing"
     fadeFontColor: !color.black
     fadeFontScale: 0.1
     fadeDuration: 6.0

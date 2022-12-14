@@ -134,8 +134,8 @@ class TextAnimation(
 }
 
 open class FadeInAndOutAnimation(
-    private val x: Float,
-    private val y: Float,
+    protected val x: Float,
+    protected val y: Float,
     val actor: Actor,
     private val screenDataProvider: ScreenDataProvider,
     private val duration: Int,
@@ -170,7 +170,6 @@ open class FadeInAndOutAnimation(
         val timeDiff: Float = (TimeUtils.millis() - startTime).toFloat()
         return if (timeDiff <= fadeIn) (timeDiff / fadeIn)
         else if (timeDiff >= duration - fadeOut) {
-            println((1 - (timeDiff - (duration - fadeOut)) / fadeOut))
             (1 - (timeDiff - (duration - fadeOut)) / fadeOut)
         }
         else 1f
@@ -211,6 +210,8 @@ class FadeInAndOutTextAnimation(
         super.start()
         label.setFontScale(fontScale)
         label.setAlignment(Align.center)
+        label.debug = true
+        label.setPosition(x, y + label.prefHeight / 2, Align.center)
     }
 
 }

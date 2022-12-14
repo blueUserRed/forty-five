@@ -607,7 +607,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 remainingCardsToDraw =
                     (if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw)
                         .coerceAtMost(maxCards - cardHand!!.cards.size)
-                if (remainingCardsToDraw == 0) return //TODO: display this in some way
+                if (remainingCardsToDraw == 0) { //TODO: display this in some way
+                    changePhase(ENEMY_REVEAL)
+                    return
+                }
                 showCardDrawActor()
             }
 
@@ -629,8 +632,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         SPECIAL_DRAW {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                remainingCardsToDraw =
+                    (cardsToDrawDuringSpecialDraw).coerceAtMost(maxCards - cardHand!!.cards.size)
+                if (remainingCardsToDraw == 0) { //TODO: display this in some way
+                    changePhase(FREE)
+                    return
+                }
                 showCardDrawActor()
-                this.remainingCardsToDraw = cardsToDrawDuringSpecialDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
