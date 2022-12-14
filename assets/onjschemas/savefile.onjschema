@@ -1,0 +1,13 @@
+
+!cardDec = {
+    name: string
+    amount: int
+}
+
+additionalCards: !cardDec[*]
+cardsToDraw: !cardDec[*]
+
+stats: {
+    usedReserves: int
+    enemiesDefeated: int
+}

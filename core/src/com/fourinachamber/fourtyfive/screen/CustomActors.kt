@@ -169,6 +169,17 @@ open class CustomLabel(
 
 }
 
+open class TemplateStringLabel(
+    private val templateString: TemplateString,
+    labelStyle: LabelStyle
+) : CustomLabel(templateString.string, labelStyle) {
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        setText(templateString.string) //TODO: updating this every frame is unnecessary
+        super.draw(batch, parentAlpha)
+    }
+}
+
 /**
  * custom Image that implements functionality for z-indices and masking
  */

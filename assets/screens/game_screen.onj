@@ -83,12 +83,6 @@ assets: {
     fonts: [
 
         $DistanceFieldFont {
-            name: "distance_field"
-            fontFile: "fonts/distanceField.fnt"
-            imageFile: "fonts/distanceField.png"
-        }
-
-        $DistanceFieldFont {
             name: "vanilla_whale"
             fontFile: "fonts/vanilla_whale.fnt"
             imageFile: "fonts/vanilla_whale.png"
@@ -288,19 +282,19 @@ options: {
     ]
 }
 
-!playerLivesLabel = $Label {
+!playerLivesLabel = $TemplateLabel {
     name: "player_lives_label"
     font: "vanilla_whale"
-    text: ""
+    template: "{game.curPlayerLives}/{game.basePlayerLives}"
     fontScale: 0.09
     color: !color.white
     backgroundTexture: "black"
 }
 
-!reservesLabel = $Label {
+!reservesLabel = $TemplateLabel {
     name: "reserves_label"
     font: "vanilla_whale"
-    text: ""
+    template: "{game.curReserves}/{game.baseReserves}"
     fontScale: 0.09
     color: !color.white
     backgroundTexture: "black"

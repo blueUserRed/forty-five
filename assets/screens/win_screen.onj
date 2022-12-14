@@ -3,6 +3,9 @@ import "imports/colors.onj" as color
 !worldWidth = 160.0
 !worldHeight = 90.0
 
+!cardScale = 0.03
+!cardPixelSize = 569
+!cardSize = <!cardPixelSize * !cardScale>
 
 viewport: $FitViewport {
     worldWidth: !worldWidth
@@ -22,14 +25,34 @@ viewport: $FitViewport {
 
 children: [
     $Table {
+        fillX: true
+        fillY: true
         rows: [
 
             {
                 cells: [
                     {
-                        expandY: true
+                        padTop: 13.0
+                        padLeft: 18.0
                         element: $Label {
-                            text: ""
+                            align: "center"
+                            text: '"We wont see him again"'
+                            font: "red_wing"
+                            color: !color.black
+                            fontScale: 0.14
+                        }
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        padTop: -8.0
+                        padLeft: 9.0
+                        element: $Label {
+                            align: "center"
+                            text: "Loot the body"
                             font: "red_wing"
                             color: !color.black
                             fontScale: 0.2
@@ -41,12 +64,14 @@ children: [
             {
                 cells: [
                     {
+                        padTop: 32.0
+                        padLeft: 61.0
                         element: $Label {
                             align: "center"
-                            text: "Back to the main screen"
+                            text: "continue without"
                             font: "red_wing"
                             color: !color.black
-                            fontScale: 0.2
+                            fontScale: 0.13
                             behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
                         }
                     }
@@ -55,13 +80,24 @@ children: [
 
         ]
     }
+
+
+     $HorizontalGroup {
+         debug: true
+         x: 110.0
+         y: 36.0
+         name: "cardSelectionActor"
+         align: "center"
+         spacing: 6.0
+         children: []
+    }
 ]
 
 assets: {
     textures: [
         {
             name: "background"
-            file: "textures/screens/win_screen.png"
+            file: "textures/screens/win_screen_background.png"
         }
     ]
     fonts: [
@@ -77,7 +113,12 @@ assets: {
     cursors: []
     postProcessors: []
     animations: []
-    colorTextures: []
+    colorTextures: [
+        {
+            name: "card_detail_background"
+            color: "04040488"
+        }
+    ]
     particles: []
 }
 
@@ -88,5 +129,34 @@ options: {
         cursorName: "arrow"
     }
     postProcessor: null
-    controller: null
+    controller: $CardSelectionScreenController {
+        cardSelectionActorName: "cardSelectionActor"
+        cardConfigFile: "cards/cards.onj"
+        cardAtlasFile: "cards/generated/cards.atlas"
+        nextScreen: "screens/title_screen.onj"
+        cardsToSelect: 3
+        cardScale: !cardScale
+        cardBehaviour: $OnHoverChangeSizeBehaviour {
+            enterDuration: 0.2
+            exitDuration: 0.2
+            baseX: !cardSize
+            baseY: !cardSize
+            targetX: <!cardSize * 1.13>
+            targetY: <!cardSize * 1.13>
+            enterInterpolation: null
+            exitInterpolation: null
+        }
+        detailFont: "red_wing"
+        detailFontColor: !color.white
+        detailBackgroundTexture: "card_detail_background"
+        detailFontScale: 0.07
+        detailWidth: 50.0
+        detailOffsetX: 0.0
+        detailOffsetY: 0.0
+        emptyFont: "red_wing"
+        emptyFontColor: !color.black
+        emptyFontScale: 0.14
+        emptyText: "no cards to select left!"
+    }
+//    controller: null
 }

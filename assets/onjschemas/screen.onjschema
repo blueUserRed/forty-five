@@ -80,6 +80,16 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+    $TemplateLabel {
+        template: string
+        font: string
+        color: string
+        fontScale: float
+        backgroundTexture?: string
+        align?: string
+        ...!widgetSharedKeys
+    }
+
     $Image {
         textureName: string
         scaleX: float
@@ -289,6 +299,8 @@ $Behaviour [
 
     $DrawCoverCardButtonBehaviour { }
 
+    $OnClickResetSavefileBehaviour { }
+
 ]
 
 $ScreenController [
@@ -297,10 +309,19 @@ $ScreenController [
         ...!gameScreenControllerKeys
     }
 
-    $IntroScreenController {
+    $CardSelectionScreenController {
+        cardSelectionActorName: string
+        cardConfigFile: string
         cardAtlasFile: string
-        appearActor: string
+        cardsToSelect: int
+        cardScale: float
+        cardBehaviour: $Behaviour
         nextScreen: string
+        ...!detailTextSharedKeys
+        emptyFont: string
+        emptyFontColor: string
+        emptyFontScale: float
+        emptyText: string
     }
 
 ]
