@@ -6,3 +6,8 @@
 
 additionalCards: !cardDec[*]
 cardsToDraw: !cardDec[*]
+
+stats: {
+    usedReserves: int
+    enemiesDefeated: int
+}

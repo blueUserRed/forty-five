@@ -2,13 +2,13 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.*
 
 object SaveState {
 
     const val saveFilePath: String = "saves/savefile.onj"
     const val defaultSavefilePath: String = "saves/default_savefile.onj"
-
 
     private var _additionalCards: MutableMap<String, Int> = mutableMapOf()
 
@@ -20,11 +20,27 @@ object SaveState {
     val cardsToDraw: Map<String, Int>
         get() = _cardsToDraw
 
+    var usedReserves: Int = 0
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
+    var enemiesDefeated: Int = 0
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
+    var savefileDirty: Boolean = false
+        private set
+
     private val savefileSchema: OnjSchema by lazy {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/savefile.onjschema").file())
     }
 
     fun drawCard(card: Card) {
+        savefileDirty = true
         if (!_cardsToDraw.containsKey(card.name)) {
             throw RuntimeException("cannot draw card $card because it dosen't exist")
         }
@@ -62,6 +78,17 @@ object SaveState {
 
         _additionalCards = readCardArray(obj.get<OnjArray>("additionalCards")).toMutableMap()
         _cardsToDraw = readCardArray(obj.get<OnjArray>("cardsToDraw")).toMutableMap()
+
+        val stats = obj.get<OnjObject>("stats")
+        usedReserves = stats.get<Long>("usedReserves").toInt()
+        enemiesDefeated = stats.get<Long>("enemiesDefeated").toInt()
+
+        bindTemplateStringParams()
+    }
+
+    private fun bindTemplateStringParams() {
+        TemplateString.bindParam("stat.usedReserves") { usedReserves }
+        TemplateString.bindParam("stat.enemiesDefeated") { enemiesDefeated }
     }
 
     fun copyDefaultFile() {
@@ -77,11 +104,17 @@ object SaveState {
         }
 
     fun write() {
+        if (!savefileDirty) return
         val obj = buildOnjObject {
             "additionalCards" with getCardArray(_additionalCards)
             "cardsToDraw" with getCardArray(_cardsToDraw)
+            "stats" with buildOnjObject {
+                "usedReserves" with usedReserves
+                "enemiesDefeated" with enemiesDefeated
+            }
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
+        savefileDirty = false
     }
 
     private fun getCardArray(cards: Map<String, Int>) = cards.entries.map {

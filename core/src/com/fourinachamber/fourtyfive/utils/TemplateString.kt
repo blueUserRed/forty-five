@@ -2,7 +2,7 @@ package com.fourinachamber.fourtyfive.utils
 
 class TemplateString(
     var rawString: String,
-    val params: Map<String, () -> Any>
+//    val params: Map<String, () -> Any>
 ) {
 
     val string: String
@@ -14,5 +14,17 @@ class TemplateString(
             }
             return s
         }
+
+    companion object {
+
+        private val params: MutableMap<String, () -> Any> = mutableMapOf()
+
+        fun bindParam(name: String, provider: () -> Any) {
+            params[name] = provider
+        }
+
+        fun removeParam(name: String): Unit = run { params.remove(name) }
+
+    }
 
 }

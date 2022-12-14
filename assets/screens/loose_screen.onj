@@ -23,14 +23,35 @@ viewport: $FitViewport {
 
 children: [
     $Table {
+        fillX: true
+        fillY: true
+//        debug: true
         rows: [
 
             {
                 cells: [
                     {
-                        expandY: true
+                        padLeft: 68.0
+                        padTop: 11.0
                         element: $Label {
-                            text: ""
+                            align: "left"
+                            text: "Put the cards away. I think you've \nlost enough."
+                            font: "red_wing"
+                            color: !color.black
+                            fontScale: 0.14
+                        }
+                    }
+                ]
+            }
+
+            {
+                cells: [
+                    {
+                        padLeft: 68.0
+                        padTop: 7.0
+                        element: $TemplateLabel {
+                            align: "left"
+                            template: "enemies killed: {stat.enemiesDefeated} \nreserves used: {stat.usedReserves} \n "
                             font: "red_wing"
                             color: !color.black
                             fontScale: 0.2
@@ -42,9 +63,10 @@ children: [
             {
                 cells: [
                     {
+                        padLeft: 59.0
                         element: $Label {
                             align: "center"
-                            text: "Back to the main screen"
+                            text: "continue to main menu"
                             font: "red_wing"
                             color: !color.black
                             fontScale: 0.2
@@ -62,7 +84,7 @@ assets: {
     textures: [
         {
             name: "background"
-            file: "textures/screens/loose_screen.png"
+            file: "textures/screens/loose_screen_background.png"
         }
     ]
     fonts: [
