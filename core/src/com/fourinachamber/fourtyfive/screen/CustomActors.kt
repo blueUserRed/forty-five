@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE1
 import com.badlogic.gdx.graphics.Texture
@@ -20,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.utils.*
+import ktx.actors.alpha
 import ktx.actors.onTouchEvent
 import onj.OnjArray
 import onj.OnjFloat
@@ -222,7 +224,10 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
         if (mask == null) {
+            val c = batch.color
+            batch.setColor(c.r, c.g, c.b, alpha)
             batch.draw(texture, x, y, width, height)
+            batch.color = c
             return
         }
 

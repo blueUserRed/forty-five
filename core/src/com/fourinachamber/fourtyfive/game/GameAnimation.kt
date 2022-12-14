@@ -4,7 +4,11 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.CustomLabel
@@ -129,22 +133,73 @@ class TextAnimation(
 
 }
 
-class FadeInAndOutTextAnimation(
+open class FadeInAndOutAnimation(
     private val x: Float,
     private val y: Float,
-    initialText: String,
-    private val fontColor: Color,
-    private val fontScale: Float,
-    private val font: BitmapFont,
+    val actor: Actor,
     private val screenDataProvider: ScreenDataProvider,
     private val duration: Int,
     private val fadeIn : Int,
-    private  val fadeOut : Int
+    private val fadeOut : Int,
+    private val fixedDimensions: Vector2? = null
 ) : GameAnimation() {
 
     private var startTime = 0L
     private var runUntil = 0L
-    private val label = CustomLabel(initialText, Label.LabelStyle(font, fontColor))
+    override fun start() {
+        startTime = TimeUtils.millis()
+        runUntil = startTime + duration
+        screenDataProvider.addActorToRoot(actor)
+        if (actor is Widget && fixedDimensions == null) {
+            actor.width = actor.prefWidth
+            actor.height = actor.prefHeight
+        }
+        if (fixedDimensions != null) {
+            actor.width = fixedDimensions.x
+            actor.height = fixedDimensions.y
+        }
+        actor.setPosition(x, y)
+    }
+
+    override fun isFinished(): Boolean = TimeUtils.millis() >= runUntil
+    override fun update() {
+        actor.alpha = calcAlpha()
+    }
+
+    private fun calcAlpha(): Float {
+        val timeDiff: Float = (TimeUtils.millis() - startTime).toFloat()
+        return if (timeDiff <= fadeIn) (timeDiff / fadeIn)
+        else if (timeDiff >= duration - fadeOut) {
+            println((1 - (timeDiff - (duration - fadeOut)) / fadeOut))
+            (1 - (timeDiff - (duration - fadeOut)) / fadeOut)
+        }
+        else 1f
+    }
+
+    override fun end() {
+        screenDataProvider.removeActorFromRoot(actor)
+    }
+}
+
+class FadeInAndOutTextAnimation(
+    x: Float,
+    y: Float,
+    initialText: String,
+    private val fontColor: Color,
+    private val fontScale: Float,
+    private val font: BitmapFont,
+    screenDataProvider: ScreenDataProvider,
+    duration: Int,
+    fadeIn : Int,
+    fadeOut : Int
+) : FadeInAndOutAnimation(
+    x, y,
+    CustomLabel(initialText, Label.LabelStyle(font, fontColor)),
+    screenDataProvider,
+    duration, fadeIn, fadeOut
+) {
+
+    private val label = actor as CustomLabel
 
     var text: String = initialText
         set(value) {
@@ -153,31 +208,9 @@ class FadeInAndOutTextAnimation(
         }
 
     override fun start() {
-        startTime = TimeUtils.millis()
-        runUntil = startTime + duration
+        super.start()
         label.setFontScale(fontScale)
-        label.fixedZIndex = Int.MAX_VALUE // lol
-        screenDataProvider.addActorToRoot(label)
         label.setAlignment(Align.center)
-        label.width = label.prefWidth
-        label.height = label.prefHeight
-        label.setPosition(x, y, Align.center)
-    }
-
-    override fun isFinished(): Boolean = TimeUtils.millis() >= runUntil
-    override fun update() {
-        label.alpha = calcAlpha()
-    }
-
-    private fun calcAlpha(): Float {
-        val timeDiff: Float = (TimeUtils.millis() - startTime).toFloat()
-        return if (timeDiff <= fadeIn) (timeDiff / fadeIn)
-        else if (timeDiff >= duration - fadeOut) (1 - timeDiff / duration)
-        else 1f
-    }
-
-    override fun end() {
-        screenDataProvider.removeActorFromRoot(label)
     }
 
 }
