@@ -118,8 +118,8 @@ cards: [
 
     { // 10
         name: "crate"
-        title: "Crate"
-        description: "It's a Cover!"
+        title: "crate"
+        description: "ol' reliable"
         baseDamage: 0
         coverValue: 3
         traitEffects: []
@@ -131,7 +131,7 @@ cards: [
     { // 11
         name: "bigCrate"
         title: "big Crate"
-        description: "It's a Cover!"
+        description: "big ol' reliable"
         baseDamage: 0
         coverValue: 5
         traitEffects: []
@@ -143,7 +143,7 @@ cards: [
     { // 12
         name: "casket"
         title: "casket"
-        description: "It's a Cover!"
+        description: "Let's not hope you won't see the inside any time soon. If yes it's red carpet inside \n \n If this cover is placed down: destroy one target Bullet in the revolver"
         baseDamage: 0
         coverValue: 5
         traitEffects: []
@@ -155,7 +155,7 @@ cards: [
     { // 13
         name: "jewelryBox"
         title: "jewelry Box"
-        description: "It's a Cover!"
+        description: "The lady I took it from didn't need it anyways \n \n If this Cover is placed down: draw 1 card"
         baseDamage: 0
         coverValue: 3
         traitEffects: []
@@ -167,7 +167,7 @@ cards: [
     { // 14
         name: "treasureChest"
         title: "treasure Chest"
-        description: "It's a Cover!"
+        description: "Found it at crestcreek. That stupid ol bastard thought hiding it under a damn rock would make it invisible or somethin. \n \n This Bullet lets you draw 1 card at the beginning of every turn"
         baseDamage: 0
         coverValue: 6
         traitEffects: []
@@ -221,6 +221,26 @@ startDeck: [
     }
     {
         name: "silverBullet"
+        amount: 1
+    }
+    {
+        name: "crate"
+        amount: 5
+    }
+    {
+        name: "bigCrate"
+        amount: 2
+    }
+    {
+        name: "casket"
+        amount: 1
+    }
+    {
+        name: "jewelryBox"
+        amount: 1
+    }
+    {
+        name: "treasureChest"
         amount: 1
     }
 
