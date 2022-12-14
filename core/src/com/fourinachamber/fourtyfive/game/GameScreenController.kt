@@ -581,6 +581,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun loose() {
+        SaveState.copyDefaultFile()
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(looseScreen)).build()
     }
 

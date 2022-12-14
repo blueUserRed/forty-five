@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Utils
 import ktx.actors.onClick
@@ -35,7 +36,7 @@ object BehaviourFactory {
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnHoverChangeFontSizeBehaviour" to { onj, actor -> OnHoverChangeFontSizeBehaviour(onj, actor) },
         "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
-//        "OnClickParticleEffectBehaviour" to { onj, actor -> OnClickParticleEffectBehaviour(onj, actor) },
+        "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
         "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
         "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
@@ -260,6 +261,14 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
         }
 
     }
+}
+
+class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    override val onCLick: BehaviourCallback = {
+        SaveState.copyDefaultFile()
+    }
+
 }
 
 class OnHoverChangeFontSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
