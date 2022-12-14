@@ -3,13 +3,15 @@ import "imports/colors.onj" as color
 !worldWidth = 160.0
 !worldHeight = 90.0
 
+!cardScale = 0.06
+!cardPixelSize = 569
+!cardSize = <!cardPixelSize * !cardScale>
 
 viewport: $FitViewport {
     worldWidth: !worldWidth
     worldHeight: !worldHeight
     backgroundTexture: "background"
 }
-
 
 !toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
     screenPath: "screens/title_screen.onj"
@@ -23,22 +25,17 @@ viewport: $FitViewport {
 
 children: [
     $Table {
-        fillX: true
-        fillY: true
-//        debug: true
         rows: [
 
             {
                 cells: [
                     {
-                        padLeft: 68.0
-                        padTop: 11.0
-                        element: $Label {
-                            align: "left"
-                            text: "Put the cards away. I think you've \nlost enough."
-                            font: "red_wing"
-                            color: !color.black
-                            fontScale: 0.14
+                        expandY: true
+                        element: $HorizontalGroup {
+                            name: "cardSelectionActor"
+                            align: "center"
+                            spacing: 6.0
+                            children: []
                         }
                     }
                 ]
@@ -47,26 +44,9 @@ children: [
             {
                 cells: [
                     {
-                        padLeft: 68.0
-                        padTop: 7.0
-                        element: $TemplateLabel {
-                            align: "left"
-                            template: "enemies killed: {stat.enemiesDefeated} \nreserves used: {stat.usedReserves} \n "
-                            font: "red_wing"
-                            color: !color.black
-                            fontScale: 0.2
-                        }
-                    }
-                ]
-            }
-
-            {
-                cells: [
-                    {
-                        padLeft: 59.0
                         element: $Label {
                             align: "center"
-                            text: "continue to main menu"
+                            text: "Back to the main screen"
                             font: "red_wing"
                             color: !color.black
                             fontScale: 0.2
@@ -84,7 +64,7 @@ assets: {
     textures: [
         {
             name: "background"
-            file: "textures/screens/loose_screen_background.png"
+            file: "textures/screens/win_screen.png"
         }
     ]
     fonts: [
@@ -100,7 +80,12 @@ assets: {
     cursors: []
     postProcessors: []
     animations: []
-    colorTextures: []
+    colorTextures: [
+        {
+            name: "card_detail_background"
+            color: "04040488"
+        }
+    ]
     particles: []
 }
 
@@ -111,5 +96,29 @@ options: {
         cursorName: "arrow"
     }
     postProcessor: null
-    controller: null
+    controller: $CardSelectionScreenController {
+        cardSelectionActorName: "cardSelectionActor"
+        cardConfigFile: "cards/cards.onj"
+        cardAtlasFile: "cards/generated/cards.atlas"
+        nextScreen: "screens/title_screen.onj"
+        cardsToSelect: 3
+        cardScale: !cardScale
+        cardBehaviour: $OnHoverChangeSizeBehaviour {
+            enterDuration: 0.2
+            exitDuration: 0.2
+            baseX: !cardSize
+            baseY: !cardSize
+            targetX: <!cardSize * 1.13>
+            targetY: <!cardSize * 1.13>
+            enterInterpolation: null
+            exitInterpolation: null
+        }
+        detailFont: "red_wing"
+        detailFontColor: !color.white
+        detailBackgroundTexture: "card_detail_background"
+        detailFontScale: 0.07
+        detailWidth: 50.0
+        detailOffsetX: 0.0
+        detailOffsetY: 0.0
+    }
 }
