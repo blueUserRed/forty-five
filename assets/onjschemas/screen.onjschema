@@ -309,6 +309,12 @@ $ScreenController [
         ...!gameScreenControllerKeys
     }
 
+    $IntroScreenController {
+        cardAtlasFile: string
+        appearActor: string
+        nextScreen: string
+    }
+
     $CardSelectionScreenController {
         cardSelectionActorName: string
         cardConfigFile: string
