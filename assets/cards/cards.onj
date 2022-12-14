@@ -1,4 +1,7 @@
 
+!burningPercent = 0.5
+!poisonDamage = 3
+
 cards: [
 
     // Bullets ----------------------------------
@@ -10,7 +13,7 @@ cards: [
         baseDamage: 7
         coverValue: 0
         traitEffects: []
-        effects: [ giveStatus("shot", burning(3, 0.5)) ]
+        effects: [ giveStatus("shot", burning(3, !burningPercent)) ]
         cost: 1
         type: $Bullet { }
     }
@@ -76,7 +79,7 @@ cards: [
         baseDamage: 15
         coverValue: 0
         traitEffects: []
-        effects: [ giveStatus("shot", burning(2, 0.5)) ]
+        effects: [ giveStatus("shot", burning(2, !burningPercent)) ]
         cost: 1
         type: $Bullet { }
     }
@@ -174,6 +177,64 @@ cards: [
         effects: [ draw("round start", 1) ]
         cost: 3
         type: $Cover { }
+    }
+
+    // not yet implemented
+
+    {
+        name: "bfb"
+        title: "BFB"
+        description: "Big fucking Bullet"
+        baseDamage: 50
+        coverValue: 0
+        traitEffects: []
+        effects: []
+        cost: 5
+        type: $Bullet { }
+    }
+    {
+        name: "poisonBullet"
+        title: "poison Bullet"
+        description: ""
+        baseDamage: 9
+        coverValue: 0
+        traitEffects: []
+        effects: [ giveStatus("shot", poison(3, !poisonDamage)) ]
+        cost: 1
+        type: $Bullet { }
+    }
+    {
+        name: "obsidianBullet"
+        title: "obsidian Bullet"
+        description: ""
+        baseDamage: 20
+        coverValue: 0
+        traitEffects: []
+        effects: [ ]
+        cost: 2
+        type: $Bullet { }
+    }
+    {
+        name: "rustedBullet"
+        title: "rusted Bullet"
+        description: ""
+        baseDamage: 10
+        coverValue: 0
+        traitEffects: [ "rotten" ]
+        effects: [ ]
+        cost: 0
+        type: $Bullet { }
+    }
+    {
+        name: "arrow"
+        title: "arrow"
+        description: ""
+        baseDamage: 5
+        coverValue: 0
+        traitEffects: [ "everlasting" ]
+        effects: [ ]
+        cost: 1
+        type: $Bullet { }
     }
 
 ]

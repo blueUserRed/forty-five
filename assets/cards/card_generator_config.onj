@@ -66,11 +66,11 @@ assets: {
 
         {
             name: "crate"
-            file: "textures/cards/casket.png"
+            file: "textures/cards/crate.png"
         }
         {
             name: "bigCrate"
-            file: "textures/cards/casket.png"
+            file: "textures/cards/bigCrate.png"
         }
         {
             name: "casket"
