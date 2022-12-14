@@ -316,6 +316,10 @@ $ScreenController [
         cardBehaviour: $Behaviour
         nextScreen: string
         ...!detailTextSharedKeys
+        emptyFont: string
+        emptyFontColor: string
+        emptyFontScale: float
+        emptyText: string
     }
 
 ]

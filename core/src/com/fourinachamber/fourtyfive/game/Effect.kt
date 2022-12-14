@@ -102,11 +102,11 @@ abstract class Effect(val trigger: Trigger) {
                 amount,
                 TemplateString(
                     buffDetailTextRawString,
-//                    mapOf(
-//                        "text" to { if (amount > 0) "buff" else "debuff" },
-//                        "amount" to { amount },
-//                        "source" to { card.title }
-//                    )
+                    mapOf(
+                        "text" to { if (amount > 0) "buff" else "debuff" },
+                        "amount" to { amount },
+                        "source" to { card.title }
+                    )
                 ),
             ) { card.inGame }
 

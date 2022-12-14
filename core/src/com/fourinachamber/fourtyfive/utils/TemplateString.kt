@@ -2,7 +2,7 @@ package com.fourinachamber.fourtyfive.utils
 
 class TemplateString(
     var rawString: String,
-//    val params: Map<String, () -> Any>
+    val additionalParams: Map<String, () -> Any>? = null
 ) {
 
     val string: String
@@ -10,6 +10,10 @@ class TemplateString(
             //TODO: there must be a better solution
             var s = rawString
             for ((name, provider) in params) {
+                s = Regex("\\{$name}").replace(s, provider().toString())
+            }
+            additionalParams ?: return s
+            for ((name, provider) in additionalParams) {
                 s = Regex("\\{$name}").replace(s, provider().toString())
             }
             return s

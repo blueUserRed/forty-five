@@ -83,12 +83,6 @@ assets: {
     fonts: [
 
         $DistanceFieldFont {
-            name: "distance_field"
-            fontFile: "fonts/distanceField.fnt"
-            imageFile: "fonts/distanceField.png"
-        }
-
-        $DistanceFieldFont {
             name: "vanilla_whale"
             fontFile: "fonts/vanilla_whale.fnt"
             imageFile: "fonts/vanilla_whale.png"
