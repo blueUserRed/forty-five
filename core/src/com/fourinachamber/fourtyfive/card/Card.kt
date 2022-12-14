@@ -109,7 +109,8 @@ class Card(
         modifiers.remove(rottenModifier)
         rottenModifier = CardModifier(
             newDamage,
-            TemplateString(rottenDetailTextRawString, mapOf("damageLost" to { newDamage }))
+            TemplateString(rottenDetailTextRawString, )
+//            TemplateString(rottenDetailTextRawString, mapOf("damageLost" to { newDamage }))
         ) { true }
         modifiers.add(rottenModifier)
         isDamageDirty = true

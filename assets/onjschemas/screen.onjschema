@@ -80,6 +80,16 @@ $Widget [
         ...!widgetSharedKeys
     }
 
+    $TemplateLabel {
+        template: string
+        font: string
+        color: string
+        fontScale: float
+        backgroundTexture?: string
+        align?: string
+        ...!widgetSharedKeys
+    }
+
     $Image {
         textureName: string
         scaleX: float

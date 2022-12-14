@@ -6,3 +6,8 @@ cardsToDraw: [
         amount: 2
     }
 ]
+
+stats: {
+    usedReserves: 0
+    enemiesDefeated: 0
+}

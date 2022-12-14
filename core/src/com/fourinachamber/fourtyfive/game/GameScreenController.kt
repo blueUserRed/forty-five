@@ -73,19 +73,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var remainingCardsToDraw: Int? = null
 
-    private val playerLivesTemplate: TemplateString = TemplateString(
-        playerLivesRawTemplateText,
-        mapOf(
-            "curLives" to { curPlayerLives },
-            "baseLives" to { basePlayerLives }
-        )
-    )
-
     var curPlayerLives: Int = basePlayerLives
-        private set(value) {
-            field = value
-            playerLivesLabel?.setText(playerLivesTemplate.string)
-        }
 
     private val timeline: Timeline = Timeline(mutableListOf()).apply {
         start()
@@ -113,19 +101,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var cardsToDrawDuringSpecialDraw: Int = 1
 
-    private val reservesTemplate: TemplateString = TemplateString(
-        reservesRawTemplateText,
-        mapOf(
-            "curReserves" to { curReserves },
-            "baseReserves" to { baseReserves }
-        )
-    )
-
     var curReserves: Int = 0
-        private set(value) {
-            field = value
-            reservesLabel?.setText(reservesTemplate.string)
-        }
 
     private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
 
@@ -156,6 +132,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         initRevolver()
         initEnemyArea()
         initCoverArea()
+        initTemplateStringParams()
 
         for (behaviour in screenDataProvider.behaviours) if (behaviour is GameScreenBehaviour) {
             behaviour.gameScreenController = this
@@ -244,6 +221,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         createdCards.add(card)
     }
 
+    private fun initTemplateStringParams() {
+        TemplateString.bindParam("game.curReserves") { curReserves }
+        TemplateString.bindParam("game.baseReserves") { baseReserves }
+        TemplateString.bindParam("game.curPlayerLives") { curPlayerLives }
+        TemplateString.bindParam("game.basePlayerLives") { basePlayerLives }
+    }
+
+    private fun removeTemplateStringParams() {
+        TemplateString.removeParam("game.curReserves")
+        TemplateString.removeParam("game.baseReserves")
+    }
+
     private fun changePhase(next: Gamephase) {
         if (next == currentPhase) return
         currentPhase.transitionAway(this)
@@ -301,13 +290,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             ?: throw RuntimeException("no named actor with name $playerLivesLabelName")
         if (playerLives !is CustomLabel) throw RuntimeException("actor named $playerLivesLabelName must be a Label")
         playerLivesLabel = playerLives
-        curPlayerLives = curPlayerLives // inits label
+//        curPlayerLives = curPlayerLives // inits label
 
         val reserves = curScreen.namedActors[reservesLabelName]
             ?: throw RuntimeException("no named actor with name $reservesLabelName")
         if (reserves !is CustomLabel) throw RuntimeException("actor named $reservesLabelName must be a Label")
         reservesLabel = reserves
-        curReserves = curReserves // inits label
+//        curReserves = curReserves // inits label
     }
 
     private fun initCoverArea() {
@@ -572,17 +561,23 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private fun cost(cost: Int): Boolean {
         if (cost > curReserves) return false
         curReserves -= cost
+        SaveState.usedReserves += cost
         return true
     }
 
     override fun end() {
+        removeTemplateStringParams()
         curScreen = null
     }
 
-    fun enemyDefeated(enemy: Enemy): Unit = win()
+    fun enemyDefeated(enemy: Enemy) {
+        SaveState.enemiesDefeated++
+        win()
+    }
 
     private fun win() {
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(winScreen)).build()
+        SaveState.write()
     }
 
     private fun loose() {
