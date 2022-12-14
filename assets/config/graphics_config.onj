@@ -80,8 +80,8 @@ stringTemplates:  {
 fadeInAndOutAnimation: {
     fadeFontName: "vanilla_whale"
     fadeFontColor: !color.black
-    fadeFontScale: 0.2
-    fadeDuration: 3.0
-    fadeIn: 1.0
-    fadeOut: 1.0
+    fadeFontScale: 0.1
+    fadeDuration: 6.0
+    fadeIn: 2.0
+    fadeOut: 2.0
 }

@@ -11,12 +11,19 @@ import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.utils.toBuilder
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.OnjArray
 import onj.OnjNamedObject
 import onj.OnjObject
+
+class CardPrototype(
+    val name: String,
+    val type: Card.Type,
+    private val creator: () -> Card
+) {
+    fun create(): Card = creator()
+}
 
 /**
  * represents a card
@@ -102,7 +109,7 @@ class Card(
         modifiers.remove(rottenModifier)
         rottenModifier = CardModifier(
             newDamage,
-            TemplateString(rottenDetailTextRawString, mapOf("damageLost" to { newDamage }))
+            TemplateString(rottenDetailTextRawString, mapOf("damageLost" to newDamage))
         ) { true }
         modifiers.add(rottenModifier)
         isDamageDirty = true
@@ -207,43 +214,65 @@ class Card(
          */
         const val cardTexturePrefix = "card%%"
 
-        /**
-         * gets an array of cards from an OnjArray
-         */
-        fun getFrom(cards: OnjArray, regions: Map<String, TextureRegion>): List<Card> = cards
-            .value
-            .map { onj ->
-                onj as OnjObject
-                val name = onj.get<String>("name")
+        fun getFrom(
+            cards: OnjArray,
+            regions: Map<String, TextureRegion>,
+            initializer: (Card) -> Unit
+        ): List<CardPrototype> {
 
-                val card = Card(
-                    name,
-                    onj.get<String>("title"),
-                    regions["$cardTexturePrefix$name"]
-                        ?: throw RuntimeException("cannot find texture for card $name"),
+            val prototypes = mutableListOf<CardPrototype>()
 
-                    onj.get<String>("description"),
+            cards
+                .value
+                .forEach { onj ->
+                    onj as OnjObject
+                    val prototype = CardPrototype(
+                        onj.get<String>("name"),
+                        cardTypeOrError(onj)
+                    ) { getCardFrom(onj, regions, initializer) }
+                    prototypes.add(prototype)
+                }
+            return prototypes
+        }
 
-                    when (val type = onj.get<OnjNamedObject>("type").name) {
-                        "Bullet" -> Type.BULLET
-                        "Cover" -> Type.COVER
-                        "OneShot" -> Type.ONE_SHOT
-                        else -> throw RuntimeException("unknown Card type: $type")
-                    },
 
-                    onj.get<Long>("baseDamage").toInt(),
-                    onj.get<Long>("coverValue").toInt(),
-                    onj.get<Long>("cost").toInt(),
+        private fun getCardFrom(
+            onj: OnjObject,
+            regions: Map<String, TextureRegion>,
+            initializer: (Card) -> Unit
+        ): Card {
+            val name = onj.get<String>("name")
 
-                    onj.get<OnjArray>("effects")
-                        .value
-                        .map { (it as OnjExtensions.OnjEffect).value }
-                )
+            val card = Card(
+                name,
+                onj.get<String>("title"),
+                regions["$cardTexturePrefix$name"]
+                    ?: throw RuntimeException("cannot find texture for card $name"),
 
-                for (effect in card.effects) effect.card = card
-                applyTraitEffects(card, onj)
-                card
-            }
+                onj.get<String>("description"),
+                cardTypeOrError(onj),
+                onj.get<Long>("baseDamage").toInt(),
+                onj.get<Long>("coverValue").toInt(),
+                onj.get<Long>("cost").toInt(),
+
+                onj.get<OnjArray>("effects")
+                    .value
+                    .map { (it as OnjExtensions.OnjEffect).value }
+            )
+
+            for (effect in card.effects) effect.card = card
+            applyTraitEffects(card, onj)
+            initializer(card)
+            return card
+        }
+
+        private fun cardTypeOrError(onj: OnjObject) = when (val type = onj.get<OnjNamedObject>("type").name) {
+            "Bullet" -> Type.BULLET
+            "Cover" -> Type.COVER
+            "OneShot" -> Type.ONE_SHOT
+            else -> throw RuntimeException("unknown Card type: $type")
+        }
+
 
         fun applyTraitEffects(card: Card, onj: OnjObject) {
             val effects = onj

@@ -1,0 +1,13 @@
+additionalCards: [
+]
+cardsToDraw: [
+    {
+        name: 'diamondBullet'
+        amount: 2
+    }
+]
+
+stats: {
+    usedReserves: 0
+    enemiesDefeated: 0
+}

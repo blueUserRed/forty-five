@@ -39,3 +39,13 @@ defaultCover: {
 }
 
 cards: !card[*]
+
+!startDeckEntry = {
+    name: string
+    amount: int
+}
+
+defaultBullet: string
+defaultCover: string
+
+startDeck: !startDeckEntry[*]

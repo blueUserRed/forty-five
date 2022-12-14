@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive.screen
 
+import com.fourinachamber.fourtyfive.game.CardSelectionScreenController
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.IntroScreenController
 import onj.*
@@ -8,6 +9,7 @@ object ScreenControllerFactory {
 
     private val controllers: MutableMap<String, (OnjNamedObject) -> ScreenController> = mutableMapOf(
         "GameScreenController" to { onj -> GameScreenController(onj) },
+        "CardSelectionScreenController" to { onj -> CardSelectionScreenController(onj) },
         "IntroScreenController" to { onj -> IntroScreenController(onj) }
     )
 
