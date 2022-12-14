@@ -38,6 +38,11 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     private val cards: MutableList<Card> = mutableListOf()
     private lateinit var screenDataProvider: ScreenDataProvider
 
+    private var emptyText = onj.get<String>("emptyText")
+    private lateinit var emptyFont: BitmapFont
+    private var emptyFontColor = Color.valueOf(onj.get<String>("emptyFontColor"))
+    private var emptyFontScale = onj.get<Double>("emptyFontScale").toFloat()
+
     private lateinit var detailFont: BitmapFont
     private lateinit var detailFontColor: Color
     private lateinit var detailBackground: Drawable
@@ -60,6 +65,10 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         detailFontScale = onj.get<Double>("detailFontScale").toFloat()
         detailOffset = Vector2(onj.get<Double>("detailOffsetX").toFloat(), onj.get<Double>("detailOffsetY").toFloat())
         detailWidth = onj.get<Double>("detailWidth").toFloat()
+
+
+        emptyFont = screenDataProvider.fonts[onj.get<String>("emptyFont")]
+            ?: throw RuntimeException("unknown font: ${onj.get<String>("emptyFont")}")
 
         hoverDetailActor = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
         hoverDetailActor.setFontScale(detailFontScale)
@@ -108,6 +117,12 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
                 ?: throw RuntimeException("unknown card in savefile: $name")
             repeat(amount) { cards.add(card) }
         }
+
+        if (cards.isEmpty()) {
+            displayCardsEmptyActor()
+            return
+        }
+
         cards.shuffle()
 
         repeat(min(cardsToSelect, cards.size)) {
@@ -131,6 +146,15 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
 
             cardSelectionActor.addActor(card.actor)
         }
+    }
+
+    private fun displayCardsEmptyActor() {
+        val label = CustomLabel(
+            emptyText,
+            Label.LabelStyle(emptyFont, emptyFontColor)
+        )
+        label.setFontScale(emptyFontScale)
+        cardSelectionActor.addActor(label)
     }
 
     override fun update() {
