@@ -21,15 +21,11 @@ assets: {
             name: "base"
             file: "textures/cards/base_transparent.png"
         }
-        {
-            name: "obsidian_bullet"
-            file: "textures/cards/obsidian_bullet.png"
-        }
+
         {
             name: "bullet"
             file: "textures/cards/bullet.png"
         }
-
         {
             name: "bewitchedBullet"
             file: "textures/cards/bewitchedBullet.png"
@@ -66,6 +62,27 @@ assets: {
         {
             name: "silverBullet"
             file: "textures/cards/silverBullet.png"
+        }
+
+        {
+            name: "crate"
+            file: "textures/cards/casket.png"
+        }
+        {
+            name: "bigCrate"
+            file: "textures/cards/casket.png"
+        }
+        {
+            name: "casket"
+            file: "textures/cards/casket.png"
+        }
+        {
+            name: "jewelryBox"
+            file: "textures/cards/casket.png"
+        }
+        {
+            name: "treasureChest"
+            file: "textures/cards/casket.png"
         }
 
     ]
@@ -114,14 +131,6 @@ assets: {
 !obsidianBulletScale = 0.5
 
 !bulletSharedElements = [
-//
-//    $ImageElement {
-//        x: <!baseSize / 2 - !normalBulletSize / 2>
-//        y: <!baseSize / 2 - !normalBulletSize / 2>
-//        textureName: "bullet"
-//        scaleX: 1.0
-//        scaleY: 1.0
-//    }
 
 ]
 
@@ -337,10 +346,17 @@ cards: [
     {
         name: !cards.10.name
         elements: [
-            ...!coverSharedElements
+            $ImageElement {
+                textureName: !cards.10.name
+                ...!imageElementSharedKeys
+            }
             $TextElement {
-                text: !cards.10.title
-                ...!titleElementSharedKeys
+                ...!valueElementSharedKeys
+                text: <!cards.10.coverValue#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.10.cost#s>
             }
         ]
     }
@@ -348,21 +364,35 @@ cards: [
     {
         name: !cards.11.name
         elements: [
-            ...!coverSharedElements
-            $TextElement {
-                text: !cards.11.title
-                ...!titleElementSharedKeys
-            }
+             $ImageElement {
+                 textureName: !cards.11.name
+                 ...!imageElementSharedKeys
+             }
+             $TextElement {
+                 ...!valueElementSharedKeys
+                 text: <!cards.11.coverValue#s>
+             }
+             $TextElement {
+                 ...!costElementSharedKeys
+                 text: <!cards.11.cost#s>
+             }
         ]
     }
 
     {
         name: !cards.12.name
         elements: [
-            ...!coverSharedElements
+            $ImageElement {
+                textureName: !cards.12.name
+                ...!imageElementSharedKeys
+            }
             $TextElement {
-                text: !cards.12.title
-                ...!titleElementSharedKeys
+                ...!valueElementSharedKeys
+                text: <!cards.12.coverValue#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.12.cost#s>
             }
         ]
     }
@@ -370,10 +400,17 @@ cards: [
     {
         name: !cards.13.name
         elements: [
-            ...!coverSharedElements
+            $ImageElement {
+                textureName: !cards.13.name
+                ...!imageElementSharedKeys
+            }
             $TextElement {
-                text: !cards.13.title
-                ...!titleElementSharedKeys
+                ...!valueElementSharedKeys
+                text: <!cards.13.coverValue#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.13.cost#s>
             }
         ]
     }
@@ -381,10 +418,17 @@ cards: [
     {
         name: !cards.14.name
         elements: [
-            ...!coverSharedElements
+            $ImageElement {
+                textureName: !cards.14.name
+                ...!imageElementSharedKeys
+            }
             $TextElement {
-                text: !cards.14.title
-                ...!titleElementSharedKeys
+                ...!valueElementSharedKeys
+                text: <!cards.14.coverValue#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.14.cost#s>
             }
         ]
     }
