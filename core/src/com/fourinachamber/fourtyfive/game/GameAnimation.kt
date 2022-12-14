@@ -161,7 +161,7 @@ class FadeInAndOutTextAnimation(
         label.setAlignment(Align.center)
         label.width = label.prefWidth
         label.height = label.prefHeight
-        label.setPosition(x, y)
+        label.setPosition(x, y, Align.center)
     }
 
     override fun isFinished(): Boolean = TimeUtils.millis() >= runUntil
