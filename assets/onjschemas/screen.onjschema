@@ -299,6 +299,8 @@ $Behaviour [
 
     $DrawCoverCardButtonBehaviour { }
 
+    $OnClickResetSavefileBehaviour { }
+
 ]
 
 $ScreenController [
