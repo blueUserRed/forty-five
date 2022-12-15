@@ -147,6 +147,18 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
+    {
+        name: "BFB"
+        title: "BFB"
+        flavourText: "Big fucking Bullet"
+        description: ""
+        baseDamage: 50
+        coverValue: 0
+        traitEffects: []
+        effects: []
+        cost: 5
+        type: $Bullet { }
+    }
 
     // Cover ----------------------------------
 
@@ -218,18 +230,6 @@ cards: [
     // not yet implemented
 
     {
-        name: "bfb"
-        title: "BFB"
-        flavourText: ""
-        description: ""
-        baseDamage: 50
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 5
-        type: $Bullet { }
-    }
-    {
         name: "poisonBullet"
         title: "poison Bullet"
         flavourText: ""
@@ -286,9 +286,15 @@ defaultCover: "crate"
 startDeck: [
 
     {
-        name: "arrow"
+        name: "BFB"
+        amount: 1
+    }
+    {
+        name: "workerBullet"
         amount: 3
     }
+
+//////////////////////////////////////////
 
 //    {
 //        name: "bullet"
