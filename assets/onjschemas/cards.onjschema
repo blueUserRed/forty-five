@@ -10,31 +10,13 @@ $CardType [
 !card = {
     name: string
     title: string
+    flavourText: string
     description: string
     baseDamage: int
     coverValue: int
     traitEffects: string[*]
     cost: int
     type: $CardType
-    effects: Effect[*]
-}
-
-defaultBullet: {
-    name: string
-    title: string
-    description: string
-    traitEffects: string[*]
-    cost: int
-    baseDamage: int
-    effects: Effect[*]
-}
-
-defaultCover: {
-    name: string
-    title: string
-    description: string
-    cost: int
-    coverValue: int
     effects: Effect[*]
 }
 

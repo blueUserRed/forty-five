@@ -38,6 +38,7 @@ class Card(
     val name: String,
     val title: String,
     val texture: TextureRegion,
+    val flavourText: String,
     val shortDescription: String,
     val type: Type,
     val baseDamage: Int,
@@ -188,8 +189,10 @@ class Card(
 
     private fun updateText() {
         val builder = StringBuilder()
-        builder
-            .append("\n$shortDescription\n\ncost: $cost\n")
+
+        builder.append("\n$flavourText\n\n")
+        if (shortDescription.isNotBlank()) builder.append("$shortDescription\n\n")
+        builder.append("cost: $cost\n")
 
         if (type == Type.BULLET) builder.append("damage: $curDamage/$baseDamage")
         else builder.append("cover value: $coverValue")
@@ -249,6 +252,7 @@ class Card(
                 regions["$cardTexturePrefix$name"]
                     ?: throw RuntimeException("cannot find texture for card $name"),
 
+                onj.get<String>("flavourText"),
                 onj.get<String>("description"),
                 cardTypeOrError(onj),
                 onj.get<Long>("baseDamage").toInt(),
