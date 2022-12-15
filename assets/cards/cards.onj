@@ -15,10 +15,11 @@ cards: [
 
     // Bullets ----------------------------------
 
-    { // 0
+    {
         name: "incendiaryBullet"
         title: "incendiary Bullet"
-        description: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime" \n \nIf this Bullet shoots: The enemy gets the status burning for 3 revolver turns'
+        flavourText: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime"'
+        description: 'If this Bullet shoots: The enemy gets the status burning for 3 revolver turns'
         baseDamage: 7
         coverValue: 0
         traitEffects: []
@@ -26,10 +27,11 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 1
+    {
         name: "workerBullet"
         title: "worker Bullet"
-        description: "backup on the way \n \nThis Bullet adds one reserve at the beginning of every turn"
+        flavourText: "backup on the way"
+        description: "This Bullet adds one reserve at the beginning of every turn"
         baseDamage: 5
         coverValue: 0
         traitEffects: []
@@ -37,10 +39,11 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 2
+    {
         name: "bigBullet"
         title: "big Bullet"
-        description: "bullet but like... idk bigger"
+        flavourText: "bullet but like... idk bigger"
+        description: ""
         baseDamage: 16
         coverValue: 0
         traitEffects: []
@@ -48,10 +51,11 @@ cards: [
         cost: 2
         type: $Bullet { }
     }
-    { // 3
+    {
         name: "rottenBullet"
         title: "rotten Bullet"
-        description: "might have forgotten it in my sattlebag... \n \n looses 1 damage for everytime it turns in the revolver"
+        flavourText: "might have forgotten it in my sattlebag..."
+        description: "looses 1 damage for everytime it turns in the revolver"
         baseDamage: 16
         coverValue: 0
         traitEffects: [ "rotten" ]
@@ -59,10 +63,11 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 4
+    {
         name: "diamondBullet"
         title: "diamond Bullet"
-        description: "Shiny \n \n If this Bullet enters the revolver: you draw 2 cards; If this Bullet shoots, your draw a card"
+        flavourText: "Shiny"
+        description: "If this Bullet enters the revolver: you draw 2 cards; If this Bullet shoots, your draw a card"
         baseDamage: 23
         coverValue: 0
         traitEffects: []
@@ -70,10 +75,11 @@ cards: [
         cost: 3
         type: $Bullet { }
     }
-    { // 5
+    {
         name: "bewitchedBullet"
         title: "bewitched Bullet"
-        description: "can you burn a Bullet on a pyre? We can try \n \n If this Bullet is shot, the revolver turns one to the left instead of to the right"
+        flavourText: "Can you burn a Bullet on a pyre? We can try"
+        description: "If this Bullet is shot, the revolver turns one to the left instead of to the right"
         baseDamage: 7
         coverValue: 0
         traitEffects: [ "leftRotating" ]
@@ -81,10 +87,11 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 6
+    {
         name: "explosiveBullet"
         title: "explosive Bullet"
-        description: "holds its promise. Just ask the residents of New Hemingway. Wait, you can't \n \n If this Bullet shoots: The enemy gets the status burning for 2 revolver turns"
+        flavourText: "Holds its promise. Just ask the residents of New Hemingway. Wait, you can't"
+        description: "If this Bullet shoots: The enemy gets the status burning for 2 revolver turns"
         baseDamage: 15
         coverValue: 0
         traitEffects: []
@@ -92,10 +99,11 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 7
+    {
         name: "leadersBullet"
         title: "leaders Bullet"
-        description: "just don't ask what it was doing in 1939-1945 \n \n If this Bullet enters the revolver: all other bullets get +4 damage as long as this Bullet is in the Revolver"
+        flavourText: "Just don't ask what it was doing in 1939-1945"
+        description: "If this Bullet enters the revolver: all other bullets get +4 damage as long as this Bullet is in the Revolver"
         baseDamage: 15
         coverValue: 0
         traitEffects: []
@@ -103,10 +111,11 @@ cards: [
         cost: 2
         type: $Bullet { }
     }
-    { // 8
+    {
         name: "silverBullet"
         title: "silver Bullet"
-        description: "this Bullet is silver and silence is golden \n \n If this Bullet enters the revolver or if it is shot: you draw 1 card"
+        flavourText: "This Bullet is silver and silence is golden"
+        description: "If this Bullet enters the revolver or if it is shot: you draw 1 card"
         baseDamage: 7
         coverValue: 0
         traitEffects: []
@@ -114,10 +123,11 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
-    { // 9
+    {
         name: "bullet"
         title: "bullet"
-        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
+        flavourText: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
+        description: ""
         baseDamage: 6
         coverValue: 0
         traitEffects: []
@@ -125,13 +135,26 @@ cards: [
         cost: 1
         type: $Bullet { }
     }
+    {
+        name: "arrow"
+        title: "arrow"
+        flavourText: "Have you actually shot an arrow with a revolver? No? Then stop saying it won't work"
+        description: "If this 'Bullet' is shot, it will continue in the revolver (it continues to turn right after it was shot (shot triggers still apply))"
+        baseDamage: 5
+        coverValue: 0
+        traitEffects: [ "everlasting" ]
+        effects: [ ]
+        cost: 1
+        type: $Bullet { }
+    }
 
     // Cover ----------------------------------
 
-    { // 10
+    {
         name: "crate"
         title: "crate"
-        description: "ol' reliable"
+        flavourText: "ol' reliable"
+        description: ""
         baseDamage: 0
         coverValue: 3
         traitEffects: []
@@ -140,10 +163,11 @@ cards: [
         type: $Cover { }
     }
 
-    { // 11
+    {
         name: "bigCrate"
         title: "big Crate"
-        description: "big ol' reliable"
+        flavourText: "big ol' reliable"
+        description: ""
         baseDamage: 0
         coverValue: 5
         traitEffects: []
@@ -152,10 +176,11 @@ cards: [
         type: $Cover { }
     }
 
-    { // 12
+    {
         name: "casket"
         title: "casket"
-        description: "Let's not hope you won't see the inside any time soon. If yes it's red carpet inside \n \n If this cover is placed down: destroy one target Bullet in the revolver"
+        flavourText: "Let's hope you won't see the inside any time soon. If yes it's red carpet inside"
+        description: "If this cover is placed down: destroy one target Bullet in the revolver"
         baseDamage: 0
         coverValue: 5
         traitEffects: []
@@ -167,7 +192,8 @@ cards: [
     { // 13
         name: "jewelryBox"
         title: "jewelry Box"
-        description: "The lady I took it from didn't need it anyways \n \n If this Cover is placed down: draw 1 card"
+        flavourText: "The lady I took it from didn't need it anyways"
+        description: "If this Cover is placed down: draw 1 card"
         baseDamage: 0
         coverValue: 3
         traitEffects: []
@@ -176,10 +202,11 @@ cards: [
         type: $Cover { }
     }
 
-    { // 14
+    {
         name: "treasureChest"
         title: "treasure Chest"
-        description: "Found it at crestcreek. That stupid ol bastard thought hiding it under a damn rock would make it invisible or somethin. \n \n This Bullet lets you draw 1 card at the beginning of every turn"
+        flavourText: "Found it at crestcreek. That stupid ol bastard thought hiding it under a damn rock would make it invisible or somethin'"
+        description: "This Bullet lets you draw 1 card at the beginning of every turn"
         baseDamage: 0
         coverValue: 6
         traitEffects: []
@@ -193,7 +220,8 @@ cards: [
     {
         name: "bfb"
         title: "BFB"
-        description: "Big fucking Bullet"
+        flavourText: ""
+        description: ""
         baseDamage: 50
         coverValue: 0
         traitEffects: []
@@ -204,6 +232,7 @@ cards: [
     {
         name: "poisonBullet"
         title: "poison Bullet"
+        flavourText: ""
         description: ""
         baseDamage: 9
         coverValue: 0
@@ -215,6 +244,7 @@ cards: [
     {
         name: "obsidianBullet"
         title: "obsidian Bullet"
+        flavourText: ""
         description: ""
         baseDamage: 20
         coverValue: 0
@@ -226,6 +256,7 @@ cards: [
     {
         name: "rustedBullet"
         title: "rusted Bullet"
+        flavourText: ""
         description: ""
         baseDamage: 10
         coverValue: 0
@@ -235,19 +266,9 @@ cards: [
         type: $Bullet { }
     }
     {
-        name: "arrow"
-        title: "arrow"
-        description: ""
-        baseDamage: 5
-        coverValue: 0
-        traitEffects: [ "everlasting" ]
-        effects: [ ]
-        cost: 1
-        type: $Bullet { }
-    }
-    {
         name: "invisibleBullet"
         title: "invisible Bullet"
+        flavourText: ""
         description: ""
         baseDamage: 0
         coverValue: 0
@@ -265,64 +286,69 @@ defaultCover: "crate"
 startDeck: [
 
     {
-        name: "bullet"
-        amount: 4
+        name: "arrow"
+        amount: 3
     }
-    {
-        name: "incendiaryBullet"
-        amount: 2
-    }
-    {
-        name: "workerBullet"
-        amount: 1
-    }
-    {
-        name: "bigBullet"
-        amount: 2
-    }
-    {
-        name: "rottenBullet"
-        amount: 1
-    }
-    {
-        name: "diamondBullet"
-        amount: 1
-    }
-    {
-        name: "bewitchedBullet"
-        amount: 1
-    }
-    {
-        name: "explosiveBullet"
-        amount: 1
-    }
-    {
-        name: "leadersBullet"
-        amount: 1
-    }
-    {
-        name: "silverBullet"
-        amount: 1
-    }
-    {
-        name: "crate"
-        amount: 5
-    }
-    {
-        name: "bigCrate"
-        amount: 2
-    }
-    {
-        name: "casket"
-        amount: 1
-    }
-    {
-        name: "jewelryBox"
-        amount: 1
-    }
-    {
-        name: "treasureChest"
-        amount: 1
-    }
+
+//    {
+//        name: "bullet"
+//        amount: 4
+//    }
+//    {
+//        name: "incendiaryBullet"
+//        amount: 2
+//    }
+//    {
+//        name: "workerBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "bigBullet"
+//        amount: 2
+//    }
+//    {
+//        name: "rottenBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "diamondBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "bewitchedBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "explosiveBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "leadersBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "silverBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "crate"
+//        amount: 5
+//    }
+//    {
+//        name: "bigCrate"
+//        amount: 2
+//    }
+//    {
+//        name: "casket"
+//        amount: 1
+//    }
+//    {
+//        name: "jewelryBox"
+//        amount: 1
+//    }
+//    {
+//        name: "treasureChest"
+//        amount: 1
+//    }
 
 ]

@@ -63,6 +63,10 @@ assets: {
             name: "silverBullet"
             file: "textures/cards/silverBullet.png"
         }
+        {
+            name: "arrow"
+            file: "textures/cards/arrow.png"
+        }
 
         {
             name: "crate"
@@ -82,27 +86,16 @@ assets: {
         }
         {
             name: "treasureChest"
-            file: "textures/cards/casket.png"
+            file: "textures/cards/treasureChest.png"
         }
 
     ]
     fonts: [
         {
-            name: "arial"
-            file: "fonts/arial.fnt"
-        },
-        {
             name: "card_character"
             file: "fonts/card_character.fnt"
         }
     ]
-}
-
-!titleElementSharedKeys = {
-    x: 10
-    y: 10
-    font: "card_character"
-    fontScale: 1.0
 }
 
 !imageElementSharedKeys = {
@@ -126,217 +119,207 @@ assets: {
     fontScale: 1.5
 }
 
-!normalBulletSize = 128
-!obsidianBulletSize = 200
-!obsidianBulletScale = 0.5
-
-!bulletSharedElements = [
-
-]
-
-!coverSharedElements = [
-
-    $ImageElement {
-        x: <(!baseSize / 2 - !obsidianBulletSize * !obsidianBulletScale / 2)#i>
-        y: <(!baseSize / 2 - !obsidianBulletSize * !obsidianBulletScale / 2)#i>
-        textureName: "obsidian_bullet"
-        scaleX: !obsidianBulletScale
-        scaleY: !obsidianBulletScale
-    }
-
-]
-
+!bulletsOffset = 0
+!coverOffset = 11
 
 cards: [
 
     // Bullets --------------------------
 
     {
-        name: !cards.0.name
+        name: !cards.<!bulletsOffset + 0>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.0.name
+                textureName: !cards.<!bulletsOffset + 0>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.0.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 0>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.0.cost#s>
+                text: <!cards.<!bulletsOffset + 0>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.1.name
+        name: !cards.<!bulletsOffset + 1>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.1.name
+                textureName: !cards.<!bulletsOffset + 1>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.1.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 1>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.1.cost#s>
+                text: <!cards.<!bulletsOffset + 1>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.2.name
+        name: !cards.<!bulletsOffset + 2>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.2.name
+                textureName: !cards.<!bulletsOffset + 2>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.2.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 2>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.2.cost#s>
+                text: <!cards.<!bulletsOffset + 2>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.3.name
+        name: !cards.<!bulletsOffset + 3>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.3.name
+                textureName: !cards.<!bulletsOffset + 3>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.3.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 3>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.3.cost#s>
+                text: <!cards.<!bulletsOffset + 3>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.4.name
+        name: !cards.<!bulletsOffset + 4>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.4.name
+                textureName: !cards.<!bulletsOffset + 4>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.4.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 4>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.4.cost#s>
+                text: <!cards.<!bulletsOffset + 4>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.5.name
+        name: !cards.<!bulletsOffset + 5>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.5.name
+                textureName: !cards.<!bulletsOffset + 5>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.5.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 5>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.5.cost#s>
+                text: <!cards.<!bulletsOffset + 5>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.6.name
+        name: !cards.<!bulletsOffset + 6>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.6.name
+                textureName: !cards.<!bulletsOffset + 6>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.6.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 6>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.6.cost#s>
+                text: <!cards.<!bulletsOffset + 6>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.7.name
+        name: !cards.<!bulletsOffset + 7>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.7.name
+                textureName: !cards.<!bulletsOffset + 7>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.7.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 7>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.7.cost#s>
+                text: <!cards.<!bulletsOffset + 7>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.8.name
+        name: !cards.<!bulletsOffset + 8>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.8.name
+                textureName: !cards.<!bulletsOffset + 8>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.8.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 8>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.8.cost#s>
+                text: <!cards.<!bulletsOffset + 8>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.9.name
+        name: !cards.<!bulletsOffset + 9>.name
         elements: [
-            ...!bulletSharedElements
             $ImageElement {
-                textureName: !cards.9.name
+                textureName: !cards.<!bulletsOffset + 9>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.9.baseDamage#s>
+                text: <!cards.<!bulletsOffset + 9>.baseDamage#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.9.cost#s>
+                text: <!cards.<!bulletsOffset + 9>.cost#s>
+            }
+        ]
+    }
+
+    {
+        name: !cards.<!bulletsOffset + 10>.name
+        elements: [
+            $ImageElement {
+                textureName: !cards.<!bulletsOffset + 10>.name
+                ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.<!bulletsOffset + 10>.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.<!bulletsOffset + 10>.cost#s>
             }
         ]
     }
@@ -344,91 +327,91 @@ cards: [
     // Cover --------------------------
     
     {
-        name: !cards.10.name
+        name: !cards.<!coverOffset + 0>.name
         elements: [
             $ImageElement {
-                textureName: !cards.10.name
+                textureName: !cards.<!coverOffset + 0>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.10.coverValue#s>
+                text: <!cards.<!coverOffset + 0>.coverValue#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.10.cost#s>
+                text: <!cards.<!coverOffset + 0>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.11.name
+        name: !cards.<!coverOffset + 1>.name
         elements: [
              $ImageElement {
-                 textureName: !cards.11.name
+                 textureName: !cards.<!coverOffset + 1>.name
                  ...!imageElementSharedKeys
              }
              $TextElement {
                  ...!valueElementSharedKeys
-                 text: <!cards.11.coverValue#s>
+                 text: <!cards.<!coverOffset + 1>.coverValue#s>
              }
              $TextElement {
                  ...!costElementSharedKeys
-                 text: <!cards.11.cost#s>
+                 text: <!cards.<!coverOffset + 1>.cost#s>
              }
         ]
     }
 
     {
-        name: !cards.12.name
+        name: !cards.<!coverOffset + 2>.name
         elements: [
             $ImageElement {
-                textureName: !cards.12.name
+                textureName: !cards.<!coverOffset + 2>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.12.coverValue#s>
+                text: <!cards.<!coverOffset + 2>.coverValue#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.12.cost#s>
+                text: <!cards.<!coverOffset + 2>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.13.name
+        name: !cards.<!coverOffset + 3>.name
         elements: [
             $ImageElement {
-                textureName: !cards.13.name
+                textureName: !cards.<!coverOffset + 3>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.13.coverValue#s>
+                text: <!cards.<!coverOffset + 3>.coverValue#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.13.cost#s>
+                text: <!cards.<!coverOffset + 3>.cost#s>
             }
         ]
     }
 
     {
-        name: !cards.14.name
+        name: !cards.<!coverOffset + 4>.name
         elements: [
             $ImageElement {
-                textureName: !cards.14.name
+                textureName: !cards.<!coverOffset + 4>.name
                 ...!imageElementSharedKeys
             }
             $TextElement {
                 ...!valueElementSharedKeys
-                text: <!cards.14.coverValue#s>
+                text: <!cards.<!coverOffset + 4>.coverValue#s>
             }
             $TextElement {
                 ...!costElementSharedKeys
-                text: <!cards.14.cost#s>
+                text: <!cards.<!coverOffset + 4>.cost#s>
             }
         ]
     }
