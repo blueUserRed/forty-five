@@ -1,4 +1,56 @@
 additionalCards: [
+    {
+        name: "incendiaryBullet"
+        amount: 1
+    }
+    {
+        name: "workerBullet"
+        amount: 1
+    }
+    {
+        name: "bigBullet"
+        amount: 1
+    }
+    {
+        name: "rottenBullet"
+        amount: 1
+    }
+    {
+        name: "diamondBullet"
+        amount: 1
+    }
+    {
+        name: "bewitchedBullet"
+        amount: 1
+    }
+    {
+        name: "explosiveBullet"
+        amount: 1
+    }
+    {
+        name: "leadersBullet"
+        amount: 1
+    }
+    {
+        name: "silverBullet"
+        amount: 1
+    }
+    {
+        name: "bigCrate"
+        amount: 1
+    }
+    {
+        name: "casket"
+        amount: 1
+    }
+    {
+        name: "jewelryBox"
+        amount: 1
+    }
+    {
+        name: "treasureChest"
+        amount: 1
+    }
 ]
 cardsToDraw: [
     {

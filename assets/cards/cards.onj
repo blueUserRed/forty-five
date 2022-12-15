@@ -2,6 +2,15 @@
 !burningPercent = 0.5
 !poisonDamage = 3
 
+!_bNumArrs = {
+    allExceptSelf: [1, 2, 3, 4, 5]
+}
+
+!bSelects = {
+    allExceptSelf: bNum(!_bNumArrs.allExceptSelf)
+    allBullets: bSelectByName("bullet")
+}
+
 cards: [
 
     // Bullets ----------------------------------
@@ -67,7 +76,7 @@ cards: [
         description: "can you burn a Bullet on a pyre? We can try \n \n If this Bullet is shot, the revolver turns one to the left instead of to the right"
         baseDamage: 7
         coverValue: 0
-        traitEffects: [ "leftRotating"]
+        traitEffects: [ "leftRotating" ]
         effects: []
         cost: 1
         type: $Bullet { }
@@ -90,7 +99,7 @@ cards: [
         baseDamage: 15
         coverValue: 0
         traitEffects: []
-        effects: [ buffDmg("enter", 4) ]
+        effects: [ buffDmg("enter", !bSelects.allExceptSelf, 4) ]
         cost: 2
         type: $Bullet { }
     }
@@ -234,6 +243,17 @@ cards: [
         traitEffects: [ "everlasting" ]
         effects: [ ]
         cost: 1
+        type: $Bullet { }
+    }
+    {
+        name: "invisibleBullet"
+        title: "invisible Bullet"
+        description: ""
+        baseDamage: 0
+        coverValue: 0
+        traitEffects: []
+        effects: [ ]
+        cost: 0
         type: $Bullet { }
     }
 
