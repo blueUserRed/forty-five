@@ -67,6 +67,10 @@ assets: {
             name: "arrow"
             file: "textures/cards/arrow.png"
         }
+        {
+            name: "BFB"
+            file: "textures/cards/BFB.png"
+        }
 
         {
             name: "crate"

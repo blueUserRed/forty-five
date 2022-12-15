@@ -115,10 +115,7 @@ abstract class EnemyAction {
                 fadeOut
             )
 
-            action {
-                println(insult)
-                gameScreenController.playGameAnimation(fadeAnimation)
-            }
+            action { gameScreenController.playGameAnimation(fadeAnimation) }
             delayUntil { fadeAnimation.isFinished() }
 
             delay(bufferTime)

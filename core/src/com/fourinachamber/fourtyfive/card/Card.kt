@@ -261,7 +261,7 @@ class Card(
 
                 onj.get<OnjArray>("effects")
                     .value
-                    .map { (it as OnjExtensions.OnjEffect).value }
+                    .map { (it as OnjExtensions.OnjEffect).value.copy() } //TODO: find a better solution
             )
 
             for (effect in card.effects) effect.card = card
