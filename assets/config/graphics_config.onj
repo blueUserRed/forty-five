@@ -56,9 +56,9 @@ bannerAnimation: {
 
 statusEffectIcons: {
     burning: "burning_icon"
-    burningScale: 0.008
+    burningScale: 0.025
     poison: "poison_icon"
-    poisonScale: 0.008
+    poisonScale: 0.025
 }
 
 destroyCardPostProcessor: {

@@ -51,15 +51,22 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         screenDataProvider.addLateRenderTask(renderTask)
 
         timeline = Timeline.timeline {
-            delay(1000)
+//            delay(1000)
             action { startTime = TimeUtils.millis() }
             delayUntil {
                 val timeSinceStart = TimeUtils.timeSinceMillis(startTime)
 //                val amount = (Math.random() * 0.08 * (timeSinceStart / 800.0).pow(3)).toInt().coerceAtLeast(1)
-                val amount = ((timeSinceStart.toFloat() / 2700)).toInt().coerceAtLeast(floor(Math.random() + 0.3).toInt())
+//                val amount = ((timeSinceStart.toFloat() / 2700)).toInt().coerceAtLeast(floor(Math.random() + 0.5).toInt())
+
+                val percent = timeSinceStart / 8000.0
+                println(percent)
+                val amount = ((percent * 10).pow(3) / 65).toInt().coerceAtLeast(1)
+                println(amount)
+
                 repeat(amount) { spawnRandomSprite() }
                 timeSinceStart > 4500
             }
+            delay(500)
             action { appearActor.isVisible = true }
             delay(3500)
             action {
@@ -74,7 +81,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         val iterator = sprites.iterator()
         while (iterator.hasNext()) {
             val sprite = iterator.next()
-            sprite.velocity += Vector2(0f, -0.07f)
+            sprite.velocity += Vector2(0f, -2.0f)
             sprite.update()
             if (sprite.y < -sprite.height) iterator.remove()
         }
@@ -108,7 +115,8 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         }
 
         fun update() {
-            setPosition(x + velocity.x, y + velocity.y)
+            val deltaTime = Gdx.graphics.deltaTime
+            setPosition(x + velocity.x * deltaTime, y + velocity.y * deltaTime)
             setOrigin(width / 2, height / 2)
             rotate(rotationalVelocity)
             rotation %= 360

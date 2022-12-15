@@ -210,7 +210,6 @@ class FadeInAndOutTextAnimation(
         super.start()
         label.setFontScale(fontScale)
         label.setAlignment(Align.center)
-        label.debug = true
         label.setPosition(x, y + label.prefHeight / 2, Align.center)
     }
 

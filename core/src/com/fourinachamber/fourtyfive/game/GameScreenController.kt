@@ -15,6 +15,7 @@ import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.*
+import java.lang.Integer.max
 import kotlin.properties.Delegates
 
 
@@ -62,7 +63,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var playerLivesLabel: CustomLabel? = null
     var reservesLabel: CustomLabel? = null
 
-    private var cardPrototypes: MutableList<CardPrototype> = mutableListOf()
+    private var cardPrototypes: List<CardPrototype> = listOf()
     private val createdCards: MutableList<Card> = mutableListOf()
     private var bulletStack: MutableList<Card> = mutableListOf()
     private var coverCardStack: MutableList<Card> = mutableListOf()
@@ -74,6 +75,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var remainingCardsToDraw: Int? = null
 
     var curPlayerLives: Int = basePlayerLives
+        set(value) {
+            field = max(value, 0)
+        }
 
     private val timeline: Timeline = Timeline(mutableListOf()).apply {
         start()
@@ -111,6 +115,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
 
     override fun init(screenDataProvider: ScreenDataProvider) {
+        SaveState.read()
         curScreen = screenDataProvider
 
         initCards()
