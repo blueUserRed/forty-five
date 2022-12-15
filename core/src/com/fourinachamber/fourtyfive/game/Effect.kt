@@ -8,7 +8,6 @@ import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
-import kotlinx.coroutines.awaitAll
 import onj.OnjObject
 import kotlin.properties.Delegates
 
@@ -95,7 +94,11 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
-    class BuffDamage(trigger: Trigger, val amount: Int) : Effect(trigger) {
+    class BuffDamage(
+        trigger: Trigger,
+        val amount: Int,
+        private val bulletSelector: BulletSelector? = null
+    ) : Effect(trigger) {
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
             val modifier = Card.CardModifier(
@@ -112,7 +115,8 @@ abstract class Effect(val trigger: Trigger) {
 
             for (i in 1..5) {
                 val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
-                if (card !== this.card) card.addModifier(modifier)
+                if (!(bulletSelector?.invoke(this.card, card, i) ?: true)) continue
+                card.addModifier(modifier)
             }
             return null
         }
@@ -185,6 +189,14 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    class PutCardInHand(trigger: Trigger, val cardName: String, val amount: Int) : Effect(trigger) {
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+            repeat(amount) { gameScreenController.putCardInHand(cardName) }
+            return null
+        }
+    }
+
     protected fun shakeCardTimeline(card: Card, shakeActorAction: ShakeActorAction): Timeline = Timeline.timeline {
         action { card.actor.addAction(shakeActorAction) }
         delayUntil { shakeActorAction.isComplete }
@@ -224,6 +236,8 @@ abstract class Effect(val trigger: Trigger) {
     }
 
 }
+
+typealias BulletSelector = (self: Card, other: Card, slot: Int) -> Boolean
 
 enum class Trigger {
 

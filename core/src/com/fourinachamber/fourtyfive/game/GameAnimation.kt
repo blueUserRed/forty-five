@@ -146,6 +146,7 @@ open class FadeInAndOutAnimation(
 
     private var startTime = 0L
     private var runUntil = 0L
+
     override fun start() {
         startTime = TimeUtils.millis()
         runUntil = startTime + duration

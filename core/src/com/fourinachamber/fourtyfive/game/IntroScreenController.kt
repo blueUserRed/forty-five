@@ -51,24 +51,20 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         screenDataProvider.addLateRenderTask(renderTask)
 
         timeline = Timeline.timeline {
-//            delay(1000)
+            delay(1000)
             action { startTime = TimeUtils.millis() }
             delayUntil {
                 val timeSinceStart = TimeUtils.timeSinceMillis(startTime)
-//                val amount = (Math.random() * 0.08 * (timeSinceStart / 800.0).pow(3)).toInt().coerceAtLeast(1)
-//                val amount = ((timeSinceStart.toFloat() / 2700)).toInt().coerceAtLeast(floor(Math.random() + 0.5).toInt())
 
-                val percent = timeSinceStart / 8000.0
-                println(percent)
-                val amount = ((percent * 10).pow(3) / 65).toInt().coerceAtLeast(1)
-                println(amount)
+                val percent = timeSinceStart / 2000.0
+                val amount = ((percent * 10).pow(3) / 128).toInt().coerceAtLeast(1)
 
                 repeat(amount) { spawnRandomSprite() }
-                timeSinceStart > 4500
+                timeSinceStart > 2000
             }
             delay(500)
             action { appearActor.isVisible = true }
-            delay(3500)
+            delay(2000)
             action {
                 FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(nextScreen)).build()
             }
@@ -81,7 +77,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         val iterator = sprites.iterator()
         while (iterator.hasNext()) {
             val sprite = iterator.next()
-            sprite.velocity += Vector2(0f, -2.0f)
+            sprite.velocity += Vector2(0f, -2.5f)
             sprite.update()
             if (sprite.y < -sprite.height) iterator.remove()
         }
@@ -92,7 +88,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         val worldWidth = screenDataProvider.stage.viewport.worldWidth
         val worldHeight = screenDataProvider.stage.viewport.worldHeight
 
-        val scale = Math.random().toFloat() * 0.06f + 0.03f
+        val scale = Math.random().toFloat() * 0.04f + 0.03f
         val texture = textures.random()
         val sprite = CardSprite(texture, 1.0f)
         sprite.setSize(texture.regionWidth * scale, texture.regionHeight * scale)

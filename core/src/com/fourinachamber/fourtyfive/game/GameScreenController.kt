@@ -376,6 +376,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }
 
+    fun putCardInHand(name: String) {
+        val cardProto = cardPrototypes
+            .firstOrNull { it.name == name }
+            ?: throw RuntimeException("unknown card: $name")
+        cardHand!!.addCard(cardProto.create())
+    }
+
     /**
      * shoots the revolver
      */
