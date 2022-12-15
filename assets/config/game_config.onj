@@ -46,7 +46,7 @@ enemyConfig: {
             scaleY: 0.03
             detailFont: "vanilla_whale"
             detailFontScale: 0.06
-            detailFontColor: !color.blue
+            detailFontColor: !color.black
         }
     ]
 
