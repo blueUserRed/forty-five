@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.profiling.GLProfiler
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
@@ -15,6 +16,7 @@ import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.plus
 import onj.*
+import kotlin.math.floor
 import kotlin.math.pow
 
 class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
@@ -53,7 +55,8 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             action { startTime = TimeUtils.millis() }
             delayUntil {
                 val timeSinceStart = TimeUtils.timeSinceMillis(startTime)
-                val amount = (Math.random() * 0.08 * (timeSinceStart / 800.0).pow(3)).toInt().coerceAtLeast(1)
+//                val amount = (Math.random() * 0.08 * (timeSinceStart / 800.0).pow(3)).toInt().coerceAtLeast(1)
+                val amount = ((timeSinceStart.toFloat() / 2700)).toInt().coerceAtLeast(floor(Math.random() + 0.3).toInt())
                 repeat(amount) { spawnRandomSprite() }
                 timeSinceStart > 4500
             }
@@ -82,12 +85,12 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         val worldWidth = screenDataProvider.stage.viewport.worldWidth
         val worldHeight = screenDataProvider.stage.viewport.worldHeight
 
-        val scale = Math.random().toFloat() * 0.04f + 0.02f
+        val scale = Math.random().toFloat() * 0.06f + 0.03f
         val texture = textures.random()
         val sprite = CardSprite(texture, 1.0f)
         sprite.setSize(texture.regionWidth * scale, texture.regionHeight * scale)
         sprite.setPosition(worldWidth * Math.random().toFloat(), worldHeight + Math.random().toFloat() * 5)
-        sprite.rotationalVelocity = Math.random().toFloat() - 0.5f
+        sprite.rotationalVelocity = (Math.random().toFloat() - 0.5f) * 1.5f
         sprites.add(sprite)
     }
 

@@ -8,7 +8,7 @@ import "imports/colors.onj" as color
             weight: 4
             min: 5
             max: 10
-            indicatorTextureScale: 0.03
+            indicatorTextureScale: 0.02
             indicatorTexture: "normal_bullet"
         }
 
@@ -16,15 +16,15 @@ import "imports/colors.onj" as color
             weight: 2
             min: 1
             max: 10
-            indicatorTextureScale: 0.008
-            indicatorTexture: "burning_icon"
+            indicatorTextureScale: 0.02
+            indicatorTexture: "shield_icon"
         }
 
         $DoNothingEnemyAction {
-            weight: 1000
+            weight: 1
             insults: ["If all your brains were dynamite, \n there wouldnt be enough to blow your nose", "You wouldnt even be able \n to teach a hen to cuck", "Your brain cavity wouldnt even \n make a drinkin cup for a canary", "I hope you play the cards \n better than you shoot", "Your hat got a knit, \n you son of a bitch"]
-            indicatorTextureScale: 0.008
-            indicatorTexture: "burning_icon"
+            indicatorTextureScale: 0.02
+            indicatorTexture: "insult_icon"
         }
 
     ]
@@ -38,12 +38,12 @@ enemyConfig: {
             lives: 12
             brain: !defaultEnemyBrain
             texture: "enemy"
-            coverIcon: "burning_icon"
+            coverIcon: "shield_icon"
+            coverIconScale: 0.03
             offsetX: 0.0
             offsetY: 15.0
             scaleX: 0.03
             scaleY: 0.03
-            coverIconScale: 0.008
             detailFont: "vanilla_whale"
             detailFontScale: 0.06
             detailFontColor: !color.blue
