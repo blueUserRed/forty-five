@@ -12,6 +12,7 @@ import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 import onj.OnjObject
 import onj.OnjParser
+import onj.OnjParserException
 import onj.OnjSchemaParser
 
 /**

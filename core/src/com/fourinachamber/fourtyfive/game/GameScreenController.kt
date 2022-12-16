@@ -392,7 +392,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         val cardToShoot = revolver.getCardInSlot(5)
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
-        if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
 
         var enemyDamageTimeline: Timeline? = null
         var statusEffectTimeline: Timeline? = null
@@ -405,7 +404,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             enemyDamageTimeline = Timeline.timeline {
                 action {
                     if (cardToShoot.shouldRemoveAfterShot) {
-                        revolver.removeCard(if (rotateLeft) 1 else 4)
+                        revolver.removeCard(5)
                     }
                 }
                 include(enemy.damage(cardToShoot.curDamage, this@GameScreenController))
@@ -428,6 +427,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             effectTimeline?.let { include(it) }
 
             action {
+                if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
                 checkCardModifierValidity()
 
                 revolver
