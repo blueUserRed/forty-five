@@ -17,6 +17,7 @@ packer: {
 assets: {
     pixmaps: [
 
+        // Bullets---------------------------
         {
             name: "base"
             file: "textures/cards/base_transparent.png"
@@ -46,7 +47,6 @@ assets: {
             name: "rottenBullet"
             file: "textures/cards/rottenBullet.png"
         }
-
         {
             name: "workerBullet"
             file: "textures/cards/workerBullet.png"
@@ -71,6 +71,20 @@ assets: {
             name: "BFB"
             file: "textures/cards/BFB.png"
         }
+        {
+            name: "obsidianBullet"
+            file: "textures/cards/obsidianBullet.png"
+        }
+        {
+            name: "undeadBullet"
+            file: "textures/cards/obsidianBullet.png"
+        }
+        {
+            name: "rustedBullet"
+            file: "textures/cards/rustedBullet.png"
+        }
+
+        // covers---------------------------
 
         {
             name: "crate"
@@ -124,7 +138,7 @@ assets: {
 }
 
 !bulletsOffset = 0
-!coverOffset = 11
+!coverOffset = 14
 
 cards: [
 
@@ -327,6 +341,61 @@ cards: [
             }
         ]
     }
+
+    {
+        name: !cards.<!bulletsOffset + 11>.name
+        elements: [
+            $ImageElement {
+                textureName: !cards.<!bulletsOffset + 11>.name
+                ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.<!bulletsOffset + 11>.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.<!bulletsOffset + 11>.cost#s>
+            }
+        ]
+    }
+
+    {
+        name: !cards.<!bulletsOffset + 12>.name
+        elements: [
+            $ImageElement {
+                textureName: !cards.<!bulletsOffset + 12>.name
+                ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.<!bulletsOffset + 12>.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.<!bulletsOffset + 12>.cost#s>
+            }
+        ]
+    }
+
+    {
+        name: !cards.<!bulletsOffset + 13>.name
+        elements: [
+            $ImageElement {
+                textureName: !cards.<!bulletsOffset + 13>.name
+                ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.<!bulletsOffset + 13>.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.<!bulletsOffset + 13>.cost#s>
+            }
+        ]
+    }
+
     
     // Cover --------------------------
     

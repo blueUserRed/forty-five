@@ -4,11 +4,13 @@
 
 !_bNumArrs = {
     allExceptSelf: [1, 2, 3, 4, 5]
+    fourButNotSelf: [ 4 ]
 }
 
 !bSelects = {
     allExceptSelf: bNum(!_bNumArrs.allExceptSelf)
     allBullets: bSelectByName("bullet")
+    fourButNotSelf: bNum(!_bNumArrs.fourButNotSelf)
 }
 
 cards: [
@@ -159,6 +161,30 @@ cards: [
         cost: 5
         type: $Bullet { }
     }
+    {
+        name: "obsidianBullet"
+        title: "obsidian Bullet"
+        flavourText: "no, you CAN'T make a portal out of it"
+        description: ""
+        baseDamage: 20
+        coverValue: 0
+        traitEffects: []
+        effects: [ ]
+        cost: 2
+        type: $Bullet { }
+    }
+    {
+         name: "rustedBullet"
+         title: "rusted Bullet"
+         flavourText: "those fucking kids with their rain dances"
+         description: "looses 1 dmg for everytime it turns in the revolver"
+         baseDamage: 10
+         coverValue: 0
+         traitEffects: [ "rotten" ]
+         effects: [ ]
+         cost: 0
+         type: $Bullet { }
+     }
 
     // Cover ----------------------------------
 
@@ -201,7 +227,7 @@ cards: [
         type: $Cover { }
     }
 
-    { // 13
+    {
         name: "jewelryBox"
         title: "jewelry Box"
         flavourText: "The lady I took it from didn't need it anyways"
@@ -242,30 +268,6 @@ cards: [
         type: $Bullet { }
     }
     {
-        name: "obsidianBullet"
-        title: "obsidian Bullet"
-        flavourText: ""
-        description: ""
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        effects: [ ]
-        cost: 2
-        type: $Bullet { }
-    }
-    {
-        name: "rustedBullet"
-        title: "rusted Bullet"
-        flavourText: ""
-        description: ""
-        baseDamage: 10
-        coverValue: 0
-        traitEffects: [ "rotten" ]
-        effects: [ ]
-        cost: 0
-        type: $Bullet { }
-    }
-    {
         name: "invisibleBullet"
         title: "invisible Bullet"
         flavourText: ""
@@ -277,6 +279,18 @@ cards: [
         cost: 0
         type: $Bullet { }
     }
+    {
+        name: "undeadBullet"
+        title: "undead Bullet"
+        flavourText: "no flavour text"
+        description: "no description"
+        baseDamage: 12
+        coverValue: 0
+        traitEffects: [ "undead" ]
+        effects: [ buffDmg("shot", !bSelects.fourButNotSelf, 5) ] // TODO: replace with gift
+        cost: 2
+        type: $Bullet { }
+    }
 
 ]
 
@@ -286,11 +300,7 @@ defaultCover: "crate"
 startDeck: [
 
     {
-        name: "BFB"
-        amount: 1
-    }
-    {
-        name: "workerBullet"
+        name: "rustedBullet"
         amount: 3
     }
 

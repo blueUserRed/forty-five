@@ -53,7 +53,13 @@ object OnjExtensions {
             var allowSelf = false
 
             for (value in onjArr.value) when (value) {
-                is OnjInt -> nums.add(value.value.toInt())
+                is OnjInt -> {
+                    var num = value.value.toInt()
+                    // convert slot from external representation (1 comes after 5)
+                    // to internal representation (4 comes after 5)
+                    num = if (num == 5) 5 else 5 - num
+                    nums.add(num)
+                }
                 is OnjString -> {
                     if (value.value.lowercase() != "this") {
                         throw RuntimeException("string '${value.value}' not allowed in bNum")
