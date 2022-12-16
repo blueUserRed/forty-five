@@ -37,7 +37,7 @@ object OnjExtensions {
             OnjEffect(Effect.Destroy(triggerOrError(it[0].value as String)))
         },
 
-        OnjFunction("putCardInHand", listOf(OnjString::class, OnjString::class)) {
+        OnjFunction("putCardInHand", listOf(OnjString::class, OnjString::class, OnjInt::class)) {
             OnjEffect(Effect.PutCardInHand(
                 triggerOrError(it[0].value as String),
                 it[1].value as String,
