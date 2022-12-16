@@ -185,6 +185,55 @@ cards: [
          cost: 0
          type: $Bullet { }
      }
+     {
+         name: "invisibleBullet"
+         title: "invisible Bullet"
+         flavourText: '"        "'
+         description: ""
+         baseDamage: 0
+         coverValue: 0
+         traitEffects: []
+         effects: [ ]
+         cost: 0
+         type: $Bullet { }
+     }
+     {
+         name: "fakeBullet"
+         title: "fake Bullet"
+         flavourText: "yeah, that's how I felt when  I bought it. Scammed. At least I got some value out of it"
+         description: "If this  Bullet shoots: add four reserves"
+         baseDamage: 0
+         coverValue: 0
+         traitEffects: []
+         effects: [ reserveGain("shot", 4) ]
+         cost: 2
+         type: $Bullet { }
+     }
+     {
+         name: "bulletBulletBullet"
+         title: "bullet bullet bullet"
+         flavourText: "It's getting old..."
+         description: "If this Bullet enters the revolver: all other bullets named [Bullet] get +10 dmg as long as this Bullet is in the Revolver"
+         baseDamage: 16
+         coverValue: 0
+         traitEffects: []
+         effects: [ buffDmg("enter", !bSelects.allBullets, 10) ]
+         cost: 3
+         type: $Bullet { }
+     }
+     {
+         name: "bulletBullet"
+         title: "bullet bullet"
+         flavourText: "Daaaamn, can i put ma Bulllet in ya Bullet? "
+         description: "If this Bullet enters the revolver: create 3 cards named [Bullet] in your hand"
+         baseDamage: 16
+         coverValue: 0
+         traitEffects: []
+         effects: [ putCardInHand("enter", "bullet", 3) ]
+         cost: 2
+         type: $Bullet { }
+     }
+
 
     // Cover ----------------------------------
 
@@ -268,18 +317,6 @@ cards: [
         type: $Bullet { }
     }
     {
-        name: "invisibleBullet"
-        title: "invisible Bullet"
-        flavourText: ""
-        description: ""
-        baseDamage: 0
-        coverValue: 0
-        traitEffects: []
-        effects: [ ]
-        cost: 0
-        type: $Bullet { }
-    }
-    {
         name: "undeadBullet"
         title: "undead Bullet"
         flavourText: "no flavour text"
@@ -300,7 +337,7 @@ defaultCover: "crate"
 startDeck: [
 
     {
-        name: "rustedBullet"
+        name: "bulletBullet"
         amount: 3
     }
 

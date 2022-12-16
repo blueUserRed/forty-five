@@ -46,7 +46,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
     private val basePlayerLives = onj.get<Long>("playerLives").toInt()
     private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
-    private val maxCards = onj.get<Long>("maxCards").toInt()
+    val maxCards = onj.get<Long>("maxCards").toInt()
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
     var curScreen: ScreenDataProvider? = null

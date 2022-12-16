@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import onj.OnjObject
+import java.lang.Integer.min
 import kotlin.properties.Delegates
 
 abstract class Effect(val trigger: Trigger) {
@@ -204,7 +205,8 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = PutCardInHand(trigger, cardName, amount)
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
-            repeat(amount) { gameScreenController.putCardInHand(cardName) }
+            val addMax = gameScreenController.maxCards - gameScreenController.cardHand!!.cards.size
+            repeat(min(amount, addMax)) { gameScreenController.putCardInHand(cardName) }
             return null
         }
     }

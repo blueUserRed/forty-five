@@ -36,9 +36,9 @@ object FourtyFive : Game() {
     override fun create() {
         init()
         Gdx.app.logLevel = Application.LOG_DEBUG
-//        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-//        cardGenerator.prepare()
-//        cardGenerator.generateCards()
+        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+        cardGenerator.prepare()
+        cardGenerator.generateCards()
         curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
     }
 
