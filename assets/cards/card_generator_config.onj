@@ -99,6 +99,14 @@ assets: {
             name: "bulletBullet"
             file: "textures/cards/bulletBullet.png"
         }
+        {
+            name: "undeadBullet"
+            file: "textures/cards/undeadBullet.png"
+        }
+        {
+            name: "poisonBullet"
+            file: "textures/cards/poisonBullet.png"
+        }
 
         // covers---------------------------
 
@@ -154,7 +162,7 @@ assets: {
 }
 
 !bulletsOffset = 0
-!coverOffset = 18
+!coverOffset = 20
 
 cards: [
 
@@ -480,6 +488,42 @@ cards: [
             $TextElement {
                 ...!costElementSharedKeys
                 text: <!cards.<!bulletsOffset + 17>.cost#s>
+            }
+        ]
+    }
+
+    {
+        name: !cards.<!bulletsOffset + 18>.name
+        elements: [
+            $ImageElement {
+                textureName: !cards.<!bulletsOffset + 18>.name
+                ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.<!bulletsOffset + 18>.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.<!bulletsOffset + 18>.cost#s>
+            }
+        ]
+    }
+
+    {
+        name: !cards.<!bulletsOffset + 19>.name
+        elements: [
+            $ImageElement {
+                textureName: !cards.<!bulletsOffset + 19>.name
+                ...!imageElementSharedKeys
+            }
+            $TextElement {
+                ...!valueElementSharedKeys
+                text: <!cards.<!bulletsOffset + 19>.baseDamage#s>
+            }
+            $TextElement {
+                ...!costElementSharedKeys
+                text: <!cards.<!bulletsOffset + 19>.cost#s>
             }
         ]
     }

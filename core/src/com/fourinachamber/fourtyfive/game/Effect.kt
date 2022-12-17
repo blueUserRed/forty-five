@@ -138,6 +138,47 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    class GiftDamage(
+        trigger: Trigger,
+        val amount: Int,
+        private val bulletSelector: BulletSelector? = null
+    ) : Effect(trigger) {
+
+        override fun copy(): Effect = GiftDamage(trigger, amount, bulletSelector)
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+            val modifier = Card.CardModifier(
+                amount,
+                TemplateString(
+                    giftDetailTextRawString,
+                    mapOf(
+                        "text" to if (amount > 0) "buff" else "debuff",
+                        "amount" to amount,
+                        "source" to card.title
+                    )
+                ),
+            ) { true }
+
+            for (i in 1..5) {
+                val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
+                if (!(bulletSelector?.invoke(this.card, card, i) ?: true)) continue
+                card.addModifier(modifier)
+            }
+            return null
+        }
+
+        companion object {
+
+            private lateinit var giftDetailTextRawString: String
+
+            fun init(config: OnjObject) {
+                val tmplOnj = config.get<OnjObject>("stringTemplates")
+                giftDetailTextRawString = tmplOnj.get<String>("giftDetailText")
+            }
+        }
+
+    }
+
     class Draw(trigger: Trigger, val amount: Int) : Effect(trigger) {
 
         private val shakeActorAction = ShakeActorAction(
@@ -245,6 +286,7 @@ abstract class Effect(val trigger: Trigger) {
 
             ReserveGain.init(config)
             BuffDamage.init(config)
+            GiftDamage.init(config)
         }
 
     }

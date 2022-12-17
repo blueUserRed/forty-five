@@ -71,10 +71,9 @@ coverStackParticles: {
 }
 
 stringTemplates:  {
-    playerLives: "{curLives}/{baseLives}"
-    reserves: "{curReserves}/{baseReserves}"
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!"
     buffDetailText: "{source} applied a {text} of {amount}!"
+    giftDetailText: "{source} gifted a {text} of {amount}!"
 }
 
 fadeInAndOutAnimation: {

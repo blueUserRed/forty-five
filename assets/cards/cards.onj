@@ -184,8 +184,8 @@ cards: [
          effects: [ ]
          cost: 0
          type: $Bullet { }
-     }
-     {
+    }
+    {
          name: "invisibleBullet"
          title: "invisible Bullet"
          flavourText: '"        "'
@@ -196,8 +196,8 @@ cards: [
          effects: [ ]
          cost: 0
          type: $Bullet { }
-     }
-     {
+    }
+    {
          name: "fakeBullet"
          title: "fake Bullet"
          flavourText: "yeah, that's how I felt when  I bought it. Scammed. At least I got some value out of it"
@@ -208,8 +208,8 @@ cards: [
          effects: [ reserveGain("shot", 4) ]
          cost: 2
          type: $Bullet { }
-     }
-     {
+    }
+    {
          name: "bulletBulletBullet"
          title: "bullet bullet bullet"
          flavourText: "It's getting old..."
@@ -220,8 +220,8 @@ cards: [
          effects: [ buffDmg("enter", !bSelects.allBullets, 10) ]
          cost: 3
          type: $Bullet { }
-     }
-     {
+    }
+    {
          name: "bulletBullet"
          title: "bullet bullet"
          flavourText: "Daaaamn, can i put ma Bulllet in ya Bullet? "
@@ -232,7 +232,31 @@ cards: [
          effects: [ putCardInHand("enter", "bullet", 3) ]
          cost: 2
          type: $Bullet { }
-     }
+    }
+    {
+         name: "undeadBullet"
+         title: "undead Bullet"
+         flavourText: "no flavour text"
+         description: "no description"
+         baseDamage: 12
+         coverValue: 0
+         traitEffects: [ "undead" ]
+         effects: [ giftDmg("shot", !bSelects.fourButNotSelf, 5) ]
+         cost: 2
+         type: $Bullet { }
+    }
+    {
+        name: "poisonBullet"
+        title: "poison Bullet"
+        flavourText: ""
+        description: ""
+        baseDamage: 9
+        coverValue: 0
+        traitEffects: []
+        effects: [ giveStatus("shot", poison(3, !poisonDamage)) ]
+        cost: 1
+        type: $Bullet { }
+    }
 
 
     // Cover ----------------------------------
@@ -302,33 +326,6 @@ cards: [
         type: $Cover { }
     }
 
-    // not yet implemented
-
-    {
-        name: "poisonBullet"
-        title: "poison Bullet"
-        flavourText: ""
-        description: ""
-        baseDamage: 9
-        coverValue: 0
-        traitEffects: []
-        effects: [ giveStatus("shot", poison(3, !poisonDamage)) ]
-        cost: 1
-        type: $Bullet { }
-    }
-    {
-        name: "undeadBullet"
-        title: "undead Bullet"
-        flavourText: "no flavour text"
-        description: "no description"
-        baseDamage: 12
-        coverValue: 0
-        traitEffects: [ "undead" ]
-        effects: [ buffDmg("shot", !bSelects.fourButNotSelf, 5) ] // TODO: replace with gift
-        cost: 2
-        type: $Bullet { }
-    }
-
 ]
 
 defaultBullet: "bullet"
@@ -337,7 +334,11 @@ defaultCover: "crate"
 startDeck: [
 
     {
-        name: "bulletBullet"
+        name: "poisonBullet"
+        amount: 3
+    }
+    {
+        name: "incendiaryBullet"
         amount: 3
     }
 

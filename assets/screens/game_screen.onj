@@ -103,7 +103,7 @@ assets: {
             defines: [
                 "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
                 "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum",
-                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon"
+                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon", "poison_icon"
             ]
         }
 
