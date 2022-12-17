@@ -103,7 +103,8 @@ assets: {
             defines: [
                 "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
                 "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum",
-                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon", "poison_icon"
+                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon",
+                "poison_icon", "draw_bullet", "draw_cover"
             ]
         }
 
@@ -307,30 +308,75 @@ options: {
     fillY: true
     zIndex: !overlayZIndex
     backgroundTexture: "card_detail_background"
+//    debug: true
     rows: [
 
+        {
+            cells: [
+                {
+                    colspan: 2
+                    padTop: 4.0
+                    element: $TemplateLabel {
+                        font: "red_wing"
+                        template: "draw {game.remainingCardsToDraw} cards"
+                        fontScale: 0.18
+                        align: "center"
+                        color: !color.white
+                    }
+                }
+            ]
+        }
 
         {
             cells: [
 
                 {
-                    element: $Label {
-                        font: "vanilla_whale"
-                        text: "BULLETS"
-                        fontScale: 0.15
+//                    padTop: 6.0
+                    padBottom: -9.0
+                    element: $TemplateLabel {
+                        font: "red_wing"
+                        template: "{game.remainingBullets} bullets remaining in stack"
+                        fontScale: 0.13
                         align: "center"
                         color: !color.white
+                    }
+                }
+                {
+//                    padTop: 6.0
+                    padBottom: -6.0
+                    element: $TemplateLabel {
+                        font: "red_wing"
+                        template: "{game.remainingCovers} covers remaining in stack"
+                        fontScale: 0.13
+                        align: "center"
+                        color: !color.white
+                    }
+                }
+
+            ]
+        }
+
+        {
+            cells: [
+
+                {
+                    sizeToActor: true
+                    element: $Image {
+                        textureName: "draw_bullet"
+                        reportDimensionsWithScaling: true
+                        scaleX: 0.08
+                        scaleY: 0.08
                         behaviours: [ $DrawBulletButtonBehaviour { }, !buttonHoverBehaviour ]
                     }
                 }
 
                 {
-                    element: $Label {
-                        font: "vanilla_whale"
-                        text: "COVER CARDS"
-                        fontScale: 0.15
-                        align: "center"
-                        color: !color.white
+                    sizeToActor: true
+                    element: $Image {
+                        textureName: "draw_cover"
+                        reportDimensionsWithScaling: true
+                        scaleX: 0.08
+                        scaleY: 0.08
                         behaviours: [ $DrawCoverCardButtonBehaviour { }, !buttonHoverBehaviour ]
                     }
                 }

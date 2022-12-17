@@ -226,16 +226,24 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         createdCards.add(card)
     }
 
-    private fun initTemplateStringParams() {
-        TemplateString.bindParam("game.curReserves") { curReserves }
-        TemplateString.bindParam("game.baseReserves") { baseReserves }
-        TemplateString.bindParam("game.curPlayerLives") { curPlayerLives }
-        TemplateString.bindParam("game.basePlayerLives") { basePlayerLives }
+    private fun initTemplateStringParams() = with(TemplateString) {
+        bindParam("game.curReserves") { curReserves }
+        bindParam("game.baseReserves") { baseReserves }
+        bindParam("game.curPlayerLives") { curPlayerLives }
+        bindParam("game.basePlayerLives") { basePlayerLives }
+        bindParam("game.remainingCardsToDraw") { remainingCardsToDraw ?: 0 }
+        bindParam("game.remainingBullets") { bulletStack.size }
+        bindParam("game.remainingCovers") { coverCardStack.size }
     }
 
-    private fun removeTemplateStringParams() {
-        TemplateString.removeParam("game.curReserves")
-        TemplateString.removeParam("game.baseReserves")
+    private fun removeTemplateStringParams() = with(TemplateString) {
+        removeParam("game.curReserves")
+        removeParam("game.baseReserves")
+        removeParam("game.curPlayerLives")
+        removeParam("game.basePlayerLives")
+        removeParam("game.remainingCardsToDraw")
+        removeParam("game.remainingBullets")
+        removeParam("game.remainingCovers")
     }
 
     private fun changePhase(next: Gamephase) {

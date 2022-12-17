@@ -248,8 +248,8 @@ cards: [
     {
         name: "poisonBullet"
         title: "poison Bullet"
-        flavourText: ""
-        description: ""
+        flavourText: "if you use this bullet, folks might call you a coward. And they would be right"
+        description: "If this Bullet shoots: The enemy gets the status poison for 3 revolver turns"
         baseDamage: 9
         coverValue: 0
         traitEffects: []
@@ -334,75 +334,64 @@ defaultCover: "crate"
 startDeck: [
 
     {
-        name: "poisonBullet"
-        amount: 3
+        name: "bullet"
+        amount: 4
     }
     {
         name: "incendiaryBullet"
-        amount: 3
+        amount: 2
     }
-
-//////////////////////////////////////////
-
-//    {
-//        name: "bullet"
-//        amount: 4
-//    }
-//    {
-//        name: "incendiaryBullet"
-//        amount: 2
-//    }
-//    {
-//        name: "workerBullet"
-//        amount: 1
-//    }
-//    {
-//        name: "bigBullet"
-//        amount: 2
-//    }
-//    {
-//        name: "rottenBullet"
-//        amount: 1
-//    }
-//    {
-//        name: "diamondBullet"
-//        amount: 1
-//    }
-//    {
-//        name: "bewitchedBullet"
-//        amount: 1
-//    }
-//    {
-//        name: "explosiveBullet"
-//        amount: 1
-//    }
-//    {
-//        name: "leadersBullet"
-//        amount: 1
-//    }
-//    {
-//        name: "silverBullet"
-//        amount: 1
-//    }
-//    {
-//        name: "crate"
-//        amount: 5
-//    }
-//    {
-//        name: "bigCrate"
-//        amount: 2
-//    }
-//    {
-//        name: "casket"
-//        amount: 1
-//    }
-//    {
-//        name: "jewelryBox"
-//        amount: 1
-//    }
-//    {
-//        name: "treasureChest"
-//        amount: 1
-//    }
+    {
+        name: "workerBullet"
+        amount: 1
+    }
+    {
+        name: "bigBullet"
+        amount: 2
+    }
+    {
+        name: "rottenBullet"
+        amount: 1
+    }
+    {
+        name: "diamondBullet"
+        amount: 1
+    }
+    {
+        name: "bewitchedBullet"
+        amount: 1
+    }
+    {
+        name: "explosiveBullet"
+        amount: 1
+    }
+    {
+        name: "leadersBullet"
+        amount: 1
+    }
+    {
+        name: "silverBullet"
+        amount: 1
+    }
+    {
+        name: "crate"
+        amount: 5
+    }
+    {
+        name: "bigCrate"
+        amount: 2
+    }
+    {
+        name: "casket"
+        amount: 1
+    }
+    {
+        name: "jewelryBox"
+        amount: 1
+    }
+    {
+        name: "treasureChest"
+        amount: 1
+    }
 
 ]
