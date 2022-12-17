@@ -1,61 +1,46 @@
 additionalCards: [
-    {
-        name: "incendiaryBullet"
-        amount: 1
-    }
-    {
-        name: "workerBullet"
-        amount: 1
-    }
-    {
-        name: "bigBullet"
-        amount: 1
-    }
-    {
-        name: "rottenBullet"
-        amount: 1
-    }
-    {
-        name: "diamondBullet"
-        amount: 1
-    }
-    {
-        name: "bewitchedBullet"
-        amount: 1
-    }
-    {
-        name: "explosiveBullet"
-        amount: 1
-    }
-    {
-        name: "leadersBullet"
-        amount: 1
-    }
-    {
-        name: "silverBullet"
-        amount: 1
-    }
-    {
-        name: "bigCrate"
-        amount: 1
-    }
-    {
-        name: "casket"
-        amount: 1
-    }
-    {
-        name: "jewelryBox"
-        amount: 1
-    }
-    {
-        name: "treasureChest"
-        amount: 1
-    }
 ]
+
 cardsToDraw: [
     {
-        name: 'diamondBullet'
-        amount: 2
+        name: "arrow"
+        amount: 1
+    }
+    {
+        name: "BFB"
+        amount: 1
+    }
+    {
+        name: "obsidianBullet"
+        amount: 1
+    }
+    {
+        name: "rustedBullet"
+        amount: 1
+    }
+    {
+        name: "invisibleBullet"
+        amount: 1
+    }
+    {
+        name: "fakeBullet"
+        amount: 1
+    }
+    {
+        name: "bulletBulletBullet"
+        amount: 1
+    }
+    {
+        name: "bulletBullet"
+        amount: 1
+    }
+    {
+        name: "undeadBullet"
+        amount: 1
+    }
+    {
+        name: "poisonBullet"
+        amount: 1
     }
 ]
 

@@ -17,11 +17,12 @@ packer: {
 assets: {
     pixmaps: [
 
-        // Bullets---------------------------
         {
             name: "base"
             file: "textures/cards/base_transparent.png"
         }
+
+        // Bullets---------------------------
 
         {
             name: "bullet"
@@ -124,7 +125,7 @@ assets: {
         }
         {
             name: "jewelryBox"
-            file: "textures/cards/casket.png"
+            file: "textures/cards/jewelryBox.png"
         }
         {
             name: "treasureChest"
