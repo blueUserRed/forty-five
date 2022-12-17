@@ -19,6 +19,14 @@ object OnjExtensions {
             ))
         },
 
+        OnjFunction("giftDmg", listOf(OnjString::class, OnjBulletSelector::class, OnjInt::class)) {
+            OnjEffect(Effect.GiftDamage(
+                triggerOrError(it[0].value as String),
+                (it[2].value as Long).toInt(),
+                (it[1] as OnjBulletSelector).value
+            ))
+        },
+
         OnjFunction("draw", listOf(OnjString::class, OnjInt::class)) {
             OnjEffect(Effect.Draw(
                 triggerOrError(it[0].value as String),

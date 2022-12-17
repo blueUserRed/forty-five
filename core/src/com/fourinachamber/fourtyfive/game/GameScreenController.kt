@@ -830,9 +830,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         private lateinit var destroyCardsPostProcessorName: String
 
-        private lateinit var playerLivesRawTemplateText: String
-        private lateinit var reservesRawTemplateText: String
-
         fun init(config: OnjObject) {
 
             bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
@@ -846,11 +843,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             playerTurnBannerName = bannerOnj.get<String>("playerTurnBanner")
             enemyTurnBannerName = bannerOnj.get<String>("enemyTurnBanner")
-
-            val tmplOnj = config.get<OnjObject>("stringTemplates")
-
-            playerLivesRawTemplateText = tmplOnj.get<String>("playerLives")
-            reservesRawTemplateText = tmplOnj.get<String>("reserves")
 
             val plOnj = config.get<OnjObject>("playerLivesAnimation")
 
