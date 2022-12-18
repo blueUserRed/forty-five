@@ -128,6 +128,7 @@ object OnjExtensions {
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER
         "shot" -> Trigger.ON_SHOT
+        "destroy" -> Trigger.ON_DESTROY
         "round start" -> Trigger.ON_ROUND_START
         else -> throw RuntimeException("unknown trigger: $trigger")
     }

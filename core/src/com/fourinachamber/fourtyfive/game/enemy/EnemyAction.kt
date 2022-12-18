@@ -46,6 +46,9 @@ abstract class EnemyAction {
         override fun execute(gameScreenController: GameScreenController): Timeline =
             gameScreenController.enemyArea!!.enemies[0].damagePlayer(damage, gameScreenController)
 
+        override fun toString(): String {
+            return "DamagePlayer(damage=$damage)"
+        }
     }
 
     class AddCover(
@@ -85,6 +88,11 @@ abstract class EnemyAction {
 
         }
 
+
+        override fun toString(): String {
+            return "AddCover(cover=$coverValue)"
+        }
+
     }
 
     class DoNothing(
@@ -119,6 +127,11 @@ abstract class EnemyAction {
             delayUntil { fadeAnimation.isFinished() }
 
             delay(bufferTime)
+        }
+
+
+        override fun toString(): String {
+            return "DoNothing()"
         }
 
     }

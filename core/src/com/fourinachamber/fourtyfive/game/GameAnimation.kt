@@ -38,7 +38,6 @@ class BannerAnimation(
     private var runUntil = 0L
 
     private val renderTask = { batch: Batch ->
-
         val timeDiff = TimeUtils.millis() - startTime
         val percent = min(timeDiff.toFloat() / animationDuration.toFloat(), 1f)
         val scale = beginScale + (endScale - beginScale) * percent
@@ -70,6 +69,7 @@ class BannerAnimation(
         screenDataProvider.removeLateRenderTask(renderTask)
     }
 
+    override fun toString(): String = "BannerAnimation"
 }
 
 class TextAnimation(
@@ -131,6 +131,8 @@ class TextAnimation(
         screenDataProvider.removeActorFromRoot(label)
     }
 
+    override fun toString(): String = "TextAnimation(${label.text})"
+
 }
 
 open class FadeInAndOutAnimation(
@@ -179,6 +181,8 @@ open class FadeInAndOutAnimation(
     override fun end() {
         screenDataProvider.removeActorFromRoot(actor)
     }
+
+    override fun toString(): String = "FadeInAndOutAnimation"
 }
 
 class FadeInAndOutTextAnimation(
@@ -213,5 +217,7 @@ class FadeInAndOutTextAnimation(
         label.setAlignment(Align.center)
         label.setPosition(x, y + label.prefHeight / 2, Align.center)
     }
+
+    override fun toString(): String = "FadeInAndOutTextAnimation(${label.text})"
 
 }

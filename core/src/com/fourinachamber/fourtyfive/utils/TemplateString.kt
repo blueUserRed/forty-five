@@ -19,6 +19,8 @@ class TemplateString(
             return s
         }
 
+    override fun toString(): String = rawString
+
     companion object {
 
         private val params: MutableMap<String, () -> Any> = mutableMapOf()

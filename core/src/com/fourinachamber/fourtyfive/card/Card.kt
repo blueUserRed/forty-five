@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.game.OnjExtensions
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import ktx.actors.onEnter
@@ -46,6 +47,8 @@ class Card(
     val cost: Int,
     val effects: List<Effect>
 ) {
+
+    val logTag = "card-$name-${++instanceCounter}"
 
     /**
      * the actor for representing the card on the screen
@@ -122,6 +125,7 @@ class Card(
         while (iterator.hasNext()) {
             val modifier = iterator.next()
             if (!modifier.validityChecker()) {
+                FourtyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
                 iterator.remove()
                 isDamageDirty = true
             }
@@ -131,6 +135,7 @@ class Card(
 
     fun afterShot(gameScreenController: GameScreenController) {
         if (isUndead) {
+            FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
             gameScreenController.cardHand!!.addCard(this)
         }
         inGame = false
@@ -143,7 +148,11 @@ class Card(
     fun allowsEnteringGame(gameScreenController: GameScreenController): Boolean {
         // handles special case for Destroy effect
         for (effect in effects) if (effect is Effect.Destroy) {
-            if (!gameScreenController.hasDestroyableCard()) return false
+            if (!gameScreenController.hasDestroyableCard()) {
+                FourtyFiveLogger.debug(logTag, "card cannot enter game because it has the destroy effect and" +
+                        "no destroyable bullet is present")
+                return false
+            }
         }
         return true
     }
@@ -152,11 +161,16 @@ class Card(
         inGame = false
     }
 
-    fun onDestroy() {
+    fun onDestroy(gameScreenController: GameScreenController) {
+        if (isUndead) {
+            FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
+            gameScreenController.cardHand!!.addCard(this)
+        }
         inGame = false
     }
 
     fun addModifier(modifier: CardModifier) {
+        FourtyFiveLogger.debug(logTag, "card got new modifier: $modifier")
         modifiers.add(modifier)
         isDamageDirty = true
         updateText()
@@ -216,6 +230,8 @@ class Card(
          * all textures of cards are prefixed with this string
          */
         const val cardTexturePrefix = "card%%"
+
+        private var instanceCounter = 0
 
         fun getFrom(
             cards: OnjArray,
@@ -342,7 +358,6 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
 
     private val destroyModeOnClickListener: EventListener = EventListener { event ->
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
-        println("hi")
         gameScreenController.destroyCard(card)
         true
     }

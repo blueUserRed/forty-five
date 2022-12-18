@@ -101,6 +101,6 @@ options: {
         appearActor: "logo"
         nextScreen: "screens/title_screen.onj"
     }
-    printFrameRate: true
+    printFrameRate: false
 //    controller: null
 }

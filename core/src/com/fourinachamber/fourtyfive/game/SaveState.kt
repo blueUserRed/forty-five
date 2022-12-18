@@ -2,11 +2,13 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.*
 
 object SaveState {
 
+    const val logTag = "SaveState"
     const val saveFilePath: String = "saves/savefile.onj"
     const val defaultSavefilePath: String = "saves/default_savefile.onj"
 
@@ -55,20 +57,23 @@ object SaveState {
     }
 
     fun read() {
+
+        FourtyFiveLogger.debug(logTag, "reading SaveState")
+
         val file = Gdx.files.local(saveFilePath).file()
         if (!file.exists()) copyDefaultFile()
 
         var obj = try {
             OnjParser.parseFile(file)
         } catch (e: OnjParserException) {
-            println("Savefile invalid:${e.message}")
+            FourtyFiveLogger.debug(logTag, "Savefile invalid:${e.message}")
             copyDefaultFile()
             OnjParser.parseFile(file)
         }
 
         val result = savefileSchema.check(obj)
         if (result != null) {
-            println("Savefile invalid: $result")
+            FourtyFiveLogger.debug(logTag, "Savefile invalid: $result")
             copyDefaultFile()
             obj = OnjParser.parseFile(Gdx.files.local(saveFilePath).file())
             savefileSchema.assertMatches(obj)
@@ -77,11 +82,15 @@ object SaveState {
         obj as OnjObject
 
         _additionalCards = readCardArray(obj.get<OnjArray>("additionalCards")).toMutableMap()
+        FourtyFiveLogger.debug(logTag, "additional cards: $_additionalCards")
         _cardsToDraw = readCardArray(obj.get<OnjArray>("cardsToDraw")).toMutableMap()
+        FourtyFiveLogger.debug(logTag, "cards to draw: $_cardsToDraw")
 
         val stats = obj.get<OnjObject>("stats")
         usedReserves = stats.get<Long>("usedReserves").toInt()
         enemiesDefeated = stats.get<Long>("enemiesDefeated").toInt()
+
+        FourtyFiveLogger.debug(logTag, "stats: usedReserves = $usedReserves, enemiesDefeated = $enemiesDefeated")
 
         bindTemplateStringParams()
     }
@@ -92,7 +101,7 @@ object SaveState {
     }
 
     fun copyDefaultFile() {
-        println("using default save...")
+        FourtyFiveLogger.debug(logTag, "copying default save")
         Gdx.files.local(defaultSavefilePath).copyTo(Gdx.files.local(saveFilePath))
     }
 
@@ -105,6 +114,7 @@ object SaveState {
 
     fun write() {
         if (!savefileDirty) return
+        FourtyFiveLogger.debug(logTag, "writing SaveState")
         val obj = buildOnjObject {
             "additionalCards" with getCardArray(_additionalCards)
             "cardsToDraw" with getCardArray(_cardsToDraw)
