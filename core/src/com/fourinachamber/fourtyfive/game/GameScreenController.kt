@@ -400,14 +400,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         val cardToShoot = revolver.getCardInSlot(5)
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
+        val enemy = enemyArea!!.enemies[0]
 
         var enemyDamageTimeline: Timeline? = null
         var statusEffectTimeline: Timeline? = null
         var effectTimeline: Timeline? = null
 
         if (cardToShoot != null) {
-
-            val enemy = enemyArea!!.enemies[0]
 
             enemyDamageTimeline = Timeline.timeline {
                 action {
@@ -423,17 +422,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT, this)
         }
 
-        val timeline = Timeline.timeline {
-
-            includeLater(
-                { enemies[0].damagePlayer(shotEmptyDamage, this@GameScreenController) },
-                { cardToShoot == null }
-            )
-
-            enemyDamageTimeline?.let { include(it) }
-            statusEffectTimeline?.let { include(it) }
-            effectTimeline?.let { include(it) }
-
+        val finishTimeline = Timeline.timeline {
             action {
                 if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
                 checkCardModifierValidity()
@@ -445,6 +434,35 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
                 enemies.forEach(Enemy::onRevolverTurn)
             }
+        }
+
+        val timeline = Timeline.timeline {
+
+            includeLater(
+                { enemy.damagePlayer(shotEmptyDamage, this@GameScreenController) },
+                { cardToShoot == null }
+            )
+
+            enemyDamageTimeline?.let { include(it) }
+
+            includeLater(
+                { statusEffectTimeline!! },
+                { enemy.currentLives > 0 && statusEffectTimeline != null }
+            )
+            includeLater(
+                { statusEffectTimeline!! },
+                { enemy.currentLives > 0 && statusEffectTimeline != null }
+            )
+            includeLater(
+                { effectTimeline!! },
+                { enemy.currentLives > 0 && effectTimeline != null }
+            )
+            includeLater(
+                { finishTimeline },
+                { enemy.currentLives > 0 }
+            )
+
+
         }
         executeTimelineLater(timeline)
     }
