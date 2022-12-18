@@ -104,13 +104,14 @@ class CoverArea(
     /**
      * adds a new cover to the area, in a specific slot
      */
-    fun addCover(card: Card, slot: Int, turnNum: Int): Boolean {
+    fun addCover(card: Card, slot: Int, turnNum: Int) {
         if (slot !in stacks.indices) throw RuntimeException("slot $slot is out of bounds for coverArea")
-        if (!stacks[slot].acceptsCard(turnNum)) return false
+        if (!stacks[slot].acceptsCard(turnNum)) throw RuntimeException("slot $slot dosen't accept cards")
         stacks[slot].addCard(card, turnNum)
         card.isDraggable = false
-        return true
     }
+
+    fun acceptsCover(slot: Int, turnNum: Int): Boolean = stacks[slot].acceptsCard(turnNum)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)

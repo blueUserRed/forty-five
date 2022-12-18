@@ -377,9 +377,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun addCover(card: Card, slot: Int) {
         if (card.type != Card.Type.COVER || !card.allowsEnteringGame(this)) return
-        if (!cost(card.cost)) return
-        val addedCard = coverArea!!.addCover(card, slot, roundCounter)
-        if (addedCard) cardHand!!.removeCard(card)
+        if (!coverArea!!.acceptsCover(slot, roundCounter) || !cost(card.cost)) return
+        coverArea!!.addCover(card, slot, roundCounter)
+        cardHand!!.removeCard(card)
         card.onEnter(this)
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }

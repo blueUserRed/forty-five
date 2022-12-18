@@ -236,8 +236,8 @@ cards: [
     {
          name: "undeadBullet"
          title: "undead Bullet"
-         flavourText: "no flavour text"
-         description: "no description"
+         flavourText: "does that happen to all ma bullets? The witch didn't mention thaat."
+         description: "If this Bullet dies or is destroyed: Put it in your hand. When this Bullet dies: the Bullet that is in slot 4 at the time this Bullet is fired gets +5 dmg"
          baseDamage: 12
          coverValue: 0
          traitEffects: [ "undead" ]
