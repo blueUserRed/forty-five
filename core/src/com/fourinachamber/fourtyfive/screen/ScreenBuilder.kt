@@ -34,7 +34,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.utils.*
-import ktx.actors.onEnter
 import onj.*
 import kotlin.system.measureTimeMillis
 
@@ -165,13 +164,15 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
     private lateinit var viewport: Viewport
 
     override fun build(): Screen = try {
+        FourtyFiveLogger.debug(logTag, "building screen ${file.name()}")
         val onj = OnjParser.parseFile(file.file())
         screenSchema.assertMatches(onj)
         onj as OnjObject
         getScreen(onj)
     } catch (e: RuntimeException) {
-        // rethrow with filename
-        throw RuntimeException("an error occurred while parsing ${file.name()}", e)
+        FourtyFiveLogger.severe(logTag, "an error occurred while parsing ${file.name()}")
+        FourtyFiveLogger.stackTrace(e)
+        throw e
     }
 
     private fun getScreen(onj: OnjObject): OnjScreen {
@@ -724,10 +725,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             Utils.setCursor(defaultCursor)
         }
 
-        override fun render(delta: Float) {
-            if (printFrameRate) {
-                Gdx.app.debug("fps", Gdx.graphics.framesPerSecond.toString())
-            }
+        override fun render(delta: Float) = try {
+            if (printFrameRate) FourtyFiveLogger.fps()
             screenController?.update()
             if (Gdx.input.isKeyJustPressed(Keys.F)) {
                 if (!Gdx.graphics.isFullscreen) {
@@ -748,6 +747,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
                     renderWithPostProcessing()
                 }
             }
+        } catch (e: Exception) {
+            FourtyFiveLogger.severe(logTag, "exception in render function")
+            FourtyFiveLogger.stackTrace(e)
         }
 
         private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
@@ -813,9 +815,15 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             additionalDisposables.forEach(Disposable::dispose)
         }
 
+        companion object {
+            const val logTag = "screen"
+        }
+
     }
 
     companion object {
+
+        const val logTag = "screenBuilder"
 
         private const val screenSchemaPath = "onjschemas/screen.onjschema"
 

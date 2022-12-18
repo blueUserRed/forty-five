@@ -46,6 +46,8 @@ class Enemy(
     private val gameScreenController: GameScreenController
 ) {
 
+    val logTag = "enemy-$name-${++instanceCounter}"
+
     /**
      * the actor that represents this enemy on the screen
      */
@@ -59,6 +61,7 @@ class Enemy(
     var currentLives: Int = lives
         private set(value) {
             field = max(value, 0)
+            FourtyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
             if (field == 0) gameScreenController.curScreen!!.afterMs(10) { //TODO: nooooo, not again
                 gameScreenController.executeTimelineLater(Timeline.timeline {
                     action { gameScreenController.enemyDefeated(this@Enemy) }
@@ -69,6 +72,7 @@ class Enemy(
     var currentCover: Int = 0
         set(value) {
             field = value
+            FourtyFiveLogger.debug(logTag, "enemy cover updated: new cover = $field")
             actor.updateText()
         }
 
@@ -95,7 +99,9 @@ class Enemy(
     }
 
     fun applyEffect(effect: StatusEffect) {
+        FourtyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
         for (effectToTest in statusEffects) if (effectToTest.canStackWith(effect)) {
+            FourtyFiveLogger.debug(logTag, "stacked with $effectToTest")
             effectToTest.stack(effect)
             return
         }
@@ -135,6 +141,7 @@ class Enemy(
             val effect = iterator.next()
             effect.onRevolverTurn(gameScreenController)
             if (!effect.isStillValid()) {
+                FourtyFiveLogger.debug(logTag, "status effect $effect no longer valid")
                 actor.removeStatusEffect(effect)
                 iterator.remove()
             }
@@ -145,6 +152,7 @@ class Enemy(
     fun chooseNewAction() {
         curAction = brain.chooseAction()
         actor.displayAction(curAction!!)
+        FourtyFiveLogger.debug(logTag, "chose new action: $curAction")
     }
 
     fun doAction(gameScreenController: GameScreenController): Timeline? {
@@ -373,6 +381,8 @@ class Enemy(
     }
 
     companion object {
+
+        private var instanceCounter = 0
 
         private lateinit var dmgFontName: String
         private lateinit var dmgFontColor: Color
