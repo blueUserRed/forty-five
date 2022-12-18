@@ -232,8 +232,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         bindParam("game.curPlayerLives") { curPlayerLives }
         bindParam("game.basePlayerLives") { basePlayerLives }
         bindParam("game.remainingCardsToDraw") { remainingCardsToDraw ?: 0 }
+        bindParam("game.remainingCardsToDrawPluralS") { if (remainingCardsToDraw == 1) "" else "s" }
         bindParam("game.remainingBullets") { bulletStack.size }
+        bindParam("game.remainingBulletsPluralS") { if (bulletStack.size == 1) "" else "s" }
         bindParam("game.remainingCovers") { coverCardStack.size }
+        bindParam("game.remainingCoversPluralS") { if (coverCardStack.size == 1) "" else "s" }
     }
 
     private fun removeTemplateStringParams() = with(TemplateString) {
@@ -242,8 +245,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         removeParam("game.curPlayerLives")
         removeParam("game.basePlayerLives")
         removeParam("game.remainingCardsToDraw")
+        removeParam("game.remainingCardsToDrawPluralS")
         removeParam("game.remainingBullets")
+        removeParam("game.remainingBulletsPluralS")
         removeParam("game.remainingCovers")
+        removeParam("game.remainingCoversPluralS")
     }
 
     private fun changePhase(next: Gamephase) {
