@@ -297,6 +297,6 @@ typealias BulletSelector = (self: Card, other: Card, slot: Int) -> Boolean
 
 enum class Trigger {
 
-    ON_ENTER, ON_SHOT, ON_ROUND_START
+    ON_ENTER, ON_SHOT, ON_ROUND_START, ON_DESTROY
 
 }

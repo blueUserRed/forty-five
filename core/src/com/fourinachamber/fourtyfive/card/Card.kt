@@ -152,7 +152,10 @@ class Card(
         inGame = false
     }
 
-    fun onDestroy() {
+    fun onDestroy(gameScreenController: GameScreenController) {
+        if (isUndead) {
+            gameScreenController.cardHand!!.addCard(this)
+        }
         inGame = false
     }
 
