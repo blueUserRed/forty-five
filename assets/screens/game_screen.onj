@@ -318,7 +318,7 @@ options: {
                     padTop: 4.0
                     element: $TemplateLabel {
                         font: "red_wing"
-                        template: "draw {game.remainingCardsToDraw} cards"
+                        template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}"
                         fontScale: 0.18
                         align: "center"
                         color: !color.white
@@ -335,7 +335,7 @@ options: {
                     padBottom: -9.0
                     element: $TemplateLabel {
                         font: "red_wing"
-                        template: "{game.remainingBullets} bullets remaining in stack"
+                        template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack"
                         fontScale: 0.13
                         align: "center"
                         color: !color.white
@@ -346,7 +346,7 @@ options: {
                     padBottom: -6.0
                     element: $TemplateLabel {
                         font: "red_wing"
-                        template: "{game.remainingCovers} covers remaining in stack"
+                        template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack"
                         fontScale: 0.13
                         align: "center"
                         color: !color.white
