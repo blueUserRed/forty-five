@@ -124,7 +124,7 @@ class Revolver(
 
     fun removeCard(card: Card) {
         for (slot in slots) if (slot.card === card) {
-            if (card.actor in stage.root) screenDataProvider.removeActorFromRoot(card.actor)
+            if (card.actor in screenDataProvider.stage.root) screenDataProvider.removeActorFromRoot(card.actor)
             setCard(slot.num, null)
         }
     }

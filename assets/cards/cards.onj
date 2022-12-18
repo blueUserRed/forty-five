@@ -241,7 +241,10 @@ cards: [
          baseDamage: 12
          coverValue: 0
          traitEffects: [ "undead" ]
-         effects: [ giftDmg("shot", !bSelects.fourButNotSelf, 5) ]
+         effects: [
+            giftDmg("shot", !bSelects.fourButNotSelf, 5),
+            giftDmg("destroy", !bSelects.fourButNotSelf, 5)
+        ]
          cost: 2
          type: $Bullet { }
     }

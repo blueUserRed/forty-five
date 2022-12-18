@@ -489,9 +489,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     fun destroyCardPhase() = changePhase(Gamephase.CARD_DESTROY)
 
     fun destroyCard(card: Card) {
-        card.onDestroy()
         revolver!!.removeCard(card)
-//        coverArea!!.removeCard(card)
+        card.onDestroy(this)
+        checkEffectsSingleCard(Trigger.ON_DESTROY, card)
         onCardDestroyed()
     }
 
