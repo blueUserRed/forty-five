@@ -1,18 +1,16 @@
 package com.fourinachamber.fourtyfive
 
-import com.badlogic.gdx.Application
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.card.CardGenerator
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import onj.OnjObject
 import onj.OnjParser
-import onj.OnjParserException
 import onj.OnjSchemaParser
 
 /**
@@ -20,11 +18,14 @@ import onj.OnjSchemaParser
  */
 object FourtyFive : Game() {
 
+    const val logTag = "fourty-five"
+
     /**
      * setting this variable will change the current screen and dispose the previous
      */
     var curScreen: Screen? = null
         set(value) {
+            FourtyFiveLogger.title("changing screen")
             field?.dispose()
             field = value
             setScreen(field)
@@ -35,7 +36,6 @@ object FourtyFive : Game() {
 
     override fun create() {
         init()
-        Gdx.app.logLevel = Application.LOG_DEBUG
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
@@ -44,6 +44,7 @@ object FourtyFive : Game() {
 
     private fun init() {
         OnjExtensions.init()
+        FourtyFiveLogger.init()
         SaveState.read()
 
         val graphicsConfig =

@@ -15,11 +15,13 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.CardPrototype
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onClick
 import onj.*
 import java.lang.Integer.min
+import kotlin.math.log
 import kotlin.properties.Delegates
 
 class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenController() {
@@ -177,12 +179,15 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     }
 
     private fun handleClick(card: Card) {
+        FourtyFiveLogger.debug(logTag, "choose card $card")
         SaveState.drawCard(card)
         SaveState.write()
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(nextScreen)).build()
     }
 
     companion object {
+
+        const val logTag = "CardSelection"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

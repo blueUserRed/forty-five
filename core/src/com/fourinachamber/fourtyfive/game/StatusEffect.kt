@@ -5,12 +5,13 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.OnjObject
 import kotlin.math.floor
 import kotlin.properties.Delegates
 
-abstract class      StatusEffect(
+abstract class StatusEffect(
     private val iconTextureName: String,
     _turns: Int,
     protected val target: StatusEffectTarget,
@@ -69,6 +70,8 @@ abstract class      StatusEffect(
 
         override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
 
+            FourtyFiveLogger.debug(logTag, "executing poison effect")
+
             val shakeActorAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
             shakeActorAction.duration = shakeDuration
 
@@ -91,6 +94,14 @@ abstract class      StatusEffect(
             effect as Poison
             turns += effect.turns
         }
+
+        override fun toString(): String {
+            return "Poison(turns=$turns, damage=$damage)"
+        }
+
+        companion object {
+            const val logTag = "StatusEffect-Poison"
+        }
     }
 
     class Burning(
@@ -105,6 +116,8 @@ abstract class      StatusEffect(
             gameScreenController: GameScreenController,
             damage: Int
         ): Timeline = Timeline.timeline {
+
+            FourtyFiveLogger.debug(logTag, "executing burning effect")
 
             val additionalDamage = floor(damage * percent).toInt()
             val shakeActorAction = ShakeActorAction(xShake * 0.5f, yShake, xSpeedMultiplier, ySpeedMultiplier)
@@ -130,6 +143,13 @@ abstract class      StatusEffect(
             turns += effect.turns
         }
 
+        override fun toString(): String {
+            return "Burning(turns=$turns, percent=$percent)"
+        }
+
+        companion object {
+            const val logTag = "StatusEffect-Burning"
+        }
     }
 
     companion object {

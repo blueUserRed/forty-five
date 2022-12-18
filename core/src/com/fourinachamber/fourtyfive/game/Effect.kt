@@ -4,10 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
-import com.fourinachamber.fourtyfive.utils.TemplateString
-import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
+import com.fourinachamber.fourtyfive.utils.*
 import onj.OnjObject
 import java.lang.Integer.min
 import kotlin.properties.Delegates
@@ -19,7 +16,10 @@ abstract class Effect(val trigger: Trigger) {
     abstract fun onTrigger(gameScreenController: GameScreenController): Timeline?
 
     fun checkTrigger(triggerToCheck: Trigger, gameScreenController: GameScreenController): Timeline? {
-        if (triggerToCheck == trigger) return onTrigger(gameScreenController)
+        if (triggerToCheck == trigger) {
+            FourtyFiveLogger.debug("Effect", "effect $this triggered")
+            return onTrigger(gameScreenController)
+        }
         return null
     }
 
@@ -66,6 +66,10 @@ abstract class Effect(val trigger: Trigger) {
                 }
                 delayUntil { textAnimation.isFinished() }
             }
+        }
+
+        override fun toString(): String {
+            return "ReserveGain(trigger=$trigger, amount=$amount)"
         }
 
         companion object {
@@ -126,6 +130,10 @@ abstract class Effect(val trigger: Trigger) {
             return null
         }
 
+        override fun toString(): String {
+            return "BuffDmg(trigger=$trigger, amount=$amount)"
+        }
+
         companion object {
 
             private lateinit var buffDetailTextRawString: String
@@ -167,6 +175,10 @@ abstract class Effect(val trigger: Trigger) {
             return null
         }
 
+        override fun toString(): String {
+            return "GiftDamage(trigger=$trigger, amount=$amount)"
+        }
+
         companion object {
 
             private lateinit var giftDetailTextRawString: String
@@ -200,6 +212,10 @@ abstract class Effect(val trigger: Trigger) {
             action { gameScreenController.specialDraw(amount) }
             delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.SPECIAL_DRAW }
         }
+
+        override fun toString(): String {
+            return "Draw(trigger=$trigger, card=$card, amount=$amount)"
+        }
     }
 
     class GiveStatus(trigger: Trigger, val statusEffect: StatusEffect) : Effect(trigger) {
@@ -210,6 +226,10 @@ abstract class Effect(val trigger: Trigger) {
             gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)
             return null
         }
+        override fun toString(): String {
+            return "GiveStatus(trigger=$trigger, status=$statusEffect)"
+        }
+
     }
 
     class Destroy(trigger: Trigger) : Effect(trigger) {
@@ -239,6 +259,10 @@ abstract class Effect(val trigger: Trigger) {
                 delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.CARD_DESTROY }
             }
         }
+
+        override fun toString(): String {
+            return "Destroy(trigger=$trigger)"
+        }
     }
 
     class PutCardInHand(trigger: Trigger, val cardName: String, val amount: Int) : Effect(trigger) {
@@ -249,6 +273,10 @@ abstract class Effect(val trigger: Trigger) {
             val addMax = gameScreenController.maxCards - gameScreenController.cardHand!!.cards.size
             repeat(min(amount, addMax)) { gameScreenController.putCardInHand(cardName) }
             return null
+        }
+
+        override fun toString(): String {
+            return "PutCardInHand(trigger=$trigger, card=$card, amount=$amount)"
         }
     }
 
