@@ -1,0 +1,14 @@
+
+$LogTarget [
+
+    $Console { }
+
+    $File {
+        path: string
+    }
+
+]
+
+logTarget: $LogTarget
+versionTag: string
+logLevel: string

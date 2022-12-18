@@ -16,6 +16,7 @@ import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.*
 import java.lang.Integer.max
+import kotlin.math.round
 import kotlin.properties.Delegates
 
 
@@ -118,6 +119,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         SaveState.read()
         curScreen = screenDataProvider
 
+        FourtyFiveLogger.title("game starting")
+
         initCards()
 
         enemies = Enemy.getFrom(enemiesOnj, this)
@@ -198,6 +201,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         bulletStack.shuffle()
         coverCardStack.shuffle()
 
+        FourtyFiveLogger.debug(logTag, "bullet stack: $bulletStack")
+        FourtyFiveLogger.debug(logTag, "cover stack: $coverCardStack")
+
         val defaultBulletName = onj.get<String>("defaultBullet")
         val defaultCoverName = onj.get<String>("defaultCover")
 
@@ -254,6 +260,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private fun changePhase(next: Gamephase) {
         if (next == currentPhase) return
+        FourtyFiveLogger.debug(logTag, "changing phase from $currentPhase to $next")
         currentPhase.transitionAway(this)
         currentPhase = next
         currentPhase.transitionTo(this)
@@ -275,6 +282,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun playGameAnimation(anim: GameAnimation) {
+        FourtyFiveLogger.debug(logTag, "playing game animation: $anim")
         anim.start()
         curGameAnims.add(anim)
     }
@@ -374,6 +382,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (!cost(card.cost)) return
         cardHand!!.removeCard(card)
         revolver!!.setCard(slot, card)
+        FourtyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
         card.onEnter(this)
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }
@@ -386,6 +395,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (!coverArea!!.acceptsCover(slot, roundCounter) || !cost(card.cost)) return
         coverArea!!.addCover(card, slot, roundCounter)
         cardHand!!.removeCard(card)
+        FourtyFiveLogger.debug(logTag, "cover $card was placed in slot $slot")
         card.onEnter(this)
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }
@@ -395,6 +405,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             .firstOrNull { it.name == name }
             ?: throw RuntimeException("unknown card: $name")
         cardHand!!.addCard(cardProto.create())
+        FourtyFiveLogger.debug(logTag, "card $name entered hand")
     }
 
     /**
@@ -404,9 +415,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val revolver = revolver!!
         turnCounter++
 
+
         val cardToShoot = revolver.getCardInSlot(5)
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
         val enemy = enemyArea!!.enemies[0]
+
+        FourtyFiveLogger.debug(logTag, "revolver is shooting; turn = $turnCounter; cardToShoot = $cardToShoot")
 
         var enemyDamageTimeline: Timeline? = null
         var statusEffectTimeline: Timeline? = null
@@ -416,9 +430,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             enemyDamageTimeline = Timeline.timeline {
                 action {
-                    if (cardToShoot.shouldRemoveAfterShot) {
-                        revolver.removeCard(5)
-                    }
+                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(5)
                 }
                 include(enemy.damage(cardToShoot.curDamage, this@GameScreenController))
                 action { cardToShoot.afterShot(this@GameScreenController) }
@@ -431,6 +443,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val finishTimeline = Timeline.timeline {
             action {
                 if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
+
+                FourtyFiveLogger.debug(logTag, "revolver rotated ${
+                    if (rotateLeft) "left" else "right"
+                }")
+
                 checkCardModifierValidity()
 
                 revolver
@@ -474,6 +491,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun checkCardModifierValidity() {
+        FourtyFiveLogger.debug(logTag, "checking card modifiers")
         for (card in createdCards) if (card.inGame) card.checkModifierValidity()
     }
 
@@ -483,6 +501,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     fun damagePlayer(damage: Int) {
         curPlayerLives -= damage
+        FourtyFiveLogger.debug(logTag, "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives")
         if (curPlayerLives <= 0) executeTimelineLater(Timeline.timeline {
             action { loose() }
         })
@@ -490,6 +509,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     fun gainReserves(amount: Int) {
         curReserves += amount
+        FourtyFiveLogger.debug(logTag, "player gained reserves; amount = $amount; curReserves = $curReserves")
     }
 
     fun destroyCardPhase() = changePhase(Gamephase.CARD_DESTROY)
@@ -497,6 +517,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     fun destroyCard(card: Card) {
         revolver!!.removeCard(card)
         card.onDestroy(this)
+        FourtyFiveLogger.debug(logTag, "destroyed card: $card")
         checkEffectsSingleCard(Trigger.ON_DESTROY, card)
         onCardDestroyed()
     }
@@ -509,10 +530,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
+        FourtyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         card.checkEffects(trigger, this)?.let { executeTimelineLater(it) }
     }
 
     private fun checkEffectsActiveCards(trigger: Trigger) {
+        FourtyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         val timeline = Timeline.timeline {
             for (card in createdCards) if (card.inGame) {
                 val timeline = card.checkEffects(trigger, this@GameScreenController)
@@ -523,6 +546,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun checkStatusEffects() {
+        FourtyFiveLogger.debug(logTag, "checking status effects")
         val timeline = Timeline.timeline {
             for (enemy in enemies) {
                 val timeline = enemy.executeStatusEffects(this@GameScreenController)
@@ -542,6 +566,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private fun freezeUI() {
         isUIFrozen = true
+        FourtyFiveLogger.debug(logTag, "froze UI")
         val shootButton = shootButton
         val endTurnButton = endTurnButton
         if (shootButton is DisableActor) shootButton.isDisabled = true
@@ -551,6 +576,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private fun unfreezeUI() {
         isUIFrozen = false
+        FourtyFiveLogger.debug(logTag, "unfroze UI")
         val shootButton = shootButton
         val endTurnButton = endTurnButton
         if (shootButton is DisableActor) shootButton.isDisabled = false
@@ -559,6 +585,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun showCardDrawActor() {
+        FourtyFiveLogger.debug(logTag, "displaying card draw actor")
         val viewport = curScreen!!.stage.viewport
         val cardDrawActor = cardDrawActor!!
         curScreen!!.addActorToRoot(cardDrawActor)
@@ -575,6 +602,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun hideCardDrawActor() {
+        FourtyFiveLogger.debug(logTag, "hiding card draw actor")
         curScreen!!.removeActorFromRoot(cardDrawActor!!)
         cardDrawActor!!.isVisible = false
     }
@@ -584,9 +612,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawBullet() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        cardHand!!.addCard(bulletStack.removeFirstOrNull() ?: defaultBullet.create())
+        val bullet = bulletStack.removeFirstOrNull() ?: defaultBullet.create()
+        cardHand!!.addCard(bullet)
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
+        FourtyFiveLogger.debug(logTag, "bullet was drawn; bullet = $bullet; cardsToDraw = $cardsToDraw")
         if (cardsToDraw <= 0) onAllCardsDrawn()
     }
 
@@ -596,9 +626,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun drawCover() {
         var cardsToDraw = remainingCardsToDraw ?: return
-        cardHand!!.addCard(coverCardStack.removeFirstOrNull() ?: defaultCover.create())
+        val cover = coverCardStack.removeFirstOrNull() ?: defaultCover.create()
+        cardHand!!.addCard(cover)
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
+        FourtyFiveLogger.debug(logTag, "bullet was drawn; bullet = $cover; cardsToDraw = $cardsToDraw")
         if (cardsToDraw <= 0) onAllCardsDrawn()
     }
 
@@ -606,10 +638,12 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         if (cost > curReserves) return false
         curReserves -= cost
         SaveState.usedReserves += cost
+        FourtyFiveLogger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
         return true
     }
 
     override fun end() {
+        FourtyFiveLogger.title("game ends")
         removeTemplateStringParams()
         curScreen = null
     }
@@ -620,11 +654,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun win() {
+        FourtyFiveLogger.debug(logTag, "player won")
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(winScreen)).build()
         SaveState.write()
     }
 
     private fun loose() {
+        FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.copyDefaultFile()
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(looseScreen)).build()
     }
@@ -648,9 +684,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 roundCounter++
+                FourtyFiveLogger.title("round: $roundCounter")
                 remainingCardsToDraw =
                     (if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw)
                         .coerceAtMost(maxCards - cardHand!!.cards.size)
+                FourtyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
                 if (remainingCardsToDraw == 0) { //TODO: display this in some way
                     changePhase(ENEMY_REVEAL)
                     return
@@ -678,6 +716,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
                 remainingCardsToDraw =
                     (cardsToDrawDuringSpecialDraw).coerceAtMost(maxCards - cardHand!!.cards.size)
+                FourtyFiveLogger.debug(logTag, "drawing cards in special draw: $remainingCardsToDraw")
                 if (remainingCardsToDraw == 0) { //TODO: display this in some way
                     changePhase(FREE)
                     return
@@ -831,6 +870,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     }
 
     companion object {
+
+        const val logTag = "game"
 
         private var bufferTime by Delegates.notNull<Int>()
 
