@@ -94,11 +94,13 @@ options: {
         useSystemCursor: true
         cursorName: "arrow"
     }
-    postProcessor: "vignette"
+    postProcessor: null
+//    postProcessor: "vignette"
     controller: $IntroScreenController {
         cardAtlasFile: "cards/generated/cards.atlas"
         appearActor: "logo"
         nextScreen: "screens/title_screen.onj"
     }
+    printFrameRate: true
 //    controller: null
 }

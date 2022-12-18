@@ -8,8 +8,8 @@ import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
-import kotlinx.coroutines.awaitAll
 import onj.OnjObject
+import java.lang.Integer.min
 import kotlin.properties.Delegates
 
 abstract class Effect(val trigger: Trigger) {
@@ -23,7 +23,7 @@ abstract class Effect(val trigger: Trigger) {
         return null
     }
 
-
+    abstract fun copy(): Effect
 
     class ReserveGain(trigger: Trigger, val amount: Int) : Effect(trigger) {
 
@@ -34,6 +34,8 @@ abstract class Effect(val trigger: Trigger) {
         init {
             shakeActorAction.duration = shakeDuration
         }
+
+        override fun copy(): Effect = ReserveGain(trigger, amount)
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline {
             val reservesLabel = gameScreenController.reservesLabel!!
@@ -55,7 +57,7 @@ abstract class Effect(val trigger: Trigger) {
             return Timeline.timeline {
                 delay(bufferTime)
                 includeLater(
-                    { shakeCardTimeline(card, shakeActorAction) },
+                    { shakeCardTimeline(shakeActorAction) },
                     { card.inGame }
                 )
                 action {
@@ -95,7 +97,13 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
-    class BuffDamage(trigger: Trigger, val amount: Int) : Effect(trigger) {
+    class BuffDamage(
+        trigger: Trigger,
+        val amount: Int,
+        private val bulletSelector: BulletSelector? = null
+    ) : Effect(trigger) {
+
+        override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector)
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
             val modifier = Card.CardModifier(
@@ -112,7 +120,8 @@ abstract class Effect(val trigger: Trigger) {
 
             for (i in 1..5) {
                 val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
-                if (card !== this.card) card.addModifier(modifier)
+                if (!(bulletSelector?.invoke(this.card, card, i) ?: true)) continue
+                card.addModifier(modifier)
             }
             return null
         }
@@ -129,6 +138,47 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    class GiftDamage(
+        trigger: Trigger,
+        val amount: Int,
+        private val bulletSelector: BulletSelector? = null
+    ) : Effect(trigger) {
+
+        override fun copy(): Effect = GiftDamage(trigger, amount, bulletSelector)
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+            val modifier = Card.CardModifier(
+                amount,
+                TemplateString(
+                    giftDetailTextRawString,
+                    mapOf(
+                        "text" to if (amount > 0) "buff" else "debuff",
+                        "amount" to amount,
+                        "source" to card.title
+                    )
+                ),
+            ) { true }
+
+            for (i in 1..5) {
+                val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
+                if (!(bulletSelector?.invoke(this.card, card, i) ?: true)) continue
+                card.addModifier(modifier)
+            }
+            return null
+        }
+
+        companion object {
+
+            private lateinit var giftDetailTextRawString: String
+
+            fun init(config: OnjObject) {
+                val tmplOnj = config.get<OnjObject>("stringTemplates")
+                giftDetailTextRawString = tmplOnj.get<String>("giftDetailText")
+            }
+        }
+
+    }
+
     class Draw(trigger: Trigger, val amount: Int) : Effect(trigger) {
 
         private val shakeActorAction = ShakeActorAction(
@@ -139,10 +189,12 @@ abstract class Effect(val trigger: Trigger) {
             shakeActorAction.duration = shakeDuration
         }
 
+        override fun copy(): Effect = Draw(trigger, amount)
+
         override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
             delay(bufferTime)
             includeLater(
-                { shakeCardTimeline(card, shakeActorAction) },
+                { shakeCardTimeline(shakeActorAction) },
                 { card.inGame }
             )
             action { gameScreenController.specialDraw(amount) }
@@ -151,6 +203,8 @@ abstract class Effect(val trigger: Trigger) {
     }
 
     class GiveStatus(trigger: Trigger, val statusEffect: StatusEffect) : Effect(trigger) {
+
+        override fun copy(): Effect = GiveStatus(trigger, statusEffect)
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
             gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)
@@ -167,6 +221,8 @@ abstract class Effect(val trigger: Trigger) {
         init {
             shakeActorAction.duration = shakeDuration
         }
+
+        override fun copy(): Effect = Destroy(trigger)
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
             if (!gameScreenController.hasDestroyableCard()) return null
@@ -185,7 +241,18 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
-    protected fun shakeCardTimeline(card: Card, shakeActorAction: ShakeActorAction): Timeline = Timeline.timeline {
+    class PutCardInHand(trigger: Trigger, val cardName: String, val amount: Int) : Effect(trigger) {
+
+        override fun copy(): Effect = PutCardInHand(trigger, cardName, amount)
+
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+            val addMax = gameScreenController.maxCards - gameScreenController.cardHand!!.cards.size
+            repeat(min(amount, addMax)) { gameScreenController.putCardInHand(cardName) }
+            return null
+        }
+    }
+
+    protected fun shakeCardTimeline(shakeActorAction: ShakeActorAction): Timeline = Timeline.timeline {
         action { card.actor.addAction(shakeActorAction) }
         delayUntil { shakeActorAction.isComplete }
         action {
@@ -219,11 +286,14 @@ abstract class Effect(val trigger: Trigger) {
 
             ReserveGain.init(config)
             BuffDamage.init(config)
+            GiftDamage.init(config)
         }
 
     }
 
 }
+
+typealias BulletSelector = (self: Card, other: Card, slot: Int) -> Boolean
 
 enum class Trigger {
 

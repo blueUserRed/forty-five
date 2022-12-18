@@ -353,6 +353,7 @@ options: {
     }
     postProcessor: string?
     controller: $ScreenController?
+    printFrameRate?: boolean
 }
 
 children: $Widget[*]

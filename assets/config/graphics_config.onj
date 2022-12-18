@@ -56,9 +56,9 @@ bannerAnimation: {
 
 statusEffectIcons: {
     burning: "burning_icon"
-    burningScale: 0.008
+    burningScale: 0.025
     poison: "poison_icon"
-    poisonScale: 0.008
+    poisonScale: 0.025
 }
 
 destroyCardPostProcessor: {
@@ -71,14 +71,13 @@ coverStackParticles: {
 }
 
 stringTemplates:  {
-    playerLives: "{curLives}/{baseLives}"
-    reserves: "{curReserves}/{baseReserves}"
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!"
     buffDetailText: "{source} applied a {text} of {amount}!"
+    giftDetailText: "{source} gifted a {text} of {amount}!"
 }
 
 fadeInAndOutAnimation: {
-    fadeFontName: "vanilla_whale"
+    fadeFontName: "red_wing"
     fadeFontColor: !color.black
     fadeFontScale: 0.1
     fadeDuration: 6.0
