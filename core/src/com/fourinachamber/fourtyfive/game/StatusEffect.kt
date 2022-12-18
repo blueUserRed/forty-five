@@ -69,23 +69,8 @@ abstract class      StatusEffect(
 
         override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
 
-            val screenDataProvider = gameScreenController.curScreen!!
-            val targetLivesActor = target.getLivesActor(gameScreenController)
-
             val shakeActorAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
             shakeActorAction.duration = shakeDuration
-
-            val textAnimation = TextAnimation(
-                targetLivesActor.x, targetLivesActor.y,
-                "-$damage",
-                dmgFontColorNegative, dmgFontScale,
-                screenDataProvider.fonts[dmgFontName] ?:
-                    throw RuntimeException("no font with name $dmgFontName"),
-                dmgRaiseHeight,
-                dmgStartFadeoutAt,
-                screenDataProvider,
-                dmgDuration
-            )
 
             action { icon.addAction(shakeActorAction) }
             delayUntil { shakeActorAction.isComplete }
@@ -93,15 +78,8 @@ abstract class      StatusEffect(
             action {
                 icon.removeAction(shakeActorAction)
                 shakeActorAction.reset()
-                targetLivesActor.addAction(shakeActorAction)
-                gameScreenController.playGameAnimation(textAnimation)
-                target.damage(gameScreenController, damage)
             }
-            delayUntil { shakeActorAction.isComplete }
-            action {
-                targetLivesActor.removeAction(shakeActorAction)
-                shakeActorAction.reset()
-            }
+            include(target.damage(gameScreenController, damage))
 
         }
 
@@ -128,25 +106,9 @@ abstract class      StatusEffect(
             damage: Int
         ): Timeline = Timeline.timeline {
 
-            val screenDataProvider = gameScreenController.curScreen!!
-            val targetLivesActor = target.getLivesActor(gameScreenController)
-            val targetLivesPos = targetLivesActor.localToStageCoordinates(Vector2(0f, 0f))
             val additionalDamage = floor(damage * percent).toInt()
-
             val shakeActorAction = ShakeActorAction(xShake * 0.5f, yShake, xSpeedMultiplier, ySpeedMultiplier)
             shakeActorAction.duration = shakeDuration
-
-            val textAnimation = TextAnimation(
-                targetLivesPos.x, targetLivesPos.y,
-                "-$additionalDamage",
-                dmgFontColorNegative, dmgFontScale,
-                screenDataProvider.fonts[dmgFontName] ?:
-                throw RuntimeException("no font with name $dmgFontName"),
-                dmgRaiseHeight,
-                dmgStartFadeoutAt,
-                screenDataProvider,
-                dmgDuration
-            )
 
             delay(bufferTime)
             action { icon.addAction(shakeActorAction) }
@@ -155,17 +117,8 @@ abstract class      StatusEffect(
             action {
                 icon.removeAction(shakeActorAction)
                 shakeActorAction.reset()
-                targetLivesActor.addAction(shakeActorAction)
-                target.damage(gameScreenController, additionalDamage)
-                gameScreenController.playGameAnimation(textAnimation)
             }
             include(target.damage(gameScreenController, additionalDamage))
-            delayUntil { shakeActorAction.isComplete }
-            action {
-                targetLivesActor.removeAction(shakeActorAction)
-                shakeActorAction.reset()
-            }
-
         }
 
         override fun canStackWith(effect: StatusEffect): Boolean {

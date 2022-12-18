@@ -247,7 +247,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             lateRenderTasks,
             namedCells,
             namedActors,
-            behavioursToBind
+            behavioursToBind,
+            options.getOr("printFrameRate", false)
         )
 
         val cursorOnj = options.get<OnjObject>("defaultCursor")
@@ -638,7 +639,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         private val lateRenderTasks: List<OnjScreen.() -> Unit>,
         override val namedCells: Map<String, Cell<*>>,
         override val namedActors: Map<String, Actor>,
-        override val behaviours: List<Behaviour>
+        override val behaviours: List<Behaviour>,
+        private val printFrameRate: Boolean
     ) : ScreenAdapter(), ScreenDataProvider {
 
         var dragAndDrop: Map<String, DragAndDrop> = mapOf()
@@ -723,6 +725,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun render(delta: Float) {
+            if (printFrameRate) {
+                Gdx.app.debug("fps", Gdx.graphics.framesPerSecond.toString())
+            }
             screenController?.update()
             if (Gdx.input.isKeyJustPressed(Keys.F)) {
                 if (!Gdx.graphics.isFullscreen) {
@@ -802,6 +807,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         override fun dispose() {
+            screenController?.end()
             stage.dispose()
             toDispose.forEach(Disposable::dispose)
             additionalDisposables.forEach(Disposable::dispose)

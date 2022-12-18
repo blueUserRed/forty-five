@@ -69,10 +69,9 @@ coverStackParticles: {
 }
 
 stringTemplates:  {
-    playerLives: string
-    reserves: string
     rottenDetailText: string
     buffDetailText: string
+    giftDetailText: string
 }
 
 fadeInAndOutAnimation: {

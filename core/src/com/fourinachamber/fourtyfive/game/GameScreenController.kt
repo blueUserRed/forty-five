@@ -15,6 +15,7 @@ import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.*
+import java.lang.Integer.max
 import kotlin.properties.Delegates
 
 
@@ -45,7 +46,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
     private val basePlayerLives = onj.get<Long>("playerLives").toInt()
     private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
-    private val maxCards = onj.get<Long>("maxCards").toInt()
+    val maxCards = onj.get<Long>("maxCards").toInt()
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
     var curScreen: ScreenDataProvider? = null
@@ -62,7 +63,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var playerLivesLabel: CustomLabel? = null
     var reservesLabel: CustomLabel? = null
 
-    private var cardPrototypes: MutableList<CardPrototype> = mutableListOf()
+    private var cardPrototypes: List<CardPrototype> = listOf()
     private val createdCards: MutableList<Card> = mutableListOf()
     private var bulletStack: MutableList<Card> = mutableListOf()
     private var coverCardStack: MutableList<Card> = mutableListOf()
@@ -74,6 +75,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private var remainingCardsToDraw: Int? = null
 
     var curPlayerLives: Int = basePlayerLives
+        set(value) {
+            field = max(value, 0)
+        }
 
     private val timeline: Timeline = Timeline(mutableListOf()).apply {
         start()
@@ -111,6 +115,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
 
     override fun init(screenDataProvider: ScreenDataProvider) {
+        SaveState.read()
         curScreen = screenDataProvider
 
         initCards()
@@ -221,16 +226,24 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         createdCards.add(card)
     }
 
-    private fun initTemplateStringParams() {
-        TemplateString.bindParam("game.curReserves") { curReserves }
-        TemplateString.bindParam("game.baseReserves") { baseReserves }
-        TemplateString.bindParam("game.curPlayerLives") { curPlayerLives }
-        TemplateString.bindParam("game.basePlayerLives") { basePlayerLives }
+    private fun initTemplateStringParams() = with(TemplateString) {
+        bindParam("game.curReserves") { curReserves }
+        bindParam("game.baseReserves") { baseReserves }
+        bindParam("game.curPlayerLives") { curPlayerLives }
+        bindParam("game.basePlayerLives") { basePlayerLives }
+        bindParam("game.remainingCardsToDraw") { remainingCardsToDraw ?: 0 }
+        bindParam("game.remainingBullets") { bulletStack.size }
+        bindParam("game.remainingCovers") { coverCardStack.size }
     }
 
-    private fun removeTemplateStringParams() {
-        TemplateString.removeParam("game.curReserves")
-        TemplateString.removeParam("game.baseReserves")
+    private fun removeTemplateStringParams() = with(TemplateString) {
+        removeParam("game.curReserves")
+        removeParam("game.baseReserves")
+        removeParam("game.curPlayerLives")
+        removeParam("game.basePlayerLives")
+        removeParam("game.remainingCardsToDraw")
+        removeParam("game.remainingBullets")
+        removeParam("game.remainingCovers")
     }
 
     private fun changePhase(next: Gamephase) {
@@ -364,11 +377,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
      */
     fun addCover(card: Card, slot: Int) {
         if (card.type != Card.Type.COVER || !card.allowsEnteringGame(this)) return
-        if (!cost(card.cost)) return
-        val addedCard = coverArea!!.addCover(card, slot, roundCounter)
-        if (addedCard) cardHand!!.removeCard(card)
+        if (!coverArea!!.acceptsCover(slot, roundCounter) || !cost(card.cost)) return
+        coverArea!!.addCover(card, slot, roundCounter)
+        cardHand!!.removeCard(card)
         card.onEnter(this)
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
+    }
+
+    fun putCardInHand(name: String) {
+        val cardProto = cardPrototypes
+            .firstOrNull { it.name == name }
+            ?: throw RuntimeException("unknown card: $name")
+        cardHand!!.addCard(cardProto.create())
     }
 
     /**
@@ -380,7 +400,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         val cardToShoot = revolver.getCardInSlot(5)
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
-        if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
 
         var enemyDamageTimeline: Timeline? = null
         var statusEffectTimeline: Timeline? = null
@@ -393,7 +412,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             enemyDamageTimeline = Timeline.timeline {
                 action {
                     if (cardToShoot.shouldRemoveAfterShot) {
-                        revolver.removeCard(if (rotateLeft) 1 else 4)
+                        revolver.removeCard(5)
                     }
                 }
                 include(enemy.damage(cardToShoot.curDamage, this@GameScreenController))
@@ -416,6 +435,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             effectTimeline?.let { include(it) }
 
             action {
+                if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
                 checkCardModifierValidity()
 
                 revolver
@@ -607,7 +627,10 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 remainingCardsToDraw =
                     (if (roundCounter == 1) cardsToDrawInFirstRound else cardsToDraw)
                         .coerceAtMost(maxCards - cardHand!!.cards.size)
-                if (remainingCardsToDraw == 0) return //TODO: display this in some way
+                if (remainingCardsToDraw == 0) { //TODO: display this in some way
+                    changePhase(ENEMY_REVEAL)
+                    return
+                }
                 showCardDrawActor()
             }
 
@@ -629,8 +652,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         SPECIAL_DRAW {
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
+                remainingCardsToDraw =
+                    (cardsToDrawDuringSpecialDraw).coerceAtMost(maxCards - cardHand!!.cards.size)
+                if (remainingCardsToDraw == 0) { //TODO: display this in some way
+                    changePhase(FREE)
+                    return
+                }
                 showCardDrawActor()
-                this.remainingCardsToDraw = cardsToDrawDuringSpecialDraw
             }
 
             override fun transitionAway(gameScreenController: GameScreenController) = with(gameScreenController) {
@@ -810,9 +838,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         private lateinit var destroyCardsPostProcessorName: String
 
-        private lateinit var playerLivesRawTemplateText: String
-        private lateinit var reservesRawTemplateText: String
-
         fun init(config: OnjObject) {
 
             bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
@@ -826,11 +851,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             playerTurnBannerName = bannerOnj.get<String>("playerTurnBanner")
             enemyTurnBannerName = bannerOnj.get<String>("enemyTurnBanner")
-
-            val tmplOnj = config.get<OnjObject>("stringTemplates")
-
-            playerLivesRawTemplateText = tmplOnj.get<String>("playerLives")
-            reservesRawTemplateText = tmplOnj.get<String>("reserves")
 
             val plOnj = config.get<OnjObject>("playerLivesAnimation")
 

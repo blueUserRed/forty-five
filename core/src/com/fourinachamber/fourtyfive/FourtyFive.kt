@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive
 
+import com.badlogic.gdx.Application
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
@@ -11,6 +12,7 @@ import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 import onj.OnjObject
 import onj.OnjParser
+import onj.OnjParserException
 import onj.OnjSchemaParser
 
 /**
@@ -33,6 +35,7 @@ object FourtyFive : Game() {
 
     override fun create() {
         init()
+        Gdx.app.logLevel = Application.LOG_DEBUG
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()

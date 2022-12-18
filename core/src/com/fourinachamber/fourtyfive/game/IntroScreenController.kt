@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.profiling.GLProfiler
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
@@ -15,6 +16,7 @@ import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.plus
 import onj.*
+import kotlin.math.floor
 import kotlin.math.pow
 
 class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
@@ -53,12 +55,16 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             action { startTime = TimeUtils.millis() }
             delayUntil {
                 val timeSinceStart = TimeUtils.timeSinceMillis(startTime)
-                val amount = (Math.random() * 0.08 * (timeSinceStart / 800.0).pow(3)).toInt().coerceAtLeast(1)
+
+                val percent = timeSinceStart / 2000.0
+                val amount = ((percent * 10).pow(3) / 128).toInt().coerceAtLeast(1)
+
                 repeat(amount) { spawnRandomSprite() }
-                timeSinceStart > 4500
+                timeSinceStart > 2000
             }
+            delay(500)
             action { appearActor.isVisible = true }
-            delay(3500)
+            delay(2000)
             action {
                 FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(nextScreen)).build()
             }
@@ -71,7 +77,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         val iterator = sprites.iterator()
         while (iterator.hasNext()) {
             val sprite = iterator.next()
-            sprite.velocity += Vector2(0f, -0.07f)
+            sprite.velocity += Vector2(0f, -2.5f)
             sprite.update()
             if (sprite.y < -sprite.height) iterator.remove()
         }
@@ -82,12 +88,12 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         val worldWidth = screenDataProvider.stage.viewport.worldWidth
         val worldHeight = screenDataProvider.stage.viewport.worldHeight
 
-        val scale = Math.random().toFloat() * 0.04f + 0.02f
+        val scale = Math.random().toFloat() * 0.04f + 0.03f
         val texture = textures.random()
         val sprite = CardSprite(texture, 1.0f)
         sprite.setSize(texture.regionWidth * scale, texture.regionHeight * scale)
         sprite.setPosition(worldWidth * Math.random().toFloat(), worldHeight + Math.random().toFloat() * 5)
-        sprite.rotationalVelocity = Math.random().toFloat() - 0.5f
+        sprite.rotationalVelocity = (Math.random().toFloat() - 0.5f) * 1.5f
         sprites.add(sprite)
     }
 
@@ -105,7 +111,8 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         }
 
         fun update() {
-            setPosition(x + velocity.x, y + velocity.y)
+            val deltaTime = Gdx.graphics.deltaTime
+            setPosition(x + velocity.x * deltaTime, y + velocity.y * deltaTime)
             setOrigin(width / 2, height / 2)
             rotate(rotationalVelocity)
             rotation %= 360
