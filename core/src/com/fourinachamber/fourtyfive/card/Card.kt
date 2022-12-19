@@ -166,6 +166,7 @@ class Card(
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
             gameScreenController.cardHand!!.addCard(this)
         }
+        leaveDestroyMode()
         inGame = false
     }
 
