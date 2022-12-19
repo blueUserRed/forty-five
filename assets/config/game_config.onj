@@ -4,21 +4,21 @@ import "imports/colors.onj" as color
 !defaultEnemyBrain = {
     actions: [
 
-        $DamagePlayerEnemyAction {
-            weight: 4
-            min: 5
-            max: 10
-            indicatorTextureScale: 0.02
-            indicatorTexture: "normal_bullet"
-        }
-
-        $AddCoverEnemyAction {
-            weight: 2
-            min: 1
-            max: 10
-            indicatorTextureScale: 0.02
-            indicatorTexture: "shield_icon"
-        }
+//        $DamagePlayerEnemyAction {
+//            weight: 4
+//            min: 5
+//            max: 10
+//            indicatorTextureScale: 0.02
+//            indicatorTexture: "normal_bullet"
+//        }
+//
+//        $AddCoverEnemyAction {
+//            weight: 2
+//            min: 1
+//            max: 10
+//            indicatorTextureScale: 0.02
+//            indicatorTexture: "shield_icon"
+//        }
 
         $DoNothingEnemyAction {
             weight: 1
@@ -35,7 +35,7 @@ enemyConfig: {
     enemies: [
         {
             name: "enemy"
-            lives: 30
+            lives: 100
             brain: !defaultEnemyBrain
             texture: "enemy"
             coverIcon: "shield_icon"

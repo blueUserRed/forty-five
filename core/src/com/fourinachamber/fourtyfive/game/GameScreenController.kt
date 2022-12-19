@@ -16,7 +16,6 @@ import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.*
 import java.lang.Integer.max
-import kotlin.math.round
 import kotlin.properties.Delegates
 
 
@@ -415,7 +414,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         val revolver = revolver!!
         turnCounter++
 
-
         val cardToShoot = revolver.getCardInSlot(5)
         val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
         val enemy = enemyArea!!.enemies[0]
@@ -468,10 +466,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
             enemyDamageTimeline?.let { include(it) }
 
-            includeLater(
-                { statusEffectTimeline!! },
-                { enemy.currentLives > 0 && statusEffectTimeline != null }
-            )
             includeLater(
                 { statusEffectTimeline!! },
                 { enemy.currentLives > 0 && statusEffectTimeline != null }
