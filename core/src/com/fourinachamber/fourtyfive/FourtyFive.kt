@@ -64,4 +64,10 @@ object FourtyFive : Game() {
         Enemy.init(graphicsConfig)
     }
 
+    override fun dispose() {
+        FourtyFiveLogger.medium(logTag, "game closing")
+        SaveState.write()
+        super.dispose()
+    }
+
 }
