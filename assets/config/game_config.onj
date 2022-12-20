@@ -60,7 +60,7 @@ cardDrawConfig: {
 }
 
 playerConfig: {
-    lives: 12
+    lives: 50
 }
 
 reservesConfig: {

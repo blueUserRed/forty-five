@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.*
@@ -115,7 +114,7 @@ class Enemy(
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
-                val timelineToInclude = effect.execute(gameScreenController) ?: continue
+                val timelineToInclude = effect.executeAfterRound(gameScreenController) ?: continue
                 hadEffectTimeline = true
                 include(timelineToInclude)
             }
@@ -128,6 +127,18 @@ class Enemy(
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
                 val timelineToInclude = effect.executeAfterDamage(gameScreenController, damage) ?: continue
+                hadEffectTimeline = true
+                include(timelineToInclude)
+            }
+        }
+        return if (hadEffectTimeline) timeline else null
+    }
+
+    fun executeStatusEffectsAfterRevolverTurn(gameScreenController: GameScreenController): Timeline? {
+        var hadEffectTimeline = false
+        val timeline = Timeline.timeline {
+            for (effect in statusEffects) {
+                val timelineToInclude = effect.executeAfterRevolverTurn(gameScreenController) ?: continue
                 hadEffectTimeline = true
                 include(timelineToInclude)
             }

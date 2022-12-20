@@ -423,7 +423,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         FourtyFiveLogger.debug(logTag, "revolver is shooting; turn = $turnCounter; cardToShoot = $cardToShoot")
 
         var enemyDamageTimeline: Timeline? = null
-        var statusEffectTimeline: Timeline? = null
+        var damageStatusEffectTimeline: Timeline? = null
+        var turnStatusEffectTimeline: Timeline? = null
         var effectTimeline: Timeline? = null
 
         if (cardToShoot != null) {
@@ -436,17 +437,15 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 action { cardToShoot.afterShot(this@GameScreenController) }
             }
 
-            statusEffectTimeline = enemy.executeStatusEffectsAfterDamage(this, cardToShoot.curDamage)
+            damageStatusEffectTimeline =
+                enemy.executeStatusEffectsAfterDamage(this, cardToShoot.curDamage)
+            turnStatusEffectTimeline = enemy.executeStatusEffectsAfterRevolverTurn(this)
+
             effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT, this)
         }
 
         val finishTimeline = Timeline.timeline {
             action {
-                if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
-
-                FourtyFiveLogger.debug(logTag, "revolver rotated ${
-                    if (rotateLeft) "left" else "right"
-                }")
 
                 checkCardModifierValidity()
 
@@ -469,13 +468,27 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             enemyDamageTimeline?.let { include(it) }
 
             includeLater(
-                { statusEffectTimeline!! },
-                { enemy.currentLives > 0 && statusEffectTimeline != null }
+                { damageStatusEffectTimeline!! },
+                { enemy.currentLives > 0 && damageStatusEffectTimeline != null }
             )
             includeLater(
                 { effectTimeline!! },
                 { enemy.currentLives > 0 && effectTimeline != null }
             )
+
+            action {
+                if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
+
+                FourtyFiveLogger.debug(logTag, "revolver rotated ${
+                    if (rotateLeft) "left" else "right"
+                }")
+            }
+
+            includeLater(
+                { turnStatusEffectTimeline!! },
+                { enemy.currentLives > 0 && turnStatusEffectTimeline != null }
+            )
+
             includeLater(
                 { finishTimeline },
                 { enemy.currentLives > 0 }
