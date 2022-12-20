@@ -258,6 +258,10 @@ $Behaviour [
         screenPath: string
     }
 
+    $OnClickAbandonRunBehaviour { }
+
+    $OnClickRemoveActorBehaviour { }
+
     $OnClickMaskBehaviour {
         maskTexture: string
         invert?: boolean

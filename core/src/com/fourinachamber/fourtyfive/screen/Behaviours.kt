@@ -15,11 +15,13 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.utils.Either
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Utils
 import ktx.actors.onClick
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.OnjNamedObject
+import onj.OnjNull
 import onj.OnjObject
 
 
@@ -33,6 +35,8 @@ object BehaviourFactory {
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
         "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
+        "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
+        "OnClickRemoveActorBehaviour" to { onj, actor -> OnClickRemoveActorBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnHoverChangeFontSizeBehaviour" to { onj, actor -> OnHoverChangeFontSizeBehaviour(onj, actor) },
         "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
@@ -174,6 +178,24 @@ class OnClickExitBehaviour(actor: Actor) : Behaviour(actor) {
     override val onCLick: BehaviourCallback = {
         Gdx.app.exit()
     }
+}
+
+class OnClickAbandonRunBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    override val onCLick: BehaviourCallback = {
+        FourtyFiveLogger.debug("OnClickAbandonRunBehaviour", "abandoning run")
+        SaveState.copyDefaultFile()
+        SaveState.read()
+    }
+
+}
+
+class OnClickRemoveActorBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    override val onCLick: BehaviourCallback = {
+        actor.parent.removeActor(actor)
+    }
+
 }
 
 /**

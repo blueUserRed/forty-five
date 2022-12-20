@@ -44,7 +44,6 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
-    private val basePlayerLives = onj.get<Long>("playerLives").toInt()
     private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
     val maxCards = onj.get<Long>("maxCards").toInt()
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
@@ -74,10 +73,13 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private var remainingCardsToDraw: Int? = null
 
-    var curPlayerLives: Int = basePlayerLives
+    var curPlayerLives: Int
         set(value) {
-            field = max(value, 0)
+            SaveState.playerLives = max(value, 0)
         }
+        get() = SaveState.playerLives
+
+    val playerLivesAtStart: Int = SaveState.playerLives
 
     private val timeline: Timeline = Timeline(mutableListOf()).apply {
         start()
@@ -235,7 +237,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         bindParam("game.curReserves") { curReserves }
         bindParam("game.baseReserves") { baseReserves }
         bindParam("game.curPlayerLives") { curPlayerLives }
-        bindParam("game.basePlayerLives") { basePlayerLives }
+        bindParam("game.basePlayerLives") { playerLivesAtStart }
         bindParam("game.remainingCardsToDraw") { remainingCardsToDraw ?: 0 }
         bindParam("game.remainingCardsToDrawPluralS") { if (remainingCardsToDraw == 1) "" else "s" }
         bindParam("game.remainingBullets") { bulletStack.size }
@@ -640,6 +642,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         FourtyFiveLogger.title("game ends")
         removeTemplateStringParams()
         curScreen = null
+        SaveState.write()
     }
 
     fun enemyDefeated(enemy: Enemy) {

@@ -11,3 +11,5 @@ stats: {
     usedReserves: int
     enemiesDefeated: int
 }
+
+playerLives: int
