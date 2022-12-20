@@ -138,7 +138,14 @@ class Card(
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
             gameScreenController.cardHand!!.addCard(this)
         }
+        leaveGame()
+    }
+
+    private fun leaveGame() {
         inGame = false
+        modifiers.clear()
+        isDamageDirty = true
+        updateText()
     }
 
     fun enterDestroyMode(gameScreenController: GameScreenController) = actor.enterDestroyMode(gameScreenController)
@@ -158,7 +165,7 @@ class Card(
     }
 
     fun onCoverDestroy() {
-        inGame = false
+        leaveGame()
     }
 
     fun onDestroy(gameScreenController: GameScreenController) {
@@ -166,7 +173,8 @@ class Card(
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
             gameScreenController.cardHand!!.addCard(this)
         }
-        inGame = false
+        leaveDestroyMode()
+        leaveGame()
     }
 
     fun addModifier(modifier: CardModifier) {
