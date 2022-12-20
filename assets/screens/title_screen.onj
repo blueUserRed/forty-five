@@ -75,32 +75,72 @@ viewport: $FitViewport {
     ]
 }
 
-!buttonBox = $VerticalGroup {
+!buttonBox = $Table {
+    rows: [
 
-    align: "center"
-    children: [
-        $Label {
-            text: "play"
-            font: "red_wing"
-            color: !color.black
-            fontScale: !buttonBaseScale
-            behaviours: [
-                $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/game_screen.onj"
+        {
+            cells: [
+                {
+                    align: "right"
+                    element: $Label {
+                        text: "play"
+                        font: "red_wing"
+                        align: "right"
+                        color: !color.black
+                        fontScale: !buttonBaseScale
+                        behaviours: [
+                            $OnClickChangeScreenBehaviour {
+                                screenPath: "screens/game_screen.onj"
+                            }
+                            ...!buttonBehaviours
+                        ]
+//                        debug: true
+                    }
                 }
-                ...!buttonBehaviours
             ]
         }
-        $Label {
-            text: "quit"
-            font: "red_wing"
-            color: !color.black
-            fontScale: !buttonBaseScale
-            behaviours: [
-                $OnClickExitBehaviour { }
-                ...!buttonBehaviours
+
+        {
+            cells: [
+                {
+                    align: "right"
+                    element: $Label {
+                        text: "abandon run"
+                        font: "red_wing"
+                        align: "right"
+                        color: !color.black
+                        fontScale: !buttonBaseScale
+                        behaviours: [
+                            $OnClickAbandonRunBehaviour { }
+                            $OnClickRemoveActorBehaviour { }
+                            ...!buttonBehaviours
+                        ]
+//                        debug: true
+                    }
+                }
             ]
         }
+
+        {
+            cells: [
+                {
+                    align: "right"
+                    element: $Label {
+                        text: "quit"
+                        font: "red_wing"
+                        align: "right"
+                        color: !color.black
+                        fontScale: !buttonBaseScale
+                        behaviours: [
+                            $OnClickExitBehaviour { }
+                            ...!buttonBehaviours
+                        ]
+//                        debug: true
+                    }
+                }
+            ]
+        }
+
     ]
 
 }

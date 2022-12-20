@@ -37,6 +37,12 @@ object SaveState {
     var savefileDirty: Boolean = false
         private set
 
+    var playerLives: Int = 0
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
     private val savefileSchema: OnjSchema by lazy {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/savefile.onjschema").file())
     }
@@ -90,7 +96,12 @@ object SaveState {
         usedReserves = stats.get<Long>("usedReserves").toInt()
         enemiesDefeated = stats.get<Long>("enemiesDefeated").toInt()
 
-        FourtyFiveLogger.debug(logTag, "stats: usedReserves = $usedReserves, enemiesDefeated = $enemiesDefeated")
+        playerLives = obj.get<Long>("playerLives").toInt()
+
+        FourtyFiveLogger.debug(logTag, "stats: " +
+                "usedReserves = $usedReserves, " +
+                "enemiesDefeated = $enemiesDefeated, " +
+                "playerLives = $playerLives")
 
         bindTemplateStringParams()
     }
@@ -118,6 +129,7 @@ object SaveState {
         val obj = buildOnjObject {
             "additionalCards" with getCardArray(_additionalCards)
             "cardsToDraw" with getCardArray(_cardsToDraw)
+            "playerLives" with playerLives
             "stats" with buildOnjObject {
                 "usedReserves" with usedReserves
                 "enemiesDefeated" with enemiesDefeated
