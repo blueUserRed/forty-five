@@ -220,7 +220,7 @@ abstract class Effect(val trigger: Trigger) {
 
     class GiveStatus(trigger: Trigger, val statusEffect: StatusEffect) : Effect(trigger) {
 
-        override fun copy(): Effect = GiveStatus(trigger, statusEffect)
+        override fun copy(): Effect = GiveStatus(trigger, statusEffect.copy())
 
         override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
             gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)

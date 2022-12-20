@@ -1,3 +1,5 @@
+import "config/game_config.onj" as gameConfig
+
 additionalCards: [
 ]
 
@@ -44,7 +46,7 @@ cardsToDraw: [
     }
 ]
 
-playerLives: 50
+playerLives: !gameConfig.playerConfig.lives
 
 stats: {
     usedReserves: 0

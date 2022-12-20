@@ -1,7 +1,6 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
@@ -34,6 +33,9 @@ abstract class StatusEffect(
     protected var isIconInitialised: Boolean = false
         private set
 
+
+    abstract fun copy(): StatusEffect
+
     fun initIcon(gameScreenController: GameScreenController) {
         val texture = gameScreenController.curScreen!!.textures[iconTextureName]
             ?: throw RuntimeException("no texture with name $iconTextureName")
@@ -53,13 +55,15 @@ abstract class StatusEffect(
 
     open fun isStillValid(): Boolean = remainingTurns > 0
 
-    abstract fun execute(gameScreenController: GameScreenController): Timeline?
-
     abstract fun canStackWith(effect: StatusEffect): Boolean
 
     abstract fun stack(effect: StatusEffect)
 
+    open fun executeAfterRound(gameScreenController: GameScreenController): Timeline? = null
+
     open fun executeAfterDamage(gameScreenController: GameScreenController, damage: Int): Timeline? = null
+
+    open fun executeAfterRevolverTurn(gameScreenController: GameScreenController): Timeline? = null
 
 
     class Poison(
@@ -68,7 +72,11 @@ abstract class StatusEffect(
         target: StatusEffectTarget
     ) : StatusEffect(poisonIconName, turns, target, poisonIconScale) {
 
-        override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        override fun copy(): StatusEffect = Poison(damage, turns, target)
+
+        override fun executeAfterRevolverTurn(
+            gameScreenController: GameScreenController
+        ): Timeline = Timeline.timeline {
 
             FourtyFiveLogger.debug(logTag, "executing poison effect")
 
@@ -110,7 +118,9 @@ abstract class StatusEffect(
         target: StatusEffectTarget
     ) : StatusEffect(burningIconName, turns, target, burningIconScale) {
 
-        override fun execute(gameScreenController: GameScreenController): Timeline? = null
+        override fun copy(): StatusEffect = Burning(turns, percent, target)
+
+        override fun executeAfterRound(gameScreenController: GameScreenController): Timeline? = null
 
         override fun executeAfterDamage(
             gameScreenController: GameScreenController,
