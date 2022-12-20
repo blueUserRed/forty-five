@@ -337,64 +337,69 @@ defaultCover: "crate"
 startDeck: [
 
     {
-        name: "bullet"
-        amount: 4
-    }
-    {
-        name: "incendiaryBullet"
+        name: "undeadBullet"
         amount: 2
     }
-    {
-        name: "workerBullet"
-        amount: 1
-    }
-    {
-        name: "bigBullet"
-        amount: 2
-    }
-    {
-        name: "rottenBullet"
-        amount: 1
-    }
-    {
-        name: "diamondBullet"
-        amount: 1
-    }
-    {
-        name: "bewitchedBullet"
-        amount: 1
-    }
-    {
-        name: "explosiveBullet"
-        amount: 1
-    }
-    {
-        name: "leadersBullet"
-        amount: 1
-    }
-    {
-        name: "silverBullet"
-        amount: 1
-    }
-    {
-        name: "crate"
-        amount: 5
-    }
-    {
-        name: "bigCrate"
-        amount: 2
-    }
-    {
-        name: "casket"
-        amount: 1
-    }
-    {
-        name: "jewelryBox"
-        amount: 1
-    }
-    {
-        name: "treasureChest"
-        amount: 1
-    }
+
+//    {
+//        name: "bullet"
+//        amount: 4
+//    }
+//    {
+//        name: "incendiaryBullet"
+//        amount: 2
+//    }
+//    {
+//        name: "workerBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "bigBullet"
+//        amount: 2
+//    }
+//    {
+//        name: "rottenBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "diamondBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "bewitchedBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "explosiveBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "leadersBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "silverBullet"
+//        amount: 1
+//    }
+//    {
+//        name: "crate"
+//        amount: 5
+//    }
+//    {
+//        name: "bigCrate"
+//        amount: 2
+//    }
+//    {
+//        name: "casket"
+//        amount: 1
+//    }
+//    {
+//        name: "jewelryBox"
+//        amount: 1
+//    }
+//    {
+//        name: "treasureChest"
+//        amount: 1
+//    }
 
 ]
