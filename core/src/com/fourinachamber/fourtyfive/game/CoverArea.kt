@@ -23,6 +23,7 @@ import java.lang.Float.max
 class CoverArea(
     val numStacks: Int,
     val maxCards: Int,
+    val onlyAllowAddingOnSameTurn: Boolean,
     infoFont: BitmapFont,
     infoFontColor: Color,
     stackBackgroundTexture: TextureRegion,
@@ -46,6 +47,7 @@ class CoverArea(
     private val stacks: Array<CoverStack> = Array(numStacks) {
         CoverStack(
             maxCards,
+            onlyAllowAddingOnSameTurn,
             this,
             infoFont,
             infoFontColor,
@@ -187,6 +189,7 @@ class CoverArea(
 
 class CoverStack(
     val maxCards: Int,
+    val onlyAllowAddingOnSameTurn: Boolean,
     private val coverArea: CoverArea,
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
@@ -264,17 +267,11 @@ class CoverStack(
 
     fun acceptsCard(turnNum: Int): Boolean {
         if (_cards.size >= maxCards) return false
-        if (lockedTurnNum != null && turnNum != lockedTurnNum) return false
+        if (onlyAllowAddingOnSameTurn && lockedTurnNum != null && turnNum != lockedTurnNum) return false
         return true
     }
 
     fun addCard(card: Card, turnNum: Int) {
-        if (_cards.size >= maxCards) {
-            throw RuntimeException("cannot add another cover because max stack size is $maxCards")
-        }
-        if (lockedTurnNum != null && turnNum != lockedTurnNum) {
-            throw RuntimeException("cannot add another cover because stack is locked")
-        }
         if (_cards.isEmpty()) lockedTurnNum = turnNum
         _cards.add(card)
         card.actor.setScale(cardScale)
