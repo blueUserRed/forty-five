@@ -214,6 +214,7 @@ $Widget [
         areaSpacing: float
         cardScale: float
         stackMinSize: float
+        onlyAllowAddingOnTheSameTurn: boolean
         ...!detailTextSharedKeys
         ...!widgetSharedKeys
     }

@@ -232,8 +232,9 @@ options: {
 
 !coverArea = $CoverArea {
     name: "cover_area"
-    numStacks: 2
-    maxCards: 3
+    numStacks: !gameConfig.coverConfig.numStacks
+    maxCards: !gameConfig.coverConfig.maxCards
+    onlyAllowAddingOnTheSameTurn: !gameConfig.coverConfig.onlyAllowAddingOnTheSameTurn
     infoFont: "vanilla_whale"
     infoFontColor: !color.black
     infoFontScale: 0.1

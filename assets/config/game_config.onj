@@ -70,3 +70,9 @@ reservesConfig: {
 damageConfig: {
     shotEmptyDamage: 5
 }
+
+coverConfig: {
+    onlyAllowAddingOnTheSameTurn: false
+    numStacks: 2
+    maxCards: 3
+}

@@ -494,6 +494,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         "CoverArea" -> CoverArea(
             widgetOnj.get<Long>("numStacks").toInt(),
             widgetOnj.get<Long>("maxCards").toInt(),
+            widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
             fontOrError(widgetOnj.get<String>("detailFont")),
             Color.valueOf(widgetOnj.get<String>("detailFontColor")),
             textureOrError(widgetOnj.get<String>("stackBackgroundTexture")),
