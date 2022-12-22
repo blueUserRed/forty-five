@@ -80,7 +80,7 @@ abstract class StatusEffect(
 
             FourtyFiveLogger.debug(logTag, "executing poison effect")
 
-            val shakeActorAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
+            val shakeActorAction = ShakeActorAction(xShake * 0.5f, yShake, xSpeedMultiplier, ySpeedMultiplier)
             shakeActorAction.duration = shakeDuration
 
             action { icon.addAction(shakeActorAction) }
