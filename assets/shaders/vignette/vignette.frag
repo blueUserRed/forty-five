@@ -24,7 +24,7 @@ void main() {
 
     float dist = distance(pos, vec2(0.5));
     float wave = abs(sin(u_time * 0.1 * u_arg_speed)) * u_arg_movement;
-    float percent = dist * clamp(wave, u_arg_minMovement, 1);
+    float percent = dist * clamp(wave, u_arg_minMovement, 1.0);
 
     color = mix(color, u_arg_color, percent);
 

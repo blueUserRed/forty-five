@@ -51,6 +51,8 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     var curScreen: ScreenDataProvider? = null
         private set
 
+    private var destroyCardPostProcessor: PostProcessor? = null
+
     var cardHand: CardHand? = null
     var revolver: Revolver? = null
     var enemyArea: EnemyArea? = null
@@ -672,7 +674,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.copyDefaultFile()
-        SaveState.read()
+//        SaveState.read()
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(looseScreen)).build()
     }
 
@@ -747,21 +749,19 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
         CARD_DESTROY {
 
-            private var postProcessor: PostProcessor? = null
-
             private var previousPostProcessor: PostProcessor? = null
 
             override fun transitionTo(gameScreenController: GameScreenController) = with(gameScreenController) {
 
-                if (postProcessor == null) {
-                    postProcessor = curScreen!!.postProcessors[destroyCardsPostProcessorName]
+                if (destroyCardPostProcessor == null) {
+                    destroyCardPostProcessor = curScreen!!.postProcessors[destroyCardsPostProcessorName]
                         ?: throw RuntimeException("unknown postProcessor: $destroyCardsPostProcessorName")
                 }
 
                 showDestroyCardInstructionActor()
 
                 previousPostProcessor = curScreen!!.postProcessor
-                curScreen!!.postProcessor = postProcessor
+                curScreen!!.postProcessor = destroyCardPostProcessor
 
                 for (card in createdCards) if (card.inGame && card.type == Card.Type.BULLET) {
                     card.enterDestroyMode(this)
