@@ -35,7 +35,7 @@ enemyConfig: {
     enemies: [
         {
             name: "enemy"
-            lives: 100
+            lives: 10
             brain: !defaultEnemyBrain
             texture: "enemy"
             coverIcon: "shield_icon"

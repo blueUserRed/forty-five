@@ -165,9 +165,13 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             hoverDetailActor.setText(card.description)
             val (x, y) = card.actor.localToStageCoordinates(Vector2(0f, 0f))
             hoverDetailActor.height = hoverDetailActor.prefHeight
+            hoverDetailActor.width = detailWidth
+
+            val toLeft = x + card.actor.width + detailWidth > screenDataProvider.stage.viewport.worldWidth
+
             hoverDetailActor.setPosition(
-                x + detailOffset.x + card.actor.width / 2 - detailWidth / 2,
-                y + detailOffset.y - hoverDetailActor.height
+                if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
+                y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
             )
             return
         }

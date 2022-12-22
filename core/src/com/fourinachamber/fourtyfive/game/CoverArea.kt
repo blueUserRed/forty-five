@@ -179,8 +179,10 @@ class CoverArea(
 
         val (x, y) = stack.localToStageCoordinates(Vector2(card.actor.x, card.actor.y))
 
+        val toLeft = x + card.actor.width + detailWidth > screenDataProvider.stage.viewport.worldWidth
+
         hoverDetailActor.setPosition(
-            x + card.actor.width + detailOffset.x,
+            if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
             y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
         )
     }
