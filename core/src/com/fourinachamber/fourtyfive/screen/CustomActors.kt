@@ -224,7 +224,7 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
         if (mask == null) {
-            val c = batch.color
+            val c = batch.color.cpy()
             batch.setColor(c.r, c.g, c.b, alpha)
             batch.draw(texture, x, y, width, height)
             batch.color = c

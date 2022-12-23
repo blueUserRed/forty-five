@@ -673,8 +673,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
 
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
-        SaveState.copyDefaultFile()
-//        SaveState.read()
+        SaveState.reset()
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(looseScreen)).build()
     }
 

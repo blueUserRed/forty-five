@@ -51,7 +51,7 @@ children: [
                         padTop: 7.0
                         element: $TemplateLabel {
                             align: "left"
-                            template: "enemies killed: {stat.enemiesDefeated} \nreserves used: {stat.usedReserves} \n "
+                            template: "enemies killed: {stat.lastRun.enemiesDefeated} \nreserves used: {stat.lastRun.usedReserves} \n "
                             font: "red_wing"
                             color: !color.black
                             fontScale: 0.2

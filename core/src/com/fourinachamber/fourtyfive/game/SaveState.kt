@@ -43,6 +43,11 @@ object SaveState {
             savefileDirty = true
         }
 
+    var lastRunUsedReserves: Int = 0
+        private set
+    var lastRunEnemiesDefeated: Int = 0
+        private set
+
     private val savefileSchema: OnjSchema by lazy {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/savefile.onjschema").file())
     }
@@ -106,12 +111,25 @@ object SaveState {
         bindTemplateStringParams()
     }
 
+    fun reset() {
+        copyLastRunStats()
+        copyDefaultFile()
+        read()
+    }
+
+    private fun copyLastRunStats() {
+        lastRunEnemiesDefeated = enemiesDefeated
+        lastRunUsedReserves = usedReserves
+    }
+
     private fun bindTemplateStringParams() {
         TemplateString.bindParam("stat.usedReserves") { usedReserves }
         TemplateString.bindParam("stat.enemiesDefeated") { enemiesDefeated }
+        TemplateString.bindParam("stat.lastRun.usedReserves") { lastRunUsedReserves }
+        TemplateString.bindParam("stat.lastRun.enemiesDefeated") { lastRunEnemiesDefeated }
     }
 
-    fun copyDefaultFile() {
+    private fun copyDefaultFile() {
         FourtyFiveLogger.debug(logTag, "copying default save")
         Gdx.files.local(defaultSavefilePath).copyTo(Gdx.files.local(saveFilePath))
     }
