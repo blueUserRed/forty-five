@@ -138,7 +138,7 @@ class Card(
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
             gameScreenController.cardHand!!.addCard(this)
         }
-        leaveGame()
+        if (!isEverlasting) leaveGame()
     }
 
     private fun leaveGame() {
