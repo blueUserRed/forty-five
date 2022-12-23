@@ -184,8 +184,7 @@ class OnClickAbandonRunBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 
     override val onCLick: BehaviourCallback = {
         FourtyFiveLogger.debug("OnClickAbandonRunBehaviour", "abandoning run")
-        SaveState.copyDefaultFile()
-        SaveState.read()
+        SaveState.reset()
     }
 
 }
@@ -288,7 +287,7 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
-        SaveState.copyDefaultFile()
+        SaveState.reset()
     }
 
 }
