@@ -6,45 +6,85 @@ import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.*
 
+/**
+ * stores data about the current run and can read/write it to a file
+ */
 object SaveState {
 
+    /**
+     * used for logging
+     */
     const val logTag = "SaveState"
+
+    /**
+     * the path to the file from which the data is read/written to
+     */
     const val saveFilePath: String = "saves/savefile.onj"
+
+    /**
+     * this file is used when the progress is reset or when no valid savefile can be found
+     */
     const val defaultSavefilePath: String = "saves/default_savefile.onj"
+
 
     private var _additionalCards: MutableMap<String, Int> = mutableMapOf()
 
     private var _cardsToDraw: MutableMap<String, Int> = mutableMapOf()
 
+    /**
+     * cards the player has in addition to the cards in the start deck; contains the name of the card and the amount
+     */
     val additionalCards: Map<String, Int>
         get() = _additionalCards
 
+    /**
+     * the cards the player can choose on the win screen; contains the name of the card and the amount
+     */
     val cardsToDraw: Map<String, Int>
         get() = _cardsToDraw
 
+    /**
+     * counts the amount of reserves used by the player over the whole run
+     */
     var usedReserves: Int = 0
         set(value) {
             field = value
             savefileDirty = true
         }
 
+    /**
+     * how many enemies the player has defeated this run
+     */
     var enemiesDefeated: Int = 0
         set(value) {
             field = value
             savefileDirty = true
         }
 
+    /**
+     * true if value has changed since the savefile was last written; will not write if this is false
+     */
     var savefileDirty: Boolean = false
         private set
 
+    /**
+     * the current lives of the player
+     */
     var playerLives: Int = 0
         set(value) {
             field = value
             savefileDirty = true
         }
 
+    /**
+     * temporarily stores the used reserves, so it can be shown on the death screen
+     */
     var lastRunUsedReserves: Int = 0
         private set
+
+    /**
+     * temporarily stores the defeated enemies, so it can be shown on the death screen
+     */
     var lastRunEnemiesDefeated: Int = 0
         private set
 
@@ -52,6 +92,9 @@ object SaveState {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/savefile.onjschema").file())
     }
 
+    /**
+     * removes a card from [cardsToDraw] and adds it to [additionalCards]
+     */
     fun drawCard(card: Card) {
         savefileDirty = true
         if (!_cardsToDraw.containsKey(card.name)) {
@@ -67,6 +110,9 @@ object SaveState {
         }
     }
 
+    /**
+     * reads the savefile and sets the values
+     */
     fun read() {
 
         FourtyFiveLogger.debug(logTag, "reading SaveState")
@@ -109,8 +155,12 @@ object SaveState {
                 "playerLives = $playerLives")
 
         bindTemplateStringParams()
+        savefileDirty = false
     }
 
+    /**
+     * resets to the default save file
+     */
     fun reset() {
         copyLastRunStats()
         copyDefaultFile()
@@ -141,6 +191,9 @@ object SaveState {
             it.get<String>("name") to it.get<Long>("amount").toInt()
         }
 
+    /**
+     * writes the values to the savefile
+     */
     fun write() {
         if (!savefileDirty) return
         FourtyFiveLogger.debug(logTag, "writing SaveState")

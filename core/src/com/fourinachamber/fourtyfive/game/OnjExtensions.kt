@@ -3,6 +3,9 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.graphics.Color
 import onj.*
 
+/**
+ * customizes the onj-parser by adding custom function and dataTypes
+ */
 object OnjExtensions {
 
     private val customFunctions: Array<OnjFunction> = arrayOf(
@@ -133,6 +136,9 @@ object OnjExtensions {
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 
+    /**
+     * an Effect that can be applied to a card that was read from an onj file
+     */
     class OnjEffect(
         override val value: Effect
     ) : OnjValue() {
@@ -143,6 +149,11 @@ object OnjExtensions {
         override fun toJsonString(indentationLevel: Int): String = toString()
 
     }
+
+    /**
+     * a bullet-selector that was read from an onj file
+     * @see BulletSelector
+     */
     class OnjBulletSelector(
         override val value: BulletSelector
     ) : OnjValue() {
@@ -154,6 +165,9 @@ object OnjExtensions {
 
     }
 
+    /**
+     * a status effect that was read from an onj file
+     */
     class OnjStatusEffect(
         override val value: StatusEffect
     ) : OnjValue() {
@@ -166,6 +180,9 @@ object OnjExtensions {
     }
 
     //TODO: swap all usages Color.valueOf with this
+    /**
+     * a color that was read from an onj file (currently only in use in combination with the args of a postProcessor)
+     */
     class OnjColor(
         override val value: Color
     ) : OnjValue() {

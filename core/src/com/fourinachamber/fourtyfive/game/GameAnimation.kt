@@ -16,15 +16,41 @@ import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import ktx.actors.alpha
 import java.lang.Float.min
 
+/**
+ * special animations that affect the whole game
+ */
 abstract class GameAnimation {
 
+    /**
+     * true if the animation finished
+     */
     abstract fun isFinished(): Boolean
+
+    /**
+     * updates the animation
+     */
     abstract fun update()
+
+    /**
+     * starts the animation
+     */
     open fun start() {}
+
+    /**
+     * called after the animation has finished
+     */
     open fun end() {}
 
 }
 
+/**
+ * displays a banner over the whole screen with a zoom animation
+ * @param banner the texture for the banner
+ * @param duration the time in ms for which the banner is displayed
+ * @param animationDuration the time in ms for which the banner is animated
+ * @param beginScale the scale when the banner is first displayed
+ * @param endScale the scale of the banner after [animationDuration] ms have passed
+ */
 class BannerAnimation(
     val banner: TextureRegion,
     private val screenDataProvider: ScreenDataProvider,
@@ -72,6 +98,9 @@ class BannerAnimation(
     override fun toString(): String = "BannerAnimation"
 }
 
+/**
+ * animates a text by raising it and fading it out (for example used for displaying the damage)
+ */
 class TextAnimation(
     private val x: Float,
     private val y: Float,
@@ -135,6 +164,15 @@ class TextAnimation(
 
 }
 
+/**
+ * fades an actor in and then out again
+ * @param duration the duration of the whole animation
+ * @param fadeIn the time in ms of the fadeIn animation (starts at startTime, finishes at startTime + fadeIn)
+ * @param fadeOut the time in ms of the fadeOut animation
+ * (starts at startTime + duration - fadeOut, finishes at startTime + duration)
+ * @param fixedDimensions if not null the width of [actor] is set to the x-component and the height is set to the
+ * y-component
+ */
 open class FadeInAndOutAnimation(
     protected val x: Float,
     protected val y: Float,
@@ -185,6 +223,13 @@ open class FadeInAndOutAnimation(
     override fun toString(): String = "FadeInAndOutAnimation"
 }
 
+/**
+ * Works like [FadeInAndOutAnimation] but automatically creates a label to display the text
+ * @param duration the duration of the whole animation
+ * @param fadeIn the time in ms of the fadeIn animation (starts at startTime, finishes at startTime + fadeIn)
+ * @param fadeOut the time in ms of the fadeOut animation
+ * (starts at startTime + duration - fadeOut, finishes at startTime + duration)
+ */
 class FadeInAndOutTextAnimation(
     x: Float,
     y: Float,
