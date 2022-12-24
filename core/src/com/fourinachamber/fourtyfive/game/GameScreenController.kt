@@ -48,6 +48,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
     val maxCards = onj.get<Long>("maxCards").toInt()
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
+    /**
+     * stores the screenDataProvider for the game-screen
+     */
     var curScreen: ScreenDataProvider? = null
         private set
 
@@ -284,12 +287,18 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
+    /**
+     * plays a gameAnimation
+     */
     fun playGameAnimation(anim: GameAnimation) {
         FourtyFiveLogger.debug(logTag, "playing game animation: $anim")
         anim.start()
         curGameAnims.add(anim)
     }
 
+    /**
+     * changes the game to the SpecialDraw phase and sets the amount of cards to draw to [amount]
+     */
     fun specialDraw(amount: Int) {
         if (currentPhase != Gamephase.FREE) return
         cardsToDrawDuringSpecialDraw = amount
@@ -320,13 +329,11 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             ?: throw RuntimeException("no named actor with name $playerLivesLabelName")
         if (playerLives !is CustomLabel) throw RuntimeException("actor named $playerLivesLabelName must be a Label")
         playerLivesLabel = playerLives
-//        curPlayerLives = curPlayerLives // inits label
 
         val reserves = curScreen.namedActors[reservesLabelName]
             ?: throw RuntimeException("no named actor with name $reservesLabelName")
         if (reserves !is CustomLabel) throw RuntimeException("actor named $reservesLabelName must be a Label")
         reservesLabel = reserves
-//        curReserves = curReserves // inits label
     }
 
     private fun initCoverArea() {
@@ -403,6 +410,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }
 
+    /**
+     * creates a new instance of the card named [name] and puts it in the hand of the player
+     */
     fun putCardInHand(name: String) {
         val cardProto = cardPrototypes
             .firstOrNull { it.name == name }
@@ -454,7 +464,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
                 revolver
                     .slots
                     .mapNotNull { it.card }
-                    .forEach { it.onRevolverTurn(it === cardToShoot) }
+                    .forEach(Card::onRevolverTurn)
 
                 enemies.forEach(Enemy::onRevolverTurn)
             }
@@ -510,6 +520,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         onEndTurnButtonClicked()
     }
 
+    /**
+     * damages the player (plays no animation, calls loose when lives go below 0)
+     */
     fun damagePlayer(damage: Int) {
         curPlayerLives -= damage
         FourtyFiveLogger.debug(logTag, "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives")
@@ -518,13 +531,22 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
+    /**
+     * adds reserves (plays no animations)
+     */
     fun gainReserves(amount: Int) {
         curReserves += amount
         FourtyFiveLogger.debug(logTag, "player gained reserves; amount = $amount; curReserves = $curReserves")
     }
 
+    /**
+     * changes the game to the destroy phase
+     */
     fun destroyCardPhase() = changePhase(Gamephase.CARD_DESTROY)
 
+    /**
+     * destroys a card in the revolver
+     */
     fun destroyCard(card: Card) {
         revolver!!.removeCard(card)
         card.onDestroy(this)
@@ -533,6 +555,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         onCardDestroyed()
     }
 
+    /**
+     * checks whether a destroyable card is in the game
+     */
     fun hasDestroyableCard(): Boolean {
         for (card in createdCards) if (card.inGame && card.type == Card.Type.BULLET) {
             return true
@@ -567,10 +592,16 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         executeTimelineLater(timeline)
     }
 
+    /**
+     * executes a timeline as soon as the current timelineAction is finished
+     */
     fun executeTimelineImmediate(timeline: Timeline) {
         for (action in timeline.actions.reversed()) this.timeline.pushAction(action)
     }
 
+    /**
+     * appends a timeline to the current timeline
+     */
     fun executeTimelineLater(timeline: Timeline) {
         for (action in timeline.actions) this.timeline.appendAction(action)
     }
@@ -660,6 +691,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
         SaveState.write()
     }
 
+    /**
+     * called when an enemy was defeated
+     */
     fun enemyDefeated(enemy: Enemy) {
         SaveState.enemiesDefeated++
         win()
@@ -746,6 +780,9 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             override fun onCardDestroyed(): Gamephase = SPECIAL_DRAW
         },
 
+        /**
+         * player has to destroy a card
+         */
         CARD_DESTROY {
 
             private var previousPostProcessor: PostProcessor? = null

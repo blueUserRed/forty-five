@@ -18,22 +18,37 @@ import onj.OnjArray
 import onj.OnjNamedObject
 import onj.OnjObject
 
+/**
+ * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
+ * actual instances of the card. Prototypes can be used to create those instances
+ * @param name the name of the card produced by this prototype
+ * @param type the type of card (bullet or cover)
+ * @param creator lambda that creates the instance
+ */
 class CardPrototype(
     val name: String,
     val type: Card.Type,
     private val creator: () -> Card
 ) {
+
+    /**
+     * creates an actual instance of this card
+     */
     fun create(): Card = creator()
 }
 
 /**
- * represents a card
+ * represents an actual instance of a card. Can be created using [CardPrototype]
  * @param name the name of the card
- * @param title the properly formatted name of the card, used for displaying
- * @param texture the texture for displaying the card
- * @param description the description of the card
- * @param type the CardType
- * @param baseDamage the base-damage of the card, before things like effects are applied
+ * @param title the name but formatted, so it looks good when shown on the screen
+ * @param texture the texture of the card
+ * @param flavourText Short phrase that (should) be funny or add to the lore
+ * @param shortDescription short text explaining the effects of this card; can be left blank
+ * @param type the type of card (bullet or cover)
+ * @param baseDamage the damage value of the card before modifiers are applied (typically 0 when this is a cover)
+ * @param coverValue the cover this card provides (typically 0 when this is a bullet)
+ * @param cost the cost of this card in reserves
+ * @param effects the effects of this card
  */
 class Card(
     val name: String,
@@ -48,12 +63,17 @@ class Card(
     val effects: List<Effect>
 ) {
 
+    /**
+     * used for logging
+     */
     val logTag = "card-$name-${++instanceCounter}"
 
     /**
      * the actor for representing the card on the screen
      */
     val actor = CardActor(this)
+
+    //TODO: isDraggable and inAnimation should be in the actor class
 
     /**
      * true when the card can be dragged
@@ -68,6 +88,9 @@ class Card(
     var inGame: Boolean = false
         private set
 
+    /**
+     * the current damage with all modifiers applied
+     */
     var curDamage: Int = baseDamage
         private set
         get() {
@@ -79,6 +102,10 @@ class Card(
             return cur
         }
 
+    /**
+     * the complete description of the card. Includes [flavourText], [shortDescription], information about damage/cover,
+     * cost and modifiers
+     */
     var description = ""
         private set
 
@@ -120,6 +147,9 @@ class Card(
         updateText()
     }
 
+    /**
+     * checks if the modifiers of this card are still valid and removes them if they are not
+     */
     fun checkModifierValidity() {
         val iterator = modifiers.iterator()
         while (iterator.hasNext()) {
@@ -133,6 +163,9 @@ class Card(
         if (isDamageDirty) updateText()
     }
 
+    /**
+     * called by gameScreenController when the card was shot
+     */
     fun afterShot(gameScreenController: GameScreenController) {
         if (isUndead) {
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
@@ -148,26 +181,41 @@ class Card(
         updateText()
     }
 
+    /**
+     * called by gameScreenController when the destroy-phase starts
+     */
     fun enterDestroyMode(gameScreenController: GameScreenController) = actor.enterDestroyMode(gameScreenController)
 
+    /**
+     * called by gameScreenController the destroy-phase ends
+     */
     fun leaveDestroyMode() = actor.leaveDestroyMode()
 
+    /**
+     * checks whether this card can currently enter the game
+     */
     fun allowsEnteringGame(gameScreenController: GameScreenController): Boolean {
         // handles special case for Destroy effect
-        for (effect in effects) if (effect is Effect.Destroy) {
+        for (effect in effects) if (effect is Effect.Destroy && effect.trigger == Trigger.ON_ENTER) {
             if (!gameScreenController.hasDestroyableCard()) {
                 FourtyFiveLogger.debug(logTag, "card cannot enter game because it has the destroy effect and" +
-                        "no destroyable bullet is present")
+                        " no destroyable bullet is present")
                 return false
             }
         }
         return true
     }
 
+    /**
+     * called when the coverStack this card is in was destroyed
+     */
     fun onCoverDestroy() {
         leaveGame()
     }
 
+    /**
+     * called when this card was destroyed by the destroy effect
+     */
     fun onDestroy(gameScreenController: GameScreenController) {
         if (isUndead) {
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
@@ -177,6 +225,9 @@ class Card(
         leaveGame()
     }
 
+    /**
+     * adds a new modifier to the card
+     */
     fun addModifier(modifier: CardModifier) {
         FourtyFiveLogger.debug(logTag, "card got new modifier: $modifier")
         modifiers.add(modifier)
@@ -184,17 +235,24 @@ class Card(
         updateText()
     }
 
+    /**
+     * called when the card enters the game
+     */
     fun onEnter(gameScreenController: GameScreenController) {
         inGame = true
     }
 
-    fun onRoundStart(gameScreenController: GameScreenController) {
+    /**
+     * called when the revolver rotates (but not when this card was shot)
+     */
+    fun onRevolverTurn() {
+        if (isRotten) updateRottenModifier(rottenModifier.damage - 1)
     }
 
-    fun onRevolverTurn(toBeShot: Boolean) {
-        if (isRotten && !toBeShot) updateRottenModifier(rottenModifier.damage - 1)
-    }
-
+    /**
+     * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
+     * effects; null if no effect was triggered
+     */
     fun checkEffects(trigger: Trigger, gameScreenController: GameScreenController): Timeline? {
         var wasEffectWithTimelineTriggered = false
         val timeline = Timeline.timeline {
@@ -241,6 +299,12 @@ class Card(
 
         private var instanceCounter = 0
 
+        /**
+         * reads an onj array it returns the corresponding card prototypes
+         * @param cards the onj array
+         * @param regions the textures for the cards will be looked up in this map
+         * @param initializer lambda that can contain additional initialization logic
+         */
         fun getFrom(
             cards: OnjArray,
             regions: Map<String, TextureRegion>,
@@ -302,7 +366,7 @@ class Card(
         }
 
 
-        fun applyTraitEffects(card: Card, onj: OnjObject) {
+        private fun applyTraitEffects(card: Card, onj: OnjObject) {
             val effects = onj
                 .get<OnjArray>("traitEffects")
                 .value
@@ -331,10 +395,19 @@ class Card(
 
     }
 
+    /**
+     * a type of card
+     */
     enum class Type {
         BULLET, COVER, ONE_SHOT
     }
 
+    /**
+     * temporarily modifies a card. For example used by the buff damage effect to change the damage of a card
+     * @param damage changes the damage of the card. Can be negative
+     * @param description if not null this description will be displayed in the detail text of the modified card
+     * @param validityChecker checks if the modifier is still valid or should be removed
+     */
     data class CardModifier(
         val damage: Int,
         val description: TemplateString?,
@@ -344,7 +417,7 @@ class Card(
 }
 
 /**
- * the actor representing a card
+ * the actor representing a card on the screen
  */
 class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
 

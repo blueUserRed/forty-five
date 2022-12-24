@@ -23,6 +23,8 @@ import java.lang.Math.sin
 
 /**
  * actor representing the revolver
+ * @param radiusExtension the width of [background] is set to radius + radiusExtension. necessary to create some space
+ * between the slots and the edge of the revolver
  */
 class Revolver(
     detailFont: BitmapFont,
@@ -80,6 +82,9 @@ class Revolver(
     private var prefHeight: Float = 0f
     private lateinit var screenDataProvider: ScreenDataProvider
 
+    /**
+     * the slots of the revoler
+     */
     lateinit var slots: Array<RevolverSlot>
         private set
 
@@ -122,6 +127,9 @@ class Revolver(
         setCard(slot, null)
     }
 
+    /**
+     * removes a card from the revolver
+     */
     fun removeCard(card: Card) {
         for (slot in slots) if (slot.card === card) {
             if (card.actor in screenDataProvider.stage.root) screenDataProvider.removeActorFromRoot(card.actor)
@@ -216,6 +224,9 @@ class Revolver(
         }
     }
 
+    /**
+     * rotates the revolver to the right
+     */
     fun rotate() {
         val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
 
@@ -231,6 +242,9 @@ class Revolver(
         slots[4].card = firstCard
     }
 
+    /**
+     * rotates the revolver to the left
+     */
     fun rotateLeft() {
         val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
 
@@ -246,6 +260,9 @@ class Revolver(
         slots[0].card = firstCard
     }
 
+    /**
+     * marks the position of the revolver and its slots as dirty
+     */
     fun markDirty() {
         dirty = true
     }
@@ -302,6 +319,12 @@ class RevolverSlot(
         }
     }
 
+    /**
+     * positions the slot on the screen using the position and the radius of the revolver
+     * @param base the position of the middle of the revolver on the screen
+     * @param r the radius of the revolver
+     * @param angle the angle in radians where this slot should be positioned
+     */
     fun position(base: Vector2, r: Float, angle: Double) {
         val slotSize = texture.regionWidth * scaleX
         val dx = cos(angle) * r
@@ -318,6 +341,10 @@ class RevolverSlot(
 
     /**
      * animates the slot to an angle
+     *  @param base the position of the middle of the revolver on the screen
+     *  @param radius the radius of the revolver
+     *  @param from the start angle in radians
+     *  @param to the end angle in radians
      */
     fun animateTo(base: Vector2, radius: Float, from: Double, to: Double) {
         if (inAnimation) return
@@ -330,6 +357,13 @@ class RevolverSlot(
         this.action = action
     }
 
+    /**
+     * animations the slot to an angle, but using the opposite animation of [animateTo]
+     *  @param base the position of the middle of the revolver on the screen
+     *  @param radius the radius of the revolver
+     *  @param from the start angle in radians
+     *  @param to the end angle in radians
+     */
     fun animateToReversed(base: Vector2, radius: Float, from: Double, to: Double) {
         if (inAnimation) return
         val action = RevolverSlotRotationAction(base, radius, this, from, to)
@@ -345,6 +379,9 @@ class RevolverSlot(
         return "revolverSlot: $num with card $card"
     }
 
+    /**
+     * the action used for animating the rotation of the revolver slots
+     */
     class RevolverSlotRotationAction(
         val base: Vector2,
         val radius: Float,
