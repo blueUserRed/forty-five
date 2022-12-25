@@ -49,10 +49,17 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         }
     }
 
+    /**
+     * pushes an action to the beginning of timeline. the action will be temporarily stored in a buffer until the
+     * current action finishes, after which this action will be started
+     */
     fun pushAction(timelineAction: TimelineAction) {
         pushActionsBuffer.add(timelineAction)
     }
 
+    /**
+     * appends an action to the end of the timeline
+     */
     fun appendAction(timelineAction: TimelineAction) {
         _actions.add(timelineAction)
     }
@@ -62,8 +69,12 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
      */
     abstract class TimelineAction {
 
+        /**
+         * true if the action has already been started
+         */
         var hasBeenStarted: Boolean = false
             protected set
+
 
         open fun start(timeline: Timeline) {
             hasBeenStarted = true
@@ -128,6 +139,12 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
             timelineActions.addAll(timeline._actions)
         }
 
+        /**
+         * used for conditionally including timelines. The condition is wrapped in a lambda and will only be executed
+         * only once right before the decision whether to include timeline is made. This is useful when the outcome of
+         * the condition is not known when the timeline is created. The timeline is also wrapped in a lambda in case
+         * the creation of the timeline to include is also dependent on factors not known when the timeline is created
+         */
         fun includeLater(timelineCreator: () -> Timeline, condition: () -> Boolean) {
             timelineActions.add(object : TimelineAction() {
 
