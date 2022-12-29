@@ -10,8 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
-import onj.OnjArray
-import onj.OnjObject
+import onj.value.OnjArray
+import onj.value.OnjObject
 import java.lang.Integer.max
 import java.lang.Integer.min
 import kotlin.properties.Delegates

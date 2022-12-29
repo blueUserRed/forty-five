@@ -4,6 +4,7 @@ import com.fourinachamber.fourtyfive.game.CardSelectionScreenController
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.game.IntroScreenController
 import onj.*
+import onj.value.OnjNamedObject
 
 object ScreenControllerFactory {
 

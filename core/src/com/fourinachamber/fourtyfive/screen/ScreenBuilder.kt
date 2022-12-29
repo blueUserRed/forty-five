@@ -34,7 +34,12 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
 import com.fourinachamber.fourtyfive.utils.*
-import onj.*
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import kotlin.system.measureTimeMillis
 
 

@@ -9,9 +9,9 @@ import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import onj.OnjObject
-import onj.OnjParser
-import onj.OnjSchemaParser
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.value.OnjObject
 
 /**
  * main game object

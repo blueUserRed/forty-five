@@ -6,7 +6,7 @@ import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
-import onj.OnjObject
+import onj.value.OnjObject
 import kotlin.math.floor
 import kotlin.properties.Delegates
 

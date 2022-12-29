@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.*
-import onj.OnjObject
+import onj.value.OnjObject
 import java.lang.Integer.min
 import kotlin.properties.Delegates
 

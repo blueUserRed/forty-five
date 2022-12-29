@@ -20,9 +20,8 @@ import com.fourinachamber.fourtyfive.utils.Utils
 import ktx.actors.onClick
 import ktx.actors.onEnter
 import ktx.actors.onExit
-import onj.OnjNamedObject
-import onj.OnjNull
-import onj.OnjObject
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 
 /**

@@ -16,6 +16,7 @@ import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.plus
 import onj.*
+import onj.value.OnjNamedObject
 import kotlin.math.floor
 import kotlin.math.pow
 

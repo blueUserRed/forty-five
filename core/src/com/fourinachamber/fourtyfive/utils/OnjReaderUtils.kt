@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fourtyfive.game.OnjExtensions
 import com.fourinachamber.fourtyfive.screen.PostProcessor
-import onj.*
+import onj.value.*
 
 /**
  * object containing utilities for reading onj files

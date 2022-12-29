@@ -14,9 +14,9 @@ import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import ktx.actors.onEnter
 import ktx.actors.onExit
-import onj.OnjArray
-import onj.OnjNamedObject
-import onj.OnjObject
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
