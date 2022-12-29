@@ -16,7 +16,7 @@ import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onClick
-import onj.OnjNamedObject
+import onj.value.OnjNamedObject
 import java.lang.Float.max
 
 

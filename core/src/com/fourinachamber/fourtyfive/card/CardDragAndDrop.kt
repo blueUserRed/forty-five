@@ -11,7 +11,7 @@ import com.fourinachamber.fourtyfive.screen.DragBehaviour
 import com.fourinachamber.fourtyfive.screen.DropBehaviour
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.obj
-import onj.OnjNamedObject
+import onj.value.OnjNamedObject
 
 
 /**

@@ -10,7 +10,12 @@ import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import kotlinx.coroutines.*
-import onj.*
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 /**
  * generates an atlas containing the cards from a config file

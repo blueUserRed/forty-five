@@ -16,8 +16,8 @@ import com.fourinachamber.fourtyfive.utils.Utils
 import com.fourinachamber.fourtyfive.utils.plus
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
-import onj.OnjNamedObject
-import onj.OnjObject
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import kotlin.properties.Delegates
 
 abstract class EnemyAction {

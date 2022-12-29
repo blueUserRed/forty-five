@@ -19,7 +19,12 @@ import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onClick
-import onj.*
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import java.lang.Integer.min
 import kotlin.math.log
 import kotlin.properties.Delegates

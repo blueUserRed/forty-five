@@ -23,10 +23,10 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.alpha
 import ktx.actors.onTouchEvent
-import onj.OnjArray
-import onj.OnjFloat
-import onj.OnjNamedObject
-import onj.OnjObject
+import onj.value.OnjArray
+import onj.value.OnjFloat
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import kotlin.math.abs
 
 /**

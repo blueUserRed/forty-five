@@ -1,9 +1,9 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
-import onj.OnjArray
-import onj.OnjNamedObject
-import onj.OnjObject
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 class EnemyBrain(
     private val actionCreators: List<Pair<Int, () -> EnemyAction>>

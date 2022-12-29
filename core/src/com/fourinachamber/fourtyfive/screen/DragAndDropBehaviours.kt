@@ -12,7 +12,7 @@ import com.fourinachamber.fourtyfive.card.RevolverDropTarget
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.eitherLeft
 import com.fourinachamber.fourtyfive.utils.eitherRight
-import onj.OnjNamedObject
+import onj.value.OnjNamedObject
 
 object DragAndDropBehaviourFactory {
 

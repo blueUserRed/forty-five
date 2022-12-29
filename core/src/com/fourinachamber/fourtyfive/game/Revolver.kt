@@ -17,7 +17,7 @@ import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import com.fourinachamber.fourtyfive.utils.plus
 import ktx.actors.contains
-import onj.OnjNamedObject
+import onj.value.OnjNamedObject
 import java.lang.Math.cos
 import java.lang.Math.sin
 
