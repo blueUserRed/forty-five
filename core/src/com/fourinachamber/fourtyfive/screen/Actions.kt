@@ -7,6 +7,13 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * Shakes an actor
+ * @param xShake controls the amplitude in the x-direction
+ * @param yShake controls the amplitude in the y-direction
+ * @param xSpeedMultiplier controls the shake speed in the x-direction
+ * @param ySpeedMultiplier controls the shake speed in the y-direction
+ */
 class ShakeActorAction(
     private val xShake: Float,
     private val yShake: Float,
@@ -40,6 +47,9 @@ class ShakeActorAction(
 
 }
 
+/**
+ * works like [MoveByAction], buts sets the inAnimation property if the actor is an [AnimationActor]
+ */
 class CustomMoveByAction : MoveByAction() {
 
     override fun begin() {

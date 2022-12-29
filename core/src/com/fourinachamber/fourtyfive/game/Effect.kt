@@ -9,12 +9,24 @@ import onj.OnjObject
 import java.lang.Integer.min
 import kotlin.properties.Delegates
 
+/**
+ * represents an effect a card can have
+ * @param trigger tells the effect when to activate
+ */
 abstract class Effect(val trigger: Trigger) {
 
     lateinit var card: Card
 
-    abstract fun onTrigger(gameScreenController: GameScreenController): Timeline?
+    /**
+     * called when the effect triggers
+     * @return a timeline containing the actions of this effect
+     */
+    abstract fun onTrigger(gameScreenController: GameScreenController): Timeline
 
+    /**
+     * checks if this effect is triggered by [triggerToCheck] and returns a timeline containing the actions of this
+     * effect if it was
+     */
     fun checkTrigger(triggerToCheck: Trigger, gameScreenController: GameScreenController): Timeline? {
         if (triggerToCheck == trigger) {
             FourtyFiveLogger.debug("Effect", "effect $this triggered")
@@ -23,8 +35,15 @@ abstract class Effect(val trigger: Trigger) {
         return null
     }
 
+    /**
+     * creates a copy of this effect
+     */
     abstract fun copy(): Effect
 
+    /**
+     * The Player gains reserves
+     * @param amount the amount of reserves gained
+     */
     class ReserveGain(trigger: Trigger, val amount: Int) : Effect(trigger) {
 
         private val shakeActorAction = ShakeActorAction(
@@ -101,6 +120,11 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    /**
+     * Buffs (or debuffs) the damage of a card; only valid while the card that has this effect is still in the game
+     * @param amount the amount the damage is changed by
+     * @param bulletSelector tells the effect which bullets to apply the modifier to
+     */
     class BuffDamage(
         trigger: Trigger,
         val amount: Int,
@@ -109,7 +133,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline {
             val modifier = Card.CardModifier(
                 amount,
                 TemplateString(
@@ -122,12 +146,15 @@ abstract class Effect(val trigger: Trigger) {
                 ),
             ) { card.inGame }
 
-            for (i in 1..5) {
-                val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
-                if (!(bulletSelector?.invoke(this.card, card, i) ?: true)) continue
-                card.addModifier(modifier)
+            return Timeline.timeline {
+                action {
+                    for (i in 1..5) {
+                        val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
+                        if (!(bulletSelector?.invoke(this@BuffDamage.card, card, i) ?: true)) continue
+                        card.addModifier(modifier)
+                    }
+                }
             }
-            return null
         }
 
         override fun toString(): String {
@@ -146,6 +173,11 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    /**
+     * gifts a card a buff (or debuff) of its damage (stays valid even after the card left the game)
+     * @param amount the amount by which the damage is changed
+     * @param bulletSelector tells this effect which bullets to apply this effect to
+     */
     class GiftDamage(
         trigger: Trigger,
         val amount: Int,
@@ -154,7 +186,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = GiftDamage(trigger, amount, bulletSelector)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline {
             val modifier = Card.CardModifier(
                 amount,
                 TemplateString(
@@ -167,12 +199,15 @@ abstract class Effect(val trigger: Trigger) {
                 ),
             ) { true }
 
-            for (i in 1..5) {
-                val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
-                if (!(bulletSelector?.invoke(this.card, card, i) ?: true)) continue
-                card.addModifier(modifier)
+            return Timeline.timeline {
+                action {
+                    for (i in 1..5) {
+                        val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
+                        if (!(bulletSelector?.invoke(this@GiftDamage.card, card, i) ?: true)) continue
+                        card.addModifier(modifier)
+                    }
+                }
             }
-            return null
         }
 
         override fun toString(): String {
@@ -191,6 +226,10 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    /**
+     * lets the player draw cards
+     * @param amount the amount of cards to draw
+     */
     class Draw(trigger: Trigger, val amount: Int) : Effect(trigger) {
 
         private val shakeActorAction = ShakeActorAction(
@@ -218,20 +257,30 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    /**
+     * applies a status effect to the enemy
+     * @param statusEffect the status to apply
+     */
     class GiveStatus(trigger: Trigger, val statusEffect: StatusEffect) : Effect(trigger) {
 
         override fun copy(): Effect = GiveStatus(trigger, statusEffect.copy())
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
-            gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)
-            return null
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+            action {
+                gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)
+            }
         }
+
         override fun toString(): String {
             return "GiveStatus(trigger=$trigger, status=$statusEffect)"
         }
 
     }
 
+    /**
+     * requires the player to destroy a bullet in the game. Has special behaviour when the trigger is onEnter: If no
+     * destroyable card is in the game the card that has this effect can not be played
+     */
     class Destroy(trigger: Trigger) : Effect(trigger) {
 
         private val shakeActorAction = ShakeActorAction(
@@ -244,20 +293,22 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = Destroy(trigger)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
-            if (!gameScreenController.hasDestroyableCard()) return null
-            return Timeline.timeline {
-                delay(bufferTime)
-                action { card.actor.addAction(shakeActorAction) }
-                delayUntil { shakeActorAction.isComplete }
-                action {
-                    card.actor.removeAction(shakeActorAction)
-                    shakeActorAction.reset()
-                }
-                delay(bufferTime)
-                action { gameScreenController.destroyCardPhase() }
-                delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.CARD_DESTROY }
-            }
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+            includeLater(
+                { Timeline.timeline {
+                    delay(bufferTime)
+                    action { card.actor.addAction(shakeActorAction) }
+                    delayUntil { shakeActorAction.isComplete }
+                    action {
+                        card.actor.removeAction(shakeActorAction)
+                        shakeActorAction.reset()
+                    }
+                    delay(bufferTime)
+                    action { gameScreenController.destroyCardPhase() }
+                    delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.CARD_DESTROY }
+                } },
+                { gameScreenController.hasDestroyableCard() }
+            )
         }
 
         override fun toString(): String {
@@ -265,14 +316,18 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    /**
+     * puts a number of specific cards in the players hand
+     */
     class PutCardInHand(trigger: Trigger, val cardName: String, val amount: Int) : Effect(trigger) {
 
         override fun copy(): Effect = PutCardInHand(trigger, cardName, amount)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline? {
-            val addMax = gameScreenController.maxCards - gameScreenController.cardHand!!.cards.size
-            repeat(min(amount, addMax)) { gameScreenController.putCardInHand(cardName) }
-            return null
+        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+            action {
+                val addMax = gameScreenController.maxCards - gameScreenController.cardHand!!.cards.size
+                repeat(min(amount, addMax)) { gameScreenController.putCardInHand(cardName) }
+            }
         }
 
         override fun toString(): String {
@@ -321,8 +376,14 @@ abstract class Effect(val trigger: Trigger) {
 
 }
 
+/**
+ * used for telling an effect which bullet to apply a modifier to
+ */
 typealias BulletSelector = (self: Card, other: Card, slot: Int) -> Boolean
 
+/**
+ * possible triggers for an effect
+ */
 enum class Trigger {
 
     ON_ENTER, ON_SHOT, ON_ROUND_START, ON_DESTROY
