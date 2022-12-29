@@ -1,76 +1,76 @@
-import "imports/colors.onj" as color
+import "imports/colors.onj" as color;
 
-!worldWidth = 160.0
-!worldHeight = 90.0
+var worldWidth = 160.0;
+var worldHeight = 90.0;
 
 
 viewport: $FitViewport {
-    worldWidth: !worldWidth
-    worldHeight: !worldHeight
+    worldWidth: worldWidth,
+    worldHeight: worldHeight,
     backgroundTexture: "background"
-}
+},
 
 
-!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
     screenPath: "screens/title_screen.onj"
-}
+};
 
-!hoverBehaviour = $MouseHoverBehaviour {
-    useSystemCursor: true
-    cursorName: "hand"
+var hoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
     disabled: null
-}
+};
 
 children: [
     $Table {
-        fillX: true
-        fillY: true
+        fillX: true,
+        fillY: true,
 //        debug: true
         rows: [
 
             {
                 cells: [
                     {
-                        padLeft: 68.0
-                        padTop: 11.0
+                        padLeft: 68.0,
+                        padTop: 11.0,
                         element: $Label {
-                            align: "left"
-                            text: "Put the cards away. I think you've \nlost enough."
-                            font: "red_wing"
-                            color: !color.black
+                            align: "left",
+                            text: "Put the cards away. I think you've\nlost enough.",
+                            font: "red_wing",
+                            color: color.black,
                             fontScale: 0.14
                         }
                     }
                 ]
-            }
+            },
 
             {
                 cells: [
                     {
-                        padLeft: 68.0
-                        padTop: 7.0
+                        padLeft: 68.0,
+                        padTop: 7.0,
                         element: $TemplateLabel {
-                            align: "left"
-                            template: "enemies killed: {stat.lastRun.enemiesDefeated} \nreserves used: {stat.lastRun.usedReserves} \n "
-                            font: "red_wing"
-                            color: !color.black
+                            align: "left",
+                            template: "enemies killed: {stat.lastRun.enemiesDefeated}\nreserves used: {stat.lastRun.usedReserves}\n ",
+                            font: "red_wing",
+                            color: color.black,
                             fontScale: 0.2
                         }
                     }
                 ]
-            }
+            },
 
             {
                 cells: [
                     {
-                        padLeft: 59.0
+                        padLeft: 59.0,
                         element: $Label {
-                            align: "center"
-                            text: "continue to main menu"
-                            font: "red_wing"
-                            color: !color.black
-                            fontScale: 0.2
-                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
+                            align: "center",
+                            text: "continue to main menu",
+                            font: "red_wing",
+                            color: color.black,
+                            fontScale: 0.2,
+                            behaviours: [ toMainScreenBehaviour, hoverBehaviour ]
                         }
                     }
                 ]
@@ -78,38 +78,38 @@ children: [
 
         ]
     }
-]
+],
 
 assets: {
     textures: [
         {
-            name: "background"
+            name: "background",
             file: "textures/screens/loose_screen_background.png"
         }
-    ]
+    ],
     fonts: [
 
         $DistanceFieldFont {
-            name: "red_wing"
-            fontFile: "fonts/red_wing.fnt"
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
             imageFile: "fonts/red_wing.png"
         }
 
-    ]
-    textureAtlases: []
-    cursors: []
-    postProcessors: []
-    animations: []
-    colorTextures: []
-    particles: []
-}
+    ],
+    textureAtlases: [],
+    cursors: [],
+    postProcessors: [],
+    animations: [],
+    colorTextures: [],
+    particles: [],
+},
 
 options: {
-    setFillParentOnRoot: true
+    setFillParentOnRoot: true,
     defaultCursor: {
-        useSystemCursor: true
+        useSystemCursor: true,
         cursorName: "arrow"
-    }
-    postProcessor: null
+    },
+    postProcessor: null,
     controller: null
 }
