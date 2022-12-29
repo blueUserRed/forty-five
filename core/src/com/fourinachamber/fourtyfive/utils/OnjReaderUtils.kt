@@ -197,7 +197,7 @@ object OnjReaderUtils {
             .forEach {
                 it as OnjObject
                 val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
-                colorPixmap.setColor(Color.valueOf(it.get<String>("color")))
+                colorPixmap.setColor(it.get<Color>("color"))
                 colorPixmap.fill()
                 textures[it.get<String>("name")] = TextureRegion(Texture(colorPixmap))
 //                colorPixmap.dispose()

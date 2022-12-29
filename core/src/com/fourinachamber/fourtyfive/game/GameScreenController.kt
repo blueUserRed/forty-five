@@ -11,6 +11,7 @@ import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.CardPrototype
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.screen.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
@@ -976,7 +977,7 @@ class GameScreenController(onj: OnjNamedObject) : ScreenController() {
             dmgDuration = (plOnj.get<Double>("duration") * 1000).toInt()
             dmgRaiseHeight = plOnj.get<Double>("raiseHeight").toFloat()
             dmgStartFadeoutAt = (plOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColor = Color.valueOf(plOnj.get<String>("negativeFontColor"))
+            dmgFontColor = plOnj.get<Color>("negativeFontColor")
 
             val shakeOnj = config.get<OnjObject>("shakeAnimation")
 

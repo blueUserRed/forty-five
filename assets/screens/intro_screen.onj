@@ -75,7 +75,7 @@ assets: {
     colorTextures: [
         {
             name: "background",
-            color: "615130"
+            color: color.beige
         }
     ],
     particles: []

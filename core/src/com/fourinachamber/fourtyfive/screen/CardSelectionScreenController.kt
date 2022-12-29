@@ -48,7 +48,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
 
     private var emptyText = onj.get<String>("emptyText")
     private lateinit var emptyFont: BitmapFont
-    private var emptyFontColor = Color.valueOf(onj.get<String>("emptyFontColor"))
+    private var emptyFontColor = onj.get<Color>("emptyFontColor")
     private var emptyFontScale = onj.get<Double>("emptyFontScale").toFloat()
 
     private lateinit var detailFont: BitmapFont
@@ -65,7 +65,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
 
         detailFont = screenDataProvider.fonts[onj.get<String>("detailFont")]
             ?: throw RuntimeException("unknown font: ${onj.get<String>("detailFont")}")
-        detailFontColor = Color.valueOf(onj.get<String>("detailFontColor"))
+        detailFontColor = onj.get<Color>("detailFontColor")
         detailBackground = TextureRegionDrawable(
             screenDataProvider.textures[onj.get<String>("detailBackgroundTexture")]
                 ?: throw RuntimeException("unknown texture: ${onj.get<String>("detailBackgroundTexture")}")

@@ -111,7 +111,7 @@ abstract class Effect(val trigger: Trigger) {
                 duration = (plOnj.get<Double>("duration") * 1000).toInt()
                 raiseHeight = plOnj.get<Double>("raiseHeight").toFloat()
                 startFadeoutAt = (plOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-                fontColor = Color.valueOf(plOnj.get<String>("positiveFontColor"))
+                fontColor = plOnj.get<Color>("positiveFontColor")
 
                 bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
             }

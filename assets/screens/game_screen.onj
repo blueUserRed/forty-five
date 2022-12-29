@@ -154,7 +154,7 @@ assets: {
     colorTextures: [
         {
             name: "card_detail_background",
-            color: "04040488"
+            color: color.backgroundTransparent
         },
         {
             name: "black",

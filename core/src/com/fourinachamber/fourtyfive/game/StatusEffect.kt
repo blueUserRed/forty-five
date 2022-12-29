@@ -248,8 +248,8 @@ abstract class StatusEffect(
             dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
             dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
             dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColorPositive = Color.valueOf(dmgOnj.get<String>("positiveFontColor"))
-            dmgFontColorNegative = Color.valueOf(dmgOnj.get<String>("negativeFontColor"))
+            dmgFontColorPositive = dmgOnj.get<Color>("positiveFontColor")
+            dmgFontColorNegative = dmgOnj.get<Color>("negativeFontColor")
 
             val statusIcons = config.get<OnjObject>("statusEffectIcons")
 
