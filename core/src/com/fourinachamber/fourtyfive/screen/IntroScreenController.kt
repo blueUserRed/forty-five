@@ -1,23 +1,17 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.profiling.GLProfiler
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
-import com.fourinachamber.fourtyfive.screen.ScreenController
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.plus
-import onj.*
 import onj.value.OnjNamedObject
-import kotlin.math.floor
 import kotlin.math.pow
 
 /**

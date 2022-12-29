@@ -1,33 +1,33 @@
 
-$CardType [
+$CardType {
 
     $Bullet { }
     $Cover { }
     $OneShot { }
 
-]
-
-!card = {
-    name: string
-    title: string
-    flavourText: string
-    description: string
-    baseDamage: int
-    coverValue: int
-    traitEffects: string[*]
-    cost: int
-    type: $CardType
-    effects: Effect[*]
 }
 
-cards: !card[*]
+var card = {
+    name: string,
+    title: string,
+    flavourText: string,
+    description: string,
+    baseDamage: int,
+    coverValue: int,
+    traitEffects: string[],
+    cost: int,
+    type: $CardType,
+    effects: Effect[],
+};
 
-!startDeckEntry = {
-    name: string
-    amount: int
-}
+cards: card[],
 
-defaultBullet: string
-defaultCover: string
+var startDeckEntry = {
+    name: string,
+    amount: int,
+};
 
-startDeck: !startDeckEntry[*]
+defaultBullet: string,
+defaultCover: string,
+
+startDeck: startDeckEntry[]

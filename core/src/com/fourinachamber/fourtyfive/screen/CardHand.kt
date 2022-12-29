@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -9,13 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.screen.CustomLabel
-import com.fourinachamber.fourtyfive.screen.InitialiseableActor
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
-import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.between
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.contains
 import kotlin.math.min
 

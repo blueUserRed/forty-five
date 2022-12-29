@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.OnjExtensions
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjExtensions
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor

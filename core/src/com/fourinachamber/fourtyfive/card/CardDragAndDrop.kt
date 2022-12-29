@@ -4,9 +4,9 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fourtyfive.game.CoverStack
+import com.fourinachamber.fourtyfive.screen.CoverStack
 import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.RevolverSlot
+import com.fourinachamber.fourtyfive.screen.RevolverSlot
 import com.fourinachamber.fourtyfive.screen.DragBehaviour
 import com.fourinachamber.fourtyfive.screen.DropBehaviour
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider

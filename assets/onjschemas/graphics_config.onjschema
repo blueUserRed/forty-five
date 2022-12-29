@@ -1,84 +1,84 @@
 
-bufferTime: float
+bufferTime: float,
 
 shakeAnimation: {
-    xShake: float
-    yShake: float
-    xSpeed: float
-    ySpeed: float
-    duration: float
-}
+    xShake: float,
+    yShake: float,
+    xSpeed: float,
+    ySpeed: float,
+    duration: float,
+},
 
 enemyChargeAnimation: {
-    xCharge: float
-    yCharge: float
-    duration: float
-    interpolation: string
-}
+    xCharge: float,
+    yCharge: float,
+    duration: float,
+    interpolation: string,
+},
 
 enemyQuickChargeAnimation: {
-    xCharge: float
-    yCharge: float
-    duration: float
-    interpolation: string
-}
+    xCharge: float,
+    yCharge: float,
+    duration: float,
+    interpolation: string,
+},
 
 playerLivesAnimation: {
-    font: string
-    negativeFontColor: string
-    positiveFontColor: string
-    fontScale: float
-    duration: float
-    startFadeoutAt: float
-    raiseHeight: float
-}
+    font: string,
+    negativeFontColor: string,
+    positiveFontColor: string,
+    fontScale: float,
+    duration: float,
+    startFadeoutAt: float,
+    raiseHeight: float,
+},
 
 reservesAnimation: {
-    font: string
-    negativeFontColor: string
-    positiveFontColor: string
-    fontScale: float
-    duration: float
-    startFadeoutAt: float
-    raiseHeight: float
-}
+    font: string,
+    negativeFontColor: string,
+    positiveFontColor: string,
+    fontScale: float,
+    duration: float,
+    startFadeoutAt: float,
+    raiseHeight: float,
+},
 
 bannerAnimation: {
-     duration: float
-     scaleAnimDuration: float
-     beginScale: float
-     endScale: float
-     playerTurnBanner: string
-     enemyTurnBanner: string
-}
+     duration: float,
+     scaleAnimDuration: float,
+     beginScale: float,
+     endScale: float,
+     playerTurnBanner: string,
+     enemyTurnBanner: string,
+},
 
 statusEffectIcons: {
-    burning: string
-    burningScale: float
-    poison: string
-    poisonScale: float
-}
+    burning: string,
+    burningScale: float,
+    poison: string,
+    poisonScale: float,
+},
 
 destroyCardPostProcessor: {
     name: string
-}
+},
 
 coverStackParticles: {
-    damaged: string
+    damaged: string,
     destroyed: string
-}
+},
 
 stringTemplates:  {
-    rottenDetailText: string
-    buffDetailText: string
-    giftDetailText: string
-}
+    rottenDetailText: string,
+    buffDetailText: string,
+    giftDetailText: string,
+},
 
 fadeInAndOutAnimation: {
-    fadeFontName: String
-    fadeFontColor: String
-    fadeFontScale: Float
-    fadeDuration: Float
-    fadeIn: Float
-    fadeOut: Float
+    fadeFontName: string,
+    fadeFontColor: string,
+    fadeFontScale: float,
+    fadeDuration: float,
+    fadeIn: float,
+    fadeOut: float,
 }

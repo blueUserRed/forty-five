@@ -7,6 +7,7 @@ import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjExtensions
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import onj.parser.OnjParser

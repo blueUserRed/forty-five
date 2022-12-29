@@ -1,38 +1,38 @@
 
-!dragAndDropBehaviourSharedKeys = {
+var dragAndDropBehaviourSharedKeys = {
     group: string
-}
+};
 
-$DragAndDropBehaviour [
+$DragAndDropBehaviour {
 
     $SimpleDragSource {
-        useDimensionsOfCell?: string
-        ...!dragAndDropBehaviourSharedKeys
+        useDimensionsOfCell?: string,
+        ...dragAndDropBehaviourSharedKeys
     }
 
     $TestDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
+        ...dragAndDropBehaviourSharedKeys
     }
 
 
     $SlotDragSource {
-        ...!dragAndDropBehaviourSharedKeys
+        ...dragAndDropBehaviourSharedKeys
     }
 
     $SlotDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
+        ...dragAndDropBehaviourSharedKeys
     }
 
     $CardDragSource {
-        ...!dragAndDropBehaviourSharedKeys
+        ...dragAndDropBehaviourSharedKeys
     }
 
     $RevolverDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
+        ...dragAndDropBehaviourSharedKeys
     }
 
     $CoverAreaDropTarget {
-        ...!dragAndDropBehaviourSharedKeys
+        ...dragAndDropBehaviourSharedKeys
     }
 
-]
+}

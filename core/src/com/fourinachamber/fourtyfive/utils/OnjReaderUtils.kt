@@ -11,7 +11,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.fourinachamber.fourtyfive.game.OnjExtensions
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjExtensions
 import com.fourinachamber.fourtyfive.screen.PostProcessor
 import onj.value.*
 
@@ -174,7 +175,7 @@ object OnjReaderUtils {
 
                 is OnjFloat -> map[key] = value.value.toFloat()
                 is OnjInt -> map[key] = value.value.toInt()
-                is OnjExtensions.OnjColor -> map[key] = value.value
+                is OnjColor -> map[key] = value.value
 
                 else -> throw RuntimeException("binding type ${value::class.simpleName} as a uniform" +
                         " is currently not supported")

@@ -1,83 +1,83 @@
 
-import "imports/drag_and_drop_behaviour.onjschema" as _
+import "imports/drag_and_drop_behaviour.onjschema" as _;
 
-!enemyActionSharedKeys = {
-    weight: int
-    indicatorTexture: string
+var enemyActionSharedKeys = {
+    weight: int,
+    indicatorTexture: string,
     indicatorTextureScale: float
-}
+};
 
-$EnemyAction [
+$EnemyAction {
 
     $DamagePlayerEnemyAction {
-        min: int
-        max: int
-        ...!enemyActionSharedKeys
+        min: int,
+        max: int,
+        ...enemyActionSharedKeys
     }
 
     $AddCoverEnemyAction {
-        min: int
-        max: int
-        ...!enemyActionSharedKeys
+        min: int,
+        max: int,
+        ...enemyActionSharedKeys
     }
 
     $DoNothingEnemyAction {
-        insults: string[*]
-        ...!enemyActionSharedKeys
+        insults: string[],
+        ...enemyActionSharedKeys
     }
 
-]
-
-!enemyBrain = {
-    actions: $EnemyAction[*]
 }
 
-!enemy = {
-    name: string
-    texture: string
-    coverIcon: string
-    lives: int
-    offsetX: float
-    offsetY: float
-    scaleX: float
-    scaleY: float
-    coverIconScale: float
-    detailFont: string
-    detailFontScale: float
-    detailFontColor: string
-    brain: !enemyBrain
-}
+var enemyBrain = {
+    actions: $EnemyAction[]
+};
 
-cardsFile: string
-cardAtlasFile: string
+var enemy = {
+    name: string,
+    texture: string,
+    coverIcon: string,
+    lives: int,
+    offsetX: float,
+    offsetY: float,
+    scaleX: float,
+    scaleY: float,
+    coverIconScale: float,
+    detailFont: string,
+    detailFontScale: float,
+    detailFontColor: string,
+    brain: enemyBrain
+};
+
+cardsFile: string,
+cardAtlasFile: string,
 cardHand: {
     actorName: string
-}
+},
 revolver: {
-    actorName: string
+    actorName: string,
     dropBehaviour: $DragAndDropBehaviour
-}
+},
 enemyArea: {
-    actorName: string
-    enemies: string[*]
-}
+    actorName: string,
+    enemies: string[]
+},
 coverArea: {
-    actorName: string
+    actorName: string,
     dropBehaviour: $DragAndDropBehaviour
-}
-cardDragBehaviour: $DragAndDropBehaviour
-enemies: !enemy[*]
-cardDrawActor: string
-playerLivesLabelName: string
-endTurnButtonName: string
-shootButtonName: string
-reservesLabelName: string
-cardsToDrawInFirstRound: int
-cardsToDraw: int
-maxCards: int
-playerLives: int
-reservesAtRoundBegin: int
-destroyCardInstructionActor: string
-shotEmptyDamage: int
-winScreen: string
-looseScreen: string
+},
+cardDragBehaviour: $DragAndDropBehaviour,
+enemies: enemy[],
+cardDrawActor: string,
+playerLivesLabelName: string,
+endTurnButtonName: string,
+shootButtonName: string,
+reservesLabelName: string,
+cardsToDrawInFirstRound: int,
+cardsToDraw: int,
+maxCards: int,
+playerLives: int,
+reservesAtRoundBegin: int,
+destroyCardInstructionActor: string,
+shotEmptyDamage: int,
+winScreen: string,
+looseScreen: string,
