@@ -1,12 +1,6 @@
 package com.fourinachamber.fourtyfive.onjNamespaces
 
-import com.badlogic.gdx.graphics.Color
-import com.fourinachamber.fourtyfive.game.BulletSelector
-import com.fourinachamber.fourtyfive.game.Effect
-import com.fourinachamber.fourtyfive.game.StatusEffect
-import com.fourinachamber.fourtyfive.game.Trigger
 import onj.customization.OnjConfig
-import onj.value.OnjValue
 
 /**
  * customizes the onj-parser by adding custom function and dataTypes
@@ -127,64 +121,14 @@ object OnjExtensions {
 
     fun init() {
 
-        OnjConfig.registerNameSpace("Common", Common)
+        OnjConfig.registerNameSpace("Common", CommonNamespace)
+        OnjConfig.registerNameSpace("Cards", CardsNamespace)
 
 //        for (func in customFunctions) OnjConfig.addFunction(func)
 //
 //        OnjConfig.addCustomDataType("Effect", OnjEffect::class)
 //        OnjConfig.addCustomDataType("StatusEffect", OnjStatusEffect::class)
 //        OnjConfig.addCustomDataType("Color", OnjStatusEffect::class)
-    }
-
-    private fun triggerOrError(trigger: String): Trigger = when (trigger) {
-        "enter" -> Trigger.ON_ENTER
-        "shot" -> Trigger.ON_SHOT
-        "destroy" -> Trigger.ON_DESTROY
-        "round start" -> Trigger.ON_ROUND_START
-        else -> throw RuntimeException("unknown trigger: $trigger")
-    }
-
-    /**
-     * an Effect that can be applied to a card that was read from an onj file
-     */
-    class OnjEffect(
-        override val value: Effect
-    ) : OnjValue() {
-
-        override fun toString(): String = "'__effect__'"
-        override fun toString(indentationLevel: Int): String = toString()
-        override fun toJsonString(): String = toString()
-        override fun toJsonString(indentationLevel: Int): String = toString()
-
-    }
-
-    /**
-     * a bullet-selector that was read from an onj file
-     * @see BulletSelector
-     */
-    class OnjBulletSelector(
-        override val value: BulletSelector
-    ) : OnjValue() {
-
-        override fun toString(): String = "'__bullet-selector__'"
-        override fun toString(indentationLevel: Int): String = toString()
-        override fun toJsonString(): String = toString()
-        override fun toJsonString(indentationLevel: Int): String = toString()
-
-    }
-
-    /**
-     * a status effect that was read from an onj file
-     */
-    class OnjStatusEffect(
-        override val value: StatusEffect
-    ) : OnjValue() {
-
-        override fun toString(): String = "'__status-effect__'"
-        override fun toString(indentationLevel: Int): String = toString()
-        override fun toJsonString(): String = toString()
-        override fun toJsonString(indentationLevel: Int): String = toString()
-
     }
 
 }
