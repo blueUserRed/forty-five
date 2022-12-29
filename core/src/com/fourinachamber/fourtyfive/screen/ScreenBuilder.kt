@@ -378,7 +378,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font")),
-                Color.valueOf(widgetOnj.get<String>("color"))
+                widgetOnj.get<Color>("color")
             )
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
@@ -436,20 +436,10 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             applyImageKeys(this, widgetOnj)
         }
 
-//        "ProgressBar" -> ProgressBar(
-//            widgetOnj.get<Double>("min").toFloat(),
-//            widgetOnj.get<Double>("max").toFloat(),
-//            widgetOnj.get<Double>("stepSize").toFloat(),
-//            widgetOnj.get<Boolean>("vertical"),
-//            ProgressBar.ProgressBarStyle(TextureRegionDrawable(textureOrError("black")), null)
-//        ).apply {
-//            value = widgetOnj.get<Double>("initialValue").toFloat()
-//        }
-
         "CardHand" -> CardHand(
             widgetOnj.get<Double>("targetWidth").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            widgetOnj.get<Color>("detailFontColor"),
             TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
@@ -468,7 +458,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         "Revolver" -> Revolver(
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            widgetOnj.get<Color>("detailFontColor"),
             TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
@@ -481,7 +471,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         ).apply {
             slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
             slotFont = fontOrError(widgetOnj.get<String>("font"))
-            fontColor = Color.valueOf(widgetOnj.get<String>("fontColor"))
+            fontColor = widgetOnj.get<Color>("fontColor")
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
@@ -499,7 +489,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Long>("maxCards").toInt(),
             widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            widgetOnj.get<Color>("detailFontColor"),
             textureOrError(widgetOnj.get<String>("stackBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             widgetOnj.get<Double>("stackSpacing").toFloat(),
@@ -507,7 +497,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("cardScale").toFloat(),
             widgetOnj.get<Double>("stackMinSize").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
+            widgetOnj.get<Color>("detailFontColor"),
             TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
@@ -521,7 +511,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             TemplateString(widgetOnj.get<String>("template")),
             Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font")),
-                Color.valueOf(widgetOnj.get<String>("color"))
+                widgetOnj.get<Color>("color")
             )
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())

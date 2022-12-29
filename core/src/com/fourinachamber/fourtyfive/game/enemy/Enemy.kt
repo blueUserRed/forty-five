@@ -426,7 +426,7 @@ class Enemy(
             dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
             dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
             dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColor = Color.valueOf(dmgOnj.get<String>("negativeFontColor"))
+            dmgFontColor = dmgOnj.get<Color>("negativeFontColor")
 
             val shakeOnj = config.get<OnjObject>("shakeAnimation")
 
@@ -480,7 +480,7 @@ class Enemy(
                     it.get<Double>("coverIconScale").toFloat(),
                     detailFont,
                     it.get<Double>("detailFontScale").toFloat(),
-                    Color.valueOf(it.get<String>("detailFontColor")),
+                    it.get<Color>("detailFontColor"),
                     gameScreenController
                 )
                 enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider, enemy)

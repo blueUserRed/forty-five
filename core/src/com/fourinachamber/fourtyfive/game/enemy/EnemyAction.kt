@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.game.*
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.screen.CustomMoveByAction
 import com.fourinachamber.fourtyfive.screen.CustomParticleActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
@@ -201,7 +202,7 @@ abstract class EnemyAction {
             dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
             dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
             dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColor = Color.valueOf(dmgOnj.get<String>("negativeFontColor"))
+            dmgFontColor = dmgOnj.get<Color>("negativeFontColor")
 
             val plOnj = config.get<OnjObject>("reservesAnimation")
 
@@ -210,7 +211,7 @@ abstract class EnemyAction {
             resDuration = (plOnj.get<Double>("duration") * 1000).toInt()
             resRaiseHeight = plOnj.get<Double>("raiseHeight").toFloat()
             resStartFadeoutAt = (plOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            resFontColor = Color.valueOf(plOnj.get<String>("positiveFontColor"))
+            resFontColor = plOnj.get<Color>("positiveFontColor")
 
             val coverStackOnj = config.get<OnjObject>("coverStackParticles")
 
@@ -220,7 +221,7 @@ abstract class EnemyAction {
             bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
 
             val fadeOnj = config.get<OnjObject>("fadeInAndOutAnimation")
-            fadeFontColor = Color.valueOf(fadeOnj.get<String>("fadeFontColor"))
+            fadeFontColor = fadeOnj.get<Color>("fadeFontColor")
             fadeFontName = fadeOnj.get<String>("fadeFontName")
             fadeFontScale = fadeOnj.get<Double>("fadeFontScale"). toFloat()
             fadeDuration = (fadeOnj.get<Double>("fadeDuration") * 1000).toInt()

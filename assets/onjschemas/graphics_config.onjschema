@@ -1,4 +1,6 @@
 
+use Common;
+
 bufferTime: float,
 
 shakeAnimation: {
@@ -25,8 +27,8 @@ enemyQuickChargeAnimation: {
 
 playerLivesAnimation: {
     font: string,
-    negativeFontColor: string,
-    positiveFontColor: string,
+    negativeFontColor: Color,
+    positiveFontColor: Color,
     fontScale: float,
     duration: float,
     startFadeoutAt: float,
@@ -35,8 +37,8 @@ playerLivesAnimation: {
 
 reservesAnimation: {
     font: string,
-    negativeFontColor: string,
-    positiveFontColor: string,
+    negativeFontColor: Color,
+    positiveFontColor: Color,
     fontScale: float,
     duration: float,
     startFadeoutAt: float,
@@ -76,7 +78,7 @@ stringTemplates:  {
 
 fadeInAndOutAnimation: {
     fadeFontName: string,
-    fadeFontColor: string,
+    fadeFontColor: Color,
     fadeFontScale: float,
     fadeDuration: float,
     fadeIn: float,

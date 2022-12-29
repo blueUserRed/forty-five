@@ -1,6 +1,8 @@
 import "imports/font_group.onjschema" as _;
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 
+use Common;
+
 var viewportSharedKeys = {
     backgroundTexture?: string
 };
@@ -58,7 +60,7 @@ var widgetSharedKeys = {
 
 var detailTextSharedKeys = {
     detailFont: string,
-    detailFontColor: string,
+    detailFontColor: Color,
     detailBackgroundTexture: string,
     detailFontScale: float,
     detailOffsetX: float,
@@ -71,7 +73,7 @@ $Widget {
     $Label {
         text: string,
         font: string,
-        color: string,
+        color: Color,
         fontScale: float,
         backgroundTexture?: string,
         align?: string,
@@ -81,7 +83,7 @@ $Widget {
     $TemplateLabel {
         template: string,
         font: string,
-        color: string,
+        color: Color,
         fontScale: float,
         backgroundTexture?: string,
         align?: string,
@@ -175,7 +177,7 @@ $Widget {
     $Revolver {
         slotTexture: string,
         font: string,
-        fontColor: string,
+        fontColor: Color,
         fontScale: float,
         slotScale: float,
         cardScale: float,
@@ -197,7 +199,7 @@ $Widget {
         numStacks: int,
         maxCards: int,
         infoFont: string,
-        infoFontColor: string,
+        infoFontColor: Color,
         infoFontScale: float,
         stackBackgroundTexture: string,
         stackSpacing: float,
@@ -320,7 +322,7 @@ $ScreenController {
         nextScreen: string,
         ...detailTextSharedKeys,
         emptyFont: string,
-        emptyFontColor: string,
+        emptyFontColor: Color,
         emptyFontScale: float,
         emptyText: string,
     }
@@ -364,7 +366,7 @@ assets: {
     }[],
     colorTextures: {
         name: string,
-        color: string,
+        color: Color,
     }[],
     particles: {
         name: string,
