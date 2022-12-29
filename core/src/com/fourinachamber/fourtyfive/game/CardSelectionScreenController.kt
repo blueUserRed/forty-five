@@ -24,6 +24,9 @@ import java.lang.Integer.min
 import kotlin.math.log
 import kotlin.properties.Delegates
 
+/**
+ * controls a screen that allows selecting cards
+ */
 class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenController() {
 
     private val cardSelectionActorName = onj.get<String>("cardSelectionActorName")
@@ -80,7 +83,6 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         hoverDetailActor.wrap = true
         hoverDetailActor.width = detailWidth
         hoverDetailActor.background = detailBackground
-//        hoverDetailActor.setPosition(detailOffset.x, detailOffset.y)
         screenDataProvider.addActorToRoot(hoverDetailActor)
 
         val cardSelectionActor = screenDataProvider.namedActors[cardSelectionActorName]
@@ -183,7 +185,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     }
 
     private fun handleClick(card: Card) {
-        FourtyFiveLogger.debug(logTag, "choose card $card")
+        FourtyFiveLogger.debug(logTag, "chose card $card")
         SaveState.drawCard(card)
         SaveState.write()
         FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(nextScreen)).build()

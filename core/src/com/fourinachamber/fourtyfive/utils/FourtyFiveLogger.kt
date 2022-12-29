@@ -9,10 +9,19 @@ import java.io.PrintStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
+/**
+ * utility for logging to the console or to files
+ */
 object FourtyFiveLogger {
 
+    /**
+     * file containing the config for this logger
+     */
     const val configFilePath = "logging/log_config.onj"
+
+    /**
+     * file containing the schema for the config file
+     */
     const val schemaFilePath = "onjschemas/log_config.onjschema"
 
     private lateinit var output: PrintStream
@@ -21,6 +30,9 @@ object FourtyFiveLogger {
     private val messageTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
     private val detailTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
 
+    /**
+     * initializes the logger
+     */
     fun init() {
         val config = OnjParser.parseFile(Gdx.files.internal(configFilePath).file())
         val schema = OnjSchemaParser.parseFile(Gdx.files.internal(schemaFilePath).file())
@@ -41,28 +53,53 @@ object FourtyFiveLogger {
         """.trimIndent())
     }
 
+    /**
+     * logs a debug message
+     * @param tag should give the reader information about where this message
+     * came from (which class, which instance, ...)
+     */
     fun debug(tag: String, message: String) {
         if (logLevel != LogLevel.DEBUG) return
         output.println(formatMessage(tag, message, LogLevel.DEBUG))
     }
 
+    /**
+     * logs a message with medium priority
+     * @param tag should give the reader information about where this message
+     * came from (which class, which instance, ...)
+     */
     fun medium(tag: String, message: String) {
         if (logLevel != LogLevel.DEBUG && logLevel != LogLevel.MEDIUM) return
         output.println(formatMessage(tag, message, LogLevel.MEDIUM))
     }
 
+    /**
+     * logs a message with information about some kind of severe failure
+     * @param tag should give the reader information about where this message
+     * came from (which class, which instance, ...)
+     */
     fun severe(tag: String, message: String) {
         output.println(formatMessage(tag, message, LogLevel.SEVERE))
     }
 
+    /**
+     * logs the stackTrace of an exception. will always be logged, regardless of the log level
+     */
     fun stackTrace(e: Exception) {
         e.printStackTrace(output)
     }
 
+    /**
+     * logs a message formatted as a title. This should be used when a big change in the state of the game happens
+     * and makes navigating the log file easier
+     */
     fun title(message: String) {
         output.println("-------------$message-------------")
     }
 
+    /**
+     * logs the current frameRate, only logs when the logLevel is set to debug
+     */
     fun fps() {
         if (logLevel != LogLevel.DEBUG) return
         output.println("-[fps]- ${Gdx.graphics.framesPerSecond}")
@@ -95,6 +132,9 @@ object FourtyFiveLogger {
         else -> throw RuntimeException("unknown log level: $logLevel")
     }
 
+    /**
+     * possible log levels
+     */
     enum class LogLevel {
         DEBUG {
             override fun toString(): String = "debug"

@@ -20,6 +20,12 @@ import onj.OnjNamedObject
 import java.lang.Float.max
 
 
+/**
+ * The area on the screen where the coverStacks are located
+ * @param numStacks the number of available stacks
+ * @param maxCards the maximum amount of cards allowed per stack
+ * @param onlyAllowAddingOnSameTurn if true, the stacks will be looked to the turn the first card was placed in
+ */
 class CoverArea(
     val numStacks: Int,
     val maxCards: Int,
@@ -40,6 +46,9 @@ class CoverArea(
     val detailWidth: Float
 ) : Widget(), InitialiseableActor {
 
+    /**
+     * set by gameScreenController //TODO: find a better solution
+     */
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
     private var isInitialised: Boolean = false
     private lateinit var screenDataProvider: ScreenDataProvider
@@ -77,6 +86,10 @@ class CoverArea(
         screenDataProvider.addActorToRoot(hoverDetailActor)
     }
 
+    /**
+     * damages the active stack
+     * @return the remaining damage (that wasn't blocked by the cover)
+     */
     fun damage(damage: Int): Int {
         for (stack in stacks) {
             if (stack.isActive) return stack.damage(damage)
@@ -98,6 +111,9 @@ class CoverArea(
         }
     }
 
+    /**
+     * returns the active stack
+     */
     fun getActive(): CoverStack? {
         for (stack in stacks) if (stack.isActive) return stack
         return null
@@ -113,6 +129,9 @@ class CoverArea(
         card.isDraggable = false
     }
 
+    /**
+     * checks whether a card can be added to a stack
+     */
     fun acceptsCover(slot: Int, turnNum: Int): Boolean = stacks[slot].acceptsCard(turnNum)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -189,6 +208,10 @@ class CoverArea(
 
 }
 
+/**
+ * stack of cover cards
+ * @see CoverArea
+ */
 class CoverStack(
     val maxCards: Int,
     val onlyAllowAddingOnSameTurn: Boolean,
@@ -205,9 +228,15 @@ class CoverStack(
 
     override var inAnimation: Boolean = false
 
+    /**
+     * the theoretical maximum health of the stack
+     */
     var baseHealth: Int = 0
         private set
 
+    /**
+     * the current health of the stack
+     */
     var currentHealth: Int = 0
         private set
 
@@ -218,15 +247,24 @@ class CoverStack(
 
     var parentWidth: Float = Float.MAX_VALUE
 
+    /**
+     * the number of cards in the stack
+     */
     val numCards: Int
         get() = _cards.size
 
+    /**
+     * true if this is the active slot
+     */
     var isActive: Boolean = false
         set(value) {
             field = value
             updateText()
         }
 
+    /**
+     * the cards in this stack
+     */
     val cards: List<Card>
         get() = _cards
 
@@ -242,6 +280,10 @@ class CoverStack(
         }
     }
 
+    /**
+     * damages this stack and destroys it if the health falls below zero
+     * @return the remaining damage (that wasn't blocked by the cover)
+     */
     fun damage(damage: Int): Int {
         currentHealth -= damage
         updateText()
@@ -251,6 +293,9 @@ class CoverStack(
         return remaining
     }
 
+    /**
+     * destroys the stack
+     */
     fun destroy() {
         currentHealth = 0
         baseHealth = 0
@@ -267,12 +312,18 @@ class CoverStack(
         this.screenDataProvider = screenDataProvider
     }
 
+    /**
+     * checks if this stack can accept a card
+     */
     fun acceptsCard(turnNum: Int): Boolean {
         if (_cards.size >= maxCards) return false
         if (onlyAllowAddingOnSameTurn && lockedTurnNum != null && turnNum != lockedTurnNum) return false
         return true
     }
 
+    /**
+     * adds a new card
+     */
     fun addCard(card: Card, turnNum: Int) {
         if (_cards.isEmpty()) lockedTurnNum = turnNum
         _cards.add(card)
@@ -288,7 +339,7 @@ class CoverStack(
         addActor(card.actor)
     }
 
-    fun updateText() {
+    private fun updateText() {
         detailText.setText("${if (isActive) "active" else "not active"}\n${currentHealth}/${baseHealth}")
     }
 

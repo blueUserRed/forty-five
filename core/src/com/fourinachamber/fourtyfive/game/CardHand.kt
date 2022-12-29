@@ -21,7 +21,8 @@ import kotlin.math.min
 
 
 /**
- * displays the cards
+ * displays the cards in the hand
+ * @param targetWidth the width this aims to be
  */
 class CardHand(
     private val targetWidth: Float,
@@ -68,6 +69,9 @@ class CardHand(
      */
     var draggedCardZIndex: Int = 0
 
+    /**
+     * the cards currently in the hand
+     */
     val cards: List<Card>
         get() = _cards
 
@@ -187,20 +191,11 @@ class CardHand(
 
 
     override fun getPrefWidth(): Float {
-//        return neededWidth
         return min(targetWidth, currentWidth)
     }
 
     override fun getMinWidth(): Float {
-//        return neededWidth
         return min(targetWidth, currentWidth)
     }
 
-//    override fun getMinHeight(): Float {
-//        return currentHeight
-//    }
-//
-//    override fun getPrefHeight(): Float {
-//        return currentHeight
-//    }
 }

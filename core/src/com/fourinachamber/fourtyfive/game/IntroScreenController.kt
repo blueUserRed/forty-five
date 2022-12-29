@@ -19,6 +19,9 @@ import onj.*
 import kotlin.math.floor
 import kotlin.math.pow
 
+/**
+ * controls the intro-screen
+ */
 class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
 
     private val cardAtlasFile = onj.get<String>("cardAtlasFile")
@@ -101,6 +104,9 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         screenDataProvider.removeLateRenderTask(renderTask)
     }
 
+    /**
+     * sprite with basic physics for animation the cards
+     */
     class CardSprite(texture: TextureRegion, initialScale: Float) : Sprite(texture) {
 
         var velocity: Vector2 = Vector2()
