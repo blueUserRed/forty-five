@@ -2,6 +2,6 @@
 //logTarget: $Console { }
 logTarget: $File {
     path: "logging/fourty-five.log"
-}
-versionTag: "dev"
+},
+versionTag: "dev",
 logLevel: "debug"

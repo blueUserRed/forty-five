@@ -1,45 +1,45 @@
-import "imports/colors.onj" as color
+import "imports/colors.onj" as color;
 
-!worldWidth = 160.0
-!worldHeight = 90.0
+var worldWidth = 160.0;
+var worldHeight = 90.0;
 
 
 viewport: $FitViewport {
-    worldWidth: !worldWidth
-    worldHeight: !worldHeight
+    worldWidth: worldWidth,
+    worldHeight: worldHeight,
     backgroundTexture: "background"
-}
+},
 
-!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
     screenPath: "screens/title_screen.onj"
-}
+};
 
-!hoverBehaviour = $MouseHoverBehaviour {
-    useSystemCursor: true
-    cursorName: "hand"
-    disabled: null
-}
+var hoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
+    disabled: null,
+};
 
 children: [
 
     $VerticalGroup {
-        align: "center"
-        expand: true
+        align: "center",
+        expand: true,
 //        debug: true
         children: [
             $Image {
-                name: "logo"
-                visible: false
-                textureName: "logo"
-                reportDimensionsWithScaling: true
-                scaleX: 0.13
-                scaleY: 0.13
+                name: "logo",
+                visible: false,
+                textureName: "logo",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.13,
+                scaleY: 0.13,
             //        width: !worldWidth
             }
         ]
     }
 
-]
+],
 
 assets: {
     textures: [
@@ -48,59 +48,52 @@ assets: {
 //            file: "textures/screens/win_screen.png"
 //        }
         {
-            name: "logo"
+            name: "logo",
             file: "textures/title_screen/logo.png"
         }
-    ]
+    ],
     fonts: [
-
-//        $DistanceFieldFont {
-//            name: "red_wing"
-//            fontFile: "fonts/red_wing.fnt"
-//            imageFile: "fonts/red_wing.png"
-//        }
-
-    ]
-    textureAtlases: []
-    cursors: []
+    ],
+    textureAtlases: [],
+    cursors: [],
     postProcessors: [
-        {
-            name: "vignette"
-            vertexShader: "shaders/vignette/vignette.vert"
-            fragmentShader: "shaders/vignette/vignette.frag"
-            timeOffset: 0
-            uniforms: [ "time", "resolution" ]
-            args: {
-                color: color("000000")
-                speed: 0.0
-                movement: 1.0
-                minMovement: 1.0
-            }
-        }
-    ]
-    animations: []
+//        {
+//            name: "vignette",
+//            vertexShader: "shaders/vignette/vignette.vert",
+//            fragmentShader: "shaders/vignette/vignette.frag",
+//            timeOffset: 0,
+//            uniforms: [ "time", "resolution" ],
+//            args: {
+//                color: color("000000"),
+//                speed: 0.0,
+//                movement: 1.0,
+//                minMovement: 1.0,
+//            }
+//        }
+    ],
+    animations: [],
     colorTextures: [
         {
-            name: "background"
+            name: "background",
             color: "615130"
         }
-    ]
+    ],
     particles: []
-}
+},
 
 options: {
-    setFillParentOnRoot: true
+    setFillParentOnRoot: true,
     defaultCursor: {
-        useSystemCursor: true
+        useSystemCursor: true,
         cursorName: "arrow"
-    }
-    postProcessor: null
+    },
+    postProcessor: null,
 //    postProcessor: "vignette"
     controller: $IntroScreenController {
-        cardAtlasFile: "cards/generated/cards.atlas"
-        appearActor: "logo"
+        cardAtlasFile: "cards/generated/cards.atlas",
+        appearActor: "logo",
         nextScreen: "screens/title_screen.onj"
-    }
+    },
     printFrameRate: false
 //    controller: null
 }

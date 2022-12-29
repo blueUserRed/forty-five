@@ -1,139 +1,139 @@
-import "imports/colors.onj" as color
+import "imports/colors.onj" as color;
 
-!worldWidth = 160.0
-!worldHeight = 90.0
+var worldWidth = 160.0;
+var worldHeight = 90.0;
 
-!buttonHeight = <!worldHeight / 8>
+var buttonHeight = worldHeight / 8;
 
-!buttonBaseScale = 0.2
-!buttonHoverScale = 0.25
+var buttonBaseScale = 0.2;
+var buttonHoverScale = 0.25;
 
-!buttonBehaviours = [
+var buttonBehaviours = [
 
     $MouseHoverBehaviour {
-        useSystemCursor: true
-        cursorName: "hand"
-        disabled: null
-    }
+        useSystemCursor: true,
+        cursorName: "hand",
+        disabled: null,
+    },
 
     $OnHoverChangeFontSizeBehaviour {
-        enterDuration: 0.1
-        exitDuration: 0.1
-        targetFontScale: !buttonHoverScale
-        baseFontScale: !buttonBaseScale
-        enterInterpolation: "elastic in"
-        exitInterpolation: "elastic out"
+        enterDuration: 0.1,
+        exitDuration: 0.1,
+        targetFontScale: buttonHoverScale,
+        baseFontScale: buttonBaseScale,
+        enterInterpolation: "elastic in",
+        exitInterpolation: "elastic out",
     }
 
-]
+];
 
 viewport: $FitViewport {
-    worldWidth: !worldWidth
-    worldHeight: !worldHeight
-    backgroundTexture: "background3"
-}
+    worldWidth: worldWidth,
+    worldHeight: worldHeight,
+    backgroundTexture: "background3",
+},
 
-!topRow = {
-    width: !worldWidth
+var topRow = {
+    width: worldWidth,
     cells: [
         {
-            expandX: true
+            expandX: true,
             element: $Label {
-                text: ""
-                font: "distance_field"
-                color: !color.black
-                fontScale: 0.2
+                text: "",
+                font: "distance_field",
+                color: color.black,
+                fontScale: 0.2,
             }
-        }
+        },
         {
-            align: "right"
-            padTop: 8.0
-            padRight: 10.0
-            sizeToActor: true
+            align: "right",
+            padTop: 8.0,
+            padRight: 10.0,
+            sizeToActor: true,
             element: $Image {
-                scalingWorkaround: true
-                textureName: "logo"
-                scaleX: 0.07
+                scalingWorkaround: true,
+                textureName: "logo",
+                scaleX: 0.07,
                 scaleY: 0.07
             }
         }
     ]
-}
+};
 
-!spacerRow = {
+var spacerRow = {
     cells: [
         {
-            colspan: 2
-            expandY: true
+            colspan: 2,
+            expandY: true,
             element: $Label {
-                text: ""
-                font: "distance_field"
-                color: !color.black
+                text: "",
+                font: "distance_field",
+                color: color.black,
                 fontScale: 0.2
             }
         }
     ]
-}
+};
 
-!buttonBox = $Table {
+var buttonBox = $Table {
     rows: [
 
         {
             cells: [
                 {
-                    align: "right"
+                    align: "right",
                     element: $Label {
-                        text: "play"
-                        font: "red_wing"
-                        align: "right"
-                        color: !color.black
-                        fontScale: !buttonBaseScale
+                        text: "play",
+                        font: "red_wing",
+                        align: "right",
+                        color: color.black,
+                        fontScale: buttonBaseScale,
                         behaviours: [
                             $OnClickChangeScreenBehaviour {
                                 screenPath: "screens/game_screen.onj"
-                            }
-                            ...!buttonBehaviours
+                            },
+                            ...buttonBehaviours
                         ]
 //                        debug: true
                     }
                 }
             ]
-        }
+        },
 
         {
             cells: [
                 {
-                    align: "right"
+                    align: "right",
                     element: $Label {
-                        text: "abandon run"
-                        font: "red_wing"
-                        align: "right"
-                        color: !color.black
-                        fontScale: !buttonBaseScale
+                        text: "abandon run",
+                        font: "red_wing",
+                        align: "right",
+                        color: color.black,
+                        fontScale: buttonBaseScale,
                         behaviours: [
-                            $OnClickAbandonRunBehaviour { }
-                            $OnClickRemoveActorBehaviour { }
-                            ...!buttonBehaviours
+                            $OnClickAbandonRunBehaviour { },
+                            $OnClickRemoveActorBehaviour { },
+                            ...buttonBehaviours
                         ]
 //                        debug: true
                     }
                 }
             ]
-        }
+        },
 
         {
             cells: [
                 {
-                    align: "right"
+                    align: "right",
                     element: $Label {
-                        text: "quit"
-                        font: "red_wing"
-                        align: "right"
-                        color: !color.black
-                        fontScale: !buttonBaseScale
+                        text: "quit",
+                        font: "red_wing",
+                        align: "right",
+                        color: color.black,
+                        fontScale: buttonBaseScale,
                         behaviours: [
-                            $OnClickExitBehaviour { }
-                            ...!buttonBehaviours
+                            $OnClickExitBehaviour { },
+                            ...buttonBehaviours
                         ]
 //                        debug: true
                     }
@@ -143,79 +143,79 @@ viewport: $FitViewport {
 
     ]
 
-}
+};
 
-!bottomRow = {
+var bottomRow = {
 
     cells: [
 
         {
-            expandX: true
+            expandX: true,
             element: $Label {
-                text: ""
-                font: "distance_field"
-                color: !color.black
+                text: "",
+                font: "distance_field",
+                color: color.black,
                 fontScale: 0.2
             }
-        }
+        },
 
         {
-            align: "right"
-            padBottom: 10.0
-            padRight: 3.0
-            sizeToActor: true
-            element: !buttonBox
+            align: "right",
+            padBottom: 10.0,
+            padRight: 3.0,
+            sizeToActor: true,
+            element: buttonBox
         }
 
     ]
 
-}
+};
 
 children: [
     $Table {
 //        fillX: true
 //        fillY: true
 //        debug: true
-        rows: [ !topRow, !spacerRow, !bottomRow ]
+        rows: [ topRow, spacerRow, bottomRow ]
     }
-]
+],
 
 assets: {
-    textures: []
+    textures: [],
     fonts: [
 
         $DistanceFieldFont {
-            name: "distance_field"
-            fontFile: "fonts/distanceField.fnt"
+            name: "distance_field",
+            fontFile: "fonts/distanceField.fnt",
             imageFile: "fonts/distanceField.png"
-        }
+        },
 
         $DistanceFieldFont {
-            name: "red_wing"
-            fontFile: "fonts/red_wing.fnt"
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
             imageFile: "fonts/red_wing.png"
         }
 
-    ]
+    ],
     textureAtlases: [
         {
-            file: "textures/packed/title_screen/title_screen.atlas"
-            defines: [ "background3" "logo"]
+            file: "textures/packed/title_screen/title_screen.atlas",
+            defines: [ "background3", "logo"]
         }
-    ]
-    cursors: []
-    postProcessors: []
-    animations: []
-    colorTextures: []
-    particles: []
-}
+    ],
+    cursors: [],
+    postProcessors: [],
+    animations: [],
+    colorTextures: [],
+    particles: [],
+},
 
 options: {
-    setFillParentOnRoot: true
+    setFillParentOnRoot: true,
     defaultCursor: {
-        useSystemCursor: true
+        useSystemCursor: true,
         cursorName: "arrow"
-    }
-    postProcessor: null
+    },
+    postProcessor: null,
     controller: null
 }

@@ -11,7 +11,7 @@ import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.CardPrototype
 import com.fourinachamber.fourtyfive.card.GameScreenControllerDragAndDrop
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
-import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
+import com.fourinachamber.fourtyfive.screen.EnemyArea
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.parser.OnjParser

@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch

@@ -1,105 +1,107 @@
 
-import "imports/colors.onj" as color
-import "config/game_config.onj" as gameConfig
+import "imports/colors.onj" as color;
+import "config/game_config.onj" as gameConfig;
 
-!pi = 3.141
+use Common;
 
-!worldWidth = 160.0
-!worldHeight = 90.0
+var pi = 3.141;
 
-!cardZIndicesStart = 100
-!cardZIndicesEnd = <!cardZIndicesStart + 100>
-!overlayZIndex = 500
+var worldWidth = 160.0;
+var worldHeight = 90.0;
 
-!cardScale = 0.028
-!cardHeight = <596.0 * !cardScale>
+var cardZIndicesStart = 100;
+var cardZIndicesEnd = cardZIndicesStart + 100;
+var overlayZIndex = 500;
 
-!buttonHoverBehaviour = $MouseHoverBehaviour {
-    useSystemCursor: true
-    cursorName: "hand"
+var cardScale = 0.028;
+var cardHeight = 596.0 * cardScale;
+
+var buttonHoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
     disabled: {
-        useSystemCursor: true
+        useSystemCursor: true,
         cursorName: "not allowed"
     }
-}
+};
 
-!sharedDetailTextKeys = {
-    detailFont: "red_wing"
-    detailFontColor: !color.white
-    detailBackgroundTexture: "card_detail_background"
-    detailFontScale: 0.07
+var sharedDetailTextKeys = {
+    detailFont: "red_wing",
+    detailFontColor: color.white,
+    detailBackgroundTexture: "card_detail_background",
+    detailFontScale: 0.07,
     detailWidth: 50.0
-}
+};
 
-!controller = $GameScreenController {
-    cardsFile: "cards/cards.onj"
-    cardAtlasFile: "cards/generated/cards.atlas"
+var controller = $GameScreenController {
+    cardsFile: "cards/cards.onj",
+    cardAtlasFile: "cards/generated/cards.atlas",
     cardHand: {
         actorName: "card_hand"
-    }
+    },
     revolver: {
-        actorName: "revolver"
+        actorName: "revolver",
         dropBehaviour: $RevolverDropTarget {
           group: "card"
         }
-    }
+    },
     enemyArea: {
-        actorName: "enemy_area"
-        enemies: [ !gameConfig.enemyConfig.startEnemy ]
-    }
+        actorName: "enemy_area",
+        enemies: [ gameConfig.enemyConfig.startEnemy ]
+    },
     coverArea: {
-        actorName: "cover_area"
+        actorName: "cover_area",
         dropBehaviour: $CoverAreaDropTarget {
             group: "card"
         }
-    }
+    },
     cardDragBehaviour: $CardDragSource {
         group: "card"
-    }
-    enemies: !gameConfig.enemyConfig.enemies
-    cardDrawActor: "card_draw_table"
-    playerLivesLabelName: "player_lives_label"
-    shootButtonName: "shoot_button"
-    endTurnButtonName: "end_turn_button"
-    reservesLabelName: "reserves_label"
-    destroyCardInstructionActor: "destroy_card_instruction_label"
-    winScreen: "screens/win_screen.onj"
-    looseScreen: "screens/loose_screen.onj"
-    cardsToDrawInFirstRound: !gameConfig.cardDrawConfig.firstRound
-    cardsToDraw: !gameConfig.cardDrawConfig.roundStart
-    maxCards: !gameConfig.cardDrawConfig.maxCards
-    playerLives: !gameConfig.playerConfig.lives
-    reservesAtRoundBegin: !gameConfig.reservesConfig.roundStart
-    shotEmptyDamage: !gameConfig.damageConfig.shotEmptyDamage
-}
+    },
+    enemies: gameConfig.enemyConfig.enemies,
+    cardDrawActor: "card_draw_table",
+    playerLivesLabelName: "player_lives_label",
+    shootButtonName: "shoot_button",
+    endTurnButtonName: "end_turn_button",
+    reservesLabelName: "reserves_label",
+    destroyCardInstructionActor: "destroy_card_instruction_label",
+    winScreen: "screens/win_screen.onj",
+    looseScreen: "screens/loose_screen.onj",
+    cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
+    cardsToDraw: gameConfig.cardDrawConfig.roundStart,
+    maxCards: gameConfig.cardDrawConfig.maxCards,
+    playerLives: gameConfig.playerConfig.lives,
+    reservesAtRoundBegin: gameConfig.reservesConfig.roundStart,
+    shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
+};
 
 viewport: $FitViewport {
-    worldWidth: !worldWidth
-    worldHeight: !worldHeight
+    worldWidth: worldWidth,
+    worldHeight: worldHeight,
     backgroundTexture: "background"
-}
+},
 
 assets: {
     fonts: [
 
         $DistanceFieldFont {
-            name: "vanilla_whale"
-            fontFile: "fonts/vanilla_whale.fnt"
+            name: "vanilla_whale",
+            fontFile: "fonts/vanilla_whale.fnt",
             imageFile: "fonts/vanilla_whale.png"
-        }
+        },
 
         $DistanceFieldFont {
-            name: "red_wing"
-            fontFile: "fonts/red_wing.fnt"
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
             imageFile: "fonts/red_wing.png"
         }
 
-    ]
-    textures: []
+    ],
+    textures: [],
     textureAtlases: [
 
         {
-            file: "textures/packed/game_screen/game_screen.atlas"
+            file: "textures/packed/game_screen/game_screen.atlas",
             defines: [
                 "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
                 "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum",
@@ -108,277 +110,277 @@ assets: {
             ]
         }
 
-    ]
+    ],
     cursors: [
         {
-            name: "cursor"
-            file: "textures/cursors/revolver.png"
-            hotspotX: 0
+            name: "cursor",
+            file: "textures/cursors/revolver.png",
+            hotspotX: 0,
             hotspotY: 0
         }
-    ]
+    ],
     postProcessors: [
         {
-            name: "earthquake"
-            vertexShader: "shaders/earthquake/earthquake.vert"
-            fragmentShader: "shaders/earthquake/earthquake.frag"
-            timeOffset: 2_000
-            uniforms: [ "time" ]
+            name: "earthquake",
+            vertexShader: "shaders/earthquake/earthquake.vert",
+            fragmentShader: "shaders/earthquake/earthquake.frag",
+            timeOffset: 2_000,
+            uniforms: [ "time" ],
             args: null
-        }
+        },
         {
-            name: "default"
-            vertexShader: "shaders/default/default.vert"
-            fragmentShader: "shaders/default/default.frag"
-            timeOffset: 0
-            uniforms: []
+            name: "default",
+            vertexShader: "shaders/default/default.vert",
+            fragmentShader: "shaders/default/default.frag",
+            timeOffset: 0,
+            uniforms: [],
             args: null
-        }
+        },
         {
-            name: "vignette"
-            vertexShader: "shaders/vignette/vignette.vert"
-            fragmentShader: "shaders/vignette/vignette.frag"
-            timeOffset: 0
-            uniforms: [ "time", "resolution" ]
+            name: "vignette",
+            vertexShader: "shaders/vignette/vignette.vert",
+            fragmentShader: "shaders/vignette/vignette.frag",
+            timeOffset: 0,
+            uniforms: [ "time", "resolution" ],
             args: {
-                color: color("ff0000")
-                speed: 0.0
-                movement: 1.0
+                color: color("ff0000"),
+                speed: 0.0,
+                movement: 1.0,
                 minMovement: 0.3
             }
         }
-    ]
-    animations: []
+    ],
+    animations: [],
     colorTextures: [
         {
-            name: "card_detail_background"
+            name: "card_detail_background",
             color: "04040488"
-        }
+        },
         {
-            name: "black"
-            color: !color.black
+            name: "black",
+            color: color.black
         }
-    ]
+    ],
     particles: [
         {
-            name: "dust"
-            particlePath: "particles/dust.particle"
-            textureDir: "textures/particles"
+            name: "dust",
+            particlePath: "particles/dust.particle",
+            textureDir: "textures/particles",
             scale: 0.1
-        }
+        },
         {
-            name: "dust_explosion"
-            particlePath: "particles/dust_explosion.particle"
-            textureDir: "textures/particles"
+            name: "dust_explosion",
+            particlePath: "particles/dust_explosion.particle",
+            textureDir: "textures/particles",
             scale: 0.1
         }
     ]
-}
+},
 
 options: {
-    setFillParentOnRoot: true
+    setFillParentOnRoot: true,
     defaultCursor: {
 //        useSystemCursor: true
 //        cursorName: "arrow"
-        useSystemCursor: false
+        useSystemCursor: false,
         cursorName: "cursor"
-    }
-    postProcessor: null
-    controller: !controller
+    },
+    postProcessor: null,
+    controller: controller
 }
 
 //!slotScale = 0.07
 //!revolverWidth = <128.0 * !slotScale * 4.0>
 
-!revolver = $Revolver {
-    name: "revolver"
-    slotTexture: "revolver_slot"
-    font: "vanilla_whale"
-    fontColor: !color.white
-    fontScale: 0.25
-    slotScale: 0.029
-    cardScale: <!cardScale * 0.6>
-    animationDuration: 0.2
-    radius: 13.0
-    radiusExtension: 5.0
-    cardZIndex: !cardZIndicesStart
-    rotationOff: <(!pi / 2.0) + (2.0 * !pi) / 5.0>
-    ...!sharedDetailTextKeys
-    detailOffsetX: 0.0
-    detailOffsetY: 0.0
-    background: "revolver_drum"
+var revolver = $Revolver {
+    name: "revolver",
+    slotTexture: "revolver_slot",
+    font: "vanilla_whale",
+    fontColor: color.white,
+    fontScale: 0.25,
+    slotScale: 0.029,
+    cardScale: cardScale * 0.6,
+    animationDuration: 0.2,
+    radius: 13.0,
+    radiusExtension: 5.0,
+    cardZIndex: cardZIndicesStart,
+    rotationOff: (pi / 2.0) + (2.0 * pi) / 5.0,
+    ...sharedDetailTextKeys,
+    detailOffsetX: 0.0,
+    detailOffsetY: 0.0,
+    background: "revolver_drum",
 //    debug: true
-}
+};
 
-!cardHand = $CardHand {
-    name: "card_hand"
-    cardScale: !cardScale
-    hoveredCardScale: <!cardScale * 1.2>
-    cardSpacing: 1.0
-    startCardZIndicesAt: !cardZIndicesStart
-    hoveredCardZIndex: <!cardZIndicesEnd - 1>
-    draggedCardZIndex: !cardZIndicesEnd
-    detailOffsetX: 0.0
-    detailOffsetY: 1.5
-    targetWidth: <!worldWidth * (7.0 / 10.0)>
-    ...!sharedDetailTextKeys
+var cardHand = $CardHand {
+    name: "card_hand",
+    cardScale: cardScale,
+    hoveredCardScale: cardScale * 1.2,
+    cardSpacing: 1.0,
+    startCardZIndicesAt: cardZIndicesStart,
+    hoveredCardZIndex: cardZIndicesEnd - 1,
+    draggedCardZIndex: cardZIndicesEnd,
+    detailOffsetX: 0.0,
+    detailOffsetY: 1.5,
+    targetWidth: worldWidth * (7.0 / 10.0),
+    ...sharedDetailTextKeys,
 //    debug: true
-}
+};
 
-!enemyArea = $EnemyArea {
+var enemyArea = $EnemyArea {
      name: "enemy_area"
 //     debug: true
- }
+};
 
-!coverArea = $CoverArea {
-    name: "cover_area"
-    numStacks: !gameConfig.coverConfig.numStacks
-    maxCards: !gameConfig.coverConfig.maxCards
-    onlyAllowAddingOnTheSameTurn: !gameConfig.coverConfig.onlyAllowAddingOnTheSameTurn
-    infoFont: "vanilla_whale"
-    infoFontColor: !color.black
-    infoFontScale: 0.1
-    stackBackgroundTexture: "card_detail_background"
-    stackSpacing: 2.0
-    areaSpacing: 4.0
-    cardScale: <!cardScale * 0.6>
-    stackMinSize: 20.0
-    ...!sharedDetailTextKeys
-    detailOffsetX: 0.0
+var coverArea = $CoverArea {
+    name: "cover_area",
+    numStacks: gameConfig.coverConfig.numStacks,
+    maxCards: gameConfig.coverConfig.maxCards,
+    onlyAllowAddingOnTheSameTurn: gameConfig.coverConfig.onlyAllowAddingOnTheSameTurn,
+    infoFont: "vanilla_whale",
+    infoFontColor: color.black,
+    infoFontScale: 0.1,
+    stackBackgroundTexture: "card_detail_background",
+    stackSpacing: 2.0,
+    areaSpacing: 4.0,
+    cardScale: cardScale * 0.6,
+    stackMinSize: 20.0,
+    ...sharedDetailTextKeys,
+    detailOffsetX: 0.0,
     detailOffsetY: 0.0
 //    debug: true
-}
+};
 
-!shootButton = $Image {
-    name: "shoot_button"
-    textureName: "shoot"
-    reportDimensionsWithScaling: true
-    scaleX: 0.03
-    scaleY: 0.03
+var shootButton = $Image {
+    name: "shoot_button",
+    textureName: "shoot",
+    reportDimensionsWithScaling: true,
+    scaleX: 0.03,
+    scaleY: 0.03,
     behaviours: [
         $OnClickChangePostProcessorBehaviour {
-            postProcessor: "earthquake"
-            duration: 70
+            postProcessor: "earthquake",
+            duration: 70,
             setOnlyIfNoPostProcessorIsSet: false
-        }
+        },
         $ShootButtonBehaviour { },
-        !buttonHoverBehaviour
+        buttonHoverBehaviour,
         $OnHoverChangeTextureBehaviour {
             hoverTexture: "shoot_hover"
         }
     ]
-}
+};
 
-!endTurnButton = $Image {
-    name: "end_turn_button"
-    textureName: "end_turn"
-    reportDimensionsWithScaling: true
-    scaleX: 0.03
-    scaleY: 0.03
+var endTurnButton = $Image {
+    name: "end_turn_button",
+    textureName: "end_turn",
+    reportDimensionsWithScaling: true,
+    scaleX: 0.03,
+    scaleY: 0.03,
     behaviours: [
         $EndTurnButtonBehaviour { },
-        !buttonHoverBehaviour,
+        buttonHoverBehaviour,
         $OnHoverChangeTextureBehaviour {
             hoverTexture: "end_turn_hover"
         }
     ]
-}
+};
 
-!playerLivesLabel = $TemplateLabel {
-    name: "player_lives_label"
-    font: "vanilla_whale"
-    template: "{game.curPlayerLives}/{game.basePlayerLives}"
-    fontScale: 0.09
-    color: !color.white
+var playerLivesLabel = $TemplateLabel {
+    name: "player_lives_label",
+    font: "vanilla_whale",
+    template: "{game.curPlayerLives}/{game.basePlayerLives}",
+    fontScale: 0.09,
+    color: color.white,
     backgroundTexture: "black"
-}
+};
 
-!reservesLabel = $TemplateLabel {
-    name: "reserves_label"
-    font: "vanilla_whale"
-    template: "{game.curReserves}/{game.baseReserves}"
-    fontScale: 0.09
-    color: !color.white
+var reservesLabel = $TemplateLabel {
+    name: "reserves_label",
+    font: "vanilla_whale",
+    template: "{game.curReserves}/{game.baseReserves}",
+    fontScale: 0.09,
+    color: color.white,
     backgroundTexture: "black"
-}
+};
 
-!cardDrawTable = $Table {
-    visible: false
-    name: "card_draw_table"
-    fillX: true
-    fillY: true
-    zIndex: !overlayZIndex
-    backgroundTexture: "card_detail_background"
+var cardDrawTable = $Table {
+    visible: false,
+    name: "card_draw_table",
+    fillX: true,
+    fillY: true,
+    zIndex: overlayZIndex,
+    backgroundTexture: "card_detail_background",
 //    debug: true
     rows: [
 
         {
             cells: [
                 {
-                    colspan: 2
-                    padTop: 4.0
+                    colspan: 2,
+                    padTop: 4.0,
                     element: $TemplateLabel {
-                        font: "red_wing"
-                        template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}"
-                        fontScale: 0.18
-                        align: "center"
-                        color: !color.white
+                        font: "red_wing",
+                        template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
+                        fontScale: 0.18,
+                        align: "center",
+                        color: color.white
                     }
                 }
             ]
-        }
+        },
 
         {
             cells: [
 
                 {
 //                    padTop: 6.0
-                    padBottom: -9.0
+                    padBottom: -9.0,
                     element: $TemplateLabel {
-                        font: "red_wing"
-                        template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack"
-                        fontScale: 0.13
-                        align: "center"
-                        color: !color.white
+                        font: "red_wing",
+                        template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
+                        fontScale: 0.13,
+                        align: "center",
+                        color: color.white
                     }
-                }
+                },
                 {
 //                    padTop: 6.0
-                    padBottom: -6.0
+                    padBottom: -6.0,
                     element: $TemplateLabel {
-                        font: "red_wing"
-                        template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack"
-                        fontScale: 0.13
-                        align: "center"
-                        color: !color.white
+                        font: "red_wing",
+                        template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
+                        fontScale: 0.13,
+                        align: "center",
+                        color: color.white
                     }
                 }
 
             ]
-        }
+        },
 
         {
             cells: [
 
                 {
-                    sizeToActor: true
+                    sizeToActor: true,
                     element: $Image {
-                        textureName: "draw_bullet"
-                        reportDimensionsWithScaling: true
-                        scaleX: 0.08
-                        scaleY: 0.08
-                        behaviours: [ $DrawBulletButtonBehaviour { }, !buttonHoverBehaviour ]
+                        textureName: "draw_bullet",
+                        reportDimensionsWithScaling: true,
+                        scaleX: 0.08,
+                        scaleY: 0.08,
+                        behaviours: [ $DrawBulletButtonBehaviour { }, buttonHoverBehaviour ]
                     }
-                }
+                },
 
                 {
-                    sizeToActor: true
+                    sizeToActor: true,
                     element: $Image {
-                        textureName: "draw_cover"
-                        reportDimensionsWithScaling: true
-                        scaleX: 0.08
-                        scaleY: 0.08
-                        behaviours: [ $DrawCoverCardButtonBehaviour { }, !buttonHoverBehaviour ]
+                        textureName: "draw_cover",
+                        reportDimensionsWithScaling: true,
+                        scaleX: 0.08,
+                        scaleY: 0.08,
+                        behaviours: [ $DrawCoverCardButtonBehaviour { }, buttonHoverBehaviour ]
                     }
                 }
 
@@ -386,9 +388,9 @@ options: {
         }
 
     ]
-}
+};
 
-!firstRow = $Table {
+var firstRow = $Table {
 
     rows: [
 
@@ -396,90 +398,80 @@ options: {
             cells: [
 
                 {
-                    padLeft: 2.0
-                    padBottom: 6.0
+                    padLeft: 2.0,
+                    padBottom: 6.0,
                     element: $HorizontalGroup {
-                        align: "left"
+                        align: "left",
                         children : [
                             $Image {
-                                reportDimensionsWithScaling: true
-                                textureName: "heart"
-                                scaleX: 0.006
+                                reportDimensionsWithScaling: true,
+                                textureName: "heart",
+                                scaleX: 0.006,
                                 scaleY: 0.006
-                            }
-                            !playerLivesLabel
+                            },
+                            playerLivesLabel
                         ]
                     }
-                }
+                },
 
                 {
-                    expandX: true
+                    expandX: true,
                     element: $Label {
-                        name: "destroy_card_instruction_label"
-                        font: "vanilla_whale"
-                        text: "Choose a card to destroy!"
-                        fontScale: 0.2
-                        align: "center"
-                        color: !color.black
+                        name: "destroy_card_instruction_label",
+                        font: "vanilla_whale",
+                        text: "Choose a card to destroy!",
+                        fontScale: 0.2,
+                        align: "center",
+                        color: color.black
                     }
                 }
-
-//                {
-//                    expandX: true
-//                    element: $Label {
-//                        font: "vanilla_whale"
-//                        text: ""
-//                        fontScale: 0.1
-//                        color: !color.white
-//                    }
-//                }
 
             ]
         }
 
     ]
-}
+};
 
-!middleRow = $Table {
+var middleRow = $Table {
     rows: [
 
         {
             cells: [
 
                 {
-                    width: <4 * (!worldWidth / 12)>
+                    width: 4 * (worldWidth / 12),
                     element: $VerticalGroup {
-                        align: "center"
-                        spacing: 2.0
+                        align: "center",
+                        spacing: 2.0,
                         children: [
-                            !revolver
-                            !shootButton
+                            revolver,
+                            shootButton
                         ]
                     }
-                }
+                },
 
                 {
-                    expandX: true
-                    width: <4 * (!worldWidth / 12)>
-                    height: <!worldHeight / 3.0>
-                    align: "top right"
-                    padTop: 6.0
-                    padRight: 5.0
-                    element: !coverArea
-                }
+                    expandX: true,
+                    width: 4 * (worldWidth / 12),
+                    height: worldHeight / 3.0,
+                    align: "top right",
+                    padTop: 6.0,
+                    padRight: 5.0,
+                    element: coverArea
+                },
 
                 {
-                    width: <2 * (!worldWidth / 12)>
-                    element: !enemyArea
+                    width: 2 * (worldWidth / 12),
+                    element: enemyArea
                 }
 
             ]
         }
 
     ]
-}
+};
 
-!bottomRow = $Table {
+var bottomRow = $Table {
 //    fillX: true
 //    debug: true
     rows: [
@@ -488,80 +480,80 @@ options: {
             cells: [
 
                 {
-                    padLeft: 2.0
-                    sizeToActor: true
+                    padLeft: 2.0,
+                    sizeToActor: true,
                     element: $HorizontalGroup {
-                        align: "center"
-                        spacing: 1.0
+                        align: "center",
+                        spacing: 1.0,
                         children: [
                             $Image {
-                                reportDimensionsWithScaling: true
-                                textureName: "reserves"
-                                scaleX: 0.05
+                                reportDimensionsWithScaling: true,
+                                textureName: "reserves",
+                                scaleX: 0.05,
                                 scaleY: 0.05
-                            }
-                            !reservesLabel
+                            },
+                            reservesLabel
                         ]
                     }
-                }
+                },
 
                 {
-                    expandX: true
-                    align: "bottom"
-                    height: !cardHeight
-                    element: !cardHand
-                }
+                    expandX: true,
+                    align: "bottom",
+                    height: cardHeight,
+                    element: cardHand
+                },
 
                 {
-                    padRight: 1.0
-                    sizeToActor: true
-                    element: !endTurnButton
+                    padRight: 1.0,
+                    sizeToActor: true,
+                    element: endTurnButton
                 }
 
             ]
         }
 
     ]
-}
+};
 
 children: [
 
     $Table {
-        align: "center"
+        align: "center",
 //        debug: true
-        fillX: true
-        fillY: true
+        fillX: true,
+        fillY: true,
         rows: [
 
             {
                 cells: [
                     {
-                        element: !firstRow
+                        element: firstRow
                     }
                 ]
-            }
+            },
 
             {
                 cells: [
                     {
-                        padBottom: 5.0
-                        element: !middleRow
+                        padBottom: 5.0,
+                        element: middleRow
                     }
                 ]
-            }
+            },
 
             {
                 cells: [
                     {
-                        align: "bottom"
-                        element: !bottomRow
+                        align: "bottom",
+                        element: bottomRow
                     }
                 ]
             }
 
         ]
-    }
+    },
 
-    !cardDrawTable
+    cardDrawTable
 
 ]

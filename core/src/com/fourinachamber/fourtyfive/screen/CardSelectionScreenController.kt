@@ -1,7 +1,6 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
@@ -14,7 +13,7 @@ import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.card.CardPrototype
-import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
@@ -26,7 +25,6 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.min
-import kotlin.math.log
 import kotlin.properties.Delegates
 
 /**
