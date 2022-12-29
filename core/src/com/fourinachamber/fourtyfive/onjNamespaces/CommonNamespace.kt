@@ -9,7 +9,7 @@ import onj.value.OnjValue
 import kotlin.reflect.KClass
 
 @OnjNamespace
-object Common {
+object CommonNamespace {
 
     @OnjNamespaceDatatypes
     val datatypes: Map<String, KClass<*>> = mapOf(

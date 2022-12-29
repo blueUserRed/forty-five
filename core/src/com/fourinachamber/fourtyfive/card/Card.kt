@@ -7,6 +7,7 @@ import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GameScreenController
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjExtensions
 import com.fourinachamber.fourtyfive.game.Trigger
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
@@ -349,7 +350,7 @@ class Card(
 
                 onj.get<OnjArray>("effects")
                     .value
-                    .map { (it as OnjExtensions.OnjEffect).value.copy() } //TODO: find a better solution
+                    .map { (it as OnjEffect).value.copy() } //TODO: find a better solution
             )
 
             for (effect in card.effects) effect.card = card
