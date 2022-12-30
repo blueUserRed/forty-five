@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.game.GameController
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
+import com.fourinachamber.fourtyfive.screen.OnjScreen
 import com.fourinachamber.fourtyfive.screen.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
@@ -308,7 +309,7 @@ class Card(
          */
         fun getFrom(
             cards: OnjArray,
-            regions: Map<String, TextureRegion>,
+            onjScreen: OnjScreen,
             initializer: (Card) -> Unit
         ): List<CardPrototype> {
 
@@ -321,7 +322,7 @@ class Card(
                     val prototype = CardPrototype(
                         onj.get<String>("name"),
                         cardTypeOrError(onj)
-                    ) { getCardFrom(onj, regions, initializer) }
+                    ) { getCardFrom(onj, onjScreen, initializer) }
                     prototypes.add(prototype)
                 }
             return prototypes
@@ -330,7 +331,7 @@ class Card(
 
         private fun getCardFrom(
             onj: OnjObject,
-            regions: Map<String, TextureRegion>,
+            onjScreen: OnjScreen,
             initializer: (Card) -> Unit
         ): Card {
             val name = onj.get<String>("name")
@@ -338,9 +339,7 @@ class Card(
             val card = Card(
                 name,
                 onj.get<String>("title"),
-                regions["$cardTexturePrefix$name"]
-                    ?: throw RuntimeException("cannot find texture for card $name"),
-
+                onjScreen.textureOrError("$cardTexturePrefix$name"),
                 onj.get<String>("flavourText"),
                 onj.get<String>("description"),
                 cardTypeOrError(onj),

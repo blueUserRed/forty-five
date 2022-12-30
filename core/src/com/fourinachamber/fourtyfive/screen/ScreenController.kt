@@ -30,7 +30,7 @@ abstract class ScreenController {
     /**
      * called when this is set as a controller for a screen
      */
-    open fun init(screenDataProvider: ScreenDataProvider) { }
+    open fun init(onjScreen: OnjScreen) { }
 
     /**
      * called every frame

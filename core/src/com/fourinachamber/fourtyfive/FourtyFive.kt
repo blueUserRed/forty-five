@@ -8,6 +8,7 @@ import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjExtensions
+import com.fourinachamber.fourtyfive.screen.OnjScreen
 import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import onj.parser.OnjParser
@@ -24,7 +25,7 @@ object FourtyFive : Game() {
     /**
      * setting this variable will change the current screen and dispose the previous
      */
-    var curScreen: Screen? = null
+    var curScreen: OnjScreen? = null
         set(value) {
             FourtyFiveLogger.title("changing screen")
             field?.dispose()

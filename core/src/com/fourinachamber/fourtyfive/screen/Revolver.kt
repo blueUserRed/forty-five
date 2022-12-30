@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.component1
@@ -35,7 +36,7 @@ class Revolver(
     val detailWidth: Float,
     private val background: Drawable?,
     private val radiusExtension: Float
-) : Widget(), ZIndexActor, InitialiseableActor {
+) : Widget(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
@@ -80,7 +81,9 @@ class Revolver(
     private var isInitialised: Boolean = false
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
-    private lateinit var screenDataProvider: ScreenDataProvider
+
+    private val onjScreen: OnjScreen
+        get() = FourtyFive.curScreen!!
 
     /**
      * the slots of the revoler
@@ -97,11 +100,6 @@ class Revolver(
         hoverDetailActor.isVisible = false
         hoverDetailActor.fixedZIndex = Int.MAX_VALUE
         hoverDetailActor.wrap = true
-    }
-
-    override fun init(screenDataProvider: ScreenDataProvider) {
-        this.screenDataProvider = screenDataProvider
-        screenDataProvider.addActorToRoot(hoverDetailActor)
     }
 
     /**
@@ -123,7 +121,7 @@ class Revolver(
     fun removeCard(slot: Int) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         val card = getCardInSlot(slot) ?: return
-        if (card.actor in stage.root) screenDataProvider.removeActorFromRoot(card.actor)
+        if (card.actor in stage.root) onjScreen.removeActorFromRoot(card.actor)
         setCard(slot, null)
     }
 
@@ -132,7 +130,7 @@ class Revolver(
      */
     fun removeCard(card: Card) {
         for (slot in slots) if (slot.card === card) {
-            if (card.actor in screenDataProvider.stage.root) screenDataProvider.removeActorFromRoot(card.actor)
+            if (card.actor in onjScreen.stage.root) onjScreen.removeActorFromRoot(card.actor)
             setCard(slot.num, null)
         }
     }
@@ -155,6 +153,7 @@ class Revolver(
             updateSlotsAndCars()
             isInitialised = true
             invalidateHierarchy()
+            onjScreen.addActorToRoot(hoverDetailActor)
         }
         if (dirty) {
             updateSlotsAndCars()
@@ -187,14 +186,14 @@ class Revolver(
         slots = Array(5) {
             val slot = RevolverSlot(it + 1, this, slotTexture!!, slotScale!!, animationDuration)
 
-            screenDataProvider.addActorToRoot(slot)
+            onjScreen.addActorToRoot(slot)
 
             if (slotDropConfig != null) {
                 val (dragAndDrop, dropOnj) = slotDropConfig!!
                 val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
                     dropOnj.name,
                     dragAndDrop,
-                    screenDataProvider,
+                    onjScreen,
                     slot,
                     dropOnj
                 )

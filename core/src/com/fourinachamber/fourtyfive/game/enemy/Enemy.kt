@@ -85,16 +85,13 @@ class Enemy(
 
     private lateinit var brain: EnemyBrain
 
-    private val dmgFont: BitmapFont = gameController.curScreen!!.fonts[dmgFontName]
-        ?: throw RuntimeException("unknown font $dmgFontName")
+    private val dmgFont: BitmapFont = gameController.curScreen.fontOrError(dmgFontName)
 
     private val coverStackDamagedParticles: ParticleEffect =
-        gameController.curScreen!!.particles[coverStackDamagedParticlesName]
-            ?: throw RuntimeException("unknown particle: $coverStackDamagedParticlesName")
+        gameController.curScreen.particleOrError(coverStackDamagedParticlesName)
 
     private val coverStackDestroyedParticles: ParticleEffect =
-        gameController.curScreen!!.particles[coverStackDestroyedParticlesName]
-            ?: throw RuntimeException("unknown particle: $coverStackDestroyedParticlesName")
+        gameController.curScreen.particleOrError(coverStackDestroyedParticlesName)
 
     init {
         actor = EnemyActor(this)
@@ -201,12 +198,12 @@ class Enemy(
             dmgFont,
             dmgRaiseHeight,
             dmgStartFadeoutAt,
-            gameController.curScreen!!,
+            gameController.curScreen,
             dmgDuration
         )
 
-        val screenDataProvider = gameController.curScreen!!
-        val overlayActor = CustomImageActor(screenDataProvider.textures["hit_overlay"]!!)
+        val screenDataProvider = gameController.curScreen
+        val overlayActor = CustomImageActor(screenDataProvider.textureOrError("hit_overlay"))
         val viewport = screenDataProvider.stage.viewport
 
         //TODO: put these magic numbers in an onj file somewhere
@@ -238,8 +235,8 @@ class Enemy(
         action { actor.removeAction(moveByAction) }
 
         action {
-            remaining = gameController.coverArea!!.damage(damage)
-            if (remaining != damage) activeStack = gameController.coverArea!!.getActive()
+            remaining = gameController.coverArea.damage(damage)
+            if (remaining != damage) activeStack = gameController.coverArea.getActive()
         }
 
         includeLater(
@@ -272,7 +269,7 @@ class Enemy(
         textAnimation: TextAnimation
     ): Timeline {
 
-        val playerLivesLabel = gameController.playerLivesLabel!!
+        val playerLivesLabel = gameController.playerLivesLabel
 
         return Timeline.timeline {
 
@@ -290,7 +287,7 @@ class Enemy(
 
     private fun getStackParticlesTimeline(
         coverStack: CoverStack,
-        screenDataProvider: ScreenDataProvider,
+        onjScreen: OnjScreen,
         wasDestroyed: Boolean
     ): Timeline = Timeline.timeline {
 
@@ -318,7 +315,7 @@ class Enemy(
                 )
             }
 
-            screenDataProvider.addActorToRoot(particleActor)
+            onjScreen.addActorToRoot(particleActor)
             particleActor.start()
         }
 
@@ -339,8 +336,7 @@ class Enemy(
             "-$damage",
             dmgFontColor,
             dmgFontScale,
-            gameController.curScreen.fonts[dmgFontName] ?:
-                throw RuntimeException("unknown font $dmgFontName"),
+            gameController.curScreen.fontOrError(dmgFontName),
             dmgRaiseHeight,
             dmgStartFadeoutAt,
             gameController.curScreen,
@@ -354,8 +350,7 @@ class Enemy(
             "-$damage",
             dmgFontColor,
             dmgFontScale,
-            gameController.curScreen.fonts[dmgFontName] ?:
-                throw RuntimeException("unknown font $dmgFontName"),
+            gameController.curScreen.fontOrError(dmgFontName),
             dmgRaiseHeight,
             dmgStartFadeoutAt,
             gameController.curScreen,
@@ -467,12 +462,9 @@ class Enemy(
                 it as OnjObject
                 val gameController = FourtyFive.currentGame!!
                 val screenDataProvider = gameController.curScreen
-                val texture = screenDataProvider.textures[it.get<String>("texture")] ?:
-                    throw RuntimeException("unknown texture ${it.get<String>("texture")}")
-                val coverIcon = screenDataProvider.textures[it.get<String>("coverIcon")] ?:
-                    throw RuntimeException("unknown texture ${it.get<String>("coverIcon")}")
-                val detailFont = screenDataProvider.fonts[it.get<String>("detailFont")] ?:
-                    throw RuntimeException("unknown font ${it.get<String>("detailFont")}")
+                val texture = screenDataProvider.textureOrError(it.get<String>("texture"))
+                val coverIcon = screenDataProvider.textureOrError(it.get<String>("coverIcon"))
+                val detailFont = screenDataProvider.fontOrError(it.get<String>("detailFont"))
                 val enemy = Enemy(
                     it.get<String>("name"),
                     texture,

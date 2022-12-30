@@ -5,12 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.screen.CoverStack
-import com.fourinachamber.fourtyfive.game.GameController
-import com.fourinachamber.fourtyfive.screen.RevolverSlot
-import com.fourinachamber.fourtyfive.screen.DragBehaviour
-import com.fourinachamber.fourtyfive.screen.DropBehaviour
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.obj
 import onj.value.OnjNamedObject
 
@@ -19,10 +14,10 @@ import onj.value.OnjNamedObject
  */
 class CardDragSource(
     dragAndDrop: DragAndDrop,
-    screenDataProvider: ScreenDataProvider,
+    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DragBehaviour(dragAndDrop, screenDataProvider, actor, onj) {
+) : DragBehaviour(dragAndDrop, onjScreen, actor, onj) {
 
     private val card: Card
 
@@ -74,10 +69,10 @@ class CardDragSource(
  */
 class RevolverDropTarget(
     dragAndDrop: DragAndDrop,
-    screenDataProvider: ScreenDataProvider,
+    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, screenDataProvider, actor, onj) {
+) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
 
     private val revolverSlot: RevolverSlot
 
@@ -107,10 +102,10 @@ class RevolverDropTarget(
 
 class CoverAreaDropTarget(
     dragAndDrop: DragAndDrop,
-    screenDataProvider: ScreenDataProvider,
+    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, screenDataProvider, actor, onj) {
+) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
 
     private val coverStack: CoverStack
 

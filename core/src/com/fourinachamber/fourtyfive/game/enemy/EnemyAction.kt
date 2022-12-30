@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.OnjScreen
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.Utils
 import com.fourinachamber.fourtyfive.utils.component1
@@ -27,19 +27,16 @@ abstract class EnemyAction {
     class DamagePlayer(
         val enemy: Enemy,
         onj: OnjNamedObject,
-        private val screenDataProvider: ScreenDataProvider,
+        private val onjScreen: OnjScreen,
         override val indicatorTextureScale: Float,
         val damage: Int
     ) : EnemyAction() {
 
-        override val indicatorTexture: TextureRegion =
-            screenDataProvider.textures[onj.get<String>("indicatorTexture")]
-                ?: throw RuntimeException("unknown texture: ${onj.get<String>("indicatorTexture")}")
+        override val indicatorTexture: TextureRegion = onjScreen.textureOrError(onj.get<String>("indicatorTexture"))
 
         override val descriptionText: String = damage.toString()
 
-        override fun execute(): Timeline =
-            FourtyFive.currentGame!!.enemyArea.enemies[0].damagePlayer(damage)
+        override fun execute(): Timeline = FourtyFive.currentGame!!.enemyArea.enemies[0].damagePlayer(damage)
 
         override fun toString(): String {
             return "DamagePlayer(damage=$damage)"
@@ -49,14 +46,12 @@ abstract class EnemyAction {
     class AddCover(
         val enemy: Enemy,
         onj: OnjNamedObject,
-        private val screenDataProvider: ScreenDataProvider,
+        private val onjScreen: OnjScreen,
         override val indicatorTextureScale: Float,
         val coverValue: Int
     ) : EnemyAction() {
 
-        override val indicatorTexture: TextureRegion = screenDataProvider.textures[onj.get<String>("indicatorTexture")]
-            ?: throw RuntimeException("unknown texture ${onj.get<String>("indicatorTexture")}")
-
+        override val indicatorTexture: TextureRegion = onjScreen.textureOrError(onj.get<String>("indicatorTexture"))
         override val descriptionText: String = coverValue.toString()
 
         override fun execute(): Timeline = Timeline.timeline {
@@ -68,7 +63,7 @@ abstract class EnemyAction {
                 coverValue.toString(),
                 resFontColor,
                 resFontScale,
-                gameController.curScreen.fonts[resFontName]!!,
+                gameController.curScreen.fontOrError(resFontName),
                 resRaiseHeight,
                 resStartFadeoutAt,
                 gameController.curScreen,
@@ -94,13 +89,11 @@ abstract class EnemyAction {
             val insult: String,
             val enemy: Enemy,
             onj: OnjNamedObject,
-            private val screenDataProvider: ScreenDataProvider,
+            private val onjScreen: OnjScreen,
             override val indicatorTextureScale: Float
         ) : EnemyAction() {
 
-        override val indicatorTexture: TextureRegion = screenDataProvider.textures[onj.get<String>("indicatorTexture")]
-                ?: throw RuntimeException("unknown texture: ${onj.get<String>("indicatorTexture")}")
-
+        override val indicatorTexture: TextureRegion =onjScreen.textureOrError(onj.get<String>("indicatorTexture"))
         override val descriptionText: String  = ""
 
         override fun execute(): Timeline = Timeline.timeline {
@@ -112,8 +105,8 @@ abstract class EnemyAction {
                 insult,
                 fadeFontColor,
                 fadeFontScale,
-                gameController.curScreen.fonts[fadeFontName]!!,
-                screenDataProvider,
+                gameController.curScreen.fontOrError(fadeFontName),
+                onjScreen,
                 fadeDuration,
                 fadeIn,
                 fadeOut

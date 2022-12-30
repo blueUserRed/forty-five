@@ -68,7 +68,7 @@ abstract class Effect(val trigger: Trigger) {
                 amount.toString(),
                 fontColor,
                 fontScale,
-                gameController.curScreen.fonts[fontName]!!,
+                gameController.curScreen.fontOrError(fontName),
                 raiseHeight,
                 startFadeoutAt,
                 gameController.curScreen,

@@ -1,6 +1,6 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.OnjScreen
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -32,13 +32,13 @@ class EnemyBrain(
 
     companion object {
 
-        fun fromOnj(onj: OnjObject, screenDataProvider: ScreenDataProvider, enemy: Enemy): EnemyBrain = EnemyBrain(
-            onj.get<OnjArray>("actions").value.map { actionFromOnj(it as OnjNamedObject, screenDataProvider, enemy) }
+        fun fromOnj(onj: OnjObject, onjScreen: OnjScreen, enemy: Enemy): EnemyBrain = EnemyBrain(
+            onj.get<OnjArray>("actions").value.map { actionFromOnj(it as OnjNamedObject, onjScreen, enemy) }
         )
 
         private fun actionFromOnj(
             onj: OnjNamedObject,
-            screenDataProvider: ScreenDataProvider,
+            onjScreen: OnjScreen,
             enemy: Enemy
         ): Pair<Int, () -> EnemyAction> = when (onj.name) {
 
@@ -49,7 +49,7 @@ class EnemyBrain(
                 EnemyAction.DamagePlayer(
                     enemy,
                     onj,
-                    screenDataProvider,
+                    onjScreen,
                     onj.get<Double>("indicatorTextureScale").toFloat(),
                     (min..max).random(),
                 )
@@ -62,7 +62,7 @@ class EnemyBrain(
                 EnemyAction.AddCover(
                     enemy,
                     onj,
-                    screenDataProvider,
+                    onjScreen,
                     onj.get<Double>("indicatorTextureScale").toFloat(),
                     (min..max).random(),
                 )
@@ -73,7 +73,7 @@ class EnemyBrain(
                     onj.get<OnjArray>("insults").value.map { it.value as String }.random(),
                     enemy,
                     onj,
-                    screenDataProvider,
+                    onjScreen,
                     onj.get<Double>("indicatorTextureScale").toFloat(),
                 )
             })

@@ -68,7 +68,7 @@ abstract class Behaviour(val actor: Actor) {
     /**
      * the screenDataProvider; only available after [bindCallbacks] has been called
      */
-    lateinit var screenDataProvider: ScreenDataProvider
+    lateinit var onjScreen: OnjScreen
 
     /**
      * called when a hover is started
@@ -94,8 +94,8 @@ abstract class Behaviour(val actor: Actor) {
     /**
      * binds the callbacks to the actor and sets the [screenDataProvider]
      */
-    fun bindCallbacks(screenDataProvider: ScreenDataProvider) {
-        this.screenDataProvider = screenDataProvider
+    fun bindCallbacks(onjScreen: OnjScreen) {
+        this.onjScreen = onjScreen
         onHoverEnter?.let { actor.onEnter(it) }
         onHoverExit?.let { actor.onExit(it) }
         actor.onClick {
@@ -131,12 +131,12 @@ class MouseHoverBehaviour(
     }
 
     private val cursor: Either<Cursor, SystemCursor> by lazy {
-        Utils.loadCursor(useSystemCursor, cursorName, screenDataProvider)
+        Utils.loadCursor(useSystemCursor, cursorName, onjScreen)
     }
 
     private val disabledCursor: Either<Cursor, SystemCursor>? by lazy {
         if (disabledUseSystemCursor != null) {
-            Utils.loadCursor(disabledUseSystemCursor!!, disabledCursorName!!, screenDataProvider)
+            Utils.loadCursor(disabledUseSystemCursor!!, disabledCursorName!!, onjScreen)
         } else null
     }
 
@@ -149,7 +149,7 @@ class MouseHoverBehaviour(
     }
 
     override val onHoverExit: BehaviourCallback = {
-        Utils.setCursor(screenDataProvider.defaultCursor)
+        Utils.setCursor(onjScreen.defaultCursor)
     }
 }
 
@@ -219,9 +219,7 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 
     override val onHoverEnter: BehaviourCallback = {
         if (cellName != null) {
-            val cell = screenDataProvider.namedCells[cellName] ?: run {
-                throw RuntimeException("unknown cell name: $cellName")
-            }
+            val cell = onjScreen.namedCellOrError(cellName)
             val action = GrowCellAction(cell, targetX, targetY)
             action.duration = enterDuration
             enterInterpolation?.let { action.interpolation = it }
@@ -238,9 +236,7 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 
     override val onHoverExit: BehaviourCallback = {
         if (cellName != null) {
-            val cell = screenDataProvider.namedCells[cellName] ?: run {
-                throw RuntimeException("unknown cell name: $cellName")
-            }
+            val cell = onjScreen.namedCellOrError(cellName)
             val action = GrowCellAction(cell, baseX, baseY)
             action.duration = exitDuration
             exitInterpolation?.let { action.interpolation = it }
@@ -343,8 +339,7 @@ class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behavio
     private val image: CustomImageActor
 
     private val hoverTexture: TextureRegion by lazy {
-        screenDataProvider.textures[hoverTextureName] ?:
-            throw RuntimeException("no texture with name $hoverTextureName")
+        onjScreen.textureOrError(hoverTextureName)
     }
 
     init {
@@ -384,9 +379,7 @@ class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor)
 
     override val onCLick: BehaviourCallback = {
 
-        val mask = screenDataProvider.textures[maskTextureName] ?: throw RuntimeException(
-            "Unknown mask texture: $maskTextureName"
-        )
+        val mask = onjScreen.textureOrError(maskTextureName)
 
         actor as Maskable
 
@@ -400,37 +393,6 @@ class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor)
     }
 
 }
-
-///**
-// * starts a particle effect when the actor is clicked
-// */
-//class OnClickParticleEffectBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-//
-//    private val particlePath = onj.get<String>("file")
-//    private val textureDir = onj.get<String>("textureDir")
-//
-//    private val effectScale = onj.getOr("effectScale", 1.0).toFloat()
-//    private val useCursorPosition = onj.getOr("useCursorPos", false)
-//
-//    override val onCLick: BehaviourCallback = {
-//
-//        val x: Float
-//        val y: Float
-//
-//        if (useCursorPosition) {
-//            val cursorPos = Utils.getCursorPos(screenDataProvider.stage.viewport)
-//            x = cursorPos.x
-//            y = cursorPos.y
-//        } else {
-//            x = actor.x + actor.width / 2
-//            y = actor.y + actor.height / 2
-//        }
-//
-//        Utils.spawnParticle(screenDataProvider, particlePath, textureDir, x, y, effectScale)
-//
-//    }
-//
-//}
 
 /**
  * when clicked, will change the PostProcessor of the whole screen
@@ -449,19 +411,17 @@ class OnClickChangePostProcessorBehaviour(onj: OnjObject, actor: Actor) : Behavi
 
     override val onCLick: BehaviourCallback = callback@ {
 
-        if (setOnlyIfPostProcessorIsNull && screenDataProvider.postProcessor != null) return@callback
+        if (setOnlyIfPostProcessorIsNull && onjScreen.postProcessor != null) return@callback
 
-        val postProcessor = screenDataProvider.postProcessors[postProcessor] ?: run {
-            throw RuntimeException("unknown post processor: $postProcessor")
-        }
+        val postProcessor = onjScreen.postProcessorOrError(postProcessor!!)
 
-        val prefPostProcessor = screenDataProvider.postProcessor
-        screenDataProvider.postProcessor = postProcessor
+        val prefPostProcessor = onjScreen.postProcessor
+        onjScreen.postProcessor = postProcessor
 
-        if (time != null) screenDataProvider.afterMs(time) {
-            screenDataProvider.postProcessor = prefPostProcessor
+        if (time != null) onjScreen.afterMs(time) {
+            onjScreen.postProcessor = prefPostProcessor
             // without manually resizing the aspect ratio of the screen breaks, don't ask me why
-            screenDataProvider.screen.resize(Gdx.graphics.width, Gdx.graphics.height)
+            onjScreen.resize(Gdx.graphics.width, Gdx.graphics.height)
         }
     }
 
@@ -479,9 +439,7 @@ class OnHoverPopupBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
     private val yOffset = onj.getOr("yOffset", 0.0).toFloat()
 
     private val popupActor by lazy {
-        screenDataProvider.namedActors[popupActorName] ?: run {
-            throw RuntimeException("unknown named actor: $popupActorName")
-        }
+        onjScreen.namedActorOrError(popupActorName)
     }
 
     override val onHoverEnter: BehaviourCallback = {

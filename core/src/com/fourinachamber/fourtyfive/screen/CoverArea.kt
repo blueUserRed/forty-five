@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
@@ -43,14 +44,16 @@ class CoverArea(
     detailFontScale: Float,
     val detailOffset: Vector2,
     val detailWidth: Float
-) : Widget(), InitialiseableActor {
+) : Widget() {
 
     /**
      * set by gameScreenController //TODO: find a better solution
      */
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
     private var isInitialised: Boolean = false
-    private lateinit var screenDataProvider: ScreenDataProvider
+
+    private val onjScreen: OnjScreen
+        get() = FourtyFive.curScreen!!
 
     private val stacks: Array<CoverStack> = Array(numStacks) {
         CoverStack(
@@ -60,7 +63,6 @@ class CoverArea(
             infoFont,
             infoFontColor,
             null,
-//            stackBackgroundTexture,
             infoFontScale,
             stackSpacing,
             cardScale,
@@ -78,11 +80,6 @@ class CoverArea(
         hoverDetailActor.isVisible = false
         hoverDetailActor.fixedZIndex = Int.MAX_VALUE
         hoverDetailActor.wrap = true
-    }
-
-    override fun init(screenDataProvider: ScreenDataProvider) {
-        this.screenDataProvider = screenDataProvider
-        screenDataProvider.addActorToRoot(hoverDetailActor)
     }
 
     /**
@@ -168,13 +165,15 @@ class CoverArea(
     }
 
     private fun initialise() {
+        onjScreen.addActorToRoot(hoverDetailActor)
         var isFirst = true
         for (stack in stacks) {
+            stack.onjScreen = onjScreen
             val (dragAndDrop, dropOnj) = slotDropConfig!!
             val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
                 dropOnj.name,
                 dragAndDrop,
-                screenDataProvider,
+                onjScreen,
                 stack,
                 dropOnj
             )
@@ -183,8 +182,7 @@ class CoverArea(
                 isFirst = false
             }
             dragAndDrop.addTarget(dropBehaviour)
-            stack.init(screenDataProvider)
-            screenDataProvider.addActorToRoot(stack)
+            onjScreen.addActorToRoot(stack)
             stack.parentWidth = width
         }
     }
@@ -197,7 +195,7 @@ class CoverArea(
 
         val (x, y) = stack.localToStageCoordinates(Vector2(card.actor.x, card.actor.y))
 
-        val toLeft = x + card.actor.width + detailWidth > screenDataProvider.stage.viewport.worldWidth
+        val toLeft = x + card.actor.width + detailWidth > onjScreen.stage.viewport.worldWidth
 
         hoverDetailActor.setPosition(
             if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
@@ -223,9 +221,11 @@ class CoverStack(
     private val cardScale: Float,
     private val minSize: Float,
     val num: Int
-) : CustomHorizontalGroup(), ZIndexActor, InitialiseableActor, AnimationActor {
+) : CustomHorizontalGroup(), ZIndexActor, AnimationActor {
 
     override var inAnimation: Boolean = false
+
+    lateinit var onjScreen: OnjScreen
 
     /**
      * the theoretical maximum health of the stack
@@ -239,7 +239,6 @@ class CoverStack(
     var currentHealth: Int = 0
         private set
 
-    private lateinit var screenDataProvider: ScreenDataProvider
     private val _cards: MutableList<Card> = mutableListOf()
     private var lockedTurnNum: Int? = null
     var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
@@ -307,10 +306,6 @@ class CoverStack(
         updateText()
     }
 
-    override fun init(screenDataProvider: ScreenDataProvider) {
-        this.screenDataProvider = screenDataProvider
-    }
-
     /**
      * checks if this stack can accept a card
      */
@@ -334,7 +329,7 @@ class CoverStack(
         baseHealth += card.coverValue
         currentHealth += card.coverValue
         updateText()
-        screenDataProvider.removeActorFromRoot(card.actor)
+        onjScreen.removeActorFromRoot(card.actor)
         addActor(card.actor)
     }
 
