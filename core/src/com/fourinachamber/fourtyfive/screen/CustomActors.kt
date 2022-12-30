@@ -1,7 +1,6 @@
 package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE1
 import com.badlogic.gdx.graphics.Texture
@@ -395,7 +394,7 @@ class RotatableImageActor(
  * @param animation the animation; contains the frames and data such as the frameTime
  */
 class AnimatedImage(
-    private val animation: Animation
+    private val animation: FrameAnimation
 ) : CustomImageActor(animation.frames[animation.initialFrame]) {
 
     override var fixedZIndex: Int = 0

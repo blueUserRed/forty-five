@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.Disposable
 
-data class Animation(
+data class FrameAnimation(
     val frames: Array<TextureRegion>,
     val textures: Iterable<Texture>,
     val initialFrame: Int,

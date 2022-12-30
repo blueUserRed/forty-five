@@ -156,7 +156,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
     private lateinit var textures: Map<String, TextureRegion>
     private lateinit var fonts: Map<String, BitmapFont>
-    private lateinit var animations: Map<String, Animation>
+    private lateinit var animations: Map<String, FrameAnimation>
     private lateinit var earlyRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var lateRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var behavioursToBind: MutableList<Behaviour>
@@ -612,7 +612,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         return fonts[name] ?: throw RuntimeException("Unknown font: $name")
     }
 
-    private fun animationOrError(name: String): Animation {
+    private fun animationOrError(name: String): FrameAnimation {
         return animations[name] ?: throw RuntimeException("Unknown animation: $name")
     }
 

@@ -32,8 +32,8 @@ object FourtyFive : Game() {
             setScreen(field)
         }
 
-//    private lateinit var gameScreen: Screen
 
+    var currentGame: GameController? = null
 
     override fun create() {
         init()
@@ -57,7 +57,7 @@ object FourtyFive : Game() {
 
         graphicsConfig as OnjObject
 
-        GameScreenController.init(graphicsConfig)
+        GameController.init(graphicsConfig)
         EnemyAction.init(graphicsConfig)
         Effect.init(graphicsConfig)
         Card.init(graphicsConfig)

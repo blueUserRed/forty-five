@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.*
@@ -21,16 +22,16 @@ abstract class Effect(val trigger: Trigger) {
      * called when the effect triggers
      * @return a timeline containing the actions of this effect
      */
-    abstract fun onTrigger(gameScreenController: GameScreenController): Timeline
+    abstract fun onTrigger(): Timeline
 
     /**
      * checks if this effect is triggered by [triggerToCheck] and returns a timeline containing the actions of this
      * effect if it was
      */
-    fun checkTrigger(triggerToCheck: Trigger, gameScreenController: GameScreenController): Timeline? {
+    fun checkTrigger(triggerToCheck: Trigger): Timeline? {
         if (triggerToCheck == trigger) {
             FourtyFiveLogger.debug("Effect", "effect $this triggered")
-            return onTrigger(gameScreenController)
+            return onTrigger()
         }
         return null
     }
@@ -56,8 +57,9 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = ReserveGain(trigger, amount)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline {
-            val reservesLabel = gameScreenController.reservesLabel!!
+        override fun onTrigger(): Timeline {
+            val gameController = FourtyFive.currentGame!!
+            val reservesLabel = gameController.reservesLabel
             val (x, y) = reservesLabel.localToStageCoordinates(Vector2(0f, 0f))
 
             val textAnimation = TextAnimation(
@@ -66,10 +68,10 @@ abstract class Effect(val trigger: Trigger) {
                 amount.toString(),
                 fontColor,
                 fontScale,
-                gameScreenController.curScreen!!.fonts[fontName]!!,
+                gameController.curScreen.fonts[fontName]!!,
                 raiseHeight,
                 startFadeoutAt,
-                gameScreenController.curScreen!!,
+                gameController.curScreen,
                 duration
             )
 
@@ -80,8 +82,8 @@ abstract class Effect(val trigger: Trigger) {
                     { card.inGame }
                 )
                 action {
-                    gameScreenController.playGameAnimation(textAnimation)
-                    gameScreenController.gainReserves(amount)
+                    gameController.playGameAnimation(textAnimation)
+                    gameController.gainReserves(amount)
                 }
                 delayUntil { textAnimation.isFinished() }
             }
@@ -133,7 +135,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline {
+        override fun onTrigger(): Timeline {
+            val gameController = FourtyFive.currentGame!!
             val modifier = Card.CardModifier(
                 amount,
                 TemplateString(
@@ -149,7 +152,7 @@ abstract class Effect(val trigger: Trigger) {
             return Timeline.timeline {
                 action {
                     for (i in 1..5) {
-                        val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
+                        val card = gameController.revolver.getCardInSlot(i) ?: continue
                         if (!(bulletSelector?.invoke(this@BuffDamage.card, card, i) ?: true)) continue
                         card.addModifier(modifier)
                     }
@@ -186,7 +189,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = GiftDamage(trigger, amount, bulletSelector)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline {
+        override fun onTrigger(): Timeline {
+            val gameController = FourtyFive.currentGame!!
             val modifier = Card.CardModifier(
                 amount,
                 TemplateString(
@@ -202,7 +206,7 @@ abstract class Effect(val trigger: Trigger) {
             return Timeline.timeline {
                 action {
                     for (i in 1..5) {
-                        val card = gameScreenController.revolver!!.getCardInSlot(i) ?: continue
+                        val card = gameController.revolver.getCardInSlot(i) ?: continue
                         if (!(bulletSelector?.invoke(this@GiftDamage.card, card, i) ?: true)) continue
                         card.addModifier(modifier)
                     }
@@ -242,14 +246,15 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = Draw(trigger, amount)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        override fun onTrigger(): Timeline = Timeline.timeline {
+            val gameController = FourtyFive.currentGame!!
             delay(bufferTime)
             includeLater(
                 { shakeCardTimeline(shakeActorAction) },
                 { card.inGame }
             )
-            action { gameScreenController.specialDraw(amount) }
-            delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.SPECIAL_DRAW }
+            action { gameController.specialDraw(amount) }
+            delayUntil { gameController.currentPhase != GameController.Gamephase.SPECIAL_DRAW }
         }
 
         override fun toString(): String {
@@ -265,9 +270,9 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = GiveStatus(trigger, statusEffect.copy())
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        override fun onTrigger(): Timeline = Timeline.timeline {
             action {
-                gameScreenController.enemyArea!!.enemies[0].applyEffect(statusEffect)
+                FourtyFive.currentGame!!.enemyArea.enemies[0].applyEffect(statusEffect)
             }
         }
 
@@ -293,7 +298,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = Destroy(trigger)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        override fun onTrigger(): Timeline = Timeline.timeline {
+            val gameController = FourtyFive.currentGame!!
             includeLater(
                 { Timeline.timeline {
                     delay(bufferTime)
@@ -304,10 +310,10 @@ abstract class Effect(val trigger: Trigger) {
                         shakeActorAction.reset()
                     }
                     delay(bufferTime)
-                    action { gameScreenController.destroyCardPhase() }
-                    delayUntil { gameScreenController.currentPhase != GameScreenController.Gamephase.CARD_DESTROY }
+                    action { gameController.destroyCardPhase() }
+                    delayUntil { gameController.currentPhase != GameController.Gamephase.CARD_DESTROY }
                 } },
-                { gameScreenController.hasDestroyableCard() }
+                { gameController.hasDestroyableCard() }
             )
         }
 
@@ -323,10 +329,11 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun copy(): Effect = PutCardInHand(trigger, cardName, amount)
 
-        override fun onTrigger(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        override fun onTrigger(): Timeline = Timeline.timeline {
+            val gameController = FourtyFive.currentGame!!
             action {
-                val addMax = gameScreenController.maxCards - gameScreenController.cardHand!!.cards.size
-                repeat(min(amount, addMax)) { gameScreenController.putCardInHand(cardName) }
+                val addMax = gameController.maxCards - gameController.cardHand.cards.size
+                repeat(min(amount, addMax)) { gameController.putCardInHand(cardName) }
             }
         }
 
