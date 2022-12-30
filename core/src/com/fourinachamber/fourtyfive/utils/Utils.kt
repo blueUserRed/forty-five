@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.OnjScreen
 import kotlin.random.Random
 import kotlin.random.asKotlinRandom
 
@@ -112,7 +112,7 @@ object Utils {
     fun loadCursor(
         useSystemCursor: Boolean,
         cursorName: String,
-        screenDataProvider: ScreenDataProvider
+        onjScreen: OnjScreen
     ): Either<Cursor, SystemCursor> {
 
         if (useSystemCursor) {
@@ -135,9 +135,7 @@ object Utils {
             }.eitherRight()
 
         } else {
-            return (screenDataProvider.cursors[cursorName] ?: run {
-                throw RuntimeException("unknown custom cursor: $cursorName")
-            }).eitherLeft()
+            return onjScreen.cursorOrError(cursorName).eitherLeft()
         }
     }
 

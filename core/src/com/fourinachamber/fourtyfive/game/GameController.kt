@@ -55,7 +55,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * stores the screenDataProvider for the game-screen
      */
-    lateinit var curScreen: ScreenDataProvider
+    lateinit var curScreen: OnjScreen
         private set
 
     private var destroyCardPostProcessor: PostProcessor? = null
@@ -135,9 +135,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
 
-    override fun init(screenDataProvider: ScreenDataProvider) {
+    override fun init(onjScreen: OnjScreen) {
         SaveState.read()
-        curScreen = screenDataProvider
+        curScreen = onjScreen
         FourtyFive.currentGame = this
 
         FourtyFiveLogger.title("game starting")
@@ -146,13 +146,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         enemies = Enemy.getFrom(enemiesOnj)
 
-        cardDrawActor = screenDataProvider.namedActors[cardDrawActorName] ?: throw RuntimeException(
-            "no actor with name $cardDrawActorName"
-        )
-        screenDataProvider.removeActorFromRoot(cardDrawActor)
+        cardDrawActor = onjScreen.namedActorOrError(cardDrawActorName)
+        onjScreen.removeActorFromRoot(cardDrawActor)
 
-        destroyCardInstructionActor = screenDataProvider.namedActors[destroyCardInstructionActorName]
-            ?: throw RuntimeException("no actor with name $destroyCardInstructionActorName")
+        destroyCardInstructionActor = onjScreen.namedActorOrError(destroyCardInstructionActorName)
         destroyCardInstructionActor.isVisible = false
 
         initButtons()
@@ -163,13 +160,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCoverArea()
         initTemplateStringParams()
 
-        screenDataProvider.afterMs(10) { screenDataProvider.resortRootZIndices() } //TODO: this is really not good
+        onjScreen.afterMs(10) { onjScreen.resortRootZIndices() } //TODO: this is really not good
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
     private fun initCards() {
-        val screenDataProvider = curScreen
-
         val onj = OnjParser.parseFile(cardConfigFile)
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
@@ -177,13 +172,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
 
         for (region in cardAtlas.regions) {
-            screenDataProvider.addTexture("${Card.cardTexturePrefix}${region.name}", region)
+            curScreen.addTexture("${Card.cardTexturePrefix}${region.name}", region)
         }
 
-        screenDataProvider.addDisposable(cardAtlas)
+        curScreen.addDisposable(cardAtlas)
 
         cardPrototypes = Card
-            .getFrom(onj.get<OnjArray>("cards"), screenDataProvider.textures, ::initCard)
+            .getFrom(onj.get<OnjArray>("cards"), curScreen, ::initCard)
             .toMutableList()
 
         val startDeck: MutableList<Card> = mutableListOf()
@@ -316,60 +311,45 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun initButtons() {
-        shootButton = curScreen.namedActors[shootButtonName]
-            ?: throw RuntimeException("no actor named $shootButtonName")
-        endTurnButton = curScreen.namedActors[endTurnButtonName]
-            ?: throw RuntimeException("no actor named $endTurnButton")
+        shootButton = curScreen.namedActorOrError(shootButtonName)
+        endTurnButton = curScreen.namedActorOrError(endTurnButtonName)
     }
 
     private fun initCardHand() {
         val curScreen = curScreen
-
         val cardHandName = cardHandOnj.get<String>("actorName")
-        val cardHand = curScreen.namedActors[cardHandName]
-            ?: throw RuntimeException("no named actor with name $cardHandName")
+        val cardHand = curScreen.namedActorOrError(cardHandName)
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
     }
 
     private fun initLabels() {
         val curScreen = curScreen
-
-        val playerLives = curScreen.namedActors[playerLivesLabelName]
-            ?: throw RuntimeException("no named actor with name $playerLivesLabelName")
+        val playerLives = curScreen.namedActorOrError(playerLivesLabelName)
         if (playerLives !is CustomLabel) throw RuntimeException("actor named $playerLivesLabelName must be a Label")
         playerLivesLabel = playerLives
-
-        val reserves = curScreen.namedActors[reservesLabelName]
-            ?: throw RuntimeException("no named actor with name $reservesLabelName")
+        val reserves = curScreen.namedActorOrError(reservesLabelName)
         if (reserves !is CustomLabel) throw RuntimeException("actor named $reservesLabelName must be a Label")
         reservesLabel = reserves
     }
 
     private fun initCoverArea() {
         val curScreen = curScreen
-
         val coverAreaName = coverAreaOnj.get<String>("actorName")
-        val coverArea = curScreen.namedActors[coverAreaName]
-            ?: throw RuntimeException("no named actor with name $coverAreaName")
+        val coverArea = curScreen.namedActorOrError(coverAreaName)
         if (coverArea !is CoverArea) throw RuntimeException("actor named $coverAreaName must be a CoverArea")
         this.coverArea = coverArea
-
         val dropOnj = coverAreaOnj.get<OnjNamedObject>("dropBehaviour")
         coverArea.slotDropConfig = cardDragAndDrop to dropOnj
     }
 
     private fun initRevolver() {
         val curScreen = curScreen
-
         val revolverName = revolverOnj.get<String>("actorName")
-        val revolver = curScreen.namedActors[revolverName]
-            ?: throw RuntimeException("no named actor with name $revolverName")
+        val revolver = curScreen.namedActorOrError(revolverName)
         if (revolver !is Revolver) throw RuntimeException("actor named $revolverName must be a Revolver")
-
         val dropOnj = revolverOnj.get<OnjNamedObject>("dropBehaviour")
         revolver.slotDropConfig = cardDragAndDrop to dropOnj
-
         this.revolver = revolver
     }
 
@@ -377,8 +357,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val curScreen = curScreen
 
         val enemyAreaName = enemyAreaOnj.get<String>("actorName")
-        val enemyArea = curScreen.namedActors[enemyAreaName] ?:
-            throw RuntimeException("no named actor with name $enemyAreaName")
+        val enemyArea = curScreen.namedActorOrError(enemyAreaName)
         if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
 
         enemyAreaOnj
@@ -799,8 +778,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameController: GameController) = with(gameController) {
 
                 if (destroyCardPostProcessor == null) {
-                    destroyCardPostProcessor = curScreen.postProcessors[destroyCardsPostProcessorName]
-                        ?: throw RuntimeException("unknown postProcessor: $destroyCardsPostProcessorName")
+                    destroyCardPostProcessor = curScreen.postProcessorOrError(destroyCardInstructionActorName)
                 }
 
                 showDestroyCardInstructionActor()
@@ -863,7 +841,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 val timeline = Timeline.timeline {
 
                     val enemyBannerAnim = BannerAnimation(
-                        curScreen.textures[enemyTurnBannerName]!!,
+                        curScreen.textureOrError(enemyTurnBannerName),
                         curScreen,
                         bannerAnimDuration,
                         bannerScaleAnimDuration,
@@ -871,7 +849,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         bannerEndScale
                     )
                     val playerBannerAnim = BannerAnimation(
-                        curScreen.textures[playerTurnBannerName]!!,
+                        curScreen.textureOrError(playerTurnBannerName),
                         curScreen,
                         bannerAnimDuration,
                         bannerScaleAnimDuration,

@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.utils.between
 import ktx.actors.contains
@@ -26,9 +27,7 @@ class CardHand(
     detailFontScale: Float,
     val detailOffset: Vector2,
     val detailWidth: Float
-) : Widget(), ZIndexActor, InitialiseableActor {
-
-    private lateinit var screenDataProvider: ScreenDataProvider
+) : Widget(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
@@ -72,6 +71,10 @@ class CardHand(
     private var _cards: MutableList<Card> = mutableListOf()
     private var currentWidth: Float = 0f
     private var currentHeight: Float = 0f
+    private var isInitialized: Boolean = false
+
+    private val onjScreen: OnjScreen
+        get() = FourtyFive.curScreen!!
 
     private var hoverDetailActor: CustomLabel =
         CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
@@ -84,17 +87,12 @@ class CardHand(
         hoverDetailActor.wrap = true
     }
 
-    override fun init(screenDataProvider: ScreenDataProvider) {
-        this.screenDataProvider = screenDataProvider
-        screenDataProvider.addActorToRoot(hoverDetailActor)
-    }
-
     /**
      * adds a card to the hand
      */
     fun addCard(card: Card) {
         _cards.add(card)
-        if (card.actor !in screenDataProvider.stage.root) screenDataProvider.addActorToRoot(card.actor)
+        if (card.actor !in onjScreen.stage.root) onjScreen.addActorToRoot(card.actor)
         updateCards()
         invalidateHierarchy()
     }
@@ -110,9 +108,13 @@ class CardHand(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
+        if (!isInitialized) {
+            onjScreen.addActorToRoot(hoverDetailActor)
+            isInitialized = true
+        }
         updateCards() //TODO: calling this every frame is unnecessary
         if (hoverDetailActor.isVisible)
-            hoverDetailActor.draw(screenDataProvider.stage.batch, 1.0f)
+            hoverDetailActor.draw(onjScreen.stage.batch, 1.0f)
     }
 
     private fun updateCards() {
@@ -164,7 +166,7 @@ class CardHand(
 
         hoverDetailActor.isVisible = isCardHoveredOver
 
-        screenDataProvider.resortRootZIndices()
+        onjScreen.resortRootZIndices()
 
     }
 
@@ -174,7 +176,7 @@ class CardHand(
         hoverDetailActor.width = detailWidth
         hoverDetailActor.height = hoverDetailActor.prefHeight
 
-        val worldWidth = screenDataProvider.stage.viewport.worldWidth
+        val worldWidth = onjScreen.stage.viewport.worldWidth
 
         hoverDetailActor.setPosition(
             (card.actor.x + detailOffset.x - hoverDetailActor.width / 2 + (card.actor.width * cardScale) / 2)

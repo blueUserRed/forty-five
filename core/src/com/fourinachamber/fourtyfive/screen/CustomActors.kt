@@ -102,18 +102,6 @@ interface ZIndexGroup {
 }
 
 /**
- * An Actor that needs to be initialised after screen is built
- */
-interface InitialiseableActor {
-
-    /**
-     * automatically called by the screenBuilder
-     * @see InitialiseableActor
-     */
-    fun init(screenDataProvider: ScreenDataProvider)
-}
-
-/**
  * an actor that can be in an animation
  */
 interface AnimationActor {

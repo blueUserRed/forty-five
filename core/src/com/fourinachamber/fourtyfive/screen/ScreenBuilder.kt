@@ -40,113 +40,8 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.system.measureTimeMillis
 
-
 interface ScreenBuilder {
     fun build(): Screen
-}
-
-/**
- * used for interfacing with a screen; provides data and functions
- */
-interface ScreenDataProvider {
-
-    /**
-     * the default-cursor of the screen
-     */
-    val defaultCursor: Either<Cursor, SystemCursor>
-
-    /**
-     * map of all table-cells with a name attribute
-     */
-    val namedCells: Map<String, Cell<*>>
-
-    /**
-     * map of all actors with a name attribute
-     */
-    val namedActors: Map<String, Actor>
-
-    /**
-     * map of all textures and their names
-     */
-    val textures: Map<String, TextureRegion>
-
-    /**
-     * map of all particles and their names
-     */
-    val particles: Map<String, ParticleEffect>
-
-    /**
-     * map of all post-processors and their names
-     */
-    val postProcessors: Map<String, PostProcessor>
-
-    /**
-     * map of all fonts and their names
-     */
-    val fonts: Map<String, BitmapFont>
-
-    /**
-     * map of all cursors and their names
-     */
-    val cursors: Map<String, Cursor>
-
-    /**
-     * the stage containing the actors
-     */
-    val stage: Stage
-
-    /**
-     * the currently applied Postprocessor; null if none
-     */
-    var postProcessor: PostProcessor?
-
-    val screen: Screen
-
-    /**
-     * the current screen controller
-     */
-    var screenController: ScreenController?
-
-    /**
-     * list of all behaviours that actors in the scene have
-     */
-    val behaviours: List<Behaviour>
-
-    /**
-     * executes a callback after [ms] time has passed
-     */
-    fun afterMs(ms: Int, callback: () -> Unit)
-
-    /**
-     * adds a new texture to the screen that can be retrieved from [textures]. If a texture with [name] already exists,
-     * it will be swapped. The textures are not owned by the screen and will not be disposed when the screen is disposed
-     */
-    fun addTexture(name: String, texture: TextureRegion)
-
-    /**
-     * adds a disposable, that will be disposed automatically when teh screen is disposed
-     */
-    fun addDisposable(disposable: Disposable)
-
-    /**
-     * adds an actor to the root of the screen
-     */
-    fun addActorToRoot(actor: Actor)
-
-    /**
-     * removes an actor from the root of the screen
-     */
-    fun removeActorFromRoot(actor: Actor)
-
-    /**
-     * resorts all children of the root of the stage, if they implement [ZIndexActor]
-     */
-    fun resortRootZIndices()
-
-    fun addLateRenderTask(task: (Batch) -> Unit)
-    fun removeLateRenderTask(task: (Batch) -> Unit)
-    fun addEarlyRenderTask(task: (Batch) -> Unit)
-    fun removeEarlyRenderTask(task: (Batch) -> Unit)
 }
 
 /**
@@ -166,7 +61,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
     private lateinit var toDispose: MutableList<Disposable>
     private lateinit var viewport: Viewport
 
-    override fun build(): Screen = try {
+    override fun build(): OnjScreen = try {
         FourtyFiveLogger.debug(logTag, "building screen ${file.name()}")
         val onj = OnjParser.parseFile(file.file())
         screenSchema.assertMatches(onj)
@@ -269,7 +164,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         children.forEach {
             if (it is Layout) it.invalidate()
         }
-        initialiseInitialiseableActors(children, onjScreen)
 
         onjScreen.postProcessor = if (!options["postProcessor"]!!.isNull()) {
             val name = options.get<String>("postProcessor")
@@ -284,13 +178,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         } else null
 
         return onjScreen
-    }
-
-    private fun initialiseInitialiseableActors(actors: Iterable<Actor>, screenDataProvider: ScreenDataProvider) {
-        for (actor in actors) {
-            if (actor is Group) initialiseInitialiseableActors(actor.children, screenDataProvider)
-            if (actor is InitialiseableActor) actor.init(screenDataProvider)
-        }
     }
 
     private fun doUnmanagedActors(children: OnjArray) = children
@@ -339,7 +226,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
     }
 
-    private fun doDragAndDrop(screenDataProvider: ScreenDataProvider): MutableMap<String, DragAndDrop> {
+    private fun doDragAndDrop(screen: OnjScreen): MutableMap<String, DragAndDrop> {
         val dragAndDrops = mutableMapOf<String, DragAndDrop>()
         for ((group, actors) in actorsWithDragAndDrop) {
             val dragAndDrop = DragAndDrop()
@@ -347,7 +234,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
                 val behaviour = DragAndDropBehaviourFactory.behaviourOrError(
                     onj.name,
                     dragAndDrop,
-                    screenDataProvider,
+                    screen,
                     actor,
                     onj
                 )
@@ -616,205 +503,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         return animations[name] ?: throw RuntimeException("Unknown animation: $name")
     }
 
-
-    /**
-     * a screen that was build from an onj file. also implements [ScreenDataProvider]
-     */
-    private class OnjScreen(
-        override val textures: MutableMap<String, TextureRegion>,
-        override val cursors: Map<String, Cursor>,
-        override val fonts: Map<String, BitmapFont>,
-        override val particles: Map<String, ParticleEffect>,
-        override val postProcessors: Map<String, PostProcessor>,
-        children: List<Actor>,
-        val viewport: Viewport,
-        batch: Batch,
-        private val toDispose: List<Disposable>,
-        private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
-        private val lateRenderTasks: List<OnjScreen.() -> Unit>,
-        override val namedCells: Map<String, Cell<*>>,
-        override val namedActors: Map<String, Actor>,
-        override val behaviours: List<Behaviour>,
-        private val printFrameRate: Boolean
-    ) : ScreenAdapter(), ScreenDataProvider {
-
-        var dragAndDrop: Map<String, DragAndDrop> = mapOf()
-
-        var lastRenderTime: Long = 0
-            private set
-
-        private val createTime: Long = TimeUtils.millis()
-        private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
-        private val additionalDisposables: MutableList<Disposable> = mutableListOf()
-
-        private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
-        private val additionalEarlyRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
-
-        override lateinit var defaultCursor: Either<Cursor, SystemCursor>
-        override val screen: Screen = this
-
-        override var postProcessor: PostProcessor? = null
-            set(value) {
-                field = value
-                value?.resetReferenceTime()
-            }
-
-        override val stage: Stage = Stage(viewport, batch).apply {
-            children.forEach { addActor(it) }
-        }
-
-        override var screenController: ScreenController? = null
-            set(value) {
-                field?.end()
-                field = value
-                value?.init(this)
-            }
-
-        override fun afterMs(ms: Int, callback: () -> Unit) {
-            callbacks.add((TimeUtils.millis() + ms) to callback)
-        }
-
-        override fun addTexture(name: String, texture: TextureRegion) {
-            textures[name] = texture
-        }
-
-        override fun addDisposable(disposable: Disposable) {
-            additionalDisposables.add(disposable)
-        }
-
-        override fun addActorToRoot(actor: Actor) {
-            stage.root.addActor(actor)
-        }
-
-        override fun removeActorFromRoot(actor: Actor) {
-            stage.root.removeActor(actor)
-        }
-
-        override fun resortRootZIndices() {
-            stage.root.children.sort { el1, el2 ->
-                (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-                (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-            }
-        }
-
-        override fun addLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
-        override fun addEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
-        override fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
-        override fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
-
-        private fun updateCallbacks() {
-            val curTime = TimeUtils.millis()
-            val iterator = callbacks.iterator()
-            while (iterator.hasNext()) {
-                val (time, callback) = iterator.next()
-                if (time <= curTime) {
-                    callback()
-                    iterator.remove()
-                }
-            }
-        }
-
-        override fun show() {
-            Gdx.input.inputProcessor = stage
-            Utils.setCursor(defaultCursor)
-        }
-
-        override fun render(delta: Float) = try {
-            if (printFrameRate) FourtyFiveLogger.fps()
-            screenController?.update()
-            if (Gdx.input.isKeyJustPressed(Keys.F)) {
-                if (!Gdx.graphics.isFullscreen) {
-                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-                } else {
-                    Gdx.graphics.setWindowedMode(600, 400)
-                }
-            }
-            updateCallbacks()
-            lastRenderTime = measureTimeMillis {
-                stage.act(Gdx.graphics.deltaTime)
-                if (postProcessor == null) {
-                    ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-                    doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-                    stage.draw()
-                    doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-                } else {
-                    renderWithPostProcessing()
-                }
-            }
-        } catch (e: Exception) {
-            FourtyFiveLogger.severe(logTag, "exception in render function")
-            FourtyFiveLogger.stackTrace(e)
-        }
-
-        private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
-            stage.batch.begin()
-            tasks.forEach { it(this) }
-            additionalTasks.forEach { it(stage.batch) }
-            stage.batch.end()
-        }
-
-        private fun renderWithPostProcessing() {
-
-            val fbo = try {
-                FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
-            } catch (e: java.lang.IllegalStateException) {
-                // construction of FrameBuffer sometimes fails when the window is minimized
-                return
-            }
-
-            fbo.begin()
-            ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-            viewport.apply()
-            doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-            stage.draw()
-            doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-            fbo.end()
-
-            val batch = SpriteBatch()
-
-            val postProcessor = postProcessor!!
-
-            batch.shader = postProcessor.shader
-            postProcessor.shader.bind()
-
-            postProcessor.shader.setUniformMatrix("u_projTrans", viewport.camera.combined)
-
-            postProcessor.bindUniforms()
-            postProcessor.bindArgUniforms()
-
-            batch.begin()
-            ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-            batch.enableBlending()
-            batch.draw(
-                fbo.colorBufferTexture,
-                0f, 0f,
-                Gdx.graphics.width.toFloat(),
-                Gdx.graphics.height.toFloat(),
-                0f, 0f, 1f, 1f // flips the y-axis
-            )
-            batch.end()
-
-            fbo.dispose()
-            batch.dispose()
-        }
-
-        override fun resize(width: Int, height: Int) {
-            stage.viewport.update(width, height, true)
-        }
-
-        override fun dispose() {
-            screenController?.end()
-            stage.dispose()
-            toDispose.forEach(Disposable::dispose)
-            additionalDisposables.forEach(Disposable::dispose)
-        }
-
-        companion object {
-            const val logTag = "screen"
-        }
-
-    }
-
     companion object {
 
         const val logTag = "screenBuilder"
@@ -828,6 +516,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
     }
 
 }
+
 
 /**
  * a postProcessor that is applied to the whole screen
