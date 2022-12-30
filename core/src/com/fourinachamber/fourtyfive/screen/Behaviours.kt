@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.game.GameScreenController
+import com.fourinachamber.fourtyfive.game.GameController
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
@@ -58,10 +58,6 @@ object BehaviourFactory {
         return behaviourCreator(onj, actor)
     }
 
-}
-
-interface GameScreenBehaviour {
-    var gameScreenController: GameScreenController
 }
 
 /**
@@ -501,41 +497,33 @@ class OnHoverPopupBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
     }
 }
 
-class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
-
-    override lateinit var gameScreenController: GameScreenController
+class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
-        gameScreenController.shoot()
+        FourtyFive.currentGame!!.shoot()
     }
 
 }
-class EndTurnButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
-
-    override lateinit var gameScreenController: GameScreenController
+class EndTurnButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
-        gameScreenController.endTurn()
+        FourtyFive.currentGame!!.endTurn()
     }
 
 }
 
-class DrawBulletButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
-
-    override lateinit var gameScreenController: GameScreenController
+class DrawBulletButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
-        gameScreenController.drawBullet()
+        FourtyFive.currentGame!!.drawBullet()
     }
 
 }
 
-class DrawCoverCardButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor), GameScreenBehaviour {
-
-    override lateinit var gameScreenController: GameScreenController
+class DrawCoverCardButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
-        gameScreenController.drawCover()
+        FourtyFive.currentGame!!.drawCover()
     }
 
 }

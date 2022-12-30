@@ -1,20 +1,14 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
-import com.fourinachamber.fourtyfive.screen.CustomMoveByAction
-import com.fourinachamber.fourtyfive.screen.CustomParticleActor
 import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
 import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.screen.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.Utils
-import com.fourinachamber.fourtyfive.utils.plus
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import onj.value.OnjNamedObject
@@ -28,7 +22,7 @@ abstract class EnemyAction {
 
     abstract val descriptionText: String
 
-    abstract fun execute(gameScreenController: GameScreenController): Timeline?
+    abstract fun execute(): Timeline?
 
     class DamagePlayer(
         val enemy: Enemy,
@@ -44,8 +38,8 @@ abstract class EnemyAction {
 
         override val descriptionText: String = damage.toString()
 
-        override fun execute(gameScreenController: GameScreenController): Timeline =
-            gameScreenController.enemyArea!!.enemies[0].damagePlayer(damage, gameScreenController)
+        override fun execute(): Timeline =
+            FourtyFive.currentGame!!.enemyArea.enemies[0].damagePlayer(damage)
 
         override fun toString(): String {
             return "DamagePlayer(damage=$damage)"
@@ -65,8 +59,8 @@ abstract class EnemyAction {
 
         override val descriptionText: String = coverValue.toString()
 
-        override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
-
+        override fun execute(): Timeline = Timeline.timeline {
+            val gameController = FourtyFive.currentGame!!
             val (x, y) = enemy.actor.coverText.localToStageCoordinates(Vector2(0f, 0f))
 
             val textAnimation = TextAnimation(
@@ -74,16 +68,16 @@ abstract class EnemyAction {
                 coverValue.toString(),
                 resFontColor,
                 resFontScale,
-                gameScreenController.curScreen!!.fonts[resFontName]!!,
+                gameController.curScreen.fonts[resFontName]!!,
                 resRaiseHeight,
                 resStartFadeoutAt,
-                gameScreenController.curScreen!!,
+                gameController.curScreen,
                 resDuration
             )
 
             action {
                 enemy.currentCover += coverValue
-                gameScreenController.playGameAnimation(textAnimation)
+                gameController.playGameAnimation(textAnimation)
             }
             delayUntil { textAnimation.isFinished() }
 
@@ -109,7 +103,8 @@ abstract class EnemyAction {
 
         override val descriptionText: String  = ""
 
-        override fun execute(gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+        override fun execute(): Timeline = Timeline.timeline {
+            val gameController = FourtyFive.currentGame!!
             val (x, y) = enemy.actor.localToStageCoordinates(Vector2(0f, 0f))
 
             val fadeAnimation = FadeInAndOutTextAnimation(
@@ -117,14 +112,14 @@ abstract class EnemyAction {
                 insult,
                 fadeFontColor,
                 fadeFontScale,
-                gameScreenController.curScreen!!.fonts[fadeFontName]!!,
+                gameController.curScreen.fonts[fadeFontName]!!,
                 screenDataProvider,
                 fadeDuration,
                 fadeIn,
                 fadeOut
             )
 
-            action { gameScreenController.playGameAnimation(fadeAnimation) }
+            action { gameController.playGameAnimation(fadeAnimation) }
             delayUntil { fadeAnimation.isFinished() }
 
             delay(bufferTime)

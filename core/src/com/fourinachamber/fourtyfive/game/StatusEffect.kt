@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
@@ -26,13 +27,13 @@ abstract class StatusEffect(
     var turns: Int = _turns
         protected set
 
-    private lateinit var gameScreenController: GameScreenController
+    private lateinit var gameController: GameController
 
     /**
      * the remaining amount of revolver-turns this effect will stay active for
      */
     val remainingTurns: Int
-        get() = (startTurn + turns) - gameScreenController.turnCounter
+        get() = (startTurn + turns) - gameController.turnCounter
 
     private var startTurn: Int = 0
 
@@ -48,8 +49,8 @@ abstract class StatusEffect(
      */
     abstract fun copy(): StatusEffect
 
-    fun initIcon(gameScreenController: GameScreenController) {
-        val texture = gameScreenController.curScreen!!.textures[iconTextureName]
+    fun initIcon(gameController: GameController) {
+        val texture = gameController.curScreen!!.textures[iconTextureName]
             ?: throw RuntimeException("no texture with name $iconTextureName")
         icon = CustomImageActor(texture)
         icon.setScale(iconScale)
@@ -61,14 +62,14 @@ abstract class StatusEffect(
     /**
      * called after the revolver turned
      */
-    open fun onRevolverTurn(gameScreenController: GameScreenController) { }
+    open fun onRevolverTurn(gameController: GameController) { }
 
     /**
      * called after the status effect got applied
      */
-    open fun start(gameScreenController: GameScreenController) {
-        this.gameScreenController = gameScreenController
-        startTurn = gameScreenController.turnCounter
+    open fun start(gameController: GameController) {
+        this.gameController = gameController
+        startTurn = gameController.turnCounter
     }
 
     /**
@@ -90,21 +91,21 @@ abstract class StatusEffect(
      * returns a timeline containing the actions of this effect; null if this status effect does nothing after a round
      * finished
      */
-    open fun executeAfterRound(gameScreenController: GameScreenController): Timeline? = null
+    open fun executeAfterRound(gameController: GameController): Timeline? = null
 
 
     /**
      * returns a timeline containing the actions of this effect; null if this status effect does nothing after the
      * target got damaged
      */
-    open fun executeAfterDamage(gameScreenController: GameScreenController, damage: Int): Timeline? = null
+    open fun executeAfterDamage(gameController: GameController, damage: Int): Timeline? = null
 
 
     /**
      * returns a timeline containing the actions of this effect; null if this status effect does nothing after the
      * revolver turned
      */
-    open fun executeAfterRevolverTurn(gameScreenController: GameScreenController): Timeline? = null
+    open fun executeAfterRevolverTurn(gameController: GameController): Timeline? = null
 
 
     /**
@@ -119,7 +120,7 @@ abstract class StatusEffect(
         override fun copy(): StatusEffect = Poison(damage, turns, target)
 
         override fun executeAfterRevolverTurn(
-            gameScreenController: GameScreenController
+            gameController: GameController
         ): Timeline = Timeline.timeline {
 
             FourtyFiveLogger.debug(logTag, "executing poison effect")
@@ -134,7 +135,7 @@ abstract class StatusEffect(
                 icon.removeAction(shakeActorAction)
                 shakeActorAction.reset()
             }
-            include(target.damage(gameScreenController, damage))
+            include(target.damage(damage))
 
         }
 
@@ -167,10 +168,10 @@ abstract class StatusEffect(
 
         override fun copy(): StatusEffect = Burning(turns, percent, target)
 
-        override fun executeAfterRound(gameScreenController: GameScreenController): Timeline? = null
+        override fun executeAfterRound(gameController: GameController): Timeline? = null
 
         override fun executeAfterDamage(
-            gameScreenController: GameScreenController,
+            gameController: GameController,
             damage: Int
         ): Timeline = Timeline.timeline {
 
@@ -188,7 +189,7 @@ abstract class StatusEffect(
                 icon.removeAction(shakeActorAction)
                 shakeActorAction.reset()
             }
-            include(target.damage(gameScreenController, additionalDamage))
+            include(target.damage(additionalDamage))
         }
 
         override fun canStackWith(effect: StatusEffect): Boolean {
@@ -269,23 +270,23 @@ abstract class StatusEffect(
     enum class StatusEffectTarget {
 
         PLAYER {
-            override fun getLivesActor(gameScreenController: GameScreenController): Actor {
-                return gameScreenController.playerLivesLabel!!
+            override fun getLivesActor(): Actor {
+                return FourtyFive.currentGame!!.playerLivesLabel
             }
-            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
-                return Timeline.timeline { //TODO: ??????????????
-                    action { gameScreenController.damagePlayer(damage) }
+            override fun damage(damage: Int): Timeline {
+                return Timeline.timeline {
+                    action { FourtyFive.currentGame!!.damagePlayer(damage) }
                 }
             }
         },
 
         ENEMY {
-            override fun getLivesActor(gameScreenController: GameScreenController): Actor {
-                return gameScreenController.enemyArea!!.enemies[0].actor.livesLabel
+            override fun getLivesActor(): Actor {
+                return FourtyFive.currentGame!!.enemyArea.enemies[0].actor.livesLabel
             }
 
-            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
-                return gameScreenController.enemyArea!!.enemies[0].damage(damage, gameScreenController)
+            override fun damage(damage: Int): Timeline {
+                return FourtyFive.currentGame!!.enemyArea.enemies[0].damage(damage)
             }
         }
         ;
@@ -293,12 +294,12 @@ abstract class StatusEffect(
         /**
          * returns the actor displaying the current and/or base lives of the target
          */
-        abstract fun getLivesActor(gameScreenController: GameScreenController): Actor
+        abstract fun getLivesActor(): Actor
 
         /**
          * returns a timeline containing the necessary actions to damage the target
          */
-        abstract fun damage(gameScreenController: GameScreenController, damage: Int): Timeline
+        abstract fun damage(damage: Int): Timeline
     }
 
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.utils.*
@@ -41,8 +42,7 @@ class Enemy(
     val coverIconScale: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
-    val detailFontColor: Color,
-    private val gameScreenController: GameScreenController
+    val detailFontColor: Color
 ) {
 
     val logTag = "enemy-$name-${++instanceCounter}"
@@ -54,6 +54,8 @@ class Enemy(
     @Suppress("JoinDeclarationAndAssignment")
     val actor: EnemyActor
 
+    private val gameController = FourtyFive.currentGame!!
+
     /**
      * the current lives of this enemy
      */
@@ -61,9 +63,10 @@ class Enemy(
         private set(value) {
             field = max(value, 0)
             FourtyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
-            if (field == 0) gameScreenController.curScreen!!.afterMs(10) { //TODO: nooooo, not again
-                gameScreenController.executeTimelineLater(Timeline.timeline {
-                    action { gameScreenController.enemyDefeated(this@Enemy) }
+            if (field != 0) return
+            gameController.curScreen.afterMs(10) { //TODO: nooooo, not again
+                gameController.executeTimelineLater(Timeline.timeline {
+                    action { gameController.enemyDefeated(this@Enemy) }
                 })
             }
         }
@@ -82,15 +85,15 @@ class Enemy(
 
     private lateinit var brain: EnemyBrain
 
-    private val dmgFont: BitmapFont = gameScreenController.curScreen!!.fonts[dmgFontName]
+    private val dmgFont: BitmapFont = gameController.curScreen!!.fonts[dmgFontName]
         ?: throw RuntimeException("unknown font $dmgFontName")
 
     private val coverStackDamagedParticles: ParticleEffect =
-        gameScreenController.curScreen!!.particles[coverStackDamagedParticlesName]
+        gameController.curScreen!!.particles[coverStackDamagedParticlesName]
             ?: throw RuntimeException("unknown particle: $coverStackDamagedParticlesName")
 
     private val coverStackDestroyedParticles: ParticleEffect =
-        gameScreenController.curScreen!!.particles[coverStackDestroyedParticlesName]
+        gameController.curScreen!!.particles[coverStackDestroyedParticlesName]
             ?: throw RuntimeException("unknown particle: $coverStackDestroyedParticlesName")
 
     init {
@@ -104,17 +107,17 @@ class Enemy(
             effectToTest.stack(effect)
             return
         }
-        effect.start(gameScreenController)
-        effect.initIcon(gameScreenController)
+        effect.start(gameController)
+        effect.initIcon(gameController)
         statusEffects.add(effect)
         actor.displayStatusEffect(effect)
     }
 
-    fun executeStatusEffects(gameScreenController: GameScreenController): Timeline? {
+    fun executeStatusEffects(): Timeline? {
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterRound(gameScreenController) ?: continue
+                val timelineToInclude = effect.executeAfterRound(gameController) ?: continue
                 hadEffectTimeline = true
                 include(timelineToInclude)
             }
@@ -122,11 +125,11 @@ class Enemy(
         return if (hadEffectTimeline) timeline else null
     }
 
-    fun executeStatusEffectsAfterDamage(gameScreenController: GameScreenController, damage: Int): Timeline? {
+    fun executeStatusEffectsAfterDamage(damage: Int): Timeline? {
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterDamage(gameScreenController, damage) ?: continue
+                val timelineToInclude = effect.executeAfterDamage(gameController, damage) ?: continue
                 hadEffectTimeline = true
                 include(timelineToInclude)
             }
@@ -134,11 +137,11 @@ class Enemy(
         return if (hadEffectTimeline) timeline else null
     }
 
-    fun executeStatusEffectsAfterRevolverTurn(gameScreenController: GameScreenController): Timeline? {
+    fun executeStatusEffectsAfterRevolverTurn(): Timeline? {
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterRevolverTurn(gameScreenController) ?: continue
+                val timelineToInclude = effect.executeAfterRevolverTurn(gameController) ?: continue
                 hadEffectTimeline = true
                 include(timelineToInclude)
             }
@@ -150,7 +153,7 @@ class Enemy(
         val iterator = statusEffects.iterator()
         while (iterator.hasNext()) {
             val effect = iterator.next()
-            effect.onRevolverTurn(gameScreenController)
+            effect.onRevolverTurn(gameController)
             if (!effect.isStillValid()) {
                 FourtyFiveLogger.debug(logTag, "status effect $effect no longer valid")
                 actor.removeStatusEffect(effect)
@@ -166,8 +169,8 @@ class Enemy(
         FourtyFiveLogger.debug(logTag, "chose new action: $curAction")
     }
 
-    fun doAction(gameScreenController: GameScreenController): Timeline? {
-        return curAction!!.execute(gameScreenController)
+    fun doAction(): Timeline? {
+        return curAction!!.execute()
     }
 
     fun resetAction() {
@@ -175,7 +178,8 @@ class Enemy(
         actor.resetAction()
     }
 
-    fun damagePlayer(damage: Int, gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+    fun damagePlayer(damage: Int): Timeline = Timeline.timeline {
+        val gameController = FourtyFive.currentGame!!
         val shakeAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
         shakeAction.duration = shakeDuration
 
@@ -184,7 +188,7 @@ class Enemy(
         moveByAction.duration = chargeDuration
         moveByAction.interpolation = chargeInterpolation
 
-        val playerLivesLabel = gameScreenController.playerLivesLabel!!
+        val playerLivesLabel = gameController.playerLivesLabel
         var playerLivesPos = playerLivesLabel.localToStageCoordinates(Vector2(0f, 0f))
         playerLivesPos += Vector2(playerLivesLabel.width / 2f, -playerLivesLabel.height)
 
@@ -197,11 +201,11 @@ class Enemy(
             dmgFont,
             dmgRaiseHeight,
             dmgStartFadeoutAt,
-            gameScreenController.curScreen!!,
+            gameController.curScreen!!,
             dmgDuration
         )
 
-        val screenDataProvider = gameScreenController.curScreen!!
+        val screenDataProvider = gameController.curScreen!!
         val overlayActor = CustomImageActor(screenDataProvider.textures["hit_overlay"]!!)
         val viewport = screenDataProvider.stage.viewport
 
@@ -234,8 +238,8 @@ class Enemy(
         action { actor.removeAction(moveByAction) }
 
         action {
-            remaining = gameScreenController.coverArea!!.damage(damage)
-            if (remaining != damage) activeStack = gameScreenController.coverArea!!.getActive()
+            remaining = gameController.coverArea!!.damage(damage)
+            if (remaining != damage) activeStack = gameController.coverArea!!.getActive()
         }
 
         includeLater(
@@ -247,7 +251,7 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-                action { gameScreenController.playGameAnimation(overlayAnim) }
+                action { gameController.playGameAnimation(overlayAnim) }
             } },
             { remaining != 0 }
         )
@@ -255,7 +259,7 @@ class Enemy(
         delay(bufferTime)
 
         includeLater(
-            { getPlayerDamagedTimeline(remaining, shakeAction, gameScreenController, textAnimation) },
+            { getPlayerDamagedTimeline(remaining, shakeAction, gameController, textAnimation) },
             { remaining != 0 }
         )
     }
@@ -264,19 +268,19 @@ class Enemy(
     private fun getPlayerDamagedTimeline(
         damage: Int,
         shakeAction: ShakeActorAction,
-        gameScreenController: GameScreenController,
+        gameController: GameController,
         textAnimation: TextAnimation
     ): Timeline {
 
-        val playerLivesLabel = gameScreenController.playerLivesLabel!!
+        val playerLivesLabel = gameController.playerLivesLabel!!
 
         return Timeline.timeline {
 
             action {
-                gameScreenController.damagePlayer(damage)
+                gameController.damagePlayer(damage)
                 playerLivesLabel.addAction(shakeAction)
                 textAnimation.text = "-$damage"
-                gameScreenController.playGameAnimation(textAnimation)
+                gameController.playGameAnimation(textAnimation)
             }
 
             delayUntil { textAnimation.isFinished() }
@@ -326,7 +330,8 @@ class Enemy(
     /**
      * reduces the enemies lives by [damage]
      */
-    fun damage(damage: Int, gameScreenController: GameScreenController): Timeline = Timeline.timeline {
+    fun damage(damage: Int): Timeline = Timeline.timeline {
+        val gameController = FourtyFive.currentGame!!
         val (livesX, livesY) = actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f))
 
         val livesTextAnimation = TextAnimation(
@@ -334,11 +339,11 @@ class Enemy(
             "-$damage",
             dmgFontColor,
             dmgFontScale,
-            gameScreenController.curScreen!!.fonts[dmgFontName] ?:
+            gameController.curScreen.fonts[dmgFontName] ?:
                 throw RuntimeException("unknown font $dmgFontName"),
             dmgRaiseHeight,
             dmgStartFadeoutAt,
-            gameScreenController.curScreen!!,
+            gameController.curScreen,
             dmgDuration
         )
 
@@ -349,11 +354,11 @@ class Enemy(
             "-$damage",
             dmgFontColor,
             dmgFontScale,
-            gameScreenController.curScreen!!.fonts[dmgFontName] ?:
+            gameController.curScreen.fonts[dmgFontName] ?:
                 throw RuntimeException("unknown font $dmgFontName"),
             dmgRaiseHeight,
             dmgStartFadeoutAt,
-            gameScreenController.curScreen!!,
+            gameController.curScreen,
             dmgDuration
         )
 
@@ -370,7 +375,7 @@ class Enemy(
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
                     actor.updateText()
-                    gameScreenController.playGameAnimation(coverTextAnimation)
+                    gameController.playGameAnimation(coverTextAnimation)
                 }
                 delayUntil { coverTextAnimation.isFinished() }
             } },
@@ -383,7 +388,7 @@ class Enemy(
                     livesTextAnimation.text = "-$remaining"
                     currentLives -= remaining
                     actor.updateText()
-                    gameScreenController.playGameAnimation(livesTextAnimation)
+                    gameController.playGameAnimation(livesTextAnimation)
                 }
                 delayUntil { livesTextAnimation.isFinished() }
             } },
@@ -455,13 +460,13 @@ class Enemy(
          * reads an array of Enemies from on an OnjArray
          */
         fun getFrom(
-            enemiesOnj: OnjArray,
-            gameScreenController: GameScreenController
+            enemiesOnj: OnjArray
         ): List<Enemy> = enemiesOnj
             .value
             .map {
                 it as OnjObject
-                val screenDataProvider = gameScreenController.curScreen!!
+                val gameController = FourtyFive.currentGame!!
+                val screenDataProvider = gameController.curScreen
                 val texture = screenDataProvider.textures[it.get<String>("texture")] ?:
                     throw RuntimeException("unknown texture ${it.get<String>("texture")}")
                 val coverIcon = screenDataProvider.textures[it.get<String>("coverIcon")] ?:
@@ -480,8 +485,7 @@ class Enemy(
                     it.get<Double>("coverIconScale").toFloat(),
                     detailFont,
                     it.get<Double>("detailFontScale").toFloat(),
-                    it.get<Color>("detailFontColor"),
-                    gameScreenController
+                    it.get<Color>("detailFontColor")
                 )
                 enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider, enemy)
                 enemy

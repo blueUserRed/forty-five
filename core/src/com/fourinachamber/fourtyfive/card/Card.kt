@@ -3,9 +3,9 @@ package com.fourinachamber.fourtyfive.card
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.Effect
-import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjExtensions
+import com.fourinachamber.fourtyfive.game.GameController
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fourtyfive.screen.CustomImageActor
@@ -167,10 +167,10 @@ class Card(
     /**
      * called by gameScreenController when the card was shot
      */
-    fun afterShot(gameScreenController: GameScreenController) {
+    fun afterShot() {
         if (isUndead) {
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
-            gameScreenController.cardHand!!.addCard(this)
+            FourtyFive.currentGame!!.cardHand.addCard(this)
         }
         if (!isEverlasting) leaveGame()
     }
@@ -185,7 +185,7 @@ class Card(
     /**
      * called by gameScreenController when the destroy-phase starts
      */
-    fun enterDestroyMode(gameScreenController: GameScreenController) = actor.enterDestroyMode(gameScreenController)
+    fun enterDestroyMode() = actor.enterDestroyMode()
 
     /**
      * called by gameScreenController the destroy-phase ends
@@ -195,10 +195,10 @@ class Card(
     /**
      * checks whether this card can currently enter the game
      */
-    fun allowsEnteringGame(gameScreenController: GameScreenController): Boolean {
+    fun allowsEnteringGame(): Boolean {
         // handles special case for Destroy effect
         for (effect in effects) if (effect is Effect.Destroy && effect.trigger == Trigger.ON_ENTER) {
-            if (!gameScreenController.hasDestroyableCard()) {
+            if (!FourtyFive.currentGame!!.hasDestroyableCard()) {
                 FourtyFiveLogger.debug(logTag, "card cannot enter game because it has the destroy effect and" +
                         " no destroyable bullet is present")
                 return false
@@ -217,10 +217,10 @@ class Card(
     /**
      * called when this card was destroyed by the destroy effect
      */
-    fun onDestroy(gameScreenController: GameScreenController) {
+    fun onDestroy() {
         if (isUndead) {
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
-            gameScreenController.cardHand!!.addCard(this)
+            FourtyFive.currentGame!!.cardHand.addCard(this)
         }
         leaveDestroyMode()
         leaveGame()
@@ -239,7 +239,7 @@ class Card(
     /**
      * called when the card enters the game
      */
-    fun onEnter(gameScreenController: GameScreenController) {
+    fun onEnter() {
         inGame = true
     }
 
@@ -254,11 +254,11 @@ class Card(
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
-    fun checkEffects(trigger: Trigger, gameScreenController: GameScreenController): Timeline? {
+    fun checkEffects(trigger: Trigger): Timeline? {
         var wasEffectWithTimelineTriggered = false
         val timeline = Timeline.timeline {
             for (effect in effects) {
-                val effectTimeline = effect.checkTrigger(trigger, gameScreenController)
+                val effectTimeline = effect.checkTrigger(trigger)
                 if (effectTimeline != null) {
                     include(effectTimeline)
                     wasEffectWithTimelineTriggered = true
@@ -435,12 +435,12 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
     var isHoveredOver: Boolean = false
         private set
 
-    //TODO: fix
-    private lateinit var gameScreenController: GameScreenController
+//    //TODO: fix
+//    private lateinit var gameController: GameController
 
     private val destroyModeOnClickListener: EventListener = EventListener { event ->
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
-        gameScreenController.destroyCard(card)
+        FourtyFive.currentGame!!.destroyCard(card)
         true
     }
 
@@ -449,8 +449,7 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
         onExit { isHoveredOver = false }
     }
 
-    fun enterDestroyMode(gameScreenController: GameScreenController) {
-        this.gameScreenController = gameScreenController
+    fun enterDestroyMode() {
         addListener(destroyModeOnClickListener)
     }
 
