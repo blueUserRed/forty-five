@@ -1,22 +1,24 @@
-package com.fourinachamber.fourtyfive.card
+package com.fourinachamber.fourtyfive.game.card
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.Effect
-import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.OnjExtensions
+import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.Trigger
-import com.fourinachamber.fourtyfive.screen.CustomImageActor
-import com.fourinachamber.fourtyfive.screen.ZIndexActor
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
 import ktx.actors.onEnter
 import ktx.actors.onExit
-import onj.OnjArray
-import onj.OnjNamedObject
-import onj.OnjObject
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -41,7 +43,7 @@ class CardPrototype(
  * represents an actual instance of a card. Can be created using [CardPrototype]
  * @param name the name of the card
  * @param title the name but formatted, so it looks good when shown on the screen
- * @param texture the texture of the card
+ * @param drawable the texture of the card
  * @param flavourText Short phrase that (should) be funny or add to the lore
  * @param shortDescription short text explaining the effects of this card; can be left blank
  * @param type the type of card (bullet or cover)
@@ -53,7 +55,7 @@ class CardPrototype(
 class Card(
     val name: String,
     val title: String,
-    val texture: TextureRegion,
+    val drawable: Drawable,
     val flavourText: String,
     val shortDescription: String,
     val type: Type,
@@ -140,7 +142,10 @@ class Card(
         modifiers.remove(rottenModifier)
         rottenModifier = CardModifier(
             newDamage,
-            TemplateString(rottenDetailTextRawString, mapOf("damageLost" to newDamage))
+            TemplateString(
+                GraphicsConfig.rawTemplateString("rottenDetailText"),
+                mapOf("damageLost" to newDamage)
+            )
         ) { true }
         modifiers.add(rottenModifier)
         isDamageDirty = true
@@ -166,10 +171,10 @@ class Card(
     /**
      * called by gameScreenController when the card was shot
      */
-    fun afterShot(gameScreenController: GameScreenController) {
+    fun afterShot() {
         if (isUndead) {
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
-            gameScreenController.cardHand!!.addCard(this)
+            FourtyFive.currentGame!!.cardHand.addCard(this)
         }
         if (!isEverlasting) leaveGame()
     }
@@ -184,7 +189,7 @@ class Card(
     /**
      * called by gameScreenController when the destroy-phase starts
      */
-    fun enterDestroyMode(gameScreenController: GameScreenController) = actor.enterDestroyMode(gameScreenController)
+    fun enterDestroyMode() = actor.enterDestroyMode()
 
     /**
      * called by gameScreenController the destroy-phase ends
@@ -194,10 +199,10 @@ class Card(
     /**
      * checks whether this card can currently enter the game
      */
-    fun allowsEnteringGame(gameScreenController: GameScreenController): Boolean {
+    fun allowsEnteringGame(): Boolean {
         // handles special case for Destroy effect
         for (effect in effects) if (effect is Effect.Destroy && effect.trigger == Trigger.ON_ENTER) {
-            if (!gameScreenController.hasDestroyableCard()) {
+            if (!FourtyFive.currentGame!!.hasDestroyableCard()) {
                 FourtyFiveLogger.debug(logTag, "card cannot enter game because it has the destroy effect and" +
                         " no destroyable bullet is present")
                 return false
@@ -216,10 +221,10 @@ class Card(
     /**
      * called when this card was destroyed by the destroy effect
      */
-    fun onDestroy(gameScreenController: GameScreenController) {
+    fun onDestroy() {
         if (isUndead) {
             FourtyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
-            gameScreenController.cardHand!!.addCard(this)
+            FourtyFive.currentGame!!.cardHand.addCard(this)
         }
         leaveDestroyMode()
         leaveGame()
@@ -238,7 +243,7 @@ class Card(
     /**
      * called when the card enters the game
      */
-    fun onEnter(gameScreenController: GameScreenController) {
+    fun onEnter() {
         inGame = true
     }
 
@@ -253,11 +258,11 @@ class Card(
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
-    fun checkEffects(trigger: Trigger, gameScreenController: GameScreenController): Timeline? {
+    fun checkEffects(trigger: Trigger): Timeline? {
         var wasEffectWithTimelineTriggered = false
         val timeline = Timeline.timeline {
             for (effect in effects) {
-                val effectTimeline = effect.checkTrigger(trigger, gameScreenController)
+                val effectTimeline = effect.checkTrigger(trigger)
                 if (effectTimeline != null) {
                     include(effectTimeline)
                     wasEffectWithTimelineTriggered = true
@@ -302,12 +307,11 @@ class Card(
         /**
          * reads an onj array it returns the corresponding card prototypes
          * @param cards the onj array
-         * @param regions the textures for the cards will be looked up in this map
          * @param initializer lambda that can contain additional initialization logic
          */
         fun getFrom(
             cards: OnjArray,
-            regions: Map<String, TextureRegion>,
+            onjScreen: OnjScreen,
             initializer: (Card) -> Unit
         ): List<CardPrototype> {
 
@@ -320,7 +324,7 @@ class Card(
                     val prototype = CardPrototype(
                         onj.get<String>("name"),
                         cardTypeOrError(onj)
-                    ) { getCardFrom(onj, regions, initializer) }
+                    ) { getCardFrom(onj, onjScreen, initializer) }
                     prototypes.add(prototype)
                 }
             return prototypes
@@ -329,7 +333,7 @@ class Card(
 
         private fun getCardFrom(
             onj: OnjObject,
-            regions: Map<String, TextureRegion>,
+            onjScreen: OnjScreen,
             initializer: (Card) -> Unit
         ): Card {
             val name = onj.get<String>("name")
@@ -337,9 +341,7 @@ class Card(
             val card = Card(
                 name,
                 onj.get<String>("title"),
-                regions["$cardTexturePrefix$name"]
-                    ?: throw RuntimeException("cannot find texture for card $name"),
-
+                onjScreen.drawableOrError("$cardTexturePrefix$name"),
                 onj.get<String>("flavourText"),
                 onj.get<String>("description"),
                 cardTypeOrError(onj),
@@ -349,7 +351,7 @@ class Card(
 
                 onj.get<OnjArray>("effects")
                     .value
-                    .map { (it as OnjExtensions.OnjEffect).value.copy() } //TODO: find a better solution
+                    .map { (it as OnjEffect).value.copy() } //TODO: find a better solution
             )
 
             for (effect in card.effects) effect.card = card
@@ -386,13 +388,6 @@ class Card(
             }
         }
 
-        private lateinit var rottenDetailTextRawString: String
-
-        fun init(config: OnjObject) {
-            val tmplOnj = config.get<OnjObject>("stringTemplates")
-            rottenDetailTextRawString = tmplOnj.get<String>("rottenDetailText")
-        }
-
     }
 
     /**
@@ -419,12 +414,12 @@ class Card(
 /**
  * the actor representing a card on the screen
  */
-class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
+class CardActor(val card: Card) : CustomImageActor(card.drawable), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
     /**
-     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.card.CardDragSource]
+     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.game.card.CardDragSource]
      */
     var isDragged: Boolean = false
 
@@ -434,12 +429,9 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
     var isHoveredOver: Boolean = false
         private set
 
-    //TODO: fix
-    private lateinit var gameScreenController: GameScreenController
-
     private val destroyModeOnClickListener: EventListener = EventListener { event ->
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
-        gameScreenController.destroyCard(card)
+        FourtyFive.currentGame!!.destroyCard(card)
         true
     }
 
@@ -448,8 +440,7 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
         onExit { isHoveredOver = false }
     }
 
-    fun enterDestroyMode(gameScreenController: GameScreenController) {
-        this.gameScreenController = gameScreenController
+    fun enterDestroyMode() {
         addListener(destroyModeOnClickListener)
     }
 

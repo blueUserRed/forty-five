@@ -1,64 +1,59 @@
+baseImage: string,
+outputFile: string,
 
-import "imports/asset_definitions.onjschema" as _
+var cardElementSharedKeys = {
+    x: int,
+    y: int,
+};
 
-
-baseImage: string
-outputFile: string
-
-!cardElementSharedKeys = {
-    x: int
-    y: int
-}
-
-$CardElement [
+$CardElement {
 
     $TextElement {
-        text: string
-        font: string
-        fontScale: float
-        ...!cardElementSharedKeys
+        text: string,
+        font: string,
+        fontScale: float,
+        ...cardElementSharedKeys
     }
 
     $ImageElement {
-        textureName: string
-        scaleX: float
-        scaleY: float
-        ...!cardElementSharedKeys
+        textureName: string,
+        scaleX: float,
+        scaleY: float,
+        ...cardElementSharedKeys
     }
 
     $RectangleElement {
-        width: int
-        height: int
-        color: string
-        strokeSize: int
-        ...!cardElementSharedKeys
+        width: int,
+        height: int,
+        color: string,
+        strokeSize: int,
+        ...cardElementSharedKeys
     }
 
-]
-
-!cardDeclaration = {
-    name: string
-    elements: $CardElement[*]
 }
 
-cards: !cardDeclaration[*]
+var cardDeclaration = {
+    name: string,
+    elements: $CardElement[]
+};
 
-!customFontDeclaration = {
-    name: string
+cards: cardDeclaration[],
+
+var customFontDeclaration = {
+    name: string,
     file: string
-}
+};
 
 assets: {
-
-//    textures: !textureDeclaration[*]
-//    textureAtlases: !textureAtlasDeclaration[*]
-    fonts: !customFontDeclaration[*]
-    pixmaps: !pixmapDeclaration[*]
-
-}
+    fonts: customFontDeclaration[],
+    pixmaps: {
+        name: string,
+        file: string,
+    }[],
+},
 
 packer: {
-    pageWidth: int
-    pageHeight: int
-    padding: int
+    pageWidth: int,
+    pageHeight: int,
+    padding: int,
 }

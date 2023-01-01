@@ -11,9 +11,11 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
-import com.fourinachamber.fourtyfive.game.OnjExtensions
-import com.fourinachamber.fourtyfive.screen.PostProcessor
-import onj.*
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
+import com.fourinachamber.fourtyfive.screen.general.PostProcessor
+import onj.value.*
 
 /**
  * object containing utilities for reading onj files
@@ -174,7 +176,7 @@ object OnjReaderUtils {
 
                 is OnjFloat -> map[key] = value.value.toFloat()
                 is OnjInt -> map[key] = value.value.toInt()
-                is OnjExtensions.OnjColor -> map[key] = value.value
+                is OnjColor -> map[key] = value.value
 
                 else -> throw RuntimeException("binding type ${value::class.simpleName} as a uniform" +
                         " is currently not supported")
@@ -196,7 +198,7 @@ object OnjReaderUtils {
             .forEach {
                 it as OnjObject
                 val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
-                colorPixmap.setColor(Color.valueOf(it.get<String>("color")))
+                colorPixmap.setColor(it.get<Color>("color"))
                 colorPixmap.fill()
                 textures[it.get<String>("name")] = TextureRegion(Texture(colorPixmap))
 //                colorPixmap.dispose()
@@ -207,7 +209,7 @@ object OnjReaderUtils {
     /**
      * reads an array of animations with names
      */
-    fun readAnimations(anims: OnjArray): Map<String, Animation> = anims
+    fun readAnimations(anims: OnjArray): Map<String, FrameAnimation> = anims
         .value
         .associate {
             it as OnjObject
@@ -218,15 +220,15 @@ object OnjReaderUtils {
     /**
      * reads a single animation
      */
-    fun readAnimation(onj: OnjObject): Animation {
+    fun readAnimation(onj: OnjObject): FrameAnimation {
         val atlas = TextureAtlas(Gdx.files.internal(onj.get<String>("atlasFile")))
 
-        val frames: Array<TextureRegion> = if (onj.hasKey<OnjArray>("frames")) {
+        val frames: Array<Drawable> = if (onj.hasKey<OnjArray>("frames")) {
             val framesOnj = onj.get<OnjArray>("frames").value
-            Array(framesOnj.size) { atlas.findRegion(framesOnj[it].value as String) }
+            Array(framesOnj.size) { TextureRegionDrawable(atlas.findRegion(framesOnj[it].value as String)) }
         } else {
             // there has to be an easier way
-            val framesMap = mutableMapOf<Int, TextureRegion>()
+            val framesMap = mutableMapOf<Int, Drawable>()
             for (region in atlas.regions) {
                 val index = try {
                     Integer.parseInt(region.name)
@@ -234,7 +236,7 @@ object OnjReaderUtils {
                     continue
                 }
                 if (framesMap.containsKey(index)) throw RuntimeException("duplicate frame number: $index")
-                framesMap[index] = region
+                framesMap[index] = TextureRegionDrawable(region)
             }
             framesMap
                 .toList()
@@ -245,7 +247,7 @@ object OnjReaderUtils {
         val initialFrame = onj.get<Long>("initialFrame").toInt()
         val frameTime = onj.get<Long>("frameTime").toInt()
         if (frameTime == 0) throw RuntimeException("frameTime can not be zero")
-        return Animation(frames, atlas.textures, initialFrame, frameTime)
+        return FrameAnimation(frames, atlas.textures, initialFrame, frameTime)
     }
 
     fun readParticles(particles: OnjArray): Map<String, ParticleEffect> = particles

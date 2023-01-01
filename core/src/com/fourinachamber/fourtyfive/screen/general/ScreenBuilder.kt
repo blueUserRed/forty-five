@@ -1,149 +1,40 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
-import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Cursor
-import com.badlogic.gdx.graphics.Cursor.SystemCursor
-import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.game.enemy.EnemyArea
+import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
+import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
+import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
+import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fourtyfive.utils.*
-import onj.*
-import kotlin.system.measureTimeMillis
-
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 interface ScreenBuilder {
     fun build(): Screen
-}
-
-/**
- * used for interfacing with a screen; provides data and functions
- */
-interface ScreenDataProvider {
-
-    /**
-     * the default-cursor of the screen
-     */
-    val defaultCursor: Either<Cursor, SystemCursor>
-
-    /**
-     * map of all table-cells with a name attribute
-     */
-    val namedCells: Map<String, Cell<*>>
-
-    /**
-     * map of all actors with a name attribute
-     */
-    val namedActors: Map<String, Actor>
-
-    /**
-     * map of all textures and their names
-     */
-    val textures: Map<String, TextureRegion>
-
-    /**
-     * map of all particles and their names
-     */
-    val particles: Map<String, ParticleEffect>
-
-    /**
-     * map of all post-processors and their names
-     */
-    val postProcessors: Map<String, PostProcessor>
-
-    /**
-     * map of all fonts and their names
-     */
-    val fonts: Map<String, BitmapFont>
-
-    /**
-     * map of all cursors and their names
-     */
-    val cursors: Map<String, Cursor>
-
-    /**
-     * the stage containing the actors
-     */
-    val stage: Stage
-
-    /**
-     * the currently applied Postprocessor; null if none
-     */
-    var postProcessor: PostProcessor?
-
-    val screen: Screen
-
-    /**
-     * the current screen controller
-     */
-    var screenController: ScreenController?
-
-    /**
-     * list of all behaviours that actors in the scene have
-     */
-    val behaviours: List<Behaviour>
-
-    /**
-     * executes a callback after [ms] time has passed
-     */
-    fun afterMs(ms: Int, callback: () -> Unit)
-
-    /**
-     * adds a new texture to the screen that can be retrieved from [textures]. If a texture with [name] already exists,
-     * it will be swapped. The textures are not owned by the screen and will not be disposed when the screen is disposed
-     */
-    fun addTexture(name: String, texture: TextureRegion)
-
-    /**
-     * adds a disposable, that will be disposed automatically when teh screen is disposed
-     */
-    fun addDisposable(disposable: Disposable)
-
-    /**
-     * adds an actor to the root of the screen
-     */
-    fun addActorToRoot(actor: Actor)
-
-    /**
-     * removes an actor from the root of the screen
-     */
-    fun removeActorFromRoot(actor: Actor)
-
-    /**
-     * resorts all children of the root of the stage, if they implement [ZIndexActor]
-     */
-    fun resortRootZIndices()
-
-    fun addLateRenderTask(task: (Batch) -> Unit)
-    fun removeLateRenderTask(task: (Batch) -> Unit)
-    fun addEarlyRenderTask(task: (Batch) -> Unit)
-    fun removeEarlyRenderTask(task: (Batch) -> Unit)
 }
 
 /**
@@ -151,9 +42,9 @@ interface ScreenDataProvider {
  */
 class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
-    private lateinit var textures: Map<String, TextureRegion>
+    private lateinit var drawables: Map<String, Drawable>
     private lateinit var fonts: Map<String, BitmapFont>
-    private lateinit var animations: Map<String, Animation>
+    private lateinit var animations: Map<String, FrameAnimation>
     private lateinit var earlyRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var lateRenderTasks: MutableList<OnjScreen.() -> Unit>
     private lateinit var behavioursToBind: MutableList<Behaviour>
@@ -163,7 +54,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
     private lateinit var toDispose: MutableList<Disposable>
     private lateinit var viewport: Viewport
 
-    override fun build(): Screen = try {
+    override fun build(): OnjScreen = try {
         FourtyFiveLogger.debug(logTag, "building screen ${file.name()}")
         val onj = OnjParser.parseFile(file.file())
         screenSchema.assertMatches(onj)
@@ -195,7 +86,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         val colorTextures = OnjReaderUtils.readColorTextures(onjAssets.get<OnjArray>("colorTextures"))
         colorTextures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
 
-        this.textures = textures + textureRegions + colorTextures
+        this.drawables = textures.mapValues { TextureRegionDrawable(it.value) } +
+                textureRegions.mapValues { TextureRegionDrawable(it.value) } +
+                colorTextures.mapValues { TextureRegionDrawable(it.value) }
 
         fonts = OnjReaderUtils.readFonts(onjAssets.get<OnjArray>("fonts"))
         toDispose.addAll(fonts.values)
@@ -212,7 +105,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         animations = OnjReaderUtils.readAnimations(onjAssets.get<OnjArray>("animations"))
         toDispose.addAll(animations.values)
 
-        viewport = getViewport(onj)
+        viewport = getViewport(onj.get<OnjNamedObject>("viewport"))
         val children = getChildren(onj.get<OnjArray>("children"))
 
         val options = onj.get<OnjObject>("options")
@@ -235,7 +128,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         val onjScreen = OnjScreen(
-            this.textures.toMutableMap(),
+            this.drawables.toMutableMap(),
             cursors,
             fonts,
             particles,
@@ -266,7 +159,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         children.forEach {
             if (it is Layout) it.invalidate()
         }
-        initialiseInitialiseableActors(children, onjScreen)
 
         onjScreen.postProcessor = if (!options["postProcessor"]!!.isNull()) {
             val name = options.get<String>("postProcessor")
@@ -283,13 +175,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         return onjScreen
     }
 
-    private fun initialiseInitialiseableActors(actors: Iterable<Actor>, screenDataProvider: ScreenDataProvider) {
-        for (actor in actors) {
-            if (actor is Group) initialiseInitialiseableActors(actor.children, screenDataProvider)
-            if (actor is InitialiseableActor) actor.init(screenDataProvider)
-        }
-    }
-
     private fun doUnmanagedActors(children: OnjArray) = children
         .value
         .map { it as OnjNamedObject }
@@ -300,43 +185,32 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             }
         }
 
-    private fun getViewport(onj: OnjObject): Viewport {
-        val viewportOnj = onj.get<OnjNamedObject>("viewport")
+    private fun getViewport(viewportOnj: OnjNamedObject): Viewport = when (viewportOnj.name) {
 
-        when (viewportOnj.name) {
+        "FitViewport" -> {
+            val worldHeight = viewportOnj.get<Double>("worldHeight").toFloat()
+            val worldWidth = viewportOnj.get<Double>("worldWidth").toFloat()
+            FitViewport(worldWidth, worldHeight)
+        }
 
-            "FitViewport" -> {
-                val worldHeight = viewportOnj.get<Double>("worldHeight").toFloat()
-                val worldWidth = viewportOnj.get<Double>("worldWidth").toFloat()
-                if (viewportOnj.hasKey<String>("backgroundTexture")) earlyRenderTasks.add {
-                    stage.batch.draw(
-                        textureOrError(viewportOnj.get<String>("backgroundTexture")),
-                        0f, 0f,
-                        worldWidth, worldHeight
-                    )
-                }
-                return FitViewport(worldWidth, worldHeight)
-            }
+        "ExtendViewport" -> {
+            val minWidth = viewportOnj.get<Double>("minWidth").toFloat()
+            val minHeight = viewportOnj.get<Double>("minWidth").toFloat()
+            val viewport = ExtendViewport(minWidth, minHeight)
+            viewport
+        }
 
-            "ExtendViewport" -> {
-                val minWidth = viewportOnj.get<Double>("minWidth").toFloat()
-                val minHeight = viewportOnj.get<Double>("minWidth").toFloat()
-                val viewport = ExtendViewport(minWidth, minHeight)
-                if (viewportOnj.hasKey<String>("backgroundTexture")) earlyRenderTasks.add {
-                    stage.batch.draw(
-                        textureOrError(viewportOnj.get<String>("backgroundTexture")),
-                        0f, 0f,
-                        viewport.worldWidth, viewport.worldHeight
-                    )
-                }
-                return viewport
-            }
+        else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
 
-            else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
+    }.apply {
+        if (!viewportOnj.hasKey<String>("backgroundTexture")) return@apply
+        val background = drawableOrError(viewportOnj.get<String>("backgroundTexture"))
+        earlyRenderTasks.add {
+            background.draw(stage.batch, 0f, 0f, viewport.worldWidth, viewport.worldHeight)
         }
     }
 
-    private fun doDragAndDrop(screenDataProvider: ScreenDataProvider): MutableMap<String, DragAndDrop> {
+    private fun doDragAndDrop(screen: OnjScreen): MutableMap<String, DragAndDrop> {
         val dragAndDrops = mutableMapOf<String, DragAndDrop>()
         for ((group, actors) in actorsWithDragAndDrop) {
             val dragAndDrop = DragAndDrop()
@@ -344,7 +218,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
                 val behaviour = DragAndDropBehaviourFactory.behaviourOrError(
                     onj.name,
                     dragAndDrop,
-                    screenDataProvider,
+                    screen,
                     actor,
                     onj
                 )
@@ -363,7 +237,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
     private fun getWidget(widgetOnj: OnjNamedObject): Actor = when (widgetOnj.name) {
 
-        "Image" -> CustomImageActor(textureOrError(widgetOnj.get<String>("textureName"))).apply {
+        "Image" -> CustomImageActor(drawableOrError(widgetOnj.get<String>("textureName"))).apply {
             if (widgetOnj.getOr("reportDimensionsWithScaling", false)) {
                 reportDimensionsWithScaling = true
                 ignoreScalingWhenDrawing = true
@@ -375,11 +249,11 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font")),
-                Color.valueOf(widgetOnj.get<String>("color"))
+                widgetOnj.get<Color>("color")
             )
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = TextureRegionDrawable(textureOrError(it)) }
+            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
         }
 
@@ -403,7 +277,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             if (widgetOnj.getOr("fillX", false)) defaults().expandX().fillX()
             if (widgetOnj.getOr("fillY", false)) defaults().expandY().fillY()
             widgetOnj.ifHas<String>("backgroundTexture") {
-                background = TextureRegionDrawable(textureOrError(it))
+                background = drawableOrError(it)
             }
             widgetOnj.ifHas<String>("align") { align(alignmentOrError(it)) }
             widgetOnj.get<OnjArray>("rows").value.forEach { row ->
@@ -423,31 +297,15 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             }
         }
 
-        "RotatableImageActor" -> RotatableImageActor(
-            textureOrError(widgetOnj.get<String>("textureName")),
-            viewport,
-            widgetOnj
-        )
-
         "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"))).apply {
             applyImageKeys(this, widgetOnj)
         }
 
-//        "ProgressBar" -> ProgressBar(
-//            widgetOnj.get<Double>("min").toFloat(),
-//            widgetOnj.get<Double>("max").toFloat(),
-//            widgetOnj.get<Double>("stepSize").toFloat(),
-//            widgetOnj.get<Boolean>("vertical"),
-//            ProgressBar.ProgressBarStyle(TextureRegionDrawable(textureOrError("black")), null)
-//        ).apply {
-//            value = widgetOnj.get<Double>("initialValue").toFloat()
-//        }
-
         "CardHand" -> CardHand(
             widgetOnj.get<Double>("targetWidth").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
-            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            widgetOnj.get<Color>("detailFontColor"),
+            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
@@ -465,20 +323,20 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
         "Revolver" -> Revolver(
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
-            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            widgetOnj.get<Color>("detailFontColor"),
+            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
                 widgetOnj.get<Double>("detailOffsetY").toFloat(),
             ),
             widgetOnj.get<Double>("detailWidth").toFloat(),
-            widgetOnj.getOr<String?>("background", null)?.let { TextureRegionDrawable(textureOrError(it)) },
+            widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it) },
             widgetOnj.get<Double>("radiusExtension").toFloat()
         ).apply {
-            slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
+            slotDrawable = drawableOrError(widgetOnj.get<String>("slotTexture"))
             slotFont = fontOrError(widgetOnj.get<String>("font"))
-            fontColor = Color.valueOf(widgetOnj.get<String>("fontColor"))
+            fontColor = widgetOnj.get<Color>("fontColor")
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
@@ -496,16 +354,15 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Long>("maxCards").toInt(),
             widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
-            textureOrError(widgetOnj.get<String>("stackBackgroundTexture")),
+            widgetOnj.get<Color>("detailFontColor"),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             widgetOnj.get<Double>("stackSpacing").toFloat(),
             widgetOnj.get<Double>("areaSpacing").toFloat(),
             widgetOnj.get<Double>("cardScale").toFloat(),
             widgetOnj.get<Double>("stackMinSize").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
-            Color.valueOf(widgetOnj.get<String>("detailFontColor")),
-            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            widgetOnj.get<Color>("detailFontColor"),
+            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
@@ -518,11 +375,11 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             TemplateString(widgetOnj.get<String>("template")),
             Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font")),
-                Color.valueOf(widgetOnj.get<String>("color"))
+                widgetOnj.get<Color>("color")
             )
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = TextureRegionDrawable(textureOrError(it)) }
+            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
         }
 
@@ -611,215 +468,16 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         else -> throw RuntimeException("unknown alignment: $alignment")
     }
 
-    private fun textureOrError(name: String): TextureRegion {
-        return textures[name] ?: throw RuntimeException("Unknown texture: $name")
+    private fun drawableOrError(name: String): Drawable {
+        return drawables[name] ?: throw RuntimeException("Unknown texture: $name")
     }
 
     private fun fontOrError(name: String): BitmapFont {
         return fonts[name] ?: throw RuntimeException("Unknown font: $name")
     }
 
-    private fun animationOrError(name: String): Animation {
+    private fun animationOrError(name: String): FrameAnimation {
         return animations[name] ?: throw RuntimeException("Unknown animation: $name")
-    }
-
-
-    /**
-     * a screen that was build from an onj file. also implements [ScreenDataProvider]
-     */
-    private class OnjScreen(
-        override val textures: MutableMap<String, TextureRegion>,
-        override val cursors: Map<String, Cursor>,
-        override val fonts: Map<String, BitmapFont>,
-        override val particles: Map<String, ParticleEffect>,
-        override val postProcessors: Map<String, PostProcessor>,
-        children: List<Actor>,
-        val viewport: Viewport,
-        batch: Batch,
-        private val toDispose: List<Disposable>,
-        private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
-        private val lateRenderTasks: List<OnjScreen.() -> Unit>,
-        override val namedCells: Map<String, Cell<*>>,
-        override val namedActors: Map<String, Actor>,
-        override val behaviours: List<Behaviour>,
-        private val printFrameRate: Boolean
-    ) : ScreenAdapter(), ScreenDataProvider {
-
-        var dragAndDrop: Map<String, DragAndDrop> = mapOf()
-
-        var lastRenderTime: Long = 0
-            private set
-
-        private val createTime: Long = TimeUtils.millis()
-        private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
-        private val additionalDisposables: MutableList<Disposable> = mutableListOf()
-
-        private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
-        private val additionalEarlyRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
-
-        override lateinit var defaultCursor: Either<Cursor, SystemCursor>
-        override val screen: Screen = this
-
-        override var postProcessor: PostProcessor? = null
-            set(value) {
-                field = value
-                value?.resetReferenceTime()
-            }
-
-        override val stage: Stage = Stage(viewport, batch).apply {
-            children.forEach { addActor(it) }
-        }
-
-        override var screenController: ScreenController? = null
-            set(value) {
-                field?.end()
-                field = value
-                value?.init(this)
-            }
-
-        override fun afterMs(ms: Int, callback: () -> Unit) {
-            callbacks.add((TimeUtils.millis() + ms) to callback)
-        }
-
-        override fun addTexture(name: String, texture: TextureRegion) {
-            textures[name] = texture
-        }
-
-        override fun addDisposable(disposable: Disposable) {
-            additionalDisposables.add(disposable)
-        }
-
-        override fun addActorToRoot(actor: Actor) {
-            stage.root.addActor(actor)
-        }
-
-        override fun removeActorFromRoot(actor: Actor) {
-            stage.root.removeActor(actor)
-        }
-
-        override fun resortRootZIndices() {
-            stage.root.children.sort { el1, el2 ->
-                (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-                (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
-            }
-        }
-
-        override fun addLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
-        override fun addEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
-        override fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
-        override fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
-
-        private fun updateCallbacks() {
-            val curTime = TimeUtils.millis()
-            val iterator = callbacks.iterator()
-            while (iterator.hasNext()) {
-                val (time, callback) = iterator.next()
-                if (time <= curTime) {
-                    callback()
-                    iterator.remove()
-                }
-            }
-        }
-
-        override fun show() {
-            Gdx.input.inputProcessor = stage
-            Utils.setCursor(defaultCursor)
-        }
-
-        override fun render(delta: Float) = try {
-            if (printFrameRate) FourtyFiveLogger.fps()
-            screenController?.update()
-            if (Gdx.input.isKeyJustPressed(Keys.F)) {
-                if (!Gdx.graphics.isFullscreen) {
-                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-                } else {
-                    Gdx.graphics.setWindowedMode(600, 400)
-                }
-            }
-            updateCallbacks()
-            lastRenderTime = measureTimeMillis {
-                stage.act(Gdx.graphics.deltaTime)
-                if (postProcessor == null) {
-                    ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-                    doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-                    stage.draw()
-                    doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-                } else {
-                    renderWithPostProcessing()
-                }
-            }
-        } catch (e: Exception) {
-            FourtyFiveLogger.severe(logTag, "exception in render function")
-            FourtyFiveLogger.stackTrace(e)
-        }
-
-        private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
-            stage.batch.begin()
-            tasks.forEach { it(this) }
-            additionalTasks.forEach { it(stage.batch) }
-            stage.batch.end()
-        }
-
-        private fun renderWithPostProcessing() {
-
-            val fbo = try {
-                FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
-            } catch (e: java.lang.IllegalStateException) {
-                // construction of FrameBuffer sometimes fails when the window is minimized
-                return
-            }
-
-            fbo.begin()
-            ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-            viewport.apply()
-            doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-            stage.draw()
-            doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-            fbo.end()
-
-            val batch = SpriteBatch()
-
-            val postProcessor = postProcessor!!
-
-            batch.shader = postProcessor.shader
-            postProcessor.shader.bind()
-
-            postProcessor.shader.setUniformMatrix("u_projTrans", viewport.camera.combined)
-
-            postProcessor.bindUniforms()
-            postProcessor.bindArgUniforms()
-
-            batch.begin()
-            ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-            batch.enableBlending()
-            batch.draw(
-                fbo.colorBufferTexture,
-                0f, 0f,
-                Gdx.graphics.width.toFloat(),
-                Gdx.graphics.height.toFloat(),
-                0f, 0f, 1f, 1f // flips the y-axis
-            )
-            batch.end()
-
-            fbo.dispose()
-            batch.dispose()
-        }
-
-        override fun resize(width: Int, height: Int) {
-            stage.viewport.update(width, height, true)
-        }
-
-        override fun dispose() {
-            screenController?.end()
-            stage.dispose()
-            toDispose.forEach(Disposable::dispose)
-            additionalDisposables.forEach(Disposable::dispose)
-        }
-
-        companion object {
-            const val logTag = "screen"
-        }
-
     }
 
     companion object {
@@ -835,6 +493,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
     }
 
 }
+
 
 /**
  * a postProcessor that is applied to the whole screen

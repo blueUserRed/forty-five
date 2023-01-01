@@ -1,257 +1,249 @@
+import "imports/font_group.onjschema" as _;
+import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 
-import "imports/asset_definitions.onjschema" as _
-import "imports/font_group.onjschema" as _
-import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys
+use Common;
 
-!viewportSharedKeys = {
+var viewportSharedKeys = {
     backgroundTexture?: string
-}
+};
 
-$Viewport [
+$Viewport {
 
     $FitViewport {
-        worldWidth: float
-        worldHeight: float
-        ...!viewportSharedKeys
+        worldWidth: float,
+        worldHeight: float,
+        ...viewportSharedKeys
     }
 
     $ExtendViewport {
-        minWidth: float
-        minHeight: float
-        ...!viewportSharedKeys
+        minWidth: float,
+        minHeight: float,
+        ...viewportSharedKeys
     }
 
-]
-!tableCell = {
-    width?: float
-    height?: float
-    colspan?: int
-    align?: string
-    padTop?: float
-    padBottom?: float
-    padLeft?: float
-    padRight?: float
-    cellName?: string
-    sizeToActor?: boolean
-    align?: string
-    expandX?: boolean
-    expandY?: boolean
+}
+
+var tableCell = {
+    width?: float,
+    height?: float,
+    colspan?: int,
+    align?: string,
+    padTop?: float,
+    padBottom?: float,
+    padLeft?: float,
+    padRight?: float,
+    cellName?: string,
+    sizeToActor?: boolean,
+    expandX?: boolean,
+    expandY?: boolean,
     element: $Widget
-}
+};
 
-!tableRow = {
-    width?: float
-    height?: float
-    cells: !tableCell[*]
-}
+var tableRow = {
+    width?: float,
+    height?: float,
+    cells: tableCell[]
+};
 
-!widgetSharedKeys = {
-    debug?: boolean
-    behaviours?: $Behaviour[*]
-    width?: float
-    height?: float
-    dragAndDrop?: $DragAndDropBehaviour
-    zIndex?: int
-    x?: float
-    y?: float
-    visible?: boolean
+var widgetSharedKeys = {
+    debug?: boolean,
+    behaviours?: $Behaviour[],
+    width?: float,
+    height?: float,
+    dragAndDrop?: $DragAndDropBehaviour,
+    zIndex?: int,
+    x?: float,
+    y?: float,
+    visible?: boolean,
     name?: string
-}
+};
 
-!detailTextSharedKeys = {
-    detailFont: string
-    detailFontColor: string
-    detailBackgroundTexture: string
-    detailFontScale: float
-    detailOffsetX: float
-    detailOffsetY: float
-    detailWidth: float
-}
+var detailTextSharedKeys = {
+    detailFont: string,
+    detailFontColor: Color,
+    detailBackgroundTexture: string,
+    detailFontScale: float,
+    detailOffsetX: float,
+    detailOffsetY: float,
+    detailWidth: float,
+};
 
-$Widget [
+$Widget {
 
     $Label {
-        text: string
-        font: string
-        color: string
-        fontScale: float
-        backgroundTexture?: string
-        align?: string
-        ...!widgetSharedKeys
+        text: string,
+        font: string,
+        color: Color,
+        fontScale: float,
+        backgroundTexture?: string,
+        align?: string,
+        ...widgetSharedKeys
     }
 
     $TemplateLabel {
-        template: string
-        font: string
-        color: string
-        fontScale: float
-        backgroundTexture?: string
-        align?: string
-        ...!widgetSharedKeys
+        template: string,
+        font: string,
+        color: Color,
+        fontScale: float,
+        backgroundTexture?: string,
+        align?: string,
+        ...widgetSharedKeys
     }
 
     $Image {
-        textureName: string
-        scaleX: float
-        scaleY: float
-        reportDimensionsWithScaling?: boolean
-        scalingWorkaround?: boolean
-        ...!widgetSharedKeys
+        textureName: string,
+        scaleX: float,
+        scaleY: float,
+        reportDimensionsWithScaling?: boolean,
+        scalingWorkaround?: boolean,
+        ...widgetSharedKeys
     }
 
     $AnimatedImage {
-        animationName: string
-        scaleX: float
-        scaleY: float
-        ...!widgetSharedKeys
+        animationName: string,
+        scaleX: float,
+        scaleY: float,
+        ...widgetSharedKeys
     }
 
     $Table {
-        fillX?: boolean
-        fillY?: boolean
-        align?: string
-        rows: !tableRow[*]
-        applyZIndices?: boolean
-        backgroundTexture?: string
-        ...!widgetSharedKeys
+        fillX?: boolean,
+        fillY?: boolean,
+        align?: string,
+        rows: tableRow[],
+        applyZIndices?: boolean,
+        backgroundTexture?: string,
+        ...widgetSharedKeys
     }
 
     $HorizontalGroup {
-        children: $Widget[*]
-        align: string
-        spacing?: float
-        expand?: boolean
-        wrap?: boolean
-        ...!widgetSharedKeys
+        children: $Widget[],
+        align: string,
+        spacing?: float,
+        expand?: boolean,
+        wrap?: boolean,
+        ...widgetSharedKeys
     }
 
     $VerticalGroup {
-        children: $Widget[*]
-        align: string
-        spacing?: float
-        expand?: boolean
-        wrap?: boolean
-        ...!widgetSharedKeys
+        children: $Widget[],
+        align: string,
+        spacing?: float,
+        expand?: boolean,
+        wrap?: boolean,
+        ...widgetSharedKeys
     }
 
     $RotatableImageActor {
-        textureName: string
-        slowdownRate: float
-        velocityMultiplier: float
-        startVelocity?: float
-        snap: ?{
-            rotations: float[*]
-            deactivateAt: float
-            strengthMultiplier: float
-            deactivateWhileDragging: boolean
-        }
-        ...!widgetSharedKeys
+        textureName: string,
+        slowdownRate: float,
+        velocityMultiplier: float,
+        startVelocity?: float,
+        snap: {
+            rotations: float[],
+            deactivateAt: float,
+            strengthMultiplier: float,
+            deactivateWhileDragging: boolean,
+        }?,
+        ...widgetSharedKeys
     }
 
     $VBox {
-        fillX?: boolean
-        fillY?: boolean
-        children: $Widget[*]
-        ...!widgetSharedKeys
+        fillX?: boolean,
+        fillY?: boolean,
+        children: $Widget[],
+        ...widgetSharedKeys
     }
 
     $HBox {
-        fillX?: boolean
-        fillY?: boolean
-        children: $Widget[*]
-        ...!widgetSharedKeys
+        fillX?: boolean,
+        fillY?: boolean,
+        children: $Widget[],
+        ...widgetSharedKeys
     }
 
-//    $ProgressBar {
-//        min: float
-//        max: float
-//        stepSize: float
-//        vertical: boolean
-//        initialValue: float
-//    }
-
     $CardHand {
-        cardScale: float
-        cardSpacing: float
-        startCardZIndicesAt: int
-        hoveredCardZIndex: int
-        draggedCardZIndex: int
-        hoveredCardScale: float
-        targetWidth: float
-        ...!detailTextSharedKeys
-        ...!widgetSharedKeys
+        cardScale: float,
+        cardSpacing: float,
+        startCardZIndicesAt: int,
+        hoveredCardZIndex: int,
+        draggedCardZIndex: int,
+        hoveredCardScale: float,
+        targetWidth: float,
+        ...detailTextSharedKeys,
+        ...widgetSharedKeys
     }
 
     $Revolver {
-        slotTexture: string
-        font: string
-        fontColor: string
-        fontScale: float
-        slotScale: float
-        cardScale: float
-        animationDuration: float
-        radius: float
-        rotationOff: float
-        cardZIndex: int
-        background?: string
-        radiusExtension: float
-        ...!detailTextSharedKeys
-        ...!widgetSharedKeys
+        slotTexture: string,
+        font: string,
+        fontColor: Color,
+        fontScale: float,
+        slotScale: float,
+        cardScale: float,
+        animationDuration: float,
+        radius: float,
+        rotationOff: float,
+        cardZIndex: int,
+        background?: string,
+        radiusExtension: float,
+        ...detailTextSharedKeys,
+        ...widgetSharedKeys
     }
 
     $EnemyArea {
-        ...!widgetSharedKeys
+        ...widgetSharedKeys
     }
 
     $CoverArea {
-        numStacks: int
-        maxCards: int
-        infoFont: string
-        infoFontColor: string
-        infoFontScale: float
-        stackBackgroundTexture: string
-        stackSpacing: float
-        areaSpacing: float
-        cardScale: float
-        stackMinSize: float
-        onlyAllowAddingOnTheSameTurn: boolean
-        ...!detailTextSharedKeys
-        ...!widgetSharedKeys
+        numStacks: int,
+        maxCards: int,
+        infoFont: string,
+        infoFontColor: Color,
+        infoFontScale: float,
+        stackBackgroundTexture: string,
+        stackSpacing: float,
+        areaSpacing: float,
+        cardScale: float,
+        stackMinSize: float,
+        onlyAllowAddingOnTheSameTurn: boolean,
+        ...detailTextSharedKeys,
+        ...widgetSharedKeys
     }
 
-]
+}
 
-$Behaviour [
+$Behaviour {
 
     $MouseHoverBehaviour {
-        useSystemCursor: boolean
-        cursorName: string
-        disabled: ?{
-            useSystemCursor: boolean
+        useSystemCursor: boolean,
+        cursorName: string,
+        disabled: {
+            useSystemCursor: boolean,
             cursorName: string
-        }
+        }?
     }
 
     $OnClickExitBehaviour { }
 
     $OnHoverChangeSizeBehaviour {
-        cellName?: string
-        enterDuration: float
-        exitDuration: float
-        baseX: float
-        baseY: float
-        targetX: float
-        targetY: float
-        enterInterpolation: string?
+        cellName?: string,
+        enterDuration: float,
+        exitDuration: float,
+        baseX: float,
+        baseY: float,
+        targetX: float,
+        targetY: float,
+        enterInterpolation: string?,
         exitInterpolation: string?
     }
 
     $OnHoverChangeFontSizeBehaviour {
-        enterDuration: float
-        exitDuration: float
-        targetFontScale: float
-        baseFontScale: float
-        enterInterpolation: string?
+        enterDuration: float,
+        exitDuration: float,
+        targetFontScale: float,
+        baseFontScale: float,
+        enterInterpolation: string?,
         exitInterpolation: string?
     }
 
@@ -264,32 +256,32 @@ $Behaviour [
     $OnClickRemoveActorBehaviour { }
 
     $OnClickMaskBehaviour {
-        maskTexture: string
-        invert?: boolean
-        maskScaleX?: float
-        maskScaleY?: float
-        maskOffsetX?: float
-        maskOffsetY?: float
+        maskTexture: string,
+        invert?: boolean,
+        maskScaleX?: float,
+        maskScaleY?: float,
+        maskOffsetX?: float,
+        maskOffsetY?: float,
     }
 
     $OnClickParticleEffectBehaviour {
-        file: string
-        textureDir: string
-        effectScale?: float
-        useCursorPos?: boolean
+        file: string,
+        textureDir: string,
+        effectScale?: float,
+        useCursorPos?: boolean,
     }
 
     $OnClickChangePostProcessorBehaviour {
-        postProcessor: string?
-        duration: int?
-        setOnlyIfNoPostProcessorIsSet: boolean
+        postProcessor: string?,
+        duration: int?,
+        setOnlyIfNoPostProcessorIsSet: boolean,
     }
 
     $OnHoverPopupBehaviour {
-        popupName: string
-        setPopupPosition: boolean
-        xOffset?: float
-        yOffset?: float
+        popupName: string,
+        setPopupPosition: boolean,
+        xOffset?: float,
+        yOffset?: float,
     }
 
     $OnHoverChangeTextureBehaviour {
@@ -306,60 +298,94 @@ $Behaviour [
 
     $OnClickResetSavefileBehaviour { }
 
-]
+}
 
-$ScreenController [
+$ScreenController {
 
     $GameScreenController {
-        ...!gameScreenControllerKeys
+        ...gameScreenControllerKeys
     }
 
     $IntroScreenController {
-        cardAtlasFile: string
-        appearActor: string
-        nextScreen: string
+        cardAtlasFile: string,
+        appearActor: string,
+        nextScreen: string,
     }
 
     $CardSelectionScreenController {
-        cardSelectionActorName: string
-        cardConfigFile: string
-        cardAtlasFile: string
-        cardsToSelect: int
-        cardScale: float
-        cardBehaviour: $Behaviour
-        nextScreen: string
-        ...!detailTextSharedKeys
-        emptyFont: string
-        emptyFontColor: string
-        emptyFontScale: float
-        emptyText: string
+        cardSelectionActorName: string,
+        cardConfigFile: string,
+        cardAtlasFile: string,
+        cardsToSelect: int,
+        cardScale: float,
+        cardBehaviour: $Behaviour,
+        nextScreen: string,
+        ...detailTextSharedKeys,
+        emptyFont: string,
+        emptyFontColor: Color,
+        emptyFontScale: float,
+        emptyText: string,
     }
 
-]
+}
 
-viewport: $Viewport
+viewport: $Viewport,
 
 assets: {
-    textures: !textureDeclaration[*]
-    fonts: $Font[*]
-    textureAtlases: !textureAtlasDeclaration[*]
-    cursors: !cursorDeclaration[*]
-    postProcessors: !postProcessorDeclaration[*]
-    animations: !animationDeclaration[*]
-    colorTextures: !colorTextureDeclaration[*]
-    particles: !particleDeclaration[*]
-}
+    textures: {
+        name: string,
+        file: string
+    }[],
+    fonts: $Font[],
+    textureAtlases: {
+        file: string,
+        defines: string[]
+    }[],
+    cursors: {
+        name: string,
+        file: string,
+        hotspotX: int,
+        hotspotY: int,
+    }[],
+    postProcessors: {
+        name: string,
+        vertexShader: string,
+        fragmentShader: string,
+        timeOffset?: int,
+        uniforms: string[],
+        args: {
+            ...*
+        }?
+    }[],
+    animations: {
+        name: string,
+        atlasFile: string,
+        frames?: string[],
+        initialFrame: int,
+        frameTime: int,
+    }[],
+    colorTextures: {
+        name: string,
+        color: Color,
+    }[],
+    particles: {
+        name: string,
+        particlePath: string,
+        textureDir: string,
+        scale: float,
+    }[]
+},
 
 options: {
-    setFillParentOnRoot: boolean
+    setFillParentOnRoot: boolean,
     defaultCursor: {
-        useSystemCursor: boolean
+        useSystemCursor: boolean,
         cursorName: string
-    }
-    postProcessor: string?
-    controller: $ScreenController?
+    },
+    postProcessor: string?,
+    controller: $ScreenController?,
     printFrameRate?: boolean
-}
+},
 
-children: $Widget[*]
-unmanagedChildren?: $Widget[*]
+children: $Widget[],
+unmanagedChildren?: $Widget[]

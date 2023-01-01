@@ -1,37 +1,27 @@
-package com.fourinachamber.fourtyfive.card
+package com.fourinachamber.fourtyfive.game.card
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fourtyfive.game.CoverStack
-import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.RevolverSlot
-import com.fourinachamber.fourtyfive.screen.DragBehaviour
-import com.fourinachamber.fourtyfive.screen.DropBehaviour
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
+import com.fourinachamber.fourtyfive.screen.gameComponents.RevolverSlot
+import com.fourinachamber.fourtyfive.screen.general.DragBehaviour
+import com.fourinachamber.fourtyfive.screen.general.DropBehaviour
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.obj
-import onj.OnjNamedObject
-
-
-/**
- * when used by [GameScreenController] [gameScreenController] will be set to it
- */
-interface GameScreenControllerDragAndDrop {
-    var gameScreenController: GameScreenController
-}
+import onj.value.OnjNamedObject
 
 /**
  * the DragSource used for dragging a card to the revolver
  */
 class CardDragSource(
     dragAndDrop: DragAndDrop,
-    screenDataProvider: ScreenDataProvider,
+    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DragBehaviour(dragAndDrop, screenDataProvider, actor, onj), GameScreenControllerDragAndDrop {
-
-    override lateinit var gameScreenController: GameScreenController
+) : DragBehaviour(dragAndDrop, onjScreen, actor, onj) {
 
     private val card: Card
 
@@ -50,7 +40,7 @@ class CardDragSource(
 
         payload.dragActor = actor
 
-        val obj = CardDragAndDropPayload(card, gameScreenController)
+        val obj = CardDragAndDropPayload(card)
         payload.obj = obj
         obj.resetTo(Vector2(actor.x, actor.y))
 
@@ -83,10 +73,10 @@ class CardDragSource(
  */
 class RevolverDropTarget(
     dragAndDrop: DragAndDrop,
-    screenDataProvider: ScreenDataProvider,
+    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, screenDataProvider, actor, onj) {
+) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
 
     private val revolverSlot: RevolverSlot
 
@@ -116,10 +106,10 @@ class RevolverDropTarget(
 
 class CoverAreaDropTarget(
     dragAndDrop: DragAndDrop,
-    screenDataProvider: ScreenDataProvider,
+    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, screenDataProvider, actor, onj) {
+) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
 
     private val coverStack: CoverStack
 
@@ -151,7 +141,7 @@ class CoverAreaDropTarget(
  * used as a payload for [CardDragSource] and [RevolverDropTarget].
  * Automatically resets cards, loads into revolver, etc.
  */
-class CardDragAndDropPayload(val card: Card, val gameScreenController: GameScreenController) {
+class CardDragAndDropPayload(val card: Card) {
 
     private val tasks: MutableList<() -> Unit> = mutableListOf()
 
@@ -166,14 +156,14 @@ class CardDragAndDropPayload(val card: Card, val gameScreenController: GameScree
      * when the drag is stopped, the card will be loaded into the revolver in [slot]
      */
     fun loadIntoRevolver(slot: Int) = tasks.add {
-        gameScreenController.loadBulletInRevolver(card, slot)
+        FourtyFive.currentGame!!.loadBulletInRevolver(card, slot)
     }
 
     /**
      * when the drag is stopped, the card will be added to the cover area in slot [slot]
      */
     fun addCover(slot: Int) = tasks.add {
-        gameScreenController.addCover(card, slot)
+        FourtyFive.currentGame!!.addCover(card, slot)
     }
 
     /**

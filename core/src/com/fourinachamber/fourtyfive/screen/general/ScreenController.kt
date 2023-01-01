@@ -1,14 +1,14 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.general
 
-import com.fourinachamber.fourtyfive.game.CardSelectionScreenController
-import com.fourinachamber.fourtyfive.game.GameScreenController
-import com.fourinachamber.fourtyfive.game.IntroScreenController
-import onj.*
+import com.fourinachamber.fourtyfive.game.GameController
+import com.fourinachamber.fourtyfive.screen.CardSelectionScreenController
+import com.fourinachamber.fourtyfive.screen.gameComponents.IntroScreenController
+import onj.value.OnjNamedObject
 
 object ScreenControllerFactory {
 
     private val controllers: MutableMap<String, (OnjNamedObject) -> ScreenController> = mutableMapOf(
-        "GameScreenController" to { onj -> GameScreenController(onj) },
+        "GameScreenController" to { onj -> GameController(onj) },
         "CardSelectionScreenController" to { onj -> CardSelectionScreenController(onj) },
         "IntroScreenController" to { onj -> IntroScreenController(onj) }
     )
@@ -32,7 +32,7 @@ abstract class ScreenController {
     /**
      * called when this is set as a controller for a screen
      */
-    open fun init(screenDataProvider: ScreenDataProvider) { }
+    open fun init(onjScreen: OnjScreen) { }
 
     /**
      * called every frame
