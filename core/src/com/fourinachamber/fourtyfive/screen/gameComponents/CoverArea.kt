@@ -33,7 +33,6 @@ class CoverArea(
     val onlyAllowAddingOnSameTurn: Boolean,
     infoFont: BitmapFont,
     infoFontColor: Color,
-    stackBackgroundTexture: TextureRegion,
     infoFontScale: Float,
     private val stackSpacing: Float,
     private val areaSpacing: Float,

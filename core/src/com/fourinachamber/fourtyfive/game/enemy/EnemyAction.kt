@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -10,8 +11,8 @@ import onj.value.OnjNamedObject
 
 abstract class EnemyAction {
 
-    abstract val indicatorTexture: TextureRegion
-    abstract val indicatorTextureScale: Float
+    abstract val indicatorDrawable: Drawable
+    abstract val indicatorScale: Float
 
     abstract val descriptionText: String
 
@@ -21,11 +22,11 @@ abstract class EnemyAction {
         val enemy: Enemy,
         onj: OnjNamedObject,
         onjScreen: OnjScreen,
-        override val indicatorTextureScale: Float,
+        override val indicatorScale: Float,
         val damage: Int
     ) : EnemyAction() {
 
-        override val indicatorTexture: TextureRegion = onjScreen.textureOrError(onj.get<String>("indicatorTexture"))
+        override val indicatorDrawable: Drawable = onjScreen.drawableOrError(onj.get<String>("indicatorTexture"))
 
         override val descriptionText: String = damage.toString()
 
@@ -40,11 +41,11 @@ abstract class EnemyAction {
         val enemy: Enemy,
         onj: OnjNamedObject,
         onjScreen: OnjScreen,
-        override val indicatorTextureScale: Float,
+        override val indicatorScale: Float,
         val coverValue: Int
     ) : EnemyAction() {
 
-        override val indicatorTexture: TextureRegion = onjScreen.textureOrError(onj.get<String>("indicatorTexture"))
+        override val indicatorDrawable: Drawable = onjScreen.drawableOrError(onj.get<String>("indicatorTexture"))
         override val descriptionText: String = coverValue.toString()
 
         override fun execute(): Timeline = Timeline.timeline {
@@ -72,10 +73,10 @@ abstract class EnemyAction {
         val enemy: Enemy,
         onj: OnjNamedObject,
         onjScreen: OnjScreen,
-        override val indicatorTextureScale: Float
+        override val indicatorScale: Float
         ) : EnemyAction() {
 
-        override val indicatorTexture: TextureRegion = onjScreen.textureOrError(onj.get<String>("indicatorTexture"))
+        override val indicatorDrawable: Drawable = onjScreen.drawableOrError(onj.get<String>("indicatorTexture"))
         override val descriptionText: String  = ""
 
         override fun execute(): Timeline = Timeline.timeline {

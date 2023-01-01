@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
@@ -51,7 +52,7 @@ abstract class GameAnimation {
  * @param endScale the scale of the banner after [animationDuration] ms have passed
  */
 class BannerAnimation(
-    val banner: TextureRegion,
+    val banner: Drawable,
     private val onjScreen: OnjScreen,
     private val duration: Int,
     private val animationDuration: Int,
@@ -71,12 +72,12 @@ class BannerAnimation(
         val worldWidth = viewport.worldWidth
         val worldHeight = viewport.worldHeight
 
-        batch.draw(
-            banner,
-            worldWidth / 2 - (banner.regionWidth * scale) / 2f,
-            worldHeight / 2 - (banner.regionHeight * scale) / 2,
-            banner.regionWidth.toFloat() * scale,
-            banner.regionHeight.toFloat() * scale,
+        banner.draw(
+            batch,
+            worldWidth / 2 - (banner.minWidth * scale) / 2f,
+            worldHeight / 2 - (banner.minHeight * scale) / 2,
+            banner.minWidth * scale,
+            banner.minHeight * scale,
         )
     }
 

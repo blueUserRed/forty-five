@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
@@ -26,7 +27,7 @@ import kotlin.system.measureTimeMillis
  * a screen that was build from an onj file.
  */
 class OnjScreen(
-    private val textures: MutableMap<String, TextureRegion>,
+    private val drawables: MutableMap<String, Drawable>,
     private val cursors: Map<String, Cursor>,
     private val fonts: Map<String, BitmapFont>,
     private val particles: Map<String, ParticleEffect>,
@@ -84,8 +85,8 @@ class OnjScreen(
         callbacks.add((TimeUtils.millis() + ms) to callback)
     }
 
-    fun addTexture(name: String, texture: TextureRegion) {
-        textures[name] = texture
+    fun addDrawable(name: String, drawable: Drawable) {
+        drawables[name] = drawable
     }
 
     fun addDisposable(disposable: Disposable) {
@@ -112,8 +113,8 @@ class OnjScreen(
     fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
     fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
 
-    fun textureOrError(name: String): TextureRegion = textures[name] ?: throw RuntimeException(
-        "no texture named $name"
+    fun drawableOrError(name: String): Drawable = drawables[name] ?: throw RuntimeException(
+        "no drawable named $name"
     )
 
     fun fontOrError(name: String): BitmapFont = fonts[name] ?: throw RuntimeException(

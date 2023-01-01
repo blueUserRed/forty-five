@@ -46,7 +46,7 @@ abstract class StatusEffect(
     abstract fun copy(): StatusEffect
 
     fun initIcon(gameController: GameController) {
-        val texture = gameController.curScreen.textureOrError(iconTextureName)
+        val texture = gameController.curScreen.drawableOrError(iconTextureName)
         icon = CustomImageActor(texture)
         icon.setScale(iconScale)
         icon.reportDimensionsWithScaling = true

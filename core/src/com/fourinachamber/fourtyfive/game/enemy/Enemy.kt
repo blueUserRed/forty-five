@@ -2,9 +2,9 @@ package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.game.*
@@ -21,7 +21,7 @@ import java.lang.Integer.min
 /**
  * represents an enemy
  * @param name the name of the enemy
- * @param texture the texture of this enemy
+ * @param drawable the texture of this enemy
  * @param offsetX x-offset from the origin of [EnemyArea] to the point where this enemy is located
  * @param offsetY y-offset from the origin of [EnemyArea] to the point where this enemy is located
  * @param scaleX scales [actor]
@@ -33,8 +33,8 @@ import java.lang.Integer.min
  */
 class Enemy(
     val name: String,
-    val texture: TextureRegion,
-    val coverIcon: TextureRegion,
+    val drawable: Drawable,
+    val coverIcon: Drawable,
     val lives: Int,
     val offsetX: Float,
     val offsetY: Float,
@@ -281,12 +281,12 @@ class Enemy(
                 it as OnjObject
                 val gameController = FourtyFive.currentGame!!
                 val screenDataProvider = gameController.curScreen
-                val texture = screenDataProvider.textureOrError(it.get<String>("texture"))
-                val coverIcon = screenDataProvider.textureOrError(it.get<String>("coverIcon"))
+                val drawable = screenDataProvider.drawableOrError(it.get<String>("texture"))
+                val coverIcon = screenDataProvider.drawableOrError(it.get<String>("coverIcon"))
                 val detailFont = screenDataProvider.fontOrError(it.get<String>("detailFont"))
                 val enemy = Enemy(
                     it.get<String>("name"),
-                    texture,
+                    drawable,
                     coverIcon,
                     it.get<Long>("lives").toInt(),
                     it.get<Double>("offsetX").toFloat(),
@@ -313,7 +313,7 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, Animati
 
     override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
-    private val image: CustomImageActor = CustomImageActor(enemy.texture)
+    private val image: CustomImageActor = CustomImageActor(enemy.drawable)
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIcon)
     val coverText: CustomLabel = CustomLabel("", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
     private var enemyBox = CustomHorizontalGroup()
@@ -362,10 +362,10 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, Animati
     }
 
     fun displayAction(action: EnemyAction) {
-        val image = CustomImageActor(action.indicatorTexture)
+        val image = CustomImageActor(action.indicatorDrawable)
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
-        image.setScale(action.indicatorTextureScale)
+        image.setScale(action.indicatorScale)
         actionIndicatorText.setText(action.descriptionText)
         actionIndicator.addActorAt(0, image)
     }

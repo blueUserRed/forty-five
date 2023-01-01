@@ -36,7 +36,7 @@ object GraphicsConfig {
 
     fun damageOverlay(): Timeline.TimelineAction {
         val screen = FourtyFive.curScreen!!
-        val overlayActor = CustomImageActor(screen.textureOrError(damageOverlayTexture))
+        val overlayActor = CustomImageActor(screen.drawableOrError(damageOverlayTexture))
         val viewport = screen.stage.viewport
         val anim = FadeInAndOutAnimation(
             0f, 0f,
@@ -136,7 +136,7 @@ object GraphicsConfig {
     fun bannerAnimation(isPlayer: Boolean): GameAnimationTimelineAction {
         val onjScreen = FourtyFive.curScreen!!
         val anim = BannerAnimation(
-            onjScreen.textureOrError(if (isPlayer) playerTurnBannerName else enemyTurnBannerName),
+            onjScreen.drawableOrError(if (isPlayer) playerTurnBannerName else enemyTurnBannerName),
             onjScreen,
             bannerAnimDuration,
             bannerScaleAnimDuration,

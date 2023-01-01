@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
@@ -168,7 +169,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
 
         for (region in cardAtlas.regions) {
-            curScreen.addTexture("${Card.cardTexturePrefix}${region.name}", region)
+            curScreen.addDrawable("${Card.cardTexturePrefix}${region.name}", TextureRegionDrawable(region))
         }
 
         curScreen.addDisposable(cardAtlas)

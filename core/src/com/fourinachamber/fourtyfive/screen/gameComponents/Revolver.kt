@@ -43,7 +43,7 @@ class Revolver(
     /**
      * the texture for a revolver-slot
      */
-    var slotTexture: TextureRegion? = null
+    var slotDrawable: Drawable? = null
 
     var slotFont: BitmapFont? = null
     var fontColor: Color? = null
@@ -184,7 +184,7 @@ class Revolver(
 
     private fun initialise() {
         slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotTexture!!, slotScale!!, animationDuration)
+            val slot = RevolverSlot(it + 1, this, slotDrawable!!, slotScale!!, animationDuration)
 
             onjScreen.addActorToRoot(slot)
 
@@ -209,7 +209,7 @@ class Revolver(
     }
 
     private fun updateSlotsAndCars() {
-        val slotSize = slotTexture!!.regionWidth * slotScale!!
+        val slotSize = slotDrawable!!.minWidth * slotScale!!
         val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size
         prefHeight = size
@@ -288,10 +288,10 @@ class Revolver(
 class RevolverSlot(
     val num: Int,
     val revolver: Revolver,
-    textureRegion: TextureRegion,
+    drawable: Drawable,
     scale: Float,
     private val animationDuration: Float
-) : CustomImageActor(textureRegion), AnimationActor {
+) : CustomImageActor(drawable), AnimationActor {
 
     override var inAnimation: Boolean = false
 
@@ -324,7 +324,7 @@ class RevolverSlot(
      * @param angle the angle in radians where this slot should be positioned
      */
     fun position(base: Vector2, r: Float, angle: Double) {
-        val slotSize = texture.regionWidth * scaleX
+        val slotSize = drawable.minWidth * scaleX
         val dx = cos(angle) * r
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)

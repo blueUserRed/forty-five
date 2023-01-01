@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
@@ -41,7 +42,7 @@ interface ScreenBuilder {
  */
 class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
-    private lateinit var textures: Map<String, TextureRegion>
+    private lateinit var drawables: Map<String, Drawable>
     private lateinit var fonts: Map<String, BitmapFont>
     private lateinit var animations: Map<String, FrameAnimation>
     private lateinit var earlyRenderTasks: MutableList<OnjScreen.() -> Unit>
@@ -85,7 +86,9 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         val colorTextures = OnjReaderUtils.readColorTextures(onjAssets.get<OnjArray>("colorTextures"))
         colorTextures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
 
-        this.textures = textures + textureRegions + colorTextures
+        this.drawables = textures.mapValues { TextureRegionDrawable(it.value) } +
+                textureRegions.mapValues { TextureRegionDrawable(it.value) } +
+                colorTextures.mapValues { TextureRegionDrawable(it.value) }
 
         fonts = OnjReaderUtils.readFonts(onjAssets.get<OnjArray>("fonts"))
         toDispose.addAll(fonts.values)
@@ -102,7 +105,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         animations = OnjReaderUtils.readAnimations(onjAssets.get<OnjArray>("animations"))
         toDispose.addAll(animations.values)
 
-        viewport = getViewport(onj)
+        viewport = getViewport(onj.get<OnjNamedObject>("viewport"))
         val children = getChildren(onj.get<OnjArray>("children"))
 
         val options = onj.get<OnjObject>("options")
@@ -125,7 +128,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         val onjScreen = OnjScreen(
-            this.textures.toMutableMap(),
+            this.drawables.toMutableMap(),
             cursors,
             fonts,
             particles,
@@ -182,39 +185,28 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             }
         }
 
-    private fun getViewport(onj: OnjObject): Viewport {
-        val viewportOnj = onj.get<OnjNamedObject>("viewport")
+    private fun getViewport(viewportOnj: OnjNamedObject): Viewport = when (viewportOnj.name) {
 
-        when (viewportOnj.name) {
+        "FitViewport" -> {
+            val worldHeight = viewportOnj.get<Double>("worldHeight").toFloat()
+            val worldWidth = viewportOnj.get<Double>("worldWidth").toFloat()
+            FitViewport(worldWidth, worldHeight)
+        }
 
-            "FitViewport" -> {
-                val worldHeight = viewportOnj.get<Double>("worldHeight").toFloat()
-                val worldWidth = viewportOnj.get<Double>("worldWidth").toFloat()
-                if (viewportOnj.hasKey<String>("backgroundTexture")) earlyRenderTasks.add {
-                    stage.batch.draw(
-                        textureOrError(viewportOnj.get<String>("backgroundTexture")),
-                        0f, 0f,
-                        worldWidth, worldHeight
-                    )
-                }
-                return FitViewport(worldWidth, worldHeight)
-            }
+        "ExtendViewport" -> {
+            val minWidth = viewportOnj.get<Double>("minWidth").toFloat()
+            val minHeight = viewportOnj.get<Double>("minWidth").toFloat()
+            val viewport = ExtendViewport(minWidth, minHeight)
+            viewport
+        }
 
-            "ExtendViewport" -> {
-                val minWidth = viewportOnj.get<Double>("minWidth").toFloat()
-                val minHeight = viewportOnj.get<Double>("minWidth").toFloat()
-                val viewport = ExtendViewport(minWidth, minHeight)
-                if (viewportOnj.hasKey<String>("backgroundTexture")) earlyRenderTasks.add {
-                    stage.batch.draw(
-                        textureOrError(viewportOnj.get<String>("backgroundTexture")),
-                        0f, 0f,
-                        viewport.worldWidth, viewport.worldHeight
-                    )
-                }
-                return viewport
-            }
+        else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
 
-            else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
+    }.apply {
+        if (!viewportOnj.hasKey<String>("backgroundTexture")) return@apply
+        val background = drawableOrError(viewportOnj.get<String>("backgroundTexture"))
+        earlyRenderTasks.add {
+            background.draw(stage.batch, 0f, 0f, viewport.worldWidth, viewport.worldHeight)
         }
     }
 
@@ -245,7 +237,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
 
     private fun getWidget(widgetOnj: OnjNamedObject): Actor = when (widgetOnj.name) {
 
-        "Image" -> CustomImageActor(textureOrError(widgetOnj.get<String>("textureName"))).apply {
+        "Image" -> CustomImageActor(drawableOrError(widgetOnj.get<String>("textureName"))).apply {
             if (widgetOnj.getOr("reportDimensionsWithScaling", false)) {
                 reportDimensionsWithScaling = true
                 ignoreScalingWhenDrawing = true
@@ -261,7 +253,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             )
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = TextureRegionDrawable(textureOrError(it)) }
+            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
         }
 
@@ -285,7 +277,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             if (widgetOnj.getOr("fillX", false)) defaults().expandX().fillX()
             if (widgetOnj.getOr("fillY", false)) defaults().expandY().fillY()
             widgetOnj.ifHas<String>("backgroundTexture") {
-                background = TextureRegionDrawable(textureOrError(it))
+                background = drawableOrError(it)
             }
             widgetOnj.ifHas<String>("align") { align(alignmentOrError(it)) }
             widgetOnj.get<OnjArray>("rows").value.forEach { row ->
@@ -305,12 +297,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             }
         }
 
-        "RotatableImageActor" -> RotatableImageActor(
-            textureOrError(widgetOnj.get<String>("textureName")),
-            viewport,
-            widgetOnj
-        )
-
         "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"))).apply {
             applyImageKeys(this, widgetOnj)
         }
@@ -319,7 +305,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("targetWidth").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
             widgetOnj.get<Color>("detailFontColor"),
-            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
@@ -338,17 +324,17 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         "Revolver" -> Revolver(
             fontOrError(widgetOnj.get<String>("detailFont")),
             widgetOnj.get<Color>("detailFontColor"),
-            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
                 widgetOnj.get<Double>("detailOffsetY").toFloat(),
             ),
             widgetOnj.get<Double>("detailWidth").toFloat(),
-            widgetOnj.getOr<String?>("background", null)?.let { TextureRegionDrawable(textureOrError(it)) },
+            widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it) },
             widgetOnj.get<Double>("radiusExtension").toFloat()
         ).apply {
-            slotTexture = textureOrError(widgetOnj.get<String>("slotTexture"))
+            slotDrawable = drawableOrError(widgetOnj.get<String>("slotTexture"))
             slotFont = fontOrError(widgetOnj.get<String>("font"))
             fontColor = widgetOnj.get<Color>("fontColor")
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
@@ -369,7 +355,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
             fontOrError(widgetOnj.get<String>("detailFont")),
             widgetOnj.get<Color>("detailFontColor"),
-            textureOrError(widgetOnj.get<String>("stackBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             widgetOnj.get<Double>("stackSpacing").toFloat(),
             widgetOnj.get<Double>("areaSpacing").toFloat(),
@@ -377,7 +362,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("stackMinSize").toFloat(),
             fontOrError(widgetOnj.get<String>("detailFont")),
             widgetOnj.get<Color>("detailFontColor"),
-            TextureRegionDrawable(textureOrError(widgetOnj.get<String>("detailBackgroundTexture"))),
+            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             Vector2(
                 widgetOnj.get<Double>("detailOffsetX").toFloat(),
@@ -394,7 +379,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             )
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = TextureRegionDrawable(textureOrError(it)) }
+            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
         }
 
@@ -483,8 +468,8 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         else -> throw RuntimeException("unknown alignment: $alignment")
     }
 
-    private fun textureOrError(name: String): TextureRegion {
-        return textures[name] ?: throw RuntimeException("Unknown texture: $name")
+    private fun drawableOrError(name: String): Drawable {
+        return drawables[name] ?: throw RuntimeException("Unknown texture: $name")
     }
 
     private fun fontOrError(name: String): BitmapFont {
