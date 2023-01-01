@@ -66,7 +66,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
 
         detailFont = onjScreen.fontOrError(onj.get<String>("detailFont"))
         detailFontColor = onj.get<Color>("detailFontColor")
-        detailBackground = TextureRegionDrawable(onjScreen.textureOrError(onj.get<String>("detailBackgroundTexture")))
+        detailBackground = onjScreen.drawableOrError(onj.get<String>("detailBackgroundTexture"))
         detailFontScale = onj.get<Double>("detailFontScale").toFloat()
         detailOffset = Vector2(onj.get<Double>("detailOffsetX").toFloat(), onj.get<Double>("detailOffsetY").toFloat())
         detailWidth = onj.get<Double>("detailWidth").toFloat()
@@ -100,7 +100,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
 
         for (region in cardAtlas.regions) {
-            onjScreen.addTexture("${Card.cardTexturePrefix}${region.name}", region)
+            onjScreen.addDrawable("${Card.cardTexturePrefix}${region.name}", TextureRegionDrawable(region))
         }
 
         onjScreen.addDisposable(cardAtlas)

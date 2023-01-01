@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.utils.Either
@@ -32,7 +33,7 @@ object BehaviourFactory {
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
-        "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
+//        "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
         "OnClickRemoveActorBehaviour" to { onj, actor -> OnClickRemoveActorBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
@@ -333,12 +334,12 @@ class OnHoverChangeFontSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behavi
 
 class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
-    private val hoverTextureName = onj.get<String>("hoverTexture")
-    private val baseTexture: TextureRegion
+    private val hoverDrawableName = onj.get<String>("hoverTexture")
+    private val baseDrawable: Drawable
     private val image: CustomImageActor
 
-    private val hoverTexture: TextureRegion by lazy {
-        onjScreen.textureOrError(hoverTextureName)
+    private val hoverDrawable: Drawable by lazy {
+        onjScreen.drawableOrError(hoverDrawableName)
     }
 
     init {
@@ -346,52 +347,52 @@ class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behavio
             throw RuntimeException("OnHoverChangeTextureBehaviour can only be used on an Image")
         }
         image = actor
-        baseTexture = actor.texture
+        baseDrawable = actor.drawable
     }
 
     override val onHoverEnter: BehaviourCallback = {
-        image.texture = hoverTexture
+        image.drawable = hoverDrawable
     }
 
 
     override val onHoverExit: BehaviourCallback = {
-        image.texture = baseTexture
+        image.drawable = baseDrawable
     }
 
 }
 
-/**
- * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
- */
-class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    private val maskTextureName = onj.get<String>("maskTexture")
-    private val invert = onj.getOr("invert", false)
-    private val maskScaleX = onj.getOr("maskScaleX", 1.0).toFloat()
-    private val maskScaleY = onj.getOr("maskScaleY", 1.0).toFloat()
-    private val maskOffsetX = onj.getOr("maskOffsetX", 0.0).toFloat()
-    private val maskOffsetY = onj.getOr("maskOffsetY", 0.0).toFloat()
-
-    init {
-        if (actor !is Maskable) throw RuntimeException("OnClickMaskBehaviour can only be used on a maskable actor")
-    }
-
-    override val onCLick: BehaviourCallback = {
-
-        val mask = onjScreen.textureOrError(maskTextureName)
-
-        actor as Maskable
-
-        actor.mask = mask.texture
-        actor.maskScaleX = maskScaleX
-        actor.maskScaleY = maskScaleY
-        actor.maskOffsetX = maskOffsetX
-        actor.maskOffsetY = maskOffsetY
-        actor.invert = invert
-
-    }
-
-}
+///**
+// * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
+// */
+//class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+//
+//    private val maskTextureName = onj.get<String>("maskTexture")
+//    private val invert = onj.getOr("invert", false)
+//    private val maskScaleX = onj.getOr("maskScaleX", 1.0).toFloat()
+//    private val maskScaleY = onj.getOr("maskScaleY", 1.0).toFloat()
+//    private val maskOffsetX = onj.getOr("maskOffsetX", 0.0).toFloat()
+//    private val maskOffsetY = onj.getOr("maskOffsetY", 0.0).toFloat()
+//
+//    init {
+//        if (actor !is Maskable) throw RuntimeException("OnClickMaskBehaviour can only be used on a maskable actor")
+//    }
+//
+//    override val onCLick: BehaviourCallback = {
+//
+//        val mask = onjScreen.drawableOrError(maskTextureName)
+//
+//        actor as Maskable
+//
+//        actor.mask = mask.texture
+//        actor.maskScaleX = maskScaleX
+//        actor.maskScaleY = maskScaleY
+//        actor.maskOffsetX = maskOffsetX
+//        actor.maskOffsetY = maskOffsetY
+//        actor.invert = invert
+//
+//    }
+//
+//}
 
 /**
  * when clicked, will change the PostProcessor of the whole screen

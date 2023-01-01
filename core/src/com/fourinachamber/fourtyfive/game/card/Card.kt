@@ -1,8 +1,8 @@
 package com.fourinachamber.fourtyfive.game.card
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
@@ -43,7 +43,7 @@ class CardPrototype(
  * represents an actual instance of a card. Can be created using [CardPrototype]
  * @param name the name of the card
  * @param title the name but formatted, so it looks good when shown on the screen
- * @param texture the texture of the card
+ * @param drawable the texture of the card
  * @param flavourText Short phrase that (should) be funny or add to the lore
  * @param shortDescription short text explaining the effects of this card; can be left blank
  * @param type the type of card (bullet or cover)
@@ -55,7 +55,7 @@ class CardPrototype(
 class Card(
     val name: String,
     val title: String,
-    val texture: TextureRegion,
+    val drawable: Drawable,
     val flavourText: String,
     val shortDescription: String,
     val type: Type,
@@ -341,7 +341,7 @@ class Card(
             val card = Card(
                 name,
                 onj.get<String>("title"),
-                onjScreen.textureOrError("$cardTexturePrefix$name"),
+                onjScreen.drawableOrError("$cardTexturePrefix$name"),
                 onj.get<String>("flavourText"),
                 onj.get<String>("description"),
                 cardTypeOrError(onj),
@@ -414,7 +414,7 @@ class Card(
 /**
  * the actor representing a card on the screen
  */
-class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
+class CardActor(val card: Card) : CustomImageActor(card.drawable), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 

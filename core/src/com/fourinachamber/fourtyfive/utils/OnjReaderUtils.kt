@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.screen.general.PostProcessor
 import onj.value.*
@@ -221,12 +223,12 @@ object OnjReaderUtils {
     fun readAnimation(onj: OnjObject): FrameAnimation {
         val atlas = TextureAtlas(Gdx.files.internal(onj.get<String>("atlasFile")))
 
-        val frames: Array<TextureRegion> = if (onj.hasKey<OnjArray>("frames")) {
+        val frames: Array<Drawable> = if (onj.hasKey<OnjArray>("frames")) {
             val framesOnj = onj.get<OnjArray>("frames").value
-            Array(framesOnj.size) { atlas.findRegion(framesOnj[it].value as String) }
+            Array(framesOnj.size) { TextureRegionDrawable(atlas.findRegion(framesOnj[it].value as String)) }
         } else {
             // there has to be an easier way
-            val framesMap = mutableMapOf<Int, TextureRegion>()
+            val framesMap = mutableMapOf<Int, Drawable>()
             for (region in atlas.regions) {
                 val index = try {
                     Integer.parseInt(region.name)
@@ -234,7 +236,7 @@ object OnjReaderUtils {
                     continue
                 }
                 if (framesMap.containsKey(index)) throw RuntimeException("duplicate frame number: $index")
-                framesMap[index] = region
+                framesMap[index] = TextureRegionDrawable(region)
             }
             framesMap
                 .toList()

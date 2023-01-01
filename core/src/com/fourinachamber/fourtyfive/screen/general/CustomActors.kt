@@ -170,7 +170,7 @@ open class TemplateStringLabel(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor(region: TextureRegion) : Image(region), Maskable, ZIndexActor, DisableActor {
+open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIndexActor, DisableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -193,12 +193,6 @@ open class CustomImageActor(region: TextureRegion) : Image(region), Maskable, ZI
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
-    var texture: TextureRegion = region
-        set(value) {
-            drawable = TextureRegionDrawable(value)
-            field = value
-        }
-
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
 
@@ -213,7 +207,7 @@ open class CustomImageActor(region: TextureRegion) : Image(region), Maskable, ZI
         if (mask == null) {
             val c = batch.color.cpy()
             batch.setColor(c.r, c.g, c.b, alpha)
-            batch.draw(texture, x, y, width, height)
+            drawable.draw(batch, x, y, width, height)
             batch.color = c
             return
         }
@@ -230,7 +224,7 @@ open class CustomImageActor(region: TextureRegion) : Image(region), Maskable, ZI
         mask.bind()
         Gdx.gl.glActiveTexture(GL_TEXTURE0)
 
-        batch.draw(texture, x, y, width, height)
+        drawable.draw(batch, x, y, width, height)
         batch.flush()
 
         batch.shader = prevShader
@@ -392,7 +386,7 @@ class AnimatedImage(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         curFrame = ((TimeUtils.timeSinceMillis(refTime) / animation.frameTime) % animation.frames.size).toInt()
-        texture = animation.frames[curFrame]
+        drawable = animation.frames[curFrame]
         super.draw(batch, parentAlpha)
     }
 }

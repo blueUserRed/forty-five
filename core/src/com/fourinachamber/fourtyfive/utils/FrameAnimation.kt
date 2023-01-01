@@ -1,12 +1,11 @@
 package com.fourinachamber.fourtyfive.utils
 
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Disposable
 
 data class FrameAnimation(
-    val frames: Array<TextureRegion>,
-    val textures: Iterable<Texture>,
+    val frames: Array<Drawable>,
+    private val disposables: Iterable<Disposable>,
     val initialFrame: Int,
     val frameTime: Int
 ) : Disposable {
@@ -16,7 +15,7 @@ data class FrameAnimation(
     }
 
     override fun dispose() {
-        textures.forEach(Disposable::dispose)
+        disposables.forEach(Disposable::dispose)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -25,14 +24,14 @@ data class FrameAnimation(
         other as FrameAnimation
 
         return frames.contentEquals(other.frames) &&
-                textures == other.textures &&
+                disposables == other.disposables &&
                 initialFrame == other.initialFrame &&
                 frameTime == other.frameTime
     }
 
     override fun hashCode(): Int {
         var result = frames.contentHashCode()
-        result = 31 * result + textures.hashCode()
+        result = 31 * result + disposables.hashCode()
         result = 31 * result + initialFrame.hashCode()
         result = 31 * result + frameTime.hashCode()
         return result
