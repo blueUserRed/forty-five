@@ -13,15 +13,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.screen.*
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import com.fourinachamber.fourtyfive.utils.plus
 import ktx.actors.contains
 import onj.value.OnjNamedObject
-import java.lang.Math.cos
-import java.lang.Math.sin
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * actor representing the revolver
@@ -284,15 +283,14 @@ class Revolver(
  * a slot of the revolver
  * @param num the number of the slot (1..5)
  * @param revolver the revolver to which this slot belongs
- * @param texture the texture for this slot
  * @param animationDuration the duration of the spin animation
  */
 class RevolverSlot(
     val num: Int,
     val revolver: Revolver,
-    private val textureRegion: TextureRegion,
-    private val scale: Float,
-    private var animationDuration: Float
+    textureRegion: TextureRegion,
+    scale: Float,
+    private val animationDuration: Float
 ) : CustomImageActor(textureRegion), AnimationActor {
 
     override var inAnimation: Boolean = false

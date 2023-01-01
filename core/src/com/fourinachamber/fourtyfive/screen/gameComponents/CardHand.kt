@@ -73,7 +73,6 @@ class CardHand(
 
     private var _cards: MutableList<Card> = mutableListOf()
     private var currentWidth: Float = 0f
-    private var currentHeight: Float = 0f
     private var isInitialized: Boolean = false
 
     private val onjScreen: OnjScreen

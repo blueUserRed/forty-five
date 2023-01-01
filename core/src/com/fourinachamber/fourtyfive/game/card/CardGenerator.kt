@@ -20,6 +20,7 @@ import onj.value.OnjObject
 /**
  * generates an atlas containing the cards from a config file
  */
+@Suppress("unused") // commented in and out, linter can report this as unused
 class CardGenerator(private val config: FileHandle) : Disposable {
 
     private lateinit var onj: OnjObject

@@ -1,15 +1,11 @@
 package com.fourinachamber.fourtyfive.game
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
-import com.fourinachamber.fourtyfive.screen.general.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
-import onj.value.OnjObject
 import kotlin.math.floor
-import kotlin.properties.Delegates
 
 /**
  * a status effect that can be applied to a [target]

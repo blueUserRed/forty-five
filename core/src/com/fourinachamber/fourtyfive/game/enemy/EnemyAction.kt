@@ -1,19 +1,12 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.utils.Utils
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 import onj.value.OnjNamedObject
-import onj.value.OnjObject
-import kotlin.properties.Delegates
 
 abstract class EnemyAction {
 
@@ -27,7 +20,7 @@ abstract class EnemyAction {
     class DamagePlayer(
         val enemy: Enemy,
         onj: OnjNamedObject,
-        private val onjScreen: OnjScreen,
+        onjScreen: OnjScreen,
         override val indicatorTextureScale: Float,
         val damage: Int
     ) : EnemyAction() {
@@ -46,7 +39,7 @@ abstract class EnemyAction {
     class AddCover(
         val enemy: Enemy,
         onj: OnjNamedObject,
-        private val onjScreen: OnjScreen,
+        onjScreen: OnjScreen,
         override val indicatorTextureScale: Float,
         val coverValue: Int
     ) : EnemyAction() {
@@ -78,7 +71,7 @@ abstract class EnemyAction {
         val insult: String,
         val enemy: Enemy,
         onj: OnjNamedObject,
-        private val onjScreen: OnjScreen,
+        onjScreen: OnjScreen,
         override val indicatorTextureScale: Float
         ) : EnemyAction() {
 

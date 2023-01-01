@@ -10,6 +10,7 @@ import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.value.*
 import kotlin.reflect.KClass
 
+@Suppress("unused") // variables and functions are read via reflection
 @OnjNamespace
 object CardsNamespace {
 

@@ -307,7 +307,6 @@ class Card(
         /**
          * reads an onj array it returns the corresponding card prototypes
          * @param cards the onj array
-         * @param regions the textures for the cards will be looked up in this map
          * @param initializer lambda that can contain additional initialization logic
          */
         fun getFrom(
@@ -420,7 +419,7 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
     override var fixedZIndex: Int = 0
 
     /**
-     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.card.CardDragSource]
+     * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.game.card.CardDragSource]
      */
     var isDragged: Boolean = false
 

@@ -129,7 +129,7 @@ open class CustomLabel(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {
-            super.draw(batch, parentAlpha)
+            super.draw(null, parentAlpha)
             return
         }
         background?.draw(batch, x, y, width, height)
@@ -170,7 +170,7 @@ open class TemplateStringLabel(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor(private val region: TextureRegion) : Image(region), Maskable, ZIndexActor, DisableActor {
+open class CustomImageActor(region: TextureRegion) : Image(region), Maskable, ZIndexActor, DisableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -203,7 +203,7 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
         val mask = mask
 
         if (batch == null) {
-            super.draw(batch, parentAlpha)
+            super.draw(null, parentAlpha)
             return
         }
 

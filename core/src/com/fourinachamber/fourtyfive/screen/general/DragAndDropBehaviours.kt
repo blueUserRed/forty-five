@@ -104,6 +104,7 @@ abstract class DragBehaviour(
 ) : DragAndDrop.Source(actor)
 
 abstract class DropBehaviour(
+    @Suppress("unused") // may be necessary in the future, also for symmetry with DragBehaviour
     protected val dragAndDrop: DragAndDrop,
     protected val onjScreen: OnjScreen,
     actor: Actor,
