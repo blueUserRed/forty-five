@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.card
+package com.fourinachamber.fourtyfive.game.card
 
 import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
@@ -10,11 +10,17 @@ import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import kotlinx.coroutines.*
-import onj.*
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 /**
  * generates an atlas containing the cards from a config file
  */
+@Suppress("unused") // commented in and out, linter can report this as unused
 class CardGenerator(private val config: FileHandle) : Disposable {
 
     private lateinit var onj: OnjObject

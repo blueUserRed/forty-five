@@ -1,22 +1,20 @@
-package com.fourinachamber.fourtyfive.game
+package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.profiling.GLProfiler
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
-import com.fourinachamber.fourtyfive.screen.ScreenController
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ScreenBuilderFromOnj
+import com.fourinachamber.fourtyfive.screen.general.ScreenController
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.plus
-import onj.*
-import kotlin.math.floor
+import onj.value.OnjNamedObject
 import kotlin.math.pow
 
 /**
@@ -28,7 +26,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
     private val appearActorName = onj.get<String>("appearActor")
     private val nextScreen = onj.get<String>("nextScreen")
 
-    private lateinit var screenDataProvider: ScreenDataProvider
+    private lateinit var onjScreen: OnjScreen
     private lateinit var textures: List<TextureRegion>
     private lateinit var appearActor: Actor
     private var startTime: Long = 0
@@ -40,18 +38,17 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
 
     private var timeline: Timeline = Timeline(mutableListOf())
 
-    override fun init(screenDataProvider: ScreenDataProvider) {
+    override fun init(onjScreen: OnjScreen) {
         //TODO: put these magic numbers in an onj file somewhere
-        this.screenDataProvider = screenDataProvider
+        this.onjScreen = onjScreen
 
         Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
 
-        appearActor = screenDataProvider.namedActors[appearActorName]
-            ?: throw RuntimeException("no actor named $appearActorName")
+        appearActor = onjScreen.namedActorOrError(appearActorName)
 
         val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
         textures = cardAtlas.regions.toList()
-        screenDataProvider.addLateRenderTask(renderTask)
+        onjScreen.addLateRenderTask(renderTask)
 
         timeline = Timeline.timeline {
             delay(1000)
@@ -88,8 +85,8 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun spawnRandomSprite() {
-        val worldWidth = screenDataProvider.stage.viewport.worldWidth
-        val worldHeight = screenDataProvider.stage.viewport.worldHeight
+        val worldWidth = onjScreen.stage.viewport.worldWidth
+        val worldHeight = onjScreen.stage.viewport.worldHeight
 
         val scale = Math.random().toFloat() * 0.04f + 0.03f
         val texture = textures.random()
@@ -101,7 +98,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun end() {
-        screenDataProvider.removeLateRenderTask(renderTask)
+        onjScreen.removeLateRenderTask(renderTask)
     }
 
     /**

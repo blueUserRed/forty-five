@@ -1,27 +1,27 @@
-import "imports/colors.onj" as color
+import "imports/colors.onj" as color;
 
-!worldWidth = 160.0
-!worldHeight = 90.0
+var worldWidth = 160.0;
+var worldHeight = 90.0;
 
-!cardScale = 0.06
-!cardPixelSize = 569
-!cardSize = <!cardPixelSize * !cardScale>
+var cardScale = 0.06;
+var cardPixelSize = 569;
+var cardSize = cardPixelSize * cardScale;
 
 viewport: $FitViewport {
-    worldWidth: !worldWidth
-    worldHeight: !worldHeight
+    worldWidth: worldWidth,
+    worldHeight: worldHeight,
     backgroundTexture: "background"
-}
+},
 
-!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
     screenPath: "screens/title_screen.onj"
-}
+};
 
-!hoverBehaviour = $MouseHoverBehaviour {
-    useSystemCursor: true
-    cursorName: "hand"
+var hoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
     disabled: null
-}
+};
 
 children: [
     $Table {
@@ -30,27 +30,27 @@ children: [
             {
                 cells: [
                     {
-                        expandY: true
+                        expandY: true,
                         element: $HorizontalGroup {
-                            name: "cardSelectionActor"
-                            align: "center"
-                            spacing: 6.0
+                            name: "cardSelectionActor",
+                            align: "center",
+                            spacing: 6.0,
                             children: []
                         }
                     }
                 ]
-            }
+            },
 
             {
                 cells: [
                     {
                         element: $Label {
-                            align: "center"
-                            text: "Back to the main screen"
-                            font: "red_wing"
-                            color: !color.black
-                            fontScale: 0.2
-                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
+                            align: "center",
+                            text: "Back to the main screen",
+                            font: "red_wing",
+                            color: color.black,
+                            fontScale: 0.2,
+                            behaviours: [ toMainScreenBehaviour, hoverBehaviour ],
                         }
                     }
                 ]
@@ -63,62 +63,62 @@ children: [
 assets: {
     textures: [
         {
-            name: "background"
+            name: "background",
             file: "textures/screens/win_screen.png"
         }
-    ]
+    ],
     fonts: [
 
         $DistanceFieldFont {
-            name: "red_wing"
-            fontFile: "fonts/red_wing.fnt"
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
             imageFile: "fonts/red_wing.png"
         }
 
-    ]
-    textureAtlases: []
-    cursors: []
-    postProcessors: []
-    animations: []
+    ],
+    textureAtlases: [],
+    cursors: [],
+    postProcessors: [],
+    animations: [],
     colorTextures: [
         {
-            name: "card_detail_background"
+            name: "card_detail_background",
             color: "04040488"
         }
-    ]
+    ],
     particles: []
-}
+},
 
 options: {
-    setFillParentOnRoot: true
+    setFillParentOnRoot: true,
     defaultCursor: {
-        useSystemCursor: true
-        cursorName: "arrow"
+        useSystemCursor: true,
+        cursorName: "arrow",
     }
-    postProcessor: null
+    postProcessor: null,
     controller: $CardSelectionScreenController {
-        cardSelectionActorName: "cardSelectionActor"
-        cardConfigFile: "cards/cards.onj"
-        cardAtlasFile: "cards/generated/cards.atlas"
-        nextScreen: "screens/title_screen.onj"
-        cardsToSelect: 3
-        cardScale: !cardScale
+        cardSelectionActorName: "cardSelectionActor",
+        cardConfigFile: "cards/cards.onj",
+        cardAtlasFile: "cards/generated/cards.atlas",
+        nextScreen: "screens/title_screen.onj",
+        cardsToSelect: 3,
+        cardScale: cardScale,
         cardBehaviour: $OnHoverChangeSizeBehaviour {
-            enterDuration: 0.2
-            exitDuration: 0.2
-            baseX: !cardSize
-            baseY: !cardSize
-            targetX: <!cardSize * 1.13>
-            targetY: <!cardSize * 1.13>
-            enterInterpolation: null
+            enterDuration: 0.2,
+            exitDuration: 0.2,
+            baseX: cardSize,
+            baseY: cardSize,
+            targetX: cardSize * 1.13,
+            targetY: cardSize * 1.13,
+            enterInterpolation: null,
             exitInterpolation: null
         }
-        detailFont: "red_wing"
-        detailFontColor: !color.white
-        detailBackgroundTexture: "card_detail_background"
-        detailFontScale: 0.07
-        detailWidth: 50.0
-        detailOffsetX: 0.0
+        detailFont: "red_wing",
+        detailFontColor: color.white,
+        detailBackgroundTexture: "card_detail_background",
+        detailFontScale: 0.07,
+        detailWidth: 50.0,
+        detailOffsetX: 0.0,
         detailOffsetY: 0.0
     }
 }

@@ -1,54 +1,54 @@
-import "config/game_config.onj" as gameConfig
+import "config/game_config.onj" as gameConfig;
 
 additionalCards: [
-]
+],
 
 cardsToDraw: [
     {
-        name: "arrow"
+        name: "arrow",
         amount: 1
-    }
+    },
     {
-        name: "BFB"
+        name: "BFB",
         amount: 1
-    }
+    },
     {
-        name: "obsidianBullet"
+        name: "obsidianBullet",
         amount: 1
-    }
+    },
     {
-        name: "rustedBullet"
+        name: "rustedBullet",
         amount: 1
-    }
+    },
     {
-        name: "invisibleBullet"
+        name: "invisibleBullet",
         amount: 1
-    }
+    },
     {
-        name: "fakeBullet"
+        name: "fakeBullet",
         amount: 1
-    }
+    },
     {
-        name: "bulletBulletBullet"
+        name: "bulletBulletBullet",
         amount: 1
-    }
+    },
     {
-        name: "bulletBullet"
+        name: "bulletBullet",
         amount: 1
-    }
+    },
     {
-        name: "undeadBullet"
+        name: "undeadBullet",
         amount: 1
-    }
+    },
     {
-        name: "poisonBullet"
+        name: "poisonBullet",
         amount: 1
     }
-]
+],
 
-playerLives: !gameConfig.playerConfig.lives
+playerLives: gameConfig.playerConfig.lives,
 
 stats: {
-    usedReserves: 0
+    usedReserves: 0,
     enemiesDefeated: 0
 }

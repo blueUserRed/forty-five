@@ -52,6 +52,9 @@ project(":desktop") {
 
 project(":onj") {
     apply plugin: "kotlin"
+    dependencies {
+        implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
+    }
 }
 
 project(":core") {

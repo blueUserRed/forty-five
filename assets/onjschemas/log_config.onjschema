@@ -1,5 +1,5 @@
 
-$LogTarget [
+$LogTarget {
 
     $Console { }
 
@@ -7,8 +7,8 @@ $LogTarget [
         path: string
     }
 
-]
+}
 
-logTarget: $LogTarget
-versionTag: string
+logTarget: $LogTarget,
+versionTag: string,
 logLevel: string

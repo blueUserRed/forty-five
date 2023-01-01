@@ -1,7 +1,6 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE1
 import com.badlogic.gdx.graphics.Texture
@@ -23,10 +22,10 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.alpha
 import ktx.actors.onTouchEvent
-import onj.OnjArray
-import onj.OnjFloat
-import onj.OnjNamedObject
-import onj.OnjObject
+import onj.value.OnjArray
+import onj.value.OnjFloat
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import kotlin.math.abs
 
 /**
@@ -103,18 +102,6 @@ interface ZIndexGroup {
 }
 
 /**
- * An Actor that needs to be initialised after screen is built
- */
-interface InitialiseableActor {
-
-    /**
-     * automatically called by the screenBuilder
-     * @see InitialiseableActor
-     */
-    fun init(screenDataProvider: ScreenDataProvider)
-}
-
-/**
  * an actor that can be in an animation
  */
 interface AnimationActor {
@@ -142,7 +129,7 @@ open class CustomLabel(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {
-            super.draw(batch, parentAlpha)
+            super.draw(null, parentAlpha)
             return
         }
         background?.draw(batch, x, y, width, height)
@@ -183,7 +170,7 @@ open class TemplateStringLabel(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor(private val region: TextureRegion) : Image(region), Maskable, ZIndexActor, DisableActor {
+open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIndexActor, DisableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -206,17 +193,11 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
-    var texture: TextureRegion = region
-        set(value) {
-            drawable = TextureRegionDrawable(value)
-            field = value
-        }
-
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
 
         if (batch == null) {
-            super.draw(batch, parentAlpha)
+            super.draw(null, parentAlpha)
             return
         }
 
@@ -226,7 +207,7 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
         if (mask == null) {
             val c = batch.color.cpy()
             batch.setColor(c.r, c.g, c.b, alpha)
-            batch.draw(texture, x, y, width, height)
+            drawable.draw(batch, x, y, width, height)
             batch.color = c
             return
         }
@@ -243,7 +224,7 @@ open class CustomImageActor(private val region: TextureRegion) : Image(region), 
         mask.bind()
         Gdx.gl.glActiveTexture(GL_TEXTURE0)
 
-        batch.draw(texture, x, y, width, height)
+        drawable.draw(batch, x, y, width, height)
         batch.flush()
 
         batch.shader = prevShader
@@ -395,7 +376,7 @@ class RotatableImageActor(
  * @param animation the animation; contains the frames and data such as the frameTime
  */
 class AnimatedImage(
-    private val animation: Animation
+    private val animation: FrameAnimation
 ) : CustomImageActor(animation.frames[animation.initialFrame]) {
 
     override var fixedZIndex: Int = 0
@@ -405,7 +386,7 @@ class AnimatedImage(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         curFrame = ((TimeUtils.timeSinceMillis(refTime) / animation.frameTime) % animation.frames.size).toInt()
-        texture = animation.frames[curFrame]
+        drawable = animation.frames[curFrame]
         super.draw(batch, parentAlpha)
     }
 }

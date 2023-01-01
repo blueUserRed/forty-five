@@ -2,16 +2,13 @@ package com.fourinachamber.fourtyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Screen
-import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.game.enemy.Enemy
-import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
-import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
+import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
+import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import onj.OnjObject
-import onj.OnjParser
-import onj.OnjSchemaParser
+import onj.customization.OnjConfig
 
 /**
  * main game object
@@ -23,7 +20,7 @@ object FourtyFive : Game() {
     /**
      * setting this variable will change the current screen and dispose the previous
      */
-    var curScreen: Screen? = null
+    var curScreen: OnjScreen? = null
         set(value) {
             FourtyFiveLogger.title("changing screen")
             field?.dispose()
@@ -31,8 +28,8 @@ object FourtyFive : Game() {
             setScreen(field)
         }
 
-//    private lateinit var gameScreen: Screen
 
+    var currentGame: GameController? = null
 
     override fun create() {
         init()
@@ -43,25 +40,11 @@ object FourtyFive : Game() {
     }
 
     private fun init() {
-        OnjExtensions.init()
+        OnjConfig.registerNameSpace("Common", CommonNamespace)
+        OnjConfig.registerNameSpace("Cards", CardsNamespace)
         FourtyFiveLogger.init()
         SaveState.read()
-
-        val graphicsConfig =
-            OnjParser.parseFile(Gdx.files.internal("config/graphics_config.onj").file())
-        val animationConfigSchema =
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/graphics_config.onjschema").file())
-
-        animationConfigSchema.assertMatches(graphicsConfig)
-
-        graphicsConfig as OnjObject
-
-        GameScreenController.init(graphicsConfig)
-        EnemyAction.init(graphicsConfig)
-        Effect.init(graphicsConfig)
-        Card.init(graphicsConfig)
-        StatusEffect.init(graphicsConfig)
-        Enemy.init(graphicsConfig)
+        GraphicsConfig.init()
     }
 
     override fun dispose() {
