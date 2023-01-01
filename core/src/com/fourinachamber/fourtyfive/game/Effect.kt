@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.utils.*
-import onj.value.OnjObject
 import java.lang.Integer.min
 
 /**

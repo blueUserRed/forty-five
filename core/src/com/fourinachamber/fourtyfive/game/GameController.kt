@@ -1,9 +1,7 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.FourtyFive
@@ -23,8 +21,6 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
-import kotlin.properties.Delegates
-
 
 /**
  * the Controller for the main game screen
@@ -88,7 +84,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val createdCards: MutableList<Card> = mutableListOf()
     private var bulletStack: MutableList<Card> = mutableListOf()
     private var coverCardStack: MutableList<Card> = mutableListOf()
-    private var oneShotStack: MutableList<Card> = mutableListOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     private var enemies: List<Enemy> = listOf()
@@ -135,8 +130,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private lateinit var defaultBullet: CardPrototype
     private lateinit var defaultCover: CardPrototype
-
-    private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
 
     override fun init(onjScreen: OnjScreen) {
         SaveState.read()
@@ -581,13 +574,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
         }
         executeTimelineLater(timeline)
-    }
-
-    /**
-     * executes a timeline as soon as the current timelineAction is finished
-     */
-    fun executeTimelineImmediate(timeline: Timeline) {
-        for (action in timeline.actions.reversed()) this.timeline.pushAction(action)
     }
 
     /**

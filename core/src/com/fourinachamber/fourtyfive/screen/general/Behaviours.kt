@@ -91,7 +91,7 @@ abstract class Behaviour(val actor: Actor) {
     protected open val onDisabledCLick: BehaviourCallback? = null
 
     /**
-     * binds the callbacks to the actor and sets the [screenDataProvider]
+     * binds the callbacks to the actor and sets the [onjScreen]
      */
     fun bindCallbacks(onjScreen: OnjScreen) {
         this.onjScreen = onjScreen

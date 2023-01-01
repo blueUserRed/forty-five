@@ -2,19 +2,13 @@ package com.fourinachamber.fourtyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
-import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.game.enemy.Enemy
-import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import onj.customization.OnjConfig
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.value.OnjObject
 
 /**
  * main game object

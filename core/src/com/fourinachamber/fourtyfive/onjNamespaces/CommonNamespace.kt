@@ -8,6 +8,7 @@ import onj.value.OnjString
 import onj.value.OnjValue
 import kotlin.reflect.KClass
 
+@Suppress("unused") // values and functions are read via reflection
 @OnjNamespace
 object CommonNamespace {
 

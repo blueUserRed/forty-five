@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
@@ -47,11 +46,6 @@ fun <T> T.eitherRight(): Either<Nothing, T> = Either.Right(this)
 val Vector3.xy: Vector2
     get() = Vector2(x, y)
 
-/**
- * gets the magnitude of the Vector
- */
-val <T : Vector<T>> Vector<T>.mag: Float
-    get() = this.len()
 
 operator fun Vector2.minus(other: Vector2) = Vector2(x - other.x, y - other.y)
 operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
@@ -69,20 +63,6 @@ fun Float.between(min: Float, max: Float): Float {
     if (this > max) return max
     return this
 }
-
-/**
- * rotates an array by [by]. Can be negative
- */
-inline fun <reified T> Array<T>.rotate(by: Int): Array<T> {
-    return Array(this.size) {
-        var newIndex = it + by
-        if (newIndex > this.size) newIndex %= this.size
-        if (newIndex < 0) newIndex += this.size
-        this[newIndex]
-    }
-}
-
-fun String.toBuilder(): StringBuilder = StringBuilder(this)
 
 object Utils {
 

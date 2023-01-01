@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
-import onj.*
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
@@ -34,8 +33,12 @@ object SaveState {
     const val defaultSavefilePath: String = "saves/default_savefile.onj"
 
 
+    // These two variables follow the kotlin naming convention, but the linter for some reason doesn't realise this
+    // https://kotlinlang.org/docs/coding-conventions.html#names-for-backing-properties
+    @Suppress("ObjectPropertyName")
     private var _additionalCards: MutableMap<String, Int> = mutableMapOf()
 
+    @Suppress("ObjectPropertyName")
     private var _cardsToDraw: MutableMap<String, Int> = mutableMapOf()
 
     /**

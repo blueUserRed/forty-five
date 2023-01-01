@@ -214,11 +214,11 @@ class CoverStack(
     val maxCards: Int,
     val onlyAllowAddingOnSameTurn: Boolean,
     private val coverArea: CoverArea,
-    private val detailFont: BitmapFont,
-    private val detailFontColor: Color,
-    private val backgroundTexture: TextureRegion?,
-    private val detailFontScale: Float,
-    private val spacing: Float,
+    detailFont: BitmapFont,
+    detailFontColor: Color,
+    backgroundTexture: TextureRegion?,
+    detailFontScale: Float,
+    spacing: Float,
     private val cardScale: Float,
     private val minSize: Float,
     val num: Int
@@ -245,12 +245,6 @@ class CoverStack(
     var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
 
     var parentWidth: Float = Float.MAX_VALUE
-
-    /**
-     * the number of cards in the stack
-     */
-    val numCards: Int
-        get() = _cards.size
 
     /**
      * true if this is the active slot
