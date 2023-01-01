@@ -1,6 +1,6 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
-import com.fourinachamber.fourtyfive.screen.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject

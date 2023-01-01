@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
-import com.fourinachamber.fourtyfive.screen.PostProcessor
+import com.fourinachamber.fourtyfive.screen.general.PostProcessor
 import onj.value.*
 
 /**

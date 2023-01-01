@@ -1,9 +1,11 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.StatusEffect
+import com.fourinachamber.fourtyfive.screen.general.CustomHorizontalGroup
+import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 
 /**
  * used for displaying status effects

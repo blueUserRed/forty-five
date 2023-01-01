@@ -1,11 +1,15 @@
-package com.fourinachamber.fourtyfive.card
+package com.fourinachamber.fourtyfive.game.card
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
+import com.fourinachamber.fourtyfive.screen.gameComponents.RevolverSlot
+import com.fourinachamber.fourtyfive.screen.general.DragBehaviour
+import com.fourinachamber.fourtyfive.screen.general.DropBehaviour
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.obj
 import onj.value.OnjNamedObject
 

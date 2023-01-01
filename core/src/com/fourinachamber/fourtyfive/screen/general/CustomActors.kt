@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0

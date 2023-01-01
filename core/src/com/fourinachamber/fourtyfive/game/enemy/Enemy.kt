@@ -4,18 +4,19 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
+import com.fourinachamber.fourtyfive.screen.gameComponents.StatusEffectDisplay
+import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.lang.Integer.max
 import java.lang.Integer.min
-import kotlin.properties.Delegates
 
 /**
  * represents an enemy
@@ -84,14 +85,6 @@ class Enemy(
     private val statusEffects: MutableList<StatusEffect> = mutableListOf()
 
     private lateinit var brain: EnemyBrain
-
-    private val dmgFont: BitmapFont = gameController.curScreen.fontOrError(dmgFontName)
-
-    private val coverStackDamagedParticles: ParticleEffect =
-        gameController.curScreen.particleOrError(coverStackDamagedParticlesName)
-
-    private val coverStackDestroyedParticles: ParticleEffect =
-        gameController.curScreen.particleOrError(coverStackDestroyedParticlesName)
 
     init {
         actor = EnemyActor(this)
@@ -176,63 +169,14 @@ class Enemy(
     }
 
     fun damagePlayer(damage: Int): Timeline = Timeline.timeline {
-        val gameController = FourtyFive.currentGame!!
-        val shakeAction = ShakeActorAction(xShake, yShake, xSpeedMultiplier, ySpeedMultiplier)
-        shakeAction.duration = shakeDuration
+        val chargeTimeline = GraphicsConfig.chargeTimeline(actor)
 
-        val moveByAction = CustomMoveByAction()
-        moveByAction.setAmount(xCharge, yCharge)
-        moveByAction.duration = chargeDuration
-        moveByAction.interpolation = chargeInterpolation
-
-        val playerLivesLabel = gameController.playerLivesLabel
-        var playerLivesPos = playerLivesLabel.localToStageCoordinates(Vector2(0f, 0f))
-        playerLivesPos += Vector2(playerLivesLabel.width / 2f, -playerLivesLabel.height)
-
-        val textAnimation = TextAnimation(
-            playerLivesPos.x,
-            playerLivesPos.y,
-            "If you see this something went wrong",
-            dmgFontColor,
-            dmgFontScale,
-            dmgFont,
-            dmgRaiseHeight,
-            dmgStartFadeoutAt,
-            gameController.curScreen,
-            dmgDuration
-        )
-
-        val screenDataProvider = gameController.curScreen
-        val overlayActor = CustomImageActor(screenDataProvider.textureOrError("hit_overlay"))
-        val viewport = screenDataProvider.stage.viewport
-
-        //TODO: put these magic numbers in an onj file somewhere
-        val overlayAnim = FadeInAndOutAnimation(
-            0f, 0f,
-            overlayActor,
-            screenDataProvider,
-            1500, 0, 500,
-            Vector2(viewport.worldWidth, viewport.worldHeight)
-        )
+        val overlayAction = GraphicsConfig.damageOverlay()
 
         var activeStack: CoverStack? = null
         var remaining = 0
 
-        action { actor.addAction(moveByAction) }
-
-        delayUntil { moveByAction.isComplete }
-
-        action {
-            actor.removeAction(moveByAction)
-            moveByAction.reset()
-            moveByAction.amountX = -moveByAction.amountX
-            moveByAction.amountY = -moveByAction.amountY
-            actor.addAction(moveByAction)
-        }
-
-        delayUntil { moveByAction.isComplete }
-
-        action { actor.removeAction(moveByAction) }
+        include(chargeTimeline)
 
         action {
             remaining = gameController.coverArea.damage(damage)
@@ -240,23 +184,17 @@ class Enemy(
         }
 
         includeLater(
-            {
-                getStackParticlesTimeline(activeStack!!, screenDataProvider, activeStack!!.currentHealth == 0)
-            },
+            { Timeline.timeline { includeAction(
+                GraphicsConfig.coverStackParticles(activeStack!!.currentHealth == 0, activeStack!!)
+            ) } },
             { activeStack != null }
+
         )
 
+        includeActionLater(overlayAction) { remaining != 0 }
+        delay(GraphicsConfig.bufferTime)
         includeLater(
-            { Timeline.timeline {
-                action { gameController.playGameAnimation(overlayAnim) }
-            } },
-            { remaining != 0 }
-        )
-
-        delay(bufferTime)
-
-        includeLater(
-            { getPlayerDamagedTimeline(remaining, shakeAction, gameController, textAnimation) },
+            { getPlayerDamagedTimeline(remaining, gameController) },
             { remaining != 0 }
         )
     }
@@ -264,63 +202,23 @@ class Enemy(
 
     private fun getPlayerDamagedTimeline(
         damage: Int,
-        shakeAction: ShakeActorAction,
         gameController: GameController,
-        textAnimation: TextAnimation
     ): Timeline {
 
-        val playerLivesLabel = gameController.playerLivesLabel
+        val livesLabel = gameController.playerLivesLabel
+        val shakeAction = GraphicsConfig.shakeActorAnimation(livesLabel, false)
+
+        val textAnimation = GraphicsConfig.numberChangeAnimation(
+            livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
+            "-$damage",
+            false,
+            false
+        )
 
         return Timeline.timeline {
-
-            action {
-                gameController.damagePlayer(damage)
-                playerLivesLabel.addAction(shakeAction)
-                textAnimation.text = "-$damage"
-                gameController.playGameAnimation(textAnimation)
-            }
-
-            delayUntil { textAnimation.isFinished() }
-
+            action { gameController.damagePlayer(damage) }
+            parallelActions(shakeAction, textAnimation)
         }
-    }
-
-    private fun getStackParticlesTimeline(
-        coverStack: CoverStack,
-        onjScreen: OnjScreen,
-        wasDestroyed: Boolean
-    ): Timeline = Timeline.timeline {
-
-        var particle: ParticleEffect? = null
-
-        delay(bufferTime)
-
-        action {
-            particle = if (wasDestroyed) coverStackDestroyedParticles else coverStackDamagedParticles
-
-            val particleActor = CustomParticleActor(particle!!)
-            particleActor.isAutoRemove = true
-            particleActor.fixedZIndex = Int.MAX_VALUE
-
-            if (wasDestroyed) {
-                particleActor.setPosition(
-                    coverStack.x + coverStack.width / 2,
-                    coverStack.y + coverStack.height / 2
-                )
-            } else {
-                val width = particle!!.emitters[0].spawnWidth.highMax
-                particleActor.setPosition(
-                    coverStack.x + coverStack.width / 2 - width / 2,
-                    coverStack.y
-                )
-            }
-
-            onjScreen.addActorToRoot(particleActor)
-            particleActor.start()
-        }
-
-        delayUntil { particle?.isComplete ?: true }
-
     }
 
 
@@ -328,35 +226,6 @@ class Enemy(
      * reduces the enemies lives by [damage]
      */
     fun damage(damage: Int): Timeline = Timeline.timeline {
-        val gameController = FourtyFive.currentGame!!
-        val (livesX, livesY) = actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f))
-
-        val livesTextAnimation = TextAnimation(
-            livesX, livesY,
-            "-$damage",
-            dmgFontColor,
-            dmgFontScale,
-            gameController.curScreen.fontOrError(dmgFontName),
-            dmgRaiseHeight,
-            dmgStartFadeoutAt,
-            gameController.curScreen,
-            dmgDuration
-        )
-
-        val (coverX, coverY) = actor.coverText.localToStageCoordinates(Vector2(0f, 0f))
-
-        val coverTextAnimation = TextAnimation(
-            coverX, coverY,
-            "-$damage",
-            dmgFontColor,
-            dmgFontScale,
-            gameController.curScreen.fontOrError(dmgFontName),
-            dmgRaiseHeight,
-            dmgStartFadeoutAt,
-            gameController.curScreen,
-            dmgDuration
-        )
-
         var remaining = 0
 
         action {
@@ -366,13 +235,16 @@ class Enemy(
         includeLater(
             { Timeline.timeline {
                 action {
-                    coverTextAnimation.text = "-${min(damage, currentCover)}"
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
                     actor.updateText()
-                    gameController.playGameAnimation(coverTextAnimation)
                 }
-                delayUntil { coverTextAnimation.isFinished() }
+                includeAction(GraphicsConfig.numberChangeAnimation(
+                    actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
+                    "-${min(damage, currentCover)}",
+                    true,
+                    false
+                ))
             } },
             { currentCover != 0 }
         )
@@ -380,12 +252,15 @@ class Enemy(
         includeLater(
             { Timeline.timeline {
                 action {
-                    livesTextAnimation.text = "-$remaining"
                     currentLives -= remaining
                     actor.updateText()
-                    gameController.playGameAnimation(livesTextAnimation)
                 }
-                delayUntil { livesTextAnimation.isFinished() }
+                includeAction(GraphicsConfig.numberChangeAnimation(
+                    actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
+                    "-$remaining",
+                    true,
+                    false
+                ))
             } },
             { remaining != 0 }
         )
@@ -394,62 +269,6 @@ class Enemy(
     companion object {
 
         private var instanceCounter = 0
-
-        private lateinit var dmgFontName: String
-        private lateinit var dmgFontColor: Color
-        private var dmgFontScale by Delegates.notNull<Float>()
-        private var dmgDuration by Delegates.notNull<Int>()
-        private var dmgRaiseHeight by Delegates.notNull<Float>()
-        private var dmgStartFadeoutAt by Delegates.notNull<Int>()
-
-        private var xShake by Delegates.notNull<Float>()
-        private var yShake by Delegates.notNull<Float>()
-        private var xSpeedMultiplier by Delegates.notNull<Float>()
-        private var ySpeedMultiplier by Delegates.notNull<Float>()
-        private var shakeDuration by Delegates.notNull<Float>()
-
-        private var xCharge by Delegates.notNull<Float>()
-        private var yCharge by Delegates.notNull<Float>()
-        private var chargeDuration by Delegates.notNull<Float>()
-        private lateinit var chargeInterpolation: Interpolation
-
-        private lateinit var coverStackDestroyedParticlesName: String
-        private lateinit var coverStackDamagedParticlesName: String
-
-        private var bufferTime by Delegates.notNull<Int>()
-
-        fun init(config: OnjObject) {
-            val dmgOnj = config.get<OnjObject>("playerLivesAnimation")
-
-            dmgFontName = dmgOnj.get<String>("font")
-            dmgFontScale = dmgOnj.get<Double>("fontScale").toFloat()
-            dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
-            dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
-            dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColor = dmgOnj.get<Color>("negativeFontColor")
-
-            val shakeOnj = config.get<OnjObject>("shakeAnimation")
-
-            xShake = shakeOnj.get<Double>("xShake").toFloat()
-            yShake = shakeOnj.get<Double>("yShake").toFloat()
-            xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
-            ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
-            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
-
-            val chargeOnj = config.get<OnjObject>("enemyChargeAnimation")
-
-            xCharge = chargeOnj.get<Double>("xCharge").toFloat()
-            yCharge = chargeOnj.get<Double>("yCharge").toFloat()
-            chargeDuration = chargeOnj.get<Double>("duration").toFloat() / 2f // divide by two because anim is played twice
-            chargeInterpolation = Utils.interpolationOrError(chargeOnj.get<String>("interpolation"))
-
-            val coverStackOnj = config.get<OnjObject>("coverStackParticles")
-
-            coverStackDamagedParticlesName = coverStackOnj.get<String>("damaged")
-            coverStackDestroyedParticlesName = coverStackOnj.get<String>("destroyed")
-
-            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
-        }
 
         /**
          * reads an array of Enemies from on an OnjArray

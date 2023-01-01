@@ -1,16 +1,16 @@
-package com.fourinachamber.fourtyfive.card
+package com.fourinachamber.fourtyfive.game.card
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.Effect
-import com.fourinachamber.fourtyfive.game.GameController
+import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
-import com.fourinachamber.fourtyfive.screen.CustomImageActor
-import com.fourinachamber.fourtyfive.screen.OnjScreen
-import com.fourinachamber.fourtyfive.screen.ZIndexActor
+import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
@@ -142,7 +142,10 @@ class Card(
         modifiers.remove(rottenModifier)
         rottenModifier = CardModifier(
             newDamage,
-            TemplateString(rottenDetailTextRawString, mapOf("damageLost" to newDamage))
+            TemplateString(
+                GraphicsConfig.rawTemplateString("rottenDetailText"),
+                mapOf("damageLost" to newDamage)
+            )
         ) { true }
         modifiers.add(rottenModifier)
         isDamageDirty = true
@@ -386,13 +389,6 @@ class Card(
             }
         }
 
-        private lateinit var rottenDetailTextRawString: String
-
-        fun init(config: OnjObject) {
-            val tmplOnj = config.get<OnjObject>("stringTemplates")
-            rottenDetailTextRawString = tmplOnj.get<String>("rottenDetailText")
-        }
-
     }
 
     /**
@@ -433,9 +429,6 @@ class CardActor(val card: Card) : CustomImageActor(card.texture), ZIndexActor {
      */
     var isHoveredOver: Boolean = false
         private set
-
-//    //TODO: fix
-//    private lateinit var gameController: GameController
 
     private val destroyModeOnClickListener: EventListener = EventListener { event ->
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false

@@ -1,9 +1,13 @@
 package com.fourinachamber.fourtyfive.utils
 
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.game.GameAnimation
 
 /**
- * tool for timing (currently only sequential) tasks. can be created directly using a list of TimelineActions or using
+ * tool for timing tasks. can be created directly using a list of TimelineActions or using
  * [timeline]
  */
 class Timeline(private val _actions: MutableList<TimelineAction>) {
@@ -76,12 +80,27 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
             protected set
 
 
+        /**
+         * called when the actions starts.
+         * super.start() should be called when overriding
+         */
         open fun start(timeline: Timeline) {
             hasBeenStarted = true
         }
 
+        /**
+         * called every frame as long as this action is active
+         */
         open fun update() { }
+
+        /**
+         * checks if the action has finished
+         */
         abstract fun isFinished(): Boolean
+
+        /**
+         * called when the action ends
+         */
         open fun end() { }
     }
 
@@ -103,6 +122,10 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
                     action()
                 }
             })
+        }
+
+        fun includeAction(action: TimelineAction) {
+            timelineActions.add(action)
         }
 
         /**
@@ -162,6 +185,45 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         }
 
         /**
+         * same as [includeLater], but includes an action instead of a timeline
+         */
+        fun includeActionLater(action: TimelineAction, condition: () -> Boolean) {
+            timelineActions.add(object : TimelineAction() {
+
+                override fun start(timeline: Timeline) {
+                    super.start(timeline)
+                    if (condition()) timeline.pushAction(action)
+                }
+
+                override fun isFinished(): Boolean = true
+
+            })
+        }
+
+        fun parallelActions(vararg actions: TimelineAction) {
+            timelineActions.add(object : TimelineAction() {
+
+                override fun start(timeline: Timeline) {
+                    super.start(timeline)
+                    for (action in actions) action.start(timeline)
+                }
+
+                override fun update() {
+                    for (action in actions) action.update()
+                }
+
+                override fun end() {
+                    for (action in actions) action.end()
+                }
+
+                override fun isFinished(): Boolean {
+                    for (action in actions) if (!action.isFinished()) return false
+                    return true
+                }
+            })
+        }
+
+        /**
          * creates the timeline. Should only be used by [timeline]
          */
         fun build(): Timeline = Timeline(timelineActions)
@@ -181,4 +243,38 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
 
     }
 
+}
+
+/**
+ * useful for including gameAnimations in timelines
+ */
+class GameAnimationTimelineAction(private val gameAnimation: GameAnimation) : Timeline.TimelineAction() {
+
+    override fun start(timeline: Timeline) {
+        super.start(timeline)
+        FourtyFive.currentGame!!.playGameAnimation(gameAnimation)
+    }
+
+    override fun isFinished(): Boolean = gameAnimation.isFinished()
+}
+
+/**
+ * useful for including actions on actors in timelines
+ */
+class ActorActionTimelineAction(
+    private val action: TemporalAction,
+    private val actor: Actor
+) : Timeline.TimelineAction() {
+
+    override fun start(timeline: Timeline) {
+        super.start(timeline)
+        actor.addAction(action)
+    }
+
+    override fun isFinished(): Boolean = action.isComplete
+
+    override fun end() {
+        actor.removeAction(action)
+        action.reset()
+    }
 }
