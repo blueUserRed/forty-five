@@ -2,15 +2,16 @@ package com.fourinachamber.fourtyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Screen
-import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjExtensions
-import com.fourinachamber.fourtyfive.screen.OnjScreen
-import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
+import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
+import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import onj.customization.OnjConfig
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.value.OnjObject
@@ -45,25 +46,11 @@ object FourtyFive : Game() {
     }
 
     private fun init() {
-        OnjExtensions.init()
+        OnjConfig.registerNameSpace("Common", CommonNamespace)
+        OnjConfig.registerNameSpace("Cards", CardsNamespace)
         FourtyFiveLogger.init()
         SaveState.read()
-
-        val graphicsConfig =
-            OnjParser.parseFile(Gdx.files.internal("config/graphics_config.onj").file())
-        val animationConfigSchema =
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/graphics_config.onjschema").file())
-
-        animationConfigSchema.assertMatches(graphicsConfig)
-
-        graphicsConfig as OnjObject
-
-        GameController.init(graphicsConfig)
-        EnemyAction.init(graphicsConfig)
-        Effect.init(graphicsConfig)
-        Card.init(graphicsConfig)
-        StatusEffect.init(graphicsConfig)
-        Enemy.init(graphicsConfig)
+        GraphicsConfig.init()
     }
 
     override fun dispose() {

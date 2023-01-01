@@ -7,13 +7,9 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
-import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.screen.OnjScreen
-import kotlin.random.Random
-import kotlin.random.asKotlinRandom
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or

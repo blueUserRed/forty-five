@@ -11,9 +11,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.card.CardPrototype
+import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.SaveState
+import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2

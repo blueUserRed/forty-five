@@ -10,8 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fourtyfive.screen.CustomLabel
-import com.fourinachamber.fourtyfive.screen.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.CustomLabel
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import ktx.actors.alpha
 import java.lang.Float.min
 

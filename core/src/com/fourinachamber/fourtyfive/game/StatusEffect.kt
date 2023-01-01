@@ -3,8 +3,8 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.screen.CustomImageActor
-import com.fourinachamber.fourtyfive.screen.ShakeActorAction
+import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
+import com.fourinachamber.fourtyfive.screen.general.ShakeActorAction
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.value.OnjObject
@@ -114,28 +114,24 @@ abstract class StatusEffect(
         val damage: Int,
         turns: Int,
         target: StatusEffectTarget
-    ) : StatusEffect(poisonIconName, turns, target, poisonIconScale) {
+    ) : StatusEffect(
+        GraphicsConfig.iconName("poison"),
+        turns,
+        target,
+        GraphicsConfig.iconScale("poison")
+    ) {
 
         override fun copy(): StatusEffect = Poison(damage, turns, target)
 
         override fun executeAfterRevolverTurn(
             gameController: GameController
         ): Timeline = Timeline.timeline {
-
             FourtyFiveLogger.debug(logTag, "executing poison effect")
+            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
 
-            val shakeActorAction = ShakeActorAction(xShake * 0.5f, yShake, xSpeedMultiplier, ySpeedMultiplier)
-            shakeActorAction.duration = shakeDuration
-
-            action { icon.addAction(shakeActorAction) }
-            delayUntil { shakeActorAction.isComplete }
-            delay(bufferTime)
-            action {
-                icon.removeAction(shakeActorAction)
-                shakeActorAction.reset()
-            }
+            includeAction(shakeActorAction)
+            delay(GraphicsConfig.bufferTime)
             include(target.damage(damage))
-
         }
 
         override fun canStackWith(effect: StatusEffect): Boolean {
@@ -163,7 +159,12 @@ abstract class StatusEffect(
         turns: Int,
         private val percent: Float,
         target: StatusEffectTarget
-    ) : StatusEffect(burningIconName, turns, target, burningIconScale) {
+    ) : StatusEffect(
+        GraphicsConfig.iconName("burning"),
+        turns,
+        target,
+        GraphicsConfig.iconScale("burning")
+    ) {
 
         override fun copy(): StatusEffect = Burning(turns, percent, target)
 
@@ -177,17 +178,11 @@ abstract class StatusEffect(
             FourtyFiveLogger.debug(logTag, "executing burning effect")
 
             val additionalDamage = floor(damage * percent).toInt()
-            val shakeActorAction = ShakeActorAction(xShake * 0.5f, yShake, xSpeedMultiplier, ySpeedMultiplier)
-            shakeActorAction.duration = shakeDuration
+            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
 
-            delay(bufferTime)
-            action { icon.addAction(shakeActorAction) }
-            delayUntil { shakeActorAction.isComplete }
-            delay(bufferTime)
-            action {
-                icon.removeAction(shakeActorAction)
-                shakeActorAction.reset()
-            }
+            delay(GraphicsConfig.bufferTime)
+            includeAction(shakeActorAction)
+            delay(GraphicsConfig.bufferTime)
             include(target.damage(additionalDamage))
         }
 
@@ -209,59 +204,6 @@ abstract class StatusEffect(
         }
     }
 
-    companion object {
-
-        private var xShake by Delegates.notNull<Float>()
-        private var yShake by Delegates.notNull<Float>()
-        private var xSpeedMultiplier by Delegates.notNull<Float>()
-        private var ySpeedMultiplier by Delegates.notNull<Float>()
-        private var shakeDuration by Delegates.notNull<Float>()
-
-        private lateinit var dmgFontName: String
-        private lateinit var dmgFontColorNegative: Color
-        private lateinit var dmgFontColorPositive: Color
-        private var dmgFontScale by Delegates.notNull<Float>()
-        private var dmgDuration by Delegates.notNull<Int>()
-        private var dmgRaiseHeight by Delegates.notNull<Float>()
-        private var dmgStartFadeoutAt by Delegates.notNull<Int>()
-
-        private lateinit var poisonIconName: String
-        private var poisonIconScale by Delegates.notNull<Float>()
-        private lateinit var burningIconName: String
-        private var burningIconScale by Delegates.notNull<Float>()
-
-        private var bufferTime by Delegates.notNull<Int>()
-
-        fun init(config: OnjObject) {
-            val shakeOnj = config.get<OnjObject>("shakeAnimation")
-
-            xShake = shakeOnj.get<Double>("xShake").toFloat()
-            yShake = shakeOnj.get<Double>("yShake").toFloat()
-            xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
-            ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
-            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
-
-            val dmgOnj = config.get<OnjObject>("playerLivesAnimation")
-
-            dmgFontName = dmgOnj.get<String>("font")
-            dmgFontScale = dmgOnj.get<Double>("fontScale").toFloat()
-            dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
-            dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
-            dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColorPositive = dmgOnj.get<Color>("positiveFontColor")
-            dmgFontColorNegative = dmgOnj.get<Color>("negativeFontColor")
-
-            val statusIcons = config.get<OnjObject>("statusEffectIcons")
-
-            poisonIconName = statusIcons.get<String>("poison")
-            poisonIconScale = statusIcons.get<Double>("poisonScale").toFloat()
-            burningIconName = statusIcons.get<String>("burning")
-            burningIconScale = statusIcons.get<Double>("burningScale").toFloat()
-
-            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
-        }
-
-    }
 
     /**
      * represents a possible target a status effect can be applied to

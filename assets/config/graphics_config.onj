@@ -25,24 +25,15 @@ enemyQuickChargeAnimation: {
     interpolation: "swing"
 },
 
-playerLivesAnimation: {
+numberChangeAnimation: {
     font: "vanilla_whale",
     negativeFontColor: color.red,
     positiveFontColor: color.green,
     fontScale: 0.2,
     duration: 1.5,
     startFadeoutAt: 1.0,
-    raiseHeight: -20.0,
-},
-
-reservesAnimation: {
-    font: "vanilla_whale",
-    negativeFontColor: color.red,
-    positiveFontColor: color.green,
-    fontScale: 0.2,
-    duration: 1.5,
-    startFadeoutAt: 1.0,
-    raiseHeight: 20.0,
+    raiseDistance: 20.0,
+    sinkDistance: -20.0
 },
 
 bannerAnimation: {
@@ -55,10 +46,21 @@ bannerAnimation: {
 },
 
 statusEffectIcons: {
-    burning: "burning_icon",
-    burningScale: 0.025,
-    poison: "poison_icon",
-    poisonScale: 0.025,
+    burning: {
+        icon: "burning_icon",
+        scale: 0.025
+    },
+    poison: {
+        icon: "poison_icon",
+        scale: 0.025
+    }
+},
+
+damageOverlay: {
+    duration: 1.5,
+    fadeIn: 0.0,
+    fadeOut: 0.5,
+    overlay: "hit_overlay"
 },
 
 destroyCardPostProcessor: {
@@ -76,7 +78,7 @@ stringTemplates:  {
     giftDetailText: "{source} gifted a {text} of {amount}!",
 },
 
-fadeInAndOutAnimation: {
+insultFadeAnimation: {
     fadeFontName: "red_wing",
     fadeFontColor: color.black,
     fadeFontScale: 0.1,

@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.card
+package com.fourinachamber.fourtyfive.game.card
 
 import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx

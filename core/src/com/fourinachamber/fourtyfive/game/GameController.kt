@@ -7,11 +7,14 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.card.CardPrototype
+import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
-import com.fourinachamber.fourtyfive.screen.EnemyArea
-import com.fourinachamber.fourtyfive.screen.*
+import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
+import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
+import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
+import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
+import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -840,34 +843,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameController: GameController) = with(gameController) {
                 val timeline = Timeline.timeline {
 
-                    val enemyBannerAnim = BannerAnimation(
-                        curScreen.textureOrError(enemyTurnBannerName),
-                        curScreen,
-                        bannerAnimDuration,
-                        bannerScaleAnimDuration,
-                        bannerBeginScale,
-                        bannerEndScale
-                    )
-                    val playerBannerAnim = BannerAnimation(
-                        curScreen.textureOrError(playerTurnBannerName),
-                        curScreen,
-                        bannerAnimDuration,
-                        bannerScaleAnimDuration,
-                        bannerBeginScale,
-                        bannerEndScale
-                    )
+                    val enemyBannerAnim = GraphicsConfig.bannerAnimation(false)
+                    val playerBannerAnim = GraphicsConfig.bannerAnimation(true)
 
-                    action { playGameAnimation(enemyBannerAnim) }
-                    delayUntil { enemyBannerAnim.isFinished() }
-                    delay(bufferTime)
+                    includeAction(enemyBannerAnim)
+                    delay(GraphicsConfig.bufferTime)
                     enemies[0].doAction()?.let { include(it) }
-                    delay(bufferTime)
-                    action {
-                        enemies[0].resetAction()
-                        playGameAnimation(playerBannerAnim)
-                    }
-                    delayUntil { playerBannerAnim.isFinished() }
-                    delay(bufferTime)
+                    delay(GraphicsConfig.bufferTime)
+                    action { enemies[0].resetAction() }
+                    includeAction(playerBannerAnim)
+                    delay(GraphicsConfig.bufferTime)
                     action { changePhase(INITIAL_DRAW) }
                 }
 
@@ -906,78 +891,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     companion object {
 
         const val logTag = "game"
-
-        private var bufferTime by Delegates.notNull<Int>()
-
-        private var bannerAnimDuration by Delegates.notNull<Int>()
-        private var bannerScaleAnimDuration by Delegates.notNull<Int>()
-        private var bannerBeginScale by Delegates.notNull<Float>()
-        private var bannerEndScale by Delegates.notNull<Float>()
-
-        private var xShake by Delegates.notNull<Float>()
-        private var yShake by Delegates.notNull<Float>()
-        private var xShakeSpeedMultiplier by Delegates.notNull<Float>()
-        private var yShakeSpeedMultiplier by Delegates.notNull<Float>()
-        private var shakeDuration by Delegates.notNull<Float>()
-
-        private lateinit var dmgFontName: String
-        private lateinit var dmgFontColor: Color
-        private var dmgFontScale by Delegates.notNull<Float>()
-        private var dmgDuration by Delegates.notNull<Int>()
-        private var dmgRaiseHeight by Delegates.notNull<Float>()
-        private var dmgStartFadeoutAt by Delegates.notNull<Int>()
-
-        private var xQuickCharge by Delegates.notNull<Float>()
-        private var yQuickCharge by Delegates.notNull<Float>()
-        private var quickChargeDuration by Delegates.notNull<Float>()
-        private lateinit var quickChargeInterpolation: Interpolation
-
-        private lateinit var playerTurnBannerName: String
-        private lateinit var enemyTurnBannerName: String
-
-        private lateinit var destroyCardsPostProcessorName: String
-
-        fun init(config: OnjObject) {
-
-            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
-
-            val bannerOnj = config.get<OnjObject>("bannerAnimation")
-
-            bannerAnimDuration = (bannerOnj.get<Double>("duration") * 1000).toInt()
-            bannerScaleAnimDuration = (bannerOnj.get<Double>("scaleAnimDuration") * 1000).toInt()
-            bannerBeginScale = bannerOnj.get<Double>("beginScale").toFloat()
-            bannerEndScale = bannerOnj.get<Double>("endScale").toFloat()
-
-            playerTurnBannerName = bannerOnj.get<String>("playerTurnBanner")
-            enemyTurnBannerName = bannerOnj.get<String>("enemyTurnBanner")
-
-            val plOnj = config.get<OnjObject>("playerLivesAnimation")
-
-            dmgFontName = plOnj.get<String>("font")
-            dmgFontScale = plOnj.get<Double>("fontScale").toFloat()
-            dmgDuration = (plOnj.get<Double>("duration") * 1000).toInt()
-            dmgRaiseHeight = plOnj.get<Double>("raiseHeight").toFloat()
-            dmgStartFadeoutAt = (plOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColor = plOnj.get<Color>("negativeFontColor")
-
-            val shakeOnj = config.get<OnjObject>("shakeAnimation")
-
-            xShake = shakeOnj.get<Double>("xShake").toFloat()
-            yShake = shakeOnj.get<Double>("yShake").toFloat()
-            xShakeSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
-            yShakeSpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
-            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
-
-            val chargeOnj = config.get<OnjObject>("enemyQuickChargeAnimation")
-
-            xQuickCharge = chargeOnj.get<Double>("xCharge").toFloat()
-            yQuickCharge = chargeOnj.get<Double>("yCharge").toFloat()
-            quickChargeDuration = chargeOnj.get<Double>("duration").toFloat() / 2f // divide by two because anim is played twice
-            quickChargeInterpolation = Utils.interpolationOrError(chargeOnj.get<String>("interpolation"))
-
-            destroyCardsPostProcessorName = config.get<OnjObject>("destroyCardPostProcessor").get<String>("name")
-
-        }
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

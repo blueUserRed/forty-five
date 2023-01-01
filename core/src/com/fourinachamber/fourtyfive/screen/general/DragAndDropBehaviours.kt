@@ -1,14 +1,13 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fourtyfive.card.Card
-import com.fourinachamber.fourtyfive.card.CardDragSource
-import com.fourinachamber.fourtyfive.card.CoverAreaDropTarget
-import com.fourinachamber.fourtyfive.card.RevolverDropTarget
+import com.fourinachamber.fourtyfive.game.card.CardDragSource
+import com.fourinachamber.fourtyfive.game.card.CoverAreaDropTarget
+import com.fourinachamber.fourtyfive.game.card.RevolverDropTarget
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.eitherLeft
 import com.fourinachamber.fourtyfive.utils.eitherRight

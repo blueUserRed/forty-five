@@ -1,10 +1,12 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.contains

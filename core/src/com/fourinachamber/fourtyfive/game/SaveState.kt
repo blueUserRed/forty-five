@@ -1,7 +1,7 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
-import com.fourinachamber.fourtyfive.card.Card
+import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.*

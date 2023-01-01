@@ -1,8 +1,7 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import kotlin.math.cos
 import kotlin.math.sin
