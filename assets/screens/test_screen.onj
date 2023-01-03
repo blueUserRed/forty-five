@@ -4,6 +4,9 @@
 
 import "imports/colors.onj" as color;
 
+use Experimental__Screen;
+use Experimental__Style;
+
 viewport: $FitViewport {
     worldWidth: 160.0,
     worldHeight: 90.0
@@ -14,6 +17,10 @@ assets: {
         {
             name: "white",
             color: color.white
+        },
+        {
+            name: "black",
+            color: color.black
         }
     ],
     fonts: [
@@ -38,40 +45,45 @@ options: {
 
 root: {
     debug: true,
-    children: [
+} children [
+
+    $Label {
+        text: "Hello World",
+        font: "red_wing",
+        fontScale: 0.18,
+        color: color.black,
+        debug: true,
+        styles: [ "test_style" ]
+    },
+
+    $Label {
+        text: "Hello World 2",
+        font: "red_wing",
+        fontScale: 0.18,
+        color: color.white,
+        debug: true,
+        directProperties: [ background("black") ]
+    },
+
+    $Box {
+        debug: true,
+        directProperties: [ relWidth(50.0) ]
+    } children [
+
         $Label {
-            text: "Hello World",
-            font: "red_wing",
-            fontScale: 0.18,
-            color: color.white,
-            debug: true,
-            styles: [ "test_style" ]
-        },
-        $Label {
-            text: "Hello World 2",
+            text: "Test",
             font: "red_wing",
             fontScale: 0.18,
             color: color.white,
             debug: true
         },
-        $Box {
-            debug: true,
-            children: [
-                $Label {
-                    text: "Test",
-                    font: "red_wing",
-                    fontScale: 0.18,
-                    color: color.white,
-                    debug: true
-                },
-                $Label {
-                    text: "Test 2",
-                    font: "red_wing",
-                    fontScale: 0.18,
-                    color: color.white,
-                    debug: true
-                }
-            ]
+
+        $Label {
+            text: "Test 2",
+            font: "red_wing",
+            fontScale: 0.18,
+            color: color.white,
+            debug: true
         }
     ]
-}
+]

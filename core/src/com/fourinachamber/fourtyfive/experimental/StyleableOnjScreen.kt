@@ -48,7 +48,12 @@ class StyleableOnjScreen(
 
     override fun show() {
         super.show()
-        for (target in styleTargets) target.initialStyle(this)
+        for (target in styleTargets) target.init(this)
+    }
+
+    override fun render(delta: Float) {
+        for (styleTarget in styleTargets) styleTarget.update()
+        super.render(delta)
     }
 
 }
