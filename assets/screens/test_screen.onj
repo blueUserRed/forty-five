@@ -1,0 +1,77 @@
+/////////////////////////////////////////////////
+//               experimental                  //
+/////////////////////////////////////////////////
+
+import "imports/colors.onj" as color;
+
+viewport: $FitViewport {
+    worldWidth: 160.0,
+    worldHeight: 90.0
+},
+
+assets: {
+    colorTextures: [
+        {
+            name: "white",
+            color: color.white
+        }
+    ],
+    fonts: [
+        $DistanceFieldFont {
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
+            imageFile: "fonts/red_wing.png"
+        }
+    ],
+    textureAtlases: [
+        {
+            file: "textures/packed/title_screen/title_screen.atlas",
+            defines: [ "background3", "logo"]
+        }
+    ],
+    styleFiles: [ "screens/test_style.onj" ]
+},
+
+options: {
+    background: "background3"
+},
+
+root: {
+    debug: true,
+    children: [
+        $Label {
+            text: "Hello World",
+            font: "red_wing",
+            fontScale: 0.18,
+            color: color.white,
+            debug: true,
+            styles: [ "test_style" ]
+        },
+        $Label {
+            text: "Hello World 2",
+            font: "red_wing",
+            fontScale: 0.18,
+            color: color.white,
+            debug: true
+        },
+        $Box {
+            debug: true,
+            children: [
+                $Label {
+                    text: "Test",
+                    font: "red_wing",
+                    fontScale: 0.18,
+                    color: color.white,
+                    debug: true
+                },
+                $Label {
+                    text: "Test 2",
+                    font: "red_wing",
+                    fontScale: 0.18,
+                    color: color.white,
+                    debug: true
+                }
+            ]
+        }
+    ]
+}
