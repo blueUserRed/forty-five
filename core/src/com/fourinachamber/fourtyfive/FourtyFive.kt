@@ -7,6 +7,7 @@ import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.experimental.ScreenBuilder2
+import com.fourinachamber.fourtyfive.experimental.ScreenNamespace
 import com.fourinachamber.fourtyfive.experimental.StyleNamespace
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import onj.customization.OnjConfig
@@ -45,6 +46,7 @@ object FourtyFive : Game() {
         OnjConfig.registerNameSpace("Common", CommonNamespace)
         OnjConfig.registerNameSpace("Cards", CardsNamespace)
         OnjConfig.registerNameSpace("Experimental__Style", StyleNamespace) //TODO: experimental
+        OnjConfig.registerNameSpace("Experimental__Screen", ScreenNamespace) //TODO: experimental
         FourtyFiveLogger.init()
         SaveState.read()
         GraphicsConfig.init()

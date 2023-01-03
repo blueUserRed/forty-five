@@ -15,7 +15,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
+import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
@@ -73,7 +75,7 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             particles = particles,
             postProcessors = postProcessors,
             children = listOf(root),
-            viewport = FitViewport(160f, 90f),
+            viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
             styleTargets = styleTargets,
             toDispose = toDispose,
@@ -158,6 +160,15 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
                     styles.putAll(Style.readFromFile(it.value as String))
                 }
         }
+        if (assets.hasKey<OnjArray>("styles")) {
+            assets
+                .get<OnjArray>("styles")
+                .value
+                .map { Style.readStyle(it as OnjObject) }
+                .forEach {
+                    styles[it.first] = it.second
+                }
+        }
     }
 
     private fun doDragAndDrop(screen: OnjScreen): MutableMap<String, DragAndDrop> {
@@ -191,6 +202,31 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
                 }
         }
         return flexBox
+    }
+
+    private fun getViewport(viewportOnj: OnjNamedObject): Viewport = when (viewportOnj.name) {
+
+        "FitViewport" -> {
+            val worldHeight = viewportOnj.get<Double>("worldHeight").toFloat()
+            val worldWidth = viewportOnj.get<Double>("worldWidth").toFloat()
+            FitViewport(worldWidth, worldHeight)
+        }
+
+        "ExtendViewport" -> {
+            val minWidth = viewportOnj.get<Double>("minWidth").toFloat()
+            val minHeight = viewportOnj.get<Double>("minWidth").toFloat()
+            val viewport = ExtendViewport(minWidth, minHeight)
+            viewport
+        }
+
+        else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
+
+    }.apply {
+        if (!viewportOnj.hasKey<String>("backgroundTexture")) return@apply
+        val background = drawableOrError(viewportOnj.get<String>("backgroundTexture"))
+        earlyRenderTasks.add {
+            background.draw(stage.batch, 0f, 0f, viewport.worldWidth, viewport.worldHeight)
+        }
     }
 
     private fun getWidget(widgetOnj: OnjNamedObject, parent: FlexBox?): Unit = when (widgetOnj.name) {
@@ -301,16 +337,37 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
     }.let { actor ->
+
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
-        widgetOnj.ifHas<OnjArray>("styles") { style ->
+
+        val styles = if (widgetOnj.hasKey<OnjArray>("styles")) {
+            val styles = widgetOnj.get<OnjArray>("styles")
+           styles
+               .value
+               .map { styleOrError(it.value as String) }
+        } else null
+
+        val directProperties = if (widgetOnj.hasKey<OnjArray>("directProperties")) {
+            val properties = widgetOnj.get<OnjArray>("directProperties")
+            properties
+                .value
+                .map {
+                    it as OnjStyleProperty
+                    it.value
+                }
+        } else null
+
+        if (styles != null || directProperties != null) {
             node ?: throw RuntimeException(
                 "root box can currently not be styled"
             )
-            val styles = style
-                .value
-                .map { styleOrError(it.value as String) }
-            styleTargets.add(StyleTarget(node, actor, styles))
+            styleTargets.add(StyleTarget(
+                node,
+                actor,
+                styles ?: listOf(),
+                directProperties ?: listOf()
+            ))
         }
     }
 

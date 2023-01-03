@@ -6,10 +6,7 @@ import "imports/font_group.onjschema" as _;
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 
 use Common;
-
-//var viewportSharedKeys = {
-//    backgroundTexture?: string
-//};
+use Experimental__Style;
 
 $Viewport {
 
@@ -33,7 +30,8 @@ var widgetSharedKeys = {
     zIndex?: int,
     visible?: boolean,
     name?: string,
-    styles?: string[]
+    styles?: string[],
+    directProperties?: StyleProperty[]
 };
 
 var detailTextSharedKeys = {
@@ -305,7 +303,11 @@ assets: {
         textureDir: string,
         scale: float,
     }[],
-    styleFiles?: string[]
+    styleFiles?: string[],
+    styles?: {
+        name: string,
+        properties: StyleProperty[]
+    }[]
 },
 
 options: {
