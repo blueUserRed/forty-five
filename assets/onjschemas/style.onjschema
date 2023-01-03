@@ -1,0 +1,10 @@
+/////////////////////////////////////////////////
+//               experimental                  //
+/////////////////////////////////////////////////
+
+use Experimental__Style;
+
+styles: {
+    name: string,
+    properties: StyleProperty[]
+}[]
