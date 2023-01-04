@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fourtyfive.utils.epsilonEquals
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -61,6 +60,9 @@ class StyleTarget(
 
     private val animations: MutableList<StyleAnimation> = mutableListOf()
 
+    private val activeUnconditionalProperties: MutableList<StyleProperty> = mutableListOf()
+    private val activeConditionalProperties: MutableList<StyleProperty> = mutableListOf()
+
     fun addAnimation(animation: StyleAnimation) {
         animations.add(animation)
         animation.startTime = TimeUtils.millis()
@@ -85,21 +87,16 @@ class StyleTarget(
         for (property in directProperties) initProperty(screen, property)
     }
 
-    private fun reapplyPropertiesWithoutConditions(screen: StyleableOnjScreen) {
-        styles
-            .flatMap { it.properties }
-            .filter { it.condition == null }
-            .forEach { it.applyTo(node, actor, screen, this) }
-
-        directProperties
-            .filter { it.condition == null }
-            .forEach { it.applyTo(node, actor, screen, this) }
+    private fun reapplyProperties(screen: StyleableOnjScreen) {
+        for (property in activeUnconditionalProperties) property.applyTo(node, actor, screen, this)
+        for (property in activeConditionalProperties) property.applyTo(node, actor, screen, this)
     }
 
     private fun initProperty(screen: StyleableOnjScreen, property: StyleProperty) {
         val condition = property.condition
         if (condition == null) {
             property.applyTo(node, actor, screen, this)
+            activeUnconditionalProperties.add(property)
             return
         }
 
@@ -107,8 +104,14 @@ class StyleTarget(
 
             is StyleCondition.Hover -> {
                 val (actor, node) = condition.actor.get(node, actor, screen)
-                actor.onEnter { property.applyTo(node, actor, screen, this@StyleTarget) }
-                actor.onExit { reapplyPropertiesWithoutConditions(screen) }
+                actor.onEnter {
+                    activeConditionalProperties.add(property)
+                    reapplyProperties(screen)
+                }
+                actor.onExit {
+                    activeConditionalProperties.remove(property)
+                    reapplyProperties(screen)
+                }
             }
 
         }
