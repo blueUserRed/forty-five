@@ -61,7 +61,7 @@ cards: [
         title: "rotten Bullet"
         flavourText: "might have forgotten it in my sattlebag..."
         description: "looses 1 damage for everytime it turns in the revolver"
-        baseDamage: 16
+        baseDamage: 10
         coverValue: 0
         traitEffects: [ "rotten" ]
         effects: []
@@ -104,7 +104,7 @@ cards: [
             giveStatus("shot", burning(2, !burningPercent))
             giveStatus("destroy", burning(2, !burningPercent))
         ]
-        cost: 1
+        cost: 2
         type: $Bullet { }
     }
     {
@@ -184,7 +184,7 @@ cards: [
          title: "rusted Bullet"
          flavourText: "those fucking kids with their rain dances"
          description: "looses 1 dmg for everytime it turns in the revolver"
-         baseDamage: 10
+         baseDamage: 5
          coverValue: 0
          traitEffects: [ "rotten" ]
          effects: [ ]
@@ -212,8 +212,8 @@ cards: [
          coverValue: 0
          traitEffects: []
          effects: [
-            reserveGain("shot", 4)
-            reserveGain("destroy", 4)
+            reserveGain("shot", 2)
+            reserveGain("destroy", 2)
          ]
          cost: 2
          type: $Bullet { }
