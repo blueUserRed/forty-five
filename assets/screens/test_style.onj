@@ -1,0 +1,23 @@
+/////////////////////////////////////////////////
+//               experimental                  //
+/////////////////////////////////////////////////
+
+use Experimental__Style;
+use Common;
+
+styles: [
+
+    {
+        name: "test_style",
+        properties: [
+            background("white"),
+            textColor(color("000000")),
+//            relWidth(100.0),
+            relWidthTo(100.0, 0.5, interpolation("linear")),
+            background("black") condition hover(self()),
+            textColor(color("ffffff")) condition hover(self()),
+            relWidthTo(50.0, 0.5, interpolation("linear")) condition hover(self())
+        ]
+    }
+
+]

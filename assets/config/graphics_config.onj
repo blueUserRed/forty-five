@@ -63,8 +63,8 @@ damageOverlay: {
     overlay: "hit_overlay"
 },
 
-destroyCardPostProcessor: {
-    name: "vignette",
+postProcessors: {
+    destroyCardPostProcessor: "vignette",
 },
 
 coverStackParticles: {

@@ -55,8 +55,8 @@ statusEffectIcons: {
     poison: statusIconConfig
 },
 
-destroyCardPostProcessor: {
-    name: string
+postProcessors: {
+    destroyCardPostProcessor: string
 },
 
 coverStackParticles: {

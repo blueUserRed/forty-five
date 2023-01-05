@@ -64,6 +64,13 @@ fun Float.between(min: Float, max: Float): Float {
     return this
 }
 
+/**
+ * compares two floats using an epsilon to make sure rounding errors don't break anything
+ */
+fun Float.epsilonEquals(other: Float, epsilon: Float = 0.00005f): Boolean {
+    return this in (other - epsilon)..(other + epsilon)
+}
+
 object Utils {
 
     /**
@@ -117,6 +124,7 @@ object Utils {
 
     fun interpolationOrError(name: String): Interpolation = when (name) {
 
+        "linear" -> Interpolation.linear
         "swing" -> Interpolation.swing
         "swing in" -> Interpolation.swingIn
         "swing out" -> Interpolation.swingOut

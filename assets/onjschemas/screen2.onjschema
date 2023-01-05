@@ -1,0 +1,327 @@
+/////////////////////////////////////////////////
+//               experimental                  //
+/////////////////////////////////////////////////
+
+import "imports/font_group.onjschema" as _;
+import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
+
+use Common;
+use Experimental__Style;
+
+$Viewport {
+
+    $FitViewport {
+        worldWidth: float,
+        worldHeight: float
+    }
+
+    $ExtendViewport {
+        minWidth: float,
+        minHeight: float
+    }
+
+}
+
+var widgetSharedKeys = {
+    debug?: boolean,
+    behaviours?: $Behaviour[],
+    width?: float,
+    height?: float,
+    zIndex?: int,
+    visible?: boolean,
+    name?: string,
+    styles?: string[],
+    directProperties?: StyleProperty[]
+};
+
+var detailTextSharedKeys = {
+    detailFont: string,
+    detailFontColor: Color,
+    detailBackgroundTexture: string,
+    detailFontScale: float,
+    detailOffsetX: float,
+    detailOffsetY: float,
+    detailWidth: float,
+};
+
+var flexBoxKeys = {
+    children?: $Widget[],
+    ...widgetSharedKeys
+};
+
+$Widget {
+
+    $Box {
+        ...flexBoxKeys
+    }
+
+    $Label {
+        text: string,
+        font: string,
+        color: Color,
+        fontScale?: float,
+        backgroundTexture?: string,
+        align?: string,
+        ...widgetSharedKeys
+    }
+
+    $TemplateLabel {
+        template: string,
+        font: string,
+        color: Color,
+        fontScale: float,
+        backgroundTexture?: string,
+        align?: string,
+        ...widgetSharedKeys
+    }
+
+    $Image {
+        textureName: string,
+        scaleX: float,
+        scaleY: float,
+        reportDimensionsWithScaling?: boolean,
+        scalingWorkaround?: boolean,
+        ...widgetSharedKeys
+    }
+
+    $AnimatedImage {
+        animationName: string,
+        scaleX: float,
+        scaleY: float,
+        ...widgetSharedKeys
+    }
+
+    $CardHand {
+        cardScale: float,
+        cardSpacing: float,
+        startCardZIndicesAt: int,
+        hoveredCardZIndex: int,
+        draggedCardZIndex: int,
+        hoveredCardScale: float,
+        targetWidth: float,
+        ...detailTextSharedKeys,
+        ...widgetSharedKeys
+    }
+
+    $Revolver {
+        slotTexture: string,
+        font: string,
+        fontColor: Color,
+        fontScale: float,
+        slotScale: float,
+        cardScale: float,
+        animationDuration: float,
+        radius: float,
+        rotationOff: float,
+        cardZIndex: int,
+        background?: string,
+        radiusExtension: float,
+        ...detailTextSharedKeys,
+        ...widgetSharedKeys
+    }
+
+    $EnemyArea {
+        ...widgetSharedKeys
+    }
+
+    $CoverArea {
+        numStacks: int,
+        maxCards: int,
+        infoFont: string,
+        infoFontColor: Color,
+        infoFontScale: float,
+        stackBackgroundTexture: string,
+        stackSpacing: float,
+        areaSpacing: float,
+        cardScale: float,
+        stackMinSize: float,
+        onlyAllowAddingOnTheSameTurn: boolean,
+        ...detailTextSharedKeys,
+        ...widgetSharedKeys
+    }
+
+}
+
+$Behaviour {
+
+    $MouseHoverBehaviour {
+        useSystemCursor: boolean,
+        cursorName: string,
+        disabled: {
+            useSystemCursor: boolean,
+            cursorName: string
+        }?
+    }
+
+    $OnClickExitBehaviour { }
+
+    $OnHoverChangeSizeBehaviour {
+        cellName?: string,
+        enterDuration: float,
+        exitDuration: float,
+        baseX: float,
+        baseY: float,
+        targetX: float,
+        targetY: float,
+        enterInterpolation: string?,
+        exitInterpolation: string?
+    }
+
+    $OnHoverChangeFontSizeBehaviour {
+        enterDuration: float,
+        exitDuration: float,
+        targetFontScale: float,
+        baseFontScale: float,
+        enterInterpolation: string?,
+        exitInterpolation: string?
+    }
+
+    $OnClickChangeScreenBehaviour {
+        screenPath: string
+    }
+
+    $OnClickAbandonRunBehaviour { }
+
+    $OnClickRemoveActorBehaviour { }
+
+    $OnClickMaskBehaviour {
+        maskTexture: string,
+        invert?: boolean,
+        maskScaleX?: float,
+        maskScaleY?: float,
+        maskOffsetX?: float,
+        maskOffsetY?: float,
+    }
+
+    $OnClickParticleEffectBehaviour {
+        file: string,
+        textureDir: string,
+        effectScale?: float,
+        useCursorPos?: boolean,
+    }
+
+    $OnClickChangePostProcessorBehaviour {
+        postProcessor: string?,
+        duration: int?,
+        setOnlyIfNoPostProcessorIsSet: boolean,
+    }
+
+    $OnHoverPopupBehaviour {
+        popupName: string,
+        setPopupPosition: boolean,
+        xOffset?: float,
+        yOffset?: float,
+    }
+
+    $OnHoverChangeTextureBehaviour {
+        hoverTexture: string
+    }
+
+    $ShootButtonBehaviour { }
+
+    $EndTurnButtonBehaviour { }
+
+    $DrawBulletButtonBehaviour { }
+
+    $DrawCoverCardButtonBehaviour { }
+
+    $OnClickResetSavefileBehaviour { }
+
+}
+
+//$ScreenController {
+//
+//    $GameScreenController {
+//        ...gameScreenControllerKeys
+//    }
+//
+//    $IntroScreenController {
+//        cardAtlasFile: string,
+//        appearActor: string,
+//        nextScreen: string,
+//    }
+//
+//    $CardSelectionScreenController {
+//        cardSelectionActorName: string,
+//        cardConfigFile: string,
+//        cardAtlasFile: string,
+//        cardsToSelect: int,
+//        cardScale: float,
+//        cardBehaviour: $Behaviour,
+//        nextScreen: string,
+//        ...detailTextSharedKeys,
+//        emptyFont: string,
+//        emptyFontColor: Color,
+//        emptyFontScale: float,
+//        emptyText: string,
+//    }
+//
+//}
+
+viewport: $Viewport,
+
+assets: {
+    textures?: {
+        name: string,
+        file: string
+    }[],
+    fonts?: $Font[],
+    textureAtlases: {
+        file: string,
+        defines: string[]
+    }[],
+    cursors?: {
+        name: string,
+        file: string,
+        hotspotX: int,
+        hotspotY: int,
+    }[],
+    postProcessors?: {
+        name: string,
+        vertexShader: string,
+        fragmentShader: string,
+        timeOffset?: int,
+        uniforms: string[],
+        args: {
+            ...*
+        }?
+    }[],
+    animations?: {
+        name: string,
+        atlasFile: string,
+        frames?: string[],
+        initialFrame: int,
+        frameTime: int,
+    }[],
+    colorTextures?: {
+        name: string,
+        color: Color,
+    }[],
+    particles?: {
+        name: string,
+        particlePath: string,
+        textureDir: string,
+        scale: float,
+    }[],
+    styleFiles?: string[],
+    styles?: {
+        name: string,
+        properties: StyleProperty[]
+    }[]
+},
+
+options: {
+    background?: string
+//    setFillParentOnRoot: boolean,
+//    defaultCursor: {
+//        useSystemCursor: boolean,
+//        cursorName: string
+//    },
+//    postProcessor: string?,
+//    controller: $ScreenController?,
+//    printFrameRate?: boolean
+},
+
+root: {
+    ...flexBoxKeys
+}

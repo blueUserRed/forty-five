@@ -34,7 +34,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
 interface ScreenBuilder {
-    fun build(): Screen
+    fun build(): OnjScreen
 }
 
 /**
