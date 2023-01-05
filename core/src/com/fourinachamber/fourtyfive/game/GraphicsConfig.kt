@@ -8,10 +8,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
-import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
-import com.fourinachamber.fourtyfive.screen.general.CustomMoveByAction
-import com.fourinachamber.fourtyfive.screen.general.CustomParticleActor
-import com.fourinachamber.fourtyfive.screen.general.ShakeActorAction
+import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.ActorActionTimelineAction
 import com.fourinachamber.fourtyfive.utils.GameAnimationTimelineAction
 import com.fourinachamber.fourtyfive.utils.Timeline
@@ -32,6 +29,11 @@ object GraphicsConfig {
         schema.assertMatches(config)
         config as OnjObject
         readConstants(config)
+    }
+
+    fun postProcessor(name: String): PostProcessor {
+        val screen = FourtyFive.curScreen!!
+        return screen.postProcessorOrError(postProcessors[name]!!)
     }
 
     fun damageOverlay(): Timeline.TimelineAction {
@@ -203,6 +205,11 @@ object GraphicsConfig {
                 obj.get<String>("icon") to obj.get<Double>("scale").toFloat()
             }
 
+        postProcessors = config
+            .get<OnjObject>("postProcessors")
+            .value
+            .mapValues { it.value.value as String }
+
         val damageOverlay = config.get<OnjObject>("damageOverlay")
 
         damageOverlayTexture = damageOverlay.get<String>("overlay")
@@ -275,6 +282,7 @@ object GraphicsConfig {
 
     private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
+    private lateinit var postProcessors: Map<String, String>
 
     var bufferTime by Delegates.notNull<Int>()
         private set
