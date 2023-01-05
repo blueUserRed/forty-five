@@ -26,7 +26,7 @@ import kotlin.system.measureTimeMillis
 /**
  * a screen that was build from an onj file.
  */
-class OnjScreen(
+open class OnjScreen(
     private val drawables: MutableMap<String, Drawable>,
     private val cursors: Map<String, Cursor>,
     private val fonts: Map<String, BitmapFont>,

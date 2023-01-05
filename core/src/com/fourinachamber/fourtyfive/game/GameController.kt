@@ -768,7 +768,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameController: GameController) = with(gameController) {
 
                 if (destroyCardPostProcessor == null) {
-                    destroyCardPostProcessor = curScreen.postProcessorOrError(destroyCardInstructionActorName)
+                    destroyCardPostProcessor = GraphicsConfig.postProcessor("destroyCardPostProcessor")
                 }
 
                 showDestroyCardInstructionActor()
