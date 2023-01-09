@@ -5,6 +5,10 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
+/**
+ * used to control the actions of an enemy
+ * @param actionCreators list containing the weight and a lambda that creates the action
+ */
 class EnemyBrain(
     private val actionCreators: List<Pair<Int, () -> EnemyAction>>
 ) {
@@ -32,6 +36,9 @@ class EnemyBrain(
 
     companion object {
 
+        /**
+         * creates an enemy brain from an onj-object
+         */
         fun fromOnj(onj: OnjObject, onjScreen: OnjScreen, enemy: Enemy): EnemyBrain = EnemyBrain(
             onj.get<OnjArray>("actions").value.map { actionFromOnj(it as OnjNamedObject, onjScreen, enemy) }
         )
