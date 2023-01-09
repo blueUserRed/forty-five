@@ -1,23 +1,40 @@
 package com.fourinachamber.fourtyfive.game.enemy
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.value.OnjNamedObject
 
+/**
+ * represents an action that the enemy can execute
+ */
 abstract class EnemyAction {
 
+    /**
+     * the Drawable that is drawn above the enemies head to indicate which action will be executed
+     */
     abstract val indicatorDrawable: Drawable
+
+    /**
+     * the scale [indicatorDrawable] is drawn at
+     */
     abstract val indicatorScale: Float
 
+    /**
+     * the text displayed next to [indicatorDrawable]
+     */
     abstract val descriptionText: String
 
+    /**
+     * returns a timeline that executes the action
+     */
     abstract fun execute(): Timeline?
 
+    /**
+     * action that damages the player
+     */
     class DamagePlayer(
         val enemy: Enemy,
         onj: OnjNamedObject,
@@ -30,13 +47,16 @@ abstract class EnemyAction {
 
         override val descriptionText: String = damage.toString()
 
-        override fun execute(): Timeline = FourtyFive.currentGame!!.enemyArea.enemies[0].damagePlayer(damage)
+        override fun execute(): Timeline = enemy.damagePlayer(damage)
 
         override fun toString(): String {
             return "DamagePlayer(damage=$damage)"
         }
     }
 
+    /**
+     * actions that adds cover to the enemy
+     */
     class AddCover(
         val enemy: Enemy,
         onj: OnjNamedObject,
@@ -68,6 +88,9 @@ abstract class EnemyAction {
 
     }
 
+    /**
+     * the player insults the player and does nothing else
+     */
     class DoNothing(
         val insult: String,
         val enemy: Enemy,
