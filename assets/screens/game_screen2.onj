@@ -1,0 +1,155 @@
+
+import "imports/colors.onj" as color;
+
+use Experimental__Screen;
+use Experimental__Style;
+
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
+assets: {
+    textureAtlases: [
+        {
+            file: "textures/packed/game_screen/game_screen.atlas",
+            defines: [
+                "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum",
+                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon",
+                "poison_icon", "draw_bullet", "draw_cover"
+            ]
+        }
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    background: "background"
+},
+
+var revolver = $Revolver {
+    name: "revolver",
+    slotTexture: "revolver_slot",
+    font: "vanilla_whale",
+    fontColor: color.white,
+    fontScale: 0.25,
+    slotScale: 0.029,
+    cardScale: cardScale * 0.6,
+    animationDuration: 0.2,
+    radius: 13.0,
+    radiusExtension: 5.0,
+    cardZIndex: cardZIndicesStart,
+    rotationOff: (pi / 2.0) + (2.0 * pi) / 5.0,
+    ...sharedDetailTextKeys,
+    detailOffsetX: 0.0,
+    detailOffsetY: 0.0,
+    background: "revolver_drum",
+//    debug: true
+};
+
+var cardHand = $CardHand {
+    name: "card_hand",
+    cardScale: cardScale,
+    hoveredCardScale: cardScale * 1.2,
+    cardSpacing: 1.0,
+    startCardZIndicesAt: cardZIndicesStart,
+    hoveredCardZIndex: cardZIndicesEnd - 1,
+    draggedCardZIndex: cardZIndicesEnd,
+    detailOffsetX: 0.0,
+    detailOffsetY: 1.5,
+    targetWidth: worldWidth * (7.0 / 10.0),
+    ...sharedDetailTextKeys,
+//    debug: true
+};
+
+var enemyArea = $EnemyArea {
+     name: "enemy_area"
+//     debug: true
+};
+
+var coverArea = $CoverArea {
+    name: "cover_area",
+    numStacks: gameConfig.coverConfig.numStacks,
+    maxCards: gameConfig.coverConfig.maxCards,
+    onlyAllowAddingOnTheSameTurn: gameConfig.coverConfig.onlyAllowAddingOnTheSameTurn,
+    infoFont: "vanilla_whale",
+    infoFontColor: color.black,
+    infoFontScale: 0.1,
+    stackBackgroundTexture: "card_detail_background",
+    stackSpacing: 2.0,
+    areaSpacing: 4.0,
+    cardScale: cardScale * 0.6,
+    stackMinSize: 20.0,
+    ...sharedDetailTextKeys,
+    detailOffsetX: 0.0,
+    detailOffsetY: 0.0
+};
+
+var shootButton = $Image {
+    name: "shoot_button",
+    textureName: "shoot",
+    reportDimensionsWithScaling: true,
+    scaleX: 0.03,
+    scaleY: 0.03,
+    behaviours: [
+        $OnClickChangePostProcessorBehaviour {
+            postProcessor: "earthquake",
+            duration: 70,
+            setOnlyIfNoPostProcessorIsSet: false
+        },
+        $ShootButtonBehaviour { },
+        buttonHoverBehaviour,
+        $OnHoverChangeTextureBehaviour {
+            hoverTexture: "shoot_hover"
+        }
+    ]
+};
+
+var endTurnButton = $Image {
+    name: "end_turn_button",
+    textureName: "end_turn",
+    reportDimensionsWithScaling: true,
+    scaleX: 0.03,
+    scaleY: 0.03,
+    behaviours: [
+        $EndTurnButtonBehaviour { },
+        buttonHoverBehaviour,
+        $OnHoverChangeTextureBehaviour {
+            hoverTexture: "end_turn_hover"
+        }
+    ]
+};
+
+var playerLivesLabel = $TemplateLabel {
+    name: "player_lives_label",
+    font: "vanilla_whale",
+    template: "{game.curPlayerLives}/{game.basePlayerLives}",
+    fontScale: 0.09,
+    color: color.white,
+    backgroundTexture: "black"
+};
+
+var reservesLabel = $TemplateLabel {
+    name: "reserves_label",
+    font: "vanilla_whale",
+    template: "{game.curReserves}/{game.baseReserves}",
+    fontScale: 0.09,
+    color: color.white,
+    backgroundTexture: "black"
+};
+
+root: $Box {
+    directProperties: [ flexDirection("row") ],
+    debug: true
+} children [
+
+    $Box {
+    } children [],
+
+    $Box {
+    } children []
+
+]

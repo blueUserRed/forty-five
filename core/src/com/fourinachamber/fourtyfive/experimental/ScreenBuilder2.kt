@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
@@ -28,7 +29,7 @@ import com.fourinachamber.fourtyfive.utils.FrameAnimation
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaNode
+import io.github.orioncraftmc.meditate.enums.YogaJustify
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -64,9 +65,11 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
         readAssets(onj)
         doOptions(onj)
 
-        val rootOnj = onj.get<OnjObject>("root")
-        val root = getFlexBox(rootOnj)
-        root.setFillParent(true)
+//        val root = FlexBox()
+//        root.setFillParent(true)
+//        root.debug = true
+        val root = getWidget(onj.get<OnjNamedObject>("root"), null)
+        if (root is Layout) root.setFillParent(true)
 
         val screen = StyleableOnjScreen(
             drawables = drawables,
@@ -229,7 +232,7 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
         }
     }
 
-    private fun getWidget(widgetOnj: OnjNamedObject, parent: FlexBox?): Unit = when (widgetOnj.name) {
+    private fun getWidget(widgetOnj: OnjNamedObject, parent: FlexBox?): Actor = when (widgetOnj.name) {
 
         "Image" -> CustomImageActor(drawableOrError(widgetOnj.get<String>("textureName"))).apply {
             applyImageKeys(this, widgetOnj)
@@ -339,12 +342,17 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
     }.let { actor ->
 
         applySharedWidgetKeys(actor, widgetOnj)
-        val node = parent?.add(actor)
+        val node = if (actor is FlexBox) {
+            parent?.add(actor)
+            actor.root
+        } else {
+            parent?.add(actor)
+        }
 
         val styles = if (widgetOnj.hasKey<OnjArray>("styles")) {
             val styles = widgetOnj.get<OnjArray>("styles")
-           styles
-               .value
+            styles
+                .value
                .map { styleOrError(it.value as String) }
         } else null
 
@@ -369,6 +377,8 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
                 directProperties ?: listOf()
             ))
         }
+
+        return actor
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {

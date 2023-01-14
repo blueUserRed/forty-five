@@ -39,8 +39,8 @@ object FourtyFive : Game() {
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
-//        curScreen = ScreenBuilder2(Gdx.files.internal("screens/test_screen.onj")).build()
-        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
+        curScreen = ScreenBuilder2(Gdx.files.internal("screens/title_screen2.onj")).build()
+//        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
     }
 
     private fun init() {
