@@ -44,15 +44,11 @@ var detailTextSharedKeys = {
     detailWidth: float,
 };
 
-var flexBoxKeys = {
-    children?: $Widget[],
-    ...widgetSharedKeys
-};
-
 $Widget {
 
     $Box {
-        ...flexBoxKeys
+        children?: $Widget[],
+        ...widgetSharedKeys
     }
 
     $Label {
@@ -266,7 +262,7 @@ assets: {
         file: string
     }[],
     fonts?: $Font[],
-    textureAtlases: {
+    textureAtlases?: {
         file: string,
         defines: string[]
     }[],
@@ -322,6 +318,4 @@ options: {
 //    printFrameRate?: boolean
 },
 
-root: {
-    ...flexBoxKeys
-}
+root: $Widget

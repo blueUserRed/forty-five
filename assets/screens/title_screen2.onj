@@ -1,0 +1,102 @@
+
+import "imports/colors.onj" as color;
+
+use Common;
+use Experimental__Screen;
+use Experimental__Style;
+
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
+var buttonBaseScale = 0.2;
+var buttonHoverScale = 0.25;
+
+assets: {
+    fonts: [
+
+        $DistanceFieldFont {
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
+            imageFile: "fonts/red_wing.png"
+        }
+
+    ],
+    textureAtlases: [
+        {
+            file: "textures/packed/title_screen/title_screen.atlas",
+            defines: [ "background3", "logo"]
+        }
+    ],
+    styles: [
+        {
+            name: "button",
+            properties: [
+                relWidth(10.0),
+                fontScaleTo(buttonBaseScale, 0.1, interpolation.elastic),
+                fontScaleTo(buttonHoverScale, 0.1, interpolation.elastic) condition hover(self()),
+            ]
+        }
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    background: "background3"
+},
+
+root: $Box {
+    directProperties: [
+        flexDirection("column"),
+        alignItems("flex end"),
+        justifyContent("flex end"),
+    ],
+    debug: true
+} children [
+
+    $Label {
+        text: "play",
+        font: "red_wing",
+        align: "right",
+        color: color.black,
+        fontScale: buttonBaseScale,
+        styles: [ "button" ],
+        behaviours: [
+            $OnClickChangeScreenBehaviour {
+                screenPath: "screens/game_screen.onj"
+            }
+        ],
+        debug: true
+    },
+
+    $Label {
+        text: "abandon run",
+        font: "red_wing",
+        align: "right",
+        color: color.black,
+        fontScale: buttonBaseScale,
+        styles: [ "button" ],
+        behaviours: [
+            $OnClickAbandonRunBehaviour { },
+            $OnClickRemoveActorBehaviour { }
+        ],
+        debug: true
+    },
+
+    $Label {
+        text: "quit",
+        font: "red_wing",
+        align: "right",
+        color: color.black,
+        styles: [ "button" ],
+        fontScale: buttonBaseScale,
+        behaviours: [
+            $OnClickExitBehaviour { }
+        ],
+        debug: true
+    }
+
+]

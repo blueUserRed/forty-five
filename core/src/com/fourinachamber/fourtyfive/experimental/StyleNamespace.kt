@@ -4,9 +4,14 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjInterpolation
+import io.github.orioncraftmc.meditate.enums.YogaAlign
+import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
+import io.github.orioncraftmc.meditate.enums.YogaJustify
+import onj.builder.buildOnjObject
 import onj.value.OnjValue
 import onj.customization.Namespace.OnjNamespace
 import onj.customization.Namespace.OnjNamespaceDatatypes
+import onj.customization.Namespace.OnjNamespaceVariables
 import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.OnjFloat
@@ -22,6 +27,15 @@ object StyleNamespace {
         "StyleCondition" to OnjStyleCondition::class,
         "StyleActorRef" to OnjStyleActorRef::class,
     )
+
+    @OnjNamespaceVariables
+    val variables: Map<String, OnjValue> = mapOf(
+//        "flex_direction" to buildOnjObject {
+//            "row" with ""
+//        }
+    )
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "params: [string?]")
     fun background(name: OnjValue): OnjStyleProperty {
@@ -69,6 +83,32 @@ object StyleNamespace {
         ))
     }
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun widthAuto(): OnjStyleProperty {
+        return OnjStyleProperty(DimensionsProperty(
+            width = null,
+            height = null,
+            widthRelative = false,
+            heightRelative = false,
+            widthAuto = true,
+            heightAuto = false,
+            condition = null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: []")
+    fun heightAuto(): OnjStyleProperty {
+        return OnjStyleProperty(DimensionsProperty(
+            width = null,
+            height = null,
+            widthRelative = false,
+            heightRelative = false,
+            widthAuto = false,
+            heightAuto = true,
+            condition = null
+        ))
+    }
+
     @RegisterOnjFunction(schema = "params: [float]")
     fun relWidth(width: OnjFloat): OnjStyleProperty {
         return OnjStyleProperty(DimensionsProperty(
@@ -104,6 +144,78 @@ object StyleNamespace {
         ))
     }
 
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun flexDirection(direction: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(FlexDirectionProperty(
+            when (direction.value) {
+                "row" -> YogaFlexDirection.ROW
+                "row reverse" -> YogaFlexDirection.ROW_REVERSE
+                "column" -> YogaFlexDirection.COLUMN
+                "column reverse" -> YogaFlexDirection.COLUMN_REVERSE
+                else -> throw RuntimeException("unknown flex direction: ${direction.value}")
+            },
+            null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun fontScale(scale: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(FontScaleProperty(scale.value.toFloat(), null))
+    }
+
+    @RegisterOnjFunction(schema = "use Common; params: [ float, float, Interpolation ]")
+    fun fontScaleTo(scale: OnjFloat, duration: OnjFloat, interpolation: OnjInterpolation): OnjStyleProperty {
+        return OnjStyleProperty(FontScaleAnimationProperty(
+            (duration.value * 1000).toInt(),
+            interpolation.value,
+            scale.value.toFloat(),
+            null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun alignItems(alignment: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(FlexAlignProperty(
+            yogaAlignmentOrError(alignment.value),
+            isItems = true,
+            isContent = false,
+            isSelf = false,
+            condition = null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun alignContent(alignment: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(FlexAlignProperty(
+            yogaAlignmentOrError(alignment.value),
+            isItems = false,
+            isContent = true,
+            isSelf = false,
+            condition = null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun alignSelf(alignment: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(FlexAlignProperty(
+            yogaAlignmentOrError(alignment.value),
+            isItems = false,
+            isContent = false,
+            isSelf = true,
+            condition = null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun justifyContent(justify: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(FlexJustifyContentProperty(
+            yogaJustifyOrError(justify.value),
+            null
+        ))
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @RegisterOnjFunction(schema = "params: []")
     fun self(): OnjStyleActorRef = OnjStyleActorRef(StyleActorReference.Self())
 
@@ -120,6 +232,8 @@ object StyleNamespace {
         return OnjStyleProperty(property.value.getWithCondition(condition.value))
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     private fun alignmentOrError(alignment: String): Int = when (alignment) {
         "center" -> Align.center
         "top" -> Align.top
@@ -131,6 +245,28 @@ object StyleNamespace {
         "bottom right" -> Align.bottomRight
         "top right" -> Align.topRight
         else -> throw RuntimeException("unknown alignment: $alignment")
+    }
+
+    private fun yogaAlignmentOrError(alignment: String): YogaAlign = when (alignment) {
+        "auto" -> YogaAlign.AUTO
+        "baseline" -> YogaAlign.BASELINE
+        "center" -> YogaAlign.CENTER
+        "flex start" -> YogaAlign.FLEX_START
+        "flex end" -> YogaAlign.FLEX_END
+        "space around" -> YogaAlign.SPACE_AROUND
+        "space between" -> YogaAlign.SPACE_BETWEEN
+        "stretch" -> YogaAlign.STRETCH
+        else -> throw RuntimeException("unknown yoga alignment: $alignment")
+    }
+
+    private fun yogaJustifyOrError(justify: String): YogaJustify = when (justify) {
+        "center" -> YogaJustify.CENTER
+        "flex start" -> YogaJustify.FLEX_START
+        "flex end" -> YogaJustify.FLEX_END
+        "space around" -> YogaJustify.SPACE_AROUND
+        "space between" -> YogaJustify.SPACE_BETWEEN
+        "space evenly" -> YogaJustify.SPACE_EVENLY
+        else -> throw RuntimeException("unknown justify value: $justify")
     }
 
 }
