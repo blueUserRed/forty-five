@@ -137,6 +137,14 @@ assets: {
             args: null
         },
         {
+            name: "simulation",
+            vertexShader: "shaders/simulation/simulation.vert",
+            fragmentShader: "shaders/simulation/simulation.frag",
+            timeOffset: 0,
+            uniforms: [ "time", "resolution" ],
+            args: null
+        },
+        {
             name: "vignette",
             vertexShader: "shaders/vignette/vignette.vert",
             fragmentShader: "shaders/vignette/vignette.frag",
