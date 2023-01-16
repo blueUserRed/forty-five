@@ -4,35 +4,55 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.enums.YogaAlign
+import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaJustify
+import io.github.orioncraftmc.meditate.enums.YogaPositionType
 import io.github.orioncraftmc.meditate.enums.YogaUnit
+import kotlin.reflect.KClass
 
 
-abstract class StyleProperty(val condition: StyleCondition?) {
+abstract class StyleProperty<T>(
+    private val clazz: KClass<T>,
+    val condition: StyleCondition?
+) where T : Actor {
 
-    abstract fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget)
+    fun applyToOrError(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        if (!clazz.isInstance(actor)) throw RuntimeException(
+            "style property ${this::class.simpleName} cannot be applied to ${actor::class.simpleName}, must be" +
+            " ${clazz.simpleName}"
+        )
+        @Suppress("UNCHECKED_CAST") // safe because of previous check
+        applyTo(node, actor as T, screen, target)
+    }
 
-    abstract fun getWithCondition(condition: StyleCondition?): StyleProperty
+    abstract fun applyTo(node: YogaNode, actor: T, screen: StyleableOnjScreen, target: StyleTarget)
+
+    abstract fun getWithCondition(condition: StyleCondition?): StyleProperty<T>
 
 }
 
 class BackgroundProperty(
     private val backgroundName: String?,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<Actor>(Actor::class, condition) {
 
     override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) = when (actor) {
+        //TODO: put the background in some interface
         is CustomImageActor -> actor.drawable = backgroundName?.let {
             screen.drawableOrError(backgroundName)
         }
         is CustomLabel -> actor.background = backgroundName?.let {
+            screen.drawableOrError(backgroundName)
+        }
+        is CustomFlexBox -> actor.background = backgroundName?.let {
             screen.drawableOrError(backgroundName)
         }
         else -> throw RuntimeException(
@@ -46,48 +66,38 @@ class BackgroundProperty(
 class TextAlignProperty(
     private val align: Int,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) = when (actor) {
-        is CustomLabel -> actor.setAlignment(align)
-        else -> throw RuntimeException(
-            "textAlign property cannot be applied to ${actor::class.simpleName}"
-        )
+    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
+        actor.setAlignment(align)
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty = TextAlignProperty(align, condition)
+    override fun getWithCondition(condition: StyleCondition?) = TextAlignProperty(align, condition)
 }
 
 class TextColorProperty(
     private val color: Color,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) = when (actor) {
-        is CustomLabel -> actor.style.fontColor = color
-        else -> throw RuntimeException(
-            "textColor property cannot be applied to ${actor::class.simpleName}"
-        )
+    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
+        actor.style.fontColor = color
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty = TextColorProperty(color, condition)
+    override fun getWithCondition(condition: StyleCondition?) = TextColorProperty(color, condition)
 }
 
 class FontScaleProperty(
     private val scale: Float,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) = when (actor) {
-        is CustomLabel -> actor.setFontScale(scale)
-        else -> throw RuntimeException(
-            "fontScale property cannot be applied to ${actor::class.simpleName}"
-        )
-    }.let {
+    override fun applyTo(node: YogaNode, actor:CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
+        actor.setFontScale(scale)
         actor.invalidateHierarchy()
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty = FontScaleProperty(scale, condition)
+    override fun getWithCondition(condition: StyleCondition?) = FontScaleProperty(scale, condition)
 }
 
 class FontScaleAnimationProperty(
@@ -95,12 +105,9 @@ class FontScaleAnimationProperty(
     val interpolation: Interpolation,
     val value: Float,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
-        if (actor !is CustomLabel) {
-            throw RuntimeException("FontScaleAnimation property cannot be applied to ${actor::class.simpleName} ")
-        }
+    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
         val startValue = actor.fontScaleX
         val animation = StyleAnimation(
             duration,
@@ -114,9 +121,8 @@ class FontScaleAnimationProperty(
         target.addAnimation(animation)
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty {
-        return FontScaleAnimationProperty(duration, interpolation, value, condition)
-    }
+    override fun getWithCondition(condition: StyleCondition?) =
+        FontScaleAnimationProperty(duration, interpolation, value, condition)
 }
 
 class DimensionsProperty(
@@ -127,7 +133,7 @@ class DimensionsProperty(
     private val widthAuto: Boolean,
     private val heightAuto: Boolean,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<Actor>(Actor::class, condition) {
 
     override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
         if (widthAuto) node.setWidthAuto()
@@ -143,9 +149,8 @@ class DimensionsProperty(
         if (actor is Layout) actor.invalidateHierarchy()
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty {
-        return DimensionsProperty(width, height, widthRelative, heightRelative, widthAuto, heightAuto, condition)
-    }
+    override fun getWithCondition(condition: StyleCondition?) =
+        DimensionsProperty(width, height, widthRelative, heightRelative, widthAuto, heightAuto, condition)
 }
 
 class DimensionsAnimationProperty(
@@ -155,7 +160,7 @@ class DimensionsAnimationProperty(
     private val duration: Int,
     private val interpolation: Interpolation,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<Actor>(Actor::class, condition) {
 
     override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
         val startValue = if (isWidth) node.width.value else node.height.value
@@ -200,23 +205,21 @@ class DimensionsAnimationProperty(
         target.addAnimation(animation)
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty {
-        return DimensionsAnimationProperty(value, isWidth, isRelative, duration, interpolation, condition)
-    }
+    override fun getWithCondition(condition: StyleCondition?) =
+        DimensionsAnimationProperty(value, isWidth, isRelative, duration, interpolation, condition)
 }
 
 class FlexDirectionProperty(
     val direction: YogaFlexDirection,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<FlexBox>(FlexBox::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
-        node.flexDirection = direction
-        if (actor is Layout) actor.invalidateHierarchy()
+    override fun applyTo(node: YogaNode, actor: FlexBox, screen: StyleableOnjScreen, target: StyleTarget) {
+        actor.root.flexDirection = direction
+        actor.invalidateHierarchy()
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty =
-        FlexDirectionProperty(direction, condition)
+    override fun getWithCondition(condition: StyleCondition?) = FlexDirectionProperty(direction, condition)
 }
 
 class FlexAlignProperty(
@@ -225,31 +228,73 @@ class FlexAlignProperty(
     val isContent: Boolean,
     val isSelf: Boolean,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<FlexBox>(FlexBox::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
-        if (isItems) node.alignItems = flexAlign
-        if (isContent) node.alignContent = flexAlign
-        if (isSelf) node.alignSelf = flexAlign
-        if (actor is Layout) actor.invalidateHierarchy()
+    override fun applyTo(node: YogaNode, actor: FlexBox, screen: StyleableOnjScreen, target: StyleTarget) {
+        if (isItems) actor.root.alignItems = flexAlign
+        if (isContent) actor.root.alignContent = flexAlign
+        if (isSelf) actor.root.alignSelf = flexAlign
+        actor.invalidateHierarchy()
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty =
+    override fun getWithCondition(condition: StyleCondition?) =
         FlexAlignProperty(flexAlign, isItems, isContent, isSelf, condition)
 }
 
 class FlexJustifyContentProperty(
     val justify: YogaJustify,
     condition: StyleCondition?
-) : StyleProperty(condition) {
+) : StyleProperty<FlexBox>(FlexBox::class, condition) {
+
+    override fun applyTo(node: YogaNode, actor: FlexBox, screen: StyleableOnjScreen, target: StyleTarget) {
+        actor.root.justifyContent = justify
+        actor.invalidateHierarchy()
+    }
+
+    override fun getWithCondition(condition: StyleCondition?) = FlexJustifyContentProperty(justify, condition)
+}
+
+class MarginProperty(
+    val margins: Array<Triple<Float, Boolean, YogaEdge>>, // margin, isRelative, edge
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
 
     override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
-        node.justifyContent = justify
-        println(node.childCount)
-        if (actor is FlexBox) println(actor.children.size)
+        for ((margin, isRelative, edge) in margins) {
+            if (isRelative) node.setMarginPercent(edge, margin)
+            else node.setMargin(edge, margin)
+        }
         if (actor is Layout) actor.invalidateHierarchy()
     }
 
-    override fun getWithCondition(condition: StyleCondition?): StyleProperty =
-        FlexJustifyContentProperty(justify, condition)
+    override fun getWithCondition(condition: StyleCondition?) = MarginProperty(margins, condition)
+}
+
+class GrowShrinkProperty(
+    val grow: Float?,
+    val shrink: Float?,
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
+
+    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        if (grow != null) node.flexGrow = grow
+        if (shrink != null) node.flexShrink = shrink
+        if (actor is Layout) actor.invalidateHierarchy()
+    }
+
+    override fun getWithCondition(condition: StyleCondition?) = GrowShrinkProperty(grow, shrink, condition)
+}
+
+class PositionProperty(
+    val positionType: YogaPositionType,
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
+
+    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        node.positionType = positionType
+        if (actor is Layout) actor.invalidateHierarchy()
+    }
+
+    override fun getWithCondition(condition: StyleCondition?) = PositionProperty(positionType, condition)
+
 }

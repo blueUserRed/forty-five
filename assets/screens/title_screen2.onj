@@ -34,6 +34,7 @@ assets: {
                 relWidth(10.0),
                 fontScaleTo(buttonBaseScale, 0.1, interpolation.elastic),
                 fontScaleTo(buttonHoverScale, 0.1, interpolation.elastic) condition hover(self()),
+                margin(0.0, 0.0, 0.3, 0.0)
             ]
         }
     ]
@@ -49,54 +50,76 @@ options: {
 },
 
 root: $Box {
-    directProperties: [
-        flexDirection("column"),
+    properties: [
         alignItems("flex end"),
-        justifyContent("flex end"),
-    ],
-    debug: true
+        flexDirection("column"),
+        relHeight(100.0)
+    ]
 } children [
 
-    $Label {
-        text: "play",
-        font: "red_wing",
-        align: "right",
-        color: color.black,
-        fontScale: buttonBaseScale,
-        styles: [ "button" ],
-        behaviours: [
-            $OnClickChangeScreenBehaviour {
-                screenPath: "screens/game_screen.onj"
-            }
-        ],
-        debug: true
-    },
+    $Box {
+        properties: [
+            flexGrow(1.0),
+            margin(0.0, 2.5, 5.0, 0.0)
+        ]
+    } children [
 
-    $Label {
-        text: "abandon run",
-        font: "red_wing",
-        align: "right",
-        color: color.black,
-        fontScale: buttonBaseScale,
-        styles: [ "button" ],
-        behaviours: [
-            $OnClickAbandonRunBehaviour { },
-            $OnClickRemoveActorBehaviour { }
-        ],
-        debug: true
-    },
+        $Image {
+            reportDimensionsWithScaling: true,
+            textureName: "logo",
+            scaleX: 0.07,
+            scaleY: 0.07
+        }
 
-    $Label {
-        text: "quit",
-        font: "red_wing",
-        align: "right",
-        color: color.black,
-        styles: [ "button" ],
-        fontScale: buttonBaseScale,
-        behaviours: [
-            $OnClickExitBehaviour { }
-        ],
-        debug: true
-    }
+    ],
+
+    $Box {
+        properties: [
+            flexDirection("column"),
+            alignItems("flex end"),
+            margin(0.0, 1.0, 0.0, 2.5)
+        ]
+    } children [
+
+        $Label {
+            text: "play",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            fontScale: buttonBaseScale,
+            styles: [ "button" ],
+            behaviours: [
+                $OnClickChangeScreenBehaviour {
+                    screenPath: "screens/game_screen.onj"
+                }
+            ]
+        },
+
+        $Label {
+            text: "abandon run",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            fontScale: buttonBaseScale,
+            styles: [ "button" ],
+            behaviours: [
+                $OnClickAbandonRunBehaviour { },
+                $OnClickRemoveActorBehaviour { }
+            ]
+        },
+
+        $Label {
+            text: "quit",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            styles: [ "button" ],
+            fontScale: buttonBaseScale,
+            behaviours: [
+                $OnClickExitBehaviour { }
+            ]
+        }
+
+    ]
 
 ]

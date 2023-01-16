@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjInterpolation
-import io.github.orioncraftmc.meditate.enums.YogaAlign
-import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
-import io.github.orioncraftmc.meditate.enums.YogaJustify
+import io.github.orioncraftmc.meditate.enums.*
 import onj.builder.buildOnjObject
 import onj.value.OnjValue
 import onj.customization.Namespace.OnjNamespace
@@ -18,6 +16,7 @@ import onj.value.OnjFloat
 import onj.value.OnjString
 import kotlin.reflect.KClass
 
+@Suppress("unused") // functions and properties are red via reflection
 @OnjNamespace
 object StyleNamespace {
 
@@ -36,27 +35,8 @@ object StyleNamespace {
     )
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @RegisterOnjFunction(schema = "params: [string?]")
-    fun background(name: OnjValue): OnjStyleProperty {
-        return OnjStyleProperty(
-            if (name.isString()) {
-                BackgroundProperty(name.value as String, null)
-            } else {
-                BackgroundProperty(null, null)
-            }
-        )
-    }
-
-    @RegisterOnjFunction(schema = "params: [string]")
-    fun textAlign(name: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(TextAlignProperty(alignmentOrError(name.value), null))
-    }
-
-    @RegisterOnjFunction(schema = "use Common; params: [Color]")
-    fun textColor(color: OnjColor): OnjStyleProperty {
-        return OnjStyleProperty(TextColorProperty(color.value, null))
-    }
+    // dimensions
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "params: [float]")
     fun width(width: OnjFloat): OnjStyleProperty {
@@ -144,6 +124,40 @@ object StyleNamespace {
         ))
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // margins
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "params: [float, float, float, float]")
+    fun margin(left: OnjFloat, right: OnjFloat, top: OnjFloat, bottom: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(MarginProperty(
+            arrayOf(
+                Triple(left.value.toFloat(), false, YogaEdge.LEFT),
+                Triple(right.value.toFloat(), false, YogaEdge.RIGHT),
+                Triple(top.value.toFloat(), false, YogaEdge.TOP),
+                Triple(bottom.value.toFloat(), false, YogaEdge.BOTTOM),
+            ),
+            null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [float, float, float, float]")
+    fun relMargin(left: OnjFloat, right: OnjFloat, top: OnjFloat, bottom: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(MarginProperty(
+            arrayOf(
+                Triple(left.value.toFloat(), true, YogaEdge.LEFT),
+                Triple(right.value.toFloat(), true, YogaEdge.RIGHT),
+                Triple(top.value.toFloat(), true, YogaEdge.TOP),
+                Triple(bottom.value.toFloat(), true, YogaEdge.BOTTOM),
+            ),
+            null
+        ))
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // flexbox properties
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     @RegisterOnjFunction(schema = "params: [string]")
     fun flexDirection(direction: OnjString): OnjStyleProperty {
         return OnjStyleProperty(FlexDirectionProperty(
@@ -154,21 +168,6 @@ object StyleNamespace {
                 "column reverse" -> YogaFlexDirection.COLUMN_REVERSE
                 else -> throw RuntimeException("unknown flex direction: ${direction.value}")
             },
-            null
-        ))
-    }
-
-    @RegisterOnjFunction(schema = "params: [float]")
-    fun fontScale(scale: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(FontScaleProperty(scale.value.toFloat(), null))
-    }
-
-    @RegisterOnjFunction(schema = "use Common; params: [ float, float, Interpolation ]")
-    fun fontScaleTo(scale: OnjFloat, duration: OnjFloat, interpolation: OnjInterpolation): OnjStyleProperty {
-        return OnjStyleProperty(FontScaleAnimationProperty(
-            (duration.value * 1000).toInt(),
-            interpolation.value,
-            scale.value.toFloat(),
             null
         ))
     }
@@ -214,6 +213,75 @@ object StyleNamespace {
         ))
     }
 
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun flexGrow(grow: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(GrowShrinkProperty(
+            grow.value.toFloat(), null, null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun flexShrink(shrink: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(GrowShrinkProperty(
+            null, shrink.value.toFloat(), null
+        ))
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // other properties
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun fontScale(scale: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(FontScaleProperty(scale.value.toFloat(), null))
+    }
+
+    @RegisterOnjFunction(schema = "use Common; params: [ float, float, Interpolation ]")
+    fun fontScaleTo(scale: OnjFloat, duration: OnjFloat, interpolation: OnjInterpolation): OnjStyleProperty {
+        return OnjStyleProperty(FontScaleAnimationProperty(
+            (duration.value * 1000).toInt(),
+            interpolation.value,
+            scale.value.toFloat(),
+            null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string?]")
+    fun background(name: OnjValue): OnjStyleProperty {
+        return OnjStyleProperty(
+            if (name.isString()) {
+                BackgroundProperty(name.value as String, null)
+            } else {
+                BackgroundProperty(null, null)
+            }
+        )
+    }
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun textAlign(name: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(TextAlignProperty(alignmentOrError(name.value), null))
+    }
+
+    @RegisterOnjFunction(schema = "use Common; params: [Color]")
+    fun textColor(color: OnjColor): OnjStyleProperty {
+        return OnjStyleProperty(TextColorProperty(color.value, null))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun position(position: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(PositionProperty(
+            when (position.value) {
+                "absolute" -> YogaPositionType.ABSOLUTE
+                "relative" -> YogaPositionType.RELATIVE
+                "static" -> YogaPositionType.STATIC
+                else -> throw RuntimeException("unknown position: ${position.value}")
+            },
+            null
+        ))
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // conditions
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "params: []")
@@ -232,6 +300,8 @@ object StyleNamespace {
         return OnjStyleProperty(property.value.getWithCondition(condition.value))
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // helper functions
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private fun alignmentOrError(alignment: String): Int = when (alignment) {
@@ -272,7 +342,7 @@ object StyleNamespace {
 }
 
 class OnjStyleProperty(
-    override val value: StyleProperty
+    override val value: StyleProperty<*>
 ) : OnjValue() {
 
     override fun toString(): String = "'--property--'"
