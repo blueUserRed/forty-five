@@ -14,7 +14,7 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 
 class Style(
-    val properties: List<StyleProperty>
+    val properties: List<StyleProperty<*>>
 ) {
 
     companion object {
@@ -55,13 +55,13 @@ class StyleTarget(
     private val node: YogaNode,
     private val actor: Actor,
     private val styles: List<Style>,
-    private val directProperties: List<StyleProperty>
+    private val directProperties: List<StyleProperty<*>>
 ) {
 
     private val animations: MutableList<StyleAnimation> = mutableListOf()
 
-    private val activeUnconditionalProperties: MutableList<StyleProperty> = mutableListOf()
-    private val activeConditionalProperties: MutableList<StyleProperty> = mutableListOf()
+    private val activeUnconditionalProperties: MutableList<StyleProperty<*>> = mutableListOf()
+    private val activeConditionalProperties: MutableList<StyleProperty<*>> = mutableListOf()
 
     fun addAnimation(animation: StyleAnimation) {
         animations.add(animation)
@@ -88,14 +88,14 @@ class StyleTarget(
     }
 
     private fun reapplyProperties(screen: StyleableOnjScreen) {
-        for (property in activeUnconditionalProperties) property.applyTo(node, actor, screen, this)
-        for (property in activeConditionalProperties) property.applyTo(node, actor, screen, this)
+        for (property in activeUnconditionalProperties) property.applyToOrError(node, actor, screen, this)
+        for (property in activeConditionalProperties) property.applyToOrError(node, actor, screen, this)
     }
 
-    private fun initProperty(screen: StyleableOnjScreen, property: StyleProperty) {
+    private fun initProperty(screen: StyleableOnjScreen, property: StyleProperty<*>) {
         val condition = property.condition
         if (condition == null) {
-            property.applyTo(node, actor, screen, this)
+            property.applyToOrError(node, actor, screen, this)
             activeUnconditionalProperties.add(property)
             return
         }

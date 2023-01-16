@@ -1,14 +1,41 @@
 
+import "config/game_config.onj" as gameConfig;
 import "imports/colors.onj" as color;
 
+use Common;
 use Experimental__Screen;
 use Experimental__Style;
+
+var pi = 3.141;
 
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
+var cardScale = 0.028;
+var cardHeight = 596.0 * cardScale;
+
+var cardZIndicesStart = 100;
+var cardZIndicesEnd = cardZIndicesStart + 100;
+var overlayZIndex = 500;
+
 assets: {
+    fonts: [
+
+        $DistanceFieldFont {
+            name: "vanilla_whale",
+            fontFile: "fonts/vanilla_whale.fnt",
+            imageFile: "fonts/vanilla_whale.png"
+        },
+
+        $DistanceFieldFont {
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
+            imageFile: "fonts/red_wing.png"
+        }
+
+    ],
     textureAtlases: [
+
         {
             file: "textures/packed/game_screen/game_screen.atlas",
             defines: [
@@ -18,6 +45,70 @@ assets: {
                 "poison_icon", "draw_bullet", "draw_cover"
             ]
         }
+
+    ],
+    cursors: [
+        {
+            name: "cursor",
+            file: "textures/cursors/revolver.png",
+            hotspotX: 0,
+            hotspotY: 0
+        }
+    ],
+    postProcessors: [
+        {
+            name: "earthquake",
+            vertexShader: "shaders/earthquake/earthquake.vert",
+            fragmentShader: "shaders/earthquake/earthquake.frag",
+            timeOffset: 2_000,
+            uniforms: [ "time" ],
+            args: null
+        },
+        {
+            name: "default",
+            vertexShader: "shaders/default/default.vert",
+            fragmentShader: "shaders/default/default.frag",
+            timeOffset: 0,
+            uniforms: [],
+            args: null
+        },
+        {
+            name: "vignette",
+            vertexShader: "shaders/vignette/vignette.vert",
+            fragmentShader: "shaders/vignette/vignette.frag",
+            timeOffset: 0,
+            uniforms: [ "time", "resolution" ],
+            args: {
+                color: color("ff0000"),
+                speed: 0.0,
+                movement: 1.0,
+                minMovement: 0.3
+            }
+        }
+    ],
+    colorTextures: [
+        {
+            name: "card_detail_background",
+            color: color.backgroundTransparent
+        },
+        {
+            name: "black",
+            color: color.black
+        }
+    ],
+    particles: [
+        {
+            name: "dust",
+            particlePath: "particles/dust.particle",
+            textureDir: "textures/particles",
+            scale: 0.1
+        },
+        {
+            name: "dust_explosion",
+            particlePath: "particles/dust_explosion.particle",
+            textureDir: "textures/particles",
+            scale: 0.1
+        }
     ]
 },
 
@@ -26,9 +117,69 @@ viewport: $FitViewport {
     worldHeight: worldHeight
 },
 
+var controller = $GameScreenController {
+    cardsFile: "cards/cards.onj",
+    cardAtlasFile: "cards/generated/cards.atlas",
+    cardHand: {
+        actorName: "card_hand"
+    },
+    revolver: {
+        actorName: "revolver",
+        dropBehaviour: $RevolverDropTarget {
+          group: "card"
+        }
+    },
+    enemyArea: {
+        actorName: "enemy_area",
+        enemies: [ gameConfig.enemyConfig.startEnemy ]
+    },
+    coverArea: {
+        actorName: "cover_area",
+        dropBehaviour: $CoverAreaDropTarget {
+            group: "card"
+        }
+    },
+    cardDragBehaviour: $CardDragSource {
+        group: "card"
+    },
+    enemies: gameConfig.enemyConfig.enemies,
+    cardDrawActor: "card_draw_table",
+    playerLivesLabelName: "player_lives_label",
+    shootButtonName: "shoot_button",
+    endTurnButtonName: "end_turn_button",
+    reservesLabelName: "reserves_label",
+    destroyCardInstructionActor: "destroy_card_instruction_label",
+    winScreen: "screens/win_screen.onj",
+    looseScreen: "screens/loose_screen.onj",
+    cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
+    cardsToDraw: gameConfig.cardDrawConfig.roundStart,
+    maxCards: gameConfig.cardDrawConfig.maxCards,
+    playerLives: gameConfig.playerConfig.lives,
+    reservesAtRoundBegin: gameConfig.reservesConfig.roundStart,
+    shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
+};
+
 options: {
-    background: "background"
+    background: "background",
+    screenController: controller
 },
+
+var sharedDetailTextKeys = {
+    detailFont: "red_wing",
+    detailFontColor: color.white,
+    detailBackgroundTexture: "card_detail_background",
+    detailFontScale: 0.07,
+    detailWidth: 50.0
+};
+
+var buttonHoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
+    disabled: {
+        useSystemCursor: true,
+        cursorName: "not allowed"
+    }
+};
 
 var revolver = $Revolver {
     name: "revolver",
@@ -66,7 +217,7 @@ var cardHand = $CardHand {
 };
 
 var enemyArea = $EnemyArea {
-     name: "enemy_area"
+     name: "enemy_area",
 //     debug: true
 };
 
@@ -85,7 +236,8 @@ var coverArea = $CoverArea {
     stackMinSize: 20.0,
     ...sharedDetailTextKeys,
     detailOffsetX: 0.0,
-    detailOffsetY: 0.0
+    detailOffsetY: 0.0,
+//    debug: true
 };
 
 var shootButton = $Image {
@@ -141,15 +293,195 @@ var reservesLabel = $TemplateLabel {
     backgroundTexture: "black"
 };
 
-root: $Box {
-    directProperties: [ flexDirection("row") ],
+var destroyCardInstructionActor = $Label {
+    name: "destroy_card_instruction_label",
+    font: "vanilla_whale",
+    text: "Choose a card to destroy!",
+    fontScale: 0.2,
+    align: "center",
+    color: color.black
+};
+
+var drawCardActor = $Box {
+    properties: [
+        position("absolute"),
+        background("card_detail_background"),
+        flexDirection("column"),
+        relWidth(100.0),
+        relHeight(100.0)
+    ],
+    name: "card_draw_table",
+    visible: false,
+    zIndex: overlayZIndex,
     debug: true
 } children [
 
-    $Box {
-    } children [],
+    $TemplateLabel {
+        font: "red_wing",
+        template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
+        fontScale: 0.18,
+        align: "center",
+        color: color.white
+    },
 
     $Box {
-    } children []
+        properties: [
+            flexDirection("row")
+        ]
+    } children [
 
+        $Box {
+            properties: [
+                flexDirection("column")
+            ]
+        } children [
+
+            $TemplateLabel {
+                font: "red_wing",
+                template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
+                fontScale: 0.13,
+                align: "center",
+                color: color.white
+            },
+
+            $Image {
+                properties: [
+                ],
+                textureName: "draw_bullet",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.08,
+                scaleY: 0.08,
+                behaviours: [ $DrawBulletButtonBehaviour { }, buttonHoverBehaviour ]
+            }
+
+        ],
+
+        $Box {
+            properties: [
+                flexDirection("column"),
+            ]
+        } children [
+
+            $TemplateLabel {
+                font: "red_wing",
+                template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
+                fontScale: 0.13,
+                align: "center",
+                color: color.white
+            },
+
+            $Image {
+                properties: [
+                ],
+                textureName: "draw_cover",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.08,
+                scaleY: 0.08,
+                behaviours: [ $DrawCoverCardButtonBehaviour { }, buttonHoverBehaviour ]
+            }
+
+        ]
+
+    ]
+
+];
+
+var gameScreen = $Box {
+    properties: [
+        position("absolute"),
+        flexDirection("column"),
+        relWidth(100.0),
+        relHeight(100.0)
+    ],
+    //    debug: true
+} children [
+
+    $Box {
+        properties: [
+            flexDirection("row"),
+            relWidth(100.0)
+        ],
+        //        debug: true
+    } children [
+        playerLivesLabel,
+        destroyCardInstructionActor
+    ],
+
+
+    $Box {
+        properties: [
+            flexDirection("row"),
+            relWidth(100.0),
+            flexGrow(1.0)
+        ],
+        //        debug: true
+    } children [
+
+        $Revolver {
+            properties: [
+                relWidth(33.33)
+            ],
+            ...revolver,
+        },
+
+        $Box {
+            properties: [
+                flexDirection("column"),
+                relWidth(66.66)
+            ],
+            //            debug: true
+        } children [
+
+            $Box {
+                properties: [
+                    flexDirection("row"),
+                    flexGrow(1.0)
+                ],
+    //                debug: true
+            } children [
+
+                $CoverArea {
+                    properties: [
+                        flexGrow(0.5)
+                    ],
+                    ...coverArea
+                },
+
+                $EnemyArea {
+                    properties: [
+                        flexGrow(0.5)
+                    ],
+                    ...enemyArea
+                }
+
+            ],
+
+            $Box {
+                properties: [
+                    flexDirection("row")
+                ],
+    //                debug: true
+            } children [ shootButton, reservesLabel, endTurnButton ],
+
+            $CardHand {
+                properties: [
+                    height(cardHeight),
+    //                    flexGrow(1.0)
+                ],
+                ...cardHand
+            }
+
+        ]
+
+    ]
+
+];
+
+root: $Box {
+    properties: [
+        relWidth(100.0),
+        relHeight(100.0)
+    ]
+} children [
+    gameScreen, drawCardActor
 ]

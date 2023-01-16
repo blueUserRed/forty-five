@@ -39,15 +39,17 @@ object FourtyFive : Game() {
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
-        curScreen = ScreenBuilder2(Gdx.files.internal("screens/title_screen2.onj")).build()
+        curScreen = ScreenBuilder2(Gdx.files.internal("screens/game_screen2.onj")).build()
 //        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
     }
 
     private fun init() {
-        OnjConfig.registerNameSpace("Common", CommonNamespace)
-        OnjConfig.registerNameSpace("Cards", CardsNamespace)
-        OnjConfig.registerNameSpace("Experimental__Style", StyleNamespace) //TODO: experimental
-        OnjConfig.registerNameSpace("Experimental__Screen", ScreenNamespace) //TODO: experimental
+        with(OnjConfig) {
+            registerNameSpace("Common", CommonNamespace)
+            registerNameSpace("Cards", CardsNamespace)
+            registerNameSpace("Experimental__Style", StyleNamespace) //TODO: experimental
+            registerNameSpace("Experimental__Screen", ScreenNamespace) //TODO: experimental
+        }
         FourtyFiveLogger.init()
         SaveState.read()
         GraphicsConfig.init()

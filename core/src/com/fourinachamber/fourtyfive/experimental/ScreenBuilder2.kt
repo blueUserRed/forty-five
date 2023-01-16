@@ -29,6 +29,7 @@ import com.fourinachamber.fourtyfive.utils.FrameAnimation
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
+import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaJustify
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -57,6 +58,8 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
     private val styleTargets: MutableList<StyleTarget> = mutableListOf()
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
+    private var screenController: ScreenController? = null
+
     override fun build(): OnjScreen {
         val onj = OnjParser.parseFile(file.file())
         screenSchema.assertMatches(onj)
@@ -65,11 +68,9 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
         readAssets(onj)
         doOptions(onj)
 
-//        val root = FlexBox()
-//        root.setFillParent(true)
-//        root.debug = true
-        val root = getWidget(onj.get<OnjNamedObject>("root"), null)
-        if (root is Layout) root.setFillParent(true)
+        val root = FlexBox()
+        root.setFillParent(true)
+        getWidget(onj.get<OnjNamedObject>("root"), root)
 
         val screen = StyleableOnjScreen(
             drawables = drawables,
@@ -89,6 +90,8 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             printFrameRate = false
         )
 
+        screen.screenController = screenController
+
         val dragAndDrops = doDragAndDrop(screen)
         screen.dragAndDrop = dragAndDrops
 
@@ -104,6 +107,9 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             earlyRenderTasks.add {
                 drawable.draw(stage.batch, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
             }
+        }
+        options.ifHas<OnjNamedObject>("screenController") {
+            screenController = ScreenControllerFactory.controllerOrError(it.name, it)
         }
     }
 
@@ -195,7 +201,8 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
     }
 
     private fun getFlexBox(widgetOnj: OnjObject): FlexBox {
-        val flexBox = FlexBox()
+        val flexBox = CustomFlexBox()
+        flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
                 .get<OnjArray>("children")
@@ -342,12 +349,7 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
     }.let { actor ->
 
         applySharedWidgetKeys(actor, widgetOnj)
-        val node = if (actor is FlexBox) {
-            parent?.add(actor)
-            actor.root
-        } else {
-            parent?.add(actor)
-        }
+        val node = parent?.add(actor)
 
         val styles = if (widgetOnj.hasKey<OnjArray>("styles")) {
             val styles = widgetOnj.get<OnjArray>("styles")
@@ -356,8 +358,8 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
                .map { styleOrError(it.value as String) }
         } else null
 
-        val directProperties = if (widgetOnj.hasKey<OnjArray>("directProperties")) {
-            val properties = widgetOnj.get<OnjArray>("directProperties")
+        val directProperties = if (widgetOnj.hasKey<OnjArray>("properties")) {
+            val properties = widgetOnj.get<OnjArray>("properties")
             properties
                 .value
                 .map {

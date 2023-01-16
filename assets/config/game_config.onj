@@ -47,7 +47,7 @@ enemyConfig: {
             coverIcon: "shield_icon",
             coverIconScale: 0.03,
             offsetX: 0.0,
-            offsetY: 15.0,
+            offsetY: 0.0,
             scaleX: 0.03,
             scaleY: 0.03,
             detailFont: "vanilla_whale",

@@ -8,10 +8,12 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
@@ -94,7 +96,22 @@ open class OnjScreen(
     }
 
     fun addActorToRoot(actor: Actor) {
-        stage.root.addActor(actor)
+//        stage.root.addActor(actor)
+    }
+
+    fun invalidateEverything() {
+
+        fun invalidateGroup(group: Group) {
+            for (child in group.children) {
+                if (child is Layout) {
+                    println("invalidate")
+                    child.invalidate()
+                }
+                if (child is Group) invalidateGroup(child)
+            }
+        }
+
+        invalidateGroup(stage.root)
     }
 
     fun removeActorFromRoot(actor: Actor) {
@@ -181,6 +198,7 @@ open class OnjScreen(
             stage.act(Gdx.graphics.deltaTime)
             if (postProcessor == null) {
                 ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
+                if (stage.batch.isDrawing) stage.batch.end()
                 doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
                 stage.draw()
                 doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
