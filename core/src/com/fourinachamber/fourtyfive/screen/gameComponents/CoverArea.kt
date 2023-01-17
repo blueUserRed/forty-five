@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -44,7 +45,7 @@ class CoverArea(
     detailFontScale: Float,
     val detailOffset: Vector2,
     val detailWidth: Float
-) : Widget() {
+) : WidgetGroup(), ZIndexGroup, ZIndexActor {
 
     /**
      * set by gameScreenController //TODO: find a better solution
@@ -52,8 +53,10 @@ class CoverArea(
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
     private var isInitialised: Boolean = false
 
-    private val onjScreen: OnjScreen
-        get() = FourtyFive.curScreen!!
+    override var fixedZIndex: Int = 0
+
+//    private val onjScreen: OnjScreen
+//        get() = FourtyFive.curScreen!!
 
     private val stacks: Array<CoverStack> = Array(numStacks) {
         CoverStack(
@@ -131,20 +134,56 @@ class CoverArea(
     fun acceptsCover(slot: Int, turnNum: Int): Boolean = stacks[slot].acceptsCard(turnNum)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
         if (!isInitialised) {
             initialise()
             isInitialised = true
             invalidateHierarchy()
         }
+        super.draw(batch, parentAlpha)
+    }
+
+    override fun resortZIndices() {
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+        }
+    }
+
+    private fun initialise() {
+//        onjScreen.addActorToRoot(hoverDetailActor)
+        var isFirst = true
+        for (stack in stacks) {
+//            stack.onjScreen = onjScreen
+            val (dragAndDrop, dropOnj) = slotDropConfig!!
+            val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+                dropOnj.name,
+                dragAndDrop,
+                stack,
+                dropOnj
+            )
+            if (isFirst) {
+                stack.isActive = true
+                isFirst = false
+            }
+            dragAndDrop.addTarget(dropBehaviour)
+//            onjScreen.addActorToRoot(stack)
+            addActor(stack)
+            stack.parentWidth = width
+        }
+    }
+
+    override fun layout() {
+        super.layout()
 
         var contentHeight = 0f
         for (stack in stacks) contentHeight += stack.height
         contentHeight += areaSpacing * stacks.size - areaSpacing
 
-        var (curX, curY) = localToStageCoordinates(Vector2(0f, 0f))
-        curY += height / 2
-        curY += contentHeight / 2
+//        var (curX, curY) = localToStageCoordinates(Vector2(0f, 0f))
+//        curY += height / 2
+//        curY += contentHeight / 2
+        val curX = 0
+        var curY = height / 2 + contentHeight / 2
 
         var isCardHoveredOver = false
 
@@ -153,6 +192,7 @@ class CoverArea(
             stack.width = max(stack.prefWidth, stack.minWidth)
             stack.height = stack.prefHeight
             if (!stack.inAnimation) stack.setPosition(curX + width / 2 - stack.width / 2, curY)
+            println("${stack.x}, ${stack.y}")
             curY -= areaSpacing
 
             for (card in stack.cards) if (card.actor.isHoveredOver) {
@@ -164,29 +204,6 @@ class CoverArea(
         hoverDetailActor.isVisible = isCardHoveredOver
     }
 
-    private fun initialise() {
-        onjScreen.addActorToRoot(hoverDetailActor)
-        var isFirst = true
-        for (stack in stacks) {
-            stack.onjScreen = onjScreen
-            val (dragAndDrop, dropOnj) = slotDropConfig!!
-            val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-                dropOnj.name,
-                dragAndDrop,
-                onjScreen,
-                stack,
-                dropOnj
-            )
-            if (isFirst) {
-                stack.isActive = true
-                isFirst = false
-            }
-            dragAndDrop.addTarget(dropBehaviour)
-            onjScreen.addActorToRoot(stack)
-            stack.parentWidth = width
-        }
-    }
-
     private fun updateHoverDetailActor(card: Card, stack: CoverStack) {
         hoverDetailActor.setText(card.description)
 
@@ -195,12 +212,12 @@ class CoverArea(
 
         val (x, y) = stack.localToStageCoordinates(Vector2(card.actor.x, card.actor.y))
 
-        val toLeft = x + card.actor.width + detailWidth > onjScreen.stage.viewport.worldWidth
+//        val toLeft = x + card.actor.width + detailWidth > onjScreen.stage.viewport.worldWidth
 
-        hoverDetailActor.setPosition(
-            if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
-            y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
-        )
+//        hoverDetailActor.setPosition(
+//            if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
+//            y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
+//        )
     }
 
 }
@@ -225,7 +242,7 @@ class CoverStack(
 
     override var inAnimation: Boolean = false
 
-    lateinit var onjScreen: OnjScreen
+//    lateinit var onjScreen: OnjScreen
 
     /**
      * the theoretical maximum health of the stack
@@ -298,6 +315,7 @@ class CoverStack(
         _cards.clear()
         lockedTurnNum = null
         updateText()
+        invalidateHierarchy()
     }
 
     /**
@@ -323,8 +341,9 @@ class CoverStack(
         baseHealth += card.coverValue
         currentHealth += card.coverValue
         updateText()
-        onjScreen.removeActorFromRoot(card.actor)
+//        onjScreen.removeActorFromRoot(card.actor)
         addActor(card.actor)
+        invalidateHierarchy()
     }
 
     private fun updateText() {

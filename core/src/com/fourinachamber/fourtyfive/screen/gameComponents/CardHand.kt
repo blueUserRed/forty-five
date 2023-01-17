@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.FourtyFive
@@ -13,6 +13,7 @@ import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
+import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
 import com.fourinachamber.fourtyfive.utils.between
 import ktx.actors.contains
 import kotlin.math.min
@@ -30,7 +31,7 @@ class CardHand(
     detailFontScale: Float,
     val detailOffset: Vector2,
     val detailWidth: Float
-) : Widget(), ZIndexActor {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
 
@@ -94,7 +95,7 @@ class CardHand(
      */
     fun addCard(card: Card) {
         _cards.add(card)
-        if (card.actor !in onjScreen.stage.root) onjScreen.addActorToRoot(card.actor)
+        if (card.actor !in this) addActor(card.actor)
         updateCards()
         invalidateHierarchy()
     }
@@ -104,22 +105,19 @@ class CardHand(
      */
     fun removeCard(card: Card) {
         _cards.remove(card)
+        removeActor(card.actor)
         updateCards()
         invalidateHierarchy()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        debug = true
+        updateCards()
         super.draw(batch, parentAlpha)
-        if (!isInitialized) {
-            onjScreen.addActorToRoot(hoverDetailActor)
-            isInitialized = true
-        }
-        updateCards() //TODO: calling this every frame is unnecessary
-        if (hoverDetailActor.isVisible)
-            hoverDetailActor.draw(onjScreen.stage.batch, 1.0f)
+        if (hoverDetailActor.isVisible) hoverDetailActor.draw(onjScreen.stage.batch, 1.0f)
     }
 
-    private fun updateCards() {
+    private fun updateCards() { //TODO: split into layout and actual update
 
         if (_cards.isEmpty()) return
 
@@ -137,7 +135,11 @@ class CardHand(
         var curX = if (targetWidth > neededWidth) {
             x + ((width - neededWidth) / 2)
         } else x
+
+        curX -= width / 2
+
         val curY = y
+
 
         var isCardHoveredOver = false
         for (i in _cards.indices) {
@@ -168,7 +170,7 @@ class CardHand(
 
         hoverDetailActor.isVisible = isCardHoveredOver
 
-        onjScreen.resortRootZIndices()
+        resortZIndices()
 
     }
 
@@ -187,6 +189,12 @@ class CardHand(
         )
     }
 
+    override fun resortZIndices() {
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+        }
+    }
 
     override fun getPrefWidth(): Float {
         return min(targetWidth, currentWidth)

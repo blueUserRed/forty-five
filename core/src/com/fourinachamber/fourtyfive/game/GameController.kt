@@ -237,7 +237,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
             cardDragAndDropBehaviour.name,
             cardDragAndDrop,
-            curScreen,
             card.actor,
             cardDragAndDropBehaviour
         )
