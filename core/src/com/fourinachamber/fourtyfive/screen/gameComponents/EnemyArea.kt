@@ -18,9 +18,6 @@ import ktx.actors.contains
  */
 class EnemyArea : WidgetGroup(), ZIndexActor, ZIndexGroup {
 
-//    private val onjScreen: OnjScreen
-//        get() = FourtyFive.curScreen!!
-
     override var fixedZIndex: Int = 0
 
     private var _enemies: MutableList<Enemy> = mutableListOf()
@@ -31,8 +28,6 @@ class EnemyArea : WidgetGroup(), ZIndexActor, ZIndexGroup {
     val enemies: List<Enemy>
         get() = _enemies
 
-//    private var isInitialised: Boolean = false
-
     /**
      * adds a new enemy to this area
      */
@@ -40,16 +35,9 @@ class EnemyArea : WidgetGroup(), ZIndexActor, ZIndexGroup {
         _enemies.add(enemy)
         addActor(enemy.actor)
         invalidate()
-        debug = true
-//        if (enemy.actor !in onjScreen.stage.root) onjScreen.addActorToRoot(enemy.actor)
-//        updateEnemyPositions()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-//        if (!isInitialised) {
-//            updateEnemyPositions()
-//            isInitialised = true
-//        }
         super.draw(batch, parentAlpha)
     }
 
