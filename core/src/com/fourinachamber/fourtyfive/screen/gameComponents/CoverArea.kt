@@ -55,9 +55,6 @@ class CoverArea(
 
     override var fixedZIndex: Int = 0
 
-//    private val onjScreen: OnjScreen
-//        get() = FourtyFive.curScreen!!
-
     private val stacks: Array<CoverStack> = Array(numStacks) {
         CoverStack(
             maxCards,
@@ -150,10 +147,8 @@ class CoverArea(
     }
 
     private fun initialise() {
-//        onjScreen.addActorToRoot(hoverDetailActor)
         var isFirst = true
         for (stack in stacks) {
-//            stack.onjScreen = onjScreen
             val (dragAndDrop, dropOnj) = slotDropConfig!!
             val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
                 dropOnj.name,
@@ -166,7 +161,6 @@ class CoverArea(
                 isFirst = false
             }
             dragAndDrop.addTarget(dropBehaviour)
-//            onjScreen.addActorToRoot(stack)
             addActor(stack)
             stack.parentWidth = width
         }
@@ -179,9 +173,6 @@ class CoverArea(
         for (stack in stacks) contentHeight += stack.height
         contentHeight += areaSpacing * stacks.size - areaSpacing
 
-//        var (curX, curY) = localToStageCoordinates(Vector2(0f, 0f))
-//        curY += height / 2
-//        curY += contentHeight / 2
         val curX = 0
         var curY = height / 2 + contentHeight / 2
 
@@ -209,15 +200,6 @@ class CoverArea(
 
         hoverDetailActor.width = detailWidth
         hoverDetailActor.height = hoverDetailActor.prefHeight
-
-        val (x, y) = stack.localToStageCoordinates(Vector2(card.actor.x, card.actor.y))
-
-//        val toLeft = x + card.actor.width + detailWidth > onjScreen.stage.viewport.worldWidth
-
-//        hoverDetailActor.setPosition(
-//            if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
-//            y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
-//        )
     }
 
 }
@@ -341,7 +323,6 @@ class CoverStack(
         baseHealth += card.coverValue
         currentHealth += card.coverValue
         updateText()
-//        onjScreen.removeActorFromRoot(card.actor)
         addActor(card.actor)
         invalidateHierarchy()
     }

@@ -76,7 +76,6 @@ class Revolver(
      */
     var rotationOff: Double = (Math.PI / 2) + slotAngleOff
 
-//    private var dirty: Boolean = true
     private var isInitialised: Boolean = false
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
@@ -85,7 +84,7 @@ class Revolver(
         get() = FourtyFive.curScreen!!
 
     /**
-     * the slots of the revoler
+     * the slots of the revolver
      */
     lateinit var slots: Array<RevolverSlot>
         private set
@@ -113,7 +112,6 @@ class Revolver(
         card?.actor?.fixedZIndex = cardZIndex
         if (card != null && card.actor !in this) addActor(card.actor)
         invalidate()
-//        dirty = true
     }
 
     /**
@@ -147,22 +145,15 @@ class Revolver(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        validate()
-//        width = prefWidth
-//        height = prefHeight
-        background?.draw(batch, x, y, width, height)
-        super.draw(batch, parentAlpha)
         if (!isInitialised) {
             initialise()
             updateSlotsAndCards()
             isInitialised = true
             invalidateHierarchy()
-//            onjScreen.addActorToRoot(hoverDetailActor)
         }
-//        if (dirty) {
-//            updateSlotsAndCards()
-//            dirty = false
-//        }
+        validate()
+        background?.draw(batch, x, y, width, height)
+        super.draw(batch, parentAlpha)
 
         var isCardHoveredOver = false
         for (slot in slots) if (slot.card?.actor?.isHoveredOver ?: false) {
@@ -262,13 +253,6 @@ class Revolver(
         slots[1].card = slots[0].card
         slots[0].card = firstCard
     }
-
-//    /**
-//     * marks the position of the revolver and its slots as dirty
-//     */
-//    fun markDirty() {
-//        dirty = true
-//    }
 
     private fun angleForIndex(i: Int): Double = slotAngleOff * i + rotationOff
 
