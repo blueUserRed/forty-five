@@ -18,10 +18,9 @@ import onj.value.OnjNamedObject
  */
 class CardDragSource(
     dragAndDrop: DragAndDrop,
-    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DragBehaviour(dragAndDrop, onjScreen, actor, onj) {
+) : DragBehaviour(dragAndDrop, actor, onj) {
 
     private val card: Card
 
@@ -73,10 +72,9 @@ class CardDragSource(
  */
 class RevolverDropTarget(
     dragAndDrop: DragAndDrop,
-    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor, onj) {
 
     private val revolverSlot: RevolverSlot
 
@@ -106,10 +104,9 @@ class RevolverDropTarget(
 
 class CoverAreaDropTarget(
     dragAndDrop: DragAndDrop,
-    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor, onj) {
 
     private val coverStack: CoverStack
 

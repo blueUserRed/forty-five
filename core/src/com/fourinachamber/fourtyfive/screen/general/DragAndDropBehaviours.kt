@@ -19,37 +19,30 @@ object DragAndDropBehaviourFactory {
     private val dropBehaviours: MutableMap<String, DropBehaviourCreator> = mutableMapOf()
 
     init {
-        dragBehaviours["SimpleDragSource"] = { dragAndDrop, onjScreen, actor, onj ->
-            SimpleDragSource(dragAndDrop, onjScreen, actor, onj)
+        dragBehaviours["SlotDragSource"] = { dragAndDrop, actor, onj ->
+            SlotDragSource(dragAndDrop, actor, onj)
         }
-        dropBehaviours["TestDropTarget"] = { dragAndDrop, onjScreen, actor, onj ->
-            TestDropTarget(dragAndDrop, onjScreen, actor, onj)
+        dropBehaviours["SlotDropTarget"] = { dragAndDrop, actor, onj ->
+            SlotDropTarget(dragAndDrop, actor, onj)
         }
-        dragBehaviours["SlotDragSource"] = { dragAndDrop, onjScreen, actor, onj ->
-            SlotDragSource(dragAndDrop, onjScreen, actor, onj)
+        dragBehaviours["CardDragSource"] = { dragAndDrop, actor, onj ->
+            CardDragSource(dragAndDrop, actor, onj)
         }
-        dropBehaviours["SlotDropTarget"] = { dragAndDrop, onjScreen, actor, onj ->
-            SlotDropTarget(dragAndDrop, onjScreen, actor, onj)
+        dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
+            RevolverDropTarget(dragAndDrop, actor, onj)
         }
-        dragBehaviours["CardDragSource"] = { dragAndDrop, onjScreen, actor, onj ->
-            CardDragSource(dragAndDrop, onjScreen, actor, onj)
-        }
-        dropBehaviours["RevolverDropTarget"] = { dragAndDrop, onjScreen, actor, onj ->
-            RevolverDropTarget(dragAndDrop, onjScreen, actor, onj)
-        }
-        dropBehaviours["CoverAreaDropTarget"] = { dragAndDrop, onjScreen, actor, onj ->
-            CoverAreaDropTarget(dragAndDrop, onjScreen, actor, onj)
+        dropBehaviours["CoverAreaDropTarget"] = { dragAndDrop, actor, onj ->
+            CoverAreaDropTarget(dragAndDrop, actor, onj)
         }
     }
 
     fun dragBehaviourOrError(
         name: String,
         dragAndDrop: DragAndDrop,
-        onjScreen: OnjScreen,
         actor: Actor,
         onj: OnjNamedObject
     ): DragBehaviour {
-        return dragBehaviourOrNull(name, dragAndDrop, onjScreen, actor, onj) ?: run {
+        return dragBehaviourOrNull(name, dragAndDrop, actor, onj) ?: run {
             throw RuntimeException("unknown drag behaviour $name")
         }
     }
@@ -57,19 +50,17 @@ object DragAndDropBehaviourFactory {
     private fun dragBehaviourOrNull(
         name: String,
         dragAndDrop: DragAndDrop,
-        onjScreen: OnjScreen,
         actor: Actor,
         onj: OnjNamedObject
-    ): DragBehaviour? = dragBehaviours[name]?.invoke(dragAndDrop, onjScreen, actor, onj)
+    ): DragBehaviour? = dragBehaviours[name]?.invoke(dragAndDrop, actor, onj)
 
     fun dropBehaviourOrError(
         name: String,
         dragAndDrop: DragAndDrop,
-        onjScreen: OnjScreen,
         actor: Actor,
         onj: OnjNamedObject
     ): DropBehaviour {
-        return dropBehaviourOrNull(name, dragAndDrop, onjScreen, actor, onj) ?: run {
+        return dropBehaviourOrNull(name, dragAndDrop, actor, onj) ?: run {
             throw RuntimeException("unknown drag behaviour $name")
         }
     }
@@ -77,10 +68,9 @@ object DragAndDropBehaviourFactory {
     private fun dropBehaviourOrNull(
         name: String,
         dragAndDrop: DragAndDrop,
-        onjScreen: OnjScreen,
         actor: Actor,
         onj: OnjNamedObject
-    ): DropBehaviour? = dropBehaviours[name]?.invoke(dragAndDrop, onjScreen, actor, onj)
+    ): DropBehaviour? = dropBehaviours[name]?.invoke(dragAndDrop, actor, onj)
 
     fun behaviourOrError(
         name: String,
@@ -89,8 +79,8 @@ object DragAndDropBehaviourFactory {
         actor: Actor,
         onj: OnjNamedObject
     ): Either<DragBehaviour, DropBehaviour> {
-        return dragBehaviourOrNull(name, dragAndDrop, onjScreen, actor, onj)?.eitherLeft() ?:
-               dropBehaviourOrNull(name, dragAndDrop, onjScreen, actor, onj)?.eitherRight() ?:
+        return dragBehaviourOrNull(name, dragAndDrop, actor, onj)?.eitherLeft() ?:
+               dropBehaviourOrNull(name, dragAndDrop, actor, onj)?.eitherRight() ?:
                throw RuntimeException("Unknown drag or drop behaviour: $name")
     }
 
@@ -98,7 +88,7 @@ object DragAndDropBehaviourFactory {
 
 abstract class DragBehaviour(
     protected val dragAndDrop: DragAndDrop,
-    protected val onjScreen: OnjScreen,
+//    protected val onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
 ) : DragAndDrop.Source(actor)
@@ -106,87 +96,16 @@ abstract class DragBehaviour(
 abstract class DropBehaviour(
     @Suppress("unused") // may be necessary in the future, also for symmetry with DragBehaviour
     protected val dragAndDrop: DragAndDrop,
-    protected val onjScreen: OnjScreen,
+//    protected val onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
 ) : DragAndDrop.Target(actor)
 
-
-class SimpleDragSource(
-    dragAndDrop: DragAndDrop,
-    onjScreen: OnjScreen,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DragBehaviour(dragAndDrop, onjScreen, actor, onj) {
-
-    private val dimensionsCell: Cell<*>? = if (onj.hasKey<String>("useDimensionsOfCell")) {
-        onjScreen.namedCellOrError(onj.get<String>("useDimensionsOfCell"))
-    } else {
-        null
-    }
-
-    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload {
-        val payload = DragAndDrop.Payload()
-        dragAndDrop.setKeepWithinStage(false)
-
-        payload.dragActor = actor
-
-        payload.setObject(mutableMapOf(
-            "resetPosition" to (actor.x to actor.y)
-        ))
-
-        val width = dimensionsCell?.actorWidth ?: payload.dragActor.width
-        val height = dimensionsCell?.actorHeight ?: payload.dragActor.height
-        dragAndDrop.setDragActorPosition(width / 2, -height / 2)
-        return payload
-    }
-
-    override fun dragStop(
-        event: InputEvent?,
-        x: Float,
-        y: Float,
-        pointer: Int,
-        payload: DragAndDrop.Payload?,
-        target: DragAndDrop.Target?
-    ) {
-        if (payload == null) return
-        val map = payload.`object` as Map<*, *>
-
-        val (actorX, actorY) = (map["resetPosition"] ?: return) as Pair<*, *>
-        actor.setPosition(actorX as Float, actorY as Float)
-    }
-
-}
-
-class TestDropTarget(
-    dragAndDrop: DragAndDrop,
-    onjScreen: OnjScreen,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
-
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean {
-        actor.color = Color.GREEN
-        return true
-    }
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-    }
-
-}
-
 class SlotDragSource(
     dragAndDrop: DragAndDrop,
-    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DragBehaviour(dragAndDrop, onjScreen, actor, onj) {
+) : DragBehaviour(dragAndDrop, actor, onj) {
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload {
         val payload = DragAndDrop.Payload()
@@ -201,8 +120,6 @@ class SlotDragSource(
         dragAndDrop.setDragActorPosition(
             actor.width - (actor.width * actor.scaleX / 2),
             -(actor.height * actor.scaleY) / 2
-//            (actor.width * actor.scaleX) / 2,
-//            -(actor.height * actor.scaleY) / 2
         )
         return payload
     }
@@ -226,10 +143,9 @@ class SlotDragSource(
 
 class SlotDropTarget(
     dragAndDrop: DragAndDrop,
-    onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, onjScreen, actor, onj) {
+) : DropBehaviour(dragAndDrop, actor, onj) {
 
     override fun drag(
         source: DragAndDrop.Source?,
@@ -252,5 +168,5 @@ class SlotDropTarget(
 
 }
 
-typealias DragBehaviourCreator = (DragAndDrop, OnjScreen, Actor, OnjNamedObject) -> DragBehaviour
-typealias DropBehaviourCreator = (DragAndDrop, OnjScreen, Actor, OnjNamedObject) -> DropBehaviour
+typealias DragBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DragBehaviour
+typealias DropBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DropBehaviour
