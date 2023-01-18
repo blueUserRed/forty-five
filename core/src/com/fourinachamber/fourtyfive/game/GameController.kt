@@ -350,7 +350,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val revolver = curScreen.namedActorOrError(revolverName)
         if (revolver !is Revolver) throw RuntimeException("actor named $revolverName must be a Revolver")
         val dropOnj = revolverOnj.get<OnjNamedObject>("dropBehaviour")
-        revolver.slotDropConfig = cardDragAndDrop to dropOnj
+        revolver.initDragAndDrop(cardDragAndDrop to dropOnj)
         this.revolver = revolver
     }
 

@@ -26,12 +26,12 @@ import kotlin.math.min
  */
 class CardHand(
     private val targetWidth: Float,
-    detailFont: BitmapFont,
-    detailFontColor: Color,
-    detailBackground: Drawable,
-    detailFontScale: Float,
-    val detailOffset: Vector2,
-    val detailWidth: Float
+//    detailFont: BitmapFont,
+//    detailFontColor: Color,
+//    detailBackground: Drawable,
+//    detailFontScale: Float,
+//    val detailOffset: Vector2,
+//    val detailWidth: Float
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
@@ -76,16 +76,16 @@ class CardHand(
     private var _cards: MutableList<Card> = mutableListOf()
     private var currentWidth: Float = 0f
 
-    private var hoverDetailActor: CustomLabel =
-        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
+//    private var hoverDetailActor: CustomLabel =
+//        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
 
-    init {
-        hoverDetailActor.setFontScale(detailFontScale)
-        hoverDetailActor.setAlignment(Align.center)
-        hoverDetailActor.isVisible = false
-        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-        hoverDetailActor.wrap = true
-    }
+//    init {
+//        hoverDetailActor.setFontScale(detailFontScale)
+//        hoverDetailActor.setAlignment(Align.center)
+//        hoverDetailActor.isVisible = false
+//        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
+//        hoverDetailActor.wrap = true
+//    }
 
     /**
      * adds a card to the hand
@@ -144,7 +144,7 @@ class CardHand(
             }
 
         }
-        hoverDetailActor.isVisible = isCardHoveredOver
+//        hoverDetailActor.isVisible = isCardHoveredOver
         resortZIndices()
     }
 

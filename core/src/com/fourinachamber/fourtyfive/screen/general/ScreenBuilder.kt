@@ -302,16 +302,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         "CardHand" -> CardHand(
-            widgetOnj.get<Double>("targetWidth").toFloat(),
-            fontOrError(widgetOnj.get<String>("detailFont")),
-            widgetOnj.get<Color>("detailFontColor"),
-            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
-            widgetOnj.get<Double>("detailFontScale").toFloat(),
-            Vector2(
-                widgetOnj.get<Double>("detailOffsetX").toFloat(),
-                widgetOnj.get<Double>("detailOffsetY").toFloat(),
-            ),
-            widgetOnj.get<Double>("detailWidth").toFloat()
+            widgetOnj.get<Double>("targetWidth").toFloat()
         ).apply {
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
@@ -322,15 +313,6 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         }
 
         "Revolver" -> Revolver(
-            fontOrError(widgetOnj.get<String>("detailFont")),
-            widgetOnj.get<Color>("detailFontColor"),
-            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
-            widgetOnj.get<Double>("detailFontScale").toFloat(),
-            Vector2(
-                widgetOnj.get<Double>("detailOffsetX").toFloat(),
-                widgetOnj.get<Double>("detailOffsetY").toFloat(),
-            ),
-            widgetOnj.get<Double>("detailWidth").toFloat(),
             widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it) },
             widgetOnj.get<Double>("radiusExtension").toFloat()
         ).apply {
@@ -359,16 +341,7 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("stackSpacing").toFloat(),
             widgetOnj.get<Double>("areaSpacing").toFloat(),
             widgetOnj.get<Double>("cardScale").toFloat(),
-            widgetOnj.get<Double>("stackMinSize").toFloat(),
-            fontOrError(widgetOnj.get<String>("detailFont")),
-            widgetOnj.get<Color>("detailFontColor"),
-            drawableOrError(widgetOnj.get<String>("detailBackgroundTexture")),
-            widgetOnj.get<Double>("detailFontScale").toFloat(),
-            Vector2(
-                widgetOnj.get<Double>("detailOffsetX").toFloat(),
-                widgetOnj.get<Double>("detailOffsetY").toFloat(),
-            ),
-            widgetOnj.get<Double>("detailWidth").toFloat()
+            widgetOnj.get<Double>("stackMinSize").toFloat()
         )
 
         "TemplateLabel" -> TemplateStringLabel(

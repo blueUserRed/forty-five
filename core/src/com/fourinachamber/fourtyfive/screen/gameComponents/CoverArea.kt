@@ -39,12 +39,12 @@ class CoverArea(
     private val areaSpacing: Float,
     private val cardScale: Float,
     private val stackMinSize: Float,
-    detailFont: BitmapFont,
-    detailFontColor: Color,
-    detailBackground: Drawable,
-    detailFontScale: Float,
-    val detailOffset: Vector2,
-    val detailWidth: Float
+//    detailFont: BitmapFont,
+//    detailFontColor: Color,
+//    detailBackground: Drawable,
+//    detailFontScale: Float,
+//    val detailOffset: Vector2,
+//    val detailWidth: Float
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor {
 
     /**
@@ -71,16 +71,16 @@ class CoverArea(
         )
     }
 
-    private val hoverDetailActor: CustomLabel =
-        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
-
-    init {
-        hoverDetailActor.setFontScale(detailFontScale)
-        hoverDetailActor.setAlignment(Align.center)
-        hoverDetailActor.isVisible = false
-        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-        hoverDetailActor.wrap = true
-    }
+//    private val hoverDetailActor: CustomLabel =
+//        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
+//
+//    init {
+//        hoverDetailActor.setFontScale(detailFontScale)
+//        hoverDetailActor.setAlignment(Align.center)
+//        hoverDetailActor.isVisible = false
+//        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
+//        hoverDetailActor.wrap = true
+//    }
 
     /**
      * damages the active stack
@@ -192,14 +192,14 @@ class CoverArea(
             }
         }
 
-        hoverDetailActor.isVisible = isCardHoveredOver
+//        hoverDetailActor.isVisible = isCardHoveredOver
     }
 
     private fun updateHoverDetailActor(card: Card, stack: CoverStack) {
-        hoverDetailActor.setText(card.description)
-
-        hoverDetailActor.width = detailWidth
-        hoverDetailActor.height = hoverDetailActor.prefHeight
+//        hoverDetailActor.setText(card.description)
+//
+//        hoverDetailActor.width = detailWidth
+//        hoverDetailActor.height = hoverDetailActor.prefHeight
     }
 
 }
@@ -223,8 +223,6 @@ class CoverStack(
 ) : CustomHorizontalGroup(), ZIndexActor, AnimationActor {
 
     override var inAnimation: Boolean = false
-
-//    lateinit var onjScreen: OnjScreen
 
     /**
      * the theoretical maximum health of the stack
@@ -316,8 +314,6 @@ class CoverStack(
         if (_cards.isEmpty()) lockedTurnNum = turnNum
         _cards.add(card)
         card.actor.setScale(cardScale)
-        // this workaround is needed because HorizontalGroup doesn't consider scaling when calculating the preferred
-        // dimensions, causing the layout to break
         card.actor.reportDimensionsWithScaling = true
         card.actor.ignoreScalingWhenDrawing = true
         baseHealth += card.coverValue
