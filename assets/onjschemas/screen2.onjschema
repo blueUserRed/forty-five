@@ -34,15 +34,15 @@ var widgetSharedKeys = {
     properties?: StyleProperty[]
 };
 
-var detailTextSharedKeys = {
-    detailFont: string,
-    detailFontColor: Color,
-    detailBackgroundTexture: string,
-    detailFontScale: float,
-    detailOffsetX: float,
-    detailOffsetY: float,
-    detailWidth: float,
-};
+//var detailTextSharedKeys = {
+//    detailFont: string,
+//    detailFontColor: Color,
+//    detailFontScale: float,
+//    detailBackgroundTexture: string,
+//    detailOffsetX: float,
+//    detailOffsetY: float,
+//    detailWidth: float,
+//};
 
 $Widget {
 
@@ -94,7 +94,7 @@ $Widget {
         draggedCardZIndex: int,
         hoveredCardScale: float,
         targetWidth: float,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
@@ -111,7 +111,7 @@ $Widget {
         cardZIndex: int,
         background?: string,
         radiusExtension: float,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
@@ -131,7 +131,10 @@ $Widget {
         cardScale: float,
         stackMinSize: float,
         onlyAllowAddingOnTheSameTurn: boolean,
-        ...detailTextSharedKeys,
+        detailFont: string,
+        detailFontColor: Color,
+        detailFontScale: float,
+//        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
@@ -244,7 +247,7 @@ $ScreenController {
         cardScale: float,
         cardBehaviour: $Behaviour,
         nextScreen: string,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         emptyFont: string,
         emptyFontColor: Color,
         emptyFontScale: float,

@@ -27,12 +27,6 @@ import kotlin.math.sin
  * between the slots and the edge of the revolver
  */
 class Revolver(
-    detailFont: BitmapFont,
-    detailFontColor: Color,
-    detailBackground: Drawable,
-    detailFontScale: Float,
-    val detailOffset: Vector2,
-    val detailWidth: Float,
     private val background: Drawable?,
     private val radiusExtension: Float
 ) : WidgetGroup(), ZIndexActor {
@@ -62,11 +56,6 @@ class Revolver(
     var animationDuration: Float = 1f
 
     /**
-     * the [DragAndDrop] used for the slots and the [OnjNamedObject] containing the config for drag and drop
-     */
-    var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
-
-    /**
      * the radius of the circle in which the slots are laid out
      */
     var radius: Float = 1f
@@ -76,7 +65,6 @@ class Revolver(
      */
     var rotationOff: Double = (Math.PI / 2) + slotAngleOff
 
-    private var isInitialised: Boolean = false
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
 
@@ -89,16 +77,7 @@ class Revolver(
     lateinit var slots: Array<RevolverSlot>
         private set
 
-    private val hoverDetailActor: CustomLabel =
-        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
-
-    init {
-        hoverDetailActor.setFontScale(detailFontScale)
-        hoverDetailActor.setAlignment(Align.center)
-        hoverDetailActor.isVisible = false
-        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-        hoverDetailActor.wrap = true
-    }
+    private var currentHoverDetailActor: CardDetailActor? = null
 
     /**
      * assigns a card to a slot in the revolver; [card] can be set to null, but consider using [removeCard] instead to
@@ -144,13 +123,24 @@ class Revolver(
         return slots[slot - 1].card
     }
 
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (!isInitialised) {
-            initialise()
-            updateSlotsAndCards()
-            isInitialised = true
-            invalidateHierarchy()
+    fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
+        slots = Array(5) {
+            val slot = RevolverSlot(it + 1, this, slotDrawable!!, slotScale!!, animationDuration)
+            addActor(slot)
+            val (dragAndDrop, dropOnj) = config
+            val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+                dropOnj.name,
+                dragAndDrop,
+                slot,
+                dropOnj
+            )
+            dragAndDrop.addTarget(dropBehaviour)
+            slot
         }
+        invalidateHierarchy()
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
@@ -158,52 +148,36 @@ class Revolver(
         var isCardHoveredOver = false
         for (slot in slots) if (slot.card?.actor?.isHoveredOver ?: false) {
             isCardHoveredOver = true
-            updateHoverDetailActor(slot.card!!)
+            if (currentHoverDetailActor === slot.card?.actor?.hoverDetailActor) break
+            currentHoverDetailActor?.isVisible = false
+            removeActor(currentHoverDetailActor)
+            currentHoverDetailActor = slot.card?.actor?.hoverDetailActor
+            addActor(currentHoverDetailActor)
+            currentHoverDetailActor!!.isVisible = true
+            invalidate()
+            break
         }
-        hoverDetailActor.isVisible = isCardHoveredOver
+        if (!isCardHoveredOver && currentHoverDetailActor != null) {
+            currentHoverDetailActor?.isVisible = false
+            removeActor(currentHoverDetailActor)
+            currentHoverDetailActor = null
+            invalidate()
+        }
     }
 
     override fun layout() {
         super.layout()
+        currentHoverDetailActor?.forcedWidth = width
+        currentHoverDetailActor?.setBounds(
+            x + width / 2 - currentHoverDetailActor!!.forcedWidth / 2,
+            y + height,
+            currentHoverDetailActor!!.prefWidth,
+            currentHoverDetailActor!!.prefHeight
+        )
         updateSlotsAndCards()
     }
 
-    private fun updateHoverDetailActor(card: Card) {
-        hoverDetailActor.setText(card.description)
-
-        hoverDetailActor.width = detailWidth
-        hoverDetailActor.height = hoverDetailActor.prefHeight
-
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-
-        hoverDetailActor.setPosition(
-            x + prefWidth + detailOffset.x,
-            y + prefHeight / 2 - hoverDetailActor.height / 2 + detailOffset.y
-        )
-    }
-
-    private fun initialise() {
-        slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawable!!, slotScale!!, animationDuration)
-
-            addActor(slot)
-
-            if (slotDropConfig != null) {
-                val (dragAndDrop, dropOnj) = slotDropConfig!!
-                val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-                    dropOnj.name,
-                    dragAndDrop,
-                    slot,
-                    dropOnj
-                )
-                dragAndDrop.addTarget(dropBehaviour)
-            }
-            slot
-        }
-    }
-
     private fun updateSlotsAndCards() {
-        if (!isInitialised) return
         val slotSize = slotDrawable!!.minWidth * slotScale!!
         val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size

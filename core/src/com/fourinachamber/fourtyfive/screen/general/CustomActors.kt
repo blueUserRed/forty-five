@@ -278,7 +278,7 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
 
 }
 
-class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
+open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
 
@@ -292,6 +292,7 @@ class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
         if (batch != null && background != null) {
             background?.draw(batch, x, y, width, height)
         }

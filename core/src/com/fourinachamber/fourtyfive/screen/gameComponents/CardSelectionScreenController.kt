@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
@@ -159,7 +159,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     override fun update() {
         for (card in cards) if (card.actor.isHoveredOver) {
             hoverDetailActor.isVisible = true
-            hoverDetailActor.setText(card.description)
+//            hoverDetailActor.setText(card.description)
             val (x, y) = card.actor.localToStageCoordinates(Vector2(0f, 0f))
             hoverDetailActor.height = hoverDetailActor.prefHeight
             hoverDetailActor.width = detailWidth

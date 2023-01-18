@@ -2,10 +2,12 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.general.*
@@ -185,6 +187,11 @@ object GraphicsConfig {
         return GameAnimationTimelineAction(anim)
     }
 
+    fun cardDetailFont(): BitmapFont = FourtyFive.curScreen!!.fontOrError(cardDetailFont)
+    fun cardDetailFontScale(): Float = cardDetailFontScale
+    fun cardDetailFontColor(): Color = cardDetailFontColor
+    fun cardDetailBackground(): Drawable? = cardDetailBackground?.let { FourtyFive.curScreen!!.drawableOrError(it) }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,7 +285,22 @@ object GraphicsConfig {
         fadeDuration = (fadeOnj.get<Double>("fadeDuration") * 1000).toInt()
         fadeIn = (fadeOnj.get<Double>("fadeIn") * 1000).toInt()
         fadeOut = (fadeOnj.get<Double>("fadeOut") * 1000).toInt()
+
+        val cardDetailOnj = config.get<OnjObject>("cardDetailText")
+        cardDetailFont = cardDetailOnj.get<String>("font")
+        cardDetailFontScale = cardDetailOnj.get<Double>("fontScale").toFloat()
+        cardDetailFontColor = cardDetailOnj.get<Color>("fontColor")
+        cardDetailBackground = if (cardDetailOnj["background"]!!.isNull()) {
+            null
+        } else {
+            cardDetailOnj.get<String>("background")
+        }
     }
+
+    private var cardDetailFont by Delegates.notNull<String>()
+    private var cardDetailFontScale by Delegates.notNull<Float>()
+    private var cardDetailFontColor by Delegates.notNull<Color>()
+    private var cardDetailBackground: String? = null
 
     private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>

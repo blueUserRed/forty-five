@@ -1,5 +1,7 @@
 package com.fourinachamber.fourtyfive.game.card
 
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -8,6 +10,7 @@ import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fourtyfive.screen.gameComponents.CardDetailActor
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
@@ -62,7 +65,11 @@ class Card(
     val baseDamage: Int,
     val coverValue: Int,
     val cost: Int,
-    val effects: List<Effect>
+    val effects: List<Effect>,
+    private val detailFont: BitmapFont,
+    private val detailFontColor: Color,
+    private val detailFontScale: Float,
+    private val detailBackground: Drawable?
 ) {
 
     /**
@@ -73,7 +80,7 @@ class Card(
     /**
      * the actor for representing the card on the screen
      */
-    val actor = CardActor(this)
+    val actor = CardActor(this, detailFont, detailFontColor, detailFontScale, detailBackground)
 
     //TODO: isDraggable and inAnimation should be in the actor class
 
@@ -103,13 +110,6 @@ class Card(
             isDamageDirty = false
             return cur
         }
-
-    /**
-     * the complete description of the card. Includes [flavourText], [shortDescription], information about damage/cover,
-     * cost and modifiers
-     */
-    var description = ""
-        private set
 
     private var isEverlasting: Boolean = false
     private var isUndead: Boolean = false
@@ -273,22 +273,17 @@ class Card(
     }
 
     private fun updateText() {
+        val detail = actor.hoverDetailActor
+        detail.description = shortDescription.ifBlank { null }
+        detail.flavourText = flavourText
+        detail.statsText =  if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "cover value: $coverValue"
+
         val builder = StringBuilder()
-
-        builder.append("\n$flavourText\n\n")
-        if (shortDescription.isNotBlank()) builder.append("$shortDescription\n\n")
-        builder.append("cost: $cost\n")
-
-        if (type == Type.BULLET) builder.append("damage: $curDamage/$baseDamage")
-        else builder.append("cover value: $coverValue")
-
-        builder.append("\n\n")
-
         for (modifier in modifiers) if (modifier.description != null) {
             builder.append(modifier.description.string).append("\n")
         }
-
-        description = builder.toString()
+        val modifiersText = builder.toString()
+        detail.statsChangedText = modifiersText.ifBlank { null }
     }
 
     override fun toString(): String {
@@ -351,7 +346,12 @@ class Card(
 
                 onj.get<OnjArray>("effects")
                     .value
-                    .map { (it as OnjEffect).value.copy() } //TODO: find a better solution
+                    .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
+
+                GraphicsConfig.cardDetailFont(),
+                GraphicsConfig.cardDetailFontColor(),
+                GraphicsConfig.cardDetailFontScale(),
+                GraphicsConfig.cardDetailBackground()
             )
 
             for (effect in card.effects) effect.card = card
@@ -414,7 +414,13 @@ class Card(
 /**
  * the actor representing a card on the screen
  */
-class CardActor(val card: Card) : CustomImageActor(card.drawable), ZIndexActor {
+class CardActor(
+    val card: Card,
+    private val font: BitmapFont,
+    private val fontColor: Color,
+    private val fontScale: Float,
+    private val detailBackground: Drawable?
+) : CustomImageActor(card.drawable), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
@@ -428,6 +434,18 @@ class CardActor(val card: Card) : CustomImageActor(card.drawable), ZIndexActor {
      */
     var isHoveredOver: Boolean = false
         private set
+
+    val hoverDetailActor = CardDetailActor(
+        initialFlavourText = "",
+        initialDescription = "",
+        initialStatsText = "",
+        initialStatsChangedText = null,
+        font = font,
+        fontColor = fontColor,
+        fontScale = fontScale,
+        initialForcedWidth = 0f,
+        initialBackground = detailBackground
+    )
 
     private val destroyModeOnClickListener: EventListener = EventListener { event ->
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
