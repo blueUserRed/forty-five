@@ -5,14 +5,14 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.NinePatch
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
@@ -30,7 +30,6 @@ import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
-import io.github.orioncraftmc.meditate.enums.YogaJustify
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -177,6 +176,11 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
                 .forEach {
                     styles[it.first] = it.second
                 }
+        }
+        assets.ifHas<OnjArray>("ninepatches") {
+            val (textures, ninepatches) = OnjReaderUtils.readNinepatches(it)
+            drawables.putAll(ninepatches)
+            toDispose.addAll(textures)
         }
     }
 

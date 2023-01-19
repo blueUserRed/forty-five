@@ -88,7 +88,7 @@ assets: {
     ],
     colorTextures: [
         {
-            name: "card_detail_background",
+            name: "transparent_black",
             color: color.backgroundTransparent
         },
         {
@@ -107,6 +107,17 @@ assets: {
             name: "dust_explosion",
             particlePath: "particles/dust_explosion.particle",
             textureDir: "textures/particles",
+            scale: 0.1
+        }
+    ],
+    ninepatches: [
+        {
+            name: "hover_detail_background",
+            file: "textures/ninepatches/hover_detail_background.png",
+            top: 14,
+            bottom: 14,
+            left: 14,
+            right: 14,
             scale: 0.1
         }
     ]
@@ -168,7 +179,7 @@ options: {
 //    detailFont: "red_wing",
 //    detailFontColor: color.white,
 //    detailFontScale: 0.07,
-//    detailBackgroundTexture: "card_detail_background",
+//    detailBackgroundTexture: "transparent_black",
 //    detailWidth: 50.0
 //};
 
@@ -204,7 +215,7 @@ var revolver = $Revolver {
 var cardHand = $CardHand {
     name: "card_hand",
     cardScale: cardScale,
-    hoveredCardScale: cardScale * 1.2,
+    hoveredCardScale: cardScale * 1.4,
     cardSpacing: 1.0,
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
@@ -229,7 +240,7 @@ var coverArea = $CoverArea {
     infoFont: "vanilla_whale",
     infoFontColor: color.black,
     infoFontScale: 0.1,
-    stackBackgroundTexture: "card_detail_background",
+    stackBackgroundTexture: "transparent_black",
     stackSpacing: 2.0,
     areaSpacing: 4.0,
     cardScale: cardScale * 0.6,
@@ -308,7 +319,7 @@ var destroyCardInstructionActor = $Label {
 var drawCardActor = $Box {
     properties: [
         position("absolute"),
-        background("card_detail_background"),
+        background("transparent_black"),
         flexDirection("column"),
         relWidth(100.0),
         relHeight(100.0)

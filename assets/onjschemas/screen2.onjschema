@@ -295,6 +295,15 @@ assets: {
         name: string,
         color: Color,
     }[],
+    ninepatches: {
+        name: string,
+        file: string,
+        left: int,
+        right: int,
+        top: int,
+        bottom: int,
+        scale: float
+    }[],
     particles?: {
         name: string,
         particlePath: string,
