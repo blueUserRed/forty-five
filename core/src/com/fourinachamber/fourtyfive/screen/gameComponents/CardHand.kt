@@ -76,16 +76,7 @@ class CardHand(
     private var _cards: MutableList<Card> = mutableListOf()
     private var currentWidth: Float = 0f
 
-//    private var hoverDetailActor: CustomLabel =
-//        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
-
-//    init {
-//        hoverDetailActor.setFontScale(detailFontScale)
-//        hoverDetailActor.setAlignment(Align.center)
-//        hoverDetailActor.isVisible = false
-//        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-//        hoverDetailActor.wrap = true
-//    }
+    private var currentHoverDetailActor: CardDetailActor? = null
 
     /**
      * adds a card to the hand
@@ -108,12 +99,11 @@ class CardHand(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        debug = true
         updateCards()
         super.draw(batch, parentAlpha)
     }
 
-    private fun updateCards() { //TODO: split into layout and actual update
+    private fun updateCards() {
 
         fun doZIndexFor(card: CardActor, zIndex: Int) {
             if (card.fixedZIndex == zIndex) return
@@ -127,25 +117,31 @@ class CardHand(
         for (i in _cards.indices) {
             val card = _cards[i]
             card.actor.setScale(cardScale)
-
             if (card.actor.isDragged) {
                 doZIndexFor(card.actor, draggedCardZIndex)
                 continue
             }
-
-            card.actor.setScale(cardScale)
-            if (card.actor.isHoveredOver) {
+            if (card.actor.isHoveredOver || card.actor.hoverDetailActor.isHoveredOver) {
                 isCardHoveredOver = true
-                updateHoverDetailActor(card)
                 card.actor.setScale(hoveredCardScale)
                 doZIndexFor(card.actor, hoveredCardZIndex)
+                if (currentHoverDetailActor === card.actor.hoverDetailActor) break
+                currentHoverDetailActor?.isVisible = false
+                removeActor(currentHoverDetailActor)
+                currentHoverDetailActor = card.actor.hoverDetailActor
+                addActor(currentHoverDetailActor)
+                currentHoverDetailActor!!.isVisible = true
+                invalidate()
             } else {
                 doZIndexFor(card.actor, startCardZIndicesAt + i)
             }
-
         }
-//        hoverDetailActor.isVisible = isCardHoveredOver
-        resortZIndices()
+        if (!isCardHoveredOver && currentHoverDetailActor != null) {
+            currentHoverDetailActor?.isVisible = false
+            removeActor(currentHoverDetailActor)
+            currentHoverDetailActor = null
+            invalidate()
+        }
     }
 
     override fun layout() {
@@ -154,6 +150,7 @@ class CardHand(
         if (_cards.isEmpty()) return
 
         val cardWidth = _cards[0].actor.width * cardScale
+        val hoveredCardWidth = _cards[0].actor.width * hoveredCardScale
 
         var neededWidth = _cards.size * (cardSpacing + cardWidth) - cardSpacing
         this.currentWidth = neededWidth
@@ -174,26 +171,28 @@ class CardHand(
 
         for (i in _cards.indices) {
             val card = _cards[i]
-            if (!card.actor.isDragged) {
+            if (card.actor.isDragged) {
+                curX += cardWidth + cardSpacing + xDistanceOffset
+                continue
+            }
+            if (currentHoverDetailActor == card.actor.hoverDetailActor) {
+                val detailActor = currentHoverDetailActor!!
+                detailActor.forcedWidth = hoveredCardWidth
+                detailActor.fixedZIndex = hoveredCardZIndex
+                val adjustedX = curX - (hoveredCardWidth - cardWidth) / 2
+                detailActor.setBounds(
+                    adjustedX,
+                    curY + hoveredCardWidth,
+                    detailActor.prefWidth,
+                    detailActor.prefHeight
+                )
+                card.actor.setPosition(adjustedX, curY)
+            } else {
                 card.actor.setPosition(curX, curY)
             }
             curX += cardWidth + cardSpacing + xDistanceOffset
         }
-    }
-
-    private fun updateHoverDetailActor(card: Card) {
-//        hoverDetailActor.setText(card.description)
-//
-//        hoverDetailActor.width = detailWidth
-//        hoverDetailActor.height = hoverDetailActor.prefHeight
-//
-//        val worldWidth = onjScreen.stage.viewport.worldWidth
-//
-//        hoverDetailActor.setPosition(
-//            (card.actor.x + detailOffset.x - hoverDetailActor.width / 2 + (card.actor.width * cardScale) / 2)
-//                .between(0f, worldWidth - hoverDetailActor.width),
-//            card.actor.y + card.actor.height * cardScale + detailOffset.y
-//        )
+        resortZIndices()
     }
 
     override fun resortZIndices() {

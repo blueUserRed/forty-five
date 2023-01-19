@@ -2,11 +2,16 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
+import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
+import ktx.actors.onEnter
+import ktx.actors.onExit
 
 class CardDetailActor(
     initialFlavourText: String,
@@ -19,6 +24,12 @@ class CardDetailActor(
     initialForcedWidth: Float,
     private val initialBackground: Drawable? = null
 ) : CustomFlexBox() {
+
+    /**
+     * true when the actor is hovered over
+     */
+    var isHoveredOver: Boolean = false
+        private set
 
     private val flavourTextActor = CustomLabel(initialFlavourText, Label.LabelStyle(font, fontColor))
     private val descriptionActor = CustomLabel(initialDescription, Label.LabelStyle(font, fontColor))
@@ -75,16 +86,20 @@ class CardDetailActor(
                 .setWidthPercent(100f)
                 .setMaxWidthPercent(100f)
             it.wrap = true
-            it.debug = true
         }
+
         root.flexDirection = YogaFlexDirection.COLUMN
+        root.setPadding(YogaEdge.ALL, 1f)
         background = initialBackground
 
         flavourTextActor.setFontScale(fontScale)
         descriptionActor.setFontScale(fontScale)
         statsTextActor.setFontScale(fontScale)
         statsChangedTextActor.setFontScale(fontScale)
-        debug = true
+
+        touchable = Touchable.enabled
+        onEnter { isHoveredOver = true }
+        onExit { isHoveredOver = false }
     }
 
     override fun setVisible(visible: Boolean) {
