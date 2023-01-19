@@ -119,6 +119,15 @@ assets: {
             left: 14,
             right: 14,
             scale: 0.1
+        },
+        {
+            name: "cover_hook",
+            file: "textures/ninepatches/cover_hook.png",
+            top: 1,
+            bottom: 1,
+            left: 6,
+            right: 6,
+            scale: 0.2
         }
     ]
 },
@@ -253,7 +262,8 @@ var coverArea = $CoverArea {
     cardInitialX: 0.0,
     cardInitialY: 6.0,
     stackHeight: 20.0,
-    stackMinWidth: 30.0
+    stackMinWidth: 15.0,
+    stackHook: "cover_hook"
 //    ...sharedDetailTextKeys,
 //    detailOffsetX: 0.0,
 //    detailOffsetY: 0.0,

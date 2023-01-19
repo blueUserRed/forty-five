@@ -313,6 +313,7 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             widgetOnj.get<Double>("cardInitialY").toFloat(),
             widgetOnj.get<Double>("cardDeltaX").toFloat(),
             widgetOnj.get<Double>("cardDeltaY").toFloat(),
+            drawableOrError(widgetOnj.get<String>("stackHook"))
         )
 
         "TemplateLabel" -> TemplateStringLabel(

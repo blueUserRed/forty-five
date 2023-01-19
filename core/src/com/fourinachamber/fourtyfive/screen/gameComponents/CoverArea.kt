@@ -3,14 +3,18 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.*
 import ktx.actors.onClick
 import onj.value.OnjNamedObject
 import java.lang.Float.max
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 
 
 /**
@@ -34,6 +38,7 @@ class CoverArea(
     private val cardInitialY: Float,
     private val cardDeltaX: Float,
     private val cardDeltaY: Float,
+    private val stackHookDrawable: Drawable
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor {
 
     /**
@@ -59,7 +64,8 @@ class CoverArea(
             cardInitialY,
             cardDeltaX,
             cardDeltaY,
-            it
+            it,
+            stackHookDrawable
         )
     }
 
@@ -193,7 +199,8 @@ class CoverStack(
     private val cardInitialY: Float,
     private val cardDeltaX: Float,
     private val cardDeltaY: Float,
-    val num: Int
+    val num: Int,
+    private val hookDrawable: Drawable
 ) : WidgetGroup(), ZIndexActor, AnimationActor {
 
     override var inAnimation: Boolean = false
@@ -240,8 +247,22 @@ class CoverStack(
         onClick {
             coverArea.makeActive(num)
         }
-        debug = true
-        detailText.debug = true
+//        debug = true
+//        detailText.debug = true
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        val hookWidth = width * 1f
+        val hookHeight = 1.5f
+        if (batch != null) hookDrawable.draw(
+            batch,
+            x + width / 2 - hookWidth / 2,
+            y + height - detailText.height - hookHeight,
+            hookWidth,
+            hookHeight
+        )
+        super.draw(batch, parentAlpha)
     }
 
     override fun layout() {
