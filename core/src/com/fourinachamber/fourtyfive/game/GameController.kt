@@ -157,12 +157,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCoverArea()
         initTemplateStringParams()
 
-        //TODO: this is really not good
-        //TODO: gotta fix this soon
-        onjScreen.afterMs(1000) {
-            onjScreen.resortRootZIndices()
-            onjScreen.invalidateEverything()
-        }
+//        //TODO: this is really not good
+//        //TODO: gotta fix this soon
+//        onjScreen.afterMs(1000) {
+//            onjScreen.resortRootZIndices()
+//            onjScreen.invalidateEverything()
+//        }
         changePhase(Gamephase.INITIAL_DRAW)
     }
 

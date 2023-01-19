@@ -165,7 +165,7 @@ open class TemplateStringLabel(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val newString = templateString.string
         if (!textEquals(newString)) {
-            setText(newString) //TODO: updating this every frame is unnecessary
+            setText(newString)
         }
         super.draw(batch, parentAlpha)
     }

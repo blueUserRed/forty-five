@@ -261,6 +261,7 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
+            widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
         "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"))).apply {
@@ -320,6 +321,7 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
+            widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")

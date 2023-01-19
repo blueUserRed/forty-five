@@ -335,6 +335,7 @@ var drawCardActor = $Box {
         template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
         fontScale: 0.18,
         align: "center",
+        wrap: true,
         color: color.white
     },
 
@@ -353,6 +354,7 @@ var drawCardActor = $Box {
             $TemplateLabel {
                 font: "red_wing",
                 template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
+                wrap: true,
                 fontScale: 0.13,
                 align: "center",
                 color: color.white
@@ -379,6 +381,7 @@ var drawCardActor = $Box {
             $TemplateLabel {
                 font: "red_wing",
                 template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
+                wrap: true,
                 fontScale: 0.13,
                 align: "center",
                 color: color.white
