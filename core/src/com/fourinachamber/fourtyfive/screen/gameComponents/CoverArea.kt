@@ -3,20 +3,11 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
-import com.badlogic.gdx.utils.Align
-import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.*
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onClick
 import onj.value.OnjNamedObject
 import java.lang.Float.max
@@ -35,16 +26,14 @@ class CoverArea(
     infoFont: BitmapFont,
     infoFontColor: Color,
     infoFontScale: Float,
-    private val stackSpacing: Float,
     private val areaSpacing: Float,
     private val cardScale: Float,
-    private val stackMinSize: Float,
-//    detailFont: BitmapFont,
-//    detailFontColor: Color,
-//    detailBackground: Drawable,
-//    detailFontScale: Float,
-//    val detailOffset: Vector2,
-//    val detailWidth: Float
+    private val stackHeight: Float,
+    private val stackMinWidth: Float,
+    private val cardInitialX: Float,
+    private val cardInitialY: Float,
+    private val cardDeltaX: Float,
+    private val cardDeltaY: Float,
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor {
 
     /**
@@ -62,25 +51,17 @@ class CoverArea(
             this,
             infoFont,
             infoFontColor,
-            null,
             infoFontScale,
-            stackSpacing,
             cardScale,
-            stackMinSize,
+            stackHeight,
+            stackMinWidth,
+            cardInitialX,
+            cardInitialY,
+            cardDeltaX,
+            cardDeltaY,
             it
         )
     }
-
-//    private val hoverDetailActor: CustomLabel =
-//        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
-//
-//    init {
-//        hoverDetailActor.setFontScale(detailFontScale)
-//        hoverDetailActor.setAlignment(Align.center)
-//        hoverDetailActor.isVisible = false
-//        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-//        hoverDetailActor.wrap = true
-//    }
 
     /**
      * damages the active stack
@@ -176,30 +157,20 @@ class CoverArea(
         val curX = 0
         var curY = height / 2 + contentHeight / 2
 
-        var isCardHoveredOver = false
+//        var isCardHoveredOver = false
 
         for (stack in stacks) {
             curY -= stack.height
             stack.width = max(stack.prefWidth, stack.minWidth)
             stack.height = stack.prefHeight
             if (!stack.inAnimation) stack.setPosition(curX + width / 2 - stack.width / 2, curY)
-            println("${stack.x}, ${stack.y}")
             curY -= areaSpacing
 
-            for (card in stack.cards) if (card.actor.isHoveredOver) {
-                isCardHoveredOver = true
-                updateHoverDetailActor(card, stack)
-            }
+//            for (card in stack.cards) if (card.actor.isHoveredOver) {
+//                isCardHoveredOver = true
+////                updateHoverDetailActor(card, stack)
+//            }
         }
-
-//        hoverDetailActor.isVisible = isCardHoveredOver
-    }
-
-    private fun updateHoverDetailActor(card: Card, stack: CoverStack) {
-//        hoverDetailActor.setText(card.description)
-//
-//        hoverDetailActor.width = detailWidth
-//        hoverDetailActor.height = hoverDetailActor.prefHeight
     }
 
 }
@@ -214,15 +185,20 @@ class CoverStack(
     private val coverArea: CoverArea,
     detailFont: BitmapFont,
     detailFontColor: Color,
-    backgroundTexture: TextureRegion?,
     detailFontScale: Float,
-    spacing: Float,
     private val cardScale: Float,
-    private val minSize: Float,
+    private val fixedHeight: Float,
+    private val minWidth: Float,
+    private val cardInitialX: Float,
+    private val cardInitialY: Float,
+    private val cardDeltaX: Float,
+    private val cardDeltaY: Float,
     val num: Int
-) : CustomHorizontalGroup(), ZIndexActor, AnimationActor {
+) : WidgetGroup(), ZIndexActor, AnimationActor {
 
     override var inAnimation: Boolean = false
+
+    override var fixedZIndex: Int = 0
 
     /**
      * the theoretical maximum health of the stack
@@ -238,7 +214,7 @@ class CoverStack(
 
     private val _cards: MutableList<Card> = mutableListOf()
     private var lockedTurnNum: Int? = null
-    var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
+    private var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
 
     var parentWidth: Float = Float.MAX_VALUE
 
@@ -261,12 +237,34 @@ class CoverStack(
         detailText.setFontScale(detailFontScale)
         updateText()
         addActor(detailText)
-        backgroundTexture?.let { background = TextureRegionDrawable(it) }
-        align(Align.left)
-        space(spacing)
         onClick {
             coverArea.makeActive(num)
         }
+        debug = true
+        detailText.debug = true
+    }
+
+    override fun layout() {
+        super.layout()
+        val cardWidth = if (_cards.isEmpty()) 0f else _cards[0].actor.prefWidth
+        width = (_cards.size * cardDeltaX + cardWidth).coerceAtLeast(minWidth)
+        height = fixedHeight
+        var curX = width / 2 - (_cards.size * cardDeltaX + cardWidth) / 2 + cardInitialX
+        var curY = cardInitialY
+        for (card in _cards) {
+            card.actor.setScale(cardScale)
+            card.actor.width = card.actor.prefWidth
+            card.actor.height = card.actor.prefHeight
+            card.actor.setPosition(curX, curY)
+            curX += cardDeltaX
+            curY += cardDeltaY
+        }
+        detailText.width = detailText.prefWidth
+        detailText.height = detailText.prefHeight
+        detailText.setPosition(
+            width / 2 - detailText.width / 2,
+            height - detailText.height
+        )
     }
 
     /**
@@ -276,6 +274,7 @@ class CoverStack(
     fun damage(damage: Int): Int {
         currentHealth -= damage
         updateText()
+        invalidateHierarchy()
         if (currentHealth > 0) return 0
         val remaining = -currentHealth
         destroy()
@@ -324,10 +323,10 @@ class CoverStack(
     }
 
     private fun updateText() {
-        detailText.setText("${if (isActive) "active" else "not active"}\n${currentHealth}/${baseHealth}")
+        detailText.setText("${if (isActive) "active" else "not active"} ${currentHealth}/${baseHealth}")
     }
 
     override fun getMinWidth(): Float {
-        return minSize
+        return minWidth
     }
 }

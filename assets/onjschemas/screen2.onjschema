@@ -127,16 +127,19 @@ $Widget {
         infoFont: string,
         infoFontColor: Color,
         infoFontScale: float,
-        stackBackgroundTexture: string,
-        stackSpacing: float,
+//        stackBackgroundTexture: string,
         areaSpacing: float,
         cardScale: float,
-        stackMinSize: float,
         onlyAllowAddingOnTheSameTurn: boolean,
         detailFont: string,
         detailFontColor: Color,
         detailFontScale: float,
-//        ...detailTextSharedKeys,
+        cardDeltaX: float,
+        cardDeltaY: float,
+        cardInitialX: float,
+        cardInitialY: float,
+        stackHeight: float,
+        stackMinWidth: float,
         ...widgetSharedKeys
     }
 

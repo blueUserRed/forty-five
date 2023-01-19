@@ -305,10 +305,14 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             fontOrError(widgetOnj.get<String>("detailFont")),
             widgetOnj.get<Color>("detailFontColor"),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
-            widgetOnj.get<Double>("stackSpacing").toFloat(),
             widgetOnj.get<Double>("areaSpacing").toFloat(),
             widgetOnj.get<Double>("cardScale").toFloat(),
-            widgetOnj.get<Double>("stackMinSize").toFloat()
+            widgetOnj.get<Double>("stackHeight").toFloat(),
+            widgetOnj.get<Double>("stackMinWidth").toFloat(),
+            widgetOnj.get<Double>("cardInitialX").toFloat(),
+            widgetOnj.get<Double>("cardInitialY").toFloat(),
+            widgetOnj.get<Double>("cardDeltaX").toFloat(),
+            widgetOnj.get<Double>("cardDeltaY").toFloat(),
         )
 
         "TemplateLabel" -> TemplateStringLabel(

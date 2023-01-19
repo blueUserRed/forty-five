@@ -331,18 +331,18 @@ class ScreenBuilderFromOnj(val file: FileHandle) : ScreenBuilder {
         "EnemyArea" -> EnemyArea().apply {
         }
 
-        "CoverArea" -> CoverArea(
-            widgetOnj.get<Long>("numStacks").toInt(),
-            widgetOnj.get<Long>("maxCards").toInt(),
-            widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
-            fontOrError(widgetOnj.get<String>("detailFont")),
-            widgetOnj.get<Color>("detailFontColor"),
-            widgetOnj.get<Double>("detailFontScale").toFloat(),
-            widgetOnj.get<Double>("stackSpacing").toFloat(),
-            widgetOnj.get<Double>("areaSpacing").toFloat(),
-            widgetOnj.get<Double>("cardScale").toFloat(),
-            widgetOnj.get<Double>("stackMinSize").toFloat()
-        )
+//        "CoverArea" -> CoverArea(
+//            widgetOnj.get<Long>("numStacks").toInt(),
+//            widgetOnj.get<Long>("maxCards").toInt(),
+//            widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
+//            fontOrError(widgetOnj.get<String>("detailFont")),
+//            widgetOnj.get<Color>("detailFontColor"),
+//            widgetOnj.get<Double>("detailFontScale").toFloat(),
+//            widgetOnj.get<Double>("stackSpacing").toFloat(),
+//            widgetOnj.get<Double>("areaSpacing").toFloat(),
+//            widgetOnj.get<Double>("cardScale").toFloat(),
+//            widgetOnj.get<Double>("stackMinSize").toFloat()
+//        )
 
         "TemplateLabel" -> TemplateStringLabel(
             TemplateString(widgetOnj.get<String>("template")),
