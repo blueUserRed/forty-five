@@ -140,6 +140,7 @@ $Widget {
         cardInitialY: float,
         stackHeight: float,
         stackMinWidth: float,
+        stackHook: string,
         ...widgetSharedKeys
     }
 
