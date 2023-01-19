@@ -99,8 +99,8 @@ class CardHand(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        updateCards()
         super.draw(batch, parentAlpha)
+        updateCards()
     }
 
     private fun updateCards() {
@@ -177,11 +177,12 @@ class CardHand(
             }
             if (currentHoverDetailActor == card.actor.hoverDetailActor) {
                 val detailActor = currentHoverDetailActor!!
-                detailActor.forcedWidth = hoveredCardWidth
+                val detailWidth = hoveredCardWidth * 2
+                detailActor.forcedWidth = detailWidth
                 detailActor.fixedZIndex = hoveredCardZIndex
                 val adjustedX = curX - (hoveredCardWidth - cardWidth) / 2
                 detailActor.setBounds(
-                    adjustedX,
+                    (adjustedX - detailWidth / 4).between(-detailWidth, width - detailWidth),
                     curY + hoveredCardWidth,
                     detailActor.prefWidth,
                     detailActor.prefHeight

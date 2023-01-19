@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
@@ -77,7 +78,6 @@ class CardDetailActor(
         set(value) {
             field = value
             root.setWidth(value)
-            invalidateHierarchy()
         }
 
     init {
@@ -85,49 +85,22 @@ class CardDetailActor(
             add(it)
                 .setWidthPercent(100f)
                 .setMaxWidthPercent(100f)
+            it.setFontScale(fontScale)
             it.wrap = true
         }
-
         root.flexDirection = YogaFlexDirection.COLUMN
         root.setPadding(YogaEdge.ALL, 1f)
         background = initialBackground
 
-        flavourTextActor.setFontScale(fontScale)
-        descriptionActor.setFontScale(fontScale)
-        statsTextActor.setFontScale(fontScale)
-        statsChangedTextActor.setFontScale(fontScale)
-
         touchable = Touchable.enabled
         onEnter { isHoveredOver = true }
         onExit { isHoveredOver = false }
+        layout() // Without this the height is not set correctly on the first frame, don't ask me why
     }
 
-    override fun setVisible(visible: Boolean) {
-        super.setVisible(visible)
-        invalidateHierarchy()
-    }
 
     override fun getPrefWidth(): Float {
-        return if (isVisible) forcedWidth else 0f
+        return if (isVisible) forcedWidth else 100f
     }
 
-    override fun getPrefHeight(): Float {
-        return if (isVisible) super.getPrefHeight() else 0f
-    }
-
-    override fun getMinWidth(): Float {
-        return if (isVisible) forcedWidth else 0f
-    }
-
-    override fun getMinHeight(): Float {
-        return if (isVisible) super.getMinHeight() else 0f
-    }
-
-    override fun getMaxWidth(): Float {
-        return if (isVisible) forcedWidth else 0f
-    }
-
-    override fun getMaxHeight(): Float {
-        return if (isVisible) super.getMaxHeight() else 0f
-    }
 }

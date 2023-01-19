@@ -90,6 +90,6 @@ insultFadeAnimation: {
 cardDetailText: {
     font: "red_wing",
     fontScale: 0.07,
-    fontColor: color.black,
-    background: "hover_detail_background"
+    fontColor: color.white,
+    background: "transparent_black"
 }
