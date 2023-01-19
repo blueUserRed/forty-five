@@ -42,12 +42,16 @@ class CardDragSource(
         val obj = CardDragAndDropPayload(card)
         payload.obj = obj
         obj.resetTo(Vector2(actor.x, actor.y))
-
-        dragAndDrop.setDragActorPosition(
-            actor.width - (actor.width * actor.scaleX / 2),
-            -(actor.height * actor.scaleY) / 2
-        )
         return payload
+    }
+
+    override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        super.drag(event, x, y, pointer)
+        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
+        dragAndDrop.setDragActorPosition(
+            -parentOff.x + actor.width - (actor.width * actor.scaleX) / 2,
+            -parentOff.y - (actor.height * actor.scaleY) / 2
+        )
     }
 
     override fun dragStop(

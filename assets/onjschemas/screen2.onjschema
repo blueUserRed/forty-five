@@ -58,6 +58,7 @@ $Widget {
         fontScale?: float,
         backgroundTexture?: string,
         align?: string,
+        wrap?: boolean,
         ...widgetSharedKeys
     }
 
@@ -68,6 +69,7 @@ $Widget {
         fontScale: float,
         backgroundTexture?: string,
         align?: string,
+        wrap?: boolean,
         ...widgetSharedKeys
     }
 
