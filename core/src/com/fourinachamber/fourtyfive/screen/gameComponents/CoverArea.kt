@@ -201,7 +201,7 @@ class CoverStack(
     private val cardDeltaY: Float,
     val num: Int,
     private val hookDrawable: Drawable
-) : WidgetGroup(), ZIndexActor, AnimationActor {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, AnimationActor {
 
     override var inAnimation: Boolean = false
 
@@ -225,6 +225,8 @@ class CoverStack(
 
     var parentWidth: Float = Float.MAX_VALUE
 
+    private var currentHoverDetail: CardDetailActor? = null
+
     /**
      * true if this is the active slot
      */
@@ -247,8 +249,6 @@ class CoverStack(
         onClick {
             coverArea.makeActive(num)
         }
-//        debug = true
-//        detailText.debug = true
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -263,6 +263,22 @@ class CoverStack(
             hookHeight
         )
         super.draw(batch, parentAlpha)
+        var wasCardHoveredOver = false
+        for (card in _cards) if (card.actor.isHoveredOver) {
+            card.actor.toFront()
+            wasCardHoveredOver = true
+            removeActor(currentHoverDetail)
+            addActor(card.actor.hoverDetailActor)
+            currentHoverDetail = card.actor.hoverDetailActor
+            currentHoverDetail!!.isVisible = true
+            invalidate()
+        }
+        if (!wasCardHoveredOver && currentHoverDetail != null) {
+            currentHoverDetail!!.isVisible = false
+            removeActor(currentHoverDetail)
+            currentHoverDetail = null
+            invalidate()
+        }
     }
 
     override fun layout() {
@@ -270,13 +286,23 @@ class CoverStack(
         val cardWidth = if (_cards.isEmpty()) 0f else _cards[0].actor.prefWidth
         width = (_cards.size * cardDeltaX + cardWidth).coerceAtLeast(minWidth)
         height = fixedHeight
-        var curX = width / 2 - (_cards.size * cardDeltaX + cardWidth) / 2 + cardInitialX
+        var curX = width / 2 - (_cards.size * cardDeltaX + cardWidth / 1.5f) / 2 + cardInitialX
         var curY = cardInitialY
         for (card in _cards) {
             card.actor.setScale(cardScale)
             card.actor.width = card.actor.prefWidth
             card.actor.height = card.actor.prefHeight
             card.actor.setPosition(curX, curY)
+            if (currentHoverDetail == card.actor.hoverDetailActor) {
+                val hoverDetail = currentHoverDetail!!
+                hoverDetail.forcedWidth = width
+                hoverDetail.setBounds(
+                    -hoverDetail.prefWidth,
+                    height / 2 - hoverDetail.prefHeight / 2,
+                    hoverDetail.prefWidth,
+                    hoverDetail.prefHeight
+                )
+            }
             curX += cardDeltaX
             curY += cardDeltaY
         }
@@ -286,6 +312,7 @@ class CoverStack(
             width / 2 - detailText.width / 2,
             height - detailText.height
         )
+        resortZIndices()
     }
 
     /**
@@ -340,7 +367,15 @@ class CoverStack(
         currentHealth += card.coverValue
         updateText()
         addActor(card.actor)
+        _cards.forEach { it.actor.forceEndHover() }
         invalidateHierarchy()
+    }
+
+    override fun resortZIndices() {
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+        }
     }
 
     private fun updateText() {

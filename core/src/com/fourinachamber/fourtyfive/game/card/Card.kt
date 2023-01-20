@@ -466,4 +466,8 @@ class CardActor(
         removeListener(destroyModeOnClickListener)
     }
 
+    fun forceEndHover() {
+        isHoveredOver = false
+    }
+
 }
