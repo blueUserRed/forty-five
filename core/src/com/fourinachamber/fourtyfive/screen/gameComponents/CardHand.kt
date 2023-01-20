@@ -25,13 +25,7 @@ import kotlin.math.min
  * @param targetWidth the width this aims to be
  */
 class CardHand(
-    private val targetWidth: Float,
-//    detailFont: BitmapFont,
-//    detailFontColor: Color,
-//    detailBackground: Drawable,
-//    detailFontScale: Float,
-//    val detailOffset: Vector2,
-//    val detailWidth: Float
+    private val targetWidth: Float
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
