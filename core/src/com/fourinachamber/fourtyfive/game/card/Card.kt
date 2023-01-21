@@ -274,7 +274,7 @@ class Card(
 
     private fun updateText() {
         val detail = actor.hoverDetailActor
-        detail.description = shortDescription.ifBlank { null }
+        detail.description = shortDescription
         detail.flavourText = flavourText
         detail.statsText =  if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "cover value: $coverValue"
 
@@ -283,7 +283,7 @@ class Card(
             builder.append(modifier.description.string).append("\n")
         }
         val modifiersText = builder.toString()
-        detail.statsChangedText = modifiersText.ifBlank { null }
+        detail.statsChangedText = modifiersText
     }
 
     override fun toString(): String {
@@ -439,7 +439,7 @@ class CardActor(
         initialFlavourText = "",
         initialDescription = "",
         initialStatsText = "",
-        initialStatsChangedText = null,
+        initialStatsChangedText = "",
         font = font,
         fontColor = fontColor,
         fontScale = fontScale,

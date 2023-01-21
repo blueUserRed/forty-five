@@ -298,3 +298,15 @@ class PositionProperty(
     override fun getWithCondition(condition: StyleCondition?) = PositionProperty(positionType, condition)
 
 }
+
+class AspectRatioProperty(
+    val ratio: Float,
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
+
+    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        node.aspectRatio = ratio
+    }
+
+    override fun getWithCondition(condition: StyleCondition?) = AspectRatioProperty(ratio, condition)
+}

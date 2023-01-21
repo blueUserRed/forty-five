@@ -191,6 +191,8 @@ object GraphicsConfig {
     fun cardDetailFontScale(): Float = cardDetailFontScale
     fun cardDetailFontColor(): Color = cardDetailFontColor
     fun cardDetailBackground(): Drawable? = cardDetailBackground?.let { FourtyFive.curScreen!!.drawableOrError(it) }
+    fun cardDetailSeparator(): Drawable = FourtyFive.curScreen!!.drawableOrError(cardDetailSeparator)
+    fun cardDetailSpacing(): Float = cardDetailSpacing
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
@@ -295,12 +297,16 @@ object GraphicsConfig {
         } else {
             cardDetailOnj.get<String>("background")
         }
+        cardDetailSeparator = cardDetailOnj.get<String>("separator")
+        cardDetailSpacing = cardDetailOnj.get<Double>("spacing").toFloat()
     }
 
     private var cardDetailFont by Delegates.notNull<String>()
     private var cardDetailFontScale by Delegates.notNull<Float>()
     private var cardDetailFontColor by Delegates.notNull<Color>()
+    private var cardDetailSpacing by Delegates.notNull<Float>()
     private var cardDetailBackground: String? = null
+    private lateinit var cardDetailSeparator: String
 
     private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
