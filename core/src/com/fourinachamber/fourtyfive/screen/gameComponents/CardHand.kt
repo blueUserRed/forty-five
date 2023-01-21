@@ -143,11 +143,13 @@ class CardHand(
 
         if (_cards.isEmpty()) return
 
+        val targetWidth = width
+
         val cardWidth = _cards[0].actor.width * cardScale
         val hoveredCardWidth = _cards[0].actor.width * hoveredCardScale
 
         var neededWidth = _cards.size * (cardSpacing + cardWidth) - cardSpacing
-        this.currentWidth = neededWidth
+//        this.currentWidth = neededWidth
 
         val xDistanceOffset = if (targetWidth < neededWidth) {
             -(neededWidth - targetWidth + cardWidth) / _cards.size
@@ -155,13 +157,16 @@ class CardHand(
 
         neededWidth = _cards.size * (xDistanceOffset + cardSpacing + cardWidth) - cardSpacing - xDistanceOffset
 
+//        var curX = if (targetWidth > neededWidth) {
+//            x + ((width - neededWidth) / 2)
+//        } else x
         var curX = if (targetWidth > neededWidth) {
-            x + ((width - neededWidth) / 2)
-        } else x
+            ((width - neededWidth) / 2)
+        } else 0f
 
-        curX -= width / 2
+//        curX -= width / 2
 
-        val curY = y
+        val curY = 0f
 
         for (i in _cards.indices) {
             val card = _cards[i]

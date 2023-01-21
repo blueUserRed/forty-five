@@ -7,10 +7,13 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
+import io.github.orioncraftmc.meditate.enums.YogaJustify
 import ktx.actors.onEnter
 import ktx.actors.onExit
 
@@ -18,12 +21,12 @@ class CardDetailActor(
     initialFlavourText: String,
     initialDescription: String,
     initialStatsText: String,
-    initialStatsChangedText: String?,
+    initialStatsChangedText: String,
     private val font: BitmapFont,
     private val fontColor: Color,
     private val fontScale: Float,
     initialForcedWidth: Float,
-    private val initialBackground: Drawable? = null
+    initialBackground: Drawable? = null
 ) : CustomFlexBox() {
 
     /**
@@ -38,39 +41,33 @@ class CardDetailActor(
     private val statsChangedTextActor =
         CustomLabel(initialStatsChangedText ?: "", Label.LabelStyle(font, fontColor))
 
+    private var requiresRebuild: Boolean = true
+
     var flavourText: String = initialFlavourText
         set(value) {
+            requiresRebuild = true
             flavourTextActor.setText(value)
             field = value
         }
 
-    var description: String? = initialDescription
+    var description: String = initialDescription
         set(value) {
-            descriptionActor.setText(value ?: "")
-            val shouldBeVisible = value != null
-            if (descriptionActor.isVisible != shouldBeVisible) {
-                descriptionActor.isVisible = shouldBeVisible
-                // When this actor is hidden the dimensions are always 0, so you don't need to recalculate everything
-                if (this.isVisible) invalidateHierarchy()
-            }
+            requiresRebuild = true
+            descriptionActor.setText(value)
             field = value
         }
 
     var statsText: String = initialStatsText
         set(value) {
+            requiresRebuild = true
             statsTextActor.setText(value)
             field = value
         }
 
-    var statsChangedText: String? = initialStatsChangedText
+    var statsChangedText: String = initialStatsChangedText
         set(value) {
-            statsChangedTextActor.setText(value ?: "")
-            val shouldBeVisible = value != null
-            if (statsChangedTextActor.isVisible != shouldBeVisible) {
-                statsChangedTextActor.isVisible = shouldBeVisible
-                // When this actor is hidden the dimensions are always 0, so you don't need to recalculate everything
-                if (this.isVisible) invalidateHierarchy()
-            }
+            requiresRebuild = true
+            statsChangedTextActor.setText(value)
             field = value
         }
 
@@ -80,17 +77,54 @@ class CardDetailActor(
             root.setWidth(value)
         }
 
+    private var spacing = 1.8f
+
     init {
-        arrayOf(flavourTextActor, descriptionActor, statsTextActor, statsChangedTextActor).forEach {
-            add(it)
-                .setWidthPercent(100f)
-                .setMaxWidthPercent(100f)
-            it.setFontScale(fontScale)
-            it.wrap = true
+        background = initialBackground
+        rebuild()
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (requiresRebuild) {
+            rebuild()
+            requiresRebuild = false
+        }
+        super.draw(batch, parentAlpha)
+        val separator = GraphicsConfig.cardDetailSeparator()
+        if (batch == null) return
+        for (i in 0 until children.size) {
+            if (i == 0) continue
+            val actor = children[i]
+            if (!actor.isVisible) continue
+            separator.draw(
+                batch,
+                x + width / 2 - (width * 0.8f) / 2,
+                y + actor.y + actor.height + spacing / 2,
+                width * 0.8f,
+                spacing / 6f
+            )
+        }
+    }
+
+    private fun rebuild() {
+        spacing = GraphicsConfig.cardDetailSpacing()
+        clear()
+        arrayOf(
+            flavourTextActor,
+            descriptionActor,
+            statsTextActor,
+            statsChangedTextActor
+        ).forEachIndexed { i, actor ->
+            if (!actor.isVisible || actor.textEquals("")) return@forEachIndexed
+            val node = add(actor)
+            node.setWidthPercent(100f)
+            if (i != 0) node.setMargin(YogaEdge.TOP, spacing)
+            actor.setFontScale(fontScale)
+            actor.setAlignment(Align.center)
+            actor.wrap = true
         }
         root.flexDirection = YogaFlexDirection.COLUMN
-        root.setPadding(YogaEdge.ALL, 1f)
-        background = initialBackground
+        root.setPadding(YogaEdge.ALL, spacing)
 
         touchable = Touchable.enabled
         onEnter { isHoveredOver = true }
@@ -98,9 +132,8 @@ class CardDetailActor(
         layout() // Without this the height is not set correctly on the first frame, don't ask me why
     }
 
-
     override fun getPrefWidth(): Float {
-        return if (isVisible) forcedWidth else 100f
+        return forcedWidth
     }
 
 }

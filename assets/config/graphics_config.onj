@@ -91,5 +91,7 @@ cardDetailText: {
     font: "red_wing",
     fontScale: 0.07,
     fontColor: color.white,
-    background: "transparent_black"
+    background: "transparent_black",
+    separator: "white",
+    spacing: 1.8
 }

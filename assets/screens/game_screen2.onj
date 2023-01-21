@@ -94,6 +94,10 @@ assets: {
         {
             name: "black",
             color: color.black
+        },
+        {
+            name: "white",
+            color: color.white
         }
     ],
     particles: [
@@ -184,14 +188,6 @@ options: {
     screenController: controller
 },
 
-//var sharedDetailTextKeys = {
-//    detailFont: "red_wing",
-//    detailFontColor: color.white,
-//    detailFontScale: 0.07,
-//    detailBackgroundTexture: "transparent_black",
-//    detailWidth: 50.0
-//};
-
 var buttonHoverBehaviour = $MouseHoverBehaviour {
     useSystemCursor: true,
     cursorName: "hand",
@@ -207,11 +203,11 @@ var revolver = $Revolver {
     font: "vanilla_whale",
     fontColor: color.white,
     fontScale: 0.25,
-    slotScale: 0.029,
-    cardScale: cardScale * 0.6,
+    slotScale: 0.04,
+    cardScale: cardScale * 0.8,
     animationDuration: 0.2,
-    radius: 13.0,
-    radiusExtension: 5.0,
+    radius: 17.0,
+    radiusExtension: 7.0,
     cardZIndex: cardZIndicesStart,
     rotationOff: (pi / 2.0) + (2.0 * pi) / 5.0,
 //    ...sharedDetailTextKeys,
@@ -224,14 +220,14 @@ var revolver = $Revolver {
 var cardHand = $CardHand {
     name: "card_hand",
     cardScale: cardScale,
-    hoveredCardScale: cardScale * 1.4,
+    hoveredCardScale: cardScale * 1.3,
     cardSpacing: 1.0,
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
     draggedCardZIndex: cardZIndicesEnd,
 //    detailOffsetX: 0.0,
 //    detailOffsetY: 1.5,
-    targetWidth: worldWidth * (7.0 / 10.0),
+    targetWidth: worldWidth * 0.6,
 //    ...sharedDetailTextKeys,
 //    debug: true
 };
@@ -311,7 +307,8 @@ var playerLivesLabel = $TemplateLabel {
     template: "{game.curPlayerLives}/{game.basePlayerLives}",
     fontScale: 0.09,
     color: color.white,
-    backgroundTexture: "black"
+//    backgroundTexture: "black",
+//    debug: true
 };
 
 var reservesLabel = $TemplateLabel {
@@ -320,7 +317,7 @@ var reservesLabel = $TemplateLabel {
     template: "{game.curReserves}/{game.baseReserves}",
     fontScale: 0.09,
     color: color.white,
-    backgroundTexture: "black"
+//    backgroundTexture: "black"
 };
 
 var destroyCardInstructionActor = $Label {
@@ -329,7 +326,8 @@ var destroyCardInstructionActor = $Label {
     text: "Choose a card to destroy!",
     fontScale: 0.2,
     align: "center",
-    color: color.black
+    color: color.black,
+//    debug: true
 };
 
 var drawCardActor = $Box {
@@ -343,7 +341,7 @@ var drawCardActor = $Box {
     name: "card_draw_table",
     visible: false,
     zIndex: overlayZIndex,
-    debug: true
+//    debug: true
 } children [
 
     $TemplateLabel {
@@ -432,10 +430,22 @@ var gameScreen = $Box {
     $Box {
         properties: [
             flexDirection("row"),
-            relWidth(100.0)
+            relWidth(100.0),
+            alignItems("center")
         ],
-        //        debug: true
+//        debug: true
     } children [
+        $Image {
+            properties: [
+                aspectRatio(1.0),
+                relHeight(90.0)
+            ],
+            reportDimensionsWithScaling: true,
+            textureName: "heart",
+            scaleX: 0.003,
+            scaleY: 0.003,
+//            debug: true
+        },
         playerLivesLabel,
         destroyCardInstructionActor
     ],
@@ -452,15 +462,18 @@ var gameScreen = $Box {
 
         $Revolver {
             properties: [
-                relWidth(33.33)
+                relWidth(40.0),
+                margin(5.0, 0.0, 0.0, 10.0)
             ],
+//            debug: true,
             ...revolver,
         },
 
         $Box {
             properties: [
                 flexDirection("column"),
-                relWidth(66.66)
+                relWidth(60.0),
+                margin(-5.0, 0.0, 0.0, 0.0)
             ],
             //            debug: true
         } children [
@@ -491,16 +504,34 @@ var gameScreen = $Box {
 
             $Box {
                 properties: [
-                    flexDirection("row")
+                    flexDirection("row"),
+                    justifyContent("space between")
                 ],
     //                debug: true
-            } children [ shootButton, reservesLabel, endTurnButton ],
+            } children [
+                shootButton,
+                $Box {
+                    properties: [
+                        flexDirection("row")
+                    ]
+                } children [
+                    $Image {
+                        reportDimensionsWithScaling: true,
+                        textureName: "reserves",
+                        scaleX: 0.05,
+                        scaleY: 0.05
+                    },
+                    reservesLabel
+                ],
+                endTurnButton,
+            ],
 
             $CardHand {
                 properties: [
                     height(cardHeight),
-    //                    flexGrow(1.0)
+                    relWidth(100.0)
                 ],
+//                debug: true,
                 ...cardHand
             }
 

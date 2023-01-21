@@ -169,8 +169,8 @@ class Revolver(
         super.layout()
         currentHoverDetailActor?.forcedWidth = width
         currentHoverDetailActor?.setBounds(
-            x + width / 2 - currentHoverDetailActor!!.forcedWidth / 2,
-            y + height,
+            width / 2 - currentHoverDetailActor!!.forcedWidth / 2,
+            height,
             currentHoverDetailActor!!.prefWidth,
             currentHoverDetailActor!!.prefHeight
         )
