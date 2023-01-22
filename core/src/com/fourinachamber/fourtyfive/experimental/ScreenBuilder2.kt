@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
@@ -58,6 +59,7 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
     private var screenController: ScreenController? = null
+    private var inputMap: KeyInputMap? = null
 
     override fun build(): OnjScreen {
         val onj = OnjParser.parseFile(file.file())
@@ -86,7 +88,8 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
             behaviours = behavioursToBind,
-            printFrameRate = false
+            printFrameRate = false,
+            keyInputMap = inputMap
         )
 
         screen.screenController = screenController
@@ -109,6 +112,9 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
         }
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
+        }
+        options.ifHas<OnjArray>("inputMap") {
+            inputMap = KeyInputMap.readFromOnj(it)
         }
     }
 
