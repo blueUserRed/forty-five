@@ -262,6 +262,15 @@ $ScreenController {
 
 }
 
+$KeyAction {
+
+    $ToggleFullscreenKeyAction {
+        width: int,
+        height: int
+    }
+
+}
+
 viewport: $Viewport,
 
 assets: {
@@ -326,6 +335,11 @@ assets: {
 options: {
     background?: string,
     screenController?: $ScreenController,
+    inputMap?: {
+        keycode: int,
+        modifiers: int[],
+        action: $KeyAction
+    }[]
 //    setFillParentOnRoot: boolean,
 //    defaultCursor: {
 //        useSystemCursor: boolean,

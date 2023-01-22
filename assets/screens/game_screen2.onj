@@ -185,7 +185,17 @@ var controller = $GameScreenController {
 
 options: {
     background: "background",
-    screenController: controller
+    screenController: controller,
+    inputMap: [
+        {
+            keycode: keys.F,
+            modifiers: [],
+            action: $ToggleFullscreenKeyAction {
+                width: 700,
+                height: 500
+            }
+        }
+    ]
 },
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
