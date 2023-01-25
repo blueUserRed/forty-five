@@ -1,0 +1,13 @@
+
+use Experimental__Screen;
+
+defaultInputMap: [
+    {
+        keycode: keys.F,
+        modifiers: [],
+        action: $ToggleFullscreenKeyAction {
+            width: 700,
+            height: 500
+        }
+    }
+]

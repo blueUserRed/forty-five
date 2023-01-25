@@ -183,7 +183,6 @@ object StyleNamespace {
             yogaAlignmentOrError(alignment.value),
             isItems = true,
             isContent = false,
-            isSelf = false,
             condition = null
         ))
     }
@@ -194,19 +193,15 @@ object StyleNamespace {
             yogaAlignmentOrError(alignment.value),
             isItems = false,
             isContent = true,
-            isSelf = false,
             condition = null
         ))
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun alignSelf(alignment: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(FlexAlignProperty(
+        return OnjStyleProperty(AlignSelfProperty(
             yogaAlignmentOrError(alignment.value),
-            isItems = false,
-            isContent = false,
-            isSelf = true,
-            condition = null
+            null
         ))
     }
 
@@ -229,6 +224,34 @@ object StyleNamespace {
     fun flexShrink(shrink: OnjFloat): OnjStyleProperty {
         return OnjStyleProperty(GrowShrinkProperty(
             null, shrink.value.toFloat(), null
+        ))
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // position
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun position(position: OnjString): OnjStyleProperty {
+        return OnjStyleProperty(PositionProperty(
+            when (position.value) {
+                "absolute" -> YogaPositionType.ABSOLUTE
+                "relative" -> YogaPositionType.RELATIVE
+                "static" -> YogaPositionType.STATIC
+                else -> throw RuntimeException("unknown position: ${position.value}")
+            },
+            null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [float?, float?, float?, float?]")
+    fun position(left: OnjValue, right: OnjValue, top: OnjValue, bottom: OnjValue): OnjStyleProperty {
+        return OnjStyleProperty(PositionFloatProperty(
+            if (left.isNull()) null else (left as OnjFloat).value.toFloat(),
+            if (right.isNull()) null else (right as OnjFloat).value.toFloat(),
+            if (top.isNull()) null else (top as OnjFloat).value.toFloat(),
+            if (bottom.isNull()) null else (bottom as OnjFloat).value.toFloat(),
+            null
         ))
     }
 
@@ -270,19 +293,6 @@ object StyleNamespace {
     @RegisterOnjFunction(schema = "use Common; params: [Color]")
     fun textColor(color: OnjColor): OnjStyleProperty {
         return OnjStyleProperty(TextColorProperty(color.value, null))
-    }
-
-    @RegisterOnjFunction(schema = "params: [string]")
-    fun position(position: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(PositionProperty(
-            when (position.value) {
-                "absolute" -> YogaPositionType.ABSOLUTE
-                "relative" -> YogaPositionType.RELATIVE
-                "static" -> YogaPositionType.STATIC
-                else -> throw RuntimeException("unknown position: ${position.value}")
-            },
-            null
-        ))
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -226,19 +226,31 @@ class FlexAlignProperty(
     val flexAlign: YogaAlign,
     val isItems: Boolean,
     val isContent: Boolean,
-    val isSelf: Boolean,
     condition: StyleCondition?
 ) : StyleProperty<FlexBox>(FlexBox::class, condition) {
 
     override fun applyTo(node: YogaNode, actor: FlexBox, screen: StyleableOnjScreen, target: StyleTarget) {
         if (isItems) actor.root.alignItems = flexAlign
         if (isContent) actor.root.alignContent = flexAlign
-        if (isSelf) actor.root.alignSelf = flexAlign
         actor.invalidateHierarchy()
     }
 
     override fun getWithCondition(condition: StyleCondition?) =
-        FlexAlignProperty(flexAlign, isItems, isContent, isSelf, condition)
+        FlexAlignProperty(flexAlign, isItems, isContent, condition)
+}
+
+class AlignSelfProperty(
+    val align: YogaAlign,
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
+
+    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        node.alignSelf = align
+        println(align)
+        if (actor is Layout) actor.invalidateHierarchy()
+    }
+
+    override fun getWithCondition(condition: StyleCondition?) = AlignSelfProperty(align, condition)
 }
 
 class FlexJustifyContentProperty(
@@ -299,6 +311,26 @@ class PositionProperty(
 
 }
 
+class PositionFloatProperty(
+    val left: Float?,
+    val right: Float?,
+    val top: Float?,
+    val bottom: Float?,
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
+
+    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        left?.let { node.setPosition(YogaEdge.LEFT, it) }
+        right?.let { node.setPosition(YogaEdge.RIGHT, it) }
+        top?.let { node.setPosition(YogaEdge.TOP, it) }
+        bottom?.let { node.setPosition(YogaEdge.BOTTOM, it) }
+        if (actor is Layout) actor.invalidateHierarchy()
+    }
+
+    override fun getWithCondition(condition: StyleCondition?): StyleProperty<Actor> =
+        PositionFloatProperty(left, right, top, bottom, condition)
+}
+
 class AspectRatioProperty(
     val ratio: Float,
     condition: StyleCondition?
@@ -306,6 +338,7 @@ class AspectRatioProperty(
 
     override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
         node.aspectRatio = ratio
+        if (actor is Layout) actor.invalidateHierarchy()
     }
 
     override fun getWithCondition(condition: StyleCondition?) = AspectRatioProperty(ratio, condition)

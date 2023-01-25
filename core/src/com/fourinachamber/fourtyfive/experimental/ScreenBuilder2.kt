@@ -69,8 +69,9 @@ class ScreenBuilder2(val file: FileHandle) : ScreenBuilder {
         readAssets(onj)
         doOptions(onj)
 
-        val root = FlexBox()
+        val root = CustomFlexBox()
         root.setFillParent(true)
+//        root.debug = true
         getWidget(onj.get<OnjNamedObject>("root"), root)
 
         val screen = StyleableOnjScreen(
