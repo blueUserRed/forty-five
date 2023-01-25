@@ -123,7 +123,13 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             )
             cardBehaviour.bindCallbacks(onjScreen)
 
-            cardSelectionActor.addActor(card.actor)
+            val cardSelectionActor = cardSelectionActor
+            if (cardSelectionActor is FlexBox) {
+                cardSelectionActor.add(card.actor)
+            } else {
+                cardSelectionActor.addActor(card.actor)
+            }
+            onjScreen.addActorToRoot(card.actor.hoverDetailActor)
         }
         cardSelectionActor.invalidateHierarchy()
     }
@@ -156,19 +162,37 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             onjScreen.removeActorFromRoot(currentHoverDetail!!)
             currentHoverDetail = null
         }
+        if (currentHoverDetail != null) layoutHoverDetail(currentHoverDetail!!, currentHoverDetail!!.card)
+
+//        for (card in cards) {
+//            val cardActor = card.actor
+//            val hoverDetail = cardActor.hoverDetailActor
+//            val cardSize = cardActor.width
+//            hoverDetail.forcedWidth = cardSize * 1.4f
+//            val (x, y) = cardActor.localToStageCoordinates(Vector2(0f, 0f))
+//            hoverDetail.setBounds(
+//                x + cardSize / 2 - hoverDetail.forcedWidth / 2,
+//                y - hoverDetail.prefHeight,
+//                hoverDetail.forcedWidth,
+//                hoverDetail.prefHeight
+//            )
+//        }
     }
 
     private fun layoutHoverDetail(hoverDetailActor: CardDetailActor, card: Card) {
-        val (x, y) = card.actor.localToStageCoordinates(Vector2(0f, 0f))
+        val (x, y) = card.actor.localToStageCoordinates(Vector2(0f,0f))
         val cardSize = card.actor.width //* card.actor.scaleX
         hoverDetailActor.forcedWidth = cardSize * 2
+        hoverDetailActor.width = hoverDetailActor.forcedWidth
+        hoverDetailActor.layout()
         hoverDetailActor.setBounds(
-            (x - cardSize / 2 - hoverDetailActor.forcedWidth / 2)
+            (x + cardSize / 2 - hoverDetailActor.forcedWidth / 2)
                 .between(0f, onjScreen.viewport.worldWidth - hoverDetailActor.forcedWidth),
-            y + cardSize,
+            y - hoverDetailActor.prefHeight,
             hoverDetailActor.forcedWidth,
             hoverDetailActor.prefHeight
         )
+//        hoverDetailActor.invalidateHierarchy()
     }
 
     override fun end() {

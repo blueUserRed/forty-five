@@ -436,6 +436,7 @@ class CardActor(
         private set
 
     val hoverDetailActor = CardDetailActor(
+        card = card,
         initialFlavourText = "",
         initialDescription = "",
         initialStatsText = "",

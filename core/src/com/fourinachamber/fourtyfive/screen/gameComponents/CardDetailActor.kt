@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
+import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import io.github.orioncraftmc.meditate.enums.YogaEdge
@@ -18,6 +19,7 @@ import ktx.actors.onEnter
 import ktx.actors.onExit
 
 class CardDetailActor(
+    val card: Card,
     initialFlavourText: String,
     initialDescription: String,
     initialStatsText: String,
