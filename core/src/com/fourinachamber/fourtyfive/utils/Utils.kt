@@ -137,6 +137,7 @@ object Utils {
         "circle" -> Interpolation.circle
         "circle in" -> Interpolation.circleIn
         "circle out" -> Interpolation.circleOut
+        "smooth" -> Interpolation.smooth
 
         else -> throw RuntimeException("Unknown interpolation: $name")
     }

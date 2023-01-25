@@ -1,5 +1,5 @@
 import "imports/colors.onj" as color;
-import "screens/screenCommons.onj" as screenCommons;
+import "screens/screen_commons.onj" as screenCommons;
 
 use Common;
 use Experimental__Screen;
@@ -47,6 +47,10 @@ assets: {
         {
             name: "transparent_black",
             color: color.backgroundTransparent
+        },
+        {
+            name: "white",
+            color: color.white
         }
     ],
 },
@@ -54,135 +58,78 @@ assets: {
 options: {
     background: "background",
     inputMap: screenCommons.defaultInputMap,
-//    screenController: $CardSelectionScreenController {
-//        cardSelectionActorName: "cardSelectionActor",
-//        cardConfigFile: "cards/cards.onj",
-//        cardAtlasFile: "cards/generated/cards.atlas",
-//        nextScreen: "screens/title_screen.onj",
-//        cardsToSelect: 3,
-//        cardScale: cardScale,
-//        cardBehaviour: $OnHoverChangeSizeBehaviour {
-//            enterDuration: 0.2,
-//            exitDuration: 0.2,
-//            baseX: cardSize,
-//            baseY: cardSize,
-//            targetX: cardSize * 1.13,
-//            targetY: cardSize * 1.13,
-//            enterInterpolation: null,
-//            exitInterpolation: null
-//        },
-//        emptyFont: "red_wing",
-//        emptyFontColor: color.black,
-//        emptyFontScale: 0.14,
-//        emptyText: "no cards to select left!"
-//    }
+    screenController: $CardSelectionScreenController {
+        cardSelectionActorName: "cardSelectionActor",
+        cardConfigFile: "cards/cards.onj",
+        cardAtlasFile: "cards/generated/cards.atlas",
+        nextScreen: "screens/title_screen.onj",
+        cardsToSelect: 3,
+        cardScale: cardScale,
+        cardBehaviour: hoverBehaviour,
+        emptyFont: "red_wing",
+        emptyFontColor: color.black,
+        emptyFontScale: 0.14,
+        emptyText: "no cards to select left!"
+    }
 },
 
 root: $Box {
     properties: [
         position("absolute"),
-        position(68.0, null, 12.0, null),
+        position(69.0, null, 10.0, null),
         height(80.0),
-        width(85.0),
-        alignItems("flex start"),
-        justifyContent("space around"),
-        flexDirection("column"),
-    ],
-    debug: true
+        width(84.0)
+    ]
 } children [
 
     $Label {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 5.0, null)
+        ],
         align: "left",
-        text: "Put the cards away. I think you've\nlost enough.",
-        font: "red_wing",
-        color: color.black,
-        fontScale: 0.14
-    },
-
-    $TemplateLabel {
-        align: "left",
-        template: "enemies killed: {stat.lastRun.enemiesDefeated}\nreserves used: {stat.lastRun.usedReserves}\n",
+        text: '"We won\'t see him again"',
         font: "red_wing",
         color: color.black,
         fontScale: 0.2
     },
 
-//    $Box {
-//        properties: [
-//            flexDirection("row")
-//        ],
-//        name: "cardSelectionActor"
-//    },
+    $Label {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 15.0, null)
+        ],
+        align: "left",
+        text: "Loot the body",
+        font: "red_wing",
+        color: color.black,
+        fontScale: 0.2
+    },
+
+    $Box {
+        name: "cardSelectionActor",
+        properties: [
+            position("absolute"),
+            flexDirection("row"),
+            justifyContent("space around"),
+            position(0.0, null, 25.0, null),
+            height(cardSize),
+            relWidth(100.0)
+        ]
+    },
 
     $Label {
         properties: [
-            alignSelf("center")
+            position("absolute"),
+            position(0.0, null, 70.0, null),
+            relWidth(100.0)
         ],
         align: "center",
-        text: "continue to main menu",
+        text: "continue without",
         font: "red_wing",
         color: color.black,
-        fontScale: 0.2,
+        fontScale: 0.13,
         behaviours: [ toMainScreenBehaviour, hoverBehaviour ]
     }
 
 ]
-
-//root: $Box {
-//    properties: [
-//        flexDirection("column"),
-//        position("absolute"),
-//        position(68.0, null, 3.0, null),
-//        height(80.0),
-//        width(85.0),
-//        alignItems("center"),
-//        justifyContent("space around")
-//    ],
-//    debug: true
-//} children [
-//
-//    $Label {
-//        properties: [
-//            alignSelf("flex start")
-//        ],
-//        align: "center",
-//        text: '"We wont see him again"',
-//        font: "red_wing",
-//        color: color.black,
-//        fontScale: 0.14
-//    },
-//
-//    $Label {
-//        align: "center",
-//        text: "Loot the body",
-//        font: "red_wing",
-//        color: color.black,
-//        fontScale: 0.2
-//    },
-//
-//    $Box {
-//        properties: [
-//            width(85.0),
-//            flexDirection("row"),
-////            alignSelf("center"),
-////            justifyContent("space around")
-//        ],
-//        name: "cardSelectionActor",
-//        debug: true
-//    },
-//
-//    $Label {
-//        properties: [
-////            alignSelf("center"),
-////            relWidth(100.0)
-//        ],
-//        align: "center",
-//        text: "continue without",
-//        font: "red_wing",
-//        color: color.black,
-//        fontScale: 0.13,
-//        debug: true,
-//        behaviours: [ toMainScreenBehaviour, hoverBehaviour ]
-//    }
-//
-//]

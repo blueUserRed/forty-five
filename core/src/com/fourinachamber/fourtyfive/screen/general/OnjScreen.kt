@@ -101,7 +101,7 @@ open class OnjScreen(
     }
 
     fun addActorToRoot(actor: Actor) {
-//        stage.root.addActor(actor)
+        stage.root.addActor(actor)
     }
 
     fun invalidateEverything() {
