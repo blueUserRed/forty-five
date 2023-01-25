@@ -683,14 +683,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun win() {
         FourtyFiveLogger.debug(logTag, "player won")
-        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(winScreen)).build()
+        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(winScreen)).build()
         SaveState.write()
     }
 
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()
-        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(looseScreen)).build()
+        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(looseScreen)).build()
     }
 
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())

@@ -203,7 +203,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         FourtyFiveLogger.debug(logTag, "chose card $card")
         SaveState.drawCard(card)
         SaveState.write()
-        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(nextScreen)).build()
+        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(nextScreen)).build()
     }
 
     companion object {

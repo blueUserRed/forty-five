@@ -4,8 +4,8 @@ import "imports/colors.onj" as color;
 import "screens/screen_commons.onj" as screenCommons;
 
 use Common;
-use Experimental__Screen;
-use Experimental__Style;
+use Screen;
+use Style;
 
 var pi = 3.141;
 

@@ -9,9 +9,8 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.experimental.ScreenBuilder2
+import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
-import com.fourinachamber.fourtyfive.screen.general.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.screen.general.ScreenController
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.plus
@@ -67,7 +66,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             action { appearActor.isVisible = true }
             delay(2000)
             action {
-                FourtyFive.curScreen = ScreenBuilder2(Gdx.files.internal(nextScreen)).build()
+                FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(nextScreen)).build()
             }
         }
 

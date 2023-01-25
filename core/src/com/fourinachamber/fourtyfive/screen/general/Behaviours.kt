@@ -3,7 +3,6 @@ package com.fourinachamber.fourtyfive.screen.general
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
@@ -14,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.experimental.ScreenBuilder2
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
@@ -163,7 +161,7 @@ class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviou
     private val screenPath = onj.get<String>("screenPath")
 
     override val onCLick: BehaviourCallback = {
-        FourtyFive.curScreen = ScreenBuilder2(Gdx.files.internal(screenPath)).build()
+        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(screenPath)).build()
     }
 }
 

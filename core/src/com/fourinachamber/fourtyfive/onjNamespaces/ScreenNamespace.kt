@@ -1,6 +1,5 @@
-package com.fourinachamber.fourtyfive.experimental
+package com.fourinachamber.fourtyfive.onjNamespaces
 
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.Input.Keys
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*

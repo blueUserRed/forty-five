@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.experimental
+package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -8,10 +8,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
-import com.fourinachamber.fourtyfive.screen.general.Behaviour
-import com.fourinachamber.fourtyfive.screen.general.OnjScreen
-import com.fourinachamber.fourtyfive.screen.general.PostProcessor
 
 class StyleableOnjScreen(
     drawables: MutableMap<String, Drawable>,
