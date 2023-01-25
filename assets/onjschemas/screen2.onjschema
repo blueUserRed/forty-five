@@ -310,7 +310,7 @@ assets: {
         name: string,
         color: Color,
     }[],
-    ninepatches: {
+    ninepatches?: {
         name: string,
         file: string,
         left: int,

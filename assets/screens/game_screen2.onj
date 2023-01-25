@@ -1,6 +1,7 @@
 
 import "config/game_config.onj" as gameConfig;
 import "imports/colors.onj" as color;
+import "screens/screenCommons.onj" as screenCommons;
 
 use Common;
 use Experimental__Screen;
@@ -186,16 +187,7 @@ var controller = $GameScreenController {
 options: {
     background: "background",
     screenController: controller,
-    inputMap: [
-        {
-            keycode: keys.F,
-            modifiers: [],
-            action: $ToggleFullscreenKeyAction {
-                width: 700,
-                height: 500
-            }
-        }
-    ]
+    inputMap: screenCommons.defaultImportMap
 },
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -345,28 +337,36 @@ var drawCardActor = $Box {
         position("absolute"),
         background("transparent_black"),
         flexDirection("column"),
+        alignItems("center"),
         relWidth(100.0),
         relHeight(100.0)
     ],
     name: "card_draw_table",
     visible: false,
     zIndex: overlayZIndex,
-//    debug: true
+    debug: true
 } children [
 
     $TemplateLabel {
+        properties: [
+            relWidth(100.0)
+        ],
         font: "red_wing",
         template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
         fontScale: 0.18,
         align: "center",
         wrap: true,
+//        debug: true,
         color: color.white
     },
 
     $Box {
         properties: [
-            flexDirection("row")
-        ]
+            flexDirection("row"),
+            justifyContent("space around"),
+            relWidth(100.0)
+        ],
+        debug: true
     } children [
 
         $Box {
@@ -376,6 +376,9 @@ var drawCardActor = $Box {
         } children [
 
             $TemplateLabel {
+                properties: [
+                    margin(0.0, 0.0, 6.0, -6.0)
+                ],
                 font: "red_wing",
                 template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
                 wrap: true,
@@ -403,6 +406,9 @@ var drawCardActor = $Box {
         } children [
 
             $TemplateLabel {
+                properties: [
+                    margin(0.0, 0.0, 6.0, -6.0)
+                ],
                 font: "red_wing",
                 template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
                 wrap: true,

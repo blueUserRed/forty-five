@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.utils.Either
@@ -232,6 +233,7 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
             enterInterpolation?.let { action.interpolation = it }
             actor.addAction(action)
         }
+        if (actor is Layout) actor.invalidateHierarchy()
     }
 
     override val onHoverExit: BehaviourCallback = {
@@ -249,6 +251,7 @@ class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
             exitInterpolation?.let { action.interpolation = it }
             actor.addAction(action)
         }
+        if (actor is Layout) actor.invalidateHierarchy()
     }
 
     /**
