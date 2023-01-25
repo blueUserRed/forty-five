@@ -6,10 +6,9 @@ import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
-import com.fourinachamber.fourtyfive.experimental.ScreenBuilder2
-import com.fourinachamber.fourtyfive.experimental.ScreenNamespace
+import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.experimental.StyleNamespace
-import com.fourinachamber.fourtyfive.screen.general.ScreenBuilderFromOnj
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import onj.customization.OnjConfig
 
@@ -39,7 +38,7 @@ object FourtyFive : Game() {
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
-        curScreen = ScreenBuilder2(Gdx.files.internal("screens/intro_screen.onj")).build()
+        curScreen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
 //        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
     }
 
@@ -47,8 +46,8 @@ object FourtyFive : Game() {
         with(OnjConfig) {
             registerNameSpace("Common", CommonNamespace)
             registerNameSpace("Cards", CardsNamespace)
-            registerNameSpace("Experimental__Style", StyleNamespace) //TODO: experimental
-            registerNameSpace("Experimental__Screen", ScreenNamespace) //TODO: experimental
+            registerNameSpace("Style", StyleNamespace)
+            registerNameSpace("Screen", ScreenNamespace)
         }
         FourtyFiveLogger.init()
         SaveState.read()

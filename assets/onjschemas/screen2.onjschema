@@ -1,12 +1,8 @@
-/////////////////////////////////////////////////
-//               experimental                  //
-/////////////////////////////////////////////////
-
 import "imports/font_group.onjschema" as _;
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 
 use Common;
-use Experimental__Style;
+use Style;
 
 $Viewport {
 

@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.experimental
+package com.fourinachamber.fourtyfive.screen.general.styles
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
+import com.fourinachamber.fourtyfive.screen.general.StyleableOnjScreen
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode

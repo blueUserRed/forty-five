@@ -1,11 +1,10 @@
 package com.fourinachamber.fourtyfive.experimental
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjInterpolation
+import com.fourinachamber.fourtyfive.screen.general.styles.*
 import io.github.orioncraftmc.meditate.enums.*
-import onj.builder.buildOnjObject
 import onj.value.OnjValue
 import onj.customization.Namespace.OnjNamespace
 import onj.customization.Namespace.OnjNamespaceDatatypes
@@ -40,19 +39,22 @@ object StyleNamespace {
 
     @RegisterOnjFunction(schema = "params: [float]")
     fun width(width: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(DimensionsProperty(
+        return OnjStyleProperty(
+            DimensionsProperty(
             width.value.toFloat(), null,
             widthRelative = false,
             heightRelative = false,
             widthAuto = false,
             heightAuto = false,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float]")
     fun height(height: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(DimensionsProperty(
+        return OnjStyleProperty(
+            DimensionsProperty(
             null,
             height.value.toFloat(),
             widthRelative = false,
@@ -60,12 +62,14 @@ object StyleNamespace {
             widthAuto = false,
             heightAuto = false,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: []")
     fun widthAuto(): OnjStyleProperty {
-        return OnjStyleProperty(DimensionsProperty(
+        return OnjStyleProperty(
+            DimensionsProperty(
             width = null,
             height = null,
             widthRelative = false,
@@ -73,12 +77,14 @@ object StyleNamespace {
             widthAuto = true,
             heightAuto = false,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: []")
     fun heightAuto(): OnjStyleProperty {
-        return OnjStyleProperty(DimensionsProperty(
+        return OnjStyleProperty(
+            DimensionsProperty(
             width = null,
             height = null,
             widthRelative = false,
@@ -86,42 +92,49 @@ object StyleNamespace {
             widthAuto = false,
             heightAuto = true,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float]")
     fun relWidth(width: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(DimensionsProperty(
+        return OnjStyleProperty(
+            DimensionsProperty(
             width.value.toFloat(), null,
             widthRelative = true,
             heightRelative = false,
             widthAuto = false, heightAuto = false,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float]")
     fun relHeight(height: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(DimensionsProperty(
+        return OnjStyleProperty(
+            DimensionsProperty(
             null, height.value.toFloat(),
             widthRelative = false,
             heightRelative = true,
             widthAuto = false,
             heightAuto = false,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "use Common; params: [float, float, Interpolation]")
     fun relWidthTo(width: OnjFloat, duration: OnjFloat, interpolation: OnjInterpolation): OnjStyleProperty {
-        return OnjStyleProperty(DimensionsAnimationProperty(
+        return OnjStyleProperty(
+            DimensionsAnimationProperty(
             width.value.toFloat(),
             true,
             true,
             (duration.value * 1000f).toInt(),
             interpolation.value,
             null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float]")
@@ -135,7 +148,8 @@ object StyleNamespace {
 
     @RegisterOnjFunction(schema = "params: [float, float, float, float]")
     fun margin(left: OnjFloat, right: OnjFloat, top: OnjFloat, bottom: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(MarginProperty(
+        return OnjStyleProperty(
+            MarginProperty(
             arrayOf(
                 Triple(left.value.toFloat(), false, YogaEdge.LEFT),
                 Triple(right.value.toFloat(), false, YogaEdge.RIGHT),
@@ -143,12 +157,14 @@ object StyleNamespace {
                 Triple(bottom.value.toFloat(), false, YogaEdge.BOTTOM),
             ),
             null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float, float, float, float]")
     fun relMargin(left: OnjFloat, right: OnjFloat, top: OnjFloat, bottom: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(MarginProperty(
+        return OnjStyleProperty(
+            MarginProperty(
             arrayOf(
                 Triple(left.value.toFloat(), true, YogaEdge.LEFT),
                 Triple(right.value.toFloat(), true, YogaEdge.RIGHT),
@@ -156,7 +172,8 @@ object StyleNamespace {
                 Triple(bottom.value.toFloat(), true, YogaEdge.BOTTOM),
             ),
             null
-        ))
+        )
+        )
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +182,8 @@ object StyleNamespace {
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun flexDirection(direction: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(FlexDirectionProperty(
+        return OnjStyleProperty(
+            FlexDirectionProperty(
             when (direction.value) {
                 "row" -> YogaFlexDirection.ROW
                 "row reverse" -> YogaFlexDirection.ROW_REVERSE
@@ -174,57 +192,70 @@ object StyleNamespace {
                 else -> throw RuntimeException("unknown flex direction: ${direction.value}")
             },
             null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun alignItems(alignment: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(FlexAlignProperty(
+        return OnjStyleProperty(
+            FlexAlignProperty(
             yogaAlignmentOrError(alignment.value),
             isItems = true,
             isContent = false,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun alignContent(alignment: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(FlexAlignProperty(
+        return OnjStyleProperty(
+            FlexAlignProperty(
             yogaAlignmentOrError(alignment.value),
             isItems = false,
             isContent = true,
             condition = null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun alignSelf(alignment: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(AlignSelfProperty(
+        return OnjStyleProperty(
+            AlignSelfProperty(
             yogaAlignmentOrError(alignment.value),
             null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun justifyContent(justify: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(FlexJustifyContentProperty(
+        return OnjStyleProperty(
+            FlexJustifyContentProperty(
             yogaJustifyOrError(justify.value),
             null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float]")
     fun flexGrow(grow: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(GrowShrinkProperty(
+        return OnjStyleProperty(
+            GrowShrinkProperty(
             grow.value.toFloat(), null, null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float]")
     fun flexShrink(shrink: OnjFloat): OnjStyleProperty {
-        return OnjStyleProperty(GrowShrinkProperty(
+        return OnjStyleProperty(
+            GrowShrinkProperty(
             null, shrink.value.toFloat(), null
-        ))
+        )
+        )
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,7 +264,8 @@ object StyleNamespace {
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun position(position: OnjString): OnjStyleProperty {
-        return OnjStyleProperty(PositionProperty(
+        return OnjStyleProperty(
+            PositionProperty(
             when (position.value) {
                 "absolute" -> YogaPositionType.ABSOLUTE
                 "relative" -> YogaPositionType.RELATIVE
@@ -241,18 +273,21 @@ object StyleNamespace {
                 else -> throw RuntimeException("unknown position: ${position.value}")
             },
             null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [float?, float?, float?, float?]")
     fun position(left: OnjValue, right: OnjValue, top: OnjValue, bottom: OnjValue): OnjStyleProperty {
-        return OnjStyleProperty(PositionFloatProperty(
+        return OnjStyleProperty(
+            PositionFloatProperty(
             if (left.isNull()) null else (left as OnjFloat).value.toFloat(),
             if (right.isNull()) null else (right as OnjFloat).value.toFloat(),
             if (top.isNull()) null else (top as OnjFloat).value.toFloat(),
             if (bottom.isNull()) null else (bottom as OnjFloat).value.toFloat(),
             null
-        ))
+        )
+        )
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -266,12 +301,14 @@ object StyleNamespace {
 
     @RegisterOnjFunction(schema = "use Common; params: [ float, float, Interpolation ]")
     fun fontScaleTo(scale: OnjFloat, duration: OnjFloat, interpolation: OnjInterpolation): OnjStyleProperty {
-        return OnjStyleProperty(FontScaleAnimationProperty(
+        return OnjStyleProperty(
+            FontScaleAnimationProperty(
             (duration.value * 1000).toInt(),
             interpolation.value,
             scale.value.toFloat(),
             null
-        ))
+        )
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [string?]")
@@ -302,13 +339,13 @@ object StyleNamespace {
     @RegisterOnjFunction(schema = "params: []")
     fun self(): OnjStyleActorRef = OnjStyleActorRef(StyleActorReference.Self())
 
-    @RegisterOnjFunction(schema = "use Experimental__Style; params: [StyleActorRef]")
+    @RegisterOnjFunction(schema = "use Style; params: [StyleActorRef]")
     fun hover(actorRef: OnjStyleActorRef): OnjStyleCondition {
         return OnjStyleCondition(StyleCondition.Hover(actorRef.value))
     }
 
     @RegisterOnjFunction(
-        schema = "use Experimental__Style; params: [StyleProperty, StyleCondition]",
+        schema = "use Style; params: [StyleProperty, StyleCondition]",
         type = OnjFunctionType.INFIX
     )
     fun condition(property: OnjStyleProperty, condition: OnjStyleCondition): OnjStyleProperty {
