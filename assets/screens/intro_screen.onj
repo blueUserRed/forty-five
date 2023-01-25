@@ -1,99 +1,90 @@
 import "imports/colors.onj" as color;
+import "screens/screen_commons.onj" as screenCommons;
+
+use Common;
+use Experimental__Screen;
+use Experimental__Style;
 
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-
 viewport: $FitViewport {
     worldWidth: worldWidth,
-    worldHeight: worldHeight,
-    backgroundTexture: "background"
+    worldHeight: worldHeight
 },
 
-var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
-    screenPath: "screens/title_screen.onj"
-};
+//var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+//    screenPath: "screens/title_screen.onj"
+//};
+//
+//var hoverBehaviour = $MouseHoverBehaviour {
+//    useSystemCursor: true,
+//    cursorName: "hand",
+//    disabled: null,
+//};
 
-var hoverBehaviour = $MouseHoverBehaviour {
-    useSystemCursor: true,
-    cursorName: "hand",
-    disabled: null,
-};
+root: $Box {
+    properties: [
+        alignItems("center"),
+        justifyContent("center"),
+        relWidth(100.0),
+        relHeight(100.0)
+    ]
+} children [
 
-children: [
-
-    $VerticalGroup {
-        align: "center",
-        expand: true,
-//        debug: true
-        children: [
-            $Image {
-                name: "logo",
-                visible: false,
-                textureName: "logo",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.13,
-                scaleY: 0.13,
-            //        width: !worldWidth
-            }
-        ]
+    $Image {
+        name: "logo",
+        visible: false,
+        textureName: "logo",
+        reportDimensionsWithScaling: true,
+        scaleX: 0.13,
+        scaleY: 0.13,
     }
 
 ],
 
+//children: [
+//
+//    $VerticalGroup {
+//        align: "center",
+//        expand: true,
+////        debug: true
+//        children: [
+//            $Image {
+//                name: "logo",
+//                visible: false,
+//                textureName: "logo",
+//                reportDimensionsWithScaling: true,
+//                scaleX: 0.13,
+//                scaleY: 0.13,
+//            //        width: !worldWidth
+//            }
+//        ]
+//    }
+//
+//],
+
 assets: {
     textures: [
-//        {
-//            name: "background"
-//            file: "textures/screens/win_screen.png"
-//        }
         {
             name: "logo",
             file: "textures/title_screen/logo.png"
         }
     ],
-    fonts: [
-    ],
-    textureAtlases: [],
-    cursors: [],
-    postProcessors: [
-//        {
-//            name: "vignette",
-//            vertexShader: "shaders/vignette/vignette.vert",
-//            fragmentShader: "shaders/vignette/vignette.frag",
-//            timeOffset: 0,
-//            uniforms: [ "time", "resolution" ],
-//            args: {
-//                color: color("000000"),
-//                speed: 0.0,
-//                movement: 1.0,
-//                minMovement: 1.0,
-//            }
-//        }
-    ],
-    animations: [],
     colorTextures: [
         {
             name: "background",
             color: color.beige
         }
-    ],
-    particles: []
+    ]
 },
 
 options: {
-    setFillParentOnRoot: true,
-    defaultCursor: {
-        useSystemCursor: true,
-        cursorName: "arrow"
-    },
-    postProcessor: null,
-//    postProcessor: "vignette"
-    controller: $IntroScreenController {
+    background: "background",
+    inputMap: screenCommons.defaultInputMap,
+    screenController: $IntroScreenController {
         cardAtlasFile: "cards/generated/cards.atlas",
         appearActor: "logo",
         nextScreen: "screens/title_screen.onj"
-    },
-    printFrameRate: false
-//    controller: null
+    }
 }
