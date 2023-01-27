@@ -1,18 +1,10 @@
 package com.fourinachamber.fourtyfive.screen.gameComponents
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardActor
-import com.fourinachamber.fourtyfive.screen.general.CustomLabel
-import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
 import com.fourinachamber.fourtyfive.utils.between
@@ -83,7 +75,7 @@ class CardHand(
     }
 
     /**
-     * removes a card from the hand (will not be removed from the stage)
+     * removes a card from the hand
      */
     fun removeCard(card: Card) {
         _cards.remove(card)
@@ -107,30 +99,40 @@ class CardHand(
 
         if (_cards.isEmpty()) return
 
-        var isCardHoveredOver = false
-        for (i in _cards.indices) {
-            val card = _cards[i]
-            card.actor.setScale(cardScale)
+        val isCardHoveredOver = _cards.find { it.actor.isHoveredOver } != null
+
+        val detailCard: Card? = _cards.find {
+            if (it.actor.isDragged) return@find false
+            if (it.actor.isHoveredOver) return@find true
+            if (!isCardHoveredOver && it.actor.isSelected) return@find true
+            return@find false
+        }
+
+        _cards.forEachIndexed { i, card ->
             if (card.actor.isDragged) {
+                card.actor.setScale(cardScale)
                 doZIndexFor(card.actor, draggedCardZIndex)
-                continue
-            }
-            if (card.actor.isHoveredOver || card.actor.hoverDetailActor.isHoveredOver) {
-                isCardHoveredOver = true
-                card.actor.setScale(hoveredCardScale)
+            } else if (card === detailCard) {
+                detailCard.actor.setScale(hoveredCardScale)
                 doZIndexFor(card.actor, hoveredCardZIndex)
-                if (currentHoverDetailActor === card.actor.hoverDetailActor) break
-                currentHoverDetailActor?.isVisible = false
-                removeActor(currentHoverDetailActor)
-                currentHoverDetailActor = card.actor.hoverDetailActor
-                addActor(currentHoverDetailActor)
-                currentHoverDetailActor!!.isVisible = true
-                invalidate()
             } else {
+                if (card.actor.isSelected) FourtyFive.currentGame!!.keySelectedCard = null
+                card.actor.setScale(cardScale)
                 doZIndexFor(card.actor, startCardZIndicesAt + i)
             }
         }
-        if (!isCardHoveredOver && currentHoverDetailActor != null) {
+
+        if (detailCard != null) {
+            if (currentHoverDetailActor === detailCard.actor.hoverDetailActor) return
+            currentHoverDetailActor?.isVisible = false
+            removeActor(currentHoverDetailActor)
+            currentHoverDetailActor = detailCard.actor.hoverDetailActor
+            addActor(currentHoverDetailActor)
+            currentHoverDetailActor!!.isVisible = true
+            invalidate()
+            return
+        }
+        if (currentHoverDetailActor != null) {
             currentHoverDetailActor?.isVisible = false
             removeActor(currentHoverDetailActor)
             currentHoverDetailActor = null
@@ -149,7 +151,6 @@ class CardHand(
         val hoveredCardWidth = _cards[0].actor.width * hoveredCardScale
 
         var neededWidth = _cards.size * (cardSpacing + cardWidth) - cardSpacing
-//        this.currentWidth = neededWidth
 
         val xDistanceOffset = if (targetWidth < neededWidth) {
             -(neededWidth - targetWidth + cardWidth) / _cards.size
@@ -157,14 +158,9 @@ class CardHand(
 
         neededWidth = _cards.size * (xDistanceOffset + cardSpacing + cardWidth) - cardSpacing - xDistanceOffset
 
-//        var curX = if (targetWidth > neededWidth) {
-//            x + ((width - neededWidth) / 2)
-//        } else x
         var curX = if (targetWidth > neededWidth) {
             ((width - neededWidth) / 2)
         } else 0f
-
-//        curX -= width / 2
 
         val curY = 0f
 

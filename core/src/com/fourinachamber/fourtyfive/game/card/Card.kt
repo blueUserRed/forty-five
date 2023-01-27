@@ -435,6 +435,11 @@ class CardActor(
     var isHoveredOver: Boolean = false
         private set
 
+    /**
+     * true when the actor was selected using the keyboard
+     */
+    var isSelected: Boolean = false
+
     val hoverDetailActor = CardDetailActor(
         card = card,
         initialFlavourText = "",

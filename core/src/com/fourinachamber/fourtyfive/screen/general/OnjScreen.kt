@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -20,6 +21,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMapEntry
 import com.fourinachamber.fourtyfive.utils.Either
@@ -88,6 +90,19 @@ open class OnjScreen(
             if (isVisible) value?.init(this)
         }
 
+    var highlightArea: Rectangle? = null
+
+    private val keySelectDrawable: Drawable by lazy {
+        GraphicsConfig.keySelectDrawable()
+    }
+
+    init {
+        addLateRenderTask {
+            val highlight = highlightArea ?: return@addLateRenderTask
+            keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
+        }
+    }
+
     fun afterMs(ms: Int, callback: () -> Unit) {
         callbacks.add((TimeUtils.millis() + ms) to callback)
     }
@@ -109,7 +124,6 @@ open class OnjScreen(
         fun invalidateGroup(group: Group) {
             for (child in group.children) {
                 if (child is Layout) {
-                    println("invalidate")
                     child.invalidate()
                 }
                 if (child is Group) invalidateGroup(child)

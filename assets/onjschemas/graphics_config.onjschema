@@ -93,4 +93,8 @@ cardDetailText: {
     background: string?,
     separator: string,
     spacing: float
+},
+
+keySelect: {
+    drawable: string
 }

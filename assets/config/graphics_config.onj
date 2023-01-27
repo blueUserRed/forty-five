@@ -94,4 +94,8 @@ cardDetailText: {
     background: "transparent_black",
     separator: "white",
     spacing: 1.8
+},
+
+keySelect: {
+    drawable: "key_select_frame"
 }

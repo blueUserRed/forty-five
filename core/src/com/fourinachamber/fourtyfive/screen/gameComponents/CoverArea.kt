@@ -297,9 +297,9 @@ class CoverStack(
                 val hoverDetail = currentHoverDetail!!
                 hoverDetail.forcedWidth = width
                 hoverDetail.setBounds(
-                    -hoverDetail.prefWidth,
+                    width,
                     height / 2 - hoverDetail.prefHeight / 2,
-                    hoverDetail.prefWidth,
+                    hoverDetail.forcedWidth,
                     hoverDetail.prefHeight
                 )
             }

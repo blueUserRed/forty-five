@@ -2,6 +2,8 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -132,6 +134,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBullet: CardPrototype
     private lateinit var defaultCover: CardPrototype
 
+    var keySelectedCard: Card? = null
+        set(value) {
+            field?.actor?.isSelected = false
+            field = value
+            field?.actor?.isSelected = true
+        }
+
     override fun init(onjScreen: OnjScreen) {
         SaveState.read()
         curScreen = onjScreen
@@ -157,12 +166,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCoverArea()
         initTemplateStringParams()
 
-//        //TODO: this is really not good
-//        //TODO: gotta fix this soon
-//        onjScreen.afterMs(1000) {
-//            onjScreen.resortRootZIndices()
-//            onjScreen.invalidateEverything()
-//        }
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
@@ -279,7 +282,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun update() {
+
         timeline.update()
+
         if (timeline.isFinished && isUIFrozen) unfreezeUI()
         if (!timeline.isFinished && !isUIFrozen) freezeUI()
         val iterator = curGameAnims.iterator()
@@ -291,6 +296,29 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             anim.update()
         }
+
+        val selected = keySelectedCard ?: run {
+            curScreen.highlightArea = null
+            return
+        }
+        val (x, y) = selected.actor.localToStageCoordinates(Vector2(0f, 0f))
+        val width: Float
+        val height: Float
+        if (selected.actor.reportDimensionsWithScaling) {
+            width = selected.actor.width
+            height = selected.actor.height
+        } else {
+            width = selected.actor.width * selected.actor.scaleX
+            height = selected.actor.height * selected.actor.scaleY
+        }
+        curScreen.highlightArea?.let {
+            it.x = x
+            it.y = y
+            it.width = width
+            it.height = height
+            return
+        }
+        curScreen.highlightArea = Rectangle(x, y, width, height)
     }
 
     /**

@@ -12,6 +12,7 @@ import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
+import io.github.orioncraftmc.meditate.enums.YogaAlign
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaJustify
@@ -41,7 +42,7 @@ class CardDetailActor(
     private val descriptionActor = CustomLabel(initialDescription, Label.LabelStyle(font, fontColor))
     private val statsTextActor = CustomLabel(initialStatsText, Label.LabelStyle(font, fontColor))
     private val statsChangedTextActor =
-        CustomLabel(initialStatsChangedText ?: "", Label.LabelStyle(font, fontColor))
+        CustomLabel(initialStatsChangedText, Label.LabelStyle(font, fontColor))
 
     private var requiresRebuild: Boolean = true
 
@@ -127,6 +128,9 @@ class CardDetailActor(
         }
         root.flexDirection = YogaFlexDirection.COLUMN
         root.setPadding(YogaEdge.ALL, spacing)
+//        root.alignItems = YogaAlign.CENTER
+//        root.justifyContent = YogaJustify.CENTER
+        root.setHeightAuto()
 
         touchable = Touchable.enabled
         onEnter { isHoveredOver = true }

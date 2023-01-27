@@ -1,7 +1,7 @@
 
 import "config/game_config.onj" as gameConfig;
 import "imports/colors.onj" as color;
-import "screens/screen_commons.onj" as screenCommons;
+import "screens/input_maps.onj" as inputMaps;
 
 use Common;
 use Screen;
@@ -133,6 +133,15 @@ assets: {
             left: 6,
             right: 6,
             scale: 0.2
+        },
+        {
+            name: "key_select_frame",
+            file: "textures/ninepatches/key_select_frame.png",
+            top: 3,
+            bottom: 3,
+            left: 3,
+            right: 3,
+            scale: 0.2
         }
     ]
 },
@@ -187,7 +196,10 @@ var controller = $GameScreenController {
 options: {
     background: "background",
     screenController: controller,
-    inputMap: screenCommons.defaultInputMap
+    inputMap: [
+        ...(inputMaps.cardHandSelectionInputMap),
+        ...(inputMaps.defaultInputMap)
+    ]
 },
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -261,7 +273,8 @@ var coverArea = $CoverArea {
     cardInitialY: 9.0,
     stackHeight: 27.0,
     stackMinWidth: 15.0,
-    stackHook: "cover_hook"
+    stackHook: "cover_hook",
+    zIndex: 3
 //    ...sharedDetailTextKeys,
 //    detailOffsetX: 0.0,
 //    detailOffsetY: 0.0,
