@@ -17,7 +17,7 @@ import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.experimental.OnjStyleProperty
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
@@ -37,6 +37,7 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import onj.value.OnjValue
 
 class ScreenBuilder(val file: FileHandle) {
 
@@ -260,10 +261,12 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
-            labelStyle = Label.LabelStyle(
-                fontOrError(widgetOnj.get<String>("font")),
-                widgetOnj.get<Color>("color")
-            )
+            labelStyle = Label.LabelStyle().apply {
+                font = fontOrError(widgetOnj.get<String>("font"))
+                if (!widgetOnj.get<OnjValue>("color").isNull()) {
+                    fontColor = widgetOnj.get<Color>("color")
+                }
+            }
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }

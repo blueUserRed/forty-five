@@ -37,7 +37,8 @@ assets: {
         $DistanceFieldFont {
             name: "red_wing",
             fontFile: "fonts/red_wing.fnt",
-            imageFile: "fonts/red_wing.png"
+            imageFile: "fonts/red_wing.png",
+            markupEnabled: true
         }
 
     ]

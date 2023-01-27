@@ -3,13 +3,15 @@ $Font {
 
     $BitmapFont {
         name: string,
-        file: string
+        file: string,
+        markupEnabled?: boolean
     }
 
     $FreeTypeFont {
         name: string,
         file: string,
-        size: int
+        size: int,
+        markupEnabled?: boolean
     }
 
     $DistanceFieldFont {
@@ -17,7 +19,8 @@ $Font {
         fontFile: string,
         imageFile: string,
         color?: string,
-        useMipMapLinearLinear?: boolean
+        useMipMapLinearLinear?: boolean,
+        markupEnabled?: boolean
     }
 
 }

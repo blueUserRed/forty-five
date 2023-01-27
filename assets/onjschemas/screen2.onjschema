@@ -50,7 +50,7 @@ $Widget {
     $Label {
         text: string,
         font: string,
-        color: Color,
+        color: Color?,
         fontScale?: float,
         backgroundTexture?: string,
         align?: string,
