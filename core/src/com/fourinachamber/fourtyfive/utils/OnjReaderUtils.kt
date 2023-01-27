@@ -111,6 +111,7 @@ object OnjReaderUtils {
     fun readBitmapFont(it: OnjNamedObject): BitmapFont {
         val font = BitmapFont(Gdx.files.internal(it.get<String>("file")))
         font.setUseIntegerPositions(false)
+        font.data.markupEnabled = it.getOr("markupEnabled", false)
         return font
     }
 
@@ -124,6 +125,7 @@ object OnjReaderUtils {
         val font = generator.generateFont(parameter)
         generator.dispose()
         font.setUseIntegerPositions(false)
+        font.data.markupEnabled = fontOnj.getOr("markupEnabled", false)
         return font
     }
 
@@ -137,9 +139,11 @@ object OnjReaderUtils {
             if (useMipMapLinearLinear) Texture.TextureFilter.MipMapLinearLinear else Texture.TextureFilter.MipMapLinearNearest,
             Texture.TextureFilter.Linear
         )
+        //TODO: this line leaks memory
         val font = BitmapFont(Gdx.files.internal(fontOnj.get<String>("fontFile")), TextureRegion(texture), false)
         font.setUseIntegerPositions(false)
         font.color = Color.valueOf(fontOnj.getOr("color", "0000ff"))
+        font.data.markupEnabled = fontOnj.getOr("markupEnabled", false)
         return font
     }
 

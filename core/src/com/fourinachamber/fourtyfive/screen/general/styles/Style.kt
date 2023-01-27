@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fourtyfive.experimental.OnjStyleProperty
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.StyleableOnjScreen
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
