@@ -1,5 +1,5 @@
 import "imports/colors.onj" as color;
-import "screens/screen_commons.onj" as screenCommons;
+import "screens/input_maps.onj" as inputMaps;
 
 use Common;
 use Screen;
@@ -57,7 +57,7 @@ assets: {
 
 options: {
     background: "background",
-    inputMap: screenCommons.defaultInputMap,
+    inputMap: inputMaps.defaultInputMap,
     screenController: $CardSelectionScreenController {
         cardSelectionActorName: "cardSelectionActor",
         cardConfigFile: "cards/cards.onj",

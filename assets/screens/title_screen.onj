@@ -1,6 +1,6 @@
 
 import "imports/colors.onj" as color;
-import "screens/screen_commons.onj" as screenCommons;
+import "screens/input_maps.onj" as inputMaps;
 
 use Common;
 use Screen;
@@ -48,7 +48,7 @@ viewport: $FitViewport {
 
 options: {
     background: "background3",
-    inputMap: screenCommons.defaultInputMap
+    inputMap: inputMaps.defaultInputMap
 },
 
 root: $Box {

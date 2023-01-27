@@ -242,7 +242,7 @@ class Enemy(
                 includeAction(GraphicsConfig.numberChangeAnimation(
                     actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
                     "-${min(damage, currentCover)}",
-                    true,
+                    false,
                     false
                 ))
             } },
@@ -258,7 +258,7 @@ class Enemy(
                 includeAction(GraphicsConfig.numberChangeAnimation(
                     actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
                     "-$remaining",
-                    true,
+                    false,
                     false
                 ))
             } },

@@ -363,14 +363,12 @@ class ScreenBuilder(val file: FileHandle) {
             node ?: throw RuntimeException(
                 "root box can currently not be styled"
             )
-            styleTargets.add(
-                StyleTarget(
+            styleTargets.add(StyleTarget(
                 node,
                 actor,
                 styles ?: listOf(),
                 directProperties ?: listOf()
-            )
-            )
+            ))
         }
 
         return actor
