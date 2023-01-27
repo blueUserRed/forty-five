@@ -1,12 +1,8 @@
-/////////////////////////////////////////////////
-//               experimental                  //
-/////////////////////////////////////////////////
-
 import "imports/font_group.onjschema" as _;
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 
 use Common;
-use Experimental__Style;
+use Style;
 
 $Viewport {
 
@@ -31,28 +27,24 @@ var widgetSharedKeys = {
     visible?: boolean,
     name?: string,
     styles?: string[],
-    directProperties?: StyleProperty[]
+    properties?: StyleProperty[]
 };
 
-var detailTextSharedKeys = {
-    detailFont: string,
-    detailFontColor: Color,
-    detailBackgroundTexture: string,
-    detailFontScale: float,
-    detailOffsetX: float,
-    detailOffsetY: float,
-    detailWidth: float,
-};
-
-var flexBoxKeys = {
-    children?: $Widget[],
-    ...widgetSharedKeys
-};
+//var detailTextSharedKeys = {
+//    detailFont: string,
+//    detailFontColor: Color,
+//    detailFontScale: float,
+//    detailBackgroundTexture: string,
+//    detailOffsetX: float,
+//    detailOffsetY: float,
+//    detailWidth: float,
+//};
 
 $Widget {
 
     $Box {
-        ...flexBoxKeys
+        children?: $Widget[],
+        ...widgetSharedKeys
     }
 
     $Label {
@@ -62,6 +54,7 @@ $Widget {
         fontScale?: float,
         backgroundTexture?: string,
         align?: string,
+        wrap?: boolean,
         ...widgetSharedKeys
     }
 
@@ -72,6 +65,7 @@ $Widget {
         fontScale: float,
         backgroundTexture?: string,
         align?: string,
+        wrap?: boolean,
         ...widgetSharedKeys
     }
 
@@ -80,7 +74,6 @@ $Widget {
         scaleX: float,
         scaleY: float,
         reportDimensionsWithScaling?: boolean,
-        scalingWorkaround?: boolean,
         ...widgetSharedKeys
     }
 
@@ -99,7 +92,7 @@ $Widget {
         draggedCardZIndex: int,
         hoveredCardScale: float,
         targetWidth: float,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
@@ -116,7 +109,7 @@ $Widget {
         cardZIndex: int,
         background?: string,
         radiusExtension: float,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
@@ -130,13 +123,20 @@ $Widget {
         infoFont: string,
         infoFontColor: Color,
         infoFontScale: float,
-        stackBackgroundTexture: string,
-        stackSpacing: float,
+//        stackBackgroundTexture: string,
         areaSpacing: float,
         cardScale: float,
-        stackMinSize: float,
         onlyAllowAddingOnTheSameTurn: boolean,
-        ...detailTextSharedKeys,
+        detailFont: string,
+        detailFontColor: Color,
+        detailFontScale: float,
+        cardDeltaX: float,
+        cardDeltaY: float,
+        cardInitialX: float,
+        cardInitialY: float,
+        stackHeight: float,
+        stackMinWidth: float,
+        stackHook: string,
         ...widgetSharedKeys
     }
 
@@ -229,34 +229,47 @@ $Behaviour {
 
 }
 
-//$ScreenController {
-//
-//    $GameScreenController {
-//        ...gameScreenControllerKeys
-//    }
-//
-//    $IntroScreenController {
-//        cardAtlasFile: string,
-//        appearActor: string,
-//        nextScreen: string,
-//    }
-//
-//    $CardSelectionScreenController {
-//        cardSelectionActorName: string,
-//        cardConfigFile: string,
-//        cardAtlasFile: string,
-//        cardsToSelect: int,
-//        cardScale: float,
-//        cardBehaviour: $Behaviour,
-//        nextScreen: string,
+$ScreenController {
+
+    $GameScreenController {
+        ...gameScreenControllerKeys
+    }
+
+    $IntroScreenController {
+        cardAtlasFile: string,
+        appearActor: string,
+        nextScreen: string,
+    }
+
+    $CardSelectionScreenController {
+        cardSelectionActorName: string,
+        cardConfigFile: string,
+        cardAtlasFile: string,
+        cardsToSelect: int,
+        cardScale: float,
+        cardBehaviour: $Behaviour,
+        nextScreen: string,
 //        ...detailTextSharedKeys,
-//        emptyFont: string,
-//        emptyFontColor: Color,
-//        emptyFontScale: float,
-//        emptyText: string,
-//    }
-//
-//}
+        emptyFont: string,
+        emptyFontColor: Color,
+        emptyFontScale: float,
+        emptyText: string,
+    }
+
+}
+
+$KeyAction {
+
+    $ToggleFullscreenKeyAction {
+        width: int,
+        height: int
+    }
+
+    $SelectFirstInCardHandKeyAction {
+        num: int
+    }
+
+}
 
 viewport: $Viewport,
 
@@ -266,7 +279,7 @@ assets: {
         file: string
     }[],
     fonts?: $Font[],
-    textureAtlases: {
+    textureAtlases?: {
         file: string,
         defines: string[]
     }[],
@@ -297,6 +310,15 @@ assets: {
         name: string,
         color: Color,
     }[],
+    ninepatches?: {
+        name: string,
+        file: string,
+        left: int,
+        right: int,
+        top: int,
+        bottom: int,
+        scale: float
+    }[],
     particles?: {
         name: string,
         particlePath: string,
@@ -311,17 +333,20 @@ assets: {
 },
 
 options: {
-    background?: string
+    background?: string,
+    screenController?: $ScreenController,
+    inputMap?: {
+        keycode: int,
+        modifiers: int[],
+        action: $KeyAction
+    }[]
 //    setFillParentOnRoot: boolean,
 //    defaultCursor: {
 //        useSystemCursor: boolean,
 //        cursorName: string
 //    },
 //    postProcessor: string?,
-//    controller: $ScreenController?,
 //    printFrameRate?: boolean
 },
 
-root: {
-    ...flexBoxKeys
-}
+root: $Widget

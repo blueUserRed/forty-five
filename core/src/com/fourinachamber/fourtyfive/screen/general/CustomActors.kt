@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import ktx.actors.alpha
 import ktx.actors.onTouchEvent
 import onj.value.OnjArray
@@ -162,7 +163,10 @@ open class TemplateStringLabel(
 ) : CustomLabel(templateString.string, labelStyle) {
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        setText(templateString.string) //TODO: updating this every frame is unnecessary
+        val newString = templateString.string
+        if (!textEquals(newString)) {
+            setText(newString)
+        }
         super.draw(batch, parentAlpha)
     }
 }
@@ -187,6 +191,10 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
      * already applied
      */
     var reportDimensionsWithScaling: Boolean = false
+        set(value) {
+            field = value
+            invalidateHierarchy()
+        }
 
     /**
      * if set to true, the scale of the image will be ignored when drawing
@@ -200,6 +208,8 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
             super.draw(null, parentAlpha)
             return
         }
+
+        validate()
 
         val width = if (ignoreScalingWhenDrawing) width else width * scaleX
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
@@ -231,13 +241,13 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
     }
 
     override fun getMinWidth(): Float =
-        if (reportDimensionsWithScaling) super.getMinWidth() * scaleX else super.getMinWidth()
+        if (reportDimensionsWithScaling) super.getPrefWidth() * scaleX else super.getPrefWidth()
     override fun getPrefWidth(): Float =
         if (reportDimensionsWithScaling) super.getPrefWidth() * scaleX else super.getPrefWidth()
     override fun getMaxWidth(): Float =
         if (reportDimensionsWithScaling) super.getMaxWidth() * scaleX else super.getMaxWidth()
     override fun getMinHeight(): Float =
-        if (reportDimensionsWithScaling) super.getMinHeight() * scaleY else super.getMinHeight()
+        if (reportDimensionsWithScaling) super.getPrefHeight() * scaleY else super.getPrefHeight()
     override fun getPrefHeight(): Float =
         if (reportDimensionsWithScaling) super.getPrefHeight() * scaleY else super.getPrefHeight()
     override fun getMaxHeight(): Float =
@@ -266,6 +276,28 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
 
     }
 
+}
+
+open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
+
+    override var fixedZIndex: Int = 0
+
+    var background: Drawable? = null
+
+    override fun resortZIndices() {
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+            (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+        }
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        if (batch != null && background != null) {
+            background?.draw(batch, x, y, width, height)
+        }
+        super.draw(batch, parentAlpha)
+    }
 }
 
 /**

@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screen
+package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
@@ -11,13 +11,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import com.fourinachamber.fourtyfive.utils.between
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
+import dev.lyze.flexbox.FlexBox
 import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -52,35 +55,12 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     private var emptyFontColor = onj.get<Color>("emptyFontColor")
     private var emptyFontScale = onj.get<Double>("emptyFontScale").toFloat()
 
-    private lateinit var detailFont: BitmapFont
-    private lateinit var detailFontColor: Color
-    private lateinit var detailBackground: Drawable
-    private var detailFontScale by Delegates.notNull<Float>()
-    private lateinit var detailOffset: Vector2
-    private var detailWidth by Delegates.notNull<Float>()
-
-    private lateinit var hoverDetailActor: CustomLabel
+    private var currentHoverDetail: CardDetailActor? = null
 
     override fun init(onjScreen: OnjScreen) {
         this.onjScreen = onjScreen
 
-        detailFont = onjScreen.fontOrError(onj.get<String>("detailFont"))
-        detailFontColor = onj.get<Color>("detailFontColor")
-        detailBackground = onjScreen.drawableOrError(onj.get<String>("detailBackgroundTexture"))
-        detailFontScale = onj.get<Double>("detailFontScale").toFloat()
-        detailOffset = Vector2(onj.get<Double>("detailOffsetX").toFloat(), onj.get<Double>("detailOffsetY").toFloat())
-        detailWidth = onj.get<Double>("detailWidth").toFloat()
         emptyFont = onjScreen.fontOrError(onj.get<String>("emptyFont"))
-
-        hoverDetailActor = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
-        hoverDetailActor.setFontScale(detailFontScale)
-        hoverDetailActor.setAlignment(Align.center)
-        hoverDetailActor.isVisible = false
-        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-        hoverDetailActor.wrap = true
-        hoverDetailActor.width = detailWidth
-        hoverDetailActor.background = detailBackground
-        onjScreen.addActorToRoot(hoverDetailActor)
 
         val cardSelectionActor = onjScreen.namedActorOrError(cardSelectionActorName)
         if (cardSelectionActor !is WidgetGroup) {
@@ -133,7 +113,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             card.actor.setScale(cardScale)
             card.actor.reportDimensionsWithScaling = true
             card.actor.ignoreScalingWhenDrawing = true
-
+            card.actor.invalidate()
             card.actor.onClick { handleClick(card) }
 
             val cardBehaviour = BehaviourFactory.behaviorOrError(
@@ -143,8 +123,15 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             )
             cardBehaviour.bindCallbacks(onjScreen)
 
-            cardSelectionActor.addActor(card.actor)
+            val cardSelectionActor = cardSelectionActor
+            if (cardSelectionActor is FlexBox) {
+                cardSelectionActor.add(card.actor)
+            } else {
+                cardSelectionActor.addActor(card.actor)
+            }
+            onjScreen.addActorToRoot(card.actor.hoverDetailActor)
         }
+        cardSelectionActor.invalidateHierarchy()
     }
 
     private fun displayCardsEmptyActor() {
@@ -157,33 +144,66 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     }
 
     override fun update() {
+//        onjScreen.invalidateEverything()
+        var isCardHoveredOver = false
         for (card in cards) if (card.actor.isHoveredOver) {
-            hoverDetailActor.isVisible = true
-            hoverDetailActor.setText(card.description)
-            val (x, y) = card.actor.localToStageCoordinates(Vector2(0f, 0f))
-            hoverDetailActor.height = hoverDetailActor.prefHeight
-            hoverDetailActor.width = detailWidth
-
-            val toLeft = x + card.actor.width + detailWidth > onjScreen.stage.viewport.worldWidth
-
-            hoverDetailActor.setPosition(
-                if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
-                y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
-            )
-            return
+            isCardHoveredOver = true
+            if (currentHoverDetail === card.actor.hoverDetailActor) break
+            currentHoverDetail?.isVisible = false
+            currentHoverDetail?.let { onjScreen.removeActorFromRoot(it) }
+            currentHoverDetail = card.actor.hoverDetailActor
+            onjScreen.addActorToRoot(currentHoverDetail!!)
+            currentHoverDetail!!.isVisible = true
+            layoutHoverDetail(currentHoverDetail!!, card)
+            break
         }
-        hoverDetailActor.isVisible = false
+        if (!isCardHoveredOver && currentHoverDetail != null) {
+            currentHoverDetail!!.isVisible = false
+            onjScreen.removeActorFromRoot(currentHoverDetail!!)
+            currentHoverDetail = null
+        }
+        if (currentHoverDetail != null) layoutHoverDetail(currentHoverDetail!!, currentHoverDetail!!.card)
+
+//        for (card in cards) {
+//            val cardActor = card.actor
+//            val hoverDetail = cardActor.hoverDetailActor
+//            val cardSize = cardActor.width
+//            hoverDetail.forcedWidth = cardSize * 1.4f
+//            val (x, y) = cardActor.localToStageCoordinates(Vector2(0f, 0f))
+//            hoverDetail.setBounds(
+//                x + cardSize / 2 - hoverDetail.forcedWidth / 2,
+//                y - hoverDetail.prefHeight,
+//                hoverDetail.forcedWidth,
+//                hoverDetail.prefHeight
+//            )
+//        }
+    }
+
+    private fun layoutHoverDetail(hoverDetailActor: CardDetailActor, card: Card) {
+        val (x, y) = card.actor.localToStageCoordinates(Vector2(0f,0f))
+        val cardSize = card.actor.width //* card.actor.scaleX
+        hoverDetailActor.forcedWidth = cardSize * 2
+        hoverDetailActor.width = hoverDetailActor.forcedWidth
+        hoverDetailActor.layout()
+        hoverDetailActor.setBounds(
+            (x + cardSize / 2 - hoverDetailActor.forcedWidth / 2)
+                .between(0f, onjScreen.viewport.worldWidth - hoverDetailActor.forcedWidth),
+            y - hoverDetailActor.prefHeight,
+            hoverDetailActor.forcedWidth,
+            hoverDetailActor.prefHeight
+        )
+//        hoverDetailActor.invalidateHierarchy()
     }
 
     override fun end() {
-        onjScreen.removeActorFromRoot(hoverDetailActor)
+        currentHoverDetail?.let { onjScreen.removeActorFromRoot(it) }
     }
 
     private fun handleClick(card: Card) {
         FourtyFiveLogger.debug(logTag, "chose card $card")
         SaveState.drawCard(card)
         SaveState.write()
-        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(nextScreen)).build()
+        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(nextScreen)).build()
     }
 
     companion object {

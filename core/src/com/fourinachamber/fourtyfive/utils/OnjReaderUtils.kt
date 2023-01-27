@@ -6,12 +6,14 @@ import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.NinePatch
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.screen.general.PostProcessor
@@ -263,4 +265,25 @@ object OnjReaderUtils {
             it.get<String>("name") to effect
         }
 
+    fun readNinepatches(arr: OnjArray): Pair<List<Texture>, Map<String, NinePatchDrawable>> {
+        val textures = mutableListOf<Texture>()
+        val ninepatches  = mutableMapOf<String, NinePatchDrawable>()
+        for (obj in arr.value) {
+            obj as OnjObject
+            val texture = Texture(Gdx.files.internal(obj.get<String>("file")))
+            textures.add(texture)
+            val ninepatch = NinePatch(
+                TextureRegion(texture),
+                obj.get<Long>("left").toInt(),
+                obj.get<Long>("right").toInt(),
+                obj.get<Long>("top").toInt(),
+                obj.get<Long>("bottom").toInt(),
+            )
+            obj.ifHas<Double>("scale") {
+                ninepatch.scale(it.toFloat(), it.toFloat())
+            }
+            ninepatches[obj.get<String>("name")] = NinePatchDrawable(ninepatch)
+        }
+        return textures to ninepatches
+    }
 }

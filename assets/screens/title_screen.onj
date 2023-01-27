@@ -1,194 +1,19 @@
+
 import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+
+use Common;
+use Screen;
+use Style;
 
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-var buttonHeight = worldHeight / 8;
-
 var buttonBaseScale = 0.2;
 var buttonHoverScale = 0.25;
 
-var buttonBehaviours = [
-
-    $MouseHoverBehaviour {
-        useSystemCursor: true,
-        cursorName: "hand",
-        disabled: null,
-    },
-
-    $OnHoverChangeFontSizeBehaviour {
-        enterDuration: 0.1,
-        exitDuration: 0.1,
-        targetFontScale: buttonHoverScale,
-        baseFontScale: buttonBaseScale,
-        enterInterpolation: "elastic in",
-        exitInterpolation: "elastic out",
-    }
-
-];
-
-viewport: $FitViewport {
-    worldWidth: worldWidth,
-    worldHeight: worldHeight,
-    backgroundTexture: "background3",
-},
-
-var topRow = {
-    width: worldWidth,
-    cells: [
-        {
-            expandX: true,
-            element: $Label {
-                text: "",
-                font: "distance_field",
-                color: color.black,
-                fontScale: 0.2,
-            }
-        },
-        {
-            align: "right",
-            padTop: 8.0,
-            padRight: 10.0,
-            sizeToActor: true,
-            element: $Image {
-                scalingWorkaround: true,
-                textureName: "logo",
-                scaleX: 0.07,
-                scaleY: 0.07
-            }
-        }
-    ]
-};
-
-var spacerRow = {
-    cells: [
-        {
-            colspan: 2,
-            expandY: true,
-            element: $Label {
-                text: "",
-                font: "distance_field",
-                color: color.black,
-                fontScale: 0.2
-            }
-        }
-    ]
-};
-
-var buttonBox = $Table {
-    rows: [
-
-        {
-            cells: [
-                {
-                    align: "right",
-                    element: $Label {
-                        text: "play",
-                        font: "red_wing",
-                        align: "right",
-                        color: color.black,
-                        fontScale: buttonBaseScale,
-                        behaviours: [
-                            $OnClickChangeScreenBehaviour {
-                                screenPath: "screens/game_screen.onj"
-                            },
-                            ...buttonBehaviours
-                        ]
-//                        debug: true
-                    }
-                }
-            ]
-        },
-
-        {
-            cells: [
-                {
-                    align: "right",
-                    element: $Label {
-                        text: "abandon run",
-                        font: "red_wing",
-                        align: "right",
-                        color: color.black,
-                        fontScale: buttonBaseScale,
-                        behaviours: [
-                            $OnClickAbandonRunBehaviour { },
-                            $OnClickRemoveActorBehaviour { },
-                            ...buttonBehaviours
-                        ]
-//                        debug: true
-                    }
-                }
-            ]
-        },
-
-        {
-            cells: [
-                {
-                    align: "right",
-                    element: $Label {
-                        text: "quit",
-                        font: "red_wing",
-                        align: "right",
-                        color: color.black,
-                        fontScale: buttonBaseScale,
-                        behaviours: [
-                            $OnClickExitBehaviour { },
-                            ...buttonBehaviours
-                        ]
-//                        debug: true
-                    }
-                }
-            ]
-        }
-
-    ]
-
-};
-
-var bottomRow = {
-
-    cells: [
-
-        {
-            expandX: true,
-            element: $Label {
-                text: "",
-                font: "distance_field",
-                color: color.black,
-                fontScale: 0.2
-            }
-        },
-
-        {
-            align: "right",
-            padBottom: 10.0,
-            padRight: 3.0,
-            sizeToActor: true,
-            element: buttonBox
-        }
-
-    ]
-
-};
-
-children: [
-    $Table {
-//        fillX: true
-//        fillY: true
-//        debug: true
-        rows: [ topRow, spacerRow, bottomRow ]
-    }
-],
-
 assets: {
-    textures: [],
     fonts: [
-
-        $DistanceFieldFont {
-            name: "distance_field",
-            fontFile: "fonts/distanceField.fnt",
-            imageFile: "fonts/distanceField.png"
-        },
 
         $DistanceFieldFont {
             name: "red_wing",
@@ -203,19 +28,100 @@ assets: {
             defines: [ "background3", "logo"]
         }
     ],
-    cursors: [],
-    postProcessors: [],
-    animations: [],
-    colorTextures: [],
-    particles: [],
+    styles: [
+        {
+            name: "button",
+            properties: [
+                relWidth(10.0),
+                fontScaleTo(buttonBaseScale, 0.1, interpolation.elastic),
+                fontScaleTo(buttonHoverScale, 0.1, interpolation.elastic) condition hover(self()),
+                margin(0.0, 0.0, 0.3, 0.0)
+            ]
+        }
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
 },
 
 options: {
-    setFillParentOnRoot: true,
-    defaultCursor: {
-        useSystemCursor: true,
-        cursorName: "arrow"
-    },
-    postProcessor: null,
-    controller: null
-}
+    background: "background3",
+    inputMap: inputMaps.defaultInputMap
+},
+
+root: $Box {
+    properties: [
+        alignItems("flex end"),
+        flexDirection("column"),
+        relHeight(100.0)
+    ]
+} children [
+
+    $Box {
+        properties: [
+            flexGrow(1.0),
+            margin(0.0, 2.5, 5.0, 0.0)
+        ]
+    } children [
+
+        $Image {
+            reportDimensionsWithScaling: true,
+            textureName: "logo",
+            scaleX: 0.07,
+            scaleY: 0.07
+        }
+
+    ],
+
+    $Box {
+        properties: [
+            flexDirection("column"),
+            alignItems("flex end"),
+            margin(0.0, 1.0, 0.0, 2.5)
+        ]
+    } children [
+
+        $Label {
+            text: "play",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            fontScale: buttonBaseScale,
+            styles: [ "button" ],
+            behaviours: [
+                $OnClickChangeScreenBehaviour {
+                    screenPath: "screens/game_screen.onj"
+                }
+            ]
+        },
+
+        $Label {
+            text: "abandon run",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            fontScale: buttonBaseScale,
+            styles: [ "button" ],
+            behaviours: [
+                $OnClickAbandonRunBehaviour { },
+                $OnClickRemoveActorBehaviour { }
+            ]
+        },
+
+        $Label {
+            text: "quit",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            styles: [ "button" ],
+            fontScale: buttonBaseScale,
+            behaviours: [
+                $OnClickExitBehaviour { }
+            ]
+        }
+
+    ]
+
+]
