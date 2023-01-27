@@ -2,6 +2,8 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -132,6 +134,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBullet: CardPrototype
     private lateinit var defaultCover: CardPrototype
 
+    var keySelectedCard: Card? = null
+        set(value) {
+            field?.actor?.isSelected = false
+            field = value
+            field?.actor?.isSelected = true
+        }
+
     override fun init(onjScreen: OnjScreen) {
         SaveState.read()
         curScreen = onjScreen
@@ -157,7 +166,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCoverArea()
         initTemplateStringParams()
 
-        onjScreen.afterMs(10) { onjScreen.resortRootZIndices() } //TODO: this is really not good
         changePhase(Gamephase.INITIAL_DRAW)
     }
 
@@ -232,7 +240,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
             cardDragAndDropBehaviour.name,
             cardDragAndDrop,
-            curScreen,
             card.actor,
             cardDragAndDropBehaviour
         )
@@ -275,7 +282,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun update() {
+
         timeline.update()
+
         if (timeline.isFinished && isUIFrozen) unfreezeUI()
         if (!timeline.isFinished && !isUIFrozen) freezeUI()
         val iterator = curGameAnims.iterator()
@@ -287,6 +296,29 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             anim.update()
         }
+
+        val selected = keySelectedCard ?: run {
+            curScreen.highlightArea = null
+            return
+        }
+        val (x, y) = selected.actor.localToStageCoordinates(Vector2(0f, 0f))
+        val width: Float
+        val height: Float
+        if (selected.actor.reportDimensionsWithScaling) {
+            width = selected.actor.width
+            height = selected.actor.height
+        } else {
+            width = selected.actor.width * selected.actor.scaleX
+            height = selected.actor.height * selected.actor.scaleY
+        }
+        curScreen.highlightArea?.let {
+            it.x = x
+            it.y = y
+            it.width = width
+            it.height = height
+            return
+        }
+        curScreen.highlightArea = Rectangle(x, y, width, height)
     }
 
     /**
@@ -346,7 +378,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val revolver = curScreen.namedActorOrError(revolverName)
         if (revolver !is Revolver) throw RuntimeException("actor named $revolverName must be a Revolver")
         val dropOnj = revolverOnj.get<OnjNamedObject>("dropBehaviour")
-        revolver.slotDropConfig = cardDragAndDrop to dropOnj
+        revolver.initDragAndDrop(cardDragAndDrop to dropOnj)
         this.revolver = revolver
     }
 
@@ -679,14 +711,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun win() {
         FourtyFiveLogger.debug(logTag, "player won")
-        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(winScreen)).build()
+        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(winScreen)).build()
         SaveState.write()
     }
 
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()
-        FourtyFive.curScreen = ScreenBuilderFromOnj(Gdx.files.internal(looseScreen)).build()
+        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(looseScreen)).build()
     }
 
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())

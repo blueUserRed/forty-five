@@ -1,7 +1,7 @@
 package com.fourinachamber.fourtyfive.screen.general
 
 import com.fourinachamber.fourtyfive.game.GameController
-import com.fourinachamber.fourtyfive.screen.CardSelectionScreenController
+import com.fourinachamber.fourtyfive.screen.gameComponents.CardSelectionScreenController
 import com.fourinachamber.fourtyfive.screen.gameComponents.IntroScreenController
 import onj.value.OnjNamedObject
 

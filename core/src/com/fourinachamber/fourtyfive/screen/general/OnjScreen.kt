@@ -2,20 +2,28 @@ package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.game.GraphicsConfig
+import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.keyInput.KeyInputMapEntry
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -41,7 +49,8 @@ open class OnjScreen(
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
     private val behaviours: List<Behaviour>,
-    private val printFrameRate: Boolean
+    private val printFrameRate: Boolean,
+    private val keyInputMap: KeyInputMap? = null
 ) : ScreenAdapter() {
 
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
@@ -81,6 +90,19 @@ open class OnjScreen(
             if (isVisible) value?.init(this)
         }
 
+    var highlightArea: Rectangle? = null
+
+    private val keySelectDrawable: Drawable by lazy {
+        GraphicsConfig.keySelectDrawable()
+    }
+
+    init {
+        addLateRenderTask {
+            val highlight = highlightArea ?: return@addLateRenderTask
+            keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
+        }
+    }
+
     fun afterMs(ms: Int, callback: () -> Unit) {
         callbacks.add((TimeUtils.millis() + ms) to callback)
     }
@@ -95,6 +117,20 @@ open class OnjScreen(
 
     fun addActorToRoot(actor: Actor) {
         stage.root.addActor(actor)
+    }
+
+    fun invalidateEverything() {
+
+        fun invalidateGroup(group: Group) {
+            for (child in group.children) {
+                if (child is Layout) {
+                    child.invalidate()
+                }
+                if (child is Group) invalidateGroup(child)
+            }
+        }
+
+        invalidateGroup(stage.root)
     }
 
     fun removeActorFromRoot(actor: Actor) {
@@ -155,7 +191,20 @@ open class OnjScreen(
 
     override fun show() {
         screenController?.init(this)
-        Gdx.input.inputProcessor = stage
+        val multiplexer = InputMultiplexer()
+//        val inputMap = KeyInputMap(listOf(
+//            KeyInputMapEntry(Keys.F, listOf()) {
+//                if (!Gdx.graphics.isFullscreen) {
+//                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+//                } else {
+//                    Gdx.graphics.setWindowedMode(600, 400)
+//                }
+//                return@KeyInputMapEntry true
+//            }
+//        ))
+        keyInputMap?.let { multiplexer.addProcessor(it) }
+        multiplexer.addProcessor(stage)
+        Gdx.input.inputProcessor = multiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
     }
@@ -169,18 +218,12 @@ open class OnjScreen(
     override fun render(delta: Float) = try {
         if (printFrameRate) FourtyFiveLogger.fps()
         screenController?.update()
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F)) {
-            if (!Gdx.graphics.isFullscreen) {
-                Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-            } else {
-                Gdx.graphics.setWindowedMode(600, 400)
-            }
-        }
         updateCallbacks()
         lastRenderTime = measureTimeMillis {
             stage.act(Gdx.graphics.deltaTime)
             if (postProcessor == null) {
                 ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
+                if (stage.batch.isDrawing) stage.batch.end()
                 doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
                 stage.draw()
                 doRenderTasks(lateRenderTasks, additionalLateRenderTasks)

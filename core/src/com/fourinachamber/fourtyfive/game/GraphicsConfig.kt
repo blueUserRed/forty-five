@@ -2,10 +2,12 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.general.*
@@ -13,9 +15,12 @@ import com.fourinachamber.fourtyfive.utils.ActorActionTimelineAction
 import com.fourinachamber.fourtyfive.utils.GameAnimationTimelineAction
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.Utils
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.value.OnjObject
+import onj.value.OnjString
 import kotlin.properties.Delegates
 
 object GraphicsConfig {
@@ -96,16 +101,17 @@ object GraphicsConfig {
                 particleActor.isAutoRemove = true
                 particleActor.fixedZIndex = Int.MAX_VALUE
 
+                val (x, y) = particleActor.localToStageCoordinates(Vector2(0f, 0f))
                 if (destroyed) {
                     particleActor.setPosition(
-                        coverStack.x + coverStack.width / 2,
-                        coverStack.y + coverStack.height / 2
+                        x + coverStack.width / 2,
+                        y + coverStack.height / 2
                     )
                 } else {
                     val width = particle!!.emitters[0].spawnWidth.highMax
                     particleActor.setPosition(
-                        coverStack.x + coverStack.width / 2 - width / 2,
-                        coverStack.y
+                        x + coverStack.width / 2 - width / 2,
+                        y
                     )
                 }
 
@@ -184,6 +190,15 @@ object GraphicsConfig {
         )
         return GameAnimationTimelineAction(anim)
     }
+
+    fun cardDetailFont(): BitmapFont = FourtyFive.curScreen!!.fontOrError(cardDetailFont)
+    fun cardDetailFontScale(): Float = cardDetailFontScale
+    fun cardDetailFontColor(): Color = cardDetailFontColor
+    fun cardDetailBackground(): Drawable? = cardDetailBackground?.let { FourtyFive.curScreen!!.drawableOrError(it) }
+    fun cardDetailSeparator(): Drawable = FourtyFive.curScreen!!.drawableOrError(cardDetailSeparator)
+    fun cardDetailSpacing(): Float = cardDetailSpacing
+
+    fun keySelectDrawable(): Drawable = FourtyFive.curScreen!!.drawableOrError(keySelectDrawable)
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
@@ -278,7 +293,31 @@ object GraphicsConfig {
         fadeDuration = (fadeOnj.get<Double>("fadeDuration") * 1000).toInt()
         fadeIn = (fadeOnj.get<Double>("fadeIn") * 1000).toInt()
         fadeOut = (fadeOnj.get<Double>("fadeOut") * 1000).toInt()
+
+        val cardDetailOnj = config.get<OnjObject>("cardDetailText")
+        cardDetailFont = cardDetailOnj.get<String>("font")
+        cardDetailFontScale = cardDetailOnj.get<Double>("fontScale").toFloat()
+        cardDetailFontColor = cardDetailOnj.get<Color>("fontColor")
+        cardDetailBackground = if (cardDetailOnj["background"]!!.isNull()) {
+            null
+        } else {
+            cardDetailOnj.get<String>("background")
+        }
+        cardDetailSeparator = cardDetailOnj.get<String>("separator")
+        cardDetailSpacing = cardDetailOnj.get<Double>("spacing").toFloat()
+
+        val keySelect = config.get<OnjObject>("keySelect")
+        keySelectDrawable = keySelect.get<OnjString>("drawable").value
     }
+
+    private lateinit var keySelectDrawable: String
+
+    private var cardDetailFont by Delegates.notNull<String>()
+    private var cardDetailFontScale by Delegates.notNull<Float>()
+    private var cardDetailFontColor by Delegates.notNull<Color>()
+    private var cardDetailSpacing by Delegates.notNull<Float>()
+    private var cardDetailBackground: String? = null
+    private lateinit var cardDetailSeparator: String
 
     private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>

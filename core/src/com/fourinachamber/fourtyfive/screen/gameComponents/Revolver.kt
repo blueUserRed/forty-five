@@ -3,11 +3,10 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
@@ -28,15 +27,9 @@ import kotlin.math.sin
  * between the slots and the edge of the revolver
  */
 class Revolver(
-    detailFont: BitmapFont,
-    detailFontColor: Color,
-    detailBackground: Drawable,
-    detailFontScale: Float,
-    val detailOffset: Vector2,
-    val detailWidth: Float,
     private val background: Drawable?,
     private val radiusExtension: Float
-) : Widget(), ZIndexActor {
+) : WidgetGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
@@ -63,11 +56,6 @@ class Revolver(
     var animationDuration: Float = 1f
 
     /**
-     * the [DragAndDrop] used for the slots and the [OnjNamedObject] containing the config for drag and drop
-     */
-    var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
-
-    /**
      * the radius of the circle in which the slots are laid out
      */
     var radius: Float = 1f
@@ -77,8 +65,6 @@ class Revolver(
      */
     var rotationOff: Double = (Math.PI / 2) + slotAngleOff
 
-    private var dirty: Boolean = true
-    private var isInitialised: Boolean = false
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
 
@@ -86,21 +72,12 @@ class Revolver(
         get() = FourtyFive.curScreen!!
 
     /**
-     * the slots of the revoler
+     * the slots of the revolver
      */
     lateinit var slots: Array<RevolverSlot>
         private set
 
-    private val hoverDetailActor: CustomLabel =
-        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
-
-    init {
-        hoverDetailActor.setFontScale(detailFontScale)
-        hoverDetailActor.setAlignment(Align.center)
-        hoverDetailActor.isVisible = false
-        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-        hoverDetailActor.wrap = true
-    }
+    private var currentHoverDetailActor: CardDetailActor? = null
 
     /**
      * assigns a card to a slot in the revolver; [card] can be set to null, but consider using [removeCard] instead to
@@ -112,7 +89,8 @@ class Revolver(
         slots[slot - 1].card = card
         card?.actor?.setScale(cardScale)
         card?.actor?.fixedZIndex = cardZIndex
-        dirty = true
+        if (card != null && card.actor !in this) addActor(card.actor)
+        invalidate()
     }
 
     /**
@@ -121,7 +99,7 @@ class Revolver(
     fun removeCard(slot: Int) {
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         val card = getCardInSlot(slot) ?: return
-        if (card.actor in stage.root) onjScreen.removeActorFromRoot(card.actor)
+        removeCard(card)
         setCard(slot, null)
     }
 
@@ -132,6 +110,8 @@ class Revolver(
         for (slot in slots) if (slot.card === card) {
             if (card.actor in onjScreen.stage.root) onjScreen.removeActorFromRoot(card.actor)
             setCard(slot.num, null)
+            removeActor(card.actor)
+            return
         }
     }
 
@@ -143,79 +123,68 @@ class Revolver(
         return slots[slot - 1].card
     }
 
+    fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
+        slots = Array(5) {
+            val slot = RevolverSlot(it + 1, this, slotDrawable!!, slotScale!!, animationDuration)
+            addActor(slot)
+            val (dragAndDrop, dropOnj) = config
+            val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+                dropOnj.name,
+                dragAndDrop,
+                slot,
+                dropOnj
+            )
+            dragAndDrop.addTarget(dropBehaviour)
+            slot
+        }
+        invalidateHierarchy()
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        width = prefWidth
-        height = prefHeight
+        validate()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
-        if (!isInitialised) {
-            initialise()
-            updateSlotsAndCars()
-            isInitialised = true
-            invalidateHierarchy()
-            onjScreen.addActorToRoot(hoverDetailActor)
-        }
-        if (dirty) {
-            updateSlotsAndCars()
-            dirty = false
-        }
 
         var isCardHoveredOver = false
         for (slot in slots) if (slot.card?.actor?.isHoveredOver ?: false) {
             isCardHoveredOver = true
-            updateHoverDetailActor(slot.card!!)
+            if (currentHoverDetailActor === slot.card?.actor?.hoverDetailActor) break
+            currentHoverDetailActor?.isVisible = false
+            removeActor(currentHoverDetailActor)
+            currentHoverDetailActor = slot.card?.actor?.hoverDetailActor
+            addActor(currentHoverDetailActor)
+            currentHoverDetailActor!!.isVisible = true
+            invalidate()
+            break
         }
-        hoverDetailActor.isVisible = isCardHoveredOver
+        if (!isCardHoveredOver && currentHoverDetailActor != null) {
+            currentHoverDetailActor?.isVisible = false
+            removeActor(currentHoverDetailActor)
+            currentHoverDetailActor = null
+            invalidate()
+        }
     }
 
-    private fun updateHoverDetailActor(card: Card) {
-        hoverDetailActor.setText(card.description)
-
-        hoverDetailActor.width = detailWidth
-        hoverDetailActor.height = hoverDetailActor.prefHeight
-
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-
-        hoverDetailActor.setPosition(
-            x + prefWidth + detailOffset.x,
-            y + prefHeight / 2 - hoverDetailActor.height / 2 + detailOffset.y
+    override fun layout() {
+        super.layout()
+        currentHoverDetailActor?.forcedWidth = width
+        currentHoverDetailActor?.setBounds(
+            width / 2 - currentHoverDetailActor!!.forcedWidth / 2,
+            height,
+            currentHoverDetailActor!!.prefWidth,
+            currentHoverDetailActor!!.prefHeight
         )
+        updateSlotsAndCards()
     }
 
-    private fun initialise() {
-        slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawable!!, slotScale!!, animationDuration)
-
-            onjScreen.addActorToRoot(slot)
-
-            if (slotDropConfig != null) {
-                val (dragAndDrop, dropOnj) = slotDropConfig!!
-                val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-                    dropOnj.name,
-                    dragAndDrop,
-                    onjScreen,
-                    slot,
-                    dropOnj
-                )
-                dragAndDrop.addTarget(dropBehaviour)
-            }
-            slot
-        }
-    }
-
-    override fun positionChanged() {
-        super.positionChanged()
-        dirty = true
-    }
-
-    private fun updateSlotsAndCars() {
+    private fun updateSlotsAndCards() {
         val slotSize = slotDrawable!!.minWidth * slotScale!!
         val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size
         prefHeight = size
         width = prefWidth
         height = prefHeight
-        val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
+        val basePos = Vector2(width / 2, height / 2)
         for (i in slots.indices) {
             val slot = slots[i]
             val angle = angleForIndex(i)
@@ -227,7 +196,7 @@ class Revolver(
      * rotates the revolver to the right
      */
     fun rotate() {
-        val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
+        val basePos = Vector2(width / 2, height / 2)
 
         for (i in slots.indices) {
             slots[i].animateTo(basePos, radius, angleForIndex(i), angleForIndex((i + 1) % slots.size))
@@ -245,7 +214,7 @@ class Revolver(
      * rotates the revolver to the left
      */
     fun rotateLeft() {
-        val basePos = localToStageCoordinates(Vector2(0f, 0f)) + Vector2(width / 2, height / 2)
+        val basePos = Vector2(width / 2, height / 2)
 
         for (i in slots.indices) {
             slots[i].animateToReversed(basePos, radius, angleForIndex(if (i == 0) 4 else i - 1), angleForIndex(i))
@@ -257,13 +226,6 @@ class Revolver(
         slots[2].card = slots[1].card
         slots[1].card = slots[0].card
         slots[0].card = firstCard
-    }
-
-    /**
-     * marks the position of the revolver and its slots as dirty
-     */
-    fun markDirty() {
-        dirty = true
     }
 
     private fun angleForIndex(i: Int): Double = slotAngleOff * i + rotationOff
@@ -313,7 +275,7 @@ class RevolverSlot(
             removeAction(action)
             inAnimation = false
             card?.inAnimation = false
-            revolver.markDirty()
+            revolver.invalidate()
         }
     }
 

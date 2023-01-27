@@ -85,4 +85,17 @@ insultFadeAnimation: {
     fadeDuration: 6.0,
     fadeIn: 2.0,
     fadeOut: 2.0,
+},
+
+cardDetailText: {
+    font: "red_wing",
+    fontScale: 0.07,
+    fontColor: color.white,
+    background: "transparent_black",
+    separator: "white",
+    spacing: 1.8
+},
+
+keySelect: {
+    drawable: "key_select_frame"
 }

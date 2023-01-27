@@ -84,4 +84,17 @@ insultFadeAnimation: {
     fadeDuration: float,
     fadeIn: float,
     fadeOut: float,
+},
+
+cardDetailText: {
+    font: string,
+    fontScale: float,
+    fontColor: Color,
+    background: string?,
+    separator: string,
+    spacing: float
+},
+
+keySelect: {
+    drawable: string
 }

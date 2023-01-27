@@ -3,22 +3,18 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
-import com.badlogic.gdx.utils.Align
-import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.*
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onClick
 import onj.value.OnjNamedObject
 import java.lang.Float.max
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 
 
 /**
@@ -34,17 +30,16 @@ class CoverArea(
     infoFont: BitmapFont,
     infoFontColor: Color,
     infoFontScale: Float,
-    private val stackSpacing: Float,
     private val areaSpacing: Float,
     private val cardScale: Float,
-    private val stackMinSize: Float,
-    detailFont: BitmapFont,
-    detailFontColor: Color,
-    detailBackground: Drawable,
-    detailFontScale: Float,
-    val detailOffset: Vector2,
-    val detailWidth: Float
-) : Widget() {
+    private val stackHeight: Float,
+    private val stackMinWidth: Float,
+    private val cardInitialX: Float,
+    private val cardInitialY: Float,
+    private val cardDeltaX: Float,
+    private val cardDeltaY: Float,
+    private val stackHookDrawable: Drawable
+) : WidgetGroup(), ZIndexGroup, ZIndexActor {
 
     /**
      * set by gameScreenController //TODO: find a better solution
@@ -52,8 +47,7 @@ class CoverArea(
     var slotDropConfig: Pair<DragAndDrop, OnjNamedObject>? = null
     private var isInitialised: Boolean = false
 
-    private val onjScreen: OnjScreen
-        get() = FourtyFive.curScreen!!
+    override var fixedZIndex: Int = 0
 
     private val stacks: Array<CoverStack> = Array(numStacks) {
         CoverStack(
@@ -62,24 +56,17 @@ class CoverArea(
             this,
             infoFont,
             infoFontColor,
-            null,
             infoFontScale,
-            stackSpacing,
             cardScale,
-            stackMinSize,
-            it
+            stackHeight,
+            stackMinWidth,
+            cardInitialX,
+            cardInitialY,
+            cardDeltaX,
+            cardDeltaY,
+            it,
+            stackHookDrawable
         )
-    }
-
-    private val hoverDetailActor: CustomLabel =
-        CustomLabel("", Label.LabelStyle(detailFont, detailFontColor), detailBackground)
-
-    init {
-        hoverDetailActor.setFontScale(detailFontScale)
-        hoverDetailActor.setAlignment(Align.center)
-        hoverDetailActor.isVisible = false
-        hoverDetailActor.fixedZIndex = Int.MAX_VALUE
-        hoverDetailActor.wrap = true
     }
 
     /**
@@ -131,49 +118,28 @@ class CoverArea(
     fun acceptsCover(slot: Int, turnNum: Int): Boolean = stacks[slot].acceptsCard(turnNum)
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
         if (!isInitialised) {
             initialise()
             isInitialised = true
             invalidateHierarchy()
         }
+        super.draw(batch, parentAlpha)
+    }
 
-        var contentHeight = 0f
-        for (stack in stacks) contentHeight += stack.height
-        contentHeight += areaSpacing * stacks.size - areaSpacing
-
-        var (curX, curY) = localToStageCoordinates(Vector2(0f, 0f))
-        curY += height / 2
-        curY += contentHeight / 2
-
-        var isCardHoveredOver = false
-
-        for (stack in stacks) {
-            curY -= stack.height
-            stack.width = max(stack.prefWidth, stack.minWidth)
-            stack.height = stack.prefHeight
-            if (!stack.inAnimation) stack.setPosition(curX + width / 2 - stack.width / 2, curY)
-            curY -= areaSpacing
-
-            for (card in stack.cards) if (card.actor.isHoveredOver) {
-                isCardHoveredOver = true
-                updateHoverDetailActor(card, stack)
-            }
+    override fun resortZIndices() {
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
-
-        hoverDetailActor.isVisible = isCardHoveredOver
     }
 
     private fun initialise() {
-        onjScreen.addActorToRoot(hoverDetailActor)
         var isFirst = true
         for (stack in stacks) {
-            stack.onjScreen = onjScreen
             val (dragAndDrop, dropOnj) = slotDropConfig!!
             val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
                 dropOnj.name,
                 dragAndDrop,
-                onjScreen,
                 stack,
                 dropOnj
             )
@@ -182,25 +148,35 @@ class CoverArea(
                 isFirst = false
             }
             dragAndDrop.addTarget(dropBehaviour)
-            onjScreen.addActorToRoot(stack)
+            addActor(stack)
             stack.parentWidth = width
         }
     }
 
-    private fun updateHoverDetailActor(card: Card, stack: CoverStack) {
-        hoverDetailActor.setText(card.description)
+    override fun layout() {
+        super.layout()
 
-        hoverDetailActor.width = detailWidth
-        hoverDetailActor.height = hoverDetailActor.prefHeight
+        var contentHeight = 0f
+        for (stack in stacks) contentHeight += stack.height
+        contentHeight += areaSpacing * stacks.size - areaSpacing
 
-        val (x, y) = stack.localToStageCoordinates(Vector2(card.actor.x, card.actor.y))
+        val curX = 0
+        var curY = height / 2 + contentHeight / 2
 
-        val toLeft = x + card.actor.width + detailWidth > onjScreen.stage.viewport.worldWidth
+//        var isCardHoveredOver = false
 
-        hoverDetailActor.setPosition(
-            if (toLeft) x - detailWidth else x + card.actor.width + detailOffset.x,
-            y + card.actor.height / 2 - hoverDetailActor.height / 2 + detailOffset.y
-        )
+        for (stack in stacks) {
+            curY -= stack.height
+            stack.width = max(stack.prefWidth, stack.minWidth)
+            stack.height = stack.prefHeight
+            if (!stack.inAnimation) stack.setPosition(curX + width / 2 - stack.width / 2, curY)
+            curY -= areaSpacing
+
+//            for (card in stack.cards) if (card.actor.isHoveredOver) {
+//                isCardHoveredOver = true
+////                updateHoverDetailActor(card, stack)
+//            }
+        }
     }
 
 }
@@ -215,17 +191,21 @@ class CoverStack(
     private val coverArea: CoverArea,
     detailFont: BitmapFont,
     detailFontColor: Color,
-    backgroundTexture: TextureRegion?,
     detailFontScale: Float,
-    spacing: Float,
     private val cardScale: Float,
-    private val minSize: Float,
-    val num: Int
-) : CustomHorizontalGroup(), ZIndexActor, AnimationActor {
+    private val fixedHeight: Float,
+    private val minWidth: Float,
+    private val cardInitialX: Float,
+    private val cardInitialY: Float,
+    private val cardDeltaX: Float,
+    private val cardDeltaY: Float,
+    val num: Int,
+    private val hookDrawable: Drawable
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, AnimationActor {
 
     override var inAnimation: Boolean = false
 
-    lateinit var onjScreen: OnjScreen
+    override var fixedZIndex: Int = 0
 
     /**
      * the theoretical maximum health of the stack
@@ -241,9 +221,11 @@ class CoverStack(
 
     private val _cards: MutableList<Card> = mutableListOf()
     private var lockedTurnNum: Int? = null
-    var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
+    private var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
 
     var parentWidth: Float = Float.MAX_VALUE
+
+    private var currentHoverDetail: CardDetailActor? = null
 
     /**
      * true if this is the active slot
@@ -264,12 +246,73 @@ class CoverStack(
         detailText.setFontScale(detailFontScale)
         updateText()
         addActor(detailText)
-        backgroundTexture?.let { background = TextureRegionDrawable(it) }
-        align(Align.left)
-        space(spacing)
         onClick {
             coverArea.makeActive(num)
         }
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        val hookWidth = width * 1f
+        val hookHeight = 1.5f
+        if (batch != null) hookDrawable.draw(
+            batch,
+            x + width / 2 - hookWidth / 2,
+            y + height - detailText.height - hookHeight,
+            hookWidth,
+            hookHeight
+        )
+        super.draw(batch, parentAlpha)
+        var wasCardHoveredOver = false
+        for (card in _cards) if (card.actor.isHoveredOver) {
+            card.actor.toFront()
+            wasCardHoveredOver = true
+            removeActor(currentHoverDetail)
+            addActor(card.actor.hoverDetailActor)
+            currentHoverDetail = card.actor.hoverDetailActor
+            currentHoverDetail!!.isVisible = true
+            invalidate()
+        }
+        if (!wasCardHoveredOver && currentHoverDetail != null) {
+            currentHoverDetail!!.isVisible = false
+            removeActor(currentHoverDetail)
+            currentHoverDetail = null
+            invalidate()
+        }
+    }
+
+    override fun layout() {
+        super.layout()
+        val cardWidth = if (_cards.isEmpty()) 0f else _cards[0].actor.prefWidth
+        width = (_cards.size * cardDeltaX + cardWidth).coerceAtLeast(minWidth)
+        height = fixedHeight
+        var curX = width / 2 - (_cards.size * cardDeltaX + cardWidth / 1.5f) / 2 + cardInitialX
+        var curY = cardInitialY
+        for (card in _cards) {
+            card.actor.setScale(cardScale)
+            card.actor.width = card.actor.prefWidth
+            card.actor.height = card.actor.prefHeight
+            card.actor.setPosition(curX, curY)
+            if (currentHoverDetail == card.actor.hoverDetailActor) {
+                val hoverDetail = currentHoverDetail!!
+                hoverDetail.forcedWidth = width
+                hoverDetail.setBounds(
+                    width,
+                    height / 2 - hoverDetail.prefHeight / 2,
+                    hoverDetail.forcedWidth,
+                    hoverDetail.prefHeight
+                )
+            }
+            curX += cardDeltaX
+            curY += cardDeltaY
+        }
+        detailText.width = detailText.prefWidth
+        detailText.height = detailText.prefHeight
+        detailText.setPosition(
+            width / 2 - detailText.width / 2,
+            height - detailText.height
+        )
+        resortZIndices()
     }
 
     /**
@@ -279,6 +322,7 @@ class CoverStack(
     fun damage(damage: Int): Int {
         currentHealth -= damage
         updateText()
+        invalidateHierarchy()
         if (currentHealth > 0) return 0
         val remaining = -currentHealth
         destroy()
@@ -298,6 +342,7 @@ class CoverStack(
         _cards.clear()
         lockedTurnNum = null
         updateText()
+        invalidateHierarchy()
     }
 
     /**
@@ -316,22 +361,28 @@ class CoverStack(
         if (_cards.isEmpty()) lockedTurnNum = turnNum
         _cards.add(card)
         card.actor.setScale(cardScale)
-        // this workaround is needed because HorizontalGroup doesn't consider scaling when calculating the preferred
-        // dimensions, causing the layout to break
         card.actor.reportDimensionsWithScaling = true
         card.actor.ignoreScalingWhenDrawing = true
         baseHealth += card.coverValue
         currentHealth += card.coverValue
         updateText()
-        onjScreen.removeActorFromRoot(card.actor)
         addActor(card.actor)
+        _cards.forEach { it.actor.forceEndHover() }
+        invalidateHierarchy()
+    }
+
+    override fun resortZIndices() {
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+        }
     }
 
     private fun updateText() {
-        detailText.setText("${if (isActive) "active" else "not active"}\n${currentHealth}/${baseHealth}")
+        detailText.setText("${if (isActive) "active" else "not active"} ${currentHealth}/${baseHealth}")
     }
 
     override fun getMinWidth(): Float {
-        return minSize
+        return minWidth
     }
 }

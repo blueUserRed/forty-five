@@ -1,4 +1,9 @@
 import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+
+use Common;
+use Screen;
+use Style;
 
 var worldWidth = 160.0;
 var worldHeight = 90.0;
@@ -6,8 +11,7 @@ var worldHeight = 90.0;
 
 viewport: $FitViewport {
     worldWidth: worldWidth,
-    worldHeight: worldHeight,
-    backgroundTexture: "background"
+    worldHeight: worldHeight
 },
 
 
@@ -20,65 +24,6 @@ var hoverBehaviour = $MouseHoverBehaviour {
     cursorName: "hand",
     disabled: null
 };
-
-children: [
-    $Table {
-        fillX: true,
-        fillY: true,
-//        debug: true
-        rows: [
-
-            {
-                cells: [
-                    {
-                        padLeft: 68.0,
-                        padTop: 11.0,
-                        element: $Label {
-                            align: "left",
-                            text: "Put the cards away. I think you've\nlost enough.",
-                            font: "red_wing",
-                            color: color.black,
-                            fontScale: 0.14
-                        }
-                    }
-                ]
-            },
-
-            {
-                cells: [
-                    {
-                        padLeft: 68.0,
-                        padTop: 7.0,
-                        element: $TemplateLabel {
-                            align: "left",
-                            template: "enemies killed: {stat.lastRun.enemiesDefeated}\nreserves used: {stat.lastRun.usedReserves}\n ",
-                            font: "red_wing",
-                            color: color.black,
-                            fontScale: 0.2
-                        }
-                    }
-                ]
-            },
-
-            {
-                cells: [
-                    {
-                        padLeft: 59.0,
-                        element: $Label {
-                            align: "center",
-                            text: "continue to main menu",
-                            font: "red_wing",
-                            color: color.black,
-                            fontScale: 0.2,
-                            behaviours: [ toMainScreenBehaviour, hoverBehaviour ]
-                        }
-                    }
-                ]
-            }
-
-        ]
-    }
-],
 
 assets: {
     textures: [
@@ -95,21 +40,60 @@ assets: {
             imageFile: "fonts/red_wing.png"
         }
 
-    ],
-    textureAtlases: [],
-    cursors: [],
-    postProcessors: [],
-    animations: [],
-    colorTextures: [],
-    particles: [],
+    ]
 },
 
 options: {
-    setFillParentOnRoot: true,
-    defaultCursor: {
-        useSystemCursor: true,
-        cursorName: "arrow"
+    background: "background",
+    inputMap: inputMaps.defaultInputMap
+},
+
+root: $Box {
+    properties: [
+        position("absolute"),
+        position(68.0, null, 6.5, null),
+        height(80.0),
+        width(85.0),
+    ]
+} children [
+
+
+    $Label {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 10.0, null)
+        ],
+        align: "left",
+        text: "Put the cards away. I think you've\nlost enough.",
+        font: "red_wing",
+        color: color.black,
+        fontScale: 0.14
     },
-    postProcessor: null,
-    controller: null
-}
+
+    $TemplateLabel {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 36.0, null)
+        ],
+        align: "left",
+        template: "enemies killed: {stat.lastRun.enemiesDefeated}\nreserves used: {stat.lastRun.usedReserves}",
+        font: "red_wing",
+        color: color.black,
+        fontScale: 0.2
+    },
+
+    $Label {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 70.0, null),
+            relWidth(100.0)
+        ],
+        align: "center",
+        text: "continue to main menu",
+        font: "red_wing",
+        color: color.black,
+        fontScale: 0.2,
+        behaviours: [ toMainScreenBehaviour, hoverBehaviour ],
+    }
+
+]
