@@ -1,8 +1,6 @@
 package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
-import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
@@ -23,7 +21,8 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
-import com.fourinachamber.fourtyfive.keyInput.KeyInputMapEntry
+import com.fourinachamber.fourtyfive.screen.ResourceBorrower
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -40,18 +39,18 @@ open class OnjScreen(
     private val fonts: Map<String, BitmapFont>,
     private val particles: Map<String, ParticleEffect>,
     private val postProcessors: Map<String, PostProcessor>,
-    children: List<Actor>,
     val viewport: Viewport,
     batch: Batch,
-    private val toDispose: List<Disposable>,
+    private val background: String?,
+//    private val toDispose: List<Disposable>,
+    private val useAssets: List<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
-    private val behaviours: List<Behaviour>,
     private val printFrameRate: Boolean,
     private val keyInputMap: KeyInputMap? = null
-) : ScreenAdapter() {
+) : ScreenAdapter(), ResourceBorrower {
 
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
 
@@ -79,9 +78,7 @@ open class OnjScreen(
             value?.resetReferenceTime()
         }
 
-    val stage: Stage = Stage(viewport, batch).apply {
-        children.forEach { addActor(it) }
-    }
+    val stage: Stage = Stage(viewport, batch)
 
     var screenController: ScreenController? = null
         set(value) {
@@ -96,7 +93,18 @@ open class OnjScreen(
         GraphicsConfig.keySelectDrawable()
     }
 
+    private val backgroundDrawable: Drawable? by lazy {
+        background?.let { ResourceManager.get<Drawable>(this, it) }
+    }
+
     init {
+        useAssets.forEach {
+            ResourceManager.borrow(this, it)
+        }
+        addEarlyRenderTask {
+            val drawable = backgroundDrawable ?: return@addEarlyRenderTask
+            drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
+        }
         addLateRenderTask {
             val highlight = highlightArea ?: return@addLateRenderTask
             keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
@@ -149,13 +157,13 @@ open class OnjScreen(
     fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
     fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
 
-    fun drawableOrError(name: String): Drawable = drawables[name] ?: throw RuntimeException(
-        "no drawable named $name"
-    )
+    fun drawableOrError(name: String): Drawable {
+        return ResourceManager.get(this, name)
+    }
 
-    fun fontOrError(name: String): BitmapFont = fonts[name] ?: throw RuntimeException(
-        "no font named $name"
-    )
+    fun fontOrError(name: String): BitmapFont {
+        return ResourceManager.get(this, name)
+    }
 
     fun postProcessorOrError(name: String): PostProcessor = postProcessors[name] ?: throw RuntimeException(
         "no post processor named $name"
@@ -295,7 +303,10 @@ open class OnjScreen(
     override fun dispose() {
         screenController?.end()
         stage.dispose()
-        toDispose.forEach(Disposable::dispose)
+//        toDispose.forEach(Disposable::dispose)
+        useAssets.forEach {
+            ResourceManager.giveBack(this, it)
+        }
         additionalDisposables.forEach(Disposable::dispose)
     }
 

@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fourtyfive.screen.general.PostProcessor
 import onj.value.*
@@ -65,31 +66,38 @@ object OnjReaderUtils {
             .value
             .forEach { atlasOnj ->
                 atlasOnj as OnjObject
-                val atlas = TextureAtlas(atlasOnj.get<String>("file"))
-                atlases.add(atlas)
-                atlasOnj
-                    .get<OnjArray>("defines")
-                    .value
-                    .map { (it as OnjString).value }
-                    .forEach {
-                        textures[it] = atlas.findRegion(it) ?: run {
-                            throw RuntimeException("unknown texture name in atlas: $it")
-                        }
-                    }
+                readAtlas(atlasOnj)
             }
         return textures to atlases
+    }
+
+    fun readAtlas(
+        atlasOnj: OnjObject,
+    ): Pair<TextureAtlas, Map<String, TextureRegion>> {
+        val textures = mutableMapOf<String, TextureRegion>()
+        val atlas = TextureAtlas(atlasOnj.get<String>("file"))
+        atlasOnj
+            .get<OnjArray>("defines")
+            .value
+            .map { (it as OnjString).value }
+            .forEach {
+                textures[it] = atlas.findRegion(it) ?: run {
+                    throw RuntimeException("unknown texture name in atlas: $it")
+                }
+            }
+        return atlas to textures
     }
 
     /**
      * reads an array of fonts with names
      */
-    fun readFonts(onj: OnjArray): Map<String, BitmapFont> = onj
+    fun readFonts(onj: OnjArray): Map<String, Pair<BitmapFont, Disposable?>> = onj
         .value
         .map { it as OnjNamedObject }
         .associate {
             when (it.name) {
-                "BitmapFont" -> it.get<String>("name") to readBitmapFont(it)
-                "FreeTypeFont" -> it.get<String>("name") to readFreeTypeFont(it)
+                "BitmapFont" -> it.get<String>("name") to (readBitmapFont(it) to null)
+                "FreeTypeFont" -> it.get<String>("name") to (readFreeTypeFont(it) to null)
                 "DistanceFieldFont" -> it.get<String>("name") to readDistanceFieldFont(it)
                 else -> throw RuntimeException("Unknown font type ${it.name}")
             }
@@ -132,7 +140,7 @@ object OnjReaderUtils {
     /**
      * reads a single distanceFieldFont
      */
-    fun readDistanceFieldFont(fontOnj: OnjNamedObject): BitmapFont {
+    fun readDistanceFieldFont(fontOnj: OnjObject): Pair<BitmapFont, Disposable> {
         val texture = Texture(Gdx.files.internal(fontOnj.get<String>("imageFile")), true)
         val useMipMapLinearLinear = fontOnj.getOr("useMipMapLinearLinear", false)
         texture.setFilter(
@@ -144,7 +152,7 @@ object OnjReaderUtils {
         font.setUseIntegerPositions(false)
         font.color = Color.valueOf(fontOnj.getOr("color", "0000ff"))
         font.data.markupEnabled = fontOnj.getOr("markupEnabled", false)
-        return font
+        return font to texture
     }
 
     /**

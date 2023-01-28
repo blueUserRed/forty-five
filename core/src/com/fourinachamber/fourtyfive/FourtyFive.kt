@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import onj.customization.OnjConfig
 
@@ -38,7 +39,7 @@ object FourtyFive : Game() {
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
-        curScreen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
+        curScreen = ScreenBuilder(Gdx.files.internal("screens/title_screen.onj")).build()
 //        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
     }
 
@@ -50,6 +51,7 @@ object FourtyFive : Game() {
             registerNameSpace("Screen", ScreenNamespace)
         }
         FourtyFiveLogger.init()
+        ResourceManager.init()
         SaveState.read()
         GraphicsConfig.init()
     }
@@ -57,6 +59,8 @@ object FourtyFive : Game() {
     override fun dispose() {
         FourtyFiveLogger.medium(logTag, "game closing")
         SaveState.write()
+        curScreen?.dispose()
+        ResourceManager.end()
         super.dispose()
     }
 

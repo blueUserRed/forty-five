@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
@@ -17,15 +16,15 @@ class StyleableOnjScreen(
     fonts: Map<String, BitmapFont>,
     particles: Map<String, ParticleEffect>,
     postProcessors: Map<String, PostProcessor>,
-    children: List<Actor>,
     viewport: Viewport,
     batch: Batch,
-    toDispose: List<Disposable>,
+    background: String?,
+    useAssets: List<String>,
     earlyRenderTasks: List<OnjScreen.() -> Unit>,
     lateRenderTasks: List<OnjScreen.() -> Unit>,
     private val styleTargets: List<StyleTarget>,
     namedActors: Map<String, Actor>,
-    behaviours: List<Behaviour>,
+//    behaviours: List<Behaviour>,
     printFrameRate: Boolean,
     keyInputMap: KeyInputMap?
 ) : OnjScreen(
@@ -34,15 +33,15 @@ class StyleableOnjScreen(
     fonts,
     particles,
     postProcessors,
-    children,
     viewport,
     batch,
-    toDispose,
+    background,
+//    toDispose,
+    useAssets,
     earlyRenderTasks,
     lateRenderTasks,
     mapOf(),
     namedActors,
-    behaviours,
     printFrameRate,
     keyInputMap
 ) {
