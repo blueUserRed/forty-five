@@ -1,0 +1,37 @@
+
+fonts: [
+
+    {
+        name: "red_wing",
+        fontFile: "fonts/red_wing.fnt",
+        imageFile: "fonts/red_wing.png"
+    }
+
+],
+
+textureAtlases: [
+
+    {
+        name: "title_screen_atlas",
+        file: "textures/packed/title_screen/title_screen.atlas",
+        regions: [
+            {
+                handle: "title_screen_background",
+                regionName: "background3"
+            },
+            {
+                handle: "logo",
+                regionName: "logo"
+            }
+        ]
+    }
+
+],
+
+textures: [],
+cursors: [],
+postProcessors: [],
+animations: [],
+colorTextures: [],
+ninepatches: [],
+particles: []

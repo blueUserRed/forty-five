@@ -274,57 +274,7 @@ $KeyAction {
 viewport: $Viewport,
 
 assets: {
-    textures?: {
-        name: string,
-        file: string
-    }[],
-    fonts?: $Font[],
-    textureAtlases?: {
-        file: string,
-        defines: string[]
-    }[],
-    cursors?: {
-        name: string,
-        file: string,
-        hotspotX: int,
-        hotspotY: int,
-    }[],
-    postProcessors?: {
-        name: string,
-        vertexShader: string,
-        fragmentShader: string,
-        timeOffset?: int,
-        uniforms: string[],
-        args: {
-            ...*
-        }?
-    }[],
-    animations?: {
-        name: string,
-        atlasFile: string,
-        frames?: string[],
-        initialFrame: int,
-        frameTime: int,
-    }[],
-    colorTextures?: {
-        name: string,
-        color: Color,
-    }[],
-    ninepatches?: {
-        name: string,
-        file: string,
-        left: int,
-        right: int,
-        top: int,
-        bottom: int,
-        scale: float
-    }[],
-    particles?: {
-        name: string,
-        particlePath: string,
-        textureDir: string,
-        scale: float,
-    }[],
+    useAssets: string[],
     styleFiles?: string[],
     styles?: {
         name: string,
