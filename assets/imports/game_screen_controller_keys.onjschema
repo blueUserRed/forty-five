@@ -51,7 +51,6 @@ var enemy = {
 };
 
 cardsFile: string,
-cardAtlasFile: string,
 cardHand: {
     actorName: string
 },

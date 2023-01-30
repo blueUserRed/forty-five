@@ -67,11 +67,11 @@ class Card(
     val coverValue: Int,
     val cost: Int,
     val effects: List<Effect>,
-    private val detailFont: BitmapFont,
-    private val detailFontColor: Color,
-    private val detailFontScale: Float,
-    private val detailBackground: Drawable?,
-    private val screen: OnjScreen
+    detailFont: BitmapFont,
+    detailFontColor: Color,
+    detailFontScale: Float,
+    detailBackground: Drawable?,
+    screen: OnjScreen
 ) {
 
     /**
@@ -419,11 +419,11 @@ class Card(
  */
 class CardActor(
     val card: Card,
-    private val font: BitmapFont,
-    private val fontColor: Color,
-    private val fontScale: Float,
-    private val detailBackground: Drawable?,
-    private val screen: OnjScreen
+    font: BitmapFont,
+    fontColor: Color,
+    fontScale: Float,
+    detailBackground: Drawable?,
+    screen: OnjScreen
 ) : CustomImageActor(card.drawable), ZIndexActor {
 
     override var fixedZIndex: Int = 0

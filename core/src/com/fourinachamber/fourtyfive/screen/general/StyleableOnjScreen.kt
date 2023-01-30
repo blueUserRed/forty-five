@@ -29,10 +29,6 @@ class StyleableOnjScreen(
     keyInputMap: KeyInputMap?
 ) : OnjScreen(
     drawables,
-    cursors,
-    fonts,
-    particles,
-    postProcessors,
     viewport,
     batch,
     background,

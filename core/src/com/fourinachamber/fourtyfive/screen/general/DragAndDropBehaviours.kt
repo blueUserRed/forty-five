@@ -1,9 +1,7 @@
 package com.fourinachamber.fourtyfive.screen.general
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fourtyfive.game.card.CardDragSource
 import com.fourinachamber.fourtyfive.game.card.CoverAreaDropTarget

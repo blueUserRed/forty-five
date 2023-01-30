@@ -3,7 +3,6 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -13,10 +12,8 @@ import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
-import io.github.orioncraftmc.meditate.enums.YogaAlign
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
-import io.github.orioncraftmc.meditate.enums.YogaJustify
 import ktx.actors.onEnter
 import ktx.actors.onExit
 
@@ -26,8 +23,8 @@ class CardDetailActor(
     initialDescription: String,
     initialStatsText: String,
     initialStatsChangedText: String,
-    private val font: BitmapFont,
-    private val fontColor: Color,
+    font: BitmapFont,
+    fontColor: Color,
     private val fontScale: Float,
     initialForcedWidth: Float,
     private val screen: OnjScreen,
