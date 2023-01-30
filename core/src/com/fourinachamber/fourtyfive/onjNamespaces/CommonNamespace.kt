@@ -4,10 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.fourinachamber.fourtyfive.utils.Utils
 import onj.builder.buildOnjObject
-import onj.customization.Namespace
-import onj.customization.Namespace.OnjNamespaceDatatypes
-import onj.customization.Namespace.OnjNamespaceVariables
-import onj.customization.Namespace.OnjNamespace
+import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.value.OnjString
 import onj.value.OnjValue

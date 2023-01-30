@@ -13,21 +13,7 @@ var buttonBaseScale = 0.2;
 var buttonHoverScale = 0.25;
 
 assets: {
-    fonts: [
-
-        $DistanceFieldFont {
-            name: "red_wing",
-            fontFile: "fonts/red_wing.fnt",
-            imageFile: "fonts/red_wing.png"
-        }
-
-    ],
-    textureAtlases: [
-        {
-            file: "textures/packed/title_screen/title_screen.atlas",
-            defines: [ "background3", "logo"]
-        }
-    ],
+    useAssets: [ "title_screen_background", "logo", "red_wing" ],
     styles: [
         {
             name: "button",
@@ -47,7 +33,7 @@ viewport: $FitViewport {
 },
 
 options: {
-    background: "background3",
+    background: "title_screen_background",
     inputMap: inputMaps.defaultInputMap
 },
 

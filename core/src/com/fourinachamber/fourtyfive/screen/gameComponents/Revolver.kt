@@ -5,17 +5,11 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.Align
-import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.*
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
-import com.fourinachamber.fourtyfive.utils.plus
 import ktx.actors.contains
 import onj.value.OnjNamedObject
 import kotlin.math.cos
@@ -28,7 +22,8 @@ import kotlin.math.sin
  */
 class Revolver(
     private val background: Drawable?,
-    private val radiusExtension: Float
+    private val radiusExtension: Float,
+    private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
@@ -68,9 +63,6 @@ class Revolver(
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
 
-    private val onjScreen: OnjScreen
-        get() = FourtyFive.curScreen!!
-
     /**
      * the slots of the revolver
      */
@@ -108,7 +100,7 @@ class Revolver(
      */
     fun removeCard(card: Card) {
         for (slot in slots) if (slot.card === card) {
-            if (card.actor in onjScreen.stage.root) onjScreen.removeActorFromRoot(card.actor)
+            if (card.actor in screen.stage.root) screen.removeActorFromRoot(card.actor)
             setCard(slot.num, null)
             removeActor(card.actor)
             return

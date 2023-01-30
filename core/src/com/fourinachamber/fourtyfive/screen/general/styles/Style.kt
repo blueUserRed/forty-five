@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fourtyfive.experimental.OnjStyleProperty
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.StyleableOnjScreen
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
@@ -136,7 +136,7 @@ sealed class StyleCondition {
 
 sealed class StyleActorReference {
 
-    class Self() : StyleActorReference() {
+    object Self : StyleActorReference() {
 
         override fun get(node: YogaNode, actor: Actor, screen: StyleableOnjScreen): Pair<Actor, YogaNode> {
             return actor to node

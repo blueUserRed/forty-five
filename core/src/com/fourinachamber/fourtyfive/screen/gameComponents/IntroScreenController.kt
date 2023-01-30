@@ -3,14 +3,14 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.FourtyFive
-import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.screen.general.ScreenController
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.plus
@@ -22,7 +22,6 @@ import kotlin.math.pow
  */
 class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
 
-    private val cardAtlasFile = onj.get<String>("cardAtlasFile")
     private val appearActorName = onj.get<String>("appearActor")
     private val nextScreen = onj.get<String>("nextScreen")
 
@@ -46,8 +45,14 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
 
         appearActor = onjScreen.namedActorOrError(appearActorName)
 
-        val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
-        textures = cardAtlas.regions.toList()
+        textures = ResourceManager
+            .resources
+            .filter {
+                it is ResourceManager.AtlasRegionResource &&
+                        it.atlasResourceHandle == ResourceManager.cardAtlasResourceHandle
+            }
+            .map { ResourceManager.get(onjScreen, it.handle) }
+
         onjScreen.addLateRenderTask(renderTask)
 
         timeline = Timeline.timeline {
@@ -66,7 +71,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             action { appearActor.isVisible = true }
             delay(2000)
             action {
-                FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(nextScreen)).build()
+                FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(nextScreen)).build())
             }
         }
 

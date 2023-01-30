@@ -1,8 +1,6 @@
-package com.fourinachamber.fourtyfive.experimental
+package com.fourinachamber.fourtyfive.onjNamespaces
 
 import com.badlogic.gdx.utils.Align
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjInterpolation
 import com.fourinachamber.fourtyfive.screen.general.styles.*
 import io.github.orioncraftmc.meditate.enums.*
 import onj.value.OnjValue
@@ -337,7 +335,7 @@ object StyleNamespace {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "params: []")
-    fun self(): OnjStyleActorRef = OnjStyleActorRef(StyleActorReference.Self())
+    fun self(): OnjStyleActorRef = OnjStyleActorRef(StyleActorReference.Self)
 
     @RegisterOnjFunction(schema = "use Style; params: [StyleActorRef]")
     fun hover(actorRef: OnjStyleActorRef): OnjStyleCondition {

@@ -2,7 +2,9 @@ package com.fourinachamber.fourtyfive.game.enemy
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.value.OnjNamedObject
@@ -43,11 +45,11 @@ abstract class EnemyAction {
         val damage: Int
     ) : EnemyAction() {
 
-        override val indicatorDrawable: Drawable = onjScreen.drawableOrError(onj.get<String>("indicatorTexture"))
+        override val indicatorDrawable: Drawable = ResourceManager.get(onjScreen, onj.get<String>("indicatorTexture"))
 
         override val descriptionText: String = damage.toString()
 
-        override fun execute(): Timeline = enemy.damagePlayer(damage)
+        override fun execute(): Timeline = enemy.damagePlayer(damage, FourtyFive.currentGame!!)
 
         override fun toString(): String {
             return "DamagePlayer(damage=$damage)"
@@ -60,12 +62,12 @@ abstract class EnemyAction {
     class AddCover(
         val enemy: Enemy,
         onj: OnjNamedObject,
-        onjScreen: OnjScreen,
+        private val onjScreen: OnjScreen,
         override val indicatorScale: Float,
         val coverValue: Int
     ) : EnemyAction() {
 
-        override val indicatorDrawable: Drawable = onjScreen.drawableOrError(onj.get<String>("indicatorTexture"))
+        override val indicatorDrawable: Drawable = ResourceManager.get(onjScreen, onj.get<String>("indicatorTexture"))
         override val descriptionText: String = coverValue.toString()
 
         override fun execute(): Timeline = Timeline.timeline {
@@ -73,7 +75,8 @@ abstract class EnemyAction {
                 enemy.actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
                 coverValue.toString(),
                 true,
-                true
+                true,
+                onjScreen
             )
 
             action { enemy.currentCover += coverValue }
@@ -95,17 +98,18 @@ abstract class EnemyAction {
         val insult: String,
         val enemy: Enemy,
         onj: OnjNamedObject,
-        onjScreen: OnjScreen,
+        private val onjScreen: OnjScreen,
         override val indicatorScale: Float
         ) : EnemyAction() {
 
-        override val indicatorDrawable: Drawable = onjScreen.drawableOrError(onj.get<String>("indicatorTexture"))
+        override val indicatorDrawable: Drawable = ResourceManager.get(onjScreen, onj.get<String>("indicatorTexture"))
         override val descriptionText: String  = ""
 
         override fun execute(): Timeline = Timeline.timeline {
             val fadeAnimation = GraphicsConfig.insultFadeAnimation(
                 enemy.actor.localToStageCoordinates(Vector2(0f, 0f)),
-                insult
+                insult,
+                onjScreen
             )
             delayUntil { fadeAnimation.isFinished() }
             includeAction(fadeAnimation)

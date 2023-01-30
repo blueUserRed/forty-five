@@ -26,25 +26,11 @@ var hoverBehaviour = $MouseHoverBehaviour {
 };
 
 assets: {
-    textures: [
-        {
-            name: "background",
-            file: "textures/screens/loose_screen_background.png"
-        }
-    ],
-    fonts: [
-
-        $DistanceFieldFont {
-            name: "red_wing",
-            fontFile: "fonts/red_wing.fnt",
-            imageFile: "fonts/red_wing.png"
-        }
-
-    ]
+    useAssets: [ "loose_screen_background", "red_wing" ]
 },
 
 options: {
-    background: "background",
+    background: "loose_screen_background",
     inputMap: inputMaps.defaultInputMap
 },
 
