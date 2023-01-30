@@ -1,7 +1,10 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
@@ -46,7 +49,7 @@ abstract class StatusEffect(
     abstract fun copy(): StatusEffect
 
     fun initIcon(gameController: GameController) {
-        val texture = gameController.curScreen.drawableOrError(iconTextureName)
+        val texture = ResourceManager.get<Drawable>(gameController.curScreen, iconTextureName)
         icon = CustomImageActor(texture)
         icon.setScale(iconScale)
         icon.reportDimensionsWithScaling = true

@@ -13,16 +13,6 @@ viewport: $FitViewport {
     worldHeight: worldHeight
 },
 
-//var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
-//    screenPath: "screens/title_screen.onj"
-//};
-//
-//var hoverBehaviour = $MouseHoverBehaviour {
-//    useSystemCursor: true,
-//    cursorName: "hand",
-//    disabled: null,
-//};
-
 root: $Box {
     properties: [
         alignItems("center"),
@@ -43,44 +33,13 @@ root: $Box {
 
 ],
 
-//children: [
-//
-//    $VerticalGroup {
-//        align: "center",
-//        expand: true,
-////        debug: true
-//        children: [
-//            $Image {
-//                name: "logo",
-//                visible: false,
-//                textureName: "logo",
-//                reportDimensionsWithScaling: true,
-//                scaleX: 0.13,
-//                scaleY: 0.13,
-//            //        width: !worldWidth
-//            }
-//        ]
-//    }
-//
-//],
-
 assets: {
-    textures: [
-        {
-            name: "logo",
-            file: "textures/title_screen/logo.png"
-        }
-    ],
-    colorTextures: [
-        {
-            name: "background",
-            color: color.beige
-        }
-    ]
+    useCardAtlas: true,
+    useAssets: [ "logo", "beige_texture" ]
 },
 
 options: {
-    background: "background",
+    background: "beige_texture",
     inputMap: inputMaps.defaultInputMap,
     screenController: $IntroScreenController {
         cardAtlasFile: "cards/generated/cards.atlas",

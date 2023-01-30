@@ -90,7 +90,7 @@ open class OnjScreen(
     var highlightArea: Rectangle? = null
 
     private val keySelectDrawable: Drawable by lazy {
-        GraphicsConfig.keySelectDrawable()
+        GraphicsConfig.keySelectDrawable(this)
     }
 
     private val backgroundDrawable: Drawable? by lazy {
@@ -157,25 +157,25 @@ open class OnjScreen(
     fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
     fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
 
-    fun drawableOrError(name: String): Drawable {
-        return ResourceManager.get(this, name)
-    }
-
-    fun fontOrError(name: String): BitmapFont {
-        return ResourceManager.get(this, name)
-    }
-
-    fun postProcessorOrError(name: String): PostProcessor = postProcessors[name] ?: throw RuntimeException(
-        "no post processor named $name"
-    )
-
-    fun particleOrError(name: String): ParticleEffect = particles[name] ?: throw RuntimeException(
-        "no particle named $name"
-    )
-
-    fun cursorOrError(name: String): Cursor = cursors[name] ?: throw RuntimeException(
-        "no cursor named $name"
-    )
+//    fun drawableOrError(name: String): Drawable {
+//        return ResourceManager.get(this, name)
+//    }
+//
+//    fun fontOrError(name: String): BitmapFont {
+//        return ResourceManager.get(this, name)
+//    }
+//
+//    fun postProcessorOrError(name: String): PostProcessor = postProcessors[name] ?: throw RuntimeException(
+//        "no post processor named $name"
+//    )
+//
+//    fun particleOrError(name: String): ParticleEffect = particles[name] ?: throw RuntimeException(
+//        "no particle named $name"
+//    )
+//
+//    fun cursorOrError(name: String): Cursor = cursors[name] ?: throw RuntimeException(
+//        "no cursor named $name"
+//    )
 
     fun namedActorOrError(name: String): Actor = namedActors[name] ?: throw RuntimeException(
         "no actor named $name"

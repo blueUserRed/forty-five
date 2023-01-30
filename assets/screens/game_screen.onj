@@ -1,5 +1,6 @@
 
 import "config/game_config.onj" as gameConfig;
+import "config/graphics_config.onj" as graphicsConfig;
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 
@@ -20,129 +21,33 @@ var cardZIndicesEnd = cardZIndicesStart + 100;
 var overlayZIndex = 500;
 
 assets: {
-    fonts: [
+    useCardAtlas: true,
+    useAssets: [
 
-        $DistanceFieldFont {
-            name: "vanilla_whale",
-            fontFile: "fonts/vanilla_whale.fnt",
-            imageFile: "fonts/vanilla_whale.png"
-        },
+        "vanilla_whale", "red_wing",
 
-        $DistanceFieldFont {
-            name: "red_wing",
-            fontFile: "fonts/red_wing.fnt",
-            imageFile: "fonts/red_wing.png"
-        }
+        "game_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
+        "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
+        "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover",
 
-    ],
-    textureAtlases: [
+        "revolver_cursor",
 
-        {
-            file: "textures/packed/game_screen/game_screen.atlas",
-            defines: [
-                "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
-                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum",
-                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon",
-                "poison_icon", "draw_bullet", "draw_cover"
-            ]
-        }
+        "earthquake_shader",
 
-    ],
-    cursors: [
-        {
-            name: "cursor",
-            file: "textures/cursors/revolver.png",
-            hotspotX: 0,
-            hotspotY: 0
-        }
-    ],
-    postProcessors: [
-        {
-            name: "earthquake",
-            vertexShader: "shaders/earthquake/earthquake.vert",
-            fragmentShader: "shaders/earthquake/earthquake.frag",
-            timeOffset: 2_000,
-            uniforms: [ "time" ],
-            args: null
-        },
-        {
-            name: "default",
-            vertexShader: "shaders/default/default.vert",
-            fragmentShader: "shaders/default/default.frag",
-            timeOffset: 0,
-            uniforms: [],
-            args: null
-        },
-        {
-            name: "vignette",
-            vertexShader: "shaders/vignette/vignette.vert",
-            fragmentShader: "shaders/vignette/vignette.frag",
-            timeOffset: 0,
-            uniforms: [ "time", "resolution" ],
-            args: {
-                color: color("ff0000"),
-                speed: 0.0,
-                movement: 1.0,
-                minMovement: 0.3
-            }
-        }
-    ],
-    colorTextures: [
-        {
-            name: "transparent_black",
-            color: color.backgroundTransparent
-        },
-        {
-            name: "black",
-            color: color.black
-        },
-        {
-            name: "white",
-            color: color.white
-        }
-    ],
-    particles: [
-        {
-            name: "dust",
-            particlePath: "particles/dust.particle",
-            textureDir: "textures/particles",
-            scale: 0.1
-        },
-        {
-            name: "dust_explosion",
-            particlePath: "particles/dust_explosion.particle",
-            textureDir: "textures/particles",
-            scale: 0.1
-        }
-    ],
-    ninepatches: [
-//        {
-//            name: "hover_detail_background",
-//            file: "textures/ninepatches/hover_detail_background.png",
-//            top: 14,
-//            bottom: 14,
-//            left: 14,
-//            right: 14,
-//            scale: 0.1
-//        },
-        {
-            name: "cover_hook",
-            file: "textures/ninepatches/cover_hook.png",
-            top: 1,
-            bottom: 1,
-            left: 6,
-            right: 6,
-            scale: 0.2
-        },
-        {
-            name: "key_select_frame",
-            file: "textures/ninepatches/key_select_frame.png",
-            top: 3,
-            bottom: 3,
-            left: 3,
-            right: 3,
-            scale: 0.2
-        }
+        "transparent_black_texture",
+
+        "cover_hook", "key_select_frame",
+
+        ...(graphicsConfig.bannerAnimationUsedAssets),
+        ...(graphicsConfig.statusEffectsUsedAssets),
+        ...(graphicsConfig.damageOverlayUsedAssets),
+        ...(graphicsConfig.destroyCardUsedAssets),
+        ...(graphicsConfig.coverStackUsedAssets),
+        ...(graphicsConfig.textAnimationUsedAssets),
+        ...(graphicsConfig.cardDetailUsedAssets),
+        ...(graphicsConfig.keySelectUsedAssets),
+        ...(graphicsConfig.enemyUsedAssets)
+
     ]
 },
 
@@ -179,7 +84,7 @@ var controller = $GameScreenController {
     enemies: gameConfig.enemyConfig.enemies,
     cardDrawActor: "card_draw_table",
     playerLivesLabelName: "player_lives_label",
-    shootButtonName: "shoot_button",
+    shootButtonName: "shoot_button_texture",
     endTurnButtonName: "end_turn_button",
     reservesLabelName: "reserves_label",
     destroyCardInstructionActor: "destroy_card_instruction_label",
@@ -194,7 +99,7 @@ var controller = $GameScreenController {
 };
 
 options: {
-    background: "background",
+    background: "game_screen_background",
     screenController: controller,
     inputMap: [
         ...(inputMaps.cardHandSelectionInputMap),
@@ -213,7 +118,7 @@ var buttonHoverBehaviour = $MouseHoverBehaviour {
 
 var revolver = $Revolver {
     name: "revolver",
-    slotTexture: "revolver_slot",
+    slotTexture: "revolver_slot_texture",
     font: "vanilla_whale",
     fontColor: color.white,
     fontScale: 0.25,
@@ -259,7 +164,7 @@ var coverArea = $CoverArea {
     infoFont: "vanilla_whale",
     infoFontColor: color.black,
     infoFontScale: 0.1,
-//    stackBackgroundTexture: "transparent_black",
+//    stackBackgroundTexture: "transparent_black_texture",
 //    stackSpacing: 2.0,
     areaSpacing: 4.0,
     cardScale: cardScale * 0.8,
@@ -282,28 +187,28 @@ var coverArea = $CoverArea {
 };
 
 var shootButton = $Image {
-    name: "shoot_button",
-    textureName: "shoot",
+    name: "shoot_button_texture",
+    textureName: "shoot_button_texture",
     reportDimensionsWithScaling: true,
     scaleX: 0.03,
     scaleY: 0.03,
     behaviours: [
         $OnClickChangePostProcessorBehaviour {
-            postProcessor: "earthquake",
+            postProcessor: "earthquake_shader",
             duration: 70,
             setOnlyIfNoPostProcessorIsSet: false
         },
         $ShootButtonBehaviour { },
         buttonHoverBehaviour,
         $OnHoverChangeTextureBehaviour {
-            hoverTexture: "shoot_hover"
+            hoverTexture: "shoot_button_texture_hover"
         }
     ]
 };
 
 var endTurnButton = $Image {
     name: "end_turn_button",
-    textureName: "end_turn",
+    textureName: "end_turn_button_texture",
     reportDimensionsWithScaling: true,
     scaleX: 0.03,
     scaleY: 0.03,
@@ -311,7 +216,7 @@ var endTurnButton = $Image {
         $EndTurnButtonBehaviour { },
         buttonHoverBehaviour,
         $OnHoverChangeTextureBehaviour {
-            hoverTexture: "end_turn_hover"
+            hoverTexture: "end_turn_button_texture_hover"
         }
     ]
 };
@@ -322,7 +227,7 @@ var playerLivesLabel = $TemplateLabel {
     template: "{game.curPlayerLives}/{game.basePlayerLives}",
     fontScale: 0.09,
     color: color.white,
-//    backgroundTexture: "black",
+//    backgroundTexture: "black_texture",
 //    debug: true
 };
 
@@ -332,7 +237,7 @@ var reservesLabel = $TemplateLabel {
     template: "{game.curReserves}/{game.baseReserves}",
     fontScale: 0.09,
     color: color.white,
-//    backgroundTexture: "black"
+//    backgroundTexture: "black_texture"
 };
 
 var destroyCardInstructionActor = $Label {
@@ -348,7 +253,7 @@ var destroyCardInstructionActor = $Label {
 var drawCardActor = $Box {
     properties: [
         position("absolute"),
-        background("transparent_black"),
+        background("transparent_black_texture"),
         flexDirection("column"),
         alignItems("center"),
         relWidth(100.0),
@@ -470,7 +375,7 @@ var gameScreen = $Box {
                 relHeight(90.0)
             ],
             reportDimensionsWithScaling: true,
-            textureName: "heart",
+            textureName: "heart_texture",
             scaleX: 0.003,
             scaleY: 0.003,
 //            debug: true
@@ -546,7 +451,7 @@ var gameScreen = $Box {
                 } children [
                     $Image {
                         reportDimensionsWithScaling: true,
-                        textureName: "reserves",
+                        textureName: "reserves_texture",
                         scaleX: 0.05,
                         scaleY: 0.05
                     },

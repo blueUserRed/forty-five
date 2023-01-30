@@ -11,6 +11,7 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -174,13 +175,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
-        val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
-
-        for (region in cardAtlas.regions) {
-            curScreen.addDrawable("${Card.cardTexturePrefix}${region.name}", TextureRegionDrawable(region))
-        }
-
-        curScreen.addDisposable(cardAtlas)
+//        val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
+//
+//        for (region in cardAtlas.regions) {
+//            curScreen.addDrawable("${Card.cardTexturePrefix}${region.name}", TextureRegionDrawable(region))
+//        }
+//
+//        curScreen.addDisposable(cardAtlas)
 
         cardPrototypes = Card
             .getFrom(onj.get<OnjArray>("cards"), curScreen, ::initCard)
@@ -491,7 +492,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val timeline = Timeline.timeline {
 
             includeLater(
-                { enemy.damagePlayer(shotEmptyDamage) },
+                { enemy.damagePlayer(shotEmptyDamage, this@GameController) },
                 { cardToShoot == null }
             )
 
@@ -711,14 +712,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun win() {
         FourtyFiveLogger.debug(logTag, "player won")
-        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(winScreen)).build()
+        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(winScreen)).build())
         SaveState.write()
     }
 
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()
-        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(looseScreen)).build()
+        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(looseScreen)).build())
     }
 
     private fun onAllCardsDrawn() = changePhase(currentPhase.onAllCardsDrawn())
@@ -800,7 +801,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameController: GameController) = with(gameController) {
 
                 if (destroyCardPostProcessor == null) {
-                    destroyCardPostProcessor = GraphicsConfig.postProcessor("destroyCardPostProcessor")
+                    destroyCardPostProcessor = ResourceManager.get(gameController.curScreen, "destroyCardPostProcessor")
                 }
 
                 showDestroyCardInstructionActor()
@@ -862,8 +863,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             override fun transitionTo(gameController: GameController) = with(gameController) {
                 val timeline = Timeline.timeline {
 
-                    val enemyBannerAnim = GraphicsConfig.bannerAnimation(false)
-                    val playerBannerAnim = GraphicsConfig.bannerAnimation(true)
+                    val screen = gameController.curScreen
+
+                    val enemyBannerAnim = GraphicsConfig.bannerAnimation(false, screen)
+                    val playerBannerAnim = GraphicsConfig.bannerAnimation(true, screen)
 
                     includeAction(enemyBannerAnim)
                     delay(GraphicsConfig.bufferTime)

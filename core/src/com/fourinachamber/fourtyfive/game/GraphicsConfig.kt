@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.ActorActionTimelineAction
@@ -36,14 +37,8 @@ object GraphicsConfig {
         readConstants(config)
     }
 
-    fun postProcessor(name: String): PostProcessor {
-        val screen = FourtyFive.curScreen!!
-        return screen.postProcessorOrError(postProcessors[name]!!)
-    }
-
-    fun damageOverlay(): Timeline.TimelineAction {
-        val screen = FourtyFive.curScreen!!
-        val overlayActor = CustomImageActor(screen.drawableOrError(damageOverlayTexture))
+    fun damageOverlay(screen: OnjScreen): Timeline.TimelineAction {
+        val overlayActor = CustomImageActor(ResourceManager.get(screen, damageOverlayTexture))
         val viewport = screen.stage.viewport
         val anim = FadeInAndOutAnimation(
             0f, 0f,
@@ -86,14 +81,15 @@ object GraphicsConfig {
         }
     }
 
-    fun coverStackParticles(destroyed: Boolean, coverStack: CoverStack): Timeline.TimelineAction {
+    fun coverStackParticles(destroyed: Boolean, coverStack: CoverStack, screen: OnjScreen): Timeline.TimelineAction {
         return object : Timeline.TimelineAction() {
 
             var particle: ParticleEffect? = null
 
             override fun start(timeline: Timeline) {
                 super.start(timeline)
-                particle = FourtyFive.curScreen!!.particleOrError(
+                particle = ResourceManager.get<ParticleEffect>(
+                    screen,
                     if (destroyed) coverStackDestroyedParticles else coverStackDamagedParticles
                 )
 
@@ -115,7 +111,7 @@ object GraphicsConfig {
                     )
                 }
 
-                FourtyFive.curScreen!!.addActorToRoot(particleActor)
+                screen.addActorToRoot(particleActor)
                 particleActor.start()
             }
 
@@ -141,11 +137,10 @@ object GraphicsConfig {
         return ActorActionTimelineAction(action, actor)
     }
 
-    fun bannerAnimation(isPlayer: Boolean): GameAnimationTimelineAction {
-        val onjScreen = FourtyFive.curScreen!!
+    fun bannerAnimation(isPlayer: Boolean, screen: OnjScreen): GameAnimationTimelineAction {
         val anim = BannerAnimation(
-            onjScreen.drawableOrError(if (isPlayer) playerTurnBannerName else enemyTurnBannerName),
-            onjScreen,
+            ResourceManager.get(screen, if (isPlayer) playerTurnBannerName else enemyTurnBannerName),
+            screen,
             bannerAnimDuration,
             bannerScaleAnimDuration,
             bannerBeginScale,
@@ -154,15 +149,14 @@ object GraphicsConfig {
         return GameAnimationTimelineAction(anim)
     }
 
-    fun insultFadeAnimation(pos: Vector2, insult: String): GameAnimationTimelineAction {
-        val curScreen = FourtyFive.curScreen!!
+    fun insultFadeAnimation(pos: Vector2, insult: String, screen: OnjScreen): GameAnimationTimelineAction {
         val anim = FadeInAndOutTextAnimation(
             pos.x, pos.y,
             insult,
             fadeFontColor,
             fadeFontScale,
-            curScreen.fontOrError(fadeFontName),
-            curScreen,
+            ResourceManager.get(screen, fadeFontName),
+            screen,
             fadeDuration,
             fadeIn,
             fadeOut
@@ -174,31 +168,34 @@ object GraphicsConfig {
         pos: Vector2,
         text: String,
         raise: Boolean,
-        positive: Boolean
+        positive: Boolean,
+        screen: OnjScreen
     ): GameAnimationTimelineAction {
-        val curScreen = FourtyFive.curScreen!!
         val anim = TextAnimation(
             pos.x, pos.y,
             text,
             if (positive) numChangePositiveFontColor else numChangeNegativeFontColor,
             numChangeFontScale,
-            curScreen.fontOrError(numChangeFontName),
+            ResourceManager.get(screen, numChangeFontName),
             if (raise) numChangeRaiseDistance else numChangeSinkDistance,
             numChangeStartFadeoutAt,
-            curScreen,
+            screen,
             numChangeDuration
         )
         return GameAnimationTimelineAction(anim)
     }
 
-    fun cardDetailFont(): BitmapFont = FourtyFive.curScreen!!.fontOrError(cardDetailFont)
+    fun cardDetailFont(screen: OnjScreen): BitmapFont = ResourceManager.get(screen, cardDetailFont)
     fun cardDetailFontScale(): Float = cardDetailFontScale
     fun cardDetailFontColor(): Color = cardDetailFontColor
-    fun cardDetailBackground(): Drawable? = cardDetailBackground?.let { FourtyFive.curScreen!!.drawableOrError(it) }
-    fun cardDetailSeparator(): Drawable = FourtyFive.curScreen!!.drawableOrError(cardDetailSeparator)
+    fun cardDetailSeparator(screen: OnjScreen): Drawable = ResourceManager.get(screen, cardDetailSeparator)
     fun cardDetailSpacing(): Float = cardDetailSpacing
 
-    fun keySelectDrawable(): Drawable = FourtyFive.curScreen!!.drawableOrError(keySelectDrawable)
+    fun cardDetailBackground(screen: OnjScreen): Drawable? {
+        return cardDetailBackground?.let { ResourceManager.get(screen, it) }
+    }
+
+    fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below

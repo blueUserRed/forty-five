@@ -10,6 +10,7 @@ import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardDetailActor
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -69,7 +70,8 @@ class Card(
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
     private val detailFontScale: Float,
-    private val detailBackground: Drawable?
+    private val detailBackground: Drawable?,
+    private val screen: OnjScreen
 ) {
 
     /**
@@ -80,7 +82,7 @@ class Card(
     /**
      * the actor for representing the card on the screen
      */
-    val actor = CardActor(this, detailFont, detailFontColor, detailFontScale, detailBackground)
+    val actor = CardActor(this, detailFont, detailFontColor, detailFontScale, detailBackground, screen)
 
     //TODO: isDraggable and inAnimation should be in the actor class
 
@@ -336,7 +338,7 @@ class Card(
             val card = Card(
                 name,
                 onj.get<String>("title"),
-                onjScreen.drawableOrError("$cardTexturePrefix$name"),
+                ResourceManager.get(onjScreen, "$cardTexturePrefix$name"),
                 onj.get<String>("flavourText"),
                 onj.get<String>("description"),
                 cardTypeOrError(onj),
@@ -348,10 +350,11 @@ class Card(
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
 
-                GraphicsConfig.cardDetailFont(),
+                GraphicsConfig.cardDetailFont(onjScreen),
                 GraphicsConfig.cardDetailFontColor(),
                 GraphicsConfig.cardDetailFontScale(),
-                GraphicsConfig.cardDetailBackground()
+                GraphicsConfig.cardDetailBackground(onjScreen),
+                onjScreen
             )
 
             for (effect in card.effects) effect.card = card
@@ -419,7 +422,8 @@ class CardActor(
     private val font: BitmapFont,
     private val fontColor: Color,
     private val fontScale: Float,
-    private val detailBackground: Drawable?
+    private val detailBackground: Drawable?,
+    private val screen: OnjScreen
 ) : CustomImageActor(card.drawable), ZIndexActor {
 
     override var fixedZIndex: Int = 0
@@ -450,7 +454,8 @@ class CardActor(
         fontColor = fontColor,
         fontScale = fontScale,
         initialForcedWidth = 0f,
-        initialBackground = detailBackground
+        initialBackground = detailBackground,
+        screen = screen
     )
 
     private val destroyModeOnClickListener: EventListener = EventListener { event ->

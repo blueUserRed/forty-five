@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
@@ -48,13 +49,13 @@ class BackgroundProperty(
     override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) = when (actor) {
         //TODO: put the background in some interface
         is CustomImageActor -> actor.drawable = backgroundName?.let {
-            screen.drawableOrError(backgroundName)
+            ResourceManager.get(screen, backgroundName)
         }
         is CustomLabel -> actor.background = backgroundName?.let {
-            screen.drawableOrError(backgroundName)
+            ResourceManager.get(screen, backgroundName)
         }
         is CustomFlexBox -> actor.background = backgroundName?.let {
-            screen.drawableOrError(backgroundName)
+            ResourceManager.get(screen, backgroundName)
         }
         else -> throw RuntimeException(
             "background property cannot be applied to ${actor::class.simpleName}"

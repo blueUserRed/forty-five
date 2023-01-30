@@ -15,6 +15,7 @@ import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.SaveState
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.between
@@ -60,7 +61,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     override fun init(onjScreen: OnjScreen) {
         this.onjScreen = onjScreen
 
-        emptyFont = onjScreen.fontOrError(onj.get<String>("emptyFont"))
+        emptyFont = ResourceManager.get(onjScreen, onj.get<String>("emptyFont"))
 
         val cardSelectionActor = onjScreen.namedActorOrError(cardSelectionActorName)
         if (cardSelectionActor !is WidgetGroup) {
@@ -203,7 +204,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         FourtyFiveLogger.debug(logTag, "chose card $card")
         SaveState.drawCard(card)
         SaveState.write()
-        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(nextScreen)).build()
+        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(nextScreen)).build())
     }
 
     companion object {

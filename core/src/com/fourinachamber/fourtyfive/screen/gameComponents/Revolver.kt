@@ -28,7 +28,8 @@ import kotlin.math.sin
  */
 class Revolver(
     private val background: Drawable?,
-    private val radiusExtension: Float
+    private val radiusExtension: Float,
+    private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
@@ -68,9 +69,6 @@ class Revolver(
     private var prefWidth: Float = 0f
     private var prefHeight: Float = 0f
 
-    private val onjScreen: OnjScreen
-        get() = FourtyFive.curScreen!!
-
     /**
      * the slots of the revolver
      */
@@ -108,7 +106,7 @@ class Revolver(
      */
     fun removeCard(card: Card) {
         for (slot in slots) if (slot.card === card) {
-            if (card.actor in onjScreen.stage.root) onjScreen.removeActorFromRoot(card.actor)
+            if (card.actor in screen.stage.root) screen.removeActorFromRoot(card.actor)
             setCard(slot.num, null)
             removeActor(card.actor)
             return
