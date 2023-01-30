@@ -41,7 +41,7 @@ class ScreenBuilder(val file: FileHandle) {
     private val drawables: MutableMap<String, Drawable> = mutableMapOf()
     private var cursors: MutableMap<String, Cursor> = mutableMapOf()
     private var postProcessors: MutableMap<String, PostProcessor> = mutableMapOf()
-    private var animations: MutableMap<String, FrameAnimation> = mutableMapOf()
+//    private var animations: MutableMap<String, FrameAnimation> = mutableMapOf()
     private var particles: MutableMap<String, ParticleEffect> = mutableMapOf()
     private val styles: MutableMap<String, Style> = mutableMapOf()
     private var borrowed: List<String> = listOf()

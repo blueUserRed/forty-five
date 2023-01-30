@@ -1,20 +1,18 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.screen.ResourceManager
-import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
+import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.*
@@ -32,7 +30,6 @@ import java.lang.Integer.max
 class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private val cardConfigFile = onj.get<String>("cardsFile")
-    private val cardAtlasFile = onj.get<String>("cardAtlasFile")
     private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")

@@ -42,7 +42,6 @@ options: {
     background: "beige_texture",
     inputMap: inputMaps.defaultInputMap,
     screenController: $IntroScreenController {
-        cardAtlasFile: "cards/generated/cards.atlas",
         appearActor: "logo",
         nextScreen: "screens/title_screen.onj"
     }

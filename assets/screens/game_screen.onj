@@ -58,7 +58,6 @@ viewport: $FitViewport {
 
 var controller = $GameScreenController {
     cardsFile: "cards/cards.onj",
-    cardAtlasFile: "cards/generated/cards.atlas",
     cardHand: {
         actorName: "card_hand"
     },

@@ -42,7 +42,6 @@ options: {
     screenController: $CardSelectionScreenController {
         cardSelectionActorName: "cardSelectionActor",
         cardConfigFile: "cards/cards.onj",
-        cardAtlasFile: "cards/generated/cards.atlas",
         nextScreen: "screens/title_screen.onj",
         cardsToSelect: 3,
         cardScale: cardScale,

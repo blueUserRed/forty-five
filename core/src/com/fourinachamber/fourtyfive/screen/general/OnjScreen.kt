@@ -35,10 +35,6 @@ import kotlin.system.measureTimeMillis
  */
 open class OnjScreen(
     private val drawables: MutableMap<String, Drawable>,
-    private val cursors: Map<String, Cursor>,
-    private val fonts: Map<String, BitmapFont>,
-    private val particles: Map<String, ParticleEffect>,
-    private val postProcessors: Map<String, PostProcessor>,
     val viewport: Viewport,
     batch: Batch,
     private val background: String?,

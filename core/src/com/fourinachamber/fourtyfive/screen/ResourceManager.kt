@@ -8,7 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import onj.parser.OnjParser
@@ -23,12 +22,11 @@ object ResourceManager {
 
     const val cardAtlasResourceHandle = "${Card.cardTexturePrefix}_cards_atlas"
 
-    private lateinit var _resources: List<Resource>
-    val resources: List<Resource>
-        get() = _resources
+    lateinit var resources: List<Resource>
+        private set
 
     fun borrow(borrower: ResourceBorrower, handle: String) {
-        val toBorrow = _resources.find { it.handle == handle }
+        val toBorrow = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         toBorrow.borrow(borrower)
     }
@@ -46,7 +44,7 @@ object ResourceManager {
     }
 
     fun giveBack(borrower: ResourceBorrower, handle: String) {
-        val toGiveBack = _resources.find { it.handle == handle }
+        val toGiveBack = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         if (borrower !in toGiveBack.borrowedBy) {
             throw RuntimeException("resource $handle not borrowed by $borrower")
@@ -255,7 +253,7 @@ object ResourceManager {
             resources.addAll(regionResources)
         }
 
-        _resources = resources
+        this.resources = resources
     }
 
     private val cardConfigSchema: OnjSchema by lazy {
@@ -265,7 +263,7 @@ object ResourceManager {
     private const val logTag = "ResourceManager"
 
     fun end() {
-        for (resource in _resources) {
+        for (resource in resources) {
             if (!resource.isLoaded) continue
             val message = StringBuilder("resource $resource was still loaded when the Game closed!\n")
             for (borrower in resource.borrowedBy) message.append("is borrowed by: $borrower\n")

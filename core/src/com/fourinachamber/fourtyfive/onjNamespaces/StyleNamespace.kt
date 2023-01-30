@@ -335,7 +335,7 @@ object StyleNamespace {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @RegisterOnjFunction(schema = "params: []")
-    fun self(): OnjStyleActorRef = OnjStyleActorRef(StyleActorReference.Self())
+    fun self(): OnjStyleActorRef = OnjStyleActorRef(StyleActorReference.Self)
 
     @RegisterOnjFunction(schema = "use Style; params: [StyleActorRef]")
     fun hover(actorRef: OnjStyleActorRef): OnjStyleCondition {

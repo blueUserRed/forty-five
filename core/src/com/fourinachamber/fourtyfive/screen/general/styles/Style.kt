@@ -136,7 +136,7 @@ sealed class StyleCondition {
 
 sealed class StyleActorReference {
 
-    class Self() : StyleActorReference() {
+    object Self : StyleActorReference() {
 
         override fun get(node: YogaNode, actor: Actor, screen: StyleableOnjScreen): Pair<Actor, YogaNode> {
             return actor to node

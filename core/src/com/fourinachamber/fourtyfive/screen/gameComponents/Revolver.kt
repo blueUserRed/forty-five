@@ -5,17 +5,11 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.Align
-import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.*
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
-import com.fourinachamber.fourtyfive.utils.plus
 import ktx.actors.contains
 import onj.value.OnjNamedObject
 import kotlin.math.cos

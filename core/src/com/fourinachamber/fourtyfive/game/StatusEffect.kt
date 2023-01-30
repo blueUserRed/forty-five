@@ -2,7 +2,6 @@ package com.fourinachamber.fourtyfive.game
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
@@ -209,6 +208,7 @@ abstract class StatusEffect(
      */
     enum class StatusEffectTarget {
 
+        @Suppress("unused") // will be needed in the future
         PLAYER {
             override fun getLivesActor(): Actor {
                 return FourtyFive.currentGame!!.playerLivesLabel

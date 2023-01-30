@@ -1,3 +1,6 @@
+// contains currently unused actors, but they may be important in the future
+@file:Suppress("unused")
+
 package com.fourinachamber.fourtyfive.screen.general
 
 import com.badlogic.gdx.Gdx
@@ -5,9 +8,9 @@ import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE1
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
@@ -16,7 +19,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.utils.*
