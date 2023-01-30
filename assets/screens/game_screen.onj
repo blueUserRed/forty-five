@@ -38,6 +38,8 @@ assets: {
 
         "cover_hook", "key_select_frame",
 
+        "grayscale_shader",
+
         ...(graphicsConfig.bannerAnimationUsedAssets),
         ...(graphicsConfig.statusEffectsUsedAssets),
         ...(graphicsConfig.damageOverlayUsedAssets),
@@ -100,6 +102,7 @@ var controller = $GameScreenController {
 options: {
     background: "game_screen_background",
     screenController: controller,
+//    postProcessor: "grayscale_shader",
     inputMap: [
         ...(inputMaps.cardHandSelectionInputMap),
         ...(inputMaps.defaultInputMap)
