@@ -4,19 +4,24 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
+import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 
 interface ResourceBorrower
 
 object ResourceManager {
+
+    const val cardAtlasResourceHandle = "${Card.cardTexturePrefix}_cards_atlas"
 
     private lateinit var _resources: List<Resource>
     val resources: List<Resource>
@@ -172,7 +177,89 @@ object ResourceManager {
             resources.addAll(regionResources)
         }
 
+        assets.get<OnjArray>("cursors").value.forEach {
+            it as OnjObject
+            val resource = Resource(it.get<String>("name")) {
+                val cursor = OnjReaderUtils.readCursor(it)
+                variants = listOf(cursor)
+                disposables = listOf(cursor)
+            }
+            resources.add(resource)
+        }
+
+        assets.get<OnjArray>("postProcessors").value.forEach {
+            it as OnjObject
+            val resource = Resource(it.get<String>("name")) {
+                val postProcessor = OnjReaderUtils.readPostProcessor(it)
+                variants = listOf(postProcessor, postProcessor.shader)
+                disposables = listOf(postProcessor)
+            }
+            resources.add(resource)
+        }
+
+        assets.get<OnjArray>("colorTextures").value.forEach {
+            it as OnjObject
+            val resource = Resource(it.get<String>("name")) {
+                val colorPixmap = OnjReaderUtils.readColorPixmap(it)
+                val texture = Texture(colorPixmap)
+                val textureRegion = TextureRegion(texture)
+                variants = listOf(colorPixmap, texture, textureRegion, TextureRegionDrawable(textureRegion))
+                disposables = listOf(colorPixmap, texture)
+            }
+            resources.add(resource)
+        }
+
+        assets.get<OnjArray>("particles").value.forEach {
+            it as OnjObject
+            val resource = Resource(it.get<String>("name")) {
+                val particle = OnjReaderUtils.readParticleEffect(it)
+                variants = listOf(particle)
+                disposables = listOf(particle)
+            }
+            resources.add(resource)
+        }
+
+        assets.get<OnjArray>("ninepatches").value.forEach {
+            it as OnjObject
+            val resource = Resource(it.get<String>("name")) {
+                val (ninepatch, texture) = OnjReaderUtils.readNinepatch(it)
+                variants = listOf(ninepatch, NinePatchDrawable(ninepatch))
+                disposables = listOf(texture)
+            }
+            resources.add(resource)
+        }
+
+        assets.ifHas<OnjObject>("cards") { onj ->
+            val atlasFile = onj.get<String>("atlas")
+            val configFile = onj.get<String>("config")
+            val cardPrefix = Card.cardTexturePrefix
+            val atlasResource = Resource(
+                cardAtlasResourceHandle,
+            ) {
+                val atlas = TextureAtlas(Gdx.files.internal(atlasFile))
+                disposables = listOf(atlas)
+                variants = listOf(atlas)
+            }
+            val config = OnjParser.parseFile(Gdx.files.internal(configFile).file())
+            cardConfigSchema.assertMatches(config)
+            config as OnjObject
+            val regionResources = config.get<OnjArray>("cards").value.map {
+                it as OnjObject
+                AtlasRegionResource(
+                    "${cardPrefix}${it.get<String>("name")}",
+                    it.get<String>("name"),
+                    atlasResource.handle
+                )
+            }
+            resources.add(atlasResource)
+            resources.addAll(regionResources)
+        }
+
         _resources = resources
+    }
+
+    private val cardConfigSchema: OnjSchema by lazy {
+        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/cards.onjschema").file())
     }
 
     private const val logTag = "ResourceManager"

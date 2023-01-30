@@ -3,6 +3,13 @@ use Common;
 
 bufferTime: float,
 
+enemyConfig: {
+    // this is validated by game_config.onjschema anyway
+    ...*
+},
+
+enemyUsedAssets: string[],
+
 shakeAnimation: {
     xShake: float,
     yShake: float,
@@ -45,6 +52,8 @@ bannerAnimation: {
      enemyTurnBanner: string,
 },
 
+bannerAnimationUsedAssets: string[],
+
 var statusIconConfig = {
     icon: string,
     scale: float
@@ -55,14 +64,20 @@ statusEffectIcons: {
     poison: statusIconConfig
 },
 
+statusEffectsUsedAssets: string[],
+
 postProcessors: {
     destroyCardPostProcessor: string
 },
+
+destroyCardUsedAssets: string[],
 
 coverStackParticles: {
     damaged: string,
     destroyed: string
 },
+
+coverStackUsedAssets: string[],
 
 stringTemplates:  {
     rottenDetailText: string,
@@ -77,6 +92,8 @@ damageOverlay: {
     overlay: string
 },
 
+damageOverlayUsedAssets: string[],
+
 insultFadeAnimation: {
     fadeFontName: string,
     fadeFontColor: Color,
@@ -85,6 +102,8 @@ insultFadeAnimation: {
     fadeIn: float,
     fadeOut: float,
 },
+
+textAnimationUsedAssets: string[],
 
 cardDetailText: {
     font: string,
@@ -95,6 +114,10 @@ cardDetailText: {
     spacing: float
 },
 
+cardDetailUsedAssets: string[],
+
 keySelect: {
     drawable: string
-}
+},
+
+keySelectUsedAssets: string[]

@@ -54,7 +54,8 @@ abstract class Effect(val trigger: Trigger) {
                 reservesLabel.localToStageCoordinates(Vector2(0f, 0f)),
                 amount.toString(),
                 true,
-                true
+                true,
+                FourtyFive.currentGame!!.curScreen
             )
 
             return Timeline.timeline {

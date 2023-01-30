@@ -42,17 +42,22 @@ object OnjReaderUtils {
         val cursors = mutableMapOf<String, Cursor>()
         onj.value.forEach {
             it as OnjObject
-            val cursorPixmap = Pixmap(Gdx.files.internal(it.get<String>("file")))
-            val pixmap = Pixmap(cursorPixmap.width, cursorPixmap.height, Pixmap.Format.RGBA8888)
-            pixmap.drawPixmap(cursorPixmap, 0, 0)
-            cursorPixmap.dispose()
-            val hotspotX = it.get<Long>("hotspotX").toInt()
-            val hotspotY = it.get<Long>("hotspotY").toInt()
-            val cursor = Gdx.graphics.newCursor(pixmap, hotspotX, hotspotY)
-            pixmap.dispose()
+            val cursor = readCursor(it)
             cursors[it.get<String>("name")] = cursor
         }
         return cursors
+    }
+
+    fun readCursor(onj: OnjObject): Cursor {
+        val cursorPixmap = Pixmap(Gdx.files.internal(onj.get<String>("file")))
+        val pixmap = Pixmap(cursorPixmap.width, cursorPixmap.height, Pixmap.Format.RGBA8888)
+        pixmap.drawPixmap(cursorPixmap, 0, 0)
+        cursorPixmap.dispose()
+        val hotspotX = onj.get<Long>("hotspotX").toInt()
+        val hotspotY = onj.get<Long>("hotspotY").toInt()
+        val cursor = Gdx.graphics.newCursor(pixmap, hotspotX, hotspotY)
+        pixmap.dispose()
+        return cursor
     }
 
     /**
@@ -202,22 +207,29 @@ object OnjReaderUtils {
         return PostProcessor(shader, uniformsToBind, args, timeOffset)
     }
 
-    /**
-     * reads an array of single-color textures with names
-     */
-    fun readColorTextures(textureArr: OnjArray): Map<String, TextureRegion> {
-        val textures = mutableMapOf<String, TextureRegion>()
-        textureArr
-            .value
-            .forEach {
-                it as OnjObject
-                val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
-                colorPixmap.setColor(it.get<Color>("color"))
-                colorPixmap.fill()
-                textures[it.get<String>("name")] = TextureRegion(Texture(colorPixmap))
-//                colorPixmap.dispose()
-            }
-        return textures
+//    /**
+//     * reads an array of single-color textures with names
+//     */
+//    fun readColorTextures(textureArr: OnjArray): Map<String, TextureRegion> {
+//        val textures = mutableMapOf<String, TextureRegion>()
+//        textureArr
+//            .value
+//            .forEach {
+//                it as OnjObject
+//                val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+//                colorPixmap.setColor(it.get<Color>("color"))
+//                colorPixmap.fill()
+//                textures[it.get<String>("name")] = TextureRegion(Texture(colorPixmap))
+////                colorPixmap.dispose()
+//            }
+//        return textures
+//    }
+
+    fun readColorPixmap(onj: OnjObject): Pixmap {
+        val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
+        colorPixmap.setColor(onj.get<Color>("color"))
+        colorPixmap.fill()
+        return colorPixmap
     }
 
     /**
@@ -268,34 +280,44 @@ object OnjReaderUtils {
         .value
         .associate {
             it as OnjObject
-            val effect = ParticleEffect()
-            effect.load(
-                Gdx.files.internal(it.get<String>("particlePath")),
-                Gdx.files.internal(it.get<String>("textureDir"))
-            )
-            effect.scaleEffect(it.get<Double>("scale").toFloat())
+            val effect = readParticleEffect(it)
             it.get<String>("name") to effect
         }
+
+    fun readParticleEffect(onj: OnjObject): ParticleEffect {
+        val effect = ParticleEffect()
+        effect.load(
+            Gdx.files.internal(onj.get<String>("particlePath")),
+            Gdx.files.internal(onj.get<String>("textureDir"))
+        )
+        effect.scaleEffect(onj.get<Double>("scale").toFloat())
+        return effect
+    }
 
     fun readNinepatches(arr: OnjArray): Pair<List<Texture>, Map<String, NinePatchDrawable>> {
         val textures = mutableListOf<Texture>()
         val ninepatches  = mutableMapOf<String, NinePatchDrawable>()
         for (obj in arr.value) {
             obj as OnjObject
-            val texture = Texture(Gdx.files.internal(obj.get<String>("file")))
+            val (ninepatch, texture) = readNinepatch(obj)
             textures.add(texture)
-            val ninepatch = NinePatch(
-                TextureRegion(texture),
-                obj.get<Long>("left").toInt(),
-                obj.get<Long>("right").toInt(),
-                obj.get<Long>("top").toInt(),
-                obj.get<Long>("bottom").toInt(),
-            )
-            obj.ifHas<Double>("scale") {
-                ninepatch.scale(it.toFloat(), it.toFloat())
-            }
             ninepatches[obj.get<String>("name")] = NinePatchDrawable(ninepatch)
         }
         return textures to ninepatches
+    }
+
+    fun readNinepatch(obj: OnjObject): Pair<NinePatch, Texture> {
+        val texture = Texture(Gdx.files.internal(obj.get<String>("file")))
+        val ninepatch = NinePatch(
+            TextureRegion(texture),
+            obj.get<Long>("left").toInt(),
+            obj.get<Long>("right").toInt(),
+            obj.get<Long>("top").toInt(),
+            obj.get<Long>("bottom").toInt(),
+        )
+        obj.ifHas<Double>("scale") {
+            ninepatch.scale(it.toFloat(), it.toFloat())
+        }
+        return ninepatch to texture
     }
 }

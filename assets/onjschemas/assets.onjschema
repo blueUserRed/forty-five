@@ -63,4 +63,8 @@ particles: {
     particlePath: string,
     textureDir: string,
     scale: float,
-}[]
+}[],
+cards?: {
+    atlas: string,
+    config: string
+}

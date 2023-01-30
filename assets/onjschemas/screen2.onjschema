@@ -274,6 +274,7 @@ $KeyAction {
 viewport: $Viewport,
 
 assets: {
+    useCardAtlas?: boolean,
     useAssets: string[],
     styleFiles?: string[],
     styles?: {

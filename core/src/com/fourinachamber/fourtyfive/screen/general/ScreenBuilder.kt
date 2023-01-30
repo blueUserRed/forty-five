@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
@@ -136,9 +137,22 @@ class ScreenBuilder(val file: FileHandle) {
                 }
         }
 
+        val toBorrow = mutableListOf<String>()
+
         assets.ifHas<OnjArray>("useAssets") { arr ->
-            borrowed = arr.value.map { (it as OnjString).value }
+            toBorrow.addAll(arr.value.map { (it as OnjString).value })
         }
+
+        if (assets.getOr("useCardAtlas", false)) {
+            val cardResources = ResourceManager
+                .resources
+                .map { it.handle }
+                .filter { it.startsWith(Card.cardTexturePrefix) }
+            toBorrow.addAll(cardResources)
+            toBorrow.add(ResourceManager.cardAtlasResourceHandle)
+        }
+
+        borrowed = toBorrow
     }
 
     private fun doDragAndDrop(screen: OnjScreen): MutableMap<String, DragAndDrop> {
@@ -238,7 +252,8 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Revolver" -> Revolver(
             widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it, screen) },
-            widgetOnj.get<Double>("radiusExtension").toFloat()
+            widgetOnj.get<Double>("radiusExtension").toFloat(),
+            screen
         ).apply {
             slotDrawable = drawableOrError(widgetOnj.get<String>("slotTexture"), screen)
             slotFont = fontOrError(widgetOnj.get<String>("font"), screen)

@@ -66,7 +66,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             action { appearActor.isVisible = true }
             delay(2000)
             action {
-                FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(nextScreen)).build()
+                FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(nextScreen)).build())
             }
         }
 

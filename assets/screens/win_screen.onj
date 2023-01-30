@@ -1,5 +1,6 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
+import "config/graphics_config.onj" as graphicsConfig;
 
 use Common;
 use Screen;
@@ -28,35 +29,15 @@ var hoverBehaviour = $MouseHoverBehaviour {
 };
 
 assets: {
-    textures: [
-        {
-            name: "background",
-            file: "textures/screens/win_screen_background.png"
-        }
-    ],
-    fonts: [
-
-        $DistanceFieldFont {
-            name: "red_wing",
-            fontFile: "fonts/red_wing.fnt",
-            imageFile: "fonts/red_wing.png"
-        }
-
-    ],
-    colorTextures: [
-        {
-            name: "transparent_black",
-            color: color.backgroundTransparent
-        },
-        {
-            name: "white",
-            color: color.white
-        }
-    ],
+    useCardAtlas: true,
+    useAssets: [
+        "win_screen_background", "red_wing",
+        ...(graphicsConfig.cardDetailUsedAssets)
+    ]
 },
 
 options: {
-    background: "background",
+    background: "win_screen_background",
     inputMap: inputMaps.defaultInputMap,
     screenController: $CardSelectionScreenController {
         cardSelectionActorName: "cardSelectionActor",

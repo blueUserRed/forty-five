@@ -1,10 +1,19 @@
 
+import "imports/colors.onj" as color;
+
+use Common;
+
 fonts: [
 
     {
         name: "red_wing",
         fontFile: "fonts/red_wing.fnt",
         imageFile: "fonts/red_wing.png"
+    },
+    {
+        name: "vanilla_whale",
+        fontFile: "fonts/vanilla_whale.fnt",
+        imageFile: "fonts/vanilla_whale.png"
     }
 
 ],
@@ -24,14 +33,187 @@ textureAtlases: [
                 regionName: "logo"
             }
         ]
+    },
+    {
+        name: "game_screen_atlas",
+        file: "textures/packed/game_screen/game_screen.atlas",
+        regions: [
+            {
+                handle: "game_screen_background",
+                regionName: "background"
+            },
+            {   handle: "revolver_slot_texture",
+                regionName: "revolver_slot"
+            },
+            {   handle: "enemy_texture",
+                regionName: "enemy"
+            },
+            {   handle: "normal_bullet",
+                regionName: "normal_bullet"
+            },
+            {   handle: "end_turn_button_texture",
+                regionName: "end_turn"
+            },
+            {   handle: "end_turn_button_texture_hover",
+                regionName: "end_turn_hover"
+            },
+            {   handle: "shoot_button_texture",
+                regionName: "shoot"
+            },
+            {   handle: "shoot_button_texture_hover",
+                regionName: "shoot_hover"
+            },
+            {   handle: "enemy_turn_banner",
+                regionName: "enemy_turn_banner"
+            },
+            {   handle: "player_turn_banner",
+                regionName: "player_turn_banner"
+            },
+            {   handle: "revolver_drum",
+                regionName: "revolver_drum"
+            },
+            {   handle: "heart_texture",
+                regionName: "heart"
+            },
+            {   handle: "reserves_texture",
+                regionName: "reserves"
+            },
+            {   handle: "hit_overlay",
+                regionName: "hit_overlay"
+            },
+            {   handle: "burning_icon",
+                regionName: "burning_icon"
+            },
+            {   handle: "insult_icon",
+                regionName: "insult_icon"
+            },
+            {   handle: "shield_icon",
+                regionName: "shield_icon"
+            },
+            {   handle: "poison_icon",
+                regionName: "poison_icon"
+            },
+            {   handle: "draw_bullet",
+                regionName: "draw_bullet"
+            },
+            {   handle: "draw_cover",
+                regionName: "draw_cover"
+            }
+        ]
     }
 
 ],
 
-textures: [],
-cursors: [],
-postProcessors: [],
+textures: [
+    {
+        name: "loose_screen_background",
+        file: "textures/screens/loose_screen_background.png"
+    },
+    {
+        name: "win_screen_background",
+        file: "textures/screens/win_screen_background.png"
+    }
+],
+
+cursors: [
+    {
+        name: "revolver_cursor",
+        file: "textures/cursors/revolver.png",
+        hotspotX: 0,
+        hotspotY: 0
+    }
+],
+
+postProcessors: [
+    {
+        name: "earthquake_shader",
+        vertexShader: "shaders/earthquake/earthquake.vert",
+        fragmentShader: "shaders/earthquake/earthquake.frag",
+        timeOffset: 2_000,
+        uniforms: [ "time" ],
+        args: null
+    },
+    {
+        name: "default_shader",
+        vertexShader: "shaders/default/default.vert",
+        fragmentShader: "shaders/default/default.frag",
+        timeOffset: 0,
+        uniforms: [],
+        args: null
+    },
+    {
+        name: "vignette_shader",
+        vertexShader: "shaders/vignette/vignette.vert",
+        fragmentShader: "shaders/vignette/vignette.frag",
+        timeOffset: 0,
+        uniforms: [ "time", "resolution" ],
+        args: {
+            color: color.red,
+            speed: 0.0,
+            movement: 1.0,
+            minMovement: 0.3
+        }
+    }
+],
+
 animations: [],
-colorTextures: [],
-ninepatches: [],
-particles: []
+
+colorTextures: [
+    {
+        name: "transparent_black_texture",
+        color: color.backgroundTransparent
+    },
+    {
+        name: "black_texture",
+        color: color.black
+    },
+    {
+        name: "white_texture",
+        color: color.white
+    },
+    {
+        name: "beige_texture",
+        color: color.beige
+    }
+],
+
+ninepatches: [
+     {
+        name: "cover_hook",
+        file: "textures/ninepatches/cover_hook.png",
+        top: 1,
+        bottom: 1,
+        left: 6,
+        right: 6,
+        scale: 0.2
+    },
+    {
+        name: "key_select_frame",
+        file: "textures/ninepatches/key_select_frame.png",
+        top: 3,
+        bottom: 3,
+        left: 3,
+        right: 3,
+        scale: 0.2
+    }
+],
+
+particles: [
+    {
+        name: "dust_particle",
+        particlePath: "particles/dust.particle",
+        textureDir: "textures/particles",
+        scale: 0.1
+    },
+    {
+        name: "dust_explosion_particle",
+        particlePath: "particles/dust_explosion.particle",
+        textureDir: "textures/particles",
+        scale: 0.1
+    }
+],
+
+cards: {
+    atlas: "cards/generated/cards.atlas",
+    config: "cards/cards.onj"
+}
