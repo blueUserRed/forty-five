@@ -1,5 +1,6 @@
 
 import "imports/colors.onj" as color;
+import "config/graphics_config.onj" as graphicsConfig;
 
 var defaultEnemyBrain = {
     actions: [
@@ -8,16 +9,14 @@ var defaultEnemyBrain = {
             weight: 4,
             min: 5,
             max: 10,
-            indicatorTextureScale: 0.02,
-            indicatorTexture: "normal_bullet"
+            ...(graphicsConfig.enemyConfig.damagePlayerIcon)
         },
 
         $AddCoverEnemyAction {
             weight: 2,
             min: 1,
             max: 10,
-            indicatorTextureScale: 0.02,
-            indicatorTexture: "shield_icon"
+            ...(graphicsConfig.enemyConfig.addCoverIcon)
         },
 
         $DoNothingEnemyAction {
@@ -29,8 +28,7 @@ var defaultEnemyBrain = {
                 "I hope you play the cards\n better than you shoot",
                 "Your hat got a knit,\n you son of a bitch"
             ],
-            indicatorTextureScale: 0.02,
-            indicatorTexture: "insult_icon"
+            ...(graphicsConfig.enemyConfig.doNothingIcon)
         }
 
     ]
@@ -43,16 +41,7 @@ enemyConfig: {
             name: "enemy",
             lives: 100,
             brain: defaultEnemyBrain,
-            texture: "enemy",
-            coverIcon: "shield_icon",
-            coverIconScale: 0.03,
-            offsetX: 25.0,
-            offsetY: 50.0,
-            scaleX: 0.03,
-            scaleY: 0.03,
-            detailFont: "vanilla_whale",
-            detailFontScale: 0.06,
-            detailFontColor: color.black
+            ...(graphicsConfig.enemyConfig.enemy)
         }
     ],
 

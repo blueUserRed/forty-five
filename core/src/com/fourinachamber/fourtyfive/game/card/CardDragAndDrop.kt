@@ -9,7 +9,6 @@ import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fourtyfive.screen.general.DragBehaviour
 import com.fourinachamber.fourtyfive.screen.general.DropBehaviour
-import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.obj
 import onj.value.OnjNamedObject
 

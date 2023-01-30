@@ -168,10 +168,11 @@ class Enemy(
         actor.resetAction()
     }
 
-    fun damagePlayer(damage: Int): Timeline = Timeline.timeline {
+    fun damagePlayer(damage: Int, gameController: GameController): Timeline = Timeline.timeline {
+        val screen = gameController.curScreen
         val chargeTimeline = GraphicsConfig.chargeTimeline(actor)
 
-        val overlayAction = GraphicsConfig.damageOverlay()
+        val overlayAction = GraphicsConfig.damageOverlay(screen)
 
         var activeStack: CoverStack? = null
         var remaining = 0
@@ -185,7 +186,7 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline { includeAction(
-                GraphicsConfig.coverStackParticles(activeStack!!.currentHealth == 0, activeStack!!)
+                GraphicsConfig.coverStackParticles(activeStack!!.currentHealth == 0, activeStack!!, screen)
             ) } },
             { activeStack != null }
 
@@ -212,7 +213,8 @@ class Enemy(
             livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
             "-$damage",
             false,
-            false
+            false,
+            gameController.curScreen
         )
 
         return Timeline.timeline {
@@ -243,7 +245,8 @@ class Enemy(
                     actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
                     "-${min(damage, currentCover)}",
                     false,
-                    false
+                    false,
+                    gameController.curScreen
                 ))
             } },
             { currentCover != 0 }
@@ -259,7 +262,8 @@ class Enemy(
                     actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
                     "-$remaining",
                     false,
-                    false
+                    false,
+                    gameController.curScreen
                 ))
             } },
             { remaining != 0 }
@@ -280,10 +284,10 @@ class Enemy(
             .map {
                 it as OnjObject
                 val gameController = FourtyFive.currentGame!!
-                val screenDataProvider = gameController.curScreen
-                val drawable = screenDataProvider.drawableOrError(it.get<String>("texture"))
-                val coverIcon = screenDataProvider.drawableOrError(it.get<String>("coverIcon"))
-                val detailFont = screenDataProvider.fontOrError(it.get<String>("detailFont"))
+                val curScreen = gameController.curScreen
+                val drawable = ResourceManager.get<Drawable>(curScreen, it.get<String>("texture"))
+                val coverIcon = ResourceManager.get<Drawable>(curScreen, it.get<String>("coverIcon"))
+                val detailFont = ResourceManager.get<BitmapFont>(curScreen, it.get<String>("detailFont"))
                 val enemy = Enemy(
                     it.get<String>("name"),
                     drawable,
@@ -298,7 +302,7 @@ class Enemy(
                     it.get<Double>("detailFontScale").toFloat(),
                     it.get<Color>("detailFontColor")
                 )
-                enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), screenDataProvider, enemy)
+                enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), curScreen, enemy)
                 enemy
             }
 

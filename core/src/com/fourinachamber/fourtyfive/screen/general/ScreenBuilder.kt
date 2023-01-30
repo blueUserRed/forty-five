@@ -11,32 +11,29 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Align
-import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.experimental.OnjStyleProperty
+import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FrameAnimation
-import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
-import onj.value.OnjArray
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
+import onj.value.*
 
 class ScreenBuilder(val file: FileHandle) {
 
@@ -44,10 +41,10 @@ class ScreenBuilder(val file: FileHandle) {
     private val drawables: MutableMap<String, Drawable> = mutableMapOf()
     private var cursors: MutableMap<String, Cursor> = mutableMapOf()
     private var postProcessors: MutableMap<String, PostProcessor> = mutableMapOf()
-    private var animations: MutableMap<String, FrameAnimation> = mutableMapOf()
+//    private var animations: MutableMap<String, FrameAnimation> = mutableMapOf()
     private var particles: MutableMap<String, ParticleEffect> = mutableMapOf()
     private val styles: MutableMap<String, Style> = mutableMapOf()
-    private val toDispose: MutableList<Disposable> = mutableListOf()
+    private var borrowed: List<String> = listOf()
 
     private val earlyRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
     private val lateRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
@@ -60,6 +57,7 @@ class ScreenBuilder(val file: FileHandle) {
 
     private var screenController: ScreenController? = null
     private var inputMap: KeyInputMap? = null
+    private var background: String? = null
 
     fun build(): OnjScreen {
         val onj = OnjParser.parseFile(file.file())
@@ -69,29 +67,30 @@ class ScreenBuilder(val file: FileHandle) {
         readAssets(onj)
         doOptions(onj)
 
-        val root = CustomFlexBox()
-        root.setFillParent(true)
-//        root.debug = true
-        getWidget(onj.get<OnjNamedObject>("root"), root)
-
         val screen = StyleableOnjScreen(
             drawables = drawables,
             cursors = cursors,
             fonts = fonts,
             particles = particles,
             postProcessors = postProcessors,
-            children = listOf(root),
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
             styleTargets = styleTargets,
-            toDispose = toDispose,
+            background = background,
+            useAssets = borrowed,
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
-            behaviours = behavioursToBind,
             printFrameRate = false,
             keyInputMap = inputMap
         )
+
+        val root = CustomFlexBox()
+        root.setFillParent(true)
+//        root.debug = true
+        getWidget(onj.get<OnjNamedObject>("root"), root, screen)
+
+        screen.addActorToRoot(root)
 
         screen.screenController = screenController
 
@@ -106,10 +105,7 @@ class ScreenBuilder(val file: FileHandle) {
     private fun doOptions(onj: OnjObject) {
         val options = onj.get<OnjObject>("options")
         options.ifHas<String>("background") {
-            val drawable = drawableOrError(it)
-            earlyRenderTasks.add {
-                drawable.draw(stage.batch, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
-            }
+            background = it
         }
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
@@ -122,51 +118,6 @@ class ScreenBuilder(val file: FileHandle) {
     private fun readAssets(onj: OnjObject) {
         val assets = onj.get<OnjObject>("assets")
 
-        if (assets.hasKey<OnjArray>("textures")) {
-            val textures = OnjReaderUtils.readTextures(assets.get<OnjArray>("textures"))
-            drawables.putAll(
-                textures.mapValues { TextureRegionDrawable(it.value) }
-            )
-            textures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
-        }
-        if (assets.hasKey<OnjArray>("fonts")) {
-            fonts = OnjReaderUtils.readFonts(assets.get<OnjArray>("fonts")).toMutableMap()
-            toDispose.addAll(fonts.values)
-        }
-        if (assets.hasKey<OnjArray>("textureAtlases")) {
-            val (regions, atlases) = OnjReaderUtils.readAtlases(assets.get<OnjArray>("textureAtlases"))
-            drawables.putAll(
-                regions.mapValues { TextureRegionDrawable(it.value) }
-            )
-            toDispose.addAll(atlases)
-        }
-        if (assets.hasKey<OnjArray>("cursors")) {
-            val cursors = OnjReaderUtils.readCursors(assets.get<OnjArray>("cursors"))
-            this.cursors = cursors.toMutableMap()
-            toDispose.addAll(cursors.values)
-        }
-        if (assets.hasKey<OnjArray>("postProcessors")) {
-            val postProcessors = OnjReaderUtils.readPostProcessors(assets.get<OnjArray>("postProcessors"))
-            this.postProcessors = postProcessors.toMutableMap()
-            toDispose.addAll(postProcessors.values)
-        }
-        if (assets.hasKey<OnjArray>("animations")) {
-            val animations = OnjReaderUtils.readAnimations(assets.get<OnjArray>("animations"))
-            this.animations = animations.toMutableMap()
-            toDispose.addAll(animations.values)
-        }
-        if (assets.hasKey<OnjArray>("colorTextures")) {
-            val colorTextures = OnjReaderUtils.readColorTextures(assets.get<OnjArray>("colorTextures"))
-            drawables.putAll(
-                colorTextures.mapValues { TextureRegionDrawable(it.value) }
-            )
-            colorTextures.values.forEach { region -> region.texture?.let { toDispose.add(it) } }
-        }
-        if (assets.hasKey<OnjArray>("particles")) {
-            val particles = OnjReaderUtils.readParticles(assets.get<OnjArray>("particles"))
-            this.particles = particles.toMutableMap()
-            toDispose.addAll(particles.values)
-        }
         if (assets.hasKey<OnjArray>("styleFiles")) {
             assets
                 .get<OnjArray>("styleFiles")
@@ -175,6 +126,7 @@ class ScreenBuilder(val file: FileHandle) {
                     styles.putAll(Style.readFromFile(it.value as String))
                 }
         }
+
         if (assets.hasKey<OnjArray>("styles")) {
             assets
                 .get<OnjArray>("styles")
@@ -184,11 +136,23 @@ class ScreenBuilder(val file: FileHandle) {
                     styles[it.first] = it.second
                 }
         }
-        assets.ifHas<OnjArray>("ninepatches") {
-            val (textures, ninepatches) = OnjReaderUtils.readNinepatches(it)
-            drawables.putAll(ninepatches)
-            toDispose.addAll(textures)
+
+        val toBorrow = mutableListOf<String>()
+
+        assets.ifHas<OnjArray>("useAssets") { arr ->
+            toBorrow.addAll(arr.value.map { (it as OnjString).value })
         }
+
+        if (assets.getOr("useCardAtlas", false)) {
+            val cardResources = ResourceManager
+                .resources
+                .map { it.handle }
+                .filter { it.startsWith(Card.cardTexturePrefix) }
+            toBorrow.addAll(cardResources)
+            toBorrow.add(ResourceManager.cardAtlasResourceHandle)
+        }
+
+        borrowed = toBorrow
     }
 
     private fun doDragAndDrop(screen: OnjScreen): MutableMap<String, DragAndDrop> {
@@ -211,7 +175,7 @@ class ScreenBuilder(val file: FileHandle) {
         return dragAndDrops
     }
 
-    private fun getFlexBox(widgetOnj: OnjObject): FlexBox {
+    private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
         val flexBox = CustomFlexBox()
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
@@ -219,7 +183,7 @@ class ScreenBuilder(val file: FileHandle) {
                 .get<OnjArray>("children")
                 .value
                 .forEach {
-                    getWidget(it as OnjNamedObject, flexBox)
+                    getWidget(it as OnjNamedObject, flexBox, screen)
                 }
         }
         return flexBox
@@ -242,36 +206,36 @@ class ScreenBuilder(val file: FileHandle) {
 
         else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
 
-    }.apply {
-        if (!viewportOnj.hasKey<String>("backgroundTexture")) return@apply
-        val background = drawableOrError(viewportOnj.get<String>("backgroundTexture"))
-        earlyRenderTasks.add {
-            background.draw(stage.batch, 0f, 0f, viewport.worldWidth, viewport.worldHeight)
-        }
     }
 
-    private fun getWidget(widgetOnj: OnjNamedObject, parent: FlexBox?): Actor = when (widgetOnj.name) {
+    private fun getWidget(
+        widgetOnj: OnjNamedObject,
+        parent: FlexBox?,
+        screen: OnjScreen
+    ): Actor = when (widgetOnj.name) {
 
-        "Image" -> CustomImageActor(drawableOrError(widgetOnj.get<String>("textureName"))).apply {
+        "Image" -> CustomImageActor(drawableOrError(widgetOnj.get<String>("textureName"), screen)).apply {
             applyImageKeys(this, widgetOnj)
         }
 
-        "Box" -> getFlexBox(widgetOnj)
+        "Box" -> getFlexBox(widgetOnj, screen)
 
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
-            labelStyle = Label.LabelStyle(
-                fontOrError(widgetOnj.get<String>("font")),
-                widgetOnj.get<Color>("color")
-            )
+            labelStyle = Label.LabelStyle().apply {
+                font = fontOrError(widgetOnj.get<String>("font"), screen)
+                if (!widgetOnj.get<OnjValue>("color").isNull()) {
+                    fontColor = widgetOnj.get<Color>("color")
+                }
+            }
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
+            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
-        "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"))).apply {
+        "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"), screen)).apply {
             applyImageKeys(this, widgetOnj)
         }
 
@@ -287,11 +251,12 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         "Revolver" -> Revolver(
-            widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it) },
-            widgetOnj.get<Double>("radiusExtension").toFloat()
+            widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it, screen) },
+            widgetOnj.get<Double>("radiusExtension").toFloat(),
+            screen
         ).apply {
-            slotDrawable = drawableOrError(widgetOnj.get<String>("slotTexture"))
-            slotFont = fontOrError(widgetOnj.get<String>("font"))
+            slotDrawable = drawableOrError(widgetOnj.get<String>("slotTexture"), screen)
+            slotFont = fontOrError(widgetOnj.get<String>("font"), screen)
             fontColor = widgetOnj.get<Color>("fontColor")
             fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
@@ -309,7 +274,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Long>("numStacks").toInt(),
             widgetOnj.get<Long>("maxCards").toInt(),
             widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
-            fontOrError(widgetOnj.get<String>("detailFont")),
+            fontOrError(widgetOnj.get<String>("detailFont"), screen),
             widgetOnj.get<Color>("detailFontColor"),
             widgetOnj.get<Double>("detailFontScale").toFloat(),
             widgetOnj.get<Double>("areaSpacing").toFloat(),
@@ -320,18 +285,18 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("cardInitialY").toFloat(),
             widgetOnj.get<Double>("cardDeltaX").toFloat(),
             widgetOnj.get<Double>("cardDeltaY").toFloat(),
-            drawableOrError(widgetOnj.get<String>("stackHook"))
+            drawableOrError(widgetOnj.get<String>("stackHook"), screen)
         )
 
         "TemplateLabel" -> TemplateStringLabel(
             TemplateString(widgetOnj.get<String>("template")),
             Label.LabelStyle(
-                fontOrError(widgetOnj.get<String>("font")),
+                fontOrError(widgetOnj.get<String>("font"), screen),
                 widgetOnj.get<Color>("color")
             )
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it) }
+            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
@@ -412,16 +377,16 @@ class ScreenBuilder(val file: FileHandle) {
         actorsWithDragAndDrop[group]!!.add(actor to onj)
     }
 
-    private fun fontOrError(name: String): BitmapFont {
-        return fonts[name] ?: throw RuntimeException("Unknown font: $name")
+    private fun fontOrError(name: String, screen: OnjScreen): BitmapFont {
+        return ResourceManager.get(screen, name)
     }
 
-    private fun drawableOrError(name: String): Drawable {
-        return drawables[name] ?: throw RuntimeException("Unknown drawable: $name")
+    private fun drawableOrError(name: String, screen: OnjScreen): Drawable {
+        return ResourceManager.get(screen, name)
     }
 
-    private fun animationOrError(name: String): FrameAnimation {
-        return animations[name] ?: throw RuntimeException("unknown animation: $name")
+    private fun animationOrError(name: String, screen: OnjScreen): FrameAnimation {
+        return ResourceManager.get(screen, name)
     }
 
     private fun styleOrError(name: String): Style {

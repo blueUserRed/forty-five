@@ -3,7 +3,6 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -12,10 +11,9 @@ import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
-import io.github.orioncraftmc.meditate.enums.YogaAlign
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
-import io.github.orioncraftmc.meditate.enums.YogaJustify
 import ktx.actors.onEnter
 import ktx.actors.onExit
 
@@ -25,10 +23,11 @@ class CardDetailActor(
     initialDescription: String,
     initialStatsText: String,
     initialStatsChangedText: String,
-    private val font: BitmapFont,
-    private val fontColor: Color,
+    font: BitmapFont,
+    fontColor: Color,
     private val fontScale: Float,
     initialForcedWidth: Float,
+    private val screen: OnjScreen,
     initialBackground: Drawable? = null
 ) : CustomFlexBox() {
 
@@ -93,7 +92,7 @@ class CardDetailActor(
             requiresRebuild = false
         }
         super.draw(batch, parentAlpha)
-        val separator = GraphicsConfig.cardDetailSeparator()
+        val separator = GraphicsConfig.cardDetailSeparator(screen)
         if (batch == null) return
         for (i in 0 until children.size) {
             if (i == 0) continue

@@ -10,6 +10,7 @@ import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
+@Suppress("unused") // values are read via reflection
 @OnjNamespace
 object ScreenNamespace {
 

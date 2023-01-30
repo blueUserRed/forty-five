@@ -26,7 +26,7 @@ object KeyActionFactory {
 
         "SelectFirstInCardHand" to { obj ->
             val num = obj.get<Long>("num").toInt() - 1 // covert from one-indexed to 0-indexed
-            ; lambda@ {
+            lambda@ {
                 val game = FourtyFive.currentGame ?: return@lambda false
                 val card = game.cardHand.cards.getOrElse(num) { return@lambda false }
                 game.keySelectedCard = card

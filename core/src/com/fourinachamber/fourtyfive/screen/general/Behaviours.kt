@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Utils
@@ -161,7 +162,7 @@ class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviou
     private val screenPath = onj.get<String>("screenPath")
 
     override val onCLick: BehaviourCallback = {
-        FourtyFive.curScreen = ScreenBuilder(Gdx.files.internal(screenPath)).build()
+        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(screenPath)).build())
     }
 }
 
@@ -341,7 +342,7 @@ class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behavio
     private val image: CustomImageActor
 
     private val hoverDrawable: Drawable by lazy {
-        onjScreen.drawableOrError(hoverDrawableName)
+        ResourceManager.get(onjScreen, hoverDrawableName)
     }
 
     init {
@@ -415,7 +416,7 @@ class OnClickChangePostProcessorBehaviour(onj: OnjObject, actor: Actor) : Behavi
 
         if (setOnlyIfPostProcessorIsNull && onjScreen.postProcessor != null) return@callback
 
-        val postProcessor = onjScreen.postProcessorOrError(postProcessor!!)
+        val postProcessor = ResourceManager.get<PostProcessor>(onjScreen, postProcessor!!)
 
         val prefPostProcessor = onjScreen.postProcessor
         onjScreen.postProcessor = postProcessor

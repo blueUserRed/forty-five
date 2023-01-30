@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 
 /**
@@ -118,7 +119,7 @@ object Utils {
             }.eitherRight()
 
         } else {
-            return onjScreen.cursorOrError(cursorName).eitherLeft()
+            return ResourceManager.get<Cursor>(onjScreen, cursorName).eitherLeft()
         }
     }
 
