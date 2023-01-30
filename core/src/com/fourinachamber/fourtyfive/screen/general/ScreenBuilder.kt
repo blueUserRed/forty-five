@@ -58,6 +58,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var inputMap: KeyInputMap? = null
     private var background: String? = null
+    private var postProcessor: String? = null
 
     fun build(): OnjScreen {
         val onj = OnjParser.parseFile(file.file())
@@ -92,6 +93,10 @@ class ScreenBuilder(val file: FileHandle) {
 
         screen.addActorToRoot(root)
 
+        postProcessor?.let {
+            screen.postProcessor = ResourceManager.get<PostProcessor>(screen, it)
+        }
+
         screen.screenController = screenController
 
         val dragAndDrops = doDragAndDrop(screen)
@@ -112,6 +117,9 @@ class ScreenBuilder(val file: FileHandle) {
         }
         options.ifHas<OnjArray>("inputMap") {
             inputMap = KeyInputMap.readFromOnj(it)
+        }
+        options.ifHas<String>("postProcessor") {
+            postProcessor = it
         }
     }
 
