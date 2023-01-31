@@ -11,6 +11,7 @@ import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.customization.OnjConfig
 
 /**
@@ -25,6 +26,9 @@ object FourtyFive : Game() {
     var currentGame: GameController? = null
 
     override fun create() {
+//        val s = TemplateString("{test}", mapOf("test" to 5))
+//        println(s.string)
+//        return
         init()
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()

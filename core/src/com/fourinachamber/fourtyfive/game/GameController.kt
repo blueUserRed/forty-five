@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
@@ -48,7 +49,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     private val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
-    private val baseReserves = onj.get<Long>("reservesAtRoundBegin").toInt()
+
+    private val baseReserves by templateParam(
+        "game.baseReserves", onj.get<Long>("reservesAtRoundBegin").toInt()
+    )
+
     val maxCards = onj.get<Long>("maxCards").toInt()
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
@@ -87,17 +92,31 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var coverCardStack: MutableList<Card> = mutableListOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
+    private var remainingBullets: Int by multipleTemplateParam(
+        "game.remainingBullets", bulletStack.size,
+        "game.remainingBulletsPluralS" to { if (it == 1) "" else "s" }
+    )
+
+    private var remainingCovers: Int by multipleTemplateParam(
+        "game.remainingCovers", coverCardStack.size,
+        "game.remainingCoversPluralS" to { if (it == 1) "" else "s" }
+    )
+
     private var enemies: List<Enemy> = listOf()
 
-    private var remainingCardsToDraw: Int? = null
+    private var remainingCardsToDraw: Int? by multipleTemplateParam(
+        "game.remainingCardsToDraw", null,
+        "game.remainingCardsToDrawPluralS" to { if (it == 1) "" else "s" }
+    )
 
     var curPlayerLives: Int
         set(value) {
-            SaveState.playerLives = max(value, 0)
+            val newLives = max(value, 0)
+            SaveState.playerLives = newLives
         }
         get() = SaveState.playerLives
 
-    val playerLivesAtStart: Int = SaveState.playerLives
+    val playerLivesAtStart: Int by templateParam("game.basePlayerLives", SaveState.playerLives)
 
     private val timeline: Timeline = Timeline(mutableListOf()).apply {
         start()
@@ -125,7 +144,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private var cardsToDrawDuringSpecialDraw: Int = 1
 
-    var curReserves: Int = 0
+    var curReserves: Int by templateParam("game.curReserves", 0)
 
     private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
 
@@ -151,7 +170,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         enemies = Enemy.getFrom(enemiesOnj)
 
         cardDrawActor = onjScreen.namedActorOrError(cardDrawActorName)
-        onjScreen.removeActorFromRoot(cardDrawActor)
+//        onjScreen.removeActorFromRoot(cardDrawActor)
 
         destroyCardInstructionActor = onjScreen.namedActorOrError(destroyCardInstructionActorName)
         destroyCardInstructionActor.isVisible = false
@@ -162,23 +181,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initRevolver()
         initEnemyArea()
         initCoverArea()
-        initTemplateStringParams()
 
         changePhase(Gamephase.INITIAL_DRAW)
+        onjScreen.invalidateEverything()
     }
 
     private fun initCards() {
         val onj = OnjParser.parseFile(cardConfigFile)
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
-
-//        val cardAtlas = TextureAtlas(Gdx.files.internal(cardAtlasFile))
-//
-//        for (region in cardAtlas.regions) {
-//            curScreen.addDrawable("${Card.cardTexturePrefix}${region.name}", TextureRegionDrawable(region))
-//        }
-//
-//        curScreen.addDisposable(cardAtlas)
 
         cardPrototypes = Card
             .getFrom(onj.get<OnjArray>("cards"), curScreen, ::initCard)
@@ -199,7 +210,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
 
         bulletStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
+        remainingBullets = bulletStack.size
         coverCardStack = startDeck.filter { it.type == Card.Type.COVER }.toMutableList()
+        remainingCovers = coverCardStack.size
 
         SaveState.additionalCards.forEach { entry ->
             val (cardName, amount) = entry
@@ -245,32 +258,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         createdCards.add(card)
     }
 
-    private fun initTemplateStringParams() = with(TemplateString) {
-        bindParam("game.curReserves") { curReserves }
-        bindParam("game.baseReserves") { baseReserves }
-        bindParam("game.curPlayerLives") { curPlayerLives }
-        bindParam("game.basePlayerLives") { playerLivesAtStart }
-        bindParam("game.remainingCardsToDraw") { remainingCardsToDraw ?: 0 }
-        bindParam("game.remainingCardsToDrawPluralS") { if (remainingCardsToDraw == 1) "" else "s" }
-        bindParam("game.remainingBullets") { bulletStack.size }
-        bindParam("game.remainingBulletsPluralS") { if (bulletStack.size == 1) "" else "s" }
-        bindParam("game.remainingCovers") { coverCardStack.size }
-        bindParam("game.remainingCoversPluralS") { if (coverCardStack.size == 1) "" else "s" }
-    }
-
-    private fun removeTemplateStringParams() = with(TemplateString) {
-        removeParam("game.curReserves")
-        removeParam("game.baseReserves")
-        removeParam("game.curPlayerLives")
-        removeParam("game.basePlayerLives")
-        removeParam("game.remainingCardsToDraw")
-        removeParam("game.remainingCardsToDrawPluralS")
-        removeParam("game.remainingBullets")
-        removeParam("game.remainingBulletsPluralS")
-        removeParam("game.remainingCovers")
-        removeParam("game.remainingCoversPluralS")
-    }
-
     private fun changePhase(next: Gamephase) {
         if (next == currentPhase) return
         FourtyFiveLogger.debug(logTag, "changing phase from $currentPhase to $next")
@@ -279,7 +266,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         currentPhase.transitionTo(this)
     }
 
+    private var updateCount = 0 //TODO: this is stupid
     override fun update() {
+
+        if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
+        updateCount++
 
         timeline.update()
 
@@ -638,7 +629,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FourtyFiveLogger.debug(logTag, "displaying card draw actor")
         val viewport = curScreen.stage.viewport
         val cardDrawActor = cardDrawActor
-        curScreen.addActorToRoot(cardDrawActor)
+//        curScreen.addActorToRoot(cardDrawActor)
         cardDrawActor.isVisible = true
         cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
     }
@@ -653,7 +644,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun hideCardDrawActor() {
         FourtyFiveLogger.debug(logTag, "hiding card draw actor")
-        curScreen.removeActorFromRoot(cardDrawActor)
+//        curScreen.removeActorFromRoot(cardDrawActor)
         cardDrawActor.isVisible = false
     }
 
@@ -663,6 +654,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun drawBullet() {
         var cardsToDraw = remainingCardsToDraw ?: return
         val bullet = bulletStack.removeFirstOrNull() ?: defaultBullet.create()
+        remainingBullets = bulletStack.size
         cardHand.addCard(bullet)
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
@@ -677,6 +669,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun drawCover() {
         var cardsToDraw = remainingCardsToDraw ?: return
         val cover = coverCardStack.removeFirstOrNull() ?: defaultCover.create()
+        remainingCovers = coverCardStack.size
         cardHand.addCard(cover)
         cardsToDraw--
         this.remainingCardsToDraw = cardsToDraw
@@ -694,7 +687,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     override fun end() {
         FourtyFiveLogger.title("game ends")
-        removeTemplateStringParams()
         FourtyFive.currentGame = null
         SaveState.write()
     }
