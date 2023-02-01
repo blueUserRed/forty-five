@@ -1,162 +1,115 @@
-import "imports/colors.onj" as color
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "config/graphics_config.onj" as graphicsConfig;
 
-!worldWidth = 160.0
-!worldHeight = 90.0
+use Common;
+use Screen;
+use Style;
 
-!cardScale = 0.03
-!cardPixelSize = 569
-!cardSize = <!cardPixelSize * !cardScale>
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
+var cardScale = 0.03;
+var cardPixelSize = 569;
+var cardSize = cardPixelSize * cardScale;
 
 viewport: $FitViewport {
-    worldWidth: !worldWidth
-    worldHeight: !worldHeight
-    backgroundTexture: "background"
-}
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
 
-!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
+var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
     screenPath: "screens/title_screen.onj"
-}
+};
 
-!hoverBehaviour = $MouseHoverBehaviour {
-    useSystemCursor: true
-    cursorName: "hand"
+var hoverBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
     disabled: null
-}
-
-children: [
-    $Table {
-        fillX: true
-        fillY: true
-        rows: [
-
-            {
-                cells: [
-                    {
-                        padTop: 13.0
-                        padLeft: 18.0
-                        element: $Label {
-                            align: "center"
-                            text: '"We wont see him again"'
-                            font: "red_wing"
-                            color: !color.black
-                            fontScale: 0.14
-                        }
-                    }
-                ]
-            }
-
-            {
-                cells: [
-                    {
-                        padTop: -8.0
-                        padLeft: 9.0
-                        element: $Label {
-                            align: "center"
-                            text: "Loot the body"
-                            font: "red_wing"
-                            color: !color.black
-                            fontScale: 0.2
-                        }
-                    }
-                ]
-            }
-
-            {
-                cells: [
-                    {
-                        padTop: 32.0
-                        padLeft: 61.0
-                        element: $Label {
-                            align: "center"
-                            text: "continue without"
-                            font: "red_wing"
-                            color: !color.black
-                            fontScale: 0.13
-                            behaviours: [ !toMainScreenBehaviour, !hoverBehaviour ]
-                        }
-                    }
-                ]
-            }
-
-        ]
-    }
-
-
-     $HorizontalGroup {
-         debug: true
-         x: 110.0
-         y: 36.0
-         name: "cardSelectionActor"
-         align: "center"
-         spacing: 6.0
-         children: []
-    }
-]
+};
 
 assets: {
-    textures: [
-        {
-            name: "background"
-            file: "textures/screens/win_screen_background.png"
-        }
+    useCardAtlas: true,
+    useAssets: [
+        "win_screen_background", "red_wing",
+        ...(graphicsConfig.cardDetailUsedAssets)
     ]
-    fonts: [
-
-        $DistanceFieldFont {
-            name: "red_wing"
-            fontFile: "fonts/red_wing.fnt"
-            imageFile: "fonts/red_wing.png"
-        }
-
-    ]
-    textureAtlases: []
-    cursors: []
-    postProcessors: []
-    animations: []
-    colorTextures: [
-        {
-            name: "card_detail_background"
-            color: "04040488"
-        }
-    ]
-    particles: []
-}
+},
 
 options: {
-    setFillParentOnRoot: true
-    defaultCursor: {
-        useSystemCursor: true
-        cursorName: "arrow"
-    }
-    postProcessor: null
-    controller: $CardSelectionScreenController {
-        cardSelectionActorName: "cardSelectionActor"
-        cardConfigFile: "cards/cards.onj"
-        cardAtlasFile: "cards/generated/cards.atlas"
-        nextScreen: "screens/title_screen.onj"
-        cardsToSelect: 3
-        cardScale: !cardScale
-        cardBehaviour: $OnHoverChangeSizeBehaviour {
-            enterDuration: 0.2
-            exitDuration: 0.2
-            baseX: !cardSize
-            baseY: !cardSize
-            targetX: <!cardSize * 1.13>
-            targetY: <!cardSize * 1.13>
-            enterInterpolation: null
-            exitInterpolation: null
-        }
-        detailFont: "red_wing"
-        detailFontColor: !color.white
-        detailBackgroundTexture: "card_detail_background"
-        detailFontScale: 0.07
-        detailWidth: 50.0
-        detailOffsetX: 0.0
-        detailOffsetY: 0.0
-        emptyFont: "red_wing"
-        emptyFontColor: !color.black
-        emptyFontScale: 0.14
+    background: "win_screen_background",
+    inputMap: inputMaps.defaultInputMap,
+    screenController: $CardSelectionScreenController {
+        cardSelectionActorName: "cardSelectionActor",
+        cardConfigFile: "cards/cards.onj",
+        nextScreen: "screens/title_screen.onj",
+        cardsToSelect: 3,
+        cardScale: cardScale,
+        cardBehaviour: hoverBehaviour,
+        emptyFont: "red_wing",
+        emptyFontColor: color.black,
+        emptyFontScale: 0.14,
         emptyText: "no cards to select left!"
     }
-//    controller: null
-}
+},
+
+root: $Box {
+    properties: [
+        position("absolute"),
+        position(69.0, null, 10.0, null),
+        height(80.0),
+        width(84.0)
+    ]
+} children [
+
+    $Label {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 5.0, null)
+        ],
+        align: "left",
+        text: '"We won\'t see him again"',
+        font: "red_wing",
+        color: color.black,
+        fontScale: 0.2
+    },
+
+    $Label {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 15.0, null)
+        ],
+        align: "left",
+        text: "Loot the body",
+        font: "red_wing",
+        color: color.black,
+        fontScale: 0.2
+    },
+
+    $Box {
+        name: "cardSelectionActor",
+        properties: [
+            position("absolute"),
+            flexDirection("row"),
+            justifyContent("space around"),
+            position(0.0, null, 25.0, null),
+            height(cardSize),
+            relWidth(100.0)
+        ]
+    },
+
+    $Label {
+        properties: [
+            position("absolute"),
+            position(0.0, null, 70.0, null),
+            relWidth(100.0)
+        ],
+        align: "center",
+        text: "continue without",
+        font: "red_wing",
+        color: color.black,
+        fontScale: 0.13,
+        behaviours: [ toMainScreenBehaviour, hoverBehaviour ]
+    }
+
+]

@@ -4,16 +4,12 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.scenes.scene2d.ui.ParticleEffectActor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
-import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
-import kotlin.random.Random
-import kotlin.random.asKotlinRandom
+import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
@@ -51,11 +47,6 @@ fun <T> T.eitherRight(): Either<Nothing, T> = Either.Right(this)
 val Vector3.xy: Vector2
     get() = Vector2(x, y)
 
-/**
- * gets the magnitude of the Vector
- */
-val <T : Vector<T>> Vector<T>.mag: Float
-    get() = this.len()
 
 operator fun Vector2.minus(other: Vector2) = Vector2(x - other.x, y - other.y)
 operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
@@ -75,18 +66,11 @@ fun Float.between(min: Float, max: Float): Float {
 }
 
 /**
- * rotates an array by [by]. Can be negative
+ * compares two floats using an epsilon to make sure rounding errors don't break anything
  */
-inline fun <reified T> Array<T>.rotate(by: Int): Array<T> {
-    return Array(this.size) {
-        var newIndex = it + by
-        if (newIndex > this.size) newIndex %= this.size
-        if (newIndex < 0) newIndex += this.size
-        this[newIndex]
-    }
+fun Float.epsilonEquals(other: Float, epsilon: Float = 0.00005f): Boolean {
+    return this in (other - epsilon)..(other + epsilon)
 }
-
-fun String.toBuilder(): StringBuilder = StringBuilder(this)
 
 object Utils {
 
@@ -112,7 +96,7 @@ object Utils {
     fun loadCursor(
         useSystemCursor: Boolean,
         cursorName: String,
-        screenDataProvider: ScreenDataProvider
+        onjScreen: OnjScreen
     ): Either<Cursor, SystemCursor> {
 
         if (useSystemCursor) {
@@ -135,14 +119,13 @@ object Utils {
             }.eitherRight()
 
         } else {
-            return (screenDataProvider.cursors[cursorName] ?: run {
-                throw RuntimeException("unknown custom cursor: $cursorName")
-            }).eitherLeft()
+            return ResourceManager.get<Cursor>(onjScreen, cursorName).eitherLeft()
         }
     }
 
     fun interpolationOrError(name: String): Interpolation = when (name) {
 
+        "linear" -> Interpolation.linear
         "swing" -> Interpolation.swing
         "swing in" -> Interpolation.swingIn
         "swing out" -> Interpolation.swingOut
@@ -155,6 +138,7 @@ object Utils {
         "circle" -> Interpolation.circle
         "circle in" -> Interpolation.circleIn
         "circle out" -> Interpolation.circleOut
+        "smooth" -> Interpolation.smooth
 
         else -> throw RuntimeException("Unknown interpolation: $name")
     }

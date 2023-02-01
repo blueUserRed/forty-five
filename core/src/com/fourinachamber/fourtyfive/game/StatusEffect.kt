@@ -1,14 +1,13 @@
 package com.fourinachamber.fourtyfive.game
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.fourinachamber.fourtyfive.screen.CustomImageActor
-import com.fourinachamber.fourtyfive.screen.ShakeActorAction
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
-import onj.OnjObject
 import kotlin.math.floor
-import kotlin.properties.Delegates
 
 /**
  * a status effect that can be applied to a [target]
@@ -26,13 +25,13 @@ abstract class StatusEffect(
     var turns: Int = _turns
         protected set
 
-    private lateinit var gameScreenController: GameScreenController
+    private lateinit var gameController: GameController
 
     /**
      * the remaining amount of revolver-turns this effect will stay active for
      */
     val remainingTurns: Int
-        get() = (startTurn + turns) - gameScreenController.turnCounter
+        get() = (startTurn + turns) - gameController.turnCounter
 
     private var startTurn: Int = 0
 
@@ -48,9 +47,8 @@ abstract class StatusEffect(
      */
     abstract fun copy(): StatusEffect
 
-    fun initIcon(gameScreenController: GameScreenController) {
-        val texture = gameScreenController.curScreen!!.textures[iconTextureName]
-            ?: throw RuntimeException("no texture with name $iconTextureName")
+    fun initIcon(gameController: GameController) {
+        val texture = ResourceManager.get<Drawable>(gameController.curScreen, iconTextureName)
         icon = CustomImageActor(texture)
         icon.setScale(iconScale)
         icon.reportDimensionsWithScaling = true
@@ -61,14 +59,14 @@ abstract class StatusEffect(
     /**
      * called after the revolver turned
      */
-    open fun onRevolverTurn(gameScreenController: GameScreenController) { }
+    open fun onRevolverTurn(gameController: GameController) { }
 
     /**
      * called after the status effect got applied
      */
-    open fun start(gameScreenController: GameScreenController) {
-        this.gameScreenController = gameScreenController
-        startTurn = gameScreenController.turnCounter
+    open fun start(gameController: GameController) {
+        this.gameController = gameController
+        startTurn = gameController.turnCounter
     }
 
     /**
@@ -90,21 +88,21 @@ abstract class StatusEffect(
      * returns a timeline containing the actions of this effect; null if this status effect does nothing after a round
      * finished
      */
-    open fun executeAfterRound(gameScreenController: GameScreenController): Timeline? = null
+    open fun executeAfterRound(gameController: GameController): Timeline? = null
 
 
     /**
      * returns a timeline containing the actions of this effect; null if this status effect does nothing after the
      * target got damaged
      */
-    open fun executeAfterDamage(gameScreenController: GameScreenController, damage: Int): Timeline? = null
+    open fun executeAfterDamage(gameController: GameController, damage: Int): Timeline? = null
 
 
     /**
      * returns a timeline containing the actions of this effect; null if this status effect does nothing after the
      * revolver turned
      */
-    open fun executeAfterRevolverTurn(gameScreenController: GameScreenController): Timeline? = null
+    open fun executeAfterRevolverTurn(gameController: GameController): Timeline? = null
 
 
     /**
@@ -114,28 +112,24 @@ abstract class StatusEffect(
         val damage: Int,
         turns: Int,
         target: StatusEffectTarget
-    ) : StatusEffect(poisonIconName, turns, target, poisonIconScale) {
+    ) : StatusEffect(
+        GraphicsConfig.iconName("poison"),
+        turns,
+        target,
+        GraphicsConfig.iconScale("poison")
+    ) {
 
         override fun copy(): StatusEffect = Poison(damage, turns, target)
 
         override fun executeAfterRevolverTurn(
-            gameScreenController: GameScreenController
+            gameController: GameController
         ): Timeline = Timeline.timeline {
-
             FourtyFiveLogger.debug(logTag, "executing poison effect")
+            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
 
-            val shakeActorAction = ShakeActorAction(xShake * 0.5f, yShake, xSpeedMultiplier, ySpeedMultiplier)
-            shakeActorAction.duration = shakeDuration
-
-            action { icon.addAction(shakeActorAction) }
-            delayUntil { shakeActorAction.isComplete }
-            delay(bufferTime)
-            action {
-                icon.removeAction(shakeActorAction)
-                shakeActorAction.reset()
-            }
-            include(target.damage(gameScreenController, damage))
-
+            includeAction(shakeActorAction)
+            delay(GraphicsConfig.bufferTime)
+            include(target.damage(damage))
         }
 
         override fun canStackWith(effect: StatusEffect): Boolean {
@@ -163,32 +157,31 @@ abstract class StatusEffect(
         turns: Int,
         private val percent: Float,
         target: StatusEffectTarget
-    ) : StatusEffect(burningIconName, turns, target, burningIconScale) {
+    ) : StatusEffect(
+        GraphicsConfig.iconName("burning"),
+        turns,
+        target,
+        GraphicsConfig.iconScale("burning")
+    ) {
 
         override fun copy(): StatusEffect = Burning(turns, percent, target)
 
-        override fun executeAfterRound(gameScreenController: GameScreenController): Timeline? = null
+        override fun executeAfterRound(gameController: GameController): Timeline? = null
 
         override fun executeAfterDamage(
-            gameScreenController: GameScreenController,
+            gameController: GameController,
             damage: Int
         ): Timeline = Timeline.timeline {
 
             FourtyFiveLogger.debug(logTag, "executing burning effect")
 
             val additionalDamage = floor(damage * percent).toInt()
-            val shakeActorAction = ShakeActorAction(xShake * 0.5f, yShake, xSpeedMultiplier, ySpeedMultiplier)
-            shakeActorAction.duration = shakeDuration
+            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
 
-            delay(bufferTime)
-            action { icon.addAction(shakeActorAction) }
-            delayUntil { shakeActorAction.isComplete }
-            delay(bufferTime)
-            action {
-                icon.removeAction(shakeActorAction)
-                shakeActorAction.reset()
-            }
-            include(target.damage(gameScreenController, additionalDamage))
+            delay(GraphicsConfig.bufferTime)
+            includeAction(shakeActorAction)
+            delay(GraphicsConfig.bufferTime)
+            include(target.damage(additionalDamage))
         }
 
         override fun canStackWith(effect: StatusEffect): Boolean {
@@ -209,83 +202,31 @@ abstract class StatusEffect(
         }
     }
 
-    companion object {
-
-        private var xShake by Delegates.notNull<Float>()
-        private var yShake by Delegates.notNull<Float>()
-        private var xSpeedMultiplier by Delegates.notNull<Float>()
-        private var ySpeedMultiplier by Delegates.notNull<Float>()
-        private var shakeDuration by Delegates.notNull<Float>()
-
-        private lateinit var dmgFontName: String
-        private lateinit var dmgFontColorNegative: Color
-        private lateinit var dmgFontColorPositive: Color
-        private var dmgFontScale by Delegates.notNull<Float>()
-        private var dmgDuration by Delegates.notNull<Int>()
-        private var dmgRaiseHeight by Delegates.notNull<Float>()
-        private var dmgStartFadeoutAt by Delegates.notNull<Int>()
-
-        private lateinit var poisonIconName: String
-        private var poisonIconScale by Delegates.notNull<Float>()
-        private lateinit var burningIconName: String
-        private var burningIconScale by Delegates.notNull<Float>()
-
-        private var bufferTime by Delegates.notNull<Int>()
-
-        fun init(config: OnjObject) {
-            val shakeOnj = config.get<OnjObject>("shakeAnimation")
-
-            xShake = shakeOnj.get<Double>("xShake").toFloat()
-            yShake = shakeOnj.get<Double>("yShake").toFloat()
-            xSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
-            ySpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
-            shakeDuration = shakeOnj.get<Double>("duration").toFloat()
-
-            val dmgOnj = config.get<OnjObject>("playerLivesAnimation")
-
-            dmgFontName = dmgOnj.get<String>("font")
-            dmgFontScale = dmgOnj.get<Double>("fontScale").toFloat()
-            dmgDuration = (dmgOnj.get<Double>("duration") * 1000).toInt()
-            dmgRaiseHeight = dmgOnj.get<Double>("raiseHeight").toFloat()
-            dmgStartFadeoutAt = (dmgOnj.get<Double>("startFadeoutAt") * 1000).toInt()
-            dmgFontColorPositive = Color.valueOf(dmgOnj.get<String>("positiveFontColor"))
-            dmgFontColorNegative = Color.valueOf(dmgOnj.get<String>("negativeFontColor"))
-
-            val statusIcons = config.get<OnjObject>("statusEffectIcons")
-
-            poisonIconName = statusIcons.get<String>("poison")
-            poisonIconScale = statusIcons.get<Double>("poisonScale").toFloat()
-            burningIconName = statusIcons.get<String>("burning")
-            burningIconScale = statusIcons.get<Double>("burningScale").toFloat()
-
-            bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
-        }
-
-    }
 
     /**
      * represents a possible target a status effect can be applied to
      */
     enum class StatusEffectTarget {
 
+        @Suppress("unused") // will be needed in the future
         PLAYER {
-            override fun getLivesActor(gameScreenController: GameScreenController): Actor {
-                return gameScreenController.playerLivesLabel!!
+            override fun getLivesActor(): Actor {
+                return FourtyFive.currentGame!!.playerLivesLabel
             }
-            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
-                return Timeline.timeline { //TODO: ??????????????
-                    action { gameScreenController.damagePlayer(damage) }
+            override fun damage(damage: Int): Timeline {
+                return Timeline.timeline {
+                    action { FourtyFive.currentGame!!.damagePlayer(damage) }
                 }
             }
         },
 
         ENEMY {
-            override fun getLivesActor(gameScreenController: GameScreenController): Actor {
-                return gameScreenController.enemyArea!!.enemies[0].actor.livesLabel
+            override fun getLivesActor(): Actor {
+                return FourtyFive.currentGame!!.enemyArea.enemies[0].actor.livesLabel
             }
 
-            override fun damage(gameScreenController: GameScreenController, damage: Int): Timeline {
-                return gameScreenController.enemyArea!!.enemies[0].damage(damage, gameScreenController)
+            override fun damage(damage: Int): Timeline {
+                return FourtyFive.currentGame!!.enemyArea.enemies[0].damage(damage)
             }
         }
         ;
@@ -293,12 +234,12 @@ abstract class StatusEffect(
         /**
          * returns the actor displaying the current and/or base lives of the target
          */
-        abstract fun getLivesActor(gameScreenController: GameScreenController): Actor
+        abstract fun getLivesActor(): Actor
 
         /**
          * returns a timeline containing the necessary actions to damage the target
          */
-        abstract fun damage(gameScreenController: GameScreenController, damage: Int): Timeline
+        abstract fun damage(damage: Int): Timeline
     }
 
 }

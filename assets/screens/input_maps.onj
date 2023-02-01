@@ -1,0 +1,86 @@
+
+use Screen;
+
+defaultInputMap: [
+    {
+        keycode: keys.F,
+        modifiers: [],
+        action: $ToggleFullscreenKeyAction {
+            width: 700,
+            height: 500
+        }
+    }
+],
+
+cardHandSelectionInputMap: [
+    {
+        keycode: keys."1",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 1
+        }
+    },
+    {
+        keycode: keys."2",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 2
+        }
+    },
+    {
+        keycode: keys."3",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 3
+        }
+    },
+    {
+        keycode: keys."4",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 4
+        }
+    },
+    {
+        keycode: keys."5",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 5
+        }
+    },
+    {
+        keycode: keys."6",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 6
+        }
+    },
+    {
+        keycode: keys."7",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 7
+        }
+    },
+    {
+        keycode: keys."8",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 8
+        }
+    },
+    {
+        keycode: keys."9",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 9
+        }
+    },
+    {
+        keycode: keys."0",
+        modifiers: [],
+        action: $SelectFirstInCardHandKeyAction {
+            num: 10
+        }
+    }
+]

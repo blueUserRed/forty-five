@@ -3,16 +3,15 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fourtyfive.screen.CustomLabel
-import com.fourinachamber.fourtyfive.screen.ScreenDataProvider
+import com.fourinachamber.fourtyfive.screen.general.CustomLabel
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import ktx.actors.alpha
 import java.lang.Float.min
 
@@ -52,8 +51,8 @@ abstract class GameAnimation {
  * @param endScale the scale of the banner after [animationDuration] ms have passed
  */
 class BannerAnimation(
-    val banner: TextureRegion,
-    private val screenDataProvider: ScreenDataProvider,
+    val banner: Drawable,
+    private val onjScreen: OnjScreen,
     private val duration: Int,
     private val animationDuration: Int,
     private val beginScale: Float,
@@ -68,23 +67,23 @@ class BannerAnimation(
         val percent = min(timeDiff.toFloat() / animationDuration.toFloat(), 1f)
         val scale = beginScale + (endScale - beginScale) * percent
 
-        val viewport = screenDataProvider.stage.viewport
+        val viewport = onjScreen.stage.viewport
         val worldWidth = viewport.worldWidth
         val worldHeight = viewport.worldHeight
 
-        batch.draw(
-            banner,
-            worldWidth / 2 - (banner.regionWidth * scale) / 2f,
-            worldHeight / 2 - (banner.regionHeight * scale) / 2,
-            banner.regionWidth.toFloat() * scale,
-            banner.regionHeight.toFloat() * scale,
+        banner.draw(
+            batch,
+            worldWidth / 2 - (banner.minWidth * scale) / 2f,
+            worldHeight / 2 - (banner.minHeight * scale) / 2,
+            banner.minWidth * scale,
+            banner.minHeight * scale,
         )
     }
 
     override fun start() {
         startTime = TimeUtils.millis()
         runUntil = startTime + duration
-        screenDataProvider.addLateRenderTask(renderTask)
+        onjScreen.addLateRenderTask(renderTask)
     }
 
     override fun update() { }
@@ -92,7 +91,7 @@ class BannerAnimation(
     override fun isFinished(): Boolean = TimeUtils.millis() >= runUntil
 
     override fun end() {
-        screenDataProvider.removeLateRenderTask(renderTask)
+        onjScreen.removeLateRenderTask(renderTask)
     }
 
     override fun toString(): String = "BannerAnimation"
@@ -105,12 +104,12 @@ class TextAnimation(
     private val x: Float,
     private val y: Float,
     initialText: String,
-    private val fontColor: Color,
+    fontColor: Color,
     private val fontScale: Float,
-    private val font: BitmapFont,
+    font: BitmapFont,
     private val raise: Float,
     private val startFadeOutAt: Int,
-    private val screenDataProvider: ScreenDataProvider,
+    private val onjScreen: OnjScreen,
     private val duration: Int
 ) : GameAnimation() {
 
@@ -130,7 +129,7 @@ class TextAnimation(
         runUntil = startTime + duration
         label.setFontScale(fontScale)
         label.fixedZIndex = Int.MAX_VALUE // lol
-        screenDataProvider.addActorToRoot(label)
+        onjScreen.addActorToRoot(label)
         label.setAlignment(Align.center)
     }
 
@@ -157,7 +156,7 @@ class TextAnimation(
     }
 
     override fun end() {
-        screenDataProvider.removeActorFromRoot(label)
+        onjScreen.removeActorFromRoot(label)
     }
 
     override fun toString(): String = "TextAnimation(${label.text})"
@@ -177,7 +176,7 @@ open class FadeInAndOutAnimation(
     protected val x: Float,
     protected val y: Float,
     val actor: Actor,
-    private val screenDataProvider: ScreenDataProvider,
+    private val onjScreen: OnjScreen,
     private val duration: Int,
     private val fadeIn : Int,
     private val fadeOut : Int,
@@ -190,7 +189,7 @@ open class FadeInAndOutAnimation(
     override fun start() {
         startTime = TimeUtils.millis()
         runUntil = startTime + duration
-        screenDataProvider.addActorToRoot(actor)
+        onjScreen.addActorToRoot(actor)
         if (actor is Widget && fixedDimensions == null) {
             actor.width = actor.prefWidth
             actor.height = actor.prefHeight
@@ -217,7 +216,7 @@ open class FadeInAndOutAnimation(
     }
 
     override fun end() {
-        screenDataProvider.removeActorFromRoot(actor)
+        onjScreen.removeActorFromRoot(actor)
     }
 
     override fun toString(): String = "FadeInAndOutAnimation"
@@ -234,17 +233,17 @@ class FadeInAndOutTextAnimation(
     x: Float,
     y: Float,
     initialText: String,
-    private val fontColor: Color,
+    fontColor: Color,
     private val fontScale: Float,
-    private val font: BitmapFont,
-    screenDataProvider: ScreenDataProvider,
+    font: BitmapFont,
+    onjScreen: OnjScreen,
     duration: Int,
     fadeIn : Int,
     fadeOut : Int
 ) : FadeInAndOutAnimation(
     x, y,
     CustomLabel(initialText, Label.LabelStyle(font, fontColor)),
-    screenDataProvider,
+    onjScreen,
     duration, fadeIn, fadeOut
 ) {
 

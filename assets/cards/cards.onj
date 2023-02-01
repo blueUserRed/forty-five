@@ -1,411 +1,408 @@
 
-!burningPercent = 0.5
-!poisonDamage = 3
+use Cards;
 
-!_bNumArrs = {
-    allExceptSelf: [1, 2, 3, 4, 5]
-    fourButNotSelf: [ 4 ]
-}
+var burningPercent = 0.5;
+var poisonDamage = 3;
 
-!bSelects = {
-    allExceptSelf: bNum(!_bNumArrs.allExceptSelf)
-    allBullets: bSelectByName("bullet")
-    fourButNotSelf: bNum(!_bNumArrs.fourButNotSelf)
-}
+var bSelects = {
+    allExceptSelf: bNum([1, 2, 3, 4, 5]),
+    allBullets: bSelectByName("bullet"),
+    fourButNotSelf: bNum([4])
+};
 
 cards: [
 
     // Bullets ----------------------------------
 
     {
-        name: "incendiaryBullet"
-        title: "incendiary Bullet"
-        flavourText: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime"'
-        description: 'If this Bullet shoots: The enemy gets the status burning for 3 revolver turns'
-        baseDamage: 7
-        coverValue: 0
-        traitEffects: []
+        name: "incendiaryBullet",
+        title: "incendiary Bullet",
+        flavourText: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime"',
+        description: 'If this Bullet shoots: The enemy gets the status burning for 3 revolver turns',
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
         effects: [
-            giveStatus("shot", burning(3, !burningPercent))
-            giveStatus("destroy", burning(3, !burningPercent))
-        ]
-        cost: 1
+            giveStatus("shot", burning(3, burningPercent)),
+            giveStatus("destroy", burning(3, burningPercent)),
+        ],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "workerBullet"
-        title: "worker Bullet"
-        flavourText: "backup on the way"
-        description: "This Bullet adds one reserve at the beginning of every turn"
-        baseDamage: 5
-        coverValue: 0
-        traitEffects: []
-        effects: [ reserveGain("round start", 1) ]
-        cost: 1
+        name: "workerBullet",
+        title: "worker Bullet",
+        flavourText: "backup on the way",
+        description: "This Bullet adds one reserve at the beginning of every turn",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [ reserveGain("round start", 1) ],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "bigBullet"
-        title: "big Bullet"
-        flavourText: "bullet but like... idk bigger"
-        description: ""
-        baseDamage: 16
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 2
+        name: "bigBullet",
+        title: "big Bullet",
+        flavourText: "bullet but like... idk bigger",
+        description: "",
+        baseDamage: 16,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [],
+        cost: 2,
         type: $Bullet { }
-    }
+    },
     {
-        name: "rottenBullet"
-        title: "rotten Bullet"
-        flavourText: "might have forgotten it in my sattlebag..."
-        description: "looses 1 damage for everytime it turns in the revolver"
-        baseDamage: 10
-        coverValue: 0
-        traitEffects: [ "rotten" ]
-        effects: []
-        cost: 1
+        name: "rottenBullet",
+        title: "rotten Bullet",
+        flavourText: "might have forgotten it in my sattlebag...",
+        description: "looses 1 damage for everytime it turns in the revolver",
+        baseDamage: 16,
+        coverValue: 0,
+        traitEffects: [ "rotten" ],
+        effects: [],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "diamondBullet"
-        title: "diamond Bullet"
-        flavourText: "Shiny"
-        description: "If this Bullet enters the revolver: you draw 2 cards; If this Bullet shoots, your draw a card"
-        baseDamage: 23
-        coverValue: 0
-        traitEffects: []
-        effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ]
-        cost: 3
+        name: "diamondBullet",
+        title: "diamond Bullet",
+        flavourText: "Shiny",
+        description: "If this Bullet enters the revolver: you draw 2 cards; If this Bullet shoots, your draw a card",
+        baseDamage: 23,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ],
+        cost: 3,
         type: $Bullet { }
-    }
+    },
     {
-        name: "bewitchedBullet"
-        title: "bewitched Bullet"
-        flavourText: "Can you burn a Bullet on a pyre? We can try"
-        description: "If this Bullet is shot, the revolver turns one to the left instead of to the right"
-        baseDamage: 7
-        coverValue: 0
-        traitEffects: [ "leftRotating" ]
-        effects: []
-        cost: 1
+        name: "bewitchedBullet",
+        title: "bewitched Bullet",
+        flavourText: "Can you burn a Bullet on a pyre? We can try",
+        description: "If this Bullet is shot, the revolver turns one to the left instead of to the right",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [ "leftRotating" ],
+        effects: [],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "explosiveBullet"
-        title: "explosive Bullet"
-        flavourText: "Holds its promise. Just ask the residents of New Hemingway. Wait, you can't"
-        description: "If this Bullet shoots: The enemy gets the status burning for 2 revolver turns"
-        baseDamage: 15
-        coverValue: 0
-        traitEffects: []
+        name: "explosiveBullet",
+        title: "explosive Bullet",
+        flavourText: "Holds its promise. Just ask the residents of New Hemingway. Wait, you can't",
+        description: "If this Bullet shoots: The enemy gets the status burning for 2 revolver turns",
+        baseDamage: 15,
+        coverValue: 0,
+        traitEffects: [],
         effects: [
-            giveStatus("shot", burning(2, !burningPercent))
-            giveStatus("destroy", burning(2, !burningPercent))
-        ]
-        cost: 2
+            giveStatus("shot", burning(2, burningPercent)),
+            giveStatus("destroy", burning(2, burningPercent))
+        ],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "leadersBullet"
-        title: "leaders Bullet"
-        flavourText: "Just don't ask what it was doing in 1939-1945"
-        description: "If this Bullet enters the revolver: all other bullets get +4 damage as long as this Bullet is in the Revolver"
-        baseDamage: 15
-        coverValue: 0
-        traitEffects: []
-        effects: [ buffDmg("enter", !bSelects.allExceptSelf, 4) ]
-        cost: 2
+        name: "leadersBullet",
+        title: "leaders Bullet",
+        flavourText: "Just don't ask what it was doing in 1939-1945",
+        description: "If this Bullet enters the revolver: all other bullets get +4 damage as long as this Bullet is in the Revolver",
+        baseDamage: 15,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [ buffDmg("enter", bSelects.allExceptSelf, 4) ],
+        cost: 2,
         type: $Bullet { }
-    }
+    },
     {
-        name: "silverBullet"
-        title: "silver Bullet"
-        flavourText: "This Bullet is silver and silence is golden"
-        description: "If this Bullet enters the revolver or if it is shot: you draw 1 card"
-        baseDamage: 7
-        coverValue: 0
-        traitEffects: []
-        effects: [ draw("enter", 1), draw("shot", 1), draw("destroy", 1) ]
-        cost: 1
+        name: "silverBullet",
+        title: "silver Bullet",
+        flavourText: "This Bullet is silver and silence is golden",
+        description: "If this Bullet enters the revolver or if it is shot: you draw 1 card",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [ draw("enter", 1), draw("shot", 1), draw("destroy", 1) ],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "bullet"
-        title: "bullet"
-        flavourText: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright"
-        description: ""
-        baseDamage: 6
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 1
+        name: "bullet",
+        title: "bullet",
+        flavourText: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright",
+        description: "",
+        baseDamage: 6,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "arrow"
-        title: "arrow"
-        flavourText: "Have you actually shot an arrow with a revolver? No? Then stop saying it won't work"
-        description: "If this 'Bullet' is shot, it will continue in the revolver (it continues to turn right after it was shot (shot triggers still apply))"
-        baseDamage: 5
-        coverValue: 0
-        traitEffects: [ "everlasting" ]
-        effects: [ ]
-        cost: 1
+        name: "arrow",
+        title: "arrow",
+        flavourText: "Have you actually shot an arrow with a revolver? No? Then stop saying it won't work",
+        description: "If this 'Bullet' is shot, it will continue in the revolver (it continues to turn right after it was shot (shot triggers still apply))",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [ "everlasting" ],
+        effects: [ ],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
     {
-        name: "BFB"
-        title: "BFB"
-        flavourText: "Big fucking Bullet"
-        description: ""
-        baseDamage: 50
-        coverValue: 0
-        traitEffects: []
-        effects: []
-        cost: 5
+        name: "BFB",
+        title: "BFB",
+        flavourText: "Big fucking Bullet",
+        description: "",
+        baseDamage: 50,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [],
+        cost: 5,
         type: $Bullet { }
-    }
+    },
     {
-        name: "obsidianBullet"
-        title: "obsidian Bullet"
-        flavourText: "no, you CAN'T make a portal out of it"
-        description: ""
-        baseDamage: 20
-        coverValue: 0
-        traitEffects: []
-        effects: [ ]
-        cost: 2
+        name: "obsidianBullet",
+        title: "obsidian Bullet",
+        flavourText: "no, you CAN'T make a portal out of it",
+        description: "",
+        baseDamage: 20,
+        coverValue: 0,
+        traitEffects: [],
+        effects: [ ],
+        cost: 2,
         type: $Bullet { }
-    }
+    },
     {
-         name: "rustedBullet"
-         title: "rusted Bullet"
-         flavourText: "those fucking kids with their rain dances"
-         description: "looses 1 dmg for everytime it turns in the revolver"
-         baseDamage: 5
-         coverValue: 0
-         traitEffects: [ "rotten" ]
-         effects: [ ]
-         cost: 0
+         name: "rustedBullet",
+         title: "rusted Bullet",
+         flavourText: "those fucking kids with their rain dances",
+         description: "looses 1 dmg for everytime it turns in the revolver",
+         baseDamage: 10,
+         coverValue: 0,
+         traitEffects: [ "rotten" ],
+         effects: [ ],
+         cost: 0,
          type: $Bullet { }
-    }
+    },
     {
-         name: "invisibleBullet"
-         title: "invisible Bullet"
-         flavourText: '"        "'
-         description: ""
-         baseDamage: 0
-         coverValue: 0
-         traitEffects: []
-         effects: [ ]
-         cost: 0
+         name: "invisibleBullet",
+         title: "invisible Bullet",
+         flavourText: '"        "',
+         description: "",
+         baseDamage: 0,
+         coverValue: 0,
+         traitEffects: [],
+         effects: [ ],
+         cost: 0,
          type: $Bullet { }
-    }
+    },
     {
-         name: "fakeBullet"
-         title: "fake Bullet"
-         flavourText: "yeah, that's how I felt when  I bought it. Scammed. At least I got some value out of it"
-         description: "If this  Bullet shoots: add four reserves"
-         baseDamage: 0
-         coverValue: 0
-         traitEffects: []
+         name: "fakeBullet",
+         title: "fake Bullet",
+         flavourText: "yeah, that's how I felt when  I bought it. Scammed. At least I got some value out of it",
+         description: "If this  Bullet shoots: add four reserves",
+         baseDamage: 0,
+         coverValue: 0,
+         traitEffects: [],
          effects: [
-            reserveGain("shot", 2)
-            reserveGain("destroy", 2)
-         ]
-         cost: 2
+            reserveGain("shot", 4),
+            reserveGain("destroy", 4)
+         ],
+         cost: 2,
          type: $Bullet { }
-    }
+    },
     {
-         name: "bulletBulletBullet"
-         title: "bullet bullet bullet"
-         flavourText: "It's getting old..."
-         description: "If this Bullet enters the revolver: all other bullets named [Bullet] get +10 dmg as long as this Bullet is in the Revolver"
-         baseDamage: 16
-         coverValue: 0
-         traitEffects: []
-         effects: [ buffDmg("enter", !bSelects.allBullets, 10) ]
-         cost: 3
+         name: "bulletBulletBullet",
+         title: "bullet bullet bullet",
+         flavourText: "It's getting old...",
+         description: "If this Bullet enters the revolver: all other bullets named [Bullet] get +10 dmg as long as this Bullet is in the Revolver",
+         baseDamage: 16,
+         coverValue: 0,
+         traitEffects: [],
+         effects: [ buffDmg("enter", bSelects.allBullets, 10) ],
+         cost: 3,
          type: $Bullet { }
-    }
+    },
     {
-         name: "bulletBullet"
-         title: "bullet bullet"
-         flavourText: "Daaaamn, can i put ma Bulllet in ya Bullet? "
-         description: "If this Bullet enters the revolver: create 3 cards named [Bullet] in your hand"
-         baseDamage: 16
-         coverValue: 0
-         traitEffects: []
-         effects: [ putCardInHand("enter", "bullet", 3) ]
-         cost: 2
-         type: $Bullet { }
-    }
+         name: "bulletBullet",
+         title: "bullet bullet",
+         flavourText: "Daaaamn, can i put ma Bulllet in ya Bullet? ",
+         description: "If this Bullet enters the revolver: create 3 cards named [Bullet] in your hand",
+         baseDamage: 16,
+         coverValue: 0,
+         traitEffects: [],
+         effects: [ putCardInHand("enter", "bullet", 3) ],
+         cost: 2,
+         type: $Bullet { },
+    },
     {
-         name: "undeadBullet"
-         title: "undead Bullet"
-         flavourText: "does that happen to all ma bullets? The witch didn't mention thaat."
-         description: "If this Bullet dies or is destroyed: Put it in your hand. When this Bullet dies: the Bullet that is in slot 4 at the time this Bullet is fired gets +5 dmg"
-         baseDamage: 12
-         coverValue: 0
-         traitEffects: [ "undead" ]
+         name: "undeadBullet",
+         title: "undead Bullet",
+         flavourText: "does that happen to all ma bullets? The witch didn't mention thaat.",
+         description: "If this Bullet dies or is destroyed: Put it in your hand. When this Bullet dies: the Bullet that is in slot 4 at the time this Bullet is fired gets +5 dmg",
+         baseDamage: 12,
+         coverValue: 0,
+         traitEffects: [ "undead" ],
          effects: [
-            giftDmg("shot", !bSelects.fourButNotSelf, 5),
-            giftDmg("destroy", !bSelects.fourButNotSelf, 5)
-        ]
-         cost: 2
+            giftDmg("shot", bSelects.fourButNotSelf, 5),
+            giftDmg("destroy", bSelects.fourButNotSelf, 5)
+        ],
+         cost: 2,
          type: $Bullet { }
-    }
+    },
     {
-        name: "poisonBullet"
-        title: "poison Bullet"
-        flavourText: "if you use this bullet, folks might call you a coward. And they would be right"
-        description: "If this Bullet shoots: The enemy gets the status poison for 3 revolver turns"
-        baseDamage: 9
-        coverValue: 0
-        traitEffects: []
+        name: "poisonBullet",
+        title: "poison Bullet",
+        flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
+        description: "If this Bullet shoots: The enemy gets the status poison for 3 revolver turns",
+        baseDamage: 9,
+        coverValue: 0,
+        traitEffects: [],
         effects: [
-            giveStatus("shot", poison(3, !poisonDamage))
-            giveStatus("destroy", poison(3, !poisonDamage))
-        ]
-        cost: 1
+            giveStatus("shot", poison(3, poisonDamage)),
+            giveStatus("destroy", poison(3, poisonDamage))
+        ],
+        cost: 1,
         type: $Bullet { }
-    }
+    },
 
 
     // Cover ----------------------------------
 
     {
-        name: "crate"
-        title: "crate"
-        flavourText: "ol' reliable"
-        description: ""
-        baseDamage: 0
-        coverValue: 3
-        traitEffects: []
-        effects: []
-        cost: 1
+        name: "crate",
+        title: "crate",
+        flavourText: "ol' reliable",
+        description: "",
+        baseDamage: 0,
+        coverValue: 3,
+        traitEffects: [],
+        effects: [],
+        cost: 1,
         type: $Cover { }
-    }
+    },
 
     {
-        name: "bigCrate"
-        title: "big Crate"
-        flavourText: "big ol' reliable"
-        description: ""
-        baseDamage: 0
-        coverValue: 5
-        traitEffects: []
-        effects: []
-        cost: 2
+        name: "bigCrate",
+        title: "big Crate",
+        flavourText: "big ol' reliable",
+        description: "",
+        baseDamage: 0,
+        coverValue: 5,
+        traitEffects: [],
+        effects: [],
+        cost: 2,
         type: $Cover { }
-    }
+    },
 
     {
-        name: "casket"
-        title: "casket"
-        flavourText: "Let's hope you won't see the inside any time soon. If yes it's red carpet inside"
-        description: "If this cover is placed down: destroy one target Bullet in the revolver"
-        baseDamage: 0
-        coverValue: 5
-        traitEffects: []
-        effects: [ destroy("enter") ]
-        cost: 1
+        name: "casket",
+        title: "casket",
+        flavourText: "Let's hope you won't see the inside any time soon. If yes it's red carpet inside",
+        description: "If this cover is placed down: destroy one target Bullet in the revolver",
+        baseDamage: 0,
+        coverValue: 5,
+        traitEffects: [],
+        effects: [ destroy("enter") ],
+        cost: 1,
         type: $Cover { }
-    }
+    },
 
     {
-        name: "jewelryBox"
-        title: "jewelry Box"
-        flavourText: "The lady I took it from didn't need it anyways"
-        description: "If this Cover is placed down: draw 1 card"
-        baseDamage: 0
-        coverValue: 3
-        traitEffects: []
-        effects: [ draw("enter", 1) ]
-        cost: 1
+        name: "jewelryBox",
+        title: "jewelry Box",
+        flavourText: "The lady I took it from didn't need it anyways",
+        description: "If this Cover is placed down: draw 1 card",
+        baseDamage: 0,
+        coverValue: 3,
+        traitEffects: [],
+        effects: [ draw("enter", 1) ],
+        cost: 1,
         type: $Cover { }
-    }
+    },
 
     {
-        name: "treasureChest"
-        title: "treasure Chest"
-        flavourText: "Found it at crestcreek. That stupid ol bastard thought hiding it under a damn rock would make it invisible or somethin'"
-        description: "This Cover lets you draw 1 card at the beginning of every turn"
-        baseDamage: 0
-        coverValue: 6
-        traitEffects: []
-        effects: [ draw("round start", 1) ]
-        cost: 3
+        name: "treasureChest",
+        title: "treasure Chest",
+        flavourText: "Found it at crestcreek. That stupid ol bastard thought hiding it under a damn rock would make it invisible or somethin'",
+        description: "This Cover lets you draw 1 card at the beginning of every turn",
+        baseDamage: 0,
+        coverValue: 6,
+        traitEffects: [],
+        effects: [ draw("round start", 1) ],
+        cost: 3,
         type: $Cover { }
     }
 
-]
+],
 
-defaultBullet: "bullet"
-defaultCover: "crate"
+defaultBullet: "bullet",
+defaultCover: "crate",
 
 startDeck: [
 
     {
-        name: "bullet"
+        name: "bullet",
         amount: 4
-    }
+    },
     {
-        name: "incendiaryBullet"
+        name: "incendiaryBullet",
         amount: 2
-    }
+    },
     {
-        name: "workerBullet"
+        name: "workerBullet",
         amount: 1
-    }
+    },
     {
-        name: "bigBullet"
+        name: "bigBullet",
         amount: 2
-    }
+    },
     {
-        name: "rottenBullet"
+        name: "rottenBullet",
         amount: 1
-    }
+    },
     {
-        name: "diamondBullet"
+        name: "diamondBullet",
         amount: 1
-    }
+    },
     {
-        name: "bewitchedBullet"
+        name: "bewitchedBullet",
         amount: 1
-    }
+    },
     {
-        name: "explosiveBullet"
+        name: "explosiveBullet",
         amount: 1
-    }
+    },
     {
-        name: "leadersBullet"
+        name: "leadersBullet",
         amount: 1
-    }
+    },
     {
-        name: "silverBullet"
+        name: "silverBullet",
         amount: 1
-    }
+    },
     {
-        name: "crate"
+        name: "crate",
         amount: 5
-    }
+    },
     {
-        name: "bigCrate"
+        name: "bigCrate",
         amount: 2
-    }
+    },
     {
-        name: "casket"
+        name: "casket",
         amount: 1
-    }
+    },
     {
-        name: "jewelryBox"
+        name: "jewelryBox",
         amount: 1
-    }
+    },
     {
-        name: "treasureChest"
+        name: "treasureChest",
         amount: 1
     }
 

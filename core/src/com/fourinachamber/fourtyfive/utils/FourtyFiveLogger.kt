@@ -1,10 +1,10 @@
 package com.fourinachamber.fourtyfive.utils
 
 import com.badlogic.gdx.Gdx
-import onj.OnjNamedObject
-import onj.OnjObject
-import onj.OnjParser
-import onj.OnjSchemaParser
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import java.io.PrintStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

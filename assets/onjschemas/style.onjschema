@@ -1,0 +1,6 @@
+use Style;
+
+styles: {
+    name: string,
+    properties: StyleProperty[]
+}[]
