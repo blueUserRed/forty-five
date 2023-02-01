@@ -26,9 +26,6 @@ object FourtyFive : Game() {
     var currentGame: GameController? = null
 
     override fun create() {
-//        val s = TemplateString("{test}", mapOf("test" to 5))
-//        println(s.string)
-//        return
         init()
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
@@ -43,6 +40,10 @@ object FourtyFive : Game() {
         currentScreen?.dispose()
         currentScreen = screen
         setScreen(screen)
+    }
+
+    override fun render() {
+
     }
 
     private fun init() {

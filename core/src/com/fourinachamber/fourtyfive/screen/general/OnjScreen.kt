@@ -153,26 +153,6 @@ open class OnjScreen(
     fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
     fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
 
-//    fun drawableOrError(name: String): Drawable {
-//        return ResourceManager.get(this, name)
-//    }
-//
-//    fun fontOrError(name: String): BitmapFont {
-//        return ResourceManager.get(this, name)
-//    }
-//
-//    fun postProcessorOrError(name: String): PostProcessor = postProcessors[name] ?: throw RuntimeException(
-//        "no post processor named $name"
-//    )
-//
-//    fun particleOrError(name: String): ParticleEffect = particles[name] ?: throw RuntimeException(
-//        "no particle named $name"
-//    )
-//
-//    fun cursorOrError(name: String): Cursor = cursors[name] ?: throw RuntimeException(
-//        "no cursor named $name"
-//    )
-
     fun namedActorOrError(name: String): Actor = namedActors[name] ?: throw RuntimeException(
         "no actor named $name"
     )
@@ -196,16 +176,6 @@ open class OnjScreen(
     override fun show() {
         screenController?.init(this)
         val multiplexer = InputMultiplexer()
-//        val inputMap = KeyInputMap(listOf(
-//            KeyInputMapEntry(Keys.F, listOf()) {
-//                if (!Gdx.graphics.isFullscreen) {
-//                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-//                } else {
-//                    Gdx.graphics.setWindowedMode(600, 400)
-//                }
-//                return@KeyInputMapEntry true
-//            }
-//        ))
         keyInputMap?.let { multiplexer.addProcessor(it) }
         multiplexer.addProcessor(stage)
         Gdx.input.inputProcessor = multiplexer
