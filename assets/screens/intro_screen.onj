@@ -1,106 +1,48 @@
-import "imports/colors.onj" as color
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
 
-!worldWidth = 160.0
-!worldHeight = 90.0
+use Common;
+use Screen;
+use Style;
 
+var worldWidth = 160.0;
+var worldHeight = 90.0;
 
 viewport: $FitViewport {
-    worldWidth: !worldWidth
-    worldHeight: !worldHeight
-    backgroundTexture: "background"
-}
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
 
-!toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
-    screenPath: "screens/title_screen.onj"
-}
+root: $Box {
+    properties: [
+        alignItems("center"),
+        justifyContent("center"),
+        relWidth(100.0),
+        relHeight(100.0)
+    ]
+} children [
 
-!hoverBehaviour = $MouseHoverBehaviour {
-    useSystemCursor: true
-    cursorName: "hand"
-    disabled: null
-}
-
-children: [
-
-    $VerticalGroup {
-        align: "center"
-        expand: true
-//        debug: true
-        children: [
-            $Image {
-                name: "logo"
-                visible: false
-                textureName: "logo"
-                reportDimensionsWithScaling: true
-                scaleX: 0.13
-                scaleY: 0.13
-            //        width: !worldWidth
-            }
-        ]
+    $Image {
+        name: "logo",
+        visible: false,
+        textureName: "logo",
+        reportDimensionsWithScaling: true,
+        scaleX: 0.13,
+        scaleY: 0.13,
     }
 
-]
+],
 
 assets: {
-    textures: [
-//        {
-//            name: "background"
-//            file: "textures/screens/win_screen.png"
-//        }
-        {
-            name: "logo"
-            file: "textures/title_screen/logo.png"
-        }
-    ]
-    fonts: [
-
-//        $DistanceFieldFont {
-//            name: "red_wing"
-//            fontFile: "fonts/red_wing.fnt"
-//            imageFile: "fonts/red_wing.png"
-//        }
-
-    ]
-    textureAtlases: []
-    cursors: []
-    postProcessors: [
-        {
-            name: "vignette"
-            vertexShader: "shaders/vignette/vignette.vert"
-            fragmentShader: "shaders/vignette/vignette.frag"
-            timeOffset: 0
-            uniforms: [ "time", "resolution" ]
-            args: {
-                color: color("000000")
-                speed: 0.0
-                movement: 1.0
-                minMovement: 1.0
-            }
-        }
-    ]
-    animations: []
-    colorTextures: [
-        {
-            name: "background"
-            color: "615130"
-        }
-    ]
-    particles: []
-}
+    useCardAtlas: true,
+    useAssets: [ "logo", "beige_texture" ]
+},
 
 options: {
-    setFillParentOnRoot: true
-    defaultCursor: {
-        useSystemCursor: true
-        cursorName: "arrow"
-    }
-    postProcessor: null
-//    postProcessor: "vignette"
-    controller: $IntroScreenController {
-        cardAtlasFile: "cards/generated/cards.atlas"
-        appearActor: "logo"
+    background: "beige_texture",
+    inputMap: inputMaps.defaultInputMap,
+    screenController: $IntroScreenController {
+        appearActor: "logo",
         nextScreen: "screens/title_screen.onj"
     }
-    printFrameRate: false
-//    controller: null
 }

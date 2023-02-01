@@ -1,0 +1,201 @@
+/////////////////////////////////////////////////
+//               experimental                  //
+/////////////////////////////////////////////////
+
+import "imports/colors.onj" as color;
+
+use Experimental__Screen;
+use Experimental__Style;
+
+viewport: $FitViewport {
+    worldWidth: 160.0,
+    worldHeight: 90.0
+},
+
+assets: {
+    colorTextures: [
+        {
+            name: "white",
+            color: color.white
+        },
+        {
+            name: "black",
+            color: color.black
+        },
+        {
+            name: "card_detail_background",
+            color: color.backgroundTransparent
+        }
+    ],
+    fonts: [
+        $DistanceFieldFont {
+            name: "red_wing",
+            fontFile: "fonts/red_wing.fnt",
+            imageFile: "fonts/red_wing.png"
+        }
+    ],
+    textureAtlases: [
+        {
+            file: "textures/packed/title_screen/title_screen.atlas",
+            defines: [ "background3", "logo"]
+        },
+        {
+            file: "textures/packed/game_screen/game_screen.atlas",
+            defines: [
+                "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
+                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum",
+                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon",
+                "poison_icon", "draw_bullet", "draw_cover"
+            ]
+        }
+
+    ],
+    styleFiles: [ "screens/test_style.onj" ],
+},
+
+options: {
+    background: "background3"
+},
+
+
+var drawCardActor = $Box {
+    properties: [
+        position("absolute"),
+        background("card_detail_background"),
+        flexDirection("column"),
+        relWidth(100.0),
+        relHeight(100.0)
+    ],
+    name: "card_draw_table",
+    debug: true
+} children [
+
+    $TemplateLabel {
+        font: "red_wing",
+        template: "draw x cards",
+        fontScale: 0.18,
+        align: "center",
+        color: color.white
+    },
+
+    $Box {
+        properties: [
+            flexDirection("row")
+        ]
+    } children [
+
+        $Box {
+            properties: [
+                flexDirection("column")
+            ]
+        } children [
+
+            $TemplateLabel {
+                font: "red_wing",
+                template: "x bullets remaining in stack",
+                fontScale: 0.13,
+                align: "center",
+                color: color.white
+            },
+
+            $Image {
+                properties: [
+                ],
+                textureName: "draw_bullet",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.08,
+                scaleY: 0.08,
+                behaviours: [ ]
+            }
+
+        ],
+
+        $Box {
+            properties: [
+                flexDirection("column"),
+            ]
+        } children [
+
+            $TemplateLabel {
+                font: "red_wing",
+                template: "5 covers remaining in stack",
+                fontScale: 0.13,
+                align: "center",
+                color: color.white
+            },
+
+            $Image {
+                properties: [
+                ],
+                textureName: "draw_cover",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.08,
+                scaleY: 0.08,
+                behaviours: [ ]
+            }
+
+        ]
+
+    ]
+
+];
+
+root: $Box {
+} children [
+
+    $Box {
+        properties: [
+            position("absolute"),
+            relWidth(100.0),
+            relHeight(100.0)
+        ],
+        debug: true
+    },
+
+    drawCardActor
+]
+
+//root: {
+//    debug: true,
+//} children [
+//
+//    $Label {
+//        text: "Hello World",
+//        font: "red_wing",
+//        fontScale: 0.18,
+//        color: color.black,
+//        debug: true,
+//        styles: [ "test_style" ]
+//    },
+//
+//    $Label {
+//        text: "Hello World 2",
+//        font: "red_wing",
+//        fontScale: 0.18,
+//        color: color.white,
+//        debug: true,
+//        directProperties: [ background("black") ]
+//    },
+//
+//    $Box {
+//        debug: true,
+//        directProperties: [ relWidth(50.0) ]
+//    } children [
+//
+//        $Label {
+//            text: "Test",
+//            font: "red_wing",
+//            fontScale: 0.18,
+//            color: color.white,
+//            debug: true
+//        },
+//
+//        $Label {
+//            text: "Test 2",
+//            font: "red_wing",
+//            fontScale: 0.18,
+//            color: color.white,
+//            debug: true
+//        }
+//    ]
+//]

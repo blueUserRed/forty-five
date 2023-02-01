@@ -1,23 +1,26 @@
 
-$Font [
+$Font {
 
     $BitmapFont {
-        name: string
-        file: string
+        name: string,
+        file: string,
+        markupEnabled?: boolean
     }
 
     $FreeTypeFont {
-        name: string
-        file: string
-        size: int
+        name: string,
+        file: string,
+        size: int,
+        markupEnabled?: boolean
     }
 
     $DistanceFieldFont {
-        name: string
-        fontFile: string
-        imageFile: string
-        color?: string
-        useMipMapLinearLinear?: boolean
+        name: string,
+        fontFile: string,
+        imageFile: string,
+        color?: string,
+        useMipMapLinearLinear?: boolean,
+        markupEnabled?: boolean
     }
 
-]
+}

@@ -1,84 +1,123 @@
 
-bufferTime: float
+use Common;
+
+bufferTime: float,
+
+enemyConfig: {
+    // this is validated by game_config.onjschema anyway
+    ...*
+},
+
+enemyUsedAssets: string[],
 
 shakeAnimation: {
-    xShake: float
-    yShake: float
-    xSpeed: float
-    ySpeed: float
-    duration: float
-}
+    xShake: float,
+    yShake: float,
+    xSpeed: float,
+    ySpeed: float,
+    duration: float,
+},
 
 enemyChargeAnimation: {
-    xCharge: float
-    yCharge: float
-    duration: float
-    interpolation: string
-}
+    xCharge: float,
+    yCharge: float,
+    duration: float,
+    interpolation: string,
+},
 
 enemyQuickChargeAnimation: {
-    xCharge: float
-    yCharge: float
-    duration: float
-    interpolation: string
-}
+    xCharge: float,
+    yCharge: float,
+    duration: float,
+    interpolation: string,
+},
 
-playerLivesAnimation: {
-    font: string
-    negativeFontColor: string
-    positiveFontColor: string
-    fontScale: float
-    duration: float
-    startFadeoutAt: float
-    raiseHeight: float
-}
-
-reservesAnimation: {
-    font: string
-    negativeFontColor: string
-    positiveFontColor: string
-    fontScale: float
-    duration: float
-    startFadeoutAt: float
-    raiseHeight: float
-}
+numberChangeAnimation: {
+    font: string,
+    negativeFontColor: Color,
+    positiveFontColor: Color,
+    fontScale: float,
+    duration: float,
+    startFadeoutAt: float,
+    raiseDistance: float,
+    sinkDistance: float,
+},
 
 bannerAnimation: {
-     duration: float
-     scaleAnimDuration: float
-     beginScale: float
-     endScale: float
-     playerTurnBanner: string
-     enemyTurnBanner: string
-}
+     duration: float,
+     scaleAnimDuration: float,
+     beginScale: float,
+     endScale: float,
+     playerTurnBanner: string,
+     enemyTurnBanner: string,
+},
+
+bannerAnimationUsedAssets: string[],
+
+var statusIconConfig = {
+    icon: string,
+    scale: float
+};
 
 statusEffectIcons: {
-    burning: string
-    burningScale: float
-    poison: string
-    poisonScale: float
-}
+    burning: statusIconConfig,
+    poison: statusIconConfig
+},
 
-destroyCardPostProcessor: {
-    name: string
-}
+statusEffectsUsedAssets: string[],
+
+postProcessors: {
+    destroyCardPostProcessor: string
+},
+
+destroyCardUsedAssets: string[],
 
 coverStackParticles: {
-    damaged: string
+    damaged: string,
     destroyed: string
-}
+},
+
+coverStackUsedAssets: string[],
 
 stringTemplates:  {
-    rottenDetailText: string
-    buffDetailText: string
-    giftDetailText: string
-}
+    rottenDetailText: string,
+    buffDetailText: string,
+    giftDetailText: string,
+},
 
-fadeInAndOutAnimation: {
-    fadeFontName: String
-    fadeFontColor: String
-    fadeFontScale: Float
-    fadeDuration: Float
-    fadeIn: Float
-    fadeOut: Float
-}
+damageOverlay: {
+    duration: float,
+    fadeIn: float,
+    fadeOut: float,
+    overlay: string
+},
+
+damageOverlayUsedAssets: string[],
+
+insultFadeAnimation: {
+    fadeFontName: string,
+    fadeFontColor: Color,
+    fadeFontScale: float,
+    fadeDuration: float,
+    fadeIn: float,
+    fadeOut: float,
+},
+
+textAnimationUsedAssets: string[],
+
+cardDetailText: {
+    font: string,
+    fontScale: float,
+    fontColor: Color,
+    background: string?,
+    separator: string,
+    spacing: float
+},
+
+cardDetailUsedAssets: string[],
+
+keySelect: {
+    drawable: string
+},
+
+keySelectUsedAssets: string[]

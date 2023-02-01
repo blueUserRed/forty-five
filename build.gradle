@@ -34,6 +34,7 @@ allprojects {
         gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -52,6 +53,9 @@ project(":desktop") {
 
 project(":onj") {
     apply plugin: "kotlin"
+    dependencies {
+        implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
+    }
 }
 
 project(":core") {
@@ -62,7 +66,9 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api 'io.github.libktx:ktx-actors:1.11.0-rc2'
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+        api "com.github.lyze237:gdx-FlexBox:425149b588"
+        api "com.github.lyze237:gdx-FlexBox:425149b588:sources"
     }
 }
 

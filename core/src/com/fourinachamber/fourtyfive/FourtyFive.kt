@@ -2,16 +2,17 @@ package com.fourinachamber.fourtyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Screen
-import com.fourinachamber.fourtyfive.card.Card
 import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.game.enemy.Enemy
-import com.fourinachamber.fourtyfive.game.enemy.EnemyAction
-import com.fourinachamber.fourtyfive.screen.ScreenBuilderFromOnj
+import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
+import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
+import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import onj.OnjObject
-import onj.OnjParser
-import onj.OnjSchemaParser
+import com.fourinachamber.fourtyfive.utils.TemplateString
+import onj.customization.OnjConfig
 
 /**
  * main game object
@@ -20,53 +21,49 @@ object FourtyFive : Game() {
 
     const val logTag = "fourty-five"
 
-    /**
-     * setting this variable will change the current screen and dispose the previous
-     */
-    var curScreen: Screen? = null
-        set(value) {
-            FourtyFiveLogger.title("changing screen")
-            field?.dispose()
-            field = value
-            setScreen(field)
-        }
+    private var currentScreen: OnjScreen? = null
 
-//    private lateinit var gameScreen: Screen
-
+    var currentGame: GameController? = null
 
     override fun create() {
         init()
 //        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
-        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
+        val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
+        changeToScreen(screen)
+//        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
+    }
+
+    fun changeToScreen(screen: OnjScreen) {
+        FourtyFiveLogger.title("changing screen")
+        currentScreen?.dispose()
+        currentScreen = screen
+        setScreen(screen)
+    }
+
+    override fun render() {
+
     }
 
     private fun init() {
-        OnjExtensions.init()
+        with(OnjConfig) {
+            registerNameSpace("Common", CommonNamespace)
+            registerNameSpace("Cards", CardsNamespace)
+            registerNameSpace("Style", StyleNamespace)
+            registerNameSpace("Screen", ScreenNamespace)
+        }
         FourtyFiveLogger.init()
         SaveState.read()
-
-        val graphicsConfig =
-            OnjParser.parseFile(Gdx.files.internal("config/graphics_config.onj").file())
-        val animationConfigSchema =
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/graphics_config.onjschema").file())
-
-        animationConfigSchema.assertMatches(graphicsConfig)
-
-        graphicsConfig as OnjObject
-
-        GameScreenController.init(graphicsConfig)
-        EnemyAction.init(graphicsConfig)
-        Effect.init(graphicsConfig)
-        Card.init(graphicsConfig)
-        StatusEffect.init(graphicsConfig)
-        Enemy.init(graphicsConfig)
+        GraphicsConfig.init()
+        ResourceManager.init()
     }
 
     override fun dispose() {
         FourtyFiveLogger.medium(logTag, "game closing")
         SaveState.write()
+        currentScreen?.dispose()
+        ResourceManager.end()
         super.dispose()
     }
 

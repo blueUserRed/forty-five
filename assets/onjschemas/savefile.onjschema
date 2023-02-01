@@ -1,15 +1,15 @@
 
-!cardDec = {
-    name: string
+var cardDec = {
+    name: string,
     amount: int
-}
+};
 
-additionalCards: !cardDec[*]
-cardsToDraw: !cardDec[*]
+additionalCards: cardDec[],
+cardsToDraw: cardDec[],
 
 stats: {
-    usedReserves: int
+    usedReserves: int,
     enemiesDefeated: int
-}
+},
 
 playerLives: int
