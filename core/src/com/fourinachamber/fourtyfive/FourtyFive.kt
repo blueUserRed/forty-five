@@ -42,9 +42,9 @@ object FourtyFive : Game() {
         setScreen(screen)
     }
 
-    override fun render() {
-
-    }
+//    override fun render() {
+//        super.render()
+//    }
 
     private fun init() {
         with(OnjConfig) {
