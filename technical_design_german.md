@@ -288,12 +288,79 @@ effects: [
     buffDmg("enter", bSelects.allBullets, 10)
 ]
 ````
+Um festzustellen, welche Karten gebufft werden sollen, wird ein sogenanntes bSelect
+verwendet. Diese sind in der cards.onj Datei in einer Variable definiert.
+````json5
+var bSelects = {
+    allExceptSelf: bNum([1, 2, 3, 4, 5]),
+    allBullets: bSelectByName("bullet"),
+    fourButNotSelf: bNum([4])
+};
+````
+Die bNum Funktion nimmt einen Array mit den Slot-Zahlen die gebufft werden sollen.
+Das default-Verhalten ist das bNum nie die den Effekt auslösende Bullet buffen kann,
+wenn dies aber passieren soll, kann der String 'this' in den Array hinzugefügt werden.
+
+bSelectByName wählt alle Bullets aus, die den angegebenen Namen haben.
+
+Effekte können aber auch StatusEffekte auslösen. Ein solcher StatusEffekt ist z.B. der
+Burning Status, der den Schaden um 50% erhöht. StatusEffekte sind immer nur eine 
+begrenzte Zeit aktiv, diese ist Revolver-Turns angegeben. Beispiel: Wenn der Gegner den
+Effekt Burning(3) hat und der Spieler den Revolver schießt (auch wenn er leer schießt)
+wird der Effekt zu Burning(2) verringert.
+
+> Notiz: <br>
+> Aktuell kann nur der Gegner von StatusEffekten betroffen sein, es ist aber geplant
+> das auch der Spieler StatusEffekte haben kann
+
+### Trait Effekte
+Trait Effekte sind spezielle Effekte, die eher eine Eigenschaft der Karte beschreiben, 
+als wirklich ein Effekt zu sein. Beispiele dafür sind der rotten Effekt (durch den die
+Bullet bei jeder Revolver-Rotation an Schaden verliert) oder der left-turning Effekt
+(durch den die Bullet den Revolver nach links statt nach rechts dreht).
 
 ### Der Gegner
 
-TODO
+Das Verhalten des Gegners ist aktuell sehr simpel. In der game_config.onj Datei
+werden die Aktionen des Gegners definiert.
+
+Beispiel aus game_config.onj (Auszug):
+````json5
+ $DamagePlayerEnemyAction {
+    weight: 4,
+    min: 5,
+    max: 10,
+    ...(graphicsConfig.enemyConfig.damagePlayerIcon)
+},
+
+$AddCoverEnemyAction {
+    weight: 2,
+    min: 1,
+    max: 10,
+    ...(graphicsConfig.enemyConfig.addCoverIcon)
+},
+````
+
+Hier werden die möglichen Aktionen mit ihren Stats und jeweils einem Weight definiert.
+Der Gegner wählt dann unter Berücksichtigung der Weights eine zufällige Aktion aus.
+
+> Notiz: <br>
+> Spätestens wenn es verschiedene Gegnertypen geben wird, wird das Gegnerverhalten
+> komplexer werden
+
 
 ### Der CardGenerator
+
+Um den Schreiben des Schadens und der Kosten auf die Karte zu automatisieren wurde der
+CardGenerator geschrieben. Dieser wird durch die card_generator_config.onj Datei 
+konfiguriert. Er kann gestartet werden, indem die drei Zeilen in der .create() Funktion
+des FourtyFive Objektes einkommentiert werden.
+
+Wenn Schaden, CoverValue oder Kosten einer Karte geändert werden, ist es notwending,
+dass der CardGenerator einmal ausgeführt wird.
+
+Wenn eine neue Karte hinzugefügt oder eine alte entfernt wird, ist es notwendig, dass
+die config-Datei geupdatet wird und der CardGenerator einmal ausgeführt wird.
 
 ## Utility Klassen
 
