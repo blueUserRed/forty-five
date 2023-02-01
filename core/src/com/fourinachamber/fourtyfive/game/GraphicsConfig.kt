@@ -97,7 +97,7 @@ object GraphicsConfig {
                 particleActor.isAutoRemove = true
                 particleActor.fixedZIndex = Int.MAX_VALUE
 
-                val (x, y) = particleActor.localToStageCoordinates(Vector2(0f, 0f))
+                val (x, y) = coverStack.localToStageCoordinates(Vector2(0f, 0f))
                 if (destroyed) {
                     particleActor.setPosition(
                         x + coverStack.width / 2,

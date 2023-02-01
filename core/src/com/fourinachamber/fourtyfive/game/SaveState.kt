@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
+import com.fourinachamber.fourtyfive.utils.templateParam
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
@@ -65,11 +66,9 @@ object SaveState {
     /**
      * how many enemies the player has defeated this run
      */
-    var enemiesDefeated: Int = 0
-        set(value) {
-            field = value
-            savefileDirty = true
-        }
+    var enemiesDefeated: Int by templateParam("stat.enemiesDefeated", 0) {
+        savefileDirty = true
+    }
 
     /**
      * true if value has changed since the savefile was last written; will not write if this is false
@@ -80,22 +79,20 @@ object SaveState {
     /**
      * the current lives of the player
      */
-    var playerLives: Int = 0
-        set(value) {
-            field = value
-            savefileDirty = true
-        }
+    var playerLives: Int by templateParam("stat.playerLives", 0) {
+        savefileDirty = true
+    }
 
     /**
      * temporarily stores the used reserves, so it can be shown on the death screen
      */
-    var lastRunUsedReserves: Int = 0
+    var lastRunUsedReserves: Int by templateParam("stat.lastRun.usedReserves", 0)
         private set
 
     /**
      * temporarily stores the defeated enemies, so it can be shown on the death screen
      */
-    var lastRunEnemiesDefeated: Int = 0
+    var lastRunEnemiesDefeated: Int by templateParam("stat.lastRun.enemiesDefeated", 0)
         private set
 
     private val savefileSchema: OnjSchema by lazy {
@@ -164,7 +161,6 @@ object SaveState {
                 "enemiesDefeated = $enemiesDefeated, " +
                 "playerLives = $playerLives")
 
-        bindTemplateStringParams()
         savefileDirty = false
     }
 
@@ -180,13 +176,6 @@ object SaveState {
     private fun copyLastRunStats() {
         lastRunEnemiesDefeated = enemiesDefeated
         lastRunUsedReserves = usedReserves
-    }
-
-    private fun bindTemplateStringParams() {
-        TemplateString.bindParam("stat.usedReserves") { usedReserves }
-        TemplateString.bindParam("stat.enemiesDefeated") { enemiesDefeated }
-        TemplateString.bindParam("stat.lastRun.usedReserves") { lastRunUsedReserves }
-        TemplateString.bindParam("stat.lastRun.enemiesDefeated") { lastRunEnemiesDefeated }
     }
 
     private fun copyDefaultFile() {
