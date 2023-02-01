@@ -38,6 +38,8 @@ assets: {
 
         "cover_hook", "key_select_frame",
 
+        "grayscale_shader",
+
         ...(graphicsConfig.bannerAnimationUsedAssets),
         ...(graphicsConfig.statusEffectsUsedAssets),
         ...(graphicsConfig.damageOverlayUsedAssets),
@@ -99,6 +101,7 @@ var controller = $GameScreenController {
 options: {
     background: "game_screen_background",
     screenController: controller,
+//    postProcessor: "grayscale_shader",
     inputMap: [
         ...(inputMaps.cardHandSelectionInputMap),
         ...(inputMaps.defaultInputMap)
@@ -222,7 +225,7 @@ var endTurnButton = $Image {
 var playerLivesLabel = $TemplateLabel {
     name: "player_lives_label",
     font: "vanilla_whale",
-    template: "{game.curPlayerLives}/{game.basePlayerLives}",
+    template: "{stat.playerLives}/{game.basePlayerLives}",
     fontScale: 0.09,
     color: color.white,
 //    backgroundTexture: "black_texture",
@@ -263,11 +266,13 @@ var drawCardActor = $Box {
 //    debug: true
 } children [
 
+//    $Label {
     $TemplateLabel {
         properties: [
             relWidth(100.0)
         ],
         font: "red_wing",
+//        text: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
         template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
         fontScale: 0.18,
         align: "center",
@@ -291,11 +296,13 @@ var drawCardActor = $Box {
             ]
         } children [
 
+//            $Label {
             $TemplateLabel {
                 properties: [
                     margin(0.0, 0.0, 6.0, -6.0)
                 ],
                 font: "red_wing",
+//                text: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
                 template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
                 wrap: true,
                 fontScale: 0.13,
@@ -321,11 +328,13 @@ var drawCardActor = $Box {
             ]
         } children [
 
+//            $Label {
             $TemplateLabel {
                 properties: [
                     margin(0.0, 0.0, 6.0, -6.0)
                 ],
                 font: "red_wing",
+//                text: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
                 template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
                 wrap: true,
                 fontScale: 0.13,

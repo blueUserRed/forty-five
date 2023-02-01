@@ -153,6 +153,14 @@ postProcessors: [
             movement: 1.0,
             minMovement: 0.3
         }
+    },
+    {
+        name: "grayscale_shader",
+        vertexShader: "shaders/grayscale/grayscale.vert",
+        fragmentShader: "shaders/grayscale/grayscale.frag",
+        timeOffset: 0,
+        uniforms: [],
+        args: null
     }
 ],
 
