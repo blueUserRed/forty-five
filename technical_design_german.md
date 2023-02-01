@@ -205,35 +205,95 @@ class SomeClass(
 
 ------
 
+_relevantes package: game_
+
 ### Die Game Components
 
 _relevantes package: screen.gameComponents_
 
-TODO
+Die GameComponents sind Actors für spiel-spezifische Elemente wie der Revolver,
+die CardHand, die CoverStacks, etc. Sie werden von ScreenBuilder instanziiert und 
+vom GameController verwaltet.
 
 ### Der GameController
-
-TODO
+Die Hauptklasse die den Großteil der Spiellogik ausführt. Sie merkt sich den aktuellen
+Stand des Kampfes, führt Aktionen (wie z.B. den Revolver schießen) durch und verwaltet
+die Game Components. Bei dem GameController handelt es sich um einen ScreenController
+(siehe ScreenController). Außerdem beinhaltet er ein enum names Gamephase, bei dem es 
+sich um eine finite state machine handelt. Diese verwaltet die Spielphasen (Zug des 
+Spielers, Zug des Gegners, Karten ziehen, etc.).
 
 ### SaveState und das savefile
-
-TODO
+Das savefile (saves/savefile.onj) speichert den Fortschritt des aktuellen Run des
+Spielers. Das inkludiert Information wie: Leben, welche Karten ausgesucht wurden aber
+auch Statistiken wie bis jetzt verwendete Reserves und besiegte Gegner. Das SaveState
+Objekt verwaltet dieses savefile, stellt die Information zur Verfügung und erlaubt es
+sie zu verändern.
 
 ### GraphicsConfig
+Das GraphicsConfig Objekt liest Information wie Länge von Animationen, Geschwindigkeiten
+von Animation, etc. aus einem Config-file ein und stellt sie dem restlichen Programm
+zur Verfügung. Außerdem stellt es einige Convenience-Funktionen zur Verfügung die gleich
+die Animation erstellen.
 
-TODO
+>Notiz: <br>
+> Ich bin nicht hunderprotzentig zufrieden mit dem Code in der Klasse, 
+> vielleicht fällt mir irgendwann mal was besseres ein
 
 ### GameAnimations
+Die meisten Animationen sind mittels LibGdx Actions implementiert, da diese aber
+relativ limitiert sind, sind für einige Effekte GameAnimations nötig. Das betrifft vor
+allem Effekte die über den ganzen Screen gehen, wie z.B. die Banner-Animation oder der
+Blut-Effekt, wenn der Spieler Schaden nimmt. Diese Animationen werden von der
+statt vom Screen von der GameController Klasse verwaltet.
 
-TODO
+### Karten
 
-### Karten, Effekte und StatusEffekte
+_relevanter namespace für onj-dateien: Card_
 
-TODO
+Die Karten werden über die cards/cards.onj Datei verwaltet. Wenn Dinge wie Anzahl der 
+Karten, Schaden oder Kosten geändert werden, bitte auch card_generator_config.onj
+beachten (siehe Der CardGenerator). Anhand der in der Config-Datei angegeben Stats
+werden CardPrototypes erstellt, die dann Karten dieses Types erzeugen. Z.B. ein 
+CardPrototype für die Karte Incendiary Bullet wird erstellt, da der Spieler diese Karte
+aber zweimal im Deck hat, wird dieser Prototype verwendet um zwei separate incendiary
+bullets zu erstellen.
+
+### Effekte und StatusEffekte
+
+_relevanter namespace für onj-dateien: Card_
+
+Karten können Effekte haben, die sich in irgendeiner Form auf das Spiel auswirken und
+es interessanter machen. Ein Effekt muss immer einen Trigger haben, der angibt, wann
+er auslöst. Das kann z.B. beim Start der Runde, nach dem Spielen der Karte oder vor 
+dem Schießen sein. 
+
+Beispiele für Effekte:
+
+Effekte der FakeBullet:
+```
+effects: [
+    // Die FakeBullet hat zwei reserveGain Effekte, einer löst aus wenn sie geschossen
+    // wird, der ander wenn sich durch eine andere Quelle zerstört wird. Das ist im 
+    // zweiten Parameter der Funktion definiert. Der letzte Parameter gibt an wie viele
+    // Reserves der Spieler durch den Effekt bekommt.
+    reserveGain("shot", 4),
+    reserveGain("destroy", 4)
+]
+```
+
+Effekte der BulletBulletBullet:
+````json5
+effects: [
+    buffDmg("enter", bSelects.allBullets, 10)
+]
+````
 
 ### Der Gegner
 
 TODO
+
+### Der CardGenerator
 
 ## Utility Klassen
 
@@ -362,6 +422,8 @@ val timeline = Timeline.timeline {
 ## Assets und Config files
 
 ------
+
+
 
 ## Coding Conventions
 
