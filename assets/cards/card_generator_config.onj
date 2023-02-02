@@ -12,7 +12,7 @@ packer: {
     pageWidth: 2_000,
     pageHeight: 2_000,
     padding: 0
-}
+},
 
 assets: {
     pixmaps: [
@@ -43,7 +43,7 @@ assets: {
         {
             name: "leadersBullet",
             file: "textures/cards/leadersBullet.png"
-        }
+        },
         {
             name: "rottenBullet",
             file: "textures/cards/rottenBullet.png"
@@ -178,11 +178,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 0).baseDamage#s
+                text: cards.(bulletsOffset + 0).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 0).cost#s
+                text: cards.(bulletsOffset + 0).cost#string
             }
         ]
     },
@@ -196,11 +196,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 1).baseDamage#s
+                text: cards.(bulletsOffset + 1).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 1).cost#s
+                text: cards.(bulletsOffset + 1).cost#string
             }
         ]
     },
@@ -214,11 +214,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 2).baseDamage#s
+                text: cards.(bulletsOffset + 2).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 2).cost#s
+                text: cards.(bulletsOffset + 2).cost#string
             }
         ]
     },
@@ -232,11 +232,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 3).baseDamage#s
+                text: cards.(bulletsOffset + 3).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 3).cost#s
+                text: cards.(bulletsOffset + 3).cost#string
             }
         ]
     },
@@ -250,11 +250,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 4).baseDamage#s
+                text: cards.(bulletsOffset + 4).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 4).cost#s
+                text: cards.(bulletsOffset + 4).cost#string
             }
         ]
     },
@@ -268,11 +268,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 5).baseDamage#s
+                text: cards.(bulletsOffset + 5).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 5).cost#s
+                text: cards.(bulletsOffset + 5).cost#string
             }
         ]
     },
@@ -286,11 +286,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 6).baseDamage#s
+                text: cards.(bulletsOffset + 6).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 6).cost#s
+                text: cards.(bulletsOffset + 6).cost#string
             }
         ]
     },
@@ -304,11 +304,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 7).baseDamage#s
+                text: cards.(bulletsOffset + 7).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 7).cost#s
+                text: cards.(bulletsOffset + 7).cost#string
             }
         ]
     },
@@ -322,11 +322,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 8).baseDamage#s
+                text: cards.(bulletsOffset + 8).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 8).cost#s
+                text: cards.(bulletsOffset + 8).cost#string
             }
         ]
     },
@@ -340,11 +340,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 9).baseDamage#s
+                text: cards.(bulletsOffset + 9).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 9).cost#s
+                text: cards.(bulletsOffset + 9).cost#string
             }
         ]
     },
@@ -358,11 +358,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 10).baseDamage#s
+                text: cards.(bulletsOffset + 10).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 10).cost#s
+                text: cards.(bulletsOffset + 10).cost#string
             }
         ]
     },
@@ -376,11 +376,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 11).baseDamage#s
+                text: cards.(bulletsOffset + 11).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 11).cost#s
+                text: cards.(bulletsOffset + 11).cost#string
             }
         ]
     },
@@ -394,11 +394,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 12).baseDamage#s
+                text: cards.(bulletsOffset + 12).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 12).cost#s
+                text: cards.(bulletsOffset + 12).cost#string
             }
         ]
     },
@@ -412,11 +412,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 13).baseDamage#s
+                text: cards.(bulletsOffset + 13).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 13).cost#s
+                text: cards.(bulletsOffset + 13).cost#string
             }
         ]
     },
@@ -430,11 +430,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 14).baseDamage#s
+                text: cards.(bulletsOffset + 14).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 14).cost#s
+                text: cards.(bulletsOffset + 14).cost#string
             }
         ]
     },
@@ -448,11 +448,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 15).baseDamage#s
+                text: cards.(bulletsOffset + 15).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 15).cost#s
+                text: cards.(bulletsOffset + 15).cost#string
             }
         ]
     },
@@ -466,11 +466,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 16).baseDamage#s
+                text: cards.(bulletsOffset + 16).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 16).cost#s
+                text: cards.(bulletsOffset + 16).cost#string
             }
         ]
     },
@@ -484,11 +484,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 17).baseDamage#s
+                text: cards.(bulletsOffset + 17).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 17).cost#s
+                text: cards.(bulletsOffset + 17).cost#string
             }
         ]
     },
@@ -502,11 +502,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 18).baseDamage#s
+                text: cards.(bulletsOffset + 18).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 18).cost#s
+                text: cards.(bulletsOffset + 18).cost#string
             }
         ]
     },
@@ -520,11 +520,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(bulletsOffset + 19).baseDamage#s
+                text: cards.(bulletsOffset + 19).baseDamage#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(bulletsOffset + 19).cost#s
+                text: cards.(bulletsOffset + 19).cost#string
             }
         ]
     },
@@ -533,7 +533,7 @@ cards: [
     // Cover --------------------------
     
     {
-        name: cards.(coverOffset + 0).name
+        name: cards.(coverOffset + 0).name,
         elements: [
             $ImageElement {
                 textureName: cards.(coverOffset + 0).name,
@@ -541,17 +541,17 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(coverOffset + 0).coverValue#s
+                text: cards.(coverOffset + 0).coverValue#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(coverOffset + 0).cost#s
+                text: cards.(coverOffset + 0).cost#string
             }
         ]
-    }
+    },
 
     {
-        name: cards.(coverOffset + 1).name
+        name: cards.(coverOffset + 1).name,
         elements: [
             $ImageElement {
                 textureName: cards.(coverOffset + 1).name,
@@ -559,17 +559,17 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(coverOffset + 1).coverValue#s
+                text: cards.(coverOffset + 1).coverValue#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(coverOffset + 1).cost#s
+                text: cards.(coverOffset + 1).cost#string
             }
         ]
-    }
+    },
 
     {
-        name: cards.(coverOffset + 2).name
+        name: cards.(coverOffset + 2).name,
         elements: [
             $ImageElement {
                 textureName: cards.(coverOffset + 2).name,
@@ -577,17 +577,17 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(coverOffset + 2).coverValue#s
+                text: cards.(coverOffset + 2).coverValue#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(coverOffset + 2).cost#s
+                text: cards.(coverOffset + 2).cost#string
             }
         ]
-    }
+    },
 
     {
-        name: cards.(coverOffset + 3).name
+        name: cards.(coverOffset + 3).name,
         elements: [
             $ImageElement {
                 textureName: cards.(coverOffset + 3).name,
@@ -595,17 +595,17 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(coverOffset + 3).coverValue#s
+                text: cards.(coverOffset + 3).coverValue#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(coverOffset + 3).cost#s
+                text: cards.(coverOffset + 3).cost#string
             }
         ]
-    }
+    },
 
     {
-        name: cards.(coverOffset + 4).name
+        name: cards.(coverOffset + 4).name,
         elements: [
             $ImageElement {
                 textureName: cards.(coverOffset + 4).name,
@@ -613,11 +613,11 @@ cards: [
             },
             $TextElement {
                 ...valueElementSharedKeys,
-                text: cards.(coverOffset + 4).coverValue#s
+                text: cards.(coverOffset + 4).coverValue#string
             },
             $TextElement {
                 ...costElementSharedKeys,
-                text: cards.(coverOffset + 4).cost#s
+                text: cards.(coverOffset + 4).cost#string
             }
         ]
     }
