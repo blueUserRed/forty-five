@@ -4,6 +4,45 @@
 
 ------
 
+### wichtige Links:
+ 
+- LibGdx wiki: https://libgdx.com/wiki/
+- YogaLayout Playground: https://yogalayout.com/playground/
+
+### Inhaltsverzeichnis
+
+- [Aufbauen und Stylen von Screens](#aufbauen-und-stylen-von-screens)
+  - [ScreenBuilder](#screenbuilder)
+  - [Eigene ZIndex Implementation](#eigene-z-index-implementation)
+  - [FlexBoxen](#flexboxen)
+  - [Styling](#styling)
+  - [Behaviours](#behaviours)
+  - [ScreenController](#screencontroller)
+- [ResourceManager](#resourcemanager)
+  - [Randnotiz zu Assets](#randnotiz-zu-assets)
+  - [Definieren welche Assets existieren](#definieren-welche-assets-existieren)
+  - [Funktion des ResourceManager](#funktion-des-resourcemanager)
+  - [Verwendung](#verwendung)
+- [Struktur des Spiels](#struktur-des-spiels)
+  - [Die Game Components](#die-game-components)
+  - [Der GameController](#der-gamecontroller)
+  - [SaveState und das savefile](#savestate-und-das-savefile)
+  - [GraphicsConfig](#graphicsconfig)
+  - [GameAnimations](#gameanimations)
+  - [Karten](#karten)
+  - [Effekte und StatusEffekte](#effekte-und-statuseffekte)
+  - [Trait Effekte](#trait-effekte)
+  - [Der Gegner](#der-gegner)
+  - [Der CardGenerator](#der-cardgenerator)
+- [Utility Klassen](#utility-klassen)
+  - [Logger](#logger)
+  - [TemplateString](#templatestring)
+  - [Timeline](#timeline)
+- [Assets und Config Files](#assets-und-config-files)
+  - [Der TexturePacker](#der-texturepacker)
+  - [Die Dateistruktur](#die-dateistruktur)
+- [Coding Conventions](#coding-conventions)
+
 ## Aufbauen und Stylen von Screens
 
 ------
@@ -288,12 +327,79 @@ effects: [
     buffDmg("enter", bSelects.allBullets, 10)
 ]
 ````
+Um festzustellen, welche Karten gebufft werden sollen, wird ein sogenanntes bSelect
+verwendet. Diese sind in der cards.onj Datei in einer Variable definiert.
+````json5
+var bSelects = {
+    allExceptSelf: bNum([1, 2, 3, 4, 5]),
+    allBullets: bSelectByName("bullet"),
+    fourButNotSelf: bNum([4])
+};
+````
+Die bNum Funktion nimmt einen Array mit den Slot-Zahlen die gebufft werden sollen.
+Das default-Verhalten ist das bNum nie die den Effekt auslösende Bullet buffen kann,
+wenn dies aber passieren soll, kann der String 'this' in den Array hinzugefügt werden.
+
+bSelectByName wählt alle Bullets aus, die den angegebenen Namen haben.
+
+Effekte können aber auch StatusEffekte auslösen. Ein solcher StatusEffekt ist z.B. der
+Burning Status, der den Schaden um 50% erhöht. StatusEffekte sind immer nur eine 
+begrenzte Zeit aktiv, diese ist Revolver-Turns angegeben. Beispiel: Wenn der Gegner den
+Effekt Burning(3) hat und der Spieler den Revolver schießt (auch wenn er leer schießt)
+wird der Effekt zu Burning(2) verringert.
+
+> Notiz: <br>
+> Aktuell kann nur der Gegner von StatusEffekten betroffen sein, es ist aber geplant
+> das auch der Spieler StatusEffekte haben kann
+
+### Trait Effekte
+Trait Effekte sind spezielle Effekte, die eher eine Eigenschaft der Karte beschreiben, 
+als wirklich ein Effekt zu sein. Beispiele dafür sind der rotten Effekt (durch den die
+Bullet bei jeder Revolver-Rotation an Schaden verliert) oder der left-turning Effekt
+(durch den die Bullet den Revolver nach links statt nach rechts dreht).
 
 ### Der Gegner
 
-TODO
+Das Verhalten des Gegners ist aktuell sehr simpel. In der game_config.onj Datei
+werden die Aktionen des Gegners definiert.
+
+Beispiel aus game_config.onj (Auszug):
+````json5
+ $DamagePlayerEnemyAction {
+    weight: 4,
+    min: 5,
+    max: 10,
+    ...(graphicsConfig.enemyConfig.damagePlayerIcon)
+},
+
+$AddCoverEnemyAction {
+    weight: 2,
+    min: 1,
+    max: 10,
+    ...(graphicsConfig.enemyConfig.addCoverIcon)
+},
+````
+
+Hier werden die möglichen Aktionen mit ihren Stats und jeweils einem Weight definiert.
+Der Gegner wählt dann unter Berücksichtigung der Weights eine zufällige Aktion aus.
+
+> Notiz: <br>
+> Spätestens wenn es verschiedene Gegnertypen geben wird, wird das Gegnerverhalten
+> komplexer werden
+
 
 ### Der CardGenerator
+
+Um den Schreiben des Schadens und der Kosten auf die Karte zu automatisieren wurde der
+CardGenerator geschrieben. Dieser wird durch die card_generator_config.onj Datei 
+konfiguriert. Er kann gestartet werden, indem die drei Zeilen in der .create() Funktion
+des FourtyFive Objektes einkommentiert werden.
+
+Wenn Schaden, CoverValue oder Kosten einer Karte geändert werden, ist es notwending,
+dass der CardGenerator einmal ausgeführt wird.
+
+Wenn eine neue Karte hinzugefügt oder eine alte entfernt wird, ist es notwendig, dass
+die config-Datei geupdatet wird und der CardGenerator einmal ausgeführt wird.
 
 ## Utility Klassen
 
@@ -423,8 +529,91 @@ val timeline = Timeline.timeline {
 
 ------
 
+### Der TexturePacker
+Um die Effizienz beim Rendern zu steigen, empfiehlt LibGdx mehrere Texturen in einen
+Atlas zusammenzufassen, da das die Textureswitches auf der GPU minimiert. Um das zu 
+automatisieren, stellt LibGdx die TexturePacker Klasse zur Verfügung. Außerdem wurde
+ein texturePacker gradle task geschrieben, der das toPack.txt File einliest, die die 
+Namen der Directories enthält die gebündelt werden. Die fertigen Atlanten werden im
+textures/packed directory abgelegt.
+
+### Die Dateistruktur
+Das Assets Directory ist folgendermaßen aufgebaut:
+<pre>
+assets
+|-cards
+  |-generated
+  | -> enthält den Karten Atlas der vom CardGenerator generiert
+  | -> wird
+  |-card_generator_config.onj
+  | -> konfiguriert den CardGenerator
+  |-cards.onj
+  | -> definiert alle existierenden Karten, ihre Effekte
+  | -> und Stats
+|-config
+  |-assets.onj
+  | -> definiert alle verfügbaren Assets (siehe ResourceManager)
+  |-game_config.onj
+  | -> enthält Konfigurationen zu dem Spiel wie z.B. Spielerleben,
+  | -> die Aktionen und Leben des Gegners, wie viele Karten 
+  | -> gezogen werden, etc.
+  |-graphics_config.onj
+  | -> enthält Konfiguration zu Animationen die in dem Spiel
+  | -> zu sehen sind
+|-fonts
+| -> enthält gerasterte Schriftarten
+|-imports
+| -> enthält .onj oder .onjschema Dateien die nur zum importieren
+| -> in anderen Dateien gedacht sind
+|-logging
+  |-fourty-five.log
+  | -> der log, der von dem letzten Spiel produziert wurde
+  |-log_config.onj
+  | -> Konfiguration des Loggers
+|-onjschemas
+| -> enthält .onjschema Dateien, gegen die andere .onj Dateien
+| -> validiert werden
+|-particles
+| -> enthält partikel effekte
+|-saves
+  |-default_savefile.onj
+  | -> Das Standard savefile, dass verwendet wird wenn noch
+  | -> kein savefile existiert oder der Spieler den Run
+  | -> verliert
+  |-savefile.onj
+  | -> speichert den aktuellen Fortschritt des Runs
+|-screens
+| -> enthält die verschiedenen Screens die von dem Spiel
+| -> verwendet werden, außerdem die Konfiguration für den
+| -> keyboard input
+|-shaders
+| -> enthält die verschiedenen Shader die von dem Spiel
+| -> verwendet werden
+|-textures
+  |-cards
+  | -> enthält die rohen Textures für die Karten, die dann von
+  | -> dem CardGenerator weiterverarbeitet werden
+  |-cursors
+  |-game_screen
+  | -> enthält die Texturen für den game_screen, werden vom
+  | -> TexturePacker gebündelt
+  |-ninepatches
+  | -> mehr Informationen zu Ninepatches hier:
+  | -> https://libgdx.com/wiki/graphics/2d/ninepatches
+  |-packed
+  | -> siehe Der TexturePacker
+  |-particles
+  |-screens
+  |-title_screen
+  | -> enthält die Texturen für den title_screen, werden vom
+  | -> TexturePacker gebündelt
+  |-toPack.txt
+  | -> siehe Der TexturePacker
+</pre>
 
 
 ## Coding Conventions
 
 ------
+
+TODO
