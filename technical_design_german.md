@@ -4,6 +4,45 @@
 
 ------
 
+### wichtige Links:
+ 
+- LibGdx wiki: https://libgdx.com/wiki/
+- YogaLayout Playground: https://yogalayout.com/playground/
+
+### Inhaltsverzeichnis
+
+- [Aufbauen und Stylen von Screens](#aufbauen-und-stylen-von-screens)
+  - [ScreenBuilder](#screenbuilder)
+  - [Eigene ZIndex Implementation](#eigene-z-index-implementation)
+  - [FlexBoxen](#flexboxen)
+  - [Styling](#styling)
+  - [Behaviours](#behaviours)
+  - [ScreenController](#screencontroller)
+- [ResourceManager](#resourcemanager)
+  - [Randnotiz zu Assets](#randnotiz-zu-assets)
+  - [Definieren welche Assets existieren](#definieren-welche-assets-existieren)
+  - [Funktion des ResourceManager](#funktion-des-resourcemanager)
+  - [Verwendung](#verwendung)
+- [Struktur des Spiels](#struktur-des-spiels)
+  - [Die Game Components](#die-game-components)
+  - [Der GameController](#der-gamecontroller)
+  - [SaveState und das savefile](#savestate-und-das-savefile)
+  - [GraphicsConfig](#graphicsconfig)
+  - [GameAnimations](#gameanimations)
+  - [Karten](#karten)
+  - [Effekte und StatusEffekte](#effekte-und-statuseffekte)
+  - [Trait Effekte](#trait-effekte)
+  - [Der Gegner](#der-gegner)
+  - [Der CardGenerator](#der-cardgenerator)
+- [Utility Klassen](#utility-klassen)
+  - [Logger](#logger)
+  - [TemplateString](#templatestring)
+  - [Timeline](#timeline)
+- [Assets und Config Files](#assets-und-config-files)
+  - [Der TexturePacker](#der-texturepacker)
+  - [Die Dateistruktur](#die-dateistruktur)
+- [Coding Conventions](#coding-conventions)
+
 ## Aufbauen und Stylen von Screens
 
 ------
@@ -490,8 +529,91 @@ val timeline = Timeline.timeline {
 
 ------
 
+### Der TexturePacker
+Um die Effizienz beim Rendern zu steigen, empfiehlt LibGdx mehrere Texturen in einen
+Atlas zusammenzufassen, da das die Textureswitches auf der GPU minimiert. Um das zu 
+automatisieren, stellt LibGdx die TexturePacker Klasse zur Verfügung. Außerdem wurde
+ein texturePacker gradle task geschrieben, der das toPack.txt File einliest, die die 
+Namen der Directories enthält die gebündelt werden. Die fertigen Atlanten werden im
+textures/packed directory abgelegt.
+
+### Die Dateistruktur
+Das Assets Directory ist folgendermaßen aufgebaut:
+<pre>
+assets
+|-cards
+  |-generated
+  | -> enthält den Karten Atlas der vom CardGenerator generiert
+  | -> wird
+  |-card_generator_config.onj
+  | -> konfiguriert den CardGenerator
+  |-cards.onj
+  | -> definiert alle existierenden Karten, ihre Effekte
+  | -> und Stats
+|-config
+  |-assets.onj
+  | -> definiert alle verfügbaren Assets (siehe ResourceManager)
+  |-game_config.onj
+  | -> enthält Konfigurationen zu dem Spiel wie z.B. Spielerleben,
+  | -> die Aktionen und Leben des Gegners, wie viele Karten 
+  | -> gezogen werden, etc.
+  |-graphics_config.onj
+  | -> enthält Konfiguration zu Animationen die in dem Spiel
+  | -> zu sehen sind
+|-fonts
+| -> enthält gerasterte Schriftarten
+|-imports
+| -> enthält .onj oder .onjschema Dateien die nur zum importieren
+| -> in anderen Dateien gedacht sind
+|-logging
+  |-fourty-five.log
+  | -> der log, der von dem letzten Spiel produziert wurde
+  |-log_config.onj
+  | -> Konfiguration des Loggers
+|-onjschemas
+| -> enthält .onjschema Dateien, gegen die andere .onj Dateien
+| -> validiert werden
+|-particles
+| -> enthält partikel effekte
+|-saves
+  |-default_savefile.onj
+  | -> Das Standard savefile, dass verwendet wird wenn noch
+  | -> kein savefile existiert oder der Spieler den Run
+  | -> verliert
+  |-savefile.onj
+  | -> speichert den aktuellen Fortschritt des Runs
+|-screens
+| -> enthält die verschiedenen Screens die von dem Spiel
+| -> verwendet werden, außerdem die Konfiguration für den
+| -> keyboard input
+|-shaders
+| -> enthält die verschiedenen Shader die von dem Spiel
+| -> verwendet werden
+|-textures
+  |-cards
+  | -> enthält die rohen Textures für die Karten, die dann von
+  | -> dem CardGenerator weiterverarbeitet werden
+  |-cursors
+  |-game_screen
+  | -> enthält die Texturen für den game_screen, werden vom
+  | -> TexturePacker gebündelt
+  |-ninepatches
+  | -> mehr Informationen zu Ninepatches hier:
+  | -> https://libgdx.com/wiki/graphics/2d/ninepatches
+  |-packed
+  | -> siehe Der TexturePacker
+  |-particles
+  |-screens
+  |-title_screen
+  | -> enthält die Texturen für den title_screen, werden vom
+  | -> TexturePacker gebündelt
+  |-toPack.txt
+  | -> siehe Der TexturePacker
+</pre>
 
 
 ## Coding Conventions
 
 ------
+
+TODO
