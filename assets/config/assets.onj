@@ -161,6 +161,14 @@ postProcessors: [
         timeOffset: 0,
         uniforms: [],
         args: null
+    },
+    {
+        name: "film_shader",
+        vertexShader: "shaders/film/film.vert",
+        fragmentShader: "shaders/film/film.frag",
+        timeOffset: 0,
+        uniforms: [ "resolution", "time" ],
+        args: null
     }
 ],
 
