@@ -3,19 +3,15 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
-import io.github.orioncraftmc.meditate.enums.YogaEdge
-import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import ktx.actors.onEnter
 import ktx.actors.onExit
 
@@ -42,7 +38,8 @@ class CardDetailActor(
 
     override var fixedZIndex: Int = 0
 
-    private val lineHeight = spacing * 0.8f
+    private val lineHeight = spacing * 0.2f
+    private val lineWidthMultiplier = 0.8f
 
     private val flavourTextActor = CustomLabel(initialFlavourText, Label.LabelStyle(font, fontColor))
     private val descriptionActor = CustomLabel(initialDescription, Label.LabelStyle(font, fontColor))
@@ -107,8 +104,6 @@ class CardDetailActor(
             component.setAlignment(Align.center)
         }
 
-//        background = initialBackground
-//        rebuild()
         onEnter { isHoveredOver = true }
         onExit { isHoveredOver = false }
         invalidateHierarchy()
@@ -133,10 +128,11 @@ class CardDetailActor(
 
         val separator = GraphicsConfig.cardDetailSeparator(screen)
         separatorPositions.forEach { position ->
+            val lineWidth = forcedWidth * lineWidthMultiplier
             separator.draw(
                 batch,
-                x, y + position,
-                forcedWidth, lineHeight
+                x + forcedWidth / 2 - lineWidth / 2, y + position,
+                lineWidth, lineHeight
             )
         }
     }
@@ -149,14 +145,14 @@ class CardDetailActor(
             .map { it.prefHeight }
             .sum()
         height += (visibleComponents.size - 1) * spacing
-        var curY = height
+        var curY = height - spacing
         val separatorPositions = mutableListOf<Float>()
         visibleComponents.forEachIndexed { i, component ->
             component.setBounds(
                 0f, curY - component.prefHeight,
                 forcedWidth, component.prefHeight
             )
-            if (i == visibleComponents.size) {
+            if (i != visibleComponents.size - 1 && i != 0) {
                 separatorPositions.add(curY + spacing / 2 - lineHeight / 2)
             }
             curY -= component.height + spacing
