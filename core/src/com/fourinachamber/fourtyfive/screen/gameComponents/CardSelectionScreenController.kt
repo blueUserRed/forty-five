@@ -116,6 +116,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
                 cardSelectionActor.addActor(card.actor)
             }
             onjScreen.addActorToRoot(card.actor.hoverDetailActor)
+            card.actor.hoverDetailActor.isVisible = false
         }
         cardSelectionActor.invalidateHierarchy()
     }
