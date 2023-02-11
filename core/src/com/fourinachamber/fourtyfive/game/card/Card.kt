@@ -71,6 +71,7 @@ class Card(
     detailFontColor: Color,
     detailFontScale: Float,
     detailBackground: Drawable?,
+    detailSpacing: Float,
     screen: OnjScreen
 ) {
 
@@ -82,7 +83,15 @@ class Card(
     /**
      * the actor for representing the card on the screen
      */
-    val actor = CardActor(this, detailFont, detailFontColor, detailFontScale, detailBackground, screen)
+    val actor = CardActor(
+        this,
+        detailFont,
+        detailFontColor,
+        detailFontScale,
+        detailBackground,
+        detailSpacing,
+        screen
+    )
 
     //TODO: isDraggable and inAnimation should be in the actor class
 
@@ -350,10 +359,12 @@ class Card(
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
 
+                //TODO: CardDetailActor could call these functions itself
                 GraphicsConfig.cardDetailFont(onjScreen),
                 GraphicsConfig.cardDetailFontColor(),
                 GraphicsConfig.cardDetailFontScale(),
                 GraphicsConfig.cardDetailBackground(onjScreen),
+                GraphicsConfig.cardDetailSpacing(),
                 onjScreen
             )
 
@@ -423,6 +434,7 @@ class CardActor(
     fontColor: Color,
     fontScale: Float,
     detailBackground: Drawable?,
+    detailSpacing: Float,
     screen: OnjScreen
 ) : CustomImageActor(card.drawable), ZIndexActor {
 
@@ -454,7 +466,8 @@ class CardActor(
         fontColor = fontColor,
         fontScale = fontScale,
         initialForcedWidth = 0f,
-        initialBackground = detailBackground,
+        background = detailBackground,
+        spacing = detailSpacing,
         screen = screen
     )
 
