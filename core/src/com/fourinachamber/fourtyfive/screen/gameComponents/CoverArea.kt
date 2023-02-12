@@ -292,7 +292,7 @@ class CoverStack(
             card.actor.setPosition(curX, curY)
             if (currentHoverDetail == card.actor.hoverDetailActor) {
                 val hoverDetail = currentHoverDetail!!
-                hoverDetail.forcedWidth = width
+                hoverDetail.forcedWidth = card.actor.width * 1.5f
                 hoverDetail.setBounds(
                     width,
                     height / 2 - hoverDetail.prefHeight / 2,
