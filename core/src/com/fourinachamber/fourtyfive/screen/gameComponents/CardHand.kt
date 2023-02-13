@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardActor
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
 import com.fourinachamber.fourtyfive.utils.between
@@ -17,7 +18,8 @@ import kotlin.math.min
  * @param targetWidth the width this aims to be
  */
 class CardHand(
-    private val targetWidth: Float
+    private val targetWidth: Float,
+    private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
@@ -116,7 +118,7 @@ class CardHand(
                 detailCard.actor.setScale(hoveredCardScale)
                 doZIndexFor(card.actor, hoveredCardZIndex)
             } else {
-                if (card.actor.isSelected) FourtyFive.currentGame!!.keySelectedCard = null
+                if (card.actor.isSelected) screen.selectedActor = null
                 card.actor.setScale(cardScale)
                 doZIndexFor(card.actor, startCardZIndicesAt + i)
             }

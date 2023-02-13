@@ -263,9 +263,23 @@ $KeyAction {
         height: int
     }
 
-    $SelectFirstInCardHandKeyAction {
+    $SelectCardInHandKeyAction {
         num: int
     }
+
+    $SelectRevolverSlotKeyAction {
+        num: int
+    }
+
+    $SelectAdjacentKeyAction {
+        direction: string
+    }
+
+    $PlaceSelectedCardInRevolverKeyAction {
+        revolverSlot: int
+    }
+
+    $DeselectAllKeyAction { }
 
 }
 

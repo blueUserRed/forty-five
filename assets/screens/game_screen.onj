@@ -103,7 +103,7 @@ options: {
     screenController: controller,
 //    postProcessor: "film_shader",
     inputMap: [
-        ...(inputMaps.cardHandSelectionInputMap),
+        ...(inputMaps.gameInputMap),
         ...(inputMaps.defaultInputMap)
     ]
 },

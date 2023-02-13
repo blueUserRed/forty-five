@@ -37,12 +37,6 @@ import onj.value.*
 
 class ScreenBuilder(val file: FileHandle) {
 
-    private var fonts: MutableMap<String, BitmapFont> = mutableMapOf()
-    private val drawables: MutableMap<String, Drawable> = mutableMapOf()
-    private var cursors: MutableMap<String, Cursor> = mutableMapOf()
-    private var postProcessors: MutableMap<String, PostProcessor> = mutableMapOf()
-//    private var animations: MutableMap<String, FrameAnimation> = mutableMapOf()
-    private var particles: MutableMap<String, ParticleEffect> = mutableMapOf()
     private val styles: MutableMap<String, Style> = mutableMapOf()
     private var borrowed: List<String> = listOf()
 
@@ -56,7 +50,6 @@ class ScreenBuilder(val file: FileHandle) {
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
     private var screenController: ScreenController? = null
-    private var inputMap: KeyInputMap? = null
     private var background: String? = null
     private var postProcessor: String? = null
 
@@ -69,11 +62,6 @@ class ScreenBuilder(val file: FileHandle) {
         doOptions(onj)
 
         val screen = StyleableOnjScreen(
-            drawables = drawables,
-            cursors = cursors,
-            fonts = fonts,
-            particles = particles,
-            postProcessors = postProcessors,
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
             styleTargets = styleTargets,
@@ -82,9 +70,13 @@ class ScreenBuilder(val file: FileHandle) {
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
-            printFrameRate = false,
-            keyInputMap = inputMap
+            printFrameRate = false
         )
+
+
+        onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
+            screen.inputMap = KeyInputMap.readFromOnj(it, screen)
+        }
 
         val root = CustomFlexBox()
         root.setFillParent(true)
@@ -114,9 +106,6 @@ class ScreenBuilder(val file: FileHandle) {
         }
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
-        }
-        options.ifHas<OnjArray>("inputMap") {
-            inputMap = KeyInputMap.readFromOnj(it)
         }
         options.ifHas<String>("postProcessor") {
             postProcessor = it
@@ -248,7 +237,8 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         "CardHand" -> CardHand(
-            widgetOnj.get<Double>("targetWidth").toFloat()
+            widgetOnj.get<Double>("targetWidth").toFloat(),
+            screen
         ).apply {
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()

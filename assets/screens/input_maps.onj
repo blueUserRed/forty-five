@@ -12,75 +12,181 @@ defaultInputMap: [
     }
 ],
 
-cardHandSelectionInputMap: [
+gameInputMap: [
+
+    // selecting cards in the hand
+
     {
         keycode: keys."1",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 1
         }
     },
     {
         keycode: keys."2",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 2
         }
     },
     {
         keycode: keys."3",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 3
         }
     },
     {
         keycode: keys."4",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 4
         }
     },
     {
         keycode: keys."5",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 5
         }
     },
     {
         keycode: keys."6",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 6
         }
     },
     {
         keycode: keys."7",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 7
         }
     },
     {
         keycode: keys."8",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 8
         }
     },
     {
         keycode: keys."9",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 9
         }
     },
     {
         keycode: keys."0",
         modifiers: [],
-        action: $SelectFirstInCardHandKeyAction {
+        action: $SelectCardInHandKeyAction {
             num: 10
         }
+    },
+
+    // selecting revolver slots
+
+    {
+        keycode: keys.F1,
+        modifiers: [],
+        action: $SelectRevolverSlotKeyAction {
+            num: 1
+        }
+    },
+    {
+        keycode: keys.F2,
+        modifiers: [],
+        action: $SelectRevolverSlotKeyAction {
+            num: 2
+        }
+    },
+    {
+        keycode: keys.F3,
+        modifiers: [],
+        action: $SelectRevolverSlotKeyAction {
+            num: 3
+        }
+    },
+    {
+        keycode: keys.F4,
+        modifiers: [],
+        action: $SelectRevolverSlotKeyAction {
+            num: 4
+        }
+    },
+    {
+        keycode: keys.F5,
+        modifiers: [],
+        action: $SelectRevolverSlotKeyAction {
+            num: 5
+        }
+    },
+
+
+    // selecting adjacent
+
+    {
+        keycode: keys.Left,
+        modifiers: [],
+        action: $SelectAdjacentKeyAction {
+            direction: "left"
+        }
+    },
+    {
+        keycode: keys.Right,
+        modifiers: [],
+        action: $SelectAdjacentKeyAction {
+            direction: "right"
+        }
+    },
+
+    // loading bullets
+
+    {
+        keycode: keys.F1,
+        modifiers: [ keys."L-Shift" ],
+        action: $PlaceSelectedCardInRevolverKeyAction {
+            revolverSlot: 1
+        }
+    },
+    {
+        keycode: keys.F2,
+        modifiers: [ keys."L-Shift" ],
+        action: $PlaceSelectedCardInRevolverKeyAction {
+            revolverSlot: 2
+        }
+    },
+    {
+        keycode: keys.F3,
+        modifiers: [ keys."L-Shift" ],
+        action: $PlaceSelectedCardInRevolverKeyAction {
+            revolverSlot: 3
+        }
+    },
+    {
+        keycode: keys.F4,
+        modifiers: [ keys."L-Shift" ],
+        action: $PlaceSelectedCardInRevolverKeyAction {
+            revolverSlot: 4
+        }
+    },
+    {
+        keycode: keys.F5,
+        modifiers: [ keys."L-Shift" ],
+        action: $PlaceSelectedCardInRevolverKeyAction {
+            revolverSlot: 5
+        }
+    },
+
+    // deselecting all
+
+    {
+        keycode: keys.Escape,
+        modifiers: [],
+        action: $DeselectAllKeyAction { }
     }
+
 ]
