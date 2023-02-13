@@ -187,6 +187,29 @@ gameInputMap: [
         keycode: keys.Escape,
         modifiers: [],
         action: $DeselectAllKeyAction { }
+    },
+
+    // buttons
+
+    {
+        keycode: keys.E,
+        modifiers: [ keys."L-Ctrl" ],
+        action: $EndTurnKeyAction { }
+    },
+    {
+        keycode: keys.S,
+        modifiers: [ keys."L-Ctrl" ],
+        action: $ShootKeyAction { }
+    },
+    {
+        keycode: keys.B,
+        modifiers: [],
+        action: $DrawBulletKeyAction { }
+    },
+    {
+        keycode: keys.C,
+        modifiers: [],
+        action: $DrawCoverKeyAction { }
     }
 
 ]
