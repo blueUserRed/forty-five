@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -113,6 +114,19 @@ interface AnimationActor {
      * true if the actor is in an animation. If so, it should be treated differently, e.g. by not setting its position
      */
     var inAnimation: Boolean
+}
+
+/**
+ * an actor that can be selected using the keyboard
+ */
+interface KeySelectableActor {
+
+    /**
+     * true when the actor is currently selected
+     */
+    var isSelected: Boolean
+
+    fun getHighlightArea(): Rectangle
 }
 
 /**
