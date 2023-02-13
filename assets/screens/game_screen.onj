@@ -194,11 +194,11 @@ var shootButton = $Image {
     scaleX: 0.03,
     scaleY: 0.03,
     behaviours: [
-        $OnClickChangePostProcessorBehaviour {
-            postProcessor: "earthquake_shader",
-            duration: 70,
-            setOnlyIfNoPostProcessorIsSet: false
-        },
+//        $OnClickChangePostProcessorBehaviour {
+//            postProcessor: "earthquake_shader",
+//            duration: 70,
+//            setOnlyIfNoPostProcessorIsSet: false
+//        },
         $ShootButtonBehaviour { },
         buttonHoverBehaviour,
         $OnHoverChangeTextureBehaviour {

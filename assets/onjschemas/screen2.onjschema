@@ -281,6 +281,14 @@ $KeyAction {
 
     $DeselectAllKeyAction { }
 
+    $ShootKeyAction { }
+
+    $EndTurnKeyAction { }
+
+    $DrawBulletKeyAction { }
+
+    $DrawCoverKeyAction { }
+
 }
 
 viewport: $Viewport,

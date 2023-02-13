@@ -421,6 +421,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * shoots the revolver
      */
     fun shoot() {
+        if (currentPhase != Gamephase.FREE) return
         val revolver = revolver
         turnCounter++
 
@@ -503,7 +504,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
 
         }
-        executeTimelineLater(timeline)
+        val postProcessor = GraphicsConfig.shootPostProcessor(curScreen)
+        val duration = GraphicsConfig.shootPostProcessorDuration()
+        val postProcessorTimeline = Timeline.timeline {
+            action { curScreen.postProcessor = postProcessor }
+            delay(duration)
+            action { curScreen.postProcessor = null }
+        }
+
+        executeTimelineLater(Timeline.timeline {
+            parallelActions(
+                timeline.asAction(),
+                postProcessorTimeline.asAction()
+            )
+        })
     }
 
     private fun checkCardModifierValidity() {
@@ -512,6 +526,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun endTurn() {
+        if (currentPhase != Gamephase.FREE) return
         onEndTurnButtonClicked()
     }
 
@@ -641,6 +656,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * draws a bullet from the stack
      */
     fun drawBullet() {
+        if (currentPhase !in arrayOf(Gamephase.INITIAL_DRAW, Gamephase.SPECIAL_DRAW)) return
         var cardsToDraw = remainingCardsToDraw ?: return
         val bullet = bulletStack.removeFirstOrNull() ?: defaultBullet.create()
         remainingBullets = bulletStack.size
@@ -656,6 +672,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * draws a cover from the stack
      */
     fun drawCover() {
+        if (currentPhase !in arrayOf(Gamephase.INITIAL_DRAW, Gamephase.SPECIAL_DRAW)) return
         var cardsToDraw = remainingCardsToDraw ?: return
         val cover = coverCardStack.removeFirstOrNull() ?: defaultCover.create()
         remainingCovers = coverCardStack.size

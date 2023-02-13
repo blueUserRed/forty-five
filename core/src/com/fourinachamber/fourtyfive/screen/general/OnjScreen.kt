@@ -68,6 +68,7 @@ open class OnjScreen(
         set(value) {
             field = value
             value?.resetReferenceTime()
+            resize(Gdx.graphics.width, Gdx.graphics.height)
         }
 
     val stage: Stage = Stage(viewport, batch)

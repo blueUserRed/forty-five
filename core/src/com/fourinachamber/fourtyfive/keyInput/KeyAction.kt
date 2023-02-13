@@ -97,6 +97,38 @@ object KeyActionFactory {
                 screen.selectedActor = null
                 true
             }
+        },
+
+        "Shoot" to {
+            lambda@ {
+                val game = FourtyFive.currentGame ?: return@lambda false
+                game.shoot()
+                true
+            }
+        },
+
+        "EndTurn" to {
+            lambda@ {
+                val game = FourtyFive.currentGame ?: return@lambda false
+                game.endTurn()
+                true
+            }
+        },
+
+        "DrawBullet" to {
+            lambda@ {
+                val game = FourtyFive.currentGame ?: return@lambda false
+                game.drawBullet()
+                true
+            }
+        },
+
+        "DrawCover" to {
+            lambda@ {
+                val game = FourtyFive.currentGame ?: return@lambda false
+                game.drawCover()
+                true
+            }
         }
 
     )
