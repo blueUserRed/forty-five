@@ -175,7 +175,7 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
-        val flexBox = CustomFlexBox(widgetOnj.getOr("partOfSelectionHierarchy", false))
+        val flexBox = CustomFlexBox()
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
