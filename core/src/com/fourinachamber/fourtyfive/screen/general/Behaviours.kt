@@ -99,11 +99,11 @@ abstract class Behaviour(val actor: Actor) {
         this.onjScreen = onjScreen
         onHoverEnter?.let { actor.onEnter(it) }
         onHoverExit?.let { actor.onExit(it) }
-        actor.onClick {
+        actor.onButtonClick {
             if (actor is DisableActor) {
-                if (actor.isDisabled) onDisabledCLick?.let { it() }
-                else onCLick?.let { it() }
-            } else onCLick?.let { it() }
+                if (actor.isDisabled) onDisabledCLick?.let { it(actor) }
+                else onCLick?.let { it(actor) }
+            } else onCLick?.let { it(actor) }
         }
     }
 

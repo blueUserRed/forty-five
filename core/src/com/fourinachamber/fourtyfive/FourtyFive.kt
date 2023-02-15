@@ -33,7 +33,6 @@ object FourtyFive : Game() {
         cardGenerator.generateCards()
         val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
         changeToScreen(screen)
-//        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
     }
 
     fun changeToScreen(screen: OnjScreen) {

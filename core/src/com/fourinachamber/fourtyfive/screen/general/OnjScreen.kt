@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -21,6 +20,8 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyBuilder
+import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.screen.ResourceBorrower
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.Either
@@ -34,18 +35,15 @@ import kotlin.system.measureTimeMillis
  * a screen that was build from an onj file.
  */
 open class OnjScreen(
-    private val drawables: MutableMap<String, Drawable>,
     val viewport: Viewport,
     batch: Batch,
     private val background: String?,
-//    private val toDispose: List<Disposable>,
     private val useAssets: List<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
-    private val printFrameRate: Boolean,
-    private val keyInputMap: KeyInputMap? = null
+    private val printFrameRate: Boolean
 ) : ScreenAdapter(), ResourceBorrower {
 
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
@@ -72,6 +70,7 @@ open class OnjScreen(
         set(value) {
             field = value
             value?.resetReferenceTime()
+            resize(Gdx.graphics.width, Gdx.graphics.height)
         }
 
     val stage: Stage = Stage(viewport, batch)
@@ -83,7 +82,30 @@ open class OnjScreen(
             if (isVisible) value?.init(this)
         }
 
-    var highlightArea: Rectangle? = null
+    var selectedActor: KeySelectableActor? = null
+        set(value) {
+            field?.isSelected = false
+            field = value
+            field?.isSelected = true
+            selectedNode = null
+        }
+
+    var selectedNode: KeySelectionHierarchyNode? = null
+        set(value) {
+            if (!(value?.isSelectable ?: true)) {
+                throw RuntimeException("only a node that is selectable can be assigned to 'selectedNode'")
+            }
+            value?.actor?.let { selectedActor = it as KeySelectableActor }
+            field = value
+        }
+
+    var inputMap: KeyInputMap? = null
+        set(value) {
+            field = value
+            inputMultiplexer.clear()
+            value?.let { inputMultiplexer.addProcessor(it) }
+            inputMultiplexer.addProcessor(stage)
+        }
 
     private val keySelectDrawable: Drawable by lazy {
         GraphicsConfig.keySelectDrawable(this)
@@ -92,6 +114,11 @@ open class OnjScreen(
     private val backgroundDrawable: Drawable? by lazy {
         background?.let { ResourceManager.get<Drawable>(this, it) }
     }
+
+    private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
+
+    var keySelectionHierarchy: KeySelectionHierarchyNode? = null
+        private set
 
     init {
         useAssets.forEach {
@@ -102,17 +129,14 @@ open class OnjScreen(
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
         addLateRenderTask {
-            val highlight = highlightArea ?: return@addLateRenderTask
+            val highlight = selectedActor?.getHighlightArea() ?: return@addLateRenderTask
             keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
         }
+        inputMultiplexer.addProcessor(stage)
     }
 
     fun afterMs(ms: Int, callback: () -> Unit) {
         callbacks.add((TimeUtils.millis() + ms) to callback)
-    }
-
-    fun addDrawable(name: String, drawable: Drawable) {
-        drawables[name] = drawable
     }
 
     fun addDisposable(disposable: Disposable) {
@@ -148,6 +172,10 @@ open class OnjScreen(
         }
     }
 
+    fun buildKeySelectHierarchy() {
+        keySelectionHierarchy = KeySelectionHierarchyBuilder().build(stage.root)
+    }
+
     fun addLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
     fun addEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
     fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
@@ -175,10 +203,7 @@ open class OnjScreen(
 
     override fun show() {
         screenController?.init(this)
-        val multiplexer = InputMultiplexer()
-        keyInputMap?.let { multiplexer.addProcessor(it) }
-        multiplexer.addProcessor(stage)
-        Gdx.input.inputProcessor = multiplexer
+        Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
     }

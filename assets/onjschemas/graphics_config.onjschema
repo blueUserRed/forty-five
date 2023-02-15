@@ -120,4 +120,11 @@ keySelect: {
     drawable: string
 },
 
-keySelectUsedAssets: string[]
+keySelectUsedAssets: string[],
+
+shootPostProcessor: {
+    name: string,
+    duration: float
+},
+
+shootPostProcessorUsedAssets: string[]

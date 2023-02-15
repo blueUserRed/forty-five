@@ -197,6 +197,9 @@ object GraphicsConfig {
 
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
 
+    fun shootPostProcessor(screen: OnjScreen): PostProcessor = ResourceManager.get(screen, shootPostProcessor)
+    fun shootPostProcessorDuration(): Int = shootPostProcessorDuration
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,7 +308,14 @@ object GraphicsConfig {
 
         val keySelect = config.get<OnjObject>("keySelect")
         keySelectDrawable = keySelect.get<OnjString>("drawable").value
+
+        val onShootPostProcessor = config.get<OnjObject>("shootPostProcessor")
+        shootPostProcessor = onShootPostProcessor.get<String>("name")
+        shootPostProcessorDuration = (onShootPostProcessor.get<Double>("duration") * 100).toInt()
     }
+
+    private lateinit var shootPostProcessor: String
+    private var shootPostProcessorDuration: Int by Delegates.notNull()
 
     private lateinit var keySelectDrawable: String
 

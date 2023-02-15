@@ -147,4 +147,11 @@ keySelect: {
     drawable: "key_select_frame"
 },
 
-keySelectUsedAssets: [ "key_select_frame" ]
+keySelectUsedAssets: [ "key_select_frame" ],
+
+shootPostProcessor: {
+    name: "earthquake_shader",
+    duration: 0.7
+},
+
+shootPostProcessorUsedAssets: [ "earthquake_shader" ]

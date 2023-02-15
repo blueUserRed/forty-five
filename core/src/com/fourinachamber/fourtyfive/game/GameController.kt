@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
@@ -151,13 +150,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBullet: CardPrototype
     private lateinit var defaultCover: CardPrototype
 
-    var keySelectedCard: Card? = null
-        set(value) {
-            field?.actor?.isSelected = false
-            field = value
-            field?.actor?.isSelected = true
-        }
-
     override fun init(onjScreen: OnjScreen) {
         SaveState.read()
         curScreen = onjScreen
@@ -286,28 +278,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             anim.update()
         }
 
-        val selected = keySelectedCard ?: run {
-            curScreen.highlightArea = null
-            return
-        }
-        val (x, y) = selected.actor.localToStageCoordinates(Vector2(0f, 0f))
-        val width: Float
-        val height: Float
-        if (selected.actor.reportDimensionsWithScaling) {
-            width = selected.actor.width
-            height = selected.actor.height
-        } else {
-            width = selected.actor.width * selected.actor.scaleX
-            height = selected.actor.height * selected.actor.scaleY
-        }
-        curScreen.highlightArea?.let {
-            it.x = x
-            it.y = y
-            it.width = width
-            it.height = height
-            return
-        }
-        curScreen.highlightArea = Rectangle(x, y, width, height)
+//        val (x, y) = selected.actor.localToStageCoordinates(Vector2(0f, 0f))
+//        val width: Float
+//        val height: Float
+//        if (selected.actor.reportDimensionsWithScaling) {
+//            width = selected.actor.width
+//            height = selected.actor.height
+//        } else {
+//            width = selected.actor.width * selected.actor.scaleX
+//            height = selected.actor.height * selected.actor.scaleY
+//        }
+//        curScreen.highlightArea?.let {
+//            it.x = x
+//            it.y = y
+//            it.width = width
+//            it.height = height
+//            return
+//        }
+//        curScreen.highlightArea = Rectangle(x, y, width, height)
     }
 
     /**
@@ -396,6 +384,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     fun loadBulletInRevolver(card: Card, slot: Int) {
         if (card.type != Card.Type.BULLET || !card.allowsEnteringGame()) return
+        if (revolver.getCardInSlot(slot) != null) return
         if (!cost(card.cost)) return
         cardHand.removeCard(card)
         revolver.setCard(slot, card)
@@ -432,6 +421,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * shoots the revolver
      */
     fun shoot() {
+        if (currentPhase != Gamephase.FREE) return
         val revolver = revolver
         turnCounter++
 
@@ -514,7 +504,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
 
         }
-        executeTimelineLater(timeline)
+        val postProcessor = GraphicsConfig.shootPostProcessor(curScreen)
+        val duration = GraphicsConfig.shootPostProcessorDuration()
+        val postProcessorTimeline = Timeline.timeline {
+            action { curScreen.postProcessor = postProcessor }
+            delay(duration)
+            action { curScreen.postProcessor = null }
+        }
+
+        executeTimelineLater(Timeline.timeline {
+            parallelActions(
+                timeline.asAction(),
+                postProcessorTimeline.asAction()
+            )
+        })
     }
 
     private fun checkCardModifierValidity() {
@@ -523,6 +526,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun endTurn() {
+        if (currentPhase != Gamephase.FREE) return
         onEndTurnButtonClicked()
     }
 
@@ -652,6 +656,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * draws a bullet from the stack
      */
     fun drawBullet() {
+        if (currentPhase !in arrayOf(Gamephase.INITIAL_DRAW, Gamephase.SPECIAL_DRAW)) return
         var cardsToDraw = remainingCardsToDraw ?: return
         val bullet = bulletStack.removeFirstOrNull() ?: defaultBullet.create()
         remainingBullets = bulletStack.size
@@ -667,6 +672,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * draws a cover from the stack
      */
     fun drawCover() {
+        if (currentPhase !in arrayOf(Gamephase.INITIAL_DRAW, Gamephase.SPECIAL_DRAW)) return
         var cardsToDraw = remainingCardsToDraw ?: return
         val cover = coverCardStack.removeFirstOrNull() ?: defaultCover.create()
         remainingCovers = coverCardStack.size
