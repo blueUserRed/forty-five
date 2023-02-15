@@ -610,10 +610,3 @@ assets
   |-toPack.txt
   | -> siehe Der TexturePacker
 </pre>
-
-
-## Coding Conventions
-
-------
-
-TODO
