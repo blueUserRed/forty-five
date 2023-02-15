@@ -84,6 +84,7 @@ class ScreenBuilder(val file: FileHandle) {
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
         screen.addActorToRoot(root)
+        screen.buildKeySelectHierarchy()
 
         postProcessor?.let {
             screen.postProcessor = ResourceManager.get<PostProcessor>(screen, it)
@@ -173,7 +174,7 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
-        val flexBox = CustomFlexBox()
+        val flexBox = CustomFlexBox(widgetOnj.getOr("partOfSelectionHierarchy", false))
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
@@ -211,7 +212,10 @@ class ScreenBuilder(val file: FileHandle) {
         screen: OnjScreen
     ): Actor = when (widgetOnj.name) {
 
-        "Image" -> CustomImageActor(drawableOrError(widgetOnj.get<String>("textureName"), screen)).apply {
+        "Image" -> CustomImageActor(
+            drawableOrError(widgetOnj.get<String>("textureName"), screen),
+            widgetOnj.getOr("partOfSelectionHierarchy", false)
+        ).apply {
             applyImageKeys(this, widgetOnj)
         }
 
@@ -224,7 +228,8 @@ class ScreenBuilder(val file: FileHandle) {
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
                 }
-            }
+            },
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
@@ -232,7 +237,10 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
-        "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"), screen)).apply {
+        "AnimatedImage" -> AnimatedImage(
+            animationOrError(widgetOnj.get<String>("animationName"), screen),
+            widgetOnj.getOr("partOfSelectionHierarchy", false)
+        ).apply {
             applyImageKeys(this, widgetOnj)
         }
 
@@ -287,11 +295,12 @@ class ScreenBuilder(val file: FileHandle) {
         )
 
         "TemplateLabel" -> TemplateStringLabel(
-            TemplateString(widgetOnj.get<String>("template")),
-            Label.LabelStyle(
+            templateString = TemplateString(widgetOnj.get<String>("template")),
+            labelStyle = Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font"), screen),
                 widgetOnj.get<Color>("color")
-            )
+            ),
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }

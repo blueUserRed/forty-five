@@ -20,6 +20,8 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyBuilder
+import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.screen.ResourceBorrower
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.Either
@@ -85,6 +87,16 @@ open class OnjScreen(
             field?.isSelected = false
             field = value
             field?.isSelected = true
+            selectedNode = null
+        }
+
+    var selectedNode: KeySelectionHierarchyNode? = null
+        set(value) {
+            if (!(value?.isSelectable ?: true)) {
+                throw RuntimeException("only a node that is selectable can be assigned to 'selectedNode'")
+            }
+            value?.actor?.let { selectedActor = it as KeySelectableActor }
+            field = value
         }
 
     var inputMap: KeyInputMap? = null
@@ -104,6 +116,9 @@ open class OnjScreen(
     }
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
+
+    var keySelectionHierarchy: KeySelectionHierarchyNode? = null
+        private set
 
     init {
         useAssets.forEach {
@@ -155,6 +170,10 @@ open class OnjScreen(
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
                     (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
+    }
+
+    fun buildKeySelectHierarchy() {
+        keySelectionHierarchy = KeySelectionHierarchyBuilder().build(stage.root)
     }
 
     fun addLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }

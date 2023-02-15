@@ -20,8 +20,10 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.SnapshotArray
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import ktx.actors.alpha
@@ -126,7 +128,17 @@ interface KeySelectableActor {
      */
     var isSelected: Boolean
 
+    val partOfHierarchy: Boolean
+
     fun getHighlightArea(): Rectangle
+}
+
+interface KeySelectableHierarchyGroup {
+
+    val partOfHierarchy: Boolean
+
+    fun children(): SnapshotArray<Actor>
+
 }
 
 /**
@@ -137,12 +149,20 @@ interface KeySelectableActor {
 open class CustomLabel(
     text: String,
     labelStyle: LabelStyle,
-    var background: Drawable? = null
-) : Label(text, labelStyle), ZIndexActor, DisableActor {
+    var background: Drawable? = null,
+    override val partOfHierarchy: Boolean = false
+) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor {
 
     override var fixedZIndex: Int = 0
 
     override var isDisabled: Boolean = false
+
+    override var isSelected: Boolean = false
+
+    override fun getHighlightArea(): Rectangle {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        return Rectangle(x, y, width, height)
+    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {
@@ -175,8 +195,10 @@ open class CustomLabel(
 
 open class TemplateStringLabel(
     private val templateString: TemplateString,
-    labelStyle: LabelStyle
-) : CustomLabel(templateString.string, labelStyle) {
+    labelStyle: LabelStyle,
+    background: Drawable? = null,
+    partOfHierarchy: Boolean = false
+) : CustomLabel(templateString.string, labelStyle, background, partOfHierarchy) {
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val newString = templateString.string
@@ -190,7 +212,10 @@ open class TemplateStringLabel(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIndexActor, DisableActor {
+open class CustomImageActor(
+    drawable: Drawable,
+    override val partOfHierarchy: Boolean = false
+) : Image(drawable), Maskable, ZIndexActor, DisableActor, KeySelectableActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -201,6 +226,8 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
     override var maskScaleY: Float = 1f
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
+
+    override var isSelected: Boolean = false
 
     /**
      * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
@@ -277,6 +304,15 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
         return if (didHit) this else null
     }
 
+    override fun getHighlightArea(): Rectangle {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        return if (reportDimensionsWithScaling) {
+            Rectangle(x, y, width, height)
+        } else {
+            Rectangle(x, y, width * scaleX, height * scaleY)
+        }
+    }
+
     companion object {
 
         val maskingShader: ShaderProgram by lazy {
@@ -294,11 +330,15 @@ open class CustomImageActor(drawable: Drawable) : Image(drawable), Maskable, ZIn
 
 }
 
-open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
+open class CustomFlexBox(
+    override val partOfHierarchy: Boolean = false
+) : FlexBox(), ZIndexActor, ZIndexGroup, KeySelectableHierarchyGroup {
 
     override var fixedZIndex: Int = 0
 
     var background: Drawable? = null
+
+    override fun children(): SnapshotArray<Actor> = children
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->
@@ -424,8 +464,9 @@ class RotatableImageActor(
  * @param animation the animation; contains the frames and data such as the frameTime
  */
 class AnimatedImage(
-    private val animation: FrameAnimation
-) : CustomImageActor(animation.frames[animation.initialFrame]) {
+    private val animation: FrameAnimation,
+    partOfHierarchy: Boolean = false
+) : CustomImageActor(animation.frames[animation.initialFrame], partOfHierarchy) {
 
     override var fixedZIndex: Int = 0
 

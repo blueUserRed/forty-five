@@ -441,11 +441,11 @@ class CardActor(
     detailBackground: Drawable?,
     detailSpacing: Float,
     screen: OnjScreen
-) : CustomImageActor(card.drawable), ZIndexActor, KeySelectableActor {
-
-    override var fixedZIndex: Int = 0
+) : CustomImageActor(card.drawable) {
 
     override var isSelected: Boolean = false
+
+    override var partOfHierarchy: Boolean = true
 
     /**
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.game.card.CardDragSource]
@@ -494,15 +494,6 @@ class CardActor(
 
     fun forceEndHover() {
         isHoveredOver = false
-    }
-
-    override fun getHighlightArea(): Rectangle {
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        return if (reportDimensionsWithScaling) {
-            Rectangle(x, y, width, height)
-        } else {
-            Rectangle(x, y, width * scaleX, height * scaleY)
-        }
     }
 
 }
