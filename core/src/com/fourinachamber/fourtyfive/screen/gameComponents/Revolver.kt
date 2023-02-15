@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
@@ -10,6 +11,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.*
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.contains
 import onj.value.OnjNamedObject
 import kotlin.math.cos
@@ -245,7 +248,9 @@ class RevolverSlot(
     drawable: Drawable,
     scale: Float,
     private val animationDuration: Float
-) : CustomImageActor(drawable), AnimationActor {
+) : CustomImageActor(drawable), AnimationActor, KeySelectableActor {
+
+    override var isSelected: Boolean = false
 
     override var inAnimation: Boolean = false
 
@@ -329,6 +334,15 @@ class RevolverSlot(
 
     override fun toString(): String {
         return "revolverSlot: $num with card $card"
+    }
+
+    override fun getHighlightArea(): Rectangle {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        return if (reportDimensionsWithScaling) {
+            Rectangle(x, y, width, height)
+        } else {
+            Rectangle(x, y, width * scaleX, height * scaleY)
+        }
     }
 
     /**

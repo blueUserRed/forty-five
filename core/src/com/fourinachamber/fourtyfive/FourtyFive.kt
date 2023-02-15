@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
+import com.fourinachamber.fourtyfive.game.card.CardGenerator
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -27,12 +28,11 @@ object FourtyFive : Game() {
 
     override fun create() {
         init()
-//        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-//        cardGenerator.prepare()
-//        cardGenerator.generateCards()
+        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+        cardGenerator.prepare()
+        cardGenerator.generateCards()
         val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
         changeToScreen(screen)
-//        curScreen = ScreenBuilderFromOnj(Gdx.files.internal("screens/intro_screen.onj")).build()
     }
 
     fun changeToScreen(screen: OnjScreen) {

@@ -68,6 +68,13 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         _actions.add(timelineAction)
     }
 
+    fun asAction(): TimelineAction {
+        if (hasBeenStarted) {
+            throw RuntimeException("Timeline cannot be made into an action if it has already started")
+        }
+        return TimelineAsAction(this)
+    }
+
     /**
      * an action that can be put in a timeline
      */
@@ -277,4 +284,20 @@ class ActorActionTimelineAction(
         actor.removeAction(action)
         action.reset()
     }
+}
+
+class TimelineAsAction(private val timeline: Timeline) : Timeline.TimelineAction() {
+
+    override fun start(timeline: Timeline) {
+        super.start(timeline)
+        this.timeline.start()
+    }
+
+    override fun update() {
+        super.update()
+        this.timeline.update()
+    }
+
+    override fun isFinished(): Boolean = timeline.isFinished
+
 }

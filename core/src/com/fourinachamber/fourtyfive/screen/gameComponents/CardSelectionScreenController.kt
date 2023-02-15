@@ -100,7 +100,8 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             card.actor.reportDimensionsWithScaling = true
             card.actor.ignoreScalingWhenDrawing = true
             card.actor.invalidate()
-            card.actor.onClick { handleClick(card) }
+            card.actor.partOfHierarchy = true
+            card.actor.onButtonClick { handleClick(card) }
 
             val cardBehaviour = BehaviourFactory.behaviorOrError(
                 cardBehaviourOnj.name,
@@ -116,8 +117,10 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
                 cardSelectionActor.addActor(card.actor)
             }
             onjScreen.addActorToRoot(card.actor.hoverDetailActor)
+            card.actor.hoverDetailActor.isVisible = false
         }
         cardSelectionActor.invalidateHierarchy()
+        onjScreen.buildKeySelectHierarchy()
     }
 
     private fun displayCardsEmptyActor() {
@@ -130,7 +133,6 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     }
 
     override fun update() {
-//        onjScreen.invalidateEverything()
         var isCardHoveredOver = false
         for (card in cards) if (card.actor.isHoveredOver) {
             isCardHoveredOver = true
@@ -150,19 +152,6 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         }
         if (currentHoverDetail != null) layoutHoverDetail(currentHoverDetail!!, currentHoverDetail!!.card)
 
-//        for (card in cards) {
-//            val cardActor = card.actor
-//            val hoverDetail = cardActor.hoverDetailActor
-//            val cardSize = cardActor.width
-//            hoverDetail.forcedWidth = cardSize * 1.4f
-//            val (x, y) = cardActor.localToStageCoordinates(Vector2(0f, 0f))
-//            hoverDetail.setBounds(
-//                x + cardSize / 2 - hoverDetail.forcedWidth / 2,
-//                y - hoverDetail.prefHeight,
-//                hoverDetail.forcedWidth,
-//                hoverDetail.prefHeight
-//            )
-//        }
     }
 
     private fun layoutHoverDetail(hoverDetailActor: CardDetailActor, card: Card) {
@@ -178,7 +167,6 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
             hoverDetailActor.forcedWidth,
             hoverDetailActor.prefHeight
         )
-//        hoverDetailActor.invalidateHierarchy()
     }
 
     override fun end() {

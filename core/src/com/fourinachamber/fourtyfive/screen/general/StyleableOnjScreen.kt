@@ -11,11 +11,6 @@ import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 
 class StyleableOnjScreen(
-    drawables: MutableMap<String, Drawable>,
-    cursors: Map<String, Cursor>,
-    fonts: Map<String, BitmapFont>,
-    particles: Map<String, ParticleEffect>,
-    postProcessors: Map<String, PostProcessor>,
     viewport: Viewport,
     batch: Batch,
     background: String?,
@@ -24,22 +19,17 @@ class StyleableOnjScreen(
     lateRenderTasks: List<OnjScreen.() -> Unit>,
     private val styleTargets: List<StyleTarget>,
     namedActors: Map<String, Actor>,
-//    behaviours: List<Behaviour>,
     printFrameRate: Boolean,
-    keyInputMap: KeyInputMap?
 ) : OnjScreen(
-    drawables,
     viewport,
     batch,
     background,
-//    toDispose,
     useAssets,
     earlyRenderTasks,
     lateRenderTasks,
     mapOf(),
     namedActors,
     printFrameRate,
-    keyInputMap
 ) {
 
     override fun show() {

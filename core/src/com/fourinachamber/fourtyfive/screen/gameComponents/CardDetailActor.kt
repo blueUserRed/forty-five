@@ -3,17 +3,15 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
-import io.github.orioncraftmc.meditate.enums.YogaEdge
-import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
+import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import ktx.actors.onEnter
 import ktx.actors.onExit
 
@@ -26,10 +24,11 @@ class CardDetailActor(
     font: BitmapFont,
     fontColor: Color,
     private val fontScale: Float,
+    private val spacing: Float,
     initialForcedWidth: Float,
     private val screen: OnjScreen,
-    initialBackground: Drawable? = null
-) : CustomFlexBox() {
+    var background: Drawable? = null
+) : WidgetGroup(), ZIndexActor {
 
     /**
      * true when the actor is hovered over
@@ -37,108 +36,134 @@ class CardDetailActor(
     var isHoveredOver: Boolean = false
         private set
 
+    override var fixedZIndex: Int = 0
+
+    private val lineHeight = spacing * 0.2f
+    private val lineWidthMultiplier = 0.8f
+
     private val flavourTextActor = CustomLabel(initialFlavourText, Label.LabelStyle(font, fontColor))
     private val descriptionActor = CustomLabel(initialDescription, Label.LabelStyle(font, fontColor))
     private val statsTextActor = CustomLabel(initialStatsText, Label.LabelStyle(font, fontColor))
     private val statsChangedTextActor =
         CustomLabel(initialStatsChangedText, Label.LabelStyle(font, fontColor))
 
-    private var requiresRebuild: Boolean = true
+//    private var requiresRebuild: Boolean = true
 
     var flavourText: String = initialFlavourText
         set(value) {
-            requiresRebuild = true
+            invalidateHierarchy()
             flavourTextActor.setText(value)
+            flavourTextActor.isVisible = value.isNotBlank()
             field = value
         }
 
     var description: String = initialDescription
         set(value) {
-            requiresRebuild = true
+            invalidateHierarchy()
             descriptionActor.setText(value)
+            descriptionActor.isVisible = value.isNotBlank()
             field = value
         }
 
     var statsText: String = initialStatsText
         set(value) {
-            requiresRebuild = true
+            invalidateHierarchy()
             statsTextActor.setText(value)
+            statsTextActor.isVisible = value.isNotBlank()
             field = value
         }
 
     var statsChangedText: String = initialStatsChangedText
         set(value) {
-            requiresRebuild = true
+            invalidateHierarchy()
             statsChangedTextActor.setText(value)
+            statsChangedTextActor.isVisible = value.isNotBlank()
             field = value
         }
 
     var forcedWidth = initialForcedWidth
-        set(value) {
-            field = value
-            root.setWidth(value)
-        }
 
-    private var spacing = 1.8f
+    private var separatorPositions: List<Float> = listOf()
+
+    private val components = arrayOf(
+        flavourTextActor,
+        descriptionActor,
+        statsTextActor,
+        statsChangedTextActor,
+    )
+
+    private var _prefHeight: Float = 0f
+
+//    private var spacing = 1.8f
 
     init {
-        background = initialBackground
-        rebuild()
+        components.forEach { component ->
+            addActor(component)
+            component.setFontScale(fontScale)
+            component.wrap = true
+            component.setAlignment(Align.center)
+        }
+
+        onEnter { isHoveredOver = true }
+        onExit { isHoveredOver = false }
+        invalidateHierarchy()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (requiresRebuild) {
-            rebuild()
-            requiresRebuild = false
+        validate()
+
+        // the calculated layout is sometimes just wrong, especially on the first frame the detail actor is displayed
+        // this sanity check returns when that is the case
+        if (height > screen.viewport.worldHeight) return
+
+        if (batch == null) {
+            super.draw(null, parentAlpha)
+            return
         }
+
+        validate()
+        background?.draw(batch, x, y, width, height)
+
         super.draw(batch, parentAlpha)
+
         val separator = GraphicsConfig.cardDetailSeparator(screen)
-        if (batch == null) return
-        for (i in 0 until children.size) {
-            if (i == 0) continue
-            val actor = children[i]
-            if (!actor.isVisible) continue
+        separatorPositions.forEach { position ->
+            val lineWidth = forcedWidth * lineWidthMultiplier
             separator.draw(
                 batch,
-                x + width / 2 - (width * 0.8f) / 2,
-                y + actor.y + actor.height + spacing / 2,
-                width * 0.8f,
-                spacing / 6f
+                x + forcedWidth / 2 - lineWidth / 2, y + position,
+                lineWidth, lineHeight
             )
         }
     }
 
-    private fun rebuild() {
-        spacing = GraphicsConfig.cardDetailSpacing()
-        clear()
-        arrayOf(
-            flavourTextActor,
-            descriptionActor,
-            statsTextActor,
-            statsChangedTextActor
-        ).forEachIndexed { i, actor ->
-            if (!actor.isVisible || actor.textEquals("")) return@forEachIndexed
-            val node = add(actor)
-            node.setWidthPercent(100f)
-            if (i != 0) node.setMargin(YogaEdge.TOP, spacing)
-            actor.setFontScale(fontScale)
-            actor.setAlignment(Align.center)
-            actor.wrap = true
+    override fun layout() {
+        super.layout()
+        val visibleComponents = components.filter { it.isVisible }
+        var height = visibleComponents
+            .map { it.prefHeight }
+            .sum()
+        height += visibleComponents.size * spacing
+        var curY = height - spacing
+        val separatorPositions = mutableListOf<Float>()
+        visibleComponents.forEachIndexed { i, component ->
+            component.setBounds(
+                0f, curY - component.prefHeight,
+                forcedWidth, component.prefHeight
+            )
+            if (i != 0) {
+                separatorPositions.add(curY + spacing / 2 - lineHeight / 2)
+            }
+            curY -= component.height + spacing
         }
-        root.flexDirection = YogaFlexDirection.COLUMN
-        root.setPadding(YogaEdge.ALL, spacing)
-//        root.alignItems = YogaAlign.CENTER
-//        root.justifyContent = YogaJustify.CENTER
-        root.setHeightAuto()
-
-        touchable = Touchable.enabled
-        onEnter { isHoveredOver = true }
-        onExit { isHoveredOver = false }
-        layout() // Without this the height is not set correctly on the first frame, don't ask me why
+        this.separatorPositions = separatorPositions
+        this.height = height
+        _prefHeight = height
     }
 
     override fun getPrefWidth(): Float {
         return forcedWidth
     }
 
+    override fun getPrefHeight(): Float = _prefHeight
 }

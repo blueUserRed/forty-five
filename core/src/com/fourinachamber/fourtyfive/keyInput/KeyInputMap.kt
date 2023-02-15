@@ -2,13 +2,15 @@ package com.fourinachamber.fourtyfive.keyInput
 
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputProcessor
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import onj.value.OnjArray
 import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
 class KeyInputMap(
-    private val entries: List<KeyInputMapEntry>
+    private val entries: List<KeyInputMapEntry>,
+    private val screen: OnjScreen
 ) : InputProcessor {
 
     private val modifiers: MutableSet<Keycode> = mutableSetOf()
@@ -18,13 +20,18 @@ class KeyInputMap(
             modifiers.add(keycode)
             return true
         }
+
+        var bestCandidate: KeyAction? = null
+        var bestCandidateModifierCount = -1
         for (entry in entries) {
             if (entry.keycode != keycode) continue
-            //TODO: what if you have two actions with the same keycode but one has a modifier
             if (!areAllModifiersPressed(entry.modifierKeys)) continue
-            return entry.action()
+            if (entry.modifierKeys.size > bestCandidateModifierCount) {
+                bestCandidate = entry.action
+                bestCandidateModifierCount = entry.modifierKeys.size
+            }
         }
-        return false
+        return bestCandidate?.invoke(screen) ?: false
     }
 
     private fun areAllModifiersPressed(modifierKeys: List<Keycode>): Boolean {
@@ -75,7 +82,7 @@ class KeyInputMap(
             Keys.SHIFT_RIGHT
         )
 
-        fun readFromOnj(actions: OnjArray): KeyInputMap {
+        fun readFromOnj(actions: OnjArray, screen: OnjScreen): KeyInputMap {
             val entries = actions
                 .value
                 .map { obj ->
@@ -91,12 +98,12 @@ class KeyInputMap(
 
                     KeyInputMapEntry(
                         obj.get<Long>("keycode").toInt(),
-                        modifiers,
-                        action
+                        action,
+                        modifiers
                     )
                 }
 
-            return KeyInputMap(entries)
+            return KeyInputMap(entries, screen)
         }
 
     }
