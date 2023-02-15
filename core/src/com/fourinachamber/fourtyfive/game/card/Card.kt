@@ -2,6 +2,8 @@ package com.fourinachamber.fourtyfive.game.card
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -13,11 +15,14 @@ import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardDetailActor
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
+import com.fourinachamber.fourtyfive.screen.general.KeySelectableActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import com.fourinachamber.fourtyfive.utils.Timeline
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjArray
@@ -436,9 +441,11 @@ class CardActor(
     detailBackground: Drawable?,
     detailSpacing: Float,
     screen: OnjScreen
-) : CustomImageActor(card.drawable), ZIndexActor {
+) : CustomImageActor(card.drawable) {
 
-    override var fixedZIndex: Int = 0
+    override var isSelected: Boolean = false
+
+    override var partOfHierarchy: Boolean = true
 
     /**
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.game.card.CardDragSource]
@@ -450,11 +457,6 @@ class CardActor(
      */
     var isHoveredOver: Boolean = false
         private set
-
-    /**
-     * true when the actor was selected using the keyboard
-     */
-    var isSelected: Boolean = false
 
     val hoverDetailActor = CardDetailActor(
         card = card,

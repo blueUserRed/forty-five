@@ -53,6 +53,7 @@ class CardDetailActor(
         set(value) {
             invalidateHierarchy()
             flavourTextActor.setText(value)
+            flavourTextActor.isVisible = value.isNotBlank()
             field = value
         }
 
@@ -60,6 +61,7 @@ class CardDetailActor(
         set(value) {
             invalidateHierarchy()
             descriptionActor.setText(value)
+            descriptionActor.isVisible = value.isNotBlank()
             field = value
         }
 
@@ -67,6 +69,7 @@ class CardDetailActor(
         set(value) {
             invalidateHierarchy()
             statsTextActor.setText(value)
+            statsTextActor.isVisible = value.isNotBlank()
             field = value
         }
 
@@ -74,14 +77,11 @@ class CardDetailActor(
         set(value) {
             invalidateHierarchy()
             statsChangedTextActor.setText(value)
+            statsChangedTextActor.isVisible = value.isNotBlank()
             field = value
         }
 
     var forcedWidth = initialForcedWidth
-        set(value) {
-            field = value
-//            root.setWidth(value)
-        }
 
     private var separatorPositions: List<Float> = listOf()
 
@@ -140,11 +140,10 @@ class CardDetailActor(
     override fun layout() {
         super.layout()
         val visibleComponents = components.filter { it.isVisible }
-        var height = components
-            .filter { it.isVisible }
+        var height = visibleComponents
             .map { it.prefHeight }
             .sum()
-        height += (visibleComponents.size - 1) * spacing
+        height += visibleComponents.size * spacing
         var curY = height - spacing
         val separatorPositions = mutableListOf<Float>()
         visibleComponents.forEachIndexed { i, component ->
@@ -152,7 +151,7 @@ class CardDetailActor(
                 0f, curY - component.prefHeight,
                 forcedWidth, component.prefHeight
             )
-            if (i != visibleComponents.size - 1 && i != 0) {
+            if (i != 0) {
                 separatorPositions.add(curY + spacing / 2 - lineHeight / 2)
             }
             curY -= component.height + spacing
