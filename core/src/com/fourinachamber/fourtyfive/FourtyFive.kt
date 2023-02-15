@@ -42,10 +42,6 @@ object FourtyFive : Game() {
         setScreen(screen)
     }
 
-    override fun render() {
-
-    }
-
     private fun init() {
         with(OnjConfig) {
             registerNameSpace("Common", CommonNamespace)

@@ -423,8 +423,3 @@ val timeline = Timeline.timeline {
 
 ------
 
-
-
-## Coding Conventions
-
-------
