@@ -30,6 +30,7 @@ import com.fourinachamber.fourtyfive.utils.FrameAnimation
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
+import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -376,6 +377,8 @@ class ScreenBuilder(val file: FileHandle) {
 
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
         widgetOnj.ifHas<String>("name") { namedActors[it] = this }
+
+        onClick { fire(ButtonClickEvent()) }
     }
 
     private fun applyDragAndDrop(actor: Actor, onj: OnjNamedObject) {

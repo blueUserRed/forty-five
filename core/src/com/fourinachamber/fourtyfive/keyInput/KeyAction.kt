@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.CardActor
 import com.fourinachamber.fourtyfive.screen.gameComponents.RevolverSlot
+import com.fourinachamber.fourtyfive.screen.general.ButtonClickEvent
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -164,10 +165,7 @@ object KeyActionFactory {
             lambda@ { screen ->
                 val selected = screen.selectedActor ?: return@lambda false
                 selected as Actor
-                val event = InputEvent()
-                event.type = InputEvent.Type.touchDown
-                event.button = Input.Buttons.LEFT
-                selected.fire(event)
+                selected.fire(ButtonClickEvent())
                 true
             }
         }
