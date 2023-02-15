@@ -133,14 +133,6 @@ interface KeySelectableActor {
     fun getHighlightArea(): Rectangle
 }
 
-interface KeySelectableHierarchyGroup {
-
-    val partOfHierarchy: Boolean
-
-    fun children(): SnapshotArray<Actor>
-
-}
-
 /**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
@@ -330,15 +322,11 @@ open class CustomImageActor(
 
 }
 
-open class CustomFlexBox(
-    override val partOfHierarchy: Boolean = false
-) : FlexBox(), ZIndexActor, ZIndexGroup, KeySelectableHierarchyGroup {
+open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
 
     var background: Drawable? = null
-
-    override fun children(): SnapshotArray<Actor> = children
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->

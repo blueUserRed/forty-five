@@ -66,42 +66,30 @@ class KeySelectionHierarchyNode(
 class KeySelectionHierarchyBuilder {
 
     fun build(root: Actor): KeySelectionHierarchyNode {
-        val children = buildChild(root, null)
-        return KeySelectionHierarchyNode(children, null, root)
-//        return children ?: KeySelectionHierarchyNode(listOf(), null, root)
+        val child = buildChild(root, null)
+        return child ?: KeySelectionHierarchyNode(listOf(), null, root)
     }
 
-    //TODO: KeySelectableHierarchyGroup may not be necessary
-    private fun buildChild(root: Actor, parent: KeySelectionHierarchyNode?): List<KeySelectionHierarchyNode> {
+    private fun buildChild(root: Actor, parent: KeySelectionHierarchyNode?): KeySelectionHierarchyNode? {
         return when (root) {
 
             is KeySelectableActor -> {
                 if (root.partOfHierarchy) {
-                    listOf(KeySelectionHierarchyNode(listOf(), parent, root))
-                } else listOf()
+                    KeySelectionHierarchyNode(listOf(), parent, root)
+                } else null
             }
-
-//            is KeySelectableHierarchyGroup -> {
-//                val childNodes = mutableListOf<KeySelectionHierarchyNode>()
-//                val thisNode = KeySelectionHierarchyNode(childNodes, parent, root)
-//                for (child in root.children()) {
-//                    val builtChild = buildChild(child, thisNode)
-//                    childNodes.addAll(builtChild)
-//                }
-//                listOf(thisNode)
-//            }
 
             is Group -> {
                 val childNodes = mutableListOf<KeySelectionHierarchyNode>()
                 val thisNode = KeySelectionHierarchyNode(childNodes, parent, root)
                 for (child in root.children) {
                     val builtChild = buildChild(child, thisNode)
-                    childNodes.addAll(builtChild)
+                    builtChild?.let { childNodes.add(it) }
                 }
-                listOf(thisNode)
+                thisNode
             }
 
-            else -> listOf()
+            else -> null
 
         }
     }
