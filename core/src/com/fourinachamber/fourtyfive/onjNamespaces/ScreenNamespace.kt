@@ -32,5 +32,4 @@ object ScreenNamespace {
             else -> OnjObject(pairs)
         }
     }
-
 }

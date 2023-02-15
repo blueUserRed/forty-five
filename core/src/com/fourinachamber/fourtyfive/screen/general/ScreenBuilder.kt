@@ -30,6 +30,7 @@ import com.fourinachamber.fourtyfive.utils.FrameAnimation
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
+import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -37,12 +38,6 @@ import onj.value.*
 
 class ScreenBuilder(val file: FileHandle) {
 
-    private var fonts: MutableMap<String, BitmapFont> = mutableMapOf()
-    private val drawables: MutableMap<String, Drawable> = mutableMapOf()
-    private var cursors: MutableMap<String, Cursor> = mutableMapOf()
-    private var postProcessors: MutableMap<String, PostProcessor> = mutableMapOf()
-//    private var animations: MutableMap<String, FrameAnimation> = mutableMapOf()
-    private var particles: MutableMap<String, ParticleEffect> = mutableMapOf()
     private val styles: MutableMap<String, Style> = mutableMapOf()
     private var borrowed: List<String> = listOf()
 
@@ -56,7 +51,6 @@ class ScreenBuilder(val file: FileHandle) {
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
     private var screenController: ScreenController? = null
-    private var inputMap: KeyInputMap? = null
     private var background: String? = null
     private var postProcessor: String? = null
 
@@ -69,11 +63,6 @@ class ScreenBuilder(val file: FileHandle) {
         doOptions(onj)
 
         val screen = StyleableOnjScreen(
-            drawables = drawables,
-            cursors = cursors,
-            fonts = fonts,
-            particles = particles,
-            postProcessors = postProcessors,
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
             styleTargets = styleTargets,
@@ -82,9 +71,13 @@ class ScreenBuilder(val file: FileHandle) {
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
-            printFrameRate = false,
-            keyInputMap = inputMap
+            printFrameRate = false
         )
+
+
+        onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
+            screen.inputMap = KeyInputMap.readFromOnj(it, screen)
+        }
 
         val root = CustomFlexBox()
         root.setFillParent(true)
@@ -92,6 +85,7 @@ class ScreenBuilder(val file: FileHandle) {
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
         screen.addActorToRoot(root)
+        screen.buildKeySelectHierarchy()
 
         postProcessor?.let {
             screen.postProcessor = ResourceManager.get<PostProcessor>(screen, it)
@@ -114,9 +108,6 @@ class ScreenBuilder(val file: FileHandle) {
         }
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
-        }
-        options.ifHas<OnjArray>("inputMap") {
-            inputMap = KeyInputMap.readFromOnj(it)
         }
         options.ifHas<String>("postProcessor") {
             postProcessor = it
@@ -222,7 +213,10 @@ class ScreenBuilder(val file: FileHandle) {
         screen: OnjScreen
     ): Actor = when (widgetOnj.name) {
 
-        "Image" -> CustomImageActor(drawableOrError(widgetOnj.get<String>("textureName"), screen)).apply {
+        "Image" -> CustomImageActor(
+            drawableOrError(widgetOnj.get<String>("textureName"), screen),
+            widgetOnj.getOr("partOfSelectionHierarchy", false)
+        ).apply {
             applyImageKeys(this, widgetOnj)
         }
 
@@ -235,7 +229,8 @@ class ScreenBuilder(val file: FileHandle) {
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
                 }
-            }
+            },
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
@@ -243,12 +238,16 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
-        "AnimatedImage" -> AnimatedImage(animationOrError(widgetOnj.get<String>("animationName"), screen)).apply {
+        "AnimatedImage" -> AnimatedImage(
+            animationOrError(widgetOnj.get<String>("animationName"), screen),
+            widgetOnj.getOr("partOfSelectionHierarchy", false)
+        ).apply {
             applyImageKeys(this, widgetOnj)
         }
 
         "CardHand" -> CardHand(
-            widgetOnj.get<Double>("targetWidth").toFloat()
+            widgetOnj.get<Double>("targetWidth").toFloat(),
+            screen
         ).apply {
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
@@ -297,11 +296,12 @@ class ScreenBuilder(val file: FileHandle) {
         )
 
         "TemplateLabel" -> TemplateStringLabel(
-            TemplateString(widgetOnj.get<String>("template")),
-            Label.LabelStyle(
+            templateString = TemplateString(widgetOnj.get<String>("template")),
+            labelStyle = Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font"), screen),
                 widgetOnj.get<Color>("color")
-            )
+            ),
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
             widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
@@ -377,6 +377,8 @@ class ScreenBuilder(val file: FileHandle) {
 
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
         widgetOnj.ifHas<String>("name") { namedActors[it] = this }
+
+        onClick { fire(ButtonClickEvent()) }
     }
 
     private fun applyDragAndDrop(actor: Actor, onj: OnjNamedObject) {

@@ -1,6 +1,7 @@
 
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
+import "config/graphics_config.onj" as graphicsConfig;
 
 use Common;
 use Screen;
@@ -13,7 +14,10 @@ var buttonBaseScale = 0.2;
 var buttonHoverScale = 0.25;
 
 assets: {
-    useAssets: [ "title_screen_background", "logo", "red_wing" ],
+    useAssets: [
+        "title_screen_background", "logo", "red_wing",
+        ...(graphicsConfig.keySelectUsedAssets)
+    ],
     styles: [
         {
             name: "button",
@@ -34,7 +38,10 @@ viewport: $FitViewport {
 
 options: {
     background: "title_screen_background",
-    inputMap: inputMaps.defaultInputMap
+    inputMap: [
+        ...(inputMaps.hierarchyBasedNavigationInputMap),
+        ...(inputMaps.defaultInputMap)
+    ]
 },
 
 root: $Box {
@@ -66,7 +73,8 @@ root: $Box {
             flexDirection("column"),
             alignItems("flex end"),
             margin(0.0, 1.0, 0.0, 2.5)
-        ]
+        ],
+        partOfSelectionHierarchy: true
     } children [
 
         $Label {
@@ -76,6 +84,7 @@ root: $Box {
             color: color.black,
             fontScale: buttonBaseScale,
             styles: [ "button" ],
+            partOfSelectionHierarchy: true,
             behaviours: [
                 $OnClickChangeScreenBehaviour {
                     screenPath: "screens/game_screen.onj"
@@ -90,6 +99,7 @@ root: $Box {
             color: color.black,
             fontScale: buttonBaseScale,
             styles: [ "button" ],
+            partOfSelectionHierarchy: true,
             behaviours: [
                 $OnClickAbandonRunBehaviour { },
                 $OnClickRemoveActorBehaviour { }
@@ -103,6 +113,7 @@ root: $Box {
             color: color.black,
             styles: [ "button" ],
             fontScale: buttonBaseScale,
+            partOfSelectionHierarchy: true,
             behaviours: [
                 $OnClickExitBehaviour { }
             ]
