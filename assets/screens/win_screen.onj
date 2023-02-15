@@ -32,13 +32,17 @@ assets: {
     useCardAtlas: true,
     useAssets: [
         "win_screen_background", "red_wing",
-        ...(graphicsConfig.cardDetailUsedAssets)
+        ...(graphicsConfig.cardDetailUsedAssets),
+        ...(graphicsConfig.keySelectUsedAssets)
     ]
 },
 
 options: {
     background: "win_screen_background",
-    inputMap: inputMaps.defaultInputMap,
+    inputMap: [
+        ...(inputMaps.hierarchyBasedNavigationInputMap),
+        ...(inputMaps.defaultInputMap)
+    ],
     screenController: $CardSelectionScreenController {
         cardSelectionActorName: "cardSelectionActor",
         cardConfigFile: "cards/cards.onj",
@@ -109,6 +113,7 @@ root: $Box {
         font: "red_wing",
         color: color.black,
         fontScale: 0.13,
+        partOfSelectionHierarchy: true,
         behaviours: [ toMainScreenBehaviour, hoverBehaviour ]
     }
 
