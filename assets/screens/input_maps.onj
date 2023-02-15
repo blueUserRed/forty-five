@@ -12,6 +12,29 @@ defaultInputMap: [
     }
 ],
 
+hierarchyBasedNavigationInputMap: [
+    {
+        keycode: keys.Right,
+        modifiers: [],
+        action: $NextInHierarchyKeyAction { }
+    },
+    {
+        keycode: keys.Left,
+        modifiers: [],
+        action: $PreviousInHierarchyKeyAction { }
+    },
+    {
+        keycode: keys.Escape,
+        modifiers: [],
+        action: $DeselectAllKeyAction { }
+    },
+    {
+        keycode: keys.Enter,
+        modifiers: [],
+        action: $FireClickEventKeyAction { }
+    }
+],
+
 gameInputMap: [
 
     // selecting cards in the hand

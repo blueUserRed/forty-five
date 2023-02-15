@@ -44,6 +44,7 @@ $Widget {
 
     $Box {
         children?: $Widget[],
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
@@ -55,6 +56,7 @@ $Widget {
         backgroundTexture?: string,
         align?: string,
         wrap?: boolean,
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
@@ -66,6 +68,7 @@ $Widget {
         backgroundTexture?: string,
         align?: string,
         wrap?: boolean,
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
@@ -81,6 +84,7 @@ $Widget {
         animationName: string,
         scaleX: float,
         scaleY: float,
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
@@ -288,6 +292,12 @@ $KeyAction {
     $DrawBulletKeyAction { }
 
     $DrawCoverKeyAction { }
+
+    $NextInHierarchyKeyAction { }
+
+    $PreviousInHierarchyKeyAction { }
+
+    $FireClickEventKeyAction { }
 
 }
 

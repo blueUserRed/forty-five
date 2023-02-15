@@ -1,6 +1,9 @@
 package com.fourinachamber.fourtyfive.keyInput
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.CardActor
 import com.fourinachamber.fourtyfive.screen.gameComponents.RevolverSlot
@@ -127,6 +130,44 @@ object KeyActionFactory {
             lambda@ {
                 val game = FourtyFive.currentGame ?: return@lambda false
                 game.drawCover()
+                true
+            }
+        },
+
+        "NextInHierarchy" to {
+            lambda@ { screen ->
+                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
+                if (screen.selectedNode == null) {
+                    screen.selectedNode = hierarchy.getFirstSelectableNodeInHierarchy()
+                } else {
+                    val selected = screen.selectedNode!!
+                    screen.selectedNode = selected.getNextOrWrap()
+                }
+                true
+            }
+        },
+
+        "PreviousInHierarchy" to {
+            lambda@ { screen ->
+                val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
+                if (screen.selectedNode == null) {
+                    screen.selectedNode = hierarchy.getLastSelectableNodeInHierarchy()
+                } else {
+                    val selected = screen.selectedNode!!
+                    screen.selectedNode = selected.getPreviousOrWrap()
+                }
+                true
+            }
+        },
+
+        "FireClickEvent" to {
+            lambda@ { screen ->
+                val selected = screen.selectedActor ?: return@lambda false
+                selected as Actor
+                val event = InputEvent()
+                event.type = InputEvent.Type.touchDown
+                event.button = Input.Buttons.LEFT
+                selected.fire(event)
                 true
             }
         }
