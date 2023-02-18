@@ -174,7 +174,7 @@ abstract class Effect(val trigger: Trigger) {
             delay(GraphicsConfig.bufferTime)
             includeActionLater(shakeActorAction) { card.inGame }
             action { gameController.specialDraw(amount) }
-            delayUntil { gameController.currentPhase != GameController.Gamephase.SPECIAL_DRAW }
+            delayUntil { gameController.currentState !is GameState.SpecialDraw }
         }
 
         override fun toString(): String {
@@ -219,7 +219,7 @@ abstract class Effect(val trigger: Trigger) {
                     includeAction(shakeActorAction)
                     delay(GraphicsConfig.bufferTime)
                     action { gameController.destroyCardPhase() }
-                    delayUntil { gameController.currentPhase != GameController.Gamephase.CARD_DESTROY }
+                    delayUntil { gameController.currentState !is GameState.CardDestroy }
                 } },
                 { gameController.hasDestroyableCard() && card.inGame }
             )

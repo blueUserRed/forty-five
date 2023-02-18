@@ -169,6 +169,14 @@ postProcessors: [
         timeOffset: 0,
         uniforms: [ "resolution", "time" ],
         args: null
+    },
+    {
+        name: "mosaic_shader",
+        vertexShader: "shaders/mosaic/mosaic.vert",
+        fragmentShader: "shaders/mosaic/mosaic.frag",
+        timeOffset: 0,
+        uniforms: [ "resolution" ],
+        args: null
     }
 ],
 
