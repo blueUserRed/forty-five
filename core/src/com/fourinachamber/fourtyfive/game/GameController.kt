@@ -7,6 +7,7 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
@@ -142,10 +143,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBullet: CardPrototype
     private lateinit var defaultCover: CardPrototype
 
+    lateinit var gameRenderPipeline: GameRenderPipeline
+
     override fun init(onjScreen: OnjScreen) {
         SaveState.read()
         curScreen = onjScreen
         FourtyFive.currentGame = this
+        gameRenderPipeline = GameRenderPipeline(onjScreen)
+        FourtyFive.useRenderPipeline(gameRenderPipeline)
 
         FourtyFiveLogger.title("game starting")
 
@@ -475,18 +480,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
 
         }
-        val postProcessor = GraphicsConfig.shootPostProcessor(curScreen)
-        val duration = GraphicsConfig.shootPostProcessorDuration()
-        val postProcessorTimeline = Timeline.timeline {
-            action { curScreen.postProcessor = postProcessor }
-            delay(duration)
-            action { curScreen.postProcessor = null }
-        }
 
         executeTimelineLater(Timeline.timeline {
             parallelActions(
                 timeline.asAction(),
-                postProcessorTimeline.asAction()
+                gameRenderPipeline.getOnShotPostProcessingTimelineAction()
             )
         })
     }

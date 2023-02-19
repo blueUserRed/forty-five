@@ -10,7 +10,7 @@ import com.fourinachamber.fourtyfive.utils.eitherRight
 
 class BetterShaderPreProcessor(private val fileHandle: FileHandle) {
 
-    fun preProcess(): Either<ShaderProgram, String> {
+    fun preProcess(): Either<BetterShader, String> {
         val text = fileHandle.file().readText(Charsets.UTF_8)
         val lines = text.split("\n").toMutableList()
         val sections = splitIntoSections(lines)
@@ -20,7 +20,7 @@ class BetterShaderPreProcessor(private val fileHandle: FileHandle) {
             val fragment = sections["fragment"]!!.joinToString(separator = "\n")
             val vertex = sections["vertex"]!!.joinToString(separator = "\n")
             val shader = ShaderProgram(vertex, fragment)
-            if (shader.isCompiled) return shader.eitherLeft()
+            if (shader.isCompiled) return BetterShader(shader).eitherLeft()
             FourtyFiveLogger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
             FourtyFiveLogger.dump(LogLevel.SEVERE, shader.log, "log")
             FourtyFiveLogger.dump(LogLevel.SEVERE, vertex, "pre-processed vertex shader")
