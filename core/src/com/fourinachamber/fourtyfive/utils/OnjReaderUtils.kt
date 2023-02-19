@@ -17,7 +17,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjColor
-import com.fourinachamber.fourtyfive.screen.general.PostProcessor
+import com.fourinachamber.fourtyfive.rendering.BetterShader
+import com.fourinachamber.fourtyfive.rendering.BetterShaderPreProcessor
 import onj.value.*
 
 /**
@@ -108,15 +109,20 @@ object OnjReaderUtils {
             }
         }
 
-    /**
-     * reads an array of postProcessors with names
-     */
-    fun readPostProcessors(onj: OnjArray): Map<String, PostProcessor> = onj
+//    /**
+//     * reads an array of postProcessors with names
+//     */
+//    fun readPostProcessors(onj: OnjArray): Map<String, PostProcessor> = onj
+//        .value
+//        .map { it as OnjObject }
+//        .associate {
+//            it.get<String>("name") to readPostProcessor(it)
+//        }
+
+    fun readShaders(onj: OnjArray): Map<String, BetterShader> = onj
         .value
         .map { it as OnjObject }
-        .associate {
-            it.get<String>("name") to readPostProcessor(it)
-        }
+        .associate { it.get<String>("name") to readShader(it) }
 
     /**
      * reads a single BitmapFont
@@ -168,44 +174,51 @@ object OnjReaderUtils {
         .map { it as OnjObject }
         .associate { it.get<String>("name") to Pixmap(Gdx.files.internal(it.get<String>("file"))) }
 
-    /**
-     * reads a single postProcessor
-     */
-    fun readPostProcessor(onj: OnjObject): PostProcessor {
-        val shader = ShaderProgram(
-            Gdx.files.internal(onj.get<String>("vertexShader")),
-            Gdx.files.internal(onj.get<String>("fragmentShader"))
-        )
-        if (!shader.isCompiled) throw RuntimeException(shader.log)
-        val uniformsToBind = onj.get<OnjArray>("uniforms").value.map { it.value as String }
+    fun readShader(onj: OnjObject): BetterShader {
+        val fileHandle = Gdx.files.internal(onj.get<String>("file"))
+        val shader = BetterShaderPreProcessor(fileHandle).preProcess()
+        if (shader is Either.Right) throw RuntimeException("shader ${fileHandle.name()} is only meant for importing")
+        return (shader as Either.Left).value
+    }
 
-        val timeOffset = onj.getOr<Long>("timeOffset", 0).toInt()
-
-        val args: Map<String, Any?> = if (!onj["args"]!!.isNull()) {
-            val map = mutableMapOf<String, Any?>()
-
-            val argsOnj = onj.get<OnjObject>("args")
-//            onj.get<OnjObject>("args").value
-
-//            for ((key, value)  in argsOnj.value) {
-//                map[key] = value.value
+//    /**
+//     * reads a single postProcessor
+//     */
+//    fun readPostProcessor(onj: OnjObject): PostProcessor {
+//        val shader = ShaderProgram(
+//            Gdx.files.internal(onj.get<String>("vertexShader")),
+//            Gdx.files.internal(onj.get<String>("fragmentShader"))
+//        )
+//        if (!shader.isCompiled) throw RuntimeException(shader.log)
+//        val uniformsToBind = onj.get<OnjArray>("uniforms").value.map { it.value as String }
+//
+//        val timeOffset = onj.getOr<Long>("timeOffset", 0).toInt()
+//
+//        val args: Map<String, Any?> = if (!onj["args"]!!.isNull()) {
+//            val map = mutableMapOf<String, Any?>()
+//
+//            val argsOnj = onj.get<OnjObject>("args")
+////            onj.get<OnjObject>("args").value
+//
+////            for ((key, value)  in argsOnj.value) {
+////                map[key] = value.value
+////            }
+////
+//            for ((key, value)  in argsOnj.value) when (value) {
+//
+//                is OnjFloat -> map[key] = value.value.toFloat()
+//                is OnjInt -> map[key] = value.value.toInt()
+//                is OnjColor -> map[key] = value.value
+//
+//                else -> throw RuntimeException("binding type ${value::class.simpleName} as a uniform" +
+//                        " is currently not supported")
 //            }
 //
-            for ((key, value)  in argsOnj.value) when (value) {
-
-                is OnjFloat -> map[key] = value.value.toFloat()
-                is OnjInt -> map[key] = value.value.toInt()
-                is OnjColor -> map[key] = value.value
-
-                else -> throw RuntimeException("binding type ${value::class.simpleName} as a uniform" +
-                        " is currently not supported")
-            }
-
-            map
-        } else mapOf()
-
-        return PostProcessor(shader, uniformsToBind, args, timeOffset)
-    }
+//            map
+//        } else mapOf()
+//
+//        return PostProcessor(shader, uniformsToBind, args, timeOffset)
+//    }
 
 //    /**
 //     * reads an array of single-color textures with names

@@ -2,7 +2,6 @@ package com.fourinachamber.fourtyfive.game
 
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.ResourceManager
-import com.fourinachamber.fourtyfive.screen.general.PostProcessor
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.multipleTemplateParam
@@ -91,21 +90,22 @@ sealed class GameState {
 
     object CardDestroy : GameState() {
 
-        private var destroyCardPostProcessor: PostProcessor? = null
-        private var previousPostProcessor: PostProcessor? = null
+//        private var destroyCardPostProcessor: PostProcessor? = null
+//        private var previousPostProcessor: PostProcessor? = null
 
-        private fun getDestroyCardPostProcessor(controller: GameController): PostProcessor {
-            val destroyCardPostProcessor = destroyCardPostProcessor
-            if (destroyCardPostProcessor != null) return destroyCardPostProcessor
-            val fromManager = ResourceManager.get<PostProcessor>(controller.curScreen, "destroyCardPostProcessor")
-            this.destroyCardPostProcessor = fromManager
-            return fromManager
-        }
+//        private fun getDestroyCardPostProcessor(controller: GameController): PostProcessor {
+//            val destroyCardPostProcessor = destroyCardPostProcessor
+//            if (destroyCardPostProcessor != null) return destroyCardPostProcessor
+//            val fromManager = ResourceManager.get<PostProcessor>(controller.curScreen, "destroyCardPostProcessor")
+//            this.destroyCardPostProcessor = fromManager
+//            return fromManager
+//        }
 
         override fun transitionTo(controller: GameController) = with(controller) {
             showDestroyCardInstructionActor()
-            previousPostProcessor = curScreen.postProcessor
-            curScreen.postProcessor = getDestroyCardPostProcessor(this)
+//            previousPostProcessor = curScreen.postProcessor
+//            curScreen.postProcessor = getDestroyCardPostProcessor(this)
+            gameRenderPipeline.enterDestroyMode()
             createdCards
                 .filter { it.inGame && it.type == Card.Type.BULLET }
                 .forEach(Card::enterDestroyMode)
@@ -113,7 +113,8 @@ sealed class GameState {
 
         override fun transitionAway(controller: GameController) = with(controller) {
             hideDestroyCardInstructionActor()
-            curScreen.postProcessor = previousPostProcessor
+//            curScreen.postProcessor = previousPostProcessor
+            gameRenderPipeline.leaveDestroyMode()
             createdCards
                 .filter { it.inGame && it.type == Card.Type.BULLET }
                 .forEach(Card::leaveDestroyMode)

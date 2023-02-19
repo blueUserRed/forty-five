@@ -11,11 +11,9 @@ import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fourtyfive.rendering.BetterShaderPreProcessor
+import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceManager
-import com.fourinachamber.fourtyfive.screen.general.PostProcessor
-import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.customization.OnjConfig
 
 /**
@@ -25,6 +23,7 @@ object FourtyFive : Game() {
 
     const val logTag = "fourty-five"
 
+    private var currentRenderable: Renderable? = null
     private var currentScreen: OnjScreen? = null
 
     var currentGame: GameController? = null
@@ -36,15 +35,24 @@ object FourtyFive : Game() {
 //        cardGenerator.generateCards()
         val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
         val shader = BetterShaderPreProcessor(Gdx.files.internal("shaders/test_shader.glsl")).preProcess()
-        screen.postProcessor = PostProcessor((shader as Either.Left).value, listOf(), mapOf())
+//        screen.postProcessor = PostProcessor((shader as Either.Left).value, listOf(), mapOf())
         changeToScreen(screen)
+    }
+
+    override fun render() {
+        currentRenderable?.render(Gdx.graphics.deltaTime)
     }
 
     fun changeToScreen(screen: OnjScreen) {
         FourtyFiveLogger.title("changing screen")
         currentScreen?.dispose()
         currentScreen = screen
+        currentRenderable = screen
         setScreen(screen)
+    }
+
+    fun useRenderPipeline(renderable: Renderable) {
+        currentRenderable = renderable
     }
 
     private fun init() {

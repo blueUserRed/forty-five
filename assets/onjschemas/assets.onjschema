@@ -28,13 +28,14 @@ cursors: {
     hotspotX: int,
     hotspotY: int,
 }[],
-postProcessors: {
+shaders: {
     name: string,
-    vertexShader: string,
-    fragmentShader: string,
-    timeOffset?: int,
-    uniforms: string[],
-    args: {
+    file: string,
+//    vertexShader: string,
+//    fragmentShader: string,
+//    timeOffset?: int,
+//    uniforms: string[],
+    constantArgs: {
         ...*
     }?
 }[],
