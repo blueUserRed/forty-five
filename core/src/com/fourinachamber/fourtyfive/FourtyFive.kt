@@ -10,7 +10,10 @@ import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
+import com.fourinachamber.fourtyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.PostProcessor
+import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.customization.OnjConfig
@@ -28,10 +31,12 @@ object FourtyFive : Game() {
 
     override fun create() {
         init()
-        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-        cardGenerator.prepare()
-        cardGenerator.generateCards()
+//        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+//        cardGenerator.prepare()
+//        cardGenerator.generateCards()
         val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
+        val shader = BetterShaderPreProcessor(Gdx.files.internal("shaders/test_shader.glsl")).preProcess()
+        screen.postProcessor = PostProcessor((shader as Either.Left).value, listOf(), mapOf())
         changeToScreen(screen)
     }
 

@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.utils
 
 import com.badlogic.gdx.Gdx
+import com.sun.jdi.BooleanValue
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.value.OnjNamedObject
@@ -59,7 +60,7 @@ object FourtyFiveLogger {
      * came from (which class, which instance, ...)
      */
     fun debug(tag: String, message: String) {
-        if (logLevel != LogLevel.DEBUG) return
+        if (!logLevel.shouldLog(LogLevel.DEBUG)) return
         output.println(formatMessage(tag, message, LogLevel.DEBUG))
     }
 
@@ -69,7 +70,7 @@ object FourtyFiveLogger {
      * came from (which class, which instance, ...)
      */
     fun medium(tag: String, message: String) {
-        if (logLevel != LogLevel.DEBUG && logLevel != LogLevel.MEDIUM) return
+        if (!logLevel.shouldLog(LogLevel.MEDIUM)) return
         output.println(formatMessage(tag, message, LogLevel.MEDIUM))
     }
 
@@ -80,6 +81,27 @@ object FourtyFiveLogger {
      */
     fun severe(tag: String, message: String) {
         output.println(formatMessage(tag, message, LogLevel.SEVERE))
+    }
+
+    /**
+     * logs a message
+     * @param level the level of the message
+     * @param tag should give the reader information about where this message
+     * came from (which class, which instance, ...)
+     */
+    fun log(level: LogLevel, tag: String, message: String) {
+        if (!logLevel.shouldLog(level)) return
+        output.println(formatMessage(tag, message, level))
+    }
+
+    /**
+     * logs larger stings that contain multiple line breaks
+     * @param level the level of the message
+     */
+    fun dump(level: LogLevel, message: String, title: String? = null) {
+        if (!logLevel.shouldLog(level)) return
+        title?.let { output.println("-> $it:") }
+        message.lines().forEach { output.println("| $it") }
     }
 
     /**
@@ -138,15 +160,23 @@ object FourtyFiveLogger {
     enum class LogLevel {
         DEBUG {
             override fun toString(): String = "debug"
+            override fun shouldLog(logLevel: LogLevel): Boolean = true
         },
         MEDIUM {
             override fun toString(): String = "medium"
+            override fun shouldLog(logLevel: LogLevel): Boolean = logLevel in arrayOf(SEVERE, MEDIUM)
         },
         SEVERE {
             override fun toString(): String = "severe"
+            override fun shouldLog(logLevel: LogLevel): Boolean = logLevel == SEVERE
         }
 
         ;
+
+        /**
+         * checks if a message with the level [logLevel] should be logged when the current logLevel is `this`
+         */
+        abstract fun shouldLog(logLevel: LogLevel): Boolean
 
         abstract override fun toString(): String
     }
