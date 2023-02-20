@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive.rendering
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
@@ -53,7 +54,7 @@ class BetterShaderPreProcessor(
         if ("export" in sections.keys && sections.size != 1) {
             throw RuntimeException("file ${fileHandle.name()} defines sections in addition to the export section")
         }
-        if ("vertex" in sections.keys && sections.size != 2) {
+        if ("export" !in sections.keys && sections.size != 2) {
             throw RuntimeException("file ${fileHandle.name()} must define both a vertex and a fragment section")
         }
         return sections
@@ -75,12 +76,23 @@ class BetterShaderPreProcessor(
                 }
                 val value = getConstArgValueOrError(parts[0], parts[1])
                 return@map "#define ${parts[0]} $value"
+            } else if (line.startsWith("%include")) {
+                val toInclude = line.substringAfter("%include").trim()
+                return@map include(toInclude)
             } else {
                 return@map line
             }
         }
         .joinToString(separator = "\n")
 
+    private fun include(toInclude: String): String {
+        val preProcessor = BetterShaderPreProcessor(Gdx.files.internal(toInclude), mapOf())
+        val result = preProcessor.preProcess()
+        if (result !is Either.Right) {
+            throw RuntimeException("shader ${preProcessor.fileHandle.name()} is not meant for being included")
+        }
+        return result.value
+    }
 
     private fun getUniformTypeOrError(uniform: String): String = uniforms[uniform]
         ?: throw RuntimeException("unknown uniform $uniform in shader ${fileHandle.name()}")

@@ -141,6 +141,11 @@ shaders: [
             movement: 1.0,
             minMovement: 0.3
         }
+    },
+    {
+        name: "film_shader",
+        file: "shaders/film.glsl",
+        constantArgs: null
     }
 //    {
 //        name: "default_shader",

@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.Timeline
 
 interface Renderable {
@@ -26,6 +27,10 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
     }
 
     private var sizeDirty = false
+
+    init {
+        currentPostProcessingShaders.add(ResourceManager.get(screen, "film_shader"))
+    }
 
     override fun render(delta: Float) {
         if (sizeDirty) {
@@ -75,6 +80,7 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
             batch.dispose()
 
         }
+        fbo.dispose()
     }
 
     fun enterDestroyMode() {
