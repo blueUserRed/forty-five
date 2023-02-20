@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.PixmapPacker
 import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
 import com.badlogic.gdx.utils.Disposable
+import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import kotlinx.coroutines.*
 import onj.parser.OnjParser
@@ -21,7 +22,7 @@ import onj.value.OnjObject
  * generates an atlas containing the cards from a config file
  */
 @Suppress("unused") // commented in and out, linter can report this as unused
-class CardGenerator(private val config: FileHandle) : Disposable {
+class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandle) : Disposable {
 
     private lateinit var onj: OnjObject
     private lateinit var outputFile: FileHandle
@@ -34,6 +35,7 @@ class CardGenerator(private val config: FileHandle) : Disposable {
     /**
      * reads the config file and loads all textures. must be called before [generateCards]
      */
+    @AllThreadsAllowed
     fun prepare() {
 
         if (wasPrepared) return
@@ -64,6 +66,7 @@ class CardGenerator(private val config: FileHandle) : Disposable {
     /**
      * generates the cards and disposes the textures. [prepare] must be called before.
      */
+    @AllThreadsAllowed
     fun generateCards() {
 
         if (!wasPrepared) throw RuntimeException("CardGenerator must be prepared before generateCards() is called")
@@ -184,7 +187,7 @@ class CardGenerator(private val config: FileHandle) : Disposable {
      * libgdx's BitmapFont uses the Texture-class, which doesn't work on a non-openGL thread, so I had to write a custom
      * Font class which was a great experience and a lot of Fun. I love multithreading in libgdx!
      */
-    class CustomFont(fntFile: FileHandle) : Disposable {
+    class CustomFont @AllThreadsAllowed constructor(fntFile: FileHandle) : Disposable {
 
         private val pixmap: Pixmap
         private val letters: List<Letter>
@@ -227,6 +230,7 @@ class CardGenerator(private val config: FileHandle) : Disposable {
         /**
          * writes text to a pixmap
          */
+        @AllThreadsAllowed
         fun write(on: Pixmap, text: String, x: Int, y: Int, scale: Float = 1f) {
             var curX = x
             var curY = y
