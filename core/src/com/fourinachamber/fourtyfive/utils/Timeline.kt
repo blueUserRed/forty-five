@@ -210,6 +210,8 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         fun parallelActions(vararg actions: TimelineAction) {
             timelineActions.add(object : TimelineAction() {
 
+                private var actions: List<TimelineAction> = actions.toMutableList()
+
                 override fun start(timeline: Timeline) {
                     super.start(timeline)
                     for (action in actions) action.start(timeline)
@@ -224,8 +226,15 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
                 }
 
                 override fun isFinished(): Boolean {
-                    for (action in actions) if (!action.isFinished()) return false
-                    return true
+                    this.actions = this.actions.filter {
+                        if (!it.isFinished()) {
+                            true
+                        } else {
+                            it.end()
+                            false
+                        }
+                    }
+                    return this.actions.isEmpty()
                 }
             })
         }

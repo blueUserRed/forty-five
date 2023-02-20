@@ -34,7 +34,6 @@ object FourtyFive : Game() {
 //        cardGenerator.prepare()
 //        cardGenerator.generateCards()
         val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
-        val shader = BetterShaderPreProcessor(Gdx.files.internal("shaders/test_shader.glsl")).preProcess()
 //        screen.postProcessor = PostProcessor((shader as Either.Left).value, listOf(), mapOf())
         changeToScreen(screen)
     }

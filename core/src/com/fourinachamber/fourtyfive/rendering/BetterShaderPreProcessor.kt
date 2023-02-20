@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.rendering
 
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
@@ -8,7 +9,12 @@ import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger.LogLevel
 import com.fourinachamber.fourtyfive.utils.eitherLeft
 import com.fourinachamber.fourtyfive.utils.eitherRight
 
-class BetterShaderPreProcessor(private val fileHandle: FileHandle) {
+class BetterShaderPreProcessor(
+    private val fileHandle: FileHandle,
+    private val constantArgs: Map<String, Any>
+) {
+
+    private val uniformsToBind: MutableList<String> = mutableListOf()
 
     fun preProcess(): Either<BetterShader, String> {
         val text = fileHandle.file().readText(Charsets.UTF_8)
@@ -17,10 +23,10 @@ class BetterShaderPreProcessor(private val fileHandle: FileHandle) {
         if (sections.containsKey("export")) {
             return sections["export"]!!.joinToString(separator = "\n").eitherRight()
         } else {
-            val fragment = sections["fragment"]!!.joinToString(separator = "\n")
-            val vertex = sections["vertex"]!!.joinToString(separator = "\n")
+            val fragment = processCode(sections["fragment"]!!)
+            val vertex = processCode(sections["vertex"]!!)
             val shader = ShaderProgram(vertex, fragment)
-            if (shader.isCompiled) return BetterShader(shader).eitherLeft()
+            if (shader.isCompiled) return BetterShader(shader, uniformsToBind).eitherLeft()
             FourtyFiveLogger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
             FourtyFiveLogger.dump(LogLevel.SEVERE, shader.log, "log")
             FourtyFiveLogger.dump(LogLevel.SEVERE, vertex, "pre-processed vertex shader")
@@ -53,10 +59,80 @@ class BetterShaderPreProcessor(private val fileHandle: FileHandle) {
         return sections
     }
 
+    private fun processCode(lines: List<String>): String = lines
+        .map { line ->
+            if (line.startsWith("%uniform")) {
+                val uniformName = line.substringAfter("%uniform").trim()
+                val uniformType = getUniformTypeOrError(uniformName)
+                uniformsToBind.add(uniformName)
+                return@map "uniform $uniformType $uniformName;"
+            } else if (line.startsWith("%constArg")) {
+                val definition = line.substringAfter("%constArg").trim()
+                val parts = definition.split(" ")
+                if (parts.size != 2) {
+                    throw RuntimeException("expected constArg declaration in shader ${fileHandle.name()} to" +
+                            "have a name and a type separated by a space")
+                }
+                val value = getConstArgValueOrError(parts[0], parts[1])
+                return@map "#define ${parts[0]} $value"
+            } else {
+                return@map line
+            }
+        }
+        .joinToString(separator = "\n")
+
+
+    private fun getUniformTypeOrError(uniform: String): String = uniforms[uniform]
+        ?: throw RuntimeException("unknown uniform $uniform in shader ${fileHandle.name()}")
+
+    private fun getConstArgValueOrError(constArg: String, type: String): String {
+        val arg = constantArgs[constArg]
+            ?: throw RuntimeException("unknown constArg $constArg in shader ${fileHandle.name()}")
+
+        return when (type) {
+
+            "float" -> {
+                if (arg !is Number) throw RuntimeException("expected constArg $constArg to be a number")
+                arg.toDouble().toString()
+            }
+
+            "int" -> {
+                if (arg !is Number) throw RuntimeException("expected constArg $constArg to be a number")
+                arg.toLong().toString()
+            }
+
+            "vec4" -> {
+                if (arg !is Collection<*> || arg.size != 4) {
+                    throw RuntimeException("expected constArg $constArg to be a collection of floats of size 4")
+                }
+                val vec = StringBuilder("vec4(")
+                arg.forEachIndexed { i, f ->
+                    vec.append(f.toString())
+                    if (i != 3) vec.append(", ")
+                }
+                vec.append(")")
+                vec.toString()
+            }
+
+            "color" -> {
+                if (arg !is Color) throw RuntimeException("expected constArg $constArg to be a color")
+                return "vec4(${arg.r}, ${arg.g}, ${arg.b}, ${arg.a})"
+            }
+
+            else -> throw RuntimeException("unknown type $type in constArg declaration in shader ${fileHandle.name()}")
+
+        }
+    }
+
     companion object {
 
         const val sectionMarker = "~~~section "
         const val logTag = "BetterShaderPreProcessor"
+
+        private val uniforms: Map<String, String> = mapOf(
+            "u_time" to "float",
+            "u_resolution" to "vec2"
+        )
 
     }
 

@@ -176,7 +176,15 @@ object OnjReaderUtils {
 
     fun readShader(onj: OnjObject): BetterShader {
         val fileHandle = Gdx.files.internal(onj.get<String>("file"))
-        val shader = BetterShaderPreProcessor(fileHandle).preProcess()
+        val constArgs: Map<String, Any> = if (onj.get<OnjValue>("constantArgs").isNull()) {
+            mapOf()
+        } else {
+            val argsOnj = onj.get<OnjObject>("constantArgs")
+            argsOnj.value.entries.associate { (key, value) ->
+                "ca_$key" to value.value as Any
+            }
+        }
+        val shader = BetterShaderPreProcessor(fileHandle, constArgs).preProcess()
         if (shader is Either.Right) throw RuntimeException("shader ${fileHandle.name()} is only meant for importing")
         return (shader as Either.Left).value
     }
