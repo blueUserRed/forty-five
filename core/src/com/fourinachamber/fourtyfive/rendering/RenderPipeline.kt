@@ -18,6 +18,7 @@ interface Renderable {
     fun render(delta: Float)
 }
 
+// TODO: this could use just one shader wich does everything
 class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
 
     private val currentPostProcessingShaders = mutableListOf<BetterShader>()

@@ -189,63 +189,6 @@ object OnjReaderUtils {
         return (shader as Either.Left).value
     }
 
-//    /**
-//     * reads a single postProcessor
-//     */
-//    fun readPostProcessor(onj: OnjObject): PostProcessor {
-//        val shader = ShaderProgram(
-//            Gdx.files.internal(onj.get<String>("vertexShader")),
-//            Gdx.files.internal(onj.get<String>("fragmentShader"))
-//        )
-//        if (!shader.isCompiled) throw RuntimeException(shader.log)
-//        val uniformsToBind = onj.get<OnjArray>("uniforms").value.map { it.value as String }
-//
-//        val timeOffset = onj.getOr<Long>("timeOffset", 0).toInt()
-//
-//        val args: Map<String, Any?> = if (!onj["args"]!!.isNull()) {
-//            val map = mutableMapOf<String, Any?>()
-//
-//            val argsOnj = onj.get<OnjObject>("args")
-////            onj.get<OnjObject>("args").value
-//
-////            for ((key, value)  in argsOnj.value) {
-////                map[key] = value.value
-////            }
-////
-//            for ((key, value)  in argsOnj.value) when (value) {
-//
-//                is OnjFloat -> map[key] = value.value.toFloat()
-//                is OnjInt -> map[key] = value.value.toInt()
-//                is OnjColor -> map[key] = value.value
-//
-//                else -> throw RuntimeException("binding type ${value::class.simpleName} as a uniform" +
-//                        " is currently not supported")
-//            }
-//
-//            map
-//        } else mapOf()
-//
-//        return PostProcessor(shader, uniformsToBind, args, timeOffset)
-//    }
-
-//    /**
-//     * reads an array of single-color textures with names
-//     */
-//    fun readColorTextures(textureArr: OnjArray): Map<String, TextureRegion> {
-//        val textures = mutableMapOf<String, TextureRegion>()
-//        textureArr
-//            .value
-//            .forEach {
-//                it as OnjObject
-//                val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
-//                colorPixmap.setColor(it.get<Color>("color"))
-//                colorPixmap.fill()
-//                textures[it.get<String>("name")] = TextureRegion(Texture(colorPixmap))
-////                colorPixmap.dispose()
-//            }
-//        return textures
-//    }
-
     fun readColorPixmap(onj: OnjObject): Pixmap {
         val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
         colorPixmap.setColor(onj.get<Color>("color"))
