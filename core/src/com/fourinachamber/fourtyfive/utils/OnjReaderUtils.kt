@@ -48,6 +48,7 @@ object OnjReaderUtils {
         return cursors
     }
 
+    @MainThreadOnly
     fun readCursor(onj: OnjObject): Cursor {
         val cursorPixmap = Pixmap(Gdx.files.internal(onj.get<String>("file")))
         val pixmap = Pixmap(cursorPixmap.width, cursorPixmap.height, Pixmap.Format.RGBA8888)
@@ -76,6 +77,7 @@ object OnjReaderUtils {
         return textures to atlases
     }
 
+    @MainThreadOnly
     fun readAtlas(
         atlasOnj: OnjObject,
     ): Pair<TextureAtlas, Map<String, TextureRegion>> {
@@ -145,6 +147,7 @@ object OnjReaderUtils {
     /**
      * reads a single distanceFieldFont
      */
+    @MainThreadOnly
     fun readDistanceFieldFont(fontOnj: OnjObject): Pair<BitmapFont, Disposable> {
         val texture = Texture(Gdx.files.internal(fontOnj.get<String>("imageFile")), true)
         val useMipMapLinearLinear = fontOnj.getOr("useMipMapLinearLinear", false)
@@ -163,6 +166,7 @@ object OnjReaderUtils {
     /**
      * reads an array of pixmaps with names
      */
+    @AllThreadsAllowed
     fun readPixmaps(onj: OnjArray): Map<String, Pixmap> = onj
         .value
         .map { it as OnjObject }
@@ -225,6 +229,7 @@ object OnjReaderUtils {
 //        return textures
 //    }
 
+    @AllThreadsAllowed
     fun readColorPixmap(onj: OnjObject): Pixmap {
         val colorPixmap = Pixmap(1, 1, Pixmap.Format.RGBA8888)
         colorPixmap.setColor(onj.get<Color>("color"))
@@ -235,6 +240,7 @@ object OnjReaderUtils {
     /**
      * reads an array of animations with names
      */
+    @MainThreadOnly
     fun readAnimations(anims: OnjArray): Map<String, FrameAnimation> = anims
         .value
         .associate {
@@ -246,6 +252,7 @@ object OnjReaderUtils {
     /**
      * reads a single animation
      */
+    @MainThreadOnly
     fun readAnimation(onj: OnjObject): FrameAnimation {
         val atlas = TextureAtlas(Gdx.files.internal(onj.get<String>("atlasFile")))
 
@@ -284,6 +291,7 @@ object OnjReaderUtils {
             it.get<String>("name") to effect
         }
 
+    @MainThreadOnly
     fun readParticleEffect(onj: OnjObject): ParticleEffect {
         val effect = ParticleEffect()
         effect.load(
@@ -306,6 +314,7 @@ object OnjReaderUtils {
         return textures to ninepatches
     }
 
+    @MainThreadOnly
     fun readNinepatch(obj: OnjObject): Pair<NinePatch, Texture> {
         val texture = Texture(Gdx.files.internal(obj.get<String>("file")))
         val ninepatch = NinePatch(

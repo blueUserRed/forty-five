@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.game
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.PostProcessor
+import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
 import com.fourinachamber.fourtyfive.utils.multipleTemplateParam
@@ -154,17 +155,28 @@ sealed class GameState {
     }
 
 
-
+    @AllThreadsAllowed
     open fun transitionTo(controller: GameController) { }
+
+    @AllThreadsAllowed
     open fun transitionAway(controller: GameController) { }
 
+    @AllThreadsAllowed
     open fun allowsShooting(): Boolean = false
+
+    @AllThreadsAllowed
     open fun allowsDrawingCards(): Boolean = false
 
+    @AllThreadsAllowed
     open fun shouldIncrementRoundCounter(): Boolean = false
 
+    @AllThreadsAllowed
     open fun onEndTurn(controller: GameController) { }
+
+    @AllThreadsAllowed
     open fun onCardDestroyed(controller: GameController) { }
+
+    @AllThreadsAllowed
     open fun onCardDrawn(controller: GameController) { }
 
     override fun equals(other: Any?): Boolean {
