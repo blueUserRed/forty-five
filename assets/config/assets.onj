@@ -132,6 +132,16 @@ shaders: [
             timeOffset: 2_000
         }
     },
+    {
+        name: "vignette_shader", // TODO: fix
+        file: "shaders/vignette.glsl",
+        constantArgs: {
+            color: color.red,
+            speed: 0.0,
+            movement: 1.0,
+            minMovement: 0.3
+        }
+    }
 //    {
 //        name: "default_shader",
 //        vertexShader: "shaders/default/default.vert",
