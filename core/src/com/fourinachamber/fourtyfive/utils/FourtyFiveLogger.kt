@@ -101,7 +101,11 @@ object FourtyFiveLogger {
     fun dump(level: LogLevel, message: String, title: String? = null) {
         if (!logLevel.shouldLog(level)) return
         title?.let { output.println("-> $it:") }
-        message.lines().forEach { output.println("| $it") }
+        val lines = message.lines()
+        val max = lines.size.toString().length
+        lines.forEachIndexed { index, line ->
+            output.println("${(index + 1).toString().padStart(max, '0')}| $line")
+        }
     }
 
     /**
