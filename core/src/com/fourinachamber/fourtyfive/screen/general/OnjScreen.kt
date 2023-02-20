@@ -24,17 +24,14 @@ import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.screen.ResourceBorrower
 import com.fourinachamber.fourtyfive.screen.ResourceManager
-import com.fourinachamber.fourtyfive.utils.Either
-import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import com.fourinachamber.fourtyfive.utils.Utils
-import com.fourinachamber.fourtyfive.utils.eitherRight
+import com.fourinachamber.fourtyfive.utils.*
 import kotlin.system.measureTimeMillis
 
 
 /**
  * a screen that was build from an onj file.
  */
-open class OnjScreen(
+open class OnjScreen @MainThreadOnly constructor(
     val viewport: Viewport,
     batch: Batch,
     private val background: String?,
@@ -61,13 +58,13 @@ open class OnjScreen(
     private var isVisible: Boolean = false
 
     var defaultCursor: Either<Cursor, Cursor.SystemCursor> = Cursor.SystemCursor.Arrow.eitherRight()
-        set(value) {
+        @MainThreadOnly set(value) {
             field = value
             Utils.setCursor(value)
         }
 
     var postProcessor: PostProcessor? = null
-        set(value) {
+        @MainThreadOnly set(value) {
             field = value
             value?.resetReferenceTime()
             resize(Gdx.graphics.width, Gdx.graphics.height)
@@ -76,14 +73,14 @@ open class OnjScreen(
     val stage: Stage = Stage(viewport, batch)
 
     var screenController: ScreenController? = null
-        set(value) {
+        @MainThreadOnly set(value) {
             field?.end()
             field = value
             if (isVisible) value?.init(this)
         }
 
     var selectedActor: KeySelectableActor? = null
-        set(value) {
+        @AllThreadsAllowed set(value) {
             field?.isSelected = false
             field = value
             field?.isSelected = true
@@ -91,7 +88,7 @@ open class OnjScreen(
         }
 
     var selectedNode: KeySelectionHierarchyNode? = null
-        set(value) {
+        @AllThreadsAllowed set(value) {
             if (!(value?.isSelectable ?: true)) {
                 throw RuntimeException("only a node that is selectable can be assigned to 'selectedNode'")
             }
@@ -100,7 +97,7 @@ open class OnjScreen(
         }
 
     var inputMap: KeyInputMap? = null
-        set(value) {
+        @AllThreadsAllowed set(value) {
             field = value
             inputMultiplexer.clear()
             value?.let { inputMultiplexer.addProcessor(it) }
@@ -135,18 +132,22 @@ open class OnjScreen(
         inputMultiplexer.addProcessor(stage)
     }
 
-    fun afterMs(ms: Int, callback: () -> Unit) {
+    @AllThreadsAllowed
+    fun afterMs(ms: Int, callback: @MainThreadOnly () -> Unit) {
         callbacks.add((TimeUtils.millis() + ms) to callback)
     }
 
+    @AllThreadsAllowed
     fun addDisposable(disposable: Disposable) {
         additionalDisposables.add(disposable)
     }
 
+    @AllThreadsAllowed
     fun addActorToRoot(actor: Actor) {
         stage.root.addActor(actor)
     }
 
+    @AllThreadsAllowed
     fun invalidateEverything() {
 
         fun invalidateGroup(group: Group) {
@@ -161,10 +162,12 @@ open class OnjScreen(
         invalidateGroup(stage.root)
     }
 
+    @AllThreadsAllowed
     fun removeActorFromRoot(actor: Actor) {
         stage.root.removeActor(actor)
     }
 
+    @AllThreadsAllowed
     fun resortRootZIndices() {
         stage.root.children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
@@ -172,19 +175,33 @@ open class OnjScreen(
         }
     }
 
+    @AllThreadsAllowed
     fun buildKeySelectHierarchy() {
         keySelectionHierarchy = KeySelectionHierarchyBuilder().build(stage.root)
     }
 
-    fun addLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
-    fun addEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
-    fun removeLateRenderTask(task: (Batch) -> Unit): Unit = run { additionalLateRenderTasks.remove(task) }
-    fun removeEarlyRenderTask(task: (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.remove(task) }
+    @AllThreadsAllowed
+    fun addLateRenderTask(task: @MainThreadOnly (Batch) -> Unit): Unit = run { additionalLateRenderTasks.add(task) }
 
+    @AllThreadsAllowed
+    fun addEarlyRenderTask(task: @MainThreadOnly (Batch) -> Unit): Unit = run { additionalEarlyRenderTasks.add(task) }
+
+    @AllThreadsAllowed
+    fun removeLateRenderTask(task: @MainThreadOnly (Batch) -> Unit) {
+        additionalLateRenderTasks.remove(task)
+    }
+
+    @AllThreadsAllowed
+    fun removeEarlyRenderTask(task: @MainThreadOnly (Batch) -> Unit) {
+        additionalEarlyRenderTasks.remove(task)
+    }
+
+    @AllThreadsAllowed
     fun namedActorOrError(name: String): Actor = namedActors[name] ?: throw RuntimeException(
         "no actor named $name"
     )
 
+    @AllThreadsAllowed
     fun namedCellOrError(name: String): Cell<*> = namedCells[name] ?: throw RuntimeException(
         "no cell named $name"
     )
@@ -201,6 +218,7 @@ open class OnjScreen(
         }
     }
 
+    @MainThreadOnly
     override fun show() {
         screenController?.init(this)
         Gdx.input.inputProcessor = inputMultiplexer
@@ -208,12 +226,14 @@ open class OnjScreen(
         isVisible = true
     }
 
+    @MainThreadOnly
     override fun hide() {
         super.hide()
         screenController?.end()
         isVisible = false
     }
 
+    @MainThreadOnly
     override fun render(delta: Float) = try {
         if (printFrameRate) FourtyFiveLogger.fps()
         screenController?.update()
@@ -287,10 +307,12 @@ open class OnjScreen(
         batch.dispose()
     }
 
+    @MainThreadOnly
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
     }
 
+    @MainThreadOnly
     override fun dispose() {
         screenController?.end()
         stage.dispose()
