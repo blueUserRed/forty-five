@@ -29,10 +29,6 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
 
     private var sizeDirty = false
 
-    init {
-        currentPostProcessingShaders.add(ResourceManager.get(screen, "film_shader"))
-    }
-
     override fun render(delta: Float) {
         if (sizeDirty) {
             screen.resize(Gdx.graphics.width, Gdx.graphics.height)
