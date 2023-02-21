@@ -15,9 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.screen.ResourceManager
-import com.fourinachamber.fourtyfive.utils.Either
-import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import com.fourinachamber.fourtyfive.utils.Utils
+import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.onClick
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -74,27 +72,28 @@ abstract class Behaviour(val actor: Actor) {
     /**
      * called when a hover is started
      */
-    protected open val onHoverEnter: BehaviourCallback? = null
+    protected open val onHoverEnter: @MainThreadOnly BehaviourCallback? = null
 
     /**
      * called when the hover has ended
      */
-    protected open val onHoverExit: BehaviourCallback? = null
+    protected open val onHoverExit: @MainThreadOnly BehaviourCallback? = null
 
     /**
      * called when the actor is clicked. If the actor is a [DisableActor] and [DisableActor.isDisabled] is set to false,
      * this will not be called
      */
-    protected open val onCLick: BehaviourCallback? = null
+    protected open val onCLick: @MainThreadOnly BehaviourCallback? = null
 
     /**
      * called when the actor is a [DisableActor], [DisableActor.isDisabled] is set to true and the actor is clicked
      */
-    protected open val onDisabledCLick: BehaviourCallback? = null
+    protected open val onDisabledCLick: @MainThreadOnly BehaviourCallback? = null
 
     /**
      * binds the callbacks to the actor and sets the [onjScreen]
      */
+    @AllThreadsAllowed
     fun bindCallbacks(onjScreen: OnjScreen) {
         this.onjScreen = onjScreen
         onHoverEnter?.let { actor.onEnter(it) }

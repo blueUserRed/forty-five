@@ -5,6 +5,13 @@
  - When writing identifiers, comments, etc. english should be used
  - files and directories in the assets directory should use snake_case 
 
+## Application specific
+ - use the ``@MainThreadOnly`` and the ``@AllThreadsAllowed`` annotations to indicate
+   whether a function / constructor / lambda has to be called from the main thread.
+   Functions that use the ``@AllThreadAllowed`` annotation should not call functions 
+   marked with ``@MainThreadOnly`` or perform actions that require the openGl context
+   
+
 ## Git
  - when tackling a feature, create a branch with the prefix 'f_' and develop there
  - for small bugfixes, you can use your personal brach with the 'dev_' prefix
