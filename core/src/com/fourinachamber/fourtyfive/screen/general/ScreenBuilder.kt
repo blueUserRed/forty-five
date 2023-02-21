@@ -50,7 +50,7 @@ class ScreenBuilder(val file: FileHandle) {
 
     private var screenController: ScreenController? = null
     private var background: String? = null
-    private var postProcessor: String? = null
+//    private var postProcessor: String? = null
 
     @MainThreadOnly
     fun build(): OnjScreen {
@@ -86,9 +86,9 @@ class ScreenBuilder(val file: FileHandle) {
         screen.addActorToRoot(root)
         screen.buildKeySelectHierarchy()
 
-        postProcessor?.let {
-            screen.postProcessor = ResourceManager.get<PostProcessor>(screen, it)
-        }
+//        postProcessor?.let {
+//            screen.postProcessor = ResourceManager.get<PostProcessor>(screen, it)
+//        }
 
         screen.screenController = screenController
 
@@ -108,9 +108,9 @@ class ScreenBuilder(val file: FileHandle) {
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
         }
-        options.ifHas<String>("postProcessor") {
-            postProcessor = it
-        }
+//        options.ifHas<String>("postProcessor") {
+//            postProcessor = it
+//        }
     }
 
     private fun readAssets(onj: OnjObject) {

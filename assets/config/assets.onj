@@ -124,30 +124,18 @@ cursors: [
     }
 ],
 
-postProcessors: [
+shaders: [
     {
         name: "earthquake_shader",
-        vertexShader: "shaders/earthquake/earthquake.vert",
-        fragmentShader: "shaders/earthquake/earthquake.frag",
-        timeOffset: 2_000,
-        uniforms: [ "time" ],
-        args: null
+        file: "shaders/earthquake.glsl",
+        constantArgs: {
+            timeOffset: 2_000
+        }
     },
     {
-        name: "default_shader",
-        vertexShader: "shaders/default/default.vert",
-        fragmentShader: "shaders/default/default.frag",
-        timeOffset: 0,
-        uniforms: [],
-        args: null
-    },
-    {
-        name: "vignette_shader",
-        vertexShader: "shaders/vignette/vignette.vert",
-        fragmentShader: "shaders/vignette/vignette.frag",
-        timeOffset: 0,
-        uniforms: [ "time", "resolution" ],
-        args: {
+        name: "vignette_shader", // TODO: fix
+        file: "shaders/vignette.glsl",
+        constantArgs: {
             color: color.red,
             speed: 0.0,
             movement: 1.0,
@@ -155,29 +143,55 @@ postProcessors: [
         }
     },
     {
-        name: "grayscale_shader",
-        vertexShader: "shaders/grayscale/grayscale.vert",
-        fragmentShader: "shaders/grayscale/grayscale.frag",
-        timeOffset: 0,
-        uniforms: [],
-        args: null
-    },
-    {
         name: "film_shader",
-        vertexShader: "shaders/film/film.vert",
-        fragmentShader: "shaders/film/film.frag",
-        timeOffset: 0,
-        uniforms: [ "resolution", "time" ],
-        args: null
-    },
-    {
-        name: "mosaic_shader",
-        vertexShader: "shaders/mosaic/mosaic.vert",
-        fragmentShader: "shaders/mosaic/mosaic.frag",
-        timeOffset: 0,
-        uniforms: [ "resolution" ],
-        args: null
+        file: "shaders/film.glsl",
+        constantArgs: null
     }
+//    {
+//        name: "default_shader",
+//        vertexShader: "shaders/default/default.vert",
+//        fragmentShader: "shaders/default/default.frag",
+//        timeOffset: 0,
+//        uniforms: [],
+//        args: null
+//    },
+//    {
+//        name: "vignette_shader",
+//        vertexShader: "shaders/vignette/vignette.vert",
+//        fragmentShader: "shaders/vignette/vignette.frag",
+//        timeOffset: 0,
+//        uniforms: [ "time", "resolution" ],
+//        args: {
+//            color: color.red,
+//            speed: 0.0,
+//            movement: 1.0,
+//            minMovement: 0.3
+//        }
+//    },
+//    {
+//        name: "grayscale_shader",
+//        vertexShader: "shaders/grayscale/grayscale.vert",
+//        fragmentShader: "shaders/grayscale/grayscale.frag",
+//        timeOffset: 0,
+//        uniforms: [],
+//        args: null
+//    },
+//    {
+//        name: "film_shader",
+//        vertexShader: "shaders/film/film.vert",
+//        fragmentShader: "shaders/film/film.frag",
+//        timeOffset: 0,
+//        uniforms: [ "resolution", "time" ],
+//        args: null
+//    },
+//    {
+//        name: "mosaic_shader",
+//        vertexShader: "shaders/mosaic/mosaic.vert",
+//        fragmentShader: "shaders/mosaic/mosaic.frag",
+//        timeOffset: 0,
+//        uniforms: [ "resolution" ],
+//        args: null
+//    }
 ],
 
 animations: [],

@@ -1,17 +1,13 @@
-#ifdef GL_ES
-#define LOWP lowp
-precision mediump float;
-#else
-#define LOWP 
-#endif
 
-varying LOWP vec4 v_color;
-varying vec2 v_texCoords;
-uniform sampler2D u_texture;
+Defines:
+ - random(vec2)
+ - snoise(vec2)
+ - fbm(vec2 pos, int octaves, float amplitudeDecrease, float frequencyIncrease)
+ - mod289(vec2)
+ - mod289(vec3)
+ - permute(vec3)
 
-uniform float u_time;
-uniform vec2 u_resolution;
-
+~~~section export
 
 float random (in vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -39,9 +35,9 @@ float snoise(vec2 v) {
     + i.x + vec3(0.0, i1.x, 1.0 ));
 
     vec3 m = max(0.5 - vec3(
-    dot(x0, x0),
-    dot(x1, x1),
-    dot(x2,x2)
+        dot(x0, x0),
+        dot(x1, x1),
+        dot(x2,x2)
     ), 0.0);
 
     m = m* m;
@@ -60,42 +56,15 @@ float snoise(vec2 v) {
     return 130.0 * dot(m, g);
 }
 
-
-bool floatCompare(float a, float b, float epsilon) {
-    return a < b + epsilon && a > b - epsilon;
-}
-
-vec4 grayScale(vec4 color) {
-    float value = (color.r + color.g + color.b) / 3.0;
-    return vec4(value, value, value, 1.0);
-}
-
 float fbm(vec2 pos, int octaves, float amplitudeDecrease, float frequencyIncrease) {
     float amplitude = 1.0;
     float frequency = 1.0;
     float value = 0.0;
     for (int i = 0; i < octaves; i++) {
-        value += snoise(pos * frequency) * amplitude;
-        frequency += frequencyIncrease;
-        amplitude -= amplitudeDecrease;
+    value += snoise(pos * frequency) * amplitude;
+    frequency += frequencyIncrease;
+    amplitude -= amplitudeDecrease;
     }
     return value;
 }
 
-#define LineEpsilon 0.002
-void main() {
-    vec2 pos = gl_FragCoord.xy / u_resolution;
-
-    float lineHeight = fbm(vec2(u_time / 28.0), 2, 0.8, 3.0) + 0.4;
-    bool isLine = floatCompare(lineHeight, pos.y, LineEpsilon);
-
-    vec4 baseColor = v_color * texture2D(u_texture, v_texCoords);
-    baseColor = grayScale(baseColor);
-
-    baseColor += vec4(random(pos + vec2(u_time))) / 10.0;
-
-    float noise = snoise((pos * 10.0) + vec2(u_time * 50.0));
-    bool turnBlack = noise > 0.97;
-
-    gl_FragColor = isLine || turnBlack ? vec4(0.0, 0.0, 0.0, 1.0) : baseColor;
-}
