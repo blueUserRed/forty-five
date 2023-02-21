@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 
 class StyleableOnjScreen(
     viewport: Viewport,
@@ -32,11 +33,13 @@ class StyleableOnjScreen(
     printFrameRate,
 ) {
 
+    @MainThreadOnly
     override fun show() {
         super.show()
         for (target in styleTargets) target.init(this)
     }
 
+    @MainThreadOnly
     override fun render(delta: Float) {
         for (styleTarget in styleTargets) styleTarget.update()
         super.render(delta)

@@ -77,6 +77,7 @@ object Utils {
     /**
      * sets the currently active cursor
      */
+    @MainThreadOnly
     fun setCursor(cursor: Either<Cursor, SystemCursor>) = when (cursor) {
         is Either.Left -> Gdx.graphics.setCursor(cursor.value)
         is Either.Right -> Gdx.graphics.setSystemCursor(cursor.value)
@@ -85,6 +86,7 @@ object Utils {
     /**
      * gets the current cursor pos and unprojects it using [viewport]
      */
+    @AllThreadsAllowed
     fun getCursorPos(viewport: Viewport): Vector2 {
         return viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
     }
@@ -93,6 +95,7 @@ object Utils {
      * loads either a custom cursor or a system cursor
      * @throws RuntimeException when [cursorName] is not known
      */
+    @AllThreadsAllowed
     fun loadCursor(
         useSystemCursor: Boolean,
         cursorName: String,
@@ -123,6 +126,7 @@ object Utils {
         }
     }
 
+    @AllThreadsAllowed
     fun interpolationOrError(name: String): Interpolation = when (name) {
 
         "linear" -> Interpolation.linear

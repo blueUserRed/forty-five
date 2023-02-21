@@ -8,7 +8,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -25,12 +27,14 @@ object ResourceManager {
     lateinit var resources: List<Resource>
         private set
 
+    @MainThreadOnly
     fun borrow(borrower: ResourceBorrower, handle: String) {
         val toBorrow = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         toBorrow.borrow(borrower)
     }
 
+    @AllThreadsAllowed
     inline fun <reified T> get(borrower: ResourceBorrower, handle: String): T {
         val toGet = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
@@ -43,6 +47,7 @@ object ResourceManager {
         throw RuntimeException("no variant of type ${T::class.simpleName} for handle $handle")
     }
 
+    @MainThreadOnly
     fun giveBack(borrower: ResourceBorrower, handle: String) {
         val toGiveBack = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
@@ -57,28 +62,32 @@ object ResourceManager {
         var variants: List<Any> = listOf(),
         var disposables: List<Disposable> = listOf(),
         val borrowedBy: MutableList<ResourceBorrower> = mutableListOf(),
-        val loader: Resource.() -> Unit
+        val loader: @MainThreadOnly Resource.() -> Unit
     ) : Disposable {
 
         var isLoaded: Boolean = false
 
+        @MainThreadOnly
         open fun load() {
             if (isLoaded) return
             isLoaded = true
             loader()
         }
 
+        @MainThreadOnly
         fun borrow(borrower: ResourceBorrower): Resource {
             if (!isLoaded) load()
             borrowedBy.add(borrower)
             return this
         }
 
+        @MainThreadOnly
         open fun giveBack(borrower: ResourceBorrower) {
             if (!borrowedBy.remove(borrower)) return
             if (borrowedBy.isEmpty()) dispose()
         }
 
+        @MainThreadOnly
         override fun dispose() {
             if (!isLoaded) return
             disposables.forEach(Disposable::dispose)
@@ -99,6 +108,7 @@ object ResourceManager {
         loader = atlasRegionLoader
     ), ResourceBorrower {
 
+        @MainThreadOnly
         override fun dispose() {
             giveBack(this, atlasResourceHandle)
             super.dispose()
@@ -124,7 +134,7 @@ object ResourceManager {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/assets.onjschema").file())
     }
 
-
+    @MainThreadOnly
     fun init() {
         val resources = mutableListOf<Resource>()
 

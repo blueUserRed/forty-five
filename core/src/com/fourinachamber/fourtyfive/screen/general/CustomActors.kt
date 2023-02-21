@@ -138,7 +138,7 @@ interface KeySelectableActor {
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
  *  label
  */
-open class CustomLabel(
+open class CustomLabel @AllThreadsAllowed constructor(
     text: String,
     labelStyle: LabelStyle,
     var background: Drawable? = null,
@@ -156,6 +156,7 @@ open class CustomLabel(
         return Rectangle(x, y, width, height)
     }
 
+    @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {
             super.draw(null, parentAlpha)
@@ -185,13 +186,14 @@ open class CustomLabel(
 
 }
 
-open class TemplateStringLabel(
+open class TemplateStringLabel @AllThreadsAllowed constructor(
     private val templateString: TemplateString,
     labelStyle: LabelStyle,
     background: Drawable? = null,
     partOfHierarchy: Boolean = false
 ) : CustomLabel(templateString.string, labelStyle, background, partOfHierarchy) {
 
+    @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val newString = templateString.string
         if (!textEquals(newString)) {
@@ -204,7 +206,7 @@ open class TemplateStringLabel(
 /**
  * custom Image that implements functionality for z-indices and masking
  */
-open class CustomImageActor(
+open class CustomImageActor @AllThreadsAllowed constructor(
     drawable: Drawable,
     override val partOfHierarchy: Boolean = false
 ) : Image(drawable), Maskable, ZIndexActor, DisableActor, KeySelectableActor {
@@ -236,6 +238,7 @@ open class CustomImageActor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
+    @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
 
@@ -335,6 +338,7 @@ open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
         }
     }
 
+    @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
         if (batch != null && background != null) {
