@@ -28,6 +28,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
     /**
      * starts executing the tasks in the timeline
      */
+    @AllThreadsAllowed
     fun start() {
         hasBeenStarted = true
         if (_actions.isEmpty()) return
@@ -37,6 +38,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
     /**
      * should be called every frame to keep the timeline updated
      */
+    @AllThreadsAllowed
     fun update() {
         if (isFinished || !hasBeenStarted) return
         while (true) {
@@ -57,6 +59,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
      * pushes an action to the beginning of timeline. the action will be temporarily stored in a buffer until the
      * current action finishes, after which this action will be started
      */
+    @AllThreadsAllowed
     fun pushAction(timelineAction: TimelineAction) {
         pushActionsBuffer.add(timelineAction)
     }
@@ -64,10 +67,12 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
     /**
      * appends an action to the end of the timeline
      */
+    @AllThreadsAllowed
     fun appendAction(timelineAction: TimelineAction) {
         _actions.add(timelineAction)
     }
 
+    @AllThreadsAllowed
     fun asAction(): TimelineAction {
         if (hasBeenStarted) {
             throw RuntimeException("Timeline cannot be made into an action if it has already started")
@@ -121,7 +126,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * adds an action that finishes instantly to the timeline
          */
-        fun action(action: () -> Unit) {
+        fun action(action: @AllThreadsAllowed () -> Unit) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(): Boolean = true
                 override fun start(timeline: Timeline) {
@@ -138,7 +143,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * delays the timeline until a condition is met
          */
-        fun delayUntil(condition: () -> Boolean) {
+        fun delayUntil(condition: @AllThreadsAllowed () -> Boolean) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(): Boolean = condition()
             })
@@ -175,7 +180,10 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
          * the condition is not known when the timeline is created. The timeline is also wrapped in a lambda in case
          * the creation of the timeline to include is also dependent on factors not known when the timeline is created
          */
-        fun includeLater(timelineCreator: () -> Timeline, condition: () -> Boolean) {
+        fun includeLater(
+            timelineCreator: @AllThreadsAllowed () -> Timeline,
+            condition: @AllThreadsAllowed () -> Boolean
+        ) {
             timelineActions.add(object : TimelineAction() {
 
                 override fun start(timeline: Timeline) {
@@ -194,7 +202,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * same as [includeLater], but includes an action instead of a timeline
          */
-        fun includeActionLater(action: TimelineAction, condition: () -> Boolean) {
+        fun includeActionLater(action: TimelineAction, condition: @AllThreadsAllowed () -> Boolean) {
             timelineActions.add(object : TimelineAction() {
 
                 override fun start(timeline: Timeline) {

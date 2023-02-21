@@ -14,6 +14,8 @@ import com.fourinachamber.fourtyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
+import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.customization.OnjConfig
 
 /**

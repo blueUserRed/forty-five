@@ -59,6 +59,7 @@ object FourtyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
+    @AllThreadsAllowed
     fun debug(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.DEBUG)) return
         output.println(formatMessage(tag, message, LogLevel.DEBUG))
@@ -69,6 +70,7 @@ object FourtyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
+    @AllThreadsAllowed
     fun medium(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.MEDIUM)) return
         output.println(formatMessage(tag, message, LogLevel.MEDIUM))
@@ -79,6 +81,7 @@ object FourtyFiveLogger {
      * @param tag should give the reader information about where this message
      * came from (which class, which instance, ...)
      */
+    @AllThreadsAllowed
     fun severe(tag: String, message: String) {
         output.println(formatMessage(tag, message, LogLevel.SEVERE))
     }
@@ -111,6 +114,7 @@ object FourtyFiveLogger {
     /**
      * logs the stackTrace of an exception. will always be logged, regardless of the log level
      */
+    @AllThreadsAllowed
     fun stackTrace(e: Exception) {
         e.printStackTrace(output)
     }
@@ -119,6 +123,7 @@ object FourtyFiveLogger {
      * logs a message formatted as a title. This should be used when a big change in the state of the game happens
      * and makes navigating the log file easier
      */
+    @AllThreadsAllowed
     fun title(message: String) {
         output.println("-------------$message-------------")
     }
@@ -126,6 +131,7 @@ object FourtyFiveLogger {
     /**
      * logs the current frameRate, only logs when the logLevel is set to debug
      */
+    @AllThreadsAllowed
     fun fps() {
         if (logLevel != LogLevel.DEBUG) return
         output.println("-[fps]- ${Gdx.graphics.framesPerSecond}")

@@ -25,9 +25,7 @@ import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
-import com.fourinachamber.fourtyfive.utils.Either
-import com.fourinachamber.fourtyfive.utils.FrameAnimation
-import com.fourinachamber.fourtyfive.utils.TemplateString
+import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import ktx.actors.onClick
@@ -54,6 +52,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var background: String? = null
 //    private var postProcessor: String? = null
 
+    @MainThreadOnly
     fun build(): OnjScreen {
         val onj = OnjParser.parseFile(file.file())
         screenSchema.assertMatches(onj)
