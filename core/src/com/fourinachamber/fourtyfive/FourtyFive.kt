@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.card.CardGenerator
+import com.fourinachamber.fourtyfive.map.DetailMapWidget
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -23,6 +24,8 @@ import onj.customization.OnjConfig
  */
 object FourtyFive : Game() {
 
+    const val generateCards: Boolean = false
+
     const val logTag = "fourty-five"
 
     private var currentRenderable: Renderable? = null
@@ -32,16 +35,25 @@ object FourtyFive : Game() {
 
     override fun create() {
         init()
-//        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-//        cardGenerator.prepare()
-//        cardGenerator.generateCards()
-        val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
-//        screen.postProcessor = PostProcessor((shader as Either.Left).value, listOf(), mapOf())
-        changeToScreen(screen)
+
+        if (generateCards) runCardGenerator()
+
+        val mapScreen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
+        val map = mapScreen.namedActorOrError("map") as DetailMapWidget
+        changeToScreen(mapScreen)
+
+//        val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
+//        changeToScreen(screen)
     }
 
     override fun render() {
         currentRenderable?.render(Gdx.graphics.deltaTime)
+    }
+
+    private fun runCardGenerator() {
+        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+        cardGenerator.prepare()
+        cardGenerator.generateCards()
     }
 
     fun changeToScreen(screen: OnjScreen) {

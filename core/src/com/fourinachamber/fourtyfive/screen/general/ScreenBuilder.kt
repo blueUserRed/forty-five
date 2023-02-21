@@ -20,6 +20,7 @@ import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.map.DetailMapWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -308,7 +309,13 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
+        "Map" -> DetailMapWidget(
+            drawableOrError(widgetOnj.get<String>("nodeTexture"), screen),
+            drawableOrError(widgetOnj.get<String>("background"), screen),
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
+
     }.let { actor ->
 
         applySharedWidgetKeys(actor, widgetOnj)
