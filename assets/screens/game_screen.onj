@@ -38,7 +38,7 @@ assets: {
 
         "cover_hook", "key_select_frame",
 
-//        "grayscale_shader", "film_shader", "mosaic_shader", // TODO: remove
+//        "film_shader", // TODO: remove
 
         ...(graphicsConfig.bannerAnimationUsedAssets),
         ...(graphicsConfig.statusEffectsUsedAssets),

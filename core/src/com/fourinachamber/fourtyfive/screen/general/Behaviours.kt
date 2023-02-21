@@ -39,7 +39,7 @@ object BehaviourFactory {
         "OnHoverChangeFontSizeBehaviour" to { onj, actor -> OnHoverChangeFontSizeBehaviour(onj, actor) },
         "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
         "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
-        "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
+//        "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
         "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
         "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
         "EndTurnButtonBehaviour" to { onj, actor -> EndTurnButtonBehaviour(onj, actor) },
@@ -396,38 +396,38 @@ class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behavio
 //
 //}
 
-/**
- * when clicked, will change the PostProcessor of the whole screen
- */
-class OnClickChangePostProcessorBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-
-    private val time: Int? = if (!onj["duration"]!!.isNull()) {
-        onj.get<Long>("duration").toInt()
-    } else null
-
-    private val postProcessor: String? = if (!onj["postProcessor"]!!.isNull()) {
-        onj.get<String>("postProcessor")
-    } else null
-
-    private val setOnlyIfPostProcessorIsNull: Boolean = onj.get<Boolean>("setOnlyIfNoPostProcessorIsSet")
-
-    override val onCLick: BehaviourCallback = callback@ {
-
-        if (setOnlyIfPostProcessorIsNull && onjScreen.postProcessor != null) return@callback
-
-        val postProcessor = ResourceManager.get<PostProcessor>(onjScreen, postProcessor!!)
-
-        val prefPostProcessor = onjScreen.postProcessor
-        onjScreen.postProcessor = postProcessor
-
-        if (time != null) onjScreen.afterMs(time) {
-            onjScreen.postProcessor = prefPostProcessor
-            // without manually resizing the aspect ratio of the screen breaks, don't ask me why
-            onjScreen.resize(Gdx.graphics.width, Gdx.graphics.height)
-        }
-    }
-
-}
+///**
+// * when clicked, will change the PostProcessor of the whole screen
+// */
+//class OnClickChangePostProcessorBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
+//
+//    private val time: Int? = if (!onj["duration"]!!.isNull()) {
+//        onj.get<Long>("duration").toInt()
+//    } else null
+//
+//    private val postProcessor: String? = if (!onj["postProcessor"]!!.isNull()) {
+//        onj.get<String>("postProcessor")
+//    } else null
+//
+//    private val setOnlyIfPostProcessorIsNull: Boolean = onj.get<Boolean>("setOnlyIfNoPostProcessorIsSet")
+//
+//    override val onCLick: BehaviourCallback = callback@ {
+//
+//        if (setOnlyIfPostProcessorIsNull && onjScreen.postProcessor != null) return@callback
+//
+//        val postProcessor = ResourceManager.get<PostProcessor>(onjScreen, postProcessor!!)
+//
+//        val prefPostProcessor = onjScreen.postProcessor
+//        onjScreen.postProcessor = postProcessor
+//
+//        if (time != null) onjScreen.afterMs(time) {
+//            onjScreen.postProcessor = prefPostProcessor
+//            // without manually resizing the aspect ratio of the screen breaks, don't ask me why
+//            onjScreen.resize(Gdx.graphics.width, Gdx.graphics.height)
+//        }
+//    }
+//
+//}
 
 /**
  * sets the visibility of another actor when this actor is hovered over

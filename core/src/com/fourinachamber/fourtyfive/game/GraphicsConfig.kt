@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.rendering.BetterShader
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.general.*
@@ -197,8 +198,10 @@ object GraphicsConfig {
 
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
 
-    fun shootPostProcessor(screen: OnjScreen): PostProcessor = ResourceManager.get(screen, shootPostProcessor)
-    fun shootPostProcessorDuration(): Int = shootPostProcessorDuration
+    fun shootShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, shootPostProcessor)
+    fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
+
+    fun destroyCardShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, destroyCardPostProcessor)
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
@@ -312,7 +315,12 @@ object GraphicsConfig {
         val onShootPostProcessor = config.get<OnjObject>("shootPostProcessor")
         shootPostProcessor = onShootPostProcessor.get<String>("name")
         shootPostProcessorDuration = (onShootPostProcessor.get<Double>("duration") * 100).toInt()
+
+        val postProcessors = config.get<OnjObject>("postProcessors")
+        destroyCardPostProcessor = postProcessors.get<String>("destroyCardPostProcessor")
     }
+
+    private lateinit var destroyCardPostProcessor: String
 
     private lateinit var shootPostProcessor: String
     private var shootPostProcessorDuration: Int by Delegates.notNull()

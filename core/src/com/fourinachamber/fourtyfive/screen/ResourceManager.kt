@@ -195,12 +195,12 @@ object ResourceManager {
             resources.add(resource)
         }
 
-        assets.get<OnjArray>("postProcessors").value.forEach {
+        assets.get<OnjArray>("shaders").value.forEach {
             it as OnjObject
             val resource = Resource(it.get<String>("name")) {
-                val postProcessor = OnjReaderUtils.readPostProcessor(it)
-                variants = listOf(postProcessor, postProcessor.shader)
-                disposables = listOf(postProcessor)
+                val shader = OnjReaderUtils.readShader(it)
+                variants = listOf(shader)
+                disposables = listOf(shader)
             }
             resources.add(resource)
         }
