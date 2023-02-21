@@ -12,6 +12,7 @@ import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.customization.OnjConfig
 
@@ -35,6 +36,7 @@ object FourtyFive : Game() {
         changeToScreen(screen)
     }
 
+    @MainThreadOnly
     fun changeToScreen(screen: OnjScreen) {
         FourtyFiveLogger.title("changing screen")
         currentScreen?.dispose()

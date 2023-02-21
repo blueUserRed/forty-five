@@ -142,6 +142,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBullet: CardPrototype
     private lateinit var defaultCover: CardPrototype
 
+    @MainThreadOnly
     override fun init(onjScreen: OnjScreen) {
         SaveState.read()
         curScreen = onjScreen
@@ -241,6 +242,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         createdCards.add(card)
     }
 
+    @AllThreadsAllowed
     fun changeState(next: GameState) {
         if (next == currentState) return
         FourtyFiveLogger.debug(logTag, "changing state from $currentState to $next")
@@ -251,6 +253,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private var updateCount = 0 //TODO: this is stupid
+
+    @MainThreadOnly
     override fun update() {
 
         if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
@@ -274,6 +278,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * plays a gameAnimation
      */
+    @AllThreadsAllowed
     fun playGameAnimation(anim: GameAnimation) {
         FourtyFiveLogger.debug(logTag, "playing game animation: $anim")
         anim.start()
@@ -283,6 +288,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * changes the game to the SpecialDraw phase and sets the amount of cards to draw to [amount]
      */
+    @AllThreadsAllowed
     fun specialDraw(amount: Int) {
         if (currentState !is GameState.Free) return
         changeState(GameState.SpecialDraw(amount))
@@ -354,6 +360,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * puts [card] in [slot] of the revolver (checks if the card is a bullet)
      */
+    @AllThreadsAllowed
     fun loadBulletInRevolver(card: Card, slot: Int) {
         if (card.type != Card.Type.BULLET || !card.allowsEnteringGame()) return
         if (revolver.getCardInSlot(slot) != null) return
@@ -368,6 +375,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * adds a new cover to a slot in the cover area (checks if the card is a cover)
      */
+    @AllThreadsAllowed
     fun addCover(card: Card, slot: Int) {
         if (card.type != Card.Type.COVER || !card.allowsEnteringGame()) return
         if (!coverArea.acceptsCover(slot, roundCounter) || !cost(card.cost)) return
@@ -381,6 +389,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * creates a new instance of the card named [name] and puts it in the hand of the player
      */
+    @AllThreadsAllowed
     fun putCardInHand(name: String) {
         val cardProto = cardPrototypes
             .firstOrNull { it.name == name }
@@ -392,6 +401,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * shoots the revolver
      */
+    @AllThreadsAllowed
     fun shoot() {
         if (!currentState.allowsShooting()) return
         turnCounter++
@@ -491,11 +501,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
+    @AllThreadsAllowed
     fun checkCardModifierValidity() {
         FourtyFiveLogger.debug(logTag, "checking card modifiers")
         for (card in createdCards) if (card.inGame) card.checkModifierValidity()
     }
 
+    @AllThreadsAllowed
     fun endTurn() {
         currentState.onEndTurn(this)
     }
@@ -503,6 +515,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * damages the player (plays no animation, calls loose when lives go below 0)
      */
+    @AllThreadsAllowed
     fun damagePlayer(damage: Int) {
         curPlayerLives -= damage
         FourtyFiveLogger.debug(logTag, "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives")
@@ -514,6 +527,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * adds reserves (plays no animations)
      */
+    @AllThreadsAllowed
     fun gainReserves(amount: Int) {
         curReserves += amount
         FourtyFiveLogger.debug(logTag, "player gained reserves; amount = $amount; curReserves = $curReserves")
@@ -522,11 +536,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * changes the game to the destroy phase
      */
+    @AllThreadsAllowed
     fun destroyCardPhase() = changeState(GameState.CardDestroy)
 
     /**
      * destroys a card in the revolver
      */
+    @AllThreadsAllowed
     fun destroyCard(card: Card) {
         revolver.removeCard(card)
         card.onDestroy()
@@ -550,6 +566,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         card.checkEffects(trigger)?.let { executeTimelineLater(it) }
     }
 
+    @AllThreadsAllowed
     fun checkEffectsActiveCards(trigger: Trigger) {
         FourtyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         val timeline = Timeline.timeline {
@@ -561,6 +578,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         executeTimelineLater(timeline)
     }
 
+    @AllThreadsAllowed
     fun checkStatusEffects() {
         FourtyFiveLogger.debug(logTag, "checking status effects")
         val timeline = Timeline.timeline {
@@ -599,6 +617,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         for (card in cardHand.cards) card.isDraggable = true
     }
 
+    @AllThreadsAllowed
     fun showCardDrawActor() {
         FourtyFiveLogger.debug(logTag, "displaying card draw actor")
         val viewport = curScreen.stage.viewport
@@ -608,14 +627,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
     }
 
+    @AllThreadsAllowed
     fun showDestroyCardInstructionActor() {
         destroyCardInstructionActor.isVisible = true
     }
 
+    @AllThreadsAllowed
     fun hideDestroyCardInstructionActor() {
         destroyCardInstructionActor.isVisible = false
     }
 
+    @AllThreadsAllowed
     fun hideCardDrawActor() {
         FourtyFiveLogger.debug(logTag, "hiding card draw actor")
 //        curScreen.removeActorFromRoot(cardDrawActor)
@@ -625,6 +647,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * draws a bullet from the stack
      */
+    @AllThreadsAllowed
     fun drawBullet() {
         if (!currentState.allowsDrawingCards()) return
         val bullet = bulletStack.removeFirstOrNull() ?: defaultBullet.create()
@@ -638,6 +661,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * draws a cover from the stack
      */
+    @AllThreadsAllowed
     fun drawCover() {
         if (!currentState.allowsDrawingCards()) return
         val cover = coverCardStack.removeFirstOrNull() ?: defaultCover.create()
@@ -664,6 +688,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * called when an enemy was defeated
      */
+    @AllThreadsAllowed
     fun enemyDefeated(enemy: Enemy) {
         SaveState.enemiesDefeated++
         win()

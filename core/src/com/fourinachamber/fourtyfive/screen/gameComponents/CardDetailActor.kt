@@ -12,10 +12,12 @@ import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
+import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import ktx.actors.onEnter
 import ktx.actors.onExit
 
-class CardDetailActor(
+class CardDetailActor @MainThreadOnly constructor(
     val card: Card,
     initialFlavourText: String,
     initialDescription: String,
@@ -50,7 +52,7 @@ class CardDetailActor(
 //    private var requiresRebuild: Boolean = true
 
     var flavourText: String = initialFlavourText
-        set(value) {
+        @AllThreadsAllowed set(value) {
             invalidateHierarchy()
             flavourTextActor.setText(value)
             flavourTextActor.isVisible = value.isNotBlank()
@@ -58,7 +60,7 @@ class CardDetailActor(
         }
 
     var description: String = initialDescription
-        set(value) {
+        @AllThreadsAllowed set(value) {
             invalidateHierarchy()
             descriptionActor.setText(value)
             descriptionActor.isVisible = value.isNotBlank()
@@ -66,7 +68,7 @@ class CardDetailActor(
         }
 
     var statsText: String = initialStatsText
-        set(value) {
+        @AllThreadsAllowed set(value) {
             invalidateHierarchy()
             statsTextActor.setText(value)
             statsTextActor.isVisible = value.isNotBlank()
@@ -74,7 +76,7 @@ class CardDetailActor(
         }
 
     var statsChangedText: String = initialStatsChangedText
-        set(value) {
+        @AllThreadsAllowed set(value) {
             invalidateHierarchy()
             statsChangedTextActor.setText(value)
             statsChangedTextActor.isVisible = value.isNotBlank()
@@ -109,6 +111,7 @@ class CardDetailActor(
         invalidateHierarchy()
     }
 
+    @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
 
