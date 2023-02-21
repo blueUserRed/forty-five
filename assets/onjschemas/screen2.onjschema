@@ -144,6 +144,12 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $Map {
+        nodeTexture: string,
+        background: string,
+        ...widgetSharedKeys
+    }
+
 }
 
 $Behaviour {
