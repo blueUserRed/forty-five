@@ -33,7 +33,8 @@ data class MapNode(
             for (node in uniqueNodes) {
                 for (edgeTo in node.edgesTo) {
                     val pair = node to edgeTo
-                    if (pair !in edges) edges.add(pair)
+                    val opposite = edgeTo to node
+                    if (pair !in edges && opposite !in edges) edges.add(pair)
                 }
             }
             return edges

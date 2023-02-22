@@ -147,6 +147,8 @@ $Widget {
     $Map {
         nodeTexture: string,
         background: string,
+        nodeSize: float,
+        lineWidth: float,
         ...widgetSharedKeys
     }
 

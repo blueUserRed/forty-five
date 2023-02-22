@@ -310,7 +310,10 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         "Map" -> DetailMapWidget(
+            screen,
             drawableOrError(widgetOnj.get<String>("nodeTexture"), screen),
+            widgetOnj.get<Double>("nodeSize").toFloat(),
+            widgetOnj.get<Double>("lineWidth").toFloat(),
             drawableOrError(widgetOnj.get<String>("background"), screen),
         )
 

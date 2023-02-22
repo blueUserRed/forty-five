@@ -5,18 +5,16 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.card.CardGenerator
 import com.fourinachamber.fourtyfive.map.DetailMapWidget
+import com.fourinachamber.fourtyfive.map.MapNode
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
-import com.fourinachamber.fourtyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import com.fourinachamber.fourtyfive.utils.MainThreadOnly
-import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.customization.OnjConfig
 
 /**
@@ -39,7 +37,14 @@ object FourtyFive : Game() {
         if (generateCards) runCardGenerator()
 
         val mapScreen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
-        val map = mapScreen.namedActorOrError("map") as DetailMapWidget
+
+        val mapWidget = mapScreen.namedActorOrError("map") as DetailMapWidget
+        val map = MapNode(listOf(
+            MapNode(listOf(), false, 40f, 70f),
+            MapNode(listOf(), false, 40f, 30f)
+        ), false, 10f, 60f)
+        mapWidget.setMap(map)
+
         changeToScreen(mapScreen)
 
 //        val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
