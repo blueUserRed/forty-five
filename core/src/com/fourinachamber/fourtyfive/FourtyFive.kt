@@ -41,7 +41,15 @@ object FourtyFive : Game() {
         val mapWidget = mapScreen.namedActorOrError("map") as DetailMapWidget
         val map = MapNode(listOf(
             MapNode(listOf(), false, 40f, 70f),
-            MapNode(listOf(), false, 40f, 30f)
+            MapNode(listOf(
+                MapNode(listOf(
+                    MapNode(listOf(
+                        MapNode(listOf(
+                            MapNode(listOf(), false, 240f, 30f)
+                        ), false, 200f, 30f)
+                    ), false, 120f, 30f)
+                ), false, 80f, 30f)
+            ), false, 40f, 30f)
         ), false, 10f, 60f)
         mapWidget.setMap(map)
 
