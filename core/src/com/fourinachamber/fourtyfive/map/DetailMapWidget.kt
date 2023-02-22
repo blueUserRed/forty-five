@@ -5,11 +5,16 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
+import com.fourinachamber.fourtyfive.utils.minus
 import com.fourinachamber.fourtyfive.utils.plus
+import com.fourinachamber.fourtyfive.utils.component1
+import com.fourinachamber.fourtyfive.utils.component2
 
 class DetailMapWidget(
     private val screen: OnjScreen,
@@ -26,6 +31,38 @@ class DetailMapWidget(
     override var fixedZIndex: Int = 0
 
     private val shapeRenderer: ShapeRenderer = ShapeRenderer()
+
+    private var mapOffset: Vector2 = Vector2(0f, 0f)
+
+    private val dragListener = object : DragListener() {
+
+        private var dragStartPosition: Vector2? = null
+        private var mapOffsetOnDragStart: Vector2? = null
+
+        override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            super.dragStart(event, x, y, pointer)
+            dragStartPosition = Vector2(x, y)
+            mapOffsetOnDragStart = mapOffset
+        }
+
+        override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            super.drag(event, x, y, pointer)
+            val dragStartPosition = dragStartPosition ?: return
+            val mapOffsetOnDragStart = mapOffsetOnDragStart ?: return
+            val draggedDistance = dragStartPosition - Vector2(x, y)
+            mapOffset = mapOffsetOnDragStart - draggedDistance
+        }
+
+        override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            super.dragStop(event, x, y, pointer)
+            dragStartPosition = null
+            mapOffsetOnDragStart = null
+        }
+    }
+
+    init {
+        addListener(dragListener)
+    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
@@ -46,7 +83,8 @@ class DetailMapWidget(
         val uniqueNodes = uniqueNodes ?: return
         val uniqueEdges = uniqueEdges ?: return
         for (node in uniqueNodes) {
-            nodeDrawable.draw(batch, x + node.x, y + node.y, nodeSize, nodeSize)
+            val (nodeX, nodeY) = calcNodePosition(node)
+            nodeDrawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }
         val globalCoords = localToStageCoordinates(Vector2(0f, 0f))
         batch.end()
@@ -56,13 +94,19 @@ class DetailMapWidget(
         Gdx.gl.glLineWidth(Gdx.graphics.height / lineWidth)
         for (edge in uniqueEdges) {
             val (node1, node2) = edge
+            val (node1x, node1y) = calcNodePosition(node1)
+            val (node2x, node2y) = calcNodePosition(node2)
             shapeRenderer.line(
-                globalCoords + Vector2(node1.x + nodeSize / 2, node1.y + nodeSize / 2),
-                globalCoords + Vector2(node2.x + nodeSize / 2, node2.y + nodeSize / 2)
+                globalCoords + Vector2(node1x + nodeSize / 2, node1y + nodeSize / 2),
+                globalCoords + Vector2(node2x + nodeSize / 2, node2y + nodeSize / 2)
             )
         }
         shapeRenderer.end()
         batch.begin()
+    }
+
+    private fun calcNodePosition(node: MapNode): Vector2 {
+        return Vector2(node.x, node.y) + mapOffset
     }
 
 }
