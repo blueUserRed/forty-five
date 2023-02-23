@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -312,6 +313,7 @@ class ScreenBuilder(val file: FileHandle) {
         "Map" -> DetailMapWidget(
             screen,
             drawableOrError(widgetOnj.get<String>("nodeTexture"), screen),
+            ResourceManager.get(screen, widgetOnj.get<String>("edgeTexture")),
             widgetOnj.get<Double>("nodeSize").toFloat(),
             widgetOnj.get<Double>("lineWidth").toFloat(),
             drawableOrError(widgetOnj.get<String>("background"), screen),

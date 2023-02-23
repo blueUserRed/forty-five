@@ -13,7 +13,7 @@ var worldHeight = 90.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "key_select_frame", "white_texture"
+        "title_screen_background", "key_select_frame", "white_texture", "black_texture"
     ]
 },
 
@@ -35,8 +35,9 @@ root: $Map {
         relHeight(100.0)
     ],
     nodeSize: 5.0,
-    lineWidth: 200.0,
+    lineWidth: 1.0,
     name: "map",
     nodeTexture: "key_select_frame",
     background: "white_texture",
+    edgeTexture: "black_texture"
 }
