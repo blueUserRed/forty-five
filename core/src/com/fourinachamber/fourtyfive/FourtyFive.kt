@@ -36,9 +36,22 @@ object FourtyFive : Game() {
 
         if (generateCards) runCardGenerator()
 
+        // TODO: this code below is just for testing
+
         val mapScreen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
 
         val mapWidget = mapScreen.namedActorOrError("map") as DetailMapWidget
+
+        mapWidget.setMap(createTestingMap())
+
+        changeToScreen(mapScreen)
+
+//        val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
+//        changeToScreen(screen)
+    }
+
+    // TODO: just for testing
+    fun createTestingMap(): MapNode {
         val map = MapNode(listOf(
             MapNode(listOf(), false, 40f, 70f),
             MapNode(listOf(
@@ -51,12 +64,7 @@ object FourtyFive : Game() {
                 ), false, 80f, 30f)
             ), false, 40f, 30f)
         ), false, 10f, 60f)
-        mapWidget.setMap(map)
-
-        changeToScreen(mapScreen)
-
-//        val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
-//        changeToScreen(screen)
+        return map
     }
 
     override fun render() {
