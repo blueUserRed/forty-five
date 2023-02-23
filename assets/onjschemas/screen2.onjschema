@@ -149,6 +149,7 @@ $Widget {
         background: string,
         nodeSize: float,
         lineWidth: float,
+        edgeTexture: string,
         ...widgetSharedKeys
     }
 

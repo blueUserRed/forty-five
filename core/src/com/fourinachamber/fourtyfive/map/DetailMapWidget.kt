@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.map
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
@@ -15,10 +16,12 @@ import com.fourinachamber.fourtyfive.utils.minus
 import com.fourinachamber.fourtyfive.utils.plus
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
+import kotlin.math.asin
 
 class DetailMapWidget(
     private val screen: OnjScreen,
     private val nodeDrawable: Drawable,
+    private val edgeTexture: TextureRegion,
     private val nodeSize: Float,
     private val lineWidth: Float,
     var background: Drawable? = null
@@ -68,7 +71,8 @@ class DetailMapWidget(
         validate()
         batch ?: return
         background?.draw(batch, x, y, width, height)
-        drawMap(batch)
+        drawEdges(batch)
+        drawNodes(batch)
     }
 
     fun setMap(start: MapNode?) {
@@ -79,30 +83,31 @@ class DetailMapWidget(
         uniqueEdges = MapNode.getUniqueEdgesFor(uniqueNodes!!)
     }
 
-    private fun drawMap(batch: Batch) {
+    private fun drawNodes(batch: Batch) {
         val uniqueNodes = uniqueNodes ?: return
-        val uniqueEdges = uniqueEdges ?: return
         for (node in uniqueNodes) {
             val (nodeX, nodeY) = calcNodePosition(node)
             nodeDrawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }
-        val globalCoords = localToStageCoordinates(Vector2(0f, 0f))
-        batch.end()
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.projectionMatrix = screen.stage.viewport.camera.combined
-        shapeRenderer.color = Color.BLACK
-        Gdx.gl.glLineWidth(Gdx.graphics.height / lineWidth)
-        for (edge in uniqueEdges) {
-            val (node1, node2) = edge
-            val (node1x, node1y) = calcNodePosition(node1)
-            val (node2x, node2y) = calcNodePosition(node2)
-            shapeRenderer.line(
-                globalCoords + Vector2(node1x + nodeSize / 2, node1y + nodeSize / 2),
-                globalCoords + Vector2(node2x + nodeSize / 2, node2y + nodeSize / 2)
+    }
+
+    private fun drawEdges(batch: Batch) {
+        val uniqueEdges = uniqueEdges ?: return
+        for ((node1, node2) in uniqueEdges) {
+            val dy = node2.y - node1.y
+            val dx = node2.x - node1.x
+            val length = Vector2(dx, dy).len()
+            val angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
+            batch.draw(
+                edgeTexture,
+                x + node1.x + mapOffset.x + nodeSize / 2, y + node1.y + mapOffset.y + nodeSize / 2 + lineWidth / 2,
+                0f, 0f,
+                lineWidth,
+                length,
+                1.0f, 1.0f,
+                angle
             )
         }
-        shapeRenderer.end()
-        batch.begin()
     }
 
     private fun calcNodePosition(node: MapNode): Vector2 {
