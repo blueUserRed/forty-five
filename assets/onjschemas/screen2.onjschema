@@ -147,9 +147,13 @@ $Widget {
     $Map {
         nodeTexture: string,
         background: string,
+        playerTexture: string,
+        playerWidth: float,
+        playerHeight: float,
         nodeSize: float,
         lineWidth: float,
         edgeTexture: string,
+        playerMovementTime: float,
         ...widgetSharedKeys
     }
 

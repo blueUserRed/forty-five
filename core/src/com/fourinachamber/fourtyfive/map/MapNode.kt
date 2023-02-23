@@ -12,6 +12,13 @@ data class MapNode(
     fun getTop(): MapNode? = null
     fun getBottom(): MapNode? = null
 
+    fun isLinkedTo(node: MapNode): Boolean {
+        for (linkedNode in node.edgesTo) {
+            if (linkedNode === this) return true
+        }
+        return false
+    }
+
     fun getUniqueNodes(): List<MapNode> {
         val nodes = mutableListOf(this)
         getUniqueNodes(nodes)
@@ -25,6 +32,8 @@ data class MapNode(
             child.getUniqueNodes(to)
         }
     }
+
+    override fun equals(other: Any?): Boolean = this === other
 
     companion object {
 

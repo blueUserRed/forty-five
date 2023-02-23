@@ -314,8 +314,12 @@ class ScreenBuilder(val file: FileHandle) {
             screen,
             drawableOrError(widgetOnj.get<String>("nodeTexture"), screen),
             ResourceManager.get(screen, widgetOnj.get<String>("edgeTexture")),
+            drawableOrError(widgetOnj.get<String>("playerTexture"), screen),
+            widgetOnj.get<Double>("playerWidth").toFloat(),
+            widgetOnj.get<Double>("playerHeight").toFloat(),
             widgetOnj.get<Double>("nodeSize").toFloat(),
             widgetOnj.get<Double>("lineWidth").toFloat(),
+            (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             drawableOrError(widgetOnj.get<String>("background"), screen),
         )
 
