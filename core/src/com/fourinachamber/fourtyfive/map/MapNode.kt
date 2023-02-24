@@ -35,6 +35,17 @@ data class MapNode(
 
     override fun equals(other: Any?): Boolean = this === other
 
+    override fun toString(): String {
+        return "MapNode(x = $x, y = $y, isArea = $isArea)"
+    }
+
+    override fun hashCode(): Int {
+        var result = isArea.hashCode()
+        result = 31 * result + x.hashCode()
+        result = 31 * result + y.hashCode()
+        return result
+    }
+
     companion object {
 
         fun getUniqueEdgesFor(uniqueNodes: List<MapNode>): List<Pair<MapNode, MapNode>> {
