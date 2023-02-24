@@ -6,6 +6,7 @@ import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.card.CardGenerator
 import com.fourinachamber.fourtyfive.map.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.MapNode
+import com.fourinachamber.fourtyfive.map.MapNodeBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -52,19 +53,23 @@ object FourtyFive : Game() {
 
     // TODO: just for testing
     fun createTestingMap(): MapNode {
-        val map = MapNode(listOf(
-            MapNode(listOf(), false, 40f, 70f),
-            MapNode(listOf(
-                MapNode(listOf(
-                    MapNode(listOf(
-                        MapNode(listOf(
-                            MapNode(listOf(), false, 240f, 30f)
-                        ), false, 200f, 30f)
-                    ), false, 120f, 30f)
-                ), false, 80f, 30f)
-            ), false, 40f, 30f)
-        ), false, 10f, 60f)
-        return map
+        val firstBuilder = MapNodeBuilder(mutableListOf(), false, 40f, 70f)
+        val secondBuilder = MapNodeBuilder(mutableListOf(), false, 80f, 70f)
+        firstBuilder.edgesTo.add(secondBuilder)
+        secondBuilder.edgesTo.add(firstBuilder)
+//        val map = MapNode(listOf(
+//            MapNode(listOf(), false, 40f, 70f),
+//            MapNode(listOf(
+//                MapNode(listOf(
+//                    MapNode(listOf(
+//                        MapNode(listOf(
+//                            MapNode(listOf(), false, 240f, 30f)
+//                        ), false, 200f, 30f)
+//                    ), false, 120f, 30f)
+//                ), false, 80f, 30f)
+//            ), false, 40f, 30f)
+//        ), false, 10f, 60f)
+        return firstBuilder.build()
     }
 
     override fun render() {
