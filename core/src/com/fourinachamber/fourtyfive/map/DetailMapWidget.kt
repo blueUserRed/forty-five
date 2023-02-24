@@ -71,8 +71,9 @@ class DetailMapWidget(
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
             val uniqueNodes = uniqueNodes ?: return
+            val (adjX, adjY) = Vector2(x, y) - mapOffset
             for (node in uniqueNodes) {
-                if (x in node.x..(node.x + nodeSize) && y in node.y..(node.y + nodeSize)) {
+                if (adjX in node.x..(node.x + nodeSize) && adjY in node.y..(node.y + nodeSize)) {
                     handleClick(node)
                 }
             }
@@ -85,7 +86,7 @@ class DetailMapWidget(
     }
 
     private fun handleClick(node: MapNode) {
-        if (playerNode?.isLinkedTo(node) ?: false) return
+        if (!(playerNode?.isLinkedTo(node) ?: false)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
     }
