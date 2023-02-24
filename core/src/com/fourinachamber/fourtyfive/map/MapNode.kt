@@ -52,3 +52,29 @@ data class MapNode(
     }
 
 }
+
+data class MapNodeBuilder(
+    val edgesTo: MutableList<MapNodeBuilder>,
+    val isArea: Boolean,
+    val x: Float,
+    val y: Float
+) {
+
+    private var buildEdges: MutableList<MapNode> = mutableListOf()
+
+    private var inBuild: Boolean = false
+
+    private var asNode: MapNode? = null
+
+    fun build(): MapNode {
+        if (inBuild) return asNode!!
+        inBuild = true
+        asNode = MapNode(buildEdges, isArea, x, y)
+        for (edge in edgesTo) {
+            buildEdges.add(edge.build())
+        }
+        inBuild = false
+        return asNode!!
+    }
+
+}
