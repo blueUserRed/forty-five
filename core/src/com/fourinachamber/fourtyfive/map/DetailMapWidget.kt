@@ -144,7 +144,8 @@ class DetailMapWidget(
             val dy = node2.y - node1.y
             val dx = node2.x - node1.x
             val length = Vector2(dx, dy).len()
-            val angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
+            var angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
+            if (dx < 0) angle = 360 - angle
             batch.draw(
                 edgeTexture,
                 x + node1.x + mapOffset.x + nodeSize / 2, y + node1.y + mapOffset.y + nodeSize / 2 + lineWidth / 2,

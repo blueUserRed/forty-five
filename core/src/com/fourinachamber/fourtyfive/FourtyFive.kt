@@ -7,6 +7,7 @@ import com.fourinachamber.fourtyfive.game.card.CardGenerator
 import com.fourinachamber.fourtyfive.map.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.MapNode
 import com.fourinachamber.fourtyfive.map.MapNodeBuilder
+import com.fourinachamber.fourtyfive.map.SeededMapGenerator
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -43,7 +44,7 @@ object FourtyFive : Game() {
 
         val mapWidget = mapScreen.namedActorOrError("map") as DetailMapWidget
 
-        mapWidget.setMap(createTestingMap())
+        mapWidget.setMap(SeededMapGenerator.generateDef().build())
 
         changeToScreen(mapScreen)
 
@@ -53,8 +54,8 @@ object FourtyFive : Game() {
 
     // TODO: just for testing
     fun createTestingMap(): MapNode {
-        val firstBuilder = MapNodeBuilder(mutableListOf(), false, 40f, 70f)
-        val secondBuilder = MapNodeBuilder(mutableListOf(), false, 80f, 70f)
+        val firstBuilder = MapNodeBuilder(40f, 70f, mutableListOf(), false)
+        val secondBuilder = MapNodeBuilder(80f, 70f, mutableListOf(), false)
         firstBuilder.edgesTo.add(secondBuilder)
         secondBuilder.edgesTo.add(firstBuilder)
 //        val map = MapNode(listOf(
