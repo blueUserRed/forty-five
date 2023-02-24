@@ -48,16 +48,14 @@ data class MapNode(
             }
             return edges
         }
-
     }
-
 }
 
 data class MapNodeBuilder(
-    val edgesTo: MutableList<MapNodeBuilder>,
-    val isArea: Boolean,
     val x: Float,
-    val y: Float
+    val y: Float,
+    val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
+    val isArea: Boolean = false,
 ) {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
@@ -77,4 +75,23 @@ data class MapNodeBuilder(
         return asNode!!
     }
 
+    fun connect(other: MapNodeBuilder): Boolean {
+        if (edgesTo.size > 3 || other.edgesTo.size > 3) throw IllegalArgumentException("Already to 4 Nodes connect, not anymore possible!")
+        if (edgesTo.contains(other)) return false
+        edgesTo.add(other)
+        other.edgesTo.add(this)
+        return true
+    }
+
+    private fun toStringRec(): String {
+        return javaClass.name + "{x: " + x + ",y: " + y + "}"
+    }
+
+    override fun toString(): String {
+        var cur: String = ""
+        for (i in edgesTo) {
+            cur += i.toStringRec() + ", "
+        }
+        return javaClass.name + "{x: " + x + ",y: " + y + ", neighbours: " + cur + "}"
+    }
 }
