@@ -99,10 +99,10 @@ data class MapNodeBuilder(
     }
 
     override fun toString(): String {
-        var cur: String = ""
+        var cur = ""
         for (i in edgesTo) {
             cur += i.toStringRec() + ", "
         }
-        return javaClass.name + "{x: " + x + ",y: " + y + ", neighbours: " + cur + "}"
+        return javaClass.name + "{x: $x,y: $y, neighbours: $cur}"
     }
 }
