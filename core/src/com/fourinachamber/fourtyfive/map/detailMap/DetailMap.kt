@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.map
+package com.fourinachamber.fourtyfive.map.detailMap
 
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
@@ -48,12 +48,14 @@ data class DetailMap(
                 .value
                 .forEach { nodeOnj ->
                     nodeOnj as OnjObject
-                    nodes.add(MapNodeBuilder(
+                    nodes.add(
+                        MapNodeBuilder(
                         nodeOnj.get<Double>("x").toFloat(),
                         nodeOnj.get<Double>("y").toFloat(),
                         mutableListOf(),
                         nodeOnj.get<Boolean>("isArea"),
-                    ))
+                    )
+                    )
                 }
             nodesOnj
                 .value

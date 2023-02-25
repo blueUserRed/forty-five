@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.map
+package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle

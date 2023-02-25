@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.map
+package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
