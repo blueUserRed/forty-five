@@ -21,6 +21,7 @@ import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.map.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.DetailMapWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
@@ -312,6 +313,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Map" -> DetailMapWidget(
             screen,
+            DetailMapProviderFactory.get(widgetOnj.get<OnjNamedObject>("detailMapProvider")).get(),
             drawableOrError(widgetOnj.get<String>("nodeTexture"), screen),
             ResourceManager.get(screen, widgetOnj.get<String>("edgeTexture")),
             drawableOrError(widgetOnj.get<String>("playerTexture"), screen),

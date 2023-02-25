@@ -16,6 +16,7 @@ import kotlin.math.asin
 
 class DetailMapWidget(
     private val screen: OnjScreen,
+    private val map: DetailMap,
     private val nodeDrawable: Drawable,
     private val edgeTexture: TextureRegion,
     private val playerDrawable: Drawable,
@@ -27,14 +28,12 @@ class DetailMapWidget(
     var background: Drawable? = null
 ) : Widget(), ZIndexActor {
 
-    private var map: GameMap? = null
-
     override var fixedZIndex: Int = 0
 
     private var mapOffset: Vector2 = Vector2(0f, 0f)
 
-    private var playerNode: MapNode? = null
-    private var playerPos: Vector2? = null
+    private var playerNode: MapNode = map.startNode
+    private var playerPos: Vector2 = Vector2(map.startNode.x, map.startNode.y)
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
@@ -68,7 +67,7 @@ class DetailMapWidget(
 
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
-            val uniqueNodes = map?.uniqueNodes ?: return
+            val uniqueNodes = map.uniqueNodes
             val (adjX, adjY) = Vector2(x, y) - mapOffset
             for (node in uniqueNodes) {
                 if (adjX in node.x..(node.x + nodeSize) && adjY in node.y..(node.y + nodeSize)) {
@@ -84,7 +83,7 @@ class DetailMapWidget(
     }
 
     private fun handleClick(node: MapNode) {
-        if (!(playerNode?.isLinkedTo(node) ?: false)) return
+        if (!playerNode.isLinkedTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
     }
@@ -96,7 +95,6 @@ class DetailMapWidget(
         background?.draw(batch, x, y, width, height)
         drawEdges(batch)
         drawNodes(batch)
-        val playerPos = playerPos ?: return
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
@@ -104,7 +102,7 @@ class DetailMapWidget(
 
     private fun updatePlayerMovement() {
         val movePlayerTo = movePlayerTo ?: return
-        val playerNode = playerNode ?: return
+        val playerNode = playerNode
         val curTime = TimeUtils.millis()
         val movementFinishTime = playerMovementStartTime + playerMoveTime
         if (curTime >= movementFinishTime) {
@@ -119,16 +117,8 @@ class DetailMapWidget(
         playerPos = Vector2(playerNode.x, playerNode.y) + playerOffset
     }
 
-    fun setMap(map: GameMap?) {
-        // this is a function instead of a kotlin setter to indicate that setting the map can be expensive
-        this.map = map
-        map ?: return
-        playerNode = map.startNode
-        playerPos = Vector2(map.startNode.x, map.startNode.y)
-    }
-
     private fun drawNodes(batch: Batch) {
-        val uniqueNodes = map?.uniqueNodes ?: return
+        val uniqueNodes = map.uniqueNodes
         for (node in uniqueNodes) {
             val (nodeX, nodeY) = calcNodePosition(node)
             nodeDrawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
@@ -136,7 +126,7 @@ class DetailMapWidget(
     }
 
     private fun drawEdges(batch: Batch) {
-        val uniqueEdges = map?.uniqueEdges ?: return
+        val uniqueEdges = map.uniqueEdges
         for ((node1, node2) in uniqueEdges) {
             val dy = node2.y - node1.y
             val dx = node2.x - node1.x
