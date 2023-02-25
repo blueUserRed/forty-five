@@ -4,10 +4,7 @@ import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.card.CardGenerator
-import com.fourinachamber.fourtyfive.map.DetailMapWidget
-import com.fourinachamber.fourtyfive.map.MapNode
-import com.fourinachamber.fourtyfive.map.MapNodeBuilder
-import com.fourinachamber.fourtyfive.map.SeededMapGenerator
+import com.fourinachamber.fourtyfive.map.*
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -44,7 +41,7 @@ object FourtyFive : Game() {
 
         val mapWidget = mapScreen.namedActorOrError("map") as DetailMapWidget
 
-        mapWidget.setMap(SeededMapGenerator.generateDef().build())
+        mapWidget.setMap(GameMap(SeededMapGenerator.generateDef().build()))
 
         changeToScreen(mapScreen)
 
