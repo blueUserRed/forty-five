@@ -3,11 +3,8 @@ package com.fourinachamber.fourtyfive.screen.general
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -21,8 +18,8 @@ import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
-import com.fourinachamber.fourtyfive.map.DetailMapProviderFactory
-import com.fourinachamber.fourtyfive.map.DetailMapWidget
+import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
+import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea

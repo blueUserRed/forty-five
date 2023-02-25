@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.map
+package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.math.Vector2
 import java.lang.Float.max

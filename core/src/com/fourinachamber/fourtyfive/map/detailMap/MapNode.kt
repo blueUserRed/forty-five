@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.map
+package com.fourinachamber.fourtyfive.map.detailMap
 
 data class MapNode(
     val edgesTo: List<MapNode>,
