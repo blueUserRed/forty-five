@@ -27,9 +27,7 @@ class DetailMapWidget(
     var background: Drawable? = null
 ) : Widget(), ZIndexActor {
 
-    private var start: MapNode? = null
-    private var uniqueNodes: List<MapNode>? = null
-    private var uniqueEdges: List<Pair<MapNode, MapNode>>? = null
+    private var map: GameMap? = null
 
     override var fixedZIndex: Int = 0
 
@@ -70,7 +68,7 @@ class DetailMapWidget(
 
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
-            val uniqueNodes = uniqueNodes ?: return
+            val uniqueNodes = map?.uniqueNodes ?: return
             val (adjX, adjY) = Vector2(x, y) - mapOffset
             for (node in uniqueNodes) {
                 if (adjX in node.x..(node.x + nodeSize) && adjY in node.y..(node.y + nodeSize)) {
@@ -121,18 +119,16 @@ class DetailMapWidget(
         playerPos = Vector2(playerNode.x, playerNode.y) + playerOffset
     }
 
-    fun setMap(start: MapNode?) {
+    fun setMap(map: GameMap?) {
         // this is a function instead of a kotlin setter to indicate that setting the map can be expensive
-        this.start = start
-        start ?: return
-        uniqueNodes = start.getUniqueNodes()
-        uniqueEdges = MapNode.getUniqueEdgesFor(uniqueNodes!!)
-        playerNode = start
-        playerPos = Vector2(start.x, start.y)
+        this.map = map
+        map ?: return
+        playerNode = map.startNode
+        playerPos = Vector2(map.startNode.x, map.startNode.y)
     }
 
     private fun drawNodes(batch: Batch) {
-        val uniqueNodes = uniqueNodes ?: return
+        val uniqueNodes = map?.uniqueNodes ?: return
         for (node in uniqueNodes) {
             val (nodeX, nodeY) = calcNodePosition(node)
             nodeDrawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
@@ -140,7 +136,7 @@ class DetailMapWidget(
     }
 
     private fun drawEdges(batch: Batch) {
-        val uniqueEdges = uniqueEdges ?: return
+        val uniqueEdges = map?.uniqueEdges ?: return
         for ((node1, node2) in uniqueEdges) {
             val dy = node2.y - node1.y
             val dx = node2.x - node1.x

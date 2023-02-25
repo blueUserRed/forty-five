@@ -59,6 +59,18 @@ data class MapNode(
             }
             return edges
         }
+
+        fun getUniqueEdgesWithOppositesFor(uniqueNodes: List<MapNode>): List<Pair<MapNode, MapNode>> {
+            val edges = mutableListOf<Pair<MapNode, MapNode>>()
+            for (node in uniqueNodes) {
+                for (edgeTo in node.edgesTo) {
+                    val pair = node to edgeTo
+                    if (pair !in edges) edges.add(pair)
+                }
+            }
+            return edges
+        }
+
     }
 }
 
