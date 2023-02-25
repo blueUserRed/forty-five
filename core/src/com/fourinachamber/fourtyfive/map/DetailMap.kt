@@ -6,7 +6,7 @@ import onj.value.OnjArray
 import onj.value.OnjInt
 import onj.value.OnjObject
 
-data class GameMap(
+data class DetailMap(
     val startNode: MapNode
 ) {
 
@@ -41,7 +41,7 @@ data class GameMap(
 
     companion object {
 
-        fun readFromOnj(onj: OnjObject): GameMap {
+        fun readFromOnj(onj: OnjObject): DetailMap {
             val nodes = mutableListOf<MapNodeBuilder>()
             val nodesOnj = onj.get<OnjArray>("nodes")
             nodesOnj
@@ -65,7 +65,7 @@ data class GameMap(
                     }
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
-            return GameMap(nodes[startNodeIndex].build())
+            return DetailMap(nodes[startNodeIndex].build())
         }
 
     }

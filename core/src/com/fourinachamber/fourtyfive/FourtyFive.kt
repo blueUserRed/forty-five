@@ -35,39 +35,8 @@ object FourtyFive : Game() {
 
         if (generateCards) runCardGenerator()
 
-        // TODO: this code below is just for testing
-
-        val mapScreen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
-
-        val mapWidget = mapScreen.namedActorOrError("map") as DetailMapWidget
-
-        mapWidget.setMap(GameMap(SeededMapGenerator.generateDef().build()))
-
-        changeToScreen(mapScreen)
-
-//        val screen = ScreenBuilder(Gdx.files.internal("screens/intro_screen.onj")).build()
-//        changeToScreen(screen)
-    }
-
-    // TODO: just for testing
-    fun createTestingMap(): MapNode {
-        val firstBuilder = MapNodeBuilder(40f, 70f, mutableListOf(), false)
-        val secondBuilder = MapNodeBuilder(80f, 70f, mutableListOf(), false)
-        firstBuilder.edgesTo.add(secondBuilder)
-        secondBuilder.edgesTo.add(firstBuilder)
-//        val map = MapNode(listOf(
-//            MapNode(listOf(), false, 40f, 70f),
-//            MapNode(listOf(
-//                MapNode(listOf(
-//                    MapNode(listOf(
-//                        MapNode(listOf(
-//                            MapNode(listOf(), false, 240f, 30f)
-//                        ), false, 200f, 30f)
-//                    ), false, 120f, 30f)
-//                ), false, 80f, 30f)
-//            ), false, 40f, 30f)
-//        ), false, 10f, 60f)
-        return firstBuilder.build()
+        val screen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
+        changeToScreen(screen)
     }
 
     override fun render() {

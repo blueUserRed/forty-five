@@ -145,6 +145,7 @@ $Widget {
     }
 
     $Map {
+        detailMapProvider: $DetailMapProvider,
         nodeTexture: string,
         background: string,
         playerTexture: string,
@@ -155,6 +156,18 @@ $Widget {
         edgeTexture: string,
         playerMovementTime: float,
         ...widgetSharedKeys
+    }
+
+}
+
+$DetailMapProvider {
+
+    $FromFileDetailMapProvider {
+        file: string
+    }
+
+    $FromSeededGeneratorDetailMapProvider {
+        seed: int
     }
 
 }
