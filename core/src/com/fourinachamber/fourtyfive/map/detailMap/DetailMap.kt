@@ -4,6 +4,7 @@ import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
 import onj.value.OnjArray
 import onj.value.OnjInt
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
 data class DetailMap(
@@ -34,6 +35,7 @@ data class DetailMap(
                 "y" with node.y
                 "isArea" with node.isArea
                 "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
+                "event" with node.event?.asOnjObject()
             }
         }
         .toOnjArray()
@@ -48,14 +50,13 @@ data class DetailMap(
                 .value
                 .forEach { nodeOnj ->
                     nodeOnj as OnjObject
-                    nodes.add(
-                        MapNodeBuilder(
+                    nodes.add(MapNodeBuilder(
                         nodeOnj.get<Double>("x").toFloat(),
                         nodeOnj.get<Double>("y").toFloat(),
                         mutableListOf(),
                         nodeOnj.get<Boolean>("isArea"),
-                    )
-                    )
+                        MapEventFactory.getMapEvent(nodeOnj.get<OnjNamedObject>("event"))
+                    ))
                 }
             nodesOnj
                 .value

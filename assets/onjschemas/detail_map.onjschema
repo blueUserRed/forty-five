@@ -1,8 +1,15 @@
 
+$MapEvent {
+
+    $EmptyMapEvent { }
+
+}
+
 startNode: int,
 nodes: {
     x: float,
     y: float,
     isArea: boolean,
-    edgesTo: int[]
+    edgesTo: int[],
+    event: $MapEvent
 }[]
