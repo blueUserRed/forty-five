@@ -11,10 +11,11 @@ import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 
-class StyleableOnjScreen(
+class StyleableOnjScreen( // TODO: having this as a separate class is useless, merge it with OnjScreen
     viewport: Viewport,
     batch: Batch,
     background: String?,
+    controllerContext: Any?,
     useAssets: List<String>,
     earlyRenderTasks: List<OnjScreen.() -> Unit>,
     lateRenderTasks: List<OnjScreen.() -> Unit>,
@@ -25,6 +26,7 @@ class StyleableOnjScreen(
     viewport,
     batch,
     background,
+    controllerContext,
     useAssets,
     earlyRenderTasks,
     lateRenderTasks,

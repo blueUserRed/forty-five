@@ -36,6 +36,7 @@ open class OnjScreen @MainThreadOnly constructor(
     val viewport: Viewport,
     batch: Batch,
     private val background: String?,
+    private val controllerContext: Any?,
     private val useAssets: List<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
@@ -77,7 +78,7 @@ open class OnjScreen @MainThreadOnly constructor(
         @MainThreadOnly set(value) {
             field?.end()
             field = value
-            if (isVisible) value?.init(this)
+            if (isVisible) value?.init(this, controllerContext)
         }
 
     var selectedActor: KeySelectableActor? = null
@@ -221,7 +222,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun show() {
-        screenController?.init(this)
+        screenController?.init(this, controllerContext)
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true

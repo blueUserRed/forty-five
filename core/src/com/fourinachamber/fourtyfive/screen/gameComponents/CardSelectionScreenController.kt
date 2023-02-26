@@ -51,7 +51,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
 
     private var currentHoverDetail: CardDetailActor? = null
 
-    override fun init(onjScreen: OnjScreen) {
+    override fun init(onjScreen: OnjScreen, context: Any?) {
         this.onjScreen = onjScreen
 
         emptyFont = ResourceManager.get(onjScreen, onj.get<String>("emptyFont"))
