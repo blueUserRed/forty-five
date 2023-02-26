@@ -1,10 +1,13 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -25,8 +28,10 @@ class DetailMapWidget(
     private val nodeSize: Float,
     private val lineWidth: Float,
     private val playerMoveTime: Int,
+    private val detailFont: BitmapFont,
+    private val detailFontColor: Color,
     var background: Drawable? = null
-) : Widget(), ZIndexActor {
+) : WidgetGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
@@ -36,6 +41,9 @@ class DetailMapWidget(
     private var playerPos: Vector2 = Vector2(map.startNode.x, map.startNode.y)
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
+
+    private var displayDetail: Boolean = false
+    private val detailWidget: MapEventDetailWidget = MapEventDetailWidget(screen, detailFont, detailFontColor)
 
     private val dragListener = object : DragListener() {
 
@@ -80,6 +88,7 @@ class DetailMapWidget(
     init {
         addListener(dragListener)
         addListener(clickListener)
+        addActor(detailWidget)
     }
 
     private fun handleClick(node: MapNode) {
@@ -98,6 +107,20 @@ class DetailMapWidget(
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
+        super.draw(batch, parentAlpha)
+    }
+
+    override fun layout() {
+        super.layout()
+        if (!displayDetail) return
+        val node = playerNode
+        val detail = detailWidget
+        detail.width = detail.prefWidth
+        detail.height = detail.prefHeight
+        detail.setPosition(
+            node.x + nodeSize / 2 - detail.width / 2,
+            node.y
+        )
     }
 
     private fun updatePlayerMovement() {
@@ -108,6 +131,7 @@ class DetailMapWidget(
         if (curTime >= movementFinishTime) {
             this.playerNode = movePlayerTo
             playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
+            setupDetailFor(movePlayerTo)
             this.movePlayerTo = null
             return
         }
@@ -115,6 +139,14 @@ class DetailMapWidget(
         val movementPath = Vector2(movePlayerTo.x, movePlayerTo.y) - Vector2(playerNode.x, playerNode.y)
         val playerOffset = movementPath * (1f - percent)
         playerPos = Vector2(playerNode.x, playerNode.y) + playerOffset
+    }
+
+    private fun setupDetailFor(node: MapNode?) {
+        displayDetail = node?.event?.displayDescription ?: false
+        detailWidget.isVisible = displayDetail
+        if (!displayDetail) return
+        detailWidget.setForEvent(node!!.event!!)
+        invalidate()
     }
 
     private fun drawNodes(batch: Batch) {

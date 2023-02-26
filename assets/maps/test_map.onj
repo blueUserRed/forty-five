@@ -13,7 +13,7 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [0, 2],
-        event: $EmptyMapEvent { }
+        event: $EncounterMapEvent { }
     },
     {
         x: 100.0,

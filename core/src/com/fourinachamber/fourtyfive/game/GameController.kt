@@ -7,6 +7,8 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.map.detailMap.EncounterMapEvent
+import com.fourinachamber.fourtyfive.map.detailMap.MapEvent
 import com.fourinachamber.fourtyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -144,9 +146,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultCover: CardPrototype
 
     lateinit var gameRenderPipeline: GameRenderPipeline
+    private lateinit var encounterMapEvent: EncounterMapEvent
 
     @MainThreadOnly
-    override fun init(onjScreen: OnjScreen) {
+    override fun init(onjScreen: OnjScreen, context: Any?) {
+
+        if (context !is EncounterMapEvent) {
+            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
+        }
+        encounterMapEvent = context
+
         SaveState.read()
         curScreen = onjScreen
         FourtyFive.currentGame = this
@@ -694,6 +703,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun win() {
         FourtyFiveLogger.debug(logTag, "player won")
+        encounterMapEvent.completed()
         FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(winScreen)).build())
         SaveState.write()
     }

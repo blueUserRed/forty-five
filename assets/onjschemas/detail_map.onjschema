@@ -3,6 +3,8 @@ $MapEvent {
 
     $EmptyMapEvent { }
 
+    $EncounterMapEvent { }
+
 }
 
 startNode: int,

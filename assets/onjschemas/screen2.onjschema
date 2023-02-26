@@ -155,6 +155,8 @@ $Widget {
         lineWidth: float,
         edgeTexture: string,
         playerMovementTime: float,
+        detailFont: string,
+        detailFontColor: Color,
         ...widgetSharedKeys
     }
 

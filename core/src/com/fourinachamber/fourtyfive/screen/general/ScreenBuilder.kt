@@ -53,7 +53,7 @@ class ScreenBuilder(val file: FileHandle) {
 //    private var postProcessor: String? = null
 
     @MainThreadOnly
-    fun build(): OnjScreen {
+    fun build(controllerContext: Any? = null): OnjScreen {
         val onj = OnjParser.parseFile(file.file())
         screenSchema.assertMatches(onj)
         onj as OnjObject
@@ -64,6 +64,7 @@ class ScreenBuilder(val file: FileHandle) {
         val screen = StyleableOnjScreen(
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
+            controllerContext = controllerContext,
             styleTargets = styleTargets,
             background = background,
             useAssets = borrowed,
@@ -319,6 +320,8 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("nodeSize").toFloat(),
             widgetOnj.get<Double>("lineWidth").toFloat(),
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
+            fontOrError(widgetOnj.get<String>("detailFont"), screen),
+            widgetOnj.get<Color>("detailFontColor"),
             drawableOrError(widgetOnj.get<String>("background"), screen),
         )
 

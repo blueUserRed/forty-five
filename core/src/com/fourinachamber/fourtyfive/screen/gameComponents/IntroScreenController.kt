@@ -37,7 +37,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
 
     private var timeline: Timeline = Timeline(mutableListOf())
 
-    override fun init(onjScreen: OnjScreen) {
+    override fun init(onjScreen: OnjScreen, context: Any?) {
         //TODO: put these magic numbers in an onj file somewhere
         this.onjScreen = onjScreen
 
