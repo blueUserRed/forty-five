@@ -4,7 +4,8 @@ data class MapNode(
     val edgesTo: List<MapNode>,
     val isArea: Boolean,
     val x: Float,
-    val y: Float
+    val y: Float,
+    val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
     fun getLeft(): MapNode? = null
@@ -79,6 +80,7 @@ data class MapNodeBuilder(
     val y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     val isArea: Boolean = false,
+    val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
@@ -90,7 +92,7 @@ data class MapNodeBuilder(
     fun build(): MapNode {
         if (inBuild) return asNode!!
         inBuild = true
-        asNode = MapNode(buildEdges, isArea, x, y)
+        asNode = MapNode(buildEdges, isArea, x, y, event)
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
         }
