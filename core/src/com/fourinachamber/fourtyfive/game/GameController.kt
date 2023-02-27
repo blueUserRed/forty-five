@@ -8,7 +8,6 @@ import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.map.detailMap.EncounterMapEvent
-import com.fourinachamber.fourtyfive.map.detailMap.MapEvent
 import com.fourinachamber.fourtyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -148,14 +147,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var gameRenderPipeline: GameRenderPipeline
     private lateinit var encounterMapEvent: EncounterMapEvent
 
+    var modifier: EncounterModifier? = null
+
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
 
-        if (context !is EncounterMapEvent) {
+        if (context !is EncounterMapEvent) { // TODO: comment back in
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
         encounterMapEvent = context
-
+//        modifier = EncounterModifier.Frost // TODO: remove
         SaveState.read()
         curScreen = onjScreen
         FourtyFive.currentGame = this
@@ -421,7 +422,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         turnCounter++
 
         val cardToShoot = revolver.getCardInSlot(5)
-        val rotateLeft = cardToShoot?.shouldRotateLeft ?: false
+        var rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.RIGHT
+        if (modifier != null) rotationDirection = modifier!!.modifyRevolverRotation(rotationDirection)
         val enemy = enemyArea.enemies[0]
 
         FourtyFiveLogger.debug(logTag, "revolver is shooting; turn = $turnCounter; cardToShoot = $cardToShoot")
@@ -481,11 +483,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
 
             action {
-                if (rotateLeft) revolver.rotateLeft() else revolver.rotate()
+                when (rotationDirection) {
+                    RevolverRotation.LEFT -> revolver.rotateLeft()
+                    RevolverRotation.RIGHT -> revolver.rotate()
+                    RevolverRotation.DONT -> { }
+                }
 
-                FourtyFiveLogger.debug(logTag, "revolver rotated ${
-                    if (rotateLeft) "left" else "right"
-                }")
+                FourtyFiveLogger.debug(logTag, "revolver rotated $rotationDirection")
             }
 
             includeLater(
@@ -712,6 +716,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()
         FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(looseScreen)).build())
+    }
+
+    enum class RevolverRotation {
+        LEFT, RIGHT, DONT
     }
 
     companion object {

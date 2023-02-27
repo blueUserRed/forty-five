@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.Effect
+import com.fourinachamber.fourtyfive.game.GameController
+import com.fourinachamber.fourtyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
@@ -135,8 +137,8 @@ class Card(
     val shouldRemoveAfterShot: Boolean
         get() = !isEverlasting
 
-    val shouldRotateLeft: Boolean
-        get() = isLeftRotating
+    val rotationDirection: RevolverRotation
+        get() = if (isLeftRotating) RevolverRotation.LEFT else RevolverRotation.RIGHT
 
     private lateinit var rottenModifier: CardModifier
 
