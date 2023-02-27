@@ -35,7 +35,7 @@ object FourtyFive : Game() {
 
         if (generateCards) runCardGenerator()
 
-        val screen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
+        val screen = ScreenBuilder(Gdx.files.internal("screens/game_screen.onj")).build()
         changeToScreen(screen)
     }
 

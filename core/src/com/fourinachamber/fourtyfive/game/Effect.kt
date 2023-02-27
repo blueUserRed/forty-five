@@ -192,7 +192,10 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             action {
-                FourtyFive.currentGame!!.enemyArea.enemies[0].applyEffect(statusEffect)
+                val game = FourtyFive.currentGame!!
+                if (game.modifier?.shouldApplyStatusEffects() ?: true) {
+                    game.enemyArea.enemies[0].applyEffect(statusEffect)
+                }
             }
         }
 
