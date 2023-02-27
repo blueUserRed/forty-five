@@ -43,7 +43,12 @@ class DetailMapWidget(
     private var playerMovementStartTime: Long = 0L
 
     private var displayDetail: Boolean = false
-    private val detailWidget: MapEventDetailWidget = MapEventDetailWidget(screen, detailFont, detailFontColor)
+    private val detailWidget: MapEventDetailWidget = MapEventDetailWidget(
+        screen,
+        detailFont,
+        detailFontColor,
+        this::onStartButtonClicked
+    )
 
     private val dragListener = object : DragListener() {
 
@@ -91,8 +96,13 @@ class DetailMapWidget(
         addActor(detailWidget)
     }
 
+    private fun onStartButtonClicked() {
+        playerNode.event?.start()
+    }
+
     private fun handleClick(node: MapNode) {
         if (!playerNode.isLinkedTo(node)) return
+        if (playerNode.event?.currentlyBlocks ?: false && node in playerNode.blockingEdges) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
     }
@@ -107,6 +117,10 @@ class DetailMapWidget(
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
+        detailWidget.setPosition(
+            mapOffset.x + playerNode.x + nodeSize / 2 - detailWidget.width / 2,
+            mapOffset.y + playerNode.y
+        )
         super.draw(batch, parentAlpha)
     }
 

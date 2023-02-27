@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.map.detailMap
 
 data class MapNode(
     val edgesTo: List<MapNode>,
+    val blockingEdges: List<MapNode>,
     val isArea: Boolean,
     val x: Float,
     val y: Float,
@@ -79,11 +80,13 @@ data class MapNodeBuilder(
     val x: Float,
     val y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
+    val blockingEdges: MutableList<MapNodeBuilder> = mutableListOf(),
     val isArea: Boolean = false,
     val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
+    private var buildBlockingEdges: MutableList<MapNode> = mutableListOf()
 
     private var inBuild: Boolean = false
 
@@ -92,9 +95,12 @@ data class MapNodeBuilder(
     fun build(): MapNode {
         if (inBuild) return asNode!!
         inBuild = true
-        asNode = MapNode(buildEdges, isArea, x, y, event)
+        asNode = MapNode(buildEdges, buildBlockingEdges, isArea, x, y, event)
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
+        }
+        blockingEdges.forEach { edge ->
+            buildBlockingEdges.add(buildEdges[edgesTo.indexOf(edge)])
         }
         inBuild = false
         return asNode!!
@@ -118,5 +124,18 @@ data class MapNodeBuilder(
             cur += i.toStringRec() + ", "
         }
         return javaClass.name + "{x: $x,y: $y, neighbours: $cur}"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other === this // TODO: ???
+//        return other != null &&
+//                other is MapNodeBuilder &&
+//                other.x == this.x &&
+//                other.y == this.y &&
+//                other.isArea == this.isArea &&
+    }
+
+    override fun hashCode(): Int {
+        return super.hashCode()
     }
 }
