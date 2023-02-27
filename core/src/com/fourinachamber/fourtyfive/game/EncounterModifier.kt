@@ -12,6 +12,15 @@ sealed class EncounterModifier {
         override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.DONT
     }
 
+    object BewitchedMist : EncounterModifier() {
+
+        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = when (rotation) {
+            RevolverRotation.RIGHT -> RevolverRotation.LEFT
+            RevolverRotation.LEFT -> RevolverRotation.RIGHT
+            RevolverRotation.DONT -> RevolverRotation.DONT
+        }
+    }
+
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
     open fun shouldApplyStatusEffects(): Boolean = true
 

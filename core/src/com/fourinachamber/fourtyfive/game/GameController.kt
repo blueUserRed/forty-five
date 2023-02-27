@@ -156,7 +156,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
         encounterMapEvent = context
-//        modifier = EncounterModifier.Frost // TODO: remove
+//        modifier = EncounterModifier.BewitchedMist // TODO: remove
         SaveState.read()
         curScreen = onjScreen
         FourtyFive.currentGame = this
