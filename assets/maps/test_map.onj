@@ -6,6 +6,7 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [1],
+        blockingEdges: [1],
         event: $EmptyMapEvent { }
     },
     {
@@ -13,6 +14,7 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [0, 2],
+        blockingEdges: [2],
         event: $EncounterMapEvent { }
     },
     {
@@ -20,6 +22,7 @@ nodes: [
         y: 90.0,
         isArea: false,
         edgesTo: [1],
+        blockingEdges: [],
         event: $EmptyMapEvent { }
     },
 ]

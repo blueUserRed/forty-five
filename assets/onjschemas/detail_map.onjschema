@@ -13,5 +13,6 @@ nodes: {
     y: float,
     isArea: boolean,
     edgesTo: int[],
+    blockingEdges: int[],
     event: $MapEvent
 }[]
