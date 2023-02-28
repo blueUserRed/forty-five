@@ -222,11 +222,11 @@ abstract class StatusEffect(
 
         ENEMY {
             override fun getLivesActor(): Actor {
-                return FourtyFive.currentGame!!.enemyArea.enemies[0].actor.livesLabel
+                return FourtyFive.currentGame!!.enemyArea.getTargetedEnemy().actor.livesLabel
             }
 
             override fun damage(damage: Int): Timeline {
-                return FourtyFive.currentGame!!.enemyArea.enemies[0].damage(damage)
+                return FourtyFive.currentGame!!.enemyArea.getTargetedEnemy().damage(damage)
             }
         }
         ;

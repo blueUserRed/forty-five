@@ -194,7 +194,7 @@ abstract class Effect(val trigger: Trigger) {
             action {
                 val game = FourtyFive.currentGame!!
                 if (game.modifier?.shouldApplyStatusEffects() ?: true) {
-                    game.enemyArea.enemies[0].applyEffect(statusEffect)
+                    game.enemyArea.getTargetedEnemy().applyEffect(statusEffect)
                 }
             }
         }

@@ -14,7 +14,7 @@ var worldHeight = 90.0;
 assets: {
     useAssets: [
         "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
-        "normal_bullet"
+        "normal_bullet", "grey_texture"
     ]
 },
 
@@ -52,5 +52,6 @@ root: $Map {
     edgeTexture: "black_texture",
     playerMovementTime: 0.3,
     detailFont: "red_wing",
+    detailBackground: "grey_texture",
     detailFontColor: color.black
 }

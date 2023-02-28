@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.game
 
 import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
@@ -30,7 +31,7 @@ sealed class GameState {
             checkStatusEffects()
             checkCardModifierValidity()
 
-            enemies[0].chooseNewAction()
+            enemyArea.enemies.forEach(Enemy::chooseNewAction)
             curReserves = baseReserves
             checkEffectsActiveCards(Trigger.ON_ROUND_START)
         }
@@ -143,9 +144,11 @@ sealed class GameState {
                 val playerBannerAnim = GraphicsConfig.bannerAnimation(true, screen)
                 includeAction(enemyBannerAnim)
                 delay(GraphicsConfig.bufferTime)
-                enemies[0].doAction()?.let { include(it) }
+                enemyArea.enemies.forEach { enemy ->
+                    enemy.doAction()?.let { include(it) }
+                }
                 delay(GraphicsConfig.bufferTime)
-                action { enemies[0].resetAction() }
+                action { enemyArea.enemies.forEach(Enemy::resetAction) }
                 includeAction(playerBannerAnim)
                 delay(GraphicsConfig.bufferTime)
                 action { changeState(InitialDraw(cardsToDraw)) }

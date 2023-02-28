@@ -13,6 +13,7 @@ import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.*
+import ktx.actors.onClick
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.lang.Integer.max
@@ -43,7 +44,8 @@ class Enemy(
     val coverIconScale: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
-    val detailFontColor: Color
+    val detailFontColor: Color,
+    val area: EnemyArea
 ) {
 
     val logTag = "enemy-$name-${++instanceCounter}"
@@ -87,7 +89,7 @@ class Enemy(
     private lateinit var brain: EnemyBrain
 
     init {
-        actor = EnemyActor(this)
+        actor = EnemyActor(this, area)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -278,7 +280,8 @@ class Enemy(
          * reads an array of Enemies from on an OnjArray
          */
         fun getFrom(
-            enemiesOnj: OnjArray
+            enemiesOnj: OnjArray,
+            area: EnemyArea
         ): List<Enemy> = enemiesOnj
             .value
             .map {
@@ -300,7 +303,8 @@ class Enemy(
                     it.get<Double>("coverIconScale").toFloat(),
                     detailFont,
                     it.get<Double>("detailFontScale").toFloat(),
-                    it.get<Color>("detailFontColor")
+                    it.get<Color>("detailFontColor"),
+                    area
                 )
                 enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), curScreen, enemy)
                 enemy
@@ -313,7 +317,7 @@ class Enemy(
 /**
  * used for representing an enemy on the screen
  */
-class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, AnimationActor {
+class EnemyActor(val enemy: Enemy, private val area: EnemyArea) : CustomVerticalGroup(), ZIndexActor, AnimationActor {
 
     override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
@@ -363,6 +367,8 @@ class EnemyActor(val enemy: Enemy) : CustomVerticalGroup(), ZIndexActor, Animati
         addActor(livesLabel)
         addActor(statusEffectDisplay)
         updateText()
+
+        onClick { area.selectedEnemy = enemy }
     }
 
     fun displayAction(action: EnemyAction) {
