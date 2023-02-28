@@ -20,18 +20,31 @@ enemyConfig: {
         indicatorTexture: "insult_icon"
     },
 
-    enemy: {
+    enemy1: {
         texture: "enemy_texture",
         coverIcon: "shield_icon",
         coverIconScale: 0.03,
-        offsetX: 25.0,
+        offsetX: 15.0,
         offsetY: 50.0,
-        scaleX: 0.03,
-        scaleY: 0.03,
+        scaleX: 0.025,
+        scaleY: 0.025,
         detailFont: "vanilla_whale",
         detailFontScale: 0.06,
         detailFontColor: color.black
-    }
+    },
+
+    enemy2: {
+        texture: "enemy_texture",
+        coverIcon: "shield_icon",
+        coverIconScale: 0.03,
+        offsetX: 40.0,
+        offsetY: 50.0,
+        scaleX: 0.025,
+        scaleY: 0.025,
+        detailFont: "vanilla_whale",
+        detailFontScale: 0.06,
+        detailFontColor: color.black
+    },
 },
 
 enemyUsedAssets: [ "normal_bullet", "shield_icon", "insult_icon", "enemy_texture", "vanilla_whale" ],

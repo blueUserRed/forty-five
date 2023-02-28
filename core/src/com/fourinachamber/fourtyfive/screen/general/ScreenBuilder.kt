@@ -274,8 +274,9 @@ class ScreenBuilder(val file: FileHandle) {
             cardZIndex = widgetOnj.get<Long>("cardZIndex").toInt()
         }
 
-        "EnemyArea" -> EnemyArea().apply {
-        }
+        "EnemyArea" -> EnemyArea(
+            drawableOrError(widgetOnj.get<String>("enemySelectionDrawable"), screen)
+        )
 
         "CoverArea" -> CoverArea(
             widgetOnj.get<Long>("numStacks").toInt(),
@@ -322,6 +323,7 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             fontOrError(widgetOnj.get<String>("detailFont"), screen),
             widgetOnj.get<Color>("detailFontColor"),
+            drawableOrError(widgetOnj.get<String>("detailBackground"), screen),
             drawableOrError(widgetOnj.get<String>("background"), screen),
         )
 

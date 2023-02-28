@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.map.detailMap
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
 import ktx.actors.onClick
@@ -11,14 +12,18 @@ class MapEventDetailWidget(
     private val screen: OnjScreen,
     private val font: BitmapFont,
     private val fontColor: Color,
+    background: Drawable,
     private val onStartClickedListener: () -> Unit
-) : CustomHorizontalGroup() {
+) : CustomVerticalGroup() {
 
     private val descriptionWidget: CustomLabel = CustomLabel("", Label.LabelStyle(font, fontColor))
 
     private val startButton: CustomLabel = CustomLabel("start", Label.LabelStyle(font, fontColor))
 
+    private val completedLabel: CustomLabel = CustomLabel("already completed", Label.LabelStyle(font, fontColor))
+
     init {
+        this.background = background
         // TODO: put magic numbers in some file
         descriptionWidget.setFontScale(0.05f)
         startButton.setFontScale(0.05f)
@@ -46,6 +51,7 @@ class MapEventDetailWidget(
         }
         addActor(descriptionWidget)
         if (mapEvent.canBeStarted) addActor(startButton)
+        if (mapEvent.isCompleted) addActor(completedLabel)
         invalidateHierarchy()
     }
 

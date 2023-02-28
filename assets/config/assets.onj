@@ -147,51 +147,6 @@ shaders: [
         file: "shaders/film.glsl",
         constantArgs: null
     }
-//    {
-//        name: "default_shader",
-//        vertexShader: "shaders/default/default.vert",
-//        fragmentShader: "shaders/default/default.frag",
-//        timeOffset: 0,
-//        uniforms: [],
-//        args: null
-//    },
-//    {
-//        name: "vignette_shader",
-//        vertexShader: "shaders/vignette/vignette.vert",
-//        fragmentShader: "shaders/vignette/vignette.frag",
-//        timeOffset: 0,
-//        uniforms: [ "time", "resolution" ],
-//        args: {
-//            color: color.red,
-//            speed: 0.0,
-//            movement: 1.0,
-//            minMovement: 0.3
-//        }
-//    },
-//    {
-//        name: "grayscale_shader",
-//        vertexShader: "shaders/grayscale/grayscale.vert",
-//        fragmentShader: "shaders/grayscale/grayscale.frag",
-//        timeOffset: 0,
-//        uniforms: [],
-//        args: null
-//    },
-//    {
-//        name: "film_shader",
-//        vertexShader: "shaders/film/film.vert",
-//        fragmentShader: "shaders/film/film.frag",
-//        timeOffset: 0,
-//        uniforms: [ "resolution", "time" ],
-//        args: null
-//    },
-//    {
-//        name: "mosaic_shader",
-//        vertexShader: "shaders/mosaic/mosaic.vert",
-//        fragmentShader: "shaders/mosaic/mosaic.frag",
-//        timeOffset: 0,
-//        uniforms: [ "resolution" ],
-//        args: null
-//    }
 ],
 
 animations: [],
@@ -212,6 +167,10 @@ colorTextures: [
     {
         name: "beige_texture",
         color: color.beige
+    },
+    {
+        name: "grey_texture",
+        color: color.grey
     }
 ],
 

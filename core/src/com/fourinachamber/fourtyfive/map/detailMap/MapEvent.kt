@@ -23,6 +23,7 @@ abstract class MapEvent {
 
     abstract val currentlyBlocks: Boolean
     abstract val canBeStarted: Boolean
+    abstract val isCompleted: Boolean
 
     abstract val displayDescription: Boolean
 
@@ -41,6 +42,7 @@ class EmptyMapEvent : MapEvent() {
 
     override val currentlyBlocks: Boolean = false
     override val canBeStarted: Boolean = false
+    override val isCompleted: Boolean = false
 
     override val displayDescription: Boolean = false
 
@@ -55,6 +57,7 @@ class EncounterMapEvent : MapEvent() {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
+    override val isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 

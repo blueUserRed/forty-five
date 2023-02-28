@@ -30,6 +30,7 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
+    private val detailBackground: Drawable,
     var background: Drawable? = null
 ) : WidgetGroup(), ZIndexActor {
 
@@ -47,6 +48,7 @@ class DetailMapWidget(
         screen,
         detailFont,
         detailFontColor,
+        detailBackground,
         this::onStartButtonClicked
     )
 
@@ -117,23 +119,19 @@ class DetailMapWidget(
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
-        detailWidget.setPosition(
-            mapOffset.x + playerNode.x + nodeSize / 2 - detailWidget.width / 2,
-            mapOffset.y + playerNode.y
-        )
         super.draw(batch, parentAlpha)
     }
 
     override fun layout() {
         super.layout()
         if (!displayDetail) return
-        val node = playerNode
         val detail = detailWidget
+        detail.height = height
         detail.width = detail.prefWidth
-        detail.height = detail.prefHeight
+        detail.debug = true
         detail.setPosition(
-            node.x + nodeSize / 2 - detail.width / 2,
-            node.y
+            width - detail.width,
+            0f
         )
     }
 

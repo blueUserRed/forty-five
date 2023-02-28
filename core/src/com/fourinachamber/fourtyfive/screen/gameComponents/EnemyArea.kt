@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
@@ -9,11 +10,19 @@ import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
 /**
  * actor representing the area in which enemies can appear on the screen
  */
-class EnemyArea : WidgetGroup(), ZIndexActor, ZIndexGroup {
+class EnemyArea(
+    private val enemySelectionDrawable: Drawable
+) : WidgetGroup(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
 
     private var _enemies: MutableList<Enemy> = mutableListOf()
+
+    var selectedEnemy: Enemy? = null
+        set(value) {
+            // refuse to set value if there is only one enemy
+            if (_enemies.size != 1) field = value
+        }
 
     /**
      * all enemies in this area
@@ -30,8 +39,18 @@ class EnemyArea : WidgetGroup(), ZIndexActor, ZIndexGroup {
         invalidate()
     }
 
+    fun getTargetedEnemy(): Enemy {
+        return selectedEnemy ?: enemies.firstOrNull() ?: throw RuntimeException("No enemies in enemy area")
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
+        val enemy = selectedEnemy ?: return
+        enemySelectionDrawable.draw(
+            batch,
+            x + enemy.actor.x, y + enemy.actor.y,
+            enemy.actor.prefWidth, enemy.actor.prefHeight
+        )
     }
 
     override fun layout() {

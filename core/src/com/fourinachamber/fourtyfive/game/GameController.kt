@@ -98,7 +98,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         "game.remainingCoversPluralS" to { if (it == 1) "" else "s" }
     )
 
-    var enemies: List<Enemy> = listOf()
+//    var enemies: List<Enemy> = listOf()
 
     var curPlayerLives: Int
         set(value) {
@@ -152,10 +152,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
 
-        if (context !is EncounterMapEvent) { // TODO: comment back in
-            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
-        }
-        encounterMapEvent = context
+//        if (context !is EncounterMapEvent) { // TODO: comment back in
+//            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
+//        }
+//        encounterMapEvent = context
 //        modifier = EncounterModifier.BewitchedMist // TODO: remove
         SaveState.read()
         curScreen = onjScreen
@@ -166,8 +166,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FourtyFiveLogger.title("game starting")
 
         initCards()
-
-        enemies = Enemy.getFrom(enemiesOnj)
 
         cardDrawActor = onjScreen.namedActorOrError(cardDrawActorName)
 
@@ -359,6 +357,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val enemyArea = curScreen.namedActorOrError(enemyAreaName)
         if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
 
+        val enemies = Enemy.getFrom(enemiesOnj, enemyArea)
+
         enemyAreaOnj
             .get<OnjArray>("enemies")
             .value
@@ -368,6 +368,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     enemies.firstOrNull { it.name == name} ?: throw RuntimeException("no enemy with name $name")
                 )
             }
+
+        if (enemyArea.enemies.isEmpty()) throw RuntimeException("enemyArea must have at leas one enemy")
+        if (enemyArea.enemies.size != 1) enemyArea.selectedEnemy = enemyArea.enemies[0]
 
         this.enemyArea = enemyArea
     }
@@ -424,7 +427,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val cardToShoot = revolver.getCardInSlot(5)
         var rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.RIGHT
         if (modifier != null) rotationDirection = modifier!!.modifyRevolverRotation(rotationDirection)
-        val enemy = enemyArea.enemies[0]
+        val enemy = enemyArea.getTargetedEnemy()
 
         FourtyFiveLogger.debug(logTag, "revolver is shooting; turn = $turnCounter; cardToShoot = $cardToShoot")
 
@@ -460,7 +463,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     .mapNotNull { it.card }
                     .forEach(Card::onRevolverTurn)
 
-                enemies.forEach(Enemy::onRevolverTurn)
+                enemyArea.enemies.forEach(Enemy::onRevolverTurn)
             }
         }
 
@@ -593,7 +596,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun checkStatusEffects() {
         FourtyFiveLogger.debug(logTag, "checking status effects")
         val timeline = Timeline.timeline {
-            for (enemy in enemies) {
+            for (enemy in enemyArea.enemies) {
                 val timeline = enemy.executeStatusEffects()
                 if (timeline != null) include(timeline)
             }

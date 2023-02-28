@@ -118,6 +118,7 @@ $Widget {
     }
 
     $EnemyArea {
+        enemySelectionDrawable: string,
         ...widgetSharedKeys
     }
 
@@ -157,6 +158,7 @@ $Widget {
         playerMovementTime: float,
         detailFont: string,
         detailFontColor: Color,
+        detailBackground: string,
         ...widgetSharedKeys
     }
 
