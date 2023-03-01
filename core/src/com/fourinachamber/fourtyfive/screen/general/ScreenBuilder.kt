@@ -321,6 +321,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("nodeSize").toFloat(),
             widgetOnj.get<Double>("lineWidth").toFloat(),
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
+            ResourceManager.get(screen, widgetOnj.get<String>("directionIndicator")),
             fontOrError(widgetOnj.get<String>("detailFont"), screen),
             widgetOnj.get<Color>("detailFontColor"),
             drawableOrError(widgetOnj.get<String>("detailBackground"), screen),
