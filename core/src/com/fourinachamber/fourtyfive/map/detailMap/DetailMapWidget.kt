@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
@@ -15,6 +16,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.*
+import kotlin.math.absoluteValue
 import kotlin.math.asin
 
 class DetailMapWidget(
@@ -28,6 +30,7 @@ class DetailMapWidget(
     private val nodeSize: Float,
     private val lineWidth: Float,
     private val playerMoveTime: Int,
+//    private val directionIndicaor: Drawable,
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
     private val detailBackground: Drawable,
@@ -51,6 +54,8 @@ class DetailMapWidget(
         detailBackground,
         this::onStartButtonClicked
     )
+
+    private var pointToNode: MapNode? = null
 
     private val dragListener = object : DragListener() {
 
@@ -80,6 +85,11 @@ class DetailMapWidget(
 
     private val clickListener = object : ClickListener() {
 
+        override fun mouseMoved(event: InputEvent?, x: Float, y: Float): Boolean {
+            updateDirectionIndicator(Vector2(x, y))
+            return super.mouseMoved(event, x, y)
+        }
+
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
             val uniqueNodes = map.uniqueNodes
@@ -100,6 +110,22 @@ class DetailMapWidget(
 
     private fun onStartButtonClicked() {
         playerNode.event?.start()
+    }
+
+    private fun updateDirectionIndicator(pointerPosition: Vector2) {
+        var bestMatch: MapNode? = null
+        var bestMatchValue = -1f
+        val playerNodePosition = Vector2(playerNode.x, playerNode.y)
+        val mouseDirection = ((pointerPosition - mapOffset) - playerNodePosition).unit
+        playerNode.edgesTo.forEach { node ->
+            val nodeDirection = (Vector2(node.x, node.y) - playerNodePosition).unit
+            val result = mouseDirection dot nodeDirection
+            if (result > bestMatchValue) {
+                bestMatch = node
+                bestMatchValue = result
+            }
+        }
+        pointToNode = bestMatch
     }
 
     private fun handleClick(node: MapNode) {

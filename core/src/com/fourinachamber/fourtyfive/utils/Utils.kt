@@ -47,10 +47,17 @@ fun <T> T.eitherRight(): Either<Nothing, T> = Either.Right(this)
 val Vector3.xy: Vector2
     get() = Vector2(x, y)
 
+val Vector2.unit: Vector2
+    get() {
+        val len = this.len()
+        if (len == 0f) return Vector2(0f, 0f)
+        return this / len
+    }
 
 operator fun Vector2.minus(other: Vector2) = Vector2(x - other.x, y - other.y)
 operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 operator fun Vector2.times(other: Float): Vector2 = Vector2(this.x * other, this.y * other)
+operator fun Vector2.div(other: Float): Vector2 = Vector2(this.x / other, this.y / other)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
 fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
 
@@ -69,7 +76,7 @@ fun Float.between(min: Float, max: Float): Float {
 /**
  * compares two floats using an epsilon to make sure rounding errors don't break anything
  */
-fun Float.epsilonEquals(other: Float, epsilon: Float = 0.00005f): Boolean {
+fun Float.epsilonEquals(other: Float, epsilon: Float = 0.0005f): Boolean {
     return this in (other - epsilon)..(other + epsilon)
 }
 

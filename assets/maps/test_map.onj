@@ -13,9 +13,19 @@ nodes: [
         x: 60.0,
         y: 80.0,
         isArea: false,
-        edgesTo: [0, 2],
-        blockingEdges: [2],
-        event: $EncounterMapEvent { }
+        edgesTo: [0, 2, 3],
+        blockingEdges: [2, 3],
+        event: $EmptyMapEvent { }
+//        event: $EncounterMapEvent { }
+    },
+    {
+        x: 60.0,
+        y: 40.0,
+        isArea: false,
+        edgesTo: [1],
+        blockingEdges: [],
+        event: $EmptyMapEvent { }
+//        event: $EncounterMapEvent { }
     },
     {
         x: 100.0,
