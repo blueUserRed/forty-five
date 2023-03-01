@@ -80,6 +80,12 @@ fun Float.epsilonEquals(other: Float, epsilon: Float = 0.0005f): Boolean {
     return this in (other - epsilon)..(other + epsilon)
 }
 
+val Float.radians: Float
+    get() = Math.toRadians(this.toDouble()).toFloat()
+
+val Float.degrees: Float
+    get() = Math.toDegrees(this.toDouble()).toFloat()
+
 object Utils {
 
     /**

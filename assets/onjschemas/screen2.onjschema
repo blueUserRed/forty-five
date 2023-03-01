@@ -159,6 +159,7 @@ $Widget {
         detailFont: string,
         detailFontColor: Color,
         detailBackground: string,
+        directionIndicator: string,
         ...widgetSharedKeys
     }
 

@@ -4,10 +4,8 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Vector
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
@@ -16,8 +14,9 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.utils.*
-import kotlin.math.absoluteValue
 import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.sin
 
 class DetailMapWidget(
     private val screen: OnjScreen,
@@ -30,7 +29,7 @@ class DetailMapWidget(
     private val nodeSize: Float,
     private val lineWidth: Float,
     private val playerMoveTime: Int,
-//    private val directionIndicaor: Drawable,
+    private val directionIndicator: TextureRegion,
     private val detailFont: BitmapFont,
     private val detailFontColor: Color,
     private val detailBackground: Drawable,
@@ -85,20 +84,24 @@ class DetailMapWidget(
 
     private val clickListener = object : ClickListener() {
 
+        val maxClickTime: Long = 300
+
+        private var lastTouchDownTime: Long = 0
+
         override fun mouseMoved(event: InputEvent?, x: Float, y: Float): Boolean {
             updateDirectionIndicator(Vector2(x, y))
             return super.mouseMoved(event, x, y)
         }
 
+        override fun touchDown(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+            lastTouchDownTime = TimeUtils.millis()
+            return super.touchDown(event, x, y, pointer, button)
+        }
+
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
-            val uniqueNodes = map.uniqueNodes
-            val (adjX, adjY) = Vector2(x, y) - mapOffset
-            for (node in uniqueNodes) {
-                if (adjX in node.x..(node.x + nodeSize) && adjY in node.y..(node.y + nodeSize)) {
-                    handleClick(node)
-                }
-            }
+            if (TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
+            pointToNode?.let { goToNode(it) }
         }
     }
 
@@ -128,7 +131,7 @@ class DetailMapWidget(
         pointToNode = bestMatch
     }
 
-    private fun handleClick(node: MapNode) {
+    private fun goToNode(node: MapNode) {
         if (!playerNode.isLinkedTo(node)) return
         if (playerNode.event?.currentlyBlocks ?: false && node in playerNode.blockingEdges) return
         movePlayerTo = node
@@ -145,7 +148,36 @@ class DetailMapWidget(
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
+        drawDirectionIndicator(batch)
         super.draw(batch, parentAlpha)
+    }
+
+    private fun drawDirectionIndicator(batch: Batch) {
+        val pointToNode = pointToNode ?: return
+        val node = playerNode
+        val indicatorOffset = 10f
+
+        val yDiff = pointToNode.y - node.y
+        val xDiff = pointToNode.x - node.x
+        val length = (Vector2(pointToNode.x, pointToNode.y) - Vector2(node.x, node.y)).len()
+        val angleRadians = asin((yDiff / length).toDouble()).toFloat()
+
+        val dy = sin(angleRadians) * indicatorOffset
+        var dx = cos(angleRadians) * indicatorOffset
+        if (xDiff < 0) dx = -dx
+
+        batch.draw(
+            directionIndicator,
+            x + node.x + mapOffset.x + dx,
+            y + node.y + mapOffset.y + dy,
+            (directionIndicator.regionWidth * 0.01f) / 2,
+            (directionIndicator.regionHeight * 0.01f) / 2,
+            directionIndicator.regionWidth * 0.01f,
+            directionIndicator.regionHeight * 0.01f,
+            1f,
+            1f,
+            if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees
+        )
     }
 
     override fun layout() {
