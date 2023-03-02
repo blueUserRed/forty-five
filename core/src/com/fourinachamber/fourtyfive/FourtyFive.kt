@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.card.CardGenerator
 import com.fourinachamber.fourtyfive.map.*
+import com.fourinachamber.fourtyfive.map.detailMap.MapEventFactory
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -34,7 +35,6 @@ object FourtyFive : Game() {
         init()
 
         if (generateCards) runCardGenerator()
-
         val screen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
         changeToScreen(screen)
     }
@@ -59,6 +59,11 @@ object FourtyFive : Game() {
 
     fun useRenderPipeline(renderable: Renderable) {
         currentRenderable = renderable
+    }
+
+    fun newRun() {
+        SaveState.reset()
+        MapGenerator(Gdx.files.internal("maps/map_generator_config.onj")).generate()
     }
 
     private fun init() {

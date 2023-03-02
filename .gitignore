@@ -3,6 +3,7 @@ assets/textures/packed/
 assets/cards/generated/
 assets/saves/savefile.onj
 assets/logging/fourty-five.log
+assets/maps/roads/*
 /onj/build
 
 ## Java

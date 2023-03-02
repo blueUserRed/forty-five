@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.math.Vector2
+import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
 import java.util.Random
@@ -123,11 +124,23 @@ class BezierCurve(
     }
 }
 
-class MapRestriction(
+data class MapRestriction(
     var maxNodes: Int = 22,
     var minNodes: Int = 15,
     var maxSplits: Int = 4,
     var splitProb: Float = 0.25F,
     var compressProb: Float = 0.55F,
 ) {
+
+    companion object {
+
+        fun fromOnj(onj: OnjObject): MapRestriction = MapRestriction(
+            onj.get<Long>("maxNodes").toInt(),
+            onj.get<Long>("minNodes").toInt(),
+            onj.get<Long>("maxSplits").toInt(),
+            onj.get<Double>("splitProbability").toFloat(),
+            onj.get<Double>("compressProbability").toFloat(),
+        )
+    }
+
 }
