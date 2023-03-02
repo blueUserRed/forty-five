@@ -34,7 +34,11 @@ object ResourceManager {
         toBorrow.borrow(borrower)
     }
 
-    @AllThreadsAllowed
+    /**
+     * this function can currently be used from every thread, but this may change in the future, so it should be treated
+     * as `@MainThreadOnly`
+     */
+    @MainThreadOnly
     inline fun <reified T> get(borrower: ResourceBorrower, handle: String): T {
         val toGet = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")

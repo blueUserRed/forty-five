@@ -106,6 +106,7 @@ open class OnjScreen @MainThreadOnly constructor(
             inputMultiplexer.addProcessor(stage)
         }
 
+    @MainThreadOnly
     private val keySelectDrawable: Drawable by lazy {
         GraphicsConfig.keySelectDrawable(this)
     }

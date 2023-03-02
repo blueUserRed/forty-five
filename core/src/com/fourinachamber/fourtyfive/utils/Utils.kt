@@ -109,7 +109,7 @@ object Utils {
      * loads either a custom cursor or a system cursor
      * @throws RuntimeException when [cursorName] is not known
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun loadCursor(
         useSystemCursor: Boolean,
         cursorName: String,

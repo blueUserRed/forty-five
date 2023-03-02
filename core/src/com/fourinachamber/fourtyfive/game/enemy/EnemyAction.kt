@@ -6,6 +6,7 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import com.fourinachamber.fourtyfive.utils.Timeline
 import onj.value.OnjNamedObject
 
@@ -32,12 +33,13 @@ abstract class EnemyAction {
     /**
      * returns a timeline that executes the action
      */
+    @MainThreadOnly
     abstract fun execute(): Timeline?
 
     /**
      * action that damages the player
      */
-    class DamagePlayer(
+    class DamagePlayer @MainThreadOnly constructor(
         val enemy: Enemy,
         onj: OnjNamedObject,
         onjScreen: OnjScreen,
@@ -59,7 +61,7 @@ abstract class EnemyAction {
     /**
      * actions that adds cover to the enemy
      */
-    class AddCover(
+    class AddCover @MainThreadOnly constructor(
         val enemy: Enemy,
         onj: OnjNamedObject,
         private val onjScreen: OnjScreen,
@@ -94,7 +96,7 @@ abstract class EnemyAction {
     /**
      * the player insults the player and does nothing else
      */
-    class DoNothing(
+    class DoNothing @MainThreadOnly constructor(
         val insult: String,
         val enemy: Enemy,
         onj: OnjNamedObject,

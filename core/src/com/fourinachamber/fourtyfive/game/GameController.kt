@@ -255,7 +255,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         createdCards.add(card)
     }
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun changeState(next: GameState) {
         if (next == currentState) return
         FourtyFiveLogger.debug(logTag, "changing state from $currentState to $next")
@@ -378,7 +378,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * puts [card] in [slot] of the revolver (checks if the card is a bullet)
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) {
         if (card.type != Card.Type.BULLET || !card.allowsEnteringGame()) return
         if (revolver.getCardInSlot(slot) != null) return
@@ -393,7 +393,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * adds a new cover to a slot in the cover area (checks if the card is a cover)
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun addCover(card: Card, slot: Int) {
         if (card.type != Card.Type.COVER || !card.allowsEnteringGame()) return
         if (!coverArea.acceptsCover(slot, roundCounter) || !cost(card.cost)) return
@@ -419,7 +419,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * shoots the revolver
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun shoot() {
         if (!currentState.allowsShooting()) return
         turnCounter++
@@ -467,10 +467,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
         }
 
+        val damagePlayerTimeline = enemy.damagePlayer(shotEmptyDamage, this@GameController)
+
         val timeline = Timeline.timeline {
 
             includeLater(
-                { enemy.damagePlayer(shotEmptyDamage, this@GameController) },
+                { damagePlayerTimeline },
                 { cardToShoot == null }
             )
 
@@ -521,7 +523,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         for (card in createdCards) if (card.inGame) card.checkModifierValidity()
     }
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun endTurn() {
         currentState.onEndTurn(this)
     }
@@ -534,7 +536,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         curPlayerLives -= damage
         FourtyFiveLogger.debug(logTag, "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives")
         if (curPlayerLives <= 0) executeTimelineLater(Timeline.timeline {
-            action { loose() }
+            mainThreadAction { loose() }
         })
     }
 
@@ -550,13 +552,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * changes the game to the destroy phase
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun destroyCardPhase() = changeState(GameState.CardDestroy)
 
     /**
      * destroys a card in the revolver
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun destroyCard(card: Card) {
         revolver.removeCard(card)
         card.onDestroy()
@@ -575,12 +577,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         return false
     }
 
+    @MainThreadOnly
     private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
         FourtyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         card.checkEffects(trigger)?.let { executeTimelineLater(it) }
     }
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun checkEffectsActiveCards(trigger: Trigger) {
         FourtyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         val timeline = Timeline.timeline {
@@ -592,7 +595,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         executeTimelineLater(timeline)
     }
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun checkStatusEffects() {
         FourtyFiveLogger.debug(logTag, "checking status effects")
         val timeline = Timeline.timeline {
@@ -607,6 +610,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * appends a timeline to the current timeline
      */
+    @AllThreadsAllowed
     fun executeTimelineLater(timeline: Timeline) {
         for (action in timeline.actions) this.timeline.appendAction(action)
     }
@@ -702,12 +706,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * called when an enemy was defeated
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun enemyDefeated(enemy: Enemy) {
         SaveState.enemiesDefeated++
         win()
     }
 
+    @MainThreadOnly
     private fun win() {
         FourtyFiveLogger.debug(logTag, "player won")
         encounterMapEvent.completed()
@@ -715,6 +720,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         SaveState.write()
     }
 
+    @MainThreadOnly
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()

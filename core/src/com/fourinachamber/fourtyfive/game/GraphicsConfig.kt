@@ -13,12 +13,7 @@ import com.fourinachamber.fourtyfive.rendering.BetterShader
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.general.*
-import com.fourinachamber.fourtyfive.utils.ActorActionTimelineAction
-import com.fourinachamber.fourtyfive.utils.GameAnimationTimelineAction
-import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.utils.Utils
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
+import com.fourinachamber.fourtyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.value.OnjObject
@@ -38,6 +33,7 @@ object GraphicsConfig {
         readConstants(config)
     }
 
+    @MainThreadOnly
     fun damageOverlay(screen: OnjScreen): Timeline.TimelineAction {
         val overlayActor = CustomImageActor(ResourceManager.get(screen, damageOverlayTexture))
         val viewport = screen.stage.viewport
@@ -82,19 +78,20 @@ object GraphicsConfig {
         }
     }
 
+    @MainThreadOnly
     fun coverStackParticles(destroyed: Boolean, coverStack: CoverStack, screen: OnjScreen): Timeline.TimelineAction {
-        return object : Timeline.TimelineAction() {
 
-            var particle: ParticleEffect? = null
+        val particle = ResourceManager.get<ParticleEffect>(
+            screen,
+            if (destroyed) coverStackDestroyedParticles else coverStackDamagedParticles
+        )
+
+        return object : Timeline.TimelineAction() {
 
             override fun start(timeline: Timeline) {
                 super.start(timeline)
-                particle = ResourceManager.get<ParticleEffect>(
-                    screen,
-                    if (destroyed) coverStackDestroyedParticles else coverStackDamagedParticles
-                )
 
-                val particleActor = CustomParticleActor(particle!!)
+                val particleActor = CustomParticleActor(particle)
                 particleActor.isAutoRemove = true
                 particleActor.fixedZIndex = Int.MAX_VALUE
 
@@ -105,7 +102,7 @@ object GraphicsConfig {
                         y + coverStack.height / 2
                     )
                 } else {
-                    val width = particle!!.emitters[0].spawnWidth.highMax
+                    val width = particle.emitters[0].spawnWidth.highMax
                     particleActor.setPosition(
                         x + coverStack.width / 2 - width / 2,
                         y
@@ -116,7 +113,7 @@ object GraphicsConfig {
                 particleActor.start()
             }
 
-            override fun isFinished(): Boolean = particle?.isComplete ?: true
+            override fun isFinished(): Boolean = particle.isComplete
 
         }
     }
@@ -138,6 +135,7 @@ object GraphicsConfig {
         return ActorActionTimelineAction(action, actor)
     }
 
+    @MainThreadOnly
     fun bannerAnimation(isPlayer: Boolean, screen: OnjScreen): GameAnimationTimelineAction {
         val anim = BannerAnimation(
             ResourceManager.get(screen, if (isPlayer) playerTurnBannerName else enemyTurnBannerName),
@@ -150,6 +148,7 @@ object GraphicsConfig {
         return GameAnimationTimelineAction(anim)
     }
 
+    @MainThreadOnly
     fun insultFadeAnimation(pos: Vector2, insult: String, screen: OnjScreen): GameAnimationTimelineAction {
         val anim = FadeInAndOutTextAnimation(
             pos.x, pos.y,
@@ -165,6 +164,7 @@ object GraphicsConfig {
         return GameAnimationTimelineAction(anim)
     }
 
+    @MainThreadOnly
     fun numberChangeAnimation(
         pos: Vector2,
         text: String,
@@ -186,21 +186,28 @@ object GraphicsConfig {
         return GameAnimationTimelineAction(anim)
     }
 
+    @MainThreadOnly
     fun cardDetailFont(screen: OnjScreen): BitmapFont = ResourceManager.get(screen, cardDetailFont)
     fun cardDetailFontScale(): Float = cardDetailFontScale
     fun cardDetailFontColor(): Color = cardDetailFontColor
+
+    @MainThreadOnly
     fun cardDetailSeparator(screen: OnjScreen): Drawable = ResourceManager.get(screen, cardDetailSeparator)
     fun cardDetailSpacing(): Float = cardDetailSpacing
 
+    @MainThreadOnly
     fun cardDetailBackground(screen: OnjScreen): Drawable? {
         return cardDetailBackground?.let { ResourceManager.get(screen, it) }
     }
 
+    @MainThreadOnly
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
 
+    @MainThreadOnly
     fun shootShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, shootPostProcessor)
     fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
 
+    @MainThreadOnly
     fun destroyCardShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, destroyCardPostProcessor)
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////

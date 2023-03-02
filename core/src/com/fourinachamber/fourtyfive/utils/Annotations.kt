@@ -11,6 +11,7 @@ package com.fourinachamber.fourtyfive.utils
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.PROPERTY,
     AnnotationTarget.TYPE, // for annotating lambdas
 )
 @Retention(AnnotationRetention.SOURCE)
@@ -27,6 +28,7 @@ annotation class MainThreadOnly
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER,
+    AnnotationTarget.PROPERTY,
     AnnotationTarget.TYPE, // for annotating lambdas
 )
 @Retention(AnnotationRetention.SOURCE)
