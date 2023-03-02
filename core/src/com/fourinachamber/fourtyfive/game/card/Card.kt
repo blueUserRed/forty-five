@@ -20,11 +20,7 @@ import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.KeySelectableActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
-import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import com.fourinachamber.fourtyfive.utils.TemplateString
-import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
+import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjArray
@@ -276,6 +272,7 @@ class Card(
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
+    @MainThreadOnly
     fun checkEffects(trigger: Trigger): Timeline? {
         var wasEffectWithTimelineTriggered = false
         val timeline = Timeline.timeline {
@@ -343,7 +340,7 @@ class Card(
             return prototypes
         }
 
-
+        @MainThreadOnly
         private fun getCardFrom(
             onj: OnjObject,
             onjScreen: OnjScreen,

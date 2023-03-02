@@ -69,7 +69,7 @@ class Enemy(
             if (field != 0) return
             gameController.curScreen.afterMs(10) { //TODO: nooooo, not again
                 gameController.executeTimelineLater(Timeline.timeline {
-                    action { gameController.enemyDefeated(this@Enemy) }
+                    mainThreadAction { gameController.enemyDefeated(this@Enemy) }
                 })
             }
         }
@@ -161,6 +161,7 @@ class Enemy(
         FourtyFiveLogger.debug(logTag, "chose new action: $curAction")
     }
 
+    @MainThreadOnly
     fun doAction(): Timeline? {
         return curAction!!.execute()
     }
@@ -170,6 +171,7 @@ class Enemy(
         actor.resetAction()
     }
 
+    @MainThreadOnly
     fun damagePlayer(damage: Int, gameController: GameController): Timeline = Timeline.timeline {
         val screen = gameController.curScreen
         val chargeTimeline = GraphicsConfig.chargeTimeline(actor)
@@ -279,6 +281,7 @@ class Enemy(
         /**
          * reads an array of Enemies from on an OnjArray
          */
+        @MainThreadOnly
         fun getFrom(
             enemiesOnj: OnjArray,
             area: EnemyArea

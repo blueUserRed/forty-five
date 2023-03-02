@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive.utils
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.utils.TimeUtils
@@ -132,6 +133,25 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
                 override fun start(timeline: Timeline) {
                     super.start(timeline)
                     action()
+                }
+            })
+        }
+
+        /**
+         * Adds an action that finishes instantly to the timeline.
+         *
+         * In contrast to [action()](Timeline.TimelineBuilderDSL.action) the action is always executed on the
+         * main thread using `Gdx.app.postRunnable`
+         *
+         * *WARNING:* because the action is executed on the next render call, this may break the sequence of actions,
+         * for example if the next action is an [action()](Timeline.TimelineBuilderDSL.action)'
+         */
+        fun mainThreadAction(action: @MainThreadOnly () -> Unit) {
+            timelineActions.add(object : TimelineAction() {
+                override fun isFinished(): Boolean = true
+                override fun start(timeline: Timeline) {
+                    super.start(timeline)
+                    Gdx.app.postRunnable { action() }
                 }
             })
         }

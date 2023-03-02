@@ -10,6 +10,7 @@ import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.StyleableOnjScreen
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.enums.YogaAlign
@@ -26,6 +27,7 @@ abstract class StyleProperty<T>(
     val condition: StyleCondition?
 ) where T : Actor {
 
+    @MainThreadOnly
     fun applyToOrError(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
         if (!clazz.isInstance(actor)) throw RuntimeException(
             "style property ${this::class.simpleName} cannot be applied to ${actor::class.simpleName}, must be" +
@@ -35,6 +37,7 @@ abstract class StyleProperty<T>(
         applyTo(node, actor as T, screen, target)
     }
 
+    @MainThreadOnly
     abstract fun applyTo(node: YogaNode, actor: T, screen: StyleableOnjScreen, target: StyleTarget)
 
     abstract fun getWithCondition(condition: StyleCondition?): StyleProperty<T>

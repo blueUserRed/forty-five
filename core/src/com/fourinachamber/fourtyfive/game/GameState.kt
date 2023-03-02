@@ -2,10 +2,7 @@ package com.fourinachamber.fourtyfive.game
 
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
-import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
-import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.utils.multipleTemplateParam
+import com.fourinachamber.fourtyfive.utils.*
 
 sealed class GameState {
 
@@ -158,10 +155,10 @@ sealed class GameState {
     }
 
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     open fun transitionTo(controller: GameController) { }
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     open fun transitionAway(controller: GameController) { }
 
     @AllThreadsAllowed
@@ -173,13 +170,13 @@ sealed class GameState {
     @AllThreadsAllowed
     open fun shouldIncrementRoundCounter(): Boolean = false
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     open fun onEndTurn(controller: GameController) { }
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     open fun onCardDestroyed(controller: GameController) { }
 
-    @AllThreadsAllowed
+    @MainThreadOnly
     open fun onCardDrawn(controller: GameController) { }
 
     override fun equals(other: Any?): Boolean {

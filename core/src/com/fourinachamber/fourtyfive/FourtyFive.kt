@@ -14,7 +14,9 @@ import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import onj.customization.OnjConfig
 
 /**
@@ -49,6 +51,7 @@ object FourtyFive : Game() {
         cardGenerator.generateCards()
     }
 
+    @MainThreadOnly
     fun changeToScreen(screen: OnjScreen) {
         FourtyFiveLogger.title("changing screen")
         currentScreen?.dispose()
@@ -57,6 +60,7 @@ object FourtyFive : Game() {
         setScreen(screen)
     }
 
+    @AllThreadsAllowed
     fun useRenderPipeline(renderable: Renderable) {
         currentRenderable = renderable
     }
