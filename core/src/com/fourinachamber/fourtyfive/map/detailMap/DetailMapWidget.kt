@@ -101,6 +101,10 @@ class DetailMapWidget(
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
             if (TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
+            if (movePlayerTo != null) {
+                skipPlayerAnimation()
+                return
+            }
             pointToNode?.let { goToNode(it) }
         }
     }
@@ -209,6 +213,14 @@ class DetailMapWidget(
         val movementPath = Vector2(movePlayerTo.x, movePlayerTo.y) - Vector2(playerNode.x, playerNode.y)
         val playerOffset = movementPath * (1f - percent)
         playerPos = Vector2(playerNode.x, playerNode.y) + playerOffset
+    }
+
+    private fun skipPlayerAnimation() {
+        val movePlayerTo = movePlayerTo ?: return
+        this.playerNode = movePlayerTo
+        playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
+        setupDetailFor(movePlayerTo)
+        this.movePlayerTo = null
     }
 
     private fun setupDetailFor(node: MapNode?) {
