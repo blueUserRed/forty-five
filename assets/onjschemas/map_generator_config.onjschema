@@ -1,0 +1,14 @@
+
+var mapRestrictions = {
+    maxNodes: int,
+    minNodes: int,
+    maxSplits: int,
+    splitProbability: float,
+    compressProbability: float, // TODO: what does this mean??
+};
+
+outputDirectory: string,
+maps: {
+    name: string,
+    restrictions: mapRestrictions
+}[]

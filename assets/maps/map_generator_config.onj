@@ -1,0 +1,15 @@
+
+outputDirectory: "maps/roads",
+
+maps: [
+    {
+        name: "roadToSalem",
+        restrictions: {
+            maxNodes: 22,
+            minNodes: 15,
+            maxSplits: 4,
+            splitProbability: 0.25,
+            compressProbability: 0.55
+        }
+    }
+]
