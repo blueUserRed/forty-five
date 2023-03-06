@@ -35,9 +35,7 @@ root: $Map {
         relWidth(100.0),
         relHeight(100.0)
     ],
-    detailMapProvider: $FromFileDetailMapProvider {
-        file: "maps/areas/test_map.onj"
-    },
+    detailMapProvider: $CurrentMapProvider { },
 //    detailMapProvider: $FromSeededGeneratorDetailMapProvider {
 //        seed: 231239729
 //    },

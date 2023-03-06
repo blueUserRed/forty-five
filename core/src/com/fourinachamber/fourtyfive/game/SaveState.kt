@@ -63,7 +63,19 @@ object SaveState {
             savefileDirty = true
         }
 
-    /**
+    var currentMap: String = ""
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
+    var currentNode: Int = 0
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
+            /**
      * how many enemies the player has defeated this run
      */
     var enemiesDefeated: Int by templateParam("stat.enemiesDefeated", 0) {
@@ -154,12 +166,20 @@ object SaveState {
         usedReserves = stats.get<Long>("usedReserves").toInt()
         enemiesDefeated = stats.get<Long>("enemiesDefeated").toInt()
 
+        val position = obj.get<OnjObject>("position")
+        currentMap = position.get<String>("map")
+        currentNode = position.get<Long>("node").toInt()
+
         playerLives = obj.get<Long>("playerLives").toInt()
 
         FourtyFiveLogger.debug(logTag, "stats: " +
                 "usedReserves = $usedReserves, " +
                 "enemiesDefeated = $enemiesDefeated, " +
                 "playerLives = $playerLives")
+
+        FourtyFiveLogger.debug(logTag, "position: " +
+                "currentMap = $currentMap, " +
+                "currentNode = $currentNode")
 
         savefileDirty = false
     }
@@ -203,6 +223,10 @@ object SaveState {
             "stats" with buildOnjObject {
                 "usedReserves" with usedReserves
                 "enemiesDefeated" with enemiesDefeated
+            }
+            "position" with buildOnjObject {
+                "map" with currentMap
+                "node" with currentNode
             }
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())

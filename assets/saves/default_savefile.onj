@@ -51,4 +51,9 @@ playerLives: gameConfig.playerConfig.lives,
 stats: {
     usedReserves: 0,
     enemiesDefeated: 0
+},
+
+position: {
+    map: "test_area",
+    node: 0
 }

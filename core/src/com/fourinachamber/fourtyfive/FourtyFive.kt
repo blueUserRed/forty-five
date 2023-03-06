@@ -35,7 +35,6 @@ object FourtyFive : Game() {
 
     override fun create() {
         init()
-
         if (generateCards) runCardGenerator()
         val screen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
         changeToScreen(screen)
@@ -67,7 +66,7 @@ object FourtyFive : Game() {
 
     fun newRun() {
         SaveState.reset()
-        MapGenerator(Gdx.files.internal("maps/map_generator_config.onj")).generate()
+        MapManager.newRun()
     }
 
     private fun init() {
@@ -79,12 +78,14 @@ object FourtyFive : Game() {
         }
         FourtyFiveLogger.init()
         SaveState.read()
+        MapManager.init()
         GraphicsConfig.init()
         ResourceManager.init()
     }
 
     override fun dispose() {
         FourtyFiveLogger.medium(logTag, "game closing")
+        MapManager.write()
         SaveState.write()
         currentScreen?.dispose()
         ResourceManager.end()

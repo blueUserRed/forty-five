@@ -1,9 +1,17 @@
 
+var mapEventStandardConfig = {
+    currentlyBlocks: boolean,
+    canBeStarted: boolean,
+    isCompleted: boolean
+};
+
 $MapEvent {
 
     $EmptyMapEvent { }
 
-    $EncounterMapEvent { }
+    $EncounterMapEvent {
+        ...mapEventStandardConfig
+    }
 
 }
 
