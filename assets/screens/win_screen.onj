@@ -19,7 +19,7 @@ viewport: $FitViewport {
 },
 
 var toMainScreenBehaviour = $OnClickChangeScreenBehaviour {
-    screenPath: "screens/title_screen.onj"
+    screenPath: "screens/map_test.onj"
 };
 
 var hoverBehaviour = $MouseHoverBehaviour {

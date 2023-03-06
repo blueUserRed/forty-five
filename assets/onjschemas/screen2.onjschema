@@ -175,6 +175,8 @@ $DetailMapProvider {
         seed: int
     }
 
+    $CurrentMapProvider { }
+
 }
 
 $Behaviour {

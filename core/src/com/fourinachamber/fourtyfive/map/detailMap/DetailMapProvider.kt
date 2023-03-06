@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.fourinachamber.fourtyfive.map.MapManager
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -14,11 +15,13 @@ interface DetailMapProvider {
 
 }
 
+// TODO: this may be useless
 object DetailMapProviderFactory {
 
     private val detailMapProviderCreators: Map<String, (onj: OnjObject) -> DetailMapProvider> = mapOf(
         "FromFileDetailMapProvider" to { FromFileDetailMapProvider(Gdx.files.internal(it.get<String>("file"))) },
-        "FromSeededGeneratorDetailMapProvider" to { FromSeededGeneratorDetailMapProvider(it.get<Long>("seed")) }
+        "FromSeededGeneratorDetailMapProvider" to { FromSeededGeneratorDetailMapProvider(it.get<Long>("seed")) },
+        "CurrentMapProvider" to { CurrentMapProvider() }
     )
 
     fun get(onj: OnjNamedObject): DetailMapProvider =
@@ -56,4 +59,9 @@ class FromSeededGeneratorDetailMapProvider(
         generator.generate()
         return DetailMap(generator.build())
     }
+}
+
+class CurrentMapProvider : DetailMapProvider {
+
+    override fun get(): DetailMap = MapManager.currentDetail
 }

@@ -1,0 +1,42 @@
+nodes: [
+    {
+        x: 20.0,
+        y: 80.0,
+        isArea: false,
+        edgesTo: [ 1, ],
+        blockingEdges: [ 1, ],
+        event: $EmptyMapEvent {
+        },
+    },
+    {
+        x: 60.0,
+        y: 80.0,
+        isArea: false,
+        edgesTo: [ 0, 2, 3, ],
+        blockingEdges: [ 2, 3, ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: false,
+            isCompleted: true,
+        },
+    },
+    {
+        x: 60.0,
+        y: 40.0,
+        isArea: false,
+        edgesTo: [ 1, ],
+        blockingEdges: [ ],
+        event: $EmptyMapEvent {
+        },
+    },
+    {
+        x: 100.0,
+        y: 90.0,
+        isArea: false,
+        edgesTo: [ 1, ],
+        blockingEdges: [ ],
+        event: $EmptyMapEvent {
+        },
+    },
+],
+startNode: 0,
