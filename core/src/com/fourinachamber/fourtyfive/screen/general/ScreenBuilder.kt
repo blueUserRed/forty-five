@@ -63,7 +63,7 @@ class ScreenBuilder(val file: FileHandle) {
         readAssets(onj)
         doOptions(onj)
 
-        val screen = StyleableOnjScreen(
+        val screen = OnjScreen(
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
             controllerContext = controllerContext,
@@ -73,9 +73,9 @@ class ScreenBuilder(val file: FileHandle) {
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
-            printFrameRate = false
+            printFrameRate = false,
+            namedCells = mapOf()
         )
-
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)

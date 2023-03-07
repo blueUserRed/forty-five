@@ -8,7 +8,7 @@ import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
-import com.fourinachamber.fourtyfive.screen.general.StyleableOnjScreen
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import dev.lyze.flexbox.FlexBox
@@ -28,7 +28,7 @@ abstract class StyleProperty<T>(
 ) where T : Actor {
 
     @MainThreadOnly
-    fun applyToOrError(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    fun applyToOrError(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         if (!clazz.isInstance(actor)) throw RuntimeException(
             "style property ${this::class.simpleName} cannot be applied to ${actor::class.simpleName}, must be" +
             " ${clazz.simpleName}"
@@ -38,7 +38,7 @@ abstract class StyleProperty<T>(
     }
 
     @MainThreadOnly
-    abstract fun applyTo(node: YogaNode, actor: T, screen: StyleableOnjScreen, target: StyleTarget)
+    abstract fun applyTo(node: YogaNode, actor: T, screen: OnjScreen, target: StyleTarget)
 
     abstract fun getWithCondition(condition: StyleCondition?): StyleProperty<T>
 
@@ -49,7 +49,7 @@ class BackgroundProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) = when (actor) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) = when (actor) {
         //TODO: put the background in some interface
         is CustomImageActor -> actor.drawable = backgroundName?.let {
             ResourceManager.get(screen, backgroundName)
@@ -73,7 +73,7 @@ class TextAlignProperty(
     condition: StyleCondition?
 ) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: OnjScreen, target: StyleTarget) {
         actor.setAlignment(align)
     }
 
@@ -85,7 +85,7 @@ class TextColorProperty(
     condition: StyleCondition?
 ) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: OnjScreen, target: StyleTarget) {
         actor.style.fontColor = color
     }
 
@@ -97,7 +97,7 @@ class FontScaleProperty(
     condition: StyleCondition?
 ) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor:CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor:CustomLabel, screen: OnjScreen, target: StyleTarget) {
         actor.setFontScale(scale)
         actor.invalidateHierarchy()
     }
@@ -112,7 +112,7 @@ class FontScaleAnimationProperty(
     condition: StyleCondition?
 ) : StyleProperty<CustomLabel>(CustomLabel::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: CustomLabel, screen: OnjScreen, target: StyleTarget) {
         val startValue = actor.fontScaleX
         val animation = StyleAnimation(
             duration,
@@ -140,7 +140,7 @@ class DimensionsProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         if (widthAuto) node.setWidthAuto()
         if (heightAuto) node.setHeightAuto()
         if (width != null) {
@@ -166,7 +166,7 @@ class MinDimensionsProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         if (width != null) {
             if (widthRelative) node.setMinWidthPercent(width)
             else node.setMinWidth(width)
@@ -191,7 +191,7 @@ class DimensionsAnimationProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         val startValue = if (isWidth) node.width.value else node.height.value
         val unitToTest = if (isWidth) node.width.unit else node.height.unit
 
@@ -243,7 +243,7 @@ class FlexDirectionProperty(
     condition: StyleCondition?
 ) : StyleProperty<FlexBox>(FlexBox::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: FlexBox, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: FlexBox, screen: OnjScreen, target: StyleTarget) {
         actor.root.flexDirection = direction
         actor.invalidateHierarchy()
     }
@@ -258,7 +258,7 @@ class FlexAlignProperty(
     condition: StyleCondition?
 ) : StyleProperty<FlexBox>(FlexBox::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: FlexBox, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: FlexBox, screen: OnjScreen, target: StyleTarget) {
         if (isItems) actor.root.alignItems = flexAlign
         if (isContent) actor.root.alignContent = flexAlign
         actor.invalidateHierarchy()
@@ -273,7 +273,7 @@ class AlignSelfProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         node.alignSelf = align
         if (actor is Layout) actor.invalidateHierarchy()
     }
@@ -286,7 +286,7 @@ class FlexJustifyContentProperty(
     condition: StyleCondition?
 ) : StyleProperty<FlexBox>(FlexBox::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: FlexBox, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: FlexBox, screen: OnjScreen, target: StyleTarget) {
         actor.root.justifyContent = justify
         actor.invalidateHierarchy()
     }
@@ -299,7 +299,7 @@ class MarginProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         for ((margin, isRelative, edge) in margins) {
             if (isRelative) node.setMarginPercent(edge, margin)
             else node.setMargin(edge, margin)
@@ -316,7 +316,7 @@ class GrowShrinkProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         if (grow != null) node.flexGrow = grow
         if (shrink != null) node.flexShrink = shrink
         if (actor is Layout) actor.invalidateHierarchy()
@@ -330,7 +330,7 @@ class PositionProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         node.positionType = positionType
         if (actor is Layout) actor.invalidateHierarchy()
     }
@@ -347,7 +347,7 @@ class PositionFloatProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         left?.let { node.setPosition(YogaEdge.LEFT, it) }
         right?.let { node.setPosition(YogaEdge.RIGHT, it) }
         top?.let { node.setPosition(YogaEdge.TOP, it) }
@@ -405,7 +405,7 @@ class PositionAnimationProperty(
         target.addAnimation(animation)
     }
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         left?.let { applyFor(YogaEdge.LEFT, actor, it, node, target) }
         right?.let { applyFor(YogaEdge.RIGHT, actor, it, node, target) }
         top?.let { applyFor(YogaEdge.TOP, actor, it, node, target) }
@@ -421,7 +421,7 @@ class AspectRatioProperty(
     condition: StyleCondition?
 ) : StyleProperty<Actor>(Actor::class, condition) {
 
-    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) {
         node.aspectRatio = ratio
         if (actor is Layout) actor.invalidateHierarchy()
     }
