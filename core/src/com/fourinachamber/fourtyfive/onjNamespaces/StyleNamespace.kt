@@ -388,6 +388,11 @@ object StyleNamespace {
         return OnjStyleProperty(styleProperty.value.getWithCondition(StyleCondition.Hover(StyleActorReference.Self)))
     }
 
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun state(state: OnjString): OnjStyleCondition {
+        return OnjStyleCondition(StyleCondition.ScreenState(state.value))
+    }
+
     @RegisterOnjFunction(
         schema = "use Style; params: [StyleProperty, StyleCondition]",
         type = OnjFunctionType.INFIX

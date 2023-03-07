@@ -77,10 +77,13 @@ class StyleTarget(
         while (iterator.hasNext()) {
             val animation = iterator.next()
             val timeSinceStart = TimeUtils.millis() - animation.startTime
-            val rawPercent = timeSinceStart.toFloat() / animation.duration.toFloat()
+            var rawPercent = timeSinceStart.toFloat() / animation.duration.toFloat()
+            if (rawPercent > 1f) {
+                rawPercent = 1f
+                iterator.remove()
+            }
             val percent = animation.interpolation.apply(rawPercent)
             animation.updateCallback(percent, actor, node)
-            if (rawPercent >= 1f) iterator.remove()
         }
         for (style in styles) {
             for (property in style.properties) updateProperty(screen, property)
@@ -151,6 +154,11 @@ sealed class StyleCondition {
         }
 
         override fun evaluate(): Boolean = isHoveredOver
+    }
+
+    class ScreenState(val state: String) : StyleCondition() {
+
+        override fun evaluate(): Boolean = state in screen.screenState
     }
 
     abstract fun evaluate(): Boolean

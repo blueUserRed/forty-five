@@ -219,6 +219,7 @@ class DetailMapWidget(
             this.playerNode = movePlayerTo
             playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
             detailWidget.setForEvent(movePlayerTo.event)
+            updateScreenState(movePlayerTo.event)
             this.movePlayerTo = null
             return
         }
@@ -233,7 +234,17 @@ class DetailMapWidget(
         this.playerNode = movePlayerTo
         playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
         detailWidget.setForEvent(movePlayerTo.event)
+        updateScreenState(movePlayerTo.event)
         this.movePlayerTo = null
+    }
+
+    private fun updateScreenState(event: MapEvent?) {
+        val enter = event?.displayDescription ?: false
+        if (enter) {
+            screen.enterState(displayEventDetailScreenState)
+        } else {
+            screen.leaveState(displayEventDetailScreenState)
+        }
     }
 
     private fun drawNodes(batch: Batch) {
@@ -266,6 +277,10 @@ class DetailMapWidget(
 
     private fun calcNodePosition(node: MapNode): Vector2 {
         return Vector2(node.x, node.y) + mapOffset
+    }
+
+    companion object {
+        const val displayEventDetailScreenState: String = "displayEventDetail"
     }
 
 }

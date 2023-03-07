@@ -65,7 +65,9 @@ open class OnjScreen @MainThreadOnly constructor(
             Utils.setCursor(value)
         }
 
-    private val screenState: MutableSet<String> = mutableSetOf()
+    private val _screenState: MutableSet<String> = mutableSetOf()
+    val screenState: Set<String>
+        get() = _screenState
 
     private val screenStateChangeListeners: MutableList<(entered: Boolean, state: String) -> Unit> = mutableListOf()
 
@@ -177,15 +179,15 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @AllThreadsAllowed
     fun enterState(state: String) {
-        if (state in screenState) return
-        screenState.add(state)
+        if (state in _screenState) return
+        _screenState.add(state)
         screenStateChangeListeners.forEach { it(true, state) }
     }
 
     @AllThreadsAllowed
     fun leaveState(state: String) {
-        if (state !in screenState) return
-        screenState.remove(state)
+        if (state !in _screenState) return
+        _screenState.remove(state)
         screenStateChangeListeners.forEach { it(false, state) }
     }
 
