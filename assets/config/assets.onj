@@ -192,6 +192,15 @@ ninepatches: [
         left: 3,
         right: 3,
         scale: 0.2
+    },
+    {
+        name: "white_rounded",
+        file: "textures/ninepatches/white_rounded.png",
+        top: 24,
+        bottom: 24,
+        left: 24,
+        right: 24,
+        scale: 0.1
     }
 ],
 

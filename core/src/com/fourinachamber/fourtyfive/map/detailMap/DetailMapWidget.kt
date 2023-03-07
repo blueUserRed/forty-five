@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
@@ -30,11 +32,9 @@ class DetailMapWidget(
     private val lineWidth: Float,
     private val playerMoveTime: Int,
     private val directionIndicator: TextureRegion,
-    private val detailFont: BitmapFont,
-    private val detailFontColor: Color,
-    private val detailBackground: Drawable,
+    private val detailWidgetName: String,
     var background: Drawable? = null
-) : WidgetGroup(), ZIndexActor {
+) : Widget(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
@@ -45,14 +45,22 @@ class DetailMapWidget(
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
-    private var displayDetail: Boolean = false
-    private val detailWidget: MapEventDetailWidget = MapEventDetailWidget(
-        screen,
-        detailFont,
-        detailFontColor,
-        detailBackground,
-        this::onStartButtonClicked
-    )
+//    private val detailWidget: MapEventDetailWidget = MapEventDetailWidget(
+//        screen,
+//        detailFont,
+//        detailFontColor,
+//        detailBackground,
+//        this::onStartButtonClicked
+//    )
+
+    private val detailWidget: MapEventDetailWidget by lazy {
+        val widget = screen.namedActorOrError(detailWidgetName)
+        if (widget !is MapEventDetailWidget) {
+            throw RuntimeException("expected $detailWidgetName to be of type DetailMapWidget")
+        }
+        widget.onStartClickedListener = this::onStartButtonClicked
+        widget
+    }
 
     private var pointToNode: MapNode? = null
 
@@ -112,7 +120,7 @@ class DetailMapWidget(
     init {
         addListener(dragListener)
         addListener(clickListener)
-        addActor(detailWidget)
+        invalidateHierarchy()
     }
 
     private fun onStartButtonClicked() {
@@ -202,19 +210,6 @@ class DetailMapWidget(
         }
     }
 
-    override fun layout() {
-        super.layout()
-        if (!displayDetail) return
-        val detail = detailWidget
-        detail.height = height
-        detail.width = detail.prefWidth
-        detail.debug = true
-        detail.setPosition(
-            width - detail.width,
-            0f
-        )
-    }
-
     private fun updatePlayerMovement() {
         val movePlayerTo = movePlayerTo ?: return
         val playerNode = playerNode
@@ -223,7 +218,7 @@ class DetailMapWidget(
         if (curTime >= movementFinishTime) {
             this.playerNode = movePlayerTo
             playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
-            setupDetailFor(movePlayerTo)
+            detailWidget.setForEvent(movePlayerTo.event)
             this.movePlayerTo = null
             return
         }
@@ -237,16 +232,8 @@ class DetailMapWidget(
         val movePlayerTo = movePlayerTo ?: return
         this.playerNode = movePlayerTo
         playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
-        setupDetailFor(movePlayerTo)
+        detailWidget.setForEvent(movePlayerTo.event)
         this.movePlayerTo = null
-    }
-
-    private fun setupDetailFor(node: MapNode?) {
-        displayDetail = node?.event?.displayDescription ?: false
-        detailWidget.isVisible = displayDetail
-        if (!displayDetail) return
-        detailWidget.setForEvent(node!!.event!!)
-        invalidate()
     }
 
     private fun drawNodes(batch: Batch) {

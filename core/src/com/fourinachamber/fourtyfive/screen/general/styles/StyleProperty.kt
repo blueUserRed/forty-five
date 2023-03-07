@@ -158,6 +158,30 @@ class DimensionsProperty(
         DimensionsProperty(width, height, widthRelative, heightRelative, widthAuto, heightAuto, condition)
 }
 
+class MinDimensionsProperty(
+    private val width: Float?,
+    private val height: Float?,
+    private val widthRelative: Boolean,
+    private val heightRelative: Boolean,
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
+
+    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        if (width != null) {
+            if (widthRelative) node.setMinWidthPercent(width)
+            else node.setMinWidth(width)
+        }
+        if (height != null) {
+            if (heightRelative) node.setMinHeightPercent(height)
+            else node.setMinHeight(height)
+        }
+        if (actor is Layout) actor.invalidateHierarchy()
+    }
+
+    override fun getWithCondition(condition: StyleCondition?) =
+        MinDimensionsProperty(width, height, widthRelative, heightRelative, condition)
+}
+
 class DimensionsAnimationProperty(
     private val value: Float,
     private val isWidth: Boolean,
@@ -251,7 +275,6 @@ class AlignSelfProperty(
 
     override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
         node.alignSelf = align
-        println(align)
         if (actor is Layout) actor.invalidateHierarchy()
     }
 
@@ -334,6 +357,63 @@ class PositionFloatProperty(
 
     override fun getWithCondition(condition: StyleCondition?): StyleProperty<Actor> =
         PositionFloatProperty(left, right, top, bottom, condition)
+}
+
+class PositionAnimationProperty(
+    val left: Float?,
+    val right: Float?,
+    val top: Float?,
+    val bottom: Float?,
+    private val isRelative: Boolean,
+    private val duration: Int,
+    private val interpolation: Interpolation,
+    condition: StyleCondition?
+) : StyleProperty<Actor>(Actor::class, condition) {
+
+    private fun applyFor(edge: YogaEdge, actor: Actor, value: Float, node: YogaNode, target: StyleTarget) {
+        val startValue = node.getPosition(edge).value
+        val unitToTest = node.getPosition(edge).unit
+
+        if (unitToTest == YogaUnit.UNDEFINED || unitToTest == YogaUnit.AUTO) {
+            if (isRelative) node.setPositionPercent(edge, value)
+            else node.setPosition(edge, value)
+            if (actor is Layout) actor.invalidateHierarchy()
+            return
+        }
+
+        if (isRelative && unitToTest != YogaUnit.PERCENT) {
+            FourtyFiveLogger.medium("style", "PositionAnimation property on actor '$actor' animates using" +
+                    "a relative value, but the currently set value is not relative")
+        }
+        if (!isRelative && unitToTest != YogaUnit.POINT) {
+            FourtyFiveLogger.medium("style", "PositionAnimation property on actor '$actor' animates using" +
+                    "an absolute value, but the currently set value is not absolute")
+        }
+
+        val animation = StyleAnimation(
+            duration,
+            -1,
+            interpolation
+        ) { percent, _, animNode ->
+            val curValue = startValue + (value - startValue) * percent
+
+            if (isRelative) animNode.setPositionPercent(edge, curValue)
+            else animNode.setPosition(edge, curValue)
+
+            if (actor is Layout) actor.invalidateHierarchy()
+        }
+        target.addAnimation(animation)
+    }
+
+    override fun applyTo(node: YogaNode, actor: Actor, screen: StyleableOnjScreen, target: StyleTarget) {
+        left?.let { applyFor(YogaEdge.LEFT, actor, it, node, target) }
+        right?.let { applyFor(YogaEdge.RIGHT, actor, it, node, target) }
+        top?.let { applyFor(YogaEdge.TOP, actor, it, node, target) }
+        bottom?.let { applyFor(YogaEdge.BOTTOM, actor, it, node, target) }
+    }
+
+    override fun getWithCondition(condition: StyleCondition?) =
+        PositionAnimationProperty(left, right, top, bottom, isRelative, duration, interpolation, condition)
 }
 
 class AspectRatioProperty(

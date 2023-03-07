@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
@@ -13,8 +14,7 @@ class MapEventDetailWidget(
     private val screen: OnjScreen,
     private val font: BitmapFont,
     private val fontColor: Color,
-    background: Drawable,
-    private val onStartClickedListener: () -> Unit
+    background: Drawable
 ) : CustomVerticalGroup() {
 
     private val descriptionWidget: CustomLabel = CustomLabel("", Label.LabelStyle(font, fontColor))
@@ -23,19 +23,24 @@ class MapEventDetailWidget(
 
     private val completedLabel: CustomLabel = CustomLabel("already completed", Label.LabelStyle(font, fontColor))
 
+    var onStartClickedListener: (() -> Unit)? = null
+
     init {
+        align(Align.center)
         this.background = background
         // TODO: put magic numbers in some file
         descriptionWidget.setFontScale(0.05f)
         startButton.setFontScale(0.05f)
+        completedLabel.setFontScale(0.05f)
         width = 0f
         height = 0f
-        startButton.onClick { onStartClickedListener() }
+        startButton.onClick { onStartClickedListener?.invoke() }
     }
 
     @MainThreadOnly
-    fun setForEvent(mapEvent: MapEvent) {
+    fun setForEvent(mapEvent: MapEvent?) {
         clearChildren()
+        mapEvent ?: return
         descriptionWidget.setText(mapEvent.descriptionText)
         mapEvent.icon?.let {
             val icon = CustomImageActor(ResourceManager.get(screen, it))
