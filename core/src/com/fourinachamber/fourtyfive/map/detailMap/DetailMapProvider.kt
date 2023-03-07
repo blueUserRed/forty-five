@@ -57,7 +57,7 @@ class FromSeededGeneratorDetailMapProvider(
     override fun get(): DetailMap {
         val generator = SeededMapGenerator(seed)
         generator.generate()
-        return DetailMap(generator.build())
+        return DetailMap(generator.build(), listOf())
     }
 }
 

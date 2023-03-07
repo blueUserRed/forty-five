@@ -1,5 +1,11 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fourtyfive.game.Effect
+import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
 import onj.value.OnjArray
@@ -8,7 +14,8 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
 data class DetailMap(
-    val startNode: MapNode
+    val startNode: MapNode,
+    val decorations: List<MapDecoration>
 ) {
 
     val uniqueNodes by lazy {
@@ -26,6 +33,7 @@ data class DetailMap(
     fun asOnjObject(): OnjObject = buildOnjObject {
         "nodes" with nodesAsOnjArray()
         "startNode" with uniqueNodes.indexOf(startNode)
+        "decorations" with decorations.map { it.asOnjObject() }
     }
 
     fun nodesAsOnjArray(): OnjArray = uniqueNodes
@@ -79,7 +87,56 @@ data class DetailMap(
                     }
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
-            return DetailMap(nodes[startNodeIndex].build())
+            val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
+            return DetailMap(nodes[startNodeIndex].build(), decorations)
+        }
+
+    }
+
+    data class MapDecoration(
+        val drawableHandle: String,
+        val baseWidth: Float,
+        val baseHeight: Float,
+        val instances: List<Pair<Vector2 /* = Position */, Float /* = scale */>>
+    ) {
+
+        private var drawable: Drawable? = null
+
+        @MainThreadOnly
+        fun getDrawable(screen: OnjScreen): Drawable {
+            drawable?.let { return it }
+            val drawable = ResourceManager.get<Drawable>(screen, drawableHandle)
+            this.drawable = drawable
+            return drawable
+        }
+
+        fun asOnjObject(): OnjObject = buildOnjObject {
+            "texture" with drawableHandle
+            "baseWidth" with baseWidth
+            "baseHeight" with baseHeight
+            "positions" with instances.map { buildOnjObject {
+                "x" with it.first.x
+                "y" with it.first.y
+                "scale" with it.second
+            } }
+        }
+
+        companion object {
+            fun fromOnj(obj: OnjObject): MapDecoration = MapDecoration(
+                obj.get<String>("texture"),
+                obj.get<Double>("baseWidth").toFloat(),
+                obj.get<Double>("baseHeight").toFloat(),
+                obj
+                    .get<OnjArray>("positions")
+                    .value
+                    .map {
+                        it as OnjObject
+                        Vector2(
+                            it.get<Double>("x").toFloat(),
+                            it.get<Double>("y").toFloat()
+                        ) to it.get<Double>("scale").toFloat()
+                    }
+            )
         }
 
     }

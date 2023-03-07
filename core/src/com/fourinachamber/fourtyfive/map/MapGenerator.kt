@@ -35,7 +35,7 @@ class MapGenerator(
         val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
         val generator = SeededMapGenerator(Random.nextLong(), mapRestriction)
         generator.generate()
-        val map = DetailMap(generator.nodes[0].build())
+        val map = DetailMap(generator.nodes[0].build(), listOf())
         val path = "${outputDir.toPath()}/$name.onj"
         val file = File(path)
         file.createNewFile()

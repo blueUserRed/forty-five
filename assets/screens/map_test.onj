@@ -14,7 +14,7 @@ var worldHeight = 90.0;
 assets: {
     useAssets: [
         "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
-        "normal_bullet", "grey_texture", "heart_texture"
+        "normal_bullet", "grey_texture", "heart_texture", "burning_icon"
     ]
 },
 

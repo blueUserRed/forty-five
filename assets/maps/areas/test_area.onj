@@ -40,3 +40,32 @@ nodes: [
     },
 ],
 startNode: 0,
+decorations: [
+    {
+        texture: 'burning_icon',
+        baseWidth: 8.0,
+        baseHeight: 8.0,
+        positions: [
+            {
+                x: 30.0,
+                y: 30.0,
+                scale: 1.5,
+            },
+            {
+                x: 60.0,
+                y: 20.0,
+                scale: 1.0,
+            },
+            {
+                x: 10.0,
+                y: 10.0,
+                scale: 0.5,
+            },
+            {
+                x: 90.0,
+                y: 30.0,
+                scale: 2.0,
+            },
+        ],
+    },
+],

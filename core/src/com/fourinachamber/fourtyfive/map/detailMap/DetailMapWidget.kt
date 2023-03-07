@@ -153,6 +153,7 @@ class DetailMapWidget(
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
         drawDirectionIndicator(batch)
+        drawDecorations(batch)
         super.draw(batch, parentAlpha)
     }
 
@@ -182,6 +183,23 @@ class DetailMapWidget(
             1f,
             if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees
         )
+    }
+
+
+    private fun drawDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        map.decorations.forEach { decoration ->
+            val drawable = decoration.getDrawable(screen)
+            val width = decoration.baseWidth
+            val height = decoration.baseHeight
+            decoration.instances.forEach { instance ->
+                drawable.draw(
+                    batch,
+                    offX + instance.first.x, offY + instance.first.y,
+                    width * instance.second, height * instance.second
+                )
+            }
+        }
     }
 
     override fun layout() {
