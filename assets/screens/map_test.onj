@@ -14,7 +14,7 @@ var worldHeight = 90.0;
 assets: {
     useAssets: [
         "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
-        "normal_bullet", "grey_texture", "heart_texture", "burning_icon"
+        "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded"
     ]
 },
 
@@ -30,27 +30,48 @@ options: {
     ]
 },
 
-root: $Map {
+root: $Box {
     properties: [
         relWidth(100.0),
-        relHeight(100.0)
-    ],
-    detailMapProvider: $CurrentMapProvider { },
-//    detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-//        seed: 231239729
-//    },
-    nodeSize: 5.0,
-    lineWidth: 1.0,
-    name: "map",
-    nodeTexture: "key_select_frame",
-    playerTexture: "enemy_texture",
-    playerWidth: 2.0,
-    playerHeight: 6.0,
-    background: "white_texture",
-    edgeTexture: "black_texture",
-    playerMovementTime: 0.3,
-    detailFont: "red_wing",
-    detailBackground: "grey_texture",
-    detailFontColor: color.black,
-    directionIndicator: "heart_texture"
-}
+        relHeight(100.0),
+        flexDirection("column"),
+        justifyContent("center")
+    ]
+} children [
+
+    $Map {
+        properties: [
+            relWidth(100.0),
+            relHeight(100.0),
+            position("absolute")
+        ],
+        detailMapProvider: $CurrentMapProvider { },
+        nodeSize: 5.0,
+        lineWidth: 1.0,
+        name: "map",
+        nodeTexture: "key_select_frame",
+        playerTexture: "enemy_texture",
+        playerWidth: 2.0,
+        playerHeight: 6.0,
+        background: "white_texture",
+        edgeTexture: "black_texture",
+        playerMovementTime: 0.3,
+        directionIndicator: "heart_texture",
+        detailWidgetName: "mapEventDetail"
+    },
+
+    $MapEventDetail {
+        properties: [
+            alignSelf("flex end"),
+            relHeight(70.0),
+            relWidth(20.0),
+            positionTo(10.0, null, null, null, 0.2, interpolation.linear),
+            positionTo(0.0, null, null, null, 0.2, interpolation.linear)#hover,
+        ],
+        name: "mapEventDetail",
+        font: "red_wing",
+        fontColor: color.black,
+        background: "white_rounded",
+    }
+
+]

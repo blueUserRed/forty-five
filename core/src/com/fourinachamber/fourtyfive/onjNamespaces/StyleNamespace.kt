@@ -121,6 +121,26 @@ object StyleNamespace {
         )
     }
 
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun minWidth(width: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(MinDimensionsProperty(
+            width.value.toFloat(),
+            null,
+            false, false,
+            null
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "params: [float]")
+    fun minHeight(height: OnjFloat): OnjStyleProperty {
+        return OnjStyleProperty(MinDimensionsProperty(
+            null,
+            height.value.toFloat(),
+            false, false,
+            null
+        ))
+    }
+
     @RegisterOnjFunction(schema = "use Common; params: [float, float, Interpolation]")
     fun relWidthTo(width: OnjFloat, duration: OnjFloat, interpolation: OnjInterpolation): OnjStyleProperty {
         return OnjStyleProperty(
@@ -288,6 +308,27 @@ object StyleNamespace {
         )
     }
 
+    @RegisterOnjFunction(schema = "use Common; params: [float?, float?, float?, float?, float, Interpolation]")
+    fun positionTo(
+        left: OnjValue,
+        right: OnjValue,
+        top: OnjValue,
+        bottom: OnjValue,
+        duration: OnjFloat,
+        interpolation: OnjInterpolation
+    ): OnjStyleProperty {
+        return OnjStyleProperty(PositionAnimationProperty(
+            if (left.isNull()) null else (left as OnjFloat).value.toFloat(),
+            if (right.isNull()) null else (right as OnjFloat).value.toFloat(),
+            if (top.isNull()) null else (top as OnjFloat).value.toFloat(),
+            if (bottom.isNull()) null else (bottom as OnjFloat).value.toFloat(),
+            false,
+            (duration.value * 1000f).toInt(),
+            interpolation.value,
+            null
+        ))
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // other properties
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -340,6 +381,11 @@ object StyleNamespace {
     @RegisterOnjFunction(schema = "use Style; params: [StyleActorRef]")
     fun hover(actorRef: OnjStyleActorRef): OnjStyleCondition {
         return OnjStyleCondition(StyleCondition.Hover(actorRef.value))
+    }
+
+    @RegisterOnjFunction(schema = "use Style; params: [StyleProperty]", type = OnjFunctionType.CONVERSION)
+    fun hover(styleProperty: OnjStyleProperty): OnjStyleProperty {
+        return OnjStyleProperty(styleProperty.value.getWithCondition(StyleCondition.Hover(StyleActorReference.Self)))
     }
 
     @RegisterOnjFunction(

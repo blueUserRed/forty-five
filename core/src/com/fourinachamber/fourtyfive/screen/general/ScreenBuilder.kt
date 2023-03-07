@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -20,6 +21,7 @@ import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
+import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -322,11 +324,16 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("lineWidth").toFloat(),
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             ResourceManager.get(screen, widgetOnj.get<String>("directionIndicator")),
-            fontOrError(widgetOnj.get<String>("detailFont"), screen),
-            widgetOnj.get<Color>("detailFontColor"),
-            drawableOrError(widgetOnj.get<String>("detailBackground"), screen),
-            drawableOrError(widgetOnj.get<String>("background"), screen),
+            widgetOnj.get<String>("detailWidgetName"),
+            drawableOrError(widgetOnj.get<String>("background"), screen)
         )
+
+        "MapEventDetail" -> MapEventDetailWidget(
+            screen,
+            fontOrError(widgetOnj.get<String>("font"), screen),
+            widgetOnj.get<Color>("fontColor"),
+            drawableOrError(widgetOnj.get<String>("background"), screen)
+        ).apply { touchable = Touchable.enabled }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 

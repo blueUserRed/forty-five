@@ -156,10 +156,15 @@ $Widget {
         lineWidth: float,
         edgeTexture: string,
         playerMovementTime: float,
-        detailFont: string,
-        detailFontColor: Color,
-        detailBackground: string,
         directionIndicator: string,
+        detailWidgetName: string,
+        ...widgetSharedKeys
+    }
+
+    $MapEventDetail {
+        font: string,
+        fontColor: Color,
+        background: string,
         ...widgetSharedKeys
     }
 
