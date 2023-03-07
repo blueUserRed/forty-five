@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
-import com.fourinachamber.fourtyfive.screen.general.StyleableOnjScreen
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -54,11 +54,13 @@ class Style(
 }
 
 class StyleTarget(
-    private val node: YogaNode,
-    private val actor: Actor,
+    val node: YogaNode,
+    val actor: Actor,
     private val styles: List<Style>,
     private val directProperties: List<StyleProperty<*>>
 ) {
+
+    private lateinit var screen: OnjScreen
 
     private val animations: MutableList<StyleAnimation> = mutableListOf()
 
@@ -80,43 +82,45 @@ class StyleTarget(
             animation.updateCallback(percent, actor, node)
             if (rawPercent >= 1f) iterator.remove()
         }
+        for (style in styles) {
+            for (property in style.properties) updateProperty(screen, property)
+        }
+        for (property in directProperties) updateProperty(screen, property)
     }
 
-    fun init(screen: StyleableOnjScreen) {
+    fun init(screen: OnjScreen) {
+        this.screen = screen
         for (style in styles) {
             for (property in style.properties) initProperty(screen, property)
         }
         for (property in directProperties) initProperty(screen, property)
     }
 
-    private fun reapplyProperties(screen: StyleableOnjScreen) {
+    private fun reapplyProperties(screen: OnjScreen) {
         for (property in activeUnconditionalProperties) property.applyToOrError(node, actor, screen, this)
         for (property in activeConditionalProperties) property.applyToOrError(node, actor, screen, this)
     }
 
-    private fun initProperty(screen: StyleableOnjScreen, property: StyleProperty<*>) {
+    private fun updateProperty(screen: OnjScreen, property: StyleProperty<*>) {
+        val condition = property.condition ?: return
+        val state = condition.update() ?: return
+        if (state) {
+            activeConditionalProperties.add(property)
+            reapplyProperties(screen)
+        } else {
+            activeConditionalProperties.remove(property)
+            reapplyProperties(screen)
+        }
+    }
+
+    private fun initProperty(screen: OnjScreen, property: StyleProperty<*>) {
         val condition = property.condition
-        if (condition == null) {
-            property.applyToOrError(node, actor, screen, this)
-            activeUnconditionalProperties.add(property)
+        if (condition != null) {
+            condition.init(screen, actor)
             return
         }
-
-        when (condition) {
-
-            is StyleCondition.Hover -> {
-                val (actor, node) = condition.actor.get(node, actor, screen)
-                actor.onEnter {
-                    activeConditionalProperties.add(property)
-                    reapplyProperties(screen)
-                }
-                actor.onExit {
-                    activeConditionalProperties.remove(property)
-                    reapplyProperties(screen)
-                }
-            }
-
-        }
+        property.applyToOrError(node, actor, screen, this)
+        activeUnconditionalProperties.add(property)
     }
 
 }
@@ -130,7 +134,38 @@ data class StyleAnimation(
 
 sealed class StyleCondition {
 
-    class Hover(val actor: StyleActorReference) : StyleCondition()
+    private var lastState: Boolean = true
+
+    protected lateinit var screen: OnjScreen
+    protected lateinit var actor: Actor
+
+    class Hover(val actorRef: StyleActorReference) : StyleCondition() {
+
+        private var isHoveredOver: Boolean = false
+
+        override fun init(screen: OnjScreen, actor: Actor) {
+            super.init(screen, actor)
+            val target = actorRef.get(actor, screen)
+            target.actor.onEnter { isHoveredOver = true }
+            target.actor.onExit { isHoveredOver = false }
+        }
+
+        override fun evaluate(): Boolean = isHoveredOver
+    }
+
+    abstract fun evaluate(): Boolean
+
+    fun update(): Boolean? {
+        val curState = evaluate()
+        if (lastState == curState) return null
+        lastState = curState
+        return curState
+    }
+
+    open fun init(screen: OnjScreen, actor: Actor) {
+        this.screen = screen
+        this.actor = actor
+    }
 
 }
 
@@ -138,11 +173,12 @@ sealed class StyleActorReference {
 
     object Self : StyleActorReference() {
 
-        override fun get(node: YogaNode, actor: Actor, screen: StyleableOnjScreen): Pair<Actor, YogaNode> {
-            return actor to node
+        override fun get(actor: Actor, screen: OnjScreen): StyleTarget {
+            return screen.styleTargets.find { it.actor === actor }
+                ?: throw RuntimeException("could not find style target of self ref") // this should never happen
         }
     }
 
-    abstract fun get(node: YogaNode, actor: Actor, screen: StyleableOnjScreen): Pair<Actor, YogaNode>
+    abstract fun get(actor: Actor, screen: OnjScreen): StyleTarget
 
 }

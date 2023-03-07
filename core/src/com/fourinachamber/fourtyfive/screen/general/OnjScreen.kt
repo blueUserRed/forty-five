@@ -4,9 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
-import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.*
-import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -25,6 +23,7 @@ import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceBorrower
 import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.utils.*
 import kotlin.system.measureTimeMillis
 
@@ -40,6 +39,7 @@ open class OnjScreen @MainThreadOnly constructor(
     private val useAssets: List<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
+    val styleTargets: List<StyleTarget>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
     private val printFrameRate: Boolean
@@ -65,12 +65,9 @@ open class OnjScreen @MainThreadOnly constructor(
             Utils.setCursor(value)
         }
 
-//    var postProcessor: PostProcessor? = null
-//        set(value) {
-//            field = value
-//            value?.resetReferenceTime()
-//            resize(Gdx.graphics.width, Gdx.graphics.height)
-//        }
+    private val screenState: MutableSet<String> = mutableSetOf()
+
+    private val screenStateChangeListeners: MutableList<(entered: Boolean, state: String) -> Unit> = mutableListOf()
 
     val stage: Stage = Stage(viewport, batch)
 
@@ -179,6 +176,25 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     @AllThreadsAllowed
+    fun enterState(state: String) {
+        if (state in screenState) return
+        screenState.add(state)
+        screenStateChangeListeners.forEach { it(true, state) }
+    }
+
+    @AllThreadsAllowed
+    fun leaveState(state: String) {
+        if (state !in screenState) return
+        screenState.remove(state)
+        screenStateChangeListeners.forEach { it(false, state) }
+    }
+
+    @AllThreadsAllowed
+    fun addScreenStateChangeListener(listener: @AllThreadsAllowed (entered: Boolean, state: String) -> Unit) {
+        screenStateChangeListeners.add(listener)
+    }
+
+    @AllThreadsAllowed
     fun buildKeySelectHierarchy() {
         keySelectionHierarchy = KeySelectionHierarchyBuilder().build(stage.root)
     }
@@ -227,6 +243,7 @@ open class OnjScreen @MainThreadOnly constructor(
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
+        for (target in styleTargets) target.init(this)
     }
 
     @MainThreadOnly
@@ -238,6 +255,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
+        for (styleTarget in styleTargets) styleTarget.update()
         if (printFrameRate) FourtyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()
