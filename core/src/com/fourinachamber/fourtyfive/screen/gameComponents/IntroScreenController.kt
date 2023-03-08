@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -44,14 +45,19 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
         Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
 
         appearActor = onjScreen.namedActorOrError(appearActorName)
-
+// fixme
         textures = ResourceManager
-            .resources
-            .filter {
-                it is ResourceManager.AtlasRegionResource &&
-                        it.atlasResourceHandle == ResourceManager.cardAtlasResourceHandle
-            }
-            .map { ResourceManager.get(onjScreen, it.handle) }
+            .get<TextureAtlas>(onjScreen, ResourceManager.cardAtlasResourceHandle)
+            .regions
+            .toList()
+
+//        textures = ResourceManager
+//            .resources
+//            .filter {
+//                it is ResourceManager.AtlasRegionResource &&
+//                        it.atlasResourceHandle == ResourceManager.cardAtlasResourceHandle
+//            }
+//            .map { ResourceManager.get(onjScreen, it.handle) }
 
         onjScreen.addLateRenderTask(renderTask)
 

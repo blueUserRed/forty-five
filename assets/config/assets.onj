@@ -145,7 +145,7 @@ shaders: [
     {
         name: "film_shader",
         file: "shaders/film.glsl",
-        constantArgs: null
+        constantArgs: { }
     }
 ],
 
@@ -207,13 +207,13 @@ ninepatches: [
 particles: [
     {
         name: "dust_particle",
-        particlePath: "particles/dust.particle",
+        file: "particles/dust.particle",
         textureDir: "textures/particles",
         scale: 0.1
     },
     {
         name: "dust_explosion_particle",
-        particlePath: "particles/dust_explosion.particle",
+        file: "particles/dust_explosion.particle",
         textureDir: "textures/particles",
         scale: 0.1
     }
