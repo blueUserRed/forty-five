@@ -13,6 +13,8 @@ var worldHeight = 90.0;
 var buttonBaseScale = 0.2;
 var buttonHoverScale = 0.25;
 
+var transitionAwayTime = 0.2;
+
 assets: {
     useAssets: [
         "title_screen_background", "logo", "red_wing",
@@ -24,7 +26,7 @@ assets: {
             properties: [
                 relWidth(10.0),
                 fontScaleTo(buttonBaseScale, 0.1, interpolation.elastic),
-                fontScaleTo(buttonHoverScale, 0.1, interpolation.elastic) condition hover(self()),
+                fontScaleTo(buttonHoverScale, 0.1, interpolation.elastic)#hover,
                 margin(0.0, 0.0, 0.3, 0.0)
             ]
         }
@@ -41,7 +43,8 @@ options: {
     inputMap: [
         ...(inputMaps.hierarchyBasedNavigationInputMap),
         ...(inputMaps.defaultInputMap)
-    ]
+    ],
+    transitionAwayTime: transitionAwayTime + 0.2
 },
 
 root: $Box {
@@ -72,7 +75,9 @@ root: $Box {
         properties: [
             flexDirection("column"),
             alignItems("flex end"),
-            margin(0.0, 1.0, 0.0, 2.5)
+            margin(0.0, 1.0, 0.0, 2.5),
+            position(0.0, null, null, null),
+            positionTo(35.0, null, null, null, transitionAwayTime, interpolation.linear) condition state("transition away")
         ],
         partOfSelectionHierarchy: true
     } children [

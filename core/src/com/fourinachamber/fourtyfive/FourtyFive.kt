@@ -36,7 +36,7 @@ object FourtyFive : Game() {
     override fun create() {
         init()
         if (generateCards) runCardGenerator()
-        val screen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
+        val screen = ScreenBuilder(Gdx.files.internal("screens/title_screen.onj")).build()
         changeToScreen(screen)
     }
 
@@ -52,11 +52,23 @@ object FourtyFive : Game() {
 
     @MainThreadOnly
     fun changeToScreen(screen: OnjScreen) {
-        FourtyFiveLogger.title("changing screen")
-        currentScreen?.dispose()
-        currentScreen = screen
-        currentRenderable = screen
-        setScreen(screen)
+        val currentScreen = currentScreen
+        if (currentScreen?.transitionAwayTime == null) {
+            FourtyFiveLogger.title("changing screen")
+            currentScreen?.dispose()
+            this.currentScreen = screen
+            currentRenderable = screen
+            setScreen(screen)
+            return
+        }
+        currentScreen.transitionAway()
+        currentScreen.afterMs(currentScreen.transitionAwayTime) {
+            FourtyFiveLogger.title("changing screen")
+            currentScreen.dispose()
+            this.currentScreen = screen
+            currentRenderable = screen
+            setScreen(screen)
+        }
     }
 
     @AllThreadsAllowed
