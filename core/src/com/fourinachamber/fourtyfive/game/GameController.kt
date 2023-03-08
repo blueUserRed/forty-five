@@ -152,10 +152,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
 
-        if (context !is EncounterMapEvent) { // TODO: comment back in
-            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
-        }
-        encounterMapEvent = context
+//        if (context !is EncounterMapEvent) { // TODO: comment back in
+//            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
+//        }
+//        encounterMapEvent = context
 //        modifier = EncounterModifier.BewitchedMist // TODO: remove
         SaveState.read()
         curScreen = onjScreen

@@ -365,6 +365,7 @@ options: {
 //        cursorName: string
 //    },
     postProcessor?: string,
+    transitionAwayTime?: float
 //    printFrameRate?: boolean
 },
 

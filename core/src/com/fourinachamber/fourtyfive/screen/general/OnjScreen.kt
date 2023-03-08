@@ -42,7 +42,8 @@ open class OnjScreen @MainThreadOnly constructor(
     val styleTargets: List<StyleTarget>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
-    private val printFrameRate: Boolean
+    private val printFrameRate: Boolean,
+    val transitionAwayTime: Int?
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
 
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
@@ -248,6 +249,12 @@ open class OnjScreen @MainThreadOnly constructor(
         for (target in styleTargets) target.init(this)
     }
 
+    fun transitionAway() {
+        screenController = null
+        inputMap = null
+        enterState(transitionAwayScreenState)
+    }
+
     @MainThreadOnly
     override fun hide() {
         super.hide()
@@ -285,51 +292,6 @@ open class OnjScreen @MainThreadOnly constructor(
         stage.batch.end()
     }
 
-//    private fun renderWithPostProcessing() {
-//
-//        val fbo = try {
-//            FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
-//        } catch (e: java.lang.IllegalStateException) {
-//            // construction of FrameBuffer sometimes fails when the window is minimized
-//            return
-//        }
-//
-//        fbo.begin()
-//        ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-//        viewport.apply()
-//        doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-//        stage.draw()
-//        doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-//        fbo.end()
-//
-//        val batch = SpriteBatch()
-//
-//        val postProcessor = postProcessor!!
-//
-//        batch.shader = postProcessor.shader
-//        postProcessor.shader.bind()
-//
-//        postProcessor.shader.setUniformMatrix("u_projTrans", viewport.camera.combined)
-//
-//        postProcessor.bindUniforms()
-//        postProcessor.bindArgUniforms()
-//
-//        batch.begin()
-//        ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-//        batch.enableBlending()
-//        batch.draw(
-//            fbo.colorBufferTexture,
-//            0f, 0f,
-//            Gdx.graphics.width.toFloat(),
-//            Gdx.graphics.height.toFloat(),
-//            0f, 0f, 1f, 1f // flips the y-axis
-//        )
-//        batch.end()
-//
-//        fbo.dispose()
-//        batch.dispose()
-//    }
-
     @MainThreadOnly
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
@@ -347,7 +309,10 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     companion object {
+
         const val logTag = "screen"
+
+        const val transitionAwayScreenState = "transition away"
     }
 
 }

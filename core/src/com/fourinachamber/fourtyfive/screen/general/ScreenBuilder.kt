@@ -52,6 +52,7 @@ class ScreenBuilder(val file: FileHandle) {
 
     private var screenController: ScreenController? = null
     private var background: String? = null
+    private var transitionAwayTime: Int? = null
 //    private var postProcessor: String? = null
 
     @MainThreadOnly
@@ -74,7 +75,8 @@ class ScreenBuilder(val file: FileHandle) {
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
             printFrameRate = false,
-            namedCells = mapOf()
+            namedCells = mapOf(),
+            transitionAwayTime = transitionAwayTime
         )
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
@@ -111,9 +113,9 @@ class ScreenBuilder(val file: FileHandle) {
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
         }
-//        options.ifHas<String>("postProcessor") {
-//            postProcessor = it
-//        }
+        options.ifHas<Double>("transitionAwayTime") {
+            transitionAwayTime = (it * 1000).toInt()
+        }
     }
 
     private fun readAssets(onj: OnjObject) {
