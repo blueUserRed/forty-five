@@ -2,7 +2,6 @@ package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Colors
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.*
@@ -39,7 +38,7 @@ abstract class Resource(
     protected abstract fun finishLoadingMainThread()
 
     @MainThreadOnly
-    fun loadDirect() = synchronized(this) {
+    fun load() = synchronized(this) {
         if (state == ResourceState.NOT_LOADED) {
             loadDirectMainThread()
         } else if (state == ResourceState.PREPARED) {
@@ -50,27 +49,20 @@ abstract class Resource(
 
     @MainThreadOnly
     fun <T> get(variantType: KClass<T>): T? where T : Any = synchronized(this) {
-        if (state == ResourceState.NOT_LOADED) {
-            loadDirectMainThread()
-        } else if (state == ResourceState.PREPARED) {
-            finishLoadingMainThread()
-        }
+        load()
         for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
         return null
     }
 
     @AllThreadsAllowed
     fun prepare() = synchronized(this) {
+        if (state != ResourceState.NOT_LOADED) return
         prepareLoadingAllThreads()
         state = ResourceState.PREPARED
     }
 
     @MainThreadOnly
-    fun borrow(borrower: ResourceBorrower): Resource {
-        if (state != ResourceState.LOADED) {
-            prepare()
-            loadDirect()
-        }
+    fun borrow(borrower: ResourceBorrower): Resource = synchronized(this) {
         borrowedBy.add(borrower)
         return this
     }
@@ -241,12 +233,12 @@ class AtlasRegionResource(
         val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
         val region = atlas.findRegion(regionName)
         variants = listOf(region, TextureRegionDrawable(region))
-        super.loadDirect()
     }
 
     @MainThreadOnly
     override fun dispose() {
-        ResourceManager.giveBack(this, atlasResourceHandle)
+        val atlas = ResourceManager.resources.find { it.handle == atlasResourceHandle }!!
+        if (this in atlas.borrowedBy) ResourceManager.giveBack(this, atlasResourceHandle)
         super.dispose()
     }
 
