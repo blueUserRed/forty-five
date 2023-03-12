@@ -77,7 +77,7 @@ root: $Box {
             alignItems("flex end"),
             margin(0.0, 1.0, 0.0, 2.5),
             position(0.0, null, null, null),
-            positionTo(35.0, null, null, null, transitionAwayTime, interpolation.linear) condition state("transition away")
+            positionTo(35.0, null, null, null, transitionAwayTime, interpolation.linear)#transitionAway
         ],
         partOfSelectionHierarchy: true
     } children [
