@@ -451,12 +451,6 @@ class CardActor(
      */
     var isDragged: Boolean = false
 
-    /**
-     * true when the actor is hovered over
-     */
-    var isHoveredOver: Boolean = false
-        private set
-
     val hoverDetailActor = CardDetailActor(
         card = card,
         initialFlavourText = "",
@@ -476,11 +470,6 @@ class CardActor(
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
         FourtyFive.currentGame!!.destroyCard(card)
         true
-    }
-
-    init {
-        onEnter { isHoveredOver = true }
-        onExit { isHoveredOver = false }
     }
 
     fun enterDestroyMode() {

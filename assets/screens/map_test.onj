@@ -10,7 +10,6 @@ use Style;
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-
 assets: {
     useAssets: [
         "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
@@ -25,6 +24,7 @@ viewport: $FitViewport {
 
 options: {
     background: "title_screen_background",
+    transitionAwayTime: 1.5,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ]
@@ -32,6 +32,7 @@ options: {
 
 root: $Box {
     properties: [
+        position("absolute"),
         relWidth(100.0),
         relHeight(100.0),
         flexDirection("column"),
@@ -43,7 +44,9 @@ root: $Box {
         properties: [
             relWidth(100.0),
             relHeight(100.0),
-            position("absolute")
+            position("absolute"),
+            position(0.0, 0.0, 0.0, 0.0),
+            positionTo(20.0, null, -worldHeight, null, 1.7, interpolation.linear)#transitionAway
         ],
         detailMapProvider: $CurrentMapProvider { },
         nodeSize: 5.0,
@@ -67,6 +70,7 @@ root: $Box {
             relWidth(20.0),
             positionTo(25.0, null, null, null, 0.2, interpolation.linear),
             positionTo(0.0, null, null, null, 0.2, interpolation.linear) condition state("displayEventDetail"),
+//            positionTo(40.0, null, null, null, 0.2, interpolation.linear)#transitionAway,
         ],
         name: "mapEventDetail",
         font: "red_wing",

@@ -26,8 +26,7 @@ var widgetSharedKeys = {
     zIndex?: int,
     visible?: boolean,
     name?: string,
-    styles?: string[],
-    properties?: StyleProperty[]
+    styles?: { ...* }[]
 };
 
 //var detailTextSharedKeys = {
@@ -343,12 +342,7 @@ viewport: $Viewport,
 
 assets: {
     useCardAtlas?: boolean,
-    useAssets: string[],
-    styleFiles?: string[],
-    styles?: {
-        name: string,
-        properties: StyleProperty[]
-    }[]
+    useAssets: string[]
 },
 
 options: {

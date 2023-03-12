@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
@@ -154,6 +156,13 @@ class DetailMapWidget(
         validate()
         updatePlayerMovement()
         batch ?: return
+
+        val (screenX, screenY) = localToStageCoordinates(Vector2(0f, 0f))
+        val bounds = Rectangle(screenX, screenY, width, height)
+        val scissor = Rectangle()
+        ScissorStack.calculateScissors(screen.stage.camera, batch.transformMatrix, bounds, scissor)
+        if (!ScissorStack.pushScissors(scissor)) return
+
         background?.draw(batch, x, y, width, height)
         drawEdges(batch)
         drawNodes(batch)
@@ -163,6 +172,9 @@ class DetailMapWidget(
         drawDirectionIndicator(batch)
         drawDecorations(batch)
         super.draw(batch, parentAlpha)
+
+        batch.flush()
+        ScissorStack.popScissors()
     }
 
     private fun drawDirectionIndicator(batch: Batch) {
@@ -203,7 +215,7 @@ class DetailMapWidget(
             decoration.instances.forEach { instance ->
                 drawable.draw(
                     batch,
-                    offX + instance.first.x, offY + instance.first.y,
+                    x + offX + instance.first.x, y + offY + instance.first.y,
                     width * instance.second, height * instance.second
                 )
             }
