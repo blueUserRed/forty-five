@@ -42,19 +42,24 @@ options: {
 },
 
 root: $Box {
-    properties: [
-        position("absolute"),
-        position(68.0, null, 6.5, null),
-        height(80.0),
-        width(85.0),
+    styles: [
+        {
+            positionType: positionType.absolute,
+            positionLeft: 68.0#points,
+            positionTop: 6.5#points,
+            height: 80.0#points,
+            width: 85.0#points
+        }
     ]
 } children [
 
 
     $Label {
-        properties: [
-            position("absolute"),
-            position(0.0, null, 10.0, null)
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 10.0#points
+            }
         ],
         align: "left",
         text: "Put the cards away. I think you've\nlost enough.",
@@ -64,9 +69,11 @@ root: $Box {
     },
 
     $TemplateLabel {
-        properties: [
-            position("absolute"),
-            position(0.0, null, 36.0, null)
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 36.0#points
+            }
         ],
         align: "left",
         template: "enemies killed: {stat.lastRun.enemiesDefeated}\nreserves used: {stat.lastRun.usedReserves}",
@@ -76,10 +83,12 @@ root: $Box {
     },
 
     $Label {
-        properties: [
-            position("absolute"),
-            position(0.0, null, 70.0, null),
-            relWidth(100.0)
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 70.0#points,
+                width: 100.0#percent
+            }
         ],
         align: "center",
         text: "continue to main menu",
