@@ -36,7 +36,7 @@ object FourtyFive : Game() {
     override fun create() {
         init()
         if (generateCards) runCardGenerator()
-        val screen = ScreenBuilder(Gdx.files.internal("screens/test_screen.onj")).build()
+        val screen = ScreenBuilder(Gdx.files.internal("screens/title_screen.onj")).build()
         changeToScreen(screen)
     }
 

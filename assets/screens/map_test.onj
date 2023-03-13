@@ -23,31 +23,50 @@ viewport: $FitViewport {
 },
 
 options: {
+    transitionAwayTime: 1.0,
     background: "title_screen_background",
-    transitionAwayTime: 1.5,
+//    transitionAwayTime: 1.5,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ]
 },
 
 root: $Box {
-    properties: [
-        position("absolute"),
-        relWidth(100.0),
-        relHeight(100.0),
-        flexDirection("column"),
-        justifyContent("center")
-    ]
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            flexDirection: flexDirection.column,
+            justifyContent: justify.center
+        }
+    ],
+    debug: true
 } children [
 
     $Map {
-        properties: [
-            relWidth(100.0),
-            relHeight(100.0),
-            position("absolute"),
-            position(0.0, 0.0, 0.0, 0.0),
-            positionTo(20.0, null, -worldHeight, null, 1.7, interpolation.linear)#transitionAway
+        styles: [
+            {
+                style_priority: 1,
+                width: 100.0#percent,
+                height: 100.0#percent,
+                positionType: positionType.absolute,
+                positionRight: 0.0#points,
+                positionBottom: 0.0#points,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("transition away"),
+                positionRight: 20.0#points,
+                positionBottom: worldHeight#points,
+                style_animation: {
+                    duration: 0.5,
+                    interpolation: interpolation.linear
+                }
+            }
         ],
+        debug: true,
         detailMapProvider: $CurrentMapProvider { },
         nodeSize: 5.0,
         lineWidth: 1.0,
@@ -64,13 +83,31 @@ root: $Box {
     },
 
     $MapEventDetail {
-        properties: [
-            alignSelf("flex end"),
-            relHeight(70.0),
-            relWidth(20.0),
-            positionTo(25.0, null, null, null, 0.2, interpolation.linear),
-            positionTo(0.0, null, null, null, 0.2, interpolation.linear) condition state("displayEventDetail"),
-//            positionTo(40.0, null, null, null, 0.2, interpolation.linear)#transitionAway,
+        styles: [
+            {
+                style_priority: 1,
+                alignSelf: align.flexEnd,
+                height: 70.0#percent,
+                width: 20.0#percent,
+                positionLeft: 0.0#points
+            },
+            {
+                style_priority: 2,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                },
+                positionLeft: 25.0#points,
+            },
+            {
+                style_priority: 3,
+                style_condition: state("displayEventDetail") and not(state("transition away")),
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                },
+                positionLeft: 0.0#points,
+            },
         ],
         name: "mapEventDetail",
         font: "red_wing",

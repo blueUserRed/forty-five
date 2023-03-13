@@ -17,7 +17,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
+import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleManager
+import com.fourinachamber.fourtyfive.screen.general.styleTest.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styleTest.addActorStyles
 import com.fourinachamber.fourtyfive.utils.*
+import io.github.orioncraftmc.meditate.YogaNode
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sin
@@ -36,9 +40,12 @@ class DetailMapWidget(
     private val directionIndicator: TextureRegion,
     private val detailWidgetName: String,
     var background: Drawable? = null
-) : Widget(), ZIndexActor {
+) : Widget(), ZIndexActor, StyledActor {
 
     override var fixedZIndex: Int = 0
+
+    override lateinit var styleManager: StyleManager
+    override var isHoveredOver: Boolean = false
 
     private var mapOffset: Vector2 = Vector2(0f, 0f)
 
@@ -120,6 +127,7 @@ class DetailMapWidget(
     }
 
     init {
+        bindHoverStateListeners(this)
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
@@ -289,6 +297,10 @@ class DetailMapWidget(
 
     private fun calcNodePosition(node: MapNode): Vector2 {
         return Vector2(node.x, node.y) + mapOffset
+    }
+
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
     }
 
     companion object {

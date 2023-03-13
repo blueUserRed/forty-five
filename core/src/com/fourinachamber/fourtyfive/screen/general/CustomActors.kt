@@ -567,9 +567,11 @@ open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 /**
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor {
 
     override var fixedZIndex: Int = 0
+    override lateinit var styleManager: StyleManager
+    override var isHoveredOver: Boolean = false
 
     var background: Drawable? = null
 
@@ -586,6 +588,9 @@ open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
         }
     }
 
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
+    }
 }
 
 class CustomParticleActor(

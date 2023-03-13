@@ -11,7 +11,7 @@ var worldWidth = 160.0;
 var worldHeight = 90.0;
 
 var buttonBaseScale = 0.2;
-var buttonHoverScale = 0.25;
+//var buttonHoverScale = 0.25;
 
 var transitionAwayTime = 0.2;
 
@@ -19,19 +19,17 @@ assets: {
     useAssets: [
         "title_screen_background", "logo", "red_wing",
         ...(graphicsConfig.keySelectUsedAssets)
-    ],
-    styles: [
-        {
-            name: "button",
-            properties: [
-                relWidth(10.0),
-                fontScaleTo(buttonBaseScale, 0.1, interpolation.elastic),
-                fontScaleTo(buttonHoverScale, 0.1, interpolation.elastic)#hover,
-                margin(0.0, 0.0, 0.3, 0.0)
-            ]
-        }
     ]
 },
+
+var buttonStyles = [
+    {
+        style_priority: 1,
+        width: 10.0#percent,
+        marginTop: 0.3#points,
+        fontScale: buttonBaseScale,
+    }
+];
 
 viewport: $FitViewport {
     worldWidth: worldWidth,
@@ -48,36 +46,56 @@ options: {
 },
 
 root: $Box {
-    properties: [
-        alignItems("flex end"),
-        flexDirection("column"),
-        relHeight(100.0)
+    styles: [
+        {
+            style_priority: 1,
+            alignItems: align.flexEnd,
+            flexDirection: flexDirection.column,
+            justifyContent: justify.flexEnd,
+            height: 100.0#percent
+        }
     ]
 } children [
 
     $Box {
-        properties: [
-            flexGrow(1.0),
-            margin(0.0, 2.5, 5.0, 0.0)
-        ]
+        styles: [
+            {
+                style_priority: 1,
+                flexGrow: 1.0,
+                marginRight: 2.5#points,
+                marginTop: 5.0#points
+            }
+        ],
     } children [
 
         $Image {
             reportDimensionsWithScaling: true,
             textureName: "logo",
             scaleX: 0.07,
-            scaleY: 0.07
+            scaleY: 0.07,
         }
 
     ],
 
     $Box {
-        properties: [
-            flexDirection("column"),
-            alignItems("flex end"),
-            margin(0.0, 1.0, 0.0, 2.5),
-            position(0.0, null, null, null),
-            positionTo(35.0, null, null, null, transitionAwayTime, interpolation.linear)#transitionAway
+        styles: [
+            {
+                style_priority: 1,
+                flexDirection: flexDirection.column,
+                alignItems: align.flexEnd,
+                marginRight: 1.0#points,
+                marginBottom: 2.5#points,
+                positionLeft: 0.0#points
+            },
+            {
+                style_priority: 2,
+                style_condition: state("transition away"),
+                positionLeft: 35.0#points,
+                style_animation: {
+                    duration: transitionAwayTime,
+                    interpolation: interpolation.linear
+                }
+            }
         ],
         partOfSelectionHierarchy: true
     } children [
@@ -88,11 +106,11 @@ root: $Box {
             align: "right",
             color: color.black,
             fontScale: buttonBaseScale,
-            styles: [ "button" ],
+            styles: buttonStyles,
             partOfSelectionHierarchy: true,
             behaviours: [
                 $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/game_screen.onj"
+                    screenPath: "screens/map_test.onj"
                 }
             ]
         },
@@ -103,7 +121,7 @@ root: $Box {
             align: "right",
             color: color.black,
             fontScale: buttonBaseScale,
-            styles: [ "button" ],
+            styles: buttonStyles,
             partOfSelectionHierarchy: true,
             behaviours: [
                 $OnClickAbandonRunBehaviour { },
@@ -116,7 +134,7 @@ root: $Box {
             font: "red_wing",
             align: "right",
             color: color.black,
-            styles: [ "button" ],
+            styles: buttonStyles,
             fontScale: buttonBaseScale,
             partOfSelectionHierarchy: true,
             behaviours: [
