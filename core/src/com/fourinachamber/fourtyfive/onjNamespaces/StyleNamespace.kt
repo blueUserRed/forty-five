@@ -2,10 +2,7 @@ package com.fourinachamber.fourtyfive.onjNamespaces
 
 import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleCondition
 import io.github.orioncraftmc.meditate.YogaValue
-import io.github.orioncraftmc.meditate.enums.YogaAlign
-import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
-import io.github.orioncraftmc.meditate.enums.YogaJustify
-import io.github.orioncraftmc.meditate.enums.YogaUnit
+import io.github.orioncraftmc.meditate.enums.*
 import onj.builder.buildOnjObject
 import onj.customization.Namespace
 import onj.customization.Namespace.*
@@ -15,9 +12,15 @@ import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.OnjFloat
 import onj.value.OnjString
 import onj.value.OnjValue
+import kotlin.reflect.KClass
 
 @OnjNamespace
 object StyleNamespace {
+
+    @OnjNamespaceDatatypes
+    val datatypes: Map<String, KClass<*>> = mapOf(
+        "StyleCondition" to OnjStyleCondition::class
+    )
 
     @OnjNamespaceVariables
     val variables: Map<String, OnjValue> = mapOf(
@@ -45,6 +48,11 @@ object StyleNamespace {
             "spaceAround" with OnjYogaJustify(YogaJustify.SPACE_AROUND)
             "spaceBetween" with OnjYogaJustify(YogaJustify.SPACE_BETWEEN)
             "spaceEvenly" with OnjYogaJustify(YogaJustify.SPACE_EVENLY)
+        },
+        "positionType" to buildOnjObject {
+            "relative" with OnjPositionType(YogaPositionType.RELATIVE)
+            "static" with OnjPositionType(YogaPositionType.STATIC)
+            "absolute" with OnjPositionType(YogaPositionType.ABSOLUTE)
         }
     )
 
@@ -57,6 +65,16 @@ object StyleNamespace {
     @RegisterOnjFunction(schema = "params: [string]")
     fun state(state: OnjString): OnjStyleCondition = OnjStyleCondition(StyleCondition.ScreenState(state.value))
 
+    @RegisterOnjFunction(schema = "use Style; params: [StyleCondition, StyleCondition]", type = OnjFunctionType.INFIX)
+    fun or(first: OnjStyleCondition, second: OnjStyleCondition): OnjStyleCondition =
+        OnjStyleCondition(StyleCondition.Or(first.value, second.value))
+
+    @RegisterOnjFunction(schema = "use Style; params: [StyleCondition, StyleCondition]", type = OnjFunctionType.INFIX)
+    fun and(first: OnjStyleCondition, second: OnjStyleCondition): OnjStyleCondition =
+        OnjStyleCondition(StyleCondition.And(first.value, second.value))
+
+    @RegisterOnjFunction(schema = "use Style; params: [StyleCondition]")
+    fun not(first: OnjStyleCondition): OnjStyleCondition = OnjStyleCondition(StyleCondition.Not(first.value))
 
     @RegisterOnjFunction(schema = "params: [float]", type = OnjFunctionType.CONVERSION)
     fun percent(value: OnjFloat): OnjYogaValue = OnjYogaValue(YogaValue(value.value.toFloat(), YogaUnit.PERCENT))
@@ -64,6 +82,16 @@ object StyleNamespace {
     @RegisterOnjFunction(schema = "params: [float]", type = OnjFunctionType.CONVERSION)
     fun points(value: OnjFloat): OnjYogaValue = OnjYogaValue(YogaValue(value.value.toFloat(), YogaUnit.POINT))
 
+}
+
+class OnjPositionType(
+    override val value: YogaPositionType
+) : OnjValue() {
+
+    override fun toString(): String = "'--yoga-position-type--'"
+    override fun toString(indentationLevel: Int): String = "'--yoga-position-type--'"
+    override fun toJsonString(): String = "'--yoga-position-type--'"
+    override fun toJsonString(indentationLevel: Int): String = "'--yoga-position-type--'"
 }
 
 class OnjYogaAlign(

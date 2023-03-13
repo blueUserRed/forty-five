@@ -10,6 +10,7 @@ import io.github.orioncraftmc.meditate.enums.YogaAlign
 import io.github.orioncraftmc.meditate.enums.YogaEdge
 import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
 import io.github.orioncraftmc.meditate.enums.YogaJustify
+import io.github.orioncraftmc.meditate.enums.YogaPositionType
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,11 +173,57 @@ class FlexGrowStyleProperty<T>(
     override fun get(): Float = node.flexGrow
 }
 
+class PositionTypeStyleProperty<T>(
+    target: T,
+    node: YogaNode,
+    screen: OnjScreen
+) : StyleProperty<T, YogaPositionType>(
+    "positionType",
+    target,
+    node,
+    YogaPositionType.RELATIVE,
+    YogaPositionType::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor {
+
+    override fun set(data: YogaPositionType) {
+        node.positionType = data
+    }
+
+    override fun get(): YogaPositionType = node.positionType
+}
+
+class AlignSelfStyleProperty<T>(
+    target: T,
+    node: YogaNode,
+    screen: OnjScreen
+) : StyleProperty<T, YogaAlign>(
+    "alignSelf",
+    target,
+    node,
+    YogaAlign.AUTO,
+    YogaAlign::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor {
+
+    override fun set(data: YogaAlign) {
+        node.alignSelf = data
+    }
+
+    override fun get(): YogaAlign = node.alignSelf
+}
+
 fun <T> T.addActorStyles(node: YogaNode, screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(VisibleStyleProperty(this, node, screen))
     styleManager.addStyleProperty(WidthStyleProperty(this, node, screen))
     styleManager.addStyleProperty(HeightStyleProperty(this, node, screen))
     styleManager.addStyleProperty(FlexGrowStyleProperty(this, node, screen))
+    styleManager.addStyleProperty(PositionTypeStyleProperty(this, node, screen))
+    styleManager.addStyleProperty(AlignSelfStyleProperty(this, node, screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, node, YogaEdge.TOP, "marginTop", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, node, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, node, YogaEdge.LEFT, "marginLeft", screen))

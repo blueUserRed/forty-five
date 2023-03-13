@@ -1,10 +1,15 @@
 package com.fourinachamber.fourtyfive.screen.general.styleTest
 
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.HoverStateActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import io.github.orioncraftmc.meditate.YogaNode
+import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaUnit
 import kotlin.reflect.KClass
 
 interface StyledActor : HoverStateActor {
@@ -39,6 +44,35 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
         property.addInstruction(instruction)
     }
 
+    companion object {
+
+        const val logTag = "style"
+
+        @Suppress("UNCHECKED_CAST") // the `as T` casts are safe
+        fun <T> lerpStyleData(type: KClass<*>, from: T, to: T, percent: Float): T? {
+            return when (from) {
+
+                is Float -> (from + ((to as Float) - from) * percent) as T
+
+                is YogaValue -> {
+                    to as YogaValue
+                    if (to.unit != from.unit || to.unit in arrayOf(YogaUnit.AUTO, YogaUnit.UNDEFINED)) {
+                        FourtyFiveLogger.medium(logTag, "attempted to animate a property of type YogaValue, " +
+                                "but the units used are either mixed or set to auto or undefined")
+                        return null
+                    }
+                    YogaValue(from.value + (to.value - from.value) * percent, to.unit) as T
+                }
+
+                else -> {
+                    FourtyFiveLogger.medium(logTag, "attempted to animate property of type ${type.simpleName}, " +
+                            "which currently cannot be interpolated")
+                    null
+                }
+            }
+        }
+    }
+
 }
 
 abstract class StyleProperty<Target, DataType>(
@@ -61,7 +95,11 @@ abstract class StyleProperty<Target, DataType>(
         val top = instructions
             .filter { it.condition.check(target, screen) }
             .maxByOrNull { it.priority }
-        currentInstruction = top
+        if (currentInstruction != top) {
+            currentInstruction?.onControlLost()
+            currentInstruction = top
+            currentInstruction?.onControlGained(current)
+        }
         top ?: return
         val value = top.value
         if (current == value) return
@@ -82,12 +120,61 @@ abstract class StyleProperty<Target, DataType>(
 open class StyleInstruction<DataType>(
     val data: DataType,
     val priority: Int,
-    val condition: StyleCondition
+    val condition: StyleCondition,
+    val dataTypeClass: KClass<*>
 ) {
 
     open val value: DataType
         get() = data
 
+
+    open fun onControlGained(valueBefore: DataType) { }
+
+    open fun onControlLost() { }
+
+}
+
+class AnimatedStyleInstruction<DataType>(
+    data: DataType,
+    priority: Int,
+    condition: StyleCondition,
+    dataTypeClass: KClass<*>,
+    val duration: Int,
+    val interpolation: Interpolation
+) : StyleInstruction<DataType>(data, priority, condition, dataTypeClass) {
+
+    private var startValue: DataType? = null
+    private var startTime: Long = 0L
+
+    override val value: DataType
+        get() {
+            if (startValue == null) return data
+            if (TimeUtils.millis() >= startTime + duration) {
+                startValue = null
+                return data
+            }
+            val percent = ((TimeUtils.millis().toDouble() - startTime.toDouble()) / duration.toDouble()).toFloat()
+            return StyleManager.lerpStyleData(
+                dataTypeClass,
+                startValue!!,
+                data,
+                percent
+            ) ?: run {
+                startValue = null
+                startTime = 0L
+                data
+            }
+        }
+
+    override fun onControlGained(valueBefore: DataType) {
+        startValue = valueBefore
+        startTime = TimeUtils.millis()
+    }
+
+    override fun onControlLost() {
+        startValue = null
+        startTime = 0
+    }
 }
 
 sealed class StyleCondition {
@@ -104,6 +191,21 @@ sealed class StyleCondition {
     class ScreenState(val state: String) : StyleCondition() {
         override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
             state in screen.screenState
+    }
+
+    class Or(val first: StyleCondition, val second: StyleCondition) : StyleCondition() {
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
+            first.check(actor, screen) || second.check(actor, screen)
+    }
+
+    class And(val first: StyleCondition, val second: StyleCondition) : StyleCondition() {
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
+            first.check(actor, screen) && second.check(actor, screen)
+    }
+
+    class Not(val first: StyleCondition) : StyleCondition() {
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
+            !first.check(actor, screen)
     }
 
     abstract fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor

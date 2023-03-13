@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -25,10 +26,7 @@ import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleCondition
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleInstruction
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleManager
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styleTest.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
@@ -359,17 +357,34 @@ class ScreenBuilder(val file: FileHandle) {
                 obj as OnjObject
                 val priority = obj.getOr("style_priority", -1L).toInt()
                 val condition = obj.getOr<StyleCondition>("style_condition", StyleCondition.Always)
+                var duration: Int? = null
+                var interpolation: Interpolation? = null
+                obj.ifHas<OnjObject>("style_animation") {
+                    val result = readStyleAnimation(it)
+                    duration = result.first
+                    interpolation = result.second
+                }
                 obj
                     .value
                     .filter { !it.key.startsWith("style_") }
                     .forEach { (key, value) ->
                         val data = getDataForStyle(value, key)
-                        styleManager.addInstruction(key, StyleInstruction(data, priority, condition), data::class)
+                        val dataClass = data::class
+                        val instruction = if (duration == null) {
+                            StyleInstruction(data, priority, condition, dataClass)
+                        } else {
+                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!)
+                        }
+                        styleManager.addInstruction(key, instruction, dataClass)
                     }
             }
         }
 
         return actor
+    }
+
+    private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {
+        return (animation.get<Double>("duration") * 1000).toInt() to animation.get<Interpolation>("interpolation")
     }
 
     private fun getDataForStyle(onjValue: OnjValue, keyName: String): Any {
