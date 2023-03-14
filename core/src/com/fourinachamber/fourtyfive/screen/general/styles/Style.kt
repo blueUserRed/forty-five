@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
+//import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
@@ -19,38 +19,38 @@ class Style(
     val properties: List<StyleProperty<*>>
 ) {
 
-    companion object {
-
-        fun readStyle(obj: OnjObject): Pair<String, Style> {
-            val properties = obj
-                .get<OnjArray>("properties")
-                .value
-                .map {
-                    it as OnjStyleProperty
-                    it.value
-                }
-            return obj.get<String>("name") to Style(properties)
-        }
-
-        fun readFromFile(path: String): Map<String, Style> {
-            val obj = OnjParser.parseFile(Gdx.files.internal(path).file())
-            schema.assertMatches(obj)
-            obj as OnjObject
-
-            return obj
-                .get<OnjArray>("styles")
-                .value
-                .associate { style ->
-                    style as OnjObject
-                    readStyle(style)
-                }
-        }
-
-        private val schema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/style.onjschema").file())
-        }
-
-    }
+//    companion object {
+//
+//        fun readStyle(obj: OnjObject): Pair<String, Style> {
+//            val properties = obj
+//                .get<OnjArray>("properties")
+//                .value
+//                .map {
+//                    it as OnjStyleProperty
+//                    it.value
+//                }
+//            return obj.get<String>("name") to Style(properties)
+//        }
+//
+//        fun readFromFile(path: String): Map<String, Style> {
+//            val obj = OnjParser.parseFile(Gdx.files.internal(path).file())
+//            schema.assertMatches(obj)
+//            obj as OnjObject
+//
+//            return obj
+//                .get<OnjArray>("styles")
+//                .value
+//                .associate { style ->
+//                    style as OnjObject
+//                    readStyle(style)
+//                }
+//        }
+//
+//        private val schema: OnjSchema by lazy {
+//            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/style.onjschema").file())
+//        }
+//
+//    }
 }
 
 class StyleTarget(
@@ -69,20 +69,21 @@ class StyleTarget(
 
     fun addAnimation(animation: StyleAnimation) {
         animations.add(animation)
-        animation.startTime = TimeUtils.millis()
+        animation.startTimeNanos = TimeUtils.nanoTime()
     }
 
     fun update() {
         val iterator = animations.iterator()
         while (iterator.hasNext()) {
             val animation = iterator.next()
-            val timeSinceStart = TimeUtils.millis() - animation.startTime
-            var rawPercent = timeSinceStart.toFloat() / animation.duration.toFloat()
+            val timeSinceStart = TimeUtils.timeSinceNanos(animation.startTimeNanos)
+            var rawPercent = ((timeSinceStart.toDouble() / 1_000_000.0) / animation.duration.toDouble()).toFloat()
             if (rawPercent > 1f) {
                 rawPercent = 1f
                 iterator.remove()
             }
             val percent = animation.interpolation.apply(rawPercent)
+            println("$rawPercent $percent")
             animation.updateCallback(percent, actor, node)
         }
         for (style in styles) {
@@ -130,7 +131,7 @@ class StyleTarget(
 
 data class StyleAnimation(
     val duration: Int,
-    var startTime: Long,
+    var startTimeNanos: Long,
     val interpolation: Interpolation,
     val updateCallback: (percent: Float, actor: Actor, node: YogaNode) -> Unit
 )
@@ -179,13 +180,13 @@ sealed class StyleCondition {
 
 sealed class StyleActorReference {
 
-    object Self : StyleActorReference() {
-
-        override fun get(actor: Actor, screen: OnjScreen): StyleTarget {
-            return screen.styleTargets.find { it.actor === actor }
-                ?: throw RuntimeException("could not find style target of self ref") // this should never happen
-        }
-    }
+//    object Self : StyleActorReference() {
+//
+//        override fun get(actor: Actor, screen: OnjScreen): StyleTarget {
+//            return screen.styleManagers.find { it.actor === actor }
+//                ?: throw RuntimeException("could not find style target of self ref") // this should never happen
+//        }
+//    }
 
     abstract fun get(actor: Actor, screen: OnjScreen): StyleTarget
 

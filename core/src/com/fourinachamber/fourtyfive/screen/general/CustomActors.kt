@@ -24,9 +24,13 @@ import com.badlogic.gdx.utils.SnapshotArray
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fourtyfive.screen.general.styleTest.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
+import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.alpha
+import ktx.actors.onEnter
+import ktx.actors.onExit
 import ktx.actors.onTouchEvent
 import onj.value.OnjArray
 import onj.value.OnjFloat
@@ -133,6 +137,17 @@ interface KeySelectableActor {
     fun getHighlightArea(): Rectangle
 }
 
+interface HoverStateActor {
+
+    var isHoveredOver: Boolean
+
+    fun bindHoverStateListeners(actor: Actor) {
+        actor.onEnter { isHoveredOver = true }
+        actor.onExit { isHoveredOver = false }
+    }
+
+}
+
 /**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
@@ -143,13 +158,21 @@ open class CustomLabel @AllThreadsAllowed constructor(
     labelStyle: LabelStyle,
     var background: Drawable? = null,
     override val partOfHierarchy: Boolean = false
-) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor {
+) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, StyledActor {
 
     override var fixedZIndex: Int = 0
 
     override var isDisabled: Boolean = false
 
     override var isSelected: Boolean = false
+
+    override var isHoveredOver: Boolean = false
+
+    override lateinit var styleManager: StyleManager
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     override fun getHighlightArea(): Rectangle {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
@@ -167,6 +190,10 @@ open class CustomLabel @AllThreadsAllowed constructor(
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
         batch.shader = prevShader
+    }
+
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addLabelStyles(node, screen)
     }
 
     companion object {
@@ -209,7 +236,7 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
 open class CustomImageActor @AllThreadsAllowed constructor(
     drawable: Drawable,
     override val partOfHierarchy: Boolean = false
-) : Image(drawable), Maskable, ZIndexActor, DisableActor, KeySelectableActor {
+) : Image(drawable), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -222,6 +249,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override var maskOffsetY: Float = 0f
 
     override var isSelected: Boolean = false
+
+    override var isHoveredOver: Boolean = false
+
+    override lateinit var styleManager: StyleManager
 
     /**
      * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
@@ -237,6 +268,11 @@ open class CustomImageActor @AllThreadsAllowed constructor(
      * if set to true, the scale of the image will be ignored when drawing
      */
     var ignoreScalingWhenDrawing: Boolean = false
+
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -308,6 +344,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         }
     }
 
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
+    }
+
     companion object {
 
         val maskingShader: ShaderProgram by lazy {
@@ -325,11 +365,19 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 }
 
-open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
+open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor {
 
     override var fixedZIndex: Int = 0
 
     var background: Drawable? = null
+
+    override var isHoveredOver: Boolean = false
+
+    override lateinit var styleManager: StyleManager
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->
@@ -345,6 +393,10 @@ open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
             background?.draw(batch, x, y, width, height)
         }
         super.draw(batch, parentAlpha)
+    }
+
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addFlexBoxStyles(node, screen)
     }
 }
 
@@ -515,9 +567,11 @@ open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 /**
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor {
 
     override var fixedZIndex: Int = 0
+    override lateinit var styleManager: StyleManager
+    override var isHoveredOver: Boolean = false
 
     var background: Drawable? = null
 
@@ -534,6 +588,9 @@ open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
         }
     }
 
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
+    }
 }
 
 class CustomParticleActor(

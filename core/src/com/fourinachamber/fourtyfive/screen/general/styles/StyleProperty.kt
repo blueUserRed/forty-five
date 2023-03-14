@@ -396,7 +396,7 @@ class PositionAnimationProperty(
             interpolation
         ) { percent, _, animNode ->
             val curValue = startValue + (value - startValue) * percent
-
+            println(curValue)
             if (isRelative) animNode.setPositionPercent(edge, curValue)
             else animNode.setPosition(edge, curValue)
 

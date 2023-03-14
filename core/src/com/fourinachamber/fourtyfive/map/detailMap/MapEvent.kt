@@ -85,7 +85,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     }
 
     override fun start() {
-        val screen = ScreenBuilder(Gdx.files.internal("screens/game_screen.onj")).build(this)
+        val screen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build(this)
         FourtyFive.changeToScreen(screen)
     }
 

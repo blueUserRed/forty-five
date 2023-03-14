@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -15,18 +16,19 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
 import com.fourinachamber.fourtyfive.screen.general.styles.Style
-import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+import com.fourinachamber.fourtyfive.map.dialog.Dialog
+import com.fourinachamber.fourtyfive.map.dialog.DialogTextWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
+import com.fourinachamber.fourtyfive.screen.general.styleTest.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
@@ -47,7 +49,7 @@ class ScreenBuilder(val file: FileHandle) {
     private val behavioursToBind: MutableList<Behaviour> = mutableListOf()
     private var actorsWithDragAndDrop: MutableMap<String, MutableList<Pair<Actor, OnjNamedObject>>> = mutableMapOf()
 
-    private val styleTargets: MutableList<StyleTarget> = mutableListOf()
+    private val styleManagers: MutableList<StyleManager> = mutableListOf()
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
     private var screenController: ScreenController? = null
@@ -68,7 +70,7 @@ class ScreenBuilder(val file: FileHandle) {
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
             controllerContext = controllerContext,
-            styleTargets = styleTargets,
+            styleManagers = styleManagers,
             background = background,
             useAssets = borrowed,
             earlyRenderTasks = earlyRenderTasks,
@@ -121,24 +123,24 @@ class ScreenBuilder(val file: FileHandle) {
     private fun readAssets(onj: OnjObject) {
         val assets = onj.get<OnjObject>("assets")
 
-        if (assets.hasKey<OnjArray>("styleFiles")) {
-            assets
-                .get<OnjArray>("styleFiles")
-                .value
-                .forEach {
-                    styles.putAll(Style.readFromFile(it.value as String))
-                }
-        }
-
-        if (assets.hasKey<OnjArray>("styles")) {
-            assets
-                .get<OnjArray>("styles")
-                .value
-                .map { Style.readStyle(it as OnjObject) }
-                .forEach {
-                    styles[it.first] = it.second
-                }
-        }
+//        if (assets.hasKey<OnjArray>("styleFiles")) {
+//            assets
+//                .get<OnjArray>("styleFiles")
+//                .value
+//                .forEach {
+//                    styles.putAll(Style.readFromFile(it.value as String))
+//                }
+//        }
+//
+//        if (assets.hasKey<OnjArray>("styles")) {
+//            assets
+//                .get<OnjArray>("styles")
+//                .value
+//                .map { Style.readStyle(it as OnjObject) }
+//                .forEach {
+//                    styles[it.first] = it.second
+//                }
+//        }
 
         val toBorrow = mutableListOf<String>()
 
@@ -337,6 +339,15 @@ class ScreenBuilder(val file: FileHandle) {
             drawableOrError(widgetOnj.get<String>("background"), screen)
         ).apply { touchable = Touchable.enabled }
 
+        "DialogText" -> DialogTextWidget(
+            Dialog.readFromOnj(
+                widgetOnj.get<OnjArray>("dialog"),
+                fontOrError(widgetOnj.get<String>("font"), screen),
+            ),
+            widgetOnj.get<Double>("fontScale").toFloat(),
+            (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
@@ -344,36 +355,54 @@ class ScreenBuilder(val file: FileHandle) {
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
 
-        val styles = if (widgetOnj.hasKey<OnjArray>("styles")) {
-            val styles = widgetOnj.get<OnjArray>("styles")
-            styles
-                .value
-               .map { styleOrError(it.value as String) }
-        } else null
+        node ?: return actor
+        if (actor !is StyledActor) return actor
 
-        val directProperties = if (widgetOnj.hasKey<OnjArray>("properties")) {
-            val properties = widgetOnj.get<OnjArray>("properties")
-            properties
-                .value
-                .map {
-                    it as OnjStyleProperty
-                    it.value
+        val styleManager = StyleManager(actor, node)
+        actor.styleManager = styleManager
+        actor.initStyles(node, screen)
+        styleManagers.add(styleManager)
+
+        widgetOnj.ifHas<OnjArray>("styles") { arr ->
+            arr.value.forEach { obj ->
+                obj as OnjObject
+                val priority = obj.getOr("style_priority", -1L).toInt()
+                val condition = obj.getOr<StyleCondition>("style_condition", StyleCondition.Always)
+                var duration: Int? = null
+                var interpolation: Interpolation? = null
+                obj.ifHas<OnjObject>("style_animation") {
+                    val result = readStyleAnimation(it)
+                    duration = result.first
+                    interpolation = result.second
                 }
-        } else null
-
-        if (styles != null || directProperties != null) {
-            node ?: throw RuntimeException(
-                "root box can currently not be styled"
-            )
-            styleTargets.add(StyleTarget(
-                node,
-                actor,
-                styles ?: listOf(),
-                directProperties ?: listOf()
-            ))
+                obj
+                    .value
+                    .filter { !it.key.startsWith("style_") }
+                    .forEach { (key, value) ->
+                        val data = getDataForStyle(value, key)
+                        val dataClass = data::class
+                        val instruction = if (duration == null) {
+                            StyleInstruction(data, priority, condition, dataClass)
+                        } else {
+                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!)
+                        }
+                        styleManager.addInstruction(key, instruction, dataClass)
+                    }
+            }
         }
 
         return actor
+    }
+
+    private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {
+        return (animation.get<Double>("duration") * 1000).toInt() to animation.get<Interpolation>("interpolation")
+    }
+
+    private fun getDataForStyle(onjValue: OnjValue, keyName: String): Any {
+        var data = onjValue.value ?: throw RuntimeException("style instruction $keyName cannot be null")
+        if (data is Double) data = data.toFloat()
+        if (data is Long) data = data.toInt()
+        return data
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {

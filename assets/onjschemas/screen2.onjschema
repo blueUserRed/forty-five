@@ -26,8 +26,7 @@ var widgetSharedKeys = {
     zIndex?: int,
     visible?: boolean,
     name?: string,
-    styles?: string[],
-    properties?: StyleProperty[]
+    styles?: { ...* }[]
 };
 
 //var detailTextSharedKeys = {
@@ -166,6 +165,25 @@ $Widget {
         fontColor: Color,
         background: string,
         ...widgetSharedKeys
+    }
+
+    $DialogText {
+        font: string,
+        dialog: { text: string, color: Color, actions?: $DialogPartAction[] }[],
+        fontScale: float,
+        progressTime: float,
+        ...widgetSharedKeys
+    }
+
+}
+
+$DialogPartAction {
+
+    $ShakeDialogAction {
+        xMagnitude: float,
+        xSpeed: float,
+        yMagnitude: float,
+        ySpeed: float,
     }
 
 }
@@ -343,12 +361,7 @@ viewport: $Viewport,
 
 assets: {
     useCardAtlas?: boolean,
-    useAssets: string[],
-    styleFiles?: string[],
-    styles?: {
-        name: string,
-        properties: StyleProperty[]
-    }[]
+    useAssets: string[]
 },
 
 options: {
