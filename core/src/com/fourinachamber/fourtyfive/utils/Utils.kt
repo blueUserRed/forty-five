@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import kotlin.random.Random
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
@@ -86,6 +87,9 @@ val Float.radians: Float
 val Float.degrees: Float
     get() = Math.toDegrees(this.toDouble()).toFloat()
 
+fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
+    return random.nextFloat() * (endInclusive - start) + start
+}
 object Utils {
 
     /**
