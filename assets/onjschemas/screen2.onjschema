@@ -167,6 +167,25 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $DialogText {
+        font: string,
+        dialog: { text: string, color: Color, actions?: $DialogPartAction[] }[],
+        fontScale: float,
+        progressTime: float,
+        ...widgetSharedKeys
+    }
+
+}
+
+$DialogPartAction {
+
+    $ShakeDialogAction {
+        xMagnitude: float,
+        xSpeed: float,
+        yMagnitude: float,
+        ySpeed: float,
+    }
+
 }
 
 $DetailMapProvider {
