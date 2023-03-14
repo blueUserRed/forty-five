@@ -1,4 +1,3 @@
-
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 import "config/graphics_config.onj" as graphicsConfig;
@@ -45,7 +44,11 @@ root: $Box {
             relHeight(100.0),
             position("absolute")
         ],
-        detailMapProvider: $CurrentMapProvider { },
+        //        detailMapProvider: $CurrentMapProvider { },
+
+        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
+            seed: 100
+        },
         nodeSize: 5.0,
         lineWidth: 1.0,
         name: "map",
