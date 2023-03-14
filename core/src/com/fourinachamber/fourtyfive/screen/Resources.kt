@@ -123,7 +123,7 @@ class TextureResource(
 }
 
 class FontResource(
-    handle: String,
+    handle: ResourceHandle,
     private val imageFile: String,
     private val fontFile: String,
     private val markupEnabled: Boolean,
@@ -168,7 +168,7 @@ class FontResource(
 }
 
 class AtlasResource(
-    handle: String,
+    handle: ResourceHandle,
     private val file: String
 ) : Resource(handle) {
 
@@ -213,7 +213,7 @@ class AtlasResource(
 }
 
 class AtlasRegionResource(
-    handle: String,
+    handle: ResourceHandle,
     val regionName: String,
     val atlasResourceHandle: String
 ) : Resource(handle), ResourceBorrower {
@@ -245,7 +245,7 @@ class AtlasRegionResource(
 }
 
 class CursorResource(
-    handle: String,
+    handle: ResourceHandle,
     private val file: String,
     private val hotspotX: Int,
     private val hotspotY: Int
@@ -282,7 +282,7 @@ class CursorResource(
 }
 
 class ShaderResource(
-    handle: String,
+    handle: ResourceHandle,
     private val file: String,
     private val constantArgs: Map<String, Any>
 ) : Resource(handle) {
@@ -317,7 +317,7 @@ class ShaderResource(
 }
 
 class ColorTextureResource(
-    handle: String,
+    handle: ResourceHandle,
     private val color: Color
 ) : Resource(handle) {
 
@@ -355,7 +355,7 @@ class ColorTextureResource(
 }
 
 class ParticleResource(
-    handle: String,
+    handle: ResourceHandle,
     private val file: String,
     private val textureDirectory: String,
     private val scale: Float
@@ -384,7 +384,7 @@ class ParticleResource(
 }
 
 class NinepatchResource(
-    handle: String,
+    handle: ResourceHandle,
     private val file: String,
     private val left: Int,
     private val right: Int,
