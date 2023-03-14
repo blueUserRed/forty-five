@@ -10,13 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import kotlin.random.Random
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
  * `is Either.Right`. Can be created using the constructor of the subclasses or using the [eitherLeft] or [eitherRight]
  * extension functions.
  */
-sealed class Either<out T, out U>  {
+sealed class Either<out T, out U> {
 
     class Left<out T>(val value: T) : Either<T, Nothing>()
     class Right<out U>(val value: U) : Either<Nothing, U>()
@@ -36,6 +37,7 @@ var Payload.obj: Any?
  * @see Either
  */
 fun <T> T.eitherLeft(): Either<T, Nothing> = Either.Left(this)
+
 /**
  * @see Either
  */
@@ -85,6 +87,10 @@ val Float.radians: Float
 
 val Float.degrees: Float
     get() = Math.toDegrees(this.toDouble()).toFloat()
+
+fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
+    return random.nextFloat() * (endInclusive - start) + start
+}
 
 object Utils {
 

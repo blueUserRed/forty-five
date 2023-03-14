@@ -1,11 +1,12 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fourtyfive.utils.random
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
-import java.util.Random
 import kotlin.math.pow
+import kotlin.random.Random
 
 class SeededMapGenerator(
     val seed: Long = 102,
@@ -31,7 +32,7 @@ class SeededMapGenerator(
     fun generate() {
         println("NOW TEST_OUTPUT")
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
-        val nbrOfNodes = rnd.nextInt(restictions.minNodes, restictions.maxNodes)
+        val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
 //        val boundary: Float = 50F
         nodes.add(MapNodeBuilder(0F, 0F))
 //        nodes.add(MapNodeBuilder(boundary, 0F))
@@ -45,7 +46,7 @@ class SeededMapGenerator(
             addNodeFromCurve(
                 curve,
                 (max(
-                    min(i.toFloat() + rnd.nextFloat(-0.75F / accuracy, 0.75F / accuracy), accuracy.toFloat()),
+                    min(i.toFloat() + ((-0.75F / accuracy)..(0.75F / accuracy)).random(rnd), accuracy.toFloat()),
                     0F
                 ) / accuracy.toFloat()),
                 nodes
