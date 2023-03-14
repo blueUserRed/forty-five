@@ -16,8 +16,8 @@ nodes: [
         blockingEdges: [ 2, 3, ],
         event: $EncounterMapEvent {
             currentlyBlocks: false,
-            canBeStarted: false,
-            isCompleted: true,
+            canBeStarted: true,
+            isCompleted: false,
         },
     },
     {
