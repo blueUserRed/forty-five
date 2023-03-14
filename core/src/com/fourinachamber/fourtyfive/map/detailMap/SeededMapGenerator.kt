@@ -16,20 +16,11 @@ class SeededMapGenerator(
     lateinit var nodes: List<MapNodeBuilder>
     val rnd: Random = Random(seed)
 
-    companion object {
-        @JvmStatic
-        fun generateDef(): SeededMapGenerator {
-            val r = SeededMapGenerator()
-            r.generate()
-            return r
-        }
-    }
-
     fun build(): MapNode {
         return nodes[0].build()
     }
 
-    fun generate() {
+    fun generate(): DetailMap {
         println("NOW TEST_OUTPUT")
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
@@ -60,6 +51,7 @@ class SeededMapGenerator(
         }
 //        printNodesAndNeighbours(nodes)
         this.nodes = nodes
+        return DetailMap(build())
     }
 
     private fun addNodeFromCurve(
