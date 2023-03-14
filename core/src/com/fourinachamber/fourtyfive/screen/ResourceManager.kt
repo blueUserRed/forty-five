@@ -22,6 +22,8 @@ import kotlin.reflect.cast
 
 interface ResourceBorrower
 
+typealias ResourceHandle = String
+
 object ResourceManager {
 
     const val cardAtlasResourceHandle = "${Card.cardTexturePrefix}_cards_atlas"
@@ -30,7 +32,7 @@ object ResourceManager {
         private set
 
     @MainThreadOnly
-    fun borrow(borrower: ResourceBorrower, handle: String) {
+    fun borrow(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toBorrow = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         toBorrow.borrow(borrower)
@@ -41,11 +43,11 @@ object ResourceManager {
      * as `@MainThreadOnly`
      */
     @MainThreadOnly
-    inline fun <reified T> get(borrower: ResourceBorrower, handle: String): T where T : Any {
+    inline fun <reified T> get(borrower: ResourceBorrower, handle: ResourceHandle): T where T : Any {
         return get(borrower, handle, T::class)
     }
 
-    fun <T> get(borrower: ResourceBorrower, handle: String, type: KClass<T>): T where T : Any {
+    fun <T> get(borrower: ResourceBorrower, handle: ResourceHandle, type: KClass<T>): T where T : Any {
         val toGet = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         if (borrower !in toGet.borrowedBy) {
@@ -55,7 +57,7 @@ object ResourceManager {
     }
 
     @MainThreadOnly
-    fun giveBack(borrower: ResourceBorrower, handle: String) {
+    fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toGiveBack = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
         if (borrower !in toGiveBack.borrowedBy) {
