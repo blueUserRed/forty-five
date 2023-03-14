@@ -23,6 +23,7 @@ import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceBorrower
 import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleManager
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.utils.*
 import kotlin.system.measureTimeMillis
@@ -39,7 +40,7 @@ open class OnjScreen @MainThreadOnly constructor(
     private val useAssets: List<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
-    val styleTargets: List<StyleTarget>,
+    val styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
     private val printFrameRate: Boolean,
@@ -246,7 +247,6 @@ open class OnjScreen @MainThreadOnly constructor(
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
-        for (target in styleTargets) target.init(this)
     }
 
     fun transitionAway() {
@@ -264,7 +264,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
-        for (styleTarget in styleTargets) styleTarget.update()
+        for (styleTarget in styleManagers) styleTarget.update()
         if (printFrameRate) FourtyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()

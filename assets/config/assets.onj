@@ -11,6 +11,12 @@ fonts: [
         imageFile: "fonts/red_wing.png"
     },
     {
+        name: "red_wing_cm",
+        fontFile: "fonts/red_wing.fnt",
+        imageFile: "fonts/red_wing.png",
+        markupEnabled: true
+    },
+    {
         name: "vanilla_whale",
         fontFile: "fonts/vanilla_whale.fnt",
         imageFile: "fonts/vanilla_whale.png"

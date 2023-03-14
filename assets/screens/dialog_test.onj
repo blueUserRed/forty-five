@@ -1,0 +1,58 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "dialog/dialog.onj" as dialogs;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
+assets: {
+    useAssets: [
+        "title_screen_background", "red_wing_cm",
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    transitionAwayTime: 1.0,
+    background: "title_screen_background",
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ]
+},
+
+root: $Box {
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent,
+            alignItems: align.center,
+            justifyContent: justify.center
+        }
+    ]
+} children [
+
+    $DialogText {
+        styles: [
+            {
+                flexDirection: flexDirection.row
+//                width: 100.0#percent,
+//                height: 100.0#percent,
+            }
+        ],
+        dialog: dialogs.testDialog,
+        font: "red_wing_cm",
+//        fontColor: null,
+        fontScale: 0.1,
+        progressTime: 0.05,
+        debug: true
+    }
+
+]

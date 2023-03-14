@@ -17,6 +17,7 @@ import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
+import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.customization.OnjConfig
 
 /**
@@ -88,6 +89,7 @@ object FourtyFive : Game() {
             registerNameSpace("Style", StyleNamespace)
             registerNameSpace("Screen", ScreenNamespace)
         }
+        TemplateString.init()
         FourtyFiveLogger.init()
         SaveState.read()
         MapManager.init()
