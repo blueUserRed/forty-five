@@ -21,6 +21,8 @@ import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+import com.fourinachamber.fourtyfive.map.dialog.Dialog
+import com.fourinachamber.fourtyfive.map.dialog.DialogTextWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -336,6 +338,15 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Color>("fontColor"),
             drawableOrError(widgetOnj.get<String>("background"), screen)
         ).apply { touchable = Touchable.enabled }
+
+        "DialogText" -> DialogTextWidget(
+            Dialog.readFromOnj(
+                widgetOnj.get<OnjArray>("dialog"),
+                fontOrError(widgetOnj.get<String>("font"), screen),
+            ),
+            widgetOnj.get<Double>("fontScale").toFloat(),
+            (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+        )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
