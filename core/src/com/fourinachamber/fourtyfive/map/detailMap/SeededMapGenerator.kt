@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fourtyfive.utils.Vector2
 import com.fourinachamber.fourtyfive.utils.random
 import onj.value.OnjObject
 import java.lang.Float.max
@@ -16,20 +17,33 @@ class SeededMapGenerator(
     lateinit var nodes: List<MapNodeBuilder>
     val rnd: Random = Random(seed)
 
-    companion object {
-        @JvmStatic
-        fun generateDef(): SeededMapGenerator {
-            val r = SeededMapGenerator()
-            r.generate()
-            return r
-        }
-    }
-
     fun build(): MapNode {
         return nodes[0].build()
     }
 
-    fun generate() {
+    fun generate(): DetailMap {
+        val nodes: MutableList<MapNodeBuilder> = mutableListOf()
+        val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
+        val boundary: Float = 50F
+        nodes.add(MapNodeBuilder(0F, -boundary / 2))
+        nodes.add(MapNodeBuilder(boundary, -boundary / 2))
+        nodes.add(MapNodeBuilder(boundary, boundary / 2))
+        nodes.add(MapNodeBuilder(0F, boundary / 2))
+        nodes.add(MapNodeBuilder(0F, -boundary / 2))
+
+        val l = MapGeneratorLine(seed, MapRestriction())
+        for (i in l.points) {
+            nodes.add(MapNodeBuilder(i.x, i.y))
+        }
+        for (i in 1 until nodes.size) {
+            nodes[i].connect(nodes[i - 1])
+        }
+        this.nodes = nodes
+        return DetailMap(build(), listOf())
+    }
+
+
+    fun generateBezier(): DetailMap {
         println("NOW TEST_OUTPUT")
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
@@ -60,6 +74,7 @@ class SeededMapGenerator(
         }
 //        printNodesAndNeighbours(nodes)
         this.nodes = nodes
+        return DetailMap(build(), listOf())
     }
 
     private fun addNodeFromCurve(
@@ -83,6 +98,41 @@ class SeededMapGenerator(
 
 //    private fun addNode(nodes: MutableList<MapNodeBuilder>, nbrOfNodes: Int, mapNodeBuilder: MapNodeBuilder) {
 //    }
+}
+
+class MapGeneratorLine(
+    private val seed: Long,
+    restrict: MapRestriction,
+    val rnd: Random = Random(seed),
+    nbrOfPoints: Int = 15,
+    border: Int = 50,
+) {
+    lateinit var points: List<Vector2>
+
+    init {
+        val points: MutableList<Vector2> = mutableListOf()
+
+        points.add(Vector2(0, -50))
+        for (i in 2 until nbrOfPoints) {
+            val length: Float = getMutliplier(5) * restrict.averageLengthOfLineInBetween
+            val angle: Float = (0F..(Math.PI * 0.95).toFloat()).random(rnd)
+            val posVec: Vector2 = Vector2(
+                points.last().x + ((Math.cos(angle.toDouble())
+                    .pow(2)).toFloat()) * length,
+                points.last().y + ((Math.sin(angle.toDouble())
+                    .pow(2)).toFloat()) * length * (if (Math.sin(angle.toDouble()) < 0) -1 else 1)
+            )
+            points.add(
+                posVec
+            )
+        }
+        this.points = points.toList()
+    }
+
+    fun getMutliplier(max: Int): Float {
+        val a = rnd.nextInt(max - 1) + 1
+        return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
+    }
 }
 
 class BezierCurve(
@@ -131,6 +181,7 @@ data class MapRestriction(
     var maxSplits: Int = 4,
     var splitProb: Float = 0.25F,
     var compressProb: Float = 0.55F,
+    var averageLengthOfLineInBetween: Float = 26F,
 ) {
 
     companion object {
@@ -143,5 +194,4 @@ data class MapRestriction(
             onj.get<Double>("compressProbability").toFloat(),
         )
     }
-
 }

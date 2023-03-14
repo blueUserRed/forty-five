@@ -75,6 +75,10 @@ fun Float.between(min: Float, max: Float): Float {
     return this
 }
 
+fun Vector2(x: Int, y: Int): Vector2 {
+    return Vector2(x.toFloat(), y.toFloat())
+}
+
 /**
  * compares two floats using an epsilon to make sure rounding errors don't break anything
  */
