@@ -35,10 +35,10 @@ root: $Map {
         relWidth(100.0),
         relHeight(100.0)
     ],
-    detailMapProvider: $CurrentMapProvider { },
-//    detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-//        seed: 231239729
-//    },
+//    detailMapProvider: $CurrentMapProvider { },
+    detailMapProvider: $FromSeededGeneratorDetailMapProvider {
+        seed: 231239729
+    },
     nodeSize: 5.0,
     lineWidth: 1.0,
     name: "map",
