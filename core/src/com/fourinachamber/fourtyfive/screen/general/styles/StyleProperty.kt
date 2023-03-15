@@ -44,29 +44,29 @@ abstract class StyleProperty<T>(
 
 }
 
-class BackgroundProperty(
-    private val backgroundName: String?,
-    condition: StyleCondition?
-) : StyleProperty<Actor>(Actor::class, condition) {
-
-    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) = when (actor) {
-        //TODO: put the background in some interface
-        is CustomImageActor -> actor.drawable = backgroundName?.let {
-            ResourceManager.get(screen, backgroundName)
-        }
-        is CustomLabel -> actor.background = backgroundName?.let {
-            ResourceManager.get(screen, backgroundName)
-        }
-        is CustomFlexBox -> actor.background = backgroundName?.let {
-            ResourceManager.get(screen, backgroundName)
-        }
-        else -> throw RuntimeException(
-            "background property cannot be applied to ${actor::class.simpleName}"
-        )
-    }
-
-    override fun getWithCondition(condition: StyleCondition?) = BackgroundProperty(backgroundName, condition)
-}
+//class BackgroundProperty(
+//    private val backgroundName: String?,
+//    condition: StyleCondition?
+//) : StyleProperty<Actor>(Actor::class, condition) {
+//
+//    override fun applyTo(node: YogaNode, actor: Actor, screen: OnjScreen, target: StyleTarget) = when (actor) {
+//        //TODO: put the background in some interface
+//        is CustomImageActor -> actor.drawable = backgroundName?.let {
+//            ResourceManager.get(screen, backgroundName)
+//        }
+//        is CustomLabel -> actor.background = backgroundName?.let {
+//            ResourceManager.get(screen, backgroundName)
+//        }
+//        is CustomFlexBox -> actor.background = backgroundName?.let {
+//            ResourceManager.get(screen, backgroundName)
+//        }
+//        else -> throw RuntimeException(
+//            "background property cannot be applied to ${actor::class.simpleName}"
+//        )
+//    }
+//
+//    override fun getWithCondition(condition: StyleCondition?) = BackgroundProperty(backgroundName, condition)
+//}
 
 class TextAlignProperty(
     private val align: Int,

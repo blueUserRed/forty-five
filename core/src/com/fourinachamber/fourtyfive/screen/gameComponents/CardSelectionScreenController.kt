@@ -125,6 +125,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
 
     private fun displayCardsEmptyActor() {
         val label = CustomLabel(
+            onjScreen,
             emptyText,
             Label.LabelStyle(emptyFont, emptyFontColor)
         )

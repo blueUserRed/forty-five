@@ -4,6 +4,9 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
 
@@ -11,7 +14,8 @@ import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
  * actor representing the area in which enemies can appear on the screen
  */
 class EnemyArea(
-    private val enemySelectionDrawable: Drawable
+    private val enemySelectionDrawableHandle: ResourceHandle,
+    private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup {
 
     override var fixedZIndex: Int = 0
@@ -23,6 +27,10 @@ class EnemyArea(
             // refuse to set value if there is only one enemy
             if (_enemies.size != 1) field = value
         }
+
+    private val enemySelectionDrawable: Drawable by lazy {
+        ResourceManager.get(screen, enemySelectionDrawableHandle)
+    }
 
     /**
      * all enemies in this area

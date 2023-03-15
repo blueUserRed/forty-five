@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
@@ -29,7 +31,7 @@ class CardDetailActor @MainThreadOnly constructor(
     private val spacing: Float,
     initialForcedWidth: Float,
     private val screen: OnjScreen,
-    var background: Drawable? = null
+    var backgroundHandle: ResourceHandle
 ) : WidgetGroup(), ZIndexActor {
 
     /**
@@ -43,11 +45,11 @@ class CardDetailActor @MainThreadOnly constructor(
     private val lineHeight = spacing * 0.2f
     private val lineWidthMultiplier = 0.8f
 
-    private val flavourTextActor = CustomLabel(initialFlavourText, Label.LabelStyle(font, fontColor))
-    private val descriptionActor = CustomLabel(initialDescription, Label.LabelStyle(font, fontColor))
-    private val statsTextActor = CustomLabel(initialStatsText, Label.LabelStyle(font, fontColor))
+    private val flavourTextActor = CustomLabel(screen, initialFlavourText, Label.LabelStyle(font, fontColor))
+    private val descriptionActor = CustomLabel(screen, initialDescription, Label.LabelStyle(font, fontColor))
+    private val statsTextActor = CustomLabel(screen, initialStatsText, Label.LabelStyle(font, fontColor))
     private val statsChangedTextActor =
-        CustomLabel(initialStatsChangedText, Label.LabelStyle(font, fontColor))
+        CustomLabel(screen, initialStatsChangedText, Label.LabelStyle(font, fontColor))
 
 //    private var requiresRebuild: Boolean = true
 
@@ -96,7 +98,9 @@ class CardDetailActor @MainThreadOnly constructor(
 
     private var _prefHeight: Float = 0f
 
-//    private var spacing = 1.8f
+    private val background: Drawable by lazy {
+        ResourceManager.get(screen, backgroundHandle)
+    }
 
     init {
         components.forEach { component ->

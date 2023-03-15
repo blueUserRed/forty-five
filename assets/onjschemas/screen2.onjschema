@@ -110,7 +110,7 @@ $Widget {
         radius: float,
         rotationOff: float,
         cardZIndex: int,
-        background?: string,
+        background: string,
         radiusExtension: float,
 //        ...detailTextSharedKeys,
         ...widgetSharedKeys

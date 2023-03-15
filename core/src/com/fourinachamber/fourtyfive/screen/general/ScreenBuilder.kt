@@ -220,7 +220,8 @@ class ScreenBuilder(val file: FileHandle) {
     ): Actor = when (widgetOnj.name) {
 
         "Image" -> CustomImageActor(
-            drawableOrError(widgetOnj.get<String>("textureName"), screen),
+            widgetOnj.get<String>("textureName"),
+            screen,
             widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             applyImageKeys(this, widgetOnj)
@@ -231,24 +232,18 @@ class ScreenBuilder(val file: FileHandle) {
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle().apply {
-                font = fontOrError(widgetOnj.get<String>("font"), screen)
+                font = fontOrError(widgetOnj.get<String>("font"), screen) // TODO: figure out how to not load the font immediatley
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
                 }
             },
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
+            screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
+            widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
-        }
-
-        "AnimatedImage" -> AnimatedImage(
-            animationOrError(widgetOnj.get<String>("animationName"), screen),
-            widgetOnj.getOr("partOfSelectionHierarchy", false)
-        ).apply {
-            applyImageKeys(this, widgetOnj)
         }
 
         "CardHand" -> CardHand(
@@ -264,14 +259,11 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         "Revolver" -> Revolver(
-            widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it, screen) },
+            widgetOnj.get<String>("background"),
+            widgetOnj.get<String>("slotTexture"),
             widgetOnj.get<Double>("radiusExtension").toFloat(),
             screen
         ).apply {
-            slotDrawable = drawableOrError(widgetOnj.get<String>("slotTexture"), screen)
-            slotFont = fontOrError(widgetOnj.get<String>("font"), screen)
-            fontColor = widgetOnj.get<Color>("fontColor")
-            fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
@@ -281,10 +273,12 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         "EnemyArea" -> EnemyArea(
-            drawableOrError(widgetOnj.get<String>("enemySelectionDrawable"), screen)
+            widgetOnj.get<String>("enemySelectionDrawable"),
+            screen
         )
 
         "CoverArea" -> CoverArea(
+            screen,
             widgetOnj.get<Long>("numStacks").toInt(),
             widgetOnj.get<Long>("maxCards").toInt(),
             widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
@@ -299,10 +293,11 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("cardInitialY").toFloat(),
             widgetOnj.get<Double>("cardDeltaX").toFloat(),
             widgetOnj.get<Double>("cardDeltaY").toFloat(),
-            drawableOrError(widgetOnj.get<String>("stackHook"), screen)
+            widgetOnj.get<String>("stackHook")
         )
 
         "TemplateLabel" -> TemplateStringLabel(
+            screen,
             templateString = TemplateString(widgetOnj.get<String>("template")),
             labelStyle = Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font"), screen),
@@ -311,7 +306,7 @@ class ScreenBuilder(val file: FileHandle) {
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
+            widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
@@ -319,30 +314,31 @@ class ScreenBuilder(val file: FileHandle) {
         "Map" -> DetailMapWidget(
             screen,
             DetailMapProviderFactory.get(widgetOnj.get<OnjNamedObject>("detailMapProvider")).get(),
-            drawableOrError(widgetOnj.get<String>("nodeTexture"), screen),
-            ResourceManager.get(screen, widgetOnj.get<String>("edgeTexture")),
-            drawableOrError(widgetOnj.get<String>("playerTexture"), screen),
+            widgetOnj.get<String>("nodeTexture"),
+            widgetOnj.get<String>("edgeTexture"),
+            widgetOnj.get<String>("playerTexture"),
             widgetOnj.get<Double>("playerWidth").toFloat(),
             widgetOnj.get<Double>("playerHeight").toFloat(),
             widgetOnj.get<Double>("nodeSize").toFloat(),
             widgetOnj.get<Double>("lineWidth").toFloat(),
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
-            ResourceManager.get(screen, widgetOnj.get<String>("directionIndicator")),
+            widgetOnj.get<String>("directionIndicator"),
             widgetOnj.get<String>("detailWidgetName"),
-            drawableOrError(widgetOnj.get<String>("background"), screen)
+            widgetOnj.get<String>("background")
         )
 
         "MapEventDetail" -> MapEventDetailWidget(
             screen,
             fontOrError(widgetOnj.get<String>("font"), screen),
             widgetOnj.get<Color>("fontColor"),
-            drawableOrError(widgetOnj.get<String>("background"), screen)
+            widgetOnj.get<String>("background")
         ).apply { touchable = Touchable.enabled }
 
         "DialogText" -> DialogTextWidget(
             Dialog.readFromOnj(
                 widgetOnj.get<OnjArray>("dialog"),
                 fontOrError(widgetOnj.get<String>("font"), screen),
+                screen
             ),
             widgetOnj.get<Double>("fontScale").toFloat(),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
@@ -448,18 +444,14 @@ class ScreenBuilder(val file: FileHandle) {
     private fun fontOrError(name: String, screen: OnjScreen): BitmapFont {
         return ResourceManager.get(screen, name)
     }
-
-    private fun drawableOrError(name: String, screen: OnjScreen): Drawable {
-        return ResourceManager.get(screen, name)
-    }
-
-    private fun animationOrError(name: String, screen: OnjScreen): FrameAnimation {
-        return ResourceManager.get(screen, name)
-    }
-
-    private fun styleOrError(name: String): Style {
-        return styles[name] ?: throw RuntimeException("unknown style: $name")
-    }
+//
+//    private fun drawableOrError(name: String, screen: OnjScreen): Drawable {
+//        return ResourceManager.get(screen, name)
+//    }
+//
+//    private fun animationOrError(name: String, screen: OnjScreen): FrameAnimation {
+//        return ResourceManager.get(screen, name)
+//    }
 
     private fun alignmentOrError(alignment: String): Int = when (alignment) {
         "center" -> Align.center

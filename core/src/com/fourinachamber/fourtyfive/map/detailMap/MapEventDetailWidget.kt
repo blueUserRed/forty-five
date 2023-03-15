@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
@@ -14,20 +15,21 @@ class MapEventDetailWidget(
     private val screen: OnjScreen,
     private val font: BitmapFont,
     private val fontColor: Color,
-    background: Drawable
-) : CustomVerticalGroup() {
+    backgroundHandle: ResourceHandle
+) : CustomVerticalGroup(screen) {
 
-    private val descriptionWidget: CustomLabel = CustomLabel("", Label.LabelStyle(font, fontColor))
+    private val descriptionWidget: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(font, fontColor))
 
-    private val startButton: CustomLabel = CustomLabel("start", Label.LabelStyle(font, fontColor))
+    private val startButton: CustomLabel = CustomLabel(screen, "start", Label.LabelStyle(font, fontColor))
 
-    private val completedLabel: CustomLabel = CustomLabel("already completed", Label.LabelStyle(font, fontColor))
+    private val completedLabel: CustomLabel =
+        CustomLabel(screen, "already completed", Label.LabelStyle(font, fontColor))
 
     var onStartClickedListener: (() -> Unit)? = null
 
     init {
+        this.backgroundHandle = backgroundHandle
         align(Align.center)
-        this.background = background
         // TODO: put magic numbers in some file
         descriptionWidget.setFontScale(0.05f)
         startButton.setFontScale(0.05f)
@@ -43,14 +45,14 @@ class MapEventDetailWidget(
         mapEvent ?: return
         descriptionWidget.setText(mapEvent.descriptionText)
         mapEvent.icon?.let {
-            val icon = CustomImageActor(ResourceManager.get(screen, it))
+            val icon = CustomImageActor(it, screen)
             icon.setScale(0.03f)
             icon.reportDimensionsWithScaling = true
             icon.ignoreScalingWhenDrawing = true
             addActor(icon)
         }
         mapEvent.additionalIcons.forEach { iconHandle ->
-            val icon = CustomImageActor(ResourceManager.get(screen, iconHandle))
+            val icon = CustomImageActor(iconHandle, screen)
             icon.setScale(0.016f)
             icon.reportDimensionsWithScaling = true
             icon.ignoreScalingWhenDrawing = true

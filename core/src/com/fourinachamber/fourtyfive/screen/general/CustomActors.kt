@@ -20,10 +20,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.SnapshotArray
-import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.styleTest.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -148,17 +147,23 @@ interface HoverStateActor {
 
 }
 
+interface BackgroundActor {
+
+    var backgroundHandle: String?
+
+}
+
 /**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
  *  label
  */
 open class CustomLabel @AllThreadsAllowed constructor(
+    val screen: OnjScreen,
     text: String,
     labelStyle: LabelStyle,
-    var background: Drawable? = null,
     override val partOfHierarchy: Boolean = false
-) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, StyledActor {
+) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
 
@@ -170,8 +175,22 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     override lateinit var styleManager: StyleManager
 
+    override var backgroundHandle: String? = null
+        set(value) {
+            field = value
+            background = null
+        }
+
+    private var background: Drawable? = null
+
     init {
         bindHoverStateListeners(this)
+    }
+
+    private fun getBackground(): Drawable? {
+        if (backgroundHandle == null) return null
+        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
+        return background
     }
 
     override fun getHighlightArea(): Rectangle {
@@ -185,6 +204,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
             super.draw(null, parentAlpha)
             return
         }
+        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         val prevShader = batch.shader
         batch.shader = fontShader
@@ -214,11 +234,11 @@ open class CustomLabel @AllThreadsAllowed constructor(
 }
 
 open class TemplateStringLabel @AllThreadsAllowed constructor(
+    screen: OnjScreen,
     private val templateString: TemplateString,
     labelStyle: LabelStyle,
-    background: Drawable? = null,
     partOfHierarchy: Boolean = false
-) : CustomLabel(templateString.string, labelStyle, background, partOfHierarchy) {
+) : CustomLabel(screen, templateString.string, labelStyle, partOfHierarchy), BackgroundActor {
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -234,9 +254,10 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
  * custom Image that implements functionality for z-indices and masking
  */
 open class CustomImageActor @AllThreadsAllowed constructor(
-    drawable: Drawable,
+    drawableHandle: ResourceHandle,
+    private val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false
-) : Image(drawable), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor {
+) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -269,6 +290,12 @@ open class CustomImageActor @AllThreadsAllowed constructor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
+    private val _drawable: Drawable by lazy {
+        val drawable = ResourceManager.get<Drawable>(screen, drawableHandle)
+        this.drawable = drawable
+        drawable
+    }
+
 
     init {
         bindHoverStateListeners(this)
@@ -277,7 +304,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
-
+        _drawable // assure drawable is loaded
         if (batch == null) {
             super.draw(null, parentAlpha)
             return
@@ -504,27 +531,6 @@ class RotatableImageActor(
 }
 
 /**
- * An animated image
- * @param animation the animation; contains the frames and data such as the frameTime
- */
-class AnimatedImage(
-    private val animation: FrameAnimation,
-    partOfHierarchy: Boolean = false
-) : CustomImageActor(animation.frames[animation.initialFrame], partOfHierarchy) {
-
-    override var fixedZIndex: Int = 0
-
-    private var curFrame = animation.initialFrame
-    private val refTime = TimeUtils.millis()
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        curFrame = ((TimeUtils.timeSinceMillis(refTime) / animation.frameTime) % animation.frames.size).toInt()
-        drawable = animation.frames[curFrame]
-        super.draw(batch, parentAlpha)
-    }
-}
-
-/**
  * custom table, that implements [ZIndexActor] and [ZIndexGroup]
  */
 class CustomTable : Table(), ZIndexGroup, ZIndexActor {
@@ -543,14 +549,29 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
 /**
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomHorizontalGroup(
+    private val screen: OnjScreen
+) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
 
-    var background: Drawable? = null
+    override var backgroundHandle: String? = null
+        set(value) {
+            field = value
+            background = null
+        }
+
+    private var background: Drawable? = null
+
+    private fun getBackground(): Drawable? {
+        if (backgroundHandle == null) return null
+        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
+        return background
+    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }
@@ -567,16 +588,32 @@ open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 /**
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor {
+open class CustomVerticalGroup(
+    private val screen: OnjScreen
+) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
     override lateinit var styleManager: StyleManager
     override var isHoveredOver: Boolean = false
 
-    var background: Drawable? = null
+    override var backgroundHandle: String? = null
+        set(value) {
+            field = value
+            background = null
+        }
+
+    private var background: Drawable? = null
+
+    private fun getBackground(): Drawable? {
+        if (backgroundHandle == null) return null
+        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
+        return background
+    }
+
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }

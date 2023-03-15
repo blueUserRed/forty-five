@@ -10,6 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.component1
 import com.fourinachamber.fourtyfive.utils.component2
@@ -24,21 +26,14 @@ import kotlin.math.sin
  * between the slots and the edge of the revolver
  */
 class Revolver(
-    private val background: Drawable?,
+    private val backgroundHandle: ResourceHandle,
+    private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
     private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
 
-    /**
-     * the texture for a revolver-slot
-     */
-    var slotDrawable: Drawable? = null
-
-    var slotFont: BitmapFont? = null
-    var fontColor: Color? = null
-    var fontScale: Float? = null
     var slotScale: Float? = null
 
     var cardZIndex: Int = 0
@@ -73,6 +68,14 @@ class Revolver(
         private set
 
     private var currentHoverDetailActor: CardDetailActor? = null
+
+    private val background: Drawable by lazy {
+        ResourceManager.get(screen, backgroundHandle)
+    }
+
+    private val slotDrawable: Drawable by lazy {
+        ResourceManager.get(screen, slotDrawableHandle)
+    }
 
     /**
      * assigns a card to a slot in the revolver; [card] can be set to null, but consider using [removeCard] instead to
@@ -120,7 +123,7 @@ class Revolver(
 
     fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
         slots = Array(5) {
-            val slot = RevolverSlot(it + 1, this, slotDrawable!!, slotScale!!, animationDuration)
+            val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)
             addActor(slot)
             val (dragAndDrop, dropOnj) = config
             val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
@@ -137,7 +140,7 @@ class Revolver(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        background?.draw(batch, x, y, width, height)
+        background.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
 
         var isCardHoveredOver = false
@@ -173,7 +176,7 @@ class Revolver(
     }
 
     private fun updateSlotsAndCards() {
-        val slotSize = slotDrawable!!.minWidth * slotScale!!
+        val slotSize = slotDrawable.minWidth * slotScale!!
         val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size
         prefHeight = size
@@ -245,10 +248,11 @@ class Revolver(
 class RevolverSlot(
     val num: Int,
     val revolver: Revolver,
-    drawable: Drawable,
+    drawableHandle: ResourceHandle,
     scale: Float,
+    screen: OnjScreen,
     private val animationDuration: Float
-) : CustomImageActor(drawable), AnimationActor, KeySelectableActor {
+) : CustomImageActor(drawableHandle, screen), AnimationActor, KeySelectableActor {
 
     override var isSelected: Boolean = false
 
