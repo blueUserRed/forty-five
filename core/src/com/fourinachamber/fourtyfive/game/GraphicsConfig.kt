@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.rendering.BetterShader
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fourtyfive.screen.general.*
@@ -35,7 +36,7 @@ object GraphicsConfig {
 
     @MainThreadOnly
     fun damageOverlay(screen: OnjScreen): Timeline.TimelineAction {
-        val overlayActor = CustomImageActor(ResourceManager.get(screen, damageOverlayTexture))
+        val overlayActor = CustomImageActor( damageOverlayTexture, screen)
         val viewport = screen.stage.viewport
         val anim = FadeInAndOutAnimation(
             0f, 0f,
@@ -151,6 +152,7 @@ object GraphicsConfig {
     @MainThreadOnly
     fun insultFadeAnimation(pos: Vector2, insult: String, screen: OnjScreen): GameAnimationTimelineAction {
         val anim = FadeInAndOutTextAnimation(
+            screen,
             pos.x, pos.y,
             insult,
             fadeFontColor,
@@ -173,6 +175,7 @@ object GraphicsConfig {
         screen: OnjScreen
     ): GameAnimationTimelineAction {
         val anim = TextAnimation(
+            screen,
             pos.x, pos.y,
             text,
             if (positive) numChangePositiveFontColor else numChangeNegativeFontColor,
@@ -196,9 +199,7 @@ object GraphicsConfig {
     fun cardDetailSpacing(): Float = cardDetailSpacing
 
     @MainThreadOnly
-    fun cardDetailBackground(screen: OnjScreen): Drawable? {
-        return cardDetailBackground?.let { ResourceManager.get(screen, it) }
-    }
+    fun cardDetailBackground(): ResourceHandle = cardDetailBackground!!
 
     @MainThreadOnly
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
@@ -308,11 +309,7 @@ object GraphicsConfig {
         cardDetailFont = cardDetailOnj.get<String>("font")
         cardDetailFontScale = cardDetailOnj.get<Double>("fontScale").toFloat()
         cardDetailFontColor = cardDetailOnj.get<Color>("fontColor")
-        cardDetailBackground = if (cardDetailOnj["background"]!!.isNull()) {
-            null
-        } else {
-            cardDetailOnj.get<String>("background")
-        }
+        cardDetailBackground = cardDetailOnj.get<String>("background")
         cardDetailSeparator = cardDetailOnj.get<String>("separator")
         cardDetailSpacing = cardDetailOnj.get<Double>("spacing").toFloat()
 
@@ -338,7 +335,7 @@ object GraphicsConfig {
     private var cardDetailFontScale by Delegates.notNull<Float>()
     private var cardDetailFontColor by Delegates.notNull<Color>()
     private var cardDetailSpacing by Delegates.notNull<Float>()
-    private var cardDetailBackground: String? = null
+    private lateinit var cardDetailBackground: String
     private lateinit var cardDetailSeparator: String
 
     private lateinit var rawTemplateStrings: Map<String, String>

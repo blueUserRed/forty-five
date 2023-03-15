@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.*
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
@@ -18,16 +19,10 @@ abstract class EnemyAction {
     /**
      * the Drawable that is drawn above the enemies head to indicate which action will be executed
      */
-    abstract val indicatorDrawable: Drawable
+    abstract val indicatorDrawableHandle: ResourceHandle
 
-    /**
-     * the scale [indicatorDrawable] is drawn at
-     */
     abstract val indicatorScale: Float
 
-    /**
-     * the text displayed next to [indicatorDrawable]
-     */
     abstract val descriptionText: String
 
     /**
@@ -42,12 +37,11 @@ abstract class EnemyAction {
     class DamagePlayer @MainThreadOnly constructor(
         val enemy: Enemy,
         onj: OnjNamedObject,
-        onjScreen: OnjScreen,
         override val indicatorScale: Float,
         val damage: Int
     ) : EnemyAction() {
 
-        override val indicatorDrawable: Drawable = ResourceManager.get(onjScreen, onj.get<String>("indicatorTexture"))
+        override val indicatorDrawableHandle = onj.get<String>("indicatorTexture")
 
         override val descriptionText: String = damage.toString()
 
@@ -69,7 +63,7 @@ abstract class EnemyAction {
         val coverValue: Int
     ) : EnemyAction() {
 
-        override val indicatorDrawable: Drawable = ResourceManager.get(onjScreen, onj.get<String>("indicatorTexture"))
+        override val indicatorDrawableHandle = onj.get<String>("indicatorTexture")
         override val descriptionText: String = coverValue.toString()
 
         override fun execute(): Timeline = Timeline.timeline {
@@ -104,7 +98,7 @@ abstract class EnemyAction {
         override val indicatorScale: Float
         ) : EnemyAction() {
 
-        override val indicatorDrawable: Drawable = ResourceManager.get(onjScreen, onj.get<String>("indicatorTexture"))
+        override val indicatorDrawableHandle = onj.get<String>("indicatorTexture")
         override val descriptionText: String  = ""
 
         override fun execute(): Timeline = Timeline.timeline {

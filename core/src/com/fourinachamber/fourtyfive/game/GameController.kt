@@ -357,7 +357,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val enemyArea = curScreen.namedActorOrError(enemyAreaName)
         if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
 
-        val enemies = Enemy.getFrom(enemiesOnj, enemyArea)
+        val enemies = Enemy.getFrom(enemiesOnj, enemyArea, curScreen)
 
         enemyAreaOnj
             .get<OnjArray>("enemies")

@@ -3,8 +3,10 @@ package com.fourinachamber.fourtyfive.game
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
 import kotlin.math.floor
@@ -13,7 +15,7 @@ import kotlin.math.floor
  * a status effect that can be applied to a [target]
  */
 abstract class StatusEffect(
-    private val iconTextureName: String,
+    private val iconHandle: ResourceHandle,
     _turns: Int,
     protected val target: StatusEffectTarget,
     private val iconScale: Float
@@ -48,8 +50,7 @@ abstract class StatusEffect(
     abstract fun copy(): StatusEffect
 
     fun initIcon(gameController: GameController) {
-        val texture = ResourceManager.get<Drawable>(gameController.curScreen, iconTextureName)
-        icon = CustomImageActor(texture)
+        icon = CustomImageActor(iconHandle, gameController.curScreen)
         icon.setScale(iconScale)
         icon.reportDimensionsWithScaling = true
         icon.ignoreScalingWhenDrawing = true
@@ -111,7 +112,7 @@ abstract class StatusEffect(
     class Poison(
         val damage: Int,
         turns: Int,
-        target: StatusEffectTarget
+        target: StatusEffectTarget,
     ) : StatusEffect(
         GraphicsConfig.iconName("poison"),
         turns,
@@ -156,12 +157,12 @@ abstract class StatusEffect(
     class Burning(
         turns: Int,
         private val percent: Float,
-        target: StatusEffectTarget
+        target: StatusEffectTarget,
     ) : StatusEffect(
         GraphicsConfig.iconName("burning"),
         turns,
         target,
-        GraphicsConfig.iconScale("burning")
+        GraphicsConfig.iconScale("burning"),
     ) {
 
         override fun copy(): StatusEffect = Burning(turns, percent, target)

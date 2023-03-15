@@ -34,8 +34,8 @@ import java.lang.Integer.min
  */
 class Enemy(
     val name: String,
-    val drawable: Drawable,
-    val coverIcon: Drawable,
+    val drawableHandle: ResourceHandle,
+    val coverIconHandle: ResourceHandle,
     val lives: Int,
     val offsetX: Float,
     val offsetY: Float,
@@ -45,7 +45,8 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val area: EnemyArea
+    val area: EnemyArea,
+    private val screen: OnjScreen
 ) {
 
     val logTag = "enemy-$name-${++instanceCounter}"
@@ -89,7 +90,7 @@ class Enemy(
     private lateinit var brain: EnemyBrain
 
     init {
-        actor = EnemyActor(this, area)
+        actor = EnemyActor(this, area, screen)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -284,20 +285,21 @@ class Enemy(
         @MainThreadOnly
         fun getFrom(
             enemiesOnj: OnjArray,
-            area: EnemyArea
+            area: EnemyArea,
+            screen: OnjScreen
         ): List<Enemy> = enemiesOnj
             .value
             .map {
                 it as OnjObject
                 val gameController = FourtyFive.currentGame!!
                 val curScreen = gameController.curScreen
-                val drawable = ResourceManager.get<Drawable>(curScreen, it.get<String>("texture"))
-                val coverIcon = ResourceManager.get<Drawable>(curScreen, it.get<String>("coverIcon"))
+                val drawableHandle = it.get<String>("texture")
+                val coverIconHandle = it.get<String>("coverIcon")
                 val detailFont = ResourceManager.get<BitmapFont>(curScreen, it.get<String>("detailFont"))
                 val enemy = Enemy(
                     it.get<String>("name"),
-                    drawable,
-                    coverIcon,
+                    drawableHandle,
+                    coverIconHandle,
                     it.get<Long>("lives").toInt(),
                     it.get<Double>("offsetX").toFloat(),
                     it.get<Double>("offsetY").toFloat(),
@@ -307,7 +309,8 @@ class Enemy(
                     detailFont,
                     it.get<Double>("detailFontScale").toFloat(),
                     it.get<Color>("detailFontColor"),
-                    area
+                    area,
+                    screen
                 )
                 enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), curScreen, enemy)
                 enemy
@@ -320,27 +323,34 @@ class Enemy(
 /**
  * used for representing an enemy on the screen
  */
-class EnemyActor(val enemy: Enemy, private val area: EnemyArea) : CustomVerticalGroup(), ZIndexActor, AnimationActor {
+class EnemyActor(
+    val enemy: Enemy,
+    private val area: EnemyArea,
+    private val screen: OnjScreen
+) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
 
     override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
-    private val image: CustomImageActor = CustomImageActor(enemy.drawable)
-    private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIcon)
-    val coverText: CustomLabel = CustomLabel("", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
-    private var enemyBox = CustomHorizontalGroup()
-    private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup()
+    private val image: CustomImageActor = CustomImageActor(enemy.drawableHandle, screen)
+    private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
+    val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
+    private var enemyBox = CustomHorizontalGroup(screen)
+    private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup(screen)
     private val statusEffectDisplay = StatusEffectDisplay(
+        screen,
         enemy.detailFont,
         enemy.detailFontColor,
         enemy.detailFontScale
     )
 
     private val actionIndicatorText: CustomLabel = CustomLabel(
+        screen,
         "",
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
     val livesLabel: CustomLabel = CustomLabel(
+        screen,
         "",
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
@@ -359,7 +369,7 @@ class EnemyActor(val enemy: Enemy, private val area: EnemyArea) : CustomVertical
 
         addActor(actionIndicator)
 
-        val coverInfoBox = CustomVerticalGroup()
+        val coverInfoBox = CustomVerticalGroup(screen)
         coverInfoBox.addActor(coverIcon)
         coverInfoBox.addActor(coverText)
 
@@ -375,7 +385,7 @@ class EnemyActor(val enemy: Enemy, private val area: EnemyArea) : CustomVertical
     }
 
     fun displayAction(action: EnemyAction) {
-        val image = CustomImageActor(action.indicatorDrawable)
+        val image = CustomImageActor(action.indicatorDrawableHandle, screen)
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
         image.setScale(action.indicatorScale)

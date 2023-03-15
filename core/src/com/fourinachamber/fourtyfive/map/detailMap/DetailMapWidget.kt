@@ -15,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleManager
@@ -29,17 +31,17 @@ import kotlin.math.sin
 class DetailMapWidget(
     private val screen: OnjScreen,
     private val map: DetailMap,
-    private val nodeDrawable: Drawable,
-    private val edgeTexture: TextureRegion,
-    private val playerDrawable: Drawable,
+    private val nodeDrawableHandle: ResourceHandle,
+    private val edgeTextureHandle: ResourceHandle,
+    private val playerDrawableHandle: ResourceHandle,
     private val playerWidth: Float,
     private val playerHeight: Float,
     private val nodeSize: Float,
     private val lineWidth: Float,
     private val playerMoveTime: Int,
-    private val directionIndicator: TextureRegion,
+    private val directionIndicatorHandle: ResourceHandle,
     private val detailWidgetName: String,
-    var background: Drawable? = null
+    var backgroundHandle: ResourceHandle
 ) : Widget(), ZIndexActor, StyledActor {
 
     override var fixedZIndex: Int = 0
@@ -54,13 +56,25 @@ class DetailMapWidget(
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
-//    private val detailWidget: MapEventDetailWidget = MapEventDetailWidget(
-//        screen,
-//        detailFont,
-//        detailFontColor,
-//        detailBackground,
-//        this::onStartButtonClicked
-//    )
+    private val nodeDrawable: Drawable by lazy {
+        ResourceManager.get(screen, nodeDrawableHandle)
+    }
+
+    private val playerDrawable: Drawable by lazy {
+        ResourceManager.get(screen, playerDrawableHandle)
+    }
+
+    private val background: Drawable by lazy {
+        ResourceManager.get(screen, backgroundHandle)
+    }
+
+    private val edgeTexture: TextureRegion by lazy {
+        ResourceManager.get(screen, edgeTextureHandle)
+    }
+
+    private val directionIndicator: TextureRegion by lazy {
+        ResourceManager.get(screen, directionIndicatorHandle)
+    }
 
     private val detailWidget: MapEventDetailWidget by lazy {
         val widget = screen.namedActorOrError(detailWidgetName)

@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.styleTest.StyledActor
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.value.OnjArray
@@ -59,10 +60,10 @@ data class Dialog(
     }
 
     companion object {
-        fun readFromOnj(arr: OnjArray, font: BitmapFont): Dialog {
+        fun readFromOnj(arr: OnjArray, font: BitmapFont, screen: OnjScreen): Dialog {
             val parts = arr.value.map {
                 it as OnjObject
-                DialogPart.readFromOnj(it, font)
+                DialogPart.readFromOnj(it, font, screen)
             }
             return Dialog(parts)
         }
@@ -74,8 +75,9 @@ class DialogPart(
     rawText: String,
     font: BitmapFont,
     fontColor: Color,
-    private val actions: List<DialogPart.() -> Unit>
-) : CustomLabel("", LabelStyle(font, fontColor)) {
+    private val actions: List<DialogPart.() -> Unit>,
+    screen: OnjScreen,
+) : CustomLabel(screen, "", LabelStyle(font, fontColor)) {
 
     var progress: Int = 0
         private set
@@ -144,7 +146,7 @@ class DialogPart(
 
     companion object {
 
-        fun readFromOnj(onj: OnjObject, font: BitmapFont): DialogPart {
+        fun readFromOnj(onj: OnjObject, font: BitmapFont, screen: OnjScreen): DialogPart {
             return DialogPart(
                 onj.get<String>("text"),
                 font,
@@ -152,7 +154,8 @@ class DialogPart(
                 onj.getOr<List<OnjValue>>("actions", listOf()).map {
                     it as OnjNamedObject
                     DialogPartActionFactory.getAction(it)
-                }
+                },
+                screen
             )
         }
 

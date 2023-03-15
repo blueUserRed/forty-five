@@ -109,7 +109,7 @@ cardDetailText: {
     font: string,
     fontScale: float,
     fontColor: Color,
-    background: string?,
+    background: string,
     separator: string,
     spacing: float
 },

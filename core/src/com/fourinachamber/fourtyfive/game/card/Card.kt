@@ -14,6 +14,7 @@ import com.fourinachamber.fourtyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardDetailActor
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
@@ -62,7 +63,7 @@ class CardPrototype(
 class Card(
     val name: String,
     val title: String,
-    val drawable: Drawable,
+    val drawableHandle: ResourceHandle,
     val flavourText: String,
     val shortDescription: String,
     val type: Type,
@@ -73,7 +74,7 @@ class Card(
     detailFont: BitmapFont,
     detailFontColor: Color,
     detailFontScale: Float,
-    detailBackground: Drawable?,
+    detailBackgroundHandle: ResourceHandle,
     detailSpacing: Float,
     screen: OnjScreen
 ) {
@@ -91,7 +92,7 @@ class Card(
         detailFont,
         detailFontColor,
         detailFontScale,
-        detailBackground,
+        detailBackgroundHandle,
         detailSpacing,
         screen
     )
@@ -367,7 +368,7 @@ class Card(
                 GraphicsConfig.cardDetailFont(onjScreen),
                 GraphicsConfig.cardDetailFontColor(),
                 GraphicsConfig.cardDetailFontScale(),
-                GraphicsConfig.cardDetailBackground(onjScreen),
+                GraphicsConfig.cardDetailBackground(),
                 GraphicsConfig.cardDetailSpacing(),
                 onjScreen
             )
@@ -437,10 +438,10 @@ class CardActor(
     font: BitmapFont,
     fontColor: Color,
     fontScale: Float,
-    detailBackground: Drawable?,
+    detailBackgroundHandle: ResourceHandle,
     detailSpacing: Float,
     screen: OnjScreen
-) : CustomImageActor(card.drawable) {
+) : CustomImageActor(card.drawableHandle, screen) {
 
     override var isSelected: Boolean = false
 
@@ -461,7 +462,7 @@ class CardActor(
         fontColor = fontColor,
         fontScale = fontScale,
         initialForcedWidth = 0f,
-        background = detailBackground,
+        backgroundHandle = detailBackgroundHandle,
         spacing = detailSpacing,
         screen = screen
     )
