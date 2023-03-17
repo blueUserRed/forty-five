@@ -16,9 +16,25 @@ var buttonBaseScale = 0.2;
 var transitionAwayTime = 0.2;
 
 assets: {
+    useCardAtlas: true,
     useAssets: [
+        "vanilla_whale", "red_wing",
+
+        "game_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
+        "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
+        "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover",
+
+        "revolver_cursor",
+
+        "earthquake_shader",
+
+        "transparent_black_texture",
+
+        "cover_hook", "key_select_frame",
+
+        "film_shader", // TODO: remove
+
         "title_screen_background", "logo", "red_wing",
-        ...(graphicsConfig.keySelectUsedAssets)
     ]
 },
 
@@ -101,7 +117,7 @@ root: $Box {
     } children [
 
         $Label {
-            text: "play",
+            text: "to maps",
             font: "red_wing",
             align: "right",
             color: color.black,
@@ -110,37 +126,10 @@ root: $Box {
             partOfSelectionHierarchy: true,
             behaviours: [
                 $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/expensive_to_load_screen.onj"
+                    screenPath: "screens/map_test.onj"
                 }
             ]
         },
-
-        $Label {
-            text: "abandon run",
-            font: "red_wing",
-            align: "right",
-            color: color.black,
-            fontScale: buttonBaseScale,
-            styles: buttonStyles,
-            partOfSelectionHierarchy: true,
-            behaviours: [
-                $OnClickAbandonRunBehaviour { },
-                $OnClickRemoveActorBehaviour { }
-            ]
-        },
-
-        $Label {
-            text: "quit",
-            font: "red_wing",
-            align: "right",
-            color: color.black,
-            styles: buttonStyles,
-            fontScale: buttonBaseScale,
-            partOfSelectionHierarchy: true,
-            behaviours: [
-                $OnClickExitBehaviour { }
-            ]
-        }
 
     ]
 

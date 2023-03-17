@@ -178,7 +178,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         FourtyFiveLogger.debug(logTag, "chose card $card")
         SaveState.drawCard(card)
         SaveState.write()
-        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(nextScreen)).build())
+        FourtyFive.changeToScreen(nextScreen)
     }
 
     companion object {

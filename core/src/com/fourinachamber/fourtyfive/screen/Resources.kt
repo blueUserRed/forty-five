@@ -14,6 +14,9 @@ import com.fourinachamber.fourtyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.Either
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
 
@@ -28,6 +31,8 @@ abstract class Resource(
     var state: ResourceState = ResourceState.NOT_LOADED
         protected set
 
+    private val mutex = Mutex()
+
     @MainThreadOnly
     protected abstract fun loadDirectMainThread()
 
@@ -37,8 +42,20 @@ abstract class Resource(
     @MainThreadOnly
     protected abstract fun finishLoadingMainThread()
 
+
     @MainThreadOnly
-    fun load() = synchronized(this) {
+    fun <T> get(variantType: KClass<T>): T? where T : Any {
+        if (state != ResourceState.LOADED) {
+            runBlocking {
+                mutex.withLock { load() }
+            }
+        }
+        for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
+        return null
+    }
+
+    @MainThreadOnly
+    private fun load() {
         if (state == ResourceState.NOT_LOADED) {
             loadDirectMainThread()
         } else if (state == ResourceState.PREPARED) {
@@ -47,22 +64,15 @@ abstract class Resource(
         state = ResourceState.LOADED
     }
 
-    @MainThreadOnly
-    fun <T> get(variantType: KClass<T>): T? where T : Any = synchronized(this) {
-        load()
-        for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
-        return null
-    }
-
     @AllThreadsAllowed
-    fun prepare() = synchronized(this) {
+    suspend fun prepare() = mutex.withLock {
         if (state != ResourceState.NOT_LOADED) return
         prepareLoadingAllThreads()
         state = ResourceState.PREPARED
     }
 
     @MainThreadOnly
-    fun borrow(borrower: ResourceBorrower): Resource = synchronized(this) {
+    fun borrow(borrower: ResourceBorrower): Resource {
         borrowedBy.add(borrower)
         return this
     }
