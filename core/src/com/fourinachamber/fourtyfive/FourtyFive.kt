@@ -13,12 +13,18 @@ import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fourtyfive.rendering.Renderable
+import com.fourinachamber.fourtyfive.screen.Resource
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import com.fourinachamber.fourtyfive.utils.TemplateString
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import onj.customization.OnjConfig
+import kotlin.system.measureTimeMillis
 
 /**
  * main game object
@@ -37,8 +43,7 @@ object FourtyFive : Game() {
     override fun create() {
         init()
         if (generateCards) runCardGenerator()
-        val screen = ScreenBuilder(Gdx.files.internal("screens/map_test.onj")).build()
-        changeToScreen(screen)
+        changeToScreen("screens/title_screen.onj")
     }
 
     override fun render() {
@@ -51,26 +56,62 @@ object FourtyFive : Game() {
         cardGenerator.generateCards()
     }
 
-    @MainThreadOnly
-    fun changeToScreen(screen: OnjScreen) {
+    fun changeToScreen(screenPath: String, controllerContext: Any? = null) = runBlocking {
         val currentScreen = currentScreen
-        if (currentScreen?.transitionAwayTime == null) {
-            FourtyFiveLogger.title("changing screen")
-            currentScreen?.dispose()
-            this.currentScreen = screen
-            currentRenderable = screen
-            setScreen(screen)
-            return
+        val screen: OnjScreen
+        val time = measureTimeMillis {
+            if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
+            screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
         }
-        currentScreen.transitionAway()
-        currentScreen.afterMs(currentScreen.transitionAwayTime) {
+//        println("screen building: $time")
+        // TODO: figure out how to load resources during the transition time
+        ResourceManager
+            .resources
+            .filter { it.state == Resource.ResourceState.NOT_LOADED && screen in it.borrowedBy }
+            .forEach {
+//                CoroutineScope
+                launch(Dispatchers.IO) {
+//                    println("preparing ${it.handle}")
+                    it.prepare()
+//                    println("finished preparing ${it.handle}")
+                }
+            }
+        if (currentScreen == null) {
             FourtyFiveLogger.title("changing screen")
-            currentScreen.dispose()
-            this.currentScreen = screen
+            this@FourtyFive.currentScreen = screen
             currentRenderable = screen
             setScreen(screen)
+        } else {
+            currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
+                FourtyFiveLogger.title("changing screen")
+                currentScreen.dispose()
+                this@FourtyFive.currentScreen = screen
+                currentRenderable = screen
+                setScreen(screen)
+            }
         }
     }
+
+//    @MainThreadOnly
+//    fun changeToScreen(screen: OnjScreen) {
+//        val currentScreen = currentScreen
+//        if (currentScreen?.transitionAwayTime == null) {
+//            FourtyFiveLogger.title("changing screen")
+//            currentScreen?.dispose()
+//            this.currentScreen = screen
+//            currentRenderable = screen
+//            setScreen(screen)
+//            return
+//        }
+//        currentScreen.transitionAway()
+//        currentScreen.afterMs(currentScreen.transitionAwayTime) {
+//            FourtyFiveLogger.title("changing screen")
+//            currentScreen.dispose()
+//            this.currentScreen = screen
+//            currentRenderable = screen
+//            setScreen(screen)
+//        }
+//    }
 
     @AllThreadsAllowed
     fun useRenderPipeline(renderable: Renderable) {

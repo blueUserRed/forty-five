@@ -87,15 +87,10 @@ class ScreenBuilder(val file: FileHandle) {
 
         val root = CustomFlexBox()
         root.setFillParent(true)
-//        root.debug = true
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
         screen.addActorToRoot(root)
         screen.buildKeySelectHierarchy()
-
-//        postProcessor?.let {
-//            screen.postProcessor = ResourceManager.get<PostProcessor>(screen, it)
-//        }
 
         screen.screenController = screenController
 

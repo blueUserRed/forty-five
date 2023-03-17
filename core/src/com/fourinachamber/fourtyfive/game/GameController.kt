@@ -716,7 +716,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun win() {
         FourtyFiveLogger.debug(logTag, "player won")
         encounterMapEvent.completed()
-        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(winScreen)).build())
+        FourtyFive.changeToScreen(winScreen)
         SaveState.write()
     }
 
@@ -724,7 +724,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()
-        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(looseScreen)).build())
+        FourtyFive.changeToScreen(looseScreen)
     }
 
     enum class RevolverRotation {
