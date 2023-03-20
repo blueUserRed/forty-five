@@ -51,31 +51,28 @@ root: $Box {
             style_priority: 1,
             alignItems: align.flexEnd,
             flexDirection: flexDirection.column,
-            justifyContent: justify.flexEnd,
+            justifyContent: justify.spaceBetween,
             height: 100.0#percent
-        }
-    ]
+        },
+    ],
+    debug: true,
 } children [
 
-    $Box {
+    $Image {
         styles: [
             {
                 style_priority: 1,
-                flexGrow: 1.0,
+                aspectRatio: 880.0 / 161.0,
+                width: 40.0#percent,
                 marginRight: 2.5#points,
                 marginTop: 5.0#points
             }
         ],
-    } children [
-
-        $Image {
-            reportDimensionsWithScaling: true,
-            textureName: "logo",
-            scaleX: 0.07,
-            scaleY: 0.07,
-        }
-
-    ],
+        reportDimensionsWithScaling: true,
+        textureName: "logo",
+        scaleX: 0.07,
+        scaleY: 0.07,
+    },
 
     $Box {
         styles: [
@@ -97,7 +94,8 @@ root: $Box {
                 }
             }
         ],
-        partOfSelectionHierarchy: true
+        partOfSelectionHierarchy: true,
+        debug: true
     } children [
 
         $Label {

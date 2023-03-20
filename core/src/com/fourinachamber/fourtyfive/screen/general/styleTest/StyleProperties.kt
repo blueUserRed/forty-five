@@ -217,6 +217,29 @@ class AlignSelfStyleProperty<T>(
     override fun get(): YogaAlign = node.alignSelf
 }
 
+
+class AspectRatioStyleProperty<T>(
+    target: T,
+    node: YogaNode,
+    screen: OnjScreen
+) : StyleProperty<T, Float>(
+    "aspectRatio",
+    target,
+    node,
+    0f,
+    Float::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor {
+
+    override fun set(data: Float) {
+        node.aspectRatio = data
+    }
+
+    override fun get(): Float = node.aspectRatio
+}
+
 fun <T> T.addActorStyles(node: YogaNode, screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(VisibleStyleProperty(this, node, screen))
     styleManager.addStyleProperty(WidthStyleProperty(this, node, screen))
@@ -224,6 +247,7 @@ fun <T> T.addActorStyles(node: YogaNode, screen: OnjScreen) where T : Actor, T :
     styleManager.addStyleProperty(FlexGrowStyleProperty(this, node, screen))
     styleManager.addStyleProperty(PositionTypeStyleProperty(this, node, screen))
     styleManager.addStyleProperty(AlignSelfStyleProperty(this, node, screen))
+    styleManager.addStyleProperty(AspectRatioStyleProperty(this, node, screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, node, YogaEdge.TOP, "marginTop", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, node, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, node, YogaEdge.LEFT, "marginLeft", screen))
