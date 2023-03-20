@@ -1,15 +1,11 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
@@ -19,9 +15,9 @@ import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleManager
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyledActor
-import com.fourinachamber.fourtyfive.screen.general.styleTest.addActorStyles
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fourtyfive.utils.*
 import io.github.orioncraftmc.meditate.YogaNode
 import kotlin.math.asin

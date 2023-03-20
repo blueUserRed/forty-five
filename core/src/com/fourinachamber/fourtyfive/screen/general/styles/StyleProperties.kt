@@ -1,4 +1,4 @@
-package com.fourinachamber.fourtyfive.screen.general.styleTest
+package com.fourinachamber.fourtyfive.screen.general.styles
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox

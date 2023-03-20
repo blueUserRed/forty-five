@@ -23,7 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
-import com.fourinachamber.fourtyfive.screen.general.styleTest.*
+import com.fourinachamber.fourtyfive.screen.general.styles.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode

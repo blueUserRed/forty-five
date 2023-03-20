@@ -1,12 +1,10 @@
 package com.fourinachamber.fourtyfive.onjNamespaces
 
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleCondition
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleCondition
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
 import onj.builder.buildOnjObject
-import onj.customization.Namespace
 import onj.customization.Namespace.*
-import onj.customization.OnjFunction
 import onj.customization.OnjFunction.*
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.OnjFloat
