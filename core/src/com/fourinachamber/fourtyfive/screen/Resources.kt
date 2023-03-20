@@ -229,10 +229,10 @@ class AtlasRegionResource(
 ) : Resource(handle), ResourceBorrower {
 
     override fun prepareLoadingAllThreads() {
-        ResourceManager.borrow(this, atlasResourceHandle)
     }
 
     override fun finishLoadingMainThread() {
+        ResourceManager.borrow(this, atlasResourceHandle)
         val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
         val region = atlas.findRegion(regionName)
         variants = listOf(region, TextureRegionDrawable(region))
