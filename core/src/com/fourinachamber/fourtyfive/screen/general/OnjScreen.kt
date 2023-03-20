@@ -23,8 +23,7 @@ import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceBorrower
 import com.fourinachamber.fourtyfive.screen.ResourceManager
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyleManager
-import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fourtyfive.utils.*
 import kotlin.system.measureTimeMillis
 

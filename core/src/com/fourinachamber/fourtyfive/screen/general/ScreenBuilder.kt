@@ -10,13 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.screen.general.styles.Style
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
@@ -28,7 +26,7 @@ import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
-import com.fourinachamber.fourtyfive.screen.general.styleTest.*
+import com.fourinachamber.fourtyfive.screen.general.styles.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
@@ -40,7 +38,6 @@ import onj.value.*
 
 class ScreenBuilder(val file: FileHandle) {
 
-    private val styles: MutableMap<String, Style> = mutableMapOf()
     private var borrowed: List<String> = listOf()
 
     private val earlyRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()

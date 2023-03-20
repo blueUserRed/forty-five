@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
-import com.fourinachamber.fourtyfive.screen.general.styleTest.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
