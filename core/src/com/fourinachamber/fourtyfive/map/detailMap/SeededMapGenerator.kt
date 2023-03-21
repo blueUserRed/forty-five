@@ -25,25 +25,29 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
 
-        var l = MapGeneratorLine(seed, MapRestriction())
+        var l = MapGeneratorLine(seed, restictions)
         for (i in l.points) {
             nodes.add(MapNodeBuilder(i.x, i.y - 60))
         }
-        l = MapGeneratorLine(seed + 1, MapRestriction())
+        l = MapGeneratorLine(seed + 1, restictions)
         for (i in l.points) {
             nodes.add(MapNodeBuilder(i.x, i.y))
         }
-        l = MapGeneratorLine(seed + 2, MapRestriction())
+        l = MapGeneratorLine(seed + 2, restictions)
         for (i in l.points) {
             nodes.add(MapNodeBuilder(i.x, i.y + 60))
         }
-        for (i in 1 until nodes.size) {
+        for (i in 1 until nodes.size - 15) {
+            nodes[i].connect(nodes[i - 1 + 15])
+        }
+        for (i in 1 until 14) {
             nodes[i].connect(nodes[i - 1])
+//            nodes[i + 15].connect(nodes[i - 1 + 15])
+//            nodes[i + 15 * 2].connect(nodes[i - 1 + 15 * 2])
         }
         this.nodes = nodes
         return DetailMap(build(), listOf())
     }
-
 
     fun generateBezier(): DetailMap {
         println("NOW TEST_OUTPUT")
@@ -100,48 +104,50 @@ class SeededMapGenerator(
 
 //    private fun addNode(nodes: MutableList<MapNodeBuilder>, nbrOfNodes: Int, mapNodeBuilder: MapNodeBuilder) {
 //    }
-}
 
-class MapGeneratorLine(
-    private val seed: Long,
-    restrict: MapRestriction,
-    private val rnd: Random = Random(seed),
-    nbrOfPoints: Int = 15,
-    maxWidth: Int = 60,
-    maxAnglePercent: Float = 0.9F,
-) {
-    lateinit var points: List<Vector2>
 
-    init {
-        val points: MutableList<Vector2> = mutableListOf()
+    class MapGeneratorLine(
+        private val seed: Long,
+        restrict: MapRestriction,
+        private val rnd: Random = Random(seed),
+        nbrOfPoints: Int = 15,
 
-        points.add(Vector2(0, 0))
-        for (i in 2 until nbrOfPoints) {
-            val length: Float = getMutliplier(5) * restrict.averageLengthOfLineInBetween
-            val angle: Float =
-                (((1 - maxAnglePercent) / 2)..(1 - (1 - maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
-            println(angle)
-            println(length)
-            println()
-            val posVec: Vector2 = Vector2(
-                (Math.sin(angle.toDouble()) * length).toFloat(),
-                (Math.cos(angle.toDouble()) * 0.5 * length).toFloat()
-            )
-            if (abs(points.last().y + posVec.y) > maxWidth / 2) {
-                posVec.y *= -1
+        ) {
+        lateinit var points: List<Vector2>
+
+        init {
+            val points: MutableList<Vector2> = mutableListOf()
+
+            points.add(Vector2(0, 0))
+            for (i in 2 until nbrOfPoints) {
+                val length: Float = getMutliplier(5) * restrict.averageLengthOfLineInBetween
+                val angle: Float =
+                    (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
+                println(angle)
+                println(length)
+                println()
+                val posVec: Vector2 = Vector2(
+                    (Math.sin(angle.toDouble()) * length).toFloat(),
+                    (Math.cos(angle.toDouble()) * 0.5 * length).toFloat()
+                )
+                if (abs(points.last().y + posVec.y) > restrict.maxWidth / 2) {
+                    posVec.y *= -1
+                }
+                points.add(
+                    posVec.add(points.last())
+                )
             }
-            points.add(
-                posVec.add(points.last())
-            )
+            this.points = points.toList()
         }
-        this.points = points.toList()
+
+        fun getMutliplier(max: Int): Float {
+            val a = rnd.nextInt(max - 1) + 1
+            return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
+        }
     }
 
-    fun getMutliplier(max: Int): Float {
-        val a = rnd.nextInt(max - 1) + 1
-        return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
-    }
 }
+
 
 class BezierCurve(
     private val seed: Long,
@@ -189,6 +195,8 @@ data class MapRestriction(
     var splitProb: Float = 0.25F,
     var compressProb: Float = 0.55F,
     var averageLengthOfLineInBetween: Float = 26F,
+    var maxWidth: Int = 60,
+    var maxAnglePercent: Float = 0.9F,
 ) {
 
     companion object {
