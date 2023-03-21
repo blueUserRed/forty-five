@@ -49,7 +49,7 @@ task dist(type: Jar) {
 //    destinationDir(file(layout.buildDirectory.dir("launch4j")))
 //}
 
-task doExeTest() {
+task createExeFile() {
     launch4j {
         mainClassName = 'com.fourinachamber.fourtyfive.DesktopLauncher'
         icon = "${projectDir}/icons/myApp.ico"
