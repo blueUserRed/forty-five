@@ -7,10 +7,12 @@ buildscript {
         gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         google()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
+        classpath 'edu.sc.seis.launch4j:launch4j:2.5.4'
     }
 }
 
@@ -40,8 +42,19 @@ allprojects {
 
 project(":desktop") {
     apply plugin: "kotlin"
+    apply plugin: 'java'
+    apply plugin: 'edu.sc.seis.launch4j'
+
+    repositories {
+        jcenter()
+    }
 
 
+    launch4j {
+        mainClassName = 'com.fourinachamber.fourtyfive.DesktopLauncher'
+        icon = "${projectDir}/icons/myApp.ico"
+        headerType = "gui"
+    }
     dependencies {
         implementation project(":core")
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
@@ -86,9 +99,9 @@ task texturePacker {
                 }
                 println(line)
                 TexturePacker.process(
-                    "assets/textures/$line",
-                    "assets/textures/packed/$line",
-                    line
+                        "assets/textures/$line",
+                        "assets/textures/packed/$line",
+                        line
                 )
             }
         }
