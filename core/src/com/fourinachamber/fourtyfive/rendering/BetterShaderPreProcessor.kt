@@ -17,23 +17,27 @@ class BetterShaderPreProcessor(
 
     private val uniformsToBind: MutableList<String> = mutableListOf()
 
-    fun preProcess(): Either<BetterShader, String> {
+    fun preProcess(): Either<Pair<String /*=Vertex*/, String /*=Fragment*/>, String /*=export*/> {
         val text = fileHandle.file().readText(Charsets.UTF_8)
         val lines = text.split("\n").toMutableList()
         val sections = splitIntoSections(lines)
-        if (sections.containsKey("export")) {
-            return sections["export"]!!.joinToString(separator = "\n").eitherRight()
+        return if (sections.containsKey("export")) {
+            sections["export"]!!.joinToString(separator = "\n").eitherRight()
         } else {
             val fragment = processCode(sections["fragment"]!!)
             val vertex = processCode(sections["vertex"]!!)
-            val shader = ShaderProgram(vertex, fragment)
-            if (shader.isCompiled) return BetterShader(shader, uniformsToBind).eitherLeft()
-            FourtyFiveLogger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
-            FourtyFiveLogger.dump(LogLevel.SEVERE, shader.log, "log")
-            FourtyFiveLogger.dump(LogLevel.SEVERE, vertex, "pre-processed vertex shader")
-            FourtyFiveLogger.dump(LogLevel.SEVERE, fragment, "pre-processed fragment shader")
-            throw RuntimeException("compilation of shader ${fileHandle.name()} failed")
+            (vertex to fragment).eitherLeft()
         }
+    }
+
+    fun compile(code: Pair<String, String>): BetterShader {
+        val shader = ShaderProgram(code.first, code.second)
+        if (shader.isCompiled) return BetterShader(shader, uniformsToBind)
+        FourtyFiveLogger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
+        FourtyFiveLogger.dump(LogLevel.SEVERE, shader.log, "log")
+        FourtyFiveLogger.dump(LogLevel.SEVERE, code.first, "pre-processed vertex shader")
+        FourtyFiveLogger.dump(LogLevel.SEVERE, code.second, "pre-processed fragment shader")
+        throw RuntimeException("compilation of shader ${fileHandle.name()} failed")
     }
 
     private fun splitIntoSections(lines: MutableList<String>): MutableMap<String, MutableList<String>> {

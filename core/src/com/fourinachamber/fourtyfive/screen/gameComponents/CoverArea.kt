@@ -8,6 +8,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.game.card.Card
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
 import ktx.actors.onClick
 import onj.value.OnjNamedObject
@@ -21,6 +23,7 @@ import java.lang.Float.max
  * @param onlyAllowAddingOnSameTurn if true, the stacks will be looked to the turn the first card was placed in
  */
 class CoverArea(
+    private val screen: OnjScreen,
     val numStacks: Int,
     val maxCards: Int,
     val onlyAllowAddingOnSameTurn: Boolean,
@@ -35,7 +38,7 @@ class CoverArea(
     private val cardInitialY: Float,
     private val cardDeltaX: Float,
     private val cardDeltaY: Float,
-    private val stackHookDrawable: Drawable
+    private val stackHookDrawableHandle: ResourceHandle
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor {
 
     /**
@@ -62,7 +65,8 @@ class CoverArea(
             cardDeltaX,
             cardDeltaY,
             it,
-            stackHookDrawable
+            stackHookDrawableHandle,
+            screen
         )
     }
 
@@ -197,7 +201,8 @@ class CoverStack(
     private val cardDeltaX: Float,
     private val cardDeltaY: Float,
     val num: Int,
-    private val hookDrawable: Drawable
+    private val hookDrawableHandle: ResourceHandle,
+    private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup, AnimationActor {
 
     override var inAnimation: Boolean = false
@@ -218,11 +223,15 @@ class CoverStack(
 
     private val _cards: MutableList<Card> = mutableListOf()
     private var lockedTurnNum: Int? = null
-    private var detailText: CustomLabel = CustomLabel("", Label.LabelStyle(detailFont, detailFontColor))
+    private var detailText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(detailFont, detailFontColor))
 
     var parentWidth: Float = Float.MAX_VALUE
 
     private var currentHoverDetail: CardDetailActor? = null
+
+    private val hookDrawable: Drawable by lazy {
+        ResourceManager.get(screen, hookDrawableHandle)
+    }
 
     /**
      * true if this is the active slot

@@ -140,7 +140,14 @@ object FourtyFiveLogger {
     private fun formatMessage(tag: String, message: String, level: LogLevel): String {
         //TODO: this could use TemplateString
         val time = messageTimeFormatter.format(LocalDateTime.now())
-        return "[$time $tag] $message"
+
+        val (beginAnsi, endAnsi) = when (level) {
+            LogLevel.DEBUG -> ANSI.blue to ANSI.reset
+            LogLevel.MEDIUM -> ANSI.yellow to ANSI.reset
+            LogLevel.SEVERE -> ANSI.red to ANSI.reset
+        }
+
+        return "$beginAnsi[$time $tag] $message$endAnsi"
     }
 
     private fun outputOrError(config: OnjNamedObject): PrintStream = when (val name = config.name) {

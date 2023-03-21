@@ -7,4 +7,5 @@ green: color("00ff00"),
 blue: color("0000ff"),
 black: color("000000"),
 backgroundTransparent: color("04040488"),
-beige: color("615130")
+beige: color("615130"),
+grey: color("aaaaaa")

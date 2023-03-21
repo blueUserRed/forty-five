@@ -36,7 +36,7 @@ abstract class ScreenController {
      * called when this is set as a controller for a screen
      */
     @MainThreadOnly
-    open fun init(onjScreen: OnjScreen) { }
+    open fun init(onjScreen: OnjScreen, context: Any?) { }
 
     /**
      * called every frame

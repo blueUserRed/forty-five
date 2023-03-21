@@ -9,20 +9,19 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.Effect
+import com.fourinachamber.fourtyfive.game.GameController
+import com.fourinachamber.fourtyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fourtyfive.game.GraphicsConfig
 import com.fourinachamber.fourtyfive.game.Trigger
 import com.fourinachamber.fourtyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardDetailActor
 import com.fourinachamber.fourtyfive.screen.general.CustomImageActor
 import com.fourinachamber.fourtyfive.screen.general.KeySelectableActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
-import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
-import com.fourinachamber.fourtyfive.utils.TemplateString
-import com.fourinachamber.fourtyfive.utils.Timeline
-import com.fourinachamber.fourtyfive.utils.component1
-import com.fourinachamber.fourtyfive.utils.component2
+import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjArray
@@ -64,7 +63,7 @@ class CardPrototype(
 class Card(
     val name: String,
     val title: String,
-    val drawable: Drawable,
+    val drawableHandle: ResourceHandle,
     val flavourText: String,
     val shortDescription: String,
     val type: Type,
@@ -75,7 +74,7 @@ class Card(
     detailFont: BitmapFont,
     detailFontColor: Color,
     detailFontScale: Float,
-    detailBackground: Drawable?,
+    detailBackgroundHandle: ResourceHandle,
     detailSpacing: Float,
     screen: OnjScreen
 ) {
@@ -93,7 +92,7 @@ class Card(
         detailFont,
         detailFontColor,
         detailFontScale,
-        detailBackground,
+        detailBackgroundHandle,
         detailSpacing,
         screen
     )
@@ -135,8 +134,8 @@ class Card(
     val shouldRemoveAfterShot: Boolean
         get() = !isEverlasting
 
-    val shouldRotateLeft: Boolean
-        get() = isLeftRotating
+    val rotationDirection: RevolverRotation
+        get() = if (isLeftRotating) RevolverRotation.LEFT else RevolverRotation.RIGHT
 
     private lateinit var rottenModifier: CardModifier
 
@@ -274,6 +273,7 @@ class Card(
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
+    @MainThreadOnly
     fun checkEffects(trigger: Trigger): Timeline? {
         var wasEffectWithTimelineTriggered = false
         val timeline = Timeline.timeline {
@@ -341,7 +341,7 @@ class Card(
             return prototypes
         }
 
-
+        @MainThreadOnly
         private fun getCardFrom(
             onj: OnjObject,
             onjScreen: OnjScreen,
@@ -368,7 +368,7 @@ class Card(
                 GraphicsConfig.cardDetailFont(onjScreen),
                 GraphicsConfig.cardDetailFontColor(),
                 GraphicsConfig.cardDetailFontScale(),
-                GraphicsConfig.cardDetailBackground(onjScreen),
+                GraphicsConfig.cardDetailBackground(),
                 GraphicsConfig.cardDetailSpacing(),
                 onjScreen
             )
@@ -438,10 +438,10 @@ class CardActor(
     font: BitmapFont,
     fontColor: Color,
     fontScale: Float,
-    detailBackground: Drawable?,
+    detailBackgroundHandle: ResourceHandle,
     detailSpacing: Float,
     screen: OnjScreen
-) : CustomImageActor(card.drawable) {
+) : CustomImageActor(card.drawableHandle, screen) {
 
     override var isSelected: Boolean = false
 
@@ -451,12 +451,6 @@ class CardActor(
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fourtyfive.game.card.CardDragSource]
      */
     var isDragged: Boolean = false
-
-    /**
-     * true when the actor is hovered over
-     */
-    var isHoveredOver: Boolean = false
-        private set
 
     val hoverDetailActor = CardDetailActor(
         card = card,
@@ -468,7 +462,7 @@ class CardActor(
         fontColor = fontColor,
         fontScale = fontScale,
         initialForcedWidth = 0f,
-        background = detailBackground,
+        backgroundHandle = detailBackgroundHandle,
         spacing = detailSpacing,
         screen = screen
     )
@@ -477,11 +471,6 @@ class CardActor(
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
         FourtyFive.currentGame!!.destroyCard(card)
         true
-    }
-
-    init {
-        onEnter { isHoveredOver = true }
-        onExit { isHoveredOver = false }
     }
 
     fun enterDestroyMode() {

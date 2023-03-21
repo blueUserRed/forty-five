@@ -16,11 +16,11 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.*
-import ktx.actors.onClick
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.system.measureTimeMillis
 
 
 /**
@@ -161,7 +161,10 @@ class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviou
     private val screenPath = onj.get<String>("screenPath")
 
     override val onCLick: BehaviourCallback = {
-        FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(screenPath)).build())
+        val time = measureTimeMillis {
+            FourtyFive.changeToScreen(screenPath)
+        }
+//        println(time)
     }
 }
 

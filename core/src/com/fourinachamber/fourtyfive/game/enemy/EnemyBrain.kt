@@ -46,7 +46,7 @@ class EnemyBrain(
         private fun actionFromOnj(
             onj: OnjNamedObject,
             onjScreen: OnjScreen,
-            enemy: Enemy
+            enemy: Enemy,
         ): Pair<Int, () -> EnemyAction> = when (onj.name) {
 
             "DamagePlayerEnemyAction" -> ({
@@ -56,7 +56,6 @@ class EnemyBrain(
                 EnemyAction.DamagePlayer(
                     enemy,
                     onj,
-                    onjScreen,
                     onj.get<Double>("indicatorTextureScale").toFloat(),
                     (min..max).random(),
                 )

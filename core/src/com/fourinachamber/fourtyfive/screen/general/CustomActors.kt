@@ -20,13 +20,16 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.utils.SnapshotArray
-import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.styles.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
+import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.alpha
+import ktx.actors.onEnter
+import ktx.actors.onExit
 import ktx.actors.onTouchEvent
 import onj.value.OnjArray
 import onj.value.OnjFloat
@@ -133,23 +136,62 @@ interface KeySelectableActor {
     fun getHighlightArea(): Rectangle
 }
 
+interface HoverStateActor {
+
+    var isHoveredOver: Boolean
+
+    fun bindHoverStateListeners(actor: Actor) {
+        actor.onEnter { isHoveredOver = true }
+        actor.onExit { isHoveredOver = false }
+    }
+
+}
+
+interface BackgroundActor {
+
+    var backgroundHandle: String?
+
+}
+
 /**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
  *  label
  */
 open class CustomLabel @AllThreadsAllowed constructor(
+    val screen: OnjScreen,
     text: String,
     labelStyle: LabelStyle,
-    var background: Drawable? = null,
     override val partOfHierarchy: Boolean = false
-) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor {
+) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
 
     override var isDisabled: Boolean = false
 
     override var isSelected: Boolean = false
+
+    override var isHoveredOver: Boolean = false
+
+    override lateinit var styleManager: StyleManager
+
+    override var backgroundHandle: String? = null
+        set(value) {
+            field = value
+            background = null
+        }
+
+    private var background: Drawable? = null
+
+    init {
+        bindHoverStateListeners(this)
+    }
+
+    private fun getBackground(): Drawable? {
+        if (backgroundHandle == null) return null
+        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
+        return background
+    }
 
     override fun getHighlightArea(): Rectangle {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
@@ -162,11 +204,16 @@ open class CustomLabel @AllThreadsAllowed constructor(
             super.draw(null, parentAlpha)
             return
         }
+        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         val prevShader = batch.shader
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
         batch.shader = prevShader
+    }
+
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addLabelStyles(node, screen)
     }
 
     companion object {
@@ -187,11 +234,11 @@ open class CustomLabel @AllThreadsAllowed constructor(
 }
 
 open class TemplateStringLabel @AllThreadsAllowed constructor(
+    screen: OnjScreen,
     private val templateString: TemplateString,
     labelStyle: LabelStyle,
-    background: Drawable? = null,
     partOfHierarchy: Boolean = false
-) : CustomLabel(templateString.string, labelStyle, background, partOfHierarchy) {
+) : CustomLabel(screen, templateString.string, labelStyle, partOfHierarchy), BackgroundActor {
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -207,9 +254,10 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
  * custom Image that implements functionality for z-indices and masking
  */
 open class CustomImageActor @AllThreadsAllowed constructor(
-    drawable: Drawable,
+    drawableHandle: ResourceHandle,
+    private val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false
-) : Image(drawable), Maskable, ZIndexActor, DisableActor, KeySelectableActor {
+) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -222,6 +270,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override var maskOffsetY: Float = 0f
 
     override var isSelected: Boolean = false
+
+    override var isHoveredOver: Boolean = false
+
+    override lateinit var styleManager: StyleManager
 
     /**
      * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
@@ -238,10 +290,21 @@ open class CustomImageActor @AllThreadsAllowed constructor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
+    private val _drawable: Drawable by lazy {
+        val drawable = ResourceManager.get<Drawable>(screen, drawableHandle)
+        this.drawable = drawable
+        drawable
+    }
+
+
+    init {
+        bindHoverStateListeners(this)
+    }
+
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
-
+        _drawable // assure drawable is loaded
         if (batch == null) {
             super.draw(null, parentAlpha)
             return
@@ -308,6 +371,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         }
     }
 
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
+    }
+
     companion object {
 
         val maskingShader: ShaderProgram by lazy {
@@ -325,11 +392,19 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 }
 
-open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
+open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor {
 
     override var fixedZIndex: Int = 0
 
     var background: Drawable? = null
+
+    override var isHoveredOver: Boolean = false
+
+    override lateinit var styleManager: StyleManager
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->
@@ -345,6 +420,10 @@ open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup {
             background?.draw(batch, x, y, width, height)
         }
         super.draw(batch, parentAlpha)
+    }
+
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addFlexBoxStyles(node, screen)
     }
 }
 
@@ -452,27 +531,6 @@ class RotatableImageActor(
 }
 
 /**
- * An animated image
- * @param animation the animation; contains the frames and data such as the frameTime
- */
-class AnimatedImage(
-    private val animation: FrameAnimation,
-    partOfHierarchy: Boolean = false
-) : CustomImageActor(animation.frames[animation.initialFrame], partOfHierarchy) {
-
-    override var fixedZIndex: Int = 0
-
-    private var curFrame = animation.initialFrame
-    private val refTime = TimeUtils.millis()
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        curFrame = ((TimeUtils.timeSinceMillis(refTime) / animation.frameTime) % animation.frames.size).toInt()
-        drawable = animation.frames[curFrame]
-        super.draw(batch, parentAlpha)
-    }
-}
-
-/**
  * custom table, that implements [ZIndexActor] and [ZIndexGroup]
  */
 class CustomTable : Table(), ZIndexGroup, ZIndexActor {
@@ -491,14 +549,29 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
 /**
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomHorizontalGroup(
+    private val screen: OnjScreen
+) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
 
-    var background: Drawable? = null
+    override var backgroundHandle: String? = null
+        set(value) {
+            field = value
+            background = null
+        }
+
+    private var background: Drawable? = null
+
+    private fun getBackground(): Drawable? {
+        if (backgroundHandle == null) return null
+        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
+        return background
+    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }
@@ -515,14 +588,32 @@ open class CustomHorizontalGroup : HorizontalGroup(), ZIndexGroup, ZIndexActor {
 /**
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
-open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
+open class CustomVerticalGroup(
+    private val screen: OnjScreen
+) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
+    override lateinit var styleManager: StyleManager
+    override var isHoveredOver: Boolean = false
 
-    var background: Drawable? = null
+    override var backgroundHandle: String? = null
+        set(value) {
+            field = value
+            background = null
+        }
+
+    private var background: Drawable? = null
+
+    private fun getBackground(): Drawable? {
+        if (backgroundHandle == null) return null
+        if (background == null) background = ResourceManager.get(screen, backgroundHandle!!)
+        return background
+    }
+
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        val background = getBackground()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
     }
@@ -534,6 +625,9 @@ open class CustomVerticalGroup : VerticalGroup(), ZIndexGroup, ZIndexActor {
         }
     }
 
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
+    }
 }
 
 class CustomParticleActor(

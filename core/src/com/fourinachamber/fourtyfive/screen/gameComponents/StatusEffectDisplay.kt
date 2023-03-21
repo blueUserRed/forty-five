@@ -6,15 +6,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fourtyfive.game.StatusEffect
 import com.fourinachamber.fourtyfive.screen.general.CustomHorizontalGroup
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 
 /**
  * used for displaying status effects
  */
 class StatusEffectDisplay(
+    private val screen: OnjScreen,
     private val font: BitmapFont,
     private val fontColor: Color,
     private val fontScale: Float
-) : CustomHorizontalGroup() {
+) : CustomHorizontalGroup(screen) {
 
     private val effects: MutableList<Pair<StatusEffect, CustomLabel>> = mutableListOf()
 
@@ -23,7 +25,7 @@ class StatusEffectDisplay(
      */
     fun displayEffect(effect: StatusEffect) {
         if (effect in effects.map { it.first }) return
-        val remainingLabel = CustomLabel(effect.remainingTurns.toString(), Label.LabelStyle(font, fontColor))
+        val remainingLabel = CustomLabel(screen, effect.remainingTurns.toString(), Label.LabelStyle(font, fontColor))
         remainingLabel.setFontScale(fontScale)
         addActor(effect.icon)
         addActor(remainingLabel)

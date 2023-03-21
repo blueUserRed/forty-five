@@ -11,6 +11,12 @@ fonts: [
         imageFile: "fonts/red_wing.png"
     },
     {
+        name: "red_wing_cm",
+        fontFile: "fonts/red_wing.fnt",
+        imageFile: "fonts/red_wing.png",
+        markupEnabled: true
+    },
+    {
         name: "vanilla_whale",
         fontFile: "fonts/vanilla_whale.fnt",
         imageFile: "fonts/vanilla_whale.png"
@@ -145,53 +151,8 @@ shaders: [
     {
         name: "film_shader",
         file: "shaders/film.glsl",
-        constantArgs: null
+        constantArgs: { }
     }
-//    {
-//        name: "default_shader",
-//        vertexShader: "shaders/default/default.vert",
-//        fragmentShader: "shaders/default/default.frag",
-//        timeOffset: 0,
-//        uniforms: [],
-//        args: null
-//    },
-//    {
-//        name: "vignette_shader",
-//        vertexShader: "shaders/vignette/vignette.vert",
-//        fragmentShader: "shaders/vignette/vignette.frag",
-//        timeOffset: 0,
-//        uniforms: [ "time", "resolution" ],
-//        args: {
-//            color: color.red,
-//            speed: 0.0,
-//            movement: 1.0,
-//            minMovement: 0.3
-//        }
-//    },
-//    {
-//        name: "grayscale_shader",
-//        vertexShader: "shaders/grayscale/grayscale.vert",
-//        fragmentShader: "shaders/grayscale/grayscale.frag",
-//        timeOffset: 0,
-//        uniforms: [],
-//        args: null
-//    },
-//    {
-//        name: "film_shader",
-//        vertexShader: "shaders/film/film.vert",
-//        fragmentShader: "shaders/film/film.frag",
-//        timeOffset: 0,
-//        uniforms: [ "resolution", "time" ],
-//        args: null
-//    },
-//    {
-//        name: "mosaic_shader",
-//        vertexShader: "shaders/mosaic/mosaic.vert",
-//        fragmentShader: "shaders/mosaic/mosaic.frag",
-//        timeOffset: 0,
-//        uniforms: [ "resolution" ],
-//        args: null
-//    }
 ],
 
 animations: [],
@@ -212,6 +173,10 @@ colorTextures: [
     {
         name: "beige_texture",
         color: color.beige
+    },
+    {
+        name: "grey_texture",
+        color: color.grey
     }
 ],
 
@@ -233,19 +198,28 @@ ninepatches: [
         left: 3,
         right: 3,
         scale: 0.2
+    },
+    {
+        name: "white_rounded",
+        file: "textures/ninepatches/white_rounded.png",
+        top: 24,
+        bottom: 24,
+        left: 24,
+        right: 24,
+        scale: 0.1
     }
 ],
 
 particles: [
     {
         name: "dust_particle",
-        particlePath: "particles/dust.particle",
+        file: "particles/dust.particle",
         textureDir: "textures/particles",
         scale: 0.1
     },
     {
         name: "dust_explosion_particle",
-        particlePath: "particles/dust_explosion.particle",
+        file: "particles/dust_explosion.particle",
         textureDir: "textures/particles",
         scale: 0.1
     }

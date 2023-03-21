@@ -1,6 +1,10 @@
 package com.fourinachamber.fourtyfive.utils
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.utils.TimeUtils
+import onj.parser.OnjParser
+import onj.value.OnjObject
 import kotlin.reflect.KProperty
 
 class TemplateString(
@@ -79,6 +83,19 @@ class TemplateString(
         private fun updateGlobalParam(param: String, value: Any?) {
             globalParams[param] = value
             lastParamUpdateTimeStamp = TimeUtils.millis()
+        }
+
+        const val colorFilePath: String = "imports/colors.onj"
+
+        fun init() {
+            val onj = OnjParser.parseFile(Gdx.files.internal(colorFilePath).file())
+            // who needs schemas anyway?
+            onj as OnjObject
+            onj.value.forEach { (key, value) ->
+                val color = value.value as Color
+                updateGlobalParam("c.$key", "[#$color]")
+            }
+            updateGlobalParam("c.reset", "[]")
         }
 
     }

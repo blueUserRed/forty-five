@@ -26,8 +26,7 @@ var widgetSharedKeys = {
     zIndex?: int,
     visible?: boolean,
     name?: string,
-    styles?: string[],
-    properties?: StyleProperty[]
+    styles?: { ...* }[]
 };
 
 //var detailTextSharedKeys = {
@@ -111,13 +110,14 @@ $Widget {
         radius: float,
         rotationOff: float,
         cardZIndex: int,
-        background?: string,
+        background: string,
         radiusExtension: float,
 //        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
     $EnemyArea {
+        enemySelectionDrawable: string,
         ...widgetSharedKeys
     }
 
@@ -143,6 +143,62 @@ $Widget {
         stackHook: string,
         ...widgetSharedKeys
     }
+
+    $Map {
+        detailMapProvider: $DetailMapProvider,
+        nodeTexture: string,
+        background: string,
+        playerTexture: string,
+        playerWidth: float,
+        playerHeight: float,
+        nodeSize: float,
+        lineWidth: float,
+        edgeTexture: string,
+        playerMovementTime: float,
+        directionIndicator: string,
+        detailWidgetName: string,
+        ...widgetSharedKeys
+    }
+
+    $MapEventDetail {
+        font: string,
+        fontColor: Color,
+        background: string,
+        ...widgetSharedKeys
+    }
+
+    $DialogText {
+        font: string,
+        dialog: { text: string, color: Color, actions?: $DialogPartAction[] }[],
+        fontScale: float,
+        progressTime: float,
+        ...widgetSharedKeys
+    }
+
+}
+
+$DialogPartAction {
+
+    $ShakeDialogAction {
+        xMagnitude: float,
+        xSpeed: float,
+        yMagnitude: float,
+        ySpeed: float,
+    }
+
+}
+
+$DetailMapProvider {
+
+    $FromFileDetailMapProvider {
+        file: string
+    }
+
+    $FromSeededGeneratorDetailMapProvider {
+        seed: int
+    }
+
+    $CurrentMapProvider { }
 
 }
 
@@ -305,12 +361,7 @@ viewport: $Viewport,
 
 assets: {
     useCardAtlas?: boolean,
-    useAssets: string[],
-    styleFiles?: string[],
-    styles?: {
-        name: string,
-        properties: StyleProperty[]
-    }[]
+    useAssets: string[]
 },
 
 options: {
@@ -327,6 +378,7 @@ options: {
 //        cursorName: string
 //    },
     postProcessor?: string,
+    transitionAwayTime?: float
 //    printFrameRate?: boolean
 },
 
