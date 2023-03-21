@@ -12,4 +12,9 @@ stats: {
     enemiesDefeated: int
 },
 
-playerLives: int
+playerLives: int,
+
+position: {
+    map: string,
+    node: int
+}

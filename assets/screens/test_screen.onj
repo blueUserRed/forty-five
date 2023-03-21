@@ -1,201 +1,152 @@
-/////////////////////////////////////////////////
-//               experimental                  //
-/////////////////////////////////////////////////
 
 import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "config/graphics_config.onj" as graphicsConfig;
 
-use Experimental__Screen;
-use Experimental__Style;
+use Common;
+use Screen;
+use Style;
 
-viewport: $FitViewport {
-    worldWidth: 160.0,
-    worldHeight: 90.0
-},
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
+var buttonBaseScale = 0.1;
+//var buttonBaseScale = 0.2;
+var buttonHoverScale = 0.25;
+
+var transitionAwayTime = 0.2;
 
 assets: {
-    colorTextures: [
-        {
-            name: "white",
-            color: color.white
-        },
-        {
-            name: "black",
-            color: color.black
-        },
-        {
-            name: "card_detail_background",
-            color: color.backgroundTransparent
-        }
-    ],
-    fonts: [
-        $DistanceFieldFont {
-            name: "red_wing",
-            fontFile: "fonts/red_wing.fnt",
-            imageFile: "fonts/red_wing.png"
-        }
-    ],
-    textureAtlases: [
-        {
-            file: "textures/packed/title_screen/title_screen.atlas",
-            defines: [ "background3", "logo"]
-        },
-        {
-            file: "textures/packed/game_screen/game_screen.atlas",
-            defines: [
-                "background", "revolver_slot", "enemy", "normal_bullet", "end_turn", "end_turn_hover",
-                "shoot", "shoot_hover", "enemy_turn_banner", "player_turn_banner", "revolver_drum",
-                "heart", "reserves", "hit_overlay", "burning_icon", "insult_icon", "shield_icon",
-                "poison_icon", "draw_bullet", "draw_cover"
-            ]
-        }
+    useAssets: [
+        "title_screen_background", "logo", "red_wing",
+        ...(graphicsConfig.keySelectUsedAssets)
+    ]
+},
 
-    ],
-    styleFiles: [ "screens/test_style.onj" ],
+var buttonStyles = [
+    {
+        style_priority: 1,
+        width: 10.0#percent,
+        marginTop: 0.3#points,
+        fontScale: buttonBaseScale,
+    }
+];
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
 },
 
 options: {
-    background: "background3"
+    background: "title_screen_background",
+    inputMap: [
+        ...(inputMaps.hierarchyBasedNavigationInputMap),
+        ...(inputMaps.defaultInputMap)
+    ],
+    transitionAwayTime: transitionAwayTime + 0.2
 },
 
-
-var drawCardActor = $Box {
-    properties: [
-        position("absolute"),
-        background("card_detail_background"),
-        flexDirection("column"),
-        relWidth(100.0),
-        relHeight(100.0)
+root: $Box {
+    styles: [
+        {
+            style_priority: 1,
+            alignItems: align.flexEnd,
+            flexDirection: flexDirection.column,
+            justifyContent: justify.flexEnd,
+            height: 100.0#percent
+        }
     ],
-    name: "card_draw_table",
     debug: true
 } children [
 
-    $TemplateLabel {
-        font: "red_wing",
-        template: "draw x cards",
-        fontScale: 0.18,
-        align: "center",
-        color: color.white
-    },
-
     $Box {
-        properties: [
-            flexDirection("row")
-        ]
+        styles: [
+            {
+                style_priority: 1,
+                flexGrow: 1.0,
+                marginRight: 2.5#points,
+                marginTop: 5.0#points
+            }
+        ],
+        debug: true,
     } children [
 
-        $Box {
-            properties: [
-                flexDirection("column")
-            ]
-        } children [
+        $Image {
+            reportDimensionsWithScaling: true,
+            textureName: "logo",
+            scaleX: 0.07,
+            scaleY: 0.07,
+            debug: true
+        }
 
-            $TemplateLabel {
-                font: "red_wing",
-                template: "x bullets remaining in stack",
-                fontScale: 0.13,
-                align: "center",
-                color: color.white
+    ],
+
+    $Box {
+        debug: true,
+        styles: [
+            {
+                style_priority: 1,
+                flexDirection: flexDirection.column,
+                marginRight: 1.0#points,
+                marginBottom: 2.5#points,
+                positionLeft: 0.0#points
             },
-
-            $Image {
-                properties: [
-                ],
-                textureName: "draw_bullet",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.08,
-                scaleY: 0.08,
-                behaviours: [ ]
-            }
-
+//            {
+//                style_priority: 2,
+//                style_condition: state("transition away"),
+//                positionLeft: 35.0#points,
+////                style_animation: {
+////                    duration: transitionAwayTime,
+////                    interpolation: interpolation.linear
+////                }
+//            }
         ],
+        partOfSelectionHierarchy: true
+    } children [
 
-        $Box {
-            properties: [
-                flexDirection("column"),
+        $Label {
+            text: "play",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            fontScale: buttonBaseScale,
+            styles: buttonStyles,
+            partOfSelectionHierarchy: true,
+            behaviours: [
+                $OnClickChangeScreenBehaviour {
+                    screenPath: "screens/game_screen.onj"
+                }
+            ],
+            debug: true
+        },
+
+        $Label {
+            text: "abandon run",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            fontScale: buttonBaseScale,
+            styles: buttonStyles,
+            partOfSelectionHierarchy: true,
+            behaviours: [
+                $OnClickAbandonRunBehaviour { },
+                $OnClickRemoveActorBehaviour { }
             ]
-        } children [
+        },
 
-            $TemplateLabel {
-                font: "red_wing",
-                template: "5 covers remaining in stack",
-                fontScale: 0.13,
-                align: "center",
-                color: color.white
-            },
-
-            $Image {
-                properties: [
-                ],
-                textureName: "draw_cover",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.08,
-                scaleY: 0.08,
-                behaviours: [ ]
-            }
-
-        ]
+        $Label {
+            text: "quit",
+            font: "red_wing",
+            align: "right",
+            color: color.black,
+            styles: buttonStyles,
+            fontScale: buttonBaseScale,
+            partOfSelectionHierarchy: true,
+            behaviours: [
+                $OnClickExitBehaviour { }
+            ]
+        }
 
     ]
 
-];
-
-root: $Box {
-} children [
-
-    $Box {
-        properties: [
-            position("absolute"),
-            relWidth(100.0),
-            relHeight(100.0)
-        ],
-        debug: true
-    },
-
-    drawCardActor
 ]
-
-//root: {
-//    debug: true,
-//} children [
-//
-//    $Label {
-//        text: "Hello World",
-//        font: "red_wing",
-//        fontScale: 0.18,
-//        color: color.black,
-//        debug: true,
-//        styles: [ "test_style" ]
-//    },
-//
-//    $Label {
-//        text: "Hello World 2",
-//        font: "red_wing",
-//        fontScale: 0.18,
-//        color: color.white,
-//        debug: true,
-//        directProperties: [ background("black") ]
-//    },
-//
-//    $Box {
-//        debug: true,
-//        directProperties: [ relWidth(50.0) ]
-//    } children [
-//
-//        $Label {
-//            text: "Test",
-//            font: "red_wing",
-//            fontScale: 0.18,
-//            color: color.white,
-//            debug: true
-//        },
-//
-//        $Label {
-//            text: "Test 2",
-//            font: "red_wing",
-//            fontScale: 0.18,
-//            color: color.white,
-//            debug: true
-//        }
-//    ]
-//]

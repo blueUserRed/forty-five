@@ -106,6 +106,7 @@ class BannerAnimation(
  * animates a text by raising it and fading it out (for example used for displaying the damage)
  */
 class TextAnimation(
+    private val screen: OnjScreen,
     private val x: Float,
     private val y: Float,
     initialText: String,
@@ -121,7 +122,7 @@ class TextAnimation(
     private var startTime = 0L
     private var runUntil = 0L
 
-    private val label = CustomLabel(initialText, Label.LabelStyle(font, fontColor))
+    private val label = CustomLabel(screen, initialText, Label.LabelStyle(font, fontColor))
 
     var text: String = initialText
         set(value) {
@@ -235,6 +236,7 @@ open class FadeInAndOutAnimation(
  * (starts at startTime + duration - fadeOut, finishes at startTime + duration)
  */
 class FadeInAndOutTextAnimation(
+    private val screen: OnjScreen,
     x: Float,
     y: Float,
     initialText: String,
@@ -247,7 +249,7 @@ class FadeInAndOutTextAnimation(
     fadeOut : Int
 ) : FadeInAndOutAnimation(
     x, y,
-    CustomLabel(initialText, Label.LabelStyle(font, fontColor)),
+    CustomLabel(screen, initialText, Label.LabelStyle(font, fontColor)),
     onjScreen,
     duration, fadeIn, fadeOut
 ) {

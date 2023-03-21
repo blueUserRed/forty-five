@@ -4,9 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
-import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.*
-import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -25,6 +23,7 @@ import com.fourinachamber.fourtyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fourtyfive.rendering.Renderable
 import com.fourinachamber.fourtyfive.screen.ResourceBorrower
 import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fourtyfive.utils.*
 import kotlin.system.measureTimeMillis
 
@@ -36,12 +35,15 @@ open class OnjScreen @MainThreadOnly constructor(
     val viewport: Viewport,
     batch: Batch,
     private val background: String?,
+    private val controllerContext: Any?,
     private val useAssets: List<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
+    val styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
-    private val printFrameRate: Boolean
+    private val printFrameRate: Boolean,
+    val transitionAwayTime: Int?
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
 
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
@@ -64,12 +66,11 @@ open class OnjScreen @MainThreadOnly constructor(
             Utils.setCursor(value)
         }
 
-//    var postProcessor: PostProcessor? = null
-//        set(value) {
-//            field = value
-//            value?.resetReferenceTime()
-//            resize(Gdx.graphics.width, Gdx.graphics.height)
-//        }
+    private val _screenState: MutableSet<String> = mutableSetOf()
+    val screenState: Set<String>
+        get() = _screenState
+
+    private val screenStateChangeListeners: MutableList<(entered: Boolean, state: String) -> Unit> = mutableListOf()
 
     val stage: Stage = Stage(viewport, batch)
 
@@ -77,7 +78,7 @@ open class OnjScreen @MainThreadOnly constructor(
         @MainThreadOnly set(value) {
             field?.end()
             field = value
-            if (isVisible) value?.init(this)
+            if (isVisible) value?.init(this, controllerContext)
         }
 
     var selectedActor: KeySelectableActor? = null
@@ -105,6 +106,7 @@ open class OnjScreen @MainThreadOnly constructor(
             inputMultiplexer.addProcessor(stage)
         }
 
+    @MainThreadOnly
     private val keySelectDrawable: Drawable by lazy {
         GraphicsConfig.keySelectDrawable(this)
     }
@@ -177,6 +179,25 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     @AllThreadsAllowed
+    fun enterState(state: String) {
+        if (state in _screenState) return
+        _screenState.add(state)
+        screenStateChangeListeners.forEach { it(true, state) }
+    }
+
+    @AllThreadsAllowed
+    fun leaveState(state: String) {
+        if (state !in _screenState) return
+        _screenState.remove(state)
+        screenStateChangeListeners.forEach { it(false, state) }
+    }
+
+    @AllThreadsAllowed
+    fun addScreenStateChangeListener(listener: @AllThreadsAllowed (entered: Boolean, state: String) -> Unit) {
+        screenStateChangeListeners.add(listener)
+    }
+
+    @AllThreadsAllowed
     fun buildKeySelectHierarchy() {
         keySelectionHierarchy = KeySelectionHierarchyBuilder().build(stage.root)
     }
@@ -221,10 +242,16 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun show() {
-        screenController?.init(this)
+        screenController?.init(this, controllerContext)
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
+    }
+
+    fun transitionAway() {
+        screenController = null
+        inputMap = null
+        enterState(transitionAwayScreenState)
     }
 
     @MainThreadOnly
@@ -236,6 +263,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
+        for (styleTarget in styleManagers) styleTarget.update()
         if (printFrameRate) FourtyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()
@@ -263,51 +291,6 @@ open class OnjScreen @MainThreadOnly constructor(
         stage.batch.end()
     }
 
-//    private fun renderWithPostProcessing() {
-//
-//        val fbo = try {
-//            FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
-//        } catch (e: java.lang.IllegalStateException) {
-//            // construction of FrameBuffer sometimes fails when the window is minimized
-//            return
-//        }
-//
-//        fbo.begin()
-//        ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-//        viewport.apply()
-//        doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-//        stage.draw()
-//        doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-//        fbo.end()
-//
-//        val batch = SpriteBatch()
-//
-//        val postProcessor = postProcessor!!
-//
-//        batch.shader = postProcessor.shader
-//        postProcessor.shader.bind()
-//
-//        postProcessor.shader.setUniformMatrix("u_projTrans", viewport.camera.combined)
-//
-//        postProcessor.bindUniforms()
-//        postProcessor.bindArgUniforms()
-//
-//        batch.begin()
-//        ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-//        batch.enableBlending()
-//        batch.draw(
-//            fbo.colorBufferTexture,
-//            0f, 0f,
-//            Gdx.graphics.width.toFloat(),
-//            Gdx.graphics.height.toFloat(),
-//            0f, 0f, 1f, 1f // flips the y-axis
-//        )
-//        batch.end()
-//
-//        fbo.dispose()
-//        batch.dispose()
-//    }
-
     @MainThreadOnly
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
@@ -325,7 +308,10 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     companion object {
+
         const val logTag = "screen"
+
+        const val transitionAwayScreenState = "transition away"
     }
 
 }

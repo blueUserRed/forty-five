@@ -1,0 +1,39 @@
+
+var mapEventStandardConfig = {
+    currentlyBlocks: boolean,
+    canBeStarted: boolean,
+    isCompleted: boolean
+};
+
+$MapEvent {
+
+    $EmptyMapEvent { }
+
+    $EncounterMapEvent {
+        ...mapEventStandardConfig
+    }
+
+}
+
+startNode: int,
+nodes: {
+    x: float,
+    y: float,
+    isArea: boolean,
+    edgesTo: int[],
+    blockingEdges: int[],
+    event: $MapEvent
+}[],
+
+decorations: {
+
+    texture: string,
+    baseWidth: float,
+    baseHeight: float,
+    positions: {
+        x: float,
+        y: float,
+        scale: float
+    }[]
+
+}[]

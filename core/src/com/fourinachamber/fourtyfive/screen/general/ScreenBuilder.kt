@@ -3,28 +3,30 @@ package com.fourinachamber.fourtyfive.screen.general
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.onjNamespaces.OnjStyleProperty
-import com.fourinachamber.fourtyfive.screen.general.styles.Style
-import com.fourinachamber.fourtyfive.screen.general.styles.StyleTarget
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
+import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
+import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+import com.fourinachamber.fourtyfive.map.dialog.Dialog
+import com.fourinachamber.fourtyfive.map.dialog.DialogTextWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fourtyfive.screen.gameComponents.Revolver
+import com.fourinachamber.fourtyfive.screen.general.styles.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
@@ -36,7 +38,6 @@ import onj.value.*
 
 class ScreenBuilder(val file: FileHandle) {
 
-    private val styles: MutableMap<String, Style> = mutableMapOf()
     private var borrowed: List<String> = listOf()
 
     private val earlyRenderTasks: MutableList<OnjScreen.() -> Unit> = mutableListOf()
@@ -45,15 +46,16 @@ class ScreenBuilder(val file: FileHandle) {
     private val behavioursToBind: MutableList<Behaviour> = mutableListOf()
     private var actorsWithDragAndDrop: MutableMap<String, MutableList<Pair<Actor, OnjNamedObject>>> = mutableMapOf()
 
-    private val styleTargets: MutableList<StyleTarget> = mutableListOf()
+    private val styleManagers: MutableList<StyleManager> = mutableListOf()
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
     private var screenController: ScreenController? = null
     private var background: String? = null
+    private var transitionAwayTime: Int? = null
 //    private var postProcessor: String? = null
 
     @MainThreadOnly
-    fun build(): OnjScreen {
+    fun build(controllerContext: Any? = null): OnjScreen {
         val onj = OnjParser.parseFile(file.file())
         screenSchema.assertMatches(onj)
         onj as OnjObject
@@ -61,18 +63,20 @@ class ScreenBuilder(val file: FileHandle) {
         readAssets(onj)
         doOptions(onj)
 
-        val screen = StyleableOnjScreen(
+        val screen = OnjScreen(
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
-            styleTargets = styleTargets,
+            controllerContext = controllerContext,
+            styleManagers = styleManagers,
             background = background,
             useAssets = borrowed,
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
-            printFrameRate = false
+            printFrameRate = false,
+            namedCells = mapOf(),
+            transitionAwayTime = transitionAwayTime
         )
-
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
@@ -80,15 +84,10 @@ class ScreenBuilder(val file: FileHandle) {
 
         val root = CustomFlexBox()
         root.setFillParent(true)
-//        root.debug = true
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
         screen.addActorToRoot(root)
         screen.buildKeySelectHierarchy()
-
-//        postProcessor?.let {
-//            screen.postProcessor = ResourceManager.get<PostProcessor>(screen, it)
-//        }
 
         screen.screenController = screenController
 
@@ -108,32 +107,32 @@ class ScreenBuilder(val file: FileHandle) {
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
         }
-//        options.ifHas<String>("postProcessor") {
-//            postProcessor = it
-//        }
+        options.ifHas<Double>("transitionAwayTime") {
+            transitionAwayTime = (it * 1000).toInt()
+        }
     }
 
     private fun readAssets(onj: OnjObject) {
         val assets = onj.get<OnjObject>("assets")
 
-        if (assets.hasKey<OnjArray>("styleFiles")) {
-            assets
-                .get<OnjArray>("styleFiles")
-                .value
-                .forEach {
-                    styles.putAll(Style.readFromFile(it.value as String))
-                }
-        }
-
-        if (assets.hasKey<OnjArray>("styles")) {
-            assets
-                .get<OnjArray>("styles")
-                .value
-                .map { Style.readStyle(it as OnjObject) }
-                .forEach {
-                    styles[it.first] = it.second
-                }
-        }
+//        if (assets.hasKey<OnjArray>("styleFiles")) {
+//            assets
+//                .get<OnjArray>("styleFiles")
+//                .value
+//                .forEach {
+//                    styles.putAll(Style.readFromFile(it.value as String))
+//                }
+//        }
+//
+//        if (assets.hasKey<OnjArray>("styles")) {
+//            assets
+//                .get<OnjArray>("styles")
+//                .value
+//                .map { Style.readStyle(it as OnjObject) }
+//                .forEach {
+//                    styles[it.first] = it.second
+//                }
+//        }
 
         val toBorrow = mutableListOf<String>()
 
@@ -213,7 +212,8 @@ class ScreenBuilder(val file: FileHandle) {
     ): Actor = when (widgetOnj.name) {
 
         "Image" -> CustomImageActor(
-            drawableOrError(widgetOnj.get<String>("textureName"), screen),
+            widgetOnj.get<String>("textureName"),
+            screen,
             widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             applyImageKeys(this, widgetOnj)
@@ -224,24 +224,18 @@ class ScreenBuilder(val file: FileHandle) {
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle().apply {
-                font = fontOrError(widgetOnj.get<String>("font"), screen)
+                font = fontOrError(widgetOnj.get<String>("font"), screen) // TODO: figure out how to not load the font immediatley
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
                 }
             },
-            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
+            screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
+            widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
-        }
-
-        "AnimatedImage" -> AnimatedImage(
-            animationOrError(widgetOnj.get<String>("animationName"), screen),
-            widgetOnj.getOr("partOfSelectionHierarchy", false)
-        ).apply {
-            applyImageKeys(this, widgetOnj)
         }
 
         "CardHand" -> CardHand(
@@ -257,14 +251,11 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         "Revolver" -> Revolver(
-            widgetOnj.getOr<String?>("background", null)?.let { drawableOrError(it, screen) },
+            widgetOnj.get<String>("background"),
+            widgetOnj.get<String>("slotTexture"),
             widgetOnj.get<Double>("radiusExtension").toFloat(),
             screen
         ).apply {
-            slotDrawable = drawableOrError(widgetOnj.get<String>("slotTexture"), screen)
-            slotFont = fontOrError(widgetOnj.get<String>("font"), screen)
-            fontColor = widgetOnj.get<Color>("fontColor")
-            fontScale = widgetOnj.get<Double>("fontScale").toFloat()
             slotScale = widgetOnj.get<Double>("slotScale").toFloat()
             cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             animationDuration = widgetOnj.get<Double>("animationDuration").toFloat()
@@ -273,10 +264,13 @@ class ScreenBuilder(val file: FileHandle) {
             cardZIndex = widgetOnj.get<Long>("cardZIndex").toInt()
         }
 
-        "EnemyArea" -> EnemyArea().apply {
-        }
+        "EnemyArea" -> EnemyArea(
+            widgetOnj.get<String>("enemySelectionDrawable"),
+            screen
+        )
 
         "CoverArea" -> CoverArea(
+            screen,
             widgetOnj.get<Long>("numStacks").toInt(),
             widgetOnj.get<Long>("maxCards").toInt(),
             widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
@@ -291,10 +285,11 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("cardInitialY").toFloat(),
             widgetOnj.get<Double>("cardDeltaX").toFloat(),
             widgetOnj.get<Double>("cardDeltaY").toFloat(),
-            drawableOrError(widgetOnj.get<String>("stackHook"), screen)
+            widgetOnj.get<String>("stackHook")
         )
 
         "TemplateLabel" -> TemplateStringLabel(
+            screen,
             templateString = TemplateString(widgetOnj.get<String>("template")),
             labelStyle = Label.LabelStyle(
                 fontOrError(widgetOnj.get<String>("font"), screen),
@@ -303,47 +298,99 @@ class ScreenBuilder(val file: FileHandle) {
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
-            widgetOnj.ifHas<String>("backgroundTexture") { background = drawableOrError(it, screen) }
+            widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
             widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
             widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
         }
 
+        "Map" -> DetailMapWidget(
+            screen,
+            DetailMapProviderFactory.get(widgetOnj.get<OnjNamedObject>("detailMapProvider")).get(),
+            widgetOnj.get<String>("nodeTexture"),
+            widgetOnj.get<String>("edgeTexture"),
+            widgetOnj.get<String>("playerTexture"),
+            widgetOnj.get<Double>("playerWidth").toFloat(),
+            widgetOnj.get<Double>("playerHeight").toFloat(),
+            widgetOnj.get<Double>("nodeSize").toFloat(),
+            widgetOnj.get<Double>("lineWidth").toFloat(),
+            (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
+            widgetOnj.get<String>("directionIndicator"),
+            widgetOnj.get<String>("detailWidgetName"),
+            widgetOnj.get<String>("background")
+        )
+
+        "MapEventDetail" -> MapEventDetailWidget(
+            screen,
+            fontOrError(widgetOnj.get<String>("font"), screen),
+            widgetOnj.get<Color>("fontColor"),
+            widgetOnj.get<String>("background")
+        ).apply { touchable = Touchable.enabled }
+
+        "DialogText" -> DialogTextWidget(
+            Dialog.readFromOnj(
+                widgetOnj.get<OnjArray>("dialog"),
+                fontOrError(widgetOnj.get<String>("font"), screen),
+                screen
+            ),
+            widgetOnj.get<Double>("fontScale").toFloat(),
+            (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
+
     }.let { actor ->
 
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
 
-        val styles = if (widgetOnj.hasKey<OnjArray>("styles")) {
-            val styles = widgetOnj.get<OnjArray>("styles")
-            styles
-                .value
-               .map { styleOrError(it.value as String) }
-        } else null
+        node ?: return actor
+        if (actor !is StyledActor) return actor
 
-        val directProperties = if (widgetOnj.hasKey<OnjArray>("properties")) {
-            val properties = widgetOnj.get<OnjArray>("properties")
-            properties
-                .value
-                .map {
-                    it as OnjStyleProperty
-                    it.value
+        val styleManager = StyleManager(actor, node)
+        actor.styleManager = styleManager
+        actor.initStyles(node, screen)
+        styleManagers.add(styleManager)
+
+        widgetOnj.ifHas<OnjArray>("styles") { arr ->
+            arr.value.forEach { obj ->
+                obj as OnjObject
+                val priority = obj.getOr("style_priority", -1L).toInt()
+                val condition = obj.getOr<StyleCondition>("style_condition", StyleCondition.Always)
+                var duration: Int? = null
+                var interpolation: Interpolation? = null
+                obj.ifHas<OnjObject>("style_animation") {
+                    val result = readStyleAnimation(it)
+                    duration = result.first
+                    interpolation = result.second
                 }
-        } else null
-
-        if (styles != null || directProperties != null) {
-            node ?: throw RuntimeException(
-                "root box can currently not be styled"
-            )
-            styleTargets.add(StyleTarget(
-                node,
-                actor,
-                styles ?: listOf(),
-                directProperties ?: listOf()
-            ))
+                obj
+                    .value
+                    .filter { !it.key.startsWith("style_") }
+                    .forEach { (key, value) ->
+                        val data = getDataForStyle(value, key)
+                        val dataClass = data::class
+                        val instruction = if (duration == null) {
+                            StyleInstruction(data, priority, condition, dataClass)
+                        } else {
+                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!)
+                        }
+                        styleManager.addInstruction(key, instruction, dataClass)
+                    }
+            }
         }
 
         return actor
+    }
+
+    private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {
+        return (animation.get<Double>("duration") * 1000).toInt() to animation.get<Interpolation>("interpolation")
+    }
+
+    private fun getDataForStyle(onjValue: OnjValue, keyName: String): Any {
+        var data = onjValue.value ?: throw RuntimeException("style instruction $keyName cannot be null")
+        if (data is Double) data = data.toFloat()
+        if (data is Long) data = data.toInt()
+        return data
     }
 
     private fun applyImageKeys(image: CustomImageActor, widgetOnj: OnjNamedObject) {
@@ -389,18 +436,14 @@ class ScreenBuilder(val file: FileHandle) {
     private fun fontOrError(name: String, screen: OnjScreen): BitmapFont {
         return ResourceManager.get(screen, name)
     }
-
-    private fun drawableOrError(name: String, screen: OnjScreen): Drawable {
-        return ResourceManager.get(screen, name)
-    }
-
-    private fun animationOrError(name: String, screen: OnjScreen): FrameAnimation {
-        return ResourceManager.get(screen, name)
-    }
-
-    private fun styleOrError(name: String): Style {
-        return styles[name] ?: throw RuntimeException("unknown style: $name")
-    }
+//
+//    private fun drawableOrError(name: String, screen: OnjScreen): Drawable {
+//        return ResourceManager.get(screen, name)
+//    }
+//
+//    private fun animationOrError(name: String, screen: OnjScreen): FrameAnimation {
+//        return ResourceManager.get(screen, name)
+//    }
 
     private fun alignmentOrError(alignment: String): Int = when (alignment) {
         "center" -> Align.center

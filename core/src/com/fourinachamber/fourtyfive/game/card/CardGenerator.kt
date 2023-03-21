@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.PixmapPacker
 import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
-import com.fourinachamber.fourtyfive.utils.OnjReaderUtils
 import kotlinx.coroutines.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -47,7 +46,7 @@ class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandl
 
         outputFile = Gdx.files.getFileHandle(onj.get<String>("outputFile"), Files.FileType.Local)
 
-        pixmaps = OnjReaderUtils.readPixmaps(onj.get<OnjObject>("assets").get<OnjArray>("pixmaps"))
+        pixmaps = readPixmaps(onj.get<OnjObject>("assets").get<OnjArray>("pixmaps"))
 
         baseImage = pixmapOrError(onj.get<String>("baseImage"))
 
@@ -62,6 +61,12 @@ class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandl
 
         wasPrepared = true
     }
+
+    private fun readPixmaps(onj: OnjArray): Map<String, Pixmap> = onj
+        .value
+        .map { it as OnjObject }
+        .associate { it.get<String>("name") to Pixmap(Gdx.files.internal(it.get<String>("file"))) }
+
 
     /**
      * generates the cards and disposes the textures. [prepare] must be called before.

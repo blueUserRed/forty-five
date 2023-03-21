@@ -9,10 +9,11 @@ import com.fourinachamber.fourtyfive.game.card.CardActor
 import com.fourinachamber.fourtyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fourtyfive.screen.general.ButtonClickEvent
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
-typealias KeyAction = (screen: OnjScreen) -> Boolean
+typealias KeyAction = @MainThreadOnly (screen: OnjScreen) -> Boolean
 
 object KeyActionFactory {
 

@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -37,21 +38,26 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
 
     private var timeline: Timeline = Timeline(mutableListOf())
 
-    override fun init(onjScreen: OnjScreen) {
+    override fun init(onjScreen: OnjScreen, context: Any?) {
         //TODO: put these magic numbers in an onj file somewhere
         this.onjScreen = onjScreen
 
         Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
 
         appearActor = onjScreen.namedActorOrError(appearActorName)
-
+// fixme
         textures = ResourceManager
-            .resources
-            .filter {
-                it is ResourceManager.AtlasRegionResource &&
-                        it.atlasResourceHandle == ResourceManager.cardAtlasResourceHandle
-            }
-            .map { ResourceManager.get(onjScreen, it.handle) }
+            .get<TextureAtlas>(onjScreen, ResourceManager.cardAtlasResourceHandle)
+            .regions
+            .toList()
+
+//        textures = ResourceManager
+//            .resources
+//            .filter {
+//                it is ResourceManager.AtlasRegionResource &&
+//                        it.atlasResourceHandle == ResourceManager.cardAtlasResourceHandle
+//            }
+//            .map { ResourceManager.get(onjScreen, it.handle) }
 
         onjScreen.addLateRenderTask(renderTask)
 
@@ -71,7 +77,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             action { appearActor.isVisible = true }
             delay(2000)
             action {
-                FourtyFive.changeToScreen(ScreenBuilder(Gdx.files.internal(nextScreen)).build())
+                FourtyFive.changeToScreen(nextScreen)
             }
         }
 

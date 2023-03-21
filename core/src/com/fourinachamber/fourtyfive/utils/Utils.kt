@@ -10,13 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import kotlin.random.Random
 
 /**
  * represents a value that can be of type [T] or of type [U]. Check which type it is using `is Either.Left` or
  * `is Either.Right`. Can be created using the constructor of the subclasses or using the [eitherLeft] or [eitherRight]
  * extension functions.
  */
-sealed class Either<out T, out U>  {
+sealed class Either<out T, out U> {
 
     class Left<out T>(val value: T) : Either<T, Nothing>()
     class Right<out U>(val value: U) : Either<Nothing, U>()
@@ -36,6 +37,7 @@ var Payload.obj: Any?
  * @see Either
  */
 fun <T> T.eitherLeft(): Either<T, Nothing> = Either.Left(this)
+
 /**
  * @see Either
  */
@@ -47,9 +49,17 @@ fun <T> T.eitherRight(): Either<Nothing, T> = Either.Right(this)
 val Vector3.xy: Vector2
     get() = Vector2(x, y)
 
+val Vector2.unit: Vector2
+    get() {
+        val len = this.len()
+        if (len == 0f) return Vector2(0f, 0f)
+        return this / len
+    }
 
 operator fun Vector2.minus(other: Vector2) = Vector2(x - other.x, y - other.y)
 operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
+operator fun Vector2.times(other: Float): Vector2 = Vector2(this.x * other, this.y * other)
+operator fun Vector2.div(other: Float): Vector2 = Vector2(this.x / other, this.y / other)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
 fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
 
@@ -65,11 +75,25 @@ fun Float.between(min: Float, max: Float): Float {
     return this
 }
 
+fun Vector2(x: Int, y: Int): Vector2 {
+    return Vector2(x.toFloat(), y.toFloat())
+}
+
 /**
  * compares two floats using an epsilon to make sure rounding errors don't break anything
  */
-fun Float.epsilonEquals(other: Float, epsilon: Float = 0.00005f): Boolean {
+fun Float.epsilonEquals(other: Float, epsilon: Float = 0.0005f): Boolean {
     return this in (other - epsilon)..(other + epsilon)
+}
+
+val Float.radians: Float
+    get() = Math.toRadians(this.toDouble()).toFloat()
+
+val Float.degrees: Float
+    get() = Math.toDegrees(this.toDouble()).toFloat()
+
+fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
+    return random.nextFloat() * (endInclusive - start) + start
 }
 
 object Utils {
@@ -95,7 +119,7 @@ object Utils {
      * loads either a custom cursor or a system cursor
      * @throws RuntimeException when [cursorName] is not known
      */
-    @AllThreadsAllowed
+    @MainThreadOnly
     fun loadCursor(
         useSystemCursor: Boolean,
         cursorName: String,

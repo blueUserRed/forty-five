@@ -18,12 +18,14 @@ abstract class Effect(val trigger: Trigger) {
      * called when the effect triggers
      * @return a timeline containing the actions of this effect
      */
+    @MainThreadOnly
     abstract fun onTrigger(): Timeline
 
     /**
      * checks if this effect is triggered by [triggerToCheck] and returns a timeline containing the actions of this
      * effect if it was
      */
+    @MainThreadOnly
     fun checkTrigger(triggerToCheck: Trigger): Timeline? {
         if (triggerToCheck == trigger) {
             FourtyFiveLogger.debug("Effect", "effect $this triggered")
@@ -192,7 +194,10 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             action {
-                FourtyFive.currentGame!!.enemyArea.enemies[0].applyEffect(statusEffect)
+                val game = FourtyFive.currentGame!!
+                if (game.modifier?.shouldApplyStatusEffects() ?: true) {
+                    game.enemyArea.getTargetedEnemy().applyEffect(statusEffect)
+                }
             }
         }
 

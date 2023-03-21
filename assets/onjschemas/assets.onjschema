@@ -10,8 +10,7 @@ fonts: {
     name: string,
     fontFile: string,
     imageFile: string,
-    color?: string,
-    useMipMapLinearLinear?: boolean,
+    color?: Color,
     markupEnabled?: boolean
 }[],
 textureAtlases: {
@@ -37,7 +36,7 @@ shaders: {
 //    uniforms: string[],
     constantArgs: {
         ...*
-    }?
+    }
 }[],
 animations: {
     name: string,
@@ -61,7 +60,7 @@ ninepatches: {
 }[],
 particles: {
     name: string,
-    particlePath: string,
+    file: string,
     textureDir: string,
     scale: float,
 }[],

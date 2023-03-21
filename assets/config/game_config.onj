@@ -38,14 +38,21 @@ enemyConfig: {
 
     enemies: [
         {
-            name: "enemy",
+            name: "enemy1",
+            lives: 1,
+            brain: defaultEnemyBrain,
+            ...(graphicsConfig.enemyConfig.enemy1)
+        },
+        {
+            name: "enemy2",
             lives: 100,
             brain: defaultEnemyBrain,
-            ...(graphicsConfig.enemyConfig.enemy)
+            ...(graphicsConfig.enemyConfig.enemy2)
         }
     ],
 
-    startEnemy: "enemy"
+    startEnemies: [ "enemy1" ]
+//    startEnemies: [ "enemy1", "enemy2" ]
 },
 
 cardDrawConfig: {
