@@ -17,7 +17,7 @@ var transitionAwayTime = 0.2;
 
 assets: {
     useAssets: [
-        "title_screen_background", "logo", "red_wing",
+        "title_screen_background", "logo", "red_wing", "film_shader",
         ...(graphicsConfig.keySelectUsedAssets)
     ]
 },
@@ -38,6 +38,7 @@ viewport: $FitViewport {
 
 options: {
     background: "title_screen_background",
+    postProcessor: "film_shader",
     inputMap: [
         ...(inputMaps.hierarchyBasedNavigationInputMap),
         ...(inputMaps.defaultInputMap)

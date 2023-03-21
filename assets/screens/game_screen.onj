@@ -101,7 +101,6 @@ var controller = $GameScreenController {
 options: {
     background: "game_screen_background",
     screenController: controller,
-//    postProcessor: "film_shader",
     inputMap: [
         ...(inputMaps.gameInputMap),
         ...(inputMaps.defaultInputMap)
@@ -130,9 +129,6 @@ var revolver = $Revolver {
     radiusExtension: 7.0,
     cardZIndex: cardZIndicesStart,
     rotationOff: (pi / 2.0) + (2.0 * pi) / 5.0,
-//    ...sharedDetailTextKeys,
-//    detailOffsetX: 0.0,
-//    detailOffsetY: 0.0,
     background: "revolver_drum",
 //    debug: true
 };
@@ -145,17 +141,12 @@ var cardHand = $CardHand {
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
     draggedCardZIndex: cardZIndicesEnd,
-//    detailOffsetX: 0.0,
-//    detailOffsetY: 1.5,
     targetWidth: worldWidth * 0.6,
-//    ...sharedDetailTextKeys,
-//    debug: true
 };
 
 var enemyArea = $EnemyArea {
     name: "enemy_area",
     enemySelectionDrawable: "key_select_frame"
-//     debug: true
 };
 
 var coverArea = $CoverArea {
@@ -166,11 +157,8 @@ var coverArea = $CoverArea {
     infoFont: "vanilla_whale",
     infoFontColor: color.black,
     infoFontScale: 0.1,
-//    stackBackgroundTexture: "transparent_black_texture",
-//    stackSpacing: 2.0,
     areaSpacing: 4.0,
     cardScale: cardScale * 0.8,
-//    stackMinSize: 20.0,
     detailFont: "red_wing",
     detailFontColor: color.white,
     detailFontScale: 0.07,
@@ -182,10 +170,6 @@ var coverArea = $CoverArea {
     stackMinWidth: 15.0,
     stackHook: "cover_hook",
     zIndex: 3
-//    ...sharedDetailTextKeys,
-//    detailOffsetX: 0.0,
-//    detailOffsetY: 0.0,
-//    debug: true
 };
 
 var shootButton = $Image {
@@ -195,11 +179,6 @@ var shootButton = $Image {
     scaleX: 0.03,
     scaleY: 0.03,
     behaviours: [
-//        $OnClickChangePostProcessorBehaviour {
-//            postProcessor: "earthquake_shader",
-//            duration: 70,
-//            setOnlyIfNoPostProcessorIsSet: false
-//        },
         $ShootButtonBehaviour { },
         buttonHoverBehaviour,
         $OnHoverChangeTextureBehaviour {
@@ -229,8 +208,6 @@ var playerLivesLabel = $TemplateLabel {
     template: "{stat.playerLives}/{game.basePlayerLives}",
     fontScale: 0.09,
     color: color.white,
-//    backgroundTexture: "black_texture",
-//    debug: true
 };
 
 var reservesLabel = $TemplateLabel {
@@ -239,7 +216,6 @@ var reservesLabel = $TemplateLabel {
     template: "{game.curReserves}/{game.baseReserves}",
     fontScale: 0.09,
     color: color.white,
-//    backgroundTexture: "black_texture"
 };
 
 var destroyCardInstructionActor = $Label {
@@ -249,7 +225,6 @@ var destroyCardInstructionActor = $Label {
     fontScale: 0.2,
     align: "center",
     color: color.black,
-//    debug: true
 };
 
 var drawCardActor = $Box {
@@ -264,21 +239,17 @@ var drawCardActor = $Box {
     name: "card_draw_table",
     visible: false,
     zIndex: overlayZIndex,
-//    debug: true
 } children [
 
-//    $Label {
     $TemplateLabel {
         properties: [
             relWidth(100.0)
         ],
         font: "red_wing",
-//        text: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
         template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
         fontScale: 0.18,
         align: "center",
         wrap: true,
-//        debug: true,
         color: color.white
     },
 
@@ -288,7 +259,6 @@ var drawCardActor = $Box {
             justifyContent("space around"),
             relWidth(100.0)
         ],
-//        debug: true
     } children [
 
         $Box {
@@ -297,13 +267,11 @@ var drawCardActor = $Box {
             ]
         } children [
 
-//            $Label {
             $TemplateLabel {
                 properties: [
                     margin(0.0, 0.0, 6.0, -6.0)
                 ],
                 font: "red_wing",
-//                text: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
                 template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
                 wrap: true,
                 fontScale: 0.13,
@@ -329,13 +297,11 @@ var drawCardActor = $Box {
             ]
         } children [
 
-//            $Label {
             $TemplateLabel {
                 properties: [
                     margin(0.0, 0.0, 6.0, -6.0)
                 ],
                 font: "red_wing",
-//                text: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
                 template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
                 wrap: true,
                 fontScale: 0.13,
@@ -360,33 +326,34 @@ var drawCardActor = $Box {
 ];
 
 var gameScreen = $Box {
-    properties: [
-        position("absolute"),
-        flexDirection("column"),
-        relWidth(100.0),
-        relHeight(100.0)
+    styles: [
+        {
+            positionType: positionType.absolute,
+            flexDirection: flexDirection.column,
+            width: 100.0#percent,
+            height: 100.0#percent
+        }
     ],
-    //    debug: true
 } children [
 
     $Box {
-        properties: [
-            flexDirection("row"),
-            relWidth(100.0),
-            alignItems("center")
+        styles: [
+            {
+                flexDirection: flexDirection.row,
+                width: 100.0#percent,
+                alignItems: align.center
+            }
         ],
-//        debug: true
     } children [
         $Image {
-            properties: [
-                aspectRatio(1.0),
-                relHeight(90.0)
+            styles: [
+                aspectRatio: 1.0,
+                height: 90.0#percent,
             ],
             reportDimensionsWithScaling: true,
             textureName: "heart_texture",
             scaleX: 0.003,
             scaleY: 0.003,
-//            debug: true
         },
         playerLivesLabel,
         destroyCardInstructionActor
@@ -394,38 +361,44 @@ var gameScreen = $Box {
 
 
     $Box {
-        properties: [
-            flexDirection("row"),
-            relWidth(100.0),
-            flexGrow(1.0)
-        ],
-        //        debug: true
+        styles: [
+            {
+                flexDirection: flexDirection.row,
+                width: 100.0#percent,
+                flexGrow: 1.0
+            }
+        ]
     } children [
 
         $Revolver {
-            properties: [
-                relWidth(40.0),
-                margin(5.0, 0.0, 0.0, 10.0)
+            styles: [
+                {
+                    width: 40.0#percent,
+                    marginTop: 5.0,
+                    marginRight: 10.0
+                }
             ],
-//            debug: true,
             ...revolver,
         },
 
         $Box {
-            properties: [
-                flexDirection("column"),
-                relWidth(60.0),
-                margin(-5.0, 0.0, 0.0, 0.0)
+            styles: [
+                {
+                    flexDirection: flexDirection.column,
+                    width: 60.0,
+                    marginTop: -5.0,
+                }
             ],
-            //            debug: true
         } children [
 
             $Box {
+                styles: [
+                // TODO: continue
+        ],
                 properties: [
                     flexDirection("row"),
                     flexGrow(1.0)
                 ],
-    //                debug: true
             } children [
 
                 $CoverArea {
@@ -449,7 +422,6 @@ var gameScreen = $Box {
                     flexDirection("row"),
                     justifyContent("space between")
                 ],
-    //                debug: true
             } children [
                 shootButton,
                 $Box {
@@ -473,7 +445,6 @@ var gameScreen = $Box {
                     height(cardHeight),
                     relWidth(100.0)
                 ],
-//                debug: true,
                 ...cardHand
             }
 
