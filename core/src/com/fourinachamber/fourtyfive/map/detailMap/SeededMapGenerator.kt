@@ -6,12 +6,12 @@ import com.fourinachamber.fourtyfive.utils.random
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.random.Random
 
 class SeededMapGenerator(
-    val seed: Long = 102,
-//    val isHorizontal: Boolean = false,
+    val seed: Long = 103,
     val restictions: MapRestriction = MapRestriction()
 ) {
     lateinit var nodes: List<MapNodeBuilder>
@@ -24,16 +24,18 @@ class SeededMapGenerator(
     fun generate(): DetailMap {
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
-        val boundary: Float = 50F
-        nodes.add(MapNodeBuilder(0F, -boundary / 2))
-        nodes.add(MapNodeBuilder(boundary, -boundary / 2))
-        nodes.add(MapNodeBuilder(boundary, boundary / 2))
-        nodes.add(MapNodeBuilder(0F, boundary / 2))
-        nodes.add(MapNodeBuilder(0F, -boundary / 2))
 
-        val l = MapGeneratorLine(seed, MapRestriction())
+        var l = MapGeneratorLine(seed, MapRestriction())
+        for (i in l.points) {
+            nodes.add(MapNodeBuilder(i.x, i.y - 60))
+        }
+        l = MapGeneratorLine(seed + 1, MapRestriction())
         for (i in l.points) {
             nodes.add(MapNodeBuilder(i.x, i.y))
+        }
+        l = MapGeneratorLine(seed + 2, MapRestriction())
+        for (i in l.points) {
+            nodes.add(MapNodeBuilder(i.x, i.y + 60))
         }
         for (i in 1 until nodes.size) {
             nodes[i].connect(nodes[i - 1])
@@ -103,27 +105,33 @@ class SeededMapGenerator(
 class MapGeneratorLine(
     private val seed: Long,
     restrict: MapRestriction,
-    val rnd: Random = Random(seed),
+    private val rnd: Random = Random(seed),
     nbrOfPoints: Int = 15,
-    border: Int = 50,
+    maxWidth: Int = 60,
+    maxAnglePercent: Float = 0.9F,
 ) {
     lateinit var points: List<Vector2>
 
     init {
         val points: MutableList<Vector2> = mutableListOf()
 
-        points.add(Vector2(0, -50))
+        points.add(Vector2(0, 0))
         for (i in 2 until nbrOfPoints) {
             val length: Float = getMutliplier(5) * restrict.averageLengthOfLineInBetween
-            val angle: Float = (0F..(Math.PI * 0.95).toFloat()).random(rnd)
+            val angle: Float =
+                (((1 - maxAnglePercent) / 2)..(1 - (1 - maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
+            println(angle)
+            println(length)
+            println()
             val posVec: Vector2 = Vector2(
-                points.last().x + ((Math.cos(angle.toDouble())
-                    .pow(2)).toFloat()) * length,
-                points.last().y + ((Math.sin(angle.toDouble())
-                    .pow(2)).toFloat()) * length * (if (Math.sin(angle.toDouble()) < 0) -1 else 1)
+                (Math.sin(angle.toDouble()) * length).toFloat(),
+                (Math.cos(angle.toDouble()) * 0.5 * length).toFloat()
             )
+            if (abs(points.last().y + posVec.y) > maxWidth / 2) {
+                posVec.y *= -1
+            }
             points.add(
-                posVec
+                posVec.add(points.last())
             )
         }
         this.points = points.toList()
@@ -154,7 +162,6 @@ class BezierCurve(
             points.add(Vector2(lastX + 1, rnd.nextFloat() * max - max / 2))
         }
         points.add(Vector2(lastX + rnd.nextFloat() * 25 + 4, 0F))
-        println(points)
     }
 
     fun getPos(t: Float): Vector2 {
