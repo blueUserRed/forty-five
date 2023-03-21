@@ -1,5 +1,5 @@
 sourceCompatibility = 1.8
-sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.main.java.srcDirs = ["src/"]
 sourceSets.main.resources.srcDirs = ["../assets"]
 
 project.ext.mainClassName = "com.fourinachamber.fourtyfive.DesktopLauncher"
@@ -40,7 +40,31 @@ task dist(type: Jar) {
     }
     with jar
 }
+//
+//task createSendableZip(type: Zip) {
+//    from 'launch4j/'
+//    include '*'
+//    include '*/*' //to include contents of a folder present inside Reports directory
+//    archiveName 'fourty-five.zip'
+//    destinationDir(file(layout.buildDirectory.dir("launch4j")))
+//}
 
+task createExeFile() {
+    launch4j {
+        mainClassName = 'com.fourinachamber.fourtyfive.DesktopLauncher'
+        icon = "${projectDir}/icons/myApp.ico"
+        headerType = "gui"
+    }
+    dependsOn(tasks.launch4j)
+    dependsOn(tasks.build)
+    tasks.register('copyFilesToExe', Copy) {
+        from layout.buildDirectory.dir("resources/main")
+        into layout.buildDirectory.dir("launch4j")
+    }
+    dependsOn(tasks.copyFilesToExe)
+//    dependsOn(tasks.createSendableZip)
+//    project.logger.lifecycle('my debug message:'+layout.buildDirectory)
+}
 
 dist.dependsOn classes
 
