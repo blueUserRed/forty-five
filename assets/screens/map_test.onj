@@ -65,9 +65,10 @@ root: $Box {
                 }
             }
         ],
-        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-            seed: 100
-        },
+        detailMapProvider: $CurrentMapProvider { },
+//        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
+//            seed: 100
+//        },
         nodeSize: 5.0,
         lineWidth: 1.0,
         name: "map",

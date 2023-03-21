@@ -85,7 +85,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     }
 
     override fun start() {
-        FourtyFive.changeToScreen("screens/map_test.onj", this)
+        FourtyFive.changeToScreen("screens/game_screen.onj", this)
     }
 
     fun completed() {

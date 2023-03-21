@@ -44,7 +44,7 @@ object FourtyFive : Game() {
         init()
         serviceThread.start()
         if (generateCards) runCardGenerator()
-        changeToScreen("screens/title_screen.onj")
+        changeToScreen("screens/game_screen.onj")
     }
 
     override fun render() {
