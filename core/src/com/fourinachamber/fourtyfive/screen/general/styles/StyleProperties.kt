@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.screen.general.styles
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.fourinachamber.fourtyfive.screen.general.BackgroundActor
 import com.fourinachamber.fourtyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fourtyfive.screen.general.CustomLabel
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -365,4 +366,43 @@ fun <T> T.addFlexBoxStyles(node: YogaNode, screen: OnjScreen) where T : CustomFl
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, node, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, node, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, node, screen))
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// other
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class BackgroundStyleProperty<T>(
+    target: T,
+    node: YogaNode,
+    screen: OnjScreen
+) : StyleProperty<T, String>(
+    "background",
+    target,
+    node,
+    nullHandle,
+    String::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor, T : BackgroundActor {
+
+    override fun set(data: String) {
+        target.backgroundHandle = if (data == nullHandle) null else data
+    }
+
+    override fun get(): String = target.backgroundHandle ?: nullHandle
+
+    companion object {
+        const val nullHandle = "%%--null%%--" // lets hope nobody names their texture this
+    }
+
+}
+
+fun <T> T.addBackgroundStyles(
+    node: YogaNode,
+    screen: OnjScreen
+) where T : Actor, T : StyledActor, T : BackgroundActor {
+    styleManager.addStyleProperty(BackgroundStyleProperty(this, node, screen))
 }

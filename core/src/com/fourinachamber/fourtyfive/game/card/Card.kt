@@ -352,7 +352,7 @@ class Card(
             val card = Card(
                 name,
                 onj.get<String>("title"),
-                ResourceManager.get(onjScreen, "$cardTexturePrefix$name"),
+                "$cardTexturePrefix$name",
                 onj.get<String>("flavourText"),
                 onj.get<String>("description"),
                 cardTypeOrError(onj),
