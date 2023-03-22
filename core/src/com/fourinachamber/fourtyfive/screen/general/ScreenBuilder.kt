@@ -82,7 +82,7 @@ class ScreenBuilder(val file: FileHandle) {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
-        val root = CustomFlexBox()
+        val root = CustomFlexBox(screen)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
@@ -173,7 +173,7 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
-        val flexBox = CustomFlexBox()
+        val flexBox = CustomFlexBox(screen)
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
@@ -334,6 +334,7 @@ class ScreenBuilder(val file: FileHandle) {
             ),
             widgetOnj.get<Double>("fontScale").toFloat(),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+            screen
         )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")

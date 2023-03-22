@@ -214,6 +214,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     override fun initStyles(node: YogaNode, screen: OnjScreen) {
         addLabelStyles(node, screen)
+        addBackgroundStyles(node, screen)
     }
 
     companion object {
@@ -257,7 +258,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     drawableHandle: ResourceHandle,
     private val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false
-) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor {
+) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -268,6 +269,14 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override var maskScaleY: Float = 1f
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
+
+    override var backgroundHandle: String? = drawableHandle
+        set(value) {
+            if (field != value) loadedDrawable = null
+            field = value
+        }
+
+    private var loadedDrawable: Drawable? = null
 
     override var isSelected: Boolean = false
 
@@ -290,13 +299,6 @@ open class CustomImageActor @AllThreadsAllowed constructor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
-    private val _drawable: Drawable by lazy {
-        val drawable = ResourceManager.get<Drawable>(screen, drawableHandle)
-        this.drawable = drawable
-        drawable
-    }
-
-
     init {
         bindHoverStateListeners(this)
     }
@@ -304,8 +306,15 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
-        _drawable // assure drawable is loaded
-        if (batch == null) {
+        val backgroundHandle = backgroundHandle
+
+        if (backgroundHandle != null && loadedDrawable == null) {
+            loadedDrawable = ResourceManager.get(screen, backgroundHandle)
+            drawable = loadedDrawable
+            invalidateHierarchy()
+        }
+
+        if (batch == null || drawable == null) {
             super.draw(null, parentAlpha)
             return
         }
@@ -373,6 +382,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override fun initStyles(node: YogaNode, screen: OnjScreen) {
         addActorStyles(node, screen)
+        addBackgroundStyles(node, screen)
     }
 
     companion object {
@@ -392,15 +402,23 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 }
 
-open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor {
+open class CustomFlexBox(
+    private val screen: OnjScreen
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
 
-    var background: Drawable? = null
+    private var background: Drawable? = null
 
     override var isHoveredOver: Boolean = false
 
     override lateinit var styleManager: StyleManager
+
+    override var backgroundHandle: String? = null
+        set(value) {
+            if (field != value) background = null
+            field = value
+        }
 
     init {
         bindHoverStateListeners(this)
@@ -415,6 +433,10 @@ open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor {
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        val backgroundHandle = backgroundHandle
+        if (backgroundHandle != null && background == null) {
+            background = ResourceManager.get(screen, backgroundHandle)
+        }
         validate()
         if (batch != null && background != null) {
             background?.draw(batch, x, y, width, height)
@@ -424,6 +446,7 @@ open class CustomFlexBox : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor {
 
     override fun initStyles(node: YogaNode, screen: OnjScreen) {
         addFlexBoxStyles(node, screen)
+        addBackgroundStyles(node, screen)
     }
 }
 

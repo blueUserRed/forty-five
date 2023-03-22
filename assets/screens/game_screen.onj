@@ -181,9 +181,6 @@ var shootButton = $Image {
     behaviours: [
         $ShootButtonBehaviour { },
         buttonHoverBehaviour,
-        $OnHoverChangeTextureBehaviour {
-            hoverTexture: "shoot_button_texture_hover"
-        }
     ]
 };
 
@@ -196,9 +193,6 @@ var endTurnButton = $Image {
     behaviours: [
         $EndTurnButtonBehaviour { },
         buttonHoverBehaviour,
-        $OnHoverChangeTextureBehaviour {
-            hoverTexture: "end_turn_button_texture_hover"
-        }
     ]
 };
 
@@ -228,13 +222,15 @@ var destroyCardInstructionActor = $Label {
 };
 
 var drawCardActor = $Box {
-    properties: [
-        position("absolute"),
-        background("transparent_black_texture"),
-        flexDirection("column"),
-        alignItems("center"),
-        relWidth(100.0),
-        relHeight(100.0)
+    styles: [
+        {
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+        }
     ],
     name: "card_draw_table",
     visible: false,
@@ -242,8 +238,10 @@ var drawCardActor = $Box {
 } children [
 
     $TemplateLabel {
-        properties: [
-            relWidth(100.0)
+        styles: [
+            {
+                width: 100.0#percent
+            }
         ],
         font: "red_wing",
         template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
@@ -254,22 +252,29 @@ var drawCardActor = $Box {
     },
 
     $Box {
-        properties: [
-            flexDirection("row"),
-            justifyContent("space around"),
-            relWidth(100.0)
+        styles: [
+            {
+                flexDirection: flexDirection.row,
+                justifyContent: justify.spaceAround,
+                width: 100.0#percent
+            }
         ],
     } children [
 
         $Box {
-            properties: [
-                flexDirection("column")
+            styles: [
+                {
+                    flexDirection: flexDirection.column
+                }
             ]
         } children [
 
             $TemplateLabel {
-                properties: [
-                    margin(0.0, 0.0, 6.0, -6.0)
+                styles: [
+                    {
+                        marginTop: 6.0#points,
+                        marginBottom: -6.0#points
+                    }
                 ],
                 font: "red_wing",
                 template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
@@ -280,8 +285,6 @@ var drawCardActor = $Box {
             },
 
             $Image {
-                properties: [
-                ],
                 textureName: "draw_bullet",
                 reportDimensionsWithScaling: true,
                 scaleX: 0.08,
@@ -292,14 +295,19 @@ var drawCardActor = $Box {
         ],
 
         $Box {
-            properties: [
-                flexDirection("column"),
+            styles: [
+                {
+                    flexDirection: flexDirection.column
+                }
             ]
         } children [
 
             $TemplateLabel {
-                properties: [
-                    margin(0.0, 0.0, 6.0, -6.0)
+                styles: [
+                    {
+                        marginTop: 6.0#points,
+                        marginBottom: -6.0#points,
+                    }
                 ],
                 font: "red_wing",
                 template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
@@ -310,8 +318,6 @@ var drawCardActor = $Box {
             },
 
             $Image {
-                properties: [
-                ],
                 textureName: "draw_cover",
                 reportDimensionsWithScaling: true,
                 scaleX: 0.08,
@@ -347,8 +353,10 @@ var gameScreen = $Box {
     } children [
         $Image {
             styles: [
-                aspectRatio: 1.0,
-                height: 90.0#percent,
+                {
+                    aspectRatio: 1.0,
+                    height: 90.0#percent,
+                }
             ],
             reportDimensionsWithScaling: true,
             textureName: "heart_texture",
@@ -374,8 +382,8 @@ var gameScreen = $Box {
             styles: [
                 {
                     width: 40.0#percent,
-                    marginTop: 5.0,
-                    marginRight: 10.0
+                    marginTop: 5.0#points,
+                    marginRight: 10.0#points
                 }
             ],
             ...revolver,
@@ -385,32 +393,35 @@ var gameScreen = $Box {
             styles: [
                 {
                     flexDirection: flexDirection.column,
-                    width: 60.0,
-                    marginTop: -5.0,
+                    width: 60.0#percent,
+                    marginTop: -5.0#points,
                 }
             ],
         } children [
 
             $Box {
                 styles: [
-                // TODO: continue
-        ],
-                properties: [
-                    flexDirection("row"),
-                    flexGrow(1.0)
-                ],
+                    {
+                        flexDirection: flexDirection.row,
+                        flexGrow: 1.0
+                    }
+                ]
             } children [
 
                 $CoverArea {
-                    properties: [
-                        flexGrow(0.5)
+                    styles: [
+                        {
+                            flexGrow: 0.5
+                        }
                     ],
                     ...coverArea
                 },
 
                 $EnemyArea {
-                    properties: [
-                        flexGrow(0.5)
+                    styles: [
+                        {
+                            flexGrow: 0.5
+                        }
                     ],
                     ...enemyArea
                 }
@@ -418,16 +429,20 @@ var gameScreen = $Box {
             ],
 
             $Box {
-                properties: [
-                    flexDirection("row"),
-                    justifyContent("space between")
+                styles: [
+                    {
+                        flexDirection: flexDirection.row,
+                        justifyContent: justify.spaceBetween
+                    }
                 ],
             } children [
                 shootButton,
                 $Box {
-                    properties: [
-                        flexDirection("row")
-                    ]
+                    styles: [
+                        {
+                            flexDirection: flexDirection.row
+                        }
+                    ],
                 } children [
                     $Image {
                         reportDimensionsWithScaling: true,
@@ -441,9 +456,11 @@ var gameScreen = $Box {
             ],
 
             $CardHand {
-                properties: [
-                    height(cardHeight),
-                    relWidth(100.0)
+                styles: [
+                    {
+                        height: cardHeight#points,
+                        width: 100.0#percent
+                    }
                 ],
                 ...cardHand
             }
@@ -455,9 +472,11 @@ var gameScreen = $Box {
 ];
 
 root: $Box {
-    properties: [
-        relWidth(100.0),
-        relHeight(100.0)
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent
+        }
     ]
 } children [
     gameScreen, drawCardActor

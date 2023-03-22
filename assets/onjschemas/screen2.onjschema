@@ -273,10 +273,6 @@ $Behaviour {
         yOffset?: float,
     }
 
-    $OnHoverChangeTextureBehaviour {
-        hoverTexture: string
-    }
-
     $ShootButtonBehaviour { }
 
     $EndTurnButtonBehaviour { }
