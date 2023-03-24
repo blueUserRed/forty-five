@@ -82,7 +82,7 @@ class ScreenBuilder(val file: FileHandle) {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
-        val root = CustomFlexBox()
+        val root = CustomFlexBox(screen)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
@@ -173,7 +173,7 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
-        val flexBox = CustomFlexBox()
+        val flexBox = CustomFlexBox(screen)
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
@@ -212,7 +212,7 @@ class ScreenBuilder(val file: FileHandle) {
     ): Actor = when (widgetOnj.name) {
 
         "Image" -> CustomImageActor(
-            widgetOnj.get<String>("textureName"),
+            widgetOnj.getOr<String?>("textureName", null),
             screen,
             widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
@@ -240,9 +240,9 @@ class ScreenBuilder(val file: FileHandle) {
 
         "CardHand" -> CardHand(
             widgetOnj.get<Double>("targetWidth").toFloat(),
+            widgetOnj.get<Double>("cardSize").toFloat(),
             screen
         ).apply {
-            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
             cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
@@ -334,6 +334,7 @@ class ScreenBuilder(val file: FileHandle) {
             ),
             widgetOnj.get<Double>("fontScale").toFloat(),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+            screen
         )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
@@ -344,7 +345,12 @@ class ScreenBuilder(val file: FileHandle) {
         val node = parent?.add(actor)
 
         node ?: return actor
-        if (actor !is StyledActor) return actor
+        if (actor !is StyledActor) {
+            if (widgetOnj.hasKey<OnjArray>("styles")) {
+                throw RuntimeException("actor $actor defines styles but does not implement StyledActor")
+            }
+            return actor
+        }
 
         val styleManager = StyleManager(actor, node)
         actor.styleManager = styleManager
