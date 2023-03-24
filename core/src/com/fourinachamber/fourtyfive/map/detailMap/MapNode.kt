@@ -23,7 +23,9 @@ data class MapNode(
 
     fun getUniqueNodes(): List<MapNode> {
         val nodes = mutableListOf(this)
+        println("Starting NOdes")
         getUniqueNodes(nodes)
+        println("Finished NOdes")
         return nodes
     }
 
@@ -72,7 +74,6 @@ data class MapNode(
             }
             return edges
         }
-
     }
 }
 
@@ -102,13 +103,13 @@ data class MapNodeBuilder(
         blockingEdges.forEach { edge ->
             buildBlockingEdges.add(buildEdges[edgesTo.indexOf(edge)])
         }
-        inBuild = false
+//        inBuild = false
         return asNode!!
     }
 
     fun connect(other: MapNodeBuilder): Boolean {
+        if (other == this || edgesTo.contains(other)) return false
         if (edgesTo.size > 3 || other.edgesTo.size > 3) throw IllegalArgumentException("Already to 4 Nodes connect, not anymore possible!")
-        if (edgesTo.contains(other)) return false
         edgesTo.add(other)
         other.edgesTo.add(this)
         return true

@@ -24,7 +24,7 @@ class SeededMapGenerator(
     fun generate(): DetailMap {
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
-
+        val lines: Array<MapGeneratorLine?> = arrayOfNulls(restictions.maxSplits)
         var l = MapGeneratorLine(seed, restictions)
         for (i in l.points) {
             nodes.add(MapNodeBuilder(i.x, i.y - 60))
@@ -40,17 +40,22 @@ class SeededMapGenerator(
         for (i in 1 until nodes.size - 15) {
             nodes[i].connect(nodes[i - 1 + 15])
         }
-        for (i in 1 until 14) {
+        for (i in 1 until 15) {
             nodes[i].connect(nodes[i - 1])
-//            nodes[i + 15].connect(nodes[i - 1 + 15])
-//            nodes[i + 15 * 2].connect(nodes[i - 1 + 15 * 2])
+//            nodes[i + 14].connect(nodes[i - 1 + 14])
+            if (i < 12)
+                nodes[i + 15 * 2].connect(nodes[i - 1 + 15 * 2])
         }
         this.nodes = nodes
-        return DetailMap(build(), listOf())
+
+        println(nodes.size)
+        var no = build()
+        println("build")
+        return DetailMap(no, listOf())
     }
 
     fun generateBezier(): DetailMap {
-        println("NOW TEST_OUTPUT")
+//        println("NOW TEST_OUTPUT")
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
 //        val boundary: Float = 50F
@@ -123,9 +128,9 @@ class SeededMapGenerator(
                 val length: Float = getMutliplier(5) * restrict.averageLengthOfLineInBetween
                 val angle: Float =
                     (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
-                println(angle)
-                println(length)
-                println()
+//                println(angle)
+//                println(length)
+//                println()
                 val posVec: Vector2 = Vector2(
                     (Math.sin(angle.toDouble()) * length).toFloat(),
                     (Math.cos(angle.toDouble()) * 0.5 * length).toFloat()
