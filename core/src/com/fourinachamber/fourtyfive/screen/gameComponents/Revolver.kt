@@ -184,6 +184,8 @@ class Revolver(
             val slot = slots[i]
             val angle = angleForIndex(i)
             slot.position(basePos, radius, angle)
+            slot.width = slotSize
+            slot.height = slotSize
         }
     }
 
@@ -265,6 +267,8 @@ class RevolverSlot(
 
     init {
         setScale(scale)
+        reportDimensionsWithScaling = true
+        ignoreScalingWhenDrawing = true
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {

@@ -135,8 +135,8 @@ var revolver = $Revolver {
 
 var cardHand = $CardHand {
     name: "card_hand",
-    cardScale: cardScale,
-    hoveredCardScale: cardScale * 1.3,
+    cardSize: cardHeight,
+    hoveredCardScale: 1.3,
     cardSpacing: 1.0,
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
@@ -339,18 +339,19 @@ var gameScreen = $Box {
             width: 100.0#percent,
             height: 100.0#percent
         }
-    ],
+    ]
 } children [
 
     $Box {
         styles: [
             {
-                flexDirection: flexDirection.row,
                 width: 100.0#percent,
-                alignItems: align.center
+                flexDirection: flexDirection.row
             }
         ],
+        debug: true
     } children [
+
         $Image {
             styles: [
                 {
@@ -363,10 +364,12 @@ var gameScreen = $Box {
             scaleX: 0.003,
             scaleY: 0.003,
         },
-        playerLivesLabel,
-        destroyCardInstructionActor
-    ],
 
+        playerLivesLabel,
+
+        destroyCardInstructionActor
+
+    ],
 
     $Box {
         styles: [
@@ -375,101 +378,212 @@ var gameScreen = $Box {
                 width: 100.0#percent,
                 flexGrow: 1.0
             }
-        ]
+        ],
+        debug: true
     } children [
-
-        $Revolver {
-            styles: [
-                {
-                    width: 40.0#percent,
-                    marginTop: 5.0#points,
-                    marginRight: 10.0#points
-                }
-            ],
-            ...revolver,
-        },
 
         $Box {
             styles: [
                 {
                     flexDirection: flexDirection.column,
-                    width: 60.0#percent,
-                    marginTop: -5.0#points,
+                    width: 30.0#percent
                 }
             ],
+            debug: true
         } children [
 
-            $Box {
-                styles: [
-                    {
-                        flexDirection: flexDirection.row,
-                        flexGrow: 1.0
-                    }
-                ]
-            } children [
+            revolver,
 
-                $CoverArea {
-                    styles: [
-                        {
-                            flexGrow: 0.5
-                        }
-                    ],
-                    ...coverArea
-                },
+            shootButton
 
-                $EnemyArea {
-                    styles: [
-                        {
-                            flexGrow: 0.5
-                        }
-                    ],
-                    ...enemyArea
-                }
+        ],
 
-            ],
+        coverArea,
 
-            $Box {
-                styles: [
-                    {
-                        flexDirection: flexDirection.row,
-                        justifyContent: justify.spaceBetween
-                    }
-                ],
-            } children [
-                shootButton,
-                $Box {
-                    styles: [
-                        {
-                            flexDirection: flexDirection.row
-                        }
-                    ],
-                } children [
-                    $Image {
-                        reportDimensionsWithScaling: true,
-                        textureName: "reserves_texture",
-                        scaleX: 0.05,
-                        scaleY: 0.05
-                    },
-                    reservesLabel
-                ],
-                endTurnButton,
-            ],
+        enemyArea
 
-            $CardHand {
-                styles: [
-                    {
-                        height: cardHeight#points,
-                        width: 100.0#percent
-                    }
-                ],
-                ...cardHand
+    ],
+
+    $Box {
+        styles: [
+            {
+                flexDirection: flexDirection.row,
+                width: 100.0#percent,
+                height: (cardHeight + 5.0)#points
             }
+        ],
+        debug: true
+    } children [
 
-        ]
+        $Image {
+            styles: [
+                {
+                    aspectRatio: 1.0,
+                    height: 8.0#points
+                }
+            ],
+            reportDimensionsWithScaling: true,
+            textureName: "reserves_texture",
+            scaleX: 0.002,
+            scaleY: 0.002
+        },
 
+        reservesLabel,
+
+        $CardHand {
+            styles: [
+                {
+                    flexGrow: 1.0
+                }
+            ],
+            debug: true,
+            ...cardHand
+        },
+
+        endTurnButton
     ]
 
 ];
+
+//var gameScreen = $Box {
+//    styles: [
+//        {
+//            positionType: positionType.absolute,
+//            flexDirection: flexDirection.column,
+//            width: 100.0#percent,
+//            height: 100.0#percent
+//        }
+//    ],
+//} children [
+//
+//    $Box {
+//        styles: [
+//            {
+//                flexDirection: flexDirection.row,
+//                width: 100.0#percent,
+//                alignItems: align.center
+//            }
+//        ],
+//    } children [
+//        $Image {
+//            styles: [
+//                {
+//                    aspectRatio: 1.0,
+//                    height: 90.0#percent,
+//                }
+//            ],
+//            reportDimensionsWithScaling: true,
+//            textureName: "heart_texture",
+//            scaleX: 0.003,
+//            scaleY: 0.003,
+//        },
+//        playerLivesLabel,
+//        destroyCardInstructionActor
+//    ],
+//
+//
+//    $Box {
+//        styles: [
+//            {
+//                flexDirection: flexDirection.row,
+//                width: 100.0#percent,
+//                flexGrow: 1.0
+//            }
+//        ]
+//    } children [
+//
+//        $Revolver {
+//            styles: [
+//                {
+//                    width: 40.0#percent,
+//                    marginTop: 5.0#points,
+//                    marginRight: 10.0#points
+//                }
+//            ],
+//            ...revolver,
+//        },
+//
+//        $Box {
+//            styles: [
+//                {
+//                    flexDirection: flexDirection.column,
+//                    width: 60.0#percent,
+//                    marginTop: -5.0#points,
+//                }
+//            ],
+//        } children [
+//
+//            $Box {
+//                styles: [
+//                    {
+//                        flexDirection: flexDirection.row,
+//                        flexGrow: 1.0
+//                    }
+//                ]
+//            } children [
+//
+//                $CoverArea {
+//                    styles: [
+//                        {
+//                            flexGrow: 0.5
+//                        }
+//                    ],
+//                    ...coverArea
+//                },
+//
+//                $EnemyArea {
+//                    styles: [
+//                        {
+//                            flexGrow: 0.5
+//                        }
+//                    ],
+//                    ...enemyArea
+//                }
+//
+//            ],
+//
+//            $Box {
+//                styles: [
+//                    {
+//                        flexDirection: flexDirection.row,
+//                        justifyContent: justify.spaceBetween
+//                    }
+//                ],
+//            } children [
+//                shootButton,
+//                $Box {
+//                    styles: [
+//                        {
+//                            flexDirection: flexDirection.row
+//                        }
+//                    ],
+//                } children [
+//                    $Image {
+//                        reportDimensionsWithScaling: true,
+//                        textureName: "reserves_texture",
+//                        scaleX: 0.05,
+//                        scaleY: 0.05
+//                    },
+//                    reservesLabel
+//                ],
+//                endTurnButton,
+//            ],
+//
+//            $CardHand {
+//                styles: [
+//                    {
+//                        height: cardHeight#points,
+//                        width: 100.0#percent
+//                    }
+//                ],
+//                ...cardHand
+//            }
+//
+//        ]
+//
+//    ]
+//
+//];
 
 root: $Box {
     styles: [
