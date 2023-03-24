@@ -29,6 +29,7 @@ class SeededMapGenerator(
 
         val mainLine: MapGeneratorLine = MapGeneratorLine(seed, restictions, rnd)
         mainLine.generateNextLine(false)
+        mainLine.generateNextLine(true)
         mainLine.lineDown?.generateNextLine()
         mainLine.connectEachTestRec(null, nodes)
 //        val lines: Array<MapGeneratorLine?> = arrayOfNulls(restictions.maxLines)
@@ -56,7 +57,6 @@ class SeededMapGenerator(
 ////                nodes[i + 15 * 2].connect(nodes[i - 1 + 15 * 2])
 //        }
         this.nodes = nodes
-
         println(nodes.size)
         var no = build()
         println("build")
@@ -126,7 +126,7 @@ class SeededMapGenerator(
         private val rnd: Random = Random(seed),
         oldLine: MapGeneratorLine? = null,
         isOldLineMin: Boolean = false,
-        nbrOfPoints: Int = 15,
+        val nbrOfPoints: Int = 15,
     ) {
         //        var points: List<Vector2>
         var lineNodes: List<MapNodeBuilder> = mutableListOf()
@@ -141,49 +141,121 @@ class SeededMapGenerator(
                 } else {
                     lineDown = oldLine;
                 }
-
-
-
-            } /*else {*/
-                points.add(Vector2(0, 0))
-                for (i in 2 until nbrOfPoints) {
-                    val length: Float = getMutliplier(5) * restrict.averageLengthOfLineInBetween
-                    val angle: Float =
-                        (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
-                    val posVec: Vector2 = Vector2(
-                        (sin(angle.toDouble()) * length).toFloat(),
-                        (cos(angle.toDouble()) * 0.5 * length).toFloat()
-                    )
-                    if (abs(points.last().y + posVec.y) > restrict.maxWidth / 2) {
-                        posVec.y *= -1
-                    }
-                    points.add(
-                        posVec.add(points.last())
-                    )
-                }
-//            }
+                calcPointsForAdditionalLines(points, oldLine, isOldLineMin)
+            } else {
+                calcPointsForFirstLine(points)
+            }
 
             val mu: MutableList<MapNodeBuilder> = mutableListOf()
             points.forEach() { p -> mu.add(MapNodeBuilder(p.x, p.y)) }
             this.lineNodes = mu
         }
 
-        fun generateNextLine(generateUp: Boolean = true) {
-            if (lineDown != null && lineUp == null)
-                lineUp = MapGeneratorLine(seed, restrict, rnd, this, false)
-            if (lineUp != null && lineDown == null)
-                lineDown = MapGeneratorLine(seed, restrict, rnd, this, true)
+        private fun calcPointsForAdditionalLines(
+            points: MutableList<Vector2>,
+            oldLine: MapGeneratorLine,
+            isOldLineMin: Boolean
+        ) {
+            points.add(
+                Vector2(
+                    oldLine.lineNodes[0].x + (sin(
+                        (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(
+                            rnd
+                        ) * Math.PI.toFloat().toDouble()
+                    ) * getMultiplier(5) * restrict.averageLengthOfLineInBetween).toFloat(),
+                    oldLine.lineNodes[0].y + restrict.maxWidth / 2 * (if (isOldLineMin) -1 else 1)
+                )
+            )
+            for (i in 1 until nbrOfPoints) {
+                val length: Float = getMultiplier(5) * restrict.averageLengthOfLineInBetween
+                val angle: Float =
+                    (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
+                val posVec: Vector2 = Vector2(
+                    (sin(angle.toDouble()) * length).toFloat(),
+                    (cos(angle.toDouble()) * 0.5 * length).toFloat()
+                )
 
-            if (lineUp == null && lineDown == null) {
-                if (generateUp) {
-                    lineUp = MapGeneratorLine(seed, restrict, rnd, this, false)
+                val pointToAdd: Vector2 = posVec.add(points.last())
+                val posRange = getPossibleYPoint(pointToAdd, isOldLineMin, oldLine)
+                if (pointToAdd.y !in posRange) {
+                    points.add(Vector2(pointToAdd.x, posRange.random(rnd)))
                 } else {
-                    lineDown = MapGeneratorLine(seed, restrict, rnd, this, true)
+                    points.add(pointToAdd)
                 }
             }
         }
 
-        fun getMutliplier(max: Int): Float {
+        private fun getPossibleYPoint(
+            pointToAdd: Vector2,
+            oldLineMin: Boolean,
+            oldLine: MapGeneratorLine
+        ): ClosedFloatingPointRange<Float> {
+            if (oldLineMin) {
+                val a = oldLine.getMinInRange(pointToAdd.x) - 5
+                println(a)
+                return ((a - restrict.maxWidth)..(a))
+            }
+            val a = oldLine.getMaxInRange(pointToAdd.x) + 5
+            return ((a)..(a + restrict.maxWidth))
+        }
+
+
+        private fun getMinInRange(x: Float): Float {
+            var minPos: Float = Float.MAX_VALUE
+            lineNodes.forEach() { a ->
+                if (abs(x - a.x) < restrict.rangeToCheck / 2) minPos = min(minPos, a.y)
+            }
+            if (minPos == Float.MAX_VALUE) {
+                minPos = lineNodes.stream().min { o1, o2 -> (abs(o1.x - x) compareTo abs(o2.x - x)) }.orElse(null).y
+            }
+            return minPos
+        }
+
+
+        private fun getMaxInRange(x: Float): Float {
+            var maxPos: Float = Float.MIN_VALUE
+            lineNodes.forEach() { a ->
+                if (abs(x - a.x) < restrict.rangeToCheck / 2) maxPos = max(maxPos, a.y)
+            }
+            return maxPos
+        }
+
+        private fun calcPointsForFirstLine(points: MutableList<Vector2>) {
+            points.add(Vector2(0, 0))
+            for (i in 1 until nbrOfPoints) {
+                val length: Float = getMultiplier(5) * restrict.averageLengthOfLineInBetween
+                val angle: Float =
+                    (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
+                val posVec: Vector2 = Vector2(
+                    (sin(angle.toDouble()) * length).toFloat(),
+                    (cos(angle.toDouble()) * 0.5 * length).toFloat()
+                )
+                if (abs(points.last().y + posVec.y) > restrict.maxWidth / 2) posVec.y *= -1
+                points.add(posVec.add(points.last()))
+            }
+        }
+
+        fun generateNextLine(generateUp: Boolean = true): Boolean {
+            if (lineDown != null && lineUp == null) {
+                lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
+                return true
+            }
+            if (lineUp != null && lineDown == null) {
+                lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
+                return false
+            }
+            if (lineUp == null) {
+                if (generateUp) {
+                    lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
+                } else {
+                    lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
+                }
+                return true
+            }
+            return false
+        }
+
+        fun getMultiplier(max: Int): Float {
             val a = rnd.nextInt(max - 1) + 1
             return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
         }
@@ -192,13 +264,25 @@ class SeededMapGenerator(
             for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
             for (i in lineNodes) if (i !in nodes) nodes.add(i)
             if (lineUp != lastOne && lineUp != null) {
-                for (i in lineNodes.indices) lineUp!!.lineNodes[i].connect(lineNodes[i])
+                for (i in lineUp?.lineNodes!!.indices) lineUp!!.lineNodes[i].connect(lineNodes[i])
                 lineUp!!.connectEachTestRec(this, nodes)
+                lineUp?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
             }
             if (lineDown != lastOne && lineDown != null) {
-                for (i in lineNodes.indices) lineDown!!.lineNodes[i].connect(lineNodes[i])
+                for (i in lineDown?.lineNodes!!.indices) lineDown!!.lineNodes[i].connect(lineNodes[i])
                 lineDown!!.connectEachTestRec(this, nodes)
+                lineDown?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
             }
+//            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
+//            for (i in lineNodes) if (i !in nodes) nodes.add(i)
+//            if (lineUp != lastOne && lineUp != null) {
+//                lineUp?.connectEachTestRec(this, nodes)
+//                lineUp?.lineNodes!![0].connect(lineNodes[0])
+//            }
+//            if (lineDown != lastOne && lineDown != null) {
+//                lineDown?.connectEachTestRec(this, nodes)
+//                lineDown?.lineNodes!![0].connect(lineNodes[0])
+//            }
         }
     }
 
@@ -253,6 +337,7 @@ data class MapRestriction(
     var averageLengthOfLineInBetween: Float = 26F,
     var maxWidth: Int = 60,
     var maxAnglePercent: Float = 0.6F,
+    var rangeToCheck: Float = 30F,
 ) {
 
     companion object {
