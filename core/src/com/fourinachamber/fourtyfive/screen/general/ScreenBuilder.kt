@@ -212,7 +212,7 @@ class ScreenBuilder(val file: FileHandle) {
     ): Actor = when (widgetOnj.name) {
 
         "Image" -> CustomImageActor(
-            widgetOnj.get<String>("textureName"),
+            widgetOnj.getOr<String?>("textureName", null),
             screen,
             widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
@@ -345,7 +345,12 @@ class ScreenBuilder(val file: FileHandle) {
         val node = parent?.add(actor)
 
         node ?: return actor
-        if (actor !is StyledActor) return actor
+        if (actor !is StyledActor) {
+            if (widgetOnj.hasKey<OnjArray>("styles")) {
+                throw RuntimeException("actor $actor defines styles but does not implement StyledActor")
+            }
+            return actor
+        }
 
         val styleManager = StyleManager(actor, node)
         actor.styleManager = styleManager

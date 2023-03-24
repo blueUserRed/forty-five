@@ -255,7 +255,7 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
  * custom Image that implements functionality for z-indices and masking
  */
 open class CustomImageActor @AllThreadsAllowed constructor(
-    drawableHandle: ResourceHandle,
+    drawableHandle: ResourceHandle?,
     private val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false
 ) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor {

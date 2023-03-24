@@ -9,6 +9,10 @@ import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styles.addActorStyles
+import io.github.orioncraftmc.meditate.YogaNode
 
 /**
  * actor representing the area in which enemies can appear on the screen
@@ -16,7 +20,10 @@ import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
 class EnemyArea(
     private val enemySelectionDrawableHandle: ResourceHandle,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, ZIndexGroup {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
+
+    override lateinit var styleManager: StyleManager
+    override var isHoveredOver: Boolean = false
 
     override var fixedZIndex: Int = 0
 
@@ -37,6 +44,10 @@ class EnemyArea(
      */
     val enemies: List<Enemy>
         get() = _enemies
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     /**
      * adds a new enemy to this area
@@ -72,6 +83,10 @@ class EnemyArea(
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
                     (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
+    }
+
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
     }
 
 }

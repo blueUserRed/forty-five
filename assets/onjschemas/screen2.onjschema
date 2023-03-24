@@ -72,7 +72,7 @@ $Widget {
     }
 
     $Image {
-        textureName: string,
+        textureName?: string,
         scaleX: float,
         scaleY: float,
         reportDimensionsWithScaling?: boolean,
