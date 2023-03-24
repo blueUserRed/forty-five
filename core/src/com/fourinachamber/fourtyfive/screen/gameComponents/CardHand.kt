@@ -7,7 +7,11 @@ import com.fourinachamber.fourtyfive.game.card.CardActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fourtyfive.utils.between
+import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.contains
 import kotlin.math.min
 
@@ -20,10 +24,13 @@ class CardHand(
     private val targetWidth: Float,
     private val cardSize: Float,
     private val screen: OnjScreen,
-) : WidgetGroup(), ZIndexActor, ZIndexGroup {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
 
     override var fixedZIndex: Int = 0
 
+    override lateinit var styleManager: StyleManager
+
+    override var isHoveredOver: Boolean = false
 
     /**
      * scaling applied to the card when hovered over
@@ -60,6 +67,10 @@ class CardHand(
     private var _cards: MutableList<Card> = mutableListOf()
 
     private var currentHoverDetailActor: CardDetailActor? = null
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     /**
      * adds a card to the hand
@@ -192,6 +203,10 @@ class CardHand(
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
                     (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
+    }
+
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
     }
 
     override fun getPrefWidth(): Float {
