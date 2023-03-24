@@ -21,7 +21,8 @@ class DialogTextWidget(
     private val dialog: Dialog,
     private val fontScale: Float,
     private val progressTime: Int,
-) : CustomFlexBox(), StyledActor {
+    screen: OnjScreen
+) : CustomFlexBox(screen), StyledActor {
 
     private var isDialogFinished: Boolean = false
 
