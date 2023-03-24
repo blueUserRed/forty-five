@@ -13,42 +13,32 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 class SeededMapGenerator(
-    val seed: Long = 103,
-    val restictions: MapRestriction = MapRestriction()
+    private val seed: Long = 103,
+    private val restrictions: MapRestriction = MapRestriction()
 ) {
-    lateinit var nodes: List<MapNodeBuilder>
-    val rnd: Random = Random(seed)
+    private lateinit var nodes: List<MapNodeBuilder>
+    private val rnd: Random = Random(seed)
 
-    fun build(): MapNode {
+    private fun build(): MapNode {
         return nodes[0].build()
     }
 
     fun generate(): DetailMap {
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
-        val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
+        val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
 
-        val mainLine: MapGeneratorLine = MapGeneratorLine(seed, restictions, rnd)
-        mainLine.generateNextLine(false)
-        mainLine.generateNextLine(true)
-        mainLine.lineDown?.generateNextLine()
-        mainLine.connectEachTestRec(null, nodes)
-//        val lines: Array<MapGeneratorLine?> = arrayOfNulls(restictions.maxLines)
-//        var cur =
-//            if ((restictions.maxLines and 1) == 0)
-//                (restictions.maxLines / 2 - (0..1).random(rnd))
-//            else (restictions.maxLines - 1) / 2
-//        lines[cur] = MapGeneratorLine(seed, restictions, rnd)
-//
-//        for (i in (cur - 1) downTo 1) {
-//            lines[i] = MapGeneratorLine(seed, restictions, rnd, false, true)
-//        }
-//
-//        for (i in (cur + 1)..restictions.maxLines) {
-//            lines[i] = MapGeneratorLine(seed, restictions, rnd, false, false)
-//        }
-//        for (i in l.points) {
-//            nodes.add(MapNodeBuilder(i.x, i.y))
-//        }
+        val mainLine: MapGeneratorLine = MapGeneratorLine(seed, restrictions, rnd)
+        var curDown = mainLine
+        var curUp = mainLine
+        for (i in 1 until restrictions.maxLines) {
+            if (rnd.nextBoolean()) {
+                println("now up")
+                curDown = curDown.generateNextLine(true)!!
+            }else{
+                println("now down")
+                curUp = curUp.generateNextLine(false)!!
+            }
+        }
 
 //        for (i in 1 until 13) {
 //            nodes[i].connect(nodes[i - 1])
@@ -56,24 +46,23 @@ class SeededMapGenerator(
 ////            if (i < 12)
 ////                nodes[i + 15 * 2].connect(nodes[i - 1 + 15 * 2])
 //        }
+
+        mainLine.connectEachTestRec(null, nodes)
         this.nodes = nodes
-        println(nodes.size)
-        var no = build()
-        println("build")
-        return DetailMap(no, listOf())
+        return DetailMap(build(), listOf())
     }
 
     fun generateBezier(): DetailMap {
 //        println("NOW TEST_OUTPUT")
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
-        val nbrOfNodes = (restictions.minNodes..restictions.maxNodes).random(rnd)
+        val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
 //        val boundary: Float = 50F
         nodes.add(MapNodeBuilder(0F, 0F))
 //        nodes.add(MapNodeBuilder(boundary, 0F))
 //        nodes.add(MapNodeBuilder(boundary, boundary))
 //        nodes.add(MapNodeBuilder(0F, boundary))
 //        nodes.add(MapNodeBuilder(0F, 0F))
-        val curve = BezierCurve(seed, restictions, rnd, nbrOfNodes)
+        val curve = BezierCurve(seed, restrictions, rnd, nbrOfNodes)
 
         val accuracy = nbrOfNodes - 1
         for (i in 0 until accuracy) {
@@ -192,7 +181,6 @@ class SeededMapGenerator(
         ): ClosedFloatingPointRange<Float> {
             if (oldLineMin) {
                 val a = oldLine.getMinInRange(pointToAdd.x) - 5
-                println(a)
                 return ((a - restrict.maxWidth)..(a))
             }
             val a = oldLine.getMaxInRange(pointToAdd.x) + 5
@@ -235,24 +223,25 @@ class SeededMapGenerator(
             }
         }
 
-        fun generateNextLine(generateUp: Boolean = true): Boolean {
+        fun generateNextLine(generateUp: Boolean = true): MapGeneratorLine? {
             if (lineDown != null && lineUp == null) {
                 lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
-                return true
+                return lineUp
             }
             if (lineUp != null && lineDown == null) {
                 lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
-                return false
+                return lineDown
             }
             if (lineUp == null) {
                 if (generateUp) {
                     lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
+                    return lineUp
                 } else {
                     lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
+                    return lineDown
                 }
-                return true
             }
-            return false
+            return null
         }
 
         fun getMultiplier(max: Int): Float {
@@ -261,28 +250,28 @@ class SeededMapGenerator(
         }
 
         fun connectEachTestRec(lastOne: MapGeneratorLine?, nodes: MutableList<MapNodeBuilder>) {
-            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
-            for (i in lineNodes) if (i !in nodes) nodes.add(i)
-            if (lineUp != lastOne && lineUp != null) {
-                for (i in lineUp?.lineNodes!!.indices) lineUp!!.lineNodes[i].connect(lineNodes[i])
-                lineUp!!.connectEachTestRec(this, nodes)
-                lineUp?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
-            }
-            if (lineDown != lastOne && lineDown != null) {
-                for (i in lineDown?.lineNodes!!.indices) lineDown!!.lineNodes[i].connect(lineNodes[i])
-                lineDown!!.connectEachTestRec(this, nodes)
-                lineDown?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
-            }
 //            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
 //            for (i in lineNodes) if (i !in nodes) nodes.add(i)
 //            if (lineUp != lastOne && lineUp != null) {
-//                lineUp?.connectEachTestRec(this, nodes)
-//                lineUp?.lineNodes!![0].connect(lineNodes[0])
+//                for (i in lineUp?.lineNodes!!.indices) lineUp!!.lineNodes[i].connect(lineNodes[i])
+//                lineUp!!.connectEachTestRec(this, nodes)
+//                lineUp?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
 //            }
 //            if (lineDown != lastOne && lineDown != null) {
-//                lineDown?.connectEachTestRec(this, nodes)
-//                lineDown?.lineNodes!![0].connect(lineNodes[0])
+//                for (i in lineDown?.lineNodes!!.indices) lineDown!!.lineNodes[i].connect(lineNodes[i])
+//                lineDown!!.connectEachTestRec(this, nodes)
+//                lineDown?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
 //            }
+            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
+            for (i in lineNodes) if (i !in nodes) nodes.add(i)
+            if (lineUp != lastOne && lineUp != null) {
+                lineUp?.connectEachTestRec(this, nodes)
+                lineUp?.lineNodes!![0].connect(lineNodes[0])
+            }
+            if (lineDown != lastOne && lineDown != null) {
+                lineDown?.connectEachTestRec(this, nodes)
+                lineDown?.lineNodes!![0].connect(lineNodes[0])
+            }
         }
     }
 
@@ -331,13 +320,13 @@ class BezierCurve(
 data class MapRestriction(
     var maxNodes: Int = 22,
     var minNodes: Int = 15,
-    var maxLines: Int = 4,
+    var maxLines: Int = 6,
     var splitProb: Float = 0.25F,
     var compressProb: Float = 0.55F,
     var averageLengthOfLineInBetween: Float = 26F,
     var maxWidth: Int = 60,
     var maxAnglePercent: Float = 0.6F,
-    var rangeToCheck: Float = 30F,
+    var rangeToCheck: Float = 70F,
 ) {
 
     companion object {
