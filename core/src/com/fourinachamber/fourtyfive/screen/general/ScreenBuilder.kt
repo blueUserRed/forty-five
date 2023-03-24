@@ -240,9 +240,9 @@ class ScreenBuilder(val file: FileHandle) {
 
         "CardHand" -> CardHand(
             widgetOnj.get<Double>("targetWidth").toFloat(),
+            widgetOnj.get<Double>("cardSize").toFloat(),
             screen
         ).apply {
-            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
             cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
