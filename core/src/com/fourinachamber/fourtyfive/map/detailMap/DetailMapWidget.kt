@@ -175,13 +175,14 @@ class DetailMapWidget(
         updatePlayerMovement()
         batch ?: return
 
+        batch.flush()
         val (screenX, screenY) = localToStageCoordinates(Vector2(0f, 0f))
         val bounds = Rectangle(screenX, screenY, width, height)
         val scissor = Rectangle()
         ScissorStack.calculateScissors(screen.stage.camera, batch.transformMatrix, bounds, scissor)
         if (!ScissorStack.pushScissors(scissor)) return
 
-        background?.draw(batch, x, y, width, height)
+        background.draw(batch, x, y, width, height)
         drawEdges(batch)
         drawNodes(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
