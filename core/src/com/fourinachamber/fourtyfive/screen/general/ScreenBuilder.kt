@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.SplitPane
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -55,7 +56,6 @@ class ScreenBuilder(val file: FileHandle) {
     private var background: String? = null
     private var transitionAwayTime: Int? = null
     private var popups: Map<String, WidgetGroup>? = null
-//    private var postProcessor: String? = null
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -78,8 +78,7 @@ class ScreenBuilder(val file: FileHandle) {
             namedActors = namedActors,
             printFrameRate = false,
             namedCells = mapOf(),
-            transitionAwayTime = transitionAwayTime,
-
+            transitionAwayTime = transitionAwayTime
         )
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
@@ -136,25 +135,6 @@ class ScreenBuilder(val file: FileHandle) {
 
     private fun readAssets(onj: OnjObject) {
         val assets = onj.get<OnjObject>("assets")
-
-//        if (assets.hasKey<OnjArray>("styleFiles")) {
-//            assets
-//                .get<OnjArray>("styleFiles")
-//                .value
-//                .forEach {
-//                    styles.putAll(Style.readFromFile(it.value as String))
-//                }
-//        }
-//
-//        if (assets.hasKey<OnjArray>("styles")) {
-//            assets
-//                .get<OnjArray>("styles")
-//                .value
-//                .map { Style.readStyle(it as OnjObject) }
-//                .forEach {
-//                    styles[it.first] = it.second
-//                }
-//        }
 
         val toBorrow = mutableListOf<String>()
 
@@ -358,6 +338,18 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
             screen
         )
+
+        "SplitPlane" -> {
+            val firstFlexBox = CustomFlexBox(screen)
+            val secondFlexBox = CustomFlexBox(screen)
+            val splitPane = SplitPane(
+                firstFlexBox,
+                secondFlexBox,
+                widgetOnj.get<Boolean>("vertical"),
+                SplitPane.SplitPaneStyle()
+            )
+            firstFlexBox
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
