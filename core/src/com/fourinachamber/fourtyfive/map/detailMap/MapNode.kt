@@ -6,6 +6,10 @@ data class MapNode(
     val isArea: Boolean,
     val x: Float,
     val y: Float,
+//    val left: Int?,
+//    val right: Int?,
+//    val top: Int?,
+//    val bottom: Int?,
     val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
@@ -23,9 +27,7 @@ data class MapNode(
 
     fun getUniqueNodes(): List<MapNode> {
         val nodes = mutableListOf(this)
-        println("Starting NOdes")
         getUniqueNodes(nodes)
-        println("Finished NOdes")
         return nodes
     }
 
@@ -92,6 +94,11 @@ data class MapNodeBuilder(
     private var inBuild: Boolean = false
 
     private var asNode: MapNode? = null
+
+    var left: Int? = null
+    var right: Int? = null
+    var top: Int? = null
+    var bottom: Int? = null
 
     fun build(): MapNode {
         if (inBuild) return asNode!!
