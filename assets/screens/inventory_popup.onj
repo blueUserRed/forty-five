@@ -1,0 +1,26 @@
+
+use Common;
+use Screen;
+use Style;
+
+assets: {
+    useCardAtlas: true,
+    useAssets: [ "black_texture" ]
+}
+
+var root = $Box {
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent,
+            background: "black_texture"
+        }
+    ]
+} children [
+
+];
+
+popup: {
+    name: "inventoryPopup",
+    popupRoot: root
+}

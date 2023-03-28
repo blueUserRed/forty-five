@@ -30,18 +30,16 @@ object BehaviourFactory {
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
-//        "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
         "OnClickRemoveActorBehaviour" to { onj, actor -> OnClickRemoveActorBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnHoverChangeFontSizeBehaviour" to { onj, actor -> OnHoverChangeFontSizeBehaviour(onj, actor) },
         "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
-//        "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
-        "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
         "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
         "EndTurnButtonBehaviour" to { onj, actor -> EndTurnButtonBehaviour(onj, actor) },
         "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
-        "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) }
+        "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) },
+        "OnClickOpenPopupBehaviour" to { onj, actor -> OnClickOpenPopupBehaviour(onj, actor) }
     )
 
     /**
@@ -148,6 +146,16 @@ class MouseHoverBehaviour(
     override val onHoverExit: BehaviourCallback = {
         Utils.setCursor(onjScreen.defaultCursor)
     }
+}
+
+class OnClickOpenPopupBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val popupName = onj.get<String>("popupName")
+
+    override val onCLick: BehaviourCallback = {
+        onjScreen.showPopup(popupName)
+    }
+
 }
 
 /**
@@ -332,34 +340,6 @@ class OnHoverChangeFontSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behavi
         }
     }
 
-}
-
-/**
- * sets the visibility of another actor when this actor is hovered over
- */
-class OnHoverPopupBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-
-    private val popupActorName = onj.get<String>("popupName")
-    private val setPopupPosition = onj.get<Boolean>("setPopupPosition")
-
-    private val xOffset = onj.getOr("xOffset", 0.0).toFloat()
-    private val yOffset = onj.getOr("yOffset", 0.0).toFloat()
-
-    private val popupActor by lazy {
-        onjScreen.namedActorOrError(popupActorName)
-    }
-
-    override val onHoverEnter: BehaviourCallback = {
-        if (setPopupPosition) {
-            popupActor.x = actor.x + xOffset
-            popupActor.y = actor.y + yOffset
-        }
-        popupActor.isVisible = true
-    }
-
-    override val onHoverExit: BehaviourCallback = {
-        popupActor.isVisible = false
-    }
 }
 
 class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
