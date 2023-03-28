@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -52,6 +54,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
+    private var popups: Map<String, WidgetGroup>? = null
 //    private var postProcessor: String? = null
 
     @MainThreadOnly
@@ -75,12 +78,16 @@ class ScreenBuilder(val file: FileHandle) {
             namedActors = namedActors,
             printFrameRate = false,
             namedCells = mapOf(),
-            transitionAwayTime = transitionAwayTime
+            transitionAwayTime = transitionAwayTime,
+
         )
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
+
+        doPopups(onj, screen)
+        popups?.let { screen.popups = it }
 
         val root = CustomFlexBox(screen)
         root.setFillParent(true)
@@ -97,6 +104,21 @@ class ScreenBuilder(val file: FileHandle) {
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
         return screen
+    }
+
+    private fun doPopups(onj: OnjObject, screen: OnjScreen) {
+        val popups = mutableMapOf<String, WidgetGroup>()
+        onj.get<OnjObject>("options").ifHas<OnjArray>("popups") { arr ->
+            arr.value.forEach { obj ->
+                obj as OnjObject
+                val name = obj.get<String>("name")
+                val rootObj = obj.get<OnjNamedObject>("popupRoot")
+                val popupRootFlexBox = CustomFlexBox(screen)
+                getWidget(rootObj, popupRootFlexBox, screen)
+                popups[name] = popupRootFlexBox
+            }
+        }
+        this.popups = popups
     }
 
     private fun doOptions(onj: OnjObject) {
