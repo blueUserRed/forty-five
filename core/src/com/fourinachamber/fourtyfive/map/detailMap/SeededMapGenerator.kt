@@ -87,41 +87,61 @@ class SeededMapGenerator(
         interceptPoint: Vector2,
         uniqueLines: MutableList<Line>
     ) {
-        var isPossibleToAdd = true
+        var intersectionNode: MapNodeBuilder? = null
         for (i in nodes) {
             val newVec = interceptPoint.clone().sub(Vector2(i.x, i.y))
             if (newVec.len() < 10) {
-                isPossibleToAdd = false
+                intersectionNode = i
                 break
             }
         }
-        if (isPossibleToAdd) {
+        if (intersectionNode == null) {
             val newNode = MapNodeBuilder(interceptPoint.x, interceptPoint.y)
             addNodeInBetween(line1, nodes, newNode, uniqueLines)
             addNodeInBetween(line2, nodes, newNode, uniqueLines)
         } else {
-            if (!deleteLineInBetween(line1, nodes, uniqueLines)) {
-                deleteLineInBetween(line2, nodes, uniqueLines)
-            }
+            deleteLineInBetween(
+                getLineToDelete(nodes, line1, line2, intersectionNode, interceptPoint),
+                nodes,
+                uniqueLines
+            )
         }
+    }
+
+    private fun getLineToDelete(
+        nodes: MutableList<MapNodeBuilder>,
+        line1: Line,
+        line2: Line,
+        possibleIntersectionNode: MapNodeBuilder,
+        interceptPoint: Vector2
+    ): Line {
+        val curNodes = arrayOf(
+            nodes.first { a -> a.x == line1.start.x && a.y == line1.start.y },
+            nodes.first { a -> a.x == line1.end.x && a.y == line1.end.y },
+            nodes.first { a -> a.x == line2.start.x && a.y == line2.start.y },
+            nodes.first { a -> a.x == line2.end.x && a.y == line2.end.y },
+        )
+        if (curNodes[0] in mainLine.lineNodes && curNodes[1] in mainLine.lineNodes) return line2
+        if (curNodes[2] in mainLine.lineNodes && curNodes[3] in mainLine.lineNodes) return line1
+
+        if (possibleIntersectionNode == curNodes[0] || possibleIntersectionNode == curNodes[1]) return line2
+        if (possibleIntersectionNode == curNodes[2] || possibleIntersectionNode == curNodes[3]) return line1
+        println("Random Chosen")
+        return if (rnd.nextBoolean()) line1 else line2
     }
 
     private fun deleteLineInBetween(
         nodesConnection: Line,
         nodes: MutableList<MapNodeBuilder>,
         uniqueLines: MutableList<Line>
-    ): Boolean {
+    ) {
         val firstNode = nodes.first { a -> a.x == nodesConnection.start.x && a.y == nodesConnection.start.y }
         val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
-        if (firstNode in mainLine.lineNodes && secNode in mainLine.lineNodes) {
-            return false
-        }
         uniqueLines.remove(nodesConnection)
         firstNode.dirNodes[firstNode.edgesTo.indexOf(secNode)] = null
         secNode.dirNodes[secNode.edgesTo.indexOf(firstNode)] = null
         firstNode.edgesTo.remove(secNode)
         secNode.edgesTo.remove(firstNode)
-        return true
     }
 
     private fun addNodeInBetween(
