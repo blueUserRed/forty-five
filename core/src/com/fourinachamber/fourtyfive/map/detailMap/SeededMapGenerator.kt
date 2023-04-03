@@ -58,7 +58,9 @@ class SeededMapGenerator(
             }
         }
         println("NOW")
-        while (checkLinesNotIntercepting(uniqueLines, nodes));
+        while (checkLinesNotIntercepting(uniqueLines, nodes)) {
+            println("NEW TURN")
+        };
     }
 
     private fun checkLinesNotIntercepting(uniqueLines: MutableList<Line>, nodes: MutableList<MapNodeBuilder>): Boolean {
@@ -68,9 +70,10 @@ class SeededMapGenerator(
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
                 val interceptPoint = line1.intersection(line2)
-                if (interceptPoint != null) {
-//                    containsStillError = true
-//                    createIntercetionNode(nodes, line1, line2, interceptPoint)
+                if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
+                    containsStillError = true
+                    createInterceptionNode(nodes, line1, line2, interceptPoint, uniqueLines)
+                    break
                 }
             }
         }
@@ -78,14 +81,39 @@ class SeededMapGenerator(
         return containsStillError
     }
 
-//    private fun createIntercetionNode(
-//        nodes: MutableList<MapNodeBuilder>,
-//        line1: Line,
-//        line2: Line,
-//        interceptPoint: Vector2
-//    ) {
-//
-//    }
+    private fun createInterceptionNode(
+        nodes: MutableList<MapNodeBuilder>,
+        line1: Line,
+        line2: Line,
+        interceptPoint: Vector2,
+        uniqueLines: MutableList<Line>
+    ) {
+        val newNode = MapNodeBuilder(interceptPoint.x, interceptPoint.y)
+        addNodeInBetween(line1, nodes, newNode, uniqueLines)
+        addNodeInBetween(line2, nodes, newNode, uniqueLines)
+    }
+
+    private fun addNodeInBetween(
+        nodesConnection: Line,
+        nodes: MutableList<MapNodeBuilder>,
+        newNode: MapNodeBuilder,
+        uniqueLines: MutableList<Line>
+    ) {
+        val firstNode = nodes.first { a -> a.x == nodesConnection.start.x && a.y == nodesConnection.start.y }
+        val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
+        println(firstNode)
+        println(secNode)
+        println(nodesConnection)
+        println()
+        firstNode.edgesTo[firstNode.edgesTo.indexOf(secNode)] = newNode
+        secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
+        newNode.edgesTo.add(firstNode)
+        newNode.edgesTo.add(secNode)
+        nodes.add(newNode)
+        uniqueLines.remove(nodesConnection)
+        uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
+        uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
+    }
 
     /*    fun generateBezier(): DetailMap {
             val nodes: MutableList<MapNodeBuilder> = mutableListOf()
@@ -148,7 +176,7 @@ class SeededMapGenerator(
         val nbrOfPoints: Int = 15,
     ) {
         //        var points: List<Vector2>
-        var lineNodes: List<MapNodeBuilder> = mutableListOf()
+        private var lineNodes: List<MapNodeBuilder> = mutableListOf()
         var lineUp: MapGeneratorLine? = null
         var lineDown: MapGeneratorLine? = null
 
@@ -156,9 +184,9 @@ class SeededMapGenerator(
             val points: MutableList<Vector2> = mutableListOf()
             if (oldLine != null) {
                 if (isOldLineMin) {
-                    lineUp = oldLine;
+                    lineUp = oldLine
                 } else {
-                    lineDown = oldLine;
+                    lineDown = oldLine
                 }
                 calcPointsForAdditionalLines(points, oldLine, isOldLineMin)
             } else {
@@ -323,7 +351,7 @@ class SeededMapGenerator(
                 for (i in lineNodes.indices) {
                     val numberOfConnections: Int = getNbrOfConn(
                         rnd,
-                        restrict.splitProb/* + 0.1F*/
+                        restrict.splitProb + max(0F, 0.3F - i / 10F)
                     ) //TODO hier wieder auskommentieren und testen (für first Line, damit da die Chancen höher sind zu splitten)
                     // TODO und auslagern nicht vergessen, auf MapBuilderNode (Nicht so wichtig, aber schöner und lesbarer)
                     if (numberOfConnections > 1) {
@@ -345,17 +373,12 @@ class SeededMapGenerator(
                 return
             }
             if (node !in nodes) nodes.add(node)
-
-
             var numberOfMissingConnections: Int = numberOfWishedConnections
             val posDirs: MutableList<Int> =
                 getPossibleDirectionsToCreatePathsTo(node, curLine)
             while (numberOfMissingConnections > 0 && posDirs.isNotEmpty() && node.edgesTo.size < 4) {
                 val curDir: Direction = Direction.values()[posDirs.random(rnd)]
                 posDirs.remove(curDir.ordinal)
-                if (node.x < 420 && node.x > 418 && curDir == Direction.UP) {
-                    println("Hallo")
-                }
                 val possiblePointsToConnectTo: List<MapNodeBuilder> =
                     getPossiblePointsToConnect(node, curLine, curDir, nodes)
                 if (possiblePointsToConnectTo.isEmpty()) continue
@@ -405,7 +428,7 @@ class SeededMapGenerator(
                                     Vector2(node.x, node.y),
                                     Vector2(possibleNode.x, possibleNode.y),
                                     Vector2(nodeToTestIfInRange.x, nodeToTestIfInRange.y),
-                                    5F.pow(2)
+                                    10F.pow(2)
                                 )
                             ) {
                                 posNodes.remove(possibleNode)
@@ -459,7 +482,11 @@ public class Line(val start: Vector2, val end: Vector2) {
     fun intersection(other: Line): Vector2? {
         val intersectVector: Vector2 = Vector2()
         if (Intersector.intersectLines(start, end, other.start, other.end, intersectVector)) {
-            return intersectVector
+            if (intersectVector.x > min(start.x, end.x) && intersectVector.x < max(start.x, end.x)) {
+                if (intersectVector.x > min(other.start.x, other.end.x)
+                    && intersectVector.x < max(other.start.x, other.end.x)
+                ) return intersectVector
+            }
         }
         return null
     }
@@ -468,6 +495,10 @@ public class Line(val start: Vector2, val end: Vector2) {
         if (other == null || other !is Line) return false
         return start.x == other.start.x && start.y == other.start.y &&
                 end.x == other.end.x && end.y == other.end.y
+    }
+
+    override fun toString(): String {
+        return javaClass.simpleName + "{start: ${start}, end: ${end}}"
     }
 }
 
@@ -558,7 +589,7 @@ data class MapRestriction(
 //    val maxLines: Int = 6,
     val maxLines: Int = 3,
 //    val splitProb: Float = 0.91F,
-    val splitProb: Float = 0.45F,
+    val splitProb: Float = 0.55F,
     val compressProb: Float = 0.55F,
     val averageLengthOfLineInBetween: Float = 26F,
     val maxWidth: Int = 40,
