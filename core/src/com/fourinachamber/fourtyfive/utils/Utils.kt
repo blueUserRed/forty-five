@@ -101,6 +101,9 @@ fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
 public fun <E> List<E>.subListTillMax(toIndex: Int): List<E> {
     return subList(0, min(size, toIndex))
 }
+fun Vector2.clone(): Vector2 {
+    return Vector2(x,y)
+}
 
 object Utils {
 

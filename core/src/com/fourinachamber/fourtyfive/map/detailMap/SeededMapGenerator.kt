@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.map.detailMap
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.utils.Vector2
+import com.fourinachamber.fourtyfive.utils.clone
 import com.fourinachamber.fourtyfive.utils.random
 import com.fourinachamber.fourtyfive.utils.subListTillMax
 import onj.value.OnjObject
@@ -21,6 +22,7 @@ class SeededMapGenerator(
 ) {
     private lateinit var nodes: List<MapNodeBuilder>
     private val rnd: Random = Random(seed)
+    private lateinit var mainLine: MapGeneratorLine
 
     private fun build(): MapNode {
         return nodes[0].build()
@@ -30,7 +32,7 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
 
-        val mainLine: MapGeneratorLine = MapGeneratorLine(seed, restrictions, rnd)
+        mainLine = MapGeneratorLine(seed, restrictions, rnd)
         var curDown = mainLine
         var curUp = mainLine
         for (i in 1 until restrictions.maxLines) {
@@ -64,33 +66,62 @@ class SeededMapGenerator(
     }
 
     private fun checkLinesNotIntercepting(uniqueLines: MutableList<Line>, nodes: MutableList<MapNodeBuilder>): Boolean {
-        var containsStillError: Boolean = false
         for (i in uniqueLines.indices) {
             val line1 = uniqueLines[i]
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
                 val interceptPoint = line1.intersection(line2)
                 if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
-                    containsStillError = true
-                    createInterceptionNode(nodes, line1, line2, interceptPoint, uniqueLines)
-                    break
+                    correctInterceptionNode(nodes, line1, line2, interceptPoint, uniqueLines)
+                    return true
                 }
             }
         }
-
-        return containsStillError
+        return false
     }
 
-    private fun createInterceptionNode(
+    private fun correctInterceptionNode(
         nodes: MutableList<MapNodeBuilder>,
         line1: Line,
         line2: Line,
         interceptPoint: Vector2,
         uniqueLines: MutableList<Line>
     ) {
-        val newNode = MapNodeBuilder(interceptPoint.x, interceptPoint.y)
-        addNodeInBetween(line1, nodes, newNode, uniqueLines)
-        addNodeInBetween(line2, nodes, newNode, uniqueLines)
+        var isPossibleToAdd = true
+        for (i in nodes) {
+            val newVec = interceptPoint.clone().sub(Vector2(i.x, i.y))
+            if (newVec.len() < 10) {
+                isPossibleToAdd = false
+                break
+            }
+        }
+        if (isPossibleToAdd) {
+            val newNode = MapNodeBuilder(interceptPoint.x, interceptPoint.y)
+            addNodeInBetween(line1, nodes, newNode, uniqueLines)
+            addNodeInBetween(line2, nodes, newNode, uniqueLines)
+        } else {
+            if (!deleteLineInBetween(line1, nodes, uniqueLines)) {
+                deleteLineInBetween(line2, nodes, uniqueLines)
+            }
+        }
+    }
+
+    private fun deleteLineInBetween(
+        nodesConnection: Line,
+        nodes: MutableList<MapNodeBuilder>,
+        uniqueLines: MutableList<Line>
+    ): Boolean {
+        val firstNode = nodes.first { a -> a.x == nodesConnection.start.x && a.y == nodesConnection.start.y }
+        val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
+        if (firstNode in mainLine.lineNodes && secNode in mainLine.lineNodes) {
+            return false
+        }
+        uniqueLines.remove(nodesConnection)
+        firstNode.dirNodes[firstNode.edgesTo.indexOf(secNode)] = null
+        secNode.dirNodes[secNode.edgesTo.indexOf(firstNode)] = null
+        firstNode.edgesTo.remove(secNode)
+        secNode.edgesTo.remove(firstNode)
+        return true
     }
 
     private fun addNodeInBetween(
@@ -103,7 +134,6 @@ class SeededMapGenerator(
         val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
         println(firstNode)
         println(secNode)
-        println(nodesConnection)
         println()
         firstNode.edgesTo[firstNode.edgesTo.indexOf(secNode)] = newNode
         secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
@@ -176,7 +206,7 @@ class SeededMapGenerator(
         val nbrOfPoints: Int = 15,
     ) {
         //        var points: List<Vector2>
-        private var lineNodes: List<MapNodeBuilder> = mutableListOf()
+        val lineNodes: List<MapNodeBuilder>
         var lineUp: MapGeneratorLine? = null
         var lineDown: MapGeneratorLine? = null
 
@@ -399,9 +429,6 @@ class SeededMapGenerator(
             }
         }
 
-        //    MapNodeBuilder{x: 419.1261,y: -47.732697, neighbours: MapNodeBuilder{x: 392.4264,y: -39.130947}, }
-// MapNodeBuilder{x: 491.9464,y: 0.0, neighbours: MapNodeBuilder{x: 466.84903,y: -11.390215}, }
-//   ToTestInRange     MapNodeBuilder{x: 466.84903,y: -11.390215, neighbours: MapNodeBuilder{x: 432.79495,y: -18.95801}, MapNodeBuilder{x: 491.9464,y: 0.0}, MapNodeBuilder{x: 392.4264,y: -39.130947}, }
         private fun getPossiblePointsToConnect(
             node: MapNodeBuilder,
             curLine: MapGeneratorLine,
