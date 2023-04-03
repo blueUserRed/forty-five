@@ -1,8 +1,10 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fourtyfive.utils.Vector2
 import com.fourinachamber.fourtyfive.utils.random
+import com.fourinachamber.fourtyfive.utils.subListTillMax
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
@@ -33,68 +35,98 @@ class SeededMapGenerator(
         var curUp = mainLine
         for (i in 1 until restrictions.maxLines) {
             if (rnd.nextBoolean()) {
-//                println("now up")
                 curDown = curDown.generateNextLine(true)!!
             } else {
-//                println("now down")
                 curUp = curUp.generateNextLine(false)!!
             }
         }
-
-//        for (i in 1 until 13) {
-//            nodes[i].connect(nodes[i - 1])
-//            nodes[i + 14].connect(nodes[i - 1 + 14])
-//            if (i < 12)
-//                nodes[i + 15 * 2].connect(nodes[i - 1 + 15 * 2])
-//        }
-
         mainLine.connectWithEachOther(null, nodes)
+//        nodes.removeIf() { a -> nodes.indexOf(a) != nodes.lastIndexOf(a) }
+
+        checkAndChangeConnectionIntersection(nodes)
         this.nodes = nodes
         return DetailMap(build(), listOf())
     }
 
-    fun generateBezier(): DetailMap {
-//        println("NOW TEST_OUTPUT")
-        val nodes: MutableList<MapNodeBuilder> = mutableListOf()
-        val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
-//        val boundary: Float = 50F
-        nodes.add(MapNodeBuilder(0F, 0F))
-//        nodes.add(MapNodeBuilder(boundary, 0F))
-//        nodes.add(MapNodeBuilder(boundary, boundary))
-//        nodes.add(MapNodeBuilder(0F, boundary))
-//        nodes.add(MapNodeBuilder(0F, 0F))
-        val curve = BezierCurve(seed, restrictions, rnd, nbrOfNodes)
-
-        val accuracy = nbrOfNodes - 1
-        for (i in 0 until accuracy) {
-            addNodeFromCurve(
-                curve,
-                (max(
-                    min(i.toFloat() + ((-0.75F / accuracy)..(0.75F / accuracy)).random(rnd), accuracy.toFloat()),
-                    0F
-                ) / accuracy.toFloat()),
-                nodes
-            )
+    private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>) {
+        val uniqueLines: MutableList<Line> = mutableListOf()
+        for (node in nodes) {
+            for (other in node.edgesTo) {
+                if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
+                    uniqueLines.add(Line(Vector2(node.x, node.y), Vector2(other.x, other.y)))
+                }
+            }
         }
-        val vec: Vector2 = curve.getPos(1F)
-        nodes.add(MapNodeBuilder(vec.x, vec.y))
-
-        for (i in 1 until nodes.size) {
-            nodes[i].connect(nodes[i - 1])
-        }
-//        printNodesAndNeighbours(nodes)
-        this.nodes = nodes
-        return DetailMap(build(), listOf())
+        println("NOW")
+        while (checkLinesNotIntercepting(uniqueLines, nodes));
     }
 
-    private fun addNodeFromCurve(
-        curve: BezierCurve,
-        t: Float,
-        nodes: MutableList<MapNodeBuilder>
-    ) {
-        val vec: Vector2 = curve.getPos(t)
-        nodes.add(MapNodeBuilder(vec.x, vec.y))
+    private fun checkLinesNotIntercepting(uniqueLines: MutableList<Line>, nodes: MutableList<MapNodeBuilder>): Boolean {
+        var containsStillError: Boolean = false
+        for (i in uniqueLines.indices) {
+            val line1 = uniqueLines[i]
+            for (j in (i + 1) until uniqueLines.size) {
+                val line2 = uniqueLines[j]
+                val interceptPoint = line1.intersection(line2)
+                if (interceptPoint != null) {
+//                    containsStillError = true
+//                    createIntercetionNode(nodes, line1, line2, interceptPoint)
+                }
+            }
+        }
+
+        return containsStillError
     }
+
+//    private fun createIntercetionNode(
+//        nodes: MutableList<MapNodeBuilder>,
+//        line1: Line,
+//        line2: Line,
+//        interceptPoint: Vector2
+//    ) {
+//
+//    }
+
+    /*    fun generateBezier(): DetailMap {
+            val nodes: MutableList<MapNodeBuilder> = mutableListOf()
+            val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
+    //        val boundary: Float = 50F
+            nodes.add(MapNodeBuilder(0F, 0F))
+    //        nodes.add(MapNodeBuilder(boundary, 0F))
+    //        nodes.add(MapNodeBuilder(boundary, boundary))
+    //        nodes.add(MapNodeBuilder(0F, boundary))
+    //        nodes.add(MapNodeBuilder(0F, 0F))
+            val curve = BezierCurve(seed, restrictions, rnd, nbrOfNodes)
+
+            val accuracy = nbrOfNodes - 1
+            for (i in 0 until accuracy) {
+                addNodeFromCurve(
+                    curve,
+                    (max(
+                        min(i.toFloat() + ((-0.75F / accuracy)..(0.75F / accuracy)).random(rnd), accuracy.toFloat()),
+                        0F
+                    ) / accuracy.toFloat()),
+                    nodes
+                )
+            }
+            val vec: Vector2 = curve.getPos(1F)
+            nodes.add(MapNodeBuilder(vec.x, vec.y))
+
+            for (i in 1 until nodes.size) {
+                nodes[i].connect(nodes[i - 1])
+            }
+            this.nodes = nodes
+            return DetailMap(build(), listOf())
+        }
+
+        private fun addNodeFromCurve(
+            curve: BezierCurve,
+            t: Float,
+            nodes: MutableList<MapNodeBuilder>
+        ) {
+            val vec: Vector2 = curve.getPos(t)
+            nodes.add(MapNodeBuilder(vec.x, vec.y))
+        }*/
 
     private fun printNodesAndNeighbours(nodes: MutableList<MapNodeBuilder>) {
         for (i in nodes) {
@@ -105,9 +137,6 @@ class SeededMapGenerator(
             println()
         }
     }
-
-//    private fun addNode(nodes: MutableList<MapNodeBuilder>, nbrOfNodes: Int, mapNodeBuilder: MapNodeBuilder) {
-//    }
 
 
     class MapGeneratorLine(
@@ -163,14 +192,7 @@ class SeededMapGenerator(
             isOldLineMin: Boolean,
             oldLine: MapGeneratorLine
         ): Pair<Vector2, ClosedFloatingPointRange<Float>> {
-            val length: Float = getMultiplier(5) * restrict.averageLengthOfLineInBetween
-            val angle: Float =
-                (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
-            val posVec: Vector2 = Vector2(
-                (sin(angle.toDouble()) * length).toFloat(),
-                (cos(angle.toDouble()) * 0.5 * length).toFloat()
-            )
-
+            val posVec: Vector2 = generateRandomPoint()
             val pointToAdd: Vector2 = posVec.add(points.last())
             val posRange = getPossibleYPoint(pointToAdd, isOldLineMin, oldLine)
             return Pair(pointToAdd, posRange)
@@ -213,17 +235,25 @@ class SeededMapGenerator(
         private fun calcPointsForFirstLine(points: MutableList<Vector2>) {
             points.add(Vector2(0, 0))
             for (i in 1 until nbrOfPoints) {
-                val length: Float =
-                    getMultiplier(5) * restrict.averageLengthOfLineInBetween * (1 + (rnd.nextFloat() * 0.1F))
-                val angle: Float =
-                    (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
-                val posVec: Vector2 = Vector2(
-                    (sin(angle.toDouble()) * length).toFloat(),
-                    (cos(angle.toDouble()) * 0.5 * length).toFloat()
-                )
+                val posVec: Vector2 = generateRandomPoint()
                 if (abs(points.last().y + posVec.y) > restrict.maxWidth / 2) posVec.y *= -1
                 points.add(posVec.add(points.last()))
             }
+            if (abs(points.last().y) > 1) {
+                val posVec: Vector2 = generateRandomPoint()
+                points.add(Vector2(posVec.add(points.last()).x, 0F))
+            }
+        }
+
+        private fun generateRandomPoint(): Vector2 {
+            val length: Float =
+                getMultiplier(5) * restrict.averageLengthOfLineInBetween * (1 + (rnd.nextFloat() * 0.1F))
+            val angle: Float =
+                (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
+            return Vector2(
+                (sin(angle.toDouble()) * length).toFloat(),
+                (cos(angle.toDouble()) * 0.5 * length).toFloat()
+            )
         }
 
         fun generateNextLine(generateUp: Boolean = true): MapGeneratorLine? {
@@ -236,67 +266,252 @@ class SeededMapGenerator(
                 return lineDown
             }
             if (lineUp == null) {
-                if (generateUp) {
+                return if (generateUp) {
                     lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
-                    return lineUp
+                    lineUp
                 } else {
                     lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
-                    return lineDown
+                    lineDown
                 }
             }
             return null
         }
 
-        fun getMultiplier(max: Int): Float {
+        private fun getMultiplier(max: Int): Float {
             val a = rnd.nextInt(max - 1) + 1
             return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
         }
 
-        fun connectEachTestRec(lastOne: MapGeneratorLine?, nodes: MutableList<MapNodeBuilder>) {
-//            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
-//            for (i in lineNodes) if (i !in nodes) nodes.add(i)
-//            if (lineUp != lastOne && lineUp != null) {
-//                for (i in lineUp?.lineNodes!!.indices) lineUp!!.lineNodes[i].connect(lineNodes[i])
-//                lineUp!!.connectEachTestRec(this, nodes)
-//                lineUp?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
-//            }
-//            if (lineDown != lastOne && lineDown != null) {
-//                for (i in lineDown?.lineNodes!!.indices) lineDown!!.lineNodes[i].connect(lineNodes[i])
-//                lineDown!!.connectEachTestRec(this, nodes)
-//                lineDown?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
-//            }
-            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
-            for (i in lineNodes) if (i !in nodes) nodes.add(i)
-            if (lineUp != lastOne && lineUp != null) {
-                lineUp?.connectEachTestRec(this, nodes)
-                lineUp?.lineNodes!![0].connect(lineNodes[0])
-            }
-            if (lineDown != lastOne && lineDown != null) {
-                lineDown?.connectEachTestRec(this, nodes)
-                lineDown?.lineNodes!![0].connect(lineNodes[0])
-            }
-        }
+        /* fun connectEachTestRec(lastOne: MapGeneratorLine?, nodes: MutableList<MapNodeBuilder>) {
+ //            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
+ //            for (i in lineNodes) if (i !in nodes) nodes.add(i)
+ //            if (lineUp != lastOne && lineUp != null) {
+ //                for (i in lineUp?.lineNodes!!.indices) lineUp!!.lineNodes[i].connect(lineNodes[i])
+ //                lineUp!!.connectEachTestRec(this, nodes)
+ //                lineUp?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
+ //            }
+ //            if (lineDown != lastOne && lineDown != null) {
+ //                for (i in lineDown?.lineNodes!!.indices) lineDown!!.lineNodes[i].connect(lineNodes[i])
+ //                lineDown!!.connectEachTestRec(this, nodes)
+ //                lineDown?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
+ //            }
+             for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1], Direction.LEFT)
+             for (i in lineNodes) if (i !in nodes) nodes.add(i)
+             if (lineUp != lastOne && lineUp != null) {
+                 lineUp?.connectEachTestRec(this, nodes)
+                 lineUp?.lineNodes!![0].connect(lineNodes[0])
+             }
+             if (lineDown != lastOne && lineDown != null) {
+                 lineDown?.connectEachTestRec(this, nodes)
+                 lineDown?.lineNodes!![0].connect(lineNodes[0])
+             }
+         }*/
 
         fun connectWithEachOther(lastOne: MapGeneratorLine?, nodes: MutableList<MapNodeBuilder>) {
             if (lastOne == null) {
-                for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
-                            for (i in lineNodes) if (i !in nodes) nodes.add(i)
+                for (i in 1 until lineNodes.size) {
+                    lineNodes[i].connect(lineNodes[i - 1], Direction.LEFT)
+                }
+                lineNodes.first().dirNodes[Direction.LEFT.ordinal] = -1
+                lineNodes.last().dirNodes[Direction.RIGHT.ordinal] = -1
+                for (i in lineNodes) {
+                    if (i !in nodes) nodes.add(i)
+                }
 
-                var lastToTop: Int = -2
-                var lastToBottom: Int = -2
+//                var lastToTop: Int = -2
+//                var lastToBottom: Int = -2
                 for (i in lineNodes.indices) {
-                    val numberOfConnections: Int = getNbrOfConn(rnd, restrict.splitProb)
+                    val numberOfConnections: Int = getNbrOfConn(
+                        rnd,
+                        restrict.splitProb/* + 0.1F*/
+                    ) //TODO hier wieder auskommentieren und testen (für first Line, damit da die Chancen höher sind zu splitten)
+                    // TODO und auslagern nicht vergessen, auf MapBuilderNode (Nicht so wichtig, aber schöner und lesbarer)
+                    if (numberOfConnections > 1) {
+                        createConnection(lineNodes[i], numberOfConnections - 1, this, this, nodes, true)
+                    }
                 }
             }
         }
 
-        fun getNbrOfConn(rnd: Random, max: Float): Int {
+        private fun createConnection(
+            node: MapNodeBuilder,
+            numberOfWishedConnections: Int,
+            curLine: MapGeneratorLine,
+            mainLine: MapGeneratorLine,
+            nodes: MutableList<MapNodeBuilder>,
+            isFirst: Boolean = false
+        ) {
+            if (node in mainLine.lineNodes && !isFirst) {
+                return
+            }
+            if (node !in nodes) nodes.add(node)
+
+
+            var numberOfMissingConnections: Int = numberOfWishedConnections
+            val posDirs: MutableList<Int> =
+                getPossibleDirectionsToCreatePathsTo(node, curLine)
+            while (numberOfMissingConnections > 0 && posDirs.isNotEmpty() && node.edgesTo.size < 4) {
+                val curDir: Direction = Direction.values()[posDirs.random(rnd)]
+                posDirs.remove(curDir.ordinal)
+                if (node.x < 420 && node.x > 418 && curDir == Direction.UP) {
+                    println("Hallo")
+                }
+                val possiblePointsToConnectTo: List<MapNodeBuilder> =
+                    getPossiblePointsToConnect(node, curLine, curDir, nodes)
+                if (possiblePointsToConnectTo.isEmpty()) continue
+                val nodeToConnectTo = possiblePointsToConnectTo.random(rnd)
+                node.connect(nodeToConnectTo, curDir)
+                numberOfMissingConnections -= 1
+                curDir.getOtherLine(curLine)
+                    ?.let {
+                        createConnection(
+                            nodeToConnectTo,
+                            getNbrOfConn(rnd, restrict.splitProb),
+                            it,
+                            mainLine,
+                            nodes,
+                            false
+                        )
+                    }
+            }
+        }
+
+        //    MapNodeBuilder{x: 419.1261,y: -47.732697, neighbours: MapNodeBuilder{x: 392.4264,y: -39.130947}, }
+// MapNodeBuilder{x: 491.9464,y: 0.0, neighbours: MapNodeBuilder{x: 466.84903,y: -11.390215}, }
+//   ToTestInRange     MapNodeBuilder{x: 466.84903,y: -11.390215, neighbours: MapNodeBuilder{x: 432.79495,y: -18.95801}, MapNodeBuilder{x: 491.9464,y: 0.0}, MapNodeBuilder{x: 392.4264,y: -39.130947}, }
+        private fun getPossiblePointsToConnect(
+            node: MapNodeBuilder,
+            curLine: MapGeneratorLine,
+            curDir: Direction,
+            nodes: MutableList<MapNodeBuilder>
+        ): List<MapNodeBuilder> {
+            val posNodes: MutableList<MapNodeBuilder> = mutableListOf()
+            when (curDir) {
+                Direction.UP -> curLine.lineUp?.getNextXNodesWithoutSpecialConnection(node, curDir.getOpp())
+                    ?.let { posNodes.addAll(it) }
+
+                Direction.DOWN -> curLine.lineDown?.getNextXNodesWithoutSpecialConnection(node, curDir.getOpp())
+                    ?.let { posNodes.addAll(it) }
+
+                Direction.RIGHT -> posNodes.add(curLine.lineNodes[curLine.lineNodes.indexOf(node) + 1])
+                Direction.LEFT -> {}
+            }
+
+            for (nodeToTestIfInRange in nodes) {
+                if (nodeToTestIfInRange != node)
+                    for (possibleNode in posNodes) {
+                        if (nodeToTestIfInRange != possibleNode) {
+                            if (Intersector.intersectSegmentCircle(
+                                    Vector2(node.x, node.y),
+                                    Vector2(possibleNode.x, possibleNode.y),
+                                    Vector2(nodeToTestIfInRange.x, nodeToTestIfInRange.y),
+                                    5F.pow(2)
+                                )
+                            ) {
+                                posNodes.remove(possibleNode)
+                                break
+                            }
+                        }
+                    }
+            }
+            return posNodes
+        }
+
+
+        private fun getNextXNodesWithoutSpecialConnection(
+            node: MapNodeBuilder,
+            direction: Direction,
+            numberOfNodes: Int = 3
+        ): List<MapNodeBuilder> {
+            return lineNodes.filter { a -> a.x > node.x }.sortedBy { a -> a.x }.subListTillMax(numberOfNodes)
+                .filter { a -> a.dirNodes[direction.ordinal] == null }
+        }
+
+        private fun getPossibleDirectionsToCreatePathsTo(
+            node: MapNodeBuilder,
+            curLine: MapGeneratorLine
+        ): MutableList<Int> {
+            val posDirs: MutableList<Int> =
+                node.dirNodes.mapIndexedNotNull() { index, elem -> index.takeIf { elem == null } } as MutableList<Int>
+            if (curLine.lineUp == null) posDirs.remove(Direction.UP.ordinal)
+            if (curLine.lineDown == null) posDirs.remove(Direction.DOWN.ordinal)
+            if (curLine.lineNodes.last() == node) posDirs.remove(Direction.RIGHT.ordinal)
+            return posDirs
+        }
+
+        /**
+         * calculates how many connections a [MapNodeBuilder] should build (at least one is existing before)
+         *
+         * @param max the probability for the maximum to be high
+         */
+        private fun getNbrOfConn(rnd: Random, max: Float): Int {
             return (sqrt(rnd.nextDouble()) * max * 3 + 0.8).coerceAtMost(3.0).toInt()
         }
     }
 
 }
 
+public class Line(val start: Vector2, val end: Vector2) {
+    fun angle(): Float {
+        return start.sub(end).angleRad()
+    }
+
+    fun intersection(other: Line): Vector2? {
+        val intersectVector: Vector2 = Vector2()
+        if (Intersector.intersectLines(start, end, other.start, other.end, intersectVector)) {
+            return intersectVector
+        }
+        return null
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is Line) return false
+        return start.x == other.start.x && start.y == other.start.y &&
+                end.x == other.end.x && end.y == other.end.y
+    }
+}
+
+enum class Direction {
+    UP {
+        override fun getOpp(): Direction {
+            return DOWN
+        }
+
+        override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
+            return curLine.lineUp
+        }
+    },
+    DOWN {
+        override fun getOpp(): Direction {
+            return UP
+        }
+
+        override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
+            return curLine.lineDown
+        }
+    },
+    LEFT {
+        override fun getOpp(): Direction {
+            return RIGHT
+        }
+
+        override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine {
+            return curLine
+        }
+    },
+    RIGHT {
+        override fun getOpp(): Direction {
+            return LEFT
+        }
+
+        override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
+            return LEFT.getOtherLine(curLine)
+        }
+    };
+
+    abstract fun getOpp(): Direction;
+    abstract fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine?;
+}
 
 class BezierCurve(
     private val seed: Long,
@@ -340,11 +555,13 @@ class BezierCurve(
 data class MapRestriction(
     val maxNodes: Int = 22,
     val minNodes: Int = 15,
-    val maxLines: Int = 6,
-    val splitProb: Float = 0.25F,
+//    val maxLines: Int = 6,
+    val maxLines: Int = 3,
+//    val splitProb: Float = 0.91F,
+    val splitProb: Float = 0.45F,
     val compressProb: Float = 0.55F,
     val averageLengthOfLineInBetween: Float = 26F,
-    val maxWidth: Int = 20,
+    val maxWidth: Int = 40,
     val maxAnglePercent: Float = 0.6F,
     val rangeToCheck: Float = 70F,
 ) {

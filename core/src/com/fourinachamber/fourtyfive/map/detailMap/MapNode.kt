@@ -95,10 +95,7 @@ data class MapNodeBuilder(
 
     private var asNode: MapNode? = null
 
-    var left: Int? = null
-    var right: Int? = null
-    var top: Int? = null
-    var bottom: Int? = null
+    val dirNodes: Array<Int?> = arrayOfNulls(4)
 
     fun build(): MapNode {
         if (inBuild) return asNode!!
@@ -114,16 +111,20 @@ data class MapNodeBuilder(
         return asNode!!
     }
 
-    fun connect(other: MapNodeBuilder): Boolean {
+    fun connect(other: MapNodeBuilder, dir: Direction = Direction.LEFT, addAsNext: Boolean = true): Boolean {
         if (other == this || edgesTo.contains(other)) return false
         if (edgesTo.size > 3 || other.edgesTo.size > 3) throw IllegalArgumentException("Already to 4 Nodes connect, not anymore possible!")
         edgesTo.add(other)
         other.edgesTo.add(this)
+        if (addAsNext) {
+            dirNodes[dir.ordinal] = edgesTo.size - 1
+            other.dirNodes[dir.getOpp().ordinal] = other.edgesTo.size - 1
+        }
         return true
     }
 
     private fun toStringRec(): String {
-        return javaClass.name + "{x: " + x + ",y: " + y + "}"
+        return javaClass.simpleName + "{x: " + x + ",y: " + y + "}"
     }
 
     override fun toString(): String {
@@ -131,7 +132,7 @@ data class MapNodeBuilder(
         for (i in edgesTo) {
             cur += i.toStringRec() + ", "
         }
-        return javaClass.name + "{x: $x,y: $y, neighbours: $cur}"
+        return javaClass.simpleName + "{x: $x,y: $y, neighbours: $cur}"
     }
 
     override fun equals(other: Any?): Boolean {

@@ -10,6 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import java.util.Collections
+import kotlin.math.min
 import kotlin.random.Random
 
 /**
@@ -94,6 +96,10 @@ val Float.degrees: Float
 
 fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
+}
+
+public fun <E> List<E>.subListTillMax(toIndex: Int): List<E> {
+    return subList(0, min(size, toIndex))
 }
 
 object Utils {
