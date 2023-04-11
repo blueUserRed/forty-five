@@ -24,7 +24,8 @@ viewport: $FitViewport {
 options: {
     transitionAwayTime: 1.0,
     background: "title_screen_background",
-//    transitionAwayTime: 1.5,
+    //    transitionAwayTime: 1.5,
+
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ]
@@ -65,10 +66,9 @@ root: $Box {
                 }
             }
         ],
-        detailMapProvider: $CurrentMapProvider { },
-//        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-//            seed: 100
-//        },
+        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
+            seed: 103
+        },
         nodeSize: 5.0,
         lineWidth: 1.0,
         name: "map",
