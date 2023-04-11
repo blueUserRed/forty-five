@@ -67,7 +67,13 @@ root: $Box {
             }
         ],
         detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-            seed: 103
+            seed: 102,
+            startArea: "Salem",
+            endArea: "Vienna",
+            otherAreas: [
+                "Styria", "Weltenbaum", "Garten der Hesperiden"
+            ],
+
         },
         nodeSize: 5.0,
         lineWidth: 1.0,

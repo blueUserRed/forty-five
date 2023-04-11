@@ -195,7 +195,10 @@ $DetailMapProvider {
     }
 
     $FromSeededGeneratorDetailMapProvider {
-        seed: int
+        seed: int,
+        startArea: string,
+        endArea: string,
+        otherAreas: string[],
     }
 
     $CurrentMapProvider { }
