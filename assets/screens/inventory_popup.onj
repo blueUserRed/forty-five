@@ -6,17 +6,26 @@ use Style;
 assets: {
     useCardAtlas: true,
     useAssets: [ "black_texture" ]
-}
+},
 
 var root = $Box {
     styles: [
         {
             width: 100.0#percent,
             height: 100.0#percent,
-            background: "black_texture"
+            background: "black_texture",
+            flexDirection: flexDirection.row
         }
     ]
 } children [
+
+    $Box {
+    } children [
+    ],
+
+    $Box {
+    } children [
+    ],
 
 ];
 
