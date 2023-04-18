@@ -15,6 +15,7 @@ package com.fourinachamber.fourtyfive.utils
     AnnotationTarget.TYPE, // for annotating lambdas
 )
 @Retention(AnnotationRetention.SOURCE)
+@MustBeDocumented
 annotation class MainThreadOnly
 
 /**
@@ -32,4 +33,5 @@ annotation class MainThreadOnly
     AnnotationTarget.TYPE, // for annotating lambdas
 )
 @Retention(AnnotationRetention.SOURCE)
+@MustBeDocumented
 annotation class AllThreadsAllowed

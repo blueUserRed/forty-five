@@ -9,6 +9,9 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.SplitPane
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -52,7 +55,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
-//    private var postProcessor: String? = null
+    private var popups: Map<String, WidgetGroup>? = null
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -82,6 +85,9 @@ class ScreenBuilder(val file: FileHandle) {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
+        doPopups(onj, screen)
+        popups?.let { screen.popups = it }
+
         val root = CustomFlexBox(screen)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
@@ -99,6 +105,21 @@ class ScreenBuilder(val file: FileHandle) {
         return screen
     }
 
+    private fun doPopups(onj: OnjObject, screen: OnjScreen) {
+        val popups = mutableMapOf<String, WidgetGroup>()
+        onj.get<OnjObject>("options").ifHas<OnjArray>("popups") { arr ->
+            arr.value.forEach { obj ->
+                obj as OnjObject
+                val name = obj.get<String>("name")
+                val rootObj = obj.get<OnjNamedObject>("popupRoot")
+                val popupRootFlexBox = CustomFlexBox(screen)
+                getWidget(rootObj, popupRootFlexBox, screen)
+                popups[name] = popupRootFlexBox
+            }
+        }
+        this.popups = popups
+    }
+
     private fun doOptions(onj: OnjObject) {
         val options = onj.get<OnjObject>("options")
         options.ifHas<String>("background") {
@@ -114,25 +135,6 @@ class ScreenBuilder(val file: FileHandle) {
 
     private fun readAssets(onj: OnjObject) {
         val assets = onj.get<OnjObject>("assets")
-
-//        if (assets.hasKey<OnjArray>("styleFiles")) {
-//            assets
-//                .get<OnjArray>("styleFiles")
-//                .value
-//                .forEach {
-//                    styles.putAll(Style.readFromFile(it.value as String))
-//                }
-//        }
-//
-//        if (assets.hasKey<OnjArray>("styles")) {
-//            assets
-//                .get<OnjArray>("styles")
-//                .value
-//                .map { Style.readStyle(it as OnjObject) }
-//                .forEach {
-//                    styles[it.first] = it.second
-//                }
-//        }
 
         val toBorrow = mutableListOf<String>()
 
@@ -336,6 +338,18 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
             screen
         )
+
+        "SplitPlane" -> {
+            val firstFlexBox = CustomFlexBox(screen)
+            val secondFlexBox = CustomFlexBox(screen)
+            val splitPane = SplitPane(
+                firstFlexBox,
+                secondFlexBox,
+                widgetOnj.get<Boolean>("vertical"),
+                SplitPane.SplitPaneStyle()
+            )
+            firstFlexBox
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 

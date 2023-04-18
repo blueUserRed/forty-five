@@ -1,22 +1,36 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
+import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.utils.MainThreadOnly
+
 data class MapNode(
     val edgesTo: List<MapNode>,
     val blockingEdges: List<MapNode>,
     val isArea: Boolean,
     val x: Float,
     val y: Float,
-//    val left: Int?,
-//    val right: Int?,
-//    val top: Int?,
-//    val bottom: Int?,
+    val imageHandle: ResourceHandle?,
+    val imagePos: ImagePosition = ImagePosition.UP,
     val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
+
+    private var loadedImage: Drawable? = null
 
     fun getLeft(): MapNode? = null
     fun getRight(): MapNode? = null
     fun getTop(): MapNode? = null
     fun getBottom(): MapNode? = null
+
+    @MainThreadOnly
+    fun getImage(screen: OnjScreen): Drawable? {
+        if (imageHandle == null) return null
+        if (loadedImage != null) return loadedImage
+        loadedImage = ResourceManager.get(screen, imageHandle)
+        return loadedImage
+    }
 
     fun isLinkedTo(node: MapNode): Boolean {
         for (linkedNode in node.edgesTo) {
@@ -77,6 +91,11 @@ data class MapNode(
             return edges
         }
     }
+
+    enum class ImagePosition {
+        UP, DOWN, LEFT, RIGHT
+    }
+
 }
 
 data class MapNodeBuilder(
@@ -84,6 +103,8 @@ data class MapNodeBuilder(
     val y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     val blockingEdges: MutableList<MapNodeBuilder> = mutableListOf(),
+    var imageHandle: ResourceHandle? = null,
+    var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
     val isArea: Boolean = false,
     val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
@@ -100,7 +121,7 @@ data class MapNodeBuilder(
     fun build(): MapNode {
         if (inBuild) return asNode!!
         inBuild = true
-        asNode = MapNode(buildEdges, buildBlockingEdges, isArea, x, y, event)
+        asNode = MapNode(buildEdges, buildBlockingEdges, isArea, x, y, imageHandle, imagePos, event)
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
         }
@@ -128,11 +149,8 @@ data class MapNodeBuilder(
     }
 
     override fun toString(): String {
-        var cur = ""
-        for (i in edgesTo) {
-            cur += i.toStringRec() + ", "
-        }
-        return javaClass.simpleName + "{x: $x,y: $y, neighbours: $cur}"
+        val cur = edgesTo.joinToString(separator = ",", transform = { it.toStringRec() })
+        return javaClass.name + "{x: $x, y: $y, neighbours: $cur}"
     }
 
     override fun equals(other: Any?): Boolean {
