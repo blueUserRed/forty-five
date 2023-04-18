@@ -185,6 +185,7 @@ class DetailMapWidget(
         background.draw(batch, x, y, width, height)
         drawEdges(batch)
         drawNodes(batch)
+        drawNodeImages(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
@@ -194,6 +195,16 @@ class DetailMapWidget(
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun drawNodeImages(batch: Batch) {
+        map
+            .uniqueNodes
+            .filter { it.imageHandle != null }
+            .forEach { node ->
+                val image = node.getImage(screen) ?: return@forEach
+                image.draw(batch, node.x + nodeSize * 2, node.y, 2 * nodeSize, 2 * nodeSize)
+            }
     }
 
     private fun drawDirectionIndicator(batch: Batch) {

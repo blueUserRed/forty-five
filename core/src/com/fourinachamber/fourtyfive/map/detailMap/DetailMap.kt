@@ -8,10 +8,7 @@ import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
-import onj.value.OnjArray
-import onj.value.OnjInt
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
+import onj.value.*
 
 data class DetailMap(
     val startNode: MapNode,
@@ -64,8 +61,14 @@ data class DetailMap(
                         nodeOnj.get<Double>("y").toFloat(),
                         mutableListOf(),
                         mutableListOf(),
+                        nodeOnj.getOr<String?>("image", null),
+                        MapNode.ImagePosition.UP,
                         nodeOnj.get<Boolean>("isArea"),
-                        MapEventFactory.getMapEvent(nodeOnj.get<OnjNamedObject>("event"))
+                        if (nodeOnj.hasKey<OnjNull>("event")) {
+                            EmptyMapEvent()
+                        } else {
+                            MapEventFactory.getMapEvent(nodeOnj.get<OnjNamedObject>("event"))
+                        }
                     ))
                 }
             nodesOnj
