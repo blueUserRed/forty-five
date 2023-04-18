@@ -1,6 +1,7 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 import "config/graphics_config.onj" as graphicsConfig;
+import "screens/inventory_popup.onj" as inventoryPopup;
 
 use Common;
 use Screen;
@@ -10,9 +11,12 @@ var worldWidth = 160.0;
 var worldHeight = 90.0;
 
 assets: {
+    useCardAtlas: inventoryPopup.assets.useCardAtlas,
     useAssets: [
         "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
-        "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded"
+        "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
+        "black_texture",
+        ...(inventoryPopup.assets.useAssets)
     ]
 },
 
@@ -24,8 +28,10 @@ viewport: $FitViewport {
 options: {
     transitionAwayTime: 1.0,
     background: "title_screen_background",
-    //    transitionAwayTime: 1.5,
-
+//    transitionAwayTime: 1.5,
+    popups: [
+        inventoryPopup.popup
+    ],
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ]
@@ -42,78 +48,123 @@ root: $Box {
             justifyContent: justify.center
         }
     ],
-    debug: true
 } children [
 
-    $Map {
+    $Box {
         styles: [
             {
-                style_priority: 1,
+                background: "black_texture",
+                flexDirection: flexDirection.row,
                 width: 100.0#percent,
-                height: 100.0#percent,
-                positionType: positionType.absolute,
-                positionRight: 0.0#points,
-                positionBottom: 0.0#points,
-            },
-            {
-                style_priority: 2,
-                style_condition: state("transition away"),
-                positionRight: 20.0#points,
-                positionBottom: worldHeight#points,
-                style_animation: {
-                    duration: 0.5,
-                    interpolation: interpolation.linear
-                }
+                height: 5.0#percent
             }
         ],
-        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-            seed: 103
-        },
-        nodeSize: 5.0,
-        lineWidth: 1.0,
-        name: "map",
-        nodeTexture: "key_select_frame",
-        playerTexture: "enemy_texture",
-        playerWidth: 2.0,
-        playerHeight: 6.0,
-        background: "white_texture",
-        edgeTexture: "black_texture",
-        playerMovementTime: 0.3,
-        directionIndicator: "heart_texture",
-        detailWidgetName: "mapEventDetail"
-    },
+        zIndex: 100,
+        debug: true
+    } children [
 
-    $MapEventDetail {
+        $Image {
+            styles: [
+                {
+                    aspectRatio: 1.0
+                }
+            ],
+            textureName: "reserves_texture",
+            scaleX: 0.01,
+            scaleY: 0.01,
+            reportDimensionsWithScaling: true,
+            behaviours: [
+                $OnClickOpenPopupBehaviour {
+                    popupName: inventoryPopup.popup.name
+                }
+            ]
+        }
+
+    ],
+
+    $Box {
         styles: [
             {
-                style_priority: 1,
-                alignSelf: align.flexEnd,
-                height: 70.0#percent,
-                width: 20.0#percent,
-                positionLeft: 0.0#points
-            },
-            {
-                style_priority: 2,
-                style_animation: {
-                    duration: 0.2,
-                    interpolation: interpolation.linear
+                height: 95.0#percent,
+                flexDirection: flexDirection.row,
+                alignItems: align.center,
+                justifyContent: justify.flexEnd
+            }
+        ]
+    } children [
+
+        $Map {
+            styles: [
+                {
+                    style_priority: 1,
+                    width: 100.0#percent,
+                    height: 100.0#percent,
+                    positionType: positionType.absolute,
+                    positionRight: 0.0#points,
+                    positionBottom: 0.0#points,
                 },
-                positionLeft: 25.0#points,
-            },
-            {
-                style_priority: 3,
-                style_condition: state("displayEventDetail") and not(state("transition away")),
-                style_animation: {
-                    duration: 0.2,
-                    interpolation: interpolation.linear
+                {
+                    style_priority: 2,
+                    style_condition: state("transition away"),
+                    positionRight: 20.0#points,
+                    positionBottom: worldHeight#points,
+                    style_animation: {
+                        duration: 0.5,
+                        interpolation: interpolation.linear
+                    }
+                }
+            ],
+            detailMapProvider: $CurrentMapProvider { },
+    //        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
+    //            seed: 100
+    //        },
+            nodeSize: 5.0,
+            lineWidth: 1.0,
+            name: "map",
+            nodeTexture: "key_select_frame",
+            playerTexture: "enemy_texture",
+            playerWidth: 2.0,
+            playerHeight: 6.0,
+            background: "white_texture",
+            edgeTexture: "black_texture",
+            playerMovementTime: 0.3,
+            directionIndicator: "heart_texture",
+            detailWidgetName: "mapEventDetail"
+        },
+
+        $MapEventDetail {
+            styles: [
+                {
+                    style_priority: 1,
+                    height: 70.0#percent,
+                    width: 20.0#percent,
+                    positionLeft: 80.0#percent
                 },
-                positionLeft: 0.0#points,
-            },
-        ],
-        name: "mapEventDetail",
-        font: "red_wing",
-        fontColor: color.black,
-        background: "white_rounded",
-    }
+                {
+                    style_priority: 2,
+                    style_animation: {
+                        duration: 0.2,
+                        interpolation: interpolation.linear
+                    },
+                    positionLeft: 25.0#points,
+                },
+                {
+                    style_priority: 3,
+                    style_condition: state("displayEventDetail") and not(state("transition away")),
+                    style_animation: {
+                        duration: 0.2,
+                        interpolation: interpolation.linear
+                    },
+                    positionLeft: 0.0#points,
+                },
+            ],
+            name: "mapEventDetail",
+            font: "red_wing",
+            fontColor: color.black,
+            background: "white_rounded",
+        }
+
+    ],
+
 
 ]

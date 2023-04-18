@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
@@ -45,6 +47,8 @@ open class OnjScreen @MainThreadOnly constructor(
     private val printFrameRate: Boolean,
     val transitionAwayTime: Int?
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
+
+    var popups: Map<String, WidgetGroup> = mapOf()
 
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
 
@@ -120,6 +124,8 @@ open class OnjScreen @MainThreadOnly constructor(
     var keySelectionHierarchy: KeySelectionHierarchyNode? = null
         private set
 
+    private var currentPopup: Pair<String, Widget>? = null
+
     init {
         useAssets.forEach {
             ResourceManager.borrow(this, it)
@@ -133,6 +139,21 @@ open class OnjScreen @MainThreadOnly constructor(
             keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
         }
         inputMultiplexer.addProcessor(stage)
+    }
+
+    fun showPopup(popupName: String) {
+        val (_, root) = popups.entries.find { it.key == popupName }
+            ?: throw RuntimeException("unknown popup $popupName")
+        if (currentPopup != null) hidePopup()
+        stage.root.addActor(root)
+        root.setFillParent(true)
+        selectedActor = null
+    }
+
+    fun hidePopup() {
+        val (_, root) = currentPopup ?: return
+        stage.root.removeActor(root)
+        selectedActor = null
     }
 
     @AllThreadsAllowed

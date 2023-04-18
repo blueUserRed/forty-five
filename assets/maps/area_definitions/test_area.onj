@@ -37,7 +37,9 @@ nodes: [
         isArea: false,
         edgesTo: [1],
         blockingEdges: [],
-        event: $EmptyMapEvent { }
+        event: $EnterMapMapEvent {
+            targetMap: "roadToSalem"
+        }
     },
 ],
 
