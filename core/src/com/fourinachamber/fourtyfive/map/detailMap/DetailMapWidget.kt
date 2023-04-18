@@ -45,7 +45,7 @@ class DetailMapWidget(
     override lateinit var styleManager: StyleManager
     override var isHoveredOver: Boolean = false
 
-    private var mapOffset: Vector2 = Vector2(0f, 0f)
+    private var mapOffset: Vector2 = Vector2(0f, 50f)
 
     private var playerNode: MapNode = map.startNode
     private var playerPos: Vector2 = Vector2(map.startNode.x, map.startNode.y)
