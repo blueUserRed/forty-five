@@ -273,6 +273,10 @@ $Behaviour {
         yOffset?: float,
     }
 
+    $OnClickOpenPopupBehaviour {
+        popupName: string
+    }
+
     $ShootButtonBehaviour { }
 
     $EndTurnButtonBehaviour { }
@@ -368,11 +372,10 @@ options: {
         modifiers: int[],
         action: $KeyAction
     }[],
-//    setFillParentOnRoot: boolean,
-//    defaultCursor: {
-//        useSystemCursor: boolean,
-//        cursorName: string
-//    },
+    popups?: {
+        name: string,
+        popupRoot: $Widget
+    }[],
     postProcessor?: string,
     transitionAwayTime?: float
 //    printFrameRate?: boolean

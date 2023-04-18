@@ -2,6 +2,7 @@ package com.fourinachamber.fourtyfive.map
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMap
 import onj.parser.OnjParser
@@ -32,6 +33,18 @@ object MapManager {
         mapOnjSchema.assertMatches(onj)
         onj as OnjObject
         currentDetail = DetailMap.readFromOnj(onj)
+    }
+
+    fun switchToMap(newMap: String) {
+        val map = lookupMapFile(newMap)
+        currentMapFile = map
+        val onj = OnjParser.parseFile(map.file())
+        mapOnjSchema.assertMatches(onj)
+        onj as OnjObject
+        currentDetail = DetailMap.readFromOnj(onj)
+        SaveState.currentMap = newMap
+        SaveState.currentNode = 0
+        FourtyFive.changeToScreen("screens/map_test.onj")
     }
 
     fun write() {
