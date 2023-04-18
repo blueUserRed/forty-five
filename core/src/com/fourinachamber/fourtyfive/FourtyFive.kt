@@ -57,7 +57,7 @@ object FourtyFive : Game() {
         cardGenerator.generateCards()
     }
 
-    fun changeToScreen(screenPath: String, controllerContext: Any? = null) = runBlocking {
+    fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
         val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
@@ -66,14 +66,14 @@ object FourtyFive : Game() {
 
         if (currentScreen == null) {
             FourtyFiveLogger.title("changing screen")
-            this@FourtyFive.currentScreen = screen
+            this.currentScreen = screen
             currentRenderable = screen
             setScreen(screen)
         } else {
             currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
                 FourtyFiveLogger.title("changing screen")
                 currentScreen.dispose()
-                this@FourtyFive.currentScreen = screen
+                this.currentScreen = screen
                 currentRenderable = screen
                 setScreen(screen)
             }

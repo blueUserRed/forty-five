@@ -45,7 +45,7 @@ class DetailMapWidget(
     override lateinit var styleManager: StyleManager
     override var isHoveredOver: Boolean = false
 
-    private var mapOffset: Vector2 = Vector2(0f, 0f)
+    private var mapOffset: Vector2 = Vector2(0f, 50f)
 
     private var playerNode: MapNode = map.startNode
     private var playerPos: Vector2 = Vector2(map.startNode.x, map.startNode.y)
@@ -175,15 +175,17 @@ class DetailMapWidget(
         updatePlayerMovement()
         batch ?: return
 
+        batch.flush()
         val (screenX, screenY) = localToStageCoordinates(Vector2(0f, 0f))
         val bounds = Rectangle(screenX, screenY, width, height)
         val scissor = Rectangle()
         ScissorStack.calculateScissors(screen.stage.camera, batch.transformMatrix, bounds, scissor)
         if (!ScissorStack.pushScissors(scissor)) return
 
-        background?.draw(batch, x, y, width, height)
+        background.draw(batch, x, y, width, height)
         drawEdges(batch)
         drawNodes(batch)
+        drawNodeImages(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
@@ -193,6 +195,16 @@ class DetailMapWidget(
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun drawNodeImages(batch: Batch) {
+        map
+            .uniqueNodes
+            .filter { it.imageHandle != null }
+            .forEach { node ->
+                val image = node.getImage(screen) ?: return@forEach
+                image.draw(batch, node.x + nodeSize * 2, node.y, 2 * nodeSize, 2 * nodeSize)
+            }
     }
 
     private fun drawDirectionIndicator(batch: Batch) {

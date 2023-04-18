@@ -553,6 +553,28 @@ class RotatableImageActor(
     }
 }
 
+class CustomSplitPane(
+    firstActor: Actor,
+    secondActor: Actor,
+    vertical: Boolean,
+    screen: OnjScreen
+) : SplitPane(firstActor, secondActor, vertical, SplitPaneStyle()) {
+
+
+    companion object {
+
+//        fun createScrollableSplitPane(first: Actor, second: Actor): Triple<
+//                CustomSplitPane,
+//                CustomFlexBox /*=parent of first actor*/,
+//                CustomFlexBox /*=parent of second actor*/
+//        > {
+//            val first = ScrollPane(first)
+//            val second = ScrollPane(first)
+//        }
+
+    }
+}
+
 /**
  * custom table, that implements [ZIndexActor] and [ZIndexGroup]
  */
