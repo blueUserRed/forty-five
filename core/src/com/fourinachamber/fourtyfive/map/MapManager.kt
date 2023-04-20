@@ -12,6 +12,9 @@ import onj.value.OnjObject
 
 object MapManager {
 
+    // TODO: this is ugly
+    const val mapScreenPath: String = "screens/map_test.onj"
+
     const val roadMapsPath: String = "maps/roads"
     const val areaMapsPath: String = "maps/areas"
     const val areaDefinitionsMapsPath: String = "maps/area_definitions"
@@ -44,7 +47,7 @@ object MapManager {
         currentDetail = DetailMap.readFromOnj(onj)
         SaveState.currentMap = newMap
         SaveState.currentNode = 0
-        FourtyFive.changeToScreen("screens/map_test.onj")
+        switchToMapScreen()
     }
 
     fun write() {
@@ -57,6 +60,10 @@ object MapManager {
             true
         )
         MapGenerator(Gdx.files.internal("maps/map_generator_config.onj")).generate()
+    }
+
+    fun switchToMapScreen() {
+        FourtyFive.changeToScreen(mapScreenPath)
     }
 
     fun lookupMapFile(mapName: String): FileHandle =

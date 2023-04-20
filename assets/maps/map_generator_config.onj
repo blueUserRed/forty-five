@@ -4,6 +4,7 @@ outputDirectory: "maps/roads",
 maps: [
     {
         name: "roadToSalem",
+        seed: 103,
         restrictions: {
             maxNodes: 22,
             minNodes: 15,

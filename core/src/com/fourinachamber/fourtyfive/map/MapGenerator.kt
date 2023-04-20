@@ -33,7 +33,7 @@ class MapGenerator(
     private fun generateMap(onj: OnjObject, outputDir: File) {
         val name = onj.get<String>("name")
         val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
-        val generator = SeededMapGenerator(Random.nextLong(), mapRestriction)
+        val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
         val map = generator.generate()
         val path = "${outputDir.toPath()}/$name.onj"
         val file = File(path)
