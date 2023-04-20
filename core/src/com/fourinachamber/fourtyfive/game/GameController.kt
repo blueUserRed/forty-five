@@ -7,6 +7,7 @@ import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardPrototype
 import com.fourinachamber.fourtyfive.game.enemy.Enemy
+import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fourtyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
@@ -716,7 +717,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun win() {
         FourtyFiveLogger.debug(logTag, "player won")
         encounterMapEvent.completed()
-        FourtyFive.changeToScreen(winScreen)
+        MapManager.switchToMapScreen()
+//        FourtyFive.changeToScreen(winScreen)
         SaveState.write()
     }
 
@@ -724,7 +726,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun loose() {
         FourtyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()
-        FourtyFive.changeToScreen(looseScreen)
+        MapManager.switchToMapScreen()
+//        FourtyFive.changeToScreen(looseScreen)
     }
 
     enum class RevolverRotation {

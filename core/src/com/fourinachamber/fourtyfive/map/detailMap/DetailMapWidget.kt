@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
@@ -176,10 +177,12 @@ class DetailMapWidget(
         batch ?: return
 
         batch.flush()
-        val (screenX, screenY) = localToStageCoordinates(Vector2(0f, 0f))
-        val bounds = Rectangle(screenX, screenY, width, height)
-        val scissor = Rectangle()
-        ScissorStack.calculateScissors(screen.stage.camera, batch.transformMatrix, bounds, scissor)
+        val viewport = screen.stage.viewport
+        val scissor = Rectangle(
+            0f, viewport.bottomGutterHeight.toFloat(),
+            (Gdx.graphics.width / 160f) * width,
+            ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / 90f) * height
+        )
         if (!ScissorStack.pushScissors(scissor)) return
 
         background.draw(batch, x, y, width, height)
