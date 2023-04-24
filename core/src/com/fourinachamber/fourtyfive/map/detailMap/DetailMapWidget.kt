@@ -200,14 +200,26 @@ class DetailMapWidget(
         ScissorStack.popScissors()
     }
 
-    private fun drawNodeImages(batch: Batch) {
-        map
-            .uniqueNodes
-            .filter { it.imageHandle != null }
-            .forEach { node ->
-                val image = node.getImage(screen) ?: return@forEach
-                image.draw(batch, node.x + nodeSize * 2, node.y, 2 * nodeSize, 2 * nodeSize)
-            }
+    private fun drawNodeImages(batch: Batch): Unit = map
+        .uniqueNodes
+        .filter { it.imageName != null }
+        .forEach { node ->
+            val image = node.getImage(screen) ?: return@forEach
+            val imageData = node.getImageData() ?: return@forEach
+            val offset = getNodeImageOffset(node.imagePos ?: return@forEach, imageData.width, imageData.height)
+            image.draw(
+                batch,
+                x + mapOffset.x + node.x + offset.x,
+                y + mapOffset.y + node.y + offset.y,
+                imageData.width, imageData.height
+            )
+        }
+
+    private fun getNodeImageOffset(pos: MapNode.ImagePosition, width: Float, height: Float): Vector2 = when (pos) {
+        MapNode.ImagePosition.UP -> Vector2(nodeSize / 2 - width / 2, 2 * nodeSize)
+        MapNode.ImagePosition.DOWN -> Vector2(nodeSize / 2 - width / 2, -height - nodeSize)
+        MapNode.ImagePosition.LEFT -> Vector2(-width - nodeSize, nodeSize / 2 - height / 2)
+        MapNode.ImagePosition.RIGHT -> Vector2(2 * nodeSize, nodeSize / 2 - height / 2)
     }
 
     private fun drawDirectionIndicator(batch: Batch) {

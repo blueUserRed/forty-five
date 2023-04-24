@@ -5,8 +5,7 @@ nodes: [
         isArea: false,
         edgesTo: [ 1, ],
         blockingEdges: [ 1, ],
-        event: $EmptyMapEvent {
-        },
+        event: null,
     },
     {
         x: 60.0,
@@ -14,11 +13,7 @@ nodes: [
         isArea: false,
         edgesTo: [ 0, 2, 3, ],
         blockingEdges: [ 2, 3, ],
-        event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            canBeStarted: true,
-            isCompleted: false,
-        },
+        event: null,
     },
     {
         x: 60.0,
@@ -26,18 +21,17 @@ nodes: [
         isArea: false,
         edgesTo: [ 1, ],
         blockingEdges: [ ],
-        event: $EmptyMapEvent {
-        },
+        event: null,
     },
     {
         x: 100.0,
         y: 90.0,
-        isArea: false,
+        isArea: true,
         edgesTo: [ 1, ],
         blockingEdges: [ ],
-        event: $EnterMapMapEvent {
-            targetMap: 'roadToSalem',
-        },
+        event: null,
+        image: 'roadToSalem',
+        imagePos: 'LEFT',
     },
 ],
 startNode: 0,
