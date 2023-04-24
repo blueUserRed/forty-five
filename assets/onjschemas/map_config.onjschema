@@ -1,0 +1,25 @@
+
+var mapRestrictions = {
+    maxNodes: int,
+    minNodes: int,
+    maxSplits: int,
+    splitProbability: float,
+    compressProbability: float,
+};
+
+mapImages: {
+    name: string,
+    image: string,
+    width: float,
+    height: float
+}[],
+
+generatorConfig: {
+    outputDirectory: string,
+    maps: {
+        name: string,
+        seed: int,
+        restrictions: mapRestrictions
+    }[]
+}
+

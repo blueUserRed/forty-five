@@ -5,16 +5,23 @@ import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMap
+import com.fourinachamber.fourtyfive.map.detailMap.MapNode
+import com.fourinachamber.fourtyfive.map.detailMap.MapRestriction
+import com.fourinachamber.fourtyfive.map.detailMap.SeededMapGenerator
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
+import onj.value.OnjArray
 import onj.value.OnjObject
+import java.io.File
 
 object MapManager {
 
     // TODO: this is ugly
     const val mapScreenPath: String = "screens/map_test.onj"
 
+    const val mapConfigFilePath: String = "maps/map_config.onj"
     const val roadMapsPath: String = "maps/roads"
     const val areaMapsPath: String = "maps/areas"
     const val areaDefinitionsMapsPath: String = "maps/area_definitions"
@@ -25,17 +32,35 @@ object MapManager {
     lateinit var currentMapFile: FileHandle
         private set
 
+    lateinit var mapImages: List<MapImageData>
+        private set
+
     private val mapOnjSchema: OnjSchema by lazy {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/detail_map.onjschema").file())
     }
 
     fun init() {
+
+        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
+        mapConfigSchema.assertMatches(onj)
+        onj as OnjObject
+        mapImages = onj
+            .get<OnjArray>("mapImages")
+            .value
+            .map { it as OnjObject }
+            .map { MapImageData(
+                it.get<String>("name"),
+                it.get<String>("image"),
+                it.get<Double>("width").toFloat(),
+                it.get<Double>("width").toFloat()
+            )}
+
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
-        val onj = OnjParser.parseFile(map.file())
-        mapOnjSchema.assertMatches(onj)
-        onj as OnjObject
-        currentDetail = DetailMap.readFromOnj(onj)
+        val mapOnj = OnjParser.parseFile(map.file())
+        mapOnjSchema.assertMatches(mapOnj)
+        mapOnj as OnjObject
+        currentDetail = DetailMap.readFromOnj(mapOnj)
     }
 
     fun switchToMap(newMap: String) {
@@ -55,11 +80,15 @@ object MapManager {
     }
 
     fun newRun() {
+        generateMaps()
+    }
+
+    fun resetAll() {
+        newRun()
         Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
             Gdx.files.internal(areaMapsPath).file(),
             true
         )
-        MapGenerator(Gdx.files.internal("maps/map_generator_config.onj")).generate()
     }
 
     fun switchToMapScreen() {
@@ -78,5 +107,41 @@ object MapManager {
             .find { it.nameWithoutExtension == mapName }
         return file?.let { FileHandle(file) }
     }
+
+    fun generateMaps() {
+        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
+        mapConfigSchema.assertMatches(onj)
+        onj as OnjObject
+        val outputDir = Gdx.files.local(onj.get<String>("outputDirectory")).file()
+        onj
+            .get<OnjObject>("generatorConfig")
+            .get<OnjArray>("maps")
+            .value
+            .forEach { map ->
+                generateMap(map as OnjObject, outputDir)
+            }
+    }
+
+    private fun generateMap(onj: OnjObject, outputDir: File) {
+        val name = onj.get<String>("name")
+        val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
+        val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
+        val map = generator.generate()
+        val path = "${outputDir.toPath()}/$name.onj"
+        val file = File(path)
+        file.createNewFile()
+        file.writeText(map.asOnjObject().toString())
+    }
+
+    private val mapConfigSchema: OnjSchema by lazy {
+        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/map_config.onjschema").file())
+    }
+
+    data class MapImageData(
+        val name: String,
+        val resourceHandle: ResourceHandle,
+        val width: Float,
+        val height: Float
+    )
 
 }
