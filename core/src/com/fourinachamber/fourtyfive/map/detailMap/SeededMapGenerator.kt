@@ -59,9 +59,9 @@ class SeededMapGenerator(
                 }
             }
         }
-        println("NOW")
+//        println("NOW")
         while (checkLinesNotIntercepting(uniqueLines, nodes)) {
-            println("NEW TURN")
+//            println("NEW TURN")
         };
     }
 
@@ -126,7 +126,7 @@ class SeededMapGenerator(
 
         if (possibleIntersectionNode == curNodes[0] || possibleIntersectionNode == curNodes[1]) return line2
         if (possibleIntersectionNode == curNodes[2] || possibleIntersectionNode == curNodes[3]) return line1
-        println("Random Chosen")
+//        println("Random Chosen")
         return if (rnd.nextBoolean()) line1 else line2
     }
 
@@ -152,9 +152,9 @@ class SeededMapGenerator(
     ) {
         val firstNode = nodes.first { a -> a.x == nodesConnection.start.x && a.y == nodesConnection.start.y }
         val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
-        println(firstNode)
-        println(secNode)
-        println()
+//        println(firstNode)
+//        println(secNode)
+//        println()
         firstNode.edgesTo[firstNode.edgesTo.indexOf(secNode)] = newNode
         secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
         newNode.edgesTo.add(firstNode)
@@ -207,13 +207,13 @@ class SeededMapGenerator(
         }*/
 
     private fun printNodesAndNeighbours(nodes: MutableList<MapNodeBuilder>) {
-        for (i in nodes) {
-            println(i.x.toString() + " " + i.y + ": ")
-            for (j in i.edgesTo) {
-                println("  " + j.x.toString() + " " + j.y)
-            }
-            println()
-        }
+//        for (i in nodes) {
+//            println(i.x.toString() + " " + i.y + ": ")
+//            for (j in i.edgesTo) {
+//                println("  " + j.x.toString() + " " + j.y)
+//            }
+//            println()
+//        }
     }
 
 

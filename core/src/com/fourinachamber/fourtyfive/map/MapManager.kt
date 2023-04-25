@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.map.detailMap.MapNode
 import com.fourinachamber.fourtyfive.map.detailMap.MapRestriction
 import com.fourinachamber.fourtyfive.map.detailMap.SeededMapGenerator
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import kotlinx.coroutines.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -79,17 +80,17 @@ object MapManager {
         currentMapFile.file().writeText(currentDetail.asOnjObject().toString())
     }
 
-    fun newRun() {
-        generateMaps()
-    }
+//    fun newRun() {
+//        generateMaps()
+//    }
 
-    fun resetAll() {
-        newRun()
-        Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
-            Gdx.files.internal(areaMapsPath).file(),
-            true
-        )
-    }
+//    fun resetAll() {
+//        newRun()
+//        Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
+//            Gdx.files.internal(areaMapsPath).file(),
+//            true
+//        )
+//    }
 
     fun switchToMapScreen() {
         FourtyFive.changeToScreen(mapScreenPath)
@@ -108,13 +109,33 @@ object MapManager {
         return file?.let { FileHandle(file) }
     }
 
-    fun generateMaps() {
+    suspend fun generateMaps(coroutineScope: CoroutineScope) = with(coroutineScope) {
+        println("starting generation")
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
         onj as OnjObject
-        val outputDir = Gdx.files.local(onj.get<String>("outputDirectory")).file()
-        onj
-            .get<OnjObject>("generatorConfig")
+        val generatorConfig = onj.get<OnjObject>("generatorConfig")
+        val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
+        val jobs = generatorConfig
+            .get<OnjArray>("maps")
+            .value
+            .map { map ->
+                launch {
+                    println("starting ${(map as OnjObject).get<String>("name")}")
+                    generateMap(map as OnjObject, outputDir)
+                    println("finished ${(map as OnjObject).get<String>("name")}")
+                }
+            }
+        jobs.joinAll()
+    }
+
+    fun generateMapsSync() {
+        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
+        mapConfigSchema.assertMatches(onj)
+        onj as OnjObject
+        val generatorConfig = onj.get<OnjObject>("generatorConfig")
+        val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
+        generatorConfig
             .get<OnjArray>("maps")
             .value
             .forEach { map ->

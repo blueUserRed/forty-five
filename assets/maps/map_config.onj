@@ -27,6 +27,61 @@ generatorConfig: {
                 splitProbability: 0.25,
                 compressProbability: 0.55
             }
-        }
+        },
+        {
+            name: "roadToSalem1",
+            seed: 103,
+            restrictions: {
+                maxNodes: 1000,
+                minNodes: 800,
+                maxSplits: 4,
+                splitProbability: 0.25,
+                compressProbability: 0.55
+            }
+        },
+        {
+            name: "roadToSalem2",
+            seed: 103,
+            restrictions: {
+                maxNodes: 1000,
+                minNodes: 800,
+                maxSplits: 4,
+                splitProbability: 0.25,
+                compressProbability: 0.55
+            }
+        },
+        {
+            name: "roadToSalem3",
+            seed: 103,
+            restrictions: {
+                maxNodes: 1000,
+                minNodes: 800,
+                maxSplits: 4,
+                splitProbability: 0.25,
+                compressProbability: 0.55
+            }
+        },
+        {
+            name: "roadToSalem4",
+            seed: 103,
+            restrictions: {
+                maxNodes: 1000,
+                minNodes: 800,
+                maxSplits: 4,
+                splitProbability: 0.25,
+                compressProbability: 0.55
+            }
+        },
+        {
+            name: "roadToSalem5",
+            seed: 103,
+            restrictions: {
+                maxNodes: 10000000,
+                minNodes: 8000000,
+                maxSplits: 4,
+                splitProbability: 0.25,
+                compressProbability: 0.55
+            }
+        },
     ]
 }
