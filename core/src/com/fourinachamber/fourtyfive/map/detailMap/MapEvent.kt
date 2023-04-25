@@ -113,10 +113,6 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
     override val displayDescription: Boolean = true
     override val descriptionText: String = "Enter $targetMap"
 
-    init {
-        println("hi")
-    }
-
     override fun start() {
         MapManager.switchToMap(targetMap)
     }
