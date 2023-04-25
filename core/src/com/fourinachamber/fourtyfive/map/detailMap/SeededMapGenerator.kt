@@ -29,8 +29,9 @@ class SeededMapGenerator(
         println("NOW DO STUFF")
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         checkAndChangeConnectionIntersection(nodes)
-//        addAreas(nodes)
+        addAreas(nodes)
         this.nodes = nodes
+        println("now built")
         return DetailMap(build(), listOf())
     }
 
@@ -55,14 +56,24 @@ class SeededMapGenerator(
                     getLimitInRange(x, nodes, direction)
                             + restrictions.distanceFromAreaToLine * if (direction == Direction.UP) 1 else -1
                 )
-                borderNodes = getBorderNodesInArea(direction, nodes, x)
-                if (borderNodes.isEmpty()) continue
-            } while (/*isIllegalPositionForArea(borderNodes, newPos, areaNodes)*/false);
+                borderNodes = getBorderNodesInArea(direction, nodes, newPos)
+                println(borderNodes)
+            } while (/*isIllegalPositionForArea(borderNodes, newPos, areaNodes)*/false)
             val newArea: MapNodeBuilder = MapNodeBuilder(newPos.x, newPos.y, event = EnterMapMapEvent(areaName))
             borderNodes.random(rnd).connect(newArea, direction)
             areaNodes.add(newArea)
         }
     }
+
+//    private fun isIllegalPositionForArea(
+//        borderNodes: List<MapNodeBuilder>,
+//        newPos: Vector2,
+//        areaNodes: MutableList<MapNodeBuilder>
+//    ): Boolean {
+//
+//
+//
+//    }
 
     private fun getLimitInRange(x: Float, nodes: MutableList<MapNodeBuilder>, direction: Direction): Float {
         val nodesInRange: List<Float> =
@@ -74,11 +85,14 @@ class SeededMapGenerator(
     private fun getBorderNodesInArea(
         direction: Direction,
         nodes: MutableList<MapNodeBuilder>,
-        xPos: Float
+        position: Vector2
     ): List<MapNodeBuilder> {
 
 
-        return listOf()
+        return nodes.filter {
+            Vector2(it.x, it.y).sub(position)
+                .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllewedNodesInRangeBetweenLineAndArea)
+        }
     }
 
 
@@ -679,7 +693,7 @@ data class MapRestriction(
     val maxNodes: Int = 22,
     val minNodes: Int = 17,
 //    val maxLines: Int = 6,
-    val maxLines: Int = 3,
+    val maxLines: Int = 4,
 //    val splitProb: Float = 0.91F,
     val splitProb: Float = 0.9F,
     val compressProb: Float = 0.55F,
@@ -692,6 +706,7 @@ data class MapRestriction(
     val otherAreas: List<String> = listOf(),
     val rangeToCheckBetweenAreas: Float = 100F,
     val distanceFromAreaToLine: Float = 100F,
+    val percentageForAllewedNodesInRangeBetweenLineAndArea: Float = 0.4F,
 ) {
 
     companion object {
