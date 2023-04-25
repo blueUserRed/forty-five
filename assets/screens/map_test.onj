@@ -132,6 +132,49 @@ root: $Box {
             directionIndicator: "heart_texture",
             detailWidgetName: "mapEventDetail"
         },
+    $Map {
+        styles: [
+            {
+                style_priority: 1,
+                width: 100.0#percent,
+                height: 100.0#percent,
+                positionType: positionType.absolute,
+                positionRight: 0.0#points,
+                positionBottom: 0.0#points,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("transition away"),
+                positionRight: 20.0#points,
+                positionBottom: worldHeight#points,
+                style_animation: {
+                    duration: 0.5,
+                    interpolation: interpolation.linear
+                }
+            }
+        ],
+        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
+            seed: 102,
+            startArea: "Salem",
+            endArea: "Vienna",
+            otherAreas: [
+                "Styria", "Weltenbaum", "Garten der Hesperiden"
+            ],
+
+        },
+        nodeSize: 5.0,
+        lineWidth: 1.0,
+        name: "map",
+        nodeTexture: "key_select_frame",
+        playerTexture: "enemy_texture",
+        playerWidth: 2.0,
+        playerHeight: 6.0,
+        background: "white_texture",
+        edgeTexture: "black_texture",
+        playerMovementTime: 0.3,
+        directionIndicator: "heart_texture",
+        detailWidgetName: "mapEventDetail"
+    },
 
         $MapEventDetail {
             styles: [
