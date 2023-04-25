@@ -44,18 +44,7 @@ object FourtyFive : Game() {
         init()
         serviceThread.start()
         if (generateCards) runCardGenerator()
-        val t1 = measureTimeMillis {
-            val message = ServiceThreadMessage.GenerateMaps()
-            serviceThread.sendMessage(message)
-            runBlocking {
-                message.completed.await()
-            }
-        }
-        val t2 = measureTimeMillis {
-            MapManager.generateMapsSync()
-        }
-        println("t1: $t1, t2: $t2")
-//        changeToScreen("screens/dialog_test.onj")
+        changeToScreen("screens/map_test.onj")
     }
 
     override fun render() {
