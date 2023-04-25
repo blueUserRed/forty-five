@@ -10,7 +10,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.SplitPane
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
@@ -22,8 +21,6 @@ import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
-import com.fourinachamber.fourtyfive.map.dialog.Dialog
-import com.fourinachamber.fourtyfive.map.dialog.DialogTextWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -328,9 +325,9 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("background")
         ).apply { touchable = Touchable.enabled }
 
-        "DialogText" -> DialogTextWidget(
+        "AdvancedText" -> AdvancedTextWidget(
             Dialog.readFromOnj(
-                widgetOnj.get<OnjArray>("dialog"),
+                widgetOnj.get<OnjArray>("parts"),
                 fontOrError(widgetOnj.get<String>("font"), screen),
                 screen
             ),
