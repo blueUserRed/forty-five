@@ -1,0 +1,32 @@
+
+mapImages: [
+    {
+        name: "roadToSalem",
+        image: "reserves_texture",
+        height: 20.0,
+        width: 20.0
+    },
+    {
+        name: "test_area",
+        image: "heart_texture",
+        height: 20.0,
+        width: 20.0
+    },
+],
+
+generatorConfig: {
+    outputDirectory: "maps/roads",
+    maps: [
+        {
+            name: "roadToSalem",
+            seed: 103,
+            restrictions: {
+                maxNodes: 22,
+                minNodes: 15,
+                maxSplits: 4,
+                splitProbability: 0.25,
+                compressProbability: 0.55
+            }
+        }
+    ]
+}

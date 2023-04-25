@@ -90,7 +90,8 @@ root: $Box {
                 alignItems: align.center,
                 justifyContent: justify.flexEnd
             }
-        ]
+        ],
+        zIndex: 0
     } children [
 
         $Map {
