@@ -11,7 +11,7 @@ var worldHeight = 90.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "red_wing_cm",
+        "title_screen_background", "red_wing_cm", "hover_detail_background"
     ]
 },
 
@@ -31,25 +31,28 @@ options: {
 root: $Box {
     styles: [
         {
+            flexDirection: flexDirection.row,
             width: 100.0#percent,
             height: 100.0#percent,
-            alignItems: align.center,
+            alignItems: align.flexEnd,
             justifyContent: justify.center
         }
     ]
 } children [
 
-    $DialogText {
+    $AdvancedText {
         styles: [
             {
-                flexDirection: flexDirection.row
-//                width: 100.0#percent,
-//                height: 100.0#percent,
+                flexDirection: flexDirection.row,
+                background: "hover_detail_background",
+                width: 90.0#percent,
+                height: 10.0#percent,
+                alignItems: align.center,
+                justifyContent: justify.center
             }
         ],
-        dialog: dialogs.testDialog,
+        parts: dialogs.testDialog,
         font: "red_wing_cm",
-//        fontColor: null,
         fontScale: 0.1,
         progressTime: 0.05,
         debug: true
