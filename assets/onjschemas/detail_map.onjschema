@@ -26,7 +26,8 @@ nodes: {
     isArea: boolean,
     edgesTo: int[],
     blockingEdges: int[],
-    image?: string?,
+    image?: string,
+    imagePos?: string,
     event: $MapEvent?
 }[],
 

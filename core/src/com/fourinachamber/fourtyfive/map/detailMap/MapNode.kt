@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -12,8 +13,8 @@ data class MapNode(
     val isArea: Boolean,
     val x: Float,
     val y: Float,
-    val imageHandle: ResourceHandle?,
-    val imagePos: ImagePosition = ImagePosition.UP,
+    val imageName: String?,
+    val imagePos: ImagePosition?,
     val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
@@ -26,11 +27,13 @@ data class MapNode(
 
     @MainThreadOnly
     fun getImage(screen: OnjScreen): Drawable? {
-        if (imageHandle == null) return null
+        if (imageName == null) return null
         if (loadedImage != null) return loadedImage
-        loadedImage = ResourceManager.get(screen, imageHandle)
+        loadedImage = ResourceManager.get(screen, getImageData()?.resourceHandle ?: return null)
         return loadedImage
     }
+
+    fun getImageData(): MapManager.MapImageData? = MapManager.mapImages.find { it.name == imageName }
 
     fun isLinkedTo(node: MapNode): Boolean {
         for (linkedNode in node.edgesTo) {
@@ -103,9 +106,9 @@ data class MapNodeBuilder(
     val y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     val blockingEdges: MutableList<MapNodeBuilder> = mutableListOf(),
-    var imageHandle: ResourceHandle? = null,
+    var isArea: Boolean = false,
+    var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
-    val isArea: Boolean = false,
     val event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
@@ -121,7 +124,14 @@ data class MapNodeBuilder(
     fun build(): MapNode {
         if (inBuild) return asNode!!
         inBuild = true
-        asNode = MapNode(buildEdges, buildBlockingEdges, isArea, x, y, imageHandle, imagePos, event)
+        asNode = MapNode(
+            buildEdges,
+            buildBlockingEdges,
+            isArea,
+            x, y,
+            imageName,
+            imagePos
+        )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
         }

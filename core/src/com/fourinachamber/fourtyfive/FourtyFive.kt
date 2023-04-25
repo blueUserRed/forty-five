@@ -99,6 +99,7 @@ object FourtyFive : Game() {
         }
         TemplateString.init()
         FourtyFiveLogger.init()
+//        newRun()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()
