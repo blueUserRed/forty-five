@@ -44,7 +44,18 @@ object FourtyFive : Game() {
         init()
         serviceThread.start()
         if (generateCards) runCardGenerator()
-        changeToScreen("screens/dialog_test.onj")
+        val t1 = measureTimeMillis {
+            val message = ServiceThreadMessage.GenerateMaps()
+            serviceThread.sendMessage(message)
+            runBlocking {
+                message.completed.await()
+            }
+        }
+        val t2 = measureTimeMillis {
+            MapManager.generateMapsSync()
+        }
+        println("t1: $t1, t2: $t2")
+//        changeToScreen("screens/dialog_test.onj")
     }
 
     override fun render() {
@@ -85,10 +96,10 @@ object FourtyFive : Game() {
         currentRenderable = renderable
     }
 
-    fun newRun() {
-        SaveState.reset()
-        MapManager.newRun()
-    }
+//    fun newRun() {
+//        SaveState.reset()
+//        MapManager.newRun()
+//    }
 
     private fun init() {
         with(OnjConfig) {

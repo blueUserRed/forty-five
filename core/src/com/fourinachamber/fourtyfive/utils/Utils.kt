@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import kotlinx.coroutines.Job
 import java.util.Collections
 import kotlin.math.min
 import kotlin.random.Random
