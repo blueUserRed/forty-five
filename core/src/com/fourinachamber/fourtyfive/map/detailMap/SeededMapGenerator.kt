@@ -26,7 +26,6 @@ class SeededMapGenerator(
     }
 
     fun generate(): DetailMap {
-        println("NOW DO STUFF")
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         checkAndChangeConnectionIntersection(nodes)
 //        addAreas(nodes)

@@ -110,7 +110,6 @@ object MapManager {
     }
 
     suspend fun generateMaps(coroutineScope: CoroutineScope) = with(coroutineScope) {
-        println("starting generation")
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
         onj as OnjObject
@@ -121,9 +120,7 @@ object MapManager {
             .value
             .map { map ->
                 launch {
-                    println("starting ${(map as OnjObject).get<String>("name")}")
                     generateMap(map as OnjObject, outputDir)
-                    println("finished ${(map as OnjObject).get<String>("name")}")
                 }
             }
         jobs.joinAll()
