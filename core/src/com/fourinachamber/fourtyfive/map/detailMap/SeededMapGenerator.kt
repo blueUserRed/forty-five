@@ -12,9 +12,6 @@ import java.lang.Float.min
 import kotlin.math.*
 import kotlin.random.Random
 
-//Feedback Weiss
-// Agenda aussenden (auch Stvl. einladen), PÜNKTLICHKEIT, Zeit schätzen für Dauern, Falls Beamer => vorher testen/bereits aufgedreht, User Storys haben beschreibung, Aufpassen hochgeladen,
-// Was ist das Product Increment
 
 class SeededMapGenerator(
     private val seed: Long = 103,
@@ -32,7 +29,8 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
 
-        mainLine = MapGeneratorLine(seed, restrictions, rnd)
+        println(restrictions.otherAreas)
+        mainLine = MapGeneratorLine(seed, restrictions, rnd, nbrOfPoints = nbrOfNodes)
         var curDown = mainLine
         var curUp = mainLine
         for (i in 1 until restrictions.maxLines) {
@@ -59,10 +57,8 @@ class SeededMapGenerator(
                 }
             }
         }
-        println("NOW")
-        while (checkLinesNotIntercepting(uniqueLines, nodes)) {
-            println("NEW TURN")
-        };
+        @Suppress("ControlFlowWithEmptyBody")
+        while (checkLinesNotIntercepting(uniqueLines, nodes));
     }
 
     private fun checkLinesNotIntercepting(uniqueLines: MutableList<Line>, nodes: MutableList<MapNodeBuilder>): Boolean {
@@ -126,7 +122,6 @@ class SeededMapGenerator(
 
         if (possibleIntersectionNode == curNodes[0] || possibleIntersectionNode == curNodes[1]) return line2
         if (possibleIntersectionNode == curNodes[2] || possibleIntersectionNode == curNodes[3]) return line1
-        println("Random Chosen")
         return if (rnd.nextBoolean()) line1 else line2
     }
 
@@ -152,9 +147,6 @@ class SeededMapGenerator(
     ) {
         val firstNode = nodes.first { a -> a.x == nodesConnection.start.x && a.y == nodesConnection.start.y }
         val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
-        println(firstNode)
-        println(secNode)
-        println()
         firstNode.edgesTo[firstNode.edgesTo.indexOf(secNode)] = newNode
         secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
         newNode.edgesTo.add(firstNode)
@@ -632,16 +624,19 @@ class BezierCurve(
 
 data class MapRestriction(
     val maxNodes: Int = 22,
-    val minNodes: Int = 15,
+    val minNodes: Int = 17,
 //    val maxLines: Int = 6,
     val maxLines: Int = 3,
 //    val splitProb: Float = 0.91F,
-    val splitProb: Float = 0.55F,
+    val splitProb: Float = 0.9F,
     val compressProb: Float = 0.55F,
     val averageLengthOfLineInBetween: Float = 26F,
     val maxWidth: Int = 40,
     val maxAnglePercent: Float = 0.6F,
     val rangeToCheck: Float = 70F,
+    val startArea: String = "Franz",
+    val endArea: String = "Huber",
+    val otherAreas: List<String> = listOf(),
 ) {
 
     companion object {
