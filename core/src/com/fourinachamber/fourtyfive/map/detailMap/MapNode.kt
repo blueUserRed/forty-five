@@ -109,7 +109,7 @@ data class MapNodeBuilder(
     var isArea: Boolean = false,
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
-    val event: MapEvent? = null // TODO: this will be non-nullable in the future
+    var event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
