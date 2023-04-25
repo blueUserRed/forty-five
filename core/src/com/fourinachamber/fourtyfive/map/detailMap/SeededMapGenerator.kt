@@ -26,6 +26,63 @@ class SeededMapGenerator(
     }
 
     fun generate(): DetailMap {
+        println("NOW DO STUFF")
+        val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
+        checkAndChangeConnectionIntersection(nodes)
+//        addAreas(nodes)
+        this.nodes = nodes
+        return DetailMap(build(), listOf())
+    }
+
+    private fun addAreas(nodes: MutableList<MapNodeBuilder>) {
+        var areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
+        areaNodes.add(mainLine.lineNodes.first())
+        areaNodes.add(mainLine.lineNodes.last())
+        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea)
+        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea)
+        for (areaName in restrictions.otherAreas) {
+            var direction: Direction
+            var borderNodes: List<MapNodeBuilder>
+            var newPos: Vector2 = Vector2(0, 0)
+            do {
+                val x: Float = 105F
+//                    (restrictions.rangeToCheckBetweenAreas..(mainLine.lineNodes.last().x - restrictions.rangeToCheckBetweenAreas)).random(
+//                        rnd
+//                    )
+                direction = arrayOf(Direction.DOWN, Direction.UP).random(rnd)
+                newPos = Vector2(
+                    x,
+                    getLimitInRange(x, nodes, direction)
+                            + restrictions.distanceFromAreaToLine * if (direction == Direction.UP) 1 else -1
+                )
+                borderNodes = getBorderNodesInArea(direction, nodes, x)
+                if (borderNodes.isEmpty()) continue
+            } while (/*isIllegalPositionForArea(borderNodes, newPos, areaNodes)*/false);
+            val newArea: MapNodeBuilder = MapNodeBuilder(newPos.x, newPos.y, event = EnterMapMapEvent(areaName))
+            borderNodes.random(rnd).connect(newArea, direction)
+            areaNodes.add(newArea)
+        }
+    }
+
+    private fun getLimitInRange(x: Float, nodes: MutableList<MapNodeBuilder>, direction: Direction): Float {
+        val nodesInRange: List<Float> =
+            nodes.filter { abs(it.x - x) < restrictions.rangeToCheckBetweenNodes }.map { it.y }
+        return if (direction == Direction.UP) nodesInRange.max() else nodesInRange.min()
+
+    }
+
+    private fun getBorderNodesInArea(
+        direction: Direction,
+        nodes: MutableList<MapNodeBuilder>,
+        xPos: Float
+    ): List<MapNodeBuilder> {
+
+
+        return listOf()
+    }
+
+
+    private fun generateNodesPositions(): MutableList<MapNodeBuilder> {
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
 
@@ -41,11 +98,7 @@ class SeededMapGenerator(
             }
         }
         mainLine.connectWithEachOther(null, nodes)
-//        nodes.removeIf() { a -> nodes.indexOf(a) != nodes.lastIndexOf(a) }
-
-        checkAndChangeConnectionIntersection(nodes)
-        this.nodes = nodes
-        return DetailMap(build(), listOf())
+        return nodes
     }
 
     private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>) {
@@ -285,7 +338,7 @@ class SeededMapGenerator(
         private fun getMinInRange(x: Float): Float {
             var minPos: Float = Float.MAX_VALUE
             lineNodes.forEach() { a ->
-                if (abs(x - a.x) < restrict.rangeToCheck / 2) minPos = min(minPos, a.y)
+                if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) minPos = min(minPos, a.y)
             }
             if (minPos == Float.MAX_VALUE) {
                 minPos = lineNodes.stream().min { o1, o2 -> (abs(o1.x - x) compareTo abs(o2.x - x)) }.orElse(null).y
@@ -297,7 +350,7 @@ class SeededMapGenerator(
         private fun getMaxInRange(x: Float): Float {
             var maxPos: Float = Float.MIN_VALUE
             lineNodes.forEach() { a ->
-                if (abs(x - a.x) < restrict.rangeToCheck / 2) maxPos = max(maxPos, a.y)
+                if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) maxPos = max(maxPos, a.y)
             }
             return maxPos
         }
@@ -633,10 +686,12 @@ data class MapRestriction(
     val averageLengthOfLineInBetween: Float = 26F,
     val maxWidth: Int = 40,
     val maxAnglePercent: Float = 0.6F,
-    val rangeToCheck: Float = 70F,
+    val rangeToCheckBetweenNodes: Float = 70F,
     val startArea: String = "Franz",
     val endArea: String = "Huber",
     val otherAreas: List<String> = listOf(),
+    val rangeToCheckBetweenAreas: Float = 100F,
+    val distanceFromAreaToLine: Float = 100F,
 ) {
 
     companion object {
