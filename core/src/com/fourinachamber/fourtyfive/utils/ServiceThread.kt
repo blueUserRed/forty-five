@@ -31,10 +31,8 @@ class ServiceThread : Thread("ServiceThread") {
     }
 
     private fun CoroutineScope.generateMaps(message: ServiceThreadMessage.GenerateMaps) = launch(Dispatchers.Default) {
-        println("received message")
         MapManager.generateMaps(this)
         message.completed.complete(Unit)
-        println("completed")
     }
 
     private fun CoroutineScope.prepareResources() {
