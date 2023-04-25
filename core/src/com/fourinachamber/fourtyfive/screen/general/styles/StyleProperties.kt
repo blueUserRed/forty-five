@@ -361,11 +361,45 @@ class JustifyContentStyleProperty(
     override fun get(): YogaJustify = target.root.justifyContent
 }
 
+class PaddingStyleProperty(
+    target: CustomFlexBox,
+    node: YogaNode,
+    screen: OnjScreen,
+    private val edge: YogaEdge,
+    name: String
+) : StyleProperty<CustomFlexBox, YogaValue>(
+    name,
+    target,
+    node,
+    YogaValue.parse("auto"),
+    YogaValue::class,
+    false,
+    true,
+    screen
+) {
+
+    override fun set(data: YogaValue): Unit = run { when (data.unit) {
+
+        YogaUnit.POINT -> target.root.setPadding(edge, data.value)
+        YogaUnit.PERCENT -> target.root.setPaddingPercent(edge, data.value)
+
+        else -> { }
+
+    } }
+
+    override fun get(): YogaValue = target.root.getPadding(edge)
+}
+
 fun <T> T.addFlexBoxStyles(node: YogaNode, screen: OnjScreen) where T : CustomFlexBox, T : StyledActor {
     addActorStyles(node, screen)
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, node, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, node, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, node, screen))
+    styleManager.addStyleProperty(PaddingStyleProperty(this, node, screen, YogaEdge.LEFT, "paddingLeft"))
+    styleManager.addStyleProperty(PaddingStyleProperty(this, node, screen, YogaEdge.RIGHT, "paddingRight"))
+    styleManager.addStyleProperty(PaddingStyleProperty(this, node, screen, YogaEdge.TOP, "paddingTop"))
+    styleManager.addStyleProperty(PaddingStyleProperty(this, node, screen, YogaEdge.BOTTOM, "paddingBottom"))
+    styleManager.addStyleProperty(PaddingStyleProperty(this, node, screen, YogaEdge.ALL, "padding"))
 }
 
 
