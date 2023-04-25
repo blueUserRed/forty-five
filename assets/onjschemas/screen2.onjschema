@@ -167,9 +167,9 @@ $Widget {
         ...widgetSharedKeys
     }
 
-    $DialogText {
+    $AdvancedText {
         font: string,
-        dialog: { text: string, color: Color, actions?: $DialogPartAction[] }[],
+        parts: { text: string, color: Color, actions?: $DialogPartAction[] }[],
         fontScale: float,
         progressTime: float,
         ...widgetSharedKeys
