@@ -12,29 +12,45 @@ import java.lang.Float.min
 import kotlin.math.*
 import kotlin.random.Random
 
-
+/**
+ * @author Zwickelstorfer Felix
+ *
+ * Generates a "road map"
+ */
 class SeededMapGenerator(
     private val seed: Long = 103,
+    /**
+     * all possible restrictions and features which the map should have
+     */
     private val restrictions: MapRestriction = MapRestriction()
 ) {
     private lateinit var nodes: List<MapNodeBuilder>
     private val rnd: Random = Random(seed)
+
+    /**
+     * the first line which is generated, which is always a fully connected line, to ensure that there is a way from beginning to end
+     */
     private lateinit var mainLine: MapGeneratorLine
 
     private fun build(): MapNode {
         return nodes[0].build()
     }
 
+    /**
+     * generates the line
+     */
     fun generate(): DetailMap {
-        println("NOW DO STUFF")
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes)
+        nodes.forEach { it.scale(.3F, .7F) }
         this.nodes = nodes
-        println("now built")
         return DetailMap(build(), listOf())
     }
 
+    /**
+     * adds the areas at the end, after all other nodes were placed
+     */
     private fun addAreas(nodes: MutableList<MapNodeBuilder>) {
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
@@ -56,23 +72,32 @@ class SeededMapGenerator(
                             + restrictions.distanceFromAreaToLine * if (direction == Direction.UP) 1 else -1
                 )
                 borderNodes = getBorderNodesInArea(direction, nodes, newPos)
-                println(borderNodes)
-            } while (isIllegalPositionForArea(borderNodes, newPos, areaNodes))
-            val newArea: MapNodeBuilder = MapNodeBuilder(newPos.x, newPos.y, event = EnterMapMapEvent(areaName)) //TODO add direction of event picture
+            } while (isIllegalPositionForArea(newPos, areaNodes))
+            val newArea = MapNodeBuilder(
+                newPos.x,
+                newPos.y,
+                event = EnterMapMapEvent(areaName)
+            ) //TODO add direction of event picture
             borderNodes.random(rnd).connect(newArea, direction)
             areaNodes.add(newArea)
         }
+        areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
     }
 
+    /**
+     * checks if there are any other areas too close
+     */
     private fun isIllegalPositionForArea(
-        borderNodes: List<MapNodeBuilder>,
         newPos: Vector2,
         areaNodes: MutableList<MapNodeBuilder>
     ): Boolean {
         return areaNodes.stream()
-            .anyMatch { it -> Vector2(it.x, it.y).sub(newPos).len() < restrictions.minDistanceBetweenAreas }
+            .anyMatch { Vector2(it.x, it.y).sub(newPos).len() < restrictions.minDistanceBetweenAreas }
     }
 
+    /**
+     * searches for the highest or lowest position of nodes in an area
+     */
     private fun getLimitInRange(x: Float, nodes: MutableList<MapNodeBuilder>, direction: Direction): Float {
         val nodesInRange: List<Float> =
             nodes.filter { abs(it.x - x) < restrictions.rangeToCheckBetweenNodes }.map { it.y }
@@ -80,13 +105,14 @@ class SeededMapGenerator(
 
     }
 
+    /**
+     * returns all nodes in a specific radius around the area
+     */
     private fun getBorderNodesInArea(
         direction: Direction,
         nodes: MutableList<MapNodeBuilder>,
         position: Vector2
     ): List<MapNodeBuilder> {
-
-
         return nodes.filter {
             Vector2(it.x, it.y).sub(position)
                 .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllowedNodesInRangeBetweenLineAndArea)
@@ -95,11 +121,12 @@ class SeededMapGenerator(
     }
 
 
+    /**
+     * generates all nodes and lines and connects them
+     */
     private fun generateNodesPositions(): MutableList<MapNodeBuilder> {
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
-
-        println(restrictions.otherAreas)
         mainLine = MapGeneratorLine(seed, restrictions, rnd, nbrOfPoints = nbrOfNodes)
         var curDown = mainLine
         var curUp = mainLine
@@ -114,6 +141,9 @@ class SeededMapGenerator(
         return nodes
     }
 
+    /**
+     * tries to fix all connections until all are fixed
+     */
     private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>) {
         val uniqueLines: MutableList<Line> = mutableListOf()
         for (node in nodes) {
@@ -127,6 +157,9 @@ class SeededMapGenerator(
         while (checkLinesNotIntercepting(uniqueLines, nodes));
     }
 
+    /**
+     * checks if lines are intercepting, and if they are, they either get deleted, or a node is placed at the intersection point
+     */
     private fun checkLinesNotIntercepting(uniqueLines: MutableList<Line>, nodes: MutableList<MapNodeBuilder>): Boolean {
         for (i in uniqueLines.indices) {
             val line1 = uniqueLines[i]
@@ -142,6 +175,9 @@ class SeededMapGenerator(
         return false
     }
 
+    /**
+     * either deletes one of the lines, or places an interception node in between
+     */
     private fun correctInterceptionNode(
         nodes: MutableList<MapNodeBuilder>,
         line1: Line,
@@ -163,19 +199,21 @@ class SeededMapGenerator(
             addNodeInBetween(line2, nodes, newNode, uniqueLines)
         } else {
             deleteLineInBetween(
-                getLineToDelete(nodes, line1, line2, intersectionNode, interceptPoint),
+                getLineToDelete(nodes, line1, line2, intersectionNode),
                 nodes,
                 uniqueLines
             )
         }
     }
 
+    /**
+     * tries to evaluate which line is better and which line should be deleted
+     */
     private fun getLineToDelete(
         nodes: MutableList<MapNodeBuilder>,
         line1: Line,
         line2: Line,
-        possibleIntersectionNode: MapNodeBuilder,
-        interceptPoint: Vector2
+        possibleIntersectionNode: MapNodeBuilder
     ): Line {
         val curNodes = arrayOf(
             nodes.first { a -> a.x == line1.start.x && a.y == line1.start.y },
@@ -191,6 +229,9 @@ class SeededMapGenerator(
         return if (rnd.nextBoolean()) line1 else line2
     }
 
+    /**
+     * deletes a line and removes all traces that it ever existed
+     */
     private fun deleteLineInBetween(
         nodesConnection: Line,
         nodes: MutableList<MapNodeBuilder>,
@@ -265,26 +306,31 @@ class SeededMapGenerator(
             nodes.add(MapNodeBuilder(vec.x, vec.y))
         }*/
 
-    private fun printNodesAndNeighbours(nodes: MutableList<MapNodeBuilder>) {
-        for (i in nodes) {
-            println(i.x.toString() + " " + i.y + ": ")
-            for (j in i.edgesTo) {
-                println("  " + j.x.toString() + " " + j.y)
+    /*    private fun printNodesAndNeighbours(nodes: MutableList<MapNodeBuilder>) {
+            for (i in nodes) {
+                println(i.x.toString() + " " + i.y + ": ")
+                for (j in i.edgesTo) {
+                    println("  " + j.x.toString() + " " + j.y)
+                }
+                println()
             }
-            println()
-        }
-    }
+        }*/
 
 
     class MapGeneratorLine(
         private val seed: Long,
         private val restrict: MapRestriction,
         private val rnd: Random = Random(seed),
+        /**
+         * the "originLine", from which direction it came (since it starts at the middle and goes up and down)
+         */
         oldLine: MapGeneratorLine? = null,
+        /**
+         * if the old line was a minimum or maximum (True means, it was a minimum, and this line now is the new minimum)
+         */
         isOldLineMin: Boolean = false,
         val nbrOfPoints: Int = 15,
     ) {
-        //        var points: List<Vector2>
         val lineNodes: List<MapNodeBuilder>
         var lineUp: MapGeneratorLine? = null
         var lineDown: MapGeneratorLine? = null
@@ -303,10 +349,13 @@ class SeededMapGenerator(
             }
 
             val nodesList: MutableList<MapNodeBuilder> = mutableListOf()
-            points.forEach() { p -> nodesList.add(MapNodeBuilder(p.x, p.y)) }
+            points.forEach { p -> nodesList.add(MapNodeBuilder(p.x, p.y)) }
             this.lineNodes = nodesList
         }
 
+        /**
+         * calculates the points, if it is not the main (first) line
+         */
         private fun calcPointsForAdditionalLines(
             points: MutableList<Vector2>,
             oldLine: MapGeneratorLine,
@@ -324,6 +373,9 @@ class SeededMapGenerator(
             points.removeFirst()
         }
 
+        /**
+         * calculates the point to add for the additional lines
+         */
         private fun calcPointToAdd(
             points: MutableList<Vector2>,
             isOldLineMin: Boolean,
@@ -348,10 +400,12 @@ class SeededMapGenerator(
             return ((a)..(a + restrict.maxWidth))
         }
 
-
+        /**
+         * returns the lowest x pos in a certain range of that line
+         */
         private fun getMinInRange(x: Float): Float {
             var minPos: Float = Float.MAX_VALUE
-            lineNodes.forEach() { a ->
+            lineNodes.forEach { a ->
                 if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) minPos = min(minPos, a.y)
             }
             if (minPos == Float.MAX_VALUE) {
@@ -360,10 +414,12 @@ class SeededMapGenerator(
             return minPos
         }
 
-
+        /**
+         * returns the highest x pos in a certain range of that line
+         */
         private fun getMaxInRange(x: Float): Float {
             var maxPos: Float = Float.MIN_VALUE
-            lineNodes.forEach() { a ->
+            lineNodes.forEach { a ->
                 if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) maxPos = max(maxPos, a.y)
             }
             return maxPos
@@ -382,15 +438,24 @@ class SeededMapGenerator(
             }
         }
 
+        /**
+         * generates a possible new Vector to go to
+         */
         private fun generateRandomPoint(): Vector2 {
             val length: Float =
-                getMultiplier(5) * restrict.averageLengthOfLineInBetween * (1 + (rnd.nextFloat() * 0.1F))
+                getMultiplier() * restrict.averageLengthOfLineInBetween * (1 + (rnd.nextFloat() * 0.1F))
             val angle: Float =
                 (((1 - restrict.maxAnglePercent) / 2)..(1 - (1 - restrict.maxAnglePercent) / 2)).random(rnd) * Math.PI.toFloat()
             return Vector2(
                 (sin(angle.toDouble()) * length).toFloat(),
                 (cos(angle.toDouble()) * 0.5 * length).toFloat()
             )
+        }
+
+        private fun getMultiplier(): Float {
+            val max = 5
+            val a = rnd.nextInt(max - 1) + 1
+            return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
         }
 
         fun generateNextLine(generateUp: Boolean = true): MapGeneratorLine? {
@@ -414,36 +479,10 @@ class SeededMapGenerator(
             return null
         }
 
-        private fun getMultiplier(max: Int): Float {
-            val a = rnd.nextInt(max - 1) + 1
-            return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
-        }
 
-        /* fun connectEachTestRec(lastOne: MapGeneratorLine?, nodes: MutableList<MapNodeBuilder>) {
- //            for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1])
- //            for (i in lineNodes) if (i !in nodes) nodes.add(i)
- //            if (lineUp != lastOne && lineUp != null) {
- //                for (i in lineUp?.lineNodes!!.indices) lineUp!!.lineNodes[i].connect(lineNodes[i])
- //                lineUp!!.connectEachTestRec(this, nodes)
- //                lineUp?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
- //            }
- //            if (lineDown != lastOne && lineDown != null) {
- //                for (i in lineDown?.lineNodes!!.indices) lineDown!!.lineNodes[i].connect(lineNodes[i])
- //                lineDown!!.connectEachTestRec(this, nodes)
- //                lineDown?.lineNodes!![nbrOfPoints - 2].connect(lineNodes[nbrOfPoints - 1])
- //            }
-             for (i in 1 until lineNodes.size) lineNodes[i].connect(lineNodes[i - 1], Direction.LEFT)
-             for (i in lineNodes) if (i !in nodes) nodes.add(i)
-             if (lineUp != lastOne && lineUp != null) {
-                 lineUp?.connectEachTestRec(this, nodes)
-                 lineUp?.lineNodes!![0].connect(lineNodes[0])
-             }
-             if (lineDown != lastOne && lineDown != null) {
-                 lineDown?.connectEachTestRec(this, nodes)
-                 lineDown?.lineNodes!![0].connect(lineNodes[0])
-             }
-         }*/
-
+        /**
+         * creates lines of connection for the nodes (like seperate paths)
+         */
         fun connectWithEachOther(lastOne: MapGeneratorLine?, nodes: MutableList<MapNodeBuilder>) {
             if (lastOne == null) {
                 for (i in 1 until lineNodes.size) {
@@ -461,8 +500,7 @@ class SeededMapGenerator(
                     val numberOfConnections: Int = getNbrOfConn(
                         rnd,
                         restrict.splitProb + max(0F, 0.3F - i / 10F)
-                    ) //TODO hier wieder auskommentieren und testen (für first Line, damit da die Chancen höher sind zu splitten)
-                    // TODO und auslagern nicht vergessen, auf MapBuilderNode (Nicht so wichtig, aber schöner und lesbarer)
+                    ) //TODO maybe extract some methods to the MapNode, due to it being more beautiful
                     if (numberOfConnections > 1) {
                         createConnection(lineNodes[i], numberOfConnections - 1, this, this, nodes, true)
                     }
@@ -470,6 +508,9 @@ class SeededMapGenerator(
             }
         }
 
+        /**
+         * represents a path which connects nodes recursive and random with each other (like a pathfinder it can go up, down or right and starts always at the main line) related to [SeededMapGenerator.MapGeneratorLine.connectWithEachOther]
+         */
         private fun createConnection(
             node: MapNodeBuilder,
             numberOfWishedConnections: Int,
@@ -508,6 +549,9 @@ class SeededMapGenerator(
             }
         }
 
+        /**
+         * searches all possible points to connect to for generating a path
+         */
         private fun getPossiblePointsToConnect(
             node: MapNodeBuilder,
             curLine: MapGeneratorLine,
@@ -516,10 +560,10 @@ class SeededMapGenerator(
         ): List<MapNodeBuilder> {
             val posNodes: MutableList<MapNodeBuilder> = mutableListOf()
             when (curDir) {
-                Direction.UP -> curLine.lineUp?.getNextXNodesWithoutSpecialConnection(node, curDir.getOpp())
+                Direction.UP -> curLine.lineUp?.getNextXNodesWithoutSpecialConnection(node, curDir.getOpposite())
                     ?.let { posNodes.addAll(it) }
 
-                Direction.DOWN -> curLine.lineDown?.getNextXNodesWithoutSpecialConnection(node, curDir.getOpp())
+                Direction.DOWN -> curLine.lineDown?.getNextXNodesWithoutSpecialConnection(node, curDir.getOpposite())
                     ?.let { posNodes.addAll(it) }
 
                 Direction.RIGHT -> posNodes.add(curLine.lineNodes[curLine.lineNodes.indexOf(node) + 1])
@@ -561,7 +605,7 @@ class SeededMapGenerator(
             curLine: MapGeneratorLine
         ): MutableList<Int> {
             val posDirs: MutableList<Int> =
-                node.dirNodes.mapIndexedNotNull() { index, elem -> index.takeIf { elem == null } } as MutableList<Int>
+                node.dirNodes.mapIndexedNotNull { index, elem -> index.takeIf { elem == null } } as MutableList<Int>
             if (curLine.lineUp == null) posDirs.remove(Direction.UP.ordinal)
             if (curLine.lineDown == null) posDirs.remove(Direction.DOWN.ordinal)
             if (curLine.lineNodes.last() == node) posDirs.remove(Direction.RIGHT.ordinal)
@@ -580,13 +624,13 @@ class SeededMapGenerator(
 
 }
 
-public class Line(val start: Vector2, val end: Vector2) {
-    fun angle(): Float {
-        return start.sub(end).angleRad()
-    }
+class Line(val start: Vector2, val end: Vector2) {
+//    fun angle(): Float {
+//        return start.sub(end).angleRad()
+//    }
 
     fun intersection(other: Line): Vector2? {
-        val intersectVector: Vector2 = Vector2()
+        val intersectVector = Vector2()
         if (Intersector.intersectLines(start, end, other.start, other.end, intersectVector)) {
             if (intersectVector.x > min(start.x, end.x) && intersectVector.x < max(start.x, end.x)) {
                 if (intersectVector.x > min(other.start.x, other.end.x)
@@ -606,11 +650,17 @@ public class Line(val start: Vector2, val end: Vector2) {
     override fun toString(): String {
         return javaClass.simpleName + "{start: ${start}, end: ${end}}"
     }
+
+    override fun hashCode(): Int {
+        var result = start.hashCode()
+        result = 31 * result + end.hashCode()
+        return result
+    }
 }
 
 enum class Direction {
     UP {
-        override fun getOpp(): Direction {
+        override fun getOpposite(): Direction {
             return DOWN
         }
 
@@ -619,7 +669,7 @@ enum class Direction {
         }
     },
     DOWN {
-        override fun getOpp(): Direction {
+        override fun getOpposite(): Direction {
             return UP
         }
 
@@ -628,7 +678,7 @@ enum class Direction {
         }
     },
     LEFT {
-        override fun getOpp(): Direction {
+        override fun getOpposite(): Direction {
             return RIGHT
         }
 
@@ -637,7 +687,7 @@ enum class Direction {
         }
     },
     RIGHT {
-        override fun getOpp(): Direction {
+        override fun getOpposite(): Direction {
             return LEFT
         }
 
@@ -646,11 +696,15 @@ enum class Direction {
         }
     };
 
-    abstract fun getOpp(): Direction;
-    abstract fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine?;
+    abstract fun getOpposite(): Direction
+
+    /**
+     * returns the line from the opposite direction
+     */
+    abstract fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine?
 }
 
-class BezierCurve(
+/*class BezierCurve(
     private val seed: Long,
     restrict: MapRestriction,
     rnd: Random = Random(seed),
@@ -687,25 +741,60 @@ class BezierCurve(
         if (k == 0 || k == n) return 1
         return binCoefficient(n - 1, k - 1) + binCoefficient(n - 1, k)
     }
-}
+}*/
 
+/**
+ * all possible restrictions within the MapGenerator
+ */
 data class MapRestriction(
+    /**
+     * minimum number of nodes for main line
+     */
     val maxNodes: Int = 22,
+    /**
+     * maximum number of nodes for main line
+     */
     val minNodes: Int = 17,
-//    val maxLines: Int = 6,
+    /**
+     * how many lines are generated and are therefore possible
+     */
     val maxLines: Int = 4,
-//    val splitProb: Float = 0.91F,
+    /**
+     * how likely it is for nodes to split (min. of 0.3 is recommended)
+     */
     val splitProb: Float = 0.9F,
+    /**
+     * how far it spreads into the "y" direction or is compressed
+     */
     val compressProb: Float = 0.55F,
+    /**
+     * the average length between two nodes on one line (actually only preferred length, not avg.)
+     */
     val averageLengthOfLineInBetween: Float = 26F,
+
+    /**
+     * max "y" width for first line, and for other lines: max distance for the x Point from one line to the x Point of another line
+     */
     val maxWidth: Int = 40,
+    /**
+     * how strong the random points can go up and down (0 means straight to the right, 1 means 180 Degree)
+     */
     val maxAnglePercent: Float = 0.6F,
+    /**
+     * the range from where nodes are checked if there are any other from another line
+     */
     val rangeToCheckBetweenNodes: Float = 70F,
     val startArea: String = "Franz",
     val endArea: String = "Huber",
     val otherAreas: List<String> = listOf(),
     val minDistanceBetweenAreas: Float = 100F,
+    /**
+     * how far the areas are from the highest/lowest point of the road
+     */
     val distanceFromAreaToLine: Float = 100F,
+    /**
+     * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
+     */
     val percentageForAllowedNodesInRangeBetweenLineAndArea: Float = 0.4F,
 ) {
 

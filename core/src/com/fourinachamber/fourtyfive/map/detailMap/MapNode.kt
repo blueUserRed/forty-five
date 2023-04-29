@@ -2,7 +2,6 @@ package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.map.MapManager
-import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
@@ -19,11 +18,13 @@ data class MapNode(
 ) {
 
     private var loadedImage: Drawable? = null
-
-    fun getLeft(): MapNode? = null
-    fun getRight(): MapNode? = null
-    fun getTop(): MapNode? = null
-    fun getBottom(): MapNode? = null
+    private val dirNodes: Array<Int?> = arrayOfNulls(4)
+    fun getEdge(dir: Direction): MapNode? {
+        if (dirNodes[dir.ordinal] != null) {
+            return edgesTo[dirNodes[dir.ordinal]!!]
+        }
+        return null
+    }
 
     @MainThreadOnly
     fun getImage(screen: OnjScreen): Drawable? {
@@ -102,8 +103,8 @@ data class MapNode(
 }
 
 data class MapNodeBuilder(
-    val x: Float,
-    val y: Float,
+    var x: Float,
+    var y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     val blockingEdges: MutableList<MapNodeBuilder> = mutableListOf(),
     var isArea: Boolean = false,
@@ -120,6 +121,12 @@ data class MapNodeBuilder(
     private var asNode: MapNode? = null
 
     val dirNodes: Array<Int?> = arrayOfNulls(4)
+
+
+    fun scale(xScale: Float = 1F, yScale: Float = 1F) {
+        x *= xScale
+        y *= yScale
+    }
 
     fun build(): MapNode {
         if (inBuild) return asNode!!
@@ -149,7 +156,7 @@ data class MapNodeBuilder(
         other.edgesTo.add(this)
         if (addAsNext) {
             dirNodes[dir.ordinal] = edgesTo.size - 1
-            other.dirNodes[dir.getOpp().ordinal] = other.edgesTo.size - 1
+            other.dirNodes[dir.getOpposite().ordinal] = other.edgesTo.size - 1
         }
         return true
     }
