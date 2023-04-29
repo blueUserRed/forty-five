@@ -36,7 +36,7 @@ class SeededMapGenerator(
     }
 
     private fun addAreas(nodes: MutableList<MapNodeBuilder>) {
-        var areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
+        val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea)
@@ -44,12 +44,11 @@ class SeededMapGenerator(
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>
-            var newPos: Vector2 = Vector2(0, 0)
+            var newPos: Vector2
             do {
-                val x: Float = 105F
-//                    (restrictions.rangeToCheckBetweenAreas..(mainLine.lineNodes.last().x - restrictions.rangeToCheckBetweenAreas)).random(
-//                        rnd
-//                    )
+                val x: Float =
+                    (restrictions.minDistanceBetweenAreas..(mainLine.lineNodes.last().x - restrictions.minDistanceBetweenAreas))
+                        .random(rnd)
                 direction = arrayOf(Direction.DOWN, Direction.UP).random(rnd)
                 newPos = Vector2(
                     x,
@@ -58,22 +57,21 @@ class SeededMapGenerator(
                 )
                 borderNodes = getBorderNodesInArea(direction, nodes, newPos)
                 println(borderNodes)
-            } while (/*isIllegalPositionForArea(borderNodes, newPos, areaNodes)*/false)
-            val newArea: MapNodeBuilder = MapNodeBuilder(newPos.x, newPos.y, event = EnterMapMapEvent(areaName))
+            } while (isIllegalPositionForArea(borderNodes, newPos, areaNodes))
+            val newArea: MapNodeBuilder = MapNodeBuilder(newPos.x, newPos.y, event = EnterMapMapEvent(areaName)) //TODO add direction of event picture
             borderNodes.random(rnd).connect(newArea, direction)
             areaNodes.add(newArea)
         }
     }
 
-//    private fun isIllegalPositionForArea(
-//        borderNodes: List<MapNodeBuilder>,
-//        newPos: Vector2,
-//        areaNodes: MutableList<MapNodeBuilder>
-//    ): Boolean {
-//
-//
-//
-//    }
+    private fun isIllegalPositionForArea(
+        borderNodes: List<MapNodeBuilder>,
+        newPos: Vector2,
+        areaNodes: MutableList<MapNodeBuilder>
+    ): Boolean {
+        return areaNodes.stream()
+            .anyMatch { it -> Vector2(it.x, it.y).sub(newPos).len() < restrictions.minDistanceBetweenAreas }
+    }
 
     private fun getLimitInRange(x: Float, nodes: MutableList<MapNodeBuilder>, direction: Direction): Float {
         val nodesInRange: List<Float> =
@@ -91,7 +89,8 @@ class SeededMapGenerator(
 
         return nodes.filter {
             Vector2(it.x, it.y).sub(position)
-                .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllewedNodesInRangeBetweenLineAndArea)
+                .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllowedNodesInRangeBetweenLineAndArea)
+                    && it.dirNodes[direction.ordinal] == null && it.edgesTo.size < 4
         }
     }
 
@@ -222,6 +221,7 @@ class SeededMapGenerator(
         uniqueLines.remove(nodesConnection)
         uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
         uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
+        //TODO set directions for the "node in between"
     }
 
     /*    fun generateBezier(): DetailMap {
@@ -704,9 +704,9 @@ data class MapRestriction(
     val startArea: String = "Franz",
     val endArea: String = "Huber",
     val otherAreas: List<String> = listOf(),
-    val rangeToCheckBetweenAreas: Float = 100F,
+    val minDistanceBetweenAreas: Float = 100F,
     val distanceFromAreaToLine: Float = 100F,
-    val percentageForAllewedNodesInRangeBetweenLineAndArea: Float = 0.4F,
+    val percentageForAllowedNodesInRangeBetweenLineAndArea: Float = 0.4F,
 ) {
 
     companion object {
