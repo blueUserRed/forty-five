@@ -43,7 +43,8 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes)
-        nodes.forEach { it.scale(.3F, .7F) }
+//        nodes.forEach { it.scale(1F, .6F) }
+        nodes.forEach { it.rotate(restrictions.rotation) }
         this.nodes = nodes
         return DetailMap(build(), listOf())
     }
@@ -197,6 +198,7 @@ class SeededMapGenerator(
             val newNode = MapNodeBuilder(interceptPoint.x, interceptPoint.y)
             addNodeInBetween(line1, nodes, newNode, uniqueLines)
             addNodeInBetween(line2, nodes, newNode, uniqueLines)
+            nodes.add(newNode)
         } else {
             deleteLineInBetween(
                 getLineToDelete(nodes, line1, line2, intersectionNode),
@@ -258,7 +260,6 @@ class SeededMapGenerator(
         secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
         newNode.edgesTo.add(firstNode)
         newNode.edgesTo.add(secNode)
-        nodes.add(newNode)
         uniqueLines.remove(nodesConnection)
         uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
         uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
@@ -796,7 +797,13 @@ data class MapRestriction(
      * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
      */
     val percentageForAllowedNodesInRangeBetweenLineAndArea: Float = 0.4F,
+    /**
+     * the rotation of the road (0 means looking left, PI/2 means looking up, and so on)
+     */
+    val rotation: Double = .0,
+
 ) {
+
 
     companion object {
 
