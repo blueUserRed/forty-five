@@ -2,9 +2,13 @@ package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.FourtyFive
+import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
@@ -12,7 +16,8 @@ object MapEventFactory {
 
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
-        "EncounterMapEvent" to { EncounterMapEvent(it) }
+        "EncounterMapEvent" to { EncounterMapEvent(it) },
+        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap")) }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -85,7 +90,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     }
 
     override fun start() {
-        FourtyFive.changeToScreen("screens/map_test.onj", this)
+        FourtyFive.changeToScreen("screens/game_screen.onj", this)
     }
 
     fun completed() {
@@ -98,4 +103,23 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
         name("EncounterMapEvent")
         includeStandardConfig()
     }
+}
+
+class EnterMapMapEvent(val targetMap: String) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+    override val displayDescription: Boolean = true
+    override val descriptionText: String = "Enter $targetMap"
+
+    override fun start() {
+        MapManager.switchToMap(targetMap)
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("EnterMapMapEvent")
+        "targetMap" with targetMap
+    }
+
 }

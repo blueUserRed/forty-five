@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.SplitPane
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -19,8 +21,6 @@ import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
-import com.fourinachamber.fourtyfive.map.dialog.Dialog
-import com.fourinachamber.fourtyfive.map.dialog.DialogTextWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -52,7 +52,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
-//    private var postProcessor: String? = null
+    private var popups: Map<String, WidgetGroup>? = null
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -82,7 +82,10 @@ class ScreenBuilder(val file: FileHandle) {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
-        val root = CustomFlexBox()
+        doPopups(onj, screen)
+        popups?.let { screen.popups = it }
+
+        val root = CustomFlexBox(screen)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
@@ -97,6 +100,21 @@ class ScreenBuilder(val file: FileHandle) {
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
         return screen
+    }
+
+    private fun doPopups(onj: OnjObject, screen: OnjScreen) {
+        val popups = mutableMapOf<String, WidgetGroup>()
+        onj.get<OnjObject>("options").ifHas<OnjArray>("popups") { arr ->
+            arr.value.forEach { obj ->
+                obj as OnjObject
+                val name = obj.get<String>("name")
+                val rootObj = obj.get<OnjNamedObject>("popupRoot")
+                val popupRootFlexBox = CustomFlexBox(screen)
+                getWidget(rootObj, popupRootFlexBox, screen)
+                popups[name] = popupRootFlexBox
+            }
+        }
+        this.popups = popups
     }
 
     private fun doOptions(onj: OnjObject) {
@@ -114,25 +132,6 @@ class ScreenBuilder(val file: FileHandle) {
 
     private fun readAssets(onj: OnjObject) {
         val assets = onj.get<OnjObject>("assets")
-
-//        if (assets.hasKey<OnjArray>("styleFiles")) {
-//            assets
-//                .get<OnjArray>("styleFiles")
-//                .value
-//                .forEach {
-//                    styles.putAll(Style.readFromFile(it.value as String))
-//                }
-//        }
-//
-//        if (assets.hasKey<OnjArray>("styles")) {
-//            assets
-//                .get<OnjArray>("styles")
-//                .value
-//                .map { Style.readStyle(it as OnjObject) }
-//                .forEach {
-//                    styles[it.first] = it.second
-//                }
-//        }
 
         val toBorrow = mutableListOf<String>()
 
@@ -173,7 +172,7 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
-        val flexBox = CustomFlexBox()
+        val flexBox = CustomFlexBox(screen)
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
@@ -212,7 +211,7 @@ class ScreenBuilder(val file: FileHandle) {
     ): Actor = when (widgetOnj.name) {
 
         "Image" -> CustomImageActor(
-            widgetOnj.get<String>("textureName"),
+            widgetOnj.getOr<String?>("textureName", null),
             screen,
             widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
@@ -240,9 +239,9 @@ class ScreenBuilder(val file: FileHandle) {
 
         "CardHand" -> CardHand(
             widgetOnj.get<Double>("targetWidth").toFloat(),
+            widgetOnj.get<Double>("cardSize").toFloat(),
             screen
         ).apply {
-            cardScale = widgetOnj.get<Double>("cardScale").toFloat()
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
             cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
@@ -326,15 +325,28 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("background")
         ).apply { touchable = Touchable.enabled }
 
-        "DialogText" -> DialogTextWidget(
+        "AdvancedText" -> AdvancedTextWidget(
             Dialog.readFromOnj(
-                widgetOnj.get<OnjArray>("dialog"),
+                widgetOnj.get<OnjArray>("parts"),
                 fontOrError(widgetOnj.get<String>("font"), screen),
                 screen
             ),
             widgetOnj.get<Double>("fontScale").toFloat(),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+            screen
         )
+
+        "SplitPlane" -> {
+            val firstFlexBox = CustomFlexBox(screen)
+            val secondFlexBox = CustomFlexBox(screen)
+            val splitPane = SplitPane(
+                firstFlexBox,
+                secondFlexBox,
+                widgetOnj.get<Boolean>("vertical"),
+                SplitPane.SplitPaneStyle()
+            )
+            firstFlexBox
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
@@ -344,7 +356,12 @@ class ScreenBuilder(val file: FileHandle) {
         val node = parent?.add(actor)
 
         node ?: return actor
-        if (actor !is StyledActor) return actor
+        if (actor !is StyledActor) {
+            if (widgetOnj.hasKey<OnjArray>("styles")) {
+                throw RuntimeException("actor $actor defines styles but does not implement StyledActor")
+            }
+            return actor
+        }
 
         val styleManager = StyleManager(actor, node)
         actor.styleManager = styleManager

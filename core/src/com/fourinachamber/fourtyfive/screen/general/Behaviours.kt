@@ -10,11 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
-import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -32,19 +30,16 @@ object BehaviourFactory {
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
-//        "OnClickMaskBehaviour" to { onj, actor -> OnClickMaskBehaviour(onj, actor) },
         "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
         "OnClickRemoveActorBehaviour" to { onj, actor -> OnClickRemoveActorBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnHoverChangeFontSizeBehaviour" to { onj, actor -> OnHoverChangeFontSizeBehaviour(onj, actor) },
-        "OnHoverChangeTextureBehaviour" to { onj, actor -> OnHoverChangeTextureBehaviour(onj, actor) },
         "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
-//        "OnClickChangePostProcessorBehaviour" to { onj, actor -> OnClickChangePostProcessorBehaviour(onj, actor) },
-        "OnHoverPopupBehaviour" to { onj, actor -> OnHoverPopupBehaviour(onj, actor) },
         "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
         "EndTurnButtonBehaviour" to { onj, actor -> EndTurnButtonBehaviour(onj, actor) },
         "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
-        "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) }
+        "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) },
+        "OnClickOpenPopupBehaviour" to { onj, actor -> OnClickOpenPopupBehaviour(onj, actor) }
     )
 
     /**
@@ -151,6 +146,16 @@ class MouseHoverBehaviour(
     override val onHoverExit: BehaviourCallback = {
         Utils.setCursor(onjScreen.defaultCursor)
     }
+}
+
+class OnClickOpenPopupBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val popupName = onj.get<String>("popupName")
+
+    override val onCLick: BehaviourCallback = {
+        onjScreen.showPopup(popupName)
+    }
+
 }
 
 /**
@@ -335,129 +340,6 @@ class OnHoverChangeFontSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behavi
         }
     }
 
-}
-
-class OnHoverChangeTextureBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    private val hoverDrawableName = onj.get<String>("hoverTexture")
-    private val baseDrawable: Drawable
-    private val image: CustomImageActor
-
-    private val hoverDrawable: Drawable by lazy {
-        ResourceManager.get(onjScreen, hoverDrawableName)
-    }
-
-    init {
-        if (actor !is CustomImageActor) {
-            throw RuntimeException("OnHoverChangeTextureBehaviour can only be used on an Image")
-        }
-        image = actor
-        baseDrawable = actor.drawable
-    }
-
-    override val onHoverEnter: BehaviourCallback = {
-        image.drawable = hoverDrawable
-    }
-
-
-    override val onHoverExit: BehaviourCallback = {
-        image.drawable = baseDrawable
-    }
-
-}
-
-///**
-// * when clicked, the actor will have a mask applied. [actor] needs to implement [Maskable]
-// */
-//class OnClickMaskBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-//
-//    private val maskTextureName = onj.get<String>("maskTexture")
-//    private val invert = onj.getOr("invert", false)
-//    private val maskScaleX = onj.getOr("maskScaleX", 1.0).toFloat()
-//    private val maskScaleY = onj.getOr("maskScaleY", 1.0).toFloat()
-//    private val maskOffsetX = onj.getOr("maskOffsetX", 0.0).toFloat()
-//    private val maskOffsetY = onj.getOr("maskOffsetY", 0.0).toFloat()
-//
-//    init {
-//        if (actor !is Maskable) throw RuntimeException("OnClickMaskBehaviour can only be used on a maskable actor")
-//    }
-//
-//    override val onCLick: BehaviourCallback = {
-//
-//        val mask = onjScreen.drawableOrError(maskTextureName)
-//
-//        actor as Maskable
-//
-//        actor.mask = mask.texture
-//        actor.maskScaleX = maskScaleX
-//        actor.maskScaleY = maskScaleY
-//        actor.maskOffsetX = maskOffsetX
-//        actor.maskOffsetY = maskOffsetY
-//        actor.invert = invert
-//
-//    }
-//
-//}
-
-///**
-// * when clicked, will change the PostProcessor of the whole screen
-// */
-//class OnClickChangePostProcessorBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-//
-//    private val time: Int? = if (!onj["duration"]!!.isNull()) {
-//        onj.get<Long>("duration").toInt()
-//    } else null
-//
-//    private val postProcessor: String? = if (!onj["postProcessor"]!!.isNull()) {
-//        onj.get<String>("postProcessor")
-//    } else null
-//
-//    private val setOnlyIfPostProcessorIsNull: Boolean = onj.get<Boolean>("setOnlyIfNoPostProcessorIsSet")
-//
-//    override val onCLick: BehaviourCallback = callback@ {
-//
-//        if (setOnlyIfPostProcessorIsNull && onjScreen.postProcessor != null) return@callback
-//
-//        val postProcessor = ResourceManager.get<PostProcessor>(onjScreen, postProcessor!!)
-//
-//        val prefPostProcessor = onjScreen.postProcessor
-//        onjScreen.postProcessor = postProcessor
-//
-//        if (time != null) onjScreen.afterMs(time) {
-//            onjScreen.postProcessor = prefPostProcessor
-//            // without manually resizing the aspect ratio of the screen breaks, don't ask me why
-//            onjScreen.resize(Gdx.graphics.width, Gdx.graphics.height)
-//        }
-//    }
-//
-//}
-
-/**
- * sets the visibility of another actor when this actor is hovered over
- */
-class OnHoverPopupBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-
-    private val popupActorName = onj.get<String>("popupName")
-    private val setPopupPosition = onj.get<Boolean>("setPopupPosition")
-
-    private val xOffset = onj.getOr("xOffset", 0.0).toFloat()
-    private val yOffset = onj.getOr("yOffset", 0.0).toFloat()
-
-    private val popupActor by lazy {
-        onjScreen.namedActorOrError(popupActorName)
-    }
-
-    override val onHoverEnter: BehaviourCallback = {
-        if (setPopupPosition) {
-            popupActor.x = actor.x + xOffset
-            popupActor.y = actor.y + yOffset
-        }
-        popupActor.isVisible = true
-    }
-
-    override val onHoverExit: BehaviourCallback = {
-        popupActor.isVisible = false
-    }
 }
 
 class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {

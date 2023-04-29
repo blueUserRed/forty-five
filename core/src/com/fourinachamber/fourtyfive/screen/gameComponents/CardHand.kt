@@ -2,13 +2,16 @@ package com.fourinachamber.fourtyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
-import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.game.card.CardActor
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
 import com.fourinachamber.fourtyfive.screen.general.ZIndexGroup
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fourtyfive.utils.between
+import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.contains
 import kotlin.math.min
 
@@ -19,15 +22,15 @@ import kotlin.math.min
  */
 class CardHand(
     private val targetWidth: Float,
-    private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor, ZIndexGroup {
+    private val cardSize: Float,
+    private val screen: OnjScreen,
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
 
     override var fixedZIndex: Int = 0
 
-    /**
-     * the scale of the card-Actors
-     */
-    var cardScale: Float = 1.0f
+    override lateinit var styleManager: StyleManager
+
+    override var isHoveredOver: Boolean = false
 
     /**
      * scaling applied to the card when hovered over
@@ -62,9 +65,12 @@ class CardHand(
         get() = _cards
 
     private var _cards: MutableList<Card> = mutableListOf()
-    private var currentWidth: Float = 0f
 
     private var currentHoverDetailActor: CardDetailActor? = null
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     /**
      * adds a card to the hand
@@ -112,14 +118,14 @@ class CardHand(
 
         _cards.forEachIndexed { i, card ->
             if (card.actor.isDragged) {
-                card.actor.setScale(cardScale)
+                card.actor.setScale(1f)
                 doZIndexFor(card.actor, draggedCardZIndex)
             } else if (card === detailCard) {
                 detailCard.actor.setScale(hoveredCardScale)
                 doZIndexFor(card.actor, hoveredCardZIndex)
             } else {
                 if (card.actor.isSelected) screen.selectedActor = null
-                card.actor.setScale(cardScale)
+                card.actor.setScale(1f)
                 doZIndexFor(card.actor, startCardZIndicesAt + i)
             }
         }
@@ -149,16 +155,15 @@ class CardHand(
 
         val targetWidth = width
 
-        val cardWidth = _cards[0].actor.width * cardScale
         val hoveredCardWidth = _cards[0].actor.width * hoveredCardScale
 
-        var neededWidth = _cards.size * (cardSpacing + cardWidth) - cardSpacing
+        var neededWidth = _cards.size * (cardSpacing + cardSize) - cardSpacing
 
         val xDistanceOffset = if (targetWidth < neededWidth) {
-            -(neededWidth - targetWidth + cardWidth) / _cards.size
+            -(neededWidth - targetWidth + cardSize) / _cards.size
         } else 0f
 
-        neededWidth = _cards.size * (xDistanceOffset + cardSpacing + cardWidth) - cardSpacing - xDistanceOffset
+        neededWidth = _cards.size * (xDistanceOffset + cardSpacing + cardSize) - cardSpacing - xDistanceOffset
 
         var curX = if (targetWidth > neededWidth) {
             ((width - neededWidth) / 2)
@@ -169,7 +174,7 @@ class CardHand(
         for (i in _cards.indices) {
             val card = _cards[i]
             if (card.actor.isDragged) {
-                curX += cardWidth + cardSpacing + xDistanceOffset
+                curX += cardSize + cardSpacing + xDistanceOffset
                 continue
             }
             if (currentHoverDetailActor == card.actor.hoverDetailActor) {
@@ -177,18 +182,18 @@ class CardHand(
                 val detailWidth = hoveredCardWidth * 2
                 detailActor.forcedWidth = detailWidth
                 detailActor.fixedZIndex = hoveredCardZIndex
-                val adjustedX = curX - (hoveredCardWidth - cardWidth) / 2
+                val adjustedX = curX - (hoveredCardWidth - cardSize) / 2
                 detailActor.setBounds(
                     (adjustedX - detailWidth / 4).between(-detailWidth, width - detailWidth),
                     curY + hoveredCardWidth,
                     detailActor.prefWidth,
                     detailActor.prefHeight
                 )
-                card.actor.setPosition(adjustedX, curY)
+                card.actor.setBounds(adjustedX, curY, cardSize, cardSize)
             } else {
-                card.actor.setPosition(curX, curY)
+                card.actor.setBounds(curX, curY, cardSize, cardSize)
             }
-            curX += cardWidth + cardSpacing + xDistanceOffset
+            curX += cardSize + cardSpacing + xDistanceOffset
         }
         resortZIndices()
     }
@@ -200,12 +205,12 @@ class CardHand(
         }
     }
 
-    override fun getPrefWidth(): Float {
-        return min(targetWidth, currentWidth)
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
     }
 
-    override fun getMinWidth(): Float {
-        return min(targetWidth, currentWidth)
+    override fun getPrefWidth(): Float {
+        return targetWidth
     }
 
 }

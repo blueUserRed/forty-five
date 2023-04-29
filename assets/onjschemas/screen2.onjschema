@@ -72,7 +72,7 @@ $Widget {
     }
 
     $Image {
-        textureName: string,
+        textureName?: string,
         scaleX: float,
         scaleY: float,
         reportDimensionsWithScaling?: boolean,
@@ -88,7 +88,7 @@ $Widget {
     }
 
     $CardHand {
-        cardScale: float,
+        cardSize: float,
         cardSpacing: float,
         startCardZIndicesAt: int,
         hoveredCardZIndex: int,
@@ -167,9 +167,9 @@ $Widget {
         ...widgetSharedKeys
     }
 
-    $DialogText {
+    $AdvancedText {
         font: string,
-        dialog: { text: string, color: Color, actions?: $DialogPartAction[] }[],
+        parts: { text: string, color: Color, actions?: $DialogPartAction[] }[],
         fontScale: float,
         progressTime: float,
         ...widgetSharedKeys
@@ -195,7 +195,10 @@ $DetailMapProvider {
     }
 
     $FromSeededGeneratorDetailMapProvider {
-        seed: int
+        seed: int,
+                startArea: string,
+                endArea: string,
+                otherAreas: string[],
     }
 
     $CurrentMapProvider { }
@@ -273,8 +276,8 @@ $Behaviour {
         yOffset?: float,
     }
 
-    $OnHoverChangeTextureBehaviour {
-        hoverTexture: string
+    $OnClickOpenPopupBehaviour {
+        popupName: string
     }
 
     $ShootButtonBehaviour { }
@@ -372,11 +375,10 @@ options: {
         modifiers: int[],
         action: $KeyAction
     }[],
-//    setFillParentOnRoot: boolean,
-//    defaultCursor: {
-//        useSystemCursor: boolean,
-//        cursorName: string
-//    },
+    popups?: {
+        name: string,
+        popupRoot: $Widget
+    }[],
     postProcessor?: string,
     transitionAwayTime?: float
 //    printFrameRate?: boolean

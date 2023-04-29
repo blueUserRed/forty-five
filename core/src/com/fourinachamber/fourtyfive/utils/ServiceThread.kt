@@ -7,7 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.trySendBlocking
 
-class ServiceThread : Thread() {
+class ServiceThread : Thread("ServiceThread") {
 
     private val channel: Channel<ServiceThreadMessage> = Channel(Channel.Factory.UNLIMITED)
 

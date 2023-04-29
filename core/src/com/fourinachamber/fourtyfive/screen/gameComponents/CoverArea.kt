@@ -11,6 +11,10 @@ import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
+import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fourtyfive.screen.general.styles.addActorStyles
+import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onClick
 import onj.value.OnjNamedObject
 import java.lang.Float.max
@@ -39,7 +43,10 @@ class CoverArea(
     private val cardDeltaX: Float,
     private val cardDeltaY: Float,
     private val stackHookDrawableHandle: ResourceHandle
-) : WidgetGroup(), ZIndexGroup, ZIndexActor {
+) : WidgetGroup(), ZIndexGroup, ZIndexActor, StyledActor {
+
+    override lateinit var styleManager: StyleManager
+    override var isHoveredOver: Boolean = false
 
     /**
      * set by gameScreenController //TODO: find a better solution
@@ -68,6 +75,10 @@ class CoverArea(
             stackHookDrawableHandle,
             screen
         )
+    }
+
+    init {
+        bindHoverStateListeners(this)
     }
 
     /**
@@ -180,6 +191,9 @@ class CoverArea(
         }
     }
 
+    override fun initStyles(node: YogaNode, screen: OnjScreen) {
+        addActorStyles(node, screen)
+    }
 }
 
 /**

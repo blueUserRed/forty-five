@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
@@ -175,15 +176,19 @@ class DetailMapWidget(
         updatePlayerMovement()
         batch ?: return
 
-        val (screenX, screenY) = localToStageCoordinates(Vector2(0f, 0f))
-        val bounds = Rectangle(screenX, screenY, width, height)
-        val scissor = Rectangle()
-        ScissorStack.calculateScissors(screen.stage.camera, batch.transformMatrix, bounds, scissor)
+        batch.flush()
+        val viewport = screen.stage.viewport
+        val scissor = Rectangle(
+            0f, viewport.bottomGutterHeight.toFloat(),
+            (Gdx.graphics.width / 160f) * width,
+            ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / 90f) * height
+        )
         if (!ScissorStack.pushScissors(scissor)) return
 
-        background?.draw(batch, x, y, width, height)
+        background.draw(batch, x, y, width, height)
         drawEdges(batch)
         drawNodes(batch)
+        drawNodeImages(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
@@ -193,6 +198,28 @@ class DetailMapWidget(
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun drawNodeImages(batch: Batch): Unit = map
+        .uniqueNodes
+        .filter { it.imageName != null }
+        .forEach { node ->
+            val image = node.getImage(screen) ?: return@forEach
+            val imageData = node.getImageData() ?: return@forEach
+            val offset = getNodeImageOffset(node.imagePos ?: return@forEach, imageData.width, imageData.height)
+            image.draw(
+                batch,
+                x + mapOffset.x + node.x + offset.x,
+                y + mapOffset.y + node.y + offset.y,
+                imageData.width, imageData.height
+            )
+        }
+
+    private fun getNodeImageOffset(pos: MapNode.ImagePosition, width: Float, height: Float): Vector2 = when (pos) {
+        MapNode.ImagePosition.UP -> Vector2(nodeSize / 2 - width / 2, 2 * nodeSize)
+        MapNode.ImagePosition.DOWN -> Vector2(nodeSize / 2 - width / 2, -height - nodeSize)
+        MapNode.ImagePosition.LEFT -> Vector2(-width - nodeSize, nodeSize / 2 - height / 2)
+        MapNode.ImagePosition.RIGHT -> Vector2(2 * nodeSize, nodeSize / 2 - height / 2)
     }
 
     private fun drawDirectionIndicator(batch: Batch) {

@@ -73,10 +73,6 @@ class Revolver(
         ResourceManager.get(screen, backgroundHandle)
     }
 
-    private val slotDrawable: Drawable by lazy {
-        ResourceManager.get(screen, slotDrawableHandle)
-    }
-
     /**
      * assigns a card to a slot in the revolver; [card] can be set to null, but consider using [removeCard] instead to
      * remove a card
@@ -176,7 +172,8 @@ class Revolver(
     }
 
     private fun updateSlotsAndCards() {
-        val slotSize = slotDrawable.minWidth * slotScale!!
+        val drawable = slots[0].drawable ?: return
+        val slotSize = drawable.minWidth * slotScale!!
         val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size
         prefHeight = size
@@ -187,6 +184,8 @@ class Revolver(
             val slot = slots[i]
             val angle = angleForIndex(i)
             slot.position(basePos, radius, angle)
+            slot.width = slotSize
+            slot.height = slotSize
         }
     }
 
@@ -268,6 +267,8 @@ class RevolverSlot(
 
     init {
         setScale(scale)
+        reportDimensionsWithScaling = true
+        ignoreScalingWhenDrawing = true
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -287,6 +288,7 @@ class RevolverSlot(
      * @param angle the angle in radians where this slot should be positioned
      */
     fun position(base: Vector2, r: Float, angle: Double) {
+        drawable ?: return
         val slotSize = drawable.minWidth * scaleX
         val dx = cos(angle) * r
         val dy = sin(angle) * r
