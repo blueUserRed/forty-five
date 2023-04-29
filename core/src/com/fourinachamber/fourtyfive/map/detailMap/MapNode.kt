@@ -1,10 +1,14 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 data class MapNode(
     val edgesTo: List<MapNode>,
@@ -128,6 +132,16 @@ data class MapNodeBuilder(
         y *= yScale
     }
 
+    /**
+     * rotates the node around P(0|0) in radians PI/2 means 90 Degree to left
+     */
+    fun rotate(radianVal: Double = PI) {
+        val xNew = cos(radianVal) * x - sin(radianVal) * y
+        val yNew = sin(radianVal) * x + cos(radianVal) * y
+        x = xNew.toFloat()
+        y = yNew.toFloat()
+    }
+
     fun build(): MapNode {
         if (inBuild) return asNode!!
         inBuild = true
@@ -171,12 +185,11 @@ data class MapNodeBuilder(
     }
 
     override fun equals(other: Any?): Boolean {
-        return other === this // TODO: ???
-//        return other != null &&
-//                other is MapNodeBuilder &&
-//                other.x == this.x &&
-//                other.y == this.y &&
-//                other.isArea == this.isArea &&
+        return other != null &&
+                (other is MapNodeBuilder || other is MapNode) &&
+                other is MapNodeBuilder &&
+                other.x == this.x &&
+                other.y == this.y
     }
 
     override fun hashCode(): Int {
