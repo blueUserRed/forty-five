@@ -13,6 +13,10 @@ $MapEvent {
         ...mapEventStandardConfig
     }
 
+    $EnterMapMapEvent {
+        targetMap: string
+    }
+
 }
 
 startNode: int,
@@ -22,7 +26,9 @@ nodes: {
     isArea: boolean,
     edgesTo: int[],
     blockingEdges: int[],
-    event: $MapEvent
+    image?: string,
+    imagePos?: string,
+    event: $MapEvent?
 }[],
 
 decorations: {

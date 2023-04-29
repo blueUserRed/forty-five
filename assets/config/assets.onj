@@ -207,6 +207,15 @@ ninepatches: [
         left: 24,
         right: 24,
         scale: 0.1
+    },
+    {
+        name: "hover_detail_background",
+        file: "textures/ninepatches/hover_detail_background.png",
+        top: 16,
+        bottom: 16,
+        left: 16,
+        right: 16,
+        scale: 0.1
     }
 ],
 
