@@ -1,0 +1,58 @@
+
+import "imports/colors.onj" as color;
+import "cards/cards.onj" as cards_obj;
+import "maps/map_config.onj" as config;
+
+var cards = cards_obj.cards;
+
+baseImage: "base",
+outputFile: "maps/world_view/generated/background.atlas",
+
+packer: {
+    pageWidth: 2_000,
+    pageHeight: 2_000,
+    padding: 0
+},
+
+assets: {
+    fonts: [],
+    pixmaps: [
+        {
+            name: "base",
+            file: "textures/world_view/world_view.png"
+        },
+        {
+            name: "location_sign_aqua_dulche",
+            file: "textures/location_signs/aqua_dulche.png"
+        },
+        {
+            name: "location_sign_salem",
+            file: "textures/location_signs/salem.png"
+        }
+    ]
+},
+
+textures: [
+    {
+        name: "world_view_background",
+        elements: [
+
+            $ImageElement {
+                textureName: config.worldViewLocations.1.image,
+                x: config.worldViewLocations.1.x - config.worldViewLocations.1.width / 2,
+                y: config.worldViewLocations.1.y - config.worldViewLocations.1.height / 2,
+                width: config.worldViewLocations.1.width,
+                height: config.worldViewLocations.1.height,
+            },
+
+            $ImageElement {
+                textureName: config.worldViewLocations.2.image,
+                x: config.worldViewLocations.2.x - config.worldViewLocations.2.width / 2,
+                y: config.worldViewLocations.2.y - config.worldViewLocations.2.height / 2,
+                width: config.worldViewLocations.2.width,
+                height: config.worldViewLocations.2.height,
+            }
+
+        ]
+    }
+]
