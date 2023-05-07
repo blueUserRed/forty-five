@@ -3,9 +3,8 @@ package com.fourinachamber.fourtyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.game.card.CardGenerator
+import com.fourinachamber.fourtyfive.game.card.TextureGenerator
 import com.fourinachamber.fourtyfive.map.*
-import com.fourinachamber.fourtyfive.map.detailMap.MapEventFactory
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -13,16 +12,9 @@ import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fourtyfive.rendering.Renderable
-import com.fourinachamber.fourtyfive.screen.Resource
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import onj.customization.OnjConfig
-import kotlin.concurrent.thread
-import kotlin.system.measureTimeMillis
 
 /**
  * main game object
@@ -30,6 +22,7 @@ import kotlin.system.measureTimeMillis
 object FourtyFive : Game() {
 
     const val generateCards: Boolean = false
+    const val generateWorldViewBackground: Boolean = true
 
     const val logTag = "fourty-five"
 
@@ -44,6 +37,7 @@ object FourtyFive : Game() {
         init()
         serviceThread.start()
         if (generateCards) runCardGenerator()
+        if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
         changeToScreen("screens/map_test.onj")
     }
 
@@ -52,9 +46,15 @@ object FourtyFive : Game() {
     }
 
     private fun runCardGenerator() {
-        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-        cardGenerator.prepare()
-        cardGenerator.generateCards()
+        val textureGenerator = TextureGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+        textureGenerator.prepare()
+        textureGenerator.generate()
+    }
+
+    private fun runWorldViewBackgroundGenerator() {
+        val textureGenerator = TextureGenerator(Gdx.files.internal("maps/world_view/background_generator_config.onj"))
+        textureGenerator.prepare()
+        textureGenerator.generate()
     }
 
     fun changeToScreen(screenPath: String, controllerContext: Any? = null) {

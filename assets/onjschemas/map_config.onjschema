@@ -21,5 +21,13 @@ generatorConfig: {
         seed: int,
         restrictions: mapRestrictions
     }[]
-}
+},
 
+worldViewLocations: {
+    name: string,
+    x: int,
+    y: int,
+    image?: string,
+    width?: int,
+    height?: int
+}[]
