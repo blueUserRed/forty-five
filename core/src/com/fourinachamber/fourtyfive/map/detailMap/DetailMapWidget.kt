@@ -336,8 +336,8 @@ class DetailMapWidget(
         return Vector2(node.x, node.y) + mapOffset
     }
 
-    override fun initStyles(node: YogaNode, screen: OnjScreen) {
-        addActorStyles(node, screen)
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
     }
 
     companion object {

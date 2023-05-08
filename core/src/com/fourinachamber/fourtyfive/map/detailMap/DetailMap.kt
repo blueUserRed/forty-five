@@ -1,16 +1,21 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.fourinachamber.fourtyfive.game.Effect
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
 import onj.value.*
 
 data class DetailMap(
+    val name: String,
     val startNode: MapNode,
     val decorations: List<MapDecoration>
 ) {
@@ -53,7 +58,10 @@ data class DetailMap(
 
     companion object {
 
-        fun readFromOnj(onj: OnjObject): DetailMap {
+        fun readFromFile(file: FileHandle): DetailMap {
+            val onj = OnjParser.parseFile(file.file())
+            mapOnjSchema.assertMatches(onj)
+            onj as OnjObject
             val nodes = mutableListOf<MapNodeBuilder>()
             val nodesOnj = onj.get<OnjArray>("nodes")
             nodesOnj
@@ -95,7 +103,11 @@ data class DetailMap(
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
             val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
-            return DetailMap(nodes[startNodeIndex].build(), decorations)
+            return DetailMap(file.nameWithoutExtension(), nodes[startNodeIndex].build(), decorations)
+        }
+
+        private val mapOnjSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/detail_map.onjschema").file())
         }
 
     }

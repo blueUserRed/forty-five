@@ -44,28 +44,36 @@ generatorConfig: {
     ]
 },
 
+
 var worldViewImageScale = 5.0;
 
-worldViewLocations: [
-    {
-        name: "roadToSalem",
-        x: 950,
-        y: 900 - 595,
-    },
-    {
-        name: "test_area",
-        x: 283,
-        y: 603,
-        image: images.testArea.image,
-        width: (images.testArea.width * worldViewImageScale)#int,
-        height: (images.testArea.height * worldViewImageScale)#int,
-    },
-    {
-        name: "salem",
-        x: 1054,
-        y: 166,
-        image: images.salem.image,
-        width: (images.salem.width * worldViewImageScale)#int,
-        height: (images.salem.height * worldViewImageScale)#int,
-    }
-]
+worldView: {
+    backgroundHandle: "world_view_background",
+    locationIndicatorHandle: "enemy_texture",
+    locationIndicatorWidth: 2.0,
+    locationIndicatorHeight: 6.0,
+    locations: [
+        {
+            name: "roadToSalem",
+            x: 950,
+            y: 900 - 595,
+        },
+        {
+            name: "test_area",
+            x: 283,
+            y: 603,
+            image: images.testArea.image,
+            width: (images.testArea.width * worldViewImageScale)#int,
+            height: (images.testArea.height * worldViewImageScale)#int,
+        },
+        {
+            name: "salem",
+            x: 1054,
+            y: 166,
+            image: images.salem.image,
+            width: (images.salem.width * worldViewImageScale)#int,
+            height: (images.salem.height * worldViewImageScale)#int,
+        }
+    ]
+}
+
