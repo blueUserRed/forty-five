@@ -5,7 +5,6 @@ import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMap
-import com.fourinachamber.fourtyfive.map.detailMap.MapNode
 import com.fourinachamber.fourtyfive.map.detailMap.MapRestriction
 import com.fourinachamber.fourtyfive.map.detailMap.SeededMapGenerator
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
@@ -36,12 +35,7 @@ object MapManager {
     lateinit var mapImages: List<MapImageData>
         private set
 
-    private val mapOnjSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/detail_map.onjschema").file())
-    }
-
     fun init() {
-
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
         onj as OnjObject
@@ -58,19 +52,13 @@ object MapManager {
 
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
-        val mapOnj = OnjParser.parseFile(map.file())
-        mapOnjSchema.assertMatches(mapOnj)
-        mapOnj as OnjObject
-        currentDetail = DetailMap.readFromOnj(mapOnj)
+        currentDetail = DetailMap.readFromFile(map)
     }
 
     fun switchToMap(newMap: String) {
         val map = lookupMapFile(newMap)
         currentMapFile = map
-        val onj = OnjParser.parseFile(map.file())
-        mapOnjSchema.assertMatches(onj)
-        onj as OnjObject
-        currentDetail = DetailMap.readFromOnj(onj)
+        currentDetail = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
         SaveState.currentNode = 0
         switchToMapScreen()
@@ -144,7 +132,7 @@ object MapManager {
         val name = onj.get<String>("name")
         val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
         val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
-        val map = generator.generate()
+        val map = generator.generate(name)
         val path = "${outputDir.toPath()}/$name.onj"
         val file = File(path)
         file.createNewFile()

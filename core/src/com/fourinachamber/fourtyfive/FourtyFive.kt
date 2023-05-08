@@ -22,7 +22,7 @@ import onj.customization.OnjConfig
 object FourtyFive : Game() {
 
     const val generateCards: Boolean = false
-    const val generateWorldViewBackground: Boolean = true
+    const val generateWorldViewBackground: Boolean = false
 
     const val logTag = "fourty-five"
 

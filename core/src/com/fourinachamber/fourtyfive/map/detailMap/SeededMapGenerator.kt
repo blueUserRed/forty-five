@@ -25,12 +25,12 @@ class SeededMapGenerator(
         return nodes[0].build()
     }
 
-    fun generate(): DetailMap {
+    fun generate(name: String): DetailMap {
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         checkAndChangeConnectionIntersection(nodes)
 //        addAreas(nodes)
         this.nodes = nodes
-        return DetailMap(build(), listOf())
+        return DetailMap(name, build(), listOf())
     }
 
     private fun addAreas(nodes: MutableList<MapNodeBuilder>) {
@@ -700,11 +700,11 @@ data class MapRestriction(
     companion object {
 
         fun fromOnj(onj: OnjObject): MapRestriction = MapRestriction(
-            onj.get<Long>("maxNodes").toInt(),
-            onj.get<Long>("minNodes").toInt(),
-            onj.get<Long>("maxSplits").toInt(),
-            onj.get<Double>("splitProbability").toFloat(),
-            onj.get<Double>("compressProbability").toFloat(),
+            maxNodes = onj.get<Long>("maxNodes").toInt(),
+            minNodes = onj.get<Long>("minNodes").toInt(),
+            maxLines = onj.get<Long>("maxSplits").toInt(),
+            splitProb = onj.get<Double>("splitProbability").toFloat(),
+            compressProb = onj.get<Double>("compressProbability").toFloat(),
         )
     }
 }

@@ -23,11 +23,18 @@ generatorConfig: {
     }[]
 },
 
-worldViewLocations: {
-    name: string,
-    x: int,
-    y: int,
-    image?: string,
-    width?: int,
-    height?: int
-}[]
+worldView: {
+    backgroundHandle: string,
+    locationIndicatorHandle: string,
+    locationIndicatorWidth: float,
+    locationIndicatorHeight: float,
+    locations: {
+        name: string,
+        x: int,
+        y: int,
+        image?: string,
+        width?: int,
+        height?: int
+    }[]
+}
+
