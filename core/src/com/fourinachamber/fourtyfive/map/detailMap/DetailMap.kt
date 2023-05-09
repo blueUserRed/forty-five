@@ -40,23 +40,25 @@ data class DetailMap(
         "decorations" with decorations.map { it.asOnjObject() }
     }
 
-    fun nodesAsOnjArray(): OnjArray = uniqueNodes
-        .sortedBy { it.index }
-        .map { node ->
-            buildOnjObject {
-                "x" with node.x
-                "y" with node.y
-                "isArea" with node.isArea
-                "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
-                "blockingEdges" with node.blockingEdges.map { uniqueNodes.indexOf(it) }
-                "event" with node.event?.asOnjObject()
-                node.imageName?.let {
-                    "image" with it
-                    "imagePos" with (node.imagePos?.name ?: "up")
+    fun nodesAsOnjArray(): OnjArray {
+        val uniqueNodes = uniqueNodes.sortedBy { it.index }
+        return uniqueNodes
+            .map { node ->
+                buildOnjObject {
+                    "x" with node.x
+                    "y" with node.y
+                    "isArea" with node.isArea
+                    "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
+                    "blockingEdges" with node.blockingEdges.map { uniqueNodes.indexOf(it) }
+                    "event" with node.event?.asOnjObject()
+                    node.imageName?.let {
+                        "image" with it
+                        "imagePos" with (node.imagePos?.name ?: "up")
+                    }
                 }
             }
-        }
-        .toOnjArray()
+            .toOnjArray()
+    }
 
 
     companion object {

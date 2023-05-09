@@ -50,7 +50,7 @@ class DetailMapWidget(
     private var mapOffset: Vector2 = Vector2(0f, 50f)
 
     private var playerNode: MapNode = MapManager.currentMapNode
-    private var playerPos: Vector2 = Vector2(map.startNode.x, map.startNode.y)
+    private var playerPos: Vector2 = Vector2(playerNode.x, playerNode.y)
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
