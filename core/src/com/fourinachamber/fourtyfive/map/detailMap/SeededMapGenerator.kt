@@ -788,9 +788,9 @@ data class MapRestriction(
      * the range from where nodes are checked if there are any other from another line
      */
     val rangeToCheckBetweenNodes: Float = 70F,
-    val startArea: String = "Franz",
-    val endArea: String = "Huber",
-    val otherAreas: List<String> = listOf(),
+    val startArea: String = "test_area",
+    val endArea: String = "salem",
+    val otherAreas: List<String> = listOf("test"),
     val minDistanceBetweenAreas: Float = 100F,
     /**
      * how far the areas are from the highest/lowest point of the road

@@ -114,7 +114,7 @@ class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEven
     override val descriptionText: String = "Enter $targetMap"
 
     override fun start() {
-        MapManager.switchToMap(targetMap)
+        MapManager.switchToMap(targetMap, placeAtEnd)
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
