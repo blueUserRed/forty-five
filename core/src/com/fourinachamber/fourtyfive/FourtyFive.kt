@@ -112,7 +112,7 @@ object FourtyFive : Game() {
         }
         TemplateString.init()
         FourtyFiveLogger.init()
-        resetAllSync()
+//        resetAllSync()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()

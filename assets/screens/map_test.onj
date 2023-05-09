@@ -46,7 +46,6 @@ var worldView = $WorldView {
             height: 100.0#percent,
         },
     ],
-    debug: true,
     behaviours: [
         $OnClickChangeScreenStateBehaviour {
             state: "show_world_view",
@@ -64,8 +63,7 @@ var navBar = $Box {
              height: 5.0#percent
          }
      ],
-     zIndex: 100,
-     debug: true
+     zIndex: 100
 } children [
 
     $Image {
@@ -113,8 +111,7 @@ var mapBox = $Box {
             justifyContent: justify.flexEnd
         }
     ],
-    zIndex: 0,
-    debug: true
+    zIndex: 0
 } children [
 
     $Map {
