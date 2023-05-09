@@ -12,6 +12,7 @@ import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import kotlinx.coroutines.Job
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -105,6 +106,14 @@ public fun <E> List<E>.subListTillMax(toIndex: Int): List<E> {
 fun Vector2.clone(): Vector2 {
     return Vector2(x,y)
 }
+
+operator fun AtomicInteger.inc(): AtomicInteger {
+    this.incrementAndGet()
+    return this
+}
+
+val AtomicInteger.get: Int
+    get() = this.get()
 
 object Utils {
 

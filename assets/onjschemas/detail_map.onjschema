@@ -14,12 +14,14 @@ $MapEvent {
     }
 
     $EnterMapMapEvent {
-        targetMap: string
+        targetMap: string,
+        placeAtEnd: boolean
     }
 
 }
 
 startNode: int,
+endNode: int,
 nodes: {
     x: float,
     y: float,

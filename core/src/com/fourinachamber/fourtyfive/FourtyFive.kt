@@ -85,10 +85,15 @@ object FourtyFive : Game() {
         currentRenderable = renderable
     }
 
-//    fun newRun() {
-//        SaveState.reset()
-//        MapManager.newRun()
-//    }
+    fun newRunSync() {
+        SaveState.reset()
+        MapManager.newRunSync()
+    }
+
+    fun resetAllSync() {
+        SaveState.reset()
+        MapManager.resetAllSync()
+    }
 
     private fun init() {
         with(OnjConfig) {
@@ -99,7 +104,7 @@ object FourtyFive : Game() {
         }
         TemplateString.init()
         FourtyFiveLogger.init()
-//        newRun()
+        resetAllSync()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()

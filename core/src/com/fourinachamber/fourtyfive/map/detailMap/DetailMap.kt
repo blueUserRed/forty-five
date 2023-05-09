@@ -17,6 +17,7 @@ import onj.value.*
 data class DetailMap(
     val name: String,
     val startNode: MapNode,
+    val endNode: MapNode,
     val decorations: List<MapDecoration>
 ) {
 
@@ -34,11 +35,13 @@ data class DetailMap(
 
     fun asOnjObject(): OnjObject = buildOnjObject {
         "nodes" with nodesAsOnjArray()
-        "startNode" with uniqueNodes.indexOf(startNode)
+        "startNode" with startNode.index
+        "endNode" with endNode.index
         "decorations" with decorations.map { it.asOnjObject() }
     }
 
     fun nodesAsOnjArray(): OnjArray = uniqueNodes
+        .sortedBy { it.index }
         .map { node ->
             buildOnjObject {
                 "x" with node.x
@@ -66,9 +69,10 @@ data class DetailMap(
             val nodesOnj = onj.get<OnjArray>("nodes")
             nodesOnj
                 .value
-                .forEach { nodeOnj ->
+                .forEachIndexed { index, nodeOnj ->
                     nodeOnj as OnjObject
                     nodes.add(MapNodeBuilder(
+                        index,
                         nodeOnj.get<Double>("x").toFloat(),
                         nodeOnj.get<Double>("y").toFloat(),
                         mutableListOf(),
@@ -83,6 +87,10 @@ data class DetailMap(
                         }
                     ))
                 }
+            val endNodeIndex = onj.get<Long>("endNode").toInt()
+            val endNode = nodes.getOrElse(endNodeIndex) {
+                throw RuntimeException("no node with index $endNodeIndex in file $file")
+            }
             nodesOnj
                 .value
                 .forEachIndexed { index, nodeOnj ->
@@ -103,7 +111,7 @@ data class DetailMap(
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
             val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
-            return DetailMap(file.nameWithoutExtension(), nodes[startNodeIndex].build(), decorations)
+            return DetailMap(file.nameWithoutExtension(), nodes[startNodeIndex].build(), endNode.asNode!!, decorations)
         }
 
         private val mapOnjSchema: OnjSchema by lazy {

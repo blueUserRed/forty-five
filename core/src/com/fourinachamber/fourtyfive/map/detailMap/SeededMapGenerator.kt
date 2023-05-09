@@ -2,13 +2,11 @@ package com.fourinachamber.fourtyfive.map.detailMap
 
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fourtyfive.utils.Vector2
-import com.fourinachamber.fourtyfive.utils.clone
-import com.fourinachamber.fourtyfive.utils.random
-import com.fourinachamber.fourtyfive.utils.subListTillMax
+import com.fourinachamber.fourtyfive.utils.*
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -22,6 +20,7 @@ class SeededMapGenerator(
     private lateinit var mainLine: MapGeneratorLine
 
     private fun build(): MapNode {
+        nodes.forEachIndexed { index, node -> node.index = index }
         return nodes[0].build()
     }
 
@@ -30,15 +29,15 @@ class SeededMapGenerator(
         checkAndChangeConnectionIntersection(nodes)
 //        addAreas(nodes)
         this.nodes = nodes
-        return DetailMap(name, build(), listOf())
+        return DetailMap(name, build(), this.nodes.last().asNode!!, listOf())
     }
 
     private fun addAreas(nodes: MutableList<MapNodeBuilder>) {
         var areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
-        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea)
-        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea)
+        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, false)
+        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, true)
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>
@@ -57,7 +56,7 @@ class SeededMapGenerator(
                 borderNodes = getBorderNodesInArea(direction, nodes, x)
                 if (borderNodes.isEmpty()) continue
             } while (/*isIllegalPositionForArea(borderNodes, newPos, areaNodes)*/false);
-            val newArea: MapNodeBuilder = MapNodeBuilder(newPos.x, newPos.y, event = EnterMapMapEvent(areaName))
+            val newArea: MapNodeBuilder = MapNodeBuilder(0, newPos.x, newPos.y, event = EnterMapMapEvent(areaName, false))
             borderNodes.random(rnd).connect(newArea, direction)
             areaNodes.add(newArea)
         }
@@ -146,7 +145,7 @@ class SeededMapGenerator(
             }
         }
         if (intersectionNode == null) {
-            val newNode = MapNodeBuilder(interceptPoint.x, interceptPoint.y)
+            val newNode = MapNodeBuilder(0, interceptPoint.x, interceptPoint.y)
             addNodeInBetween(line1, nodes, newNode, uniqueLines)
             addNodeInBetween(line2, nodes, newNode, uniqueLines)
         } else {
@@ -292,7 +291,7 @@ class SeededMapGenerator(
             }
 
             val nodesList: MutableList<MapNodeBuilder> = mutableListOf()
-            points.forEach() { p -> nodesList.add(MapNodeBuilder(p.x, p.y)) }
+            points.forEach() { p -> nodesList.add(MapNodeBuilder(0, p.x, p.y)) }
             this.lineNodes = nodesList
         }
 

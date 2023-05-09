@@ -8,6 +8,7 @@ import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 
 data class MapNode(
+    val index: Int,
     val edgesTo: List<MapNode>,
     val blockingEdges: List<MapNode>,
     val isArea: Boolean,
@@ -102,6 +103,7 @@ data class MapNode(
 }
 
 data class MapNodeBuilder(
+    var index: Int = 0,
     val x: Float,
     val y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
@@ -117,7 +119,8 @@ data class MapNodeBuilder(
 
     private var inBuild: Boolean = false
 
-    private var asNode: MapNode? = null
+    var asNode: MapNode? = null
+        private set
 
     val dirNodes: Array<Int?> = arrayOfNulls(4)
 
@@ -125,12 +128,14 @@ data class MapNodeBuilder(
         if (inBuild) return asNode!!
         inBuild = true
         asNode = MapNode(
+            index,
             buildEdges,
             buildBlockingEdges,
             isArea,
             x, y,
             imageName,
-            imagePos
+            imagePos,
+            event
         )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())

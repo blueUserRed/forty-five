@@ -32,11 +32,11 @@ generatorConfig: {
     maps: [
         {
             name: "roadToSalem",
-            seed: 103,
+            seed: 203,
             restrictions: {
-                maxNodes: 22,
-                minNodes: 15,
-                maxSplits: 4,
+                maxNodes: 10,
+                minNodes: 5,
+                maxSplits: 2,
                 splitProbability: 0.25,
                 compressProbability: 0.55
             }
