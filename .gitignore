@@ -5,6 +5,7 @@ assets/saves/savefile.onj
 assets/maps/world_view/generated/*
 assets/logging/fourty-five.log
 assets/maps/roads/*
+assets/maps/areas/*
 /onj/build
 
 ## Java

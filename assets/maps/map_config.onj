@@ -56,7 +56,7 @@ worldView: {
         {
             name: "roadToSalem",
             x: 950,
-            y: 900 - 595,
+            y: 595,
         },
         {
             name: "test_area",
