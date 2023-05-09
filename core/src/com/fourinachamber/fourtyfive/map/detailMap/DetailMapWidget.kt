@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -48,7 +49,7 @@ class DetailMapWidget(
 
     private var mapOffset: Vector2 = Vector2(0f, 50f)
 
-    private var playerNode: MapNode = map.startNode
+    private var playerNode: MapNode = MapManager.currentMapNode
     private var playerPos: Vector2 = Vector2(map.startNode.x, map.startNode.y)
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
@@ -274,6 +275,7 @@ class DetailMapWidget(
         val movementFinishTime = playerMovementStartTime + playerMoveTime
         if (curTime >= movementFinishTime) {
             this.playerNode = movePlayerTo
+            MapManager.currentMapNode = movePlayerTo
             playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
             detailWidget.setForEvent(movePlayerTo.event)
             updateScreenState(movePlayerTo.event)

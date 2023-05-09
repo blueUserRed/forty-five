@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.game.SaveState
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMap
+import com.fourinachamber.fourtyfive.map.detailMap.MapNode
 import com.fourinachamber.fourtyfive.map.detailMap.MapRestriction
 import com.fourinachamber.fourtyfive.map.detailMap.SeededMapGenerator
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
@@ -35,6 +36,14 @@ object MapManager {
     lateinit var mapImages: List<MapImageData>
         private set
 
+    var currentMapNode: MapNode
+        get() = currentDetail.uniqueNodes.find { it.index == SaveState.currentNode } ?: throw RuntimeException(
+            "invalid node index ${SaveState.currentNode} in map ${currentDetail.name}"
+        )
+        set(value) {
+            SaveState.currentNode = value.index
+        }
+
     fun init() {
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
@@ -55,12 +64,12 @@ object MapManager {
         currentDetail = DetailMap.readFromFile(map)
     }
 
-    fun switchToMap(newMap: String) {
+    fun switchToMap(newMap: String, placeAtEnd: Boolean = false) {
         val map = lookupMapFile(newMap)
         currentMapFile = map
         currentDetail = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
-        SaveState.currentNode = 0
+        SaveState.currentNode = if (placeAtEnd) currentDetail.endNode.index else currentDetail.startNode.index
         switchToMapScreen()
     }
 
@@ -68,17 +77,17 @@ object MapManager {
         currentMapFile.file().writeText(currentDetail.asOnjObject().toString())
     }
 
-//    fun newRun() {
-//        generateMaps()
-//    }
+    fun newRunSync() {
+        generateMapsSync()
+    }
 
-//    fun resetAll() {
-//        newRun()
-//        Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
-//            Gdx.files.internal(areaMapsPath).file(),
-//            true
-//        )
-//    }
+    fun resetAllSync() {
+        newRunSync()
+        Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
+            Gdx.files.internal(areaMapsPath).file(),
+            true
+        )
+    }
 
     fun switchToMapScreen() {
         FourtyFive.changeToScreen(mapScreenPath)
