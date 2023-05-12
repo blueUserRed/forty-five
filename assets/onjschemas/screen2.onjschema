@@ -169,7 +169,14 @@ $Widget {
 
     $AdvancedText {
         font: string,
-        parts: { text: string, color: Color, actions?: $DialogPartAction[] }[],
+        parts: { text: string, color: Color, actions?: $AdvancedTextPartAction[] }[],
+        fontScale: float,
+        ...widgetSharedKeys
+    }
+
+    $DialogWidget {
+        font: string,
+        parts: { text: string, color: Color, actions?: $AdvancedTextPartAction[] }[],
         fontScale: float,
         progressTime: float,
         ...widgetSharedKeys
@@ -181,7 +188,7 @@ $Widget {
 
 }
 
-$DialogPartAction {
+$AdvancedTextPartAction {
 
     $ShakeDialogAction {
         xMagnitude: float,

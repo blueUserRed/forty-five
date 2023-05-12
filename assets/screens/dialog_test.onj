@@ -40,21 +40,23 @@ root: $Box {
     ]
 } children [
 
-    $AdvancedText {
+    $DialogWidget {
         styles: [
             {
                 flexDirection: flexDirection.row,
                 background: "hover_detail_background",
-                width: 90.0#percent,
-                height: 10.0#percent,
+                width: 80.0#percent,
+//                minHeight: 5.0#points,
+                positionBottom: 2.0#points,
                 alignItems: align.center,
-                justifyContent: justify.center
+                justifyContent: justify.center,
+                flexWrap: wrap.wrap
             }
         ],
         parts: dialogs.testDialog,
         font: "red_wing_cm",
         fontScale: 0.1,
-        progressTime: 0.05,
+        progressTime: 0.03,
         debug: true
     }
 

@@ -4,12 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fourtyfive.screen.general.*
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
-import io.github.orioncraftmc.meditate.enums.YogaAlign
-import io.github.orioncraftmc.meditate.enums.YogaEdge
-import io.github.orioncraftmc.meditate.enums.YogaFlexDirection
-import io.github.orioncraftmc.meditate.enums.YogaJustify
-import io.github.orioncraftmc.meditate.enums.YogaPositionType
-import io.github.orioncraftmc.meditate.enums.YogaUnit
+import io.github.orioncraftmc.meditate.enums.*
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Actor
@@ -60,6 +55,30 @@ class WidthStyleProperty<T>(
     override fun get(node: YogaNode): YogaValue = node.width
 }
 
+class MinWidthStyleProperty<T>(
+    target: T,
+    screen: OnjScreen
+) : StyleProperty<T, YogaValue>(
+    "minWidth",
+    target,
+    YogaValue.parse("undefined"),
+    YogaValue::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor {
+
+    override fun set(data: YogaValue, node: YogaNode) {
+        when (data.unit) {
+            YogaUnit.POINT -> node.setMinWidth(data.value)
+            YogaUnit.PERCENT -> node.setMinWidthPercent(data.value)
+            else -> {}
+        }
+    }
+
+    override fun get(node: YogaNode): YogaValue = node.width
+}
+
 class HeightStyleProperty<T>(
     target: T,
     screen: OnjScreen
@@ -78,6 +97,30 @@ class HeightStyleProperty<T>(
             YogaUnit.AUTO -> node.setHeightAuto()
             YogaUnit.POINT -> node.setHeight(data.value)
             YogaUnit.PERCENT -> node.setHeightPercent(data.value)
+            else -> {}
+        }
+    }
+
+    override fun get(node: YogaNode): YogaValue = node.height
+}
+
+class MinHeightStyleProperty<T>(
+    target: T,
+    screen: OnjScreen
+) : StyleProperty<T, YogaValue>(
+    "minHeight",
+    target,
+    YogaValue.parse("undefined"),
+    YogaValue::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor {
+
+    override fun set(data: YogaValue, node: YogaNode) {
+        when (data.unit) {
+            YogaUnit.POINT -> node.setMinHeight(data.value)
+            YogaUnit.PERCENT -> node.setMinHeightPercent(data.value)
             else -> {}
         }
     }
@@ -223,7 +266,9 @@ class AspectRatioStyleProperty<T>(
 fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(VisibleStyleProperty(this, screen))
     styleManager.addStyleProperty(WidthStyleProperty(this, screen))
+    styleManager.addStyleProperty(MinWidthStyleProperty(this, screen))
     styleManager.addStyleProperty(HeightStyleProperty(this, screen))
+    styleManager.addStyleProperty(MinHeightStyleProperty(this, screen))
     styleManager.addStyleProperty(FlexGrowStyleProperty(this, screen))
     styleManager.addStyleProperty(PositionTypeStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignSelfStyleProperty(this, screen))
@@ -359,11 +404,32 @@ class PaddingStyleProperty(
     override fun get(node: YogaNode): YogaValue = target.root.getPadding(edge)
 }
 
+class FlexWrapStyleProperty(
+    target: CustomFlexBox,
+    screen: OnjScreen,
+) : StyleProperty<CustomFlexBox, YogaWrap>(
+    "flexWrap",
+    target,
+    YogaWrap.NO_WRAP,
+    YogaWrap::class,
+    false,
+    true,
+    screen
+) {
+
+    override fun set(data: YogaWrap, node: YogaNode) {
+        target.root.wrap = data
+    }
+
+    override fun get(node: YogaNode): YogaWrap = target.root.wrap
+}
+
 fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : StyledActor {
     addActorStyles(screen)
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, screen))
+    styleManager.addStyleProperty(FlexWrapStyleProperty(this, screen))
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.LEFT, "paddingLeft"))
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.RIGHT, "paddingRight"))
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.TOP, "paddingTop"))

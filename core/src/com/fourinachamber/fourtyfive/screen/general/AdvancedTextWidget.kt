@@ -12,40 +12,34 @@ import com.fourinachamber.fourtyfive.utils.TemplateString
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import onj.value.OnjValue
 import kotlin.math.sin
 
-class AdvancedTextWidget(
-    private val dialog: Dialog,
+open class AdvancedTextWidget(
+    advancedText: AdvancedText,
     private val fontScale: Float,
-    private val progressTime: Int,
     screen: OnjScreen
-) : CustomFlexBox(screen), StyledActor {
+) : CustomFlexBox(screen) {
 
-    private var isDialogFinished: Boolean = false
-
-    private var lastProgressTime: Long = Long.MAX_VALUE
+    open var advancedText: AdvancedText = advancedText
+        set(value) {
+            field = value
+            value.parts.forEach {
+                it.dialogFontScale = fontScale
+                add(it.actor)
+            }
+        }
 
     init {
-        dialog.parts.forEach {
+        advancedText.parts.forEach {
             it.dialogFontScale = fontScale
             add(it.actor)
         }
     }
 
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-        if (isDialogFinished) return
-        val curTime = TimeUtils.millis()
-        if (curTime < lastProgressTime + progressTime) return
-        isDialogFinished = dialog.progress()
-        lastProgressTime = curTime
-    }
-
 }
 
-data class Dialog(
-    val parts: List<DialogPart>
+data class AdvancedText(
+    val parts: List<AdvancedTextPart>
 ) {
 
     private var currentPartIndex: Int = 0
@@ -58,19 +52,22 @@ data class Dialog(
         return currentPartIndex >= parts.size
     }
 
+    fun resetProgress(): Unit = parts.forEach { it.resetProgress() }
+
     companion object {
-        fun readFromOnj(arr: OnjArray, font: BitmapFont, screen: OnjScreen): Dialog {
+
+        fun readFromOnj(arr: OnjArray, font: BitmapFont, screen: OnjScreen): AdvancedText {
             val parts = arr.value.map {
                 it as OnjObject
-                TextDialogPart.readFromOnj(it, font, screen)
+                TextAdvancedTextPart.readFromOnj(it, font, screen)
             }
-            return Dialog(parts)
+            return AdvancedText(parts)
         }
     }
 
 }
 
-interface DialogPart {
+interface AdvancedTextPart {
 
     var dialogFontScale: Float
     val actor: Actor
@@ -79,8 +76,8 @@ interface DialogPart {
     var yOffset: Float?
 
     fun progress(): Boolean
-    fun prepareForAnimation()
-    fun addDialogAction(action: DialogPart.() -> Unit)
+    fun resetProgress()
+    fun addDialogAction(action: AdvancedTextPart.() -> Unit)
 
     fun calcTransformationMatrixForOffsets(oldTransform: Matrix4): Matrix4 {
         val worldTransform = Affine2()
@@ -93,12 +90,12 @@ interface DialogPart {
 
 }
 
-class TextDialogPart(
+class TextAdvancedTextPart(
     rawText: String,
     font: BitmapFont,
     fontColor: Color,
     screen: OnjScreen
-) : CustomLabel(screen, rawText, LabelStyle(font, fontColor)), DialogPart {
+) : CustomLabel(screen, rawText, LabelStyle(font, fontColor)), AdvancedTextPart {
 
     override var dialogFontScale: Float
         get() = this.fontScaleX
@@ -116,9 +113,9 @@ class TextDialogPart(
     override var xOffset: Float? = null
     override var yOffset: Float? = null
 
-    private val actions: MutableList<DialogPart.() -> Unit> = mutableListOf()
+    private val actions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
 
-    override fun addDialogAction(action: DialogPart.() -> Unit) {
+    override fun addDialogAction(action: AdvancedTextPart.() -> Unit) {
         actions.add(action)
     }
 
@@ -131,13 +128,14 @@ class TextDialogPart(
         return false
     }
 
-    override fun prepareForAnimation() {
+    override fun resetProgress() {
         progress = 0
         setText("")
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        setText(templateString.string)
+        val newText = templateString.string
+        if (progress >= newText.length) setText(newText)
         actions.forEach { it(this) }
 
         if (batch == null) {
@@ -161,8 +159,8 @@ class TextDialogPart(
 
     companion object {
 
-        fun readFromOnj(onj: OnjObject, font: BitmapFont, screen: OnjScreen): TextDialogPart {
-            return TextDialogPart(
+        fun readFromOnj(onj: OnjObject, font: BitmapFont, screen: OnjScreen): TextAdvancedTextPart {
+            return TextAdvancedTextPart(
                 onj.get<String>("text"),
                 font,
                 onj.get<Color>("color"),
@@ -173,9 +171,9 @@ class TextDialogPart(
     }
 }
 
-object DialogPartActionFactory {
+object AdvancedTextPartActionFactory {
 
-    private val actions: Map<String, (onj: OnjObject) -> DialogPart.() -> Unit> = mapOf(
+    private val actions: Map<String, (onj: OnjObject) -> AdvancedTextPart.() -> Unit> = mapOf(
         "ShakeDialogAction" to { onj ->
             val xSpeed = onj.get<Double>("xSpeed").toFloat()
             val xMagnitude = onj.get<Double>("xMagnitude").toFloat()
@@ -189,7 +187,7 @@ object DialogPartActionFactory {
         }
     )
 
-    fun getAction(onj: OnjNamedObject): TextDialogPart.() -> Unit = actions[onj.name]?.invoke(onj)
+    fun getAction(onj: OnjNamedObject): TextAdvancedTextPart.() -> Unit = actions[onj.name]?.invoke(onj)
         ?: throw RuntimeException("unknown dialog action: ${onj.name}")
 
 }

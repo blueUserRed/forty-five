@@ -10,5 +10,13 @@ var shake = $ShakeDialogAction {
 testDialog: [
     { text: "I will paint the rivers ", color: color.black },
     { text: "red ", color: color.red, actions: [ shake ] },
-    { text: "with the blood of the gang", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
+    { text: "with the blood of the gang!", color: color.black },
 ]
