@@ -17,7 +17,7 @@ object MapEventFactory {
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
-        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap")) }
+        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -105,7 +105,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     }
 }
 
-class EnterMapMapEvent(val targetMap: String) : MapEvent() {
+class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -114,12 +114,13 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
     override val descriptionText: String = "Enter $targetMap"
 
     override fun start() {
-        MapManager.switchToMap(targetMap)
+        MapManager.switchToMap(targetMap, placeAtEnd)
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EnterMapMapEvent")
         "targetMap" with targetMap
+        "placeAtEnd" with placeAtEnd
     }
 
 }

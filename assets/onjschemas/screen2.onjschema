@@ -175,6 +175,10 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $WorldView {
+        ...widgetSharedKeys
+    }
+
 }
 
 $DialogPartAction {
@@ -206,6 +210,11 @@ $DetailMapProvider {
 }
 
 $Behaviour {
+
+    $OnClickChangeScreenStateBehaviour {
+        state: string,
+        enter: boolean
+    }
 
     $MouseHoverBehaviour {
         useSystemCursor: boolean,

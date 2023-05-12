@@ -20,8 +20,7 @@ import onj.value.OnjObject
 /**
  * generates an atlas containing the cards from a config file
  */
-@Suppress("unused") // commented in and out, linter can report this as unused
-class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandle) : Disposable {
+class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHandle) : Disposable {
 
     private lateinit var onj: OnjObject
     private lateinit var outputFile: FileHandle
@@ -32,7 +31,7 @@ class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandl
     private var wasPrepared: Boolean = false
 
     /**
-     * reads the config file and loads all textures. must be called before [generateCards]
+     * reads the config file and loads all textures. must be called before [generate]
      */
     @AllThreadsAllowed
     fun prepare() {
@@ -72,11 +71,11 @@ class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandl
      * generates the cards and disposes the textures. [prepare] must be called before.
      */
     @AllThreadsAllowed
-    fun generateCards() {
+    fun generate() {
 
         if (!wasPrepared) throw RuntimeException("CardGenerator must be prepared before generateCards() is called")
 
-        val cards = onj.get<OnjArray>("cards").value.map { it as OnjObject }
+        val cards = onj.get<OnjArray>("textures").value.map { it as OnjObject }
         val packerOnj = onj.get<OnjObject>("packer")
 
         val packer = PixmapPacker(
@@ -131,8 +130,6 @@ class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandl
         "ImageElement" -> {
             val name = element.get<String>("textureName")
             val pixmapToDraw = pixmapOrError(name)
-            val scaleX = element.get<Double>("scaleX")
-            val scaleY = element.get<Double>("scaleY")
             pixmap.drawPixmap(
                 pixmapToDraw,
                 0, 0,
@@ -140,8 +137,8 @@ class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandl
                 pixmapToDraw.height,
                 element.get<Long>("x").toInt(),
                 element.get<Long>("y").toInt(),
-                (pixmapToDraw.width * scaleX).toInt(),
-                (pixmapToDraw.height * scaleY).toInt(),
+                element.get<Long>("width").toInt(),
+                element.get<Long>("height").toInt(),
             )
         }
 
@@ -179,7 +176,7 @@ class CardGenerator @AllThreadsAllowed constructor(private val config: FileHandl
 
     companion object {
 
-        const val schemaPath = "onjschemas/card_generator_config.onjschema"
+        const val schemaPath = "onjschemas/texture_generator_config.onjschema"
 
         val schema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal(schemaPath).file())

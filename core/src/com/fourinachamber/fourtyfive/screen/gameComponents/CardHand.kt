@@ -205,8 +205,8 @@ class CardHand(
         }
     }
 
-    override fun initStyles(node: YogaNode, screen: OnjScreen) {
-        addActorStyles(node, screen)
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
     }
 
     override fun getPrefWidth(): Float {
