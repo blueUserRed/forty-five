@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.map.detailMap.MapNode
 import com.fourinachamber.fourtyfive.map.detailMap.MapRestriction
 import com.fourinachamber.fourtyfive.map.detailMap.SeededMapGenerator
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import kotlinx.coroutines.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -35,12 +36,15 @@ object MapManager {
     lateinit var mapImages: List<MapImageData>
         private set
 
-    private val mapOnjSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/detail_map.onjschema").file())
-    }
+    var currentMapNode: MapNode
+        get() = currentDetail.uniqueNodes.find { it.index == SaveState.currentNode } ?: throw RuntimeException(
+            "invalid node index ${SaveState.currentNode} in map ${currentDetail.name}"
+        )
+        set(value) {
+            SaveState.currentNode = value.index
+        }
 
     fun init() {
-
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
         onj as OnjObject
@@ -57,21 +61,15 @@ object MapManager {
 
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
-        val mapOnj = OnjParser.parseFile(map.file())
-        mapOnjSchema.assertMatches(mapOnj)
-        mapOnj as OnjObject
-        currentDetail = DetailMap.readFromOnj(mapOnj)
+        currentDetail = DetailMap.readFromFile(map)
     }
 
-    fun switchToMap(newMap: String) {
+    fun switchToMap(newMap: String, placeAtEnd: Boolean = false) {
         val map = lookupMapFile(newMap)
         currentMapFile = map
-        val onj = OnjParser.parseFile(map.file())
-        mapOnjSchema.assertMatches(onj)
-        onj as OnjObject
-        currentDetail = DetailMap.readFromOnj(onj)
+        currentDetail = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
-        SaveState.currentNode = 0
+        SaveState.currentNode = if (placeAtEnd) currentDetail.endNode.index else currentDetail.startNode.index
         switchToMapScreen()
     }
 
@@ -79,12 +77,12 @@ object MapManager {
         currentMapFile.file().writeText(currentDetail.asOnjObject().toString())
     }
 
-    fun newRun() {
-        generateMaps()
+    fun newRunSync() {
+        generateMapsSync()
     }
 
-    fun resetAll() {
-        newRun()
+    fun resetAllSync() {
+        newRunSync()
         Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
             Gdx.files.internal(areaMapsPath).file(),
             true
@@ -108,13 +106,30 @@ object MapManager {
         return file?.let { FileHandle(file) }
     }
 
-    fun generateMaps() {
+    suspend fun generateMaps(coroutineScope: CoroutineScope) = with(coroutineScope) {
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
         onj as OnjObject
-        val outputDir = Gdx.files.local(onj.get<String>("outputDirectory")).file()
-        onj
-            .get<OnjObject>("generatorConfig")
+        val generatorConfig = onj.get<OnjObject>("generatorConfig")
+        val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
+        val jobs = generatorConfig
+            .get<OnjArray>("maps")
+            .value
+            .map { map ->
+                launch {
+                    generateMap(map as OnjObject, outputDir)
+                }
+            }
+        jobs.joinAll()
+    }
+
+    fun generateMapsSync() {
+        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
+        mapConfigSchema.assertMatches(onj)
+        onj as OnjObject
+        val generatorConfig = onj.get<OnjObject>("generatorConfig")
+        val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
+        generatorConfig
             .get<OnjArray>("maps")
             .value
             .forEach { map ->
@@ -126,7 +141,7 @@ object MapManager {
         val name = onj.get<String>("name")
         val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
         val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
-        val map = generator.generate()
+        val map = generator.generate(name)
         val path = "${outputDir.toPath()}/$name.onj"
         val file = File(path)
         file.createNewFile()

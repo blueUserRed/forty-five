@@ -1,13 +1,18 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 data class MapNode(
+    val index: Int,
     val edgesTo: List<MapNode>,
     val blockingEdges: List<MapNode>,
     val isArea: Boolean,
@@ -19,11 +24,13 @@ data class MapNode(
 ) {
 
     private var loadedImage: Drawable? = null
-
-    fun getLeft(): MapNode? = null
-    fun getRight(): MapNode? = null
-    fun getTop(): MapNode? = null
-    fun getBottom(): MapNode? = null
+    private val dirNodes: Array<Int?> = arrayOfNulls(4)
+    fun getEdge(dir: Direction): MapNode? {
+        if (dirNodes[dir.ordinal] != null) {
+            return edgesTo[dirNodes[dir.ordinal]!!]
+        }
+        return null
+    }
 
     @MainThreadOnly
     fun getImage(screen: OnjScreen): Drawable? {
@@ -102,8 +109,9 @@ data class MapNode(
 }
 
 data class MapNodeBuilder(
-    val x: Float,
-    val y: Float,
+    var index: Int = 0,
+    var x: Float,
+    var y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
     val blockingEdges: MutableList<MapNodeBuilder> = mutableListOf(),
     var isArea: Boolean = false,
@@ -117,20 +125,39 @@ data class MapNodeBuilder(
 
     private var inBuild: Boolean = false
 
-    private var asNode: MapNode? = null
+    var asNode: MapNode? = null
+        private set
 
     val dirNodes: Array<Int?> = arrayOfNulls(4)
+
+
+    fun scale(xScale: Float = 1F, yScale: Float = 1F) {
+        x *= xScale
+        y *= yScale
+    }
+
+    /**
+     * rotates the node around P(0|0) in radians PI/2 means 90 Degree to left
+     */
+    fun rotate(radianVal: Double = PI) {
+        val xNew = cos(radianVal) * x - sin(radianVal) * y
+        val yNew = sin(radianVal) * x + cos(radianVal) * y
+        x = xNew.toFloat()
+        y = yNew.toFloat()
+    }
 
     fun build(): MapNode {
         if (inBuild) return asNode!!
         inBuild = true
         asNode = MapNode(
+            index,
             buildEdges,
             buildBlockingEdges,
             isArea,
             x, y,
             imageName,
-            imagePos
+            imagePos,
+            event
         )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
@@ -149,7 +176,7 @@ data class MapNodeBuilder(
         other.edgesTo.add(this)
         if (addAsNext) {
             dirNodes[dir.ordinal] = edgesTo.size - 1
-            other.dirNodes[dir.getOpp().ordinal] = other.edgesTo.size - 1
+            other.dirNodes[dir.getOpposite().ordinal] = other.edgesTo.size - 1
         }
         return true
     }
@@ -164,12 +191,11 @@ data class MapNodeBuilder(
     }
 
     override fun equals(other: Any?): Boolean {
-        return other === this // TODO: ???
-//        return other != null &&
-//                other is MapNodeBuilder &&
-//                other.x == this.x &&
-//                other.y == this.y &&
-//                other.isArea == this.isArea &&
+        return other != null &&
+                (other is MapNodeBuilder || other is MapNode) &&
+                other is MapNodeBuilder &&
+                other.x == this.x &&
+                other.y == this.y
     }
 
     override fun hashCode(): Int {

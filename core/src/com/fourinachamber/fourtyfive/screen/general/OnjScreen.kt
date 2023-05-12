@@ -41,12 +41,15 @@ open class OnjScreen @MainThreadOnly constructor(
     private val useAssets: List<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
-    val styleManagers: List<StyleManager>,
+    styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
     private val printFrameRate: Boolean,
     val transitionAwayTime: Int?
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
+
+    var styleManagers: List<StyleManager> = styleManagers
+        private set
 
     var popups: Map<String, WidgetGroup> = mapOf()
 
@@ -280,6 +283,10 @@ open class OnjScreen @MainThreadOnly constructor(
         super.hide()
         screenController?.end()
         isVisible = false
+    }
+
+    fun swapStyleManager(old: StyleManager, new: StyleManager) { // TODO: this whole swapping stylemanager thing is kinda ugly
+        styleManagers = styleManagers.map { if (it === old) new else it }
     }
 
     @MainThreadOnly

@@ -1,5 +1,6 @@
 package com.fourinachamber.fourtyfive.utils
 
+import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.screen.Resource
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import kotlinx.coroutines.*
@@ -22,10 +23,16 @@ class ServiceThread : Thread("ServiceThread") {
             when (message) {
 
                 is ServiceThreadMessage.PrepareResources -> prepareResources()
+                is ServiceThreadMessage.GenerateMaps -> generateMaps(message)
 
                 else -> throw RuntimeException("unknown message: $message")
             }
         }
+    }
+
+    private fun CoroutineScope.generateMaps(message: ServiceThreadMessage.GenerateMaps) = launch(Dispatchers.Default) {
+        MapManager.generateMaps(this)
+        message.completed.complete(Unit)
     }
 
     private fun CoroutineScope.prepareResources() {
@@ -53,6 +60,8 @@ class ServiceThread : Thread("ServiceThread") {
 sealed class ServiceThreadMessage {
 
     object PrepareResources : ServiceThreadMessage()
+
+    class GenerateMaps(val completed: CompletableDeferred<Unit> = CompletableDeferred()) : ServiceThreadMessage()
 
     override fun toString(): String = this::class.simpleName ?: ""
 

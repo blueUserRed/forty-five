@@ -27,6 +27,7 @@ import kotlin.system.measureTimeMillis
 object BehaviourFactory {
 
     private val behaviours: MutableMap<String, BehaviourCreator> = mutableMapOf(
+        "OnClickChangeScreenStateBehaviour" to { onj, actor -> OnClickChangeScreenStateBehaviour(onj, actor) },
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
         "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
@@ -101,6 +102,16 @@ abstract class Behaviour(val actor: Actor) {
         }
     }
 
+}
+
+class OnClickChangeScreenStateBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val stateName = onj.get<String>("state")
+    private val enter = onj.get<Boolean>("enter")
+
+    override val onCLick: BehaviourCallback = {
+        if (enter) onjScreen.enterState(stateName) else onjScreen.leaveState(stateName)
+    }
 }
 
 /**

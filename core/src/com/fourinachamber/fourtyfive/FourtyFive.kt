@@ -3,7 +3,7 @@ package com.fourinachamber.fourtyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
-import com.fourinachamber.fourtyfive.game.card.CardGenerator
+import com.fourinachamber.fourtyfive.game.card.TextureGenerator
 import com.fourinachamber.fourtyfive.map.*
 import com.fourinachamber.fourtyfive.map.detailMap.MapEventFactory
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
@@ -30,6 +30,7 @@ import kotlin.system.measureTimeMillis
 object FourtyFive : Game() {
 
     const val generateCards: Boolean = false
+    const val generateWorldViewBackground: Boolean = false
 
     const val logTag = "fourty-five"
 
@@ -44,7 +45,8 @@ object FourtyFive : Game() {
         init()
         serviceThread.start()
         if (generateCards) runCardGenerator()
-        changeToScreen("screens/dialog_test.onj")
+        if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
+        changeToScreen("screens/map_test.onj")
     }
 
     override fun render() {
@@ -52,9 +54,15 @@ object FourtyFive : Game() {
     }
 
     private fun runCardGenerator() {
-        val cardGenerator = CardGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
+        val cardGenerator = TextureGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
         cardGenerator.prepare()
-        cardGenerator.generateCards()
+        cardGenerator.generate()
+    }
+
+    private fun runWorldViewBackgroundGenerator() {
+        val textureGenerator = TextureGenerator(Gdx.files.internal("maps/world_view/background_generator_config.onj"))
+        textureGenerator.prepare()
+        textureGenerator.generate()
     }
 
     fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
@@ -85,9 +93,14 @@ object FourtyFive : Game() {
         currentRenderable = renderable
     }
 
-    fun newRun() {
+    fun newRunSync() {
         SaveState.reset()
-        MapManager.newRun()
+        MapManager.newRunSync()
+    }
+
+    fun resetAllSync() {
+        SaveState.reset()
+        MapManager.resetAllSync()
     }
 
     private fun init() {
@@ -99,7 +112,8 @@ object FourtyFive : Game() {
         }
         TemplateString.init()
         FourtyFiveLogger.init()
-//        newRun()
+//        newRunSync()
+//        resetAllSync()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()

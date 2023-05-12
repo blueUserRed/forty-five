@@ -41,6 +41,16 @@ textureAtlases: [
         ]
     },
     {
+        name: "world_view_background_atlas",
+        file: "maps/world_view/generated/background.atlas",
+        regions: [
+            {
+                handle: "world_view_background",
+                regionName: "world_view_background"
+            }
+        ]
+    },
+    {
         name: "game_screen_atlas",
         file: "textures/packed/game_screen/game_screen.atlas",
         regions: [
@@ -118,6 +128,14 @@ textures: [
     {
         name: "win_screen_background",
         file: "textures/screens/win_screen_background.png"
+    },
+    {
+        name: "location_sign_aqua_dulche",
+        file: "textures/locations_signs/aqua_dulche.png"
+    },
+    {
+        name: "location_sign_salem",
+        file: "textures/locations_signs/salem.png"
     }
 ],
 
