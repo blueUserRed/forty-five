@@ -56,7 +56,7 @@ root: $Box {
         parts: dialogs.testDialog,
         font: "red_wing_cm",
         fontScale: 0.1,
-        progressTime: 0.03,
+        progressTime: 0.09,
         debug: true
     }
 

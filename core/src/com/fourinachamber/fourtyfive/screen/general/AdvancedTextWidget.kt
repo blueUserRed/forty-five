@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fourtyfive.utils.TemplateString
+import io.github.orioncraftmc.meditate.YogaNode
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -20,20 +21,28 @@ open class AdvancedTextWidget(
     screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
+    private var nodesOfCurrentText: List<YogaNode> = listOf()
+
     open var advancedText: AdvancedText = advancedText
         set(value) {
             field = value
-            value.parts.forEach {
+            clearText()
+            nodesOfCurrentText = value.parts.map {
                 it.dialogFontScale = fontScale
                 add(it.actor)
             }
         }
 
     init {
-        advancedText.parts.forEach {
+        nodesOfCurrentText = advancedText.parts.map {
             it.dialogFontScale = fontScale
             add(it.actor)
         }
+    }
+
+    fun clearText() {
+        nodesOfCurrentText.forEach { remove(it) }
+        nodesOfCurrentText = listOf()
     }
 
 }
