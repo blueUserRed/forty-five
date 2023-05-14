@@ -21,7 +21,10 @@ import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+import com.fourinachamber.fourtyfive.map.dialog.Dialog
+import com.fourinachamber.fourtyfive.map.dialog.DialogPart
 import com.fourinachamber.fourtyfive.map.dialog.DialogWidget
+import com.fourinachamber.fourtyfive.map.dialog.NextDialogPartSelector
 import com.fourinachamber.fourtyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
@@ -339,10 +342,16 @@ class ScreenBuilder(val file: FileHandle) {
         )
 
         "DialogWidget" -> DialogWidget(
-            AdvancedText.readFromOnj(
-                widgetOnj.get<OnjArray>("parts"),
-                fontOrError(widgetOnj.get<String>("font"), screen),
-                screen
+            Dialog(
+                DialogPart(
+                    AdvancedText(listOf(TextAdvancedTextPart("Hello World", fontOrError(widgetOnj.get<String>("font"), screen), Color.BLACK, screen))),
+                    NextDialogPartSelector.Fixed(
+                        DialogPart(
+                            AdvancedText(listOf(TextAdvancedTextPart("Goodbye World", fontOrError(widgetOnj.get<String>("font"), screen), Color.BLACK, screen))),
+                            NextDialogPartSelector.End
+                        )
+                    )
+                )
             ),
             widgetOnj.get<Double>("fontScale").toFloat(),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
