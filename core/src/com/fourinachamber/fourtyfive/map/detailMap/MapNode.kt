@@ -201,4 +201,12 @@ data class MapNodeBuilder(
     override fun hashCode(): Int {
         return super.hashCode()
     }
+
+    fun posAsVec(): Vector2 {
+        return Vector2(x, y)
+    }
+
+    fun sizeAsVec(): Vector2 {
+        return Vector2(5F, 5F)
+    }
 }

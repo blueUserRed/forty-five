@@ -42,17 +42,36 @@ class SeededMapGenerator(
      */
     fun generate(name: String): DetailMap {
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
-        checkAndChangeConnectionIntersection(nodes)
-        addAreas(nodes)
+        val connections = checkAndChangeConnectionIntersection(nodes)
+        addAreas(nodes, connections)
         addEvents(nodes)
-//        addDecorations(DistributionFunction.SimplexNoise(236896432))
         nodes.forEach { it.scale(1F, .6F) }
+        val decos = generateDecorations(nodes, connections)
         nodes.forEach { it.rotate(restrictions.rotation) }
         this.nodes = nodes
-        return DetailMap(name, build(), this.nodes.last().asNode!!, listOf())
+        return DetailMap(name, build(), this.nodes.last().asNode!!, decos)
     }
 
+    private fun generateDecorations(
+        nodes: List<MapNodeBuilder>,
+        connections: MutableList<Line>
+    ): List<DetailMap.MapDecoration> {
+        val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
+        restrictions.decorations.forEach {
+            decos.add(it.getDecoration(nodes, restrictions, connections))
+        }
+        return decos
+    }
 
+    //nodeTexture: "key_select_frame",
+//        playerTexture: "enemy_texture",
+//        playerWidth: 2.0,
+//        playerHeight: 6.0,
+//        background: "white_texture",
+//        edgeTexture: "black_texture",
+//        playerMovementTime: 0.3,
+//        directionIndicator: "heart_texture",
+//        detailWidgetName: "mapEventDetail"
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
         val nodesWithoutEvents: MutableList<MapNodeBuilder> = nodes.filter { a -> a.event == null }.toMutableList()
         for (curEvent in restrictions.fixedEvents) {
@@ -82,7 +101,7 @@ class SeededMapGenerator(
     /**
      * adds the areas at the end, after all other nodes were placed
      */
-    private fun addAreas(nodes: MutableList<MapNodeBuilder>) {
+    private fun addAreas(nodes: MutableList<MapNodeBuilder>, connections: MutableList<Line>) {
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
@@ -111,6 +130,7 @@ class SeededMapGenerator(
                 event = EnterMapMapEvent(areaName, false)
             ) //TODO add direction of event picture
             borderNodes.random(rnd).connect(newArea, direction)
+            connections.add(Line(newPos, newArea.edgesTo.first().posAsVec()))
             areaNodes.add(newArea)
         }
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
@@ -176,7 +196,7 @@ class SeededMapGenerator(
     /**
      * tries to fix all connections until all are fixed
      */
-    private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>) {
+    private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>): MutableList<Line> {
         val uniqueLines: MutableList<Line> = mutableListOf()
         for (node in nodes) {
             for (other in node.edgesTo) {
@@ -187,6 +207,7 @@ class SeededMapGenerator(
         }
         @Suppress("ControlFlowWithEmptyBody")
         while (checkLinesNotIntercepting(uniqueLines, nodes));
+        return uniqueLines
     }
 
     /**
@@ -337,16 +358,6 @@ class SeededMapGenerator(
         ) {
             val vec: Vector2 = curve.getPos(t)
             nodes.add(MapNodeBuilder(vec.x, vec.y))
-        }*/
-
-    /*    private fun printNodesAndNeighbours(nodes: MutableList<MapNodeBuilder>) {
-            for (i in nodes) {
-                println(i.x.toString() + " " + i.y + ": ")
-                for (j in i.edgesTo) {
-                    println("  " + j.x.toString() + " " + j.y)
-                }
-                println()
-            }
         }*/
 
 
@@ -776,20 +787,111 @@ enum class Direction {
     }
 }*/
 
-sealed class DistributionFunction(protected val seed: Long) {
+sealed class DistributionFunction(
+    private val seed: Long,
+    protected val type: String,
+    protected val density: Float,
+    protected val baseWidth: Float,
+    protected val baseHeight: Float,
+    private val scaleMin: Float,
+    private val scaleMax: Float,
+    private val collidesOnlyWithNodes: Boolean,
+) {
+    protected val rnd: kotlin.random.Random = Random(seed)
 
-    /* class Random(seed: Long) : DistributionFunction(seed) {
-        override fun getValue(pos: Vector2) {
-        }
-    }*/
+    class Random(
+        seed: Long, type: String, density: Float = 0.25F, base_width: Float,
+        base_height: Float, scale_min: Float, scale_max: Float, collidesOnlyWithNodes: Boolean
+    ) :
+        DistributionFunction(
+            seed,
+            type,
+            density,
+            base_width,
+            base_height,
+            scale_min,
+            scale_max,
+            collidesOnlyWithNodes
+        ) {
+        override fun getPossiblePositions(
+            xRange: ClosedFloatingPointRange<Float>,
+            yRange: ClosedFloatingPointRange<Float>,
+            restrict: MapRestriction
+        ): List<Vector2> {
 
-    class SimplexNoise(seed: Long) : DistributionFunction(seed) {
-        override fun getValue(pos: Vector2): Float {
-            return Random(seed).nextFloat()
+            val positions: MutableList<Vector2> = mutableListOf()
+            var pointsLeft: Int = ((xRange.endInclusive - xRange.start) / baseWidth
+                    * (yRange.endInclusive - yRange.start) / baseHeight * density).toInt()
+            while (pointsLeft > 0) {
+                positions.add(Vector2(xRange.random(rnd), yRange.random(rnd)))
+                pointsLeft--
+            }
+            return positions
         }
+
     }
 
-    abstract fun getValue(pos: Vector2): Float
+//    class SimplexNoise(seed: Long, type: String, moreLikelyAtEvents: List<Pair<Int, String>> = listOf()) :
+//        DistributionFunction(seed, type, moreLikelyAtEvents) {
+//        override fun getPossiblePositions(): List<Vector2> {
+//            return mutableListOf()
+//        }
+//    }
+
+    abstract fun getPossiblePositions(
+        xRange: ClosedFloatingPointRange<Float>,
+        yRange: ClosedFloatingPointRange<Float>,
+        restrict: MapRestriction
+    ): List<Vector2>
+
+    fun getDecoration(
+        nodes: List<MapNodeBuilder>,
+        restrictions: MapRestriction,
+        connections: MutableList<Line>
+    ): DetailMap.MapDecoration {
+        val xRange =
+            ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
+        val yRange =
+            ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
+        nodes.forEach { println(it.x.toString() + ", " + it.y) }
+        val possiblePositions: List<Pair<Vector2, Float>> =
+            getPossiblePositions(xRange, yRange, restrictions).map { it to 1F/*(scaleMin..scaleMax).random(rnd)*/ }
+        return DetailMap.MapDecoration(
+            type,
+            baseWidth,
+            baseHeight,
+            possiblePositions.filter { isPossibleToPlaceNode(it, nodes, connections) }.sortedBy { -it.first.y }
+        )
+    }
+
+    private fun isPossibleToPlaceNode(
+        data: Pair<Vector2, Float>,
+        nodes: List<MapNodeBuilder>,
+        connections: MutableList<Line>
+    ): Boolean {
+        if (collidesOnlyWithNodes) {
+            val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
+            for (it in nodes) {
+                if (it.x == 143.5325F && it.y == -122.11233F) {
+                    if (it.posAsVec().sub(data.first).len() < 20) {
+                        println("Hi")
+                    }
+                }
+                val tempRect = it.posAsVec() to it.sizeAsVec()
+                if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                    (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                    (tempRect.first.x < rect.first.x + rect.second.x) &&
+                    (tempRect.first.y < rect.first.y + rect.second.y)
+                ) {
+                    return false
+                }
+            }
+        } else {
+//           a paint ln("Needs to be implemented")
+            return false
+        }
+        return true
+    }
 }
 
 
@@ -839,7 +941,7 @@ data class MapRestriction(
     val otherAreas: List<String> = listOf("test", "cool"),
     val minDistanceBetweenAreas: Float = 100F,
     /**
-     * how far the areas are from the highest/lowest point of the road
+     * how far the areas are from the highest/lowest point of the road in a close area around the area
      */
     val distanceFromAreaToLine: Float = 100F,
     /**
@@ -856,6 +958,10 @@ data class MapRestriction(
         10 to { EmptyMapEvent() },
         20 to { EmptyMapEvent() },
     ),
+    val decorations: List<DistributionFunction> = listOf(
+        DistributionFunction.Random(123, "enemy_texture", 5.25F, 8F, 13F, 0.75F, 1.2F, true),
+    ),
+    val decorationPadding: Float = 20F,
 ) {
 
 
