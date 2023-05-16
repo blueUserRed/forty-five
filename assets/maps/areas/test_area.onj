@@ -5,7 +5,8 @@ nodes: [
         isArea: false,
         edgesTo: [ 1, ],
         blockingEdges: [ 1, ],
-        event: null,
+        event: $EmptyMapEvent {
+        },
     },
     {
         x: 60.0,
@@ -13,7 +14,8 @@ nodes: [
         isArea: false,
         edgesTo: [ 0, 2, 3, ],
         blockingEdges: [ 2, 3, ],
-        event: null,
+        event: $EmptyMapEvent {
+        },
     },
     {
         x: 60.0,
@@ -21,7 +23,8 @@ nodes: [
         isArea: false,
         edgesTo: [ 1, ],
         blockingEdges: [ ],
-        event: null,
+        event: $EmptyMapEvent {
+        },
     },
     {
         x: 100.0,
@@ -29,7 +32,8 @@ nodes: [
         isArea: true,
         edgesTo: [ 1, ],
         blockingEdges: [ ],
-        event: null,
+        event: $EmptyMapEvent {
+        },
         image: 'roadToSalem',
         imagePos: 'LEFT',
     },

@@ -822,7 +822,7 @@ data class MapRestriction(
      */
     val rotation: Double = .0,
 
-    val fixedEvents: List<MapEvent> = listOf(EmptyMapEvent(), EmptyMapEvent()),
+    val fixedEvents: List<MapEvent> = listOf(EmptyMapEvent(), EmptyMapEventTempTest()),
     val optionalEvents: List<Pair<Int, () -> MapEvent>> = listOf(
 //        100 to { EmptyMapEvent() },
         150 to { EmptyMapEventTempTest() }),
