@@ -14,7 +14,10 @@ nodes: [
         isArea: false,
         edgesTo: [ 0, 2, 3, ],
         blockingEdges: [ 2, 3, ],
-        event: $EmptyMapEvent {
+        event: $EncounterMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: false,
+            isCompleted: true,
         },
     },
     {
@@ -29,16 +32,17 @@ nodes: [
     {
         x: 100.0,
         y: 90.0,
-        isArea: true,
+        isArea: false,
         edgesTo: [ 1, ],
         blockingEdges: [ ],
-        event: $EmptyMapEvent {
+        event: $EnterMapMapEvent {
+            targetMap: 'roadToSalem',
+            placeAtEnd: false,
         },
-        image: 'roadToSalem',
-        imagePos: 'LEFT',
     },
 ],
 startNode: 0,
+endNode: 3,
 decorations: [
     {
         texture: 'burning_icon',

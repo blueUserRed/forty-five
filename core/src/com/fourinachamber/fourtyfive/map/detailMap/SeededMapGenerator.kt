@@ -73,7 +73,8 @@ class SeededMapGenerator(
         while (nodesWithoutEvents.isNotEmpty()) {
             val curNode = nodesWithoutEvents.random(rnd)
             val rndMy = rnd.nextDouble()
-            curNode.event = restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
+            curNode.event =
+                restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
             nodesWithoutEvents.remove(curNode)
         }
     }
@@ -775,7 +776,7 @@ enum class Direction {
     }
 }*/
 
-sealed class DistributionFunction(private val seed: Long) {
+sealed class DistributionFunction(protected val seed: Long) {
 
     /* class Random(seed: Long) : DistributionFunction(seed) {
         override fun getValue(pos: Vector2) {
@@ -784,7 +785,7 @@ sealed class DistributionFunction(private val seed: Long) {
 
     class SimplexNoise(seed: Long) : DistributionFunction(seed) {
         override fun getValue(pos: Vector2): Float {
-            return 0F
+            return Random(seed).nextFloat()
         }
     }
 
@@ -835,7 +836,7 @@ data class MapRestriction(
     val rangeToCheckBetweenNodes: Float = 70F,
     val startArea: String = "Franz",
     val endArea: String = "Huber",
-    val otherAreas: List<String> = listOf("test"),
+    val otherAreas: List<String> = listOf("test", "cool"),
     val minDistanceBetweenAreas: Float = 100F,
     /**
      * how far the areas are from the highest/lowest point of the road
@@ -854,7 +855,7 @@ data class MapRestriction(
     val optionalEvents: List<Pair<Int, () -> MapEvent>> = listOf(
         10 to { EmptyMapEvent() },
         20 to { EmptyMapEvent() },
-        ),
+    ),
 ) {
 
 
