@@ -151,7 +151,8 @@ data class MapNodeBuilder(
             isArea,
             x, y,
             imageName,
-            imagePos
+            imagePos,
+            event
         )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())

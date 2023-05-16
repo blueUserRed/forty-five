@@ -43,10 +43,30 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes)
+        addEvents(nodes)
+//        addDecorations(DistributionFunction.SimplexNoise(236896432))
 //        nodes.forEach { it.scale(1F, .6F) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         this.nodes = nodes
         return DetailMap(build(), listOf())
+    }
+
+    // Nils wegen Bre sagen
+    private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
+        val nodesWithoutEvents: MutableList<MapNodeBuilder> = nodes.filter { a -> a.event == null }.toMutableList()
+        for (curEvent in restrictions.fixedEvents) {
+            if (nodesWithoutEvents.isEmpty()) {
+                break
+            }
+            val curNode = nodesWithoutEvents.random(rnd)
+            curNode.event = curEvent
+            nodesWithoutEvents.remove(curNode)
+        }
+        val maxWeight: Int = restrictions.optionalEvents.sumOf { a -> a.first }
+        println(maxWeight)
+//        while (nodesWithoutEvents.isNotEmpty()) {
+//
+//        }
     }
 
     /**
@@ -751,15 +771,15 @@ data class MapRestriction(
     /**
      * minimum number of nodes for main line
      */
-    val maxNodes: Int = 22,
+    val maxNodes: Int = 10,
     /**
      * maximum number of nodes for main line
      */
-    val minNodes: Int = 17,
+    val minNodes: Int = 8,
     /**
      * how many lines are generated and are therefore possible
      */
-    val maxLines: Int = 4,
+    val maxLines: Int = 1,
     /**
      * how likely it is for nodes to split (min. of 0.3 is recommended)
      */
@@ -788,7 +808,7 @@ data class MapRestriction(
     val startArea: String = "Franz",
     val endArea: String = "Huber",
     val otherAreas: List<String> = listOf(),
-    val minDistanceBetweenAreas: Float = 100F,
+    val minDistanceBetweenAreas: Float = 10F,
     /**
      * how far the areas are from the highest/lowest point of the road
      */
@@ -798,10 +818,14 @@ data class MapRestriction(
      */
     val percentageForAllowedNodesInRangeBetweenLineAndArea: Float = 0.4F,
     /**
-     * the rotation of the road (0 means looking left, PI/2 means looking up, and so on)
+     * the rotation of the road (0 means looking right, PI/2 means looking up, and so on)
      */
     val rotation: Double = .0,
 
+    val fixedEvents: List<MapEvent> = listOf(EmptyMapEvent(), EmptyMapEvent()),
+    val optionalEvents: List<Pair<Int, () -> MapEvent>> = listOf(
+//        100 to { EmptyMapEvent() },
+        150 to { EmptyMapEventTempTest() }),
 ) {
 
 
@@ -815,4 +839,20 @@ data class MapRestriction(
             onj.get<Double>("compressProbability").toFloat(),
         )
     }
+}
+
+sealed class DistributionFunction(private val seed: Long) {
+
+    /* class Random(seed: Long) : DistributionFunction(seed) {
+        override fun getValue(pos: Vector2) {
+        }
+    }*/
+
+    class SimplexNoise(seed: Long) : DistributionFunction(seed) {
+        override fun getValue(pos: Vector2): Float {
+            return 0F
+        }
+    }
+
+    abstract fun getValue(pos: Vector2): Float
 }
