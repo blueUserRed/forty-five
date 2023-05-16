@@ -16,7 +16,7 @@ interface StyledActor : HoverStateActor {
 
     var styleManager: StyleManager
 
-    fun initStyles(node: YogaNode, screen: OnjScreen)
+    fun initStyles(screen: OnjScreen)
 
 }
 
@@ -28,7 +28,7 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
         get() = _styleProperties
 
     fun update() {
-        _styleProperties.forEach { it.update() }
+        _styleProperties.forEach { it.update(node) }
     }
 
     fun addStyleProperty(property: StyleProperty<*, *>) {
@@ -42,6 +42,12 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
         @Suppress("UNCHECKED_CAST") // this should be safe (I hope)
         property as StyleProperty<*, Any>
         property.addInstruction(instruction)
+    }
+
+    fun copyWithNode(node: YogaNode): StyleManager {
+        val manager = StyleManager(actor, node)
+        manager._styleProperties.addAll(this._styleProperties)
+        return manager
     }
 
     companion object {
@@ -78,7 +84,6 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
 abstract class StyleProperty<Target, DataType>(
     val name: String,
     val target: Target,
-    val node: YogaNode,
     val default: DataType,
     val dataTypeClass: KClass<DataType>,
     val invalidate: Boolean,
@@ -86,13 +91,16 @@ abstract class StyleProperty<Target, DataType>(
     val screen: OnjScreen
 ) where Target : Actor, Target : StyledActor, DataType : Any {
 
-    private val instructions: MutableList<StyleInstruction<DataType>> = mutableListOf()
+    private val _instructions: MutableList<StyleInstruction<DataType>> = mutableListOf()
+
+    val instructions: List<StyleInstruction<DataType>>
+        get() = _instructions
 
     private var currentInstruction: StyleInstruction<DataType>? = null
 
-    fun update() {
-        val current = get()
-        val top = instructions
+    fun update(node: YogaNode) {
+        val current = get(node)
+        val top = _instructions
             .filter { it.condition.check(target, screen) }
             .maxByOrNull { it.priority }
         if (currentInstruction != top) {
@@ -103,17 +111,17 @@ abstract class StyleProperty<Target, DataType>(
         top ?: return
         val value = top.value
         if (current == value) return
-        set(value)
+        set(value, node)
         if (invalidate && target is Layout) target.invalidate()
         if (invalidateHierarchy && target is Layout) target.invalidateHierarchy()
     }
 
     fun addInstruction(instruction: StyleInstruction<DataType>) {
-        instructions.add(instruction)
+        _instructions.add(instruction)
     }
 
-    abstract fun set(data: DataType)
-    abstract fun get(): DataType
+    abstract fun set(data: DataType, node: YogaNode)
+    abstract fun get(node: YogaNode): DataType
 
 }
 

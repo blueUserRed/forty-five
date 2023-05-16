@@ -18,19 +18,10 @@ var transitionAwayTime = 0.2;
 
 assets: {
     useAssets: [
-        "title_screen_background", "logo", "red_wing",
+        "title_screen_background", "logo", "red_wing", "black_texture", "grey_texture",
         ...(graphicsConfig.keySelectUsedAssets)
     ]
 },
-
-var buttonStyles = [
-    {
-        style_priority: 1,
-        width: 10.0#percent,
-        marginTop: 0.3#points,
-        fontScale: buttonBaseScale,
-    }
-];
 
 viewport: $FitViewport {
     worldWidth: worldWidth,
@@ -42,111 +33,67 @@ options: {
     inputMap: [
         ...(inputMaps.hierarchyBasedNavigationInputMap),
         ...(inputMaps.defaultInputMap)
-    ],
-    transitionAwayTime: transitionAwayTime + 0.2
+    ]
 },
 
 root: $Box {
     styles: [
         {
-            style_priority: 1,
-            alignItems: align.flexEnd,
-            flexDirection: flexDirection.column,
-            justifyContent: justify.flexEnd,
-            height: 100.0#percent
+            positionType: positionType.absolute,
+            width: 100.0#percent,
+            height: 100.0#percent,
         }
-    ],
-    debug: true
+    ]
 } children [
 
     $Box {
         styles: [
             {
                 style_priority: 1,
-                flexGrow: 1.0,
-                marginRight: 2.5#points,
-                marginTop: 5.0#points
+                background: "grey_texture",
+                positionType: positionType.absolute,
+                width: 100.0#percent,
+                height: 100.0#percent,
+                detached: false
+            },
+            {
+                style_priority: 2,
+                style_condition: state("show_world_view"),
+                detached: true
             }
         ],
-        debug: true,
-    } children [
-
-        $Image {
-            reportDimensionsWithScaling: true,
-            textureName: "logo",
-            scaleX: 0.07,
-            scaleY: 0.07,
-            debug: true
-        }
-
-    ],
+        zIndex: 1,
+        behaviours: [
+            $OnClickChangeScreenStateBehaviour {
+                state: "show_world_view",
+                enter: true
+            }
+        ]
+    },
 
     $Box {
-        debug: true,
         styles: [
             {
                 style_priority: 1,
-                flexDirection: flexDirection.column,
-                marginRight: 1.0#points,
-                marginBottom: 2.5#points,
-                positionLeft: 0.0#points
+                background: "black_texture",
+                positionType: positionType.absolute,
+                width: 100.0#percent,
+                height: 100.0#percent,
+                detached: true,
             },
-//            {
-//                style_priority: 2,
-//                style_condition: state("transition away"),
-//                positionLeft: 35.0#points,
-////                style_animation: {
-////                    duration: transitionAwayTime,
-////                    interpolation: interpolation.linear
-////                }
-//            }
+            {
+                style_priority: 2,
+                style_condition: state("show_world_view"),
+                detached: false
+            }
         ],
-        partOfSelectionHierarchy: true
-    } children [
-
-        $Label {
-            text: "play",
-            font: "red_wing",
-            align: "right",
-            color: color.black,
-            fontScale: buttonBaseScale,
-            styles: buttonStyles,
-            partOfSelectionHierarchy: true,
-            behaviours: [
-                $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/game_screen.onj"
-                }
-            ],
-            debug: true
-        },
-
-        $Label {
-            text: "abandon run",
-            font: "red_wing",
-            align: "right",
-            color: color.black,
-            fontScale: buttonBaseScale,
-            styles: buttonStyles,
-            partOfSelectionHierarchy: true,
-            behaviours: [
-                $OnClickAbandonRunBehaviour { },
-                $OnClickRemoveActorBehaviour { }
-            ]
-        },
-
-        $Label {
-            text: "quit",
-            font: "red_wing",
-            align: "right",
-            color: color.black,
-            styles: buttonStyles,
-            fontScale: buttonBaseScale,
-            partOfSelectionHierarchy: true,
-            behaviours: [
-                $OnClickExitBehaviour { }
-            ]
-        }
-
-    ]
+        zIndex: 2,
+        behaviours: [
+            $OnClickChangeScreenStateBehaviour {
+                state: "show_world_view",
+                enter: false
+            }
+        ]
+    }
 
 ]

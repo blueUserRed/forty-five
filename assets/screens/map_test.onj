@@ -15,7 +15,7 @@ assets: {
     useAssets: [
         "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
-        "black_texture",
+        "black_texture", "world_view_background",
         ...(inventoryPopup.assets.useAssets)
     ]
 },
@@ -37,101 +37,83 @@ options: {
     ]
 },
 
-root: $Box {
+var worldView = $WorldView {
     styles: [
+
         {
             style_priority: 1,
-            positionType: positionType.absolute,
             width: 100.0#percent,
             height: 100.0#percent,
-            flexDirection: flexDirection.column,
-            justifyContent: justify.center
-        }
+        },
     ],
+    behaviours: [
+        $OnClickChangeScreenStateBehaviour {
+            state: "show_world_view",
+            enter: false
+        }
+    ]
+};
+
+var navBar = $Box {
+     styles: [
+         {
+             background: "black_texture",
+             flexDirection: flexDirection.row,
+             width: 100.0#percent,
+             height: 5.0#percent
+         }
+     ],
+     zIndex: 100
 } children [
 
-    $Box {
+    $Image {
         styles: [
             {
-                background: "black_texture",
-                flexDirection: flexDirection.row,
-                width: 100.0#percent,
-                height: 5.0#percent
+                aspectRatio: 1.0
             }
         ],
-        zIndex: 100,
-        debug: true
-    } children [
+        textureName: "reserves_texture",
+        scaleX: 0.01,
+        scaleY: 0.01,
+        reportDimensionsWithScaling: true,
+        behaviours: [
+            $OnClickOpenPopupBehaviour {
+                popupName: inventoryPopup.popup.name
+            }
+        ]
+    },
 
-        $Image {
-            styles: [
-                {
-                    aspectRatio: 1.0
-                }
-            ],
-            textureName: "reserves_texture",
-            scaleX: 0.01,
-            scaleY: 0.01,
-            reportDimensionsWithScaling: true,
-            behaviours: [
-                $OnClickOpenPopupBehaviour {
-                    popupName: inventoryPopup.popup.name
-                }
-            ]
+    $Image {
+        styles: [
+            {
+                aspectRatio: 1.0
+            }
+        ],
+        textureName: "heart_texture",
+        scaleX: 0.01,
+        scaleY: 0.01,
+        reportDimensionsWithScaling: true,
+        behaviours: [
+            $OnClickChangeScreenStateBehaviour {
+                state: "show_world_view",
+                enter: true
+            }
+        ]
+    }
+];
+
+var mapBox = $Box {
+    styles: [
+        {
+            height: 95.0#percent,
+            flexDirection: flexDirection.row,
+            alignItems: align.center,
+            justifyContent: justify.flexEnd
         }
-
     ],
+    zIndex: 0
+} children [
 
-    $Box {
-        styles: [
-            {
-                height: 95.0#percent,
-                flexDirection: flexDirection.row,
-                alignItems: align.center,
-                justifyContent: justify.flexEnd
-            }
-        ],
-        zIndex: 0
-    } children [
-
-        $Map {
-            styles: [
-                {
-                    style_priority: 1,
-                    width: 100.0#percent,
-                    height: 100.0#percent,
-                    positionType: positionType.absolute,
-                    positionRight: 0.0#points,
-                    positionBottom: 0.0#points,
-                },
-                {
-                    style_priority: 2,
-                    style_condition: state("transition away"),
-                    positionRight: 20.0#points,
-                    positionBottom: worldHeight#points,
-                    style_animation: {
-                        duration: 0.5,
-                        interpolation: interpolation.linear
-                    }
-                }
-            ],
-            detailMapProvider: $CurrentMapProvider { },
-    //        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-    //            seed: 100
-    //        },
-            nodeSize: 5.0,
-            lineWidth: 1.0,
-            name: "map",
-            nodeTexture: "key_select_frame",
-            playerTexture: "enemy_texture",
-            playerWidth: 2.0,
-            playerHeight: 6.0,
-            background: "white_texture",
-            edgeTexture: "black_texture",
-            playerMovementTime: 0.3,
-            directionIndicator: "heart_texture",
-            detailWidgetName: "mapEventDetail"
-        },
     $Map {
         styles: [
             {
@@ -140,28 +122,21 @@ root: $Box {
                 height: 100.0#percent,
                 positionType: positionType.absolute,
                 positionRight: 0.0#points,
+                positionTop: 0.0#points,
                 positionBottom: 0.0#points,
             },
-            {
-                style_priority: 2,
-                style_condition: state("transition away"),
-                positionRight: 20.0#points,
-                positionBottom: worldHeight#points,
-                style_animation: {
-                    duration: 0.5,
-                    interpolation: interpolation.linear
-                }
-            }
+//            {
+//                style_priority: 2,
+//                style_condition: state("transition away"),
+//                positionRight: 20.0#points,
+//                positionBottom: worldHeight#points,
+//                style_animation: {
+//                    duration: 0.5,
+//                    interpolation: interpolation.linear
+//                }
+//            }
         ],
-        detailMapProvider: $FromSeededGeneratorDetailMapProvider {
-            seed: 102,
-            startArea: "Salem",
-            endArea: "Vienna",
-            otherAreas: [
-                "Styria", "Weltenbaum", "Garten der Hesperiden"
-            ],
-
-        },
+        detailMapProvider: $CurrentMapProvider { },
         nodeSize: 5.0,
         lineWidth: 1.0,
         name: "map",
@@ -176,39 +151,94 @@ root: $Box {
         detailWidgetName: "mapEventDetail"
     },
 
-        $MapEventDetail {
-            styles: [
-                {
-                    style_priority: 1,
-                    height: 70.0#percent,
-                    width: 20.0#percent,
-                    positionLeft: 80.0#percent
+    $MapEventDetail {
+        styles: [
+            {
+                style_priority: 1,
+                height: 70.0#percent,
+                width: 20.0#percent,
+                positionLeft: 80.0#percent
+            },
+            {
+                style_priority: 2,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
                 },
-                {
-                    style_priority: 2,
-                    style_animation: {
-                        duration: 0.2,
-                        interpolation: interpolation.linear
-                    },
-                    positionLeft: 25.0#points,
+                positionLeft: 25.0#points,
+            },
+            {
+                style_priority: 3,
+                style_condition: state("displayEventDetail") and not(state("transition away")),
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
                 },
-                {
-                    style_priority: 3,
-                    style_condition: state("displayEventDetail") and not(state("transition away")),
-                    style_animation: {
-                        duration: 0.2,
-                        interpolation: interpolation.linear
-                    },
-                    positionLeft: 0.0#points,
-                },
-            ],
-            name: "mapEventDetail",
-            font: "red_wing",
-            fontColor: color.black,
-            background: "white_rounded",
-        }
+                positionLeft: 0.0#points,
+            },
+        ],
+        name: "mapEventDetail",
+        font: "red_wing",
+        fontColor: color.black,
+        background: "white_rounded",
+    }
 
+];
+
+
+root: $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            width: worldWidth#points,
+            height: worldHeight#points,
+//            width: 100.0#percent,
+//            height: 100.0#percent,
+            flexDirection: flexDirection.column,
+            justifyContent: justify.center
+        }
+    ],
+} children [
+
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                detached: true,
+                width: 100.0#percent,
+                height: 100.0#percent,
+            },
+            {
+                style_priority: 2,
+                detached: false,
+                style_condition: state("show_world_view")
+            }
+        ],
+        zIndex: 2,
+    } children [
+        worldView,
     ],
 
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                width: worldWidth#points,
+                height: worldHeight#points,
+                detached: false
+            },
+            {
+                style_priority: 2,
+//                detached: true,
+                style_condition: state("show_world_view")
+            }
+        ],
+        zIndex: 1,
+    } children [
+        navBar, mapBox
+    ]
 
 ]

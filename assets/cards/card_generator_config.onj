@@ -144,8 +144,8 @@ assets: {
 var imageElementSharedKeys = {
     x: 0,
     y: 0,
-    scaleX: 1.0,
-    scaleY: 1.0,
+    width: baseSize,
+    height: baseSize,
 };
 
 var valueElementSharedKeys = {
@@ -165,7 +165,7 @@ var costElementSharedKeys = {
 var bulletsOffset = 0;
 var coverOffset = 20;
 
-cards: [
+textures: [
 
     // Bullets --------------------------
 

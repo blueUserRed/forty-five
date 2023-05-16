@@ -1,16 +1,29 @@
 
-mapImages: [
-    {
-        name: "roadToSalem",
-        image: "reserves_texture",
+var images = {
+    testArea: {
+        image: "location_sign_aqua_dulche",
         height: 20.0,
         width: 20.0
     },
+    salem: {
+        image: "location_sign_salem",
+        width: 20.0,
+        height: 20.0
+    }
+};
+
+mapImages: [
     {
         name: "test_area",
-        image: "heart_texture",
-        height: 20.0,
-        width: 20.0
+        image: images.testArea.image,
+        width: images.testArea.width,
+        height: images.testArea.height,
+    },
+    {
+        name: "salem",
+        image: images.salem.image,
+        width: images.salem.width,
+        height: images.salem.height,
     },
 ],
 
@@ -19,14 +32,59 @@ generatorConfig: {
     maps: [
         {
             name: "roadToSalem",
-            seed: 103,
+            seed: 203,
             restrictions: {
-                maxNodes: 22,
-                minNodes: 15,
-                maxSplits: 4,
+                maxNodes: 10,
+                minNodes: 5,
+                maxSplits: 2,
+                splitProbability: 0.25,
+                compressProbability: 0.55
+            }
+        },
+        {
+            name: "test_road",
+            seed: 203,
+            restrictions: {
+                maxNodes: 10,
+                minNodes: 5,
+                maxSplits: 2,
                 splitProbability: 0.25,
                 compressProbability: 0.55
             }
         }
     ]
+},
+
+
+var worldViewImageScale = 5.0;
+
+worldView: {
+    backgroundHandle: "world_view_background",
+    locationIndicatorHandle: "enemy_texture",
+    locationIndicatorWidth: 2.0,
+    locationIndicatorHeight: 6.0,
+    locations: [
+        {
+            name: "roadToSalem",
+            x: 950,
+            y: 595,
+        },
+        {
+            name: "test_area",
+            x: 283,
+            y: 603,
+            image: images.testArea.image,
+            width: (images.testArea.width * worldViewImageScale)#int,
+            height: (images.testArea.height * worldViewImageScale)#int,
+        },
+        {
+            name: "salem",
+            x: 1054,
+            y: 166,
+            image: images.salem.image,
+            width: (images.salem.width * worldViewImageScale)#int,
+            height: (images.salem.height * worldViewImageScale)#int,
+        }
+    ]
 }
+

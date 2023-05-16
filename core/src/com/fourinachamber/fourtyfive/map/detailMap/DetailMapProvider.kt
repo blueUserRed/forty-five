@@ -42,19 +42,8 @@ class FromFileDetailMapProvider(
     private val file: FileHandle
 ) : DetailMapProvider {
 
-    override fun get(): DetailMap {
-        val onj = OnjParser.parseFile(file.file())
-        mapOnjSchema.assertMatches(onj)
-        onj as OnjObject
-        return DetailMap.readFromOnj(onj)
-    }
+    override fun get(): DetailMap = DetailMap.readFromFile(file)
 
-    companion object {
-
-        val mapOnjSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/detail_map.onjschema").file())
-        }
-    }
 }
 
 class FromSeededGeneratorDetailMapProvider(
@@ -68,7 +57,7 @@ class FromSeededGeneratorDetailMapProvider(
     override fun get(): DetailMap {
         val generator =
             SeededMapGenerator(seed, MapRestriction(startArea = startArea, endArea = endArea, otherAreas = otherAreas))
-        return generator.generate()
+        return generator.generate("anonymous")
     }
 }
 

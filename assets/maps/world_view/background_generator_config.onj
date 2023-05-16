@@ -1,0 +1,60 @@
+
+import "imports/colors.onj" as color;
+import "cards/cards.onj" as cards_obj;
+import "maps/map_config.onj" as config;
+
+var cards = cards_obj.cards;
+
+baseImage: "base",
+outputFile: "maps/world_view/generated/background.atlas",
+
+packer: {
+    pageWidth: 2_000,
+    pageHeight: 2_000,
+    padding: 0
+},
+
+assets: {
+    fonts: [],
+    pixmaps: [
+        {
+            name: "base",
+            file: "textures/world_view/world_view.png"
+        },
+        {
+            name: "location_sign_aqua_dulche",
+            file: "textures/location_signs/aqua_dulche.png"
+        },
+        {
+            name: "location_sign_salem",
+            file: "textures/location_signs/salem.png"
+        }
+    ]
+},
+
+var locations = config.worldView.locations;
+
+textures: [
+    {
+        name: "world_view_background",
+        elements: [
+
+            $ImageElement {
+                textureName: locations.1.image,
+                x: locations.1.x - locations.1.width / 2,
+                y: locations.1.y - locations.1.height / 2,
+                width: locations.1.width,
+                height: locations.1.height,
+            },
+
+            $ImageElement {
+                textureName: locations.2.image,
+                x: locations.2.x - locations.2.width / 2,
+                y: locations.2.y - locations.2.height / 2,
+                width: locations.2.width,
+                height: locations.2.height,
+            }
+
+        ]
+    }
+]

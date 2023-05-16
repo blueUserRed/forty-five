@@ -33,13 +33,14 @@ class SeededMapGenerator(
     private lateinit var mainLine: MapGeneratorLine
 
     private fun build(): MapNode {
+        nodes.forEachIndexed { index, node -> node.index = index }
         return nodes[0].build()
     }
 
     /**
      * generates the line
      */
-    fun generate(): DetailMap {
+    fun generate(name: String): DetailMap {
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes)
@@ -48,7 +49,7 @@ class SeededMapGenerator(
         nodes.forEach { it.scale(1F, .6F) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         this.nodes = nodes
-        return DetailMap(build(), listOf())
+        return DetailMap(name, build(), this.nodes.last().asNode!!, listOf())
     }
 
 
@@ -84,8 +85,8 @@ class SeededMapGenerator(
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
-        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea)
-        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea)
+        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, false)
+        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, true)
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>
@@ -103,9 +104,10 @@ class SeededMapGenerator(
                 borderNodes = getBorderNodesInArea(direction, nodes, newPos)
             } while (isIllegalPositionForArea(newPos, areaNodes))
             val newArea = MapNodeBuilder(
+                0,
                 newPos.x,
                 newPos.y,
-                event = EnterMapMapEvent(areaName)
+                event = EnterMapMapEvent(areaName, false)
             ) //TODO add direction of event picture
             borderNodes.random(rnd).connect(newArea, direction)
             areaNodes.add(newArea)
@@ -223,7 +225,7 @@ class SeededMapGenerator(
             }
         }
         if (intersectionNode == null) {
-            val newNode = MapNodeBuilder(interceptPoint.x, interceptPoint.y)
+            val newNode = MapNodeBuilder(0, interceptPoint.x, interceptPoint.y)
             addNodeInBetween(line1, nodes, newNode, uniqueLines)
             addNodeInBetween(line2, nodes, newNode, uniqueLines)
             nodes.add(newNode)
@@ -288,6 +290,7 @@ class SeededMapGenerator(
         secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
         newNode.edgesTo.add(firstNode)
         newNode.edgesTo.add(secNode)
+        nodes.add(newNode)
         uniqueLines.remove(nodesConnection)
         uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
         uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
@@ -378,7 +381,7 @@ class SeededMapGenerator(
             }
 
             val nodesList: MutableList<MapNodeBuilder> = mutableListOf()
-            points.forEach { p -> nodesList.add(MapNodeBuilder(p.x, p.y)) }
+            points.forEach { p -> nodesList.add(MapNodeBuilder(0, p.x, p.y)) }
             this.lineNodes = nodesList
         }
 
@@ -832,8 +835,8 @@ data class MapRestriction(
     val rangeToCheckBetweenNodes: Float = 70F,
     val startArea: String = "Franz",
     val endArea: String = "Huber",
-    val otherAreas: List<String> = listOf(),
-    val minDistanceBetweenAreas: Float = 10F,
+    val otherAreas: List<String> = listOf("test"),
+    val minDistanceBetweenAreas: Float = 100F,
     /**
      * how far the areas are from the highest/lowest point of the road
      */
@@ -858,11 +861,11 @@ data class MapRestriction(
     companion object {
 
         fun fromOnj(onj: OnjObject): MapRestriction = MapRestriction(
-            onj.get<Long>("maxNodes").toInt(),
-            onj.get<Long>("minNodes").toInt(),
-            onj.get<Long>("maxSplits").toInt(),
-            onj.get<Double>("splitProbability").toFloat(),
-            onj.get<Double>("compressProbability").toFloat(),
+            maxNodes = onj.get<Long>("maxNodes").toInt(),
+            minNodes = onj.get<Long>("minNodes").toInt(),
+            maxLines = onj.get<Long>("maxSplits").toInt(),
+            splitProb = onj.get<Double>("splitProbability").toFloat(),
+            compressProb = onj.get<Double>("compressProbability").toFloat(),
         )
     }
 }

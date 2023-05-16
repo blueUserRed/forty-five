@@ -16,10 +16,12 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
@@ -153,6 +155,14 @@ interface BackgroundActor {
 
 }
 
+interface Detachable {
+
+    val attached: Boolean
+
+    fun detach()
+    fun reattach()
+}
+
 /**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
@@ -212,9 +222,9 @@ open class CustomLabel @AllThreadsAllowed constructor(
         batch.shader = prevShader
     }
 
-    override fun initStyles(node: YogaNode, screen: OnjScreen) {
-        addLabelStyles(node, screen)
-        addBackgroundStyles(node, screen)
+    override fun initStyles(screen: OnjScreen) {
+        addLabelStyles(screen)
+        addBackgroundStyles(screen)
     }
 
     companion object {
@@ -380,9 +390,9 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         }
     }
 
-    override fun initStyles(node: YogaNode, screen: OnjScreen) {
-        addActorStyles(node, screen)
-        addBackgroundStyles(node, screen)
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+        addBackgroundStyles(screen)
     }
 
     companion object {
@@ -404,7 +414,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 open class CustomFlexBox(
     private val screen: OnjScreen
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor {
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable {
 
     override var fixedZIndex: Int = 0
 
@@ -420,8 +430,39 @@ open class CustomFlexBox(
             field = value
         }
 
+    private var reattachTo: Group? = null
+
+    override val attached: Boolean
+        get() = reattachTo == null
+
     init {
         bindHoverStateListeners(this)
+    }
+
+    override fun detach() {
+        val parent = parent
+        reattachTo = parent
+        if (parent is CustomFlexBox) {
+            parent.remove(styleManager.node)
+        } else {
+            parent.removeActor(this)
+        }
+    }
+
+    override fun reattach() {
+        val target = reattachTo ?: run {
+            FourtyFiveLogger.medium("scene", "attempted to reattach, but no target is defined")
+            return
+        }
+        reattachTo = null
+        if (target is CustomFlexBox) {
+            val node = target.add(this)
+            val oldManager = styleManager
+            styleManager = oldManager.copyWithNode(node)
+            screen.swapStyleManager(oldManager, styleManager)
+        } else {
+            target.addActor(this)
+        }
     }
 
     override fun resortZIndices() {
@@ -444,9 +485,10 @@ open class CustomFlexBox(
         super.draw(batch, parentAlpha)
     }
 
-    override fun initStyles(node: YogaNode, screen: OnjScreen) {
-        addFlexBoxStyles(node, screen)
-        addBackgroundStyles(node, screen)
+    override fun initStyles(screen: OnjScreen) {
+        addFlexBoxStyles(screen)
+        addBackgroundStyles(screen)
+        addDetachableStyles(screen)
     }
 }
 
@@ -670,8 +712,8 @@ open class CustomVerticalGroup(
         }
     }
 
-    override fun initStyles(node: YogaNode, screen: OnjScreen) {
-        addActorStyles(node, screen)
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
     }
 }
 
