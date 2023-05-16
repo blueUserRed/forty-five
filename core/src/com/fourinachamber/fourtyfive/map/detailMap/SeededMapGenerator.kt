@@ -855,7 +855,7 @@ sealed class DistributionFunction(
             ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
         nodes.forEach { println(it.x.toString() + ", " + it.y) }
         val possiblePositions: List<Pair<Vector2, Float>> =
-            getPossiblePositions(xRange, yRange, restrictions).map { it to 1F/*(scaleMin..scaleMax).random(rnd)*/ }
+            getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
         return DetailMap.MapDecoration(
             type,
             baseWidth,
@@ -959,7 +959,8 @@ data class MapRestriction(
         20 to { EmptyMapEvent() },
     ),
     val decorations: List<DistributionFunction> = listOf(
-        DistributionFunction.Random(123, "enemy_texture", 5.25F, 8F, 13F, 0.75F, 1.2F, true),
+        DistributionFunction.Random(123, "enemy_texture", 0.25F, 8F, 13F, 0.75F, 2F, true),
+        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
     ),
     val decorationPadding: Float = 20F,
 ) {
