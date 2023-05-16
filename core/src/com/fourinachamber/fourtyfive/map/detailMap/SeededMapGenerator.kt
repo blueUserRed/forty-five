@@ -51,7 +51,7 @@ class SeededMapGenerator(
         return DetailMap(build(), listOf())
     }
 
-    // Nils wegen Bre sagen
+
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
         val nodesWithoutEvents: MutableList<MapNodeBuilder> = nodes.filter { a -> a.event == null }.toMutableList()
         for (curEvent in restrictions.fixedEvents) {
@@ -63,7 +63,6 @@ class SeededMapGenerator(
             nodesWithoutEvents.remove(curNode)
         }
         val maxWeight: Int = restrictions.optionalEvents.sumOf { a -> a.first }
-        println(maxWeight)
         val allWeightEnds = mutableListOf<Double>()
         var curSum = .0
         for (i in restrictions.optionalEvents) {

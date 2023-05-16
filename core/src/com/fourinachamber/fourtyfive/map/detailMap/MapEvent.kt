@@ -75,23 +75,6 @@ class EmptyMapEvent : MapEvent() {
 }
 
 
-class EmptyMapEventTempTest : MapEvent() {
-
-    override var currentlyBlocks: Boolean = false
-    override var canBeStarted: Boolean = false
-    override var isCompleted: Boolean = false
-
-    override val displayDescription: Boolean = true
-
-    override val descriptionText: String = "my cool event"
-
-    override fun start() { }
-
-    override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("EmptyMapEventTempTest")
-    }
-}
-
 class EncounterMapEvent(obj: OnjObject) : MapEvent() {
 
     override var currentlyBlocks: Boolean = true
