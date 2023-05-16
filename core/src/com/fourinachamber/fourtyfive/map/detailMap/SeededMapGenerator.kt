@@ -45,7 +45,7 @@ class SeededMapGenerator(
         addAreas(nodes)
         addEvents(nodes)
 //        addDecorations(DistributionFunction.SimplexNoise(236896432))
-//        nodes.forEach { it.scale(1F, .6F) }
+        nodes.forEach { it.scale(1F, .6F) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         this.nodes = nodes
         return DetailMap(build(), listOf())
@@ -64,9 +64,18 @@ class SeededMapGenerator(
         }
         val maxWeight: Int = restrictions.optionalEvents.sumOf { a -> a.first }
         println(maxWeight)
-//        while (nodesWithoutEvents.isNotEmpty()) {
-//
-//        }
+        val allWeightEnds = mutableListOf<Double>()
+        var curSum = .0
+        for (i in restrictions.optionalEvents) {
+            curSum += i.first
+            allWeightEnds.add(curSum / maxWeight)
+        }
+        while (nodesWithoutEvents.isNotEmpty()) {
+            val curNode = nodesWithoutEvents.random(rnd)
+            val rndMy = rnd.nextDouble()
+            curNode.event = restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
+            nodesWithoutEvents.remove(curNode)
+        }
     }
 
     /**
@@ -764,6 +773,23 @@ enum class Direction {
     }
 }*/
 
+sealed class DistributionFunction(private val seed: Long) {
+
+    /* class Random(seed: Long) : DistributionFunction(seed) {
+        override fun getValue(pos: Vector2) {
+        }
+    }*/
+
+    class SimplexNoise(seed: Long) : DistributionFunction(seed) {
+        override fun getValue(pos: Vector2): Float {
+            return 0F
+        }
+    }
+
+    abstract fun getValue(pos: Vector2): Float
+}
+
+
 /**
  * all possible restrictions within the MapGenerator
  */
@@ -822,10 +848,11 @@ data class MapRestriction(
      */
     val rotation: Double = .0,
 
-    val fixedEvents: List<MapEvent> = listOf(EmptyMapEvent(), EmptyMapEventTempTest()),
+    val fixedEvents: List<MapEvent> = listOf(EmptyMapEvent(), EmptyMapEvent()),
     val optionalEvents: List<Pair<Int, () -> MapEvent>> = listOf(
-//        100 to { EmptyMapEvent() },
-        150 to { EmptyMapEventTempTest() }),
+        10 to { EmptyMapEvent() },
+        20 to { EmptyMapEvent() },
+        ),
 ) {
 
 
@@ -841,18 +868,3 @@ data class MapRestriction(
     }
 }
 
-sealed class DistributionFunction(private val seed: Long) {
-
-    /* class Random(seed: Long) : DistributionFunction(seed) {
-        override fun getValue(pos: Vector2) {
-        }
-    }*/
-
-    class SimplexNoise(seed: Long) : DistributionFunction(seed) {
-        override fun getValue(pos: Vector2): Float {
-            return 0F
-        }
-    }
-
-    abstract fun getValue(pos: Vector2): Float
-}
