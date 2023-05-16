@@ -6,7 +6,7 @@ var cardElementSharedKeys = {
     y: int,
 };
 
-$CardElement {
+$Element {
 
     $TextElement {
         text: string,
@@ -17,8 +17,8 @@ $CardElement {
 
     $ImageElement {
         textureName: string,
-        scaleX: float,
-        scaleY: float,
+        width: int,
+        height: int,
         ...cardElementSharedKeys
     }
 
@@ -32,12 +32,12 @@ $CardElement {
 
 }
 
-var cardDeclaration = {
+var textureDeclaration = {
     name: string,
-    elements: $CardElement[]
+    elements: $Element[]
 };
 
-cards: cardDeclaration[],
+textures: textureDeclaration[],
 
 var customFontDeclaration = {
     name: string,

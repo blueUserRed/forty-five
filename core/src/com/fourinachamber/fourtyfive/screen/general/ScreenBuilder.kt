@@ -18,9 +18,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.game.card.Card
 import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
+import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+import com.fourinachamber.fourtyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fourtyfive.screen.gameComponents.CoverArea
@@ -182,6 +184,7 @@ class ScreenBuilder(val file: FileHandle) {
                     getWidget(it as OnjNamedObject, flexBox, screen)
                 }
         }
+        flexBox.touchable = Touchable.enabled // TODO: remove
         return flexBox
     }
 
@@ -336,17 +339,22 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
-        "SplitPlane" -> {
-            val firstFlexBox = CustomFlexBox(screen)
-            val secondFlexBox = CustomFlexBox(screen)
-            val splitPane = SplitPane(
-                firstFlexBox,
-                secondFlexBox,
-                widgetOnj.get<Boolean>("vertical"),
-                SplitPane.SplitPaneStyle()
-            )
-            firstFlexBox
-        }
+        "WorldView" -> WorldViewWidget(
+            OnjParser.parseFile(Gdx.files.internal(MapManager.mapConfigFilePath).file()) as OnjObject, // TODO: schema?
+            screen
+        )
+
+//        "SplitPlane" -> {
+//            val firstFlexBox = CustomFlexBox(screen)
+//            val secondFlexBox = CustomFlexBox(screen)
+//            val splitPane = SplitPane(
+//                firstFlexBox,
+//                secondFlexBox,
+//                widgetOnj.get<Boolean>("vertical"),
+//                SplitPane.SplitPaneStyle()
+//            )
+//            firstFlexBox
+//        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
@@ -365,7 +373,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         val styleManager = StyleManager(actor, node)
         actor.styleManager = styleManager
-        actor.initStyles(node, screen)
+        actor.initStyles(screen)
         styleManagers.add(styleManager)
 
         widgetOnj.ifHas<OnjArray>("styles") { arr ->

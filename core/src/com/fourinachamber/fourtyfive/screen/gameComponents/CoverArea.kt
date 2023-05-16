@@ -191,8 +191,8 @@ class CoverArea(
         }
     }
 
-    override fun initStyles(node: YogaNode, screen: OnjScreen) {
-        addActorStyles(node, screen)
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
     }
 }
 

@@ -3,6 +3,7 @@ package com.fourinachamber.fourtyfive.map.detailMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.map.MapManager
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
@@ -11,6 +12,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 data class MapNode(
+    val index: Int,
     val edgesTo: List<MapNode>,
     val blockingEdges: List<MapNode>,
     val isArea: Boolean,
@@ -107,6 +109,7 @@ data class MapNode(
 }
 
 data class MapNodeBuilder(
+    var index: Int = 0,
     var x: Float,
     var y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
@@ -122,7 +125,8 @@ data class MapNodeBuilder(
 
     private var inBuild: Boolean = false
 
-    private var asNode: MapNode? = null
+    var asNode: MapNode? = null
+        private set
 
     val dirNodes: Array<Int?> = arrayOfNulls(4)
 
@@ -146,6 +150,7 @@ data class MapNodeBuilder(
         if (inBuild) return asNode!!
         inBuild = true
         asNode = MapNode(
+            index,
             buildEdges,
             buildBlockingEdges,
             isArea,
