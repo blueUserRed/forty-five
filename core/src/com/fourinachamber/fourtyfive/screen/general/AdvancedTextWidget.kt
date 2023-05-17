@@ -3,11 +3,13 @@ package com.fourinachamber.fourtyfive.screen.general
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.math.Affine2
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.TemplateString
 import io.github.orioncraftmc.meditate.YogaNode
 import onj.value.OnjArray
@@ -17,7 +19,6 @@ import kotlin.math.sin
 
 open class AdvancedTextWidget(
     advancedText: AdvancedText,
-    private val fontScale: Float,
     screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
@@ -27,17 +28,16 @@ open class AdvancedTextWidget(
         set(value) {
             field = value
             clearText()
-            nodesOfCurrentText = value.parts.map {
-                it.dialogFontScale = fontScale
-                add(it.actor)
-            }
+            nodesOfCurrentText = value.parts.map { add(it.actor) }
         }
 
     init {
-        nodesOfCurrentText = advancedText.parts.map {
-            it.dialogFontScale = fontScale
-            add(it.actor)
-        }
+        nodesOfCurrentText = advancedText.parts.map { add(it.actor) }
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        advancedText.update()
+        super.draw(batch, parentAlpha)
     }
 
     fun clearText() {
@@ -61,14 +61,37 @@ data class AdvancedText(
         return currentPartIndex >= parts.size
     }
 
+    fun update() = parts.forEach { it.update() }
+
     fun resetProgress(): Unit = parts.forEach { it.resetProgress() }
 
     companion object {
 
-        fun readFromOnj(arr: OnjArray, font: BitmapFont, screen: OnjScreen): AdvancedText {
-            val parts = arr.value.map {
-                it as OnjObject
-                TextAdvancedTextPart.readFromOnj(it, font, screen)
+        fun readFromOnj(partsOnj: OnjArray, screen: OnjScreen, defaults: OnjObject): AdvancedText {
+            val defaultFontName = defaults.get<String>("font")
+            val defaultFont = ResourceManager.get<BitmapFont>(screen, defaultFontName)
+            val defaultColor = defaults.get<Color>("color")
+            val defaultFontScale = defaults.get<Double>("fontScale").toFloat()
+            val parts = partsOnj.value.map { obj ->
+                obj as OnjNamedObject
+                when (obj.name) {
+                    "Text" -> TextAdvancedTextPart(
+                        obj.get<String>("text"),
+                        obj.getOr<String?>("font", null)?.let { ResourceManager.get(screen, it) }
+                            ?: defaultFont,
+                        obj.getOr<Color?>("color", null) ?: defaultColor,
+                        obj.getOr<Double?>("fontScale", null)?.toFloat() ?: defaultFontScale,
+                        screen
+                    )
+                    "Icon" -> IconAdvancedTextPart(
+                        obj.get<String>("icon"),
+                        obj.getOr<String?>("font", null)?.let { ResourceManager.get(screen, it) }
+                            ?: defaultFont,
+                        screen,
+                        obj.getOr<Double?>("fontScale", null)?.toFloat() ?: defaultFontScale
+                    )
+                    else -> throw RuntimeException("unknown text part ${obj.name}")
+                }
             }
             return AdvancedText(parts)
         }
@@ -78,7 +101,6 @@ data class AdvancedText(
 
 interface AdvancedTextPart {
 
-    var dialogFontScale: Float
     val actor: Actor
 
     var xOffset: Float?
@@ -94,8 +116,10 @@ interface AdvancedTextPart {
         worldTransform.translate(xOffset ?: 0f, yOffset ?: 0f)
         val computed = Matrix4()
         computed.set(worldTransform)
-       return computed
+        return computed
     }
+
+    fun update() { }
 
 }
 
@@ -103,14 +127,9 @@ class TextAdvancedTextPart(
     rawText: String,
     font: BitmapFont,
     fontColor: Color,
+    fontScale: Float,
     screen: OnjScreen
 ) : CustomLabel(screen, rawText, LabelStyle(font, fontColor)), AdvancedTextPart {
-
-    override var dialogFontScale: Float
-        get() = this.fontScaleX
-        set(value) {
-            setFontScale(value)
-        }
 
     override val actor: Actor = this
 
@@ -123,6 +142,11 @@ class TextAdvancedTextPart(
     override var yOffset: Float? = null
 
     private val actions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
+
+    init {
+        setFontScale(fontScale)
+        debug = true
+    }
 
     override fun addDialogAction(action: AdvancedTextPart.() -> Unit) {
         actions.add(action)
@@ -165,19 +189,88 @@ class TextAdvancedTextPart(
             batch.transformMatrix = oldTransform
         }
     }
+}
 
-    companion object {
+class IconAdvancedTextPart(
+    private val resourceHandle: ResourceHandle,
+    private val font: BitmapFont,
+    private val screen: OnjScreen,
+    private val dialogFontScale: Float,
+) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart{
 
-        fun readFromOnj(onj: OnjObject, font: BitmapFont, screen: OnjScreen): TextAdvancedTextPart {
-            return TextAdvancedTextPart(
-                onj.get<String>("text"),
-                font,
-                onj.get<Color>("color"),
-                screen
-            )
-        }
 
+    override val actor: Actor = this
+
+    override var xOffset: Float? = null
+
+    override var yOffset: Float? = null
+    private var isShown: Boolean = true
+
+    private var iconHeight: Float = 0f
+    private var iconWidth: Float = 0f
+
+    private val actions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
+
+    private var calculatedLayout = false
+
+    init {
+        reportDimensionsWithScaling = true
+        ignoreScalingWhenDrawing = true
+        debug = true
     }
+
+    private fun recalcLayout() {
+        val layout = GlyphLayout(font, "qh")
+        iconHeight = layout.height * dialogFontScale * 1.5f
+        val drawable = loadedDrawable!!
+        val aspectRatio = drawable.minWidth / drawable.minHeight
+        iconWidth = aspectRatio * iconHeight
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        actions.forEach { it(this) }
+        super.draw(batch, parentAlpha)
+    }
+
+    override fun update() {
+        if (loadedDrawable == null) forceLoadDrawable()
+        if (calculatedLayout && !isVisible) {
+            isVisible = true
+        }
+        if (!calculatedLayout && loadedDrawable != null && isShown) {
+            recalcLayout()
+            calculatedLayout = true
+            invalidateHierarchy()
+            println("calculated")
+        }
+    }
+
+    override fun progress(): Boolean {
+        isShown = true
+        return true
+    }
+
+    override fun resetProgress() {
+        isShown = false
+        isVisible = false
+        iconWidth = 0f
+        iconHeight = 0f
+    }
+
+    override fun addDialogAction(action: AdvancedTextPart.() -> Unit) {
+        actions.add(action)
+    }
+
+    override fun getMinHeight(): Float = iconHeight
+    override fun getPrefHeight(): Float = iconHeight
+    override fun getMaxHeight(): Float = iconHeight
+
+    override fun getMinWidth(): Float = iconWidth
+    override fun getPrefWidth(): Float = iconWidth
+    override fun getMaxWidth(): Float = iconWidth
+
+    override fun getWidth(): Float = iconWidth
+    override fun getHeight(): Float = iconHeight
 }
 
 object AdvancedTextPartActionFactory {
