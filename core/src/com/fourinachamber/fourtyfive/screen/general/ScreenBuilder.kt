@@ -332,28 +332,12 @@ class ScreenBuilder(val file: FileHandle) {
         ).apply { touchable = Touchable.enabled }
 
         "AdvancedText" -> AdvancedTextWidget(
-            AdvancedText.readFromOnj(
-                widgetOnj.get<OnjArray>("parts"),
-                fontOrError(widgetOnj.get<String>("font"), screen),
-                screen
-            ),
-            widgetOnj.get<Double>("fontScale").toFloat(),
+            AdvancedText.readFromOnj(widgetOnj.get<OnjArray>("parts"), screen, widgetOnj.get<OnjObject>("defaults")),
             screen
         )
 
         "DialogWidget" -> DialogWidget(
-            Dialog(
-                DialogPart(
-                    AdvancedText(listOf(TextAdvancedTextPart("Hello World", fontOrError(widgetOnj.get<String>("font"), screen), Color.BLACK, screen))),
-                    NextDialogPartSelector.Fixed(
-                        DialogPart(
-                            AdvancedText(listOf(TextAdvancedTextPart("Goodbye World", fontOrError(widgetOnj.get<String>("font"), screen), Color.BLACK, screen))),
-                            NextDialogPartSelector.End
-                        )
-                    )
-                )
-            ),
-            widgetOnj.get<Double>("fontScale").toFloat(),
+            Dialog.readFromOnj(widgetOnj.get<OnjObject>("dialog"), screen),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
             screen
         )

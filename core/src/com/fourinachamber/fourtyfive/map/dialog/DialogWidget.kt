@@ -3,13 +3,14 @@ package com.fourinachamber.fourtyfive.map.dialog
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.general.*
+import onj.value.OnjArray
+import onj.value.OnjObject
 
 class DialogWidget(
     private val dialog: Dialog,
-    fontScale: Float,
     private val progressTime: Int,
     screen: OnjScreen
-) : AdvancedTextWidget(dialog.currentPart!!.text, fontScale, screen) {
+) : AdvancedTextWidget(dialog.currentPart!!.text, screen) {
 
     private var isAnimFinished: Boolean = false
 
@@ -35,6 +36,7 @@ class DialogWidget(
         isAnimFinished = advancedText.progress()
         if (isAnimFinished) finished()
         lastProgressTime = curTime
+        dialog.currentPart?.text?.update()
     }
 
     private fun finished() {
@@ -68,6 +70,16 @@ data class Dialog(
         }
         currentPart = next
         return next
+    }
+
+    companion object {
+
+        fun readFromOnj(onj: OnjObject, screen: OnjScreen): Dialog = Dialog(DialogPart(AdvancedText.readFromOnj(
+            onj.get<OnjArray>("parts"),
+            screen,
+            onj.get<OnjObject>("defaults"),
+        ), NextDialogPartSelector.End))
+
     }
 
 }

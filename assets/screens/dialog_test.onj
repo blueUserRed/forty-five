@@ -11,7 +11,7 @@ var worldHeight = 90.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "red_wing_cm", "hover_detail_background"
+        "title_screen_background", "red_wing_cm", "hover_detail_background", "reserves_texture"
     ]
 },
 
@@ -53,11 +53,21 @@ root: $Box {
                 flexWrap: wrap.wrap
             }
         ],
-        parts: dialogs.testDialog,
-        font: "red_wing_cm",
-        fontScale: 0.1,
+        dialog: {
+            parts: [
+                $Text { text: "Hello World! " },
+                $Text { text: "Goodbye World! ", color: color.red },
+                $Icon { icon: "reserves_texture" },
+                $Text { text: "Hello World!" },
+            ],
+            defaults: {
+                font: "red_wing_cm",
+                fontScale: 0.1,
+                color: color.black
+            }
+        },
         progressTime: 0.09,
-        debug: true
+//        debug: true
     }
 
 ]

@@ -169,15 +169,24 @@ $Widget {
 
     $AdvancedText {
         font: string,
-        parts: { text: string, color: Color, actions?: $AdvancedTextPartAction[] }[],
-        fontScale: float,
+        parts: $AdvancedTextPart[],
+        defaults: {
+            font: string,
+            fontScale: float,
+            color: Color
+        },
         ...widgetSharedKeys
     }
 
     $DialogWidget {
-        font: string,
-        parts: { text: string, color: Color, actions?: $AdvancedTextPartAction[] }[],
-        fontScale: float,
+        dialog: {
+            parts: $AdvancedTextPart[],
+            defaults: {
+                font: string,
+                fontScale: float,
+                color: Color
+            },
+        },
         progressTime: float,
         ...widgetSharedKeys
     }
@@ -188,9 +197,29 @@ $Widget {
 
 }
 
+var advancedTextPartSharedKeys = {
+    actions?: $AdvancedTextPartAction[]
+};
+
+$AdvancedTextPart {
+
+    $Text {
+        text: string,
+        font?: string,
+        color?: Color,
+        fontScale?: float,
+        ...advancedTextPartSharedKeys
+    }
+
+    $Icon {
+        icon: string
+    }
+
+}
+
 $AdvancedTextPartAction {
 
-    $ShakeDialogAction {
+    $ShakeTextAction {
         xMagnitude: float,
         xSpeed: float,
         yMagnitude: float,
