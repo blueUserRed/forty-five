@@ -144,6 +144,7 @@ object MapManager {
         val map = generator.generate(name)
         val path = "${outputDir.toPath()}/$name.onj"
         val file = File(path)
+        if (!File(file.parent).exists()) File(file.parent).mkdirs()
         file.createNewFile()
         file.writeText(map.asOnjObject().toString())
     }
