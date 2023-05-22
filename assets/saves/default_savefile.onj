@@ -54,6 +54,6 @@ stats: {
 },
 
 position: {
-    map: "test_area",
+    map: "test_road",
     node: 0
 }

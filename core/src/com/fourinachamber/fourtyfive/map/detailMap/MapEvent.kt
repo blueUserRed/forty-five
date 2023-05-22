@@ -74,6 +74,7 @@ class EmptyMapEvent : MapEvent() {
     }
 }
 
+
 class EncounterMapEvent(obj: OnjObject) : MapEvent() {
 
     override var currentlyBlocks: Boolean = true
