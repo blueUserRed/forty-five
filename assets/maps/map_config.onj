@@ -30,24 +30,24 @@ mapImages: [
 generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [
-        {
-            name: "roadToSalem",
-            seed: 203,
-            restrictions: {
-                maxNodes: 10,
-                minNodes: 5,
-                maxSplits: 2,
-                splitProbability: 0.25,
-                compressProbability: 0.55
-            }
-        },
+//        {
+//            name: "roadToSalem",
+//            seed: 203,
+//            restrictions: {
+//                maxNodes: 10,
+//                minNodes: 5,
+//                maxSplits: 2,
+//                splitProbability: 0.25,
+//                compressProbability: 0.55
+//            }
+//        },
         {
             name: "test_road",
-            seed: 203,
+            seed: 103,
             restrictions: {
-                maxNodes: 10,
+                maxNodes: 7,
                 minNodes: 5,
-                maxSplits: 2,
+                maxSplits: 1,
                 splitProbability: 0.25,
                 compressProbability: 0.55
             }
