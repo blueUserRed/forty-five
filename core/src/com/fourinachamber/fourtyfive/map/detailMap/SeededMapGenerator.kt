@@ -57,21 +57,16 @@ class SeededMapGenerator(
         connections: MutableList<Line>
     ): List<DetailMap.MapDecoration> {
         val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
+        val xRange =
+            ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
+        val yRange =
+            ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
         restrictions.decorations.forEach {
-            decos.add(it.getDecoration(nodes, restrictions, connections))
+            decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
         }
         return decos
     }
 
-    //nodeTexture: "key_select_frame",
-//        playerTexture: "enemy_texture",
-//        playerWidth: 2.0,
-//        playerHeight: 6.0,
-//        background: "white_texture",
-//        edgeTexture: "black_texture",
-//        playerMovementTime: 0.3,
-//        directionIndicator: "heart_texture",
-//        detailWidgetName: "mapEventDetail"
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
         val nodesWithoutEvents: MutableList<MapNodeBuilder> = nodes.filter { a -> a.event == null }.toMutableList()
         for (curEvent in restrictions.fixedEvents) {
@@ -105,6 +100,8 @@ class SeededMapGenerator(
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
+        mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.LEFT
+        mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.RIGHT
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, false)
         mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, true)
         for (areaName in restrictions.otherAreas) {
@@ -119,7 +116,7 @@ class SeededMapGenerator(
                 newPos = Vector2(
                     x,
                     getLimitInRange(x, nodes, direction)
-                            + restrictions.distanceFromAreaToLine * if (direction == Direction.UP) 1 else -1
+                            + restrictions.distanceFromAreaToLine * (if (direction == Direction.UP) 1 else -1)
                 )
                 borderNodes = getBorderNodesInArea(direction, nodes, newPos)
             } while (isIllegalPositionForArea(newPos, areaNodes))
@@ -127,8 +124,11 @@ class SeededMapGenerator(
                 0,
                 newPos.x,
                 newPos.y,
-                event = EnterMapMapEvent(areaName, false)
-            ) //TODO add direction of event picture
+                imagePos = MapNode.ImagePosition.valueOf(direction.name),
+                imageName = areaName,
+                event = EnterMapMapEvent(areaName, false),
+            )
+            println(newArea.imagePos)
             borderNodes.random(rnd).connect(newArea, direction)
             connections.add(Line(newPos, newArea.edgesTo.first().posAsVec()))
             areaNodes.add(newArea)
@@ -142,10 +142,8 @@ class SeededMapGenerator(
     private fun isIllegalPositionForArea(
         newPos: Vector2,
         areaNodes: MutableList<MapNodeBuilder>
-    ): Boolean {
-        return areaNodes.stream()
-            .anyMatch { Vector2(it.x, it.y).sub(newPos).len() < restrictions.minDistanceBetweenAreas }
-    }
+    ): Boolean = areaNodes.stream()
+        .anyMatch { Vector2(it.x, it.y).sub(newPos).len() < restrictions.minDistanceBetweenAreas }
 
     /**
      * searches for the highest or lowest position of nodes in an area
@@ -164,12 +162,10 @@ class SeededMapGenerator(
         direction: Direction,
         nodes: MutableList<MapNodeBuilder>,
         position: Vector2
-    ): List<MapNodeBuilder> {
-        return nodes.filter {
-            Vector2(it.x, it.y).sub(position)
-                .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllowedNodesInRangeBetweenLineAndArea)
-                    && it.dirNodes[direction.ordinal] == null && it.edgesTo.size < 4
-        }
+    ): List<MapNodeBuilder> = nodes.filter {
+        Vector2(it.x, it.y).sub(position)
+            .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllowedNodesInRangeBetweenLineAndArea)
+                && it.dirNodes[direction.ordinal] == null && it.edgesTo.size < 4 && it.event !is EnterMapMapEvent
     }
 
 
@@ -267,7 +263,7 @@ class SeededMapGenerator(
         nodes: MutableList<MapNodeBuilder>,
         line1: Line,
         line2: Line,
-        possibleIntersectionNode: MapNodeBuilder
+        possibleIntersectionNode: MapNodeBuilder,
     ): Line {
         val curNodes = arrayOf(
             nodes.first { a -> a.x == line1.start.x && a.y == line1.start.y },
@@ -280,7 +276,7 @@ class SeededMapGenerator(
 
         if (possibleIntersectionNode == curNodes[0] || possibleIntersectionNode == curNodes[1]) return line2
         if (possibleIntersectionNode == curNodes[2] || possibleIntersectionNode == curNodes[3]) return line1
-        return if (rnd.nextBoolean()) line1 else line2
+        return (if (rnd.nextBoolean()) line1 else line2)
     }
 
     /**
@@ -453,7 +449,7 @@ class SeededMapGenerator(
                 if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) minPos = min(minPos, a.y)
             }
             if (minPos == Float.MAX_VALUE) {
-                minPos = lineNodes.stream().min { o1, o2 -> (abs(o1.x - x) compareTo abs(o2.x - x)) }.orElse(null).y
+                return lineNodes.minBy { o1 -> o1.x - x }.y
             }
             return minPos
         }
@@ -465,6 +461,9 @@ class SeededMapGenerator(
             var maxPos: Float = Float.MIN_VALUE
             lineNodes.forEach { a ->
                 if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) maxPos = max(maxPos, a.y)
+            }
+            if (maxPos == Float.MIN_VALUE) {
+                return lineNodes.minBy { o1 -> o1.x - x }.y
             }
             return maxPos
         }
@@ -537,7 +536,6 @@ class SeededMapGenerator(
                 for (i in lineNodes) {
                     if (i !in nodes) nodes.add(i)
                 }
-
 //                var lastToTop: Int = -2
 //                var lastToBottom: Int = -2
                 for (i in lineNodes.indices) {
@@ -639,10 +637,9 @@ class SeededMapGenerator(
             node: MapNodeBuilder,
             direction: Direction,
             numberOfNodes: Int = 3
-        ): List<MapNodeBuilder> {
-            return lineNodes.filter { a -> a.x > node.x }.sortedBy { a -> a.x }.subListTillMax(numberOfNodes)
+        ): List<MapNodeBuilder> =
+            lineNodes.filter { a -> a.x > node.x }.sortedBy { a -> a.x }.subListTillMax(numberOfNodes)
                 .filter { a -> a.dirNodes[direction.ordinal] == null }
-        }
 
         private fun getPossibleDirectionsToCreatePathsTo(
             node: MapNodeBuilder,
@@ -669,9 +666,6 @@ class SeededMapGenerator(
 }
 
 class Line(val start: Vector2, val end: Vector2) {
-//    fun angle(): Float {
-//        return start.sub(end).angleRad()
-//    }
 
     fun intersection(other: Line): Vector2? {
         val intersectVector = Vector2()
@@ -788,7 +782,7 @@ enum class Direction {
 }*/
 
 sealed class DistributionFunction(
-    private val seed: Long,
+    seed: Long,
     protected val type: String,
     protected val density: Float,
     protected val baseWidth: Float,
@@ -800,17 +794,17 @@ sealed class DistributionFunction(
     protected val rnd: kotlin.random.Random = Random(seed)
 
     class Random(
-        seed: Long, type: String, density: Float = 0.25F, base_width: Float,
-        base_height: Float, scale_min: Float, scale_max: Float, collidesOnlyWithNodes: Boolean
+        seed: Long, type: String, density: Float = 0.25F, baseWidth: Float,
+        baseHeight: Float, scaleMin: Float, scaleMax: Float, collidesOnlyWithNodes: Boolean
     ) :
         DistributionFunction(
             seed,
             type,
             density,
-            base_width,
-            base_height,
-            scale_min,
-            scale_max,
+            baseWidth,
+            baseHeight,
+            scaleMin,
+            scaleMax,
             collidesOnlyWithNodes
         ) {
         override fun getPossiblePositions(
@@ -818,7 +812,6 @@ sealed class DistributionFunction(
             yRange: ClosedFloatingPointRange<Float>,
             restrict: MapRestriction
         ): List<Vector2> {
-
             val positions: MutableList<Vector2> = mutableListOf()
             var pointsLeft: Int = ((xRange.endInclusive - xRange.start) / baseWidth
                     * (yRange.endInclusive - yRange.start) / baseHeight * density).toInt()
@@ -831,13 +824,6 @@ sealed class DistributionFunction(
 
     }
 
-//    class SimplexNoise(seed: Long, type: String, moreLikelyAtEvents: List<Pair<Int, String>> = listOf()) :
-//        DistributionFunction(seed, type, moreLikelyAtEvents) {
-//        override fun getPossiblePositions(): List<Vector2> {
-//            return mutableListOf()
-//        }
-//    }
-
     abstract fun getPossiblePositions(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>,
@@ -847,12 +833,11 @@ sealed class DistributionFunction(
     fun getDecoration(
         nodes: List<MapNodeBuilder>,
         restrictions: MapRestriction,
-        connections: MutableList<Line>
+        connections: MutableList<Line>,
+        xRange: ClosedFloatingPointRange<Float>,
+        yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
-        val xRange =
-            ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
-        val yRange =
-            ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
+
         nodes.forEach { println(it.x.toString() + ", " + it.y) }
         val possiblePositions: List<Pair<Vector2, Float>> =
             getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
@@ -938,7 +923,7 @@ data class MapRestriction(
     val rangeToCheckBetweenNodes: Float = 70F,
     val startArea: String = "Franz",
     val endArea: String = "Huber",
-    val otherAreas: List<String> = listOf("test", "cool"),
+    val otherAreas: List<String> = listOf("test", "franz"),
     val minDistanceBetweenAreas: Float = 100F,
     /**
      * how far the areas are from the highest/lowest point of the road in a close area around the area
@@ -959,8 +944,7 @@ data class MapRestriction(
         20 to { EmptyMapEvent() },
     ),
     val decorations: List<DistributionFunction> = listOf(
-        DistributionFunction.Random(123, "enemy_texture", 0.25F, 8F, 13F, 0.75F, 2F, true),
-        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
+//        DistributionFunction.Random(123, "enemy_texture", 0.05F, 8F, 13F, 0.75F, 2F, true),
     ),
     val decorationPadding: Float = 20F,
 ) {
