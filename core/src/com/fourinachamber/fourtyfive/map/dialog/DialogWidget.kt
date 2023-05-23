@@ -1,12 +1,16 @@
 package com.fourinachamber.fourtyfive.map.dialog
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
 import com.fourinachamber.fourtyfive.utils.Timeline
+import ktx.actors.onClick
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -16,7 +20,11 @@ class DialogWidget(
     private val progressTime: Int,
     private val advanceArrowDrawableHandle: ResourceHandle,
     private val advanceArrowOffset: Float,
-    screen: OnjScreen,
+    private val optionsBoxName: String,
+    private val optionsFont: BitmapFont,
+    private val optionsFontColor: Color,
+    private val optionsFontScale: Float,
+    private val screen: OnjScreen
 ) : AdvancedTextWidget(dialog.firstPart.text, screen) {
 
     private var isAnimFinished: Boolean = false
@@ -45,6 +53,12 @@ class DialogWidget(
         ResourceManager.get(screen, advanceArrowDrawableHandle)
     }
 
+    private var initialisedOptionsBox: Boolean = false
+    private lateinit var optionsBox: CustomFlexBox
+
+    private var chosenOption: String? = null
+    private var currentOptions: Map<String, DialogPart>? = null
+
     init {
         advancedText.resetProgress()
         onButtonClick {
@@ -72,11 +86,48 @@ class DialogWidget(
         }
 
         is NextDialogPartSelector.Choice -> Timeline.timeline {
+            action {
+                currentOptions = part.choices
+                setupOptionsBox()
+            }
+            delayUntil { chosenOption != null }
+            action {
+                val next = currentOptions!![chosenOption!!]!!
+                currentPart = next
+                clearOptionsBox()
+            }
+            delayUntil { isAnimFinished }
+            includeLater( { finished() }, { true } )
         }
 
     }
 
+    private fun setupOptionsBox() {
+        screen.enterState(showOptionsBoxScreenState)
+        currentOptions!!.forEach { (option, _) ->
+            val actor = CustomLabel(screen, option, Label.LabelStyle(optionsFont, optionsFontColor))
+            actor.setFontScale(optionsFontScale)
+            actor.onClick { chosenOption = option } // TODO: find some way to use onButtonClick there
+            optionsBox.add(actor)
+        }
+    }
+
+    private fun clearOptionsBox() {
+        screen.leaveState(showOptionsBoxScreenState)
+        optionsBox.clear()
+        chosenOption = null
+        currentOptions = null
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (!initialisedOptionsBox) {
+            val optionsBox = screen.namedActorOrError(optionsBoxName)
+            if (optionsBox !is CustomFlexBox) {
+                throw RuntimeException("actor with name $optionsBoxName must be of type CustomFlexBox")
+            }
+            this.optionsBox = optionsBox
+            initialisedOptionsBox = true
+        }
         super.draw(batch, parentAlpha)
         timeline.update()
         currentPart.text.update()
@@ -99,6 +150,10 @@ class DialogWidget(
         if (curTime < lastProgressTime + progressTime) return
         isAnimFinished = advancedText.progress()
         lastProgressTime = curTime
+    }
+
+    companion object {
+        const val showOptionsBoxScreenState: String = "displayOptionsBox"
     }
 
 }

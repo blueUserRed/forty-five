@@ -341,6 +341,10 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
             widgetOnj.get<String>("advanceArrowDrawable"),
             widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
+            widgetOnj.get<String>("optionsBox"),
+            fontOrError(widgetOnj.get<String>("optionsFont"), screen),
+            widgetOnj.get<Color>("optionsFontColor"),
+            widgetOnj.get<Double>("optionsFontScale").toFloat(),
             screen
         )
 

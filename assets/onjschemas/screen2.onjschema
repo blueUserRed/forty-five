@@ -197,6 +197,10 @@ $Widget {
         progressTime: float,
         advanceArrowDrawable: string,
         advanceArrowOffset: float,
+        optionsBox: string,
+        optionsFont: string,
+        optionsFontColor: Color,
+        optionsFontScale: float,
         ...widgetSharedKeys
     }
 
@@ -220,7 +224,7 @@ $NextDialogPartSelector {
         choices: {
             name: string,
             next: dialogPart
-        }
+        }[]
     }
 
     $EndOfDialog { }
@@ -261,9 +265,9 @@ $DetailMapProvider {
 
     $FromSeededGeneratorDetailMapProvider {
         seed: int,
-                startArea: string,
-                endArea: string,
-                otherAreas: string[],
+        startArea: string,
+        endArea: string,
+        otherAreas: string[],
     }
 
     $CurrentMapProvider { }
