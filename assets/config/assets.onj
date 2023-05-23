@@ -136,7 +136,37 @@ textures: [
     {
         name: "location_sign_salem",
         file: "textures/locations_signs/salem.png"
-    }
+    },
+    {
+        name: "map_detail_background",
+        file: "textures/map/detail/background.png"
+    },
+    {
+        name: "map_background_grass_tileable",
+        file: "textures/map/backgrounds/grass.png",
+        tileable: true,
+        tileScale: 0.1
+    },
+    {
+        name: "map_background_snow_tileable",
+        file: "textures/map/backgrounds/snow.png",
+        tileable: true,
+        tileScale: 0.1
+    },
+    {
+        name: "map_background_wasteland_tileable",
+        file: "textures/map/backgrounds/wasteland.png",
+        tileable: true,
+        tileScale: 0.1
+    },
+    {
+        name: "map_detail_fight_button",
+        file: "textures/map/detail/fight_button.png",
+    },
+    {
+        name: "map_detail_fight_button_hover",
+        file: "textures/map/detail/fight_button_hover.png",
+    },
 ],
 
 cursors: [

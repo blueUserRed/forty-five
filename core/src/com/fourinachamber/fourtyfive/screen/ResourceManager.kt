@@ -84,7 +84,9 @@ object ResourceManager {
             it as OnjObject
             resources.add(TextureResource(
                 it.get<String>("name"),
-                it.get<String>("file")
+                it.get<String>("file"),
+                it.getOr("tileable", false),
+                it.getOr("tileScale", 1.0).toFloat(),
             ))
         }
 
