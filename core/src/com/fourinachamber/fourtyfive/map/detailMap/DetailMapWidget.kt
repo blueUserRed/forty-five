@@ -23,6 +23,7 @@ import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fourtyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fourtyfive.utils.*
 import kotlin.math.asin
+import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -201,8 +202,8 @@ class DetailMapWidget(
 //        val offY = mapOffset.y % (background.minHeight / ppu)
 //        val bgX = x + mapOffset.x
 //        val bgY = y + mapOffset.y
-        val gridX = background.minHeight * 0.1f
-        val gridY = background.minHeight * 0.1f
+//        val gridX = background.minHeight * 0.1f
+//        val gridY = background.minHeight * 0.1f
 //        println("${background.minWidth}, ${background.minHeight}")
 //        background.draw(
 //            batch,
@@ -213,6 +214,7 @@ class DetailMapWidget(
 //            width * 2,
 //            height * 2
 //        )
+        drawBackground(batch)
         drawEdges(batch)
         drawNodes(batch)
         drawNodeImages(batch)
@@ -225,6 +227,26 @@ class DetailMapWidget(
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun drawBackground(batch: Batch) {
+
+        val backgroundScale = 0.05f // TODO: remove
+
+        val minWidth = background.minWidth * backgroundScale
+        val minHeight = background.minHeight * backgroundScale
+        val amountX = ceil(width / minWidth).toInt() + 2
+        val amountY = ceil(height / minHeight).toInt() + 2
+        var curX = x - minWidth + (mapOffset.x % minWidth)
+        var curY = y - minHeight + (mapOffset.y % minHeight)
+        repeat(amountX) {
+            repeat(amountY) {
+                background.draw(batch, curX, curY, minWidth, minHeight)
+                curY += minHeight
+            }
+            curY = y - minHeight + (mapOffset.y % minHeight)
+            curX += minWidth
+        }
     }
 
     private fun drawNodeImages(batch: Batch): Unit = map
