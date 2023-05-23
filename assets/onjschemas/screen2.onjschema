@@ -18,6 +18,11 @@ $Viewport {
 
 }
 
+var dialogPart = {
+    text: $AdvancedTextPart[],
+    next: $NextDialogPartSelector
+};
+
 var widgetSharedKeys = {
     debug?: boolean,
     behaviours?: $Behaviour[],
@@ -26,6 +31,7 @@ var widgetSharedKeys = {
     zIndex?: int,
     visible?: boolean,
     name?: string,
+    touchable?: string,
     styles?: { ...* }[]
 };
 
@@ -180,7 +186,8 @@ $Widget {
 
     $DialogWidget {
         dialog: {
-            parts: $AdvancedTextPart[],
+//            parts: $AdvancedTextPart[],
+            parts: dialogPart,
             defaults: {
                 font: string,
                 fontScale: float,
@@ -188,6 +195,8 @@ $Widget {
             },
         },
         progressTime: float,
+        advanceArrowDrawable: string,
+        advanceArrowOffset: float,
         ...widgetSharedKeys
     }
 
@@ -200,6 +209,22 @@ $Widget {
 var advancedTextPartSharedKeys = {
     actions?: $AdvancedTextPartAction[]
 };
+
+$NextDialogPartSelector {
+
+    $FixedNextPart {
+        next: dialogPart
+    }
+
+    $ChooseNextPart {
+        choices: {
+            name: string,
+            next: dialogPart
+        }
+    }
+
+    $EndOfDialog { }
+}
 
 $AdvancedTextPart {
 

@@ -339,6 +339,8 @@ class ScreenBuilder(val file: FileHandle) {
         "DialogWidget" -> DialogWidget(
             Dialog.readFromOnj(widgetOnj.get<OnjObject>("dialog"), screen),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+            widgetOnj.get<String>("advanceArrowDrawable"),
+            widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
             screen
         )
 
@@ -451,6 +453,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
         widgetOnj.ifHas<String>("name") { namedActors[it] = this }
+        widgetOnj.ifHas<String>("touchable") { touchable = Touchable.valueOf(it) }
 
         onClick { fire(ButtonClickEvent()) }
     }
