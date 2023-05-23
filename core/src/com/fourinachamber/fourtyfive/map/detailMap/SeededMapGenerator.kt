@@ -128,9 +128,8 @@ class SeededMapGenerator(
                 imageName = areaName,
                 event = EnterMapMapEvent(areaName, false),
             )
-            println(newArea.imagePos)
             borderNodes.random(rnd).connect(newArea, direction)
-            connections.add(Line(newPos, newArea.edgesTo.first().posAsVec()))
+            connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))//TODO evtl. falsch oder so
             areaNodes.add(newArea)
         }
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
@@ -838,9 +837,9 @@ sealed class DistributionFunction(
         yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
 
-        nodes.forEach { println(it.x.toString() + ", " + it.y) }
+//        nodes.forEach { println(it.x.toString() + ", " + it.y) }
         val possiblePositions: List<Pair<Vector2, Float>> =
-            getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
+            getPossiblePositions(xRange, yRange, restrictions).map { it to 1F/*(scaleMin..scaleMax).random(rnd)*/ }
         return DetailMap.MapDecoration(
             type,
             baseWidth,
@@ -854,14 +853,9 @@ sealed class DistributionFunction(
         nodes: List<MapNodeBuilder>,
         connections: MutableList<Line>
     ): Boolean {
+        val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
         if (collidesOnlyWithNodes) {
-            val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
             for (it in nodes) {
-                if (it.x == 143.5325F && it.y == -122.11233F) {
-                    if (it.posAsVec().sub(data.first).len() < 20) {
-                        println("Hi")
-                    }
-                }
                 val tempRect = it.posAsVec() to it.sizeAsVec()
                 if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
                     (rect.first.y < tempRect.first.y + tempRect.second.y) &&
@@ -872,8 +866,47 @@ sealed class DistributionFunction(
                 }
             }
         } else {
-//           a paint ln("Needs to be implemented")
-            return false
+//            val rect =
+//                data.first to Vector2(data.first.x + baseWidth * data.second, data.first.y + baseHeight * data.second)
+            for (it in connections) {
+                val tempRect = it.start to it.end //TODO hier weitermachen
+                if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                    (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                    (tempRect.first.x < rect.first.x + rect.second.x) &&
+                    (tempRect.first.y < rect.first.y + rect.second.y)
+                ) {
+                    return false
+                }
+            }
+            /* connections.forEach {
+                 val tempRect = it.start to it.start.sub(it.end)
+                 if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                     (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                     (tempRect.first.x < rect.first.x + rect.second.x) &&
+                     (tempRect.first.y < rect.first.y + rect.second.y)
+                 ) {
+                     val k: Float = (it.start.y - it.end.y) / (it.start.x - it.end.x)
+                     if (k.isNaN()) {
+                         println("This isn't possible")
+                         return (max(it.start.y, it.end.y) < rect.first.y || min(it.start.y, it.end.y) > rect.first.y)
+                     } else {
+                         val d = it.start.y - it.start.x * k
+                         val firstY = d + k * rect.first.x
+                         val secY = d + k * rect.second.x
+
+ //                        if ((firstY > rect.first.y && firstY < rect.second.y)) {
+ //                            return false
+ //                        }
+ //                        if ((secY > rect.first.y && secY < rect.second.y)) {
+ //                            return false
+ //                        }
+ //                        if ((min(firstY, secY) < rect.first.y && max(firstY, secY) < rect.second.y)) {
+ //                            return false
+ //                        }
+                         return false
+                     }
+                 }
+             }*/
         }
         return true
     }
@@ -944,7 +977,7 @@ data class MapRestriction(
         20 to { EmptyMapEvent() },
     ),
     val decorations: List<DistributionFunction> = listOf(
-//        DistributionFunction.Random(123, "enemy_texture", 0.05F, 8F, 13F, 0.75F, 2F, true),
+        DistributionFunction.Random(123, "enemy_texture", 9.25F, 8F, 13F, 0.75F, 2F, false),
     ),
     val decorationPadding: Float = 20F,
 ) {
