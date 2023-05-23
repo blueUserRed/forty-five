@@ -11,7 +11,7 @@ var worldHeight = 90.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "red_wing_cm", "hover_detail_background", "reserves_texture", "heart_texture"
+        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture", "heart_texture"
     ]
 },
 
@@ -28,100 +28,117 @@ options: {
     ]
 },
 
-root: $Box {
+var dialogWidget = $DialogWidget {
     styles: [
         {
             flexDirection: flexDirection.row,
+            background: "hover_detail_background",
+            width: 80.0#percent,
+//                minHeight: 5.0#points,
+            positionBottom: 2.0#points,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            flexWrap: wrap.wrap,
+            paddingLeft: 13.0#points,
+            paddingRight: 13.0#points,
+            paddingTop: 3.0#points,
+            paddingBottom: 3.0#points,
+        }
+    ],
+    dialog: {
+        parts: {
+            text: [
+                $Text { text: "World!" },
+            ],
+            next: $ChooseNextPart {
+                choices: [
+                    {
+                        name: "Hello",
+                        next: {
+                            text: [
+                                $Text { text: "Hello World!" }
+                            ],
+                            next: $EndOfDialog { }
+                        }
+                    },
+                    {
+                        name: "Goodbye",
+                        next: {
+                            text: [
+                                $Text { text: "Goodbye World" }
+                            ],
+                            next: $EndOfDialog { }
+                        }
+                    }
+                ]
+            }
+        },
+        defaults: {
+            font: "red_wing_cm",
+            fontScale: 0.1,
+            color: color.black
+        }
+    },
+    progressTime: 0.01,
+    advanceArrowDrawable: "heart_texture",
+    advanceArrowOffset: 1.0,
+    touchable: "enabled",
+    optionsBox: "options_box",
+    optionsFont: "red_wing",
+    optionsFontScale: 0.1,
+    optionsFontColor: color.black
+//        progressTime: 0.09,
+//        debug: true
+};
+
+root: $Box {
+    styles: [
+        {
             width: 100.0#percent,
             height: 100.0#percent,
-            alignItems: align.flexEnd,
-            justifyContent: justify.center
         }
     ]
 } children [
 
-    $DialogWidget {
+    $Box {
         styles: [
             {
-                flexDirection: flexDirection.row,
+                style_priority: 1,
                 background: "hover_detail_background",
-                width: 80.0#percent,
-//                minHeight: 5.0#points,
-                positionBottom: 2.0#points,
-                alignItems: align.center,
+                positionType: positionType.absolute,
+                positionTop: 55.0#points,
+                positionRight: 10.0#points,
                 justifyContent: justify.center,
-                flexWrap: wrap.wrap,
-                paddingLeft: 13.0#points,
-                paddingRight: 13.0#points,
-                paddingTop: 3.0#points,
-                paddingBottom: 3.0#points,
+                flexDirection: flexDirection.column,
+                width: 20.0#points,
+                height: 20.0#points,
+                detached: true
+            },
+            {
+                style_priority: 2,
+                style_condition: state("displayOptionsBox"),
+                detached: false,
             }
         ],
-        dialog: {
-            parts: {
-                text: [
-                    $Text { text: "Hello World! " },
-                    $Text { text: "Goodbye World! ", color: color.red },
-                    $Icon { icon: "reserves_texture" },
-                    $Text { text: "Hello World!" },
-                ],
-                next: $FixedNextPart {
-                    next: {
-                        text: [
-                            $Text { text: "Hello World! " },
-                            $Text { text: "Goodbye World! ", color: color.red },
-                            $Icon { icon: "reserves_texture" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                            $Text { text: "Hello World!" },
-                        ],
-                        next: $FixedNextPart {
-                            next: {
-                                text: [
-                                    $Text { text: "Hello World! " },
-                                    $Text { text: "Goodbye World! ", color: color.red },
-                                    $Icon { icon: "reserves_texture" },
-                                    $Text { text: "Hello World!" },
-                                ],
-                                next: $EndOfDialog { }
-                            }
-                        }
-                    }
-                }
-            },
-            defaults: {
-                font: "red_wing_cm",
-                fontScale: 0.1,
-                color: color.black
+        name: "options_box"
+    },
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 0.0#points,
+                positionRight: 0.0#points,
+                width: 100.0#percent,
+                height: 100.0#percent,
+                flexDirection: flexDirection.row,
+                alignItems: align.flexEnd,
+                justifyContent: justify.center
             }
-        },
-        progressTime: 0.01,
-        advanceArrowDrawable: "heart_texture",
-        advanceArrowOffset: 1.0,
-        touchable: "enabled"
-//        progressTime: 0.09,
-//        debug: true
-    }
+        ],
+        debug: true,
+    } children [
+        dialogWidget
+    ]
 
 ]
