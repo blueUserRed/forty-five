@@ -27,6 +27,25 @@ mapImages: [
     },
 ],
 
+displayNames: [
+    {
+        name: "test_area",
+        display: "Aqua Dulche"
+    },
+    {
+        name: "salem",
+        display: "Salem"
+    },
+    {
+        name: "roadToSalem",
+        display: "Road to Salem"
+    },
+    {
+        name: "test_road",
+        display: "Road to Aqua Dulche"
+    },
+],
+
 generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [

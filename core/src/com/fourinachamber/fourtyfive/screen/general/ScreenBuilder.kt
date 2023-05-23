@@ -20,7 +20,7 @@ import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
-import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+//import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
 import com.fourinachamber.fourtyfive.map.dialog.Dialog
 import com.fourinachamber.fourtyfive.map.dialog.DialogPart
 import com.fourinachamber.fourtyfive.map.dialog.DialogWidget
@@ -324,12 +324,12 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("background")
         )
 
-        "MapEventDetail" -> MapEventDetailWidget(
-            screen,
-            fontOrError(widgetOnj.get<String>("font"), screen),
-            widgetOnj.get<Color>("fontColor"),
-            widgetOnj.get<String>("background")
-        ).apply { touchable = Touchable.enabled }
+//        "MapEventDetail" -> MapEventDetailWidget(
+//            screen,
+//            fontOrError(widgetOnj.get<String>("font"), screen),
+//            widgetOnj.get<Color>("fontColor"),
+//            widgetOnj.get<String>("background")
+//        ).apply { touchable = Touchable.enabled }
 
         "AdvancedText" -> AdvancedTextWidget(
             AdvancedText.readFromOnj(widgetOnj.get<OnjArray>("parts"), screen, widgetOnj.get<OnjObject>("defaults")),
