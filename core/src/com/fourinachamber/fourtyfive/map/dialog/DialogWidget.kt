@@ -6,9 +6,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.*
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.Timeline
 import ktx.actors.onClick
 import onj.value.OnjArray
@@ -16,7 +18,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
 class DialogWidget(
-    private val dialog: Dialog,
     private val progressTime: Int,
     private val advanceArrowDrawableHandle: ResourceHandle,
     private val advanceArrowOffset: Float,
@@ -25,7 +26,7 @@ class DialogWidget(
     private val optionsFontColor: Color,
     private val optionsFontScale: Float,
     private val screen: OnjScreen
-) : AdvancedTextWidget(dialog.firstPart.text, screen) {
+) : AdvancedTextWidget(AdvancedText.EMPTY, screen) {
 
     private var isAnimFinished: Boolean = false
 
@@ -33,10 +34,10 @@ class DialogWidget(
 
     private val timeline: Timeline = Timeline(mutableListOf())
 
-    private var currentPart: DialogPart = dialog.firstPart
+    private var currentPart: DialogPart? = null
         set(value) {
             field = value
-            advancedText = value.text
+            advancedText = value?.text ?: AdvancedText.EMPTY
         }
 
     override var advancedText: AdvancedText
@@ -59,20 +60,21 @@ class DialogWidget(
     private var chosenOption: String? = null
     private var currentOptions: Map<String, DialogPart>? = null
 
-    init {
+    fun start(dialog: Dialog) {
+        currentPart = dialog.firstPart
         advancedText.resetProgress()
         onButtonClick {
             if (readyToAdvance) readyToAdvance = false
         }
         val line = Timeline.timeline {
             delayUntil { isAnimFinished }
-            includeLater( { finished() }, { true } )
+            includeLater({ finished() }, { true })
         }
         timeline.appendAction(line.asAction())
         timeline.start()
     }
 
-    private fun finished(): Timeline = when (val part = currentPart.nextDialogPartSelector) {
+    private fun finished(): Timeline = when (val part = currentPart!!.nextDialogPartSelector) {
 
         is NextDialogPartSelector.Fixed -> Timeline.timeline {
             action { readyToAdvance = true }
@@ -83,6 +85,9 @@ class DialogWidget(
         }
 
         is NextDialogPartSelector.End -> Timeline.timeline {
+            action { readyToAdvance = true }
+            delayUntil { !readyToAdvance }
+            action { FourtyFive.changeToScreen(part.nextScreen) }
         }
 
         is NextDialogPartSelector.Choice -> Timeline.timeline {
@@ -130,7 +135,7 @@ class DialogWidget(
         }
         super.draw(batch, parentAlpha)
         timeline.update()
-        currentPart.text.update()
+        currentPart?.text?.update()
         if (batch != null && readyToAdvance) {
             val aspect = advanceArrowDrawable.minHeight / advanceArrowDrawable.minWidth
             val arrowWidth = width * (1f / 18f)
@@ -174,7 +179,7 @@ data class Dialog(
             val text = AdvancedText.readFromOnj(onj.get<OnjArray>("text"), screen, defaults)
             val nextSelector = onj.get<OnjNamedObject>("next")
             val next = when (nextSelector.name) {
-                "EndOfDialog" -> NextDialogPartSelector.End
+                "EndOfDialog" -> NextDialogPartSelector.End(nextSelector.get<String>("changeToScreen"))
                 "FixedNextPart" -> NextDialogPartSelector.Fixed(
                     readDialogPart(nextSelector.get<OnjObject>("next"), defaults, screen)
                 )
@@ -209,6 +214,6 @@ sealed class NextDialogPartSelector {
         val choices: Map<String, DialogPart>
     ) : NextDialogPartSelector()
 
-    object End : NextDialogPartSelector()
+    class End(val nextScreen: String) : NextDialogPartSelector()
 
 }

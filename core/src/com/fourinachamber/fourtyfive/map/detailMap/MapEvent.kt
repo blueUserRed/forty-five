@@ -17,7 +17,8 @@ object MapEventFactory {
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
-        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) }
+        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
+        "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) }
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -126,5 +127,34 @@ class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEven
         "targetMap" with targetMap
         "placeAtEnd" with placeAtEnd
     }
+
+}
+
+class NPCMapEvent(val npc: String) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "talk to $npc"
+    override val displayName: String = "I just want to talk"
+
+    override fun start() {
+        FourtyFive.changeToScreen("screens/dialog_test.onj", this) // TODO: ugly
+    }
+
+    fun complete() {
+        canBeStarted = false
+        isCompleted = true
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("NPCMapEvent")
+        includeStandardConfig()
+        "npc" with npc
+    }
+
 
 }

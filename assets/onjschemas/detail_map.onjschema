@@ -18,6 +18,11 @@ $MapEvent {
         placeAtEnd: boolean
     }
 
+    $NPCMapEvent {
+        npc: string,
+        ...mapEventStandardConfig
+    }
+
 }
 
 startNode: int,
