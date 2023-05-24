@@ -67,6 +67,8 @@ data class AdvancedText(
 
     companion object {
 
+        val EMPTY = AdvancedText(listOf())
+
         fun readFromOnj(partsOnj: OnjArray, screen: OnjScreen, defaults: OnjObject): AdvancedText {
             val defaultFontName = defaults.get<String>("font")
             val defaultFont = ResourceManager.get<BitmapFont>(screen, defaultFontName)
@@ -74,7 +76,7 @@ data class AdvancedText(
             val defaultFontScale = defaults.get<Double>("fontScale").toFloat()
             val parts = partsOnj.value.map { obj ->
                 obj as OnjNamedObject
-                when (obj.name) {
+                val part = when (obj.name) {
                     "Text" -> TextAdvancedTextPart(
                         obj.get<String>("text"),
                         obj.getOr<String?>("font", null)?.let { ResourceManager.get(screen, it) }
@@ -92,6 +94,16 @@ data class AdvancedText(
                     )
                     else -> throw RuntimeException("unknown text part ${obj.name}")
                 }
+                obj.ifHas<OnjArray>("actions") { arr ->
+                    arr
+                        .value
+                        .forEach {
+                            it as OnjNamedObject
+                            val action = AdvancedTextPartActionFactory.getAction(it)
+                            part.addDialogAction(action)
+                        }
+                }
+                part
             }
             return AdvancedText(parts)
         }
@@ -145,7 +157,6 @@ class TextAdvancedTextPart(
 
     init {
         setFontScale(fontScale)
-        debug = true
     }
 
     override fun addDialogAction(action: AdvancedTextPart.() -> Unit) {
@@ -196,7 +207,7 @@ class IconAdvancedTextPart(
     private val font: BitmapFont,
     private val screen: OnjScreen,
     private val dialogFontScale: Float,
-) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart{
+) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart {
 
 
     override val actor: Actor = this
@@ -216,7 +227,6 @@ class IconAdvancedTextPart(
     init {
         reportDimensionsWithScaling = true
         ignoreScalingWhenDrawing = true
-        debug = true
     }
 
     private fun recalcLayout() {
@@ -241,7 +251,6 @@ class IconAdvancedTextPart(
             recalcLayout()
             calculatedLayout = true
             invalidateHierarchy()
-            println("calculated")
         }
     }
 
@@ -289,7 +298,7 @@ object AdvancedTextPartActionFactory {
         }
     )
 
-    fun getAction(onj: OnjNamedObject): TextAdvancedTextPart.() -> Unit = actions[onj.name]?.invoke(onj)
+    fun getAction(onj: OnjNamedObject): AdvancedTextPart.() -> Unit = actions[onj.name]?.invoke(onj)
         ?: throw RuntimeException("unknown dialog action: ${onj.name}")
 
 }

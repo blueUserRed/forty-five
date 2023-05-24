@@ -25,7 +25,11 @@ options: {
     background: "title_screen_background",
     inputMap: [
         ...(inputMaps.defaultInputMap)
-    ]
+    ],
+    screenController: $DialogScreenController {
+        npcsFile: "maps/npcs.onj",
+        dialogWidgetName: "dialog_widget"
+    }
 },
 
 var dialogWidget = $DialogWidget {
@@ -34,6 +38,7 @@ var dialogWidget = $DialogWidget {
             flexDirection: flexDirection.row,
             background: "hover_detail_background",
             width: 80.0#percent,
+            height: 25.0#percent,
 //                minHeight: 5.0#points,
             positionBottom: 2.0#points,
             alignItems: align.center,
@@ -45,40 +50,41 @@ var dialogWidget = $DialogWidget {
             paddingBottom: 3.0#points,
         }
     ],
-    dialog: {
-        parts: {
-            text: [
-                $Text { text: "World!" },
-            ],
-            next: $ChooseNextPart {
-                choices: [
-                    {
-                        name: "Hello",
-                        next: {
-                            text: [
-                                $Text { text: "Hello World!" }
-                            ],
-                            next: $EndOfDialog { }
-                        }
-                    },
-                    {
-                        name: "Goodbye",
-                        next: {
-                            text: [
-                                $Text { text: "Goodbye World" }
-                            ],
-                            next: $EndOfDialog { }
-                        }
-                    }
-                ]
-            }
-        },
-        defaults: {
-            font: "red_wing_cm",
-            fontScale: 0.1,
-            color: color.black
-        }
-    },
+//    dialog: {
+//        parts: {
+//            text: [
+//                $Text { text: "World!" },
+//            ],
+//            next: $ChooseNextPart {
+//                choices: [
+//                    {
+//                        name: "Hello",
+//                        next: {
+//                            text: [
+//                                $Text { text: "Hello World!" }
+//                            ],
+//                            next: $EndOfDialog { }
+//                        }
+//                    },
+//                    {
+//                        name: "Goodbye",
+//                        next: {
+//                            text: [
+//                                $Text { text: "Goodbye World " }
+////                                $Text { text: "shaking" }
+//                            ],
+//                            next: $EndOfDialog { }
+//                        }
+//                    }
+//                ]
+//            }
+//        },
+//        defaults: {
+//            font: "red_wing_cm",
+//            fontScale: 0.1,
+//            color: color.black
+//        }
+//    },
     progressTime: 0.01,
     advanceArrowDrawable: "heart_texture",
     advanceArrowOffset: 1.0,
@@ -86,7 +92,8 @@ var dialogWidget = $DialogWidget {
     optionsBox: "options_box",
     optionsFont: "red_wing",
     optionsFontScale: 0.1,
-    optionsFontColor: color.black
+    optionsFontColor: color.black,
+    name: "dialog_widget"
 //        progressTime: 0.09,
 //        debug: true
 };
@@ -106,7 +113,7 @@ root: $Box {
                 style_priority: 1,
                 background: "hover_detail_background",
                 positionType: positionType.absolute,
-                positionTop: 55.0#points,
+                positionTop: 35.0#points,
                 positionRight: 10.0#points,
                 justifyContent: justify.center,
                 flexDirection: flexDirection.column,

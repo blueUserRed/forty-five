@@ -337,7 +337,7 @@ class ScreenBuilder(val file: FileHandle) {
         )
 
         "DialogWidget" -> DialogWidget(
-            Dialog.readFromOnj(widgetOnj.get<OnjObject>("dialog"), screen),
+//            Dialog.readFromOnj(widgetOnj.get<OnjObject>("dialog"), screen),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
             widgetOnj.get<String>("advanceArrowDrawable"),
             widgetOnj.get<Double>("advanceArrowOffset").toFloat(),

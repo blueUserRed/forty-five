@@ -1,0 +1,49 @@
+
+import "imports/colors.onj" as color;
+
+npcs: [
+
+    {
+        name: "my_cool_npc",
+        dialog: {
+            parts: {
+                text: [
+                    $Text { text: "World!" },
+                ],
+                next: $ChooseNextPart {
+                    choices: [
+                        {
+                            name: "Hello",
+                            next: {
+                                text: [
+                                    $Text { text: "Hello World!" }
+                                ],
+                                next: $EndOfDialog {
+                                    changeToScreen: "screens/map_test.onj"
+                                }
+                            }
+                        },
+                        {
+                            name: "Goodbye",
+                            next: {
+                                text: [
+                                    $Text { text: "Goodbye World " }
+    //                                $Text { text: "shaking" }
+                                ],
+                                next: $EndOfDialog {
+                                    changeToScreen: "screens/map_test.onj"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.1,
+                color: color.black
+            }
+        },
+    }
+
+]
