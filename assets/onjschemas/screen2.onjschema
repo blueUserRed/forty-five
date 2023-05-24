@@ -26,6 +26,7 @@ var widgetSharedKeys = {
     zIndex?: int,
     visible?: boolean,
     name?: string,
+    touchable?: string,
     styles?: { ...* }[]
 };
 
@@ -169,9 +170,23 @@ $Widget {
 
     $AdvancedText {
         font: string,
-        parts: { text: string, color: Color, actions?: $DialogPartAction[] }[],
-        fontScale: float,
+        parts: $AdvancedTextPart[],
+        defaults: {
+            font: string,
+            fontScale: float,
+            color: Color
+        },
+        ...widgetSharedKeys
+    }
+
+    $DialogWidget {
         progressTime: float,
+        advanceArrowDrawable: string,
+        advanceArrowOffset: float,
+        optionsBox: string,
+        optionsFont: string,
+        optionsFontColor: Color,
+        optionsFontScale: float,
         ...widgetSharedKeys
     }
 
@@ -181,9 +196,30 @@ $Widget {
 
 }
 
-$DialogPartAction {
+var advancedTextPartSharedKeys = {
+    actions?: $AdvancedTextPartAction[]
+};
 
-    $ShakeDialogAction {
+$AdvancedTextPart {
+
+    $Text {
+        text: string,
+        font?: string,
+        color?: Color,
+        fontScale?: float,
+        ...advancedTextPartSharedKeys
+    }
+
+    $Icon {
+        icon: string,
+        ...advancedTextPartSharedKeys
+    }
+
+}
+
+$AdvancedTextPartAction {
+
+    $ShakeTextAction {
         xMagnitude: float,
         xSpeed: float,
         yMagnitude: float,
@@ -200,9 +236,9 @@ $DetailMapProvider {
 
     $FromSeededGeneratorDetailMapProvider {
         seed: int,
-                startArea: string,
-                endArea: string,
-                otherAreas: string[],
+        startArea: string,
+        endArea: string,
+        otherAreas: string[],
     }
 
     $CurrentMapProvider { }
@@ -324,6 +360,11 @@ $ScreenController {
         emptyFontColor: Color,
         emptyFontScale: float,
         emptyText: string,
+    }
+
+    $DialogScreenController {
+        npcsFile: string,
+        dialogWidgetName: string
     }
 
 }

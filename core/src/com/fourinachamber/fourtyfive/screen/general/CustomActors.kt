@@ -286,7 +286,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
             field = value
         }
 
-    private var loadedDrawable: Drawable? = null
+    protected var loadedDrawable: Drawable? = null
+        private set
 
     override var isSelected: Boolean = false
 
@@ -325,7 +326,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         }
 
         if (batch == null || drawable == null) {
-            super.draw(null, parentAlpha)
+            super.draw(batch, parentAlpha)
             return
         }
 
@@ -358,6 +359,14 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         batch.flush()
 
         batch.shader = prevShader
+    }
+
+    fun forceLoadDrawable() {
+        val backgroundHandle = backgroundHandle
+        if (backgroundHandle == null || loadedDrawable != null) return
+        loadedDrawable = ResourceManager.get(screen, backgroundHandle)
+        drawable = loadedDrawable
+        invalidateHierarchy()
     }
 
     override fun getMinWidth(): Float =

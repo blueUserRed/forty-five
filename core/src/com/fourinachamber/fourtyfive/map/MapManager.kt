@@ -9,6 +9,7 @@ import com.fourinachamber.fourtyfive.map.detailMap.MapNode
 import com.fourinachamber.fourtyfive.map.detailMap.MapRestriction
 import com.fourinachamber.fourtyfive.map.detailMap.SeededMapGenerator
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import kotlinx.coroutines.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -27,6 +28,8 @@ object MapManager {
     const val areaMapsPath: String = "maps/areas"
     const val areaDefinitionsMapsPath: String = "maps/area_definitions"
 
+    const val logTag: String = "MapManager"
+
     lateinit var currentDetail: DetailMap
         private set
 
@@ -44,6 +47,9 @@ object MapManager {
             SaveState.currentNode = value.index
         }
 
+    lateinit var displayNames: Map<String, String>
+        private set
+
     fun init() {
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
@@ -58,10 +64,19 @@ object MapManager {
                 it.get<Double>("width").toFloat(),
                 it.get<Double>("width").toFloat()
             )}
-
+        displayNames = onj
+            .get<OnjArray>("displayNames")
+            .value
+            .map { it as OnjObject }
+            .associate { it.get<String>("name") to it.get<String>("display")  }
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
         currentDetail = DetailMap.readFromFile(map)
+    }
+
+    fun displayName(internalName: String) = displayNames[internalName] ?: run {
+        FourtyFiveLogger.medium(logTag, "no display name for $internalName")
+        internalName
     }
 
     fun switchToMap(newMap: String, placeAtEnd: Boolean = false) {

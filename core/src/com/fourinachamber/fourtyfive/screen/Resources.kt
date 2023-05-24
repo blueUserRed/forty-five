@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.BitmapFontData
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
@@ -101,7 +102,9 @@ abstract class Resource(
 
 class TextureResource(
     handle: String,
-    private val file: String
+    private val file: String,
+    val tileable: Boolean,
+    val tileScale: Float
 ) : Resource(handle) {
 
     private var pixmap: Pixmap? = null
@@ -109,8 +112,10 @@ class TextureResource(
     override fun loadDirectMainThread() {
         val texture = Texture(Gdx.files.internal(file))
         val region = TextureRegion(texture)
+        val drawable =
+            if (tileable) TiledDrawable(region).apply { scale = tileScale } else TextureRegionDrawable(region)
         disposables = listOf(texture)
-        variants = listOf(texture, region, TextureRegionDrawable(region))
+        variants = listOf(texture, region, drawable)
     }
 
     override fun prepareLoadingAllThreads() {
@@ -120,8 +125,10 @@ class TextureResource(
     override fun finishLoadingMainThread() {
         val texture = Texture(pixmap)
         val region = TextureRegion(texture)
+        val drawable =
+            if (tileable) TiledDrawable(region).apply { scale = tileScale } else TextureRegionDrawable(region)
         disposables = listOf(texture)
-        variants = listOf(texture, region, TextureRegionDrawable(region))
+        variants = listOf(texture, region, drawable)
     }
 
     override fun dispose() {

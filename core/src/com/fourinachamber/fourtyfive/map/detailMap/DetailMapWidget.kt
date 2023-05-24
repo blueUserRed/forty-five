@@ -17,12 +17,13 @@ import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.screen.general.ZIndexActor
+import com.fourinachamber.fourtyfive.screen.general.onButtonClick
 import com.fourinachamber.fourtyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fourtyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fourtyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fourtyfive.utils.*
-import io.github.orioncraftmc.meditate.YogaNode
 import kotlin.math.asin
+import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -38,7 +39,7 @@ class DetailMapWidget(
     private val lineWidth: Float,
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
-    private val detailWidgetName: String,
+    private val startButtonName: String,
     var backgroundHandle: ResourceHandle
 ) : Widget(), ZIndexActor, StyledActor {
 
@@ -63,6 +64,7 @@ class DetailMapWidget(
     }
 
     private val background: Drawable by lazy {
+//    private val background: TextureRegion by lazy {
         ResourceManager.get(screen, backgroundHandle)
     }
 
@@ -74,16 +76,19 @@ class DetailMapWidget(
         ResourceManager.get(screen, directionIndicatorHandle)
     }
 
-    private val detailWidget: MapEventDetailWidget by lazy {
-        val widget = screen.namedActorOrError(detailWidgetName)
-        if (widget !is MapEventDetailWidget) {
-            throw RuntimeException("expected $detailWidgetName to be of type DetailMapWidget")
-        }
-        widget.onStartClickedListener = this::onStartButtonClicked
-        widget
-    }
+//    private val detailWidget: MapEventDetailWidget by lazy {
+//        val widget = screen.namedActorOrError(detailWidgetName)
+//        if (widget !is MapEventDetailWidget) {
+//            throw RuntimeException("expected $detailWidgetName to be of type DetailMapWidget")
+//        }
+//        widget.onStartClickedListener = this::onStartButtonClicked
+//        widget
+//    }
+
+    private var setupStartButtonListener: Boolean = false
 
     private var pointToNode: MapNode? = null
+    private var screenDragged: Boolean = false
 
     private val dragListener = object : DragListener() {
 
@@ -94,6 +99,7 @@ class DetailMapWidget(
             super.dragStart(event, x, y, pointer)
             dragStartPosition = Vector2(x, y)
             mapOffsetOnDragStart = mapOffset
+            screenDragged = true
         }
 
         override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
@@ -128,8 +134,9 @@ class DetailMapWidget(
         }
 
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
-            super.clicked(event, x, y)
-            if (TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
+            val screenDragged = screenDragged
+            this@DetailMapWidget.screenDragged = false
+            if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
             if (movePlayerTo != null) {
                 skipPlayerAnimation()
                 return
@@ -173,6 +180,11 @@ class DetailMapWidget(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (!setupStartButtonListener) {
+            screen.namedActorOrError(startButtonName).onButtonClick { onStartButtonClicked() }
+            setupStartButtonListener = true
+        }
+
         validate()
         updatePlayerMovement()
         batch ?: return
@@ -185,8 +197,24 @@ class DetailMapWidget(
             ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / 90f) * height
         )
         if (!ScissorStack.pushScissors(scissor)) return
-
-        background.draw(batch, x, y, width, height)
+//        val ppu = Gdx.graphics.width / screen.viewport.worldWidth
+//        val offX = mapOffset.x % (background.minWidth / ppu)
+//        val offY = mapOffset.y % (background.minHeight / ppu)
+//        val bgX = x + mapOffset.x
+//        val bgY = y + mapOffset.y
+//        val gridX = background.minHeight * 0.1f
+//        val gridY = background.minHeight * 0.1f
+//        println("${background.minWidth}, ${background.minHeight}")
+//        background.draw(
+//            batch,
+//            x + (mapOffset.x % width),
+//            y + (mapOffset.y % height),
+////            x - width + offX,
+////            y - height + offY,
+//            width * 2,
+//            height * 2
+//        )
+        drawBackground(batch)
         drawEdges(batch)
         drawNodes(batch)
         drawNodeImages(batch)
@@ -199,6 +227,26 @@ class DetailMapWidget(
 
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun drawBackground(batch: Batch) {
+
+        val backgroundScale = 0.05f // TODO: remove
+
+        val minWidth = background.minWidth * backgroundScale
+        val minHeight = background.minHeight * backgroundScale
+        val amountX = ceil(width / minWidth).toInt() + 2
+        val amountY = ceil(height / minHeight).toInt() + 2
+        var curX = x - minWidth + (mapOffset.x % minWidth)
+        var curY = y - minHeight + (mapOffset.y % minHeight)
+        repeat(amountX) {
+            repeat(amountY) {
+                background.draw(batch, curX, curY, minWidth, minHeight)
+                curY += minHeight
+            }
+            curY = y - minHeight + (mapOffset.y % minHeight)
+            curX += minWidth
+        }
     }
 
     private fun drawNodeImages(batch: Batch): Unit = map
@@ -277,7 +325,7 @@ class DetailMapWidget(
             this.playerNode = movePlayerTo
             MapManager.currentMapNode = movePlayerTo
             playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
-            detailWidget.setForEvent(movePlayerTo.event)
+            setupMapEvent(movePlayerTo.event)
             updateScreenState(movePlayerTo.event)
             this.movePlayerTo = null
             return
@@ -292,9 +340,19 @@ class DetailMapWidget(
         val movePlayerTo = movePlayerTo ?: return
         this.playerNode = movePlayerTo
         playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
-        detailWidget.setForEvent(movePlayerTo.event)
+        setupMapEvent(movePlayerTo.event)
         updateScreenState(movePlayerTo.event)
         this.movePlayerTo = null
+    }
+
+    private fun setupMapEvent(event: MapEvent?) {
+        if (event == null) {
+            screen.leaveState(displayEventDetailScreenState)
+            return
+        }
+        screen.enterState(displayEventDetailScreenState)
+        TemplateString.updateGlobalParam("map.curEvent.displayName", event.displayName)
+        TemplateString.updateGlobalParam("map.curEvent.description", event.descriptionText)
     }
 
     private fun updateScreenState(event: MapEvent?) {
