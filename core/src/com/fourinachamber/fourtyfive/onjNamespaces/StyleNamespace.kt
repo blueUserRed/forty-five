@@ -51,6 +51,11 @@ object StyleNamespace {
             "relative" with OnjPositionType(YogaPositionType.RELATIVE)
             "static" with OnjPositionType(YogaPositionType.STATIC)
             "absolute" with OnjPositionType(YogaPositionType.ABSOLUTE)
+        },
+        "wrap" to buildOnjObject {
+            "noWrap" with OnjFlexWrap(YogaWrap.NO_WRAP)
+            "wrap" with OnjFlexWrap(YogaWrap.WRAP)
+            "wrapReverse" with OnjFlexWrap(YogaWrap.WRAP_REVERSE)
         }
     )
 
@@ -130,6 +135,16 @@ class OnjYogaValue(
     override fun toString(indentationLevel: Int): String = "'--yoga-value--'"
     override fun toJsonString(): String = "'--yoga-value--'"
     override fun toJsonString(indentationLevel: Int): String = "'--yoga-value--'"
+}
+
+class OnjFlexWrap(
+    override val value: YogaWrap
+) : OnjValue() {
+
+    override fun toString(): String = "'--yoga-wrap--'"
+    override fun toString(indentationLevel: Int): String = "'--yoga-wrap--'"
+    override fun toJsonString(): String = "'--yoga-wrap--'"
+    override fun toJsonString(indentationLevel: Int): String = "'--yoga-wrap--'"
 }
 
 class OnjStyleCondition(

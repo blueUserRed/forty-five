@@ -1,0 +1,71 @@
+
+use Common;
+
+var advancedTextPartSharedKeys = {
+    actions?: $AdvancedTextPartAction[]
+};
+
+var dialogPart = {
+    text: $AdvancedTextPart[],
+    next: $NextDialogPartSelector
+};
+
+$NextDialogPartSelector {
+
+    $FixedNextPart {
+        next: dialogPart
+    }
+
+    $ChooseNextPart {
+        choices: {
+            name: string,
+            next: dialogPart
+        }[]
+    }
+
+    $EndOfDialog {
+        changeToScreen: string
+    }
+}
+
+$AdvancedTextPart {
+
+    $Text {
+        text: string,
+        font?: string,
+        color?: Color,
+        fontScale?: float,
+        ...advancedTextPartSharedKeys
+    }
+
+    $Icon {
+        icon: string,
+        ...advancedTextPartSharedKeys
+    }
+
+}
+
+$AdvancedTextPartAction {
+
+    $ShakeTextAction {
+        xMagnitude: float,
+        xSpeed: float,
+        yMagnitude: float,
+        ySpeed: float,
+    }
+
+}
+
+var dialog = {
+    parts: dialogPart,
+    defaults: {
+        font: string,
+        fontScale: float,
+        color: Color
+    },
+};
+
+npcs: {
+    name: string,
+    dialog: dialog
+}[]

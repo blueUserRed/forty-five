@@ -14,6 +14,11 @@ mapImages: {
     height: float
 }[],
 
+displayNames: {
+    name: string,
+    display: string
+}[],
+
 generatorConfig: {
     outputDirectory: string,
     maps: {

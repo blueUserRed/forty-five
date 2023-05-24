@@ -80,7 +80,7 @@ class TemplateString(
 
         private val globalParams: MutableMap<String, Any?> = mutableMapOf()
 
-        private fun updateGlobalParam(param: String, value: Any?) {
+        fun updateGlobalParam(param: String, value: Any?) {
             globalParams[param] = value
             lastParamUpdateTimeStamp = TimeUtils.millis()
         }

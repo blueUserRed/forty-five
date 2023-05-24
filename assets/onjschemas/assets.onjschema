@@ -4,7 +4,9 @@ use Style;
 
 textures: {
     name: string,
-    file: string
+    file: string,
+    tileable?: boolean,
+    tileScale?: float
 }[],
 fonts: {
     name: string,
