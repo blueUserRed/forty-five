@@ -65,7 +65,12 @@ operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 operator fun Vector2.times(other: Float): Vector2 = Vector2(this.x * other, this.y * other)
 operator fun Vector2.div(other: Float): Vector2 = Vector2(this.x / other, this.y / other)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
+operator fun Vector2.unaryMinus(): Vector2 = Vector2(-this.x, -this.y)
 fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
+fun Vector2.withMag(mag: Float): Vector2 = this.unit * mag
+fun Vector2.compare(other: Vector2, epsilon: Float = 0.01f): Boolean =
+    other.x in (this.x - epsilon)..(this.x + epsilon) &&
+    other.y in (this.y - epsilon)..(this.y + epsilon)
 
 operator fun Vector2.component1(): Float = this.x
 operator fun Vector2.component2(): Float = this.y
