@@ -75,7 +75,7 @@ object MapManager {
     }
 
     fun displayName(internalName: String) = displayNames[internalName] ?: run {
-        FourtyFiveLogger.medium(logTag, "no display name for $internalName")
+        FourtyFiveLogger.warn(logTag, "no display name for $internalName")
         internalName
     }
 

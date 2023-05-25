@@ -140,6 +140,9 @@ var mapBox = $Box {
         edgeTexture: "black_texture",
         playerMovementTime: 0.3,
         directionIndicator: "heart_texture",
+        screenSpeed: 2.5,
+        backgroundScale: 0.05,
+        leftScreenSideDeadSection: 10.0,
         detailWidgetName: "start_button" // TODO: fix name
     },
 

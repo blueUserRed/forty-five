@@ -158,6 +158,9 @@ $Widget {
         playerMovementTime: float,
         directionIndicator: string,
         detailWidgetName: string,
+        screenSpeed: float,
+        backgroundScale: float,
+        leftScreenSideDeadSection: float,
         ...widgetSharedKeys
     }
 
