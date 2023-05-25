@@ -60,17 +60,17 @@ generatorConfig: {
 //                compressProbability: 0.55
 //            }
 //        },
-        {
-            name: "test_road",
-            seed: 103,
-            restrictions: {
-                maxNodes: 7,
-                minNodes: 5,
-                maxSplits: 1,
-                splitProbability: 0.25,
-                compressProbability: 0.55
-            }
-        }
+//        {
+//            name: "test_road",
+//            seed: 103,
+//            restrictions: {
+//                maxNodes: 7,
+//                minNodes: 5,
+//                maxSplits: 1,
+//                splitProbability: 0.25,
+//                compressProbability: 0.55
+//            }
+//        }
     ]
 },
 
