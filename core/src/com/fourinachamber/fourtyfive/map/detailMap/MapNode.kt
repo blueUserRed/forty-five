@@ -3,7 +3,6 @@ package com.fourinachamber.fourtyfive.map.detailMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.map.MapManager
-import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
@@ -39,7 +38,7 @@ data class MapNode(
         if (loadedImage != null) return loadedImage
         val handle = getImageData()?.resourceHandle
         if (handle == null) {
-            FourtyFiveLogger.medium(logTag, "No image data found for $imageName")
+            FourtyFiveLogger.warn(logTag, "No image data found for $imageName")
             return null
         }
         loadedImage = ResourceManager.get(screen, handle)

@@ -21,14 +21,12 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.styles.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.alpha
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -460,7 +458,7 @@ open class CustomFlexBox(
 
     override fun reattach() {
         val target = reattachTo ?: run {
-            FourtyFiveLogger.medium("scene", "attempted to reattach, but no target is defined")
+            FourtyFiveLogger.warn("scene", "attempted to reattach, but no target is defined")
             return
         }
         reattachTo = null

@@ -40,7 +40,10 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
-    var backgroundHandle: ResourceHandle
+    var backgroundHandle: ResourceHandle,
+    private var screenSpeed: Float,
+    private var backgroundScale: Float,
+    private val leftScreenSideDeadSection: Float
 ) : Widget(), ZIndexActor, StyledActor {
 
     override var fixedZIndex: Int = 0
@@ -80,6 +83,7 @@ class DetailMapWidget(
     private var setupStartButtonListener: Boolean = false
 
     private var pointToNode: MapNode? = null
+    private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
 
     private val dragListener = object : DragListener() {
@@ -118,6 +122,7 @@ class DetailMapWidget(
 
         override fun mouseMoved(event: InputEvent?, x: Float, y: Float): Boolean {
             updateDirectionIndicator(Vector2(x, y))
+            lastPointerPosition = Vector2(x, y)
             return super.mouseMoved(event, x, y)
         }
 
@@ -208,9 +213,6 @@ class DetailMapWidget(
     }
 
     private fun updateScreenMovement() {
-
-        val screenSpeed = 2.5f // TODO: remove
-
         val moveScreenToPoint = moveScreenToPoint ?: return
         val movement = (moveScreenToPoint - mapOffset).withMag(screenSpeed)
         mapOffset += movement
@@ -218,9 +220,6 @@ class DetailMapWidget(
     }
 
     private fun drawBackground(batch: Batch) {
-
-        val backgroundScale = 0.05f // TODO: remove
-
         val minWidth = background.minWidth * backgroundScale
         val minHeight = background.minHeight * backgroundScale
         val amountX = ceil(width / minWidth).toInt() + 2
@@ -316,6 +315,7 @@ class DetailMapWidget(
             setupMapEvent(movePlayerTo.event)
             updateScreenState(movePlayerTo.event)
             this.movePlayerTo = null
+            updateDirectionIndicator(lastPointerPosition)
             return
         }
         val percent = (movementFinishTime - curTime) / playerMoveTime.toFloat()
@@ -325,8 +325,8 @@ class DetailMapWidget(
         val screenWidth = screen.viewport.worldWidth
         val screenHeight = screen.viewport.worldHeight
         val screenRectangle = Rectangle(
-            -mapOffset.x, -mapOffset.y,
-            screenWidth, screenHeight
+            -mapOffset.x - leftScreenSideDeadSection, -mapOffset.y,
+            screenWidth - leftScreenSideDeadSection, screenHeight
         )
         if (!screenRectangle.contains(playerPos)) {
             moveScreenToPoint = -playerPos + Vector2(screenWidth, screenHeight) / 2f
@@ -340,6 +340,7 @@ class DetailMapWidget(
         setupMapEvent(movePlayerTo.event)
         updateScreenState(movePlayerTo.event)
         this.movePlayerTo = null
+        updateDirectionIndicator(lastPointerPosition)
     }
 
     private fun setupMapEvent(event: MapEvent?) {
