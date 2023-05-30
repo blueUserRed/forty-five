@@ -26,7 +26,11 @@ nodes: [
         isArea: false,
         edgesTo: [ 1, ],
         blockingEdges: [ ],
-        event: $EmptyMapEvent {
+        event: $NPCMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            npc: 'my_cool_npc',
         },
     },
     {

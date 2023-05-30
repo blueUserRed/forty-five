@@ -285,7 +285,7 @@ class IconAdvancedTextPart(
 object AdvancedTextPartActionFactory {
 
     private val actions: Map<String, (onj: OnjObject) -> AdvancedTextPart.() -> Unit> = mapOf(
-        "ShakeDialogAction" to { onj ->
+        "ShakeTextAction" to { onj ->
             val xSpeed = onj.get<Double>("xSpeed").toFloat()
             val xMagnitude = onj.get<Double>("xMagnitude").toFloat()
             val ySpeed = onj.get<Double>("ySpeed").toFloat()

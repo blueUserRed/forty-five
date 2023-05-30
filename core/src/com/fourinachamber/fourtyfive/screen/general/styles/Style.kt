@@ -63,7 +63,7 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
                 is YogaValue -> {
                     to as YogaValue
                     if (to.unit != from.unit || to.unit in arrayOf(YogaUnit.AUTO, YogaUnit.UNDEFINED)) {
-                        FourtyFiveLogger.medium(logTag, "attempted to animate a property of type YogaValue, " +
+                        FourtyFiveLogger.warn(logTag, "attempted to animate a property of type YogaValue, " +
                                 "but the units used are either mixed or set to auto or undefined")
                         return null
                     }
@@ -71,7 +71,7 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
                 }
 
                 else -> {
-                    FourtyFiveLogger.medium(logTag, "attempted to animate property of type ${type.simpleName}, " +
+                    FourtyFiveLogger.warn(logTag, "attempted to animate property of type ${type.simpleName}, " +
                             "which currently cannot be interpolated")
                     null
                 }

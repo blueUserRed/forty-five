@@ -6,6 +6,8 @@ import com.fourinachamber.fourtyfive.utils.Vector2
 import com.fourinachamber.fourtyfive.utils.clone
 import com.fourinachamber.fourtyfive.utils.random
 import com.fourinachamber.fourtyfive.utils.subListTillMax
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
@@ -18,11 +20,11 @@ import kotlin.random.Random
  * Generates a "road map"
  */
 class SeededMapGenerator(
-    private val seed: Long = 103,
+    private val seed: Long,
     /**
      * all possible restrictions and features which the map should have
      */
-    private val restrictions: MapRestriction = MapRestriction()
+    private val restrictions: MapRestriction
 ) {
     private lateinit var nodes: List<MapNodeBuilder>
     private val rnd: Random = Random(seed)
@@ -787,7 +789,7 @@ enum class Direction {
     }
 }*/
 
-sealed class DistributionFunction(
+sealed class DecorationDistributionFunction(
     private val seed: Long,
     protected val type: String,
     protected val density: Float,
@@ -800,19 +802,24 @@ sealed class DistributionFunction(
     protected val rnd: kotlin.random.Random = Random(seed)
 
     class Random(
-        seed: Long, type: String, density: Float = 0.25F, base_width: Float,
-        base_height: Float, scale_min: Float, scale_max: Float, collidesOnlyWithNodes: Boolean
-    ) :
-        DistributionFunction(
-            seed,
-            type,
-            density,
-            base_width,
-            base_height,
-            scale_min,
-            scale_max,
-            collidesOnlyWithNodes
-        ) {
+        seed: Long,
+        type: String,
+        density: Float,
+        baseWidth: Float,
+        baseHeight: Float,
+        scaleMin: Float,
+        scaleMax: Float,
+        collidesOnlyWithNodes: Boolean
+    ) : DecorationDistributionFunction(
+        seed,
+        type,
+        density,
+        baseWidth,
+        baseHeight,
+        scaleMin,
+        scaleMax,
+        collidesOnlyWithNodes
+    ) {
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
             yRange: ClosedFloatingPointRange<Float>,
@@ -892,8 +899,30 @@ sealed class DistributionFunction(
         }
         return true
     }
+
 }
 
+object DecorationDistributionFunctionFactory {
+
+    private val functions: Map<String, (OnjNamedObject, Long) -> DecorationDistributionFunction> = mapOf(
+        "RandomDistributionFunction" to { onj, seed ->
+            DecorationDistributionFunction.Random(
+                seed,
+                onj.get<String>("decoration"),
+                onj.get<Double>("density").toFloat(),
+                onj.get<Double>("baseWidth").toFloat(),
+                onj.get<Double>("baseHeight").toFloat(),
+                onj.get<Double>("scaleMin").toFloat(),
+                onj.get<Double>("scaleMax").toFloat(),
+                onj.get<Boolean>("onlyCollidesWithNodes"),
+            )
+        }
+    )
+
+    fun get(onj: OnjNamedObject, seed: Long): DecorationDistributionFunction = functions[onj.name]?.invoke(onj, seed)
+        ?: throw RuntimeException("unknown decoration distribution function: ${onj.name}")
+
+}
 
 /**
  * all possible restrictions within the MapGenerator
@@ -902,67 +931,64 @@ data class MapRestriction(
     /**
      * minimum number of nodes for main line
      */
-    val maxNodes: Int = 10,
+    val maxNodes: Int,
     /**
      * maximum number of nodes for main line
      */
-    val minNodes: Int = 8,
+    val minNodes: Int,
     /**
      * how many lines are generated and are therefore possible
      */
-    val maxLines: Int = 1,
+    val maxLines: Int,
     /**
      * how likely it is for nodes to split (min. of 0.3 is recommended)
      */
-    val splitProb: Float = 0.9F,
+    val splitProb: Float,
     /**
      * how far it spreads into the "y" direction or is compressed
      */
-    val compressProb: Float = 0.55F,
+    val compressProb: Float,
     /**
      * the average length between two nodes on one line (actually only preferred length, not avg.)
      */
-    val averageLengthOfLineInBetween: Float = 26F,
+    val averageLengthOfLineInBetween: Float,
 
     /**
      * max "y" width for first line, and for other lines: max distance for the x Point from one line to the x Point of another line
      */
-    val maxWidth: Int = 40,
+    val maxWidth: Int,
     /**
      * how strong the random points can go up and down (0 means straight to the right, 1 means 180 Degree)
      */
-    val maxAnglePercent: Float = 0.6F,
+    val maxAnglePercent: Float,
     /**
      * the range from where nodes are checked if there are any other from another line
      */
-    val rangeToCheckBetweenNodes: Float = 70F,
-    val startArea: String = "Franz",
-    val endArea: String = "Huber",
-    val otherAreas: List<String> = listOf("test", "cool"),
-    val minDistanceBetweenAreas: Float = 100F,
+    val rangeToCheckBetweenNodes: Float,
+    val startArea: String,
+    val endArea: String,
+    val otherAreas: List<String>,
+    val minDistanceBetweenAreas: Float,
     /**
      * how far the areas are from the highest/lowest point of the road in a close area around the area
      */
-    val distanceFromAreaToLine: Float = 100F,
+    val distanceFromAreaToLine: Float,
     /**
      * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
      */
-    val percentageForAllowedNodesInRangeBetweenLineAndArea: Float = 0.4F,
+    val percentageForAllowedNodesInRangeBetweenLineAndArea: Float,
     /**
      * the rotation of the road (0 means looking right, PI/2 means looking up, and so on)
      */
-    val rotation: Double = .0,
+    val rotation: Double,
 
-    val fixedEvents: List<MapEvent> = listOf(EmptyMapEvent(), EmptyMapEvent()),
-    val optionalEvents: List<Pair<Int, () -> MapEvent>> = listOf(
-        10 to { EmptyMapEvent() },
-        20 to { EmptyMapEvent() },
-    ),
-    val decorations: List<DistributionFunction> = listOf(
-        DistributionFunction.Random(123, "enemy_texture", 0.25F, 8F, 13F, 0.75F, 2F, true),
-        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
-    ),
-    val decorationPadding: Float = 20F,
+    val fixedEvents: List<MapEvent>,
+    val optionalEvents: List<Pair<Int, () -> MapEvent>>,
+    val decorations: List<DecorationDistributionFunction>,// = listOf(
+//        DistributionFunction.Random(123, "enemy_texture", 0.25F, 8F, 13F, 0.75F, 2F, true),
+//        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
+//    ),
+    val decorationPadding: Float,
 ) {
 
 
@@ -974,6 +1000,41 @@ data class MapRestriction(
             maxLines = onj.get<Long>("maxSplits").toInt(),
             splitProb = onj.get<Double>("splitProbability").toFloat(),
             compressProb = onj.get<Double>("compressProbability").toFloat(),
+            averageLengthOfLineInBetween = onj.get<Double>("averageLengthOfLineInBetween").toFloat(),
+            decorationPadding = onj.get<Double>("decorationPadding").toFloat(),
+            distanceFromAreaToLine = onj.get<Double>("distanceFromAreaToLine").toFloat(),
+            endArea = onj.get<String>("endArea"),
+            startArea = onj.get<String>("startArea"),
+            maxAnglePercent = onj.get<Double>("maxAnglePercent").toFloat(),
+            maxWidth = onj.get<Long>("maxWidth").toInt(),
+            minDistanceBetweenAreas = onj.get<Double>("minDistanceBetweenAreas").toFloat(),
+            rangeToCheckBetweenNodes = onj.get<Double>("rangeToCheckBetweenNodes").toFloat(),
+            percentageForAllowedNodesInRangeBetweenLineAndArea =
+                  onj.get<Double>("percentageForAllowedNodesInRangeBetweenLineAndArea").toFloat(),
+            rotation = onj.get<Double>("rotation"),
+            otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
+            fixedEvents = onj
+                .get<OnjArray>("fixedEvents")
+                .value
+                .map { MapEventFactory.getMapEvent(it as OnjNamedObject) },
+            optionalEvents = onj
+                .get<OnjArray>("optionalEvents")
+                .value
+                .map { it as OnjObject }
+                .map {
+                    it.get<Long>("weight").toInt() to
+                            { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
+                },
+            decorations = onj
+                .get<OnjArray>("decorations")
+                .value
+                .mapIndexed { index, decoration ->
+                    decoration as OnjNamedObject
+                    DecorationDistributionFunctionFactory.get(
+                        decoration,
+                        onj.get<Long>("decorationSeed") * 289708 * index
+                    )
+                }
         )
     }
 }

@@ -27,6 +27,9 @@ import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * the widget used for displaying a [DetailMap]
+ */
 class DetailMapWidget(
     private val screen: OnjScreen,
     private val map: DetailMap,
@@ -40,7 +43,10 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
-    var backgroundHandle: ResourceHandle
+    var backgroundHandle: ResourceHandle,
+    private var screenSpeed: Float,
+    private var backgroundScale: Float,
+    private val leftScreenSideDeadSection: Float
 ) : Widget(), ZIndexActor, StyledActor {
 
     override var fixedZIndex: Int = 0
@@ -64,7 +70,6 @@ class DetailMapWidget(
     }
 
     private val background: Drawable by lazy {
-//    private val background: TextureRegion by lazy {
         ResourceManager.get(screen, backgroundHandle)
     }
 
@@ -76,18 +81,12 @@ class DetailMapWidget(
         ResourceManager.get(screen, directionIndicatorHandle)
     }
 
-//    private val detailWidget: MapEventDetailWidget by lazy {
-//        val widget = screen.namedActorOrError(detailWidgetName)
-//        if (widget !is MapEventDetailWidget) {
-//            throw RuntimeException("expected $detailWidgetName to be of type DetailMapWidget")
-//        }
-//        widget.onStartClickedListener = this::onStartButtonClicked
-//        widget
-//    }
+    private var moveScreenToPoint: Vector2? = null
 
     private var setupStartButtonListener: Boolean = false
 
     private var pointToNode: MapNode? = null
+    private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
 
     private val dragListener = object : DragListener() {
@@ -108,6 +107,7 @@ class DetailMapWidget(
             val mapOffsetOnDragStart = mapOffsetOnDragStart ?: return
             val draggedDistance = dragStartPosition - Vector2(x, y)
             mapOffset = mapOffsetOnDragStart - draggedDistance
+            moveScreenToPoint = null
         }
 
         override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
@@ -125,6 +125,7 @@ class DetailMapWidget(
 
         override fun mouseMoved(event: InputEvent?, x: Float, y: Float): Boolean {
             updateDirectionIndicator(Vector2(x, y))
+            lastPointerPosition = Vector2(x, y)
             return super.mouseMoved(event, x, y)
         }
 
@@ -183,10 +184,12 @@ class DetailMapWidget(
         if (!setupStartButtonListener) {
             screen.namedActorOrError(startButtonName).onButtonClick { onStartButtonClicked() }
             setupStartButtonListener = true
+            setupMapEvent(playerNode.event)
         }
 
         validate()
         updatePlayerMovement()
+        updateScreenMovement()
         batch ?: return
 
         batch.flush()
@@ -197,23 +200,6 @@ class DetailMapWidget(
             ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / 90f) * height
         )
         if (!ScissorStack.pushScissors(scissor)) return
-//        val ppu = Gdx.graphics.width / screen.viewport.worldWidth
-//        val offX = mapOffset.x % (background.minWidth / ppu)
-//        val offY = mapOffset.y % (background.minHeight / ppu)
-//        val bgX = x + mapOffset.x
-//        val bgY = y + mapOffset.y
-//        val gridX = background.minHeight * 0.1f
-//        val gridY = background.minHeight * 0.1f
-//        println("${background.minWidth}, ${background.minHeight}")
-//        background.draw(
-//            batch,
-//            x + (mapOffset.x % width),
-//            y + (mapOffset.y % height),
-////            x - width + offX,
-////            y - height + offY,
-//            width * 2,
-//            height * 2
-//        )
         drawBackground(batch)
         drawEdges(batch)
         drawNodes(batch)
@@ -229,10 +215,14 @@ class DetailMapWidget(
         ScissorStack.popScissors()
     }
 
+    private fun updateScreenMovement() {
+        val moveScreenToPoint = moveScreenToPoint ?: return
+        val movement = (moveScreenToPoint - mapOffset).withMag(screenSpeed)
+        mapOffset += movement
+        if (mapOffset.compare(moveScreenToPoint, 6f)) this.moveScreenToPoint = null
+    }
+
     private fun drawBackground(batch: Batch) {
-
-        val backgroundScale = 0.05f // TODO: remove
-
         val minWidth = background.minWidth * backgroundScale
         val minHeight = background.minHeight * backgroundScale
         val amountX = ceil(width / minWidth).toInt() + 2
@@ -328,12 +318,22 @@ class DetailMapWidget(
             setupMapEvent(movePlayerTo.event)
             updateScreenState(movePlayerTo.event)
             this.movePlayerTo = null
+            updateDirectionIndicator(lastPointerPosition)
             return
         }
         val percent = (movementFinishTime - curTime) / playerMoveTime.toFloat()
         val movementPath = Vector2(movePlayerTo.x, movePlayerTo.y) - Vector2(playerNode.x, playerNode.y)
         val playerOffset = movementPath * (1f - percent)
         playerPos = Vector2(playerNode.x, playerNode.y) + playerOffset
+        val screenWidth = screen.viewport.worldWidth
+        val screenHeight = screen.viewport.worldHeight
+        val screenRectangle = Rectangle(
+            -mapOffset.x - leftScreenSideDeadSection, -mapOffset.y,
+            screenWidth - leftScreenSideDeadSection, screenHeight
+        )
+        if (!screenRectangle.contains(playerPos)) {
+            moveScreenToPoint = -playerPos + Vector2(screenWidth, screenHeight) / 2f
+        }
     }
 
     private fun skipPlayerAnimation() {
@@ -343,14 +343,16 @@ class DetailMapWidget(
         setupMapEvent(movePlayerTo.event)
         updateScreenState(movePlayerTo.event)
         this.movePlayerTo = null
+        updateDirectionIndicator(lastPointerPosition)
     }
 
     private fun setupMapEvent(event: MapEvent?) {
-        if (event == null) {
+        if (event == null || !event.displayDescription) {
             screen.leaveState(displayEventDetailScreenState)
-            return
+        } else {
+            screen.enterState(displayEventDetailScreenState)
         }
-        screen.enterState(displayEventDetailScreenState)
+        event ?: return
         TemplateString.updateGlobalParam("map.curEvent.displayName", event.displayName)
         TemplateString.updateGlobalParam("map.curEvent.description", event.descriptionText)
     }

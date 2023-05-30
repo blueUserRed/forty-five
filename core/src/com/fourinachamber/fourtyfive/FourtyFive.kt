@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.game.*
 import com.fourinachamber.fourtyfive.game.card.TextureGenerator
 import com.fourinachamber.fourtyfive.map.*
-import com.fourinachamber.fourtyfive.map.detailMap.MapEventFactory
 import com.fourinachamber.fourtyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.CommonNamespace
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
@@ -13,16 +12,9 @@ import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fourtyfive.onjNamespaces.ScreenNamespace
 import com.fourinachamber.fourtyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fourtyfive.rendering.Renderable
-import com.fourinachamber.fourtyfive.screen.Resource
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.utils.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import onj.customization.OnjConfig
-import kotlin.concurrent.thread
-import kotlin.system.measureTimeMillis
 
 /**
  * main game object
@@ -40,6 +32,8 @@ object FourtyFive : Game() {
     var currentGame: GameController? = null
 
     val serviceThread: ServiceThread = ServiceThread()
+
+    var cleanExit: Boolean = true
 
     override fun create() {
         init()
@@ -121,7 +115,7 @@ object FourtyFive : Game() {
     }
 
     override fun dispose() {
-        FourtyFiveLogger.medium(logTag, "game closing")
+        FourtyFiveLogger.warn(logTag, "game closing")
         MapManager.write()
         SaveState.write()
         currentScreen?.dispose()
