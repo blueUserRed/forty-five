@@ -59,21 +59,16 @@ class SeededMapGenerator(
         connections: MutableList<Line>
     ): List<DetailMap.MapDecoration> {
         val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
+        val xRange =
+            ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
+        val yRange =
+            ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
         restrictions.decorations.forEach {
-            decos.add(it.getDecoration(nodes, restrictions, connections))
+            decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
         }
         return decos
     }
 
-    //nodeTexture: "key_select_frame",
-//        playerTexture: "enemy_texture",
-//        playerWidth: 2.0,
-//        playerHeight: 6.0,
-//        background: "white_texture",
-//        edgeTexture: "black_texture",
-//        playerMovementTime: 0.3,
-//        directionIndicator: "heart_texture",
-//        detailWidgetName: "mapEventDetail"
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
         val nodesWithoutEvents: MutableList<MapNodeBuilder> = nodes.filter { a -> a.event == null }.toMutableList()
         for (curEvent in restrictions.fixedEvents) {
@@ -94,8 +89,12 @@ class SeededMapGenerator(
         while (nodesWithoutEvents.isNotEmpty()) {
             val curNode = nodesWithoutEvents.random(rnd)
             val rndMy = rnd.nextDouble()
-            curNode.event =
-                restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
+            if (restrictions.optionalEvents.isEmpty()) {
+                curNode.event = null
+            } else {
+                curNode.event =
+                    restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
+            }
             nodesWithoutEvents.remove(curNode)
         }
     }
@@ -107,6 +106,8 @@ class SeededMapGenerator(
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
+        mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.LEFT
+        mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.RIGHT
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, false)
         mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, true)
         for (areaName in restrictions.otherAreas) {
@@ -121,7 +122,7 @@ class SeededMapGenerator(
                 newPos = Vector2(
                     x,
                     getLimitInRange(x, nodes, direction)
-                            + restrictions.distanceFromAreaToLine * if (direction == Direction.UP) 1 else -1
+                            + restrictions.distanceFromAreaToLine * (if (direction == Direction.UP) 1 else -1)
                 )
                 borderNodes = getBorderNodesInArea(direction, nodes, newPos)
             } while (isIllegalPositionForArea(newPos, areaNodes))
@@ -129,10 +130,12 @@ class SeededMapGenerator(
                 0,
                 newPos.x,
                 newPos.y,
-                event = EnterMapMapEvent(areaName, false)
-            ) //TODO add direction of event picture
+                imagePos = MapNode.ImagePosition.valueOf(direction.name),
+                imageName = areaName,
+                event = EnterMapMapEvent(areaName, false),
+            )
             borderNodes.random(rnd).connect(newArea, direction)
-            connections.add(Line(newPos, newArea.edgesTo.first().posAsVec()))
+            connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))//TODO evtl. falsch oder so
             areaNodes.add(newArea)
         }
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
@@ -144,10 +147,8 @@ class SeededMapGenerator(
     private fun isIllegalPositionForArea(
         newPos: Vector2,
         areaNodes: MutableList<MapNodeBuilder>
-    ): Boolean {
-        return areaNodes.stream()
-            .anyMatch { Vector2(it.x, it.y).sub(newPos).len() < restrictions.minDistanceBetweenAreas }
-    }
+    ): Boolean = areaNodes.stream()
+        .anyMatch { Vector2(it.x, it.y).sub(newPos).len() < restrictions.minDistanceBetweenAreas }
 
     /**
      * searches for the highest or lowest position of nodes in an area
@@ -166,12 +167,10 @@ class SeededMapGenerator(
         direction: Direction,
         nodes: MutableList<MapNodeBuilder>,
         position: Vector2
-    ): List<MapNodeBuilder> {
-        return nodes.filter {
-            Vector2(it.x, it.y).sub(position)
-                .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllowedNodesInRangeBetweenLineAndArea)
-                    && it.dirNodes[direction.ordinal] == null && it.edgesTo.size < 4
-        }
+    ): List<MapNodeBuilder> = nodes.filter {
+        Vector2(it.x, it.y).sub(position)
+            .len() < restrictions.distanceFromAreaToLine * (1 + restrictions.percentageForAllowedNodesInRangeBetweenLineAndArea)
+                && it.dirNodes[direction.ordinal] == null && it.edgesTo.size < 4 && it.event !is EnterMapMapEvent
     }
 
 
@@ -269,7 +268,7 @@ class SeededMapGenerator(
         nodes: MutableList<MapNodeBuilder>,
         line1: Line,
         line2: Line,
-        possibleIntersectionNode: MapNodeBuilder
+        possibleIntersectionNode: MapNodeBuilder,
     ): Line {
         val curNodes = arrayOf(
             nodes.first { a -> a.x == line1.start.x && a.y == line1.start.y },
@@ -282,7 +281,7 @@ class SeededMapGenerator(
 
         if (possibleIntersectionNode == curNodes[0] || possibleIntersectionNode == curNodes[1]) return line2
         if (possibleIntersectionNode == curNodes[2] || possibleIntersectionNode == curNodes[3]) return line1
-        return if (rnd.nextBoolean()) line1 else line2
+        return (if (rnd.nextBoolean()) line1 else line2)
     }
 
     /**
@@ -455,7 +454,7 @@ class SeededMapGenerator(
                 if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) minPos = min(minPos, a.y)
             }
             if (minPos == Float.MAX_VALUE) {
-                minPos = lineNodes.stream().min { o1, o2 -> (abs(o1.x - x) compareTo abs(o2.x - x)) }.orElse(null).y
+                return lineNodes.minBy { o1 -> o1.x - x }.y
             }
             return minPos
         }
@@ -467,6 +466,9 @@ class SeededMapGenerator(
             var maxPos: Float = Float.MIN_VALUE
             lineNodes.forEach { a ->
                 if (abs(x - a.x) < restrict.rangeToCheckBetweenNodes / 2) maxPos = max(maxPos, a.y)
+            }
+            if (maxPos == Float.MIN_VALUE) {
+                return lineNodes.minBy { o1 -> o1.x - x }.y
             }
             return maxPos
         }
@@ -539,7 +541,6 @@ class SeededMapGenerator(
                 for (i in lineNodes) {
                     if (i !in nodes) nodes.add(i)
                 }
-
 //                var lastToTop: Int = -2
 //                var lastToBottom: Int = -2
                 for (i in lineNodes.indices) {
@@ -641,10 +642,9 @@ class SeededMapGenerator(
             node: MapNodeBuilder,
             direction: Direction,
             numberOfNodes: Int = 3
-        ): List<MapNodeBuilder> {
-            return lineNodes.filter { a -> a.x > node.x }.sortedBy { a -> a.x }.subListTillMax(numberOfNodes)
+        ): List<MapNodeBuilder> =
+            lineNodes.filter { a -> a.x > node.x }.sortedBy { a -> a.x }.subListTillMax(numberOfNodes)
                 .filter { a -> a.dirNodes[direction.ordinal] == null }
-        }
 
         private fun getPossibleDirectionsToCreatePathsTo(
             node: MapNodeBuilder,
@@ -671,9 +671,6 @@ class SeededMapGenerator(
 }
 
 class Line(val start: Vector2, val end: Vector2) {
-//    fun angle(): Float {
-//        return start.sub(end).angleRad()
-//    }
 
     fun intersection(other: Line): Vector2? {
         val intersectVector = Vector2()
@@ -790,7 +787,7 @@ enum class Direction {
 }*/
 
 sealed class DecorationDistributionFunction(
-    private val seed: Long,
+    protected val seed: Long,
     protected val type: String,
     protected val density: Float,
     protected val baseWidth: Float,
@@ -825,7 +822,6 @@ sealed class DecorationDistributionFunction(
             yRange: ClosedFloatingPointRange<Float>,
             restrict: MapRestriction
         ): List<Vector2> {
-
             val positions: MutableList<Vector2> = mutableListOf()
             var pointsLeft: Int = ((xRange.endInclusive - xRange.start) / baseWidth
                     * (yRange.endInclusive - yRange.start) / baseHeight * density).toInt()
@@ -838,13 +834,6 @@ sealed class DecorationDistributionFunction(
 
     }
 
-//    class SimplexNoise(seed: Long, type: String, moreLikelyAtEvents: List<Pair<Int, String>> = listOf()) :
-//        DistributionFunction(seed, type, moreLikelyAtEvents) {
-//        override fun getPossiblePositions(): List<Vector2> {
-//            return mutableListOf()
-//        }
-//    }
-
     abstract fun getPossiblePositions(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>,
@@ -854,15 +843,14 @@ sealed class DecorationDistributionFunction(
     fun getDecoration(
         nodes: List<MapNodeBuilder>,
         restrictions: MapRestriction,
-        connections: MutableList<Line>
+        connections: MutableList<Line>,
+        xRange: ClosedFloatingPointRange<Float>,
+        yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
-        val xRange =
-            ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
-        val yRange =
-            ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
-        nodes.forEach { println(it.x.toString() + ", " + it.y) }
+
+//        nodes.forEach { println(it.x.toString() + ", " + it.y) }
         val possiblePositions: List<Pair<Vector2, Float>> =
-            getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
+            getPossiblePositions(xRange, yRange, restrictions).map { it to 1F/*(scaleMin..scaleMax).random(rnd)*/ }
         return DetailMap.MapDecoration(
             type,
             baseWidth,
@@ -876,14 +864,9 @@ sealed class DecorationDistributionFunction(
         nodes: List<MapNodeBuilder>,
         connections: MutableList<Line>
     ): Boolean {
+        val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
         if (collidesOnlyWithNodes) {
-            val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
             for (it in nodes) {
-                if (it.x == 143.5325F && it.y == -122.11233F) {
-                    if (it.posAsVec().sub(data.first).len() < 20) {
-                        println("Hi")
-                    }
-                }
                 val tempRect = it.posAsVec() to it.sizeAsVec()
                 if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
                     (rect.first.y < tempRect.first.y + tempRect.second.y) &&
@@ -894,8 +877,47 @@ sealed class DecorationDistributionFunction(
                 }
             }
         } else {
-//           a paint ln("Needs to be implemented")
-            return false
+//            val rect =
+//                data.first to Vector2(data.first.x + baseWidth * data.second, data.first.y + baseHeight * data.second)
+            for (it in connections) {
+                val tempRect = it.start to it.end //TODO hier weitermachen
+                if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                    (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                    (tempRect.first.x < rect.first.x + rect.second.x) &&
+                    (tempRect.first.y < rect.first.y + rect.second.y)
+                ) {
+                    return false
+                }
+            }
+            /* connections.forEach {
+                 val tempRect = it.start to it.start.sub(it.end)
+                 if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                     (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                     (tempRect.first.x < rect.first.x + rect.second.x) &&
+                     (tempRect.first.y < rect.first.y + rect.second.y)
+                 ) {
+                     val k: Float = (it.start.y - it.end.y) / (it.start.x - it.end.x)
+                     if (k.isNaN()) {
+                         println("This isn't possible")
+                         return (max(it.start.y, it.end.y) < rect.first.y || min(it.start.y, it.end.y) > rect.first.y)
+                     } else {
+                         val d = it.start.y - it.start.x * k
+                         val firstY = d + k * rect.first.x
+                         val secY = d + k * rect.second.x
+
+ //                        if ((firstY > rect.first.y && firstY < rect.second.y)) {
+ //                            return false
+ //                        }
+ //                        if ((secY > rect.first.y && secY < rect.second.y)) {
+ //                            return false
+ //                        }
+ //                        if ((min(firstY, secY) < rect.first.y && max(firstY, secY) < rect.second.y)) {
+ //                            return false
+ //                        }
+                         return false
+                     }
+                 }
+             }*/
         }
         return true
     }
@@ -919,8 +941,9 @@ object DecorationDistributionFunctionFactory {
         }
     )
 
-    fun get(onj: OnjNamedObject, seed: Long): DecorationDistributionFunction = functions[onj.name]?.invoke(onj, seed)
-        ?: throw RuntimeException("unknown decoration distribution function: ${onj.name}")
+    fun get(onj: OnjNamedObject, seed: Long): DecorationDistributionFunction =
+        functions[onj.name]?.invoke(onj, seed)
+            ?: throw RuntimeException("unknown decoration distribution function: ${onj.name}")
 
 }
 
@@ -964,78 +987,81 @@ data class MapRestriction(
     /**
      * the range from where nodes are checked if there are any other from another line
      */
-    val rangeToCheckBetweenNodes: Float,
-    val startArea: String,
-    val endArea: String,
-    val otherAreas: List<String>,
-    val minDistanceBetweenAreas: Float,
-    /**
-     * how far the areas are from the highest/lowest point of the road in a close area around the area
-     */
-    val distanceFromAreaToLine: Float,
-    /**
-     * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
-     */
-    val percentageForAllowedNodesInRangeBetweenLineAndArea: Float,
-    /**
-     * the rotation of the road (0 means looking right, PI/2 means looking up, and so on)
-     */
-    val rotation: Double,
+val rangeToCheckBetweenNodes: Float,
+val startArea: String,
+val endArea: String,
+val otherAreas: List<String>,
+val minDistanceBetweenAreas: Float,
+/**
+ * how far the areas are from the highest/lowest point of the road in a close area around the area
+ */
+val distanceFromAreaToLine: Float,
 
-    val fixedEvents: List<MapEvent>,
-    val optionalEvents: List<Pair<Int, () -> MapEvent>>,
-    val decorations: List<DecorationDistributionFunction>,// = listOf(
+/**
+ * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
+ */
+val percentageForAllowedNodesInRangeBetweenLineAndArea: Float,
+/**
+ * the rotation of the road (0 means looking right, PI/2 means looking up, and so on)
+ */
+val rotation: Double,
+
+val fixedEvents: List<MapEvent>,
+val optionalEvents: List<Pair<Int, () -> MapEvent>>,
+val decorations: List<DecorationDistributionFunction>,// = listOf(
+
 //        DistributionFunction.Random(123, "enemy_texture", 0.25F, 8F, 13F, 0.75F, 2F, true),
 //        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
 //    ),
-    val decorationPadding: Float,
-) {
+val decorationPadding: Float,
+)
+{
 
 
     companion object {
 
-        fun fromOnj(onj: OnjObject): MapRestriction = MapRestriction(
-            maxNodes = onj.get<Long>("maxNodes").toInt(),
-            minNodes = onj.get<Long>("minNodes").toInt(),
-            maxLines = onj.get<Long>("maxSplits").toInt(),
-            splitProb = onj.get<Double>("splitProbability").toFloat(),
-            compressProb = onj.get<Double>("compressProbability").toFloat(),
-            averageLengthOfLineInBetween = onj.get<Double>("averageLengthOfLineInBetween").toFloat(),
-            decorationPadding = onj.get<Double>("decorationPadding").toFloat(),
-            distanceFromAreaToLine = onj.get<Double>("distanceFromAreaToLine").toFloat(),
-            endArea = onj.get<String>("endArea"),
-            startArea = onj.get<String>("startArea"),
-            maxAnglePercent = onj.get<Double>("maxAnglePercent").toFloat(),
-            maxWidth = onj.get<Long>("maxWidth").toInt(),
-            minDistanceBetweenAreas = onj.get<Double>("minDistanceBetweenAreas").toFloat(),
-            rangeToCheckBetweenNodes = onj.get<Double>("rangeToCheckBetweenNodes").toFloat(),
-            percentageForAllowedNodesInRangeBetweenLineAndArea =
-                  onj.get<Double>("percentageForAllowedNodesInRangeBetweenLineAndArea").toFloat(),
-            rotation = onj.get<Double>("rotation"),
-            otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
-            fixedEvents = onj
-                .get<OnjArray>("fixedEvents")
-                .value
-                .map { MapEventFactory.getMapEvent(it as OnjNamedObject) },
-            optionalEvents = onj
-                .get<OnjArray>("optionalEvents")
-                .value
-                .map { it as OnjObject }
-                .map {
-                    it.get<Long>("weight").toInt() to
-                            { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
-                },
-            decorations = onj
-                .get<OnjArray>("decorations")
-                .value
-                .mapIndexed { index, decoration ->
-                    decoration as OnjNamedObject
-                    DecorationDistributionFunctionFactory.get(
-                        decoration,
-                        onj.get<Long>("decorationSeed") * 289708 * index
-                    )
-                }
-        )
-    }
+    fun fromOnj(onj: OnjObject): MapRestriction = MapRestriction(
+        maxNodes = onj.get<Long>("maxNodes").toInt(),
+        minNodes = onj.get<Long>("minNodes").toInt(),
+        maxLines = onj.get<Long>("maxSplits").toInt(),
+        splitProb = onj.get<Double>("splitProbability").toFloat(),
+        compressProb = onj.get<Double>("compressProbability").toFloat(),
+        averageLengthOfLineInBetween = onj.get<Double>("averageLengthOfLineInBetween").toFloat(),
+        decorationPadding = onj.get<Double>("decorationPadding").toFloat(),
+        distanceFromAreaToLine = onj.get<Double>("distanceFromAreaToLine").toFloat(),
+        endArea = onj.get<String>("endArea"),
+        startArea = onj.get<String>("startArea"),
+        maxAnglePercent = onj.get<Double>("maxAnglePercent").toFloat(),
+        maxWidth = onj.get<Long>("maxWidth").toInt(),
+        minDistanceBetweenAreas = onj.get<Double>("minDistanceBetweenAreas").toFloat(),
+        rangeToCheckBetweenNodes = onj.get<Double>("rangeToCheckBetweenNodes").toFloat(),
+        percentageForAllowedNodesInRangeBetweenLineAndArea =
+        onj.get<Double>("percentageForAllowedNodesInRangeBetweenLineAndArea").toFloat(),
+        rotation = onj.get<Double>("rotation"),
+        otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
+        fixedEvents = onj
+            .get<OnjArray>("fixedEvents")
+            .value
+            .map { MapEventFactory.getMapEvent(it as OnjNamedObject) },
+        optionalEvents = onj
+            .get<OnjArray>("optionalEvents")
+            .value
+            .map { it as OnjObject }
+            .map {
+                it.get<Long>("weight").toInt() to
+                        { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
+            },
+        decorations = onj
+            .get<OnjArray>("decorations")
+            .value
+            .mapIndexed { index, decoration ->
+                decoration as OnjNamedObject
+                DecorationDistributionFunctionFactory.get(
+                    decoration,
+                    onj.get<Long>("decorationSeed") * 289708 * index
+                )
+            }
+    )
+}
 }
 
