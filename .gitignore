@@ -7,6 +7,7 @@ assets/logging/fourty-five.log
 assets/maps/roads/*
 assets/maps/areas/*
 /onj/build
+error_logs/*
 
 ## Java
 

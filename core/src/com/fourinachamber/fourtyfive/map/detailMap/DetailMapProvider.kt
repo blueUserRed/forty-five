@@ -21,14 +21,14 @@ object DetailMapProviderFactory {
 
     private val detailMapProviderCreators: Map<String, (onj: OnjObject) -> DetailMapProvider> = mapOf(
         "FromFileDetailMapProvider" to { FromFileDetailMapProvider(Gdx.files.internal(it.get<String>("file"))) },
-        "FromSeededGeneratorDetailMapProvider" to { onj ->
-            FromSeededGeneratorDetailMapProvider(
-                onj.get<Long>("seed"),
-                onj.get<String>("startArea"),
-                onj.get<String>("endArea"),
-                onj.get<OnjArray>("otherAreas").value.map { it.value as String }
-            )
-        },
+//        "FromSeededGeneratorDetailMapProvider" to { onj ->
+//            FromSeededGeneratorDetailMapProvider(
+//                onj.get<Long>("seed"),
+//                onj.get<String>("startArea"),
+//                onj.get<String>("endArea"),
+//                onj.get<OnjArray>("otherAreas").value.map { it.value as String }
+//            )
+//        },
         "CurrentMapProvider" to { CurrentMapProvider() }
     )
 
@@ -46,20 +46,20 @@ class FromFileDetailMapProvider(
 
 }
 
-class FromSeededGeneratorDetailMapProvider(
-    private val seed: Long,
-    private val startArea: String,
-    private val endArea: String,
-    private val otherAreas: List<String>,
-
-    ) : DetailMapProvider {
-
-    override fun get(): DetailMap {
-        val generator =
-            SeededMapGenerator(seed, MapRestriction(startArea = startArea, endArea = endArea, otherAreas = otherAreas))
-        return generator.generate("anonymous")
-    }
-}
+//class FromSeededGeneratorDetailMapProvider(
+//    private val seed: Long,
+//    private val startArea: String,
+//    private val endArea: String,
+//    private val otherAreas: List<String>,
+//
+//    ) : DetailMapProvider {
+//
+//    override fun get(): DetailMap {
+//        val generator =
+//            SeededMapGenerator(seed, MapRestriction(startArea = startArea, endArea = endArea, otherAreas = otherAreas))
+//        return generator.generate("anonymous")
+//    }
+//}
 
 class CurrentMapProvider : DetailMapProvider {
 

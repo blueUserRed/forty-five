@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
@@ -14,6 +15,13 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
 
+/**
+ * represents a detailMap (a map that isn't the WorldView)
+ * @param name the name of the map
+ * @param startNode the first node of the map
+ * @param endNode the last node of the map
+ * @param decorations a list of decorations that are placed on the map
+ */
 data class DetailMap(
     val name: String,
     val startNode: MapNode,
@@ -21,14 +29,24 @@ data class DetailMap(
     val decorations: List<MapDecoration>
 ) {
 
+    /**
+     * all unique nodes on the map
+     */
     val uniqueNodes by lazy {
         startNode.getUniqueNodes()
     }
 
+    /**
+     * all unique edges on the map (a -> b and b -> a count as the same)
+     */
     val uniqueEdges by lazy {
         MapNode.getUniqueEdgesFor(uniqueNodes)
     }
 
+
+    /**
+     * all unique edges on the map (a -> b and b -> a count as different ones)
+     */
     val uniqueEdgesWithOpposites by lazy {
         MapNode.getUniqueEdgesWithOppositesFor(uniqueNodes)
     }
@@ -63,6 +81,9 @@ data class DetailMap(
 
     companion object {
 
+        /**
+         * reads a DetailMap from an onj-file
+         */
         fun readFromFile(file: FileHandle): DetailMap {
             val onj = OnjParser.parseFile(file.file())
             mapOnjSchema.assertMatches(onj)
@@ -122,8 +143,15 @@ data class DetailMap(
 
     }
 
+    /**
+     * represents a type of decoration on the map
+     * @param drawableHandle the handle for the drawable used for drawing the decoration
+     * @param baseWidth the base width of the drawable, can be adjusted by scaling
+     * @param baseHeight the base height of the drawable, can be adjusted by scaling
+     * @param instances all instances of the decoration on the map. Contains both the position and the scale
+     */
     data class MapDecoration(
-        val drawableHandle: String,
+        val drawableHandle: ResourceHandle,
         val baseWidth: Float,
         val baseHeight: Float,
         val instances: List<Pair<Vector2 /* = Position */, Float /* = scale */>>

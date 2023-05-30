@@ -1,10 +1,70 @@
 
+
+var mapEventStandardConfig = {
+    currentlyBlocks: boolean,
+    canBeStarted: boolean,
+    isCompleted: boolean
+};
+
+$MapEvent {
+
+    $EmptyMapEvent { }
+
+    $EncounterMapEvent {
+        ...mapEventStandardConfig
+    }
+
+    $EnterMapMapEvent {
+        targetMap: string,
+        placeAtEnd: boolean
+    }
+
+    $NPCMapEvent {
+        npc: string,
+        ...mapEventStandardConfig
+    }
+
+}
+
+$DecorationDistributionFunction {
+
+    $RandomDistributionFunction {
+        decoration: string,
+        density: float,
+        baseWidth: float,
+        baseHeight: float,
+        scaleMin: float,
+        scaleMax: float,
+        onlyCollidesWithNodes: float
+    }
+
+}
+
 var mapRestrictions = {
     maxNodes: int,
     minNodes: int,
     maxSplits: int,
     splitProbability: float,
     compressProbability: float,
+    averageLengthOfLineInBetween: float,
+    decorationPadding: float,
+    distanceFromAreaToLine: float,
+    startArea: string,
+    endArea: string,
+    maxAnglePercent: float,
+    maxWidth: int,
+    minDistanceBetweenAreas: float,
+    rangeToCheckBetweenNodes: float,
+    percentageForAllowedNodesInRangeBetweenLineAndArea: float,
+    rotation: float,
+    otherAreas: string[],
+    fixedEvents: $MapEvent[],
+    optionalEvents: {
+        weight: int,
+        event: $MapEvent
+    }[],
+    decorationSeed: int,
+    decorations: $DecorationDistributionFunction[]
 };
 
 mapImages: {

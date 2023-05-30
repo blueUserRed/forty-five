@@ -321,15 +321,11 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             widgetOnj.get<String>("directionIndicator"),
             widgetOnj.get<String>("detailWidgetName"),
-            widgetOnj.get<String>("background")
+            widgetOnj.get<String>("background"),
+            widgetOnj.get<Double>("screenSpeed").toFloat(),
+            widgetOnj.get<Double>("backgroundScale").toFloat(),
+            widgetOnj.get<Double>("leftScreenSideDeadSection").toFloat(),
         )
-
-//        "MapEventDetail" -> MapEventDetailWidget(
-//            screen,
-//            fontOrError(widgetOnj.get<String>("font"), screen),
-//            widgetOnj.get<Color>("fontColor"),
-//            widgetOnj.get<String>("background")
-//        ).apply { touchable = Touchable.enabled }
 
         "AdvancedText" -> AdvancedTextWidget(
             AdvancedText.readFromOnj(widgetOnj.get<OnjArray>("parts"), screen, widgetOnj.get<OnjObject>("defaults")),
@@ -352,18 +348,6 @@ class ScreenBuilder(val file: FileHandle) {
             OnjParser.parseFile(Gdx.files.internal(MapManager.mapConfigFilePath).file()) as OnjObject, // TODO: schema?
             screen
         )
-
-//        "SplitPlane" -> {
-//            val firstFlexBox = CustomFlexBox(screen)
-//            val secondFlexBox = CustomFlexBox(screen)
-//            val splitPane = SplitPane(
-//                firstFlexBox,
-//                secondFlexBox,
-//                widgetOnj.get<Boolean>("vertical"),
-//                SplitPane.SplitPaneStyle()
-//            )
-//            firstFlexBox
-//        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
@@ -471,14 +455,6 @@ class ScreenBuilder(val file: FileHandle) {
     private fun fontOrError(name: String, screen: OnjScreen): BitmapFont {
         return ResourceManager.get(screen, name)
     }
-//
-//    private fun drawableOrError(name: String, screen: OnjScreen): Drawable {
-//        return ResourceManager.get(screen, name)
-//    }
-//
-//    private fun animationOrError(name: String, screen: OnjScreen): FrameAnimation {
-//        return ResourceManager.get(screen, name)
-//    }
 
     private fun alignmentOrError(alignment: String): Int = when (alignment) {
         "center" -> Align.center
