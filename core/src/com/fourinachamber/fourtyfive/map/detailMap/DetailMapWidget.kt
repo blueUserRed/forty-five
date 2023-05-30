@@ -27,6 +27,9 @@ import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * the widget used for displaying a [DetailMap]
+ */
 class DetailMapWidget(
     private val screen: OnjScreen,
     private val map: DetailMap,
