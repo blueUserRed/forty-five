@@ -1,17 +1,15 @@
 package com.fourinachamber.fourtyfive.map.detailMap
 
-import com.badlogic.gdx.Gdx
 import com.fourinachamber.fourtyfive.FourtyFive
 import com.fourinachamber.fourtyfive.map.MapManager
-import com.fourinachamber.fourtyfive.screen.general.ScreenBuilder
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
-import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
+/**
+ * used for dynamically creating events
+ */
 object MapEventFactory {
 
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
@@ -26,15 +24,32 @@ object MapEventFactory {
 
 }
 
+/**
+ * an event that can be placed on a [MapNode]
+ */
 abstract class MapEvent {
 
+    /**
+     * when this is true, the player can't progress past the node
+     */
     abstract var currentlyBlocks: Boolean
         protected set
+
+    /**
+     * when this is true, a start button for this event is displayed and the start function can be called
+     */
     abstract var canBeStarted: Boolean
         protected set
+
+    /**
+     * when this is true, the event was already completed
+     */
     abstract var isCompleted: Boolean
         protected set
 
+    /**
+     * when this is true, the sidebar with the description is displayed
+     */
     abstract val displayDescription: Boolean
 
     open val icon: String? = null

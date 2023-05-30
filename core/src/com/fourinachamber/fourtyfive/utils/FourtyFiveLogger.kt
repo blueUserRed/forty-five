@@ -109,6 +109,10 @@ object FourtyFiveLogger {
         writelnFormatted(tag, message, LogLevel.SEVERE)
     }
 
+    /**
+     * logs the exception and exits the application
+     */
+    @AllThreadsAllowed
     fun fatal(exception: java.lang.Exception) {
         severe("fatal",  "Encountered an exception that could not be recovered from")
         stackTrace(exception)
@@ -116,6 +120,9 @@ object FourtyFiveLogger {
         Gdx.app.exit()
     }
 
+    /**
+     * logs the message and exits the application
+     */
     fun fatal(message: String) {
         severe("fatal",  "Encountered an error that could not be recovered from")
         severe("fatal", message)
@@ -173,19 +180,6 @@ object FourtyFiveLogger {
         if (logLevel != LogLevel.DEBUG) return
         writeln("-[fps]- ${Gdx.graphics.framesPerSecond}")
     }
-
-//    private fun formatMessage(tag: String, message: String, level: LogLevel): String {
-//        //TODO: this could use TemplateString
-//        val time = messageTimeFormatter.format(LocalDateTime.now())
-//
-//        val (beginAnsi, endAnsi) = when (level) {
-//            LogLevel.DEBUG -> ANSI.blue to ANSI.reset
-//            LogLevel.MEDIUM -> ANSI.yellow to ANSI.reset
-//            LogLevel.SEVERE -> ANSI.red to ANSI.reset
-//        }
-//
-//        return "$beginAnsi[$time $tag] $message$endAnsi"
-//    }
 
     private fun outputOrError(config: OnjNamedObject): Pair<PrintStream, Boolean> = when (val name = config.name) {
 
