@@ -3,9 +3,9 @@ package com.fourinachamber.fourtyfive.map.detailMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fourtyfive.map.MapManager
-import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.OnjScreen
+import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import kotlin.math.PI
 import kotlin.math.cos
@@ -36,7 +36,12 @@ data class MapNode(
     fun getImage(screen: OnjScreen): Drawable? {
         if (imageName == null) return null
         if (loadedImage != null) return loadedImage
-        loadedImage = ResourceManager.get(screen, getImageData()?.resourceHandle ?: return null)
+        val handle = getImageData()?.resourceHandle
+        if (handle == null) {
+            FourtyFiveLogger.warn(logTag, "No image data found for $imageName")
+            return null
+        }
+        loadedImage = ResourceManager.get(screen, handle)
         return loadedImage
     }
 
@@ -77,6 +82,8 @@ data class MapNode(
     }
 
     companion object {
+
+        const val logTag = "MapNode"
 
         fun getUniqueEdgesFor(uniqueNodes: List<MapNode>): List<Pair<MapNode, MapNode>> {
             val edges = mutableListOf<Pair<MapNode, MapNode>>()

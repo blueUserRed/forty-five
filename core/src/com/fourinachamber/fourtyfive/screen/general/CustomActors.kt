@@ -21,14 +21,12 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fourtyfive.screen.ResourceHandle
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.general.styles.*
 import com.fourinachamber.fourtyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.alpha
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -286,7 +284,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
             field = value
         }
 
-    private var loadedDrawable: Drawable? = null
+    protected var loadedDrawable: Drawable? = null
+        private set
 
     override var isSelected: Boolean = false
 
@@ -325,7 +324,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         }
 
         if (batch == null || drawable == null) {
-            super.draw(null, parentAlpha)
+            super.draw(batch, parentAlpha)
             return
         }
 
@@ -358,6 +357,14 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         batch.flush()
 
         batch.shader = prevShader
+    }
+
+    fun forceLoadDrawable() {
+        val backgroundHandle = backgroundHandle
+        if (backgroundHandle == null || loadedDrawable != null) return
+        loadedDrawable = ResourceManager.get(screen, backgroundHandle)
+        drawable = loadedDrawable
+        invalidateHierarchy()
     }
 
     override fun getMinWidth(): Float =
@@ -451,7 +458,7 @@ open class CustomFlexBox(
 
     override fun reattach() {
         val target = reattachTo ?: run {
-            FourtyFiveLogger.medium("scene", "attempted to reattach, but no target is defined")
+            FourtyFiveLogger.warn("scene", "attempted to reattach, but no target is defined")
             return
         }
         reattachTo = null

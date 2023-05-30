@@ -1,6 +1,7 @@
 package com.fourinachamber.fourtyfive.screen.general
 
 import com.fourinachamber.fourtyfive.game.GameController
+import com.fourinachamber.fourtyfive.map.dialog.DialogScreenController
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardSelectionScreenController
 import com.fourinachamber.fourtyfive.screen.gameComponents.IntroScreenController
 import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
@@ -12,7 +13,8 @@ object ScreenControllerFactory {
     private val controllers: MutableMap<String, (OnjNamedObject) -> ScreenController> = mutableMapOf(
         "GameScreenController" to { onj -> GameController(onj) },
         "CardSelectionScreenController" to { onj -> CardSelectionScreenController(onj) },
-        "IntroScreenController" to { onj -> IntroScreenController(onj) }
+        "IntroScreenController" to { onj -> IntroScreenController(onj) },
+        "DialogScreenController" to { onj -> DialogScreenController(onj) },
     )
 
     /**

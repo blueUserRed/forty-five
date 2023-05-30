@@ -1,7 +1,11 @@
 
-logTarget: $Console { },
-//logTarget: $File {
-//    path: "logging/fourty-five.log"
-//},
+logTargets: [
+
+    $Console { },
+
+    $File {
+        path: "logging/fourty-five.log"
+    }
+],
 versionTag: "dev",
 logLevel: "debug"
