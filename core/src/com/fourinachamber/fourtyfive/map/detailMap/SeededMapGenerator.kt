@@ -87,8 +87,12 @@ class SeededMapGenerator(
         while (nodesWithoutEvents.isNotEmpty()) {
             val curNode = nodesWithoutEvents.random(rnd)
             val rndMy = rnd.nextDouble()
-            curNode.event =
-                restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
+            if (restrictions.optionalEvents.isEmpty()) {
+                curNode.event = null
+            } else {
+                curNode.event =
+                    restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
+            }
             nodesWithoutEvents.remove(curNode)
         }
     }
@@ -973,8 +977,8 @@ data class MapRestriction(
 
     val fixedEvents: List<MapEvent> = listOf(EmptyMapEvent(), EmptyMapEvent()),
     val optionalEvents: List<Pair<Int, () -> MapEvent>> = listOf(
-        10 to { EmptyMapEvent() },
-        20 to { EmptyMapEvent() },
+//        10 to { EmptyMapEvent() },
+//        20 to { EmptyMapEvent() },
     ),
     val decorations: List<DistributionFunction> = listOf(
         DistributionFunction.Random(123, "enemy_texture", 9.25F, 8F, 13F, 0.75F, 2F, false),
