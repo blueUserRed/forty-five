@@ -15,7 +15,9 @@ assets: {
     useAssets: [
         "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
-        "black_texture", "world_view_background",
+        "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
+        "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
+        "map_background_wasteland_tileable", "location_sign_salem", "nav_bar_background",
         ...(inventoryPopup.assets.useAssets)
     ]
 },
@@ -57,7 +59,7 @@ var worldView = $WorldView {
 var navBar = $Box {
      styles: [
          {
-             background: "black_texture",
+             background: "nav_bar_background",
              flexDirection: flexDirection.row,
              width: 100.0#percent,
              height: 5.0#percent
@@ -125,16 +127,6 @@ var mapBox = $Box {
                 positionTop: 0.0#points,
                 positionBottom: 0.0#points,
             },
-//            {
-//                style_priority: 2,
-//                style_condition: state("transition away"),
-//                positionRight: 20.0#points,
-//                positionBottom: worldHeight#points,
-//                style_animation: {
-//                    duration: 0.5,
-//                    interpolation: interpolation.linear
-//                }
-//            }
         ],
         detailMapProvider: $CurrentMapProvider { },
         nodeSize: 5.0,
@@ -144,20 +136,27 @@ var mapBox = $Box {
         playerTexture: "enemy_texture",
         playerWidth: 2.0,
         playerHeight: 6.0,
-        background: "white_texture",
+        background: "map_background_grass_tileable",
         edgeTexture: "black_texture",
         playerMovementTime: 0.3,
         directionIndicator: "heart_texture",
-        detailWidgetName: "mapEventDetail"
+        screenSpeed: 2.5,
+        backgroundScale: 0.05,
+        leftScreenSideDeadSection: 10.0,
+        detailWidgetName: "start_button" // TODO: fix name
     },
 
-    $MapEventDetail {
+    $Box {
         styles: [
             {
                 style_priority: 1,
-                height: 70.0#percent,
-                width: 20.0#percent,
-                positionLeft: 80.0#percent
+                alignItems: align.center,
+                justifyContent: justify.spaceAround,
+                height: 90.0#percent,
+                width: 30.0#percent,
+                positionLeft: 100.0#percent,
+                paddingLeft: 13.0#points,
+                background: "map_detail_background"
             },
             {
                 style_priority: 2,
@@ -177,11 +176,41 @@ var mapBox = $Box {
                 positionLeft: 0.0#points,
             },
         ],
-        name: "mapEventDetail",
-        font: "red_wing",
-        fontColor: color.black,
-        background: "white_rounded",
-    }
+    } children [
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{map.curEvent.displayName}",
+            fontScale: 0.11,
+            color: color.white,
+        },
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{map.curEvent.description}",
+            fontScale: 0.07,
+            color: color.white,
+        },
+
+        $Image {
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "map_detail_fight_button"
+                },
+                {
+                    style_priority: 2,
+                    background: "map_detail_fight_button_hover",
+                    style_condition: hover()
+                }
+            ],
+            name: "start_button",
+            reportDimensionsWithScaling: true,
+            scaleX: 0.06,
+            scaleY: 0.06,
+        }
+
+    ]
 
 ];
 

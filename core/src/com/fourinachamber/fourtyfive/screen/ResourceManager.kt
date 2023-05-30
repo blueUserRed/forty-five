@@ -2,14 +2,7 @@ package com.fourinachamber.fourtyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
-import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fourtyfive.game.card.Card
-import com.fourinachamber.fourtyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fourtyfive.utils.FourtyFiveLogger
 import com.fourinachamber.fourtyfive.utils.MainThreadOnly
 import onj.parser.OnjParser
@@ -18,7 +11,6 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import kotlin.reflect.KClass
-import kotlin.reflect.cast
 
 interface ResourceBorrower
 
@@ -84,7 +76,9 @@ object ResourceManager {
             it as OnjObject
             resources.add(TextureResource(
                 it.get<String>("name"),
-                it.get<String>("file")
+                it.get<String>("file"),
+                it.getOr("tileable", false),
+                it.getOr("tileScale", 1.0).toFloat(),
             ))
         }
 
@@ -202,7 +196,7 @@ object ResourceManager {
             for (borrower in resource.borrowedBy) message.append("is borrowed by: $borrower\n")
         }
         if (message.isEmpty()) return
-        FourtyFiveLogger.medium(logTag, "Resources were loaded when the game closed. This could " +
+        FourtyFiveLogger.warn(logTag, "Resources were loaded when the game closed. This could " +
                 "be indicative of a memory leak. Summary:")
         FourtyFiveLogger.dump(FourtyFiveLogger.LogLevel.MEDIUM, message.toString())
     }

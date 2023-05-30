@@ -9,6 +9,6 @@ $LogTarget {
 
 }
 
-logTarget: $LogTarget,
+logTargets: $LogTarget[],
 versionTag: string,
 logLevel: string

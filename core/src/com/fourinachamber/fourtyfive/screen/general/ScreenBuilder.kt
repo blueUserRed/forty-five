@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.SplitPane
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
@@ -21,7 +20,11 @@ import com.fourinachamber.fourtyfive.keyInput.KeyInputMap
 import com.fourinachamber.fourtyfive.map.MapManager
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fourtyfive.map.detailMap.DetailMapWidget
-import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+//import com.fourinachamber.fourtyfive.map.detailMap.MapEventDetailWidget
+import com.fourinachamber.fourtyfive.map.dialog.Dialog
+import com.fourinachamber.fourtyfive.map.dialog.DialogPart
+import com.fourinachamber.fourtyfive.map.dialog.DialogWidget
+import com.fourinachamber.fourtyfive.map.dialog.NextDialogPartSelector
 import com.fourinachamber.fourtyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fourtyfive.screen.ResourceManager
 import com.fourinachamber.fourtyfive.screen.gameComponents.CardHand
@@ -318,24 +321,26 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             widgetOnj.get<String>("directionIndicator"),
             widgetOnj.get<String>("detailWidgetName"),
-            widgetOnj.get<String>("background")
+            widgetOnj.get<String>("background"),
+            widgetOnj.get<Double>("screenSpeed").toFloat(),
+            widgetOnj.get<Double>("backgroundScale").toFloat(),
+            widgetOnj.get<Double>("leftScreenSideDeadSection").toFloat(),
         )
 
-        "MapEventDetail" -> MapEventDetailWidget(
-            screen,
-            fontOrError(widgetOnj.get<String>("font"), screen),
-            widgetOnj.get<Color>("fontColor"),
-            widgetOnj.get<String>("background")
-        ).apply { touchable = Touchable.enabled }
-
         "AdvancedText" -> AdvancedTextWidget(
-            Dialog.readFromOnj(
-                widgetOnj.get<OnjArray>("parts"),
-                fontOrError(widgetOnj.get<String>("font"), screen),
-                screen
-            ),
-            widgetOnj.get<Double>("fontScale").toFloat(),
+            AdvancedText.readFromOnj(widgetOnj.get<OnjArray>("parts"), screen, widgetOnj.get<OnjObject>("defaults")),
+            screen
+        )
+
+        "DialogWidget" -> DialogWidget(
+//            Dialog.readFromOnj(widgetOnj.get<OnjObject>("dialog"), screen),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
+            widgetOnj.get<String>("advanceArrowDrawable"),
+            widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
+            widgetOnj.get<String>("optionsBox"),
+            fontOrError(widgetOnj.get<String>("optionsFont"), screen),
+            widgetOnj.get<Color>("optionsFontColor"),
+            widgetOnj.get<Double>("optionsFontScale").toFloat(),
             screen
         )
 
@@ -343,18 +348,6 @@ class ScreenBuilder(val file: FileHandle) {
             OnjParser.parseFile(Gdx.files.internal(MapManager.mapConfigFilePath).file()) as OnjObject, // TODO: schema?
             screen
         )
-
-//        "SplitPlane" -> {
-//            val firstFlexBox = CustomFlexBox(screen)
-//            val secondFlexBox = CustomFlexBox(screen)
-//            val splitPane = SplitPane(
-//                firstFlexBox,
-//                secondFlexBox,
-//                widgetOnj.get<Boolean>("vertical"),
-//                SplitPane.SplitPaneStyle()
-//            )
-//            firstFlexBox
-//        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
@@ -448,6 +441,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
         widgetOnj.ifHas<String>("name") { namedActors[it] = this }
+        widgetOnj.ifHas<String>("touchable") { touchable = Touchable.valueOf(it) }
 
         onClick { fire(ButtonClickEvent()) }
     }
@@ -461,14 +455,6 @@ class ScreenBuilder(val file: FileHandle) {
     private fun fontOrError(name: String, screen: OnjScreen): BitmapFont {
         return ResourceManager.get(screen, name)
     }
-//
-//    private fun drawableOrError(name: String, screen: OnjScreen): Drawable {
-//        return ResourceManager.get(screen, name)
-//    }
-//
-//    private fun animationOrError(name: String, screen: OnjScreen): FrameAnimation {
-//        return ResourceManager.get(screen, name)
-//    }
 
     private fun alignmentOrError(alignment: String): Int = when (alignment) {
         "center" -> Align.center

@@ -1,9 +1,10 @@
 package com.fourinachamber.fourtyfive.utils
 
 import com.badlogic.gdx.Gdx
-import com.sun.jdi.BooleanValue
+import com.fourinachamber.fourtyfive.FourtyFive
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
+import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.io.PrintStream
@@ -25,7 +26,7 @@ object FourtyFiveLogger {
      */
     const val schemaFilePath = "onjschemas/log_config.onjschema"
 
-    private lateinit var output: PrintStream
+    private lateinit var outputs: List<Pair<PrintStream, Boolean>>
     private var logLevel: LogLevel = LogLevel.DEBUG
 
     private val messageTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
@@ -40,18 +41,40 @@ object FourtyFiveLogger {
         schema.assertMatches(config)
         config as OnjObject
 
-        output = outputOrError(config.get<OnjNamedObject>("logTarget"))
+        outputs = config
+            .get<OnjArray>("logTargets")
+            .value
+            .map { outputOrError(it as OnjNamedObject) }
+
         logLevel = logLevelOrError(config.get<String>("logLevel"))
 
         val time = detailTimeFormatter.format(LocalDateTime.now())
 
-        output.println("""
+        writeln("""
            **** fourty-five log
            **** produced by version '${config.get<String>("versionTag")}'
            **** LogLevel is $logLevel
            **** time is $time
           
         """.trimIndent())
+    }
+
+    private fun writeln(s: String) = outputs.forEach { it.first.println(s) }
+
+    private fun writelnFormatted(tag: String, message: String, level: LogLevel) {
+        //TODO: this could use TemplateString
+        val time = messageTimeFormatter.format(LocalDateTime.now())
+
+        val (beginAnsi, endAnsi) = when (level) {
+            LogLevel.DEBUG -> ANSI.blue to ANSI.reset
+            LogLevel.MEDIUM -> ANSI.yellow to ANSI.reset
+            LogLevel.SEVERE -> ANSI.red to ANSI.reset
+        }
+
+        outputs.forEach { (stream, shouldUseAnsi) ->
+            if (shouldUseAnsi) stream.println("$beginAnsi[$time $tag] $message$endAnsi")
+            else stream.println("[$time $tag] $message")
+        }
     }
 
     /**
@@ -62,7 +85,7 @@ object FourtyFiveLogger {
     @AllThreadsAllowed
     fun debug(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.DEBUG)) return
-        output.println(formatMessage(tag, message, LogLevel.DEBUG))
+        writelnFormatted(tag, message, LogLevel.DEBUG)
     }
 
     /**
@@ -71,9 +94,9 @@ object FourtyFiveLogger {
      * came from (which class, which instance, ...)
      */
     @AllThreadsAllowed
-    fun medium(tag: String, message: String) {
+    fun warn(tag: String, message: String) {
         if (!logLevel.shouldLog(LogLevel.MEDIUM)) return
-        output.println(formatMessage(tag, message, LogLevel.MEDIUM))
+        writelnFormatted(tag, message, LogLevel.MEDIUM)
     }
 
     /**
@@ -83,7 +106,28 @@ object FourtyFiveLogger {
      */
     @AllThreadsAllowed
     fun severe(tag: String, message: String) {
-        output.println(formatMessage(tag, message, LogLevel.SEVERE))
+        writelnFormatted(tag, message, LogLevel.SEVERE)
+    }
+
+    /**
+     * logs the exception and exits the application
+     */
+    @AllThreadsAllowed
+    fun fatal(exception: java.lang.Exception) {
+        severe("fatal",  "Encountered an exception that could not be recovered from")
+        stackTrace(exception)
+        FourtyFive.cleanExit = false
+        Gdx.app.exit()
+    }
+
+    /**
+     * logs the message and exits the application
+     */
+    fun fatal(message: String) {
+        severe("fatal",  "Encountered an error that could not be recovered from")
+        severe("fatal", message)
+        FourtyFive.cleanExit = false
+        Gdx.app.exit()
     }
 
     /**
@@ -94,7 +138,7 @@ object FourtyFiveLogger {
      */
     fun log(level: LogLevel, tag: String, message: String) {
         if (!logLevel.shouldLog(level)) return
-        output.println(formatMessage(tag, message, level))
+        writelnFormatted(tag, message, level)
     }
 
     /**
@@ -103,11 +147,11 @@ object FourtyFiveLogger {
      */
     fun dump(level: LogLevel, message: String, title: String? = null) {
         if (!logLevel.shouldLog(level)) return
-        title?.let { output.println("-> $it:") }
+        title?.let { writeln("-> $it:") }
         val lines = message.lines()
         val max = lines.size.toString().length
         lines.forEachIndexed { index, line ->
-            output.println("${(index + 1).toString().padStart(max, '0')}| $line")
+            writeln("${(index + 1).toString().padStart(max, '0')}| $line")
         }
     }
 
@@ -116,7 +160,7 @@ object FourtyFiveLogger {
      */
     @AllThreadsAllowed
     fun stackTrace(e: Exception) {
-        e.printStackTrace(output)
+        outputs.forEach { e.printStackTrace(it.first) }
     }
 
     /**
@@ -125,7 +169,7 @@ object FourtyFiveLogger {
      */
     @AllThreadsAllowed
     fun title(message: String) {
-        output.println("-------------$message-------------")
+        writeln("-------------$message-------------")
     }
 
     /**
@@ -134,31 +178,18 @@ object FourtyFiveLogger {
     @AllThreadsAllowed
     fun fps() {
         if (logLevel != LogLevel.DEBUG) return
-        output.println("-[fps]- ${Gdx.graphics.framesPerSecond}")
+        writeln("-[fps]- ${Gdx.graphics.framesPerSecond}")
     }
 
-    private fun formatMessage(tag: String, message: String, level: LogLevel): String {
-        //TODO: this could use TemplateString
-        val time = messageTimeFormatter.format(LocalDateTime.now())
+    private fun outputOrError(config: OnjNamedObject): Pair<PrintStream, Boolean> = when (val name = config.name) {
 
-        val (beginAnsi, endAnsi) = when (level) {
-            LogLevel.DEBUG -> ANSI.blue to ANSI.reset
-            LogLevel.MEDIUM -> ANSI.yellow to ANSI.reset
-            LogLevel.SEVERE -> ANSI.red to ANSI.reset
-        }
-
-        return "$beginAnsi[$time $tag] $message$endAnsi"
-    }
-
-    private fun outputOrError(config: OnjNamedObject): PrintStream = when (val name = config.name) {
-
-        "Console" -> System.out
+        "Console" -> System.out to true
         "File" -> {
             val path = config.get<String>("path")
             val file = Gdx.files.local(path).file()
             if (file.exists()) file.delete()
             file.createNewFile()
-            PrintStream(file)
+            PrintStream(file) to false
         }
 
         else -> throw RuntimeException("unknown log target: $name")

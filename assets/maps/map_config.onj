@@ -27,6 +27,25 @@ mapImages: [
     },
 ],
 
+displayNames: [
+    {
+        name: "test_area",
+        display: "Aqua Dulche"
+    },
+    {
+        name: "salem",
+        display: "Salem"
+    },
+    {
+        name: "roadToSalem",
+        display: "Road to Salem"
+    },
+    {
+        name: "test_road",
+        display: "Road to Aqua Dulche"
+    },
+],
+
 generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [
@@ -41,17 +60,17 @@ generatorConfig: {
 //                compressProbability: 0.55
 //            }
 //        },
-        {
-            name: "test_road",
-            seed: 103,
-            restrictions: {
-                maxNodes: 7,
-                minNodes: 5,
-                maxSplits: 1,
-                splitProbability: 0.25,
-                compressProbability: 0.55
-            }
-        }
+//        {
+//            name: "test_road",
+//            seed: 103,
+//            restrictions: {
+//                maxNodes: 7,
+//                minNodes: 5,
+//                maxSplits: 1,
+//                splitProbability: 0.25,
+//                compressProbability: 0.55
+//            }
+//        }
     ]
 },
 
