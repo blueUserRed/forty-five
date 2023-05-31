@@ -51,7 +51,8 @@ class SeededMapGenerator(
         val decos = generateDecorations(nodes, connections)
         nodes.forEach { it.rotate(restrictions.rotation) }
         this.nodes = nodes
-        return DetailMap(name, build(), this.nodes.last().asNode!!, decos)
+        build()
+        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos)
     }
 
     private fun generateDecorations(
@@ -850,7 +851,7 @@ sealed class DecorationDistributionFunction(
 
 //        nodes.forEach { println(it.x.toString() + ", " + it.y) }
         val possiblePositions: List<Pair<Vector2, Float>> =
-            getPossiblePositions(xRange, yRange, restrictions).map { it to 1F/*(scaleMin..scaleMax).random(rnd)*/ }
+            getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
         return DetailMap.MapDecoration(
             type,
             baseWidth,
@@ -987,35 +988,34 @@ data class MapRestriction(
     /**
      * the range from where nodes are checked if there are any other from another line
      */
-val rangeToCheckBetweenNodes: Float,
-val startArea: String,
-val endArea: String,
-val otherAreas: List<String>,
-val minDistanceBetweenAreas: Float,
-/**
- * how far the areas are from the highest/lowest point of the road in a close area around the area
- */
-val distanceFromAreaToLine: Float,
+    val rangeToCheckBetweenNodes: Float,
+    val startArea: String,
+    val endArea: String,
+    val otherAreas: List<String>,
+    val minDistanceBetweenAreas: Float,
+    /**
+     * how far the areas are from the highest/lowest point of the road in a close area around the area
+     */
+    val distanceFromAreaToLine: Float,
 
-/**
- * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
- */
-val percentageForAllowedNodesInRangeBetweenLineAndArea: Float,
-/**
- * the rotation of the road (0 means looking right, PI/2 means looking up, and so on)
- */
-val rotation: Double,
+    /**
+     * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
+     */
+    val percentageForAllowedNodesInRangeBetweenLineAndArea: Float,
+    /**
+     * the rotation of the road (0 means looking right, PI/2 means looking up, and so on)
+     */
+    val rotation: Double,
 
-val fixedEvents: List<MapEvent>,
-val optionalEvents: List<Pair<Int, () -> MapEvent>>,
-val decorations: List<DecorationDistributionFunction>,// = listOf(
+    val fixedEvents: List<MapEvent>,
+    val optionalEvents: List<Pair<Int, () -> MapEvent>>,
+    val decorations: List<DecorationDistributionFunction>,// = listOf(
 
 //        DistributionFunction.Random(123, "enemy_texture", 0.25F, 8F, 13F, 0.75F, 2F, true),
 //        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
 //    ),
-val decorationPadding: Float,
-)
-{
+    val decorationPadding: Float,
+) {
 
 
     companion object {

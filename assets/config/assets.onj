@@ -164,6 +164,14 @@ textures: [
     {
         name: "nav_bar_background",
         file: "textures/nav_bar/background.png"
+    },
+    {
+        name: "map_decoration_grass",
+        file: "textures/map/decorations/grass.png"
+    },
+    {
+        name: "map_decoration_cactus",
+        file: "textures/map/decorations/cactus.png"
     }
 ],
 
