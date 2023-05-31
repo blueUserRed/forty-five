@@ -49,17 +49,52 @@ displayNames: [
 generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [
-//        {
-//            name: "roadToSalem",
-//            seed: 203,
-//            restrictions: {
-//                maxNodes: 10,
-//                minNodes: 5,
-//                maxSplits: 2,
-//                splitProbability: 0.25,
-//                compressProbability: 0.55
-//            }
-//        },
+        {
+            name: "roadToSalem",
+            seed: 203,
+            restrictions: {
+                maxNodes: 10,
+                minNodes: 5,
+                maxSplits: 8,
+                splitProbability: 0.5,
+                compressProbability: 0.55,
+                averageLengthOfLineInBetween: 26.0,
+                maxWidth: 40,
+                maxAnglePercent: 0.6,
+                rangeToCheckBetweenNodes: 0.6,
+                startArea: "test_area",
+                endArea: "Huber",
+                otherAreas: [],
+                minDistanceBetweenAreas: 100.0,
+                distanceFromAreaToLine: 100.0,
+                percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
+                rotation: 0.0,
+                fixedEvents: [],
+                optionalEvents: [],
+                decorations: [
+                    $RandomDistributionFunction {
+                        decoration: "map_decoration_grass",
+                        density: 0.5,
+                        baseWidth: 2.0,
+                        baseHeight: 2.0,
+                        scaleMin: 0.6,
+                        scaleMax: 1.2,
+                        onlyCollidesWithNodes: true
+                    },
+                    $RandomDistributionFunction {
+                        decoration: "map_decoration_cactus",
+                        density: 0.01,
+                        baseWidth: 2.0,
+                        baseHeight: 4.0,
+                        scaleMin: 1.0,
+                        scaleMax: 2.0,
+                        onlyCollidesWithNodes: true
+                    }
+                ],
+                decorationSeed: 23078923078940789234,
+                decorationPadding: 20.0
+            }
+        },
 //        {
 //            name: "test_road",
 //            seed: 103,
