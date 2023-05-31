@@ -54,10 +54,10 @@ class OnjColor(
     override val value: Color
 ) : OnjValue() {
 
-    override fun toString(): String = "color($value)"
-    override fun toString(indentationLevel: Int): String = toString()
-    override fun toJsonString(): String = toString()
-    override fun toJsonString(indentationLevel: Int): String = toString()
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append(if (info.json) "'$value'" else "color('$value')")
+    }
 
 }
 
@@ -68,9 +68,9 @@ class OnjInterpolation(
     override val value: Interpolation
 ) : OnjValue() {
 
-    override fun toString(): String = "'--interpolation--'"
-    override fun toString(indentationLevel: Int): String = toString()
-    override fun toJsonString(): String = toString()
-    override fun toJsonString(indentationLevel: Int): String = toString()
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--interpolation--'")
+    }
 
 }

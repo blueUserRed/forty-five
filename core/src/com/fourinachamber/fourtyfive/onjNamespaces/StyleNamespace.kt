@@ -91,68 +91,61 @@ class OnjPositionType(
     override val value: YogaPositionType
 ) : OnjValue() {
 
-    override fun toString(): String = "'--yoga-position-type--'"
-    override fun toString(indentationLevel: Int): String = "'--yoga-position-type--'"
-    override fun toJsonString(): String = "'--yoga-position-type--'"
-    override fun toJsonString(indentationLevel: Int): String = "'--yoga-position-type--'"
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--yoga-position-type--'")
+    }
 }
 
 class OnjYogaAlign(
     override val value: YogaAlign
 ) : OnjValue() {
 
-    override fun toString(): String = "'--yoga-align--'"
-    override fun toString(indentationLevel: Int): String = "'--yoga-align--'"
-    override fun toJsonString(): String = "'--yoga-align--'"
-    override fun toJsonString(indentationLevel: Int): String = "'--yoga-align--'"
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--yoga-align--'")
+    }
 }
 
 class OnjYogaJustify(
     override val value: YogaJustify
 ) : OnjValue() {
 
-    override fun toString(): String = "'--yoga-justify--'"
-    override fun toString(indentationLevel: Int): String = "'--yoga-justify--'"
-    override fun toJsonString(): String = "'--yoga-justify--'"
-    override fun toJsonString(indentationLevel: Int): String = "'--yoga-justify--'"
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--yoga-justify--'")
+    }
 }
 
 class OnjFlexDirection(
     override val value: YogaFlexDirection
 ) : OnjValue() {
 
-    override fun toString(): String = "'--yoga-flex-direction--'"
-    override fun toString(indentationLevel: Int): String = "'--yoga-flex-direction--'"
-    override fun toJsonString(): String = "'--yoga-flex-direction--'"
-    override fun toJsonString(indentationLevel: Int): String = "'--yoga-flex-direction--'"
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--yoga-flex-direction--'")
+    }
 }
 
 class OnjYogaValue(
     override val value: YogaValue
 ) : OnjValue() {
 
-    override fun toString(): String = "'--yoga-value--'"
-    override fun toString(indentationLevel: Int): String = "'--yoga-value--'"
-    override fun toJsonString(): String = "'--yoga-value--'"
-    override fun toJsonString(indentationLevel: Int): String = "'--yoga-value--'"
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--yoga-value--'")
+    }
 }
 
 class OnjFlexWrap(
     override val value: YogaWrap
 ) : OnjValue() {
 
-    override fun toString(): String = "'--yoga-wrap--'"
-    override fun toString(indentationLevel: Int): String = "'--yoga-wrap--'"
-    override fun toJsonString(): String = "'--yoga-wrap--'"
-    override fun toJsonString(indentationLevel: Int): String = "'--yoga-wrap--'"
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--yoga-wrap--'")
+    }
 }
 
 class OnjStyleCondition(
     override val value: StyleCondition
 ) : OnjValue() {
 
-    override fun toString(): String = "'--style-condition--'"
-    override fun toString(indentationLevel: Int): String = "'--style-condition--'"
-    override fun toJsonString(): String = "'--style-condition--'"
-    override fun toJsonString(indentationLevel: Int): String = "'--style-condition--'"
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--style-condition--'")
+    }
 }

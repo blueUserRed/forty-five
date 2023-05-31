@@ -43,10 +43,6 @@ decorations: {
     texture: string,
     baseWidth: float,
     baseHeight: float,
-    positions: {
-        x: float,
-        y: float,
-        scale: float
-    }[]
+    positions: float[3][]
 
 }[]
