@@ -18,7 +18,7 @@ npcs: [
                                 text: "Do you like  "
                             },
                             $Text {
-                                text: ".fourty-five",
+                                text: ".forty-five",
                                 color: color.red
                             },
                             $Text {

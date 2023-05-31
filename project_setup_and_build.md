@@ -7,24 +7,24 @@
 - open a terminal, cd into the onj directory, and clone the following repository: https://github.com/blueUserRed/Onj.git
 - create the following directory: assets/textures/packed
 - execute the texturePacker gradle task
-- navigate to FourtyFive.kt file, in the create function, uncomment the three lines 
+- navigate to FortyFive.kt file, in the create function, uncomment the three lines 
     regarding the CardGenerator. After the game was started successfully once, these lines
     can be commented out again.
 - start the game
 
 ## Project Build
 
-- run the fourty_five [dist] gradle task
+- run the forty_five [dist] gradle task
 - create a temporary directory
-- navigate to: fourty_five/desktop/build/libs
+- navigate to: forty_five/desktop/build/libs
 - copy the desktop.jar file to the temporary directory
 - copy the contents of the assets directory to the temporary directory
 - delete the saves/savefile.onj file
-- delete the logging/fourty-five.log file
+- delete the logging/forty-five.log file
 - _keep in mind that these files are generated again when the game
     is started_
 - modify the logging/log_config.onj file
-  - change the logTarget to the logging/fourty-five.log file
+  - change the logTarget to the logging/forty-five.log file
   - change the version tag
 - the .jar file contains the contents of the assets directory as well, but they can
     be removed because they are not needed and take up a lot of space

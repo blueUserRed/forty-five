@@ -51,7 +51,7 @@ project(":desktop") {
 
 
     launch4j {
-        mainClassName = 'com.fourinachamber.fourtyfive.DesktopLauncher'
+        mainClassName = 'com.fourinachamber.fortyfive.DesktopLauncher'
         icon = "${projectDir}/icons/myApp.ico"
         headerType = "gui"
     }
