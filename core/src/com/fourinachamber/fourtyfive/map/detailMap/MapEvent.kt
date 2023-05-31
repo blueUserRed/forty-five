@@ -131,8 +131,13 @@ class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEven
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
 
-    override val displayName: String = "Enter ${MapManager.displayName(targetMap)}"
-    override val descriptionText: String = "Have fun exploring ${MapManager.displayName(targetMap)}"
+    // lazy so it doesn't crash when the event is instanced
+    override val displayName: String by lazy {
+        "Enter ${MapManager.displayName(targetMap)}"
+    }
+    override val descriptionText: String by lazy {
+        "Have fun exploring ${MapManager.displayName(targetMap)}"
+    }
 
     override fun start() {
         MapManager.switchToMap(targetMap, placeAtEnd)

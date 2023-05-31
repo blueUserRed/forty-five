@@ -89,7 +89,7 @@ object MapManager {
     }
 
     fun write() {
-        currentMapFile.file().writeText(currentDetail.asOnjObject().toString())
+        currentMapFile.file().writeText(currentDetail.asOnjObject().toMinifiedString())
     }
 
     fun newRunSync() {
@@ -161,7 +161,7 @@ object MapManager {
         val file = File(path)
         if (!File(file.parent).exists()) File(file.parent).mkdirs()
         file.createNewFile()
-        file.writeText(map.asOnjObject().toString())
+        file.writeText(map.asOnjObject().toMinifiedString())
     }
 
     private val mapConfigSchema: OnjSchema by lazy {
