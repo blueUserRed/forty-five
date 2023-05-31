@@ -127,11 +127,9 @@ class OnjEffect(
     override val value: Effect
 ) : OnjValue() {
 
-    override fun toString(): String = "'__effect__'"
-    override fun toString(indentationLevel: Int): String = toString()
-    override fun toJsonString(): String = toString()
-    override fun toJsonString(indentationLevel: Int): String = toString()
-
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--effect--'")
+    }
 }
 
 /**
@@ -142,10 +140,9 @@ class OnjBulletSelector(
     override val value: BulletSelector
 ) : OnjValue() {
 
-    override fun toString(): String = "'__bullet-selector__'"
-    override fun toString(indentationLevel: Int): String = toString()
-    override fun toJsonString(): String = toString()
-    override fun toJsonString(indentationLevel: Int): String = toString()
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--bullet-selector--'")
+    }
 
 }
 
@@ -156,9 +153,8 @@ class OnjStatusEffect(
     override val value: StatusEffect
 ) : OnjValue() {
 
-    override fun toString(): String = "'__status-effect__'"
-    override fun toString(indentationLevel: Int): String = toString()
-    override fun toJsonString(): String = toString()
-    override fun toJsonString(indentationLevel: Int): String = toString()
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--status-effect--'")
+    }
 
 }

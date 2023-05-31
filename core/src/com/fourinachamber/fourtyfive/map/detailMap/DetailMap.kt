@@ -171,11 +171,7 @@ data class DetailMap(
             "texture" with drawableHandle
             "baseWidth" with baseWidth
             "baseHeight" with baseHeight
-            "positions" with instances.map { buildOnjObject {
-                "x" with it.first.x
-                "y" with it.first.y
-                "scale" with it.second
-            } }
+            "positions" with instances.map { arrayOf(it.first.x, it.first.y, it.second) }
         }
 
         companion object {
@@ -187,11 +183,11 @@ data class DetailMap(
                     .get<OnjArray>("positions")
                     .value
                     .map {
-                        it as OnjObject
+                        it as OnjArray
                         Vector2(
-                            it.get<Double>("x").toFloat(),
-                            it.get<Double>("y").toFloat()
-                        ) to it.get<Double>("scale").toFloat()
+                            it.get<Double>(0).toFloat(),
+                            it.get<Double>(1).toFloat()
+                        ) to it.get<Double>(2).toFloat()
                     }
             )
         }
