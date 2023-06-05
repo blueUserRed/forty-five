@@ -2,7 +2,7 @@ sourceCompatibility = 1.8
 sourceSets.main.java.srcDirs = ["src/"]
 sourceSets.main.resources.srcDirs = ["../assets"]
 
-project.ext.mainClassName = "com.fourinachamber.fourtyfive.DesktopLauncher"
+project.ext.mainClassName = "com.fourinachamber.fortyfive.DesktopLauncher"
 project.ext.assetsDir = new File("../assets")
 
 import org.gradle.internal.os.OperatingSystem
@@ -45,13 +45,13 @@ task dist(type: Jar) {
 //    from 'launch4j/'
 //    include '*'
 //    include '*/*' //to include contents of a folder present inside Reports directory
-//    archiveName 'fourty-five.zip'
+//    archiveName 'forty-five.zip'
 //    destinationDir(file(layout.buildDirectory.dir("launch4j")))
 //}
 
 task createExeFile() {
     launch4j {
-        mainClassName = 'com.fourinachamber.fourtyfive.DesktopLauncher'
+        mainClassName = 'com.fourinachamber.fortyfive.DesktopLauncher'
         icon = "${projectDir}/icons/myApp.ico"
         headerType = "gui"
     }

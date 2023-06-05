@@ -1,6 +1,6 @@
 ![logo](./assets/textures/title_screen/logo.png)
 
-# .fourty-five Technisches Design
+# .forty-five Technisches Design
 
 ------
 
@@ -393,7 +393,7 @@ Der Gegner wählt dann unter Berücksichtigung der Weights eine zufällige Aktio
 Um den Schreiben des Schadens und der Kosten auf die Karte zu automatisieren wurde der
 CardGenerator geschrieben. Dieser wird durch die card_generator_config.onj Datei 
 konfiguriert. Er kann gestartet werden, indem die drei Zeilen in der .create() Funktion
-des FourtyFive Objektes einkommentiert werden.
+des FortyFive Objektes einkommentiert werden.
 
 Wenn Schaden, CoverValue oder Kosten einer Karte geändert werden, ist es notwending,
 dass der CardGenerator einmal ausgeführt wird.
@@ -409,7 +409,7 @@ _relevantes package: utils_
 
 ### Logger
 LibGdx hat zwar einen Logger eingebaut, dieser kann aber zum Beispiel nicht zu Dateien
-schreiben, deswegen wurde ein eigener implementiert. Dieser ist unter FourtyFiveLogger
+schreiben, deswegen wurde ein eigener implementiert. Dieser ist unter FortyFiveLogger
 Objekt erreichbar. Dieser kann mittels einer Config-Datei konfiguriert werden (siehe
 Assets und Config files). 
 
@@ -566,7 +566,7 @@ assets
 | -> enthält .onj oder .onjschema Dateien die nur zum importieren
 | -> in anderen Dateien gedacht sind
 |-logging
-  |-fourty-five.log
+  |-forty-five.log
   | -> der log, der von dem letzten Spiel produziert wurde
   |-log_config.onj
   | -> Konfiguration des Loggers
