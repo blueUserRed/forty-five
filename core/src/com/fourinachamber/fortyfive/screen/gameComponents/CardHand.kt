@@ -26,7 +26,7 @@ class CardHand(
 
     override var fixedZIndex: Int = 0
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
 
     override var isHoveredOver: Boolean = false
 

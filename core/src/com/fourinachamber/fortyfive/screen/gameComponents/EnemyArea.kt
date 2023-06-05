@@ -21,7 +21,7 @@ class EnemyArea(
     private val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
 
     override var fixedZIndex: Int = 0

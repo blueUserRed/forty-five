@@ -48,7 +48,6 @@ class ScreenBuilder(val file: FileHandle) {
     private val behavioursToBind: MutableList<Behaviour> = mutableListOf()
     private var actorsWithDragAndDrop: MutableMap<String, MutableList<Pair<Actor, OnjNamedObject>>> = mutableMapOf()
 
-    private val styleManagers: MutableList<StyleManager> = mutableListOf()
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
     private var screenController: ScreenController? = null
@@ -69,7 +68,7 @@ class ScreenBuilder(val file: FileHandle) {
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
             batch = SpriteBatch(),
             controllerContext = controllerContext,
-            styleManagers = styleManagers,
+            styleManagers = listOf(),
             background = background,
             useAssets = borrowed,
             earlyRenderTasks = earlyRenderTasks,
@@ -364,7 +363,7 @@ class ScreenBuilder(val file: FileHandle) {
         val styleManager = StyleManager(actor, node)
         actor.styleManager = styleManager
         actor.initStyles(screen)
-        styleManagers.add(styleManager)
+        screen.addStyleManager(styleManager)
 
         widgetOnj.ifHas<OnjArray>("styles") { arr ->
             arr.value.forEach { obj ->

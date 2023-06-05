@@ -264,6 +264,7 @@ class AspectRatioStyleProperty<T>(
 }
 
 fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
+    val styleManager = styleManager!!
     styleManager.addStyleProperty(VisibleStyleProperty(this, screen))
     styleManager.addStyleProperty(WidthStyleProperty(this, screen))
     styleManager.addStyleProperty(MinWidthStyleProperty(this, screen))
@@ -310,6 +311,7 @@ class FontScaleStyleProperty(
 
 fun <T> T.addLabelStyles(screen: OnjScreen) where T : CustomLabel, T : StyledActor {
     addActorStyles(screen)
+    val styleManager = styleManager!!
     styleManager.addStyleProperty(FontScaleStyleProperty(this, screen))
 }
 
@@ -426,6 +428,7 @@ class FlexWrapStyleProperty(
 
 fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : StyledActor {
     addActorStyles(screen)
+    val styleManager = styleManager!!
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, screen))
@@ -490,11 +493,13 @@ class DetachStyleProperty<T>(
 }
 
 fun <T> T.addDetachableStyles(screen: OnjScreen) where T : Actor, T : StyledActor, T : Detachable {
+    val styleManager = styleManager!!
     styleManager.addStyleProperty(DetachStyleProperty(this, screen))
 }
 
 fun <T> T.addBackgroundStyles(
     screen: OnjScreen
 ) where T : Actor, T : StyledActor, T : BackgroundActor {
+    val styleManager = styleManager!!
     styleManager.addStyleProperty(BackgroundStyleProperty(this, screen))
 }

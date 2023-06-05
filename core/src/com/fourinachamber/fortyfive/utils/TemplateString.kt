@@ -51,7 +51,7 @@ class TemplateString(
             }
             cur++
         }
-        if (lastClosingBracePosition != rawString.length - 1) {
+        if (rawString.length == 1 || lastClosingBracePosition != rawString.length - 1) {
             val string = rawString.substring(lastClosingBracePosition)
             builderElements.add { string }
         }

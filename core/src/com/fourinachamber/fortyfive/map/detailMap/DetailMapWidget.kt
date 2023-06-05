@@ -51,7 +51,7 @@ class DetailMapWidget(
 
     override var fixedZIndex: Int = 0
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
 
     private var mapOffset: Vector2 = Vector2(0f, 50f)

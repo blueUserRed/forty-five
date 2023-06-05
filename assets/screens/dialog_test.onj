@@ -50,41 +50,6 @@ var dialogWidget = $DialogWidget {
             paddingBottom: 3.0#points,
         }
     ],
-//    dialog: {
-//        parts: {
-//            text: [
-//                $Text { text: "World!" },
-//            ],
-//            next: $ChooseNextPart {
-//                choices: [
-//                    {
-//                        name: "Hello",
-//                        next: {
-//                            text: [
-//                                $Text { text: "Hello World!" }
-//                            ],
-//                            next: $EndOfDialog { }
-//                        }
-//                    },
-//                    {
-//                        name: "Goodbye",
-//                        next: {
-//                            text: [
-//                                $Text { text: "Goodbye World " }
-////                                $Text { text: "shaking" }
-//                            ],
-//                            next: $EndOfDialog { }
-//                        }
-//                    }
-//                ]
-//            }
-//        },
-//        defaults: {
-//            font: "red_wing_cm",
-//            fontScale: 0.1,
-//            color: color.black
-//        }
-//    },
     progressTime: 0.01,
     advanceArrowDrawable: "heart_texture",
     advanceArrowOffset: 1.0,
@@ -94,8 +59,6 @@ var dialogWidget = $DialogWidget {
     optionsFontScale: 0.1,
     optionsFontColor: color.black,
     name: "dialog_widget"
-//        progressTime: 0.09,
-//        debug: true
 };
 
 root: $Box {
