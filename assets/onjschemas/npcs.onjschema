@@ -12,14 +12,16 @@ var dialogPart = {
 
 $NextDialogPartSelector {
 
+    $Continue { }
+
     $FixedNextPart {
-        next: dialogPart
+        next: int
     }
 
     $ChooseNextPart {
         choices: {
             name: string,
-            next: dialogPart
+            next: int
         }[]
     }
 
@@ -57,7 +59,10 @@ $AdvancedTextPartAction {
 }
 
 var dialog = {
-    parts: dialogPart,
+    parts: {
+        text: $AdvancedTextPart[],
+        next: $NextDialogPartSelector
+    }[],
     defaults: {
         font: string,
         fontScale: float,
