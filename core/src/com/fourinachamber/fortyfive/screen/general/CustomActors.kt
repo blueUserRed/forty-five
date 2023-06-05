@@ -181,7 +181,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     override var isHoveredOver: Boolean = false
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
 
     override var backgroundHandle: String? = null
         set(value) {
@@ -291,7 +291,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override var isHoveredOver: Boolean = false
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
 
     /**
      * if set to true, the preferred-, min-, and max-dimension functions will return the dimensions with the scaling
@@ -429,7 +429,7 @@ open class CustomFlexBox(
 
     override var isHoveredOver: Boolean = false
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
 
     override var backgroundHandle: String? = null
         set(value) {
@@ -450,7 +450,7 @@ open class CustomFlexBox(
         val parent = parent
         reattachTo = parent
         if (parent is CustomFlexBox) {
-            parent.remove(styleManager.node)
+            parent.remove(styleManager?.node)
         } else {
             parent.removeActor(this)
         }
@@ -465,8 +465,8 @@ open class CustomFlexBox(
         if (target is CustomFlexBox) {
             val node = target.add(this)
             val oldManager = styleManager
-            styleManager = oldManager.copyWithNode(node)
-            screen.swapStyleManager(oldManager, styleManager)
+            styleManager = oldManager!!.copyWithNode(node)
+            screen.swapStyleManager(oldManager, styleManager!!)
         } else {
             target.addActor(this)
         }
@@ -687,7 +687,7 @@ open class CustomVerticalGroup(
 ) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
 
     override var backgroundHandle: String? = null

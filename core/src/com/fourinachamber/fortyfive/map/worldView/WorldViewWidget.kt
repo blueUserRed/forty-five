@@ -24,7 +24,7 @@ class WorldViewWidget(config: OnjObject, val screen: OnjScreen) : Widget(), Styl
         ResourceManager.get(screen, backgroundHandle)
     }
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
 
     private val locationIndicatorDrawableHandle: ResourceHandle = config

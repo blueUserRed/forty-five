@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import ktx.actors.onClick
 import onj.value.OnjArray
@@ -57,10 +58,13 @@ class DialogWidget(
     private lateinit var optionsBox: CustomFlexBox
 
     private var chosenOption: String? = null
-    private var currentOptions: Map<String, DialogPart>? = null
+    private var currentOptions: Map<String, Int>? = null
+
+    private lateinit var dialog: Dialog
 
     fun start(dialog: Dialog) {
-        currentPart = dialog.firstPart
+        this.dialog = dialog
+        currentPart = dialog.parts.getOrNull(0) ?: return
         advancedText.resetProgress()
         onButtonClick {
             if (readyToAdvance) readyToAdvance = false
@@ -75,10 +79,18 @@ class DialogWidget(
 
     private fun finished(): Timeline = when (val part = currentPart!!.nextDialogPartSelector) {
 
+        is NextDialogPartSelector.Continue -> Timeline.timeline {
+            action { readyToAdvance = true }
+            delayUntil { !readyToAdvance }
+            action { currentPart = getPart(dialog.parts.indexOf(currentPart!!) + 1) }
+            delayUntil { isAnimFinished }
+            includeLater( { finished() }, { true } )
+        }
+
         is NextDialogPartSelector.Fixed -> Timeline.timeline {
             action { readyToAdvance = true }
             delayUntil { !readyToAdvance }
-            action { currentPart = part.next }
+            action { currentPart = getPart(part.next) }
             delayUntil { isAnimFinished }
             includeLater( { finished() }, { true } )
         }
@@ -97,13 +109,18 @@ class DialogWidget(
             delayUntil { chosenOption != null }
             action {
                 val next = currentOptions!![chosenOption!!]!!
-                currentPart = next
+                currentPart = getPart(next)
                 clearOptionsBox()
             }
             delayUntil { isAnimFinished }
             includeLater( { finished() }, { true } )
         }
 
+    }
+
+    private fun getPart(next: Int): DialogPart? = dialog.parts.getOrNull(next) ?: run {
+        FortyFiveLogger.warn(logTag, "dialog links to part $next which doesn't exist")
+        null
     }
 
     private fun setupOptionsBox() {
@@ -158,61 +175,7 @@ class DialogWidget(
 
     companion object {
         const val showOptionsBoxScreenState: String = "displayOptionsBox"
+        const val logTag: String = "Dialog"
     }
-
-}
-
-data class Dialog(
-    val firstPart: DialogPart
-) {
-
-    companion object {
-
-        fun readFromOnj(onj: OnjObject, screen: OnjScreen): Dialog {
-            val defaults = onj.get<OnjObject>("defaults")
-            val dialog = readDialogPart(onj.get<OnjObject>("parts"), defaults, screen)
-            return Dialog(dialog)
-        }
-
-        private fun readDialogPart(onj: OnjObject, defaults: OnjObject, screen: OnjScreen): DialogPart {
-            val text = AdvancedText.readFromOnj(onj.get<OnjArray>("text"), screen, defaults)
-            val nextSelector = onj.get<OnjNamedObject>("next")
-            val next = when (nextSelector.name) {
-                "EndOfDialog" -> NextDialogPartSelector.End(nextSelector.get<String>("changeToScreen"))
-                "FixedNextPart" -> NextDialogPartSelector.Fixed(
-                    readDialogPart(nextSelector.get<OnjObject>("next"), defaults, screen)
-                )
-                "ChooseNextPart" -> NextDialogPartSelector.Choice(
-                    nextSelector
-                        .get<OnjArray>("choices")
-                        .value
-                        .map { it as OnjObject }
-                        .associate {
-                            it.get<String>("name") to readDialogPart(it.get<OnjObject>("next"), defaults, screen)
-                        }
-                )
-                else -> throw RuntimeException()
-            }
-            return DialogPart(text, next)
-        }
-
-    }
-
-}
-
-data class DialogPart(
-    val text: AdvancedText,
-    val nextDialogPartSelector: NextDialogPartSelector
-)
-
-sealed class NextDialogPartSelector {
-
-    class Fixed(val next: DialogPart) : NextDialogPartSelector()
-
-    class Choice(
-        val choices: Map<String, DialogPart>
-    ) : NextDialogPartSelector()
-
-    class End(val nextScreen: String) : NextDialogPartSelector()
 
 }

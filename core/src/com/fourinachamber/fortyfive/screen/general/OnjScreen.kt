@@ -48,7 +48,7 @@ open class OnjScreen @MainThreadOnly constructor(
     val transitionAwayTime: Int?
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
 
-    var styleManagers: List<StyleManager> = styleManagers
+    var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
         private set
 
     var popups: Map<String, WidgetGroup> = mapOf()
@@ -286,7 +286,11 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun swapStyleManager(old: StyleManager, new: StyleManager) { // TODO: this whole swapping stylemanager thing is kinda ugly
-        styleManagers = styleManagers.map { if (it === old) new else it }
+        styleManagers = styleManagers.map { if (it === old) new else it }.toMutableList()
+    }
+
+    fun addStyleManager(manager: StyleManager) {
+        styleManagers.add(manager)
     }
 
     @MainThreadOnly

@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 
 interface StyledActor : HoverStateActor {
 
-    var styleManager: StyleManager
+    var styleManager: StyleManager?
 
     fun initStyles(screen: OnjScreen)
 

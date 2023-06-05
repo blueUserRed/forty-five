@@ -10,8 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyleCondition
+import com.fourinachamber.fortyfive.screen.general.styles.StyleInstruction
+import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.TemplateString
 import io.github.orioncraftmc.meditate.YogaNode
+import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -19,7 +25,7 @@ import kotlin.math.sin
 
 open class AdvancedTextWidget(
     advancedText: AdvancedText,
-    screen: OnjScreen
+    private val screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
     private var nodesOfCurrentText: List<YogaNode> = listOf()
@@ -28,11 +34,40 @@ open class AdvancedTextWidget(
         set(value) {
             field = value
             clearText()
-            nodesOfCurrentText = value.parts.map { add(it.actor) }
+            initNodes(value)
         }
 
     init {
-        nodesOfCurrentText = advancedText.parts.map { add(it.actor) }
+//        nodesOfCurrentText = advancedText.parts.map { add(it.actor) }
+        initNodes(advancedText)
+    }
+
+    private fun initNodes(value: AdvancedText) {
+        nodesOfCurrentText = value.parts.map { part ->
+            val node = add(part.actor)
+            if (part is StyledActor && part is Actor) { // TODO: .actor is stupid now
+                val oldManager = part.styleManager
+                val newManager = StyleManager(part, node)
+                part.styleManager = newManager
+                part.initStyles(screen)
+                newManager.addInstruction( // TODO: this is ugly
+                    "marginLeft",
+                    StyleInstruction(
+                        YogaValue(0.1f, YogaUnit.POINT),
+                        1,
+                        StyleCondition.Always,
+                        YogaValue::class
+                    ),
+                    YogaValue::class
+                )
+                if (oldManager == null) {
+                    screen.addStyleManager(newManager)
+                } else {
+                    screen.swapStyleManager(oldManager, newManager)
+                }
+            }
+            node
+        }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -178,6 +213,7 @@ class TextAdvancedTextPart(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        println("$text, $width")
         val newText = templateString.string
         if (progress >= newText.length) setText(newText)
         actions.forEach { it(this) }

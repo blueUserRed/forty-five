@@ -5,88 +5,37 @@ npcs: [
     {
         name: "my_cool_npc",
         dialog: {
-            parts: {
-                text: [
-                    $Text {
-                        text: "Hello random traveller!"
-                    },
-                ],
-                next: $FixedNextPart {
-                    next: {
-                        text: [
-                            $Text {
-                                text: "Do you like  "
-                            },
-                            $Text {
-                                text: ".forty-five",
-                                color: color.red
-                            },
-                            $Text {
-                                text: " ?"
-                            }
-                        ],
-                        next: $ChooseNextPart {
-                            choices: [
-                                {
-                                    name: "Yes",
-                                    next: {
-                                        text: [
-                                            $Text {
-                                                text: "Good. You can continue."
-                                            }
-                                        ],
-                                        next: $EndOfDialog {
-                                            changeToScreen: "screens/map_test.onj"
-                                        }
-                                    }
-                                },
-                                {
-                                    name: "No",
-                                    next: {
-                                        text: [
-                                            $Text {
-                                                text: "Prepare to ",
-                                            },
-                                            $Text {
-                                                text: "die",
-                                                color: color.red,
-                                                actions: [
-                                                    $ShakeTextAction {
-                                                        xMagnitude: 0.15,
-                                                        xSpeed: 2.0,
-                                                        yMagnitude: 0.15,
-                                                        ySpeed: 2.0,
-                                                    }
-                                                ]
-                                            }
-                                            //                                $Text { text: "shaking" }
-
-                                        ],
-                                        next: $EndOfDialog {
-                                            changeToScreen: "screens/map_test.onj"
-                                        }
-                                    }
-                                },
-                                {
-                                    name: "It's spelled .forty-five",
-                                    next: {
-                                        text: [
-                                            $Text {
-                                                text: "Who cares?"
-                                            }
-                                            //                                $Text { text: "shaking" }
-
-                                        ],
-                                        next: $EndOfDialog {
-                                            changeToScreen: "screens/map_test.onj"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
+            parts: [
+                {
+                    text: [
+                        $Text { text: "Hello " },
+                        $Text { text: "World" },
+                        $Text { text: "! " },
+                        $Text { text: "Hello " },
+                        $Text { text: "World" },
+                        $Text { text: "!" },
+                    ],
+                    next: $Continue { }
+                },
+                {
+                    text: [
+                        $Text { text: "Goodbye World" },
+                    ],
+                    next: $FixedNextPart { next: 3 }
+                },
+                {
+                    text: [
+                        $Text { text: "skipped" },
+                    ],
+                    next: $Continue { }
+                },
+                {
+                    text: [
+                        $Text { text: "last" }
+                    ],
+                    next: $EndOfDialog { changeToScreen: "screens/map_test.onj" }
                 }
-            },
+            ],
             defaults: {
                 font: "red_wing",
                 fontScale: 0.1,

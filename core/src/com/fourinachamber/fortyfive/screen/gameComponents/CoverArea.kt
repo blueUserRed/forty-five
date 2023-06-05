@@ -44,7 +44,7 @@ class CoverArea(
     private val stackHookDrawableHandle: ResourceHandle
 ) : WidgetGroup(), ZIndexGroup, ZIndexActor, StyledActor {
 
-    override lateinit var styleManager: StyleManager
+    override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
 
     /**
