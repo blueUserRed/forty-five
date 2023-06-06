@@ -468,7 +468,7 @@ class ScreenBuilder(val file: FileHandle) {
     companion object {
 
         val screenSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/screen2.onjschema").file())
+            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/screen.onjschema").file())
         }
 
     }

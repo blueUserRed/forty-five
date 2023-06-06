@@ -2,81 +2,61 @@ import "imports/font_group.onjschema" as _;
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 
 use Common;
-
-var viewportSharedKeys = {
-    backgroundTexture?: string
-};
+use Style;
 
 $Viewport {
 
     $FitViewport {
         worldWidth: float,
-        worldHeight: float,
-        ...viewportSharedKeys
+        worldHeight: float
     }
 
     $ExtendViewport {
         minWidth: float,
-        minHeight: float,
-        ...viewportSharedKeys
+        minHeight: float
     }
 
 }
-
-var tableCell = {
-    width?: float,
-    height?: float,
-    colspan?: int,
-    align?: string,
-    padTop?: float,
-    padBottom?: float,
-    padLeft?: float,
-    padRight?: float,
-    cellName?: string,
-    sizeToActor?: boolean,
-    expandX?: boolean,
-    expandY?: boolean,
-    element: $Widget
-};
-
-var tableRow = {
-    width?: float,
-    height?: float,
-    cells: tableCell[]
-};
 
 var widgetSharedKeys = {
     debug?: boolean,
     behaviours?: $Behaviour[],
     width?: float,
     height?: float,
-    dragAndDrop?: $DragAndDropBehaviour,
     zIndex?: int,
-    x?: float,
-    y?: float,
     visible?: boolean,
-    name?: string
+    name?: string,
+    touchable?: string,
+    styles?: { ...* }[]
 };
 
-var detailTextSharedKeys = {
-    detailFont: string,
-    detailFontColor: Color,
-    detailBackgroundTexture: string,
-    detailFontScale: float,
-    detailOffsetX: float,
-    detailOffsetY: float,
-    detailWidth: float,
-};
+//var detailTextSharedKeys = {
+//    detailFont: string,
+//    detailFontColor: Color,
+//    detailFontScale: float,
+//    detailBackgroundTexture: string,
+//    detailOffsetX: float,
+//    detailOffsetY: float,
+//    detailWidth: float,
+//};
 
 $Widget {
+
+    $Box {
+        children?: $Widget[],
+        partOfSelectionHierarchy?: boolean,
+        ...widgetSharedKeys
+    }
 
     $Label {
         text: string,
         font: string,
-        color: Color,
-        fontScale: float,
+        color: Color?,
+        fontScale?: float,
         backgroundTexture?: string,
         align?: string,
+        wrap?: boolean,
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
@@ -87,15 +67,16 @@ $Widget {
         fontScale: float,
         backgroundTexture?: string,
         align?: string,
+        wrap?: boolean,
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
     $Image {
-        textureName: string,
+        textureName?: string,
         scaleX: float,
         scaleY: float,
         reportDimensionsWithScaling?: boolean,
-        scalingWorkaround?: boolean,
         ...widgetSharedKeys
     }
 
@@ -103,74 +84,19 @@ $Widget {
         animationName: string,
         scaleX: float,
         scaleY: float,
-        ...widgetSharedKeys
-    }
-
-    $Table {
-        fillX?: boolean,
-        fillY?: boolean,
-        align?: string,
-        rows: tableRow[],
-        applyZIndices?: boolean,
-        backgroundTexture?: string,
-        ...widgetSharedKeys
-    }
-
-    $HorizontalGroup {
-        children: $Widget[],
-        align: string,
-        spacing?: float,
-        expand?: boolean,
-        wrap?: boolean,
-        ...widgetSharedKeys
-    }
-
-    $VerticalGroup {
-        children: $Widget[],
-        align: string,
-        spacing?: float,
-        expand?: boolean,
-        wrap?: boolean,
-        ...widgetSharedKeys
-    }
-
-    $RotatableImageActor {
-        textureName: string,
-        slowdownRate: float,
-        velocityMultiplier: float,
-        startVelocity?: float,
-        snap: {
-            rotations: float[],
-            deactivateAt: float,
-            strengthMultiplier: float,
-            deactivateWhileDragging: boolean,
-        }?,
-        ...widgetSharedKeys
-    }
-
-    $VBox {
-        fillX?: boolean,
-        fillY?: boolean,
-        children: $Widget[],
-        ...widgetSharedKeys
-    }
-
-    $HBox {
-        fillX?: boolean,
-        fillY?: boolean,
-        children: $Widget[],
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
     $CardHand {
-        cardScale: float,
+        cardSize: float,
         cardSpacing: float,
         startCardZIndicesAt: int,
         hoveredCardZIndex: int,
         draggedCardZIndex: int,
         hoveredCardScale: float,
         targetWidth: float,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
@@ -185,13 +111,14 @@ $Widget {
         radius: float,
         rotationOff: float,
         cardZIndex: int,
-        background?: string,
+        background: string,
         radiusExtension: float,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
 
     $EnemyArea {
+        enemySelectionDrawable: string,
         ...widgetSharedKeys
     }
 
@@ -201,19 +128,132 @@ $Widget {
         infoFont: string,
         infoFontColor: Color,
         infoFontScale: float,
-        stackBackgroundTexture: string,
-        stackSpacing: float,
+//        stackBackgroundTexture: string,
         areaSpacing: float,
         cardScale: float,
-        stackMinSize: float,
         onlyAllowAddingOnTheSameTurn: boolean,
-        ...detailTextSharedKeys,
+        detailFont: string,
+        detailFontColor: Color,
+        detailFontScale: float,
+        cardDeltaX: float,
+        cardDeltaY: float,
+        cardInitialX: float,
+        cardInitialY: float,
+        stackHeight: float,
+        stackMinWidth: float,
+        stackHook: string,
+        ...widgetSharedKeys
+    }
+
+    $Map {
+        detailMapProvider: $DetailMapProvider,
+        nodeTexture: string,
+        background: string,
+        playerTexture: string,
+        playerWidth: float,
+        playerHeight: float,
+        nodeSize: float,
+        lineWidth: float,
+        edgeTexture: string,
+        playerMovementTime: float,
+        directionIndicator: string,
+        detailWidgetName: string,
+        screenSpeed: float,
+        backgroundScale: float,
+        leftScreenSideDeadSection: float,
+        ...widgetSharedKeys
+    }
+
+    $MapEventDetail {
+        font: string,
+        fontColor: Color,
+        background: string,
+        ...widgetSharedKeys
+    }
+
+    $AdvancedText {
+        font: string,
+        parts: $AdvancedTextPart[],
+        defaults: {
+            font: string,
+            fontScale: float,
+            color: Color
+        },
+        ...widgetSharedKeys
+    }
+
+    $DialogWidget {
+        progressTime: float,
+        advanceArrowDrawable: string,
+        advanceArrowOffset: float,
+        optionsBox: string,
+        optionsFont: string,
+        optionsFontColor: Color,
+        optionsFontScale: float,
+        ...widgetSharedKeys
+    }
+
+    $WorldView {
         ...widgetSharedKeys
     }
 
 }
 
+var advancedTextPartSharedKeys = {
+    actions?: $AdvancedTextPartAction[]
+};
+
+$AdvancedTextPart {
+
+    $Text {
+        text: string,
+        font?: string,
+        color?: Color,
+        fontScale?: float,
+        ...advancedTextPartSharedKeys
+    }
+
+    $Icon {
+        icon: string,
+        ...advancedTextPartSharedKeys
+    }
+
+}
+
+$AdvancedTextPartAction {
+
+    $ShakeTextAction {
+        xMagnitude: float,
+        xSpeed: float,
+        yMagnitude: float,
+        ySpeed: float,
+    }
+
+}
+
+$DetailMapProvider {
+
+    $FromFileDetailMapProvider {
+        file: string
+    }
+
+    $FromSeededGeneratorDetailMapProvider {
+        seed: int,
+        startArea: string,
+        endArea: string,
+        otherAreas: string[],
+    }
+
+    $CurrentMapProvider { }
+
+}
+
 $Behaviour {
+
+    $OnClickChangeScreenStateBehaviour {
+        state: string,
+        enter: boolean
+    }
 
     $MouseHoverBehaviour {
         useSystemCursor: boolean,
@@ -284,8 +324,8 @@ $Behaviour {
         yOffset?: float,
     }
 
-    $OnHoverChangeTextureBehaviour {
-        hoverTexture: string
+    $OnClickOpenPopupBehaviour {
+        popupName: string
     }
 
     $ShootButtonBehaviour { }
@@ -307,7 +347,6 @@ $ScreenController {
     }
 
     $IntroScreenController {
-        cardAtlasFile: string,
         appearActor: string,
         nextScreen: string,
     }
@@ -315,77 +354,87 @@ $ScreenController {
     $CardSelectionScreenController {
         cardSelectionActorName: string,
         cardConfigFile: string,
-        cardAtlasFile: string,
         cardsToSelect: int,
         cardScale: float,
         cardBehaviour: $Behaviour,
         nextScreen: string,
-        ...detailTextSharedKeys,
+//        ...detailTextSharedKeys,
         emptyFont: string,
         emptyFontColor: Color,
         emptyFontScale: float,
         emptyText: string,
     }
 
+    $DialogScreenController {
+        npcsFile: string,
+        dialogWidgetName: string
+    }
+
+}
+
+$KeyAction {
+
+    $ToggleFullscreenKeyAction {
+        width: int,
+        height: int
+    }
+
+    $SelectCardInHandKeyAction {
+        num: int
+    }
+
+    $SelectRevolverSlotKeyAction {
+        num: int
+    }
+
+    $SelectAdjacentKeyAction {
+        direction: string
+    }
+
+    $PlaceSelectedCardInRevolverKeyAction {
+        revolverSlot: int
+    }
+
+    $DeselectAllKeyAction { }
+
+    $ShootKeyAction { }
+
+    $EndTurnKeyAction { }
+
+    $DrawBulletKeyAction { }
+
+    $DrawCoverKeyAction { }
+
+    $NextInHierarchyKeyAction { }
+
+    $PreviousInHierarchyKeyAction { }
+
+    $FireClickEventKeyAction { }
+
 }
 
 viewport: $Viewport,
 
 assets: {
-    textures: {
-        name: string,
-        file: string
-    }[],
-    fonts: $Font[],
-    textureAtlases: {
-        file: string,
-        defines: string[]
-    }[],
-    cursors: {
-        name: string,
-        file: string,
-        hotspotX: int,
-        hotspotY: int,
-    }[],
-    postProcessors: {
-        name: string,
-        vertexShader: string,
-        fragmentShader: string,
-        timeOffset?: int,
-        uniforms: string[],
-        args: {
-            ...*
-        }?
-    }[],
-    animations: {
-        name: string,
-        atlasFile: string,
-        frames?: string[],
-        initialFrame: int,
-        frameTime: int,
-    }[],
-    colorTextures: {
-        name: string,
-        color: Color,
-    }[],
-    particles: {
-        name: string,
-        particlePath: string,
-        textureDir: string,
-        scale: float,
-    }[]
+    useCardAtlas?: boolean,
+    useAssets: string[]
 },
 
 options: {
-    setFillParentOnRoot: boolean,
-    defaultCursor: {
-        useSystemCursor: boolean,
-        cursorName: string
-    },
-    postProcessor: string?,
-    controller: $ScreenController?,
-    printFrameRate?: boolean
+    background?: string,
+    screenController?: $ScreenController,
+    inputMap?: {
+        keycode: int,
+        modifiers: int[],
+        action: $KeyAction
+    }[],
+    popups?: {
+        name: string,
+        popupRoot: $Widget
+    }[],
+    postProcessor?: string,
+    transitionAwayTime?: float
+//    printFrameRate?: boolean
 },
 
-children: $Widget[],
-unmanagedChildren?: $Widget[]
+root: $Widget
