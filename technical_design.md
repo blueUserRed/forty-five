@@ -79,7 +79,7 @@ complete definitions of all style properties view StyleProperties.kt.
 
 Example of the styling system being used in map_screen.onj:
 
-```json lines
+```json5
 $Image {
     // The styles key is an array of multiple style objects
     styles: [
@@ -124,7 +124,7 @@ states of the screen. In your .onj-file, the screen-state can be
 queried using the state() function.
 
 Example from map_screen.onj:
-```json lines
+```json5
 {
     style_priority: 3,
     style_condition: state("displayEventDetail") and not(state("transition away")),
@@ -307,7 +307,7 @@ Cards can have effects that manipulate the gameplay in an interesting way.
 Each effect needs a trigger that tells it when the effect should be activated.
 
 example 1 (fake bullet):
-```json lines
+```json5
 effects: [
     // effects are declared using functions defined in the Card namespace
     reserveGain("shot", 4),
@@ -318,7 +318,7 @@ effects: [
 ```
 
 example 2 (bullet bullet bullet):
-```json lines
+```json5
 effects: [
     buffDmg("enter", bSelects.allBullets, 10)
 ]
@@ -327,7 +327,7 @@ effects: [
 The bSelect tells the effect which bullets to buff when it is triggered.
 The different bSelects are defined at the top of the file in a variable:
 
-```json lines
+```json5
 var bSelects = {
     allExceptSelf: bNum([1, 2, 3, 4, 5]),
     allBullets: bSelectByName("bullet"),
@@ -382,7 +382,7 @@ TemplateStrings can be used to interpolate a string with global values. For
 example, this can be done using the TemplateLabel Widget.
 
 Example from loose_screen.onj:
-```json lines
+```json5
 $TemplateLabel {
     properties: [
         position("absolute"),
