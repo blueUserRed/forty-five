@@ -21,7 +21,7 @@ import java.io.File
 object MapManager {
 
     // TODO: this is ugly
-    const val mapScreenPath: String = "screens/map_test.onj"
+    const val mapScreenPath: String = "screens/map_screen.onj"
 
     const val mapConfigFilePath: String = "maps/map_config.onj"
     const val roadMapsPath: String = "maps/roads"
