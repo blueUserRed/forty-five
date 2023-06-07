@@ -211,7 +211,9 @@ screen using the keyboard. That includes selecting different actors using the
 arrow keys, deselecting using esc and pressing a button using enter. The drawable
 that marks which actor is currently selected can be configured in graphics_config.onj.
 In order for an actor to be part of the hierarchy used to determine the next actor, 
-it must implement the KeySelectableActor interface.
+it must implement the KeySelectableActor interface. Most selectable actors require 
+you to set the `partOfSelectionHierarchy` property in the screen-file before being
+able to select them.
 
 > Note: <br>
 > You should always use the ButtonClickEvent defined in the Events.kt file instead
@@ -222,6 +224,10 @@ it must implement the KeySelectableActor interface.
 > Warning: <br>
 > When the actor was not created by the [ScreenBuilder](#screenbuilder), it will not
 > fire the ButtonClickEvent when clicked using the mouse.
+
+### Scaling issues with images
+
+TODO
 
 ### Render Pipelines
 
