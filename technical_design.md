@@ -206,6 +206,23 @@ to key presses. An entry into the input map consists of the key, modifiers
 the one with the most modifiers is chosen. The actions are defined in 
 KeyAction.kt. The input maps are usually defined in screens/input_maps.onj.
 
+The input_maps.onj file provides an input map that can be used to navigate a
+screen using the keyboard. That includes selecting different actors using the
+arrow keys, deselecting using esc and pressing a button using enter. The drawable
+that marks which actor is currently selected can be configured in graphics_config.onj.
+In order for an actor to be part of the hierarchy used to determine the next actor, 
+it must implement the KeySelectableActor interface.
+
+> Note: <br>
+> You should always use the ButtonClickEvent defined in the Events.kt file instead
+> of the default event provided by LibGdx when you want to listen for click events,
+> because the ButtonClickEvent will also get fired when the button is activated using
+> the keyboard. For convenience, the `onButtonClick` extension function can be used
+> to bind a listener. <br>
+> Warning: <br>
+> When the actor was not created by the [ScreenBuilder](#screenbuilder), it will not
+> fire the ButtonClickEvent when clicked using the mouse.
+
 ### Render Pipelines
 
 Using the `useRenderPipeline` function defined in the `FortyFive` object, the
