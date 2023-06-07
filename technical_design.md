@@ -6,7 +6,43 @@
 - YogaLayout Playground https://yogalayout.com/playground/
 - Onj repository (including readme): https://github.com/blueUserRed/Onj
 
-### Content
+### table of contents
+
+- [Creating and styling screen](#creating-and-styling-screens)
+  - [ScreenBuilder](#screenbuilder)
+  - [Custom Actors](#custom-actors)
+  - [Custom z-index implementation](#custom-z-index-implementation)
+  - [FlexBoxes](#flexboxes)
+  - [Styling](#styling)
+  - [Behaviours](#behaviors)
+  - [ScreenController](#screencontroller)
+  - [Keyboard Input](#keyboard-input)
+  - [Render Pipelines](#render-pipelines)
+- [ResourceManager](#resourcemanager)
+  - [Some words on assets](#some-words-on-assets)
+  - [Defining what assets exist](#defining-what-assets-exist)
+  - [Using the ResourceManager](#using-the-resourcemanager)
+  - [The inner workings of the ResourceManager](#the-inner-workings-of-the-resourcemanager)
+- [The encounter (core gameplay)](#the-encounter-core-gameplay)
+  - [The GameController](#the-gamecontroller)
+  - [GameAnimations](#gameanimations)
+  - [Cards](#cards)
+  - [Effects](#effects)
+  - [Trait effects](#trait-effects)
+  - [Status effects](#status-effects)
+- [The SaveState](#the-savestate)
+- [Maps](#maps)
+  - [DetailMap](#detailmap)
+  - [MapEvents](#mapevents)
+  - [Areas and Roads](#areas-and-roads)
+  - [WorldView](#worldview)
+  - [The MapGenerator](#the-mapgenerator)
+- [Utility classes](#utility-classes)
+   - [The TextureGenerator](#the-texturegenerator)
+   - [TemplateString](#templatestring)
+   - [Timeline](#timeline)
+   - [The TexturePacker](#the-texturepacker)
+   - [BetterShader](#bettershader)
 
 ## Creating and styling screens
 
@@ -161,6 +197,14 @@ Sometimes more complicated logic is necessary for a screen. In these
 cases, a ScreenController can be used. It provides the `init`, `update`
 and `end` functions, that allow the controller to listen to the lifecycle of
 a screen and manipulate it.
+
+### Keyboard input
+
+In its options, a screen can define an input map, that tells it how to respond
+to key presses. An entry into the input map consists of the key, modifiers
+(e.g. ctrl, shift), and the action to be executed. If multiple entries match,
+the one with the most modifiers is chosen. The actions are defined in 
+KeyAction.kt. The input maps are usually defined in screens/input_maps.onj.
 
 ### Render Pipelines
 
@@ -365,6 +409,48 @@ or the run ends, the savefile is replaced with the default savefile
 (saves/default_savefile.onj). This file is also used if the savefile is not
 found or corrupt.
 
+## Maps
+
+----
+
+### DetailMap
+
+A DetailMap is the type of map that the player can navigate across. It
+consists of multiple nodes, which are connected by edges. The Widget used
+to display this map is the DetailMapWidget. In addition, DetailMaps can
+define decorations. These are textures that are rendered on the map, that
+don't affect the gameplay.
+
+### MapEvents
+
+A node on a DetailMap can define an event. Events can provide a name and a
+description, which are displayed in the sidebar. An event can choose not to
+show the sidebar. Events can also define a function which is executed when
+the user attempts to start an event.
+
+### Areas and Roads
+
+DetailMaps are separated into two categories: areas and roads. Areas are
+defined statically and always persist over multiple runs, for the entire
+playthrough. Roads are generated dynamically, and are reset as soon as a
+run is over. Roads can be found in the maps/roads directory. The static
+definitions for areas can be found in maps/area_definitions, the current
+version of the map (where the player might have already completed events)
+is stored in maps/areas.
+
+### WorldView
+
+The WorldView is a static image that shows the entire structure made up
+of areas and roads to the player. To make the process of changing location
+signs easier, the WorldView is drawn by the
+[TextureGenerator](#the-texturegenerator). Additionally, a player icon is
+displayed on the part of the map where the player is currently at. The
+locations of the player icon can be configured in maps/map_config.onj.
+
+### The MapGenerator
+
+TODO
+
 ## Utility classes
 
 ----
@@ -518,45 +604,3 @@ It has the following features:
  - constArgs: You can declare a constArg with a type in a shader. The value this
    argument takes on is always the same and can be defined in assets.onj. <br>
    Example: ``%constArg ca_speed float``
-
-## Maps
-
-----
-
-### DetailMap
-
-A DetailMap is the type of map that the player can navigate across. It
-consists of multiple nodes, which are connected by edges. The Widget used
-to display this map is the DetailMapWidget. In addition, DetailMaps can 
-define decorations. These are textures that are rendered on the map, that
-don't affect the gameplay.
-
-### MapEvents
-
-A node on a DetailMap can define an event. Events can provide a name and a 
-description, which are displayed in the sidebar. An event can choose not to
-show the sidebar. Events can also define a function which is executed when
-the user attempts to start an event.
-
-### Areas and Roads
-
-DetailMaps are separated into two categories: areas and roads. Areas are
-defined statically and always persist over multiple runs, for the entire
-playthrough. Roads are generated dynamically, and are reset as soon as a
-run is over. Roads can be found in the maps/roads directory. The static
-definitions for areas can be found in maps/area_definitions, the current
-version of the map (where the player might have already completed events)
-is stored in maps/areas.
-
-### WorldView
-
-The WorldView is a static image that shows the entire structure made up
-of areas and roads to the player. To make the process of changing location
-signs easier, the WorldView is drawn by the
-[TextureGenerator](#the-texturegenerator). Additionally, a player icon is
-displayed on the part of the map where the player is currently at. The
-locations of the player icon can be configured in maps/map_config.onj.
-
-### The MapGenerator
-
-TODO
