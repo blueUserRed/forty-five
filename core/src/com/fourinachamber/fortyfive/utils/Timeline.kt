@@ -122,12 +122,12 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
      */
     class TimelineBuilderDSL {
 
-        private val timelineActions: MutableList<TimelineAction> = mutableListOf()
+        val timelineActions: MutableList<TimelineAction> = mutableListOf()
 
         /**
          * adds an action that finishes instantly to the timeline
          */
-        fun action(action: @AllThreadsAllowed () -> Unit) {
+        inline fun action(crossinline action: @AllThreadsAllowed () -> Unit) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(): Boolean = true
                 override fun start(timeline: Timeline) {
@@ -146,7 +146,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
          * *WARNING:* because the action is executed on the next render call, this may break the sequence of actions,
          * for example if the next action is an [action()](Timeline.TimelineBuilderDSL.action)'
          */
-        fun mainThreadAction(action: @MainThreadOnly () -> Unit) {
+        inline fun mainThreadAction(crossinline action: @MainThreadOnly () -> Unit) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(): Boolean = true
                 override fun start(timeline: Timeline) {
@@ -163,7 +163,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * delays the timeline until a condition is met
          */
-        fun delayUntil(condition: @AllThreadsAllowed () -> Boolean) {
+        inline fun delayUntil(crossinline condition: @AllThreadsAllowed () -> Boolean) {
             timelineActions.add(object : TimelineAction() {
                 override fun isFinished(): Boolean = condition()
             })
@@ -200,9 +200,9 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
          * the condition is not known when the timeline is created. The timeline is also wrapped in a lambda in case
          * the creation of the timeline to include is also dependent on factors not known when the timeline is created
          */
-        fun includeLater(
-            timelineCreator: @AllThreadsAllowed () -> Timeline,
-            condition: @AllThreadsAllowed () -> Boolean
+        inline fun includeLater(
+            crossinline timelineCreator: @AllThreadsAllowed () -> Timeline,
+            crossinline condition: @AllThreadsAllowed () -> Boolean
         ) {
             timelineActions.add(object : TimelineAction() {
 
@@ -210,7 +210,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
                     super.start(timeline)
                     if (condition()) {
                         val timelineToInclude = timelineCreator()
-                        for (action in timelineToInclude._actions.reversed()) timeline.pushAction(action)
+                        for (action in timelineToInclude.actions.reversed()) timeline.pushAction(action)
                     }
                 }
 
@@ -279,7 +279,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * useful for quickly creating timelines
          */
-        fun timeline(builder: TimelineBuilderDSL.() -> Unit): Timeline {
+        inline fun timeline(builder: TimelineBuilderDSL.() -> Unit): Timeline {
             val timelineBuilder = TimelineBuilderDSL()
             builder(timelineBuilder)
             return timelineBuilder.build()
