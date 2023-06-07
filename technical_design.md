@@ -132,7 +132,7 @@ $Image {
         },
         {
             style_priority: 2,
-            style_condition: hover(), // All styles in this object 
+            style_condition: hover(), // All styles in this object
                                       // are only applied when this
                                       // condition is met. hover()
                                       // is true when this actor is
@@ -283,7 +283,7 @@ class SomeClass(
 ) : SomeOtherClass(), ResourceBorrower {
     
     fun init() {
-        // The ResourceManager is an object (=Singleton) an always available.
+        // The ResourceManager is an object (=Singleton) and always available.
         ResourceManager.borrow(this, textureHandle)
     }
     

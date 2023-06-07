@@ -30,7 +30,7 @@ object MapManager {
 
     const val logTag: String = "MapManager"
 
-    lateinit var currentDetail: DetailMap
+    lateinit var currentDetailMap: DetailMap
         private set
 
     lateinit var currentMapFile: FileHandle
@@ -40,8 +40,8 @@ object MapManager {
         private set
 
     var currentMapNode: MapNode
-        get() = currentDetail.uniqueNodes.find { it.index == SaveState.currentNode } ?: throw RuntimeException(
-            "invalid node index ${SaveState.currentNode} in map ${currentDetail.name}"
+        get() = currentDetailMap.uniqueNodes.find { it.index == SaveState.currentNode } ?: throw RuntimeException(
+            "invalid node index ${SaveState.currentNode} in map ${currentDetailMap.name}"
         )
         set(value) {
             SaveState.currentNode = value.index
@@ -71,7 +71,7 @@ object MapManager {
             .associate { it.get<String>("name") to it.get<String>("display")  }
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
-        currentDetail = DetailMap.readFromFile(map)
+        currentDetailMap = DetailMap.readFromFile(map)
     }
 
     fun displayName(internalName: String) = displayNames[internalName] ?: run {
@@ -82,14 +82,14 @@ object MapManager {
     fun switchToMap(newMap: String, placeAtEnd: Boolean = false) {
         val map = lookupMapFile(newMap)
         currentMapFile = map
-        currentDetail = DetailMap.readFromFile(map)
+        currentDetailMap = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
-        SaveState.currentNode = if (placeAtEnd) currentDetail.endNode.index else currentDetail.startNode.index
+        SaveState.currentNode = if (placeAtEnd) currentDetailMap.endNode.index else currentDetailMap.startNode.index
         switchToMapScreen()
     }
 
     fun write() {
-        currentMapFile.file().writeText(currentDetail.asOnjObject().toMinifiedString())
+        currentMapFile.file().writeText(currentDetailMap.asOnjObject().toMinifiedString())
     }
 
     fun newRunSync() {
