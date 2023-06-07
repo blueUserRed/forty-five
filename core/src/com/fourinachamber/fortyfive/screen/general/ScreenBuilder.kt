@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -18,9 +17,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
-//import com.fourinachamber.fortyfive.map.detailMap.MapEventDetailWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -287,7 +284,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Map" -> DetailMapWidget(
             screen,
-            DetailMapProviderFactory.get(widgetOnj.get<OnjNamedObject>("detailMapProvider")).get(),
+            MapManager.currentDetailMap,
             widgetOnj.get<String>("nodeTexture"),
             widgetOnj.get<String>("edgeTexture"),
             widgetOnj.get<String>("playerTexture"),
