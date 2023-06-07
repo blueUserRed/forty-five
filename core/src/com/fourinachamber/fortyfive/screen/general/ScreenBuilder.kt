@@ -53,7 +53,6 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
-    private var popups: Map<String, WidgetGroup>? = null
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -83,9 +82,6 @@ class ScreenBuilder(val file: FileHandle) {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
-        doPopups(onj, screen)
-        popups?.let { screen.popups = it }
-
         val root = CustomFlexBox(screen)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
@@ -101,21 +97,6 @@ class ScreenBuilder(val file: FileHandle) {
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
         return screen
-    }
-
-    private fun doPopups(onj: OnjObject, screen: OnjScreen) {
-        val popups = mutableMapOf<String, WidgetGroup>()
-        onj.get<OnjObject>("options").ifHas<OnjArray>("popups") { arr ->
-            arr.value.forEach { obj ->
-                obj as OnjObject
-                val name = obj.get<String>("name")
-                val rootObj = obj.get<OnjNamedObject>("popupRoot")
-                val popupRootFlexBox = CustomFlexBox(screen)
-                getWidget(rootObj, popupRootFlexBox, screen)
-                popups[name] = popupRootFlexBox
-            }
-        }
-        this.popups = popups
     }
 
     private fun doOptions(onj: OnjObject) {
@@ -316,7 +297,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("lineWidth").toFloat(),
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             widgetOnj.get<String>("directionIndicator"),
-            widgetOnj.get<String>("detailWidgetName"),
+            widgetOnj.get<String>("startButtonName"),
             widgetOnj.get<String>("background"),
             widgetOnj.get<Double>("screenSpeed").toFloat(),
             widgetOnj.get<Double>("backgroundScale").toFloat(),
