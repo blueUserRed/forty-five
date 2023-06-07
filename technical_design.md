@@ -470,10 +470,6 @@ example, this can be done using the TemplateLabel Widget.
 Example from loose_screen.onj:
 ```json5
 $TemplateLabel {
-    properties: [
-        position("absolute"),
-        position(0.0, null, 36.0, null)
-    ],
     align: "left",
     template: "enemies killed: {stat.lastRun.enemiesDefeated}\nreserves used: {stat.lastRun.usedReserves}",
     font: "red_wing",

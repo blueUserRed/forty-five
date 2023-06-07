@@ -157,7 +157,7 @@ $Widget {
         edgeTexture: string,
         playerMovementTime: float,
         directionIndicator: string,
-        detailWidgetName: string,
+        startButtonName: string,
         screenSpeed: float,
         backgroundScale: float,
         leftScreenSideDeadSection: float,
