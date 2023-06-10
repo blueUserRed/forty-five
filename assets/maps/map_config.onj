@@ -79,7 +79,7 @@ generatorConfig: {
                         baseHeight: 2.0,
                         scaleMin: 0.6,
                         scaleMax: 1.2,
-                        onlyCollidesWithNodes: true
+                        onlyCollidesWithNodes: false
                     },
                     $RandomDistributionFunction {
                         decoration: "map_decoration_cactus",
