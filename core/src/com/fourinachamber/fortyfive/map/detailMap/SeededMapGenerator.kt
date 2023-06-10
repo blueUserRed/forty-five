@@ -50,6 +50,7 @@ class SeededMapGenerator(
         nodes.forEach { it.scale(1F, .6F) }
         val decos = generateDecorations(nodes, connections)//TODO manche events eher am Dead-Ends spawnen
         nodes.forEach { it.rotate(restrictions.rotation) } //TODO Parameter für Weg-breite (mit collision)
+//        decos.forEach {rotateDeco(it, restrictions.rotation) } //TODO Rotation Decorations
         this.nodes = nodes
         build()
         return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos)
@@ -199,17 +200,39 @@ class SeededMapGenerator(
      * tries to fix all connections until all are fixed
      */
     private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>): MutableList<Line> {
-        val uniqueLines: MutableList<Line> = mutableListOf()
-        for (node in nodes) {
-            for (other in node.edgesTo) {
-                if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
-                    uniqueLines.add(Line(Vector2(node.x, node.y), Vector2(other.x, other.y)))
+        while (true) {
+            var hadErrors = false
+            val uniqueNodes: MutableList<MapNodeBuilder> = getUniqueNodesFromNodeRecursive(
+                nodes[0], mutableListOf()
+            )
+            val uniqueLines= mutableListOf<Line>()
+            for (node in uniqueNodes) {
+                for (other in node.edgesTo) {
+                    if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
+                        uniqueLines.add(Line(Vector2(node.x, node.y), Vector2(other.x, other.y)))
+                    }
                 }
             }
+            nodes.removeIf{it !in uniqueNodes}
+            while (checkLinesNotIntercepting(uniqueLines, nodes)) hadErrors = true
+            if (!hadErrors) return uniqueLines
         }
-        @Suppress("ControlFlowWithEmptyBody")
-        while (checkLinesNotIntercepting(uniqueLines, nodes));
-        return uniqueLines
+    }
+
+    /**
+     * returns all nodes which are connected to the first one
+     */
+    private fun getUniqueNodesFromNodeRecursive(
+        node: MapNodeBuilder,
+        checkedNodes: MutableList<MapNodeBuilder>
+    ): MutableList<MapNodeBuilder> {
+        for (other in node.edgesTo) {
+            if (other !in checkedNodes) {
+                checkedNodes.add(other)
+                getUniqueNodesFromNodeRecursive(other, checkedNodes)
+            }
+        }
+        return checkedNodes
     }
 
     /**
@@ -797,7 +820,7 @@ sealed class DecorationDistributionFunction(
     private val scaleMax: Float,
     private val collidesOnlyWithNodes: Boolean,
 ) {
-    protected val rnd: kotlin.random.Random = Random(seed)
+    protected val rnd: kotlin.random.Random = Random(seed + 1)
 
     class Random(
         seed: Long,
@@ -848,8 +871,8 @@ sealed class DecorationDistributionFunction(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
-
-//        nodes.forEach { println(it.x.toString() + ", " + it.y) }
+        nodes.forEach { println(it.x.toString() + ", " + it.y + ", " + it.edgesTo.size) }
+//        println(nodes.size)
         val possiblePositions: List<Pair<Vector2, Float>> =
             getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
         return DetailMap.MapDecoration(
@@ -922,7 +945,6 @@ sealed class DecorationDistributionFunction(
         }
         return true
     }
-
 }
 
 object DecorationDistributionFunctionFactory {
@@ -1015,53 +1037,54 @@ data class MapRestriction(
 //        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
 //    ),
     val decorationPadding: Float,
+    val pathTotalWidth: Float = 10F,
 ) {
 
 
     companion object {
 
-    fun fromOnj(onj: OnjObject): MapRestriction = MapRestriction(
-        maxNodes = onj.get<Long>("maxNodes").toInt(),
-        minNodes = onj.get<Long>("minNodes").toInt(),
-        maxLines = onj.get<Long>("maxSplits").toInt(),
-        splitProb = onj.get<Double>("splitProbability").toFloat(),
-        compressProb = onj.get<Double>("compressProbability").toFloat(),
-        averageLengthOfLineInBetween = onj.get<Double>("averageLengthOfLineInBetween").toFloat(),
-        decorationPadding = onj.get<Double>("decorationPadding").toFloat(),
-        distanceFromAreaToLine = onj.get<Double>("distanceFromAreaToLine").toFloat(),
-        endArea = onj.get<String>("endArea"),
-        startArea = onj.get<String>("startArea"),
-        maxAnglePercent = onj.get<Double>("maxAnglePercent").toFloat(),
-        maxWidth = onj.get<Long>("maxWidth").toInt(),
-        minDistanceBetweenAreas = onj.get<Double>("minDistanceBetweenAreas").toFloat(),
-        rangeToCheckBetweenNodes = onj.get<Double>("rangeToCheckBetweenNodes").toFloat(),
-        percentageForAllowedNodesInRangeBetweenLineAndArea =
-        onj.get<Double>("percentageForAllowedNodesInRangeBetweenLineAndArea").toFloat(),
-        rotation = onj.get<Double>("rotation"),
-        otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
-        fixedEvents = onj
-            .get<OnjArray>("fixedEvents")
-            .value
-            .map { MapEventFactory.getMapEvent(it as OnjNamedObject) },
-        optionalEvents = onj
-            .get<OnjArray>("optionalEvents")
-            .value
-            .map { it as OnjObject }
-            .map {
-                it.get<Long>("weight").toInt() to
-                        { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
-            },
-        decorations = onj
-            .get<OnjArray>("decorations")
-            .value
-            .mapIndexed { index, decoration ->
-                decoration as OnjNamedObject
-                DecorationDistributionFunctionFactory.get(
-                    decoration,
-                    onj.get<Long>("decorationSeed") * 289708 * index
-                )
-            }
-    )
-}
+        fun fromOnj(onj: OnjObject): MapRestriction = MapRestriction(
+            maxNodes = onj.get<Long>("maxNodes").toInt(),
+            minNodes = onj.get<Long>("minNodes").toInt(),
+            maxLines = onj.get<Long>("maxSplits").toInt(),
+            splitProb = onj.get<Double>("splitProbability").toFloat(),
+            compressProb = onj.get<Double>("compressProbability").toFloat(),
+            averageLengthOfLineInBetween = onj.get<Double>("averageLengthOfLineInBetween").toFloat(),
+            decorationPadding = onj.get<Double>("decorationPadding").toFloat(),
+            distanceFromAreaToLine = onj.get<Double>("distanceFromAreaToLine").toFloat(),
+            endArea = onj.get<String>("endArea"),
+            startArea = onj.get<String>("startArea"),
+            maxAnglePercent = onj.get<Double>("maxAnglePercent").toFloat(),
+            maxWidth = onj.get<Long>("maxWidth").toInt(),
+            minDistanceBetweenAreas = onj.get<Double>("minDistanceBetweenAreas").toFloat(),
+            rangeToCheckBetweenNodes = onj.get<Double>("rangeToCheckBetweenNodes").toFloat(),
+            percentageForAllowedNodesInRangeBetweenLineAndArea =
+            onj.get<Double>("percentageForAllowedNodesInRangeBetweenLineAndArea").toFloat(),
+            rotation = onj.get<Double>("rotation"),
+            otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
+            fixedEvents = onj
+                .get<OnjArray>("fixedEvents")
+                .value
+                .map { MapEventFactory.getMapEvent(it as OnjNamedObject) },
+            optionalEvents = onj
+                .get<OnjArray>("optionalEvents")
+                .value
+                .map { it as OnjObject }
+                .map {
+                    it.get<Long>("weight").toInt() to
+                            { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
+                },
+            decorations = onj
+                .get<OnjArray>("decorations")
+                .value
+                .mapIndexed { index, decoration ->
+                    decoration as OnjNamedObject
+                    DecorationDistributionFunctionFactory.get(
+                        decoration,
+                        onj.get<Long>("decorationSeed") * 289708 * index
+                    )
+                }
+        )
+    }
 }
 
