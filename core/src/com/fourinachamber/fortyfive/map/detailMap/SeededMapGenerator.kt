@@ -49,7 +49,7 @@ class SeededMapGenerator(
         addEvents(nodes)
         nodes.forEach { it.scale(1F, .6F) }
         val decos = generateDecorations(nodes, connections)//TODO manche events eher am Dead-Ends spawnen
-        nodes.forEach { it.rotate(restrictions.rotation) }
+        nodes.forEach { it.rotate(restrictions.rotation) } //TODO Parameter für Weg-breite (mit collision)
         this.nodes = nodes
         build()
         return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos)
