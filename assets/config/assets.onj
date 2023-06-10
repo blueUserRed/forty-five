@@ -151,7 +151,12 @@ textures: [
     },
     {
         name: "map_background_wasteland_tileable",
-        file: "textures/map/backgrounds/wasteland.png",
+        file: "textures/map/backgrounds/wasteland.jpg",
+//        file: "textures/map/backgrounds/wasteland.png",
+    },
+    {
+        name: "map_path",
+        file: "textures/map/path.png"
     },
     {
         name: "map_detail_fight_button",
