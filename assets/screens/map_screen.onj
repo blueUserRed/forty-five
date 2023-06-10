@@ -16,7 +16,7 @@ assets: {
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
         "map_background_wasteland_tileable", "location_sign_salem", "nav_bar_background",
-        "map_decoration_cactus", "map_decoration_grass",
+        "map_decoration_cactus", "map_decoration_grass", "map_path"
     ]
 },
 
@@ -106,14 +106,15 @@ var mapBox = $Box {
         ],
         detailMapProvider: $CurrentMapProvider { },
         nodeSize: 5.0,
-        lineWidth: 1.0,
+        lineWidth: 5.5,
         name: "map",
         nodeTexture: "key_select_frame",
         playerTexture: "enemy_texture",
         playerWidth: 2.0,
         playerHeight: 6.0,
-        background: "map_background_grass_tileable",
-        edgeTexture: "black_texture",
+        background: "map_background_wasteland_tileable",
+//        background: "map_background_grass_tileable",
+        edgeTexture: "map_path",
         playerMovementTime: 0.3,
         directionIndicator: "heart_texture",
         screenSpeed: 2.5,
