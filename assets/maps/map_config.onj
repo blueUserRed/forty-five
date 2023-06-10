@@ -74,12 +74,12 @@ generatorConfig: {
                 decorations: [
                     $RandomDistributionFunction {
                         decoration: "map_decoration_grass",
-                        density: 0.95,
+                        density: 3.35,
                         baseWidth: 2.0,
                         baseHeight: 2.0,
                         scaleMin: 0.6,
                         scaleMax: 1.2,
-                        onlyCollidesWithNodes: true
+                        onlyCollidesWithNodes: false
                     },
                     $RandomDistributionFunction {
                         decoration: "map_decoration_cactus",
@@ -88,7 +88,7 @@ generatorConfig: {
                         baseHeight: 4.0,
                         scaleMin: 1.0,
                         scaleMax: 2.0,
-                        onlyCollidesWithNodes: true
+                        onlyCollidesWithNodes: false
                     }
                 ],
                 decorationSeed: 230789230789407892340,

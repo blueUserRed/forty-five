@@ -47,7 +47,7 @@ class SeededMapGenerator(
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         addEvents(nodes)
-        nodes.forEach { it.scale(1F, .6F) }
+//        nodes.forEach { it.scale(1F, .6F) }
         val decos = generateDecorations(nodes, connections)//TODO manche events eher am Dead-Ends spawnen
         nodes.forEach { it.rotate(restrictions.rotation) } //TODO Parameter für Weg-breite (mit collision)
 //        decos.forEach {rotateDeco(it, restrictions.rotation) } //TODO Rotation Decorations
@@ -205,7 +205,7 @@ class SeededMapGenerator(
             val uniqueNodes: MutableList<MapNodeBuilder> = getUniqueNodesFromNodeRecursive(
                 nodes[0], mutableListOf()
             )
-            val uniqueLines= mutableListOf<Line>()
+            val uniqueLines = mutableListOf<Line>()
             for (node in uniqueNodes) {
                 for (other in node.edgesTo) {
                     if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
@@ -213,7 +213,7 @@ class SeededMapGenerator(
                     }
                 }
             }
-            nodes.removeIf{it !in uniqueNodes}
+            nodes.removeIf { it !in uniqueNodes }
             while (checkLinesNotIntercepting(uniqueLines, nodes)) hadErrors = true
             if (!hadErrors) return uniqueLines
         }
@@ -649,7 +649,7 @@ class SeededMapGenerator(
                                     Vector2(node.x, node.y),
                                     Vector2(possibleNode.x, possibleNode.y),
                                     Vector2(nodeToTestIfInRange.x, nodeToTestIfInRange.y),
-                                    10F.pow(2)
+                                    100F
                                 )
                             ) {
                                 posNodes.remove(possibleNode)
@@ -696,6 +696,10 @@ class SeededMapGenerator(
 
 class Line(val start: Vector2, val end: Vector2) {
 
+    fun ang(): Float {
+        return Vector2(start.x, start.y).sub(end).angleRad()
+    }
+
     fun intersection(other: Line): Vector2? {
         val intersectVector = Vector2()
         if (Intersector.intersectLines(start, end, other.start, other.end, intersectVector)) {
@@ -722,6 +726,18 @@ class Line(val start: Vector2, val end: Vector2) {
         var result = start.hashCode()
         result = 31 * result + end.hashCode()
         return result
+    }
+
+    fun getAsRect(pathTotalWidth: Float, sizeToNodeCenter: Vector2): Array<Vector2> {
+        val ang = ang()
+        val a: Float = (cos(ang + Math.PI / 2) * pathTotalWidth / 2).toFloat()
+        val b: Float = (sin(ang + Math.PI / 2) * pathTotalWidth / 2).toFloat()
+        return arrayOf(
+            Vector2(start.x - a, start.y - b).add(sizeToNodeCenter),
+            Vector2(start.x + a, start.y + b).add(sizeToNodeCenter),
+            Vector2(end.x + a, end.y + b).add(sizeToNodeCenter),
+            Vector2(end.x - a, end.y - b).add(sizeToNodeCenter),
+        )
     }
 }
 
@@ -820,7 +836,7 @@ sealed class DecorationDistributionFunction(
     private val scaleMax: Float,
     private val collidesOnlyWithNodes: Boolean,
 ) {
-    protected val rnd: kotlin.random.Random = Random(seed + 1)
+    protected val rnd: kotlin.random.Random = Random(seed)
 
     class Random(
         seed: Long,
@@ -872,76 +888,75 @@ sealed class DecorationDistributionFunction(
         yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
         nodes.forEach { println(it.x.toString() + ", " + it.y + ", " + it.edgesTo.size) }
-//        println(nodes.size)
         val possiblePositions: List<Pair<Vector2, Float>> =
             getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
         return DetailMap.MapDecoration(
             type,
             baseWidth,
             baseHeight,
-            possiblePositions.filter { isPossibleToPlaceNode(it, nodes, connections) }.sortedBy { -it.first.y }
+            possiblePositions
+                .filter { isPossibleToPlaceNode(it, nodes, connections, restrictions.pathTotalWidth) }
+                .sortedBy { -it.first.y }
         )
     }
 
     private fun isPossibleToPlaceNode(
         data: Pair<Vector2, Float>,
         nodes: List<MapNodeBuilder>,
-        connections: MutableList<Line>
+        connections: MutableList<Line>,
+        pathTotalWidth: Float
     ): Boolean {
-        val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
-        if (collidesOnlyWithNodes) {
-            for (it in nodes) {
-                val tempRect = it.posAsVec() to it.sizeAsVec()
-                if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
-                    (rect.first.y < tempRect.first.y + tempRect.second.y) &&
-                    (tempRect.first.x < rect.first.x + rect.second.x) &&
-                    (tempRect.first.y < rect.first.y + rect.second.y)
-                ) {
-                    return false
-                }
-            }
-        } else {
-//            val rect =
-//                data.first to Vector2(data.first.x + baseWidth * data.second, data.first.y + baseHeight * data.second)
-            for (it in connections) {
-                val tempRect = it.start to it.end //TODO hier weitermachen
-                if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
-                    (rect.first.y < tempRect.first.y + tempRect.second.y) &&
-                    (tempRect.first.x < rect.first.x + rect.second.x) &&
-                    (tempRect.first.y < rect.first.y + rect.second.y)
-                ) {
-                    return false
-                }
-            }
-            /* connections.forEach {
-                 val tempRect = it.start to it.start.sub(it.end)
-                 if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
-                     (rect.first.y < tempRect.first.y + tempRect.second.y) &&
-                     (tempRect.first.x < rect.first.x + rect.second.x) &&
-                     (tempRect.first.y < rect.first.y + rect.second.y)
-                 ) {
-                     val k: Float = (it.start.y - it.end.y) / (it.start.x - it.end.x)
-                     if (k.isNaN()) {
-                         println("This isn't possible")
-                         return (max(it.start.y, it.end.y) < rect.first.y || min(it.start.y, it.end.y) > rect.first.y)
-                     } else {
-                         val d = it.start.y - it.start.x * k
-                         val firstY = d + k * rect.first.x
-                         val secY = d + k * rect.second.x
 
- //                        if ((firstY > rect.first.y && firstY < rect.second.y)) {
- //                            return false
- //                        }
- //                        if ((secY > rect.first.y && secY < rect.second.y)) {
- //                            return false
- //                        }
- //                        if ((min(firstY, secY) < rect.first.y && max(firstY, secY) < rect.second.y)) {
- //                            return false
- //                        }
-                         return false
-                     }
-                 }
-             }*/
+        val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
+        for (it in nodes) {
+            val tempRect = it.posAsVec() to it.sizeAsVec()
+            if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                (tempRect.first.x < rect.first.x + rect.second.x) &&
+                (tempRect.first.y < rect.first.y + rect.second.y)
+            ) {
+                return false
+            }
+        }
+        if (!collidesOnlyWithNodes) {
+            val size = Vector2(baseWidth * data.second, baseHeight * data.second)
+            val rect = arrayOf(
+                Vector2(data.first.x, data.first.y),
+                Vector2(data.first.x, data.first.y).add(size.x, 0F),
+                Vector2(data.first.x, data.first.y).add(size.x, size.y),
+                Vector2(data.first.x, data.first.y).add(0F, size.y)
+            )
+            for (it in connections) {
+                val tempRect = it.getAsRect(pathTotalWidth, Vector2(2.5F, 2.5F))
+                if (isPolygonsIntersecting(rect, tempRect)) return false
+            }
+        }
+        return true
+    }
+
+    private fun isPolygonsIntersecting(a: Array<Vector2>, b: Array<Vector2>): Boolean {
+        for (rect in arrayOf(a, b)) {
+            for (i1 in rect.indices) {
+                val i2: Int = (i1 + 1) % rect.size
+                val p1: Vector2 = rect.get(i1)
+                val p2: Vector2 = rect.get(i2)
+                val normal = Vector2(p2.y - p1.y, p1.x - p2.x)
+                var minA = Float.POSITIVE_INFINITY
+                var maxA = Float.NEGATIVE_INFINITY
+                for (p in a) {
+                    val projected: Float = normal.x * p.x + normal.y * p.y
+                    if (projected < minA) minA = projected
+                    if (projected > maxA) maxA = projected
+                }
+                var minB = Float.POSITIVE_INFINITY
+                var maxB = Float.NEGATIVE_INFINITY
+                for (p in b) {
+                    val projected: Float = normal.x * p.x + normal.y * p.y
+                    if (projected < minB) minB = projected
+                    if (projected > maxB) maxB = projected
+                }
+                if (maxA < minB || maxB < minA) return false
+            }
         }
         return true
     }
@@ -1032,12 +1047,8 @@ data class MapRestriction(
     val fixedEvents: List<MapEvent>,
     val optionalEvents: List<Pair<Int, () -> MapEvent>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
-
-//        DistributionFunction.Random(123, "enemy_texture", 0.25F, 8F, 13F, 0.75F, 2F, true),
-//        //https://gamedev.stackexchange.com/questions/79049/generating-tile-map
-//    ),
     val decorationPadding: Float,
-    val pathTotalWidth: Float = 10F,
+    val pathTotalWidth: Float = 7F,
 ) {
 
 
