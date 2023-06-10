@@ -48,7 +48,7 @@ class SeededMapGenerator(
         addAreas(nodes, connections)
         addEvents(nodes)
         nodes.forEach { it.scale(1F, .6F) }
-        val decos = generateDecorations(nodes, connections)
+        val decos = generateDecorations(nodes, connections)//TODO manche events eher am Dead-Ends spawnen
         nodes.forEach { it.rotate(restrictions.rotation) }
         this.nodes = nodes
         build()
