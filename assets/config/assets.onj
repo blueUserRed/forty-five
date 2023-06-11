@@ -206,6 +206,11 @@ shaders: [
         name: "film_shader",
         file: "shaders/film.glsl",
         constantArgs: { }
+    },
+    {
+        name: "glow_shader",
+        file: "shaders/glow.glsl",
+        constantArgs: { }
     }
 ],
 

@@ -22,4 +22,4 @@ void main() {
 
 ~~~section fragment
 
-%include shaders/includes/default_fragement.glsl
+%include shaders/includes/default_fragment.glsl

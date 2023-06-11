@@ -31,7 +31,7 @@ class BetterShader(
     private fun bindUniform(uniform: String) = when (uniform) {
 
         "u_time" -> {
-            val uTime = (TimeUtils.timeSinceMillis(referenceTime) / 100.0).toFloat()
+            val uTime = TimeUtils.timeSinceMillis(referenceTime).toFloat() / 1000f
             shader.setUniformf("u_time", uTime)
         }
 

@@ -32,7 +32,7 @@ assets: {
 
         "revolver_cursor",
 
-        "earthquake_shader",
+//        "earthquake_shader",
 
         "transparent_black_texture",
 
@@ -48,7 +48,9 @@ assets: {
         ...(graphicsConfig.textAnimationUsedAssets),
         ...(graphicsConfig.cardDetailUsedAssets),
         ...(graphicsConfig.keySelectUsedAssets),
-        ...(graphicsConfig.enemyUsedAssets)
+        ...(graphicsConfig.enemyUsedAssets),
+        ...(graphicsConfig.enemyUsedAssets),
+        ...(graphicsConfig.shootPostProcessorUsedAssets)
     ]
 },
 
