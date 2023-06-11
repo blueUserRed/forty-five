@@ -1,16 +1,21 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.Effect
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.Trigger
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardDetailActor
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -431,7 +436,7 @@ class CardActor(
     fontScale: Float,
     detailBackgroundHandle: ResourceHandle,
     detailSpacing: Float,
-    screen: OnjScreen
+    private val screen: OnjScreen
 ) : CustomImageActor(card.drawableHandle, screen) {
 
     override var isSelected: Boolean = false
@@ -462,6 +467,38 @@ class CardActor(
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
         FortyFive.currentGame!!.destroyCard(card)
         true
+    }
+
+    private var inGlowAnim: Boolean = false
+
+    private val glowShader: BetterShader by lazy {
+        ResourceManager.get(screen, "glow_shader") // TODO: fix
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        if (batch == null || drawable == null) {
+            super.draw(batch, parentAlpha)
+            return
+        }
+        if (inGlowAnim) {
+            batch.flush()
+            glowShader.shader.bind()
+            glowShader.prepare(screen)
+            batch.shader = glowShader.shader
+        }
+        super.draw(batch, parentAlpha)
+        batch.flush()
+        if (inGlowAnim) batch.shader = null
+    }
+
+    fun glowAnimation(): Timeline = Timeline.timeline {
+        action {
+            inGlowAnim = true
+            glowShader.resetReferenceTime()
+        }
+        delay(1000)
+        action { inGlowAnim = false }
     }
 
     fun enterDestroyMode() {

@@ -62,7 +62,7 @@ abstract class Effect(val trigger: Trigger) {
 
             return Timeline.timeline {
                 delay(GraphicsConfig.bufferTime)
-                includeActionLater(shakeCard) { card.inGame }
+                includeActionLater(card.actor.glowAnimation().asAction()) { card.inGame } // TODO: change back
                 action { gameController.gainReserves(amount) }
                 includeAction(textActorAction)
             }

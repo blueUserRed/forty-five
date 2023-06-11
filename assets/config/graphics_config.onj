@@ -167,4 +167,4 @@ shootPostProcessor: {
     duration: 0.7
 },
 
-shootPostProcessorUsedAssets: [ "earthquake_shader" ]
+shootPostProcessorUsedAssets: [ "earthquake_shader", "glow_shader" ] // TODO: merge all 'usedAssets'-keys
