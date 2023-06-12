@@ -16,7 +16,8 @@ assets: {
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
         "map_background_wasteland_tileable", "location_sign_salem", "nav_bar_background",
-        "map_decoration_cactus", "map_decoration_grass", "map_path", "map_node"
+        "map_decoration_cactus", "map_decoration_grass", "map_path", "map_node", "dialog_continue_arrow",
+        "map_player"
     ]
 },
 
@@ -64,7 +65,8 @@ var navBar = $Box {
     $Image {
         styles: [
             {
-                aspectRatio: 1.0
+                aspectRatio: 1.0,
+                visible: false,
             }
         ],
         textureName: "heart_texture",
@@ -109,14 +111,13 @@ var mapBox = $Box {
         lineWidth: 5.5,
         name: "map",
         nodeTexture: "map_node",
-        playerTexture: "enemy_texture",
-        playerWidth: 2.0,
-        playerHeight: 6.0,
+        playerTexture: "map_player",
+        playerWidth: 1.83 * 3.0,
+        playerHeight: 3.0 * 3.0,
         background: "map_background_wasteland_tileable",
-//        background: "map_background_grass_tileable",
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
-        directionIndicator: "heart_texture",
+        directionIndicator: "dialog_continue_arrow",
         screenSpeed: 2.5,
         backgroundScale: 0.05,
         leftScreenSideDeadSection: 10.0,
