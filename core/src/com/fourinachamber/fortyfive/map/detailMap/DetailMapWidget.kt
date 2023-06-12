@@ -206,8 +206,8 @@ class DetailMapWidget(
         drawNodeImages(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
-        playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
-        drawDirectionIndicator(batch)
+//        playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
+//        drawDirectionIndicator(batch)
         drawDecorations(batch)
         super.draw(batch, parentAlpha)
 
