@@ -158,6 +158,10 @@ textures: [
         file: "textures/map/path.png"
     },
     {
+        name: "map_node",
+        file: "textures/map/node.png"
+    },
+    {
         name: "map_detail_fight_button",
         file: "textures/map/detail/fight_button.png",
     },
