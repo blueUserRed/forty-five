@@ -206,8 +206,8 @@ class DetailMapWidget(
         drawNodeImages(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
-//        playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
-//        drawDirectionIndicator(batch)
+        playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
+        drawDirectionIndicator(batch)
         drawDecorations(batch)
         super.draw(batch, parentAlpha)
 
@@ -285,7 +285,8 @@ class DetailMapWidget(
             directionIndicator.regionHeight * 0.01f,
             1f,
             1f,
-            if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees
+//            angleRadians.degrees
+            if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees + 180f,
         )
     }
 
