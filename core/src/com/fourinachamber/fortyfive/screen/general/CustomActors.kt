@@ -131,15 +131,31 @@ interface KeySelectableActor {
      */
     var isSelected: Boolean
 
+    /**
+     * true when the actor wants to be part of the hierarchy used to determine the next actor.
+     * When this is false, the actor cannot be selected
+     */
     val partOfHierarchy: Boolean
 
+    /**
+     * returns the area of the actor on the screen, which will be highlighted when the actor is selected
+     */
     fun getHighlightArea(): Rectangle
 }
 
+/**
+ * Actor that can keep track of whether it is hovered over or not
+ */
 interface HoverStateActor {
 
+    /**
+     * true when the actor is hovered over
+     */
     var isHoveredOver: Boolean
 
+    /**
+     * binds listeners to [actor] that automatically assign [isHoveredOver]
+     */
     fun bindHoverStateListeners(actor: Actor) {
         actor.onEnter { isHoveredOver = true }
         actor.onExit { isHoveredOver = false }
@@ -147,12 +163,21 @@ interface HoverStateActor {
 
 }
 
+/**
+ * actor that has a background that can be changed
+ */
 interface BackgroundActor {
 
-    var backgroundHandle: String?
+    /**
+     * handle of the current background
+     */
+    var backgroundHandle: ResourceHandle?
 
 }
 
+/**
+ * Actor that can be detached from the screen and then reattached
+ */
 interface Detachable {
 
     val attached: Boolean

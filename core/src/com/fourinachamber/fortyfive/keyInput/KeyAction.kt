@@ -13,6 +13,9 @@ import onj.value.OnjObject
 
 typealias KeyAction = @MainThreadOnly (screen: OnjScreen) -> Boolean
 
+/**
+ * creates [KeyAction]s using an OnjObject
+ */
 object KeyActionFactory {
 
     private val actions: Map<String, (onj: OnjObject) -> KeyAction> = mapOf(
@@ -171,6 +174,9 @@ object KeyActionFactory {
 
     )
 
+    /**
+     * creates a KeyAction using an OnjObject
+     */
     fun getAction(obj: OnjNamedObject): KeyAction {
         return actions[obj.name.removeSuffix("KeyAction")]?.invoke(obj) ?: throw RuntimeException(
             "unknown key action ${obj.name}"

@@ -12,7 +12,7 @@
     can be commented out again.
 - start the game
 
-## Project Build
+## Project Build (to .jar)
 
 - run the forty_five [dist] gradle task
 - create a temporary directory
