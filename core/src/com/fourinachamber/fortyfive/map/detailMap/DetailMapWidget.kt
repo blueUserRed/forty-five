@@ -285,7 +285,8 @@ class DetailMapWidget(
             directionIndicator.regionHeight * 0.01f,
             1f,
             1f,
-            if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees
+//            angleRadians.degrees
+            if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees + 180f,
         )
     }
 
@@ -384,8 +385,9 @@ class DetailMapWidget(
             if (dx < 0) angle = 360 - angle
             batch.draw(
                 edgeTexture,
-                x + node1.x + mapOffset.x + nodeSize / 2, y + node1.y + mapOffset.y + nodeSize / 2 + lineWidth / 2,
-                0f, 0f,
+                x + node1.x + mapOffset.x + nodeSize / 2 - lineWidth / 2,
+                y + node1.y + mapOffset.y + nodeSize / 2,
+                lineWidth / 2, 0f,
                 lineWidth,
                 length,
                 1.0f, 1.0f,

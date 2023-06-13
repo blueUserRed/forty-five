@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.game.card
+package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.Files
 import com.badlogic.gdx.Gdx
@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.PixmapPacker
 import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
 import com.badlogic.gdx.utils.Disposable
-import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import kotlinx.coroutines.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser

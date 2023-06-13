@@ -8,6 +8,20 @@ import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
+/**
+ * an entry for the [KeyInputMap]
+ */
+data class KeyInputMapEntry(
+    val keycode: Keycode,
+    val action: KeyAction,
+    val modifierKeys: List<Keycode>
+)
+
+typealias Keycode = Int
+
+/**
+ * Binds keys to certain actions
+ */
 class KeyInputMap(
     private val entries: List<KeyInputMapEntry>,
     private val screen: OnjScreen
@@ -73,6 +87,9 @@ class KeyInputMap(
 
     companion object {
 
+        /**
+         * array of all keys that are considered to be modifiers
+         */
         val modifierKeys = arrayOf(
             Keys.ALT_LEFT,
             Keys.ALT_RIGHT,
@@ -82,6 +99,9 @@ class KeyInputMap(
             Keys.SHIFT_RIGHT
         )
 
+        /**
+         * creates a new KeyInputMap using an OnjArray
+         */
         fun readFromOnj(actions: OnjArray, screen: OnjScreen): KeyInputMap {
             val entries = actions
                 .value

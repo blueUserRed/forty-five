@@ -63,7 +63,7 @@ generatorConfig: {
                 maxAnglePercent: 0.6,
                 rangeToCheckBetweenNodes: 0.6,
                 startArea: "test_area",
-                endArea: "Huber",
+                endArea: "test_area",
                 otherAreas: [],
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
@@ -74,25 +74,25 @@ generatorConfig: {
                 decorations: [
                     $RandomDistributionFunction {
                         decoration: "map_decoration_grass",
-                        density: 0.5,
-                        baseWidth: 2.0,
-                        baseHeight: 2.0,
+                        density: 0.2,
+                        baseWidth: 3.0,
+                        baseHeight: 3.0,
                         scaleMin: 0.6,
                         scaleMax: 1.2,
-                        onlyCollidesWithNodes: true
+                        onlyCollidesWithNodes: false
                     },
                     $RandomDistributionFunction {
                         decoration: "map_decoration_cactus",
                         density: 0.01,
                         baseWidth: 2.0,
                         baseHeight: 4.0,
-                        scaleMin: 1.0,
-                        scaleMax: 2.0,
-                        onlyCollidesWithNodes: true
+                        scaleMin: 1.5,
+                        scaleMax: 2.5,
+                        onlyCollidesWithNodes: false
                     }
                 ],
-                decorationSeed: 23078923078940789234,
-                decorationPadding: 20.0
+                decorationSeed: 230789230789407892340,
+                decorationPadding: 40.0
             }
         },
 //        {

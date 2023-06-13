@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -18,9 +17,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.detailMap.DetailMapProviderFactory
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
-//import com.fourinachamber.fortyfive.map.detailMap.MapEventDetailWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -53,7 +50,6 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
-    private var popups: Map<String, WidgetGroup>? = null
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -83,9 +79,6 @@ class ScreenBuilder(val file: FileHandle) {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
-        doPopups(onj, screen)
-        popups?.let { screen.popups = it }
-
         val root = CustomFlexBox(screen)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
@@ -101,21 +94,6 @@ class ScreenBuilder(val file: FileHandle) {
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
         return screen
-    }
-
-    private fun doPopups(onj: OnjObject, screen: OnjScreen) {
-        val popups = mutableMapOf<String, WidgetGroup>()
-        onj.get<OnjObject>("options").ifHas<OnjArray>("popups") { arr ->
-            arr.value.forEach { obj ->
-                obj as OnjObject
-                val name = obj.get<String>("name")
-                val rootObj = obj.get<OnjNamedObject>("popupRoot")
-                val popupRootFlexBox = CustomFlexBox(screen)
-                getWidget(rootObj, popupRootFlexBox, screen)
-                popups[name] = popupRootFlexBox
-            }
-        }
-        this.popups = popups
     }
 
     private fun doOptions(onj: OnjObject) {
@@ -306,7 +284,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Map" -> DetailMapWidget(
             screen,
-            DetailMapProviderFactory.get(widgetOnj.get<OnjNamedObject>("detailMapProvider")).get(),
+            MapManager.currentDetailMap,
             widgetOnj.get<String>("nodeTexture"),
             widgetOnj.get<String>("edgeTexture"),
             widgetOnj.get<String>("playerTexture"),
@@ -316,7 +294,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("lineWidth").toFloat(),
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             widgetOnj.get<String>("directionIndicator"),
-            widgetOnj.get<String>("detailWidgetName"),
+            widgetOnj.get<String>("startButtonName"),
             widgetOnj.get<String>("background"),
             widgetOnj.get<Double>("screenSpeed").toFloat(),
             widgetOnj.get<Double>("backgroundScale").toFloat(),
@@ -468,7 +446,7 @@ class ScreenBuilder(val file: FileHandle) {
     companion object {
 
         val screenSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/screen2.onjschema").file())
+            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/screen.onjschema").file())
         }
 
     }

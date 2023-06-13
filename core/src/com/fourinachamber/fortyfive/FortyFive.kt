@@ -3,7 +3,7 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.game.card.TextureGenerator
+import com.fourinachamber.fortyfive.utils.TextureGenerator
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
 import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
@@ -40,7 +40,7 @@ object FortyFive : Game() {
         serviceThread.start()
         if (generateCards) runCardGenerator()
         if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
-        changeToScreen("screens/map_test.onj")
+        changeToScreen("screens/map_screen.onj")
     }
 
     override fun render() {
@@ -71,14 +71,12 @@ object FortyFive : Game() {
             this.currentScreen = screen
             currentRenderable = screen
             setScreen(screen)
-        } else {
-            currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
-                FortyFiveLogger.title("changing screen")
-                currentScreen.dispose()
-                this.currentScreen = screen
-                currentRenderable = screen
-                setScreen(screen)
-            }
+        } else currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
+            FortyFiveLogger.title("changing screen")
+            currentScreen.dispose()
+            this.currentScreen = screen
+            currentRenderable = screen
+            setScreen(screen)
         }
     }
 
@@ -107,7 +105,7 @@ object FortyFive : Game() {
         TemplateString.init()
         FortyFiveLogger.init()
 //        resetAllSync()
-//        newRunSync()
+        newRunSync()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()
