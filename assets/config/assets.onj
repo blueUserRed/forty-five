@@ -301,6 +301,12 @@ particles: [
         file: "particles/dust_explosion.particle",
         textureDir: "textures/particles",
         scale: 0.1
+    },
+    {
+        name: "bubble_particle",
+        file: "particles/bubble.particle",
+        textureDir: "textures/particles",
+        scale: 0.1
     }
 ],
 
