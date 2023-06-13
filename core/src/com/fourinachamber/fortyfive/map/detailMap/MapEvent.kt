@@ -206,7 +206,7 @@ class NPCMapEvent(val npc: String) : MapEvent() {
     override val displayName: String = "I just want to talk"
 
     override fun start() {
-        FortyFive.changeToScreen("screens/dialog_test.onj", this) // TODO: ugly
+        FortyFive.changeToScreen("screens/dialog.onj", this) // TODO: ugly
     }
 
     fun complete() {
