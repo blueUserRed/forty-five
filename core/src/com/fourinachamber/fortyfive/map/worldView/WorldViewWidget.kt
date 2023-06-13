@@ -61,7 +61,7 @@ class WorldViewWidget(config: OnjObject, val screen: OnjScreen) : Widget(), Styl
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         background.draw(batch, x, y, width, height)
-        val curMap = MapManager.currentDetail.name
+        val curMap = MapManager.currentDetailMap.name
         val (x, y) = locations[curMap] ?: return
         val adjX = (width / background.minWidth) * x
         val adjY = height - (height / background.minHeight) * y

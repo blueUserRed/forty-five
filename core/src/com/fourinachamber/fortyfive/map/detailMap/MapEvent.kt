@@ -52,22 +52,50 @@ abstract class MapEvent {
      */
     abstract val displayDescription: Boolean
 
+    /**
+     * currently unused
+     */
     open val icon: String? = null
+
+    /**
+     * currently unused
+     */
     open val additionalIcons: List<String> = listOf()
 
+    /**
+     * Short text describing the event
+     */
     open val descriptionText: String = ""
+
+    /**
+     * the name of the event that is displayed to the user
+     */
     open val displayName: String = ""
 
+    /**
+     * called when the start button was clicked
+     */
     abstract fun start()
 
+    /**
+     * returns a representation of this event (and its state) as an OnjObject
+     */
     abstract fun asOnjObject(): OnjObject
 
+    /**
+     * utility function that reads and sets the [currentlyBlocks], [canBeStarted], [isCompleted] fields from an
+     * OnjObject
+     */
     protected fun setStandardValuesFromConfig(config: OnjObject) {
         currentlyBlocks = config.get<Boolean>("currentlyBlocks")
         canBeStarted = config.get<Boolean>("canBeStarted")
         isCompleted = config.get<Boolean>("isCompleted")
     }
 
+    /**
+     * utility function that can be called from the [asOnjObject] function and includes the [currentlyBlocks],
+     * [canBeStarted], [isCompleted] fields in the onjObject.
+     */
     protected fun OnjObjectBuilderDSL.includeStandardConfig() {
         "currentlyBlocks" with currentlyBlocks
         "canBeStarted" with canBeStarted
@@ -76,6 +104,9 @@ abstract class MapEvent {
 
 }
 
+/**
+ * Map Event that is not visible to the user and does nothing
+ */
 class EmptyMapEvent : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -91,7 +122,9 @@ class EmptyMapEvent : MapEvent() {
     }
 }
 
-
+/**
+ * Map Event that represents an encounter with an enemy
+ */
 class EncounterMapEvent(obj: OnjObject) : MapEvent() {
 
     override var currentlyBlocks: Boolean = true
@@ -109,6 +142,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     }
 
     override fun start() {
+        // TODO: ugly
         FortyFive.changeToScreen("screens/game_screen.onj", this)
     }
 
@@ -124,6 +158,11 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     }
 }
 
+/**
+ * MapEvent that opens another map when started
+ * @param targetMap the name of the map to be opened
+ * @param placeAtEnd if true, the player is placed at last node of the map instead of the first
+ */
 class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -151,6 +190,10 @@ class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEven
 
 }
 
+/**
+ * event that opens a dialog box and allows talking to an NPC
+ * @param npc the name of the npc
+ */
 class NPCMapEvent(val npc: String) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -163,7 +206,7 @@ class NPCMapEvent(val npc: String) : MapEvent() {
     override val displayName: String = "I just want to talk"
 
     override fun start() {
-        FortyFive.changeToScreen("screens/dialog_test.onj", this) // TODO: ugly
+        FortyFive.changeToScreen("screens/dialog.onj", this) // TODO: ugly
     }
 
     fun complete() {

@@ -16,7 +16,7 @@ import onj.schema.OnjSchema
 import onj.value.*
 
 /**
- * represents a detailMap (a map that isn't the WorldView)
+ * represents a detailMap
  * @param name the name of the map
  * @param startNode the first node of the map
  * @param endNode the last node of the map
@@ -51,6 +51,9 @@ data class DetailMap(
         MapNode.getUniqueEdgesWithOppositesFor(uniqueNodes)
     }
 
+    /**
+     * returns a representation of this map as an OnjObject
+     */
     fun asOnjObject(): OnjObject = buildOnjObject {
         "nodes" with nodesAsOnjArray()
         "startNode" with startNode.index
@@ -58,7 +61,7 @@ data class DetailMap(
         "decorations" with decorations.map { it.asOnjObject() }
     }
 
-    fun nodesAsOnjArray(): OnjArray {
+    private fun nodesAsOnjArray(): OnjArray {
         val uniqueNodes = uniqueNodes.sortedBy { it.index }
         return uniqueNodes
             .map { node ->
@@ -167,6 +170,9 @@ data class DetailMap(
             return drawable
         }
 
+        /**
+         * returns a representation of this decoration as an OnjObject
+         */
         fun asOnjObject(): OnjObject = buildOnjObject {
             "texture" with drawableHandle
             "baseWidth" with baseWidth
@@ -175,6 +181,10 @@ data class DetailMap(
         }
 
         companion object {
+
+            /**
+             * reads a decoration from an OnjObject
+             */
             fun fromOnj(obj: OnjObject): MapDecoration = MapDecoration(
                 obj.get<String>("texture"),
                 obj.get<Double>("baseWidth").toFloat(),

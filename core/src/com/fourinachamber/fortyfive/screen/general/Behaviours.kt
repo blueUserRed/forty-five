@@ -40,7 +40,6 @@ object BehaviourFactory {
         "EndTurnButtonBehaviour" to { onj, actor -> EndTurnButtonBehaviour(onj, actor) },
         "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
         "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) },
-        "OnClickOpenPopupBehaviour" to { onj, actor -> OnClickOpenPopupBehaviour(onj, actor) }
     )
 
     /**
@@ -157,16 +156,6 @@ class MouseHoverBehaviour(
     override val onHoverExit: BehaviourCallback = {
         Utils.setCursor(onjScreen.defaultCursor)
     }
-}
-
-class OnClickOpenPopupBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    private val popupName = onj.get<String>("popupName")
-
-    override val onCLick: BehaviourCallback = {
-        onjScreen.showPopup(popupName)
-    }
-
 }
 
 /**

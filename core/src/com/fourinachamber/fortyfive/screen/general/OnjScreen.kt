@@ -51,8 +51,6 @@ open class OnjScreen @MainThreadOnly constructor(
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
         private set
 
-    var popups: Map<String, WidgetGroup> = mapOf()
-
     var dragAndDrop: Map<String, DragAndDrop> = mapOf()
 
     var lastRenderTime: Long = 0
@@ -142,21 +140,6 @@ open class OnjScreen @MainThreadOnly constructor(
             keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
         }
         inputMultiplexer.addProcessor(stage)
-    }
-
-    fun showPopup(popupName: String) {
-        val (_, root) = popups.entries.find { it.key == popupName }
-            ?: throw RuntimeException("unknown popup $popupName")
-        if (currentPopup != null) hidePopup()
-        stage.root.addActor(root)
-        root.setFillParent(true)
-        selectedActor = null
-    }
-
-    fun hidePopup() {
-        val (_, root) = currentPopup ?: return
-        stage.root.removeActor(root)
-        selectedActor = null
     }
 
     @AllThreadsAllowed
