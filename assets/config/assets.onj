@@ -154,6 +154,22 @@ textures: [
         file: "textures/map/backgrounds/wasteland.png",
     },
     {
+        name: "map_path",
+        file: "textures/map/path.png"
+    },
+    {
+        name: "map_node",
+        file: "textures/map/node.png"
+    },
+    {
+        name: "map_player",
+        file: "textures/map/player.png"
+    },
+    {
+        name: "dialog_continue_arrow",
+        file: "textures/map/dialog_continue.png"
+    },
+    {
         name: "map_detail_fight_button",
         file: "textures/map/detail/fight_button.png",
     },
@@ -288,6 +304,12 @@ particles: [
     {
         name: "dust_explosion_particle",
         file: "particles/dust_explosion.particle",
+        textureDir: "textures/particles",
+        scale: 0.1
+    },
+    {
+        name: "bubble_particle",
+        file: "particles/bubble.particle",
         textureDir: "textures/particles",
         scale: 0.1
     }
