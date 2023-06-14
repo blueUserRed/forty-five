@@ -1,11 +1,15 @@
 package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.GameAnimation
+import com.fourinachamber.fortyfive.screen.general.CustomParticleActor
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
 
 /**
  * tool for timing tasks. can be created directly using a list of TimelineActions or using
@@ -337,4 +341,23 @@ class TimelineAsAction(private val timeline: Timeline) : Timeline.TimelineAction
 
     override fun isFinished(): Boolean = timeline.isFinished
 
+}
+
+class ParticleTimelineAction(
+    val particle: ParticleEffect,
+    val coords: Vector2,
+    private val screen: OnjScreen
+) : Timeline.TimelineAction() {
+
+    override fun start(timeline: Timeline) {
+        super.start(timeline)
+        val particleActor = CustomParticleActor(particle)
+        particleActor.isAutoRemove = true
+        particleActor.fixedZIndex = Int.MAX_VALUE
+        particleActor.setPosition(coords.x, coords.y)
+        screen.addActorToRoot(particleActor)
+        particleActor.start()
+    }
+
+    override fun isFinished(): Boolean = particle.isComplete
 }
