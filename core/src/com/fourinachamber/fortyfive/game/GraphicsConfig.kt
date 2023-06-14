@@ -81,42 +81,24 @@ object GraphicsConfig {
 
     @MainThreadOnly
     fun coverStackParticles(destroyed: Boolean, coverStack: CoverStack, screen: OnjScreen): Timeline.TimelineAction {
-
         val particle = ResourceManager.get<ParticleEffect>(
             screen,
             if (destroyed) coverStackDestroyedParticles else coverStackDamagedParticles
         )
-
-        return object : Timeline.TimelineAction() {
-
-            override fun start(timeline: Timeline) {
-                super.start(timeline)
-
-                val particleActor = CustomParticleActor(particle)
-                particleActor.isAutoRemove = true
-                particleActor.fixedZIndex = Int.MAX_VALUE
-
-                val (x, y) = coverStack.localToStageCoordinates(Vector2(0f, 0f))
-                if (destroyed) {
-                    particleActor.setPosition(
-                        x + coverStack.width / 2,
-                        y + coverStack.height / 2
-                    )
-                } else {
-                    val width = particle.emitters[0].spawnWidth.highMax
-                    particleActor.setPosition(
-                        x + coverStack.width / 2 - width / 2,
-                        y
-                    )
-                }
-
-                screen.addActorToRoot(particleActor)
-                particleActor.start()
-            }
-
-            override fun isFinished(): Boolean = particle.isComplete
-
+        val (x, y) = coverStack.localToStageCoordinates(Vector2(0f, 0f))
+        val position = if (destroyed) {
+            Vector2(
+                x + coverStack.width / 2,
+                y + coverStack.height / 2
+            )
+        } else {
+            val width = particle.emitters[0].spawnWidth.highMax
+            Vector2(
+                x + coverStack.width / 2 - width / 2,
+                y
+            )
         }
+        return ParticleTimelineAction(particle, position, screen)
     }
 
     fun rawTemplateString(name: String): String = rawTemplateStrings[name]!!
