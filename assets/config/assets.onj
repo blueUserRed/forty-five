@@ -226,7 +226,10 @@ shaders: [
     {
         name: "glow_shader",
         file: "shaders/glow.glsl",
-        constantArgs: { }
+        constantArgs: {
+            texSize: 2000.0,
+            cardSize: 569.0
+        }
     },
     {
         name: "fog_shader",
