@@ -39,6 +39,7 @@ assets: {
         "cover_hook", "key_select_frame",
 
 //        "film_shader", // TODO: remove
+//        "fog_shader",
 
         ...(graphicsConfig.bannerAnimationUsedAssets),
         ...(graphicsConfig.statusEffectsUsedAssets),

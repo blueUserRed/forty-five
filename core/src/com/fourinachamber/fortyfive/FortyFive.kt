@@ -83,6 +83,7 @@ object FortyFive : Game() {
     @AllThreadsAllowed
     fun useRenderPipeline(renderable: Renderable) {
         currentRenderable = renderable
+        renderable.init()
     }
 
     fun newRunSync() {
@@ -105,7 +106,7 @@ object FortyFive : Game() {
         TemplateString.init()
         FortyFiveLogger.init()
 //        resetAllSync()
-        newRunSync()
+//        newRunSync()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()

@@ -7,10 +7,13 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Timeline
 
 interface Renderable {
+
+    fun init() { }
 
     // TODO: differentiate between renderables that can be rendered to a fbo and those who can not
     fun render(delta: Float)
@@ -26,6 +29,9 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
     }
 
     private var sizeDirty = false
+
+    override fun init() {
+    }
 
     override fun render(delta: Float) {
         if (sizeDirty) {

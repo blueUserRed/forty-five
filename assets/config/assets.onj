@@ -227,6 +227,11 @@ shaders: [
         name: "glow_shader",
         file: "shaders/glow.glsl",
         constantArgs: { }
+    },
+    {
+        name: "fog_shader",
+        file: "shaders/fog.glsl",
+        constantArgs: { }
     }
 ],
 

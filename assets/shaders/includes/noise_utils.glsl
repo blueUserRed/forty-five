@@ -61,9 +61,9 @@ float fbm(vec2 pos, int octaves, float amplitudeDecrease, float frequencyIncreas
     float frequency = 1.0;
     float value = 0.0;
     for (int i = 0; i < octaves; i++) {
-    value += snoise(pos * frequency) * amplitude;
-    frequency += frequencyIncrease;
-    amplitude -= amplitudeDecrease;
+        value += snoise(pos * frequency) * amplitude;
+        frequency += frequencyIncrease;
+        amplitude -= amplitudeDecrease;
     }
     return value;
 }
