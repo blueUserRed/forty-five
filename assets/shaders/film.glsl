@@ -34,15 +34,17 @@ vec4 grayScale(vec4 color) {
 void main() {
     vec2 pos = gl_FragCoord.xy / u_resolution;
 
-    float lineHeight = fbm(vec2(u_time / 28.0), 2, 0.8, 3.0) + 0.4;
+    float time = u_time / 100.0;
+
+    float lineHeight = fbm(vec2(time / 28.0), 2, 0.8, 3.0) + 0.4;
     bool isLine = floatCompare(lineHeight, pos.y, LineEpsilon);
 
     vec4 baseColor = v_color * texture2D(u_texture, v_texCoords);
     baseColor = grayScale(baseColor);
 
-    baseColor += vec4(random(pos + vec2(u_time))) / 10.0;
+    baseColor += vec4(random(pos + vec2(time))) / 10.0;
 
-    float noise = snoise((pos * 10.0) + vec2(u_time * 50.0));
+    float noise = snoise((pos * 10.0) + vec2(time * 50.0));
     bool turnBlack = noise > 0.97;
 
     gl_FragColor = isLine || turnBlack ? vec4(0.0, 0.0, 0.0, 1.0) : baseColor;
