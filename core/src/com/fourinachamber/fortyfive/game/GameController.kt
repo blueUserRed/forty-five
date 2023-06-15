@@ -425,7 +425,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         turnCounter++
 
         val cardToShoot = revolver.getCardInSlot(5)
-        var rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.RIGHT
+        var rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
         if (modifier != null) rotationDirection = modifier!!.modifyRevolverRotation(rotationDirection)
         val enemy = enemyArea.getTargetedEnemy()
 
@@ -487,13 +487,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 { enemy.currentLives > 0 && effectTimeline != null }
             )
 
-            action {
-                when (rotationDirection) {
-                    RevolverRotation.LEFT -> revolver.rotateLeft()
-                    RevolverRotation.RIGHT -> revolver.rotate()
-                    RevolverRotation.DONT -> { }
-                }
+            include(revolver.rotate(rotationDirection))
 
+            action {
                 FortyFiveLogger.debug(logTag, "revolver rotated $rotationDirection")
             }
 
@@ -729,8 +725,23 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 //        FortyFive.changeToScreen(looseScreen)
     }
 
-    enum class RevolverRotation {
-        LEFT, RIGHT, DONT
+    sealed class RevolverRotation {
+        class Right(val amount: Int) : RevolverRotation()
+        class Left(val amount: Int) : RevolverRotation()
+        object Dont : RevolverRotation()
+
+
+        companion object {
+
+            fun fromOnj(onj: OnjNamedObject): RevolverRotation = when (onj.name) {
+                "Right" -> Right(onj.get<Long>("amount").toInt())
+                "Left" -> Left(onj.get<Long>("amount").toInt())
+                "Dont" -> Dont
+                else -> throw RuntimeException("unknown revolver rotation: ${onj.name}")
+            }
+
+        }
+
     }
 
     companion object {

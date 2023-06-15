@@ -9,6 +9,19 @@ $CardType {
 
 }
 
+$Rotation {
+
+    $Left {
+        amount: int
+    }
+
+    $Right {
+        amount: int
+    }
+
+    $Dont { }
+}
+
 var card = {
     name: string,
     title: string,
@@ -17,6 +30,7 @@ var card = {
     baseDamage: int,
     coverValue: int,
     traitEffects: string[],
+    rotation: $Rotation,
     cost: int,
     type: $CardType,
     effects: Effect[],

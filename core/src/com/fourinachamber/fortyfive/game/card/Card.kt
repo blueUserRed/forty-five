@@ -67,6 +67,7 @@ class Card(
     val coverValue: Int,
     val cost: Int,
     val effects: List<Effect>,
+    val rotationDirection: RevolverRotation,
     detailFont: BitmapFont,
     detailFontColor: Color,
     detailFontScale: Float,
@@ -125,13 +126,9 @@ class Card(
     private var isEverlasting: Boolean = false
     private var isUndead: Boolean = false
     private var isRotten: Boolean = false
-    private var isLeftRotating: Boolean = false
 
     val shouldRemoveAfterShot: Boolean
         get() = !isEverlasting
-
-    val rotationDirection: RevolverRotation
-        get() = if (isLeftRotating) RevolverRotation.LEFT else RevolverRotation.RIGHT
 
     private lateinit var rottenModifier: CardModifier
 
@@ -355,11 +352,10 @@ class Card(
                 onj.get<Long>("baseDamage").toInt(),
                 onj.get<Long>("coverValue").toInt(),
                 onj.get<Long>("cost").toInt(),
-
                 onj.get<OnjArray>("effects")
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
-
+                RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
                 //TODO: CardDetailActor could call these functions itself
                 GraphicsConfig.cardDetailFont(onjScreen),
                 GraphicsConfig.cardDetailFontColor(),
@@ -397,7 +393,6 @@ class Card(
                     card.isRotten = true
                     card.initRottenModifier()
                 }
-                "leftRotating" -> card.isLeftRotating = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
