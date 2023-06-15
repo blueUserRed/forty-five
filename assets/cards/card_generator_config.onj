@@ -108,6 +108,10 @@ assets: {
             name: "poisonBullet",
             file: "textures/cards/poisonBullet.png"
         },
+        {
+            name: "enchantedBullet",
+            file: "textures/cards/poisonBullet.png"
+        },
 
         // covers---------------------------
 
@@ -163,7 +167,7 @@ var costElementSharedKeys = {
 };
 
 var bulletsOffset = 0;
-var coverOffset = 20;
+var coverOffset = 21;
 
 textures: [
 
@@ -525,6 +529,24 @@ textures: [
             $TextElement {
                 ...costElementSharedKeys,
                 text: cards.(bulletsOffset + 19).cost#string
+            }
+        ]
+    },
+
+    {
+        name: cards.(bulletsOffset + 20).name,
+        elements: [
+            $ImageElement {
+                textureName: cards.(bulletsOffset + 20).name,
+                ...imageElementSharedKeys
+            },
+            $TextElement {
+                ...valueElementSharedKeys,
+                text: cards.(bulletsOffset + 20).baseDamage#string
+            },
+            $TextElement {
+                ...costElementSharedKeys,
+                text: cards.(bulletsOffset + 20).cost#string
             }
         ]
     },
