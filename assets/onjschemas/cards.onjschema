@@ -31,6 +31,7 @@ var card = {
     coverValue: int,
     traitEffects: string[],
     rotation: $Rotation,
+    highlightType: string,
     cost: int,
     type: $CardType,
     effects: Effect[],

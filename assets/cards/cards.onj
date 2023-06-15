@@ -23,6 +23,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [
             giveStatus("shot", burning(3, burningPercent)),
             giveStatus("destroy", burning(3, burningPercent)),
@@ -39,6 +40,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ reserveGain("round start", 1) ],
         cost: 1,
         type: $Bullet { }
@@ -52,6 +54,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [],
         cost: 2,
         type: $Bullet { }
@@ -65,6 +68,7 @@ cards: [
         coverValue: 0,
         traitEffects: [ "rotten" ],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [],
         cost: 1,
         type: $Bullet { }
@@ -78,6 +82,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ],
         cost: 3,
         type: $Bullet { }
@@ -91,6 +96,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Left { amount: 1 },
+        highlightType: "standard",
         effects: [],
         cost: 1,
         type: $Bullet { }
@@ -104,6 +110,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [
             giveStatus("shot", burning(2, burningPercent)),
             giveStatus("destroy", burning(2, burningPercent))
@@ -120,6 +127,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ buffDmg("enter", bSelects.allExceptSelf, 4) ],
         cost: 2,
         type: $Bullet { }
@@ -133,6 +141,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "glow",
         effects: [ draw("enter", 1), draw("shot", 1), draw("destroy", 1) ],
         cost: 1,
         type: $Bullet { }
@@ -146,6 +155,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [],
         cost: 1,
         type: $Bullet { }
@@ -159,6 +169,7 @@ cards: [
         coverValue: 0,
         traitEffects: [ "everlasting" ],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ ],
         cost: 1,
         type: $Bullet { }
@@ -172,6 +183,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [],
         cost: 5,
         type: $Bullet { }
@@ -185,6 +197,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ ],
         cost: 2,
         type: $Bullet { }
@@ -198,6 +211,7 @@ cards: [
          coverValue: 0,
          traitEffects: [ "rotten" ],
          rotation: $Right { amount: 1 },
+         highlightType: "standard",
          effects: [ ],
          cost: 0,
          type: $Bullet { }
@@ -211,6 +225,7 @@ cards: [
          coverValue: 0,
          traitEffects: [],
          rotation: $Right { amount: 1 },
+         highlightType: "standard",
          effects: [ ],
          cost: 0,
          type: $Bullet { }
@@ -224,6 +239,7 @@ cards: [
          coverValue: 0,
          traitEffects: [],
          rotation: $Right { amount: 1 },
+         highlightType: "standard",
          effects: [
             reserveGain("shot", 4),
             reserveGain("destroy", 4)
@@ -240,6 +256,7 @@ cards: [
          coverValue: 0,
          traitEffects: [],
          rotation: $Right { amount: 1 },
+         highlightType: "standard",
          effects: [ buffDmg("enter", bSelects.allBullets, 10) ],
          cost: 3,
          type: $Bullet { }
@@ -253,6 +270,7 @@ cards: [
          coverValue: 0,
          traitEffects: [],
          rotation: $Right { amount: 1 },
+         highlightType: "standard",
          effects: [ putCardInHand("enter", "bullet", 3) ],
          cost: 2,
          type: $Bullet { },
@@ -266,6 +284,7 @@ cards: [
          coverValue: 0,
          traitEffects: [ "undead" ],
          rotation: $Right { amount: 1 },
+         highlightType: "standard",
          effects: [
             giftDmg("shot", bSelects.fourButNotSelf, 5),
             giftDmg("destroy", bSelects.fourButNotSelf, 5)
@@ -282,6 +301,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [
             giveStatus("shot", poison(3, poisonDamage)),
             giveStatus("destroy", poison(3, poisonDamage))
@@ -298,6 +318,7 @@ cards: [
         coverValue: 0,
         traitEffects: [],
         rotation: $Left { amount: 2 },
+        highlightType: "standard",
         effects: [
             giveStatus("shot", poison(3, poisonDamage)),
             giveStatus("destroy", poison(3, poisonDamage))
@@ -318,6 +339,7 @@ cards: [
         coverValue: 3,
         traitEffects: [],
         rotation: $Right { amount: 1 }, // TODO: this is stupid, but will be fixed later
+        highlightType: "standard",
         effects: [],
         cost: 1,
         type: $Cover { }
@@ -332,6 +354,7 @@ cards: [
         coverValue: 5,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [],
         cost: 2,
         type: $Cover { }
@@ -346,6 +369,7 @@ cards: [
         coverValue: 5,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ destroy("enter") ],
         cost: 1,
         type: $Cover { }
@@ -360,6 +384,7 @@ cards: [
         coverValue: 3,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ draw("enter", 1) ],
         cost: 1,
         type: $Cover { }
@@ -374,6 +399,7 @@ cards: [
         coverValue: 6,
         traitEffects: [],
         rotation: $Right { amount: 1 },
+        highlightType: "standard",
         effects: [ draw("round start", 1) ],
         cost: 3,
         type: $Cover { }
@@ -390,26 +416,26 @@ startDeck: [
         name: "bullet",
         amount: 4
     },
-//    {
-//        name: "incendiaryBullet",
-//        amount: 2
-//    },
-//    {
-//        name: "workerBullet",
-//        amount: 1
-//    },
-//    {
-//        name: "bigBullet",
-//        amount: 2
-//    },
-//    {
-//        name: "rottenBullet",
-//        amount: 1
-//    },
-//    {
-//        name: "diamondBullet",
-//        amount: 1
-//    },
+    {
+        name: "incendiaryBullet",
+        amount: 2
+    },
+    {
+        name: "workerBullet",
+        amount: 1
+    },
+    {
+        name: "bigBullet",
+        amount: 2
+    },
+    {
+        name: "rottenBullet",
+        amount: 1
+    },
+    {
+        name: "diamondBullet",
+        amount: 1
+    },
     {
         name: "bewitchedBullet",
         amount: 1
@@ -418,18 +444,18 @@ startDeck: [
         name: "enchantedBullet",
         amount: 1
     },
-//    {
-//        name: "explosiveBullet",
-//        amount: 1
-//    },
-//    {
-//        name: "leadersBullet",
-//        amount: 1
-//    },
-//    {
-//        name: "silverBullet",
-//        amount: 1
-//    },
+    {
+        name: "explosiveBullet",
+        amount: 1
+    },
+    {
+        name: "leadersBullet",
+        amount: 1
+    },
+    {
+        name: "silverBullet",
+        amount: 1
+    },
     {
         name: "crate",
         amount: 5

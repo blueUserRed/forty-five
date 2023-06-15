@@ -51,7 +51,7 @@ abstract class Effect(val trigger: Trigger) {
             val gameController = FortyFive.currentGame!!
             val reservesLabel = gameController.reservesLabel
 
-            val shakeCard = GraphicsConfig.shakeActorAnimation(card.actor, false)
+            val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             val textActorAction = GraphicsConfig.numberChangeAnimation(
                 reservesLabel.localToStageCoordinates(Vector2(0f, 0f)),
                 amount.toString(),
@@ -62,7 +62,7 @@ abstract class Effect(val trigger: Trigger) {
 
             return Timeline.timeline {
                 delay(GraphicsConfig.bufferTime)
-                includeActionLater(card.actor.glowAnimation().asAction()) { card.inGame } // TODO: change back
+                includeActionLater(cardHighlight) { card.inGame }
                 action { gameController.gainReserves(amount) }
                 includeAction(textActorAction)
             }
@@ -172,9 +172,9 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             val gameController = FortyFive.currentGame!!
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(card.actor, false)
+            val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             delay(GraphicsConfig.bufferTime)
-            includeActionLater(shakeActorAction) { card.inGame }
+            includeActionLater(cardHighlight) { card.inGame }
             action { gameController.specialDraw(amount) }
             delayUntil { gameController.currentState !is GameState.SpecialDraw }
         }
@@ -217,11 +217,11 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             val gameController = FortyFive.currentGame!!
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(card.actor, false)
+            val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             includeLater(
                 { Timeline.timeline {
                     delay(GraphicsConfig.bufferTime)
-                    includeAction(shakeActorAction)
+                    includeAction(cardHighlight)
                     delay(GraphicsConfig.bufferTime)
                     action { gameController.destroyCardPhase() }
                     delayUntil { gameController.currentState !is GameState.CardDestroy }

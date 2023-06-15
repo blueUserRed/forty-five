@@ -6,7 +6,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
+import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.Effect
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
@@ -68,6 +69,7 @@ class Card(
     val cost: Int,
     val effects: List<Effect>,
     val rotationDirection: RevolverRotation,
+    val highlightType: HighlightType,
     detailFont: BitmapFont,
     detailFontColor: Color,
     detailFontScale: Float,
@@ -356,6 +358,7 @@ class Card(
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
                 RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
+                HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
                 //TODO: CardDetailActor could call these functions itself
                 GraphicsConfig.cardDetailFont(onjScreen),
                 GraphicsConfig.cardDetailFontColor(),
@@ -405,6 +408,10 @@ class Card(
      */
     enum class Type {
         BULLET, COVER, ONE_SHOT
+    }
+
+    enum class HighlightType {
+        STANDARD, GLOW
     }
 
     /**
@@ -494,6 +501,51 @@ class CardActor(
         }
         delay(1000)
         action { inGlowAnim = false }
+    }
+
+    fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
+        var origScaleX = 0f
+        var origScaleY = 0f
+        val scaleAction = ScaleToAction()
+        val moveAction = MoveByAction()
+        action {
+            origScaleX = scaleX
+            origScaleY = scaleY
+            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
+            moveAction.setAmount(
+                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
+                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
+            )
+            moveAction.duration = 0.2f
+            scaleAction.duration = 0.2f
+            addAction(scaleAction)
+            addAction(moveAction)
+        }
+        delayUntil { scaleAction.isComplete }
+        if (includeGlow) {
+            delay(GraphicsConfig.bufferTime)
+            include(glowAnimation())
+        }
+        delay(GraphicsConfig.bufferTime)
+        action {
+            removeAction(scaleAction)
+            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
+            removeAction(moveAction)
+            scaleAction.reset()
+            moveAction.reset()
+            scaleAction.setScale(origScaleX, origScaleY)
+            moveAction.setAmount(moveAmount.x, moveAmount.y)
+            scaleAction.duration = 0.2f
+            moveAction.duration = 0.2f
+            addAction(scaleAction)
+            addAction(moveAction)
+        }
+        delayUntil { scaleAction.isComplete }
+        action {
+            removeAction(scaleAction)
+            removeAction(moveAction)
+        }
+        delay(GraphicsConfig.bufferTime)
     }
 
     fun enterDestroyMode() {
