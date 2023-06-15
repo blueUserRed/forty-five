@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -106,6 +107,13 @@ object GraphicsConfig {
     fun iconName(name: String): String = iconConfig[name]!!.first
 
     fun iconScale(name: String): Float = iconConfig[name]!!.second
+
+    fun cardHighlightEffect(card: Card): Timeline.TimelineAction = when (card.highlightType) {
+
+        Card.HighlightType.STANDARD -> card.actor.growAnimation(false).asAction()
+        Card.HighlightType.GLOW -> card.actor.growAnimation(true).asAction()
+
+    }
 
     fun shakeActorAnimation(actor: Actor, reduce: Boolean): ActorActionTimelineAction {
         val action = ShakeActorAction(
