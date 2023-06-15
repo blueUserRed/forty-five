@@ -110,7 +110,7 @@ assets: {
         },
         {
             name: "enchantedBullet",
-            file: "textures/cards/poisonBullet.png"
+            file: "textures/cards/enchantedBullet.png"
         },
 
         // covers---------------------------

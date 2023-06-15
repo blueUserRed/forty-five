@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.game.card
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
@@ -508,6 +509,7 @@ class CardActor(
         var origScaleY = 0f
         val scaleAction = ScaleToAction()
         val moveAction = MoveByAction()
+        val interpolation = Interpolation.fade
         action {
             origScaleX = scaleX
             origScaleY = scaleY
@@ -518,6 +520,8 @@ class CardActor(
             )
             moveAction.duration = 0.2f
             scaleAction.duration = 0.2f
+            scaleAction.interpolation = interpolation
+            moveAction.interpolation = interpolation
             addAction(scaleAction)
             addAction(moveAction)
         }
@@ -537,6 +541,8 @@ class CardActor(
             moveAction.setAmount(moveAmount.x, moveAmount.y)
             scaleAction.duration = 0.2f
             moveAction.duration = 0.2f
+            scaleAction.interpolation = interpolation
+            moveAction.interpolation = interpolation
             addAction(scaleAction)
             addAction(moveAction)
         }
