@@ -68,7 +68,7 @@ generatorConfig: {
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
-                rotation: 0.0,
+                rotation: 1.0,
                 fixedEvents: [],
                 optionalEvents: [],
                 decorations: [
