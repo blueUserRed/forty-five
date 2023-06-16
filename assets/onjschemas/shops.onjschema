@@ -1,0 +1,28 @@
+use Common;
+
+$CardSelector{
+    $ByName{
+        name: string
+    }
+    $ByType{
+        name: string
+    }
+}
+
+$CardEffect{
+    $Blacklist{}
+
+    $ProbabilityAddition{
+        percent: float
+    }
+}
+
+$ShopParameter{
+    name:string
+    cardChanges: {
+                     select: $CardSelector
+                     effect: $CardEffect
+                 }[]
+}
+
+types: $ShopParameter[]

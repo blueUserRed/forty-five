@@ -16,7 +16,8 @@ object MapEventFactory {
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
-        "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) }
+        "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
+        "ShopMapEvent" to { ShopMapEvent(it.get<String>("type"),it.get<String>("biome")) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -227,7 +228,7 @@ class NPCMapEvent(val npc: String) : MapEvent() {
  * event that opens a dialog box and allows talking to an NPC
  * @param npc the name of the npc
  */
-class ShopMapEvent(val type: String, val biom: String) : MapEvent() {
+class ShopMapEvent(val type: String, val biome: String) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -250,7 +251,7 @@ class ShopMapEvent(val type: String, val biom: String) : MapEvent() {
         name("ShopMapEvent")
         includeStandardConfig()
         ("type" with type)
-        ("biome" with biom)
+        ("biome" with biome)
     }
 
 

@@ -1,0 +1,44 @@
+import "imports/colors.onj" as color;
+
+types: [
+    {
+        name: "all_included",
+        cardChanges: [
+            {
+                select: $ByName {
+                    name: "workerBullet"
+                },
+                effect: $Blacklist {
+                }
+            },
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $ProbabilityAddition {
+                    percent: 1.0
+                }
+            }
+        ]
+    },
+    {
+        name: "no_biome",
+        cardChanges: [
+            {
+                select: $ByName {
+                    name: "workerBullet"
+                },
+                effect: $Blacklist {
+                }
+            },
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $ProbabilityAddition {
+                    percent: 1.0
+                }
+            }
+        ]
+    },
+]
