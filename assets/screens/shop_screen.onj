@@ -12,7 +12,8 @@ var worldHeight = 90.0;
 assets: {
     useCardAtlas: true,
     useAssets: [
-        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture", "heart_texture"
+        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
+        "heart_texture", "enemy_texture",
     ]
 },
 
@@ -23,7 +24,7 @@ viewport: $FitViewport {
 
 options: {
     transitionAwayTime: 1.0,
-    background: "title_screen_background",
+    background: "hover_detail_background",
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
@@ -31,35 +32,6 @@ options: {
         shopsFile: "maps/shops.onj",
     }
 },
-
-//var dialogWidget = $DialogWidget {
-//    styles: [
-//        {
-//            flexDirection: flexDirection.row,
-//            background: "hover_detail_background",
-//            width: 80.0#percent,
-//            height: 25.0#percent,
-//            //                minHeight: 5.0#points,
-//            positionBottom: 2.0#points,
-//            alignItems: align.center,
-//            justifyContent: justify.center,
-//            flexWrap: wrap.wrap,
-//            paddingLeft: 13.0#points,
-//            paddingRight: 13.0#points,
-//            paddingTop: 3.0#points,
-//            paddingBottom: 3.0#points,
-//        }
-//    ],
-//    progressTime: 0.01,
-//    advanceArrowDrawable: "heart_texture",
-//    advanceArrowOffset: 1.0,
-//    touchable: "enabled",
-//    optionsBox: "options_box",
-//    optionsFont: "red_wing",
-//    optionsFontScale: 0.1,
-//    optionsFontColor: color.black,
-//    name: "dialog_widget"
-//};
 
 root: $Box {
     styles: [
@@ -70,45 +42,63 @@ root: $Box {
     ]
 } children [
 
-    $Box {
+    //    $Box {
+//        styles: [ //TODO biome for background
+//            {
+//                style_priority: 1,
+//                background: "title_screen_background",
+//                positionType: positionType.absolute,
+//                positionLeft: -(worldWidth/5*3)#points,
+//                positionTop: -(worldHeight/4)#points,
+//                justifyContent: justify.center,
+//                flexDirection: flexDirection.column,
+//                width: (worldWidth*2)#points,
+//                height:(worldHeight*2)#points,
+//                detached: true
+//            },
+//            {
+//                style_priority: 2,
+////                style_condition: state("displayOptionsBox"),
+//                detached: false,
+//            }
+//        ],
+//        name: "options_box"
+//    },
+
+    $Image {       //TODO biome for background
+
+        textureName: "title_screen_background",
+        scaleX: 0.0,
+        scaleY: 0.0,
+        width: worldWidth,
+        height: worldHeight,
+        reportDimensionsWithScaling: true,
         styles: [
             {
-                style_priority: 1,
-                background: "hover_detail_background",
                 positionType: positionType.absolute,
-                positionTop: 35.0#points,
-                positionRight: 10.0#points,
-                justifyContent: justify.center,
-                flexDirection: flexDirection.column,
-                width: 20.0#points,
-                height: 20.0#points,
-                detached: true
-            },
-            {
-                style_priority: 2,
-                style_condition: state("displayOptionsBox"),
-                detached: false,
+                positionLeft: -(worldWidth / 5 * 3)#points,
+                positionTop: -(worldHeight / 4)#points,
+                width: (worldWidth * 2)#points,
+                height: (worldHeight * 2)#points,
             }
-        ],
-        name: "options_box"
+        ]
     },
+    $Image {       //TODO person for image
 
-    $Box {
+        textureName: "enemy_texture",
+        scaleX: 0.0,
+        scaleY: 0.0,
+        width: worldWidth,
+        height: worldHeight,
+        reportDimensionsWithScaling: true,
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 0.0#points,
-                positionRight: 0.0#points,
-                width: 100.0#percent,
-                height: 100.0#percent,
-                flexDirection: flexDirection.row,
-                alignItems: align.flexEnd,
-                justifyContent: justify.center
+                positionLeft: (0.0)#points,
+                positionTop: (0.0)#points,
+                width: (worldWidth *2/3)#points,
+                height: (worldHeight * 2)#points,
             }
-        ],
-        debug: true,
-    } children [
-//        dialogWidget
-    ]
-
+        ]
+    },
 ]
