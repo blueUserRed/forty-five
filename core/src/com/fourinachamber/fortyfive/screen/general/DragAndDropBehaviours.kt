@@ -4,7 +4,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.card.CardDragSource
-import com.fourinachamber.fortyfive.game.card.CoverAreaDropTarget
 import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
@@ -28,9 +27,6 @@ object DragAndDropBehaviourFactory {
         }
         dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
             RevolverDropTarget(dragAndDrop, actor, onj)
-        }
-        dropBehaviours["CoverAreaDropTarget"] = { dragAndDrop, actor, onj ->
-            CoverAreaDropTarget(dragAndDrop, actor, onj)
         }
     }
 

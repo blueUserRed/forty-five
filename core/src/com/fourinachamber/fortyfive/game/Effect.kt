@@ -49,22 +49,22 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline {
             val gameController = FortyFive.currentGame!!
-            val reservesLabel = gameController.reservesLabel
+//            val reservesLabel = gameController.reservesLabel
 
             val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
-            val textActorAction = GraphicsConfig.numberChangeAnimation(
-                reservesLabel.localToStageCoordinates(Vector2(0f, 0f)),
-                amount.toString(),
-                true,
-                true,
-                FortyFive.currentGame!!.curScreen
-            )
+//            val textActorAction = GraphicsConfig.numberChangeAnimation(
+//                reservesLabel.localToStageCoordinates(Vector2(0f, 0f)),
+//                amount.toString(),
+//                true,
+//                true,
+//                FortyFive.currentGame!!.curScreen
+//            )
 
             return Timeline.timeline {
                 delay(GraphicsConfig.bufferTime)
                 includeActionLater(cardHighlight) { card.inGame }
                 action { gameController.gainReserves(amount) }
-                includeAction(textActorAction)
+//                includeAction(textActorAction)
             }
         }
 

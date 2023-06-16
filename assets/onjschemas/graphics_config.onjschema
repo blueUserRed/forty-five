@@ -8,8 +8,6 @@ enemyConfig: {
     ...*
 },
 
-enemyUsedAssets: string[],
-
 shakeAnimation: {
     xShake: float,
     yShake: float,
@@ -52,8 +50,6 @@ bannerAnimation: {
      enemyTurnBanner: string,
 },
 
-bannerAnimationUsedAssets: string[],
-
 var statusIconConfig = {
     icon: string,
     scale: float
@@ -64,20 +60,9 @@ statusEffectIcons: {
     poison: statusIconConfig
 },
 
-statusEffectsUsedAssets: string[],
-
 postProcessors: {
     destroyCardPostProcessor: string
 },
-
-destroyCardUsedAssets: string[],
-
-coverStackParticles: {
-    damaged: string,
-    destroyed: string
-},
-
-coverStackUsedAssets: string[],
 
 stringTemplates:  {
     rottenDetailText: string,
@@ -92,8 +77,6 @@ damageOverlay: {
     overlay: string
 },
 
-damageOverlayUsedAssets: string[],
-
 insultFadeAnimation: {
     fadeFontName: string,
     fadeFontColor: Color,
@@ -103,8 +86,6 @@ insultFadeAnimation: {
     fadeOut: float,
 },
 
-textAnimationUsedAssets: string[],
-
 cardDetailText: {
     font: string,
     fontScale: float,
@@ -113,8 +94,6 @@ cardDetailText: {
     separator: string,
     spacing: float
 },
-
-cardDetailUsedAssets: string[],
 
 keySelect: {
     drawable: string
@@ -127,4 +106,4 @@ shootPostProcessor: {
     duration: float
 },
 
-shootPostProcessorUsedAssets: string[]
+gameUsedAssets: string[]

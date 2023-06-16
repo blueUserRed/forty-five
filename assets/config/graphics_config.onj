@@ -47,8 +47,6 @@ enemyConfig: {
     },
 },
 
-enemyUsedAssets: [ "normal_bullet", "shield_icon", "insult_icon", "enemy_texture", "vanilla_whale" ],
-
 shakeAnimation: {
     xShake: 1.0,
     yShake: 0.0,
@@ -80,8 +78,6 @@ bannerAnimation: {
      enemyTurnBanner: "enemy_turn_banner",
 },
 
-bannerAnimationUsedAssets: [ "player_turn_banner", "enemy_turn_banner" ],
-
 statusEffectIcons: {
     burning: {
         icon: "burning_icon",
@@ -93,8 +89,6 @@ statusEffectIcons: {
     }
 },
 
-statusEffectsUsedAssets: [ "burning_icon", "poison_icon" ],
-
 damageOverlay: {
     duration: 1.5,
     fadeIn: 0.0,
@@ -102,20 +96,9 @@ damageOverlay: {
     overlay: "hit_overlay"
 },
 
-damageOverlayUsedAssets: [ "hit_overlay" ],
-
 postProcessors: {
     destroyCardPostProcessor: "vignette_shader",
 },
-
-destroyCardUsedAssets: [ "vignette_shader" ],
-
-coverStackParticles: {
-    damaged: "dust_particle",
-    destroyed: "dust_explosion_particle",
-},
-
-coverStackUsedAssets: [ "dust_particle", "dust_explosion_particle" ],
 
 stringTemplates:  {
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!",
@@ -143,8 +126,6 @@ numberChangeAnimation: {
     sinkDistance: -20.0
 },
 
-textAnimationUsedAssets: [ "vanilla_whale", "red_wing" ],
-
 cardDetailText: {
     font: "red_wing",
     fontScale: 0.07,
@@ -153,8 +134,6 @@ cardDetailText: {
     separator: "white_texture",
     spacing: 1.8
 },
-
-cardDetailUsedAssets: [ "red_wing", "transparent_black_texture", "white_texture" ],
 
 keySelect: {
     drawable: "key_select_frame"
@@ -167,4 +146,8 @@ shootPostProcessor: {
     duration: 0.7
 },
 
-shootPostProcessorUsedAssets: [ "earthquake_shader", "glow_shader" ] // TODO: merge all 'usedAssets'-keys
+gameUsedAssets: [
+    "earthquake_shader", "glow_shader", "red_wing", "transparent_black_texture", "white_texture",
+    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon",
+    "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
+]

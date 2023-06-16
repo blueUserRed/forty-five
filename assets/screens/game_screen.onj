@@ -32,26 +32,8 @@ assets: {
 
         "revolver_cursor",
 
-//        "earthquake_shader",
-
-        "transparent_black_texture",
-
-        "cover_hook", "key_select_frame",
-
-//        "film_shader", // TODO: remove
-//        "fog_shader",
-
-        ...(graphicsConfig.bannerAnimationUsedAssets),
-        ...(graphicsConfig.statusEffectsUsedAssets),
-        ...(graphicsConfig.damageOverlayUsedAssets),
-        ...(graphicsConfig.destroyCardUsedAssets),
-        ...(graphicsConfig.coverStackUsedAssets),
-        ...(graphicsConfig.textAnimationUsedAssets),
-        ...(graphicsConfig.cardDetailUsedAssets),
         ...(graphicsConfig.keySelectUsedAssets),
-        ...(graphicsConfig.enemyUsedAssets),
-        ...(graphicsConfig.enemyUsedAssets),
-        ...(graphicsConfig.shootPostProcessorUsedAssets)
+        ...(graphicsConfig.gameUsedAssets),
     ]
 },
 
@@ -75,24 +57,10 @@ var controller = $GameScreenController {
         actorName: "enemy_area",
         enemies: gameConfig.enemyConfig.startEnemies
     },
-    coverArea: {
-        actorName: "cover_area",
-        dropBehaviour: $CoverAreaDropTarget {
-            group: "card"
-        }
-    },
     cardDragBehaviour: $CardDragSource {
         group: "card"
     },
     enemies: gameConfig.enemyConfig.enemies,
-    cardDrawActor: "card_draw_table",
-    playerLivesLabelName: "player_lives_label",
-    shootButtonName: "shoot_button_texture",
-    endTurnButtonName: "end_turn_button",
-    reservesLabelName: "reserves_label",
-    destroyCardInstructionActor: "destroy_card_instruction_label",
-    winScreen: "screens/win_screen.onj",
-    looseScreen: "screens/loose_screen.onj",
     cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
     maxCards: gameConfig.cardDrawConfig.maxCards,
@@ -151,29 +119,6 @@ var enemyArea = $EnemyArea {
     enemySelectionDrawable: "key_select_frame"
 };
 
-var coverArea = $CoverArea {
-    name: "cover_area",
-    numStacks: gameConfig.coverConfig.numStacks,
-    maxCards: gameConfig.coverConfig.maxCards,
-    onlyAllowAddingOnTheSameTurn: gameConfig.coverConfig.onlyAllowAddingOnTheSameTurn,
-    infoFont: "vanilla_whale",
-    infoFontColor: color.black,
-    infoFontScale: 0.1,
-    areaSpacing: 4.0,
-    cardScale: cardScale * 0.8,
-    detailFont: "red_wing",
-    detailFontColor: color.white,
-    detailFontScale: 0.07,
-    cardDeltaX: 5.5,
-    cardDeltaY: -3.0,
-    cardInitialX: 0.5,
-    cardInitialY: 9.0,
-    stackHeight: 27.0,
-    stackMinWidth: 15.0,
-    stackHook: "cover_hook",
-    zIndex: 3
-};
-
 var shootButton = $Image {
     name: "shoot_button_texture",
     textureName: "shoot_button_texture",
@@ -181,7 +126,6 @@ var shootButton = $Image {
     scaleX: 0.03,
     scaleY: 0.03,
     behaviours: [
-        $ShootButtonBehaviour { },
         buttonHoverBehaviour,
     ]
 };
@@ -192,7 +136,6 @@ var endTurnButton = $Image {
     scaleX: 0.03,
     scaleY: 0.03,
     behaviours: [
-        $EndTurnButtonBehaviour { },
         buttonHoverBehaviour,
     ]
 };
@@ -290,7 +233,7 @@ var drawCardActor = $Box {
                 reportDimensionsWithScaling: true,
                 scaleX: 0.08,
                 scaleY: 0.08,
-                behaviours: [ $DrawBulletButtonBehaviour { }, buttonHoverBehaviour ]
+                behaviours: [ buttonHoverBehaviour ]
             }
 
         ],
@@ -323,7 +266,7 @@ var drawCardActor = $Box {
                 reportDimensionsWithScaling: true,
                 scaleX: 0.08,
                 scaleY: 0.08,
-                behaviours: [ $DrawCoverCardButtonBehaviour { }, buttonHoverBehaviour ]
+                behaviours: [ buttonHoverBehaviour ]
             }
 
         ]
@@ -412,15 +355,6 @@ var gameScreen = $Box {
             }
 
         ],
-
-        $CoverArea {
-            styles: [
-                {
-                    flexGrow: 0.5
-                }
-            ],
-            ...coverArea
-        },
 
         $EnemyArea {
             styles: [

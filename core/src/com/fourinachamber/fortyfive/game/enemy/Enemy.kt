@@ -8,7 +8,6 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.screen.*
-import com.fourinachamber.fortyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
@@ -178,29 +177,13 @@ class Enemy(
 
         val overlayAction = GraphicsConfig.damageOverlay(screen)
 
-        var activeStack: CoverStack? = null
-        var remaining = 0
-
         include(chargeTimeline)
 
-        action {
-            remaining = gameController.coverArea.damage(damage)
-            if (remaining != damage) activeStack = gameController.coverArea.getActive()
-        }
-
-        includeLater(
-            { Timeline.timeline { includeAction(
-                GraphicsConfig.coverStackParticles(activeStack!!.currentHealth == 0, activeStack!!, screen)
-            ) } },
-            { activeStack != null }
-
-        )
-
-        includeActionLater(overlayAction) { remaining != 0 }
+        includeAction(overlayAction)
         delay(GraphicsConfig.bufferTime)
         includeLater(
-            { getPlayerDamagedTimeline(remaining, gameController) },
-            { remaining != 0 }
+            { getPlayerDamagedTimeline(damage, gameController) },
+            { true }
         )
     }
 
@@ -210,20 +193,19 @@ class Enemy(
         gameController: GameController,
     ): Timeline {
 
-        val livesLabel = gameController.playerLivesLabel
-        val shakeAction = GraphicsConfig.shakeActorAnimation(livesLabel, false)
+//        val shakeAction = GraphicsConfig.shakeActorAnimation(livesLabel, false)
 
-        val textAnimation = GraphicsConfig.numberChangeAnimation(
-            livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
-            "-$damage",
-            false,
-            false,
-            gameController.curScreen
-        )
+//        val textAnimation = GraphicsConfig.numberChangeAnimation(
+//            livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
+//            "-$damage",
+//            false,
+//            false,
+//            gameController.curScreen
+//        )
 
         return Timeline.timeline {
             action { gameController.damagePlayer(damage) }
-            parallelActions(shakeAction, textAnimation)
+//            parallelActions(shakeAction, textAnimation)
         }
     }
 

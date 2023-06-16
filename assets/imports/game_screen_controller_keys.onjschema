@@ -62,23 +62,11 @@ enemyArea: {
     actorName: string,
     enemies: string[]
 },
-coverArea: {
-    actorName: string,
-    dropBehaviour: $DragAndDropBehaviour
-},
 cardDragBehaviour: $DragAndDropBehaviour,
 enemies: enemy[],
-cardDrawActor: string,
-playerLivesLabelName: string,
-endTurnButtonName: string,
-shootButtonName: string,
-reservesLabelName: string,
 cardsToDrawInFirstRound: int,
 cardsToDraw: int,
 maxCards: int,
 playerLives: int,
 reservesAtRoundBegin: int,
-destroyCardInstructionActor: string,
 shotEmptyDamage: int,
-winScreen: string,
-looseScreen: string,

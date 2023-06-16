@@ -88,21 +88,8 @@ sealed class GameState {
 
     object CardDestroy : GameState() {
 
-//        private var destroyCardPostProcessor: PostProcessor? = null
-//        private var previousPostProcessor: PostProcessor? = null
-
-//        private fun getDestroyCardPostProcessor(controller: GameController): PostProcessor {
-//            val destroyCardPostProcessor = destroyCardPostProcessor
-//            if (destroyCardPostProcessor != null) return destroyCardPostProcessor
-//            val fromManager = ResourceManager.get<PostProcessor>(controller.curScreen, "destroyCardPostProcessor")
-//            this.destroyCardPostProcessor = fromManager
-//            return fromManager
-//        }
-
         override fun transitionTo(controller: GameController) = with(controller) {
             showDestroyCardInstructionActor()
-//            previousPostProcessor = curScreen.postProcessor
-//            curScreen.postProcessor = getDestroyCardPostProcessor(this)
             gameRenderPipeline.enterDestroyMode()
             createdCards
                 .filter { it.inGame && it.type == Card.Type.BULLET }
@@ -111,7 +98,6 @@ sealed class GameState {
 
         override fun transitionAway(controller: GameController) = with(controller) {
             hideDestroyCardInstructionActor()
-//            curScreen.postProcessor = previousPostProcessor
             gameRenderPipeline.leaveDestroyMode()
             createdCards
                 .filter { it.inGame && it.type == Card.Type.BULLET }
