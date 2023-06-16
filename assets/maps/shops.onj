@@ -47,7 +47,7 @@ types: [
 people: [
     {
         name: "traveling_merchant",
-        display_name: "",
+        display_name: "Traveling Merchant",
         default: [
             {
                 select: $ByName {
@@ -61,10 +61,12 @@ people: [
             "test Greetings from the Traveler which is: Funny Card games Haha",
             "Greetings Traveler. I have the best products you will ever see."
         ],
-        texture: "enemy_texture",
-        baseWidth: 200,
-        baseHeight: 700,
-        baseDistanceLeftPercentageScreen: 25.0,
-        baseDistanceBottomPercentageScreen: -100.0,
+        image: {
+            texture: "enemy_texture",
+            baseWidth: 200,
+            baseHeight: 700,
+            baseDistanceLeftPercentageScreen: 0.25,
+            baseDistanceBottomPercentageScreen: -1,
+        }
     }
 ],

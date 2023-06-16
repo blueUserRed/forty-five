@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.dialog
+package com.fourinachamber.fortyfive.map.shop
 
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
