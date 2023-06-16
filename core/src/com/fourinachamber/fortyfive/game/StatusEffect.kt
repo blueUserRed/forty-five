@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game
 
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
@@ -30,7 +29,7 @@ abstract class StatusEffect(
      * the remaining amount of revolver-turns this effect will stay active for
      */
     val remainingTurns: Int
-        get() = (startTurn + turns) - gameController.turnCounter
+        get() = (startTurn + turns) - gameController.revolverRotationCounter
 
     private var startTurn: Int = 0
 
@@ -64,7 +63,7 @@ abstract class StatusEffect(
      */
     open fun start(gameController: GameController) {
         this.gameController = gameController
-        startTurn = gameController.turnCounter
+        startTurn = gameController.revolverRotationCounter
     }
 
     /**

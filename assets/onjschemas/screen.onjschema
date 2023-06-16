@@ -275,6 +275,12 @@ $Behaviour {
 
     $OnClickResetSavefileBehaviour { }
 
+    $CatchEventAndEmitBehaviour {
+        catch: string,
+        emit: string,
+        blockCaughtEvent?: boolean
+    }
+
 }
 
 $ScreenController {
@@ -356,10 +362,6 @@ options: {
         keycode: int,
         modifiers: int[],
         action: $KeyAction
-    }[],
-    popups?: {
-        name: string,
-        popupRoot: $Widget
     }[],
     postProcessor?: string,
     transitionAwayTime?: float

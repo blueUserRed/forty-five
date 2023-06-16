@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
@@ -62,8 +63,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     private var remainingCards: Int by multipleTemplateParam(
-        "game.remainingBullets", cardStack.size,
-        "game.remainingBulletsPluralS" to { if (it == 1) "" else "s" }
+        "game.cardsInStack", cardStack.size,
+        "game.cardsInStackPluralS" to { if (it == 1) "" else "s" }
     )
 
 
@@ -101,7 +102,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * counts up every revolver turn; starts at 0
      */
-    var turnCounter: Int = 0
+    var revolverRotationCounter: Int = 0
         private set
 
     var curReserves: Int by templateParam("game.curReserves", 0)
@@ -199,6 +200,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         )
         cardDragAndDrop.addSource(behaviour)
         createdCards.add(card)
+    }
+
+    override fun onUnhandledEvent(event: Event) = when (event) {
+        is ShootRevolverEvent -> {
+            shoot()
+        }
+        is EndTurnEvent -> {
+            endTurn()
+        }
+        is DrawCardEvent -> {
+            drawCard()
+        }
+        else -> { }
     }
 
     @MainThreadOnly
@@ -329,14 +343,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun shoot() {
         if (!currentState.allowsShooting()) return
-        turnCounter++
+        revolverRotationCounter++
 
         val cardToShoot = revolver.getCardInSlot(5)
         var rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
         if (modifier != null) rotationDirection = modifier!!.modifyRevolverRotation(rotationDirection)
         val enemy = enemyArea.getTargetedEnemy()
 
-        FortyFiveLogger.debug(logTag, "revolver is shooting; turn = $turnCounter; cardToShoot = $cardToShoot")
+        FortyFiveLogger.debug(logTag,
+            "revolver is shooting;" +
+                    "revolverRotationCounter = $revolverRotationCounter;" +
+                    "cardToShoot = $cardToShoot"
+        )
 
         var enemyDamageTimeline: Timeline? = null
         var damageStatusEffectTimeline: Timeline? = null
@@ -522,42 +540,38 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         isUIFrozen = true
         FortyFiveLogger.debug(logTag, "froze UI")
         for (card in cardHand.cards) card.isDraggable = false
+        curScreen.enterState(freezeUIScreenState)
     }
 
     private fun unfreezeUI() {
         isUIFrozen = false
         FortyFiveLogger.debug(logTag, "unfroze UI")
         for (card in cardHand.cards) card.isDraggable = true
+        curScreen.leaveState(freezeUIScreenState)
     }
 
     @AllThreadsAllowed
     fun showCardDrawActor() {
         FortyFiveLogger.debug(logTag, "displaying card draw actor")
-    }
-
-    @AllThreadsAllowed
-    fun showDestroyCardInstructionActor() {
-    }
-
-    @AllThreadsAllowed
-    fun hideDestroyCardInstructionActor() {
+        curScreen.enterState(cardDrawActorScreenState)
     }
 
     @AllThreadsAllowed
     fun hideCardDrawActor() {
         FortyFiveLogger.debug(logTag, "hiding card draw actor")
+        curScreen.leaveState(cardDrawActorScreenState)
     }
 
     /**
      * draws a bullet from the stack
      */
     @AllThreadsAllowed
-    fun drawBullet() {
+    fun drawCard() {
         if (!currentState.allowsDrawingCards()) return
-        val bullet = cardStack.removeFirstOrNull() ?: defaultBullet.create()
+        val card = cardStack.removeFirstOrNull() ?: defaultBullet.create()
         remainingCards = cardStack.size
-        cardHand.addCard(bullet)
-        FortyFiveLogger.debug(logTag, "bullet was drawn; bullet = $bullet; cardsToDraw = $cardsToDraw")
+        cardHand.addCard(card)
+        FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         currentState.onCardDrawn(this)
     }
 
@@ -621,6 +635,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     companion object {
 
         const val logTag = "game"
+
+        const val cardDrawActorScreenState = "showCardDrawActor"
+        const val freezeUIScreenState = "uiFrozen"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

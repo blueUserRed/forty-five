@@ -92,6 +92,11 @@ class ScreenBuilder(val file: FileHandle) {
 
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
+        root.addListener { event ->
+            screen.screenController?.onUnhandledEvent(event)
+            false
+        }
+
         return screen
     }
 

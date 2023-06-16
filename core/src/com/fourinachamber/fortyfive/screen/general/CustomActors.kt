@@ -248,6 +248,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override fun initStyles(screen: OnjScreen) {
         addLabelStyles(screen)
         addBackgroundStyles(screen)
+        addDisableStyles(screen)
     }
 
     companion object {
@@ -425,6 +426,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
         addBackgroundStyles(screen)
+        addDisableStyles(screen)
     }
 
     companion object {
