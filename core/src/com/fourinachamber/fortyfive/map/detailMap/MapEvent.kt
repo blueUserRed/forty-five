@@ -115,7 +115,7 @@ class EmptyMapEvent : MapEvent() {
 
     override val displayDescription: Boolean = false
 
-    override fun start() { }
+    override fun start() {}
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EmptyMapEvent")
@@ -218,6 +218,39 @@ class NPCMapEvent(val npc: String) : MapEvent() {
         name("NPCMapEvent")
         includeStandardConfig()
         "npc" with npc
+    }
+
+
+}
+
+/**
+ * event that opens a dialog box and allows talking to an NPC
+ * @param npc the name of the npc
+ */
+class ShopMapEvent(val type: String, val biom: String) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "Enter shop"
+    override val displayName: String = "BUY STUFF NOW"
+
+    override fun start() {
+        FortyFive.changeToScreen("screens/dialog.onj", this) // TODO: ugly
+    }
+
+    fun complete() {
+        canBeStarted = true
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("ShopMapEvent")
+        includeStandardConfig()
+        ("type" with type)
+        ("biome" with biom)
     }
 
 
