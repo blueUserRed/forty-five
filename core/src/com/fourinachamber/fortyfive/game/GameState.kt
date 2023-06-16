@@ -28,7 +28,6 @@ sealed class GameState {
             checkStatusEffects()
             checkCardModifierValidity()
 
-            enemyArea.enemies.forEach(Enemy::chooseNewAction)
             curReserves = baseReserves
             checkEffectsActiveCards(Trigger.ON_ROUND_START)
         }

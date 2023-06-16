@@ -20,7 +20,6 @@ import java.lang.Integer.min
 /**
  * represents an enemy
  * @param name the name of the enemy
- * @param drawable the texture of this enemy
  * @param offsetX x-offset from the origin of [EnemyArea] to the point where this enemy is located
  * @param offsetY y-offset from the origin of [EnemyArea] to the point where this enemy is located
  * @param scaleX scales [actor]
@@ -80,12 +79,7 @@ class Enemy(
             actor.updateText()
         }
 
-    var curAction: EnemyAction? = null
-        private set
-
     private val statusEffects: MutableList<StatusEffect> = mutableListOf()
-
-    private lateinit var brain: EnemyBrain
 
     init {
         actor = EnemyActor(this, area, screen)
@@ -152,22 +146,6 @@ class Enemy(
             }
         }
         actor.onRevolverTurn()
-    }
-
-    fun chooseNewAction() {
-        curAction = brain.chooseAction()
-        actor.displayAction(curAction!!)
-        FortyFiveLogger.debug(logTag, "chose new action: $curAction")
-    }
-
-    @MainThreadOnly
-    fun doAction(): Timeline? {
-        return curAction!!.execute()
-    }
-
-    fun resetAction() {
-        curAction = null
-        actor.resetAction()
     }
 
     @MainThreadOnly
@@ -293,7 +271,6 @@ class Enemy(
                     area,
                     screen
                 )
-                enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), curScreen, enemy)
                 enemy
             }
 
@@ -316,18 +293,11 @@ class EnemyActor(
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
     private var enemyBox = CustomHorizontalGroup(screen)
-    private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup(screen)
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
         enemy.detailFontColor,
         enemy.detailFontScale
-    )
-
-    private val actionIndicatorText: CustomLabel = CustomLabel(
-        screen,
-        "",
-        Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
     val livesLabel: CustomLabel = CustomLabel(
@@ -339,16 +309,12 @@ class EnemyActor(
     init {
         livesLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
-        actionIndicatorText.setFontScale(enemy.detailFontScale)
-        actionIndicator.addActor(actionIndicatorText)
         image.setScale(enemy.scaleX, enemy.scaleY)
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
         coverIcon.setScale(enemy.coverIconScale)
         coverIcon.reportDimensionsWithScaling = true
         coverIcon.ignoreScalingWhenDrawing = true
-
-        addActor(actionIndicator)
 
         val coverInfoBox = CustomVerticalGroup(screen)
         coverInfoBox.addActor(coverIcon)
@@ -363,20 +329,6 @@ class EnemyActor(
         updateText()
 
         onClick { area.selectedEnemy = enemy }
-    }
-
-    fun displayAction(action: EnemyAction) {
-        val image = CustomImageActor(action.indicatorDrawableHandle, screen)
-        image.reportDimensionsWithScaling = true
-        image.ignoreScalingWhenDrawing = true
-        image.setScale(action.indicatorScale)
-        actionIndicatorText.setText(action.descriptionText)
-        actionIndicator.addActorAt(0, image)
-    }
-
-    fun resetAction() {
-        actionIndicatorText.setText("")
-        actionIndicator.removeActorAt(0, true)
     }
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
