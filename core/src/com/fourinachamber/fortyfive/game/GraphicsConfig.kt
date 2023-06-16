@@ -13,7 +13,6 @@ import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
@@ -78,28 +77,6 @@ object GraphicsConfig {
             delayUntil { moveByAction.isComplete }
             action { actor.removeAction(moveByAction) }
         }
-    }
-
-    @MainThreadOnly
-    fun coverStackParticles(destroyed: Boolean, coverStack: CoverStack, screen: OnjScreen): Timeline.TimelineAction {
-        val particle = ResourceManager.get<ParticleEffect>(
-            screen,
-            if (destroyed) coverStackDestroyedParticles else coverStackDamagedParticles
-        )
-        val (x, y) = coverStack.localToStageCoordinates(Vector2(0f, 0f))
-        val position = if (destroyed) {
-            Vector2(
-                x + coverStack.width / 2,
-                y + coverStack.height / 2
-            )
-        } else {
-            val width = particle.emitters[0].spawnWidth.highMax
-            Vector2(
-                x + coverStack.width / 2 - width / 2,
-                y
-            )
-        }
-        return ParticleTimelineAction(particle, position, screen)
     }
 
     fun rawTemplateString(name: String): String = rawTemplateStrings[name]!!
@@ -233,11 +210,6 @@ object GraphicsConfig {
         damageOverlayFadeIn = (damageOverlay.get<Double>("fadeIn") * 1000).toInt()
         damageOverlayFadeOut = (damageOverlay.get<Double>("fadeOut") * 1000).toInt()
 
-        val coverStackParticles = config.get<OnjObject>("coverStackParticles")
-
-        coverStackDamagedParticles = coverStackParticles.get<String>("damaged")
-        coverStackDestroyedParticles = coverStackParticles.get<String>("destroyed")
-
         val bannerOnj = config.get<OnjObject>("bannerAnimation")
 
         bannerAnimDuration = (bannerOnj.get<Double>("duration") * 1000).toInt()
@@ -280,11 +252,6 @@ object GraphicsConfig {
         numChangeStartFadeoutAt = (numChange.get<Double>("startFadeoutAt") * 1000).toInt()
         numChangeNegativeFontColor = numChange.get<Color>("negativeFontColor")
         numChangePositiveFontColor = numChange.get<Color>("positiveFontColor")
-
-        val coverStackOnj = config.get<OnjObject>("coverStackParticles")
-
-        coverStackDamagedParticlesName = coverStackOnj.get<String>("damaged")
-        coverStackDestroyedParticlesName = coverStackOnj.get<String>("destroyed")
 
         val fadeOnj = config.get<OnjObject>("insultFadeAnimation")
 

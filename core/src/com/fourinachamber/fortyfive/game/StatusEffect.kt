@@ -208,9 +208,9 @@ abstract class StatusEffect(
 
         @Suppress("unused") // will be needed in the future
         PLAYER {
-            override fun getLivesActor(): Actor {
-                return FortyFive.currentGame!!.playerLivesLabel
-            }
+//            override fun getLivesActor(): Actor {
+//                return FortyFive.currentGame!!.playerLivesLabel
+//            }
             override fun damage(damage: Int): Timeline {
                 return Timeline.timeline {
                     action { FortyFive.currentGame!!.damagePlayer(damage) }
@@ -219,9 +219,9 @@ abstract class StatusEffect(
         },
 
         ENEMY {
-            override fun getLivesActor(): Actor {
-                return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().actor.livesLabel
-            }
+//            override fun getLivesActor(): Actor {
+//                return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().actor.livesLabel
+//            }
 
             override fun damage(damage: Int): Timeline {
                 return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().damage(damage)
@@ -229,10 +229,10 @@ abstract class StatusEffect(
         }
         ;
 
-        /**
-         * returns the actor displaying the current and/or base lives of the target
-         */
-        abstract fun getLivesActor(): Actor
+//        /**
+//         * returns the actor displaying the current and/or base lives of the target
+//         */
+//        abstract fun getLivesActor(): Actor
 
         /**
          * returns a timeline containing the necessary actions to damage the target

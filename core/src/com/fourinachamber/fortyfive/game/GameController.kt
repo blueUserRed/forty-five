@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game
 
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
@@ -10,7 +9,6 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
-import com.fourinachamber.fortyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fortyfive.screen.general.*
@@ -33,17 +31,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
-    private val coverAreaOnj = onj.get<OnjObject>("coverArea")
     private val enemiesOnj = onj.get<OnjArray>("enemies")
-    private val cardDrawActorName = onj.get<String>("cardDrawActor")
-    private val destroyCardInstructionActorName = onj.get<String>("destroyCardInstructionActor")
-    private val playerLivesLabelName = onj.get<String>("playerLivesLabelName")
-    private val endTurnButtonName = onj.get<String>("endTurnButtonName")
-    private val shootButtonName = onj.get<String>("shootButtonName")
-    private val reservesLabelName = onj.get<String>("reservesLabelName")
-
-    private val winScreen = onj.get<String>("winScreen")
-    private val looseScreen = onj.get<String>("looseScreen")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -67,38 +55,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         private set
     lateinit var enemyArea: EnemyArea
         private set
-    lateinit var coverArea: CoverArea
-        private set
-    lateinit var cardDrawActor: Actor
-        private set
-    lateinit var destroyCardInstructionActor: Actor
-        private set
-    lateinit var shootButton: Actor
-        private set
-    lateinit var endTurnButton: Actor
-        private set
-    lateinit var playerLivesLabel: CustomLabel
-        private set
-    lateinit var reservesLabel: CustomLabel
-        private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
     val createdCards: MutableList<Card> = mutableListOf()
-    private var bulletStack: MutableList<Card> = mutableListOf()
-    private var coverCardStack: MutableList<Card> = mutableListOf()
+    private var cardStack: MutableList<Card> = mutableListOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
-    private var remainingBullets: Int by multipleTemplateParam(
-        "game.remainingBullets", bulletStack.size,
+    private var remainingCards: Int by multipleTemplateParam(
+        "game.remainingBullets", cardStack.size,
         "game.remainingBulletsPluralS" to { if (it == 1) "" else "s" }
     )
 
-    private var remainingCovers: Int by multipleTemplateParam(
-        "game.remainingCovers", coverCardStack.size,
-        "game.remainingCoversPluralS" to { if (it == 1) "" else "s" }
-    )
-
-//    var enemies: List<Enemy> = listOf()
 
     var curPlayerLives: Int
         set(value) {
@@ -142,7 +109,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var curGameAnims: MutableList<GameAnimation> = mutableListOf()
 
     private lateinit var defaultBullet: CardPrototype
-    private lateinit var defaultCover: CardPrototype
 
     lateinit var gameRenderPipeline: GameRenderPipeline
     private lateinit var encounterMapEvent: EncounterMapEvent
@@ -166,18 +132,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFiveLogger.title("game starting")
 
         initCards()
-
-        cardDrawActor = onjScreen.namedActorOrError(cardDrawActorName)
-
-        destroyCardInstructionActor = onjScreen.namedActorOrError(destroyCardInstructionActorName)
-        destroyCardInstructionActor.isVisible = false
-
-        initButtons()
         initCardHand()
-        initLabels()
         initRevolver()
         initEnemyArea()
-        initCoverArea()
 
         changeState(GameState.InitialDraw(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
@@ -206,10 +163,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
         }
 
-        bulletStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
-        remainingBullets = bulletStack.size
-        coverCardStack = startDeck.filter { it.type == Card.Type.COVER }.toMutableList()
-        remainingCovers = coverCardStack.size
+        cardStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
+        remainingCards = cardStack.size
 
         SaveState.additionalCards.forEach { entry ->
             val (cardName, amount) = entry
@@ -218,29 +173,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
             repeat(amount) {
-                if (card.type == Card.Type.BULLET) bulletStack.add(card.create())
-                else coverCardStack.add(card.create())
+                cardStack.add(card.create())
             }
         }
 
-        bulletStack.shuffle()
-        coverCardStack.shuffle()
+        cardStack.shuffle()
 
-        FortyFiveLogger.debug(logTag, "bullet stack: $bulletStack")
-        FortyFiveLogger.debug(logTag, "cover stack: $coverCardStack")
+        FortyFiveLogger.debug(logTag, "card stack: $cardStack")
 
         val defaultBulletName = onj.get<String>("defaultBullet")
-        val defaultCoverName = onj.get<String>("defaultCover")
 
         defaultBullet = cardPrototypes
             .filter { it.type == Card.Type.BULLET }
             .firstOrNull { it.name == defaultBulletName }
             ?: throw RuntimeException("unknown default bullet: $defaultBulletName")
-
-        defaultCover = cardPrototypes
-            .filter { it.type == Card.Type.COVER }
-            .firstOrNull { it.name == defaultCoverName }
-            ?: throw RuntimeException("unknown default cover: $defaultBulletName")
 
     }
 
@@ -307,37 +253,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         changeState(GameState.SpecialDraw(amount))
     }
 
-    private fun initButtons() {
-        shootButton = curScreen.namedActorOrError(shootButtonName)
-        endTurnButton = curScreen.namedActorOrError(endTurnButtonName)
-    }
-
     private fun initCardHand() {
         val curScreen = curScreen
         val cardHandName = cardHandOnj.get<String>("actorName")
         val cardHand = curScreen.namedActorOrError(cardHandName)
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
         this.cardHand = cardHand
-    }
-
-    private fun initLabels() {
-        val curScreen = curScreen
-        val playerLives = curScreen.namedActorOrError(playerLivesLabelName)
-        if (playerLives !is CustomLabel) throw RuntimeException("actor named $playerLivesLabelName must be a Label")
-        playerLivesLabel = playerLives
-        val reserves = curScreen.namedActorOrError(reservesLabelName)
-        if (reserves !is CustomLabel) throw RuntimeException("actor named $reservesLabelName must be a Label")
-        reservesLabel = reserves
-    }
-
-    private fun initCoverArea() {
-        val curScreen = curScreen
-        val coverAreaName = coverAreaOnj.get<String>("actorName")
-        val coverArea = curScreen.namedActorOrError(coverAreaName)
-        if (coverArea !is CoverArea) throw RuntimeException("actor named $coverAreaName must be a CoverArea")
-        this.coverArea = coverArea
-        val dropOnj = coverAreaOnj.get<OnjNamedObject>("dropBehaviour")
-        coverArea.slotDropConfig = cardDragAndDrop to dropOnj
     }
 
     private fun initRevolver() {
@@ -386,20 +307,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardHand.removeCard(card)
         revolver.setCard(slot, card)
         FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
-        card.onEnter()
-        checkEffectsSingleCard(Trigger.ON_ENTER, card)
-    }
-
-    /**
-     * adds a new cover to a slot in the cover area (checks if the card is a cover)
-     */
-    @MainThreadOnly
-    fun addCover(card: Card, slot: Int) {
-        if (card.type != Card.Type.COVER || !card.allowsEnteringGame()) return
-        if (!coverArea.acceptsCover(slot, roundCounter) || !cost(card.cost)) return
-        coverArea.addCover(card, slot, roundCounter)
-        cardHand.removeCard(card)
-        FortyFiveLogger.debug(logTag, "cover $card was placed in slot $slot")
         card.onEnter()
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
     }
@@ -614,48 +521,31 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun freezeUI() {
         isUIFrozen = true
         FortyFiveLogger.debug(logTag, "froze UI")
-        val shootButton = shootButton
-        val endTurnButton = endTurnButton
-        if (shootButton is DisableActor) shootButton.isDisabled = true
-        if (endTurnButton is DisableActor) endTurnButton.isDisabled = true
         for (card in cardHand.cards) card.isDraggable = false
     }
 
     private fun unfreezeUI() {
         isUIFrozen = false
         FortyFiveLogger.debug(logTag, "unfroze UI")
-        val shootButton = shootButton
-        val endTurnButton = endTurnButton
-        if (shootButton is DisableActor) shootButton.isDisabled = false
-        if (endTurnButton is DisableActor) endTurnButton.isDisabled = false
         for (card in cardHand.cards) card.isDraggable = true
     }
 
     @AllThreadsAllowed
     fun showCardDrawActor() {
         FortyFiveLogger.debug(logTag, "displaying card draw actor")
-        val viewport = curScreen.stage.viewport
-        val cardDrawActor = cardDrawActor
-//        curScreen.addActorToRoot(cardDrawActor)
-        cardDrawActor.isVisible = true
-        cardDrawActor.setSize(viewport.worldWidth, viewport.worldHeight)
     }
 
     @AllThreadsAllowed
     fun showDestroyCardInstructionActor() {
-        destroyCardInstructionActor.isVisible = true
     }
 
     @AllThreadsAllowed
     fun hideDestroyCardInstructionActor() {
-        destroyCardInstructionActor.isVisible = false
     }
 
     @AllThreadsAllowed
     fun hideCardDrawActor() {
         FortyFiveLogger.debug(logTag, "hiding card draw actor")
-//        curScreen.removeActorFromRoot(cardDrawActor)
-        cardDrawActor.isVisible = false
     }
 
     /**
@@ -664,24 +554,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @AllThreadsAllowed
     fun drawBullet() {
         if (!currentState.allowsDrawingCards()) return
-        val bullet = bulletStack.removeFirstOrNull() ?: defaultBullet.create()
-        remainingBullets = bulletStack.size
+        val bullet = cardStack.removeFirstOrNull() ?: defaultBullet.create()
+        remainingCards = cardStack.size
         cardHand.addCard(bullet)
         FortyFiveLogger.debug(logTag, "bullet was drawn; bullet = $bullet; cardsToDraw = $cardsToDraw")
-        currentState.onCardDrawn(this)
-    }
-
-
-    /**
-     * draws a cover from the stack
-     */
-    @AllThreadsAllowed
-    fun drawCover() {
-        if (!currentState.allowsDrawingCards()) return
-        val cover = coverCardStack.removeFirstOrNull() ?: defaultCover.create()
-        remainingCovers = coverCardStack.size
-        cardHand.addCard(cover)
-        FortyFiveLogger.debug(logTag, "bullet was drawn; bullet = $cover; cardsToDraw = $cardsToDraw")
         currentState.onCardDrawn(this)
     }
 
@@ -713,7 +589,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "player won")
         encounterMapEvent.completed()
         MapManager.switchToMapScreen()
-//        FortyFive.changeToScreen(winScreen)
         SaveState.write()
     }
 
@@ -722,7 +597,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "player lost")
         SaveState.reset()
         MapManager.switchToMapScreen()
-//        FortyFive.changeToScreen(looseScreen)
     }
 
     sealed class RevolverRotation {

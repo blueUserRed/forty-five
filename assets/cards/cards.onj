@@ -318,90 +318,11 @@ cards: [
         effects: [],
         cost: 2,
         type: $Bullet { }
-    },
-
-
-    // Cover ----------------------------------
-
-    {
-        name: "crate",
-        title: "crate",
-        flavourText: "ol' reliable",
-        description: "",
-        baseDamage: 0,
-        coverValue: 3,
-        traitEffects: [],
-        rotation: $Right { amount: 1 }, // TODO: this is stupid, but will be fixed later
-        highlightType: "standard",
-        effects: [],
-        cost: 1,
-        type: $Cover { }
-    },
-
-    {
-        name: "bigCrate",
-        title: "big Crate",
-        flavourText: "big ol' reliable",
-        description: "",
-        baseDamage: 0,
-        coverValue: 5,
-        traitEffects: [],
-        rotation: $Right { amount: 1 },
-        highlightType: "standard",
-        effects: [],
-        cost: 2,
-        type: $Cover { }
-    },
-
-    {
-        name: "casket",
-        title: "casket",
-        flavourText: "Let's hope you won't see the inside any time soon. If yes it's red carpet inside",
-        description: "If this cover is placed down: destroy one target Bullet in the revolver",
-        baseDamage: 0,
-        coverValue: 5,
-        traitEffects: [],
-        rotation: $Right { amount: 1 },
-        highlightType: "standard",
-        effects: [ destroy("enter") ],
-        cost: 1,
-        type: $Cover { }
-    },
-
-    {
-        name: "jewelryBox",
-        title: "jewelry Box",
-        flavourText: "The lady I took it from didn't need it anyways",
-        description: "If this Cover is placed down: draw 1 card",
-        baseDamage: 0,
-        coverValue: 3,
-        traitEffects: [],
-        rotation: $Right { amount: 1 },
-        highlightType: "standard",
-        effects: [ draw("enter", 1) ],
-        cost: 1,
-        type: $Cover { }
-    },
-
-    {
-        name: "treasureChest",
-        title: "treasure Chest",
-        flavourText: "Found it at crestcreek. That stupid ol bastard thought hiding it under a damn rock would make it invisible or somethin'",
-        description: "This Cover lets you draw 1 card at the beginning of every turn",
-        baseDamage: 0,
-        coverValue: 6,
-        traitEffects: [],
-        rotation: $Right { amount: 1 },
-        highlightType: "standard",
-        effects: [ draw("round start", 1) ],
-        cost: 3,
-        type: $Cover { }
     }
 
 ],
 
 defaultBullet: "bullet",
-defaultCover: "crate",
 
 startDeck: [
 
@@ -447,26 +368,6 @@ startDeck: [
 //    },
     {
         name: "silverBullet",
-        amount: 1
-    },
-    {
-        name: "crate",
-        amount: 5
-    },
-    {
-        name: "bigCrate",
-        amount: 2
-    },
-    {
-        name: "casket",
-        amount: 1
-    },
-    {
-        name: "jewelryBox",
-        amount: 1
-    },
-    {
-        name: "treasureChest",
         amount: 1
     }
 

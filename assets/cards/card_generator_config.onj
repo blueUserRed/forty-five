@@ -22,8 +22,6 @@ assets: {
             file: "textures/cards/base_transparent.png"
         },
 
-        // Bullets---------------------------
-
         {
             name: "bullet",
             file: "textures/cards/bullet.png"
@@ -112,30 +110,6 @@ assets: {
             name: "enchantedBullet",
             file: "textures/cards/enchantedBullet.png"
         },
-
-        // covers---------------------------
-
-        {
-            name: "crate",
-            file: "textures/cards/crate.png"
-        },
-        {
-            name: "bigCrate",
-            file: "textures/cards/bigCrate.png"
-        },
-        {
-            name: "casket",
-            file: "textures/cards/casket.png"
-        },
-        {
-            name: "jewelryBox",
-            file: "textures/cards/jewelryBox.png"
-        },
-        {
-            name: "treasureChest",
-            file: "textures/cards/treasureChest.png"
-        },
-
     ],
     fonts: [
         {
@@ -167,11 +141,8 @@ var costElementSharedKeys = {
 };
 
 var bulletsOffset = 0;
-var coverOffset = 21;
 
 textures: [
-
-    // Bullets --------------------------
 
     {
         name: cards.(bulletsOffset + 0).name,
@@ -550,98 +521,5 @@ textures: [
             }
         ]
     },
-
-    
-    // Cover --------------------------
-    
-    {
-        name: cards.(coverOffset + 0).name,
-        elements: [
-            $ImageElement {
-                textureName: cards.(coverOffset + 0).name,
-                ...imageElementSharedKeys
-            },
-            $TextElement {
-                ...valueElementSharedKeys,
-                text: cards.(coverOffset + 0).coverValue#string
-            },
-            $TextElement {
-                ...costElementSharedKeys,
-                text: cards.(coverOffset + 0).cost#string
-            }
-        ]
-    },
-
-    {
-        name: cards.(coverOffset + 1).name,
-        elements: [
-            $ImageElement {
-                textureName: cards.(coverOffset + 1).name,
-                ...imageElementSharedKeys
-            },
-            $TextElement {
-                ...valueElementSharedKeys,
-                text: cards.(coverOffset + 1).coverValue#string
-            },
-            $TextElement {
-                ...costElementSharedKeys,
-                text: cards.(coverOffset + 1).cost#string
-            }
-        ]
-    },
-
-    {
-        name: cards.(coverOffset + 2).name,
-        elements: [
-            $ImageElement {
-                textureName: cards.(coverOffset + 2).name,
-                ...imageElementSharedKeys
-            },
-            $TextElement {
-                ...valueElementSharedKeys,
-                text: cards.(coverOffset + 2).coverValue#string
-            },
-            $TextElement {
-                ...costElementSharedKeys,
-                text: cards.(coverOffset + 2).cost#string
-            }
-        ]
-    },
-
-    {
-        name: cards.(coverOffset + 3).name,
-        elements: [
-            $ImageElement {
-                textureName: cards.(coverOffset + 3).name,
-                ...imageElementSharedKeys
-            },
-            $TextElement {
-                ...valueElementSharedKeys,
-                text: cards.(coverOffset + 3).coverValue#string
-            },
-            $TextElement {
-                ...costElementSharedKeys,
-                text: cards.(coverOffset + 3).cost#string
-            }
-        ]
-    },
-
-    {
-        name: cards.(coverOffset + 4).name,
-        elements: [
-            $ImageElement {
-                textureName: cards.(coverOffset + 4).name,
-                ...imageElementSharedKeys
-            },
-            $TextElement {
-                ...valueElementSharedKeys,
-                text: cards.(coverOffset + 4).coverValue#string
-            },
-            $TextElement {
-                ...costElementSharedKeys,
-                text: cards.(coverOffset + 4).cost#string
-            }
-        ]
-    }
 
 ]

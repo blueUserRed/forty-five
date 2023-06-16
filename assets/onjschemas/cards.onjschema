@@ -4,7 +4,6 @@ use Cards;
 $CardType {
 
     $Bullet { }
-    $Cover { }
     $OneShot { }
 
 }
@@ -45,6 +44,5 @@ var startDeckEntry = {
 };
 
 defaultBullet: string,
-defaultCover: string,
 
 startDeck: startDeckEntry[]

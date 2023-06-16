@@ -266,75 +266,12 @@ $Behaviour {
 
     $OnClickExitBehaviour { }
 
-    $OnHoverChangeSizeBehaviour {
-        cellName?: string,
-        enterDuration: float,
-        exitDuration: float,
-        baseX: float,
-        baseY: float,
-        targetX: float,
-        targetY: float,
-        enterInterpolation: string?,
-        exitInterpolation: string?
-    }
-
-    $OnHoverChangeFontSizeBehaviour {
-        enterDuration: float,
-        exitDuration: float,
-        targetFontScale: float,
-        baseFontScale: float,
-        enterInterpolation: string?,
-        exitInterpolation: string?
-    }
-
     $OnClickChangeScreenBehaviour {
         screenPath: string
     }
 
     $OnClickAbandonRunBehaviour { }
 
-    $OnClickRemoveActorBehaviour { }
-
-    $OnClickMaskBehaviour {
-        maskTexture: string,
-        invert?: boolean,
-        maskScaleX?: float,
-        maskScaleY?: float,
-        maskOffsetX?: float,
-        maskOffsetY?: float,
-    }
-
-    $OnClickParticleEffectBehaviour {
-        file: string,
-        textureDir: string,
-        effectScale?: float,
-        useCursorPos?: boolean,
-    }
-
-    $OnClickChangePostProcessorBehaviour {
-        postProcessor: string?,
-        duration: int?,
-        setOnlyIfNoPostProcessorIsSet: boolean,
-    }
-
-    $OnHoverPopupBehaviour {
-        popupName: string,
-        setPopupPosition: boolean,
-        xOffset?: float,
-        yOffset?: float,
-    }
-
-    $OnClickOpenPopupBehaviour {
-        popupName: string
-    }
-
-    $ShootButtonBehaviour { }
-
-    $EndTurnButtonBehaviour { }
-
-    $DrawBulletButtonBehaviour { }
-
-    $DrawCoverCardButtonBehaviour { }
 
     $OnClickResetSavefileBehaviour { }
 
@@ -396,14 +333,6 @@ $KeyAction {
     }
 
     $DeselectAllKeyAction { }
-
-    $ShootKeyAction { }
-
-    $EndTurnKeyAction { }
-
-    $DrawBulletKeyAction { }
-
-    $DrawCoverKeyAction { }
 
     $NextInHierarchyKeyAction { }
 

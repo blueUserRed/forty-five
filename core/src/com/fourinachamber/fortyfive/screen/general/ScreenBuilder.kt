@@ -22,7 +22,6 @@ import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
-import com.fourinachamber.fortyfive.screen.gameComponents.CoverArea
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -246,25 +245,6 @@ class ScreenBuilder(val file: FileHandle) {
         "EnemyArea" -> EnemyArea(
             widgetOnj.get<String>("enemySelectionDrawable"),
             screen
-        )
-
-        "CoverArea" -> CoverArea(
-            screen,
-            widgetOnj.get<Long>("numStacks").toInt(),
-            widgetOnj.get<Long>("maxCards").toInt(),
-            widgetOnj.get<Boolean>("onlyAllowAddingOnTheSameTurn"),
-            fontOrError(widgetOnj.get<String>("detailFont"), screen),
-            widgetOnj.get<Color>("detailFontColor"),
-            widgetOnj.get<Double>("detailFontScale").toFloat(),
-            widgetOnj.get<Double>("areaSpacing").toFloat(),
-            widgetOnj.get<Double>("cardScale").toFloat(),
-            widgetOnj.get<Double>("stackHeight").toFloat(),
-            widgetOnj.get<Double>("stackMinWidth").toFloat(),
-            widgetOnj.get<Double>("cardInitialX").toFloat(),
-            widgetOnj.get<Double>("cardInitialY").toFloat(),
-            widgetOnj.get<Double>("cardDeltaX").toFloat(),
-            widgetOnj.get<Double>("cardDeltaY").toFloat(),
-            widgetOnj.get<String>("stackHook")
         )
 
         "TemplateLabel" -> TemplateStringLabel(
