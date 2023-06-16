@@ -370,6 +370,9 @@ $ScreenController {
         dialogWidgetName: string
     }
 
+    $ShopScreenController {
+        shopsFile: string
+    }
 }
 
 $KeyAction {

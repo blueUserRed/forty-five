@@ -26,6 +26,7 @@ $MapEvent {
     $ShopMapEvent {
         type: string,
         biome: string,
+        person: string,
         ...mapEventStandardConfig
     }
 
