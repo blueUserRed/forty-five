@@ -1046,7 +1046,7 @@ data class MapRestriction(
     val fixedEvents: List<MapEvent>,
     val optionalEvents: List<Pair<Int, () -> MapEvent>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
-    val decorationPadding: Float,
+    val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
     val pathTotalWidth: Float = 7F,
 ) {
 
