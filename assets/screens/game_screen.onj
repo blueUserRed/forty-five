@@ -127,6 +127,10 @@ var shootButton = $Image {
     scaleY: 0.03,
     behaviours: [
         buttonHoverBehaviour,
+        $CatchEventAndEmitBehaviour {
+            catch: "ButtonClickEvent",
+            emit: "ShootRevolverEvent"
+        }
     ]
 };
 
@@ -137,6 +141,10 @@ var endTurnButton = $Image {
     scaleY: 0.03,
     behaviours: [
         buttonHoverBehaviour,
+        $CatchEventAndEmitBehaviour {
+            catch: "ButtonClickEvent",
+            emit: "EndTurnEvent"
+        }
     ]
 };
 
@@ -156,28 +164,36 @@ var reservesLabel = $TemplateLabel {
     color: color.white,
 };
 
-var destroyCardInstructionActor = $Label {
-    name: "destroy_card_instruction_label",
-    font: "vanilla_whale",
-    text: "Choose a card to destroy!",
-    fontScale: 0.2,
-    align: "center",
-    color: color.black,
-};
+var disableStyles = [
+    {
+        style_priority: 1,
+        disabled: false,
+    },
+    {
+        style_priority: 2,
+        style_condition: state("uiFrozen"),
+        disabled: true
+    }
+];
 
 var drawCardActor = $Box {
     styles: [
         {
+            style_priority: 1,
             positionType: positionType.absolute,
             background: "transparent_black_texture",
             flexDirection: flexDirection.column,
             alignItems: align.center,
             width: 100.0#percent,
             height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showCardDrawActor"),
+            detached: false
         }
     ],
-    name: "card_draw_table",
-    visible: false,
     zIndex: overlayZIndex,
 } children [
 
@@ -221,7 +237,7 @@ var drawCardActor = $Box {
                     }
                 ],
                 font: "red_wing",
-                template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
+                template: "{game.cardsInStack} card{game.cardsInStackPluralS} remaining in stack",
                 wrap: true,
                 fontScale: 0.13,
                 align: "center",
@@ -233,43 +249,15 @@ var drawCardActor = $Box {
                 reportDimensionsWithScaling: true,
                 scaleX: 0.08,
                 scaleY: 0.08,
-                behaviours: [ buttonHoverBehaviour ]
+                behaviours: [
+                    $CatchEventAndEmitBehaviour {
+                        catch: "ButtonClickEvent",
+                        emit: "DrawCardEvent"
+                    }
+                ]
             }
 
         ],
-
-        $Box {
-            styles: [
-                {
-                    flexDirection: flexDirection.column
-                }
-            ]
-        } children [
-
-            $TemplateLabel {
-                styles: [
-                    {
-                        marginTop: 6.0#points,
-                        marginBottom: -6.0#points,
-                    }
-                ],
-                font: "red_wing",
-                template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
-                wrap: true,
-                fontScale: 0.13,
-                align: "center",
-                color: color.white
-            },
-
-            $Image {
-                textureName: "draw_cover",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.08,
-                scaleY: 0.08,
-                behaviours: [ buttonHoverBehaviour ]
-            }
-
-        ]
 
     ]
 
@@ -310,8 +298,6 @@ var gameScreen = $Box {
 
         playerLivesLabel,
 
-        destroyCardInstructionActor
-
     ],
 
     $Box {
@@ -349,7 +335,8 @@ var gameScreen = $Box {
                         style_priority: 2,
                         style_condition: hover(),
                         background: "shoot_button_texture_hover"
-                    }
+                    },
+                    ...disableStyles
                 ],
                 ...shootButton
             }
@@ -416,7 +403,8 @@ var gameScreen = $Box {
                     style_priority: 2,
                     style_condition: hover(),
                     background: "end_turn_button_texture_hover"
-                }
+                },
+                ...disableStyles
             ],
             ...endTurnButton
         }

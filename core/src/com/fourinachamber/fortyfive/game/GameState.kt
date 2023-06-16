@@ -88,20 +88,22 @@ sealed class GameState {
 
     object CardDestroy : GameState() {
 
+        // TODO: rework using popup
+
         override fun transitionTo(controller: GameController) = with(controller) {
-            showDestroyCardInstructionActor()
-            gameRenderPipeline.enterDestroyMode()
-            createdCards
-                .filter { it.inGame && it.type == Card.Type.BULLET }
-                .forEach(Card::enterDestroyMode)
+//            showDestroyCardInstructionActor()
+//            gameRenderPipeline.enterDestroyMode()
+//            createdCards
+//                .filter { it.inGame && it.type == Card.Type.BULLET }
+//                .forEach(Card::enterDestroyMode)
         }
 
         override fun transitionAway(controller: GameController) = with(controller) {
-            hideDestroyCardInstructionActor()
-            gameRenderPipeline.leaveDestroyMode()
-            createdCards
-                .filter { it.inGame && it.type == Card.Type.BULLET }
-                .forEach(Card::leaveDestroyMode)
+//            hideDestroyCardInstructionActor()
+//            gameRenderPipeline.leaveDestroyMode()
+//            createdCards
+//                .filter { it.inGame && it.type == Card.Type.BULLET }
+//                .forEach(Card::leaveDestroyMode)
         }
 
         override fun onCardDestroyed(controller: GameController) {
@@ -114,29 +116,30 @@ sealed class GameState {
         override fun allowsShooting(): Boolean = true
 
         override fun onEndTurn(controller: GameController) {
-            controller.changeState(EnemyAction)
+            controller.changeState(InitialDraw(controller.cardsToDraw))
         }
     }
 
     object EnemyAction : GameState() {
 
         override fun transitionTo(controller: GameController) = with(controller) {
-            val timeline = Timeline.timeline {
-                val screen = curScreen
-                val enemyBannerAnim = GraphicsConfig.bannerAnimation(false, screen)
-                val playerBannerAnim = GraphicsConfig.bannerAnimation(true, screen)
-                includeAction(enemyBannerAnim)
-                delay(GraphicsConfig.bufferTime)
-                enemyArea.enemies.forEach { enemy ->
-                    enemy.doAction()?.let { include(it) }
-                }
-                delay(GraphicsConfig.bufferTime)
-                action { enemyArea.enemies.forEach(Enemy::resetAction) }
-                includeAction(playerBannerAnim)
-                delay(GraphicsConfig.bufferTime)
-                action { changeState(InitialDraw(cardsToDraw)) }
-            }
-            executeTimelineLater(timeline)
+            // TODO: repurpose this for 'plottwist'-enemy-action
+//            val timeline = Timeline.timeline {
+//                val screen = curScreen
+//                val enemyBannerAnim = GraphicsConfig.bannerAnimation(false, screen)
+//                val playerBannerAnim = GraphicsConfig.bannerAnimation(true, screen)
+//                includeAction(enemyBannerAnim)
+//                delay(GraphicsConfig.bufferTime)
+//                enemyArea.enemies.forEach { enemy ->
+//                    enemy.doAction()?.let { include(it) }
+//                }
+//                delay(GraphicsConfig.bufferTime)
+//                action { enemyArea.enemies.forEach(Enemy::resetAction) }
+//                includeAction(playerBannerAnim)
+//                delay(GraphicsConfig.bufferTime)
+//                action { changeState(InitialDraw(cardsToDraw)) }
+//            }
+//            executeTimelineLater(timeline)
         }
     }
 

@@ -3,14 +3,8 @@ package com.fourinachamber.fortyfive.screen.general
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
-import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
-import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
-import com.badlogic.gdx.scenes.scene2d.ui.Cell
-import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.utils.*
@@ -18,6 +12,7 @@ import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.reflect.KClass
 import kotlin.system.measureTimeMillis
 
 
@@ -33,6 +28,7 @@ object BehaviourFactory {
         "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
+        "CatchEventAndEmitBehaviour" to { onj, actor -> CatchEventAndEmitBehaviour(onj, actor)}
     )
 
     /**
@@ -78,12 +74,23 @@ abstract class Behaviour(val actor: Actor) {
      */
     protected open val onDisabledCLick: @MainThreadOnly BehaviourCallback? = null
 
+    protected open val onEventCapture: @MainThreadOnly ((event: Event) -> Boolean)? = null
+
+    protected open val onDisabledEventCapture: @MainThreadOnly ((event: Event) -> Boolean)? = null
+
     /**
      * binds the callbacks to the actor and sets the [onjScreen]
      */
     @AllThreadsAllowed
     fun bindCallbacks(onjScreen: OnjScreen) {
         this.onjScreen = onjScreen
+        actor.addListener { event ->
+            return@addListener if (actor is DisableActor && !actor.isDisabled) {
+                onEventCapture?.invoke(event) ?: false
+            } else {
+                onDisabledEventCapture?.invoke(event) ?: false
+            }
+        }
         onHoverEnter?.let { actor.onEnter(it) }
         onHoverExit?.let { actor.onExit(it) }
         actor.onButtonClick {
@@ -191,6 +198,20 @@ class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor) : Behavio
         SaveState.reset()
     }
 
+}
+
+class CatchEventAndEmitBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val eventToCatch: KClass<out Event> = EventFactory.eventClass(onj.get<String>("catch"))
+    private val eventToEmit: String = onj.get<String>("emit")
+    private val blockCaughtEvent: Boolean = onj.getOr("blockCaughtEvent", true)
+
+    override val onEventCapture: ((event: Event) -> Boolean) = lambda@ { event ->
+        if (!eventToCatch.isInstance(event)) return@lambda false
+        val eventToEmit = EventFactory.createEvent(eventToEmit)
+        actor.fire(eventToEmit)
+        return@lambda blockCaughtEvent
+    }
 }
 
 typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor) -> Behaviour
