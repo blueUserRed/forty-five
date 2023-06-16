@@ -26,3 +26,22 @@ $ShopParameter{
 }
 
 types: $ShopParameter[]
+
+
+
+$Text{
+    text: string,
+    //TODO probability fe.
+}
+
+people: {
+    name: string,
+    display_name: string,
+    default: $ShopParameter[],
+    text: $text[],
+    texture: string,
+    baseWidth: float,
+    baseHeight: float,
+    baseDistanceLeftPercentageScreen: float,
+    baseDistanceBottomPercentageScreen: float,
+}[]

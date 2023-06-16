@@ -41,4 +41,30 @@ types: [
             }
         ]
     },
-]
+],
+
+
+people: [
+    {
+        name: "traveling_merchant",
+        display_name: "",
+        default: [
+            {
+                select: $ByName {
+                    name: "workerBullet"
+                },
+                effect: $Blacklist {
+                }
+            }
+        ],
+        text: [
+            "test Greetings from the Traveler which is: Funny Card games Haha",
+            "Greetings Traveler. I have the best products you will ever see."
+        ],
+        texture: "enemy_texture",
+        baseWidth: 200,
+        baseHeight: 700,
+        baseDistanceLeftPercentageScreen: 25.0,
+        baseDistanceBottomPercentageScreen: -100.0,
+    }
+],

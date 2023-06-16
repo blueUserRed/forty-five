@@ -17,7 +17,7 @@ object MapEventFactory {
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
-        "ShopMapEvent" to { ShopMapEvent(it.get<String>("type"),it.get<String>("biome")) },
+        "ShopMapEvent" to { ShopMapEvent(it.get<String>("type"), it.get<String>("biome"), it.get<String>("person")) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -225,10 +225,11 @@ class NPCMapEvent(val npc: String) : MapEvent() {
 }
 
 /**
- * event that opens a dialog box and allows talking to an NPC
- * @param npc the name of the npc
+ * event that opens a shop where the player can buy up to 4 cards
+ * @param type which type the restrictions are
+ * @param biome in what biome the shop is
  */
-class ShopMapEvent(val type: String, val biome: String) : MapEvent() {
+class ShopMapEvent(val type: String, val biome: String, val person: String) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -240,7 +241,7 @@ class ShopMapEvent(val type: String, val biome: String) : MapEvent() {
     override val displayName: String = "BUY STUFF NOW"
 
     override fun start() {
-        FortyFive.changeToScreen("screens/dialog.onj", this) // TODO: ugly
+        FortyFive.changeToScreen("screens/shop_screen.onj", this) // TODO: ugly
     }
 
     fun complete() {
@@ -252,6 +253,7 @@ class ShopMapEvent(val type: String, val biome: String) : MapEvent() {
         includeStandardConfig()
         ("type" with type)
         ("biome" with biome)
+        ("person" with person)
     }
 
 
