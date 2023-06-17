@@ -40,10 +40,10 @@ people: {
               text: string
           }[],
     image: {
-        texture: string,
-        baseWidth: float,
-        baseHeight: float,
-        baseDistanceLeftPercentageScreen: float,
-        baseDistanceBottomPercentageScreen: float,
+        textureName: string,
+        positionLeft: float,
+        positionTop: float,
+        width: float,
+        height: float,
     }
 }[]

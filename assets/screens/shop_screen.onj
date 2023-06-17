@@ -95,10 +95,10 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionLeft: (0.0)#points,
-                positionTop: (0.0)#points,
-                width: (worldWidth *2/3)#points,
-                height: (worldHeight * 2)#points,
+//                positionLeft: (0.0)#points,
+//                positionBottom: (0.0)#points,
+//                width: (worldWidth *2/3)#points,
+//                height: (worldHeight * 2)#points,
             }
         ]
     },
