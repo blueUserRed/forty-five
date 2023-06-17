@@ -30,6 +30,7 @@ options: {
     ],
     screenController: $ShopScreenController {
         shopsFile: "maps/shops.onj",
+        shopPersonImageActor: "shop_person_image",
     }
 },
 
@@ -66,7 +67,7 @@ root: $Box {
 //    },
 
     $Image {       //TODO biome for background
-
+        name: "background_img",
         textureName: "title_screen_background",
         scaleX: 0.0,
         scaleY: 0.0,
@@ -84,7 +85,7 @@ root: $Box {
         ]
     },
     $Image {       //TODO person for image
-
+        name: "shop_person_image",
         textureName: "enemy_texture",
         scaleX: 0.0,
         scaleY: 0.0,
