@@ -17,27 +17,28 @@ $CardEffect{
     }
 }
 
-$ShopParameter{
-    name:string
+var shopParameter = {
     cardChanges: {
-                     select: $CardSelector
-                     effect: $CardEffect
-                 }[]
-}
+                      select: $CardSelector,
+                      effect: $CardEffect
+                 }[],
+    name: string
 
-types: $ShopParameter[]
+};
+
+
+types: shopParameter[],
 
 
 
-$Text{
-    text: string
-}
 
 people: {
     name: string,
     display_name: string,
-    default: $ShopParameter[],
-    text: $text[],
+    defaultShopParameter: string,
+    texts: {
+              text: string
+          }[],
     image: {
         texture: string,
         baseWidth: float,

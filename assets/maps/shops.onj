@@ -48,25 +48,18 @@ people: [
     {
         name: "traveling_merchant",
         display_name: "Traveling Merchant",
-        default: [
-            {
-                select: $ByName {
-                    name: "workerBullet"
-                },
-                effect: $Blacklist {
-                }
-            }
-        ],
-        text: [
-            "test Greetings from the Traveler which is: Funny Card games Haha",
-            "Greetings Traveler. I have the best products you will ever see."
+        defaultShopParameter: "no_biome",
+        texts: [
+            {text: "test Greetings from the Traveler which is: Funny Card games Haha"},
+            {text: "Greetings Traveler. I have the best products you will ever see."},
         ],
         image: {
             texture: "enemy_texture",
-            baseWidth: 200,
-            baseHeight: 700,
+            baseWidth: 200.0,
+            baseHeight: 700.0,
             baseDistanceLeftPercentageScreen: 0.25,
-            baseDistanceBottomPercentageScreen: -1,
-        }
+            baseDistanceBottomPercentageScreen: -1.0,
+        },
+
     }
 ],
