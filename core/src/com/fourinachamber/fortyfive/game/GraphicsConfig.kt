@@ -104,19 +104,6 @@ object GraphicsConfig {
     }
 
     @MainThreadOnly
-    fun bannerAnimation(isPlayer: Boolean, screen: OnjScreen): GameAnimationTimelineAction {
-        val anim = BannerAnimation(
-            ResourceManager.get(screen, if (isPlayer) playerTurnBannerName else enemyTurnBannerName),
-            screen,
-            bannerAnimDuration,
-            bannerScaleAnimDuration,
-            bannerBeginScale,
-            bannerEndScale
-        )
-        return GameAnimationTimelineAction(anim)
-    }
-
-    @MainThreadOnly
     fun insultFadeAnimation(pos: Vector2, insult: String, screen: OnjScreen): GameAnimationTimelineAction {
         val anim = FadeInAndOutTextAnimation(
             screen,
@@ -166,7 +153,7 @@ object GraphicsConfig {
     fun cardDetailSpacing(): Float = cardDetailSpacing
 
     @MainThreadOnly
-    fun cardDetailBackground(): ResourceHandle = cardDetailBackground!!
+    fun cardDetailBackground(): ResourceHandle = cardDetailBackground
 
     @MainThreadOnly
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
@@ -209,16 +196,6 @@ object GraphicsConfig {
         damageOverlayDuration = (damageOverlay.get<Double>("duration") * 1000).toInt()
         damageOverlayFadeIn = (damageOverlay.get<Double>("fadeIn") * 1000).toInt()
         damageOverlayFadeOut = (damageOverlay.get<Double>("fadeOut") * 1000).toInt()
-
-        val bannerOnj = config.get<OnjObject>("bannerAnimation")
-
-        bannerAnimDuration = (bannerOnj.get<Double>("duration") * 1000).toInt()
-        bannerScaleAnimDuration = (bannerOnj.get<Double>("scaleAnimDuration") * 1000).toInt()
-        bannerBeginScale = bannerOnj.get<Double>("beginScale").toFloat()
-        bannerEndScale = bannerOnj.get<Double>("endScale").toFloat()
-
-        playerTurnBannerName = bannerOnj.get<String>("playerTurnBanner")
-        enemyTurnBannerName = bannerOnj.get<String>("enemyTurnBanner")
 
         val shakeOnj = config.get<OnjObject>("shakeAnimation")
 
@@ -307,14 +284,6 @@ object GraphicsConfig {
     private var damageOverlayFadeIn by Delegates.notNull<Int>()
     private var damageOverlayFadeOut by Delegates.notNull<Int>()
 
-    private lateinit var coverStackDamagedParticles: String
-    private lateinit var coverStackDestroyedParticles: String
-
-    private var bannerAnimDuration by Delegates.notNull<Int>()
-    private var bannerScaleAnimDuration by Delegates.notNull<Int>()
-    private var bannerBeginScale by Delegates.notNull<Float>()
-    private var bannerEndScale by Delegates.notNull<Float>()
-
     private var xShake by Delegates.notNull<Float>()
     private var yShake by Delegates.notNull<Float>()
     private var xShakeSpeedMultiplier by Delegates.notNull<Float>()
@@ -325,9 +294,6 @@ object GraphicsConfig {
     private var yQuickCharge by Delegates.notNull<Float>()
     private var quickChargeDuration by Delegates.notNull<Float>()
     private lateinit var quickChargeInterpolation: Interpolation
-
-    private lateinit var playerTurnBannerName: String
-    private lateinit var enemyTurnBannerName: String
 
     private var xCharge by Delegates.notNull<Float>()
     private var yCharge by Delegates.notNull<Float>()
@@ -342,9 +308,6 @@ object GraphicsConfig {
     private var numChangeRaiseDistance by Delegates.notNull<Float>()
     private var numChangeSinkDistance by Delegates.notNull<Float>()
     private var numChangeStartFadeoutAt by Delegates.notNull<Int>()
-
-    private lateinit var coverStackDestroyedParticlesName: String
-    private lateinit var coverStackDamagedParticlesName: String
 
     private lateinit var fadeFontName: String
     private lateinit var fadeFontColor: Color

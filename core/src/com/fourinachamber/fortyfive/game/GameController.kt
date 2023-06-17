@@ -27,12 +27,13 @@ import java.lang.Integer.max
  */
 class GameController(onj: OnjNamedObject) : ScreenController() {
 
+    val gameDirector = GameDirector(this)
+
     private val cardConfigFile = onj.get<String>("cardsFile")
     private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
-    private val enemiesOnj = onj.get<OnjArray>("enemies")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -67,6 +68,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         "game.cardsInStackPluralS" to { if (it == 1) "" else "s" }
     )
 
+    private var remainingTurns: Int by multipleTemplateParam(
+        "game.remainingTurnsRaw", -1,
+        "game.remainingTurns" to { if (it == -1) "" else it.toString() }
+    )
 
     var curPlayerLives: Int
         set(value) {
@@ -93,7 +98,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     /**
      * counts up every round; starts at 0
      */
-    var roundCounter: Int = 0
+    var turnCounter: Int = 0
         private set(value) {
             field = value
             FortyFiveLogger.title("round: $value")
@@ -135,7 +140,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCards()
         initCardHand()
         initRevolver()
-        initEnemyArea()
+        // enemy area is initialised by the GameDirector
+        gameDirector.init()
 
         changeState(GameState.InitialDraw(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
@@ -222,7 +228,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         currentState.transitionAway(this)
         currentState = next
         currentState.transitionTo(this)
-        if (next.shouldIncrementRoundCounter()) roundCounter++
+        if (next.shouldIncrementTurnCounter()) nextTurn()
+    }
+
+    private fun nextTurn() {
+        turnCounter++
+        if (remainingTurns != -1) remainingTurns--
+        if (remainingTurns == 0) loose()
     }
 
     private var updateCount = 0 //TODO: this is stupid
@@ -285,27 +297,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         this.revolver = revolver
     }
 
-    private fun initEnemyArea() {
+    fun initEnemyArea(enemy: Enemy) {
         val curScreen = curScreen
 
         val enemyAreaName = enemyAreaOnj.get<String>("actorName")
         val enemyArea = curScreen.namedActorOrError(enemyAreaName)
         if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
 
-        val enemies = Enemy.getFrom(enemiesOnj, enemyArea, curScreen)
+        enemyArea.addEnemy(enemy)
 
-        enemyAreaOnj
-            .get<OnjArray>("enemies")
-            .value
-            .forEach { nameOnj ->
-                val name = nameOnj.value as String
-                enemyArea.addEnemy(
-                    enemies.firstOrNull { it.name == name} ?: throw RuntimeException("no enemy with name $name")
-                )
-            }
-
-        if (enemyArea.enemies.isEmpty()) throw RuntimeException("enemyArea must have at leas one enemy")
-        if (enemyArea.enemies.size != 1) enemyArea.selectedEnemy = enemyArea.enemies[0]
+//        if (enemyArea.enemies.isEmpty()) throw RuntimeException("enemyArea must have at least one enemy")
+//        if (enemyArea.enemies.size != 1) enemyArea.selectedEnemy = enemyArea.enemies[0]
 
         this.enemyArea = enemyArea
     }
@@ -405,11 +407,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             includeLater(
                 { damageStatusEffectTimeline!! },
-                { enemy.currentLives > 0 && damageStatusEffectTimeline != null }
+                { enemy.currentHealth > 0 && damageStatusEffectTimeline != null }
             )
             includeLater(
                 { effectTimeline!! },
-                { enemy.currentLives > 0 && effectTimeline != null }
+                { enemy.currentHealth > 0 && effectTimeline != null }
             )
 
             include(revolver.rotate(rotationDirection))
@@ -420,12 +422,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             includeLater(
                 { turnStatusEffectTimeline!! },
-                { enemy.currentLives > 0 && turnStatusEffectTimeline != null }
+                { enemy.currentHealth > 0 && turnStatusEffectTimeline != null }
             )
 
             includeLater(
                 { finishTimeline },
-                { enemy.currentLives > 0 }
+                { enemy.currentHealth > 0 }
             )
 
         }

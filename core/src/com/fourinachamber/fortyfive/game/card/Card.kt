@@ -49,7 +49,6 @@ class CardPrototype(
  * represents an actual instance of a card. Can be created using [CardPrototype]
  * @param name the name of the card
  * @param title the name but formatted, so it looks good when shown on the screen
- * @param drawable the texture of the card
  * @param flavourText Short phrase that (should) be funny or add to the lore
  * @param shortDescription short text explaining the effects of this card; can be left blank
  * @param type the type of card (bullet or cover)

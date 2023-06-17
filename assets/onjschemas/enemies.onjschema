@@ -1,0 +1,18 @@
+
+use Common;
+
+var enemy = {
+    name: string,
+    baseHealth: int,
+    baseDamage: int,
+    texture: string,
+    coverIcon: string,
+    scaleX: float,
+    scaleY: float,
+    coverIconScale: float,
+    detailFont: string,
+    detailFontScale: float,
+    detailFontColor: Color,
+};
+
+enemies: enemy[]
