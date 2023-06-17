@@ -1,5 +1,13 @@
 import "imports/colors.onj" as color;
 
+use Common;
+use Style;
+use Screen;
+
+
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
 types: [
     {
         name: "all_included",
@@ -54,11 +62,11 @@ people: [
             {text: "Greetings Traveler. I have the best products you will ever see."},
         ],
         image: {
-            texture: "enemy_texture",
-            baseWidth: 200.0,
-            baseHeight: 700.0,
-            baseDistanceLeftPercentageScreen: 0.25,
-            baseDistanceBottomPercentageScreen: -1.0,
+            textureName: "enemy_texture",
+            positionLeft: (0.0),
+            positionTop: (0.0),
+            width: (worldWidth *2/3),
+            height: (worldHeight * 2),
         },
 
     }
