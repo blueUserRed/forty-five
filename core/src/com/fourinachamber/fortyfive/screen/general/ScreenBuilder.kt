@@ -19,6 +19,7 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
+import com.fourinachamber.fortyfive.map.shop.PersonWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
@@ -320,6 +321,13 @@ class ScreenBuilder(val file: FileHandle) {
 
         "WorldView" -> WorldViewWidget(
             OnjParser.parseFile(Gdx.files.internal(MapManager.mapConfigFilePath).file()) as OnjObject, // TODO: schema?
+            screen
+        )
+
+        "PersonWidget" -> PersonWidget(
+            widgetOnj.get<Double>("offsetX").toFloat(),
+            widgetOnj.get<Double>("offsetY").toFloat(),
+            widgetOnj.get<Double>("scale").toFloat(),
             screen
         )
 

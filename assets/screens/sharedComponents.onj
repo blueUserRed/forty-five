@@ -1,0 +1,37 @@
+use Screen;
+use Style;
+
+navBarAssests: [
+    "nav_bar_background"
+],
+
+navBar: $Box {
+    styles: [
+        {
+            background: "nav_bar_background",
+            flexDirection: flexDirection.row,
+            width: 100.0#percent,
+            height: 5.0#percent
+        }
+    ],
+    zIndex: 100
+} children [
+    $Image {
+        styles: [
+            {
+                aspectRatio: 1.0,
+                visible: false,
+            }
+        ],
+        textureName: "heart_texture",
+        scaleX: 0.01,
+        scaleY: 0.01,
+        reportDimensionsWithScaling: true,
+        behaviours: [
+            $OnClickChangeScreenStateBehaviour {
+                state: "show_world_view",
+                enter: true
+            }
+        ]
+    }
+],

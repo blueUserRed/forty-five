@@ -19,53 +19,67 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjFloat
 import onj.value.OnjObject
+import onj.value.OnjValue
 import kotlin.random.Random
 
 class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var screen: OnjScreen
     private lateinit var context: ShopMapEvent
-    private val personImageActorName = onj.get<String>("shopPersonImageActor")
+
+    //    private val personImageActorName = onj.get<String>("shopPersonImageActor")
     private lateinit var person: OnjObject
 
     //    private val cardConfigFile = onj.get<String>("cardsFile")
 //    private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
 //    private val cardDrawActorName = onj.get<String>("cardDrawActor")
-    lateinit var closeButton: Actor
+//    lateinit var closeButton: Actor
 
-    //    private val shopWidgetName = onj.get<String>("shopWidgetName")
     private val shopFilePath = onj.get<String>("shopsFile")
-    private lateinit var personDrawable: Drawable
+    private val npcsFilePath = onj.get<String>("npcsFile")
+    private val personWidgetName = onj.get<String>("personWidgetName")
 
-    lateinit var personImageActor: CustomImageActor
-    private lateinit var personWidget: ShopWidget
+    //    lateinit var personImageActor: CustomImageActor
+    private lateinit var personWidget: PersonWidget
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
-
-        personImageActor = screen.namedActorOrError(personImageActorName) as CustomImageActor
-        println(personImageActor)
-//        if (shopWidget !is ShopWidget) {
-//            throw RuntimeException("widget with name $shopWidgetName must be of type shopWidget")
-//        }
-//        this.shopWidget = shopWidget
+        val personWidget = onjScreen.namedActorOrError(personWidgetName)
+//        personImageActor = screen.namedActorOrError(personImageActorName) as CustomImageActor
+        if (personWidget !is PersonWidget) {
+            throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
+        }
+        this.personWidget = personWidget
         val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
-        shopsSchema.assertMatches(shopFile)
+//        shopsSchema.assertMatches(shopFile)
         shopFile as OnjObject
+        val npcsFile = OnjParser.parseFile(Gdx.files.internal(npcsFilePath).file())
+//        shopsSchema.assertMatches(npcsFile)
+        npcsFile as OnjObject
+
         person = shopFile
             .get<OnjArray>("people")
             .value
             .map { it as OnjObject }
             .find { it.get<String>("name") == context.person }
             ?: throw RuntimeException("unknown shop: ${context.person}")
+//        println(person)
+        val imgData = (npcsFile
+            .get<OnjArray>("npcs")
+            .value
+            .map { it as OnjObject }
+            .find { it.get<String>("name") == person.get<String>("npcImageName") }
+            ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
 
-        personImageActor.setSize(200.0F, 700.0F)
-
-        println("" + personImageActor.x + "  " + personImageActor.y)
-        println("" + personImageActor.width + "  " + personImageActor.height)
-        println(personImageActor.parent.children)
+        println(imgData)
+        personWidget.setDrawable(imgData)
+//        personImageActor.setSize(200.0F, 700.0F)
+//
+//        println("" + personImageActor.x + "  " + personImageActor.y)
+//        println("" + personImageActor.width + "  " + personImageActor.height)
+//        println(personImageActor.parent.children)
 
 //        personDrawable = ResourceManager.get(screen, imgData.get<String>("textureName"))
     }

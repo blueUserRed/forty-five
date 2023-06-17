@@ -197,6 +197,13 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $PersonWidget{
+        offsetX:float,
+        offsetY:float,
+        scale:float,
+        ...widgetSharedKeys
+    }
+
 }
 
 var advancedTextPartSharedKeys = {
@@ -372,7 +379,8 @@ $ScreenController {
 
     $ShopScreenController {
         shopsFile: string,
-        shopPersonImageActor: string,
+        npcsFile: string,
+        personWidgetName: string,
     }
 }
 
