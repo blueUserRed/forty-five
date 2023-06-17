@@ -82,6 +82,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 //        println(personImageActor.parent.children)
 
 //        personDrawable = ResourceManager.get(screen, imgData.get<String>("textureName"))
+        //TODO Template Strings, technical design
     }
 
     override fun update() {

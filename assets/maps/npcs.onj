@@ -45,9 +45,9 @@ npcs: [
         },
         image: {
             textureName: "enemy_texture",
-            offsetX: -10.0,
-            offsetY: -22.5,
-            scale: 0.01,
+            offsetX: -4.0,
+            offsetY: -37.5,
+            scale: 0.225
         }
     }
 

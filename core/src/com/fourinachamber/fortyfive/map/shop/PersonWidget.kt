@@ -30,15 +30,13 @@ class PersonWidget(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (this::personDrawable.isInitialized) {
-            println(height)
-            println(personDrawable.minHeight * (scale) * (defOffset["scale"]!!))
-            personDrawable.draw(
-                batch,
-                x + offsetX + defOffset["offsetX"],
-                y + offsetY + defOffset["offsetY"],
-                personDrawable.minWidth * scale * defOffset["scale"]!!,
-                personDrawable.minHeight * scale * defOffset["scale"]!!,
-            )
+            val xPos = offsetX + defOffset["offsetX"]
+            val yPos = offsetY + defOffset["offsetY"]
+            val w = personDrawable.minWidth * scale * defOffset["scale"]!!
+            val h = personDrawable.minHeight * scale * defOffset["scale"]!!
+
+//            println(""+xPos+" "+yPos+" "+w+" "+h+" ")
+            personDrawable.draw(batch, xPos, yPos, w, h)
         }
     }
 
@@ -48,9 +46,9 @@ class PersonWidget(
         defOffset["offsetX"] = imgData.get<Double>("offsetX").toFloat()
         defOffset["offsetY"] = imgData.get<Double>("offsetY").toFloat()
         defOffset["scale"] = imgData.get<Double>("scale").toFloat()
-        ResourceManager.borrow(screen, textureName)
-        personDrawable = ResourceManager.get(screen, textureName)
-//        ResourceManager.giveBack(screen, textureName)
+        ResourceManager.borrow(this, textureName)
+        personDrawable = ResourceManager.get(this, textureName)
+        ResourceManager.giveBack(this, textureName)
 //        }
     }
 }
