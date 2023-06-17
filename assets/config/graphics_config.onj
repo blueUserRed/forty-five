@@ -3,50 +3,6 @@ import "imports/colors.onj" as color;
 
 bufferTime: 0.5,
 
-enemyConfig: {
-
-    damagePlayerIcon: {
-        indicatorTextureScale: 0.02,
-        indicatorTexture: "normal_bullet"
-    },
-
-    addCoverIcon: {
-        indicatorTextureScale: 0.02,
-        indicatorTexture: "shield_icon"
-    },
-
-    doNothingIcon: {
-        indicatorTextureScale: 0.02,
-        indicatorTexture: "insult_icon"
-    },
-
-    enemy1: {
-        texture: "enemy_texture",
-        coverIcon: "shield_icon",
-        coverIconScale: 0.03,
-        offsetX: 15.0,
-        offsetY: 50.0,
-        scaleX: 0.025,
-        scaleY: 0.025,
-        detailFont: "vanilla_whale",
-        detailFontScale: 0.06,
-        detailFontColor: color.black
-    },
-
-    enemy2: {
-        texture: "enemy_texture",
-        coverIcon: "shield_icon",
-        coverIconScale: 0.03,
-        offsetX: 40.0,
-        offsetY: 50.0,
-        scaleX: 0.025,
-        scaleY: 0.025,
-        detailFont: "vanilla_whale",
-        detailFontScale: 0.06,
-        detailFontColor: color.black
-    },
-},
-
 shakeAnimation: {
     xShake: 1.0,
     yShake: 0.0,

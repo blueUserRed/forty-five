@@ -55,12 +55,10 @@ var controller = $GameScreenController {
     },
     enemyArea: {
         actorName: "enemy_area",
-        enemies: gameConfig.enemyConfig.startEnemies
     },
     cardDragBehaviour: $CardDragSource {
         group: "card"
     },
-    enemies: gameConfig.enemyConfig.enemies,
     cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
     maxCards: gameConfig.cardDrawConfig.maxCards,
@@ -160,6 +158,14 @@ var reservesLabel = $TemplateLabel {
     name: "reserves_label",
     font: "vanilla_whale",
     template: "{game.curReserves}/{game.baseReserves}",
+    fontScale: 0.09,
+    color: color.white,
+};
+
+var remainingTurnsLabel = $TemplateLabel {
+    name: "reserves_label",
+    font: "vanilla_whale",
+    template: "{game.remainingTurns}",
     fontScale: 0.09,
     color: color.white,
 };
@@ -297,6 +303,8 @@ var gameScreen = $Box {
         },
 
         playerLivesLabel,
+
+        remainingTurnsLabel
 
     ],
 

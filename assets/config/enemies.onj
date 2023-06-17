@@ -1,0 +1,31 @@
+
+import "imports/colors.onj" as color;
+
+enemies: [
+    {
+        name: "Test Enemy",
+        baseHealth: 20,
+        baseDamage: 50,
+        texture: "enemy_texture",
+        coverIcon: "shield_icon",
+        coverIconScale: 0.03,
+        scaleX: 0.025,
+        scaleY: 0.025,
+        detailFont: "red_wing",
+        detailFontScale: 0.06,
+        detailFontColor: color.black
+    },
+    {
+        name: "Test Enemy 2",
+        baseHealth: 15,
+        baseDamage: 80,
+        texture: "enemy_texture",
+        coverIcon: "shield_icon",
+        coverIconScale: 0.03,
+        scaleX: 0.025,
+        scaleY: 0.025,
+        detailFont: "red_wing",
+        detailFontScale: 0.06,
+        detailFontColor: color.black
+    }
+]

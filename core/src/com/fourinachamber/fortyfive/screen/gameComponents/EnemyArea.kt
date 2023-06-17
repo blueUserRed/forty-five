@@ -73,7 +73,7 @@ class EnemyArea(
 
     override fun layout() {
         for (enemy in _enemies) {
-            enemy.actor.setPosition(enemy.offsetX, enemy.offsetY)
+            enemy.actor.setPosition(width / 2f, height / 2f)
         }
     }
 

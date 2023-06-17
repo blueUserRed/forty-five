@@ -3,11 +3,6 @@ use Common;
 
 bufferTime: float,
 
-enemyConfig: {
-    // this is validated by game_config.onjschema anyway
-    ...*
-},
-
 shakeAnimation: {
     xShake: float,
     yShake: float,

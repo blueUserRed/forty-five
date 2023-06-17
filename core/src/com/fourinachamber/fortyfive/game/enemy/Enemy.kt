@@ -5,26 +5,31 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.onClick
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.lang.Integer.max
 import java.lang.Integer.min
 
+data class EnemyPrototype(
+    val name: String,
+    val baseHealth: Int,
+    val baseDamage: Int,
+    private val creator: (health: Int, damage: Int) -> Enemy
+) {
+    fun create(health: Int, damage: Int): Enemy = creator(health, damage)
+}
+
 /**
  * represents an enemy
  * @param name the name of the enemy
- * @param offsetX x-offset from the origin of [EnemyArea] to the point where this enemy is located
- * @param offsetY y-offset from the origin of [EnemyArea] to the point where this enemy is located
  * @param scaleX scales [actor]
  * @param scaleY scales [actor]
- * @param lives the initial (and maximum) lives of this enemy
+ * @param health the initial (and maximum) lives of this enemy
  * @param detailFont the font used for the description of the enemy
  * @param detailFontScale scales [detailFont]
  * @param detailFontColor the color of [detailFont]
@@ -33,16 +38,14 @@ class Enemy(
     val name: String,
     val drawableHandle: ResourceHandle,
     val coverIconHandle: ResourceHandle,
-    val lives: Int,
-    val offsetX: Float,
-    val offsetY: Float,
+    val health: Int,
     val scaleX: Float,
     val scaleY: Float,
     val coverIconScale: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val area: EnemyArea,
+    val damage: Int,
     private val screen: OnjScreen
 ) {
 
@@ -60,7 +63,7 @@ class Enemy(
     /**
      * the current lives of this enemy
      */
-    var currentLives: Int = lives
+    var currentHealth: Int = health
         private set(value) {
             field = max(value, 0)
             FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
@@ -82,7 +85,7 @@ class Enemy(
     private val statusEffects: MutableList<StatusEffect> = mutableListOf()
 
     init {
-        actor = EnemyActor(this, area, screen)
+        actor = EnemyActor(this, screen)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -219,7 +222,7 @@ class Enemy(
         includeLater(
             { Timeline.timeline {
                 action {
-                    currentLives -= remaining
+                    currentHealth -= remaining
                     actor.updateText()
                 }
                 includeAction(GraphicsConfig.numberChangeAnimation(
@@ -238,41 +241,38 @@ class Enemy(
 
         private var instanceCounter = 0
 
-        /**
-         * reads an array of Enemies from on an OnjArray
-         */
-        @MainThreadOnly
-        fun getFrom(
-            enemiesOnj: OnjArray,
-            area: EnemyArea,
-            screen: OnjScreen
-        ): List<Enemy> = enemiesOnj
+        fun readEnemies(arr: OnjArray): List<EnemyPrototype> = arr
             .value
+            .map { it as OnjObject }
             .map {
-                it as OnjObject
-                val gameController = FortyFive.currentGame!!
-                val curScreen = gameController.curScreen
-                val drawableHandle = it.get<String>("texture")
-                val coverIconHandle = it.get<String>("coverIcon")
-                val detailFont = ResourceManager.get<BitmapFont>(curScreen, it.get<String>("detailFont"))
-                val enemy = Enemy(
+                EnemyPrototype(
                     it.get<String>("name"),
-                    drawableHandle,
-                    coverIconHandle,
-                    it.get<Long>("lives").toInt(),
-                    it.get<Double>("offsetX").toFloat(),
-                    it.get<Double>("offsetY").toFloat(),
-                    it.get<Double>("scaleX").toFloat(),
-                    it.get<Double>("scaleY").toFloat(),
-                    it.get<Double>("coverIconScale").toFloat(),
-                    detailFont,
-                    it.get<Double>("detailFontScale").toFloat(),
-                    it.get<Color>("detailFontColor"),
-                    area,
-                    screen
-                )
-                enemy
+                    it.get<Long>("baseHealth").toInt(),
+                    it.get<Long>("baseDamage").toInt()
+                ) { health, damage -> readEnemy(it, health, damage) }
             }
+        
+        fun readEnemy(onj: OnjObject, health: Int, damage: Int): Enemy {
+            val gameController = FortyFive.currentGame!!
+            val curScreen = gameController.curScreen
+            val drawableHandle = onj.get<String>("texture")
+            val coverIconHandle = onj.get<String>("coverIcon")
+            val detailFont = ResourceManager.get<BitmapFont>(curScreen, onj.get<String>("detailFont"))
+            return Enemy(
+                onj.get<String>("name"),
+                drawableHandle,
+                coverIconHandle,
+                health,
+                onj.get<Double>("scaleX").toFloat(),
+                onj.get<Double>("scaleY").toFloat(),
+                onj.get<Double>("coverIconScale").toFloat(),
+                detailFont,
+                onj.get<Double>("detailFontScale").toFloat(),
+                onj.get<Color>("detailFontColor"),
+                damage,
+                curScreen
+            )
+        }
 
     }
 
@@ -283,7 +283,6 @@ class Enemy(
  */
 class EnemyActor(
     val enemy: Enemy,
-    private val area: EnemyArea,
     private val screen: OnjScreen
 ) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
 
@@ -327,8 +326,6 @@ class EnemyActor(
         addActor(livesLabel)
         addActor(statusEffectDisplay)
         updateText()
-
-        onClick { area.selectedEnemy = enemy }
     }
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
@@ -340,7 +337,7 @@ class EnemyActor(
      */
     fun updateText() {
         coverText.setText("${enemy.currentCover}")
-        livesLabel.setText("${enemy.currentLives}/${enemy.lives}")
+        livesLabel.setText("${enemy.currentHealth}/${enemy.health}")
     }
 
 }

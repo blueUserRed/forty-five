@@ -1,7 +1,5 @@
 package com.fourinachamber.fortyfive.game
 
-import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.*
 
 sealed class GameState {
@@ -34,7 +32,7 @@ sealed class GameState {
 
         override fun allowsDrawingCards(): Boolean = true
 
-        override fun shouldIncrementRoundCounter(): Boolean = true
+        override fun shouldIncrementTurnCounter(): Boolean = true
 
         override fun onCardDrawn(controller: GameController) {
             remainingCardsToDraw--
@@ -156,7 +154,7 @@ sealed class GameState {
     open fun allowsDrawingCards(): Boolean = false
 
     @AllThreadsAllowed
-    open fun shouldIncrementRoundCounter(): Boolean = false
+    open fun shouldIncrementTurnCounter(): Boolean = false
 
     @MainThreadOnly
     open fun onEndTurn(controller: GameController) { }
