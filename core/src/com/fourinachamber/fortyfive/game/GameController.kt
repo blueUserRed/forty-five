@@ -68,7 +68,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         "game.cardsInStackPluralS" to { if (it == 1) "" else "s" }
     )
 
-    private var remainingTurns: Int by multipleTemplateParam(
+    var remainingTurns: Int by multipleTemplateParam(
         "game.remainingTurnsRaw", -1,
         "game.remainingTurns" to { if (it == -1) "" else it.toString() }
     )
@@ -241,6 +241,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         turnCounter++
         if (remainingTurns != -1) remainingTurns--
         if (remainingTurns == 0) loose()
+        gameDirector.onNewTurn()
     }
 
     private var updateCount = 0 //TODO: this is stupid

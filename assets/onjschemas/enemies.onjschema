@@ -3,8 +3,9 @@ use Common;
 
 var enemy = {
     name: string,
-    baseHealth: int,
+    baseHealthPerTurn: int,
     baseDamage: int,
+    fightDuration: int[2],
     texture: string,
     coverIcon: string,
     scaleX: float,
