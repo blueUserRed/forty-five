@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import onj.value.OnjArray
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 import kotlin.random.Random
@@ -126,6 +127,13 @@ operator fun AtomicInteger.inc(): AtomicInteger {
 
 val AtomicInteger.get: Int
     get() = this.get()
+
+fun OnjArray.toIntRange(): IntRange {
+    val first = this.get<Long>(0).toInt()
+    val second = this.get<Long>(1).toInt()
+    if (second <= first) throw RuntimeException("second value must be higher than first when creating an IntRange")
+    return IntRange(first, second)
+}
 
 object Utils {
 
