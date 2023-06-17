@@ -1,7 +1,5 @@
 import "imports/colors.onj" as color;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
 
 npcs: [
 
@@ -47,9 +45,9 @@ npcs: [
         },
         image: {
             textureName: "enemy_texture",
-            positionLeft: -10.0,
-            positionTop: -worldHeight/ 4,
-            scale: 0.2,
+            offsetX: -10.0,
+            offsetY: -22.5,
+            scale: 0.01,
         }
     }
 
