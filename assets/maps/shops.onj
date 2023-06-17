@@ -58,16 +58,20 @@ people: [
         display_name: "Traveling Merchant",
         defaultShopParameter: "no_biome",
         texts: [
-            {text: "test Greetings from the Traveler which is: Funny Card games Haha"},
-            {text: "Greetings Traveler. I have the best products you will ever see."},
+            [
+                $Text {
+                    text: "test Greetings from the Traveler which is: "
+                },
+                $Text {
+                    text: "Funny Card games Haha"
+                }
+            ],
+            [
+                $Text {
+                    text: "Greetings Traveler. I have the best products you will ever see."
+                }
+            ],
         ],
-        image: {
-            textureName: "enemy_texture",
-            positionLeft: (0.0),
-            positionTop: (0.0),
-            width: (worldWidth *2/3),
-            height: (worldHeight * 2),
-        },
-
+        npcImageName: "my_cool_npc",
     }
 ],

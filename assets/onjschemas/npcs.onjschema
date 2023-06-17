@@ -70,7 +70,15 @@ var dialog = {
     },
 };
 
+var image = {
+        textureName: string,
+        positionLeft: float,
+        positionTop: float,
+        scale: float,
+};
+
 npcs: {
     name: string,
-    dialog: dialog
+    dialog: dialog,
+    image: image,
 }[]

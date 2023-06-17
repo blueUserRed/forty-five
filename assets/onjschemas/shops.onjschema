@@ -27,6 +27,40 @@ var shopParameter = {
 };
 
 
+var advancedTextPartSharedKeys = {
+    actions?: $AdvancedTextPartAction[]
+};
+
+
+$AdvancedTextPart {
+
+    $Text {
+        text: string,
+        font?: string,
+        color?: Color,
+        fontScale?: float,
+        ...advancedTextPartSharedKeys
+    }
+
+    $Icon {
+        icon: string,
+        ...advancedTextPartSharedKeys
+    }
+
+}
+
+$AdvancedTextPartAction {
+
+    $ShakeTextAction {
+        xMagnitude: float,
+        xSpeed: float,
+        yMagnitude: float,
+        ySpeed: float,
+    }
+
+}
+
+
 types: shopParameter[],
 
 
@@ -36,14 +70,6 @@ people: {
     name: string,
     display_name: string,
     defaultShopParameter: string,
-    texts: {
-              text: string
-          }[],
-    image: {
-        textureName: string,
-        positionLeft: float,
-        positionTop: float,
-        width: float,
-        height: float,
-    }
+    texts: $AdvancedTextPart[][],
+    npcImageName: string,
 }[]
