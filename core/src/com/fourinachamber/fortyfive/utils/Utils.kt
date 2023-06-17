@@ -82,6 +82,15 @@ fun Float.between(min: Float, max: Float): Float {
     return this
 }
 
+/**
+ * makes sure that [this] is between [min] and [max] (inclusive)
+ */
+fun Double.between(min: Double, max: Double): Double {
+    if (this < min) return min
+    if (this > max) return max
+    return this
+}
+
 fun Vector2(x: Int, y: Int): Vector2 {
     return Vector2(x.toFloat(), y.toFloat())
 }

@@ -121,6 +121,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     var modifier: EncounterModifier? = null
 
+    var reservesSpent: Int = 0
+        private set
+
+    var cardsDrawn: Int = 0
+        private set
+
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
 
@@ -241,7 +247,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
-
+        gameDirector.evaluateState() // TODO: remove, just for testing
         if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
         updateCount++
 
@@ -574,6 +580,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         remainingCards = cardStack.size
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
+        cardsDrawn++
         currentState.onCardDrawn(this)
     }
 
@@ -581,6 +588,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (cost > curReserves) return false
         curReserves -= cost
         SaveState.usedReserves += cost
+        reservesSpent += cost
         FortyFiveLogger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
         return true
     }
