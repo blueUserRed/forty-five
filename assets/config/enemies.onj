@@ -4,7 +4,7 @@ import "imports/colors.onj" as color;
 enemies: [
     {
         name: "Test Enemy",
-        baseHealth: 20,
+        baseHealth: 50,
         baseDamage: 50,
         texture: "enemy_texture",
         coverIcon: "shield_icon",
@@ -17,7 +17,7 @@ enemies: [
     },
     {
         name: "Test Enemy 2",
-        baseHealth: 15,
+        baseHealth: 50,
         baseDamage: 80,
         texture: "enemy_texture",
         coverIcon: "shield_icon",
