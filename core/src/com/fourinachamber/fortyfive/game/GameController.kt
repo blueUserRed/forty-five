@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
+import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fortyfive.screen.general.*
@@ -34,6 +35,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
+    private val cardSelectorOnj = onj.get<OnjObject>("cardSelector")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -56,6 +58,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var revolver: Revolver
         private set
     lateinit var enemyArea: EnemyArea
+        private set
+    lateinit var cardSelector: CircularCardSelector
         private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
@@ -88,7 +92,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private var popupText: String by templateParam("game.popupText", "")
     private var popupButtonText: String by templateParam("game.popupButtonText", "")
-    private var confirmedPopup: Boolean = false
+    private var popupEvent: Event? = null
 
     private val timelines: MutableList<Timeline> = mutableListOf()
     private val timelinesToStart: MutableList<Timeline> = mutableListOf()
@@ -152,6 +156,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCards()
         initCardHand()
         initRevolver()
+        initCardSelector()
         // enemy area is initialised by the GameDirector
         gameDirector.init()
 
@@ -230,8 +235,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         is DrawCardEvent -> {
             drawCard()
         }
-        is PopupConfirmationEvent -> {
-            confirmedPopup = true
+        is PopupConfirmationEvent, is PopupSelectionEvent -> {
+            popupEvent = event
         }
         else -> { }
     }
@@ -268,8 +273,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val iterator = timelines.iterator()
         while (iterator.hasNext()) {
             val cur = iterator.next()
-            cur.update()
-            if (!cur.isFinished && !cur.hasBeenStarted) cur.start()
+            cur.updateTimeline()
+            if (!cur.isFinished && !cur.hasBeenStarted) cur.startTimeline()
             if (cur.isFinished) iterator.remove()
         }
         val areTimelinesFinished = timelines.isEmpty()
@@ -328,6 +333,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         this.revolver = revolver
     }
 
+    private fun initCardSelector() {
+        val curScreen = curScreen
+        val cardSelectorName = cardSelectorOnj.get<String>("actorName")
+        val cardSelector = curScreen.namedActorOrError(cardSelectorName)
+        if (cardSelector !is CircularCardSelector) {
+            throw RuntimeException("actor named $cardSelectorName must be a CircularCardSelector")
+        }
+        this.cardSelector = cardSelector
+    }
+
     fun initEnemyArea(enemy: Enemy) {
         val curScreen = curScreen
 
@@ -365,11 +380,28 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             popupText = text
             popupButtonText = "Ok"
         }
-        delayUntil { confirmedPopup }
+        delayUntil { popupEvent != null }
         action {
-            confirmedPopup = false
+            popupEvent = null
             curScreen.leaveState(showPopupScreenState)
             curScreen.leaveState(showPopupConfirmationButtonScreenState)
+        }
+    }
+
+    fun cardSelectionPopup(text: String): Timeline = Timeline.timeline {
+        action {
+            cardSelector.setTo(revolver)
+            curScreen.enterState(showPopupScreenState)
+            curScreen.enterState(showPopupCardSelectorScreenState)
+            popupText = text
+        }
+        delayUntil { popupEvent != null }
+        action {
+            val event = popupEvent as PopupSelectionEvent
+            store("selectedCard", revolver.slots[event.cardNum].card!!)
+            popupEvent = null
+            curScreen.leaveState(showPopupScreenState)
+            curScreen.leaveState(showPopupCardSelectorScreenState)
         }
     }
 
@@ -690,6 +722,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val freezeUIScreenState = "uiFrozen"
         const val showPopupScreenState = "showPopup"
         const val showPopupConfirmationButtonScreenState = "showPopupConfirmationButton"
+        const val showPopupCardSelectorScreenState = "showPopupCardSelector"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

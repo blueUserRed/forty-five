@@ -22,6 +22,7 @@ import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
+import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -305,6 +306,12 @@ class ScreenBuilder(val file: FileHandle) {
 
         "WorldView" -> WorldViewWidget(
             OnjParser.parseFile(Gdx.files.internal(MapManager.mapConfigFilePath).file()) as OnjObject, // TODO: schema?
+            screen
+        )
+
+        "CircularCardSelector" -> CircularCardSelector(
+            widgetOnj.get<Double>("radius").toFloat(),
+            widgetOnj.get<Double>("size").toFloat(),
             screen
         )
 

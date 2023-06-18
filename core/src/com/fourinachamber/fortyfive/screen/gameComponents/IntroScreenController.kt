@@ -80,7 +80,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             }
         }
 
-        timeline.start()
+        timeline.startTimeline()
     }
 
     override fun update() {
@@ -91,7 +91,7 @@ class IntroScreenController(val onj: OnjNamedObject) : ScreenController() {
             sprite.update()
             if (sprite.y < -sprite.height) iterator.remove()
         }
-        timeline.update()
+        timeline.updateTimeline()
     }
 
     private fun spawnRandomSprite() {
