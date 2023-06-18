@@ -35,4 +35,7 @@ $DragAndDropBehaviour {
         ...dragAndDropBehaviourSharedKeys
     }
 
+    $BuyDropTarget {
+        ...dragAndDropBehaviourSharedKeys
+    }
 }

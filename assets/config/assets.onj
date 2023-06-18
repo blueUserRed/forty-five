@@ -194,6 +194,10 @@ textures: [
         file: "textures/shop/dark_background.png"
     },
     {
+        name: "shop_items_background",
+        file: "textures/shop/items_background.png"
+    },
+    {
         name: "shop_background_no_biome",
         file: "textures/shop/biomeBackgrounds/no_biome.png"
     }

@@ -17,12 +17,19 @@ object MapEventFactory {
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
-        "ShopMapEvent" to { ShopMapEvent(it.get<String>("type"), it.get<String>("biome"), it.get<String>("person")) },
+        "ShopMapEvent" to {
+            ShopMapEvent(
+                it.get<String>("type"),
+                it.get<String>("biome"),
+                it.get<String>("person"),
+                it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+                it.get<List<Int>>("boughtIndices"),
+            )
+        },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
         mapEventCreators[onj.name]?.invoke(onj) ?: throw RuntimeException("unknown map event ${onj.name}")
-
 }
 
 /**
@@ -229,7 +236,13 @@ class NPCMapEvent(val npc: String) : MapEvent() {
  * @param type which type the restrictions are
  * @param biome in what biome the shop is
  */
-class ShopMapEvent(val type: String, val biome: String, val person: String) : MapEvent() {
+class ShopMapEvent(
+    val type: String,
+    val biome: String,
+    val person: String,
+    val seed: Long,
+    val boughtIndices: List<Int>
+) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -241,6 +254,7 @@ class ShopMapEvent(val type: String, val biome: String, val person: String) : Ma
     override val displayName: String = "BUY STUFF NOW"
 
     override fun start() {
+        println(seed)
         FortyFive.changeToScreen("screens/shop_screen.onj", this) // TODO: ugly
     }
 
@@ -254,6 +268,8 @@ class ShopMapEvent(val type: String, val biome: String, val person: String) : Ma
         ("type" with type)
         ("biome" with biome)
         ("person" with person)
+        ("seed" with seed)
+        ("boughtIndices" with boughtIndices)
     }
 
 

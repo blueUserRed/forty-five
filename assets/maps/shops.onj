@@ -67,15 +67,16 @@ people: [
                     color: color.viridian,
                 },
                 $Text {
-                    text: "goods south from Dunkelwald. You'll find deals like this where else!",
+                    text: "goods south from Dunkelwald. You'll find deals like this NO where else!",
                 },
                 $Text {
                     text: "Source: Trust me pal\"",
                 },
             ],
-                        [
+            [
                 $Text {
-                    text: "Greetings Traveler. I have the best products you will ever see.", color: color.beige
+                    text: "Greetings Traveler. I have the best products you will ever see.",
+                    color: color.beige
                 }
             ],
 

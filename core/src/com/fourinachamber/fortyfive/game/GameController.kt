@@ -98,8 +98,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         "game.remainingCoversPluralS" to { if (it == 1) "" else "s" }
     )
 
-//    var enemies: List<Enemy> = listOf()
-
     var curPlayerLives: Int
         set(value) {
             val newLives = max(value, 0)
