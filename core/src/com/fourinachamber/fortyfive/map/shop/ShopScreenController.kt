@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
+import com.fourinachamber.fortyfive.screen.general.AdvancedText
+import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
 //import com.fourinachamber.fortyfive.map.shop.Shop
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -28,6 +30,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val shopFilePath = onj.get<String>("shopsFile")
     private val npcsFilePath = onj.get<String>("npcsFile")
     private val personWidgetName = onj.get<String>("personWidgetName")
+    private val messageWidgetName = onj.get<String>("messageWidgetName")
 
     //    lateinit var personImageActor: CustomImageActor
     private lateinit var personWidget: PersonWidget
@@ -55,7 +58,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == context.person }
             ?: throw RuntimeException("unknown shop: ${context.person}")
-        println(person)
         val imgData = (npcsFile
             .get<OnjArray>("npcs")
             .value
@@ -65,9 +67,18 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
         personWidget.setDrawable(imgData)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
-        TemplateString.updateGlobalParam("map.curEvent.money", "0$")
+        TemplateString.updateGlobalParam("map.curEvent.money", "0")
 
-        TemplateString.updateGlobalParam("map.curEvent.message", "Hello Darling!")
+        val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
+//        println(messageWidget)
+        val text = person.get<OnjArray>("texts").value
+        val defaults = shopFile.get<OnjObject>("defaults")
+//        TemplateString.updateGlobalParam(
+//            "map.curEvent.message",
+//            AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, messageTextDefaults)
+//        )
+        messageWidget.advancedText = AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
+
     }
 
     companion object {

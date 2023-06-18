@@ -15,7 +15,8 @@ assets: {
     useCardAtlas: true,
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "enemy_texture", "shop_dark_background", ...(sharedComponents.navBarAssests),
+        "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded",
+        ...(sharedComponents.navBarAssests),
     ]
 },
 
@@ -34,6 +35,7 @@ options: {
         shopsFile: "maps/shops.onj",
         npcsFile: "maps/npcs.onj",
         personWidgetName: "shop_person_widget",
+        messageWidgetName: "shop_message",
     }
 },
 
@@ -53,25 +55,6 @@ root: $Box {
     ]
 } children [
 
-    //    $Image {       //TODO biome for background
-//
-//        name: "background_img",
-//        textureName: "title_screen_background",
-//        scaleX: 0.0,
-//        scaleY: 0.0,
-//        width: worldWidth,
-//        height: worldHeight,
-//        reportDimensionsWithScaling: true,
-//        styles: [
-//            {
-//                positionType: positionType.absolute,
-//                positionLeft: -(worldWidth / 5 * 3)#points,
-//                positionTop: -(worldHeight / 4)#points,
-//                width: (worldWidth * 2)#points,
-//                height: (worldHeight * 2)#points,
-//            }
-//        ],
-//    },
 
     $Image {       //TODO biome for background
 
@@ -132,7 +115,7 @@ root: $Box {
                     positionTop: 2.0#points,
                     positionRight: 0.0#points,
                     width: 100.0#percent,
-                    height: 20.0#percent,
+                    height: 17.125#percent,
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceBetween,
 
@@ -148,18 +131,43 @@ root: $Box {
             },
             $TemplateLabel {
                 align: "right",
-                template: "{map.curEvent.money}",
+                template: "{map.curEvent.money}$ ",
                 font: "red_wing",
                 color: color.forty_white,
                 fontScale: 0.2
             },
         ],
-        $TemplateLabel {
-            align: "left",
-            template: "{map.curEvent.message}",
-            font: "red_wing",
-            color: color.forty_white,
-            fontScale: 0.08
+
+        $Image {
+            textureName: "forty_white_rounded",
+            scaleX: 1.0,
+            scaleY: 1.0,
+            styles: [
+                {
+                    positionType: positionType.relative,
+                    width: 100.0#percent,
+                    height: 0.02#points,
+                }
+            ],
         },
+        $AdvancedText {
+            name: "shop_message",
+            font: "red_wing",
+            parts: [
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.08,
+                color: color.forty_white
+            },
+            styles: [
+                {
+                    width: 100.0#percent,
+                    flexDirection: flexDirection.row,
+                    flexWrap: wrap.wrap,
+                    marginTop: 1.0#percent,
+                }
+            ],
+        }
     ],
 ]
