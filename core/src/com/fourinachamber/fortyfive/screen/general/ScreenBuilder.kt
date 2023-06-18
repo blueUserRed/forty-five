@@ -20,6 +20,7 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.shop.PersonWidget
+import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
@@ -328,6 +329,18 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),
             widgetOnj.get<Double>("scale").toFloat(),
+            screen
+        )
+
+        "ShopWidget" -> ShopWidget(
+            widgetOnj.get<String>("texture"),
+            widgetOnj.get<String>("dataFile"),
+            widgetOnj.get<String>("dataNamePath"),
+            widgetOnj.get<String>("dataPricePath"),
+            widgetOnj.get<String>("dataProbabilityPath"),
+            widgetOnj.get<Long>("maxPerLine").toInt(),
+            widgetOnj.get<OnjFloat>("widthPercentagePerItem").value.toFloat(),
+//            widgetOnj.get<String>("dataDragBehaviour"),
             screen
         )
 

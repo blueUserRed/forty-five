@@ -1,6 +1,8 @@
 package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.AdvancedText
 import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
@@ -13,6 +15,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import onj.value.OnjString
 
 class ShopScreenController(onj: OnjObject) : ScreenController() {
 
@@ -31,19 +34,18 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val npcsFilePath = onj.get<String>("npcsFile")
     private val personWidgetName = onj.get<String>("personWidgetName")
     private val messageWidgetName = onj.get<String>("messageWidgetName")
+    private val shopWidgetNames = onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
 
     //    lateinit var personImageActor: CustomImageActor
     private lateinit var personWidget: PersonWidget
+    private val dragAndDrop = DragAndDrop()
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
         val personWidget = onjScreen.namedActorOrError(personWidgetName)
-//        personImageActor = screen.namedActorOrError(personImageActorName) as CustomImageActor
-        if (personWidget !is PersonWidget) {
-            throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
-        }
+        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
         this.personWidget = personWidget
         val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
         shopsSchema.assertMatches(shopFile)
@@ -64,21 +66,26 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-
+        SaveState.playerMoney += 1
         personWidget.setDrawable(imgData)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
-        TemplateString.updateGlobalParam("map.curEvent.money", "0")
-
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
-//        println(messageWidget)
         val text = person.get<OnjArray>("texts").value
         val defaults = shopFile.get<OnjObject>("defaults")
-//        TemplateString.updateGlobalParam(
-//            "map.curEvent.message",
-//            AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, messageTextDefaults)
-//        )
-        messageWidget.advancedText = AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
+        messageWidget.advancedText =
+            AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
 
+        addItemWidgets()
+
+//        dragAndDrop.addTarget()
+    }
+
+    private fun addItemWidgets() {
+        shopWidgetNames.forEach {
+            val shopWidget = screen.namedActorOrError(it)
+            if (shopWidget !is ShopWidget) throw RuntimeException("widget with name $it must be of type shopWidget")
+            shopWidget.addItems(context.seed, context.boughtIndices)
+        }
     }
 
     companion object {

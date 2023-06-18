@@ -57,6 +57,8 @@ nodes: [
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
+            seed: null,
+            boughtIndices: [],
             type: "all_included",
             biome: "no_biome",
             person: "traveling_merchant",

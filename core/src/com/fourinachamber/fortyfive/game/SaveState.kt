@@ -95,6 +95,16 @@ object SaveState {
     }
 
     /**
+     * the current money of the player
+     */
+    var playerMoney: Int by templateParam("stat.playerMoney", 0) {
+        savefileDirty = true
+    }
+
+
+//    var eventData:
+
+    /**
      * temporarily stores the used reserves, so it can be shown on the death screen
      */
     var lastRunUsedReserves: Int by templateParam("stat.lastRun.usedReserves", 0)
@@ -170,10 +180,12 @@ object SaveState {
         currentNode = position.get<Long>("node").toInt()
 
         playerLives = obj.get<Long>("playerLives").toInt()
+        playerMoney = obj.get<Long>("playerMoney").toInt()
 
         FortyFiveLogger.debug(logTag, "stats: " +
                 "usedReserves = $usedReserves, " +
                 "enemiesDefeated = $enemiesDefeated, " +
+                "playerMoney = $playerMoney, " +
                 "playerLives = $playerLives")
 
         FortyFiveLogger.debug(logTag, "position: " +
@@ -219,6 +231,7 @@ object SaveState {
             "additionalCards" with getCardArray(_additionalCards)
             "cardsToDraw" with getCardArray(_cardsToDraw)
             "playerLives" with playerLives
+            "playerMoney" with playerMoney
             "stats" with buildOnjObject {
                 "usedReserves" with usedReserves
                 "enemiesDefeated" with enemiesDefeated

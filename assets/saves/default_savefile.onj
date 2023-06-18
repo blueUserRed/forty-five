@@ -47,6 +47,7 @@ cardsToDraw: [
 ],
 
 playerLives: gameConfig.playerConfig.lives,
+playerMoney: 0,
 
 stats: {
     usedReserves: 0,
@@ -56,4 +57,4 @@ stats: {
 position: {
     map: "test_area",
     node: 0
-}
+},

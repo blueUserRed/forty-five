@@ -15,7 +15,7 @@ assets: {
     useCardAtlas: true,
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded",
+        "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         ...(sharedComponents.navBarAssests),
     ]
 },
@@ -36,6 +36,9 @@ options: {
         npcsFile: "maps/npcs.onj",
         personWidgetName: "shop_person_widget",
         messageWidgetName: "shop_message",
+        shopWidgetNames: [
+            "cards_widget"
+        ],
     }
 },
 
@@ -44,6 +47,35 @@ var personWidget = $PersonWidget {
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
+    dropBehaviour: $BuyDropTarget {
+        group: "card"
+    },
+};
+
+
+var cardsWidget = $ShopWidget {
+    name: "cards_widget",
+    texture: "shop_items_background",
+    dataFile: "cards/cards.onj",
+    dataNamePath: "cards/name",
+    dataPricePath: "cards/cost",
+    dataProbabilityPath: "cards/cost",
+    dataDragBehaviour: $CardDragSource {
+        group: "card"
+    },
+    maxPerLine: 4,
+    widthPercentagePerItem: 20.0,
+
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 69.0#percent,
+            flexDirection: flexDirection.row,
+            justifyContent: justify.center,
+            flexWrap: wrap.wrap,
+            marginTop: 1.0#percent,
+        }
+    ],
 };
 
 root: $Box {
@@ -100,11 +132,9 @@ root: $Box {
                 positionType: positionType.absolute,
                 positionTop: 7.0#percent,
                 positionRight: 5.0#percent,
-                width: 54.25#percent,
+                width: 54.4#percent,
                 height: 86.0#percent,
                 flexDirection: flexDirection.column,
-                //                    justifyContent: justify.center
-
             }
         ],
     } children [
@@ -131,7 +161,7 @@ root: $Box {
             },
             $TemplateLabel {
                 align: "right",
-                template: "{map.curEvent.money}$ ",
+                template: "{stat.playerMoney}$ ",
                 font: "red_wing",
                 color: color.forty_white,
                 fontScale: 0.2
@@ -155,7 +185,8 @@ root: $Box {
             font: "red_wing",
             parts: [
             ],
-            defaults: {
+            defaults: { //defaults actually defined in map/shops.onj
+
                 font: "red_wing",
                 fontScale: 0.08,
                 color: color.forty_white
@@ -168,6 +199,7 @@ root: $Box {
                     marginTop: 1.0#percent,
                 }
             ],
-        }
+        },
+        cardsWidget,
     ],
 ]
