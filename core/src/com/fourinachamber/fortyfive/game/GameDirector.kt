@@ -47,7 +47,7 @@ class GameDirector(private val controller: GameController) {
         controller.initEnemyArea(enemy)
     }
 
-    fun onNewTurn() {
+    fun checkActions() {
         if (controller.turnCounter == turnRevealTime) {
             controller.remainingTurns = turns - controller.turnCounter
         }
@@ -59,7 +59,7 @@ class GameDirector(private val controller: GameController) {
     private fun doEnemyAction() {
         // TODO: logic
         val timeline = EnemyAction.RevolverRotation.getTimeline(controller, 0.5)
-        controller.executeTimelineLater(timeline)
+        controller.executeTimeline(timeline)
     }
 
     private fun chooseEnemy(prototypes: List<EnemyPrototype>): EnemyPrototype {
@@ -83,12 +83,13 @@ class GameDirector(private val controller: GameController) {
     fun currentEval(): Double {
         val isValue = evaluateState()
         val shouldValue = (1.0 / turns) * controller.turnCounter
-        val eval = (isValue - shouldValue).between(0.0, 1.0)
+        println("${controller.turnCounter}| $isValue $shouldValue")
+        val eval = (isValue - shouldValue)
         curEvaluation = eval
         return eval
     }
 
-    fun evaluateState(): Double { // TODO: make private
+    private fun evaluateState(): Double {
         val enemy = controller.enemyArea.enemies[0]
 
         val turns = controller.turnCounter - 1
@@ -118,6 +119,7 @@ class GameDirector(private val controller: GameController) {
         } else {
             var x = ((avgReserveGainOrLoss.between(-3.0, 3.0) + 3.0) / 6.0) - 0.5 // normalize reserve value
             x = x * 0.4 + damagedPercent * 0.6 + (cardsDrawn / 10.0) // mix reserve value with cards drawn value
+//            var x = damagedPercent
             if (controller.remainingCards < (turns - controller.turnCounter) * controller.cardsToDraw) {
                 x -= 0.3 // punish player for running out of cards
             }

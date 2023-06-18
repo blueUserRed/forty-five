@@ -70,8 +70,8 @@ class Enemy(
             FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
             if (field != 0) return
             gameController.curScreen.afterMs(10) { //TODO: nooooo, not again
-                gameController.executeTimelineLater(Timeline.timeline {
-                    mainThreadAction { gameController.enemyDefeated(this@Enemy) }
+                gameController.executeTimeline(Timeline.timeline {
+                    action { gameController.enemyDefeated(this@Enemy) }
                 })
             }
         }
@@ -186,7 +186,7 @@ class Enemy(
 //        )
 
         return Timeline.timeline {
-            action { gameController.damagePlayer(damage) }
+            include(gameController.damagePlayer(damage))
 //            parallelActions(shakeAction, textAnimation)
         }
     }
