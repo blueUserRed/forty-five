@@ -4,6 +4,7 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE1
 import com.badlogic.gdx.graphics.Texture
@@ -302,6 +303,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override var maskScaleY: Float = 1f
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
+    var tintColor: Color? = null
 
     override var backgroundHandle: String? = drawableHandle
         set(value) {
@@ -394,14 +396,19 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override fun getMinWidth(): Float =
         if (reportDimensionsWithScaling) super.getPrefWidth() * scaleX else super.getPrefWidth()
+
     override fun getPrefWidth(): Float =
         if (reportDimensionsWithScaling) super.getPrefWidth() * scaleX else super.getPrefWidth()
+
     override fun getMaxWidth(): Float =
         if (reportDimensionsWithScaling) super.getMaxWidth() * scaleX else super.getMaxWidth()
+
     override fun getMinHeight(): Float =
         if (reportDimensionsWithScaling) super.getPrefHeight() * scaleY else super.getPrefHeight()
+
     override fun getPrefHeight(): Float =
         if (reportDimensionsWithScaling) super.getPrefHeight() * scaleY else super.getPrefHeight()
+
     override fun getMaxHeight(): Float =
         if (reportDimensionsWithScaling) super.getMaxHeight() * scaleY else super.getMaxHeight()
 
@@ -500,7 +507,7 @@ open class CustomFlexBox(
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-            (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
     }
 
@@ -575,8 +582,9 @@ class RotatableImageActor(
                 InputEvent.Type.touchDown -> {
                     lastPos = viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
                 }
+
                 InputEvent.Type.touchUp -> lastPos = null
-                else -> { }
+                else -> {}
             }
         }
         touchable = Touchable.enabled
@@ -659,7 +667,7 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-            (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
     }
 
@@ -698,7 +706,7 @@ open class CustomHorizontalGroup(
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-            (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
     }
 
@@ -740,7 +748,7 @@ open class CustomVerticalGroup(
     override fun resortZIndices() {
         children.sort { el1, el2 ->
             (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
-            (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
         }
     }
 

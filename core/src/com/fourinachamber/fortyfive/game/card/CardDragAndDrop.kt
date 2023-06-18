@@ -18,14 +18,16 @@ import onj.value.OnjNamedObject
 class CardDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
-    onj: OnjNamedObject
+    onj: OnjNamedObject,
 ) : DragBehaviour(dragAndDrop, actor, onj) {
 
     private val card: Card
+    private val toLast: Boolean
 
     init {
         if (actor !is CardActor) throw RuntimeException("CardDragSource can only be used on an CardActor")
         card = actor.card
+        toLast = onj.getOr("moveToLastIndex", false)
     }
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
@@ -37,6 +39,10 @@ class CardDragSource(
         dragAndDrop.setKeepWithinStage(false)
 
         payload.dragActor = actor
+
+        if (toLast) {
+            card.actor.toFront()
+        }
 
         val obj = CardDragAndDropPayload(card)
         payload.obj = obj
@@ -63,7 +69,7 @@ class CardDragSource(
     ) {
         card.actor.isDragged = false
         if (payload == null) return
-
+        if (toLast) card.actor.zIndex -= 1
         val obj = payload.obj as CardDragAndDropPayload
         obj.onDragStop()
     }

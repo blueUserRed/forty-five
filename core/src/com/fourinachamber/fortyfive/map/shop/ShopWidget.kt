@@ -1,98 +1,122 @@
 package com.fourinachamber.fortyfive.map.shop
 
-import com.badlogic.gdx.graphics.g2d.Batch
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
-import com.fourinachamber.fortyfive.screen.general.CustomImageActor
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.utils.Align
+import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardPrototype
+import com.fourinachamber.fortyfive.screen.general.*
+import ktx.actors.alpha
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import kotlin.math.max
 import kotlin.random.Random
 
 class ShopWidget(
     texture: String,
     dataFile: String,
-    dataNamePath: String,
-    dataPricePath: String,
-    dataProbabilityPath: String,
+    val dataFont: Label.LabelStyle,
+    val dataDragBehaviour: OnjNamedObject,
     val maxPerLine: Int,
     val widthPercentagePerItem: Float,
-    val screen: OnjScreen
+    val screen: OnjScreen,
 ) : CustomFlexBox(screen) {
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-        children[0].width = width / 4
-        children[0].height = height / 3
-//        println("${width}   ${height}")
-    }
 
-    private val cardWithDefaultProbs = mapOf<String, OnjObject>()
+    private val _cards: MutableList<Card> = mutableListOf()
+    private val priceTags: MutableList<CustomLabel> = mutableListOf()
+    private val allCards: MutableList<Card> = mutableListOf()
+    private lateinit var boughtIndices: MutableList<Int>
+
+    private lateinit var dragAndDrop: DragAndDrop
+    /*override fun draw(batch: Batch?, parentAlpha: Float) {
+        super.draw(batch, parentAlpha)
+    }*/
+
+    private val cardPrototypes: MutableList<CardPrototype>
 
     init {
         backgroundHandle = texture
+        val onj = OnjParser.parseFile(dataFile)
+        cardsFileSchema.assertMatches(onj)
+        onj as OnjObject
+        cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen, ::initCard).toMutableList()
     }
 
 
-    public fun addItems(
+    fun addItems(
         seed: Long,
-        boughtIndices: List<Int>
-    ) {//TODO indicies be careful, because multiple use same "space" (start with 0)
+        boughtIndices: MutableList<Int>,
+        dragAndDrop: DragAndDrop
+    ) {
+        this.boughtIndices = boughtIndices
+        this.dragAndDrop = dragAndDrop
+        boughtIndices.add(1)
         val rnd = Random(seed)
-        val nbrOfItems = (8)
+        val nbrOfItems = (6)
         for (i in 0 until nbrOfItems) {
-            val curItem = ShopItemWidget("enemy_texture", 10, screen, i)
-            val node = this.add(curItem)
-            val styleManager = StyleManager(curItem, node)
-            curItem.styleManager = styleManager
-            curItem.initStyles(screen)
-            screen.addStyleManager(styleManager)
+            val cardId = (0..cardPrototypes.size).random(rnd)
+            _cards.add(cardPrototypes[cardId].create())
+            val stringLabel = CustomLabel(screen, "${_cards.last().cost}$", dataFont, false)
+            stringLabel.setFontScale(0.1F)
+            stringLabel.setAlignment(Align.center)
+            priceTags.add(stringLabel)
+            if (i in boughtIndices) buyCard(i)
+            add(stringLabel)
+            add(_cards.last().actor)
         }
+    }
+
+    private fun buyCard(
+        i: Int,
+    ) {
+        _cards[i].isDraggable = false
+        _cards[i].actor.alpha = 0.5F
+        priceTags[i].text.clear()
+        priceTags[i].text.append("out of stock")
+        if (i !in boughtIndices) boughtIndices.add(i)
     }
 
     override fun layout() {
         super.layout()
-
-        if (children.isEmpty) return
         val distanceBetweenX = width * ((100 - (maxPerLine * widthPercentagePerItem)) / (maxPerLine + 1) / 100)
         val sizePerItem = width * widthPercentagePerItem / 100
-        val distanceBetweenY = (height - 2 * sizePerItem) / 3
-        for (i in 0 until children.size) {
-            val child = children[i] as ShopItemWidget
-            child.imgData[0] = sizePerItem
-            child.imgData[1] = x + distanceBetweenX * (i % maxPerLine + 1) + sizePerItem * (i % maxPerLine)
-            child.imgData[2] = y + height - distanceBetweenY * (i / maxPerLine + 1) - sizePerItem * (i / maxPerLine + 1)
+        val distanceBetweenY = (height - 2 * sizePerItem) / 2.5F
+        for (i in 0 until _cards.size) {
+            val card = _cards[i]
+            card.actor.width = sizePerItem
+            card.actor.height = sizePerItem
+            card.actor.x = distanceBetweenX * (i % maxPerLine + 1) + sizePerItem * (i % maxPerLine)
+            card.actor.y = height - distanceBetweenY * (i / maxPerLine + 0.5F) - sizePerItem * (i / maxPerLine + 1)
+
+            val label = priceTags[i]
+            label.setBounds(
+                card.actor.x,
+                card.actor.y - distanceBetweenY * 2 / 4,
+                sizePerItem,
+                distanceBetweenY * 2 / 4
+            );
         }
     }
 
-}
-
-
-class ShopItemWidget(texture: String, price: Long, screen: OnjScreen, val index: Int) :
-    CustomFlexBox(screen) {
-
-    val image: CustomImageActor
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-        image.draw(batch, parentAlpha)
+    private fun initCard(card: Card) {
+        val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
+            dataDragBehaviour.name,
+            dragAndDrop,
+            card.actor,
+            dataDragBehaviour
+        )
+        dragAndDrop.addSource(behaviour)
+        allCards.add(card)
     }
 
-    val imgData = FloatArray(3)
+    companion object {
 
-    override fun layout() {
-        super.layout()
-        image.width = imgData[0]
-        image.height = imgData[0]
-        image.x = imgData[1]
-        image.y = imgData[2]
-//        println("width: ${image.width}, ${image.x}")
+        private val cardsFileSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
+        }
     }
 
-    init {
-        image = CustomImageActor(texture, screen)
-        val node = this.add(image)
-        val styleManager = StyleManager(image, node)
-        image.styleManager = styleManager
-        image.initStyles(screen)
-        screen.addStyleManager(styleManager)
-    }
 }

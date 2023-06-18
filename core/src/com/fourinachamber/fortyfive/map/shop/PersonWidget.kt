@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -14,11 +15,13 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import onj.value.OnjObject
 import java.nio.channels.FileLock
 import com.fourinachamber.fortyfive.utils.plus
+import onj.value.OnjNamedObject
 
 class PersonWidget(
     private val offsetX: Float,
     private val offsetY: Float,
     val scale: Float,
+    private val dropBehaviour: OnjNamedObject,
     val screen: OnjScreen,
 ) : Widget(), ResourceBorrower {
 
@@ -38,7 +41,7 @@ class PersonWidget(
         }
     }
 
-    public fun setDrawable(imgData: OnjObject) {
+    fun setDrawable(imgData: OnjObject) {
         val textureName = imgData.get<String>("textureName")
         defOffset["offsetX"] = imgData.get<Double>("offsetX").toFloat()
         defOffset["offsetY"] = imgData.get<Double>("offsetY").toFloat()
@@ -46,5 +49,14 @@ class PersonWidget(
         ResourceManager.borrow(this, textureName)
         personDrawable = ResourceManager.get(this, textureName)
         ResourceManager.giveBack(this, textureName)
+    }
+    fun addDrag(dragAndDrop: DragAndDrop){
+        val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+            dropBehaviour.name,
+            dragAndDrop,
+            this,
+            dropBehaviour
+        )
+        dragAndDrop.addTarget(behaviour)
     }
 }

@@ -73,12 +73,12 @@ people: [
                     text: "Source: Trust me pal\"",
                 },
             ],
-            [
-                $Text {
-                    text: "Greetings Traveler. I have the best products you will ever see.",
-                    color: color.beige
-                }
-            ],
+//            [
+//                $Text {
+//                    text: "Greetings Traveler. I have the best products you will ever see.",
+//                    color: color.beige
+//                }
+//            ],
 
         ],
         npcImageName: "my_cool_npc",
