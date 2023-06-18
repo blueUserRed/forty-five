@@ -56,6 +56,9 @@ var controller = $GameScreenController {
     enemyArea: {
         actorName: "enemy_area",
     },
+    cardSelector: {
+        actorName: "card_selector"
+    },
     cardDragBehaviour: $CardDragSource {
         group: "card"
     },
@@ -232,6 +235,23 @@ var popupActor = $Box {
             }
         ]
     },
+
+    $CircularCardSelector {
+        styles: [
+            {
+                style_priority: 1,
+                visible: false
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showPopupCardSelector"),
+                visible: true
+            }
+        ],
+        name: "card_selector",
+        radius: 17.0,
+        size: 357.0 * 0.04
+    }
 
 ];
 

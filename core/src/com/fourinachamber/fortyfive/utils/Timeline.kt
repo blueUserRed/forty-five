@@ -31,11 +31,13 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
 
     private val pushActionsBuffer: MutableList<TimelineAction> = mutableListOf()
 
+    val storage: MutableMap<String, Any?> = mutableMapOf()
+
     /**
      * starts executing the tasks in the timeline
      */
     @AllThreadsAllowed
-    fun start() {
+    fun startTimeline() {
         hasBeenStarted = true
         if (_actions.isEmpty()) return
         _actions.first().start(this)
@@ -45,20 +47,28 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
      * should be called every frame to keep the timeline updated
      */
     @AllThreadsAllowed
-    fun update() {
+    fun updateTimeline() {
         if (isFinished || !hasBeenStarted) return
         while (true) {
             val first = _actions.first()
             if (!first.hasBeenStarted) first.start(this)
-            first.update()
-            if (first.isFinished()) {
-                first.end()
+            first.update(this)
+            if (first.isFinished(this)) {
+                first.end(this)
                 _actions.removeFirst()
                 for (action in pushActionsBuffer) _actions.add(0, action)
                 pushActionsBuffer.clear()
                 if (_actions.isEmpty()) break
             } else break
         }
+    }
+
+    fun store(name: String, value: Any?) {
+        storage[name] = value
+    }
+
+    inline fun <reified T> get(name: String): T {
+        return storage[name] as T
     }
 
     /**
@@ -109,17 +119,17 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * called every frame as long as this action is active
          */
-        open fun update() { }
+        open fun update(timeline: Timeline) { }
 
         /**
          * checks if the action has finished
          */
-        abstract fun isFinished(): Boolean
+        abstract fun isFinished(timeline: Timeline): Boolean
 
         /**
          * called when the action ends
          */
-        open fun end() { }
+        open fun end(timeline: Timeline) { }
     }
 
     /**
@@ -132,12 +142,12 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * adds an action that finishes instantly to the timeline
          */
-        inline fun action(crossinline action: @AllThreadsAllowed () -> Unit) {
+        inline fun action(crossinline action: @AllThreadsAllowed Timeline.() -> Unit) {
             timelineActions.add(object : TimelineAction() {
-                override fun isFinished(): Boolean = true
+                override fun isFinished(timeline: Timeline): Boolean = true
                 override fun start(timeline: Timeline) {
                     super.start(timeline)
-                    action()
+                    action(timeline)
                 }
             })
         }
@@ -151,12 +161,12 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
          * *WARNING:* because the action is executed on the next render call, this may break the sequence of actions,
          * for example if the next action is an [action()](Timeline.TimelineBuilderDSL.action)'
          */
-        inline fun mainThreadAction(crossinline action: @MainThreadOnly () -> Unit) {
+        inline fun mainThreadAction(crossinline action: @MainThreadOnly Timeline.() -> Unit) {
             timelineActions.add(object : TimelineAction() {
-                override fun isFinished(): Boolean = true
+                override fun isFinished(timeline: Timeline): Boolean = true
                 override fun start(timeline: Timeline) {
                     super.start(timeline)
-                    Gdx.app.postRunnable { action() }
+                    Gdx.app.postRunnable { action(timeline) }
                 }
             })
         }
@@ -168,9 +178,9 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * delays the timeline until a condition is met
          */
-        inline fun delayUntil(crossinline condition: @AllThreadsAllowed () -> Boolean) {
+        inline fun delayUntil(crossinline condition: @AllThreadsAllowed Timeline.() -> Boolean) {
             timelineActions.add(object : TimelineAction() {
-                override fun isFinished(): Boolean = condition()
+                override fun isFinished(timeline: Timeline): Boolean = condition(timeline)
             })
         }
 
@@ -187,7 +197,7 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
                     finishedAt = TimeUtils.millis() + millis
                 }
 
-                override fun isFinished(): Boolean = TimeUtils.millis() >= finishedAt
+                override fun isFinished(timeline: Timeline): Boolean = TimeUtils.millis() >= finishedAt
             })
         }
 
@@ -206,20 +216,20 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
          * the creation of the timeline to include is also dependent on factors not known when the timeline is created
          */
         inline fun includeLater(
-            crossinline timelineCreator: @AllThreadsAllowed () -> Timeline,
-            crossinline condition: @AllThreadsAllowed () -> Boolean
+            crossinline timelineCreator: @AllThreadsAllowed Timeline.() -> Timeline,
+            crossinline condition: @AllThreadsAllowed Timeline.() -> Boolean
         ) {
             timelineActions.add(object : TimelineAction() {
 
                 override fun start(timeline: Timeline) {
                     super.start(timeline)
-                    if (condition()) {
-                        val timelineToInclude = timelineCreator()
+                    if (condition(timeline)) {
+                        val timelineToInclude = timelineCreator(timeline)
                         for (action in timelineToInclude.actions.reversed()) timeline.pushAction(action)
                     }
                 }
 
-                override fun isFinished(): Boolean = true
+                override fun isFinished(timeline: Timeline): Boolean = true
 
             })
         }
@@ -227,49 +237,21 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
         /**
          * same as [includeLater], but includes an action instead of a timeline
          */
-        fun includeActionLater(action: TimelineAction, condition: @AllThreadsAllowed () -> Boolean) {
+        fun includeActionLater(action: TimelineAction, condition: @AllThreadsAllowed Timeline.() -> Boolean) {
             timelineActions.add(object : TimelineAction() {
 
                 override fun start(timeline: Timeline) {
                     super.start(timeline)
-                    if (condition()) timeline.pushAction(action)
+                    if (condition(timeline)) timeline.pushAction(action)
                 }
 
-                override fun isFinished(): Boolean = true
+                override fun isFinished(timeline: Timeline): Boolean = true
 
             })
         }
 
         fun parallelActions(vararg actions: TimelineAction) {
-            timelineActions.add(object : TimelineAction() {
-
-                private var actions: List<TimelineAction> = actions.toMutableList()
-
-                override fun start(timeline: Timeline) {
-                    super.start(timeline)
-                    for (action in actions) action.start(timeline)
-                }
-
-                override fun update() {
-                    for (action in actions) action.update()
-                }
-
-                override fun end() {
-                    for (action in actions) action.end()
-                }
-
-                override fun isFinished(): Boolean {
-                    this.actions = this.actions.filter {
-                        if (!it.isFinished()) {
-                            true
-                        } else {
-                            it.end()
-                            false
-                        }
-                    }
-                    return this.actions.isEmpty()
-                }
-            })
+            timelineActions.add(ParallelTimelineAction(actions.toList()))
         }
 
         /**
@@ -304,7 +286,7 @@ class GameAnimationTimelineAction(private val gameAnimation: GameAnimation) : Ti
         FortyFive.currentGame!!.playGameAnimation(gameAnimation)
     }
 
-    override fun isFinished(): Boolean = gameAnimation.isFinished()
+    override fun isFinished(timeline: Timeline): Boolean = gameAnimation.isFinished()
 }
 
 /**
@@ -320,9 +302,9 @@ class ActorActionTimelineAction(
         actor.addAction(action)
     }
 
-    override fun isFinished(): Boolean = action.isComplete
+    override fun isFinished(timeline: Timeline): Boolean = action.isComplete
 
-    override fun end() {
+    override fun end(timeline: Timeline) {
         actor.removeAction(action)
         action.reset()
     }
@@ -332,15 +314,15 @@ class TimelineAsAction(private val timeline: Timeline) : Timeline.TimelineAction
 
     override fun start(timeline: Timeline) {
         super.start(timeline)
-        this.timeline.start()
+        this.timeline.startTimeline()
     }
 
-    override fun update() {
-        super.update()
-        this.timeline.update()
+    override fun update(timeline: Timeline) {
+        super.update(timeline)
+        this.timeline.updateTimeline()
     }
 
-    override fun isFinished(): Boolean = timeline.isFinished
+    override fun isFinished(timeline: Timeline): Boolean = timeline.isFinished
 
 }
 
@@ -360,5 +342,33 @@ class ParticleTimelineAction(
         particleActor.start()
     }
 
-    override fun isFinished(): Boolean = particle.isComplete
+    override fun isFinished(timeline: Timeline): Boolean = particle.isComplete
+}
+
+class ParallelTimelineAction(private var actions: List<Timeline.TimelineAction>) : Timeline.TimelineAction() {
+
+    override fun start(timeline: Timeline) {
+        super.start(timeline)
+        for (action in actions) action.start(timeline)
+    }
+
+    override fun update(timeline: Timeline) {
+        for (action in actions) action.update(timeline)
+    }
+
+    override fun end(timeline: Timeline) {
+        for (action in actions) action.end(timeline)
+    }
+
+    override fun isFinished(timeline: Timeline): Boolean {
+        this.actions = this.actions.filter {
+            if (!it.isFinished(timeline)) {
+                true
+            } else {
+                it.end(timeline)
+                false
+            }
+        }
+        return this.actions.isEmpty()
+    }
 }

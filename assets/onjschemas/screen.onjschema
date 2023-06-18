@@ -197,6 +197,12 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $CircularCardSelector {
+        radius: float,
+        size: float,
+        ...widgetSharedKeys
+    }
+
 }
 
 var advancedTextPartSharedKeys = {

@@ -61,6 +61,12 @@ class DrawCardEvent : Event()
 class PopupConfirmationEvent : Event()
 
 /**
+ * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
+ * a popup
+ */
+class PopupSelectionEvent(val cardNum: Int) : Event()
+
+/**
  * binds a listener for the [ButtonClickEvent] to this actor
  */
 inline fun Actor.onButtonClick(crossinline block: @MainThreadOnly () -> Unit) {
