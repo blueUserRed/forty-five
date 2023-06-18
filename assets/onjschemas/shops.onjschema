@@ -72,4 +72,11 @@ people: {
     defaultShopParameter: string,
     texts: $AdvancedTextPart[][],
     npcImageName: string,
-}[]
+}[],
+
+
+defaults: {
+    font: string,
+    fontScale: float,
+    color: Color,
+},

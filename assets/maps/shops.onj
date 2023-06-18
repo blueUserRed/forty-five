@@ -60,18 +60,32 @@ people: [
         texts: [
             [
                 $Text {
-                    text: "test Greetings from the Traveler which is: ", color: color.white
+                    text: "\"I sell the ",
                 },
                 $Text {
-                    text: "Funny Card games Haha", color: color.beige
-                }
+                    text: "BEST  ",
+                    color: color.viridian,
+                },
+                $Text {
+                    text: "goods south from Dunkelwald. You'll find deals like this where else!",
+                },
+                $Text {
+                    text: "Source: Trust me pal\"",
+                },
             ],
-            [
+                        [
                 $Text {
                     text: "Greetings Traveler. I have the best products you will ever see.", color: color.beige
                 }
             ],
+
         ],
         npcImageName: "my_cool_npc",
     }
 ],
+
+defaults: {
+    font: "red_wing",
+    fontScale: 0.08,
+    color: color.forty_white
+},

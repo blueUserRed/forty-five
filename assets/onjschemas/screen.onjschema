@@ -381,6 +381,7 @@ $ScreenController {
         shopsFile: string,
         npcsFile: string,
         personWidgetName: string,
+        messageWidgetName: string,
     }
 }
 
