@@ -63,10 +63,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var cardStack: MutableList<Card> = mutableListOf()
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
-    private var remainingCards: Int by multipleTemplateParam(
+    private var _remainingCards: Int by multipleTemplateParam(
         "game.cardsInStack", cardStack.size,
         "game.cardsInStackPluralS" to { if (it == 1) "" else "s" }
     )
+
+    val remainingCards: Int
+        get() = _remainingCards
 
     var remainingTurns: Int by multipleTemplateParam(
         "game.remainingTurnsRaw", -1,
@@ -82,6 +85,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @Suppress("unused")
     val playerLivesAtStart: Int by templateParam("game.basePlayerLives", SaveState.playerLives)
+
+    private var popupText: String by templateParam("game.popupText", "")
+    private var popupButtonText: String by templateParam("game.popupButtonText", "")
+    private var confirmedPopup: Boolean = false
 
     private val timeline: Timeline = Timeline(mutableListOf()).apply {
         start()
@@ -177,7 +184,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
 
         cardStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
-        remainingCards = cardStack.size
+        _remainingCards = cardStack.size
 
         SaveState.additionalCards.forEach { entry ->
             val (cardName, amount) = entry
@@ -224,6 +231,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         is DrawCardEvent -> {
             drawCard()
         }
+        is PopupConfirmationEvent -> {
+            confirmedPopup = true
+        }
         else -> { }
     }
 
@@ -239,7 +249,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun nextTurn() {
         turnCounter++
-        if (remainingTurns != -1) remainingTurns--
+        if (remainingTurns != -1) {
+            FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
+            remainingTurns--
+        }
         if (remainingTurns == 0) loose()
         gameDirector.onNewTurn()
     }
@@ -248,7 +261,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
-        gameDirector.evaluateState() // TODO: remove, just for testing
+        gameDirector.currentEval() // TODO: remove, just for testing
         if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
         updateCount++
 
@@ -332,6 +345,21 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
         card.onEnter()
         checkEffectsSingleCard(Trigger.ON_ENTER, card)
+    }
+
+    fun confirmationPopup(text: String): Timeline = Timeline.timeline {
+        action {
+            curScreen.enterState(showPopupScreenState)
+            curScreen.enterState(showPopupConfirmationButtonScreenState)
+            popupText = text
+            popupButtonText = "Ok"
+        }
+        delayUntil { confirmedPopup }
+        action {
+            confirmedPopup = false
+            curScreen.leaveState(showPopupScreenState)
+            curScreen.leaveState(showPopupConfirmationButtonScreenState)
+        }
     }
 
     /**
@@ -578,7 +606,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun drawCard() {
         if (!currentState.allowsDrawingCards()) return
         val card = cardStack.removeFirstOrNull() ?: defaultBullet.create()
-        remainingCards = cardStack.size
+        _remainingCards = cardStack.size
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++
@@ -649,6 +677,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         const val cardDrawActorScreenState = "showCardDrawActor"
         const val freezeUIScreenState = "uiFrozen"
+        const val showPopupScreenState = "showPopup"
+        const val showPopupConfirmationButtonScreenState = "showPopupConfirmationButton"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

@@ -163,7 +163,6 @@ var reservesLabel = $TemplateLabel {
 };
 
 var remainingTurnsLabel = $TemplateLabel {
-    name: "reserves_label",
     font: "red_wing",
     template: "{game.remainingTurns} -- current evaluation {game.curEvaluation}",
     fontScale: 0.09,
@@ -180,6 +179,60 @@ var disableStyles = [
         style_condition: state("uiFrozen"),
         disabled: true
     }
+];
+
+var popupActor = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showPopup"),
+            detached: false
+        }
+    ],
+} children [
+
+    $TemplateLabel {
+        font: "red_wing",
+        template: "{game.popupText}",
+        fontScale: 0.09,
+        color: color.white,
+    },
+
+    $TemplateLabel {
+        styles: [
+            {
+                style_priority: 1,
+                visible: false
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showPopupConfirmationButton"),
+                visible: true
+            }
+        ],
+        font: "red_wing",
+        template: "{game.popupButtonText}",
+        fontScale: 0.09,
+        color: color.white,
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "PopupConfirmationEvent"
+            }
+        ]
+    },
+
 ];
 
 var drawCardActor = $Box {
@@ -429,5 +482,5 @@ root: $Box {
         }
     ]
 } children [
-    gameScreen, drawCardActor
+    gameScreen, drawCardActor, popupActor
 ]
