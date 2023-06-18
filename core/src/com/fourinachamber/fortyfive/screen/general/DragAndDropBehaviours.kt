@@ -32,6 +32,9 @@ object DragAndDropBehaviourFactory {
         dropBehaviours["CoverAreaDropTarget"] = { dragAndDrop, actor, onj ->
             CoverAreaDropTarget(dragAndDrop, actor, onj)
         }
+        dropBehaviours["ShopBuyDropTarget"] = { dragAndDrop, actor, onj ->
+            ShopBuyDropTarget(dragAndDrop, actor, onj)
+        }
     }
 
     fun dragBehaviourOrError(
@@ -80,6 +83,25 @@ object DragAndDropBehaviourFactory {
         return dragBehaviourOrNull(name, dragAndDrop, actor, onj)?.eitherLeft() ?:
                dropBehaviourOrNull(name, dragAndDrop, actor, onj)?.eitherRight() ?:
                throw RuntimeException("Unknown drag or drop behaviour: $name")
+    }
+
+}
+
+class ShopBuyDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject): DropBehaviour(dragAndDrop, actor, onj)  {
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: DragAndDrop.Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        println("Now dragging something")
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
+        println(source?.actor)
+        println("Now dropped something")
     }
 
 }

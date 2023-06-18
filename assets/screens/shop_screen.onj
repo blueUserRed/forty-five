@@ -47,7 +47,7 @@ var personWidget = $PersonWidget {
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
-    dropBehaviour: $BuyDropTarget {
+    dropBehaviour: $ShopBuyDropTarget {
         group: "card"
     },
 };
@@ -57,11 +57,11 @@ var cardsWidget = $ShopWidget {
     name: "cards_widget",
     texture: "shop_items_background",
     dataFile: "cards/cards.onj",
-    dataNamePath: "cards/name",
-    dataPricePath: "cards/cost",
-    dataProbabilityPath: "cards/cost",
+    dataFontColor: color.dark_brown,
+    dataFont: "red_wing_cm",
     dataDragBehaviour: $CardDragSource {
-        group: "card"
+        group: "card",
+        moveToLastIndex: true,
     },
     maxPerLine: 4,
     widthPercentagePerItem: 20.0,
@@ -70,10 +70,6 @@ var cardsWidget = $ShopWidget {
         {
             width: 100.0#percent,
             height: 69.0#percent,
-            flexDirection: flexDirection.row,
-            justifyContent: justify.center,
-            flexWrap: wrap.wrap,
-            marginTop: 1.0#percent,
         }
     ],
 };

@@ -4,16 +4,14 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
-import com.fourinachamber.fortyfive.screen.general.AdvancedText
-import com.fourinachamber.fortyfive.screen.general.AdvancedTextWidget
+import com.fourinachamber.fortyfive.screen.general.*
 //import com.fourinachamber.fortyfive.map.shop.Shop
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.TemplateString
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import onj.value.OnjString
 
@@ -36,7 +34,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val messageWidgetName = onj.get<String>("messageWidgetName")
     private val shopWidgetNames = onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
 
-    //    lateinit var personImageActor: CustomImageActor
     private lateinit var personWidget: PersonWidget
     private val dragAndDrop = DragAndDrop()
 
@@ -66,7 +63,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-        SaveState.playerMoney += 1
+        SaveState.playerMoney += 1 //TODO remove
         personWidget.setDrawable(imgData)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
@@ -75,16 +72,15 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
 
+        personWidget.addDrag(dragAndDrop)
         addItemWidgets()
-
-//        dragAndDrop.addTarget()
     }
 
     private fun addItemWidgets() {
         shopWidgetNames.forEach {
             val shopWidget = screen.namedActorOrError(it)
             if (shopWidget !is ShopWidget) throw RuntimeException("widget with name $it must be of type shopWidget")
-            shopWidget.addItems(context.seed, context.boughtIndices)
+            shopWidget.addItems(context.seed, context.boughtIndices.toMutableList(), dragAndDrop)
         }
     }
 

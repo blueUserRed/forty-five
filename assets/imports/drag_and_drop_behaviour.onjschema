@@ -24,6 +24,7 @@ $DragAndDropBehaviour {
     }
 
     $CardDragSource {
+        moveToLastIndex?: boolean,
         ...dragAndDropBehaviourSharedKeys
     }
 
@@ -35,7 +36,7 @@ $DragAndDropBehaviour {
         ...dragAndDropBehaviourSharedKeys
     }
 
-    $BuyDropTarget {
+    $ShopBuyDropTarget {
         ...dragAndDropBehaviourSharedKeys
     }
 }

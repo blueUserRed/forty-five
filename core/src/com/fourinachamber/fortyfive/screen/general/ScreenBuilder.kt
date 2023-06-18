@@ -205,7 +205,10 @@ class ScreenBuilder(val file: FileHandle) {
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle().apply {
-                font = fontOrError(widgetOnj.get<String>("font"), screen) // TODO: figure out how to not load the font immediatley
+                font = fontOrError(
+                    widgetOnj.get<String>("font"),
+                    screen
+                ) // TODO: figure out how to not load the font immediatley
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
                 }
@@ -329,18 +332,20 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),
             widgetOnj.get<Double>("scale").toFloat(),
+            widgetOnj.get<OnjNamedObject>("dropBehaviour"),
             screen
         )
 
         "ShopWidget" -> ShopWidget(
             widgetOnj.get<String>("texture"),
             widgetOnj.get<String>("dataFile"),
-            widgetOnj.get<String>("dataNamePath"),
-            widgetOnj.get<String>("dataPricePath"),
-            widgetOnj.get<String>("dataProbabilityPath"),
+            Label.LabelStyle(
+                fontOrError(widgetOnj.get<String>("dataFont"), screen),
+                widgetOnj.get<Color>("dataFontColor")
+            ),
+            widgetOnj.get<OnjNamedObject>("dataDragBehaviour"),
             widgetOnj.get<Long>("maxPerLine").toInt(),
             widgetOnj.get<OnjFloat>("widthPercentagePerItem").value.toFloat(),
-//            widgetOnj.get<String>("dataDragBehaviour"),
             screen
         )
 
