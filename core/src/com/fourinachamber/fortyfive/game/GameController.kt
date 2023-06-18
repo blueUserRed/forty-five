@@ -90,9 +90,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var popupButtonText: String by templateParam("game.popupButtonText", "")
     private var confirmedPopup: Boolean = false
 
-    private val timeline: Timeline = Timeline(mutableListOf()).apply {
-        start()
-    }
+    private val timelines: MutableList<Timeline> = mutableListOf()
+    private val timelinesToStart: MutableList<Timeline> = mutableListOf()
 
     private var isUIFrozen: Boolean = false
 
@@ -254,7 +253,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             remainingTurns--
         }
         if (remainingTurns == 0) loose()
-        gameDirector.onNewTurn()
     }
 
     private var updateCount = 0 //TODO: this is stupid
@@ -265,10 +263,23 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
         updateCount++
 
-        timeline.update()
 
-        if (timeline.isFinished && isUIFrozen) unfreezeUI()
-        if (!timeline.isFinished && !isUIFrozen) freezeUI()
+        timelinesToStart.forEach { timelines.add(it) }
+        val iterator = timelines.iterator()
+        while (iterator.hasNext()) {
+            val cur = iterator.next()
+            cur.update()
+            if (!cur.isFinished && !cur.hasBeenStarted) cur.start()
+            if (cur.isFinished) iterator.remove()
+        }
+        val areTimelinesFinished = timelines.isEmpty()
+        if (areTimelinesFinished && isUIFrozen) unfreezeUI()
+        if (!areTimelinesFinished && !isUIFrozen) freezeUI()
+
+        updateGameAnimations()
+    }
+
+    private fun updateGameAnimations() {
         val iterator = curGameAnims.iterator()
         while (iterator.hasNext()) {
             val anim = iterator.next()
@@ -467,7 +478,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         }
 
-        executeTimelineLater(Timeline.timeline {
+        executeTimeline(Timeline.timeline {
             parallelActions(
                 timeline.asAction(),
                 gameRenderPipeline.getOnShotPostProcessingTimelineAction()
@@ -490,12 +501,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * damages the player (plays no animation, calls loose when lives go below 0)
      */
     @AllThreadsAllowed
-    fun damagePlayer(damage: Int) {
+    fun damagePlayer(damage: Int): Timeline {
         curPlayerLives -= damage
         FortyFiveLogger.debug(logTag, "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives")
-        if (curPlayerLives <= 0) executeTimelineLater(Timeline.timeline {
-            mainThreadAction { loose() }
-        })
+        return if (curPlayerLives <= 0) Timeline.timeline {
+            action { loose() }
+        } else Timeline(mutableListOf())
     }
 
     /**
@@ -538,7 +549,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        card.checkEffects(trigger)?.let { executeTimelineLater(it) }
+        card.checkEffects(trigger)?.let { executeTimeline(it) }
     }
 
     @MainThreadOnly
@@ -550,7 +561,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (timeline != null) include(timeline)
             }
         }
-        executeTimelineLater(timeline)
+        executeTimeline(timeline)
     }
 
     @MainThreadOnly
@@ -562,15 +573,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (timeline != null) include(timeline)
             }
         }
-        executeTimelineLater(timeline)
+        executeTimeline(timeline)
     }
 
     /**
      * appends a timeline to the current timeline
      */
     @AllThreadsAllowed
-    fun executeTimelineLater(timeline: Timeline) {
-        for (action in timeline.actions) this.timeline.appendAction(action)
+    fun executeTimeline(timeline: Timeline) {
+        timelinesToStart.add(timeline)
     }
 
     private fun freezeUI() {

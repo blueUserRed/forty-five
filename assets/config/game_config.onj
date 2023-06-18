@@ -4,7 +4,7 @@ import "config/graphics_config.onj" as graphicsConfig;
 
 cardDrawConfig: {
     firstRound: 6,
-    roundStart: 4,
+    roundStart: 2,
     maxCards: 10,
 },
 

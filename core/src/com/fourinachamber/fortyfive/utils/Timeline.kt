@@ -26,7 +26,8 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
     val actions: List<TimelineAction>
         get() = _actions
 
-    private var hasBeenStarted: Boolean = false
+    var hasBeenStarted: Boolean = false
+        private set
 
     private val pushActionsBuffer: MutableList<TimelineAction> = mutableListOf()
 

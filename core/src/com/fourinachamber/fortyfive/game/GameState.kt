@@ -14,7 +14,7 @@ sealed class GameState {
         override fun transitionTo(controller: GameController) = with(controller) {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
-            if (remainingCardsToDraw == 0) executeTimelineLater(Timeline.timeline {
+            if (remainingCardsToDraw == 0) executeTimeline(Timeline.timeline {
                 include(confirmationPopup("Hand reached maximum of $maxCards"))
                 action { changeState(Free) }
             }) else {
@@ -58,7 +58,7 @@ sealed class GameState {
         override fun transitionTo(controller: GameController) = with(controller) {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in special draw: $remainingCardsToDraw")
-            if (remainingCardsToDraw == 0) executeTimelineLater(Timeline.timeline {
+            if (remainingCardsToDraw == 0) executeTimeline(Timeline.timeline {
                 include(confirmationPopup("Hand reached maximum of $maxCards"))
                 action { changeState(Free) }
             }) else {
@@ -113,6 +113,10 @@ sealed class GameState {
     object Free : GameState() {
 
         override fun allowsShooting(): Boolean = true
+
+        override fun transitionTo(controller: GameController) {
+            controller.gameDirector.checkActions()
+        }
 
         override fun onEndTurn(controller: GameController) {
             controller.changeState(InitialDraw(controller.cardsToDraw))

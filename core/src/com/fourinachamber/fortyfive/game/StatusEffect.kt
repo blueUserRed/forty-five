@@ -212,7 +212,7 @@ abstract class StatusEffect(
 //            }
             override fun damage(damage: Int): Timeline {
                 return Timeline.timeline {
-                    action { FortyFive.currentGame!!.damagePlayer(damage) }
+                    include(FortyFive.currentGame!!.damagePlayer(damage))
                 }
             }
         },
