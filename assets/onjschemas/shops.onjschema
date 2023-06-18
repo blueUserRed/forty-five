@@ -68,7 +68,7 @@ types: shopParameter[],
 
 people: {
     name: string,
-    display_name: string,
+    displayName: string,
     defaultShopParameter: string,
     texts: $AdvancedTextPart[][],
     npcImageName: string,
