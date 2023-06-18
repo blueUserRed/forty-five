@@ -14,8 +14,8 @@ var worldHeight = 90.0;
 assets: {
     useCardAtlas: true,
     useAssets: [
-        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "enemy_texture", ...(sharedComponents.navBarAssests)
+        "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
+        "heart_texture", "enemy_texture", "shop_dark_background", ...(sharedComponents.navBarAssests),
     ]
 },
 
@@ -33,12 +33,12 @@ options: {
     screenController: $ShopScreenController {
         shopsFile: "maps/shops.onj",
         npcsFile: "maps/npcs.onj",
-        personWidgetName: "person_widget",
+        personWidgetName: "shop_person_widget",
     }
 },
 
 var personWidget = $PersonWidget {
-    name: "person_widget",
+    name: "shop_person_widget",
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
@@ -53,33 +53,30 @@ root: $Box {
     ]
 } children [
 
-    //    $Box {
-//        styles: [ //TODO biome for background
+    //    $Image {       //TODO biome for background
+//
+//        name: "background_img",
+//        textureName: "title_screen_background",
+//        scaleX: 0.0,
+//        scaleY: 0.0,
+//        width: worldWidth,
+//        height: worldHeight,
+//        reportDimensionsWithScaling: true,
+//        styles: [
 //            {
-//                style_priority: 1,
-//                background: "title_screen_background",
 //                positionType: positionType.absolute,
-//                positionLeft: -(worldWidth/5*3)#points,
-//                positionTop: -(worldHeight/4)#points,
-//                justifyContent: justify.center,
-//                flexDirection: flexDirection.column,
-//                width: (worldWidth*2)#points,
-//                height:(worldHeight*2)#points,
-//                detached: true
-//            },
-//            {
-//                style_priority: 2,
-////                style_condition: state("displayOptionsBox"),
-//                detached: false,
+//                positionLeft: -(worldWidth / 5 * 3)#points,
+//                positionTop: -(worldHeight / 4)#points,
+//                width: (worldWidth * 2)#points,
+//                height: (worldHeight * 2)#points,
 //            }
 //        ],
-//        name: "options_box"
 //    },
 
     $Image {       //TODO biome for background
 
         name: "background_img",
-        textureName: "title_screen_background",
+        textureName: "shop_background_no_biome",
         scaleX: 0.0,
         scaleY: 0.0,
         width: worldWidth,
@@ -88,13 +85,81 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionLeft: -(worldWidth / 5 * 3)#points,
-                positionTop: -(worldHeight / 4)#points,
-                width: (worldWidth * 2)#points,
-                height: (worldHeight * 2)#points,
+                width: (worldWidth)#points,
+                height: (worldHeight)#points,
             }
-        ]
+        ],
     },
-    personWidget,
+
     sharedComponents.navBar,
+    personWidget,
+    $Image {
+        textureName: "shop_dark_background",
+        width: worldWidth,
+        height: worldHeight,
+        scaleX: 0.0,
+        scaleY: 0.0,
+        reportDimensionsWithScaling: true,
+
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionRight: 0.0#points,
+                positionBottom: 0.0#points,
+                width: 93.0#percent,
+                height: 93.0#percent,
+            }
+        ],
+    },
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 7.0#percent,
+                positionRight: 5.0#percent,
+                width: 54.25#percent,
+                height: 86.0#percent,
+                flexDirection: flexDirection.column,
+                //                    justifyContent: justify.center
+
+            }
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.relative,
+                    positionTop: 2.0#points,
+                    positionRight: 0.0#points,
+                    width: 100.0#percent,
+                    height: 20.0#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+
+                }
+            ]
+        } children [
+            $TemplateLabel {
+                align: "left",
+                template: "{map.curEvent.personDisplayName}",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.2
+            },
+            $TemplateLabel {
+                align: "right",
+                template: "{map.curEvent.money}",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.2
+            },
+        ],
+        $TemplateLabel {
+            align: "left",
+            template: "{map.curEvent.message}",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 0.08
+        },
+    ],
 ]

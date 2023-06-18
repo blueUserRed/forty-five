@@ -55,20 +55,20 @@ types: [
 people: [
     {
         name: "traveling_merchant",
-        display_name: "Traveling Merchant",
+        displayName: "Traveling Merchant",
         defaultShopParameter: "no_biome",
         texts: [
             [
                 $Text {
-                    text: "test Greetings from the Traveler which is: "
+                    text: "test Greetings from the Traveler which is: ", color: color.white
                 },
                 $Text {
-                    text: "Funny Card games Haha"
+                    text: "Funny Card games Haha", color: color.beige
                 }
             ],
             [
                 $Text {
-                    text: "Greetings Traveler. I have the best products you will ever see."
+                    text: "Greetings Traveler. I have the best products you will ever see.", color: color.beige
                 }
             ],
         ],

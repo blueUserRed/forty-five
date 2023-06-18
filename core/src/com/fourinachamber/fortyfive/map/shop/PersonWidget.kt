@@ -34,14 +34,11 @@ class PersonWidget(
             val yPos = offsetY + defOffset["offsetY"]
             val w = personDrawable.minWidth * scale * defOffset["scale"]!!
             val h = personDrawable.minHeight * scale * defOffset["scale"]!!
-
-//            println(""+xPos+" "+yPos+" "+w+" "+h+" ")
             personDrawable.draw(batch, xPos, yPos, w, h)
         }
     }
 
     public fun setDrawable(imgData: OnjObject) {
-//        if (this::textureName.isInitialized) {
         val textureName = imgData.get<String>("textureName")
         defOffset["offsetX"] = imgData.get<Double>("offsetX").toFloat()
         defOffset["offsetY"] = imgData.get<Double>("offsetY").toFloat()
@@ -49,6 +46,5 @@ class PersonWidget(
         ResourceManager.borrow(this, textureName)
         personDrawable = ResourceManager.get(this, textureName)
         ResourceManager.giveBack(this, textureName)
-//        }
     }
 }

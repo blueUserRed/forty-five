@@ -188,6 +188,14 @@ textures: [
     {
         name: "map_decoration_cactus",
         file: "textures/map/decorations/cactus.png"
+    },
+    {
+        name: "shop_dark_background",
+        file: "textures/shop/dark_background.png"
+    },
+    {
+        name: "shop_background_no_biome",
+        file: "textures/shop/biomeBackgrounds/no_biome.png"
     }
 ],
 

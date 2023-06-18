@@ -1,26 +1,16 @@
 package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.ui.Image
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
-import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 //import com.fourinachamber.fortyfive.map.shop.Shop
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.WidthStyleProperty
+import com.fourinachamber.fortyfive.utils.TemplateString
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
-import onj.value.OnjFloat
 import onj.value.OnjObject
-import onj.value.OnjValue
-import kotlin.random.Random
 
 class ShopScreenController(onj: OnjObject) : ScreenController() {
 
@@ -53,10 +43,10 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         }
         this.personWidget = personWidget
         val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
-//        shopsSchema.assertMatches(shopFile)
+        shopsSchema.assertMatches(shopFile)
         shopFile as OnjObject
         val npcsFile = OnjParser.parseFile(Gdx.files.internal(npcsFilePath).file())
-//        shopsSchema.assertMatches(npcsFile)
+        npcsSchema.assertMatches(npcsFile)
         npcsFile as OnjObject
 
         person = shopFile
@@ -65,7 +55,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == context.person }
             ?: throw RuntimeException("unknown shop: ${context.person}")
-//        println(person)
+        println(person)
         val imgData = (npcsFile
             .get<OnjArray>("npcs")
             .value
@@ -73,44 +63,23 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
 
-        println(imgData)
         personWidget.setDrawable(imgData)
-//        personImageActor.setSize(200.0F, 700.0F)
-//
-//        println("" + personImageActor.x + "  " + personImageActor.y)
-//        println("" + personImageActor.width + "  " + personImageActor.height)
-//        println(personImageActor.parent.children)
+        TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
+        TemplateString.updateGlobalParam("map.curEvent.money", "0$")
 
-//        personDrawable = ResourceManager.get(screen, imgData.get<String>("textureName"))
-        //TODO Template Strings, technical design
+        TemplateString.updateGlobalParam("map.curEvent.message", "Hello Darling!")
     }
-
-    override fun update() {
-        super.update()
-//        val imgData = person.get<OnjObject>("image")
-//        if (personImageActor.width != imgData.get<OnjFloat>("width").value.toFloat()) {
-//            personImageActor.width = imgData.get<OnjFloat>("width").value.toFloat()
-//            personImageActor.height = imgData.get<OnjFloat>("height").value.toFloat()
-//            personImageActor.x = imgData.get<OnjFloat>("positionLeft").value.toFloat()
-//            personImageActor.y = imgData.get<OnjFloat>("positionTop").value.toFloat()
-//            personImageActor.drawable = personDrawable
-//        }
-    }
-
-//    override fun update() {
-//        super.update()
-//        println(personImageActor.width)
-////        System.exit(0)
-//        personImageActor.setSize(200F,800F)
-//        personImageActor.isVisible=true
-//    }
 
     companion object {
 
-        const val schemaPath: String = "onjschemas/shops.onjschema"
+        private const val schemaPathShop: String = "onjschemas/shops.onjschema"
+        private const val schemaPathNpcs: String = "onjschemas/npcs.onjschema"
 
         val shopsSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPath).file())
+            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPathShop).file())
+        }
+        val npcsSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPathNpcs).file())
         }
 
     }
