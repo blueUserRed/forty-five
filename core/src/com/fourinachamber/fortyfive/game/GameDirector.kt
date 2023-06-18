@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.between
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.parser.OnjParser
@@ -28,16 +29,21 @@ class GameDirector(private val controller: GameController) {
         enemiesOnj as OnjObject
 
         val difficulty = difficultyScale()
+        FortyFiveLogger.debug(logTag, "difficulty = $difficulty")
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         val chosen = chooseEnemy(enemyPrototypes)
+        FortyFiveLogger.debug(logTag, "chose enemy ${chosen.name}")
         turns = chosen.turnCount.random()
+        FortyFiveLogger.debug(logTag, "chose $turns turns")
         if (turns >= 10) {
             turnRevealTime = (turns * (2.0 / 3.0)).toInt()
             enemyActionTime = (turns * (1.0 / 3.0)).toInt()
         } else {
             controller.remainingTurns = turns
         }
+        FortyFiveLogger.debug(logTag, "turnRevealTime = $turnRevealTime; enemyActionTime = $enemyActionTime")
         val enemy = scaleAndCreateEnemy(chosen, difficulty)
+        FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}; damage = ${enemy.damage}")
         controller.initEnemyArea(enemy)
     }
 
@@ -52,7 +58,7 @@ class GameDirector(private val controller: GameController) {
 
     private fun doEnemyAction() {
         // TODO: logic
-        val timeline = EnemyAction.RevolverRotation.getTimeline(controller)
+        val timeline = EnemyAction.RevolverRotation.getTimeline(controller, 0.5)
         controller.executeTimelineLater(timeline)
     }
 
@@ -73,6 +79,14 @@ class GameDirector(private val controller: GameController) {
 
     // TODO: remove, just for testing
     private var curEvaluation: Double by templateParam("game.curEvaluation", 0.0)
+
+    fun currentEval(): Double {
+        val isValue = evaluateState()
+        val shouldValue = (1.0 / turns) * controller.turnCounter
+        val eval = (isValue - shouldValue).between(0.0, 1.0)
+        curEvaluation = eval
+        return eval
+    }
 
     fun evaluateState(): Double { // TODO: make private
         val enemy = controller.enemyArea.enemies[0]
@@ -99,16 +113,22 @@ class GameDirector(private val controller: GameController) {
         }
 
         val eval = if (damagedPercent > 0.8) {
+            // when player is close to beating the enemy, return only enemy health
             damagedPercent
         } else {
-            val x = ((avgReserveGainOrLoss.between(-3.0, 3.0) + 3.0) / 6.0) - 0.5
-            x * 0.4 + damagedPercent * 0.6 + (cardsDrawn / 10.0)
+            var x = ((avgReserveGainOrLoss.between(-3.0, 3.0) + 3.0) / 6.0) - 0.5 // normalize reserve value
+            x = x * 0.4 + damagedPercent * 0.6 + (cardsDrawn / 10.0) // mix reserve value with cards drawn value
+            if (controller.remainingCards < (turns - controller.turnCounter) * controller.cardsToDraw) {
+                x -= 0.3 // punish player for running out of cards
+            }
+            x
         }.between(0.0, 1.0)
-        curEvaluation = eval
         return eval
     }
 
     companion object {
+
+        const val logTag = "director"
 
         private val enemiesFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/enemies.onjschema").file())

@@ -14,11 +14,12 @@ sealed class GameState {
         override fun transitionTo(controller: GameController) = with(controller) {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
-            if (remainingCardsToDraw == 0) { //TODO: display this in some way
-                changeState(Free)
-                return
+            if (remainingCardsToDraw == 0) executeTimelineLater(Timeline.timeline {
+                include(confirmationPopup("Hand reached maximum of $maxCards"))
+                action { changeState(Free) }
+            }) else {
+                showCardDrawActor()
             }
-            showCardDrawActor()
         }
 
         override fun transitionAway(controller: GameController) = with(controller) {
@@ -57,11 +58,12 @@ sealed class GameState {
         override fun transitionTo(controller: GameController) = with(controller) {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in special draw: $remainingCardsToDraw")
-            if (remainingCardsToDraw == 0) { //TODO: display this in some way
-                changeState(Free)
-                return
+            if (remainingCardsToDraw == 0) executeTimelineLater(Timeline.timeline {
+                include(confirmationPopup("Hand reached maximum of $maxCards"))
+                action { changeState(Free) }
+            }) else {
+                showCardDrawActor()
             }
-            showCardDrawActor()
         }
 
         override fun transitionAway(controller: GameController) = with(controller) {
