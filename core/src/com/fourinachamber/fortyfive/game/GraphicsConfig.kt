@@ -54,7 +54,7 @@ object GraphicsConfig {
                 FortyFive.currentGame!!.playGameAnimation(anim)
             }
 
-            override fun isFinished(): Boolean = true
+            override fun isFinished(timeline: Timeline): Boolean = true
         }
     }
 

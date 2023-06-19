@@ -248,10 +248,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         currentState.transitionAway(this)
         currentState = next
         currentState.transitionTo(this)
-        if (next.shouldIncrementTurnCounter()) nextTurn()
     }
 
-    private fun nextTurn() {
+    fun nextTurn() {
         turnCounter++
         if (remainingTurns != -1) {
             FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")

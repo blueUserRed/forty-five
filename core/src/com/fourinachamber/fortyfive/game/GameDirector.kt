@@ -57,24 +57,23 @@ class GameDirector(private val controller: GameController) {
     }
 
     private fun doEnemyAction() {
-        // TODO: logic
-        val timeline = EnemyAction.RevolverRotation.getTimeline(controller, 0.5)
+        val enemy = controller.enemyArea.enemies[0]
+        val timeline = enemy.actions.random().getTimeline(controller)
         controller.executeTimeline(timeline)
     }
 
     private fun chooseEnemy(prototypes: List<EnemyPrototype>): EnemyPrototype {
-        return prototypes.random() // TODO: some more sophisticated logic
+        return prototypes.random()
     }
 
     private fun scaleAndCreateEnemy(prototype: EnemyPrototype, difficultyScale: Double): Enemy {
-        // TODO: some more sophisticated logic
         val health = (prototype.baseHealthPerTurn * turns * difficultyScale).toInt()
         val damage = (prototype.baseDamage * difficultyScale).toInt()
         return prototype.create(health, damage)
     }
 
     private fun difficultyScale(): Double {
-        return 1.0 + SaveState.enemiesDefeated / 10.0
+        return 1.0 + SaveState.enemiesDefeated / 20.0
     }
 
     // TODO: remove, just for testing

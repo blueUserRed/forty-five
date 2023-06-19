@@ -40,7 +40,7 @@ object FortyFive : Game() {
         serviceThread.start()
         if (generateCards) runCardGenerator()
         if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
-        changeToScreen("screens/game_screen.onj")
+        changeToScreen("screens/map_screen.onj")
     }
 
     override fun render() {
@@ -106,7 +106,7 @@ object FortyFive : Game() {
         TemplateString.init()
         FortyFiveLogger.init()
 //        resetAllSync()
-//        newRunSync()
+        newRunSync()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()

@@ -14,6 +14,15 @@ enemies: [
         scaleY: 0.025,
         detailFont: "red_wing",
         detailFontScale: 0.06,
+        actions: [
+            $DestroyCardsInHand {
+                maxCards: 4
+            },
+
+            $RevolverRotation {
+                maxTurns: 3
+            }
+        ],
         detailFontColor: color.black
     },
     {
@@ -28,6 +37,15 @@ enemies: [
         scaleY: 0.025,
         detailFont: "red_wing",
         detailFontScale: 0.06,
+        actions: [
+            $DestroyCardsInHand {
+                maxCards: 4
+            },
+
+            $RevolverRotation {
+                maxTurns: 3
+            }
+        ],
         detailFontColor: color.black
     }
 ]

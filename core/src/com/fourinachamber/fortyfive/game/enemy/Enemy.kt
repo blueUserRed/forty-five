@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
 import java.lang.Integer.min
@@ -47,6 +48,7 @@ class Enemy(
     val detailFontScale: Float,
     val detailFontColor: Color,
     val damage: Int,
+    val actions: List<EnemyAction>,
     private val screen: OnjScreen
 ) {
 
@@ -260,6 +262,10 @@ class Enemy(
             val drawableHandle = onj.get<String>("texture")
             val coverIconHandle = onj.get<String>("coverIcon")
             val detailFont = ResourceManager.get<BitmapFont>(curScreen, onj.get<String>("detailFont"))
+            val actions = onj
+                .get<OnjArray>("actions")
+                .value
+                .map { EnemyAction.fromOnj(it as OnjNamedObject) }
             return Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
@@ -272,6 +278,7 @@ class Enemy(
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
                 damage,
+                actions,
                 curScreen
             )
         }

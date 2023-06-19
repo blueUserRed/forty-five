@@ -110,10 +110,10 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
                 sizeDirty = true
             }
 
-            override fun isFinished(): Boolean = TimeUtils.millis() >= finishesAt
+            override fun isFinished(timeline: Timeline): Boolean = TimeUtils.millis() >= finishesAt
 
-            override fun end() {
-                super.end()
+            override fun end(timeline: Timeline) {
+                super.end(timeline)
                 currentPostProcessingShaders.remove(shader)
                 sizeDirty = true
             }
