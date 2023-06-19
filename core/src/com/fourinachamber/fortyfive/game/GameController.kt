@@ -269,6 +269,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
 
         timelinesToStart.forEach { timelines.add(it) }
+        timelinesToStart.clear()
         val iterator = timelines.iterator()
         while (iterator.hasNext()) {
             val cur = iterator.next()
@@ -695,9 +696,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     sealed class RevolverRotation {
-        class Right(val amount: Int) : RevolverRotation()
-        class Left(val amount: Int) : RevolverRotation()
-        object Dont : RevolverRotation()
+        class Right(val amount: Int) : RevolverRotation() {
+
+            override fun toString(): String = "Right($amount)"
+        }
+        class Left(val amount: Int) : RevolverRotation() {
+
+            override fun toString(): String = "Left($amount)"
+        }
+        object Dont : RevolverRotation() {
+
+            override fun toString(): String = "Dont"
+        }
 
 
         companion object {

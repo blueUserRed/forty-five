@@ -82,7 +82,6 @@ class GameDirector(private val controller: GameController) {
     fun currentEval(): Double {
         val isValue = evaluateState()
         val shouldValue = (1.0 / turns) * controller.turnCounter
-        println("${controller.turnCounter}| $isValue $shouldValue")
         val eval = (isValue - shouldValue)
         curEvaluation = eval
         return eval

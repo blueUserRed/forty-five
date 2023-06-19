@@ -322,7 +322,7 @@ class TimelineAsAction(private val timeline: Timeline) : Timeline.TimelineAction
         this.timeline.updateTimeline()
     }
 
-    override fun isFinished(timeline: Timeline): Boolean = timeline.isFinished
+    override fun isFinished(timeline: Timeline): Boolean = this.timeline.isFinished
 
 }
 

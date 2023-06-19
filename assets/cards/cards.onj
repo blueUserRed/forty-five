@@ -355,10 +355,6 @@ startDeck: [
         amount: 1
     },
     {
-        name: "enchantedBullet",
-        amount: 1
-    },
-    {
         name: "explosiveBullet",
         amount: 1
     },
@@ -369,6 +365,50 @@ startDeck: [
     {
         name: "silverBullet",
         amount: 1
+    },
+    {
+        name: 'arrow',
+        amount: 1,
+    },
+    {
+        name: 'BFB',
+        amount: 1,
+    },
+    {
+        name: 'obsidianBullet',
+        amount: 1,
+    },
+    {
+        name: 'rustedBullet',
+        amount: 1,
+    },
+    {
+        name: 'invisibleBullet',
+        amount: 1,
+    },
+    {
+        name: 'fakeBullet',
+        amount: 1,
+    },
+    {
+        name: 'bulletBulletBullet',
+        amount: 1,
+    },
+    {
+        name: 'bulletBullet',
+        amount: 1,
+    },
+    {
+        name: 'undeadBullet',
+        amount: 1,
+    },
+    {
+        name: 'poisonBullet',
+        amount: 1,
+    },
+    {
+        name: "enchantedBullet",
+        amount: 1,
     }
 
 ]
