@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
-//import com.fourinachamber.fortyfive.map.shop.Shop
 import com.fourinachamber.fortyfive.utils.TemplateString
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser

@@ -61,6 +61,7 @@ class Card(
     val baseDamage: Int,
     val coverValue: Int,
     val cost: Int,
+    var price: Int,
     val effects: List<Effect>,
     val tags: List<String>,
     detailFont: BitmapFont,
@@ -353,6 +354,7 @@ class Card(
                 onj.get<Long>("baseDamage").toInt(),
                 onj.get<Long>("coverValue").toInt(),
                 onj.get<Long>("cost").toInt(),
+                onj.get<Long>("price").toInt(),
 
                 onj.get<OnjArray>("effects")
                     .value

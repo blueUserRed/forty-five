@@ -15,6 +15,10 @@ $CardEffect{
     $ProbabilityAddition{
         weight: float
     }
+
+    $PriceAddition{
+        price: int
+    }
 }
 
 var shopParameter = {
