@@ -20,13 +20,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private lateinit var screen: OnjScreen
     private lateinit var context: ShopMapEvent
 
-    //    private val personImageActorName = onj.get<String>("shopPersonImageActor")
     private lateinit var person: OnjObject
-
-    //    private val cardConfigFile = onj.get<String>("cardsFile")
-//    private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
-//    private val cardDrawActorName = onj.get<String>("cardDrawActor")
-//    lateinit var closeButton: Actor
 
     private val shopFilePath = onj.get<String>("shopsFile")
     private val npcsFilePath = onj.get<String>("npcsFile")
@@ -63,7 +57,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-        SaveState.playerMoney += 1 //TODO remove
         personWidget.setDrawable(imgData)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
@@ -71,7 +64,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val defaults = shopFile.get<OnjObject>("defaults")
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
-
         addItemWidgets()
     }
 

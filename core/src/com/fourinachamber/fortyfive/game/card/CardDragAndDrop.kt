@@ -141,29 +141,6 @@ class CoverAreaDropTarget(
 
 }
 
-class InventoryDropTarget(
-    dragAndDrop: DragAndDrop,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean = true
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        if (payload == null || source == null) return
-
-        val obj = payload.obj!! as CardDragAndDropPayload
-
-    }
-
-
-}
-
 /**
  * used as a payload for [CardDragSource] and [RevolverDropTarget].
  * Automatically resets cards, loads into revolver, etc.

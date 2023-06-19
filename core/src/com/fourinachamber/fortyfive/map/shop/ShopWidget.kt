@@ -125,8 +125,8 @@ class ShopWidget(
 
     fun checkAndBuy(card: Card, x: Float, y: Float) {
         if (y > 0 && y < height && x < -card.actor.width) {
-            buyCard(cards.indexOf(card))
             SaveState.playerMoney -= card.cost
+            buyCard(cards.indexOf(card))
         }
     }
 

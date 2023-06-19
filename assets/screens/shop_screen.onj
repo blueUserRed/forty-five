@@ -47,9 +47,6 @@ var personWidget = $PersonWidget {
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
-    dropBehaviour: $ShopBuyDropTarget {
-        group: "card"
-    },
 };
 
 
@@ -61,7 +58,8 @@ var cardsWidget = $ShopWidget {
     dataFont: "red_wing_cm",
     dataDragBehaviour: $ShopCardDrag {
         group: "card",
-//        moveToLastIndex: true,
+        //        moveToLastIndex: true,
+
     },
     maxPerLine: 4,
     widthPercentagePerItem: 20.0,
@@ -185,7 +183,7 @@ root: $Box {
 
                 font: "red_wing",
                 fontScale: 0.08,
-                color: color.forty_white
+                color: color.forty_white,
             },
             styles: [
                 {
@@ -197,5 +195,12 @@ root: $Box {
             ],
         },
         cardsWidget,
+        $Label {
+            text: "drag to the merchant to confirm your purchase and add it to your backbag",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.07,
+            align: "center",
+        }
     ],
 ]

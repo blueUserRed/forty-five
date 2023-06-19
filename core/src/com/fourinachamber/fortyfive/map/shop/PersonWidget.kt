@@ -21,15 +21,12 @@ class PersonWidget(
     private val offsetX: Float,
     private val offsetY: Float,
     val scale: Float,
-    private val dropBehaviour: OnjNamedObject,
     val screen: OnjScreen,
 ) : Widget(), ResourceBorrower {
 
     private lateinit var personDrawable: Drawable
 
     private val defOffset: HashMap<String, Float> = HashMap()
-
-//    private lateinit var textureName: ResourceHandle
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (this::personDrawable.isInitialized) {
@@ -50,13 +47,4 @@ class PersonWidget(
         personDrawable = ResourceManager.get(this, textureName)
         ResourceManager.giveBack(this, textureName)
     }
-    /*fun addDrag(dragAndDrop: DragAndDrop){
-        val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-            dropBehaviour.name,
-            dragAndDrop,
-            this,
-            dropBehaviour
-        )
-        dragAndDrop.addTarget(behaviour)
-    }*/
 }

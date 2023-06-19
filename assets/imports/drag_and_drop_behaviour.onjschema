@@ -36,10 +36,6 @@ $DragAndDropBehaviour {
         ...dragAndDropBehaviourSharedKeys
     }
 
-    $ShopBuyDropTarget {
-        ...dragAndDropBehaviourSharedKeys
-    }
-
     $ShopCardDrag{
         ...dragAndDropBehaviourSharedKeys
     }
