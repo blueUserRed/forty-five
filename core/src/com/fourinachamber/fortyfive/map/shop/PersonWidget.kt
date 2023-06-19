@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import onj.value.OnjObject
 import java.nio.channels.FileLock
 import com.fourinachamber.fortyfive.utils.plus
@@ -21,12 +22,17 @@ class PersonWidget(
     private val offsetX: Float,
     private val offsetY: Float,
     val scale: Float,
+    val dropBehaviour:OnjNamedObject,
     val screen: OnjScreen,
-) : Widget(), ResourceBorrower {
+) : Widget(), ResourceBorrower,StyledActor {
 
     private lateinit var personDrawable: Drawable
 
     private val defOffset: HashMap<String, Float> = HashMap()
+
+    init {
+        bindHoverStateListeners(this)
+    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (this::personDrawable.isInitialized) {
@@ -47,4 +53,22 @@ class PersonWidget(
         personDrawable = ResourceManager.get(this, textureName)
         ResourceManager.giveBack(this, textureName)
     }
+    
+    fun addDropTarget(dragAndDrop: DragAndDrop) {
+        val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+            dropBehaviour.name,
+            dragAndDrop,
+            this,
+            dropBehaviour
+        )
+        dragAndDrop.addTarget(behaviour)
+    }
+
+    override var styleManager: StyleManager?=null
+
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+    }
+
+    override var isHoveredOver: Boolean=false
 }

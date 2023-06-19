@@ -74,7 +74,7 @@ object SaveState {
             savefileDirty = true
         }
 
-            /**
+    /**
      * how many enemies the player has defeated this run
      */
     var enemiesDefeated: Int by templateParam("stat.enemiesDefeated", 0) {
@@ -182,15 +182,19 @@ object SaveState {
         playerLives = obj.get<Long>("playerLives").toInt()
         playerMoney = obj.get<Long>("playerMoney").toInt()
 
-        FortyFiveLogger.debug(logTag, "stats: " +
-                "usedReserves = $usedReserves, " +
-                "enemiesDefeated = $enemiesDefeated, " +
-                "playerMoney = $playerMoney, " +
-                "playerLives = $playerLives")
+        FortyFiveLogger.debug(
+            logTag, "stats: " +
+                    "usedReserves = $usedReserves, " +
+                    "enemiesDefeated = $enemiesDefeated, " +
+                    "playerMoney = $playerMoney, " +
+                    "playerLives = $playerLives"
+        )
 
-        FortyFiveLogger.debug(logTag, "position: " +
-                "currentMap = $currentMap, " +
-                "currentNode = $currentNode")
+        FortyFiveLogger.debug(
+            logTag, "position: " +
+                    "currentMap = $currentMap, " +
+                    "currentNode = $currentNode"
+        )
 
         savefileDirty = false
     }
@@ -250,6 +254,10 @@ object SaveState {
             "name" with it.key
             "amount" with it.value
         }
+    }
+
+    fun buyCard(cardName: String) {
+        print("$cardName bought")
     }
 
 }

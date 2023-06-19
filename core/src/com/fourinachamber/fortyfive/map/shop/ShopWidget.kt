@@ -3,12 +3,10 @@ package com.fourinachamber.fortyfive.map.shop
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.utils.TemplateString
 import ktx.actors.alpha
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -21,28 +19,29 @@ import kotlin.random.Random
 class ShopWidget(
     texture: String,
     dataFile: String,
-    val dataFont: Label.LabelStyle,
-    val dataDragBehaviour: OnjNamedObject,
-    val maxPerLine: Int,
-    val widthPercentagePerItem: Float,
+    private val dataFont: Label.LabelStyle,
+    private val dataDragBehaviour: OnjNamedObject,
+    private val maxPerLine: Int,
+    private val widthPercentagePerItem: Float,
     val screen: OnjScreen,
 ) : CustomFlexBox(screen) {
 
     private val cards: MutableList<Card> = mutableListOf()
     private val priceTags: MutableList<CustomLabel> = mutableListOf()
-    private val allCards: MutableList<Card> = mutableListOf()
     private lateinit var boughtIndices: MutableList<Int>
 
     private lateinit var dragAndDrop: DragAndDrop
 
-    private val cardPrototypes: MutableList<CardPrototype>
+    private val allCards: MutableList<Card>
+    private val chances: HashMap<String, Float> = hashMapOf()
 
     init {
         backgroundHandle = texture
         val onj = OnjParser.parseFile(dataFile)
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
-        cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen, ::initCard).toMutableList()
+        val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
+        allCards = cardPrototypes.map { it.create() }.toMutableList()
         curShopWidget = this
     }
 
@@ -57,8 +56,9 @@ class ShopWidget(
         val rnd = Random(seed)
         val nbrOfItems = (6)
         for (i in 0 until nbrOfItems) {
-            val cardId = (0..cardPrototypes.size).random(rnd)
-            cards.add(cardPrototypes[cardId].create())
+            val cardId = (0 until allCards.size).random(rnd)
+            cards.add(allCards[cardId])
+            allCards.removeAt(cardId)
             val stringLabel = CustomLabel(screen, "${cards.last().cost}$", dataFont, false)
             stringLabel.setFontScale(0.1F)
             stringLabel.setAlignment(Align.center)
@@ -83,7 +83,7 @@ class ShopWidget(
     ) {
         makeCardUnmovable(i)
         priceTags[i].text.clear()
-        priceTags[i].text.append("out of stock")
+        priceTags[i].text.append("bought")
         if (i !in boughtIndices) boughtIndices.add(i)
         layout()
     }
@@ -112,21 +112,45 @@ class ShopWidget(
                 sizePerItem,
                 distanceBetweenY / 2,
             );
-            if (i !in boughtIndices && card.cost > SaveState.playerMoney) {
-                makeCardUnmovable(i)
-                println("$i not enough money")
-            }
+            if (i !in boughtIndices && card.cost > SaveState.playerMoney) makeCardUnmovable(i)
         }
     }
 
-    private fun initCard(card: Card) {
-        allCards.add(card)
+    fun checkAndBuy(card: Card) {
+        SaveState.playerMoney -= card.cost
+        buyCard(cards.indexOf(card))
+        SaveState.buyCard(card.name)
     }
 
-    fun checkAndBuy(card: Card, x: Float, y: Float) {
-        if (y > 0 && y < height && x < -card.actor.width) {
-            SaveState.playerMoney -= card.cost
-            buyCard(cards.indexOf(card))
+    fun calculateChances(type: String, shopFile: OnjObject, person: OnjObject) {//TODO biome, wenn die hinzugefügt werden
+        val allTypes = shopFile.get<OnjArray>("types").value.map { it as OnjObject }
+        val curTypeChances = if (type !in allTypes.map { it.get<String>("name") }) {
+            allTypes.first { it.get<String>("name") == person.get<String>("defaultShopParameter") }
+                .get<OnjArray>("cardChanges").value.map { it as OnjObject }
+        } else {
+            allTypes.first { it.get<String>("name") == type }.get<OnjArray>("cardChanges").value.map { it as OnjObject }
+        }
+        allCards.forEach { chances[it.name] = 0F }
+        curTypeChances.forEach {
+            applyChancesEffect(
+                it.get<OnjNamedObject>("select"),
+                it.get<OnjNamedObject>("effect")
+            )
+        }
+    }
+
+    private fun applyChancesEffect(selector: OnjNamedObject, effect: OnjNamedObject) {
+        println("" + selector + effect.name)
+        val cardsToChange: List<String> = allCards.filter {
+            (if (selector.name == "ByName") it.name == selector.get<String>("name") else it.tags.contains(
+                selector.get<String>("name")
+            ))
+        }.map { it.name }
+        if (effect.name == "Blacklist") {
+            cardsToChange.forEach { chances.remove(it) }
+        }
+        chances.map { (a, _)->a }.filter { it in cardsToChange }.forEach {
+            chances[it] = chances[it]!! + effect.get<Double>("weight").toFloat()
         }
     }
 

@@ -200,6 +200,10 @@ textures: [
     {
         name: "shop_background_no_biome",
         file: "textures/shop/biomeBackgrounds/no_biome.png"
+    },
+    {
+        name: "shop_back_button",
+        file: "textures/shop/back_button.png"
     }
 ],
 

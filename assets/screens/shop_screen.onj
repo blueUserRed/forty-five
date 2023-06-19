@@ -16,6 +16,7 @@ assets: {
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
         "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
+        "shop_back_button",
         ...(sharedComponents.navBarAssests),
     ]
 },
@@ -47,6 +48,15 @@ var personWidget = $PersonWidget {
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
+    dropBehaviour: $ShopDropTarget {
+        group: "card",
+    },
+    styles: [
+        {
+            width: 40.0#percent,
+            height: 100.0#percent,
+        }
+    ],
 };
 
 
@@ -56,10 +66,9 @@ var cardsWidget = $ShopWidget {
     dataFile: "cards/cards.onj",
     dataFontColor: color.dark_brown,
     dataFont: "red_wing_cm",
-    dataDragBehaviour: $ShopCardDrag {
+    dataDragBehaviour: $CardDragSource {
         group: "card",
-        //        moveToLastIndex: true,
-
+        moveToLastIndex: true,
     },
     maxPerLine: 4,
     widthPercentagePerItem: 20.0,
@@ -117,6 +126,29 @@ root: $Box {
                 positionBottom: 0.0#points,
                 width: 93.0#percent,
                 height: 93.0#percent,
+            }
+        ],
+    },
+
+    $Image {       //TODO biome for back (evtl)
+
+        name: "back_button",
+        textureName: "shop_back_button",
+        scaleX: 0.08,
+        scaleY: 0.08,
+        reportDimensionsWithScaling: true,
+        behaviours: [
+            $OnClickChangeScreenBehaviour {
+                screenPath: "screens/map_screen.onj"
+            },
+        ],
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionBottom: 0.0#points,
+                //                                width: (20.0/2)#percent,
+//                height: (20.0/2)#percent,
+
             }
         ],
     },
@@ -196,11 +228,11 @@ root: $Box {
         },
         cardsWidget,
         $Label {
-            text: "drag to the merchant to confirm your purchase and add it to your backbag",
+            text: "drag to the merchant to confirm your purchase and add it to your backpack",
             font: "red_wing_cm",
             color: color.forty_white,
             fontScale: 0.07,
             align: "center",
         }
-    ],
+    ]
 ]

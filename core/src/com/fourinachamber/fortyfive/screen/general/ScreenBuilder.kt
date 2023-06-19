@@ -332,6 +332,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),
             widgetOnj.get<Double>("scale").toFloat(),
+            widgetOnj.get<OnjNamedObject>("dropBehaviour"),
             screen
         )
 
@@ -351,7 +352,6 @@ class ScreenBuilder(val file: FileHandle) {
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
-
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
 

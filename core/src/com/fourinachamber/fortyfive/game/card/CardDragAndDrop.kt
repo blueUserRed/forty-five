@@ -138,7 +138,6 @@ class CoverAreaDropTarget(
         val obj = payload.obj!! as CardDragAndDropPayload
         obj.addCover(coverStack.num)
     }
-
 }
 
 /**
@@ -160,14 +159,14 @@ class CardDragAndDropPayload(val card: Card) {
      * when the drag is stopped, the card will be loaded into the revolver in [slot]
      */
     fun loadIntoRevolver(slot: Int) = tasks.add {
-        FortyFive.currentGame!!.loadBulletInRevolver(card, slot)
+        FortyFive.currentGame!!.loadBulletInRevolver(card, slot)  //TODO ugly
     }
 
     /**
      * when the drag is stopped, the card will be added to the cover area in slot [slot]
      */
     fun addCover(slot: Int) = tasks.add {
-        FortyFive.currentGame!!.addCover(card, slot)
+        FortyFive.currentGame!!.addCover(card, slot)  //TODO ugly
     }
 
     /**
@@ -180,24 +179,7 @@ class CardDragAndDropPayload(val card: Card) {
     /**
      * called when the drag is stopped
      */
-    fun onBuy(x: Float, y: Float) = tasks.add {
-        ShopWidget.curShopWidget.checkAndBuy(card,x,y)
-    }
-}
-
-class ShopCardDrag(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    CardDragSource(dragAndDrop, actor, onj) {
-    override fun dragStop(
-        event: InputEvent?,
-        x: Float,
-        y: Float,
-        pointer: Int,
-        payload: DragAndDrop.Payload?,
-        target: DragAndDrop.Target?
-    ) {
-        if (payload == null) return
-        val obj = payload.obj as CardDragAndDropPayload
-        obj.onBuy(actor.x,actor.y)
-        super.dragStop(event, x, y, pointer, payload, target)
+    fun onBuy() = tasks.add {
+        ShopWidget.curShopWidget.checkAndBuy(card)  //TODO ugly
     }
 }

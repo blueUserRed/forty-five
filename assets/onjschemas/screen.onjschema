@@ -201,6 +201,7 @@ $Widget {
         offsetX:float,
         offsetY:float,
         scale:float,
+        dropBehaviour: $DragAndDropBehaviour,
         ...widgetSharedKeys
     }
 

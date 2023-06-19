@@ -20,6 +20,7 @@ var card = {
     cost: int,
     type: $CardType,
     effects: Effect[],
+    tags: string[],
 };
 
 cards: card[],

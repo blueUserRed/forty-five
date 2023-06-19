@@ -4,7 +4,7 @@ $CardSelector{
     $ByName{
         name: string
     }
-    $ByType{
+    $ByTag{
         name: string
     }
 }
@@ -13,7 +13,7 @@ $CardEffect{
     $Blacklist{}
 
     $ProbabilityAddition{
-        percent: float
+        weight: float
     }
 }
 

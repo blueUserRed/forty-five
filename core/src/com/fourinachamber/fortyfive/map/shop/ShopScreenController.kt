@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
 //import com.fourinachamber.fortyfive.map.shop.Shop
@@ -11,7 +10,6 @@ import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
-import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import onj.value.OnjString
 
@@ -58,19 +56,21 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
         personWidget.setDrawable(imgData)
+        personWidget.addDropTarget(dragAndDrop)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = person.get<OnjArray>("texts").value
         val defaults = shopFile.get<OnjObject>("defaults")
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
-        addItemWidgets()
+        addItemWidgets(shopFile, person)
     }
 
-    private fun addItemWidgets() {
+    private fun addItemWidgets(shopFile: OnjObject, person: OnjObject) {
         shopWidgetNames.forEach {
             val shopWidget = screen.namedActorOrError(it)
             if (shopWidget !is ShopWidget) throw RuntimeException("widget with name $it must be of type shopWidget")
+            shopWidget.calculateChances(context.type, shopFile,person)
             shopWidget.addItems(context.seed, context.boughtIndices, dragAndDrop)
         }
     }
