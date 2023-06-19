@@ -72,7 +72,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
 
-        personWidget.addDrag(dragAndDrop)
         addItemWidgets()
     }
 
@@ -80,7 +79,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         shopWidgetNames.forEach {
             val shopWidget = screen.namedActorOrError(it)
             if (shopWidget !is ShopWidget) throw RuntimeException("widget with name $it must be of type shopWidget")
-            shopWidget.addItems(context.seed, context.boughtIndices.toMutableList(), dragAndDrop)
+            shopWidget.addItems(context.seed, context.boughtIndices, dragAndDrop)
         }
     }
 

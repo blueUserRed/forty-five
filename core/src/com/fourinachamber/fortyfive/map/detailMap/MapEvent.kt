@@ -4,6 +4,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.MapManager
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
+import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
@@ -23,7 +24,7 @@ object MapEventFactory {
                 it.get<String>("biome"),
                 it.get<String>("person"),
                 it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-                it.get<List<Int>>("boughtIndices"),
+                it.get<List<OnjInt>>("boughtIndices").map{it.value.toInt()}.toMutableList(),
             )
         },
     )
@@ -241,7 +242,7 @@ class ShopMapEvent(
     val biome: String,
     val person: String,
     val seed: Long,
-    val boughtIndices: List<Int>
+    val boughtIndices: MutableList<Int>
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -254,7 +255,6 @@ class ShopMapEvent(
     override val displayName: String = "BUY STUFF NOW"
 
     override fun start() {
-        println(seed)
         FortyFive.changeToScreen("screens/shop_screen.onj", this) // TODO: ugly
     }
 
@@ -271,6 +271,4 @@ class ShopMapEvent(
         ("seed" with seed)
         ("boughtIndices" with boughtIndices)
     }
-
-
 }
