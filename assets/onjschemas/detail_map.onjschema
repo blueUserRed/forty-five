@@ -32,7 +32,6 @@ nodes: {
     y: float,
     isArea: boolean,
     edgesTo: int[],
-    blockingEdges: int[],
     image?: string,
     imagePos?: string,
     event: $MapEvent?
