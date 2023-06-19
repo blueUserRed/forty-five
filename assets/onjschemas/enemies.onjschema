@@ -1,6 +1,18 @@
 
 use Common;
 
+$EnemyAction {
+
+    $DestroyCardsInHand {
+        maxCards: int
+    }
+
+    $RevolverRotation {
+        maxTurns: int
+    }
+
+}
+
 var enemy = {
     name: string,
     baseHealthPerTurn: int,
@@ -13,6 +25,7 @@ var enemy = {
     coverIconScale: float,
     detailFont: string,
     detailFontScale: float,
+    actions: $EnemyAction[],
     detailFontColor: Color,
 };
 

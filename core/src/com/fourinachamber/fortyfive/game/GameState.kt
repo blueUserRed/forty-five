@@ -12,6 +12,7 @@ sealed class GameState {
         )
 
         override fun transitionTo(controller: GameController) = with(controller) {
+            nextTurn()
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
             if (remainingCardsToDraw == 0) executeTimeline(Timeline.timeline {
@@ -32,8 +33,6 @@ sealed class GameState {
         }
 
         override fun allowsDrawingCards(): Boolean = true
-
-        override fun shouldIncrementTurnCounter(): Boolean = true
 
         override fun onCardDrawn(controller: GameController) {
             remainingCardsToDraw--
@@ -158,9 +157,6 @@ sealed class GameState {
 
     @AllThreadsAllowed
     open fun allowsDrawingCards(): Boolean = false
-
-    @AllThreadsAllowed
-    open fun shouldIncrementTurnCounter(): Boolean = false
 
     @MainThreadOnly
     open fun onEndTurn(controller: GameController) { }
