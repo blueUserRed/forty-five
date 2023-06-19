@@ -5,8 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.utils.random
 import ktx.actors.alpha
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -54,12 +54,13 @@ class ShopWidget(
         this.boughtIndices = boughtIndices
         this.dragAndDrop = dragAndDrop
         val rnd = Random(seed)
-        val nbrOfItems = (6)
+        val nbrOfItems = (5..8).random(rnd)
         for (i in 0 until nbrOfItems) {
-            val cardId = (0 until allCards.size).random(rnd)
+            if (chances.size == 0) break
+            val cardId = getCardToAddWithChances(rnd)
             cards.add(allCards[cardId])
-            allCards.removeAt(cardId)
-            val stringLabel = CustomLabel(screen, "${cards.last().cost}$", dataFont, false)
+            chances.remove(allCards[cardId].name)
+            val stringLabel = CustomLabel(screen, "${cards.last().price}$", dataFont, false)
             stringLabel.setFontScale(0.1F)
             stringLabel.setAlignment(Align.center)
             priceTags.add(stringLabel)
@@ -76,6 +77,19 @@ class ShopWidget(
             )
             dragAndDrop.addSource(behaviour)
         }
+    }
+
+    private fun getCardToAddWithChances(rnd: Random): Int {
+        val maxWeight = chances.map { (_, b) -> b }.sum()
+        val value = (0.0F..maxWeight).random(rnd)
+        var curSum = 0.0
+        for (e in chances) {
+            curSum += e.value
+            if (curSum > value) {
+                return allCards.indexOf(allCards.find { it.name == e.key })
+            }
+        }
+        return chances.size - 1
     }
 
     private fun buyCard(
@@ -104,25 +118,28 @@ class ShopWidget(
             card.actor.height = sizePerItem
             card.actor.x = distanceBetweenX * (i % maxPerLine + 1) + sizePerItem * (i % maxPerLine)
             card.actor.y = height - distanceBetweenY * (i / maxPerLine + 0.5F) - sizePerItem * (i / maxPerLine + 1)
-
             val label = priceTags[i]
             label.setBounds(
                 card.actor.x,
                 card.actor.y - distanceBetweenY / 2,
                 sizePerItem,
                 distanceBetweenY / 2,
-            );
-            if (i !in boughtIndices && card.cost > SaveState.playerMoney) makeCardUnmovable(i)
+            )
+            if (i !in boughtIndices && card.price > SaveState.playerMoney) makeCardUnmovable(i)
         }
     }
 
     fun checkAndBuy(card: Card) {
-        SaveState.playerMoney -= card.cost
+        SaveState.playerMoney -= card.price
         buyCard(cards.indexOf(card))
         SaveState.buyCard(card.name)
     }
 
-    fun calculateChances(type: String, shopFile: OnjObject, person: OnjObject) {//TODO biome, wenn die hinzugefügt werden
+    fun calculateChances(
+        type: String,
+        shopFile: OnjObject,
+        person: OnjObject
+    ) { //TODO biome, when they are added
         val allTypes = shopFile.get<OnjArray>("types").value.map { it as OnjObject }
         val curTypeChances = if (type !in allTypes.map { it.get<String>("name") }) {
             allTypes.first { it.get<String>("name") == person.get<String>("defaultShopParameter") }
@@ -146,11 +163,20 @@ class ShopWidget(
                 selector.get<String>("name")
             ))
         }.map { it.name }
-        if (effect.name == "Blacklist") {
-            cardsToChange.forEach { chances.remove(it) }
-        }
-        chances.map { (a, _)->a }.filter { it in cardsToChange }.forEach {
-            chances[it] = chances[it]!! + effect.get<Double>("weight").toFloat()
+        when (effect.name) {
+            "Blacklist" -> {
+                cardsToChange.forEach { chances.remove(it) }
+            }
+            "ProbabilityAddition" -> {
+                chances.map { (a, _) -> a }.filter { it in cardsToChange }.forEach {
+                    chances[it] = chances[it]!! + effect.get<Double>("weight").toFloat()
+                }
+            }
+            "PriceAddition" -> {
+                allCards.filter { it.name in cardsToChange }.forEach {
+                    it.price+= effect.get<Long>("price").toInt()
+                }
+            }
         }
     }
 

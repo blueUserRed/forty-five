@@ -28,7 +28,8 @@ types: [
                 select: $ByName {
                     name: "jewelryBox"
                 },
-                effect: $Blacklist {
+                effect: $PriceAddition {
+                    price:100,
                 }
             },
             {
@@ -36,7 +37,7 @@ types: [
                     name: "casket"
                 },
                 effect: $ProbabilityAddition {
-                    weight: 1.0
+                    weight: 100.0
                 }
             },
             {
