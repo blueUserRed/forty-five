@@ -55,5 +55,6 @@ stats: {
 
 position: {
     map: "test_area",
-    node: 0
+    node: 0,
+    lastNode: null
 }

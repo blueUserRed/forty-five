@@ -74,6 +74,12 @@ object SaveState {
             savefileDirty = true
         }
 
+    var lastNode: Int? = null
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
             /**
      * how many enemies the player has defeated this run
      */
@@ -168,6 +174,7 @@ object SaveState {
         val position = obj.get<OnjObject>("position")
         currentMap = position.get<String>("map")
         currentNode = position.get<Long>("node").toInt()
+        lastNode = position.get<Long?>("lastNode")?.toInt()
 
         playerLives = obj.get<Long>("playerLives").toInt()
 
@@ -226,6 +233,7 @@ object SaveState {
             "position" with buildOnjObject {
                 "map" with currentMap
                 "node" with currentNode
+                "lastNode" with lastNode
             }
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())

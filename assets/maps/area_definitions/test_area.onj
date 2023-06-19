@@ -7,7 +7,6 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [1],
-        blockingEdges: [1],
         event: $EmptyMapEvent { }
     },
     {
@@ -15,7 +14,6 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [0, 2, 3],
-        blockingEdges: [2, 3],
 //        event: $EmptyMapEvent { }
         event: $EncounterMapEvent {
             currentlyBlocks: false,
@@ -28,7 +26,6 @@ nodes: [
         y: 40.0,
         isArea: false,
         edgesTo: [1],
-        blockingEdges: [],
         event: $NPCMapEvent {
             currentlyBlocks: false,
             canBeStarted: true,
@@ -41,7 +38,6 @@ nodes: [
         y: 90.0,
         isArea: false,
         edgesTo: [1],
-        blockingEdges: [],
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
             placeAtEnd: false
