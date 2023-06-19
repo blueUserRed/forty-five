@@ -8,30 +8,49 @@ use Screen;
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
+var raritys=[
+    {
+        select: $ByTag { name: "common" },
+        effect: $ProbabilityAddition { weight: 20.0 }
+    },
+    {
+        select: $ByTag { name: "rare" },
+        effect: $ProbabilityAddition { weight: 1.0 }
+    }
+];
+
 types: [
     {
         name: "all_included",
         cardChanges: [
+            ...raritys,
             {
                 select: $ByName {
-                    name: "workerBullet"
+                    name: "jewelryBox"
                 },
                 effect: $Blacklist {
                 }
             },
             {
                 select: $ByName {
-                    name: "incendiaryBullet"
+                    name: "casket"
                 },
                 effect: $ProbabilityAddition {
-                    percent: 1.0
+                    weight: 1.0
                 }
+            },
+            {
+                select: $ByTag {
+                    name: "common"
+                },
+                effect: $Blacklist { }
             }
         ]
     },
     {
         name: "no_biome",
         cardChanges: [
+            ...raritys,
             {
                 select: $ByName {
                     name: "workerBullet"
@@ -44,7 +63,7 @@ types: [
                     name: "incendiaryBullet"
                 },
                 effect: $ProbabilityAddition {
-                    percent: 1.0
+                    weight: 1.0
                 }
             }
         ]
@@ -73,7 +92,7 @@ people: [
                     text: "Source: Trust me pal\"",
                 },
             ],
-//            [
+            //            [
 //                $Text {
 //                    text: "Greetings Traveler. I have the best products you will ever see.",
 //                    color: color.beige

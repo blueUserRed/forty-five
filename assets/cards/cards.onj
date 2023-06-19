@@ -27,7 +27,8 @@ cards: [
             giveStatus("destroy", burning(3, burningPercent)),
         ],
         cost: 1,
-        type: $Bullet { }
+        tags: ["common"],
+        type: $Bullet { },
     },
     {
         name: "workerBullet",
@@ -39,6 +40,7 @@ cards: [
         traitEffects: [],
         effects: [ reserveGain("round start", 1) ],
         cost: 1,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -51,6 +53,7 @@ cards: [
         traitEffects: [],
         effects: [],
         cost: 2,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -63,6 +66,7 @@ cards: [
         traitEffects: [ "rotten" ],
         effects: [],
         cost: 1,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -75,6 +79,7 @@ cards: [
         traitEffects: [],
         effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ],
         cost: 3,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -87,6 +92,7 @@ cards: [
         traitEffects: [ "leftRotating" ],
         effects: [],
         cost: 1,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -102,6 +108,7 @@ cards: [
             giveStatus("destroy", burning(2, burningPercent))
         ],
         cost: 1,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -114,6 +121,7 @@ cards: [
         traitEffects: [],
         effects: [ buffDmg("enter", bSelects.allExceptSelf, 4) ],
         cost: 2,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -126,6 +134,7 @@ cards: [
         traitEffects: [],
         effects: [ draw("enter", 1), draw("shot", 1), draw("destroy", 1) ],
         cost: 1,
+        tags: ["rare"],
         type: $Bullet { }
     },
     {
@@ -138,6 +147,7 @@ cards: [
         traitEffects: [],
         effects: [],
         cost: 1,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -150,6 +160,7 @@ cards: [
         traitEffects: [ "everlasting" ],
         effects: [ ],
         cost: 1,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -162,6 +173,7 @@ cards: [
         traitEffects: [],
         effects: [],
         cost: 5,
+        tags: ["rare"],
         type: $Bullet { }
     },
     {
@@ -174,6 +186,7 @@ cards: [
         traitEffects: [],
         effects: [ ],
         cost: 2,
+        tags: ["common"],
         type: $Bullet { }
     },
     {
@@ -186,6 +199,7 @@ cards: [
          traitEffects: [ "rotten" ],
          effects: [ ],
          cost: 0,
+         tags: ["common"],
          type: $Bullet { }
     },
     {
@@ -198,6 +212,7 @@ cards: [
          traitEffects: [],
          effects: [ ],
          cost: 0,
+         tags: ["common"],
          type: $Bullet { }
     },
     {
@@ -213,6 +228,7 @@ cards: [
             reserveGain("destroy", 4)
          ],
          cost: 2,
+         tags: ["common"],
          type: $Bullet { }
     },
     {
@@ -225,6 +241,7 @@ cards: [
          traitEffects: [],
          effects: [ buffDmg("enter", bSelects.allBullets, 10) ],
          cost: 3,
+         tags: ["common"],
          type: $Bullet { }
     },
     {
@@ -237,6 +254,7 @@ cards: [
          traitEffects: [],
          effects: [ putCardInHand("enter", "bullet", 3) ],
          cost: 2,
+         tags: ["common"],
          type: $Bullet { },
     },
     {
@@ -252,6 +270,7 @@ cards: [
             giftDmg("destroy", bSelects.fourButNotSelf, 5)
         ],
          cost: 2,
+         tags: ["common"],
          type: $Bullet { }
     },
     {
@@ -267,6 +286,7 @@ cards: [
             giveStatus("destroy", poison(3, poisonDamage))
         ],
         cost: 1,
+        tags: ["common"],
         type: $Bullet { }
     },
 
@@ -283,6 +303,7 @@ cards: [
         traitEffects: [],
         effects: [],
         cost: 1,
+        tags: ["rare"],
         type: $Cover { }
     },
 
@@ -296,6 +317,7 @@ cards: [
         traitEffects: [],
         effects: [],
         cost: 2,
+        tags: ["rare"],
         type: $Cover { }
     },
 
@@ -309,6 +331,7 @@ cards: [
         traitEffects: [],
         effects: [ destroy("enter") ],
         cost: 1,
+        tags: ["rare"],
         type: $Cover { }
     },
 
@@ -322,6 +345,7 @@ cards: [
         traitEffects: [],
         effects: [ draw("enter", 1) ],
         cost: 1,
+        tags: ["rare"],
         type: $Cover { }
     },
 
@@ -335,6 +359,7 @@ cards: [
         traitEffects: [],
         effects: [ draw("round start", 1) ],
         cost: 3,
+        tags: ["rare"],
         type: $Cover { }
     }
 

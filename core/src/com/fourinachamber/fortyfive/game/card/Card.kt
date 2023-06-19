@@ -62,6 +62,7 @@ class Card(
     val coverValue: Int,
     val cost: Int,
     val effects: List<Effect>,
+    val tags: List<String>,
     detailFont: BitmapFont,
     detailFontColor: Color,
     detailFontScale: Float,
@@ -209,8 +210,10 @@ class Card(
         // handles special case for Destroy effect
         for (effect in effects) if (effect is Effect.Destroy && effect.trigger == Trigger.ON_ENTER) {
             if (!FortyFive.currentGame!!.hasDestroyableCard()) {
-                FortyFiveLogger.debug(logTag, "card cannot enter game because it has the destroy effect and" +
-                        " no destroyable bullet is present")
+                FortyFiveLogger.debug(
+                    logTag, "card cannot enter game because it has the destroy effect and" +
+                            " no destroyable bullet is present"
+                )
                 return false
             }
         }
@@ -283,7 +286,7 @@ class Card(
         val detail = actor.hoverDetailActor
         detail.description = shortDescription
         detail.flavourText = flavourText
-        detail.statsText =  if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "cover value: $coverValue"
+        detail.statsText = if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "cover value: $coverValue"
 
         val builder = StringBuilder()
         for (modifier in modifiers) if (modifier.description != null) {
@@ -354,7 +357,7 @@ class Card(
                 onj.get<OnjArray>("effects")
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
-
+                onj.get<OnjArray>("tags").value.map { it.value as String },
                 //TODO: CardDetailActor could call these functions itself
                 GraphicsConfig.cardDetailFont(onjScreen),
                 GraphicsConfig.cardDetailFontColor(),
@@ -392,6 +395,7 @@ class Card(
                     card.isRotten = true
                     card.initRottenModifier()
                 }
+
                 "leftRotating" -> card.isLeftRotating = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")

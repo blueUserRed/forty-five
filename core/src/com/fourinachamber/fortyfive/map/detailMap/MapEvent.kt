@@ -233,13 +233,13 @@ class NPCMapEvent(val npc: String) : MapEvent() {
 }
 
 /**
- * event that opens a shop where the player can buy up to 4 cards
+ * event that opens a shop where the player can buy up to 8 cards
  * @param type which type the restrictions are
  * @param biome in what biome the shop is
  */
 class ShopMapEvent(
     val type: String,
-    val biome: String,
+    private val biome: String,
     val person: String,
     val seed: Long,
     val boughtIndices: MutableList<Int>

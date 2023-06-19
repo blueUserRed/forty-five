@@ -38,7 +38,6 @@ open class AdvancedTextWidget(
         }
 
     init {
-//        nodesOfCurrentText = advancedText.parts.map { add(it.actor) }
         initNodes(advancedText)
     }
 
