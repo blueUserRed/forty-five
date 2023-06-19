@@ -59,9 +59,9 @@ var cardsWidget = $ShopWidget {
     dataFile: "cards/cards.onj",
     dataFontColor: color.dark_brown,
     dataFont: "red_wing_cm",
-    dataDragBehaviour: $CardDragSource {
+    dataDragBehaviour: $ShopCardDrag {
         group: "card",
-        moveToLastIndex: true,
+//        moveToLastIndex: true,
     },
     maxPerLine: 4,
     widthPercentagePerItem: 20.0,

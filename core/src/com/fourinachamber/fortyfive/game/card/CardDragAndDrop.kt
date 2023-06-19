@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.DragBehaviour
@@ -15,7 +16,7 @@ import onj.value.OnjNamedObject
 /**
  * the DragSource used for dragging a card to the revolver
  */
-class CardDragSource(
+open class CardDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
@@ -40,9 +41,7 @@ class CardDragSource(
 
         payload.dragActor = actor
 
-        if (toLast) {
-            card.actor.toFront()
-        }
+        if (toLast) card.actor.toFront()
 
         val obj = CardDragAndDropPayload(card)
         payload.obj = obj
@@ -136,7 +135,6 @@ class CoverAreaDropTarget(
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null || source == null) return
-
         val obj = payload.obj!! as CardDragAndDropPayload
         obj.addCover(coverStack.num)
     }
@@ -200,5 +198,29 @@ class CardDragAndDropPayload(val card: Card) {
      */
     fun onDragStop() {
         for (task in tasks) task()
+    }
+
+    /**
+     * called when the drag is stopped
+     */
+    fun onBuy(x: Float, y: Float) = tasks.add {
+        ShopWidget.curShopWidget.checkAndBuy(card,x,y)
+    }
+}
+
+class ShopCardDrag(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
+    CardDragSource(dragAndDrop, actor, onj) {
+    override fun dragStop(
+        event: InputEvent?,
+        x: Float,
+        y: Float,
+        pointer: Int,
+        payload: DragAndDrop.Payload?,
+        target: DragAndDrop.Target?
+    ) {
+        if (payload == null) return
+        val obj = payload.obj as CardDragAndDropPayload
+        obj.onBuy(actor.x,actor.y)
+        super.dragStop(event, x, y, pointer, payload, target)
     }
 }

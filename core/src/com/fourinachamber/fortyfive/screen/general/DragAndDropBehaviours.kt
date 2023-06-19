@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.card.CardDragSource
 import com.fourinachamber.fortyfive.game.card.CoverAreaDropTarget
 import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
+import com.fourinachamber.fortyfive.game.card.ShopCardDrag
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
 import com.fourinachamber.fortyfive.utils.eitherRight
@@ -34,6 +35,9 @@ object DragAndDropBehaviourFactory {
         }
         dropBehaviours["ShopBuyDropTarget"] = { dragAndDrop, actor, onj ->
             ShopBuyDropTarget(dragAndDrop, actor, onj)
+        }
+        dragBehaviours["ShopCardDrag"] = { dragAndDrop, actor, onj ->
+            ShopCardDrag(dragAndDrop, actor, onj)
         }
     }
 
@@ -100,8 +104,8 @@ class ShopBuyDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObj
     }
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        println(source?.actor)
         println("Now dropped something")
+        println(source?.actor)
     }
 
 }

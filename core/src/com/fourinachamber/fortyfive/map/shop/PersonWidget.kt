@@ -50,7 +50,7 @@ class PersonWidget(
         personDrawable = ResourceManager.get(this, textureName)
         ResourceManager.giveBack(this, textureName)
     }
-    fun addDrag(dragAndDrop: DragAndDrop){
+    /*fun addDrag(dragAndDrop: DragAndDrop){
         val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
             dropBehaviour.name,
             dragAndDrop,
@@ -58,5 +58,5 @@ class PersonWidget(
             dropBehaviour
         )
         dragAndDrop.addTarget(behaviour)
-    }
+    }*/
 }
