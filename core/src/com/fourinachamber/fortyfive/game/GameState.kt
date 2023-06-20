@@ -12,7 +12,6 @@ sealed class GameState {
         )
 
         override fun transitionTo(controller: GameController) = with(controller) {
-            nextTurn()
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
             if (remainingCardsToDraw == 0) executeTimeline(Timeline.timeline {
@@ -114,6 +113,7 @@ sealed class GameState {
         override fun allowsShooting(): Boolean = true
 
         override fun transitionTo(controller: GameController) {
+            controller.nextTurn()
             controller.gameDirector.checkActions()
         }
 

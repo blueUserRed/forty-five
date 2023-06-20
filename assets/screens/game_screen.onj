@@ -167,9 +167,9 @@ var reservesLabel = $TemplateLabel {
 
 var remainingTurnsLabel = $TemplateLabel {
     font: "red_wing",
-    template: "{game.remainingTurns} -- current evaluation {game.curEvaluation}",
+    template: "remaining turns: {game.remainingTurns} -- current evaluation {game.curEvaluation}",
     fontScale: 0.09,
-    color: color.white,
+    color: color.black,
 };
 
 var disableStyles = [
@@ -376,6 +376,14 @@ var gameScreen = $Box {
         },
 
         playerLivesLabel,
+
+        $Box {
+            styles: [
+                {
+                    flexGrow: 1.0
+                }
+            ]
+        },
 
         remainingTurnsLabel
 
