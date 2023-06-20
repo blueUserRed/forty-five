@@ -188,6 +188,22 @@ textures: [
     {
         name: "map_decoration_cactus",
         file: "textures/map/decorations/cactus.png"
+    },
+    {
+        name: "shop_dark_background",
+        file: "textures/shop/dark_background.png"
+    },
+    {
+        name: "shop_items_background",
+        file: "textures/shop/items_background.png"
+    },
+    {
+        name: "shop_background_no_biome",
+        file: "textures/shop/biomeBackgrounds/no_biome.png"
+    },
+    {
+        name: "shop_back_button",
+        file: "textures/shop/back_button.png"
     }
 ],
 
@@ -260,6 +276,10 @@ colorTextures: [
     {
         name: "grey_texture",
         color: color.grey
+    },
+    {
+        name: "forty_white_texture",
+        color: color.forty_white
     }
 ],
 
@@ -290,6 +310,15 @@ ninepatches: [
         left: 24,
         right: 24,
         scale: 0.1
+    },
+    {
+        name: "forty_white_rounded",
+        file: "textures/ninepatches/forty_white_rounded.png",
+        top: 24,
+        bottom: 24,
+        left: 24,
+        right: 24,
+        scale: 0.0025
     },
     {
         name: "hover_detail_background",

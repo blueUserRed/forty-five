@@ -55,7 +55,6 @@ $AdvancedTextPartAction {
         yMagnitude: float,
         ySpeed: float,
     }
-
 }
 
 var dialog = {
@@ -70,7 +69,15 @@ var dialog = {
     },
 };
 
+var image = {
+        textureName: string,
+        offsetX: float,
+        offsetY: float,
+        scale: float,
+};
+
 npcs: {
     name: string,
-    dialog: dialog
+    dialog: dialog,
+    image: image,
 }[]

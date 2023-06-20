@@ -1,5 +1,6 @@
 import "imports/colors.onj" as color;
 
+
 npcs: [
 
     {
@@ -42,6 +43,12 @@ npcs: [
                 color: color.black
             }
         },
+        image: {
+            textureName: "enemy_texture",
+            offsetX: -4.0,
+            offsetY: -37.5,
+            scale: 0.225
+        }
     }
 
 ]

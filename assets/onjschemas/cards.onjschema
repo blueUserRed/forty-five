@@ -32,8 +32,10 @@ var card = {
     rotation: $Rotation,
     highlightType: string,
     cost: int,
+    price: int,
     type: $CardType,
     effects: Effect[],
+    tags: string[],
 };
 
 cards: card[],
