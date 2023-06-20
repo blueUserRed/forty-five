@@ -23,6 +23,14 @@ $MapEvent {
         ...mapEventStandardConfig
     }
 
+    $ShopMapEvent {
+        type: string,
+        biome: string,
+        person: string,
+        seed: int?,
+        boughtIndices: int[],
+        ...mapEventStandardConfig
+    }
 }
 
 startNode: int,

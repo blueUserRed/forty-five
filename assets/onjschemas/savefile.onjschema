@@ -14,6 +14,8 @@ stats: {
 
 playerLives: int,
 
+playerMoney: int,
+
 position: {
     map: string,
     node: int,

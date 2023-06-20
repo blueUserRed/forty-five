@@ -3,11 +3,11 @@ package com.fourinachamber.fortyfive.screen.general
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fortyfive.game.card.CardDragSource
-import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
+import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
 import com.fourinachamber.fortyfive.utils.eitherRight
+import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
 
 object DragAndDropBehaviourFactory {
@@ -27,6 +27,9 @@ object DragAndDropBehaviourFactory {
         }
         dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
             RevolverDropTarget(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
+            ShopDropTarget(dragAndDrop, actor, onj)
         }
     }
 
@@ -73,9 +76,56 @@ object DragAndDropBehaviourFactory {
         actor: Actor,
         onj: OnjNamedObject
     ): Either<DragBehaviour, DropBehaviour> {
-        return dragBehaviourOrNull(name, dragAndDrop, actor, onj)?.eitherLeft() ?:
-               dropBehaviourOrNull(name, dragAndDrop, actor, onj)?.eitherRight() ?:
-               throw RuntimeException("Unknown drag or drop behaviour: $name")
+        return dragBehaviourOrNull(name, dragAndDrop, actor, onj)?.eitherLeft() ?: dropBehaviourOrNull(
+            name,
+            dragAndDrop,
+            actor,
+            onj
+        )?.eitherRight() ?: throw RuntimeException("Unknown drag or drop behaviour: $name")
+    }
+
+}
+
+class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
+    DropBehaviour(dragAndDrop, actor, onj) {
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: DragAndDrop.Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
+        println("Person drag")
+
+        if (payload == null) return
+        println("Person drag2")
+
+        val obj = payload.obj as CardDragAndDropPayload
+        obj.onBuy()
+    }
+
+}
+
+class ShopBuyDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
+    DropBehaviour(dragAndDrop, actor, onj) {
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: DragAndDrop.Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        println("Now dragging something")
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
+        println("Now dropped something")
+        println(source?.actor)
     }
 
 }
@@ -107,9 +157,11 @@ class SlotDragSource(
 
         payload.dragActor = actor
 
-        payload.setObject(mutableMapOf(
-            "resetPosition" to (actor.x to actor.y)
-        ))
+        payload.setObject(
+            mutableMapOf(
+                "resetPosition" to (actor.x to actor.y)
+            )
+        )
 
         dragAndDrop.setDragActorPosition(
             actor.width - (actor.width * actor.scaleX / 2),

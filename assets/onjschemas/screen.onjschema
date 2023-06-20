@@ -203,6 +203,26 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $PersonWidget{
+        offsetX:float,
+        offsetY:float,
+        scale:float,
+        dropBehaviour: $DragAndDropBehaviour,
+        ...widgetSharedKeys
+    }
+
+    $ShopWidget{
+        name: string,
+        texture: string,
+        dataFile: string,
+        dataFont: string,
+        dataFontColor: Color,
+        dataDragBehaviour: $DragAndDropBehaviour,
+        maxPerLine: int,
+        widthPercentagePerItem: Float,
+        ...widgetSharedKeys,
+    }
+
 }
 
 var advancedTextPartSharedKeys = {
@@ -319,6 +339,13 @@ $ScreenController {
         dialogWidgetName: string
     }
 
+    $ShopScreenController {
+        shopsFile: string,
+        npcsFile: string,
+        personWidgetName: string,
+        messageWidgetName: string,
+        shopWidgetNames: string[],
+    }
 }
 
 $KeyAction {
