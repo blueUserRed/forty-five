@@ -18,8 +18,10 @@ var card = {
     coverValue: int,
     traitEffects: string[],
     cost: int,
+    price: int,
     type: $CardType,
     effects: Effect[],
+    tags: string[],
 };
 
 cards: card[],

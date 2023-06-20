@@ -74,7 +74,7 @@ object SaveState {
             savefileDirty = true
         }
 
-            /**
+    /**
      * how many enemies the player has defeated this run
      */
     var enemiesDefeated: Int by templateParam("stat.enemiesDefeated", 0) {
@@ -93,6 +93,16 @@ object SaveState {
     var playerLives: Int by templateParam("stat.playerLives", 0) {
         savefileDirty = true
     }
+
+    /**
+     * the current money of the player
+     */
+    var playerMoney: Int by templateParam("stat.playerMoney", 0) {
+        savefileDirty = true
+    }
+
+
+//    var eventData:
 
     /**
      * temporarily stores the used reserves, so it can be shown on the death screen
@@ -170,15 +180,21 @@ object SaveState {
         currentNode = position.get<Long>("node").toInt()
 
         playerLives = obj.get<Long>("playerLives").toInt()
+        playerMoney = obj.get<Long>("playerMoney").toInt()
 
-        FortyFiveLogger.debug(logTag, "stats: " +
-                "usedReserves = $usedReserves, " +
-                "enemiesDefeated = $enemiesDefeated, " +
-                "playerLives = $playerLives")
+        FortyFiveLogger.debug(
+            logTag, "stats: " +
+                    "usedReserves = $usedReserves, " +
+                    "enemiesDefeated = $enemiesDefeated, " +
+                    "playerMoney = $playerMoney, " +
+                    "playerLives = $playerLives"
+        )
 
-        FortyFiveLogger.debug(logTag, "position: " +
-                "currentMap = $currentMap, " +
-                "currentNode = $currentNode")
+        FortyFiveLogger.debug(
+            logTag, "position: " +
+                    "currentMap = $currentMap, " +
+                    "currentNode = $currentNode"
+        )
 
         savefileDirty = false
     }
@@ -219,6 +235,7 @@ object SaveState {
             "additionalCards" with getCardArray(_additionalCards)
             "cardsToDraw" with getCardArray(_cardsToDraw)
             "playerLives" with playerLives
+            "playerMoney" with playerMoney
             "stats" with buildOnjObject {
                 "usedReserves" with usedReserves
                 "enemiesDefeated" with enemiesDefeated
@@ -237,6 +254,10 @@ object SaveState {
             "name" with it.key
             "amount" with it.value
         }
+    }
+
+    fun buyCard(cardName: String) {
+        print("$cardName bought")
     }
 
 }

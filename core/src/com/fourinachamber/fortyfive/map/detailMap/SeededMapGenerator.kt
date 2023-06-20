@@ -47,10 +47,9 @@ class SeededMapGenerator(
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         addEvents(nodes)
-//        nodes.forEach { it.scale(1F, .6F) }
-        val decos = generateDecorations(nodes, connections)//TODO manche events eher am Dead-Ends spawnen
-        nodes.forEach { it.rotate(restrictions.rotation) } //TODO Parameter für Weg-breite (mit collision)
-//        decos.forEach {rotateDeco(it, restrictions.rotation) } //TODO Rotation Decorations
+        nodes.forEach { it.scale(1F, .6F) }    //TODO manche events eher am Dead-Ends spawnen
+        nodes.forEach { it.rotate(restrictions.rotation) }  //TODO Parameter für Weg-breite (mit collision)
+        val decos = generateDecorations(nodes, connections) //TODO Rotations fixen mit decorations
         this.nodes = nodes
         build()
         return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos)
@@ -873,7 +872,7 @@ sealed class DecorationDistributionFunction(
         }
 
     }
-
+    //TODO add Class for "clusters" (fe forests) only
     abstract fun getPossiblePositions(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>,
@@ -1047,7 +1046,7 @@ data class MapRestriction(
     val fixedEvents: List<MapEvent>,
     val optionalEvents: List<Pair<Int, () -> MapEvent>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
-    val decorationPadding: Float,
+    val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
     val pathTotalWidth: Float = 7F,
 ) {
 

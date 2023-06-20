@@ -1,0 +1,121 @@
+import "imports/colors.onj" as color;
+
+use Common;
+use Style;
+use Screen;
+
+
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
+var raritys = [
+    {
+        select: $ByTag {
+            name: "common"
+        },
+        effect: $ProbabilityAddition {
+            weight: 20.0
+        }
+    },
+    {
+        select: $ByTag {
+            name: "rare"
+        },
+        effect: $ProbabilityAddition {
+            weight: 1.0
+        }
+    }
+];
+
+types: [
+    {
+        name: "all_included",
+        cardChanges: [
+            ...raritys,
+            {
+                select: $ByName {
+                    name: "jewelryBox"
+                },
+                effect: $PriceMultiplier {
+                    price: 1.4,
+                }
+            },
+            {
+                select: $ByName {
+                    name: "casket"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 100.0
+                }
+            },
+            {
+                select: $ByTag {
+                    name: "common"
+                },
+                effect: $Blacklist {
+                }
+            }
+        ]
+    },
+    {
+        name: "no_biome",
+        cardChanges: [
+            ...raritys,
+            {
+                select: $ByName {
+                    name: "workerBullet"
+                },
+                effect: $Blacklist {
+                }
+            },
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 1.0
+                }
+            }
+        ]
+    },
+],
+
+
+people: [
+    {
+        name: "traveling_merchant",
+        displayName: "Traveling Merchant",
+        defaultShopParameter: "no_biome",
+        texts: [
+            [
+                $Text {
+                    text: "\"I sell the ",
+                },
+                $Text {
+                    text: "BEST  ",
+                    color: color.viridian,
+                },
+                $Text {
+                    text: "goods south from Dunkelwald. You'll find deals like this NO where else!",
+                },
+                $Text {
+                    text: "Source: Trust me pal\"",
+                },
+            ],
+            //            [
+//                $Text {
+//                    text: "Greetings Traveler. I have the best products you will ever see.",
+//                    color: color.beige
+//                }
+//            ],
+
+        ],
+        npcImageName: "my_cool_npc",
+    }
+],
+
+defaults: {
+    font: "red_wing",
+    fontScale: 0.08,
+    color: color.forty_white
+},

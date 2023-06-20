@@ -4,6 +4,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.MapManager
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
+import onj.value.OnjInt
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
@@ -16,12 +17,20 @@ object MapEventFactory {
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
-        "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) }
+        "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
+        "ShopMapEvent" to {
+            ShopMapEvent(
+                it.get<String>("type"),
+                it.get<String>("biome"),
+                it.get<String>("person"),
+                it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+                it.get<List<OnjInt>>("boughtIndices").map{it.value.toInt()}.toMutableList(),
+            )
+        },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
         mapEventCreators[onj.name]?.invoke(onj) ?: throw RuntimeException("unknown map event ${onj.name}")
-
 }
 
 /**
@@ -115,7 +124,7 @@ class EmptyMapEvent : MapEvent() {
 
     override val displayDescription: Boolean = false
 
-    override fun start() { }
+    override fun start() {}
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EmptyMapEvent")
@@ -219,6 +228,44 @@ class NPCMapEvent(val npc: String) : MapEvent() {
         includeStandardConfig()
         "npc" with npc
     }
+}
 
+/**
+ * event that opens a shop where the player can buy up to 8 cards
+ * @param type which type the restrictions are
+ * @param biome in what biome the shop is
+ */
+class ShopMapEvent(
+    val type: String,
+    private val biome: String,
+    val person: String,
+    val seed: Long,
+    val boughtIndices: MutableList<Int>
+) : MapEvent() {
 
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "Enter shop"
+    override val displayName: String = "BUY STUFF NOW"
+
+    override fun start() {
+        FortyFive.changeToScreen("screens/shop_screen.onj", this) // TODO: ugly
+    }
+
+    fun complete() {
+        canBeStarted = true
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("ShopMapEvent")
+        ("type" with type)
+        ("biome" with biome)
+        ("person" with person)
+        ("seed" with seed)
+        ("boughtIndices" with boughtIndices)
+    }
 }
