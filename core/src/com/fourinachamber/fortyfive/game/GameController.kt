@@ -77,7 +77,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     var remainingTurns: Int by multipleTemplateParam(
         "game.remainingTurnsRaw", -1,
-        "game.remainingTurns" to { if (it == -1) "" else it.toString() }
+        "game.remainingTurns" to { if (it == -1) "?" else it.toString() }
     )
 
     var curPlayerLives: Int
@@ -139,10 +139,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
-
-//        if (context !is EncounterMapEvent) { // TODO: comment back in
-//            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
-//        }
+        if (context !is EncounterMapEvent) { // TODO: comment back in
+            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
+        }
 //        encounterMapEvent = context
 //        modifier = EncounterModifier.BewitchedMist // TODO: remove
         SaveState.read()
@@ -160,7 +159,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         // enemy area is initialised by the GameDirector
         gameDirector.init()
 
-        changeState(GameState.InitialDraw(cardsToDrawInFirstRound))
+        executeTimeline(Timeline.timeline {
+            includeLater(
+                { confirmationPopup("You have $remainingTurns turns!") },
+                { remainingTurns != 1 }
+            )
+            action {
+                changeState(GameState.InitialDraw(cardsToDrawInFirstRound))
+            }
+        })
         onjScreen.invalidateEverything()
     }
 

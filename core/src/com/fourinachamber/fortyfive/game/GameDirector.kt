@@ -2,9 +2,9 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.enemy.Enemy
-import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.between
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.parser.OnjParser
@@ -21,7 +21,7 @@ class GameDirector(private val controller: GameController) {
     private var turns by Delegates.notNull<Int>()
 
     private var turnRevealTime: Int = -1
-    private var enemyActionTime: Int = -1
+    private var enemyActionTimes: List<Int> = listOf()
 
     fun init() {
         val enemiesOnj = OnjParser.parseFile(Gdx.files.internal("config/enemies.onj").file())
@@ -35,13 +35,17 @@ class GameDirector(private val controller: GameController) {
         FortyFiveLogger.debug(logTag, "chose enemy ${chosen.name}")
         turns = chosen.turnCount.random()
         FortyFiveLogger.debug(logTag, "chose $turns turns")
-        if (turns >= 10) {
+        if (turns >= 12) {
+            turnRevealTime = (turns * (3.0 / 4.0)).toInt()
+            enemyActionTimes = listOf((turns * (1.0 / 4.0)).toInt(), (turns * (2.0 / 4.0)).toInt())
+        } else if (turns >= 9) {
             turnRevealTime = (turns * (2.0 / 3.0)).toInt()
-            enemyActionTime = (turns * (1.0 / 3.0)).toInt()
+            enemyActionTimes = listOf((turns * (1.0 / 3.0)).toInt())
         } else {
             controller.remainingTurns = turns
+            enemyActionTimes = listOf((turns / 2.0).toInt())
         }
-        FortyFiveLogger.debug(logTag, "turnRevealTime = $turnRevealTime; enemyActionTime = $enemyActionTime")
+        FortyFiveLogger.debug(logTag, "turnRevealTime = $turnRevealTime; enemyActionTimes = $enemyActionTimes")
         val enemy = scaleAndCreateEnemy(chosen, difficulty)
         FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}; damage = ${enemy.damage}")
         controller.initEnemyArea(enemy)
@@ -49,16 +53,24 @@ class GameDirector(private val controller: GameController) {
 
     fun checkActions() {
         if (controller.turnCounter == turnRevealTime) {
-            controller.remainingTurns = turns - controller.turnCounter
-        }
-        if (controller.turnCounter == enemyActionTime) {
+            val remainingTurns = turns - controller.turnCounter
+            controller.remainingTurns = remainingTurns
+            controller.executeTimeline(Timeline.timeline {
+                include(controller.confirmationPopup("You have $remainingTurns left!"))
+            })
+        } else if (controller.turnCounter in enemyActionTimes) {
             doEnemyAction()
         }
     }
 
     private fun doEnemyAction() {
         val enemy = controller.enemyArea.enemies[0]
-        val timeline = enemy.actions.random().getTimeline(controller)
+        val timeline = enemy
+            .actions
+            .filter { it.applicable(controller) }
+            .randomOrNull()
+            ?.getTimeline(controller)
+            ?: return
         controller.executeTimeline(timeline)
     }
 

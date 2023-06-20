@@ -22,7 +22,7 @@ sealed class EnemyAction {
             val cardHand = controller.cardHand
             action {
                 val cardAmount = cardHand.cards.size
-                amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount)
+                amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
                 text = TemplateString(
                     rawText,
                     mapOf("amount" to amountToDestroy, "s" to if (amountToDestroy == 1) "s" else "")
@@ -34,7 +34,7 @@ sealed class EnemyAction {
             )
             action {
                 repeat(amountToDestroy) {
-                    cardHand.removeCard(cardHand.cards[(0..cardHand.cards.size).random()])
+                    cardHand.removeCard(cardHand.cards[(0 until cardHand.cards.size).random()])
                 }
             }
         }
