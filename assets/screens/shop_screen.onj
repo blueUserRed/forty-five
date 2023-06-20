@@ -1,0 +1,238 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+//import "dialog/dialog.onj" as dialogs;
+import "screens/sharedComponents.onj" as sharedComponents;
+
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
+assets: {
+    useCardAtlas: true,
+    useAssets: [
+        "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
+        "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
+        "shop_back_button",
+        ...(sharedComponents.navBarAssests),
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    transitionAwayTime: 1.0,
+    background: "hover_detail_background",
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $ShopScreenController {
+        shopsFile: "maps/shops.onj",
+        npcsFile: "maps/npcs.onj",
+        personWidgetName: "shop_person_widget",
+        messageWidgetName: "shop_message",
+        shopWidgetNames: [
+            "cards_widget"
+        ],
+    }
+},
+
+var personWidget = $PersonWidget {
+    name: "shop_person_widget",
+    offsetX: 0.0,
+    offsetY: 0.0,
+    scale: 1.0,
+    dropBehaviour: $ShopDropTarget {
+        group: "card",
+    },
+    styles: [
+        {
+            width: 40.0#percent,
+            height: 100.0#percent,
+        }
+    ],
+};
+
+
+var cardsWidget = $ShopWidget {
+    name: "cards_widget",
+    texture: "shop_items_background",
+    dataFile: "cards/cards.onj",
+    dataFontColor: color.dark_brown,
+    dataFont: "red_wing_cm",
+    dataDragBehaviour: $CardDragSource {
+        group: "card",
+        moveToLastIndex: true,
+    },
+    maxPerLine: 4,
+    widthPercentagePerItem: 20.0,
+
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 69.0#percent,
+        }
+    ],
+};
+
+root: $Box {
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent,
+        }
+    ]
+} children [
+
+
+    $Image {       //TODO biome for background
+
+        name: "background_img",
+        textureName: "shop_background_no_biome",
+        scaleX: 0.0,
+        scaleY: 0.0,
+        width: worldWidth,
+        height: worldHeight,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                width: (worldWidth)#points,
+                height: (worldHeight)#points,
+            }
+        ],
+    },
+
+    sharedComponents.navBar,
+    personWidget,
+    $Image {
+        textureName: "shop_dark_background",
+        width: worldWidth,
+        height: worldHeight,
+        scaleX: 0.0,
+        scaleY: 0.0,
+        reportDimensionsWithScaling: true,
+
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionRight: 0.0#points,
+                positionBottom: 0.0#points,
+                width: 93.0#percent,
+                height: 93.0#percent,
+            }
+        ],
+    },
+
+    $Image {       //TODO biome for back (evtl)
+
+        name: "back_button",
+        textureName: "shop_back_button",
+        scaleX: 0.08,
+        scaleY: 0.08,
+        reportDimensionsWithScaling: true,
+        behaviours: [
+            $OnClickChangeScreenBehaviour {
+                screenPath: "screens/map_screen.onj"
+            },
+        ],
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionBottom: 0.0#points,
+                //                                width: (20.0/2)#percent,
+//                height: (20.0/2)#percent,
+
+            }
+        ],
+    },
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 7.0#percent,
+                positionRight: 5.0#percent,
+                width: 54.4#percent,
+                height: 86.0#percent,
+                flexDirection: flexDirection.column,
+            }
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.relative,
+                    positionTop: 2.0#points,
+                    positionRight: 0.0#points,
+                    width: 100.0#percent,
+                    height: 17.125#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+
+                }
+            ]
+        } children [
+            $TemplateLabel {
+                align: "left",
+                template: "{map.curEvent.personDisplayName}",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.2
+            },
+            $TemplateLabel {
+                align: "right",
+                template: "{stat.playerMoney}$ ",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.2
+            },
+        ],
+
+        $Image {
+            textureName: "forty_white_rounded",
+            scaleX: 1.0,
+            scaleY: 1.0,
+            styles: [
+                {
+                    positionType: positionType.relative,
+                    width: 100.0#percent,
+                    height: 0.02#points,
+                }
+            ],
+        },
+        $AdvancedText {
+            name: "shop_message",
+            font: "red_wing",
+            parts: [
+            ],
+            defaults: { //defaults actually defined in map/shops.onj
+
+                font: "red_wing",
+                fontScale: 0.08,
+                color: color.forty_white,
+            },
+            styles: [
+                {
+                    width: 100.0#percent,
+                    flexDirection: flexDirection.row,
+                    flexWrap: wrap.wrap,
+                    marginTop: 1.0#percent,
+                }
+            ],
+        },
+        cardsWidget,
+        $Label {
+            text: "drag to the merchant to confirm your purchase and add it to your backpack",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.07,
+            align: "center",
+        }
+    ]
+]

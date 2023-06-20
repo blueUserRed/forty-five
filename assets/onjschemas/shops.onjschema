@@ -1,0 +1,82 @@
+use Common;
+
+$CardSelector{
+    $ByName{
+        name: string
+    }
+    $ByTag{
+        name: string
+    }
+}
+
+$CardEffect{
+    $Blacklist{}
+
+    $ProbabilityAddition{
+        weight: float
+    }
+
+    $PriceMultiplier{
+        price: float
+    }
+}
+
+var shopParameter = {
+    cardChanges: {
+        select: $CardSelector,
+        effect: $CardEffect
+    }[],
+    name: string
+};
+
+
+var advancedTextPartSharedKeys = {
+    actions?: $AdvancedTextPartAction[]
+};
+
+
+$AdvancedTextPart {
+
+    $Text {
+        text: string,
+        font?: string,
+        color?: Color,
+        fontScale?: float,
+        ...advancedTextPartSharedKeys
+    }
+
+    $Icon {
+        icon: string,
+        ...advancedTextPartSharedKeys
+    }
+
+}
+
+$AdvancedTextPartAction {
+
+    $ShakeTextAction {
+        xMagnitude: float,
+        xSpeed: float,
+        yMagnitude: float,
+        ySpeed: float,
+    }
+
+}
+
+
+types: shopParameter[],
+
+people: {
+    name: string,
+    displayName: string,
+    defaultShopParameter: string,
+    texts: $AdvancedTextPart[][],
+    npcImageName: string,
+}[],
+
+
+defaults: {
+    font: string,
+    fontScale: float,
+    color: Color,
+},

@@ -8,4 +8,7 @@ blue: color("0000ff"),
 black: color("000000"),
 backgroundTransparent: color("04040488"),
 beige: color("615130"),
-grey: color("aaaaaa")
+grey: color("aaaaaa"),
+forty_white: color("F0EADD"),
+viridian: color("5B8266"),
+dark_brown: color("2A2424"),

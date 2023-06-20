@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.DragBehaviour
@@ -15,17 +16,19 @@ import onj.value.OnjNamedObject
 /**
  * the DragSource used for dragging a card to the revolver
  */
-class CardDragSource(
+open class CardDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
-    onj: OnjNamedObject
+    onj: OnjNamedObject,
 ) : DragBehaviour(dragAndDrop, actor, onj) {
 
     private val card: Card
+    private val toLast: Boolean
 
     init {
         if (actor !is CardActor) throw RuntimeException("CardDragSource can only be used on an CardActor")
         card = actor.card
+        toLast = onj.getOr("moveToLastIndex", false)
     }
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
@@ -37,6 +40,8 @@ class CardDragSource(
         dragAndDrop.setKeepWithinStage(false)
 
         payload.dragActor = actor
+
+        if (toLast) card.actor.toFront()
 
         val obj = CardDragAndDropPayload(card)
         payload.obj = obj
@@ -63,7 +68,7 @@ class CardDragSource(
     ) {
         card.actor.isDragged = false
         if (payload == null) return
-
+        if (toLast) card.actor.zIndex -= 1
         val obj = payload.obj as CardDragAndDropPayload
         obj.onDragStop()
     }
@@ -130,34 +135,9 @@ class CoverAreaDropTarget(
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null || source == null) return
-
         val obj = payload.obj!! as CardDragAndDropPayload
         obj.addCover(coverStack.num)
     }
-
-}
-
-class InventoryDropTarget(
-    dragAndDrop: DragAndDrop,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean = true
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        if (payload == null || source == null) return
-
-        val obj = payload.obj!! as CardDragAndDropPayload
-
-    }
-
-
 }
 
 /**
@@ -179,14 +159,14 @@ class CardDragAndDropPayload(val card: Card) {
      * when the drag is stopped, the card will be loaded into the revolver in [slot]
      */
     fun loadIntoRevolver(slot: Int) = tasks.add {
-        FortyFive.currentGame!!.loadBulletInRevolver(card, slot)
+        FortyFive.currentGame!!.loadBulletInRevolver(card, slot)  //TODO ugly
     }
 
     /**
      * when the drag is stopped, the card will be added to the cover area in slot [slot]
      */
     fun addCover(slot: Int) = tasks.add {
-        FortyFive.currentGame!!.addCover(card, slot)
+        FortyFive.currentGame!!.addCover(card, slot)  //TODO ugly
     }
 
     /**
@@ -194,5 +174,12 @@ class CardDragAndDropPayload(val card: Card) {
      */
     fun onDragStop() {
         for (task in tasks) task()
+    }
+
+    /**
+     * called when the drag is stopped
+     */
+    fun onBuy() = tasks.add {
+        ShopWidget.curShopWidget.checkAndBuy(card)  //TODO ugly
     }
 }

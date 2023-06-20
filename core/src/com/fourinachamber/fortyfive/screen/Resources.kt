@@ -397,7 +397,6 @@ class ParticleResource(
         variants = listOf(effect)
         disposables = listOf(effect)
     }
-
 }
 
 class NinepatchResource(

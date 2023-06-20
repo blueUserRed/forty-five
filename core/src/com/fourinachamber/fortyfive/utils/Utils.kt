@@ -115,6 +115,13 @@ operator fun AtomicInteger.inc(): AtomicInteger {
     return this
 }
 
+
+operator fun Float.plus(fl: Float?): Float {
+    if (fl != null) return this + fl.toFloat()
+    return this
+}
+
+
 val AtomicInteger.get: Int
     get() = this.get()
 

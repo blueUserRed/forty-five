@@ -38,7 +38,6 @@ open class AdvancedTextWidget(
         }
 
     init {
-//        nodesOfCurrentText = advancedText.parts.map { add(it.actor) }
         initNodes(advancedText)
     }
 
@@ -213,7 +212,6 @@ class TextAdvancedTextPart(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        println("$text, $width")
         val newText = templateString.string
         if (progress >= newText.length) setText(newText)
         actions.forEach { it(this) }

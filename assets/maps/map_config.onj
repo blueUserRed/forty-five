@@ -55,7 +55,8 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 10,
                 minNodes: 5,
-                maxSplits: 8,
+                maxSplits: 1,
+//                maxSplits: 8,
                 splitProbability: 0.5,
                 compressProbability: 0.55,
                 averageLengthOfLineInBetween: 26.0,
@@ -68,28 +69,28 @@ generatorConfig: {
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
-                rotation: 0.0,
+                rotation: 1.0,
                 fixedEvents: [],
                 optionalEvents: [],
                 decorations: [
-                    $RandomDistributionFunction {
-                        decoration: "map_decoration_grass",
-                        density: 0.2,
-                        baseWidth: 3.0,
-                        baseHeight: 3.0,
-                        scaleMin: 0.6,
-                        scaleMax: 1.2,
-                        onlyCollidesWithNodes: false
-                    },
-                    $RandomDistributionFunction {
-                        decoration: "map_decoration_cactus",
-                        density: 0.01,
-                        baseWidth: 2.0,
-                        baseHeight: 4.0,
-                        scaleMin: 1.5,
-                        scaleMax: 2.5,
-                        onlyCollidesWithNodes: false
-                    }
+//                    $RandomDistributionFunction {
+//                        decoration: "map_decoration_grass",
+//                        density: 0.2,
+//                        baseWidth: 3.0,
+//                        baseHeight: 3.0,
+//                        scaleMin: 0.6,
+//                        scaleMax: 1.2,
+//                        onlyCollidesWithNodes: false
+//                    },
+//                    $RandomDistributionFunction {
+//                        decoration: "map_decoration_cactus",
+//                        density: 0.01,
+//                        baseWidth: 2.0,
+//                        baseHeight: 4.0,
+//                        scaleMin: 1.5,
+//                        scaleMax: 2.5,
+//                        onlyCollidesWithNodes: false
+//                    }
                 ],
                 decorationSeed: 230789230789407892340,
                 decorationPadding: 40.0

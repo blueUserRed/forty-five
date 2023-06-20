@@ -19,6 +19,8 @@ import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
+import com.fourinachamber.fortyfive.map.shop.PersonWidget
+import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
@@ -203,7 +205,10 @@ class ScreenBuilder(val file: FileHandle) {
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle().apply {
-                font = fontOrError(widgetOnj.get<String>("font"), screen) // TODO: figure out how to not load the font immediatley
+                font = fontOrError(
+                    widgetOnj.get<String>("font"),
+                    screen
+                ) // TODO: figure out how to not load the font immediatley
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
                 }
@@ -323,10 +328,30 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
+        "PersonWidget" -> PersonWidget(
+            widgetOnj.get<Double>("offsetX").toFloat(),
+            widgetOnj.get<Double>("offsetY").toFloat(),
+            widgetOnj.get<Double>("scale").toFloat(),
+            widgetOnj.get<OnjNamedObject>("dropBehaviour"),
+            screen
+        )
+
+        "ShopWidget" -> ShopWidget(
+            widgetOnj.get<String>("texture"),
+            widgetOnj.get<String>("dataFile"),
+            Label.LabelStyle(
+                fontOrError(widgetOnj.get<String>("dataFont"), screen),
+                widgetOnj.get<Color>("dataFontColor")
+            ),
+            widgetOnj.get<OnjNamedObject>("dataDragBehaviour"),
+            widgetOnj.get<Long>("maxPerLine").toInt(),
+            widgetOnj.get<OnjFloat>("widthPercentagePerItem").value.toFloat(),
+            screen
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
-
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
 

@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.map.dialog.DialogScreenController
+import com.fourinachamber.fortyfive.map.shop.ShopScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.CardSelectionScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
@@ -15,6 +16,7 @@ object ScreenControllerFactory {
         "CardSelectionScreenController" to { onj -> CardSelectionScreenController(onj) },
         "IntroScreenController" to { onj -> IntroScreenController(onj) },
         "DialogScreenController" to { onj -> DialogScreenController(onj) },
+        "ShopScreenController" to { onj -> ShopScreenController(onj) },
     )
 
     /**
