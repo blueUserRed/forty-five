@@ -5,7 +5,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
+import com.fourinachamber.fortyfive.screen.general.CustomLabel
+import com.fourinachamber.fortyfive.screen.general.DragAndDropBehaviourFactory
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.random
 import ktx.actors.alpha
 import onj.parser.OnjParser
@@ -167,17 +170,23 @@ class ShopWidget(
             "Blacklist" -> {
                 cardsToChange.forEach { chances.remove(it) }
             }
+
             "ProbabilityAddition" -> {
                 chances.map { (a, _) -> a }.filter { it in cardsToChange }.forEach {
                     chances[it] = chances[it]!! + effect.get<Double>("weight").toFloat()
                 }
             }
-            "PriceAddition" -> {
+
+            "PriceMultiplier" -> {
                 allCards.filter { it.name in cardsToChange }.forEach {
-                    it.price+= effect.get<Long>("price").toInt()
+                    it.price = (it.price * effect.get<Double>("price")).toInt()
                 }
             }
         }
+    }
+
+    fun giveResourcesBack() {
+
     }
 
     companion object {

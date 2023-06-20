@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
+import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -24,6 +25,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val personWidgetName = onj.get<String>("personWidgetName")
     private val messageWidgetName = onj.get<String>("messageWidgetName")
     private val shopWidgetNames = onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
+    private val backButtonName = "back_button"  //onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
 
     private lateinit var personWidget: PersonWidget
     private val dragAndDrop = DragAndDrop()
@@ -63,13 +65,20 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
         addItemWidgets(shopFile, person)
+
+
+        val backButton = onjScreen.namedActorOrError(backButtonName)
+        backButton.onClick { shopWidgetNames.forEach{
+            (screen.namedActorOrError(it) as ShopWidget).giveResourcesBack()
+            personWidget.giveResourcesBack()
+        }}
     }
 
     private fun addItemWidgets(shopFile: OnjObject, person: OnjObject) {
         shopWidgetNames.forEach {
             val shopWidget = screen.namedActorOrError(it)
             if (shopWidget !is ShopWidget) throw RuntimeException("widget with name $it must be of type shopWidget")
-            shopWidget.calculateChances(context.type, shopFile,person)
+            shopWidget.calculateChances(context.type, shopFile, person)
             shopWidget.addItems(context.seed, context.boughtIndices, dragAndDrop)
         }
     }

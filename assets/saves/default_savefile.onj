@@ -47,7 +47,7 @@ cardsToDraw: [
 ],
 
 playerLives: gameConfig.playerConfig.lives,
-playerMoney: 0,
+playerMoney: 100,
 
 stats: {
     usedReserves: 0,
