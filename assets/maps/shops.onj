@@ -8,14 +8,22 @@ use Screen;
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-var raritys=[
+var raritys = [
     {
-        select: $ByTag { name: "common" },
-        effect: $ProbabilityAddition { weight: 20.0 }
+        select: $ByTag {
+            name: "common"
+        },
+        effect: $ProbabilityAddition {
+            weight: 20.0
+        }
     },
     {
-        select: $ByTag { name: "rare" },
-        effect: $ProbabilityAddition { weight: 1.0 }
+        select: $ByTag {
+            name: "rare"
+        },
+        effect: $ProbabilityAddition {
+            weight: 1.0
+        }
     }
 ];
 
@@ -28,8 +36,8 @@ types: [
                 select: $ByName {
                     name: "jewelryBox"
                 },
-                effect: $PriceAddition {
-                    price:100,
+                effect: $PriceMultiplier {
+                    price: 1.4,
                 }
             },
             {
@@ -44,7 +52,8 @@ types: [
                 select: $ByTag {
                     name: "common"
                 },
-                effect: $Blacklist { }
+                effect: $Blacklist {
+                }
             }
         ]
     },

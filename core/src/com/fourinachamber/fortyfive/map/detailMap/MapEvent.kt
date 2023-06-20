@@ -228,8 +228,6 @@ class NPCMapEvent(val npc: String) : MapEvent() {
         includeStandardConfig()
         "npc" with npc
     }
-
-
 }
 
 /**
@@ -264,7 +262,6 @@ class ShopMapEvent(
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
-        includeStandardConfig()
         ("type" with type)
         ("biome" with biome)
         ("person" with person)

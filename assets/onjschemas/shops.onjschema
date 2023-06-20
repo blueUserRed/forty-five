@@ -16,18 +16,17 @@ $CardEffect{
         weight: float
     }
 
-    $PriceAddition{
-        price: int
+    $PriceMultiplier{
+        price: float
     }
 }
 
 var shopParameter = {
     cardChanges: {
-                      select: $CardSelector,
-                      effect: $CardEffect
-                 }[],
+        select: $CardSelector,
+        effect: $CardEffect
+    }[],
     name: string
-
 };
 
 
@@ -66,9 +65,6 @@ $AdvancedTextPartAction {
 
 
 types: shopParameter[],
-
-
-
 
 people: {
     name: string,
