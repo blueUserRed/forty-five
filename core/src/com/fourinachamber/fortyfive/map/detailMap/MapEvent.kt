@@ -151,8 +151,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     }
 
     override fun start() {
-        // TODO: ugly
-        FortyFive.changeToScreen("screens/game_screen.onj", this)
+        MapManager.changeToEncounterScreen(this)
     }
 
     fun completed() {
@@ -215,7 +214,7 @@ class NPCMapEvent(val npc: String) : MapEvent() {
     override val displayName: String = "I just want to talk"
 
     override fun start() {
-        FortyFive.changeToScreen("screens/dialog.onj", this) // TODO: ugly
+        MapManager.changeToDialogScreen(this)
     }
 
     fun complete() {
@@ -253,7 +252,7 @@ class ShopMapEvent(
     override val displayName: String = "BUY STUFF NOW"
 
     override fun start() {
-        FortyFive.changeToScreen("screens/shop_screen.onj", this) // TODO: ugly
+        MapManager.changeToShopScreen(this)
     }
 
     fun complete() {

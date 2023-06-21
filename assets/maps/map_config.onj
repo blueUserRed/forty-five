@@ -27,6 +27,13 @@ mapImages: [
     },
 ],
 
+screens: {
+    mapScreen: "screens/map_screen.onj",
+    dialogScreen: "screens/dialog_screen.onj",
+    encounterScreen: "screens/game_screen.onj",
+    shopScreen: "screens/shop_screen.onj",
+},
+
 displayNames: [
     {
         name: "test_area",

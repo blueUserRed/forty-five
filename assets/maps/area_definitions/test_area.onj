@@ -64,7 +64,7 @@ nodes: [
 
 decorations: [
     {
-        texture: "burning_icon",
+        texture: "map_decoration_cactus",
         baseWidth: 8.0,
         baseHeight: 8.0,
         positions: [

@@ -10,13 +10,13 @@ npcs: [
                 {
                     text: [
                         $Text { text: "Hello " },
-                        $Text { text: "World" },
-                        $Text { text: "! " },
-                        $Text { text: "Hello " },
-                        $Text { text: "World" },
-                        $Text { text: "!" },
+//                        $Text { text: "World" },
+//                        $Text { text: "! " },
+//                        $Text { text: "Hello " },
+//                        $Text { text: "World" },
+//                        $Text { text: "!" },
                     ],
-                    next: $Continue { }
+                    next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
                 },
                 {
                     text: [
