@@ -196,8 +196,8 @@ class DetailMapWidget(
         val viewport = screen.stage.viewport
         val scissor = Rectangle(
             0f, viewport.bottomGutterHeight.toFloat(),
-            (Gdx.graphics.width / 160f) * width,
-            ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / 90f) * height
+            (Gdx.graphics.width / viewport.worldWidth) * width,
+            ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight) * height
         )
         if (!ScissorStack.pushScissors(scissor)) return
         drawBackground(batch)

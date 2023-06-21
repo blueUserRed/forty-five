@@ -59,8 +59,52 @@ var personWidget = $PersonWidget {
     ],
 };
 
+var cardsWidgetTextChild = $Image {       //TODO biome for background
 
-var cardsWidget = $ShopWidget {
+    name: "background_img",
+    textureName: "shop_background_no_biome",
+    scaleX: 0.0,
+    scaleY: 0.0,
+    width: worldWidth,
+    height: worldHeight,
+    reportDimensionsWithScaling: true,
+    styles: [
+        {
+
+            width: 30.0#percent,
+            height: 30.0#percent,
+        }
+    ],
+};
+
+var cardsWidget = $ScrollBox {
+    name: "scroll_box",
+    scrollDirection: "row", //column
+
+    styles: [
+        {
+            flexWrap: wrap.wrap,
+            flexDirection: flexDirection.row,
+            justifyContent: justify.spaceBetween,
+            background:"shop_items_background",
+            width: 100.0#percent,
+            height: 69.0#percent,
+        }
+    ],
+} children [
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+];
+
+/*var cardsWidget = $ShopWidget {
     name: "cards_widget",
     texture: "shop_items_background",
     dataFile: "cards/cards.onj",
@@ -79,7 +123,7 @@ var cardsWidget = $ShopWidget {
             height: 69.0#percent,
         }
     ],
-};
+};*/
 
 root: $Box {
     styles: [
