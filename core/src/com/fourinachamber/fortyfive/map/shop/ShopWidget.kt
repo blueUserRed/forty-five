@@ -80,6 +80,17 @@ class ShopWidget(
             )
             dragAndDrop.addSource(behaviour)
         }
+
+        for (i in 0..nbrOfItems * 2) {
+            val pos = (0 until  cards.size).random(rnd)
+            val card = cards[pos]
+            val label = priceTags[pos]
+            cards.removeAt(pos)
+            priceTags.removeAt(pos)
+            val newPos = (0 until cards.size).random(rnd)
+            cards.add(newPos, card)
+            priceTags.add(newPos, label)
+        }
     }
 
     private fun getCardToAddWithChances(rnd: Random): Int {
