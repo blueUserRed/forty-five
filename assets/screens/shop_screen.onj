@@ -80,30 +80,37 @@ var cardsWidget = $ScrollBox {
     name: "scroll_box",
     isScrollDirectionVertical: true,
     scrollDistance: 2.0,
+    backgroundStretched: false,
 
     styles: [
         {
             flexWrap: wrap.wrap,
             flexDirection: flexDirection.row,
             justifyContent: justify.spaceBetween,
-            background:"shop_items_background",
+            background: "shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
             paddingLeft: 3.0#points,
-            paddingRight: 3.0#points,
+            paddingRight: 1.0#points,
             paddingTop: 3.0#points,
             paddingBottom: 3.0#points,
             cuttingLeft: 1.75,
             cuttingRight: 1.75,
             cuttingTop: 1.75,
             cuttingBottom: 1.75,
+            scrollbarBackground: "hallo",
+            scrollbarTextureHandle: "welt",
+            scrollbarWidth: 0.0,
+            scrollbarSide: "left",
+            //texture whole
+        //texture innere Drawable
+        //1 mal gesagt breite von scrollbar   in points
+        //top/bottom or right/left
         }
     ],
 } children [
     cardsWidgetTextChild,
     cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
@@ -111,10 +118,13 @@ var cardsWidget = $ScrollBox {
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
+    //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+
 ];
 
 /*var cardsWidget = $ShopWidget {
