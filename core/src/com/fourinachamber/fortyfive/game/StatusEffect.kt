@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game
 
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
@@ -30,7 +29,7 @@ abstract class StatusEffect(
      * the remaining amount of revolver-turns this effect will stay active for
      */
     val remainingTurns: Int
-        get() = (startTurn + turns) - gameController.turnCounter
+        get() = (startTurn + turns) - gameController.revolverRotationCounter
 
     private var startTurn: Int = 0
 
@@ -64,7 +63,7 @@ abstract class StatusEffect(
      */
     open fun start(gameController: GameController) {
         this.gameController = gameController
-        startTurn = gameController.turnCounter
+        startTurn = gameController.revolverRotationCounter
     }
 
     /**
@@ -208,20 +207,20 @@ abstract class StatusEffect(
 
         @Suppress("unused") // will be needed in the future
         PLAYER {
-            override fun getLivesActor(): Actor {
-                return FortyFive.currentGame!!.playerLivesLabel
-            }
+//            override fun getLivesActor(): Actor {
+//                return FortyFive.currentGame!!.playerLivesLabel
+//            }
             override fun damage(damage: Int): Timeline {
                 return Timeline.timeline {
-                    action { FortyFive.currentGame!!.damagePlayer(damage) }
+                    include(FortyFive.currentGame!!.damagePlayer(damage))
                 }
             }
         },
 
         ENEMY {
-            override fun getLivesActor(): Actor {
-                return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().actor.livesLabel
-            }
+//            override fun getLivesActor(): Actor {
+//                return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().actor.livesLabel
+//            }
 
             override fun damage(damage: Int): Timeline {
                 return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().damage(damage)
@@ -229,10 +228,10 @@ abstract class StatusEffect(
         }
         ;
 
-        /**
-         * returns the actor displaying the current and/or base lives of the target
-         */
-        abstract fun getLivesActor(): Actor
+//        /**
+//         * returns the actor displaying the current and/or base lives of the target
+//         */
+//        abstract fun getLivesActor(): Actor
 
         /**
          * returns a timeline containing the necessary actions to damage the target

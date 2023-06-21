@@ -9,10 +9,10 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
@@ -54,7 +54,7 @@ object GraphicsConfig {
                 FortyFive.currentGame!!.playGameAnimation(anim)
             }
 
-            override fun isFinished(): Boolean = true
+            override fun isFinished(timeline: Timeline): Boolean = true
         }
     }
 
@@ -79,51 +79,18 @@ object GraphicsConfig {
         }
     }
 
-    @MainThreadOnly
-    fun coverStackParticles(destroyed: Boolean, coverStack: CoverStack, screen: OnjScreen): Timeline.TimelineAction {
-
-        val particle = ResourceManager.get<ParticleEffect>(
-            screen,
-            if (destroyed) coverStackDestroyedParticles else coverStackDamagedParticles
-        )
-
-        return object : Timeline.TimelineAction() {
-
-            override fun start(timeline: Timeline) {
-                super.start(timeline)
-
-                val particleActor = CustomParticleActor(particle)
-                particleActor.isAutoRemove = true
-                particleActor.fixedZIndex = Int.MAX_VALUE
-
-                val (x, y) = coverStack.localToStageCoordinates(Vector2(0f, 0f))
-                if (destroyed) {
-                    particleActor.setPosition(
-                        x + coverStack.width / 2,
-                        y + coverStack.height / 2
-                    )
-                } else {
-                    val width = particle.emitters[0].spawnWidth.highMax
-                    particleActor.setPosition(
-                        x + coverStack.width / 2 - width / 2,
-                        y
-                    )
-                }
-
-                screen.addActorToRoot(particleActor)
-                particleActor.start()
-            }
-
-            override fun isFinished(): Boolean = particle.isComplete
-
-        }
-    }
-
     fun rawTemplateString(name: String): String = rawTemplateStrings[name]!!
 
     fun iconName(name: String): String = iconConfig[name]!!.first
 
     fun iconScale(name: String): Float = iconConfig[name]!!.second
+
+    fun cardHighlightEffect(card: Card): Timeline.TimelineAction = when (card.highlightType) {
+
+        Card.HighlightType.STANDARD -> card.actor.growAnimation(false).asAction()
+        Card.HighlightType.GLOW -> card.actor.growAnimation(true).asAction()
+
+    }
 
     fun shakeActorAnimation(actor: Actor, reduce: Boolean): ActorActionTimelineAction {
         val action = ShakeActorAction(
@@ -134,19 +101,6 @@ object GraphicsConfig {
         )
         action.duration = shakeDuration
         return ActorActionTimelineAction(action, actor)
-    }
-
-    @MainThreadOnly
-    fun bannerAnimation(isPlayer: Boolean, screen: OnjScreen): GameAnimationTimelineAction {
-        val anim = BannerAnimation(
-            ResourceManager.get(screen, if (isPlayer) playerTurnBannerName else enemyTurnBannerName),
-            screen,
-            bannerAnimDuration,
-            bannerScaleAnimDuration,
-            bannerBeginScale,
-            bannerEndScale
-        )
-        return GameAnimationTimelineAction(anim)
     }
 
     @MainThreadOnly
@@ -199,7 +153,7 @@ object GraphicsConfig {
     fun cardDetailSpacing(): Float = cardDetailSpacing
 
     @MainThreadOnly
-    fun cardDetailBackground(): ResourceHandle = cardDetailBackground!!
+    fun cardDetailBackground(): ResourceHandle = cardDetailBackground
 
     @MainThreadOnly
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
@@ -243,21 +197,6 @@ object GraphicsConfig {
         damageOverlayFadeIn = (damageOverlay.get<Double>("fadeIn") * 1000).toInt()
         damageOverlayFadeOut = (damageOverlay.get<Double>("fadeOut") * 1000).toInt()
 
-        val coverStackParticles = config.get<OnjObject>("coverStackParticles")
-
-        coverStackDamagedParticles = coverStackParticles.get<String>("damaged")
-        coverStackDestroyedParticles = coverStackParticles.get<String>("destroyed")
-
-        val bannerOnj = config.get<OnjObject>("bannerAnimation")
-
-        bannerAnimDuration = (bannerOnj.get<Double>("duration") * 1000).toInt()
-        bannerScaleAnimDuration = (bannerOnj.get<Double>("scaleAnimDuration") * 1000).toInt()
-        bannerBeginScale = bannerOnj.get<Double>("beginScale").toFloat()
-        bannerEndScale = bannerOnj.get<Double>("endScale").toFloat()
-
-        playerTurnBannerName = bannerOnj.get<String>("playerTurnBanner")
-        enemyTurnBannerName = bannerOnj.get<String>("enemyTurnBanner")
-
         val shakeOnj = config.get<OnjObject>("shakeAnimation")
 
         xShake = shakeOnj.get<Double>("xShake").toFloat()
@@ -290,11 +229,6 @@ object GraphicsConfig {
         numChangeStartFadeoutAt = (numChange.get<Double>("startFadeoutAt") * 1000).toInt()
         numChangeNegativeFontColor = numChange.get<Color>("negativeFontColor")
         numChangePositiveFontColor = numChange.get<Color>("positiveFontColor")
-
-        val coverStackOnj = config.get<OnjObject>("coverStackParticles")
-
-        coverStackDamagedParticlesName = coverStackOnj.get<String>("damaged")
-        coverStackDestroyedParticlesName = coverStackOnj.get<String>("destroyed")
 
         val fadeOnj = config.get<OnjObject>("insultFadeAnimation")
 
@@ -350,14 +284,6 @@ object GraphicsConfig {
     private var damageOverlayFadeIn by Delegates.notNull<Int>()
     private var damageOverlayFadeOut by Delegates.notNull<Int>()
 
-    private lateinit var coverStackDamagedParticles: String
-    private lateinit var coverStackDestroyedParticles: String
-
-    private var bannerAnimDuration by Delegates.notNull<Int>()
-    private var bannerScaleAnimDuration by Delegates.notNull<Int>()
-    private var bannerBeginScale by Delegates.notNull<Float>()
-    private var bannerEndScale by Delegates.notNull<Float>()
-
     private var xShake by Delegates.notNull<Float>()
     private var yShake by Delegates.notNull<Float>()
     private var xShakeSpeedMultiplier by Delegates.notNull<Float>()
@@ -368,9 +294,6 @@ object GraphicsConfig {
     private var yQuickCharge by Delegates.notNull<Float>()
     private var quickChargeDuration by Delegates.notNull<Float>()
     private lateinit var quickChargeInterpolation: Interpolation
-
-    private lateinit var playerTurnBannerName: String
-    private lateinit var enemyTurnBannerName: String
 
     private var xCharge by Delegates.notNull<Float>()
     private var yCharge by Delegates.notNull<Float>()
@@ -385,9 +308,6 @@ object GraphicsConfig {
     private var numChangeRaiseDistance by Delegates.notNull<Float>()
     private var numChangeSinkDistance by Delegates.notNull<Float>()
     private var numChangeStartFadeoutAt by Delegates.notNull<Int>()
-
-    private lateinit var coverStackDestroyedParticlesName: String
-    private lateinit var coverStackDamagedParticlesName: String
 
     private lateinit var fadeFontName: String
     private lateinit var fadeFontColor: Color

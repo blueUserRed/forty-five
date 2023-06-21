@@ -3,53 +3,6 @@ import "imports/drag_and_drop_behaviour.onjschema" as _;
 
 use Common;
 
-var enemyActionSharedKeys = {
-    weight: int,
-    indicatorTexture: string,
-    indicatorTextureScale: float
-};
-
-$EnemyAction {
-
-    $DamagePlayerEnemyAction {
-        min: int,
-        max: int,
-        ...enemyActionSharedKeys
-    }
-
-    $AddCoverEnemyAction {
-        min: int,
-        max: int,
-        ...enemyActionSharedKeys
-    }
-
-    $DoNothingEnemyAction {
-        insults: string[],
-        ...enemyActionSharedKeys
-    }
-
-}
-
-var enemyBrain = {
-    actions: $EnemyAction[]
-};
-
-var enemy = {
-    name: string,
-    texture: string,
-    coverIcon: string,
-    lives: int,
-    offsetX: float,
-    offsetY: float,
-    scaleX: float,
-    scaleY: float,
-    coverIconScale: float,
-    detailFont: string,
-    detailFontScale: float,
-    detailFontColor: Color,
-    brain: enemyBrain
-};
-
 cardsFile: string,
 cardHand: {
     actorName: string
@@ -60,25 +13,14 @@ revolver: {
 },
 enemyArea: {
     actorName: string,
-    enemies: string[]
 },
-coverArea: {
-    actorName: string,
-    dropBehaviour: $DragAndDropBehaviour
+cardSelector: {
+    actorName: string
 },
 cardDragBehaviour: $DragAndDropBehaviour,
-enemies: enemy[],
-cardDrawActor: string,
-playerLivesLabelName: string,
-endTurnButtonName: string,
-shootButtonName: string,
-reservesLabelName: string,
 cardsToDrawInFirstRound: int,
 cardsToDraw: int,
 maxCards: int,
 playerLives: int,
 reservesAtRoundBegin: int,
-destroyCardInstructionActor: string,
 shotEmptyDamage: int,
-winScreen: string,
-looseScreen: string,

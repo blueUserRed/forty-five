@@ -16,13 +16,8 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.EventListener
-import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragScrollListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
@@ -32,17 +27,13 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import ktx.actors.alpha
-import ktx.actors.onEnter
-import ktx.actors.onExit
-import ktx.actors.onTouchEvent
+import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import javax.swing.plaf.basic.BasicSliderUI.ActionScroller
-import javax.swing.plaf.basic.BasicSliderUI.ScrollListener
 import kotlin.math.abs
+
 
 /**
  * an object which is rendered and to which a mask can be applied
@@ -255,6 +246,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override fun initStyles(screen: OnjScreen) {
         addLabelStyles(screen)
         addBackgroundStyles(screen)
+        addDisableStyles(screen)
     }
 
     companion object {
@@ -438,6 +430,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
         addBackgroundStyles(screen)
+        addDisableStyles(screen)
     }
 
     companion object {
@@ -542,24 +535,26 @@ open class CustomScrollableFlexBox(
     private val scrollDirection: String
 ) : CustomFlexBox(screen) {
 
-    companion object {
-        val dragListener: (ScrollPane) -> DragScrollListener = {
-            object : DragScrollListener(it) {
-                override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {
-                    println("now")
-                    return super.scrolled(event, x, y, amountX, amountY)
-                }
+    private val scrollListener: (CustomScrollableFlexBox)-> EventListener={
+        object : InputListener() {
+
+            override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
+                stage.scrollFocus = it
+            }
+
+            override fun exit(event: InputEvent?, x: Float, y: Float, pointer: Int, toActor: Actor?) {
+                stage.scrollFocus = null
+            }
+
+            override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {
+                println(amountY)
+                return super.scrolled(event, x, y, amountX, amountY)
             }
         }
     }
 
-    private lateinit var scroller: ScrollPane
-
-    private lateinit var dragger: DragScrollListener
-
     override fun draw(batch: Batch?, parentAlpha: Float) {
 
-//        println("$width ${dragger.touchDownY} ${dragger.dragStartY}")
         batch ?: return
 
         batch.flush()
@@ -582,13 +577,7 @@ open class CustomScrollableFlexBox(
 
     init {
 
-        if (!this::dragger.isInitialized) {
-//            scroller=ScrollPane(this)
-//            dragger = dragListener(scroller)
-//            this.addListener(dragger)
-//            scroller.height=100F
-//            scroller.width=300F
-        }
+        addListener(scrollListener(this))
     }
 
 }

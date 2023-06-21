@@ -2,62 +2,9 @@
 import "imports/colors.onj" as color;
 import "config/graphics_config.onj" as graphicsConfig;
 
-var defaultEnemyBrain = {
-    actions: [
-
-        $DamagePlayerEnemyAction {
-            weight: 4,
-            min: 5,
-            max: 10,
-            ...(graphicsConfig.enemyConfig.damagePlayerIcon)
-        },
-
-        $AddCoverEnemyAction {
-            weight: 2,
-            min: 1,
-            max: 10,
-            ...(graphicsConfig.enemyConfig.addCoverIcon)
-        },
-
-        $DoNothingEnemyAction {
-            weight: 1,
-            insults: [
-                "If all your brains were dynamite,\n there wouldnt be enough to blow your nose",
-                "You wouldnt even be able\n to teach a hen to cuck",
-                "Your brain cavity wouldnt even\n make a drinkin cup for a canary",
-                "I hope you play the cards\n better than you shoot",
-                "Your hat got a knit,\n you son of a bitch"
-            ],
-            ...(graphicsConfig.enemyConfig.doNothingIcon)
-        }
-
-    ]
-};
-
-enemyConfig: {
-
-    enemies: [
-        {
-            name: "enemy1",
-            lives: 1,
-            brain: defaultEnemyBrain,
-            ...(graphicsConfig.enemyConfig.enemy1)
-        },
-        {
-            name: "enemy2",
-            lives: 100,
-            brain: defaultEnemyBrain,
-            ...(graphicsConfig.enemyConfig.enemy2)
-        }
-    ],
-
-    startEnemies: [ "enemy1" ]
-//    startEnemies: [ "enemy1", "enemy2" ]
-},
-
 cardDrawConfig: {
     firstRound: 6,
-    roundStart: 1,
+    roundStart: 2,
     maxCards: 10,
 },
 

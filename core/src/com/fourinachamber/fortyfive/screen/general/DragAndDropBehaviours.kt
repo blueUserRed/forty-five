@@ -28,9 +28,6 @@ object DragAndDropBehaviourFactory {
         dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
             RevolverDropTarget(dragAndDrop, actor, onj)
         }
-        dropBehaviours["CoverAreaDropTarget"] = { dragAndDrop, actor, onj ->
-            CoverAreaDropTarget(dragAndDrop, actor, onj)
-        }
         dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
             ShopDropTarget(dragAndDrop, actor, onj)
         }

@@ -32,23 +32,8 @@ assets: {
 
         "revolver_cursor",
 
-        "earthquake_shader",
-
-        "transparent_black_texture",
-
-        "cover_hook", "key_select_frame",
-
-//        "film_shader", // TODO: remove
-
-        ...(graphicsConfig.bannerAnimationUsedAssets),
-        ...(graphicsConfig.statusEffectsUsedAssets),
-        ...(graphicsConfig.damageOverlayUsedAssets),
-        ...(graphicsConfig.destroyCardUsedAssets),
-        ...(graphicsConfig.coverStackUsedAssets),
-        ...(graphicsConfig.textAnimationUsedAssets),
-        ...(graphicsConfig.cardDetailUsedAssets),
         ...(graphicsConfig.keySelectUsedAssets),
-        ...(graphicsConfig.enemyUsedAssets)
+        ...(graphicsConfig.gameUsedAssets),
     ]
 },
 
@@ -70,26 +55,13 @@ var controller = $GameScreenController {
     },
     enemyArea: {
         actorName: "enemy_area",
-        enemies: gameConfig.enemyConfig.startEnemies
     },
-    coverArea: {
-        actorName: "cover_area",
-        dropBehaviour: $CoverAreaDropTarget {
-            group: "card"
-        }
+    cardSelector: {
+        actorName: "card_selector"
     },
     cardDragBehaviour: $CardDragSource {
         group: "card"
     },
-    enemies: gameConfig.enemyConfig.enemies,
-    cardDrawActor: "card_draw_table",
-    playerLivesLabelName: "player_lives_label",
-    shootButtonName: "shoot_button_texture",
-    endTurnButtonName: "end_turn_button",
-    reservesLabelName: "reserves_label",
-    destroyCardInstructionActor: "destroy_card_instruction_label",
-    winScreen: "screens/win_screen.onj",
-    looseScreen: "screens/loose_screen.onj",
     cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
     maxCards: gameConfig.cardDrawConfig.maxCards,
@@ -148,29 +120,6 @@ var enemyArea = $EnemyArea {
     enemySelectionDrawable: "key_select_frame"
 };
 
-var coverArea = $CoverArea {
-    name: "cover_area",
-    numStacks: gameConfig.coverConfig.numStacks,
-    maxCards: gameConfig.coverConfig.maxCards,
-    onlyAllowAddingOnTheSameTurn: gameConfig.coverConfig.onlyAllowAddingOnTheSameTurn,
-    infoFont: "vanilla_whale",
-    infoFontColor: color.black,
-    infoFontScale: 0.1,
-    areaSpacing: 4.0,
-    cardScale: cardScale * 0.8,
-    detailFont: "red_wing",
-    detailFontColor: color.white,
-    detailFontScale: 0.07,
-    cardDeltaX: 5.5,
-    cardDeltaY: -3.0,
-    cardInitialX: 0.5,
-    cardInitialY: 9.0,
-    stackHeight: 27.0,
-    stackMinWidth: 15.0,
-    stackHook: "cover_hook",
-    zIndex: 3
-};
-
 var shootButton = $Image {
     name: "shoot_button_texture",
     textureName: "shoot_button_texture",
@@ -178,8 +127,11 @@ var shootButton = $Image {
     scaleX: 0.03,
     scaleY: 0.03,
     behaviours: [
-        $ShootButtonBehaviour { },
         buttonHoverBehaviour,
+        $CatchEventAndEmitBehaviour {
+            catch: "ButtonClickEvent",
+            emit: "ShootRevolverEvent"
+        }
     ]
 };
 
@@ -189,8 +141,11 @@ var endTurnButton = $Image {
     scaleX: 0.03,
     scaleY: 0.03,
     behaviours: [
-        $EndTurnButtonBehaviour { },
         buttonHoverBehaviour,
+        $CatchEventAndEmitBehaviour {
+            catch: "ButtonClickEvent",
+            emit: "EndTurnEvent"
+        }
     ]
 };
 
@@ -210,28 +165,114 @@ var reservesLabel = $TemplateLabel {
     color: color.white,
 };
 
-var destroyCardInstructionActor = $Label {
-    name: "destroy_card_instruction_label",
-    font: "vanilla_whale",
-    text: "Choose a card to destroy!",
-    fontScale: 0.2,
-    align: "center",
+var remainingTurnsLabel = $TemplateLabel {
+    font: "red_wing",
+    template: "remaining turns: {game.remainingTurns} -- current evaluation {game.curEvaluation}",
+    fontScale: 0.09,
     color: color.black,
 };
+
+var disableStyles = [
+    {
+        style_priority: 1,
+        disabled: false,
+    },
+    {
+        style_priority: 2,
+        style_condition: state("uiFrozen"),
+        disabled: true
+    }
+];
+
+var popupActor = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showPopup"),
+            detached: false
+        }
+    ],
+} children [
+
+    $TemplateLabel {
+        font: "red_wing",
+        template: "{game.popupText}",
+        fontScale: 0.09,
+        color: color.white,
+    },
+
+    $TemplateLabel {
+        styles: [
+            {
+                style_priority: 1,
+                visible: false
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showPopupConfirmationButton"),
+                visible: true
+            }
+        ],
+        font: "red_wing",
+        template: "{game.popupButtonText}",
+        fontScale: 0.09,
+        color: color.white,
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "PopupConfirmationEvent"
+            }
+        ]
+    },
+
+    $CircularCardSelector {
+        styles: [
+            {
+                style_priority: 1,
+                visible: false
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showPopupCardSelector"),
+                visible: true
+            }
+        ],
+        name: "card_selector",
+        radius: 17.0,
+        size: 357.0 * 0.04
+    }
+
+];
 
 var drawCardActor = $Box {
     styles: [
         {
+            style_priority: 1,
             positionType: positionType.absolute,
             background: "transparent_black_texture",
             flexDirection: flexDirection.column,
             alignItems: align.center,
             width: 100.0#percent,
             height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showCardDrawActor"),
+            detached: false
         }
     ],
-    name: "card_draw_table",
-    visible: false,
     zIndex: overlayZIndex,
 } children [
 
@@ -275,7 +316,7 @@ var drawCardActor = $Box {
                     }
                 ],
                 font: "red_wing",
-                template: "{game.remainingBullets} bullet{game.remainingBulletsPluralS} remaining in stack",
+                template: "{game.cardsInStack} card{game.cardsInStackPluralS} remaining in stack",
                 wrap: true,
                 fontScale: 0.13,
                 align: "center",
@@ -287,43 +328,15 @@ var drawCardActor = $Box {
                 reportDimensionsWithScaling: true,
                 scaleX: 0.08,
                 scaleY: 0.08,
-                behaviours: [ $DrawBulletButtonBehaviour { }, buttonHoverBehaviour ]
+                behaviours: [
+                    $CatchEventAndEmitBehaviour {
+                        catch: "ButtonClickEvent",
+                        emit: "DrawCardEvent"
+                    }
+                ]
             }
 
         ],
-
-        $Box {
-            styles: [
-                {
-                    flexDirection: flexDirection.column
-                }
-            ]
-        } children [
-
-            $TemplateLabel {
-                styles: [
-                    {
-                        marginTop: 6.0#points,
-                        marginBottom: -6.0#points,
-                    }
-                ],
-                font: "red_wing",
-                template: "{game.remainingCovers} cover{game.remainingCoversPluralS} remaining in stack",
-                wrap: true,
-                fontScale: 0.13,
-                align: "center",
-                color: color.white
-            },
-
-            $Image {
-                textureName: "draw_cover",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.08,
-                scaleY: 0.08,
-                behaviours: [ $DrawCoverCardButtonBehaviour { }, buttonHoverBehaviour ]
-            }
-
-        ]
 
     ]
 
@@ -364,7 +377,15 @@ var gameScreen = $Box {
 
         playerLivesLabel,
 
-        destroyCardInstructionActor
+        $Box {
+            styles: [
+                {
+                    flexGrow: 1.0
+                }
+            ]
+        },
+
+        remainingTurnsLabel
 
     ],
 
@@ -403,21 +424,13 @@ var gameScreen = $Box {
                         style_priority: 2,
                         style_condition: hover(),
                         background: "shoot_button_texture_hover"
-                    }
+                    },
+                    ...disableStyles
                 ],
                 ...shootButton
             }
 
         ],
-
-        $CoverArea {
-            styles: [
-                {
-                    flexGrow: 0.5
-                }
-            ],
-            ...coverArea
-        },
 
         $EnemyArea {
             styles: [
@@ -479,7 +492,8 @@ var gameScreen = $Box {
                     style_priority: 2,
                     style_condition: hover(),
                     background: "end_turn_button_texture_hover"
-                }
+                },
+                ...disableStyles
             ],
             ...endTurnButton
         }
@@ -496,5 +510,5 @@ root: $Box {
         }
     ]
 } children [
-    gameScreen, drawCardActor
+    gameScreen, drawCardActor, popupActor
 ]
