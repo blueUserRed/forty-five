@@ -349,32 +349,29 @@ class Card(
             val name = onj.get<String>("name")
 
             val card = Card(
-                name,
-                onj.get<String>("title"),
-                "$cardTexturePrefix$name",
-                onj.get<String>("flavourText"),
-                onj.get<String>("description"),
-                cardTypeOrError(onj),
-                onj.get<Long>("baseDamage").toInt(),
-                onj.get<Long>("coverValue").toInt(),
-                onj.get<Long>("cost").toInt(),
-                onj.get<OnjArray>("effects")
+                name = name,
+                title = onj.get<String>("title"),
+                drawableHandle = "$cardTexturePrefix$name",
+                flavourText = onj.get<String>("flavourText"),
+                shortDescription = onj.get<String>("description"),
+                type = cardTypeOrError(onj),
+                baseDamage = onj.get<Long>("baseDamage").toInt(),
+                coverValue = onj.get<Long>("coverValue").toInt(),
+                cost = onj.get<Long>("cost").toInt(),
+                price = onj.get<Long>("price").toInt(),
+                effects = onj.get<OnjArray>("effects")
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
-                RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
-                HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
-                onj.get<Long>("price").toInt(),
-                onj.get<OnjArray>("effects")
-                    .value
-                    .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
-                onj.get<OnjArray>("tags").value.map { it.value as String },
+                rotationDirection = RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
+                highlightType = HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
+                tags = onj.get<OnjArray>("tags").value.map { it.value as String },
                 //TODO: CardDetailActor could call these functions itself
-                GraphicsConfig.cardDetailFont(onjScreen),
-                GraphicsConfig.cardDetailFontColor(),
-                GraphicsConfig.cardDetailFontScale(),
-                GraphicsConfig.cardDetailBackground(),
-                GraphicsConfig.cardDetailSpacing(),
-                onjScreen
+                detailFont = GraphicsConfig.cardDetailFont(onjScreen),
+                detailFontColor = GraphicsConfig.cardDetailFontColor(),
+                detailFontScale = GraphicsConfig.cardDetailFontScale(),
+                detailBackgroundHandle = GraphicsConfig.cardDetailBackground(),
+                detailSpacing = GraphicsConfig.cardDetailSpacing(),
+                screen = onjScreen
             )
 
             for (effect in card.effects) effect.card = card
@@ -385,7 +382,6 @@ class Card(
 
         private fun cardTypeOrError(onj: OnjObject) = when (val type = onj.get<OnjNamedObject>("type").name) {
             "Bullet" -> Type.BULLET
-            "Cover" -> Type.COVER
             "OneShot" -> Type.ONE_SHOT
             else -> throw RuntimeException("unknown Card type: $type")
         }
@@ -416,7 +412,7 @@ class Card(
      * a type of card
      */
     enum class Type {
-        BULLET, COVER, ONE_SHOT
+        BULLET, ONE_SHOT
     }
 
     enum class HighlightType {

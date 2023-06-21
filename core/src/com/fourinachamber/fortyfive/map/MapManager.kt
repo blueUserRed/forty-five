@@ -49,9 +49,7 @@ object MapManager {
 
     var lastMapNode: MapNode?
         get() = if (SaveState.lastNode != null) {
-            currentDetailMap.uniqueNodes.find { it.index == SaveState.lastNode } ?: throw RuntimeException(
-                "invalid node index ${SaveState.lastNode} in map ${currentDetailMap.name}"
-            )
+            currentDetailMap.uniqueNodes.find { it.index == SaveState.lastNode }
         } else {
             null
         }
