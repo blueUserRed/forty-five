@@ -49,7 +49,6 @@ nodes: [
         y: 40.0,
         isArea: false,
         edgesTo: [0],
-        blockingEdges: [],
         event: $ShopMapEvent {
             currentlyBlocks: false,
             canBeStarted: true,

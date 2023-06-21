@@ -106,7 +106,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         private set
 
     /**
-     * counts up every round; starts at 0
+     * counts up every turn; starts at 0, but gets immediately incremented to one
      */
     var turnCounter: Int = 0
         private set(value) {
@@ -711,9 +711,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             override fun toString(): String = "Left($amount)"
         }
-        object Dont : RevolverRotation() {
+        object None : RevolverRotation() {
 
-            override fun toString(): String = "Dont"
+            override fun toString(): String = "None"
         }
 
 
@@ -722,7 +722,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             fun fromOnj(onj: OnjNamedObject): RevolverRotation = when (onj.name) {
                 "Right" -> Right(onj.get<Long>("amount").toInt())
                 "Left" -> Left(onj.get<Long>("amount").toInt())
-                "Dont" -> Dont
+                "Dont" -> None
                 else -> throw RuntimeException("unknown revolver rotation: ${onj.name}")
             }
 
