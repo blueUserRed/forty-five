@@ -70,16 +70,16 @@ var cardsWidgetTextChild = $Image {       //TODO biome for background
     reportDimensionsWithScaling: true,
     styles: [
         {
-
-            width: 30.0#percent,
-            height: 30.0#percent,
+            width: 40.0#percent,
+            height: 40.0#percent,
         }
     ],
 };
 
 var cardsWidget = $ScrollBox {
     name: "scroll_box",
-    scrollDirection: "row", //column
+    isScrollDirectionVertical: true,
+    scrollDistance: 2.0,
 
     styles: [
         {
@@ -89,6 +89,14 @@ var cardsWidget = $ScrollBox {
             background:"shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
+            paddingLeft: 3.0#points,
+            paddingRight: 3.0#points,
+            paddingTop: 3.0#points,
+            paddingBottom: 3.0#points,
+            cuttingLeft: 1.75,
+            cuttingRight: 1.75,
+            cuttingTop: 1.75,
+            cuttingBottom: 1.75,
         }
     ],
 } children [
@@ -96,12 +104,17 @@ var cardsWidget = $ScrollBox {
     cardsWidgetTextChild,
     cardsWidgetTextChild,
     cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
 ];
 
 /*var cardsWidget = $ShopWidget {

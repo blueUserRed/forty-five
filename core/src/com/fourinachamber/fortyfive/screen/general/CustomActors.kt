@@ -18,7 +18,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
-import com.badlogic.gdx.scenes.scene2d.utils.DragScrollListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -27,6 +26,8 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
+import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaEdge
 import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
@@ -532,29 +533,60 @@ open class CustomFlexBox(
 
 open class CustomScrollableFlexBox(
     private val screen: OnjScreen,
-    private val scrollDirection: String
+    private val isScrollDirectionVertical: Boolean,
+    private val scrollDistance: Float
 ) : CustomFlexBox(screen) {
 
-    private val scrollListener: (CustomScrollableFlexBox)-> EventListener={
-        object : InputListener() {
+    private val scrollListener = object : InputListener() {
+        override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
+            stage.scrollFocus = this@CustomScrollableFlexBox
+        }
 
-            override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
-                stage.scrollFocus = it
-            }
-
-            override fun exit(event: InputEvent?, x: Float, y: Float, pointer: Int, toActor: Actor?) {
+        override fun exit(event: InputEvent?, x: Float, y: Float, pointer: Int, toActor: Actor?) {
+            if (x > width || x < 0 || y > height || y < 0)
                 stage.scrollFocus = null
-            }
+        }
 
-            override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {
-                println(amountY)
-                return super.scrolled(event, x, y, amountX, amountY)
+        override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {
+            this@CustomScrollableFlexBox.scroll(amountY)
+            return super.scrolled(event, x, y, amountX, amountY)
+        }
+    }
+
+    init {
+        addListener(scrollListener)
+    }
+
+    private fun scroll(offset: Float) {
+        this.offset += offset * scrollDistance
+        invalidate()
+    }
+
+    private var offset: Float = 0F
+    var cutLeft: Float = 0F
+    var cutRight: Float = 0F
+    var cutTop: Float = 0F
+    var cutBottom: Float = 0F
+
+    override fun layout() {
+        super.layout()
+
+        if (isScrollDirectionVertical) {
+            val max = children.map { -it.y }.max()
+            if (cutTop < max + cutBottom) {
+                offset = offset.between(cutTop, max + cutBottom)
+                children.forEach { it.y += offset }
+            }
+        } else {
+            val min = (children.map { it.x + it.width }.max() - width)
+            if (-min - cutRight <  -cutLeft / scrollDistance) {
+                offset = offset.between(-min - cutRight, -cutLeft / scrollDistance)
+                children.forEach { it.x += offset }
             }
         }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-
         batch ?: return
 
         batch.flush()
@@ -564,10 +596,10 @@ open class CustomScrollableFlexBox(
         val yPixel =
             (Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight
         val scissor = Rectangle(
-            xPixel * x + viewport.leftGutterWidth,
-            yPixel * y + viewport.topGutterHeight,
-            xPixel * width,
-            yPixel * height
+            xPixel * (x + cutLeft) + viewport.leftGutterWidth,
+            yPixel * (y + cutTop) + viewport.topGutterHeight,
+            xPixel * (width - cutLeft - cutRight),
+            yPixel * (height - cutTop - cutBottom)
         )
         if (!ScissorStack.pushScissors(scissor)) return
         super.draw(batch, parentAlpha)
@@ -575,11 +607,11 @@ open class CustomScrollableFlexBox(
         ScissorStack.popScissors()
     }
 
-    init {
-
-        addListener(scrollListener(this))
+    override fun initStyles(screen: OnjScreen) {
+        addScrollFlexBoxStyles(screen)
+        addBackgroundStyles(screen)
+        addDetachableStyles(screen)
     }
-
 }
 
 /**
