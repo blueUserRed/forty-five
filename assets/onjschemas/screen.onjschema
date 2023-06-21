@@ -204,6 +204,12 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $CircularCardSelector {
+        radius: float,
+        size: float,
+        ...widgetSharedKeys
+    }
+
     $PersonWidget{
         offsetX:float,
         offsetY:float,
@@ -223,6 +229,7 @@ $Widget {
         widthPercentagePerItem: Float,
         ...widgetSharedKeys,
     }
+
 }
 
 var advancedTextPartSharedKeys = {
@@ -292,77 +299,20 @@ $Behaviour {
 
     $OnClickExitBehaviour { }
 
-    $OnHoverChangeSizeBehaviour {
-        cellName?: string,
-        enterDuration: float,
-        exitDuration: float,
-        baseX: float,
-        baseY: float,
-        targetX: float,
-        targetY: float,
-        enterInterpolation: string?,
-        exitInterpolation: string?
-    }
-
-    $OnHoverChangeFontSizeBehaviour {
-        enterDuration: float,
-        exitDuration: float,
-        targetFontScale: float,
-        baseFontScale: float,
-        enterInterpolation: string?,
-        exitInterpolation: string?
-    }
-
     $OnClickChangeScreenBehaviour {
         screenPath: string
     }
 
     $OnClickAbandonRunBehaviour { }
 
-    $OnClickRemoveActorBehaviour { }
-
-    $OnClickMaskBehaviour {
-        maskTexture: string,
-        invert?: boolean,
-        maskScaleX?: float,
-        maskScaleY?: float,
-        maskOffsetX?: float,
-        maskOffsetY?: float,
-    }
-
-    $OnClickParticleEffectBehaviour {
-        file: string,
-        textureDir: string,
-        effectScale?: float,
-        useCursorPos?: boolean,
-    }
-
-    $OnClickChangePostProcessorBehaviour {
-        postProcessor: string?,
-        duration: int?,
-        setOnlyIfNoPostProcessorIsSet: boolean,
-    }
-
-    $OnHoverPopupBehaviour {
-        popupName: string,
-        setPopupPosition: boolean,
-        xOffset?: float,
-        yOffset?: float,
-    }
-
-    $OnClickOpenPopupBehaviour {
-        popupName: string
-    }
-
-    $ShootButtonBehaviour { }
-
-    $EndTurnButtonBehaviour { }
-
-    $DrawBulletButtonBehaviour { }
-
-    $DrawCoverCardButtonBehaviour { }
 
     $OnClickResetSavefileBehaviour { }
+
+    $CatchEventAndEmitBehaviour {
+        catch: string,
+        emit: string,
+        blockCaughtEvent?: boolean
+    }
 
 }
 
@@ -430,14 +380,6 @@ $KeyAction {
 
     $DeselectAllKeyAction { }
 
-    $ShootKeyAction { }
-
-    $EndTurnKeyAction { }
-
-    $DrawBulletKeyAction { }
-
-    $DrawCoverKeyAction { }
-
     $NextInHierarchyKeyAction { }
 
     $PreviousInHierarchyKeyAction { }
@@ -460,10 +402,6 @@ options: {
         keycode: int,
         modifiers: int[],
         action: $KeyAction
-    }[],
-    popups?: {
-        name: string,
-        popupRoot: $Widget
     }[],
     postProcessor?: string,
     transitionAwayTime?: float

@@ -1,0 +1,51 @@
+
+import "imports/colors.onj" as color;
+
+enemies: [
+    {
+        name: "Test Enemy",
+        baseHealthPerTurn: 15,
+        baseDamage: 90,
+        fightDuration: [4, 6],
+        texture: "enemy_texture",
+        coverIcon: "shield_icon",
+        coverIconScale: 0.03,
+        scaleX: 0.025,
+        scaleY: 0.025,
+        detailFont: "red_wing",
+        detailFontScale: 0.06,
+        actions: [
+            $DestroyCardsInHand {
+                maxCards: 4
+            },
+
+            $RevolverRotation {
+                maxTurns: 3
+            }
+        ],
+        detailFontColor: color.black
+    },
+//    {
+//        name: "Test Enemy 2",
+//        baseHealthPerTurn: 20,
+//        baseDamage: 80,
+//        fightDuration: [10, 16],
+//        texture: "enemy_texture",
+//        coverIcon: "shield_icon",
+//        coverIconScale: 0.03,
+//        scaleX: 0.025,
+//        scaleY: 0.025,
+//        detailFont: "red_wing",
+//        detailFontScale: 0.06,
+//        actions: [
+//            $DestroyCardsInHand {
+//                maxCards: 4
+//            },
+//
+//            $RevolverRotation {
+//                maxTurns: 3
+//            }
+//        ],
+//        detailFontColor: color.black
+//    }
+]

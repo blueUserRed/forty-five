@@ -9,15 +9,15 @@ sealed class EncounterModifier {
     }
 
     object Frost : EncounterModifier() {
-        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.DONT
+        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
     }
 
     object BewitchedMist : EncounterModifier() {
 
         override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = when (rotation) {
-            RevolverRotation.RIGHT -> RevolverRotation.LEFT
-            RevolverRotation.LEFT -> RevolverRotation.RIGHT
-            RevolverRotation.DONT -> RevolverRotation.DONT
+            is RevolverRotation.Right -> RevolverRotation.Left(rotation.amount)
+            is RevolverRotation.Left -> RevolverRotation.Right(rotation.amount)
+            else -> rotation
         }
     }
 

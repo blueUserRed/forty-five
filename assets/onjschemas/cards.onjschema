@@ -4,9 +4,21 @@ use Cards;
 $CardType {
 
     $Bullet { }
-    $Cover { }
     $OneShot { }
 
+}
+
+$Rotation {
+
+    $Left {
+        amount: int
+    }
+
+    $Right {
+        amount: int
+    }
+
+    $Dont { }
 }
 
 var card = {
@@ -17,6 +29,8 @@ var card = {
     baseDamage: int,
     coverValue: int,
     traitEffects: string[],
+    rotation: $Rotation,
+    highlightType: string,
     cost: int,
     price: int,
     type: $CardType,
@@ -32,6 +46,5 @@ var startDeckEntry = {
 };
 
 defaultBullet: string,
-defaultCover: string,
 
 startDeck: startDeckEntry[]

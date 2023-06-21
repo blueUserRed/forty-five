@@ -3,14 +3,8 @@ package com.fourinachamber.fortyfive.screen.general
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.actions.RelativeTemporalAction
-import com.badlogic.gdx.scenes.scene2d.actions.SizeToAction
-import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
-import com.badlogic.gdx.scenes.scene2d.ui.Cell
-import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.utils.*
@@ -18,6 +12,7 @@ import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import kotlin.reflect.KClass
 import kotlin.system.measureTimeMillis
 
 
@@ -30,16 +25,10 @@ object BehaviourFactory {
         "OnClickChangeScreenStateBehaviour" to { onj, actor -> OnClickChangeScreenStateBehaviour(onj, actor) },
         "MouseHoverBehaviour" to { onj, actor -> MouseHoverBehaviour(onj, actor) },
         "OnClickExitBehaviour" to { _, actor -> OnClickExitBehaviour(actor) },
-        "OnHoverChangeSizeBehaviour" to { onj, actor -> OnHoverChangeSizeBehaviour(onj, actor) },
         "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
-        "OnClickRemoveActorBehaviour" to { onj, actor -> OnClickRemoveActorBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
-        "OnHoverChangeFontSizeBehaviour" to { onj, actor -> OnHoverChangeFontSizeBehaviour(onj, actor) },
         "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
-        "ShootButtonBehaviour" to { onj, actor -> ShootButtonBehaviour(onj, actor) },
-        "EndTurnButtonBehaviour" to { onj, actor -> EndTurnButtonBehaviour(onj, actor) },
-        "DrawBulletButtonBehaviour" to { onj, actor -> DrawBulletButtonBehaviour(onj, actor) },
-        "DrawCoverCardButtonBehaviour" to { onj, actor -> DrawCoverCardButtonBehaviour(onj, actor) },
+        "CatchEventAndEmitBehaviour" to { onj, actor -> CatchEventAndEmitBehaviour(onj, actor)}
     )
 
     /**
@@ -85,12 +74,23 @@ abstract class Behaviour(val actor: Actor) {
      */
     protected open val onDisabledCLick: @MainThreadOnly BehaviourCallback? = null
 
+    protected open val onEventCapture: @MainThreadOnly ((event: Event) -> Boolean)? = null
+
+    protected open val onDisabledEventCapture: @MainThreadOnly ((event: Event) -> Boolean)? = null
+
     /**
      * binds the callbacks to the actor and sets the [onjScreen]
      */
     @AllThreadsAllowed
     fun bindCallbacks(onjScreen: OnjScreen) {
         this.onjScreen = onjScreen
+        actor.addListener { event ->
+            return@addListener if (actor is DisableActor && !actor.isDisabled) {
+                onEventCapture?.invoke(event) ?: false
+            } else {
+                onDisabledEventCapture?.invoke(event) ?: false
+            }
+        }
         onHoverEnter?.let { actor.onEnter(it) }
         onHoverExit?.let { actor.onExit(it) }
         actor.onButtonClick {
@@ -192,99 +192,6 @@ class OnClickAbandonRunBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
 
 }
 
-class OnClickRemoveActorBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    override val onCLick: BehaviourCallback = {
-        actor.parent.removeActor(actor)
-    }
-
-}
-
-/**
- * changes the size of the actor (or of a named cell) when the actor is hovered over
- */
-class OnHoverChangeSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
-
-    private val cellName: String? = onj.getOr("cellName", null)
-    private val enterDuration: Float =onj.get<Double>("enterDuration").toFloat()
-    private val exitDuration: Float = onj.get<Double>("exitDuration").toFloat()
-    private val baseX: Float = onj.get<Double>("baseX").toFloat()
-    private val baseY: Float = onj.get<Double>("baseY").toFloat()
-    private val targetX: Float = onj.get<Double>("targetX").toFloat()
-    private val targetY: Float = onj.get<Double>("targetY").toFloat()
-    private val enterInterpolation: Interpolation?
-    private val exitInterpolation: Interpolation?
-
-    init {
-        enterInterpolation = if (!onj["enterInterpolation"]!!.isNull()) {
-            Utils.interpolationOrError(onj.get<String>("enterInterpolation"))
-        } else null
-
-        exitInterpolation = if (!onj["exitInterpolation"]!!.isNull()) {
-            Utils.interpolationOrError(onj.get<String>("exitInterpolation"))
-        } else null
-    }
-
-    override val onHoverEnter: BehaviourCallback = {
-        if (cellName != null) {
-            val cell = onjScreen.namedCellOrError(cellName)
-            val action = GrowCellAction(cell, targetX, targetY)
-            action.duration = enterDuration
-            enterInterpolation?.let { action.interpolation = it }
-            actor.addAction(action)
-        } else {
-            val action = SizeToAction()
-            action.width = targetX
-            action.height = targetY
-            action.duration = enterDuration
-            enterInterpolation?.let { action.interpolation = it }
-            actor.addAction(action)
-        }
-        if (actor is Layout) actor.invalidateHierarchy()
-    }
-
-    override val onHoverExit: BehaviourCallback = {
-        if (cellName != null) {
-            val cell = onjScreen.namedCellOrError(cellName)
-            val action = GrowCellAction(cell, baseX, baseY)
-            action.duration = exitDuration
-            exitInterpolation?.let { action.interpolation = it }
-            actor.addAction(action)
-        } else {
-            val action = SizeToAction()
-            action.width = baseX
-            action.height = baseY
-            action.duration = exitDuration
-            exitInterpolation?.let { action.interpolation = it }
-            actor.addAction(action)
-        }
-        if (actor is Layout) actor.invalidateHierarchy()
-    }
-
-    /**
-     * Action that grows a cell
-     */
-    private class GrowCellAction(
-        private val cell: Cell<*>,
-        private val targetX: Float,
-        private val targetY: Float
-    ) : RelativeTemporalAction() {
-
-        private val startX = cell.actorWidth
-        private val startY = cell.actorHeight
-
-        private var percent: Float = 0.0f
-
-        override fun updateRelative(percentDelta: Float) {
-            percent += percentDelta
-            cell.width(startX + percent * (targetX - startX))
-            cell.height(startY + percent * (targetY - startY))
-            cell.table.invalidate()
-        }
-
-    }
-}
-
 class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
@@ -293,84 +200,18 @@ class OnClickResetSavefileBehaviour(onj: OnjNamedObject, actor: Actor) : Behavio
 
 }
 
-class OnHoverChangeFontSizeBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+class CatchEventAndEmitBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
-    private val enterDuration: Float =onj.get<Double>("enterDuration").toFloat()
-    private val exitDuration: Float = onj.get<Double>("exitDuration").toFloat()
-    private val targetFontScale: Float = onj.get<Double>("targetFontScale").toFloat()
-    private val baseFontScale: Float = onj.get<Double>("baseFontScale").toFloat()
-    private val enterInterpolation: Interpolation?
-    private val exitInterpolation: Interpolation?
+    private val eventToCatch: KClass<out Event> = EventFactory.eventClass(onj.get<String>("catch"))
+    private val eventToEmit: String = onj.get<String>("emit")
+    private val blockCaughtEvent: Boolean = onj.getOr("blockCaughtEvent", true)
 
-    private val label: Label
-
-    init {
-        enterInterpolation = if (!onj["enterInterpolation"]!!.isNull()) {
-            Utils.interpolationOrError(onj.get<String>("enterInterpolation"))
-        } else null
-
-        exitInterpolation = if (!onj["exitInterpolation"]!!.isNull()) {
-            Utils.interpolationOrError(onj.get<String>("exitInterpolation"))
-        } else null
-
-        if (actor !is Label) throw RuntimeException("OnHoverChangeFontSizeBehaviour can only be used on a label!")
-        label = actor
+    override val onEventCapture: ((event: Event) -> Boolean) = lambda@ { event ->
+        if (!eventToCatch.isInstance(event)) return@lambda false
+        val eventToEmit = EventFactory.createEvent(eventToEmit)
+        actor.fire(eventToEmit)
+        return@lambda blockCaughtEvent
     }
-
-    override val onHoverEnter: BehaviourCallback = {
-        val action = ChangeFontScaleAction(targetFontScale, label)
-        action.duration = enterDuration
-        enterInterpolation?.let { action.interpolation = it }
-        actor.addAction(action)
-    }
-
-    override val onHoverExit: BehaviourCallback = {
-        val action = ChangeFontScaleAction(baseFontScale, label)
-        action.duration = exitDuration
-        exitInterpolation?.let { action.interpolation = it }
-        actor.addAction(action)
-    }
-
-    private class ChangeFontScaleAction(val targetScale: Float, val label: Label) : TemporalAction() {
-
-        private val startScale = label.fontScaleX
-
-        override fun update(percent: Float) {
-            label.setFontScale((targetScale - startScale) * percent + startScale)
-        }
-    }
-
-}
-
-class ShootButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-
-    override val onCLick: BehaviourCallback = {
-        FortyFive.currentGame!!.shoot()
-    }
-
-}
-class EndTurnButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-
-    override val onCLick: BehaviourCallback = {
-        FortyFive.currentGame!!.endTurn()
-    }
-
-}
-
-class DrawBulletButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-
-    override val onCLick: BehaviourCallback = {
-        FortyFive.currentGame!!.drawBullet()
-    }
-
-}
-
-class DrawCoverCardButtonBehaviour(onj: OnjObject, actor: Actor) : Behaviour(actor) {
-
-    override val onCLick: BehaviourCallback = {
-        FortyFive.currentGame!!.drawCover()
-    }
-
 }
 
 typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor) -> Behaviour

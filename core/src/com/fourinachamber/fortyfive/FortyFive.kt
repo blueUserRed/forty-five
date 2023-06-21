@@ -83,6 +83,7 @@ object FortyFive : Game() {
     @AllThreadsAllowed
     fun useRenderPipeline(renderable: Renderable) {
         currentRenderable = renderable
+        renderable.init()
     }
 
     fun newRunSync() {

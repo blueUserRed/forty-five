@@ -71,7 +71,16 @@ generatorConfig: {
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
                 rotation: 1.0,
                 fixedEvents: [],
-                optionalEvents: [],
+                optionalEvents: [
+                    {
+                        weight: 1,
+                        event: $EncounterMapEvent {
+                            currentlyBlocks: true,
+                            canBeStarted: true,
+                            isCompleted: false
+                        }
+                    }
+                ],
                 decorations: [
 //                    $RandomDistributionFunction {
 //                        decoration: "map_decoration_grass",

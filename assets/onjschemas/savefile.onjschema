@@ -18,5 +18,6 @@ playerMoney: int,
 
 position: {
     map: string,
-    node: int
+    node: int,
+    lastNode: int?
 }

@@ -7,10 +7,12 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.game.GameController.*
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
 import ktx.actors.contains
@@ -187,10 +189,27 @@ class Revolver(
         }
     }
 
-    /**
-     * rotates the revolver to the right
-     */
-    fun rotate() {
+    fun rotate(rotation: RevolverRotation): Timeline = Timeline.timeline {
+        when (rotation) {
+
+            is RevolverRotation.Right -> repeat(rotation.amount) {
+                action { rotateRight() }
+                delayUntil { animFinished() }
+                delay(10)
+            }
+
+            is RevolverRotation.Left -> repeat(rotation.amount) {
+                action { rotateLeft() }
+                delayUntil { animFinished() }
+                delay(10)
+            }
+
+            is RevolverRotation.None -> {}
+
+        }
+    }
+
+    private fun rotateRight() {
         val basePos = Vector2(width / 2, height / 2)
 
         for (i in slots.indices) {
@@ -205,10 +224,9 @@ class Revolver(
         slots[4].card = firstCard
     }
 
-    /**
-     * rotates the revolver to the left
-     */
-    fun rotateLeft() {
+    private fun animFinished(): Boolean = slots.all { !it.inAnimation }
+
+    private fun rotateLeft() {
         val basePos = Vector2(width / 2, height / 2)
 
         for (i in slots.indices) {
