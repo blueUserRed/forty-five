@@ -49,7 +49,7 @@ class ShopWidget(
     }
 
 
-    fun addItems(
+    fun addItems(//TODO Logger
         seed: Long,
         boughtIndices: MutableList<Int>,
         dragAndDrop: DragAndDrop
@@ -196,9 +196,6 @@ class ShopWidget(
         }
     }
 
-    fun giveResourcesBack() {
-
-    }
 
     companion object {
 

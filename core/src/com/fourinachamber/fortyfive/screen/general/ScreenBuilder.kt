@@ -393,7 +393,7 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
-        val flexBox = CustomScrollableFlexBox(screen,widgetOnj.get<Boolean>("isScrollDirectionVertical"), widgetOnj.get<Double>("scrollDistance").toFloat())
+        val flexBox = CustomScrollableFlexBox(screen,widgetOnj.get<Boolean>("isScrollDirectionVertical"), widgetOnj.get<Double>("scrollDistance").toFloat(),widgetOnj.get<Boolean>("backgroundStretched"))
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj

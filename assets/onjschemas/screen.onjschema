@@ -53,6 +53,7 @@ $Widget {
         partOfSelectionHierarchy?: boolean,
         isScrollDirectionVertical: boolean,
         scrollDistance: float,
+        backgroundStretched: boolean,
         ...widgetSharedKeys
     }
 

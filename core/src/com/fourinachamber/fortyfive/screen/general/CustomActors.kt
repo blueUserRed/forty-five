@@ -26,14 +26,13 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaValue
-import io.github.orioncraftmc.meditate.enums.YogaEdge
 import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.math.abs
+import kotlin.math.max
 
 
 /**
@@ -457,7 +456,7 @@ open class CustomFlexBox(
 
     override var fixedZIndex: Int = 0
 
-    private var background: Drawable? = null
+    protected var background: Drawable? = null
 
     override var isHoveredOver: Boolean = false
 
@@ -531,10 +530,11 @@ open class CustomFlexBox(
     }
 }
 
-open class CustomScrollableFlexBox(
+class CustomScrollableFlexBox(
     private val screen: OnjScreen,
     private val isScrollDirectionVertical: Boolean,
-    private val scrollDistance: Float
+    private val scrollDistance: Float,
+    private val isBackgroundStretched: Boolean,
 ) : CustomFlexBox(screen) {
 
     private val scrollListener = object : InputListener() {
@@ -555,6 +555,13 @@ open class CustomScrollableFlexBox(
 
     init {
         addListener(scrollListener)
+
+        //Scrollbar "settings"
+
+        //texture whole
+        //texture innere Drawable
+        //1 mal gesagt breite von scrollbar   in points
+        //top/bottom or right/left
     }
 
     private fun scroll(offset: Float) {
@@ -567,20 +574,21 @@ open class CustomScrollableFlexBox(
     var cutRight: Float = 0F
     var cutTop: Float = 0F
     var cutBottom: Float = 0F
+    var lastMax: Float = 0F
 
     override fun layout() {
         super.layout()
 
         if (isScrollDirectionVertical) {
-            val max = children.map { -it.y }.max()
-            if (cutTop < max + cutBottom) {
-                offset = offset.between(cutTop, max + cutBottom)
+            lastMax = children.map { -it.y }.max()
+            if (cutTop < lastMax + cutBottom) {
+                offset = offset.between(cutTop, lastMax + cutBottom)
                 children.forEach { it.y += offset }
             }
         } else {
-            val min = (children.map { it.x + it.width }.max() - width)
-            if (-min - cutRight <  -cutLeft / scrollDistance) {
-                offset = offset.between(-min - cutRight, -cutLeft / scrollDistance)
+            lastMax = (children.map { it.x + it.width }.max() - width)
+            if (-lastMax - cutRight < -cutLeft / scrollDistance) {
+                offset = offset.between(-lastMax - cutRight, -cutLeft / scrollDistance)
                 children.forEach { it.x += offset }
             }
         }
@@ -589,12 +597,17 @@ open class CustomScrollableFlexBox(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
 
+
         batch.flush()
-        super.draw(batch, parentAlpha)
         val viewport = screen.stage.viewport
         val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
         val yPixel =
             (Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight
+        if (isBackgroundStretched){
+            if (drawBackgroundStretched(batch, xPixel, viewport, yPixel, parentAlpha)) return
+        }else{
+            super.draw(batch, parentAlpha)
+        }
         val scissor = Rectangle(
             xPixel * (x + cutLeft) + viewport.leftGutterWidth,
             yPixel * (y + cutTop) + viewport.topGutterHeight,
@@ -602,9 +615,45 @@ open class CustomScrollableFlexBox(
             yPixel * (height - cutTop - cutBottom)
         )
         if (!ScissorStack.pushScissors(scissor)) return
-        super.draw(batch, parentAlpha)
         batch.flush()
         ScissorStack.popScissors()
+    }
+
+    private fun drawBackgroundStretched(
+        batch: Batch,
+        xPixel: Float,
+        viewport: Viewport,
+        yPixel: Float,
+        parentAlpha: Float
+    ): Boolean {
+        val backgroundHandle = backgroundHandle
+        if (backgroundHandle != null && background == null) background = ResourceManager.get(screen, backgroundHandle)
+        validate()
+        if (background != null) {
+            if (isScrollDirectionVertical) background?.draw(
+                batch,
+                x,
+                y - lastMax + max(0F, offset) - cutTop,
+                width,
+                height + lastMax
+            ) else {
+                background?.draw(batch, x + offset + cutLeft, y, width + lastMax, height)
+            }
+        }
+        val scissorBack = Rectangle(
+            xPixel * x + viewport.leftGutterWidth,
+            yPixel * y + viewport.topGutterHeight,
+            xPixel * width,
+            yPixel * height
+        )
+        if (!ScissorStack.pushScissors(scissorBack)) return true
+        batch.flush()
+        ScissorStack.popScissors()
+        val saveBackground = backgroundHandle
+        this.backgroundHandle = null
+        super.draw(batch, parentAlpha)
+        this.backgroundHandle = saveBackground
+        return false
     }
 
     override fun initStyles(screen: OnjScreen) {

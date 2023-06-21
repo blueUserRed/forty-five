@@ -68,8 +68,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
 
         val backButton = onjScreen.namedActorOrError(backButtonName)
-        backButton.onClick { shopWidgetNames.forEach{
-//            (screen.namedActorOrError(it) as ShopWidget).giveResourcesBack() //TODO wieder einfügen
+        backButton.onClick { shopWidgetNames.forEach{ _ ->
             personWidget.giveResourcesBack()
         }}
     }
