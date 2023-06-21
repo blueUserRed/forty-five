@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameController.*
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -205,7 +204,7 @@ class Revolver(
                 delay(10)
             }
 
-            is RevolverRotation.Dont -> {}
+            is RevolverRotation.None -> {}
 
         }
     }
