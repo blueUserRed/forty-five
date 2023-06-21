@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general.styles
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.general.*
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
@@ -394,14 +395,16 @@ class PaddingStyleProperty(
     screen
 ) {
 
-    override fun set(data: YogaValue, node: YogaNode): Unit = run { when (data.unit) {
+    override fun set(data: YogaValue, node: YogaNode): Unit = run {
+        when (data.unit) {
 
-        YogaUnit.POINT -> target.root.setPadding(edge, data.value)
-        YogaUnit.PERCENT -> target.root.setPaddingPercent(edge, data.value)
+            YogaUnit.POINT -> target.root.setPadding(edge, data.value)
+            YogaUnit.PERCENT -> target.root.setPaddingPercent(edge, data.value)
 
-        else -> { }
+            else -> {}
 
-    } }
+        }
+    }
 
     override fun get(node: YogaNode): YogaValue = target.root.getPadding(edge)
 }
@@ -438,6 +441,16 @@ fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : Style
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.TOP, "paddingTop"))
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.BOTTOM, "paddingBottom"))
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.ALL, "padding"))
+}
+
+fun <T> T.addScrollFlexBoxStyles(screen: OnjScreen) where T : CustomScrollableFlexBox, T : StyledActor {
+    addFlexBoxStyles(screen)
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.LEFT, "cuttingLeft"))
+    styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.RIGHT, "cuttingRight"))
+    styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.UP, "cuttingTop"))
+    styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.DOWN, "cuttingBottom"))
+
 }
 
 
@@ -529,4 +542,34 @@ fun <T> T.addBackgroundStyles(
 ) where T : Actor, T : StyledActor, T : BackgroundActor {
     val styleManager = styleManager!!
     styleManager.addStyleProperty(BackgroundStyleProperty(this, screen))
+}
+
+class CuttingStyleProperty(
+    target: CustomScrollableFlexBox,
+    screen: OnjScreen,
+    private val direction: Direction,
+    name: String
+) : StyleProperty<CustomScrollableFlexBox, Float>(
+    name,
+    target,
+    0f,
+    Float::class,
+    false,
+    true,
+    screen
+) {
+
+    override fun set(data: Float, node: YogaNode) = when (direction) {
+        Direction.LEFT -> target.cutLeft = data
+        Direction.UP -> target.cutTop = data
+        Direction.RIGHT -> target.cutRight = data
+        Direction.DOWN -> target.cutBottom = data
+    }
+
+    override fun get(node: YogaNode): Float = when (direction) {
+        Direction.LEFT -> target.cutLeft
+        Direction.UP -> target.cutTop
+        Direction.RIGHT -> target.cutRight
+        Direction.DOWN -> target.cutBottom
+    }
 }

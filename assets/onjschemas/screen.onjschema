@@ -51,7 +51,8 @@ $Widget {
     $ScrollBox {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,
-        scrollDirection: string,
+        isScrollDirectionVertical: boolean,
+        scrollDistance: float,
         ...widgetSharedKeys
     }
 

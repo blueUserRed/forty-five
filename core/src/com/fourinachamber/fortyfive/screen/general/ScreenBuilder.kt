@@ -9,8 +9,6 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
-import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -395,7 +393,7 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
-        val flexBox = CustomScrollableFlexBox(screen,widgetOnj.get<String>("scrollDirection"))
+        val flexBox = CustomScrollableFlexBox(screen,widgetOnj.get<Boolean>("isScrollDirectionVertical"), widgetOnj.get<Double>("scrollDistance").toFloat())
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
