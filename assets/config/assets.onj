@@ -238,6 +238,19 @@ shaders: [
         name: "film_shader",
         file: "shaders/film.glsl",
         constantArgs: { }
+    },
+    {
+        name: "glow_shader",
+        file: "shaders/glow.glsl",
+        constantArgs: {
+            texSize: 2000.0,
+            cardSize: 569.0
+        }
+    },
+    {
+        name: "fog_shader",
+        file: "shaders/fog.glsl",
+        constantArgs: { }
     }
 ],
 

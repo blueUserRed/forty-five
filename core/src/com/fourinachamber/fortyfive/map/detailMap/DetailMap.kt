@@ -70,7 +70,6 @@ data class DetailMap(
                     "y" with node.y
                     "isArea" with node.isArea
                     "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
-                    "blockingEdges" with node.blockingEdges.map { uniqueNodes.indexOf(it) }
                     "event" with node.event?.asOnjObject()
                     node.imageName?.let {
                         "image" with it
@@ -102,7 +101,6 @@ data class DetailMap(
                         nodeOnj.get<Double>("x").toFloat(),
                         nodeOnj.get<Double>("y").toFloat(),
                         mutableListOf(),
-                        mutableListOf(),
                         nodeOnj.get<Boolean>("isArea"),
                         nodeOnj.getOr<String?>("image", null),
                         MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
@@ -124,15 +122,6 @@ data class DetailMap(
                     nodeOnj.get<OnjArray>("edgesTo").value.forEach { edgeToOnj ->
                         val edgeTo = (edgeToOnj as OnjInt).value.toInt()
                         nodes[index].edgesTo.add(nodes[edgeTo])
-                    }
-                }
-            nodesOnj
-                .value
-                .forEachIndexed { index, nodeOnj ->
-                    nodeOnj as OnjObject
-                    nodeOnj.get<OnjArray>("blockingEdges").value.forEach { blockingEdgeOnj ->
-                        val blockingEdge = (blockingEdgeOnj as OnjInt).value.toInt()
-                        nodes[index].blockingEdges.add(nodes[blockingEdge])
                     }
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()

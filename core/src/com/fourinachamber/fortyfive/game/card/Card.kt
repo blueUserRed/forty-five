@@ -1,16 +1,23 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.EventListener
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
+import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.Effect
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.Trigger
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardDetailActor
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -42,7 +49,6 @@ class CardPrototype(
  * represents an actual instance of a card. Can be created using [CardPrototype]
  * @param name the name of the card
  * @param title the name but formatted, so it looks good when shown on the screen
- * @param drawable the texture of the card
  * @param flavourText Short phrase that (should) be funny or add to the lore
  * @param shortDescription short text explaining the effects of this card; can be left blank
  * @param type the type of card (bullet or cover)
@@ -63,6 +69,8 @@ class Card(
     val cost: Int,
     var price: Int,
     val effects: List<Effect>,
+    val rotationDirection: RevolverRotation,
+    val highlightType: HighlightType,
     val tags: List<String>,
     detailFont: BitmapFont,
     detailFontColor: Color,
@@ -122,13 +130,9 @@ class Card(
     private var isEverlasting: Boolean = false
     private var isUndead: Boolean = false
     private var isRotten: Boolean = false
-    private var isLeftRotating: Boolean = false
 
     val shouldRemoveAfterShot: Boolean
         get() = !isEverlasting
-
-    val rotationDirection: RevolverRotation
-        get() = if (isLeftRotating) RevolverRotation.LEFT else RevolverRotation.RIGHT
 
     private lateinit var rottenModifier: CardModifier
 
@@ -345,28 +349,29 @@ class Card(
             val name = onj.get<String>("name")
 
             val card = Card(
-                name,
-                onj.get<String>("title"),
-                "$cardTexturePrefix$name",
-                onj.get<String>("flavourText"),
-                onj.get<String>("description"),
-                cardTypeOrError(onj),
-                onj.get<Long>("baseDamage").toInt(),
-                onj.get<Long>("coverValue").toInt(),
-                onj.get<Long>("cost").toInt(),
-                onj.get<Long>("price").toInt(),
-
-                onj.get<OnjArray>("effects")
+                name = name,
+                title = onj.get<String>("title"),
+                drawableHandle = "$cardTexturePrefix$name",
+                flavourText = onj.get<String>("flavourText"),
+                shortDescription = onj.get<String>("description"),
+                type = cardTypeOrError(onj),
+                baseDamage = onj.get<Long>("baseDamage").toInt(),
+                coverValue = onj.get<Long>("coverValue").toInt(),
+                cost = onj.get<Long>("cost").toInt(),
+                price = onj.get<Long>("price").toInt(),
+                effects = onj.get<OnjArray>("effects")
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
-                onj.get<OnjArray>("tags").value.map { it.value as String },
+                rotationDirection = RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
+                highlightType = HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
+                tags = onj.get<OnjArray>("tags").value.map { it.value as String },
                 //TODO: CardDetailActor could call these functions itself
-                GraphicsConfig.cardDetailFont(onjScreen),
-                GraphicsConfig.cardDetailFontColor(),
-                GraphicsConfig.cardDetailFontScale(),
-                GraphicsConfig.cardDetailBackground(),
-                GraphicsConfig.cardDetailSpacing(),
-                onjScreen
+                detailFont = GraphicsConfig.cardDetailFont(onjScreen),
+                detailFontColor = GraphicsConfig.cardDetailFontColor(),
+                detailFontScale = GraphicsConfig.cardDetailFontScale(),
+                detailBackgroundHandle = GraphicsConfig.cardDetailBackground(),
+                detailSpacing = GraphicsConfig.cardDetailSpacing(),
+                screen = onjScreen
             )
 
             for (effect in card.effects) effect.card = card
@@ -377,7 +382,6 @@ class Card(
 
         private fun cardTypeOrError(onj: OnjObject) = when (val type = onj.get<OnjNamedObject>("type").name) {
             "Bullet" -> Type.BULLET
-            "Cover" -> Type.COVER
             "OneShot" -> Type.ONE_SHOT
             else -> throw RuntimeException("unknown Card type: $type")
         }
@@ -398,8 +402,6 @@ class Card(
                     card.initRottenModifier()
                 }
 
-                "leftRotating" -> card.isLeftRotating = true
-
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
         }
@@ -410,7 +412,11 @@ class Card(
      * a type of card
      */
     enum class Type {
-        BULLET, COVER, ONE_SHOT
+        BULLET, ONE_SHOT
+    }
+
+    enum class HighlightType {
+        STANDARD, GLOW
     }
 
     /**
@@ -437,7 +443,7 @@ class CardActor(
     fontScale: Float,
     detailBackgroundHandle: ResourceHandle,
     detailSpacing: Float,
-    screen: OnjScreen
+    private val screen: OnjScreen
 ) : CustomImageActor(card.drawableHandle, screen) {
 
     override var isSelected: Boolean = false
@@ -468,6 +474,88 @@ class CardActor(
         if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
         FortyFive.currentGame!!.destroyCard(card)
         true
+    }
+
+    private var inGlowAnim: Boolean = false
+
+    private val glowShader: BetterShader by lazy {
+        ResourceManager.get(screen, "glow_shader") // TODO: fix
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        if (batch == null || drawable == null) {
+            super.draw(batch, parentAlpha)
+            return
+        }
+        if (inGlowAnim) {
+            batch.flush()
+            glowShader.shader.bind()
+            glowShader.prepare(screen)
+            batch.shader = glowShader.shader
+        }
+        super.draw(batch, parentAlpha)
+        batch.flush()
+        if (inGlowAnim) batch.shader = null
+    }
+
+    fun glowAnimation(): Timeline = Timeline.timeline {
+        action {
+            inGlowAnim = true
+            glowShader.resetReferenceTime()
+        }
+        delay(1000)
+        action { inGlowAnim = false }
+    }
+
+    fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
+        var origScaleX = 0f
+        var origScaleY = 0f
+        val scaleAction = ScaleToAction()
+        val moveAction = MoveByAction()
+        val interpolation = Interpolation.fade
+        action {
+            origScaleX = scaleX
+            origScaleY = scaleY
+            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
+            moveAction.setAmount(
+                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
+                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
+            )
+            moveAction.duration = 0.2f
+            scaleAction.duration = 0.2f
+            scaleAction.interpolation = interpolation
+            moveAction.interpolation = interpolation
+            addAction(scaleAction)
+            addAction(moveAction)
+        }
+        delayUntil { scaleAction.isComplete }
+        if (includeGlow) {
+            delay(GraphicsConfig.bufferTime)
+            include(glowAnimation())
+        }
+        delay(GraphicsConfig.bufferTime)
+        action {
+            removeAction(scaleAction)
+            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
+            removeAction(moveAction)
+            scaleAction.reset()
+            moveAction.reset()
+            scaleAction.setScale(origScaleX, origScaleY)
+            moveAction.setAmount(moveAmount.x, moveAmount.y)
+            scaleAction.duration = 0.2f
+            moveAction.duration = 0.2f
+            scaleAction.interpolation = interpolation
+            moveAction.interpolation = interpolation
+            addAction(scaleAction)
+            addAction(moveAction)
+        }
+        delayUntil { scaleAction.isComplete }
+        action {
+            removeAction(scaleAction)
+            removeAction(moveAction)
+        }
+        delay(GraphicsConfig.bufferTime)
     }
 
     fun enterDestroyMode() {

@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.screen.general
 
+import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.map.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.shop.ShopScreenController
@@ -53,5 +54,11 @@ abstract class ScreenController {
      */
     @MainThreadOnly
     open fun end() { }
+
+    /**
+     * called when an event managed to bubble all the way up to root
+     */
+    @MainThreadOnly
+    open fun onUnhandledEvent(event: Event) { }
 
 }

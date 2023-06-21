@@ -6,7 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.shop.ShopWidget
-import com.fourinachamber.fortyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.DragBehaviour
 import com.fourinachamber.fortyfive.screen.general.DropBehaviour
@@ -110,36 +109,6 @@ class RevolverDropTarget(
 
 }
 
-class CoverAreaDropTarget(
-    dragAndDrop: DragAndDrop,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
-
-    private val coverStack: CoverStack
-
-    init {
-        if (actor !is CoverStack) throw RuntimeException("CoverAreaDropTarget can only be used on a coverStack")
-        coverStack = actor
-    }
-
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean {
-        return true
-    }
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        if (payload == null || source == null) return
-        val obj = payload.obj!! as CardDragAndDropPayload
-        obj.addCover(coverStack.num)
-    }
-}
-
 /**
  * used as a payload for [CardDragSource] and [RevolverDropTarget].
  * Automatically resets cards, loads into revolver, etc.
@@ -162,12 +131,6 @@ class CardDragAndDropPayload(val card: Card) {
         FortyFive.currentGame!!.loadBulletInRevolver(card, slot)  //TODO ugly
     }
 
-    /**
-     * when the drag is stopped, the card will be added to the cover area in slot [slot]
-     */
-    fun addCover(slot: Int) = tasks.add {
-        FortyFive.currentGame!!.addCover(card, slot)  //TODO ugly
-    }
 
     /**
      * called when the drag is stopped

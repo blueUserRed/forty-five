@@ -49,22 +49,22 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline {
             val gameController = FortyFive.currentGame!!
-            val reservesLabel = gameController.reservesLabel
+//            val reservesLabel = gameController.reservesLabel
 
-            val shakeCard = GraphicsConfig.shakeActorAnimation(card.actor, false)
-            val textActorAction = GraphicsConfig.numberChangeAnimation(
-                reservesLabel.localToStageCoordinates(Vector2(0f, 0f)),
-                amount.toString(),
-                true,
-                true,
-                FortyFive.currentGame!!.curScreen
-            )
+            val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
+//            val textActorAction = GraphicsConfig.numberChangeAnimation(
+//                reservesLabel.localToStageCoordinates(Vector2(0f, 0f)),
+//                amount.toString(),
+//                true,
+//                true,
+//                FortyFive.currentGame!!.curScreen
+//            )
 
             return Timeline.timeline {
                 delay(GraphicsConfig.bufferTime)
-                includeActionLater(shakeCard) { card.inGame }
+                includeActionLater(cardHighlight) { card.inGame }
                 action { gameController.gainReserves(amount) }
-                includeAction(textActorAction)
+//                includeAction(textActorAction)
             }
         }
 
@@ -172,9 +172,9 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             val gameController = FortyFive.currentGame!!
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(card.actor, false)
+            val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             delay(GraphicsConfig.bufferTime)
-            includeActionLater(shakeActorAction) { card.inGame }
+            includeActionLater(cardHighlight) { card.inGame }
             action { gameController.specialDraw(amount) }
             delayUntil { gameController.currentState !is GameState.SpecialDraw }
         }
@@ -217,11 +217,11 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             val gameController = FortyFive.currentGame!!
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(card.actor, false)
+            val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             includeLater(
                 { Timeline.timeline {
                     delay(GraphicsConfig.bufferTime)
-                    includeAction(shakeActorAction)
+                    includeAction(cardHighlight)
                     delay(GraphicsConfig.bufferTime)
                     action { gameController.destroyCardPhase() }
                     delayUntil { gameController.currentState !is GameState.CardDestroy }

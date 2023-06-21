@@ -497,6 +497,33 @@ fun <T> T.addDetachableStyles(screen: OnjScreen) where T : Actor, T : StyledActo
     styleManager.addStyleProperty(DetachStyleProperty(this, screen))
 }
 
+
+class DisableStyleProperty<T>(
+    target: T,
+    screen: OnjScreen
+) : StyleProperty<T, Boolean>(
+    "disabled",
+    target,
+    false,
+    Boolean::class,
+    true,
+    false,
+    screen
+) where T : Actor, T : StyledActor, T : DisableActor {
+
+    override fun set(data: Boolean, node: YogaNode) {
+        target.isDisabled = data
+    }
+
+    override fun get(node: YogaNode): Boolean = target.isDisabled
+
+}
+
+fun <T> T.addDisableStyles(screen: OnjScreen) where T : Actor, T : StyledActor, T : DisableActor {
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(DisableStyleProperty(this, screen))
+}
+
 fun <T> T.addBackgroundStyles(
     screen: OnjScreen
 ) where T : Actor, T : StyledActor, T : BackgroundActor {

@@ -1,0 +1,32 @@
+
+use Common;
+
+$EnemyAction {
+
+    $DestroyCardsInHand {
+        maxCards: int
+    }
+
+    $RevolverRotation {
+        maxTurns: int
+    }
+
+}
+
+var enemy = {
+    name: string,
+    baseHealthPerTurn: int,
+    baseDamage: int,
+    fightDuration: int[2],
+    texture: string,
+    coverIcon: string,
+    scaleX: float,
+    scaleY: float,
+    coverIconScale: float,
+    detailFont: string,
+    detailFontScale: float,
+    actions: $EnemyAction[],
+    detailFontColor: Color,
+};
+
+enemies: enemy[]

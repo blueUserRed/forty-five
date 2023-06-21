@@ -5,28 +5,33 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.screen.*
-import com.fourinachamber.fortyfive.screen.gameComponents.CoverStack
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
-import ktx.actors.onClick
 import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
 import java.lang.Integer.min
 
+data class EnemyPrototype(
+    val name: String,
+    val baseHealthPerTurn: Int,
+    val baseDamage: Int,
+    val turnCount: IntRange,
+    private val creator: (health: Int, damage: Int) -> Enemy
+) {
+    fun create(health: Int, damage: Int): Enemy = creator(health, damage)
+}
+
 /**
  * represents an enemy
  * @param name the name of the enemy
- * @param drawable the texture of this enemy
- * @param offsetX x-offset from the origin of [EnemyArea] to the point where this enemy is located
- * @param offsetY y-offset from the origin of [EnemyArea] to the point where this enemy is located
  * @param scaleX scales [actor]
  * @param scaleY scales [actor]
- * @param lives the initial (and maximum) lives of this enemy
+ * @param health the initial (and maximum) lives of this enemy
  * @param detailFont the font used for the description of the enemy
  * @param detailFontScale scales [detailFont]
  * @param detailFontColor the color of [detailFont]
@@ -35,16 +40,15 @@ class Enemy(
     val name: String,
     val drawableHandle: ResourceHandle,
     val coverIconHandle: ResourceHandle,
-    val lives: Int,
-    val offsetX: Float,
-    val offsetY: Float,
+    val health: Int,
     val scaleX: Float,
     val scaleY: Float,
     val coverIconScale: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val area: EnemyArea,
+    val damage: Int,
+    val actions: List<EnemyAction>,
     private val screen: OnjScreen
 ) {
 
@@ -62,14 +66,14 @@ class Enemy(
     /**
      * the current lives of this enemy
      */
-    var currentLives: Int = lives
+    var currentHealth: Int = health
         private set(value) {
             field = max(value, 0)
             FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
             if (field != 0) return
             gameController.curScreen.afterMs(10) { //TODO: nooooo, not again
-                gameController.executeTimelineLater(Timeline.timeline {
-                    mainThreadAction { gameController.enemyDefeated(this@Enemy) }
+                gameController.executeTimeline(Timeline.timeline {
+                    action { gameController.enemyDefeated(this@Enemy) }
                 })
             }
         }
@@ -81,15 +85,10 @@ class Enemy(
             actor.updateText()
         }
 
-    var curAction: EnemyAction? = null
-        private set
-
     private val statusEffects: MutableList<StatusEffect> = mutableListOf()
 
-    private lateinit var brain: EnemyBrain
-
     init {
-        actor = EnemyActor(this, area, screen)
+        actor = EnemyActor(this, screen)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -155,22 +154,6 @@ class Enemy(
         actor.onRevolverTurn()
     }
 
-    fun chooseNewAction() {
-        curAction = brain.chooseAction()
-        actor.displayAction(curAction!!)
-        FortyFiveLogger.debug(logTag, "chose new action: $curAction")
-    }
-
-    @MainThreadOnly
-    fun doAction(): Timeline? {
-        return curAction!!.execute()
-    }
-
-    fun resetAction() {
-        curAction = null
-        actor.resetAction()
-    }
-
     @MainThreadOnly
     fun damagePlayer(damage: Int, gameController: GameController): Timeline = Timeline.timeline {
         val screen = gameController.curScreen
@@ -178,29 +161,13 @@ class Enemy(
 
         val overlayAction = GraphicsConfig.damageOverlay(screen)
 
-        var activeStack: CoverStack? = null
-        var remaining = 0
-
         include(chargeTimeline)
 
-        action {
-            remaining = gameController.coverArea.damage(damage)
-            if (remaining != damage) activeStack = gameController.coverArea.getActive()
-        }
-
-        includeLater(
-            { Timeline.timeline { includeAction(
-                GraphicsConfig.coverStackParticles(activeStack!!.currentHealth == 0, activeStack!!, screen)
-            ) } },
-            { activeStack != null }
-
-        )
-
-        includeActionLater(overlayAction) { remaining != 0 }
+        includeAction(overlayAction)
         delay(GraphicsConfig.bufferTime)
         includeLater(
-            { getPlayerDamagedTimeline(remaining, gameController) },
-            { remaining != 0 }
+            { getPlayerDamagedTimeline(damage, gameController) },
+            { true }
         )
     }
 
@@ -210,20 +177,19 @@ class Enemy(
         gameController: GameController,
     ): Timeline {
 
-        val livesLabel = gameController.playerLivesLabel
-        val shakeAction = GraphicsConfig.shakeActorAnimation(livesLabel, false)
+//        val shakeAction = GraphicsConfig.shakeActorAnimation(livesLabel, false)
 
-        val textAnimation = GraphicsConfig.numberChangeAnimation(
-            livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
-            "-$damage",
-            false,
-            false,
-            gameController.curScreen
-        )
+//        val textAnimation = GraphicsConfig.numberChangeAnimation(
+//            livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
+//            "-$damage",
+//            false,
+//            false,
+//            gameController.curScreen
+//        )
 
         return Timeline.timeline {
-            action { gameController.damagePlayer(damage) }
-            parallelActions(shakeAction, textAnimation)
+            include(gameController.damagePlayer(damage))
+//            parallelActions(shakeAction, textAnimation)
         }
     }
 
@@ -259,7 +225,7 @@ class Enemy(
         includeLater(
             { Timeline.timeline {
                 action {
-                    currentLives -= remaining
+                    currentHealth -= remaining
                     actor.updateText()
                 }
                 includeAction(GraphicsConfig.numberChangeAnimation(
@@ -278,42 +244,44 @@ class Enemy(
 
         private var instanceCounter = 0
 
-        /**
-         * reads an array of Enemies from on an OnjArray
-         */
-        @MainThreadOnly
-        fun getFrom(
-            enemiesOnj: OnjArray,
-            area: EnemyArea,
-            screen: OnjScreen
-        ): List<Enemy> = enemiesOnj
+        fun readEnemies(arr: OnjArray): List<EnemyPrototype> = arr
             .value
+            .map { it as OnjObject }
             .map {
-                it as OnjObject
-                val gameController = FortyFive.currentGame!!
-                val curScreen = gameController.curScreen
-                val drawableHandle = it.get<String>("texture")
-                val coverIconHandle = it.get<String>("coverIcon")
-                val detailFont = ResourceManager.get<BitmapFont>(curScreen, it.get<String>("detailFont"))
-                val enemy = Enemy(
+                EnemyPrototype(
                     it.get<String>("name"),
-                    drawableHandle,
-                    coverIconHandle,
-                    it.get<Long>("lives").toInt(),
-                    it.get<Double>("offsetX").toFloat(),
-                    it.get<Double>("offsetY").toFloat(),
-                    it.get<Double>("scaleX").toFloat(),
-                    it.get<Double>("scaleY").toFloat(),
-                    it.get<Double>("coverIconScale").toFloat(),
-                    detailFont,
-                    it.get<Double>("detailFontScale").toFloat(),
-                    it.get<Color>("detailFontColor"),
-                    area,
-                    screen
-                )
-                enemy.brain = EnemyBrain.fromOnj(it.get<OnjObject>("brain"), curScreen, enemy)
-                enemy
+                    it.get<Long>("baseHealthPerTurn").toInt(),
+                    it.get<Long>("baseDamage").toInt(),
+                    it.get<OnjArray>("fightDuration").toIntRange()
+                ) { health, damage -> readEnemy(it, health, damage) }
             }
+        
+        fun readEnemy(onj: OnjObject, health: Int, damage: Int): Enemy {
+            val gameController = FortyFive.currentGame!!
+            val curScreen = gameController.curScreen
+            val drawableHandle = onj.get<String>("texture")
+            val coverIconHandle = onj.get<String>("coverIcon")
+            val detailFont = ResourceManager.get<BitmapFont>(curScreen, onj.get<String>("detailFont"))
+            val actions = onj
+                .get<OnjArray>("actions")
+                .value
+                .map { EnemyAction.fromOnj(it as OnjNamedObject) }
+            return Enemy(
+                onj.get<String>("name"),
+                drawableHandle,
+                coverIconHandle,
+                health,
+                onj.get<Double>("scaleX").toFloat(),
+                onj.get<Double>("scaleY").toFloat(),
+                onj.get<Double>("coverIconScale").toFloat(),
+                detailFont,
+                onj.get<Double>("detailFontScale").toFloat(),
+                onj.get<Color>("detailFontColor"),
+                damage,
+                actions,
+                curScreen
+            )
+        }
 
     }
 
@@ -324,7 +292,6 @@ class Enemy(
  */
 class EnemyActor(
     val enemy: Enemy,
-    private val area: EnemyArea,
     private val screen: OnjScreen
 ) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
 
@@ -334,18 +301,11 @@ class EnemyActor(
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
     private var enemyBox = CustomHorizontalGroup(screen)
-    private val actionIndicator: CustomHorizontalGroup = CustomHorizontalGroup(screen)
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
         enemy.detailFontColor,
         enemy.detailFontScale
-    )
-
-    private val actionIndicatorText: CustomLabel = CustomLabel(
-        screen,
-        "",
-        Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
     val livesLabel: CustomLabel = CustomLabel(
@@ -357,16 +317,12 @@ class EnemyActor(
     init {
         livesLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
-        actionIndicatorText.setFontScale(enemy.detailFontScale)
-        actionIndicator.addActor(actionIndicatorText)
         image.setScale(enemy.scaleX, enemy.scaleY)
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
         coverIcon.setScale(enemy.coverIconScale)
         coverIcon.reportDimensionsWithScaling = true
         coverIcon.ignoreScalingWhenDrawing = true
-
-        addActor(actionIndicator)
 
         val coverInfoBox = CustomVerticalGroup(screen)
         coverInfoBox.addActor(coverIcon)
@@ -379,22 +335,6 @@ class EnemyActor(
         addActor(livesLabel)
         addActor(statusEffectDisplay)
         updateText()
-
-        onClick { area.selectedEnemy = enemy }
-    }
-
-    fun displayAction(action: EnemyAction) {
-        val image = CustomImageActor(action.indicatorDrawableHandle, screen)
-        image.reportDimensionsWithScaling = true
-        image.ignoreScalingWhenDrawing = true
-        image.setScale(action.indicatorScale)
-        actionIndicatorText.setText(action.descriptionText)
-        actionIndicator.addActorAt(0, image)
-    }
-
-    fun resetAction() {
-        actionIndicatorText.setText("")
-        actionIndicator.removeActorAt(0, true)
     }
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
@@ -406,7 +346,7 @@ class EnemyActor(
      */
     fun updateText() {
         coverText.setText("${enemy.currentCover}")
-        livesLabel.setText("${enemy.currentLives}/${enemy.lives}")
+        livesLabel.setText("${enemy.currentHealth}/${enemy.health}")
     }
 
 }

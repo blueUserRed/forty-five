@@ -1,118 +1,86 @@
 package com.fourinachamber.fortyfive.game.enemy
 
-import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
+import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.value.OnjNamedObject
+import kotlin.random.Random
 
-/**
- * represents an action that the enemy can execute
- */
-abstract class EnemyAction {
+sealed class EnemyAction {
 
-    /**
-     * the Drawable that is drawn above the enemies head to indicate which action will be executed
-     */
-    abstract val indicatorDrawableHandle: ResourceHandle
+    abstract fun getTimeline(controller: GameController): Timeline
 
-    abstract val indicatorScale: Float
+    abstract fun applicable(controller: GameController): Boolean
 
-    abstract val descriptionText: String
+    class DestroyCardsInHand(val maxCards: Int) : EnemyAction() {
 
-    /**
-     * returns a timeline that executes the action
-     */
-    @MainThreadOnly
-    abstract fun execute(): Timeline?
+        override fun applicable(controller: GameController): Boolean = controller.cardHand.cards.isNotEmpty()
 
-    /**
-     * action that damages the player
-     */
-    class DamagePlayer @MainThreadOnly constructor(
-        val enemy: Enemy,
-        onj: OnjNamedObject,
-        override val indicatorScale: Float,
-        val damage: Int
-    ) : EnemyAction() {
+        override fun getTimeline(controller: GameController): Timeline = Timeline.timeline {
+            var text = ""
+            var amountToDestroy = 0
+            val cardHand = controller.cardHand
+            action {
+                val cardAmount = cardHand.cards.size
+                amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
+                text = TemplateString(
+                    rawText,
+                    mapOf("amount" to amountToDestroy, "s" to if (amountToDestroy == 1) "s" else "")
+                ).string
+            }
+            includeLater(
+                { controller.confirmationPopup(text) },
+                { true }
+            )
+            action {
+                repeat(amountToDestroy) {
+                    cardHand.removeCard(cardHand.cards[(0 until cardHand.cards.size).random()])
+                }
+            }
+        }
 
-        override val indicatorDrawableHandle = onj.get<String>("indicatorTexture")
-
-        override val descriptionText: String = damage.toString()
-
-        override fun execute(): Timeline = enemy.damagePlayer(damage, FortyFive.currentGame!!)
-
-        override fun toString(): String {
-            return "DamagePlayer(damage=$damage)"
+        companion object {
+            private const val rawText: String = "Haha! Now I'm going to destroy {amount} card{s} in your hand!"
         }
     }
 
-    /**
-     * actions that adds cover to the enemy
-     */
-    class AddCover @MainThreadOnly constructor(
-        val enemy: Enemy,
-        onj: OnjNamedObject,
-        private val onjScreen: OnjScreen,
-        override val indicatorScale: Float,
-        val coverValue: Int
-    ) : EnemyAction() {
+    class RevolverRotation(val maxTurnAmount: Int) : EnemyAction() {
 
-        override val indicatorDrawableHandle = onj.get<String>("indicatorTexture")
-        override val descriptionText: String = coverValue.toString()
-
-        override fun execute(): Timeline = Timeline.timeline {
-            val textAnimation = GraphicsConfig.numberChangeAnimation(
-                enemy.actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
-                coverValue.toString(),
-                true,
-                true,
-                onjScreen
-            )
-
-            action { enemy.currentCover += coverValue }
-            includeAction(textAnimation)
-            delay(GraphicsConfig.bufferTime)
+        override fun getTimeline(controller: GameController): Timeline = Timeline.timeline {
+            val amount = (1..maxTurnAmount).random()
+            val rotation = if (Random.nextBoolean()) {
+                GameController.RevolverRotation.Right(amount)
+            } else {
+                GameController.RevolverRotation.Left(amount)
+            }
+            val text = TemplateString(
+                if (amount == 1) rawText1Rot else rawTextMoreRot,
+                mapOf("direction" to rotation::class.simpleName!!.lowercase(), "amount" to amount)
+            ).string
+            include(controller.confirmationPopup(text))
+            include(controller.revolver.rotate(rotation))
         }
 
+        override fun applicable(controller: GameController): Boolean = true
 
-        override fun toString(): String {
-            return "AddCover(cover=$coverValue)"
+        companion object {
+            // TODO: move in GraphicsConfig
+            private const val rawText1Rot: String = "Haha! Now I'm going to move you revolver to the {direction}"
+            private const val rawTextMoreRot: String =
+                "Haha! Now I'm going to move you revolver {amount} times to the {direction}"
         }
 
     }
 
-    /**
-     * the player insults the player and does nothing else
-     */
-    class DoNothing @MainThreadOnly constructor(
-        val insult: String,
-        val enemy: Enemy,
-        onj: OnjNamedObject,
-        private val onjScreen: OnjScreen,
-        override val indicatorScale: Float
-        ) : EnemyAction() {
+    companion object {
 
-        override val indicatorDrawableHandle = onj.get<String>("indicatorTexture")
-        override val descriptionText: String  = ""
+        fun fromOnj(obj: OnjNamedObject): EnemyAction = when (obj.name) {
 
-        override fun execute(): Timeline = Timeline.timeline {
-            val fadeAnimation = GraphicsConfig.insultFadeAnimation(
-                enemy.actor.localToStageCoordinates(Vector2(0f, 0f)),
-                insult,
-                onjScreen
-            )
-            delayUntil { fadeAnimation.isFinished() }
-            includeAction(fadeAnimation)
-            delay(GraphicsConfig.bufferTime)
-        }
+            "DestroyCardsInHand" -> DestroyCardsInHand(obj.get<Long>("maxCards").toInt())
+            "RevolverRotation" -> RevolverRotation(obj.get<Long>("maxTurns").toInt())
 
+            else -> throw RuntimeException("unknown enemy action: ${obj.name}")
 
-        override fun toString(): String {
-            return "DoNothing()"
         }
 
     }
