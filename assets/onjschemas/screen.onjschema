@@ -48,6 +48,13 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $ScrollBox {
+        children?: $Widget[],
+        partOfSelectionHierarchy?: boolean,
+        scrollDirection: string,
+        ...widgetSharedKeys
+    }
+
     $Label {
         text: string,
         font: string,

@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane
+import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -202,6 +204,8 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Box" -> getFlexBox(widgetOnj, screen)
 
+        "ScrollBox" -> getScrollFlexBox(widgetOnj, screen)
+
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle().apply {
@@ -380,8 +384,7 @@ class ScreenBuilder(val file: FileHandle) {
                     duration = result.first
                     interpolation = result.second
                 }
-                obj
-                    .value
+                obj.value
                     .filter { !it.key.startsWith("style_") }
                     .forEach { (key, value) ->
                         val data = getDataForStyle(value, key)
@@ -397,6 +400,29 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         return actor
+    }
+
+    private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
+        val innerTable = CustomFlexBox(screen)
+        val outerTable = CustomFlexBox(screen)
+        val scrollPane = ScrollPane(innerTable)
+
+        outerTable.add(scrollPane) //y is some float
+
+        val flexBox = CustomScrollableFlexBox(screen,widgetOnj.get<String>("scrollDirection"))
+        flexBox.root.setPosition(YogaEdge.ALL, 0f)
+        if (widgetOnj.hasKey<OnjArray>("children")) {
+            widgetOnj
+                .get<OnjArray>("children")
+                .value
+                .forEach {
+                    getWidget(it as OnjNamedObject, flexBox, screen)
+                }
+        }
+        flexBox.touchable = Touchable.enabled // TODO: remove
+//        flexBox.
+        innerTable.add(flexBox)
+        return flexBox
     }
 
     private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {

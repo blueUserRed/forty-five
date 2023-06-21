@@ -57,7 +57,7 @@ class ShopWidget(
         this.boughtIndices = boughtIndices
         this.dragAndDrop = dragAndDrop
         val rnd = Random(seed)
-        val nbrOfItems = (5..8).random(rnd)
+        val nbrOfItems = 12/*(5..8).random(rnd)*/
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)
