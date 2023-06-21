@@ -357,55 +357,10 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 2,
-        type: $Bullet { }
+        type: $Bullet { },
         tags: ["rare"],
         price: 50,
     },
-
-    {
-        name: "casket",
-        title: "casket",
-        flavourText: "Let's hope you won't see the inside any time soon. If yes it's red carpet inside",
-        description: "If this cover is placed down: destroy one target Bullet in the revolver",
-        baseDamage: 0,
-        coverValue: 5,
-        traitEffects: [],
-        effects: [ destroy("enter") ],
-        cost: 1,
-        tags: ["rare"],
-        price: 51,
-        type: $Cover { }
-    },
-
-    {
-        name: "jewelryBox",
-        title: "jewelry Box",
-        flavourText: "The lady I took it from didn't need it anyways",
-        description: "If this Cover is placed down: draw 1 card",
-        baseDamage: 0,
-        coverValue: 3,
-        traitEffects: [],
-        effects: [ draw("enter", 1) ],
-        cost: 1,
-        tags: ["rare"],
-        price: 40,
-        type: $Cover { }
-    },
-
-    {
-        name: "treasureChest",
-        title: "treasure Chest",
-        flavourText: "Found it at crestcreek. That stupid ol bastard thought hiding it under a damn rock would make it invisible or somethin'",
-        description: "This Cover lets you draw 1 card at the beginning of every turn",
-        baseDamage: 0,
-        coverValue: 6,
-        traitEffects: [],
-        effects: [ draw("round start", 1) ],
-        cost: 3,
-        tags: ["rare"],
-        price: 50,
-        type: $Cover { }
-    }
 
 ],
 
