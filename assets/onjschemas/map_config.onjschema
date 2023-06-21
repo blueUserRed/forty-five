@@ -76,6 +76,13 @@ var mapRestrictions = {
     decorations: $DecorationDistributionFunction[]
 };
 
+screens: {
+    mapScreen: string,
+    dialogScreen: string,
+    encounterScreen: string,
+    shopScreen: string,
+},
+
 mapImages: {
     name: string,
     image: string,

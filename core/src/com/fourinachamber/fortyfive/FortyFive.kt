@@ -66,17 +66,20 @@ object FortyFive : Game() {
 
         serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
+        fun onScreenChange() {
+            FortyFiveLogger.title("changing screen")
+            currentScreen?.dispose()
+            this.currentScreen = screen
+            currentRenderable = screen
+            setScreen(screen)
+            // TODO: not 100% clean, this function is sometimes called when it isn't necessary
+            MapManager.invalidateCachedAssets()
+        }
+
         if (currentScreen == null) {
-            FortyFiveLogger.title("changing screen")
-            this.currentScreen = screen
-            currentRenderable = screen
-            setScreen(screen)
+            onScreenChange()
         } else currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
-            FortyFiveLogger.title("changing screen")
-            currentScreen.dispose()
-            this.currentScreen = screen
-            currentRenderable = screen
-            setScreen(screen)
+            onScreenChange()
         }
     }
 
