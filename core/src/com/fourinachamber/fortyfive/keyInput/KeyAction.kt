@@ -105,38 +105,6 @@ object KeyActionFactory {
             }
         },
 
-        "Shoot" to {
-            lambda@ {
-                val game = FortyFive.currentGame ?: return@lambda false
-                game.shoot()
-                true
-            }
-        },
-
-        "EndTurn" to {
-            lambda@ {
-                val game = FortyFive.currentGame ?: return@lambda false
-                game.endTurn()
-                true
-            }
-        },
-
-        "DrawBullet" to {
-            lambda@ {
-                val game = FortyFive.currentGame ?: return@lambda false
-                game.drawBullet()
-                true
-            }
-        },
-
-        "DrawCover" to {
-            lambda@ {
-                val game = FortyFive.currentGame ?: return@lambda false
-                game.drawCover()
-                true
-            }
-        },
-
         "NextInHierarchy" to {
             lambda@ { screen ->
                 val hierarchy = screen.keySelectionHierarchy ?: return@lambda false

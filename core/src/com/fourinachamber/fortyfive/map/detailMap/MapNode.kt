@@ -14,7 +14,6 @@ import kotlin.math.sin
 data class MapNode(
     val index: Int,
     val edgesTo: List<MapNode>,
-    val blockingEdges: List<MapNode>,
     val isArea: Boolean,
     val x: Float,
     val y: Float,
@@ -120,7 +119,6 @@ data class MapNodeBuilder(
     var x: Float,
     var y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
-    val blockingEdges: MutableList<MapNodeBuilder> = mutableListOf(),
     var isArea: Boolean = false,
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
@@ -128,7 +126,6 @@ data class MapNodeBuilder(
 ) {
 
     private var buildEdges: MutableList<MapNode> = mutableListOf()
-    private var buildBlockingEdges: MutableList<MapNode> = mutableListOf()
 
     private var inBuild: Boolean = false
 
@@ -159,7 +156,6 @@ data class MapNodeBuilder(
         asNode = MapNode(
             index,
             buildEdges,
-            buildBlockingEdges,
             isArea,
             x, y,
             imageName,
@@ -168,9 +164,6 @@ data class MapNodeBuilder(
         )
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
-        }
-        blockingEdges.forEach { edge ->
-            buildBlockingEdges.add(buildEdges[edgesTo.indexOf(edge)])
         }
 //        inBuild = false
         return asNode!!

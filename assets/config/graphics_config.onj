@@ -3,52 +3,6 @@ import "imports/colors.onj" as color;
 
 bufferTime: 0.5,
 
-enemyConfig: {
-
-    damagePlayerIcon: {
-        indicatorTextureScale: 0.02,
-        indicatorTexture: "normal_bullet"
-    },
-
-    addCoverIcon: {
-        indicatorTextureScale: 0.02,
-        indicatorTexture: "shield_icon"
-    },
-
-    doNothingIcon: {
-        indicatorTextureScale: 0.02,
-        indicatorTexture: "insult_icon"
-    },
-
-    enemy1: {
-        texture: "enemy_texture",
-        coverIcon: "shield_icon",
-        coverIconScale: 0.03,
-        offsetX: 15.0,
-        offsetY: 50.0,
-        scaleX: 0.025,
-        scaleY: 0.025,
-        detailFont: "vanilla_whale",
-        detailFontScale: 0.06,
-        detailFontColor: color.black
-    },
-
-    enemy2: {
-        texture: "enemy_texture",
-        coverIcon: "shield_icon",
-        coverIconScale: 0.03,
-        offsetX: 40.0,
-        offsetY: 50.0,
-        scaleX: 0.025,
-        scaleY: 0.025,
-        detailFont: "vanilla_whale",
-        detailFontScale: 0.06,
-        detailFontColor: color.black
-    },
-},
-
-enemyUsedAssets: [ "normal_bullet", "shield_icon", "insult_icon", "enemy_texture", "vanilla_whale" ],
-
 shakeAnimation: {
     xShake: 1.0,
     yShake: 0.0,
@@ -80,8 +34,6 @@ bannerAnimation: {
      enemyTurnBanner: "enemy_turn_banner",
 },
 
-bannerAnimationUsedAssets: [ "player_turn_banner", "enemy_turn_banner" ],
-
 statusEffectIcons: {
     burning: {
         icon: "burning_icon",
@@ -93,8 +45,6 @@ statusEffectIcons: {
     }
 },
 
-statusEffectsUsedAssets: [ "burning_icon", "poison_icon" ],
-
 damageOverlay: {
     duration: 1.5,
     fadeIn: 0.0,
@@ -102,20 +52,9 @@ damageOverlay: {
     overlay: "hit_overlay"
 },
 
-damageOverlayUsedAssets: [ "hit_overlay" ],
-
 postProcessors: {
     destroyCardPostProcessor: "vignette_shader",
 },
-
-destroyCardUsedAssets: [ "vignette_shader" ],
-
-coverStackParticles: {
-    damaged: "dust_particle",
-    destroyed: "dust_explosion_particle",
-},
-
-coverStackUsedAssets: [ "dust_particle", "dust_explosion_particle" ],
 
 stringTemplates:  {
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!",
@@ -143,8 +82,6 @@ numberChangeAnimation: {
     sinkDistance: -20.0
 },
 
-textAnimationUsedAssets: [ "vanilla_whale", "red_wing" ],
-
 cardDetailText: {
     font: "red_wing",
     fontScale: 0.07,
@@ -153,8 +90,6 @@ cardDetailText: {
     separator: "white_texture",
     spacing: 1.8
 },
-
-cardDetailUsedAssets: [ "red_wing", "transparent_black_texture", "white_texture" ],
 
 keySelect: {
     drawable: "key_select_frame"
@@ -167,4 +102,8 @@ shootPostProcessor: {
     duration: 0.7
 },
 
-shootPostProcessorUsedAssets: [ "earthquake_shader" ]
+gameUsedAssets: [
+    "earthquake_shader", "glow_shader", "red_wing", "transparent_black_texture", "white_texture",
+    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon",
+    "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
+]

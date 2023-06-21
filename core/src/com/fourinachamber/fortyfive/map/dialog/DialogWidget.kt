@@ -13,9 +13,6 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import ktx.actors.onClick
-import onj.value.OnjArray
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
 
 class DialogWidget(
     private val progressTime: Int,
@@ -74,7 +71,7 @@ class DialogWidget(
             includeLater({ finished() }, { true })
         }
         timeline.appendAction(line.asAction())
-        timeline.start()
+        timeline.startTimeline()
     }
 
     private fun finished(): Timeline = when (val part = currentPart!!.nextDialogPartSelector) {
@@ -150,7 +147,7 @@ class DialogWidget(
             initialisedOptionsBox = true
         }
         super.draw(batch, parentAlpha)
-        timeline.update()
+        timeline.updateTimeline()
         currentPart?.text?.update()
         if (batch != null && readyToAdvance) {
             val aspect = advanceArrowDrawable.minHeight / advanceArrowDrawable.minWidth

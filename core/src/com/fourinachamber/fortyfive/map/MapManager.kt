@@ -47,6 +47,16 @@ object MapManager {
             SaveState.currentNode = value.index
         }
 
+    var lastMapNode: MapNode?
+        get() = if (SaveState.lastNode != null) {
+            currentDetailMap.uniqueNodes.find { it.index == SaveState.lastNode }
+        } else {
+            null
+        }
+        set(value) {
+            SaveState.lastNode = value?.index
+        }
+
     lateinit var displayNames: Map<String, String>
         private set
 

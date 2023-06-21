@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -174,10 +175,18 @@ class DetailMapWidget(
     }
 
     private fun goToNode(node: MapNode) {
-        if (!playerNode.isLinkedTo(node)) return
-        if (playerNode.event?.currentlyBlocks ?: false && node in playerNode.blockingEdges) return
+        if (!canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
+    }
+
+    private fun canGoTo(node: MapNode): Boolean {
+        val lastNode = MapManager.lastMapNode
+        if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // make sure player does not get trapped
+        if (!playerNode.isLinkedTo(node)) return false
+        if (node == lastNode) return true
+        if (playerNode.event?.currentlyBlocks ?: false) return false
+        return true
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -315,6 +324,7 @@ class DetailMapWidget(
         if (curTime >= movementFinishTime) {
             this.playerNode = movePlayerTo
             MapManager.currentMapNode = movePlayerTo
+            MapManager.lastMapNode = playerNode
             playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
             setupMapEvent(movePlayerTo.event)
             updateScreenState(movePlayerTo.event)

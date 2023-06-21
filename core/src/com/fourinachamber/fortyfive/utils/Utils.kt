@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import onj.value.OnjArray
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 import kotlin.random.Random
@@ -82,6 +83,15 @@ fun Float.between(min: Float, max: Float): Float {
     return this
 }
 
+/**
+ * makes sure that [this] is between [min] and [max] (inclusive)
+ */
+fun Double.between(min: Double, max: Double): Double {
+    if (this < min) return min
+    if (this > max) return max
+    return this
+}
+
 fun Vector2(x: Int, y: Int): Vector2 {
     return Vector2(x.toFloat(), y.toFloat())
 }
@@ -124,6 +134,13 @@ operator fun Float.plus(fl: Float?): Float {
 
 val AtomicInteger.get: Int
     get() = this.get()
+
+fun OnjArray.toIntRange(): IntRange {
+    val first = this.get<Long>(0).toInt()
+    val second = this.get<Long>(1).toInt()
+    if (second <= first) throw RuntimeException("second value must be higher than first when creating an IntRange")
+    return IntRange(first, second)
+}
 
 object Utils {
 
