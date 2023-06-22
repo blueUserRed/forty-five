@@ -558,6 +558,13 @@ class CustomScrollableFlexBox(
         }
     }
 
+    private val dragListener = object : InputListener() {
+        override fun touchDragged(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            println(event)
+            super.touchDragged(event, x, y, pointer)
+        }
+    }
+
     init {
         addListener(scrollListener)
     }
@@ -594,19 +601,25 @@ class CustomScrollableFlexBox(
         }
         if (scrollbarName != null) {
             if (!this::scrollbarHandle.isInitialized) {
-                scrollbarHandle = screen.namedActorOrError(scrollbarName) as CustomImageActor
-                remove(scrollbarHandle.styleManager?.node)
-                //get width form style manager
-                scrollbarWidth = (scrollbarHandle.styleManager
-                    ?.let {
-                        scrollbarHandle.styleManager?.styleProperties
-                            ?.filterIsInstance<WidthStyleProperty<*>>()
-                            ?.first()
-                            ?.get(it.node)
-                    })?.value ?: scrollbarWidth
+                initScrollbarHandle()
             }
             layoutScrollbarHandle()
         }
+    }
+
+    private fun initScrollbarHandle() {
+        scrollbarHandle = screen.namedActorOrError(scrollbarName!!) as CustomImageActor
+        remove(scrollbarHandle.styleManager?.node)
+        //get width from style manager
+        scrollbarWidth = (scrollbarHandle.styleManager
+            ?.let {
+                scrollbarHandle.styleManager?.styleProperties
+                    ?.filterIsInstance<WidthStyleProperty<*>>()
+                    ?.first()
+                    ?.get(it.node)
+            })?.value ?: scrollbarWidth
+        scrollbarHandle.addListener(dragListener)
+
     }
 
     private fun layoutChildren() {
@@ -653,7 +666,6 @@ class CustomScrollableFlexBox(
             val curSize = height * height / (max + height)
 
             val curPos = offset / max * (height - curSize)
-            println("$height  $curPos")
             if (scrollbarSide != null && scrollbarSide == "left") {
                 scrollbarHandle.x = x
             } else {
@@ -663,14 +675,18 @@ class CustomScrollableFlexBox(
             scrollbarHandle.height = curSize
             scrollbarHandle.y = y + height - curPos - curSize
         } else {
+            val max = lastMax + cutLeft
+            val curSize = width * width / (max + width)
+
+            val curPos = offset / max * (width - curSize)
             if (scrollbarSide != null && scrollbarSide == "top") {
                 scrollbarHandle.y = y + height - scrollbarWidth
             } else {
                 scrollbarHandle.y = y
             }
-            scrollbarHandle.x = x
-            scrollbarHandle.width = width
             scrollbarHandle.height = scrollbarWidth
+            scrollbarHandle.width = curSize
+            scrollbarHandle.x = x - curPos
         }
     }
 
