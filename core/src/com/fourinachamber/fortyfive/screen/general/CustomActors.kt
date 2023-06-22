@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -26,7 +27,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaValue
 import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
@@ -34,7 +34,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.properties.Delegates
 
 
 /**
@@ -558,15 +557,32 @@ class CustomScrollableFlexBox(
         }
     }
 
-    private val dragListener = object : InputListener() {
-        override fun touchDragged(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-            println(event)
-            super.touchDragged(event, x, y, pointer)
+    private val dragListener = object : DragListener() {
+        override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            println("Start:$x    $y")
+        }
+
+        override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            if (isScrollDirectionVertical) {
+            } else { //TODO hier weitermachen
+                val relX = scrollbarHandle.x - scrollbarBackground.x
+                val relY = (if (scrollbarSide == "top") height - scrollbarHandle.height else 0F)
+                if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
+                    && touchDownY < relY + scrollbarHandle.height && touchDownY > relY
+                ) {
+                    println("now update position")
+                }
+            }
+        }
+
+        override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            println("End:$x    $y")
         }
     }
 
     init {
         addListener(scrollListener)
+        addListener(dragListener)
     }
 
     private fun scroll(offset: Float) {
@@ -618,8 +634,7 @@ class CustomScrollableFlexBox(
                     ?.first()
                     ?.get(it.node)
             })?.value ?: scrollbarWidth
-        scrollbarHandle.addListener(dragListener)
-
+//        scrollbarHandle.addListener(dragListener)
     }
 
     private fun layoutChildren() {
@@ -664,7 +679,6 @@ class CustomScrollableFlexBox(
         if (isScrollDirectionVertical) {
             val max = lastMax + cutBottom
             val curSize = height * height / (max + height)
-
             val curPos = offset / max * (height - curSize)
             if (scrollbarSide != null && scrollbarSide == "left") {
                 scrollbarHandle.x = x
@@ -675,10 +689,12 @@ class CustomScrollableFlexBox(
             scrollbarHandle.height = curSize
             scrollbarHandle.y = y + height - curPos - curSize
         } else {
-            val max = lastMax + cutLeft
+            val offset = offset + cutLeft
+            val max = lastMax
             val curSize = width * width / (max + width)
 
             val curPos = offset / max * (width - curSize)
+
             if (scrollbarSide != null && scrollbarSide == "top") {
                 scrollbarHandle.y = y + height - scrollbarWidth
             } else {
