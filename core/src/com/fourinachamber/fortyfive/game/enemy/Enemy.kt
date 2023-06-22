@@ -48,7 +48,7 @@ class Enemy(
     val detailFontScale: Float,
     val detailFontColor: Color,
     val damage: Int,
-    val actions: List<EnemyAction>,
+    val actions: List<Pair<Int, EnemyAction>>,
     private val screen: OnjScreen
 ) {
 
@@ -265,7 +265,8 @@ class Enemy(
             val actions = onj
                 .get<OnjArray>("actions")
                 .value
-                .map { EnemyAction.fromOnj(it as OnjNamedObject) }
+                .map { it as OnjNamedObject }
+                .map { it.get<Long>("weight").toInt() to EnemyAction.fromOnj(it) }
             return Enemy(
                 onj.get<String>("name"),
                 drawableHandle,

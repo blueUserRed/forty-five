@@ -348,7 +348,7 @@ cards: [
     {
         name: "enchantedBullet",
         title: "enchanted Bullet",
-        flavourText: "todo",
+        flavourText: "enchanted Bullet",
         description: "todo",
         baseDamage: 14,
         coverValue: 0,
@@ -356,6 +356,24 @@ cards: [
         rotation: $Left { amount: 2 },
         highlightType: "standard",
         effects: [],
+        cost: 2,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "bossBullet",
+        title: "boss Bullet",
+        flavourText: "boss Bullet",
+        description: "todo",
+        baseDamage: 10,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            putCardInHand("round start", "workerBullet", 1)
+        ],
         cost: 2,
         type: $Bullet { },
         tags: ["rare"],
@@ -451,6 +469,10 @@ startDeck: [
     {
         name: "enchantedBullet",
         amount: 1,
+    },
+    {
+        name: "bossBullet",
+        amount: 1
     }
 
 ]

@@ -3,10 +3,7 @@ package com.fourinachamber.fortyfive.game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.Timeline
-import com.fourinachamber.fortyfive.utils.between
-import com.fourinachamber.fortyfive.utils.templateParam
+import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -51,27 +48,29 @@ class GameDirector(private val controller: GameController) {
         controller.initEnemyArea(enemy)
     }
 
-    fun checkActions() {
+    fun checkActions(): Timeline {
         if (controller.turnCounter == turnRevealTime) {
-            val remainingTurns = turns - controller.turnCounter
-            controller.remainingTurns = remainingTurns
-            controller.executeTimeline(Timeline.timeline {
+            return Timeline.timeline {
+                val remainingTurns = turns - controller.turnCounter
+                action {
+                    controller.remainingTurns = remainingTurns
+                }
                 include(controller.confirmationPopup("You have $remainingTurns left!"))
-            })
+            }
         } else if (controller.turnCounter in enemyActionTimes) {
-            doEnemyAction()
+            return doEnemyAction()
         }
+        return Timeline(mutableListOf())
     }
 
-    private fun doEnemyAction() {
+    private fun doEnemyAction(): Timeline {
         val enemy = controller.enemyArea.enemies[0]
-        val timeline = enemy
+        val possibleActions = enemy
             .actions
-            .filter { it.applicable(controller) }
-            .randomOrNull()
-            ?.getTimeline(controller)
-            ?: return
-        controller.executeTimeline(timeline)
+            .filter { it.second.applicable(controller) }
+        if (possibleActions.isEmpty()) return Timeline(mutableListOf())
+        val action = possibleActions.weightedRandom()
+        return action.getTimeline(controller)
     }
 
     private fun chooseEnemy(prototypes: List<EnemyPrototype>): EnemyPrototype {
