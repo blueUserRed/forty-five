@@ -142,7 +142,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (context !is EncounterMapEvent) { // TODO: comment back in
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
-//        encounterMapEvent = context
+        encounterMapEvent = context
 //        modifier = EncounterModifier.BewitchedMist // TODO: remove
         SaveState.read()
         curScreen = onjScreen
@@ -377,7 +377,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         revolver.setCard(slot, card)
         FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
         card.onEnter()
-        checkEffectsSingleCard(Trigger.ON_ENTER, card)
+        executeTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
     }
 
     fun confirmationPopup(text: String): Timeline = Timeline.timeline {
@@ -571,7 +571,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         revolver.removeCard(card)
         card.onDestroy()
         FortyFiveLogger.debug(logTag, "destroyed card: $card")
-        checkEffectsSingleCard(Trigger.ON_DESTROY, card)
+        executeTimeline(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
         currentState.onCardDestroyed(this)
     }
 
@@ -586,13 +586,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     @MainThreadOnly
-    private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
+    private fun checkEffectsSingleCard(trigger: Trigger, card: Card): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        card.checkEffects(trigger)?.let { executeTimeline(it) }
+        return card.checkEffects(trigger) ?: Timeline(mutableListOf())
     }
 
     @MainThreadOnly
-    fun checkEffectsActiveCards(trigger: Trigger) {
+    fun checkEffectsActiveCards(trigger: Trigger): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         val timeline = Timeline.timeline {
             for (card in createdCards) if (card.inGame) {
@@ -600,11 +600,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (timeline != null) include(timeline)
             }
         }
-        executeTimeline(timeline)
+        return timeline
     }
 
     @MainThreadOnly
-    fun checkStatusEffects() {
+    fun checkStatusEffects(): Timeline {
         FortyFiveLogger.debug(logTag, "checking status effects")
         val timeline = Timeline.timeline {
             for (enemy in enemyArea.enemies) {
@@ -612,7 +612,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (timeline != null) include(timeline)
             }
         }
-        executeTimeline(timeline)
+        return timeline
     }
 
     /**

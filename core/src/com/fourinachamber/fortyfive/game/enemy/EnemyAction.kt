@@ -72,12 +72,36 @@ sealed class EnemyAction {
 
     }
 
+    object ReturnCardToHand : EnemyAction() {
+
+        override fun getTimeline(controller: GameController): Timeline = Timeline.timeline {
+            include(controller.confirmationPopup(
+                "Haha! Now I'm going to put one card from your revolver into your hand"
+            ))
+            action {
+                val card = controller
+                    .revolver
+                    .slots
+                    .filter { it.card != null }
+                    .random()
+                    .card!!
+                controller.revolver.removeCard(card)
+                card.leaveGame()
+                controller.cardHand.addCard(card)
+            }
+        }
+
+        override fun applicable(controller: GameController): Boolean =
+            controller.revolver.isBulletLoaded() && controller.cardHand.cards.size < controller.maxCards
+    }
+
     companion object {
 
         fun fromOnj(obj: OnjNamedObject): EnemyAction = when (obj.name) {
 
             "DestroyCardsInHand" -> DestroyCardsInHand(obj.get<Long>("maxCards").toInt())
             "RevolverRotation" -> RevolverRotation(obj.get<Long>("maxTurns").toInt())
+            "ReturnCardToHand" -> ReturnCardToHand
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")
 

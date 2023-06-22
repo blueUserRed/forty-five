@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game
 
-import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.utils.*
@@ -244,8 +243,17 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             val gameController = FortyFive.currentGame!!
+            var addMax = 0
+            includeAction(GraphicsConfig.cardHighlightEffect(card))
             action {
-                val addMax = gameController.maxCards - gameController.cardHand.cards.size
+                addMax = gameController.maxCards - gameController.cardHand.cards.size
+            }
+            includeLater(
+                // TODO: put string in some central place
+                { gameController.confirmationPopup("Hand reached maximum of ${gameController.maxCards}") },
+                { addMax == 0 }
+            )
+            action {
                 repeat(min(amount, addMax)) { gameController.putCardInHand(cardName) }
             }
         }

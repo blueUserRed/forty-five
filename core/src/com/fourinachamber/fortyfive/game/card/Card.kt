@@ -191,7 +191,7 @@ class Card(
         if (!isEverlasting) leaveGame()
     }
 
-    private fun leaveGame() {
+    fun leaveGame() {
         inGame = false
         modifiers.clear()
         isDamageDirty = true
@@ -223,13 +223,6 @@ class Card(
             }
         }
         return true
-    }
-
-    /**
-     * called when the coverStack this card is in was destroyed
-     */
-    fun onCoverDestroy() {
-        leaveGame()
     }
 
     /**

@@ -16,11 +16,16 @@ enemies: [
         detailFontScale: 0.06,
         actions: [
             $DestroyCardsInHand {
-                maxCards: 4
+                maxCards: 4,
+                weight: 10
             },
 
             $RevolverRotation {
-                maxTurns: 3
+                maxTurns: 3,
+                weight: 10
+            },
+            $ReturnCardToHand {
+                weight: 1000
             }
         ],
         detailFontColor: color.black
