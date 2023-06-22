@@ -320,7 +320,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("radius").toFloat(),
             widgetOnj.get<Double>("size").toFloat(),
             screen
-          )
+        )
 
         "PersonWidget" -> PersonWidget(
             widgetOnj.get<Double>("offsetX").toFloat(),
@@ -393,7 +393,15 @@ class ScreenBuilder(val file: FileHandle) {
     }
 
     private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
-        val flexBox = CustomScrollableFlexBox(screen,widgetOnj.get<Boolean>("isScrollDirectionVertical"), widgetOnj.get<Double>("scrollDistance").toFloat(),widgetOnj.get<Boolean>("backgroundStretched"))
+        val flexBox = CustomScrollableFlexBox(
+            screen,
+            widgetOnj.get<Boolean>("isScrollDirectionVertical"),
+            widgetOnj.get<Double>("scrollDistance").toFloat(),
+            widgetOnj.get<Boolean>("backgroundStretched"),
+            widgetOnj.get<String?>("scrollbarBackgroundName"),
+            widgetOnj.get<String?>("scrollbarName"),
+            widgetOnj.get<String?>("scrollbarSide"),
+        )
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
