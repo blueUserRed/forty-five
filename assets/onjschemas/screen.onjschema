@@ -54,6 +54,9 @@ $Widget {
         isScrollDirectionVertical: boolean,
         scrollDistance: float,
         backgroundStretched: boolean,
+        scrollbarBackgroundName?: string,
+        scrollbarName?: string,
+        scrollbarSide?: string,
         ...widgetSharedKeys
     }
 

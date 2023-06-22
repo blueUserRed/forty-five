@@ -16,7 +16,7 @@ assets: {
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
         "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
-        "shop_back_button",
+        "shop_back_button", "test_scrollbar_background",
         ...(sharedComponents.navBarAssests),
     ]
 },
@@ -75,13 +75,34 @@ var cardsWidgetTextChild = $Image {       //TODO biome for background
         }
     ],
 };
+var scrollBarBackground = $Image {
+
+    name: "scrollbar_background",
+    textureName: "test_scrollbar_background",
+    scaleX: 1.0,
+    scaleY: 1.0,
+    reportDimensionsWithScaling: true,
+};
+var scrollBar = $Image {
+    name: "scrollbar_handle",
+    textureName: "test_scrollbar_background",
+    scaleX: 1.0,
+    scaleY: 1.0,
+    styles: [
+        {
+            width: 5.5#points,
+        }
+    ],
+};
 
 var cardsWidget = $ScrollBox {
     name: "scroll_box",
     isScrollDirectionVertical: true,
     scrollDistance: 2.0,
     backgroundStretched: false,
-
+    scrollbarBackgroundName: "scrollbar_background",
+    scrollbarName: "scrollbar_handle",
+    scrollbarSide: "left",
     styles: [
         {
             flexWrap: wrap.wrap,
@@ -91,40 +112,33 @@ var cardsWidget = $ScrollBox {
             width: 100.0#percent,
             height: 69.0#percent,
             paddingLeft: 3.0#points,
-            paddingRight: 1.0#points,
+            paddingRight: 3.0#points,
             paddingTop: 3.0#points,
-            paddingBottom: 3.0#points,
+            paddingBottom: 4.0#points,
             cuttingLeft: 1.75,
             cuttingRight: 1.75,
-            cuttingTop: 1.75,
-            cuttingBottom: 1.75,
-            scrollbarBackground: "hallo",
-            scrollbarTextureHandle: "welt",
-            scrollbarWidth: 0.0,
-            scrollbarSide: "left",
-            //texture whole
-        //texture innere Drawable
-        //1 mal gesagt breite von scrollbar   in points
-        //top/bottom or right/left
+            cuttingTop: 2.0,
+            cuttingBottom: 3.0,
+
         }
     ],
 } children [
     cardsWidgetTextChild,
     cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
+    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
 //    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-    //    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-
+    scrollBarBackground,
+    scrollBar,
 ];
 
 /*var cardsWidget = $ShopWidget {
