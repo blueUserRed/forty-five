@@ -68,15 +68,15 @@ class Enemy(
      */
     var currentHealth: Int = health
         private set(value) {
-            field = max(value, 0)
             FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
-            if (field != 0) return
-            gameController.curScreen.afterMs(10) { //TODO: nooooo, not again
-                gameController.executeTimeline(Timeline.timeline {
-                    action { gameController.enemyDefeated(this@Enemy) }
-                })
+            if (field > 0 && value <= 0) {
+                gameController.enemyDefeated(this)
             }
+            field = value
         }
+
+    val isDefeated: Boolean
+        get() = currentHealth <= 0
 
     var currentCover: Int = 0
         set(value) {
@@ -229,7 +229,7 @@ class Enemy(
                     actor.updateText()
                 }
                 includeAction(GraphicsConfig.numberChangeAnimation(
-                    actor.livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
+                    actor.healthLabel.localToStageCoordinates(Vector2(0f, 0f)),
                     "-$remaining",
                     false,
                     false,
@@ -309,14 +309,14 @@ class EnemyActor(
         enemy.detailFontScale
     )
 
-    val livesLabel: CustomLabel = CustomLabel(
+    val healthLabel: CustomLabel = CustomLabel(
         screen,
         "",
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
     init {
-        livesLabel.setFontScale(enemy.detailFontScale)
+        healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
         image.setScale(enemy.scaleX, enemy.scaleY)
         image.reportDimensionsWithScaling = true
@@ -333,7 +333,7 @@ class EnemyActor(
         enemyBox.addActor(image)
 
         addActor(enemyBox)
-        addActor(livesLabel)
+        addActor(healthLabel)
         addActor(statusEffectDisplay)
         updateText()
     }
@@ -347,7 +347,7 @@ class EnemyActor(
      */
     fun updateText() {
         coverText.setText("${enemy.currentCover}")
-        livesLabel.setText("${enemy.currentHealth}/${enemy.health}")
+        healthLabel.setText("${enemy.currentHealth}/${enemy.health}")
     }
 
 }

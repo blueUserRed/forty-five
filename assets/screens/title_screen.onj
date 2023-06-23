@@ -114,19 +114,18 @@ root: $Box {
             ]
         },
 
-        $Label {
-            text: "abandon run",
-            font: "red_wing",
-            align: "right",
-            color: color.black,
-            fontScale: buttonBaseScale,
-            styles: buttonStyles,
-            partOfSelectionHierarchy: true,
-            behaviours: [
-                $OnClickAbandonRunBehaviour { },
-                $OnClickRemoveActorBehaviour { }
-            ]
-        },
+//        $Label {
+//            text: "abandon run",
+//            font: "red_wing",
+//            align: "right",
+//            color: color.black,
+//            fontScale: buttonBaseScale,
+//            styles: buttonStyles,
+//            partOfSelectionHierarchy: true,
+//            behaviours: [
+////                $OnClickAbandonRunBehaviour { },
+//            ]
+//        },
 
         $Label {
             text: "quit",
