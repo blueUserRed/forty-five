@@ -5,7 +5,7 @@ enemies: [
     {
         name: "Test Enemy",
         baseHealthPerTurn: 15,
-        baseDamage: 90,
+        baseDamage: 120,
         fightDuration: [4, 6],
         texture: "enemy_texture",
         coverIcon: "shield_icon",

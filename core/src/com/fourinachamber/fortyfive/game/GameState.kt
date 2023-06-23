@@ -24,16 +24,14 @@ sealed class GameState {
 
         override fun transitionAway(controller: GameController) = with(controller) {
             hideCardDrawActor()
-            val statusEffectsTimeline = checkStatusEffects()
             checkCardModifierValidity()
             val actionTimeline = controller.gameDirector.checkActions()
 
             curReserves = baseReserves
-            val effectsTimeline = checkEffectsActiveCards(Trigger.ON_ROUND_START)
             controller.executeTimeline(Timeline.timeline {
                 include(actionTimeline)
-                include(statusEffectsTimeline)
-                include(effectsTimeline)
+                includeLater({ checkStatusEffects() }, { true })
+                includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
             })
         }
 
@@ -119,11 +117,11 @@ sealed class GameState {
         override fun allowsShooting(): Boolean = true
 
         override fun transitionTo(controller: GameController) {
-            controller.nextTurn()
         }
 
         override fun onEndTurn(controller: GameController) {
-            controller.changeState(InitialDraw(controller.cardsToDraw))
+            controller.nextTurn()
+            if (!controller.playerLost) controller.changeState(InitialDraw(controller.cardsToDraw))
         }
     }
 

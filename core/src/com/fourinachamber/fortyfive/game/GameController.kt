@@ -137,6 +137,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var cardsDrawn: Int = 0
         private set
 
+    private var hasWon: Boolean = false
+
+    var playerLost: Boolean = false
+        private set
+
+    /**
+     * the next time the [nextTurn] function is called while this is true, this is set to false and nothing else is
+     * done
+     */
+    private var skipNextTurn: Boolean = true
+
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is EncounterMapEvent) { // TODO: comment back in
@@ -159,9 +170,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         // enemy area is initialised by the GameDirector
         gameDirector.init()
 
+        var popupText = ""
+        if (remainingTurns != 1) popupText = "You have $remainingTurns turns!\n"
+        popupText += "If you loose, you take ${enemyArea.enemies[0].damage} damage!"
         executeTimeline(Timeline.timeline {
             includeLater(
-                { confirmationPopup("You have $remainingTurns turns!") },
+                { confirmationPopup(popupText) },
                 { remainingTurns != 1 }
             )
             action {
@@ -258,6 +272,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun nextTurn() {
+        if (skipNextTurn) {
+            skipNextTurn = false
+            return
+        }
+        if (hasWon) completeWin()
         turnCounter++
         if (remainingTurns != -1) {
             FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
@@ -540,12 +559,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * damages the player (plays no animation, calls loose when lives go below 0)
      */
     @AllThreadsAllowed
-    fun damagePlayer(damage: Int): Timeline {
-        curPlayerLives -= damage
-        FortyFiveLogger.debug(logTag, "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives")
-        return if (curPlayerLives <= 0) Timeline.timeline {
-            action { loose() }
-        } else Timeline(mutableListOf())
+    fun damagePlayer(damage: Int): Timeline = Timeline.timeline {
+        action {
+            println("damaging player")
+            curPlayerLives -= damage
+            FortyFiveLogger.debug(
+                logTag,
+                "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives"
+            )
+            if (curPlayerLives <= 0) playerDied()
+        }
     }
 
     /**
@@ -684,22 +707,34 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun enemyDefeated(enemy: Enemy) {
         SaveState.enemiesDefeated++
-        win()
+        hasWon = true
+        FortyFiveLogger.debug(logTag, "player won")
     }
 
     @MainThreadOnly
-    private fun win() {
-        FortyFiveLogger.debug(logTag, "player won")
+    private fun completeWin() {
         encounterMapEvent.completed()
         MapManager.switchToMapScreen()
         SaveState.write()
     }
 
+    fun loose() {
+        playerLost = true
+        executeTimeline(damagePlayer(enemyArea.enemies[0].damage))
+    }
+
     @MainThreadOnly
-    private fun loose() {
-        FortyFiveLogger.debug(logTag, "player lost")
-        SaveState.reset()
-        MapManager.switchToMapScreen()
+    fun playerDied() {
+        executeTimeline(Timeline.timeline {
+            action {
+                FortyFiveLogger.debug(logTag, "player lost")
+                FortyFive.newRunSync() // TODO: use ServiceThread?
+            }
+            includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
+            action {
+                FortyFive.changeToScreen("screens/title_screen.onj")
+            }
+        })
     }
 
     sealed class RevolverRotation {
