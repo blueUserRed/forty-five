@@ -96,6 +96,7 @@ $Widget {
         draggedCardZIndex: int,
         hoveredCardScale: float,
         targetWidth: float,
+        opacityIfNotPlayable: float,
 //        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
@@ -119,29 +120,6 @@ $Widget {
 
     $EnemyArea {
         enemySelectionDrawable: string,
-        ...widgetSharedKeys
-    }
-
-    $CoverArea {
-        numStacks: int,
-        maxCards: int,
-        infoFont: string,
-        infoFontColor: Color,
-        infoFontScale: float,
-//        stackBackgroundTexture: string,
-        areaSpacing: float,
-        cardScale: float,
-        onlyAllowAddingOnTheSameTurn: boolean,
-        detailFont: string,
-        detailFontColor: Color,
-        detailFontScale: float,
-        cardDeltaX: float,
-        cardDeltaY: float,
-        cardInitialX: float,
-        cardInitialY: float,
-        stackHeight: float,
-        stackMinWidth: float,
-        stackHook: string,
         ...widgetSharedKeys
     }
 
@@ -200,6 +178,7 @@ $Widget {
     $CircularCardSelector {
         radius: float,
         size: float,
+        emptySlotTexture: string,
         ...widgetSharedKeys
     }
 

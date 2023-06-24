@@ -7,7 +7,8 @@ var poisonDamage = 3;
 var bSelects = {
     allExceptSelf: bNum([1, 2, 3, 4, 5]),
     allBullets: bSelectByName("bullet"),
-    fourButNotSelf: bNum([4])
+    fourButNotSelf: bNum([4]),
+    targetRequiredNotSelf: bSelectTarget(false, false)
 };
 
 cards: [
@@ -375,6 +376,24 @@ cards: [
             putCardInHand("round start", "workerBullet", 1)
         ],
         cost: 2,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "protectiveBullet",
+        title: "protective Bullet",
+        flavourText: "protective Bullet",
+        description: "todo",
+        baseDamage: 6,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            protect("enter", bSelects.targetRequiredNotSelf)
+        ],
+        cost: 3,
         type: $Bullet { },
         tags: ["rare"],
         price: 50,

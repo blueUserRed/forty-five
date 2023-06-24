@@ -43,7 +43,7 @@ nodes: [
         event: $ShopMapEvent {
             seed: null,
             boughtIndices: [],
-            type: "all_included",
+            type: "normal",
             biome: "no_biome",
             person: "traveling_merchant",
         }

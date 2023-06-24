@@ -42,7 +42,7 @@ object PermaSaveState {
         if (result != null) {
             FortyFiveLogger.debug(logTag, "Savefile invalid: $result")
             copyDefaultFile()
-            obj = OnjParser.parseFile(Gdx.files.local(SaveState.saveFilePath).file())
+            obj = OnjParser.parseFile(Gdx.files.local(saveFilePath).file())
             savefileSchema.assertMatches(obj)
         }
 
@@ -81,7 +81,7 @@ object PermaSaveState {
 
     private fun copyDefaultFile() {
         FortyFiveLogger.debug(logTag, "copying default save")
-        Gdx.files.local(defaultSaveFilePath).copyTo(Gdx.files.local(SaveState.saveFilePath))
+        Gdx.files.local(defaultSaveFilePath).copyTo(Gdx.files.local(saveFilePath))
     }
 
 }

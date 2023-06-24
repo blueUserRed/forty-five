@@ -230,6 +230,7 @@ class ScreenBuilder(val file: FileHandle) {
         "CardHand" -> CardHand(
             widgetOnj.get<Double>("targetWidth").toFloat(),
             widgetOnj.get<Double>("cardSize").toFloat(),
+            widgetOnj.get<Double>("opacityIfNotPlayable").toFloat(),
             screen
         ).apply {
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
@@ -317,6 +318,7 @@ class ScreenBuilder(val file: FileHandle) {
         "CircularCardSelector" -> CircularCardSelector(
             widgetOnj.get<Double>("radius").toFloat(),
             widgetOnj.get<Double>("size").toFloat(),
+            widgetOnj.get<String>("emptySlotTexture"),
             screen
           )
 
