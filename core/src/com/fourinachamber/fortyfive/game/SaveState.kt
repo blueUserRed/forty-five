@@ -11,6 +11,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import kotlin.math.log
 
 /**
  * stores data about the current run and can read/write it to a file
@@ -91,8 +92,15 @@ object SaveState {
         savefileDirty = true
     }
 
-
-//    var eventData:
+    var currentDifficulty: Double = 1.0
+        set(value) {
+            field = value
+            if (value < 0.5) {
+                FortyFiveLogger.warn(logTag, "tried to set difficulty to too small value $value")
+                field = 1.0
+            }
+            savefileDirty = true
+        }
 
     /**
      * temporarily stores the used reserves, so it can be shown on the death screen
@@ -152,6 +160,7 @@ object SaveState {
 
         playerLives = obj.get<Long>("playerLives").toInt()
         playerMoney = obj.get<Long>("playerMoney").toInt()
+        currentDifficulty = obj.get<Double>("currentDifficulty")
 
         FortyFiveLogger.debug(
             logTag, "stats: " +
@@ -204,6 +213,7 @@ object SaveState {
             "cards" with _cards
             "playerLives" with playerLives
             "playerMoney" with playerMoney
+            "currentDifficulty" with currentDifficulty
             "stats" with buildOnjObject {
                 "usedReserves" with usedReserves
                 "enemiesDefeated" with enemiesDefeated

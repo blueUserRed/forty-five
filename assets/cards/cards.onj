@@ -28,7 +28,7 @@ cards: [
             giveStatus("shot", burning(3, burningPercent)),
         ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { },
     },
@@ -44,7 +44,7 @@ cards: [
         highlightType: "standard",
         effects: [ reserveGain("round start", 1) ],
         cost: 1,
-        tags: ["rare"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -60,7 +60,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 2,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -76,7 +76,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 1,
-        tags: ["rare"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -92,8 +92,8 @@ cards: [
         highlightType: "standard",
         effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ],
         cost: 3,
-        tags: ["common"],
-        price: 50,
+        tags: ["rare"],
+        price: 100,
         type: $Bullet { }
     },
     {
@@ -108,7 +108,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -126,7 +126,7 @@ cards: [
             giveStatus("shot", burning(2, burningPercent))
         ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -142,7 +142,7 @@ cards: [
         highlightType: "standard",
         effects: [ buffDmg("enter", bSelects.allExceptSelf, 4) ],
         cost: 2,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -158,8 +158,8 @@ cards: [
         highlightType: "glow",
         effects: [ draw("enter", 1), draw("shot", 1) ],
         cost: 1,
-        tags: ["rare"],
-        price: 55,
+        tags: ["common", "startDeck"],
+        price: 50,
         type: $Bullet { }
     },
     {
@@ -174,7 +174,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -190,7 +190,7 @@ cards: [
         highlightType: "standard",
         effects: [ ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -222,7 +222,7 @@ cards: [
         highlightType: "standard",
         effects: [ ],
         cost: 2,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -238,7 +238,7 @@ cards: [
          highlightType: "standard",
          effects: [ ],
          cost: 0,
-         tags: ["common"],
+         tags: ["common", "startDeck"],
          price: 50,
          type: $Bullet { }
     },
@@ -254,7 +254,7 @@ cards: [
          highlightType: "standard",
          effects: [ ],
          cost: 0,
-         tags: ["common"],
+         tags: ["common", "startDeck"],
          price: 50,
          type: $Bullet { }
     },
@@ -341,7 +341,7 @@ cards: [
             giveStatus("shot", poison(3, poisonDamage))
         ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },

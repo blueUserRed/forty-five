@@ -1,4 +1,6 @@
 
+use Map;
+
 var images = {
     testArea: {
         image: "location_sign_aqua_dulche",
@@ -58,7 +60,7 @@ generatorConfig: {
     maps: [
         {
             name: "roadToSalem",
-            seed: 1023094783,
+            seed: runRandom(1),
             restrictions: {
                 maxNodes: 14,
                 minNodes: 8,

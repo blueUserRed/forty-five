@@ -44,7 +44,7 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
             screen.resize(Gdx.graphics.width, Gdx.graphics.height)
             sizeDirty = false
         }
-        if (fadeToBlack == 0f && currentPostProcessingShaders.isNotEmpty()) {
+        if (fadeToBlack != 0f && currentPostProcessingShaders.isNotEmpty()) {
             TODO("cannot use fadeToBlack while PostProcessors are active")
         }
         if (currentPostProcessingShaders.isEmpty()) {
