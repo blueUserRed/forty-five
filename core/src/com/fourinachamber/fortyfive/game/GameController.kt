@@ -146,7 +146,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * the next time the [nextTurn] function is called while this is true, this is set to false and nothing else is
      * done
      */
-    private var skipNextTurn: Boolean = true
+    private var skipNextTurn: Boolean = false
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
@@ -273,7 +273,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
-        gameDirector.currentEval() // TODO: remove, just for testing
         if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
         updateCount++
 
@@ -545,7 +544,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @AllThreadsAllowed
     fun damagePlayer(damage: Int): Timeline = Timeline.timeline {
         action {
-            println("damaging player")
             curPlayerLives -= damage
             FortyFiveLogger.debug(
                 logTag,
@@ -680,6 +678,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun end() {
+        gameDirector.end()
         FortyFiveLogger.title("game ends")
         FortyFive.currentGame = null
         SaveState.write()
@@ -712,7 +711,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         executeTimeline(Timeline.timeline {
             action {
                 FortyFiveLogger.debug(logTag, "player lost")
-                FortyFive.newRunSync() // TODO: use ServiceThread?
+                FortyFive.newRun()
             }
             includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
             action {

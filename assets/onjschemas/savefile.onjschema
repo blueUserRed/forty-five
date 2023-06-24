@@ -7,8 +7,8 @@ stats: {
 },
 
 playerLives: int,
-
 playerMoney: int,
+currentDifficulty: float,
 
 position: {
     map: string,

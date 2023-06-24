@@ -405,7 +405,7 @@ var gameScreen = $Box {
                     flexDirection: flexDirection.column,
                     width: 30.0#percent,
                     alignItems: align.center,
-                    positionLeft: 5.0#points
+                    positionLeft: 5.0#points,
                 }
             ]
         } children [
@@ -435,7 +435,7 @@ var gameScreen = $Box {
         $EnemyArea {
             styles: [
                 {
-                    flexGrow: 0.5
+                    flexGrow: 1.0
                 }
             ],
             ...enemyArea

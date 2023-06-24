@@ -1,14 +1,11 @@
 import "imports/colors.onj" as color;
 
 use Common;
-use Style;
-use Screen;
-
 
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-var raritys = [
+var rarities = [
     {
         select: $ByTag {
             name: "common"
@@ -31,36 +28,14 @@ types: [
     {
         name: "all_included",
         cardChanges: [
-            ...raritys,
-            {
-                select: $ByName {
-                    name: "jewelryBox"
-                },
-                effect: $PriceMultiplier {
-                    price: 1.4,
-                }
-            },
-            {
-                select: $ByName {
-                    name: "casket"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 100.0
-                }
-            },
-            {
-                select: $ByTag {
-                    name: "common"
-                },
-                effect: $Blacklist {
-                }
-            }
+            ...rarities,
+
         ]
     },
     {
         name: "no_biome",
         cardChanges: [
-            ...raritys,
+            ...rarities,
             {
                 select: $ByName {
                     name: "workerBullet"
@@ -102,12 +77,6 @@ people: [
                     text: "Source: Trust me pal\"",
                 },
             ],
-            //            [
-//                $Text {
-//                    text: "Greetings Traveler. I have the best products you will ever see.",
-//                    color: color.beige
-//                }
-//            ],
 
         ],
         npcImageName: "my_cool_npc",

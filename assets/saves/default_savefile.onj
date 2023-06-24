@@ -1,10 +1,25 @@
 import "config/game_config.onj" as gameConfig;
 
 cards: [
+    "bullet", "bullet", "bullet", "bullet",
+    "incendiaryBullet",
+    "workerBullet",
+    "bigBullet",
+    "rottenBullet",
+    "bewitchedBullet",
+    "explosiveBullet",
+    "leadersBullet",
+    "silverBullet",
+    "arrow",
+    "obsidianBullet",
+    "rustedBullet",
+    "invisibleBullet",
+    "poisonBullet"
 ],
 
 playerLives: gameConfig.playerConfig.lives,
 playerMoney: 100,
+currentDifficulty: 1.0,
 
 stats: {
     usedReserves: 0,

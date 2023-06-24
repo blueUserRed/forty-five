@@ -5,12 +5,9 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.utils.TextureGenerator
 import com.fourinachamber.fortyfive.map.*
-import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
-import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
+import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
-import com.fourinachamber.fortyfive.onjNamespaces.ScreenNamespace
-import com.fourinachamber.fortyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.*
@@ -89,12 +86,14 @@ object FortyFive : Game() {
         renderable.init()
     }
 
-    fun newRunSync() {
+    fun newRun() {
+        PermaSaveState.newRun()
         SaveState.reset()
         MapManager.newRunSync()
     }
 
-    fun resetAllSync() {
+    fun resetAll() {
+        PermaSaveState.reset()
         SaveState.reset()
         MapManager.resetAllSync()
     }
@@ -105,11 +104,13 @@ object FortyFive : Game() {
             registerNameSpace("Cards", CardsNamespace)
             registerNameSpace("Style", StyleNamespace)
             registerNameSpace("Screen", ScreenNamespace)
+            registerNameSpace("Map", MapNamespace)
         }
         TemplateString.init()
         FortyFiveLogger.init()
-        resetAllSync()
+//        resetAll()
 //        newRunSync()
+        PermaSaveState.read()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()
@@ -119,6 +120,7 @@ object FortyFive : Game() {
     override fun dispose() {
         FortyFiveLogger.warn(logTag, "game closing")
         MapManager.write()
+        PermaSaveState.write()
         SaveState.write()
         currentScreen?.dispose()
         serviceThread.close()
