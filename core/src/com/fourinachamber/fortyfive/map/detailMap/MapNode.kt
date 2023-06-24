@@ -187,7 +187,7 @@ data class MapNodeBuilder(
 
     override fun toString(): String {
         val cur = edgesTo.joinToString(separator = ",", transform = { it.toStringRec() })
-        return javaClass.name + "{x: $x, y: $y, neighbours: $cur}"
+        return javaClass.simpleName + "{x: $x, y: $y, neighbours: $cur}"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -199,7 +199,7 @@ data class MapNodeBuilder(
     }
 
     override fun hashCode(): Int {
-        return super.hashCode()
+        return (x * 100 + y).hashCode()
     }
 
     fun posAsVec(): Vector2 {

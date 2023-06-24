@@ -50,60 +50,67 @@ generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [
         {
-            name: "roadToSalem",
-            seed: 203,
-            restrictions: {
-                maxNodes: 10,
-                minNodes: 5,
-                maxSplits: 1,
-//                maxSplits: 8,
-                splitProbability: 0.5,
-                compressProbability: 0.55,
-                averageLengthOfLineInBetween: 26.0,
-                maxWidth: 40,
-                maxAnglePercent: 0.6,
-                rangeToCheckBetweenNodes: 0.6,
-                startArea: "test_area",
-                endArea: "test_area",
-                otherAreas: [],
-                minDistanceBetweenAreas: 100.0,
-                distanceFromAreaToLine: 100.0,
-                percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
-                rotation: 1.0,
-                fixedEvents: [],
-                optionalEvents: [
-                    {
-                        weight: 1,
-                        event: $EncounterMapEvent {
-                            currentlyBlocks: true,
-                            canBeStarted: true,
-                            isCompleted: false
-                        }
-                    }
-                ],
-                decorations: [
-//                    $RandomDistributionFunction {
-//                        decoration: "map_decoration_grass",
-//                        density: 0.2,
-//                        baseWidth: 3.0,
-//                        baseHeight: 3.0,
-//                        scaleMin: 0.6,
-//                        scaleMax: 1.2,
-//                        onlyCollidesWithNodes: false
-//                    },
-//                    $RandomDistributionFunction {
-//                        decoration: "map_decoration_cactus",
-//                        density: 0.01,
-//                        baseWidth: 2.0,
-//                        baseHeight: 4.0,
-//                        scaleMin: 1.5,
-//                        scaleMax: 2.5,
-//                        onlyCollidesWithNodes: false
-//                    }
-                ],
-                decorationSeed: 230789230789407892340,
-                decorationPadding: 40.0
+
+    name: "roadToSalem",
+        seed: 203,
+        restrictions: {
+        maxNodes: 10,
+        minNodes: 5,
+        //                maxSplits: 1,
+        maxSplits: 4,
+        //                splitProbability: 0.5,
+        splitProbability: 0.5,
+        compressProbability: 0.55,
+        averageLengthOfLineInBetween: 26.0,
+        maxWidth: 40,
+        maxAnglePercent: 0.6,
+        rangeToCheckBetweenNodes: 0.6,
+        startArea: "test_area",
+        endArea: "test_area",
+        otherAreas: [],
+        minDistanceBetweenAreas: 100.0,
+        distanceFromAreaToLine: 100.0,
+        percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
+        rotation: 1.0,
+        fixedEvents: [],
+        optionalEvents: [
+        {
+            weight: 20,
+            event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        }
+        },
+        {
+            weight: 20,
+            event: $EmptyMapEvent { }
+        }
+        ],
+        decorations: [
+            $RandomDistributionFunction {
+                decoration: "map_decoration_grass",
+                density: 0.2,
+                baseWidth: 3.0,
+                baseHeight: 3.0,
+                scaleMin: 0.6,
+                scaleMax: 1.2,
+                onlyCollidesWithNodes: false
+            },
+            $RandomDistributionFunction {
+                decoration: "map_decoration_cactus",
+                density: 0.01,
+                baseWidth: 2.0,
+                baseHeight: 4.0,
+                scaleMin: 1.5,
+                scaleMax: 2.5,
+                onlyCollidesWithNodes: false
             }
+        ],
+        decorationSeed: 230789230789407892340,
+        decorationPadding: 40.0
+
+        },
         },
 //        {
 //            name: "test_road",

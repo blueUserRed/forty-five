@@ -570,6 +570,7 @@ class CustomScrollableFlexBox(
                 if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
                     && touchDownY < relY + scrollbarHandle.height && touchDownY > relY
                 ) {
+//                    offset=
                     println("now update position")
                 }
             }
