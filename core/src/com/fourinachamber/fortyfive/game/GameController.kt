@@ -195,31 +195,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .toMutableList()
 
         val startDeck: MutableList<Card> = mutableListOf()
-        onj.get<OnjArray>("startDeck").value.forEach { entry ->
-
-            entry as OnjObject
-            val entryName = entry.get<String>("name")
-
-            val card = cardPrototypes.firstOrNull { it.name == entryName }
-                ?: throw RuntimeException("unknown card name is start deck: $entryName")
-
-            repeat(entry.get<Long>("amount").toInt()) {
-                startDeck.add(card.create())
-            }
-        }
 
         cardStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
         _remainingCards = cardStack.size
 
-        SaveState.additionalCards.forEach { entry ->
-            val (cardName, amount) = entry
-
+        SaveState.cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            repeat(amount) {
-                cardStack.add(card.create())
-            }
+            cardStack.add(card.create())
         }
 
         cardStack.shuffle()

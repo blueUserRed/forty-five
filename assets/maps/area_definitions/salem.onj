@@ -6,19 +6,20 @@ nodes: [
         x: 20.0,
         y: 80.0,
         isArea: false,
-        edgesTo: [1],
-        event: $EmptyMapEvent { }
+        edgesTo: [1, 4],
+        image: "test_area",
+        imagePos: "left",
+        event: $EnterMapMapEvent {
+           targetMap: "roadToSalem",
+           placeAtEnd: true
+       }
     },
     {
         x: 60.0,
         y: 80.0,
         isArea: false,
         edgesTo: [0, 2, 3],
-        event: $EncounterMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: false,
-            isCompleted: true,
-        }
+        event: $EmptyMapEvent { }
     },
     {
         x: 60.0,
@@ -32,9 +33,19 @@ nodes: [
         y: 90.0,
         isArea: false,
         edgesTo: [1],
-        event: $EnterMapMapEvent {
-            targetMap: "roadToSalem",
-            placeAtEnd: true
+        event: $EmptyMapEvent { }
+    },
+    {
+        x: 30.0,
+        y: 40.0,
+        isArea: false,
+        edgesTo: [0],
+        event: $ShopMapEvent {
+            seed: null,
+            boughtIndices: [],
+            type: "all_included",
+            biome: "no_biome",
+            person: "traveling_merchant",
         }
     },
 ],

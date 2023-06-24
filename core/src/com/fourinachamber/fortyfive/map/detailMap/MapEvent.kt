@@ -148,6 +148,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
 
     init {
         setStandardValuesFromConfig(obj)
+        currentlyBlocks = false
     }
 
     override fun start() {

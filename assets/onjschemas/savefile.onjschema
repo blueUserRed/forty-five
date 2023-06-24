@@ -1,11 +1,5 @@
 
-var cardDec = {
-    name: string,
-    amount: int
-};
-
-additionalCards: cardDec[],
-cardsToDraw: cardDec[],
+cards: string[],
 
 stats: {
     usedReserves: int,
