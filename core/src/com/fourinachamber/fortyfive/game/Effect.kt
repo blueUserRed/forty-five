@@ -20,6 +20,8 @@ abstract class Effect(val trigger: Trigger) {
     @MainThreadOnly
     abstract fun onTrigger(): Timeline
 
+    abstract fun blocks(controller: GameController): Boolean
+
     /**
      * checks if this effect is triggered by [triggerToCheck] and returns a timeline containing the actions of this
      * effect if it was
@@ -31,6 +33,38 @@ abstract class Effect(val trigger: Trigger) {
             return onTrigger()
         }
         return null
+    }
+
+    protected fun getSelectedBullets(
+        bulletSelector: BulletSelector,
+        controller: GameController,
+        self: Card
+    ): Timeline = Timeline.timeline {
+
+        when (bulletSelector) {
+
+            is BulletSelector.ByLambda -> action {
+                val cards = controller
+                    .revolver
+                    .slots
+                    .mapIndexed { index, revolverSlot -> index to revolverSlot }
+                    .filter { it.second.card != null }
+                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index) }
+                    .map { it.second.card!! }
+                store("selectedCards", cards)
+            }
+
+            is BulletSelector.ByPopup -> {
+                include(controller.cardSelectionPopup(
+                    "Select target:",
+                    if (bulletSelector.includeSelf) null else self
+                ))
+                action {
+                    store("selectedCards", listOf(get<Card>("selectedCard")))
+                }
+            }
+
+        }
     }
 
     /**
@@ -67,6 +101,8 @@ abstract class Effect(val trigger: Trigger) {
             }
         }
 
+        override fun blocks(controller: GameController) = false
+
         override fun toString(): String {
             return "ReserveGain(trigger=$trigger, amount=$amount)"
         }
@@ -81,7 +117,7 @@ abstract class Effect(val trigger: Trigger) {
     class BuffDamage(
         trigger: Trigger,
         val amount: Int,
-        private val bulletSelector: BulletSelector? = null
+        private val bulletSelector: BulletSelector
     ) : Effect(trigger) {
 
         override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector)
@@ -101,15 +137,15 @@ abstract class Effect(val trigger: Trigger) {
             ) { card.inGame }
 
             return Timeline.timeline {
+                include(getSelectedBullets(bulletSelector, gameController, this@BuffDamage.card))
                 action {
-                    for (i in 1..5) {
-                        val card = gameController.revolver.getCardInSlot(i) ?: continue
-                        if (!(bulletSelector?.invoke(this@BuffDamage.card, card, i) ?: true)) continue
-                        card.addModifier(modifier)
-                    }
+                    get<List<Card>>("selectedCards")
+                        .forEach { it.addModifier(modifier) }
                 }
             }
         }
+
+        override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
 
         override fun toString(): String {
             return "BuffDmg(trigger=$trigger, amount=$amount)"
@@ -125,7 +161,7 @@ abstract class Effect(val trigger: Trigger) {
     class GiftDamage(
         trigger: Trigger,
         val amount: Int,
-        private val bulletSelector: BulletSelector? = null
+        private val bulletSelector: BulletSelector
     ) : Effect(trigger) {
 
         override fun copy(): Effect = GiftDamage(trigger, amount, bulletSelector)
@@ -145,15 +181,15 @@ abstract class Effect(val trigger: Trigger) {
             ) { true }
 
             return Timeline.timeline {
+                include(getSelectedBullets(bulletSelector, gameController, this@GiftDamage.card))
                 action {
-                    for (i in 1..5) {
-                        val card = gameController.revolver.getCardInSlot(i) ?: continue
-                        if (!(bulletSelector?.invoke(this@GiftDamage.card, card, i) ?: true)) continue
-                        card.addModifier(modifier)
-                    }
+                    get<List<Card>>("selectedCards")
+                        .forEach { it.addModifier(modifier) }
                 }
             }
         }
+
+        override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
 
         override fun toString(): String {
             return "GiftDamage(trigger=$trigger, amount=$amount)"
@@ -178,6 +214,8 @@ abstract class Effect(val trigger: Trigger) {
             delayUntil { gameController.currentState !is GameState.SpecialDraw }
         }
 
+        override fun blocks(controller: GameController) = false
+
         override fun toString(): String {
             return "Draw(trigger=$trigger, card=$card, amount=$amount)"
         }
@@ -200,38 +238,12 @@ abstract class Effect(val trigger: Trigger) {
             }
         }
 
+        override fun blocks(controller: GameController) = false
+
         override fun toString(): String {
             return "GiveStatus(trigger=$trigger, status=$statusEffect)"
         }
 
-    }
-
-    /**
-     * requires the player to destroy a bullet in the game. Has special behaviour when the trigger is onEnter: If no
-     * destroyable card is in the game the card that has this effect can not be played
-     */
-    class Destroy(trigger: Trigger) : Effect(trigger) {
-
-        override fun copy(): Effect = Destroy(trigger)
-
-        override fun onTrigger(): Timeline = Timeline.timeline {
-            val gameController = FortyFive.currentGame!!
-            val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
-            includeLater(
-                { Timeline.timeline {
-                    delay(GraphicsConfig.bufferTime)
-                    includeAction(cardHighlight)
-                    delay(GraphicsConfig.bufferTime)
-                    action { gameController.destroyCardPhase() }
-                    delayUntil { gameController.currentState !is GameState.CardDestroy }
-                } },
-                { gameController.hasDestroyableCard() && card.inGame }
-            )
-        }
-
-        override fun toString(): String {
-            return "Destroy(trigger=$trigger)"
-        }
     }
 
     /**
@@ -258,9 +270,35 @@ abstract class Effect(val trigger: Trigger) {
             }
         }
 
+        override fun blocks(controller: GameController) = false
+
         override fun toString(): String {
             return "PutCardInHand(trigger=$trigger, card=$card, amount=$amount)"
         }
+    }
+
+    class Protect(trigger: Trigger, val bulletSelector: BulletSelector) : Effect(trigger) {
+
+        override fun onTrigger(): Timeline = Timeline.timeline {
+            val controller = FortyFive.currentGame!!
+            val modifier = Card.CardModifier(
+                0,
+                TemplateString("${card.name} applied everlasting!"), // TODO: GraphicsConfig
+                true
+            ) { card.inGame }
+
+            include(getSelectedBullets(bulletSelector, controller, this@Protect.card))
+            action {
+                get<List<Card>>("selectedCards")
+                    .forEach { it.addModifier(modifier) }
+            }
+        }
+
+        override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
+
+        override fun copy(): Effect = Protect(trigger, bulletSelector)
+
+        override fun toString(): String = "Protect(trigger=$trigger)"
     }
 
 }
@@ -268,7 +306,31 @@ abstract class Effect(val trigger: Trigger) {
 /**
  * used for telling an effect which bullet to apply a modifier to
  */
-typealias BulletSelector = (self: Card, other: Card, slot: Int) -> Boolean
+sealed class BulletSelector {
+
+    class ByLambda(val lambda: (self: Card, other: Card, slot: Int) -> Boolean) : BulletSelector() {
+
+        override fun blocks(controller: GameController, self: Card): Boolean = false
+    }
+
+    class ByPopup(val includeSelf: Boolean, val optional: Boolean) : BulletSelector() {
+
+        override fun blocks(controller: GameController, self: Card): Boolean {
+            if (optional) return false
+            val bulletsInRevolver = controller
+                .revolver
+                .slots
+                .mapNotNull { it.card }
+            if (bulletsInRevolver.size >= 2) return false
+            if (bulletsInRevolver.isEmpty()) return true
+            if (!includeSelf && bulletsInRevolver[0] === self) return false
+            return true
+        }
+    }
+
+    abstract fun blocks(controller: GameController, self: Card): Boolean
+
+}
 
 /**
  * possible triggers for an effect

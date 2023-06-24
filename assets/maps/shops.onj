@@ -25,13 +25,20 @@ var rarities = [
 ];
 
 types: [
+
     {
-        name: "all_included",
+        name: "normal",
         cardChanges: [
             ...rarities,
-
+            {
+                select: $ByTag {
+                    name: "startDeck"
+                },
+                effect: $Blacklist { }
+            }
         ]
     },
+
     {
         name: "no_biome",
         cardChanges: [

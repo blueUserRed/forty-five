@@ -329,6 +329,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val cardHandName = cardHandOnj.get<String>("actorName")
         val cardHand = curScreen.namedActorOrError(cardHandName)
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
+        cardHand.init(this)
         this.cardHand = cardHand
     }
 
@@ -372,7 +373,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) {
-        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame()) return
+        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this)) return
         if (revolver.getCardInSlot(slot) != null) return
         if (!cost(card.cost)) return
         cardHand.removeCard(card)
@@ -397,9 +398,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun cardSelectionPopup(text: String): Timeline = Timeline.timeline {
+    fun cardSelectionPopup(text: String, exclude: Card? = null): Timeline = Timeline.timeline {
         action {
-            cardSelector.setTo(revolver)
+            cardSelector.setTo(revolver, exclude)
             curScreen.enterState(showPopupScreenState)
             curScreen.enterState(showPopupCardSelectorScreenState)
             popupText = text
@@ -578,16 +579,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "destroyed card: $card")
         executeTimeline(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
         currentState.onCardDestroyed(this)
-    }
-
-    /**
-     * checks whether a destroyable card is in the game
-     */
-    fun hasDestroyableCard(): Boolean {
-        for (card in createdCards) if (card.inGame && card.type == Card.Type.BULLET) {
-            return true
-        }
-        return false
     }
 
     @MainThreadOnly

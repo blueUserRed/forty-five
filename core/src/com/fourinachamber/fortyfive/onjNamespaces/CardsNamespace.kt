@@ -46,14 +46,14 @@ object CardsNamespace {
         return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value))
     }
 
-    @RegisterOnjFunction(schema = "params: [string]")
-    fun destroy(trigger: OnjString): OnjEffect {
-        return OnjEffect(Effect.Destroy(triggerOrError(trigger.value)))
-    }
-
     @RegisterOnjFunction(schema = "params: [string, string, int]")
     fun putCardInHand(trigger: OnjString, name: OnjString, amount: OnjInt): OnjEffect {
         return OnjEffect(Effect.PutCardInHand(triggerOrError(trigger.value), name.value, amount.value.toInt()))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
+    fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
+        return OnjEffect(Effect.Protect(triggerOrError(trigger.value), bulletSelector.value))
     }
 
     @RegisterOnjFunction(schema = "params: [*[]]")
@@ -79,16 +79,21 @@ object CardsNamespace {
         }
 
 
-        return OnjBulletSelector { self, other, slot ->
+        return OnjBulletSelector(BulletSelector.ByLambda { self, other, slot ->
             // when self === other allowSelf must be true, even if the slot is correct
             if (self === other) allowSelf
             else nums.contains(slot)
-        }
+        })
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun bSelectByName(name: OnjString): OnjBulletSelector {
-        return OnjBulletSelector { _, other, _ -> other.name == name.value }
+        return OnjBulletSelector(BulletSelector.ByLambda { _, other, _ -> other.name == name.value })
+    }
+
+    @RegisterOnjFunction(schema = "params: [boolean, boolean]")
+    fun bSelectTarget(includeSelf: OnjBoolean, optional: OnjBoolean): OnjBulletSelector {
+        return OnjBulletSelector(BulletSelector.ByPopup(includeSelf.value, optional.value))
     }
 
     @RegisterOnjFunction(schema = "params: [int, int]")
