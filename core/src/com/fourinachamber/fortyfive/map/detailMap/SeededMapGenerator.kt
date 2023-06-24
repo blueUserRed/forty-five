@@ -11,6 +11,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
+import java.util.function.BinaryOperator
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -47,7 +48,10 @@ class SeededMapGenerator(
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         addEvents(nodes)
-        nodes.forEach { it.scale(1F, .6F) }    //TODO manche events eher am Dead-Ends spawnen
+
+        println(nodes.size)
+
+        nodes.forEach { it.scale(.5F, .5F) }    //TODO manche events eher am Dead-Ends spawnen
         nodes.forEach { it.rotate(restrictions.rotation) }  //TODO Parameter für Weg-breite (mit collision)
         val decos = generateDecorations(nodes, connections) //TODO Rotations fixen mit decorations
         this.nodes = nodes
@@ -204,6 +208,7 @@ class SeededMapGenerator(
             val uniqueNodes: MutableList<MapNodeBuilder> = getUniqueNodesFromNodeRecursive(
                 nodes[0], mutableListOf()
             )
+            nodes.removeIf { it !in uniqueNodes }
             val uniqueLines = mutableListOf<Line>()
             for (node in uniqueNodes) {
                 for (other in node.edgesTo) {
@@ -212,7 +217,7 @@ class SeededMapGenerator(
                     }
                 }
             }
-            nodes.removeIf { it !in uniqueNodes }
+            println(nodes.size)
             while (checkLinesNotIntercepting(uniqueLines, nodes)) hadErrors = true
             if (!hadErrors) return uniqueLines
         }
@@ -242,10 +247,13 @@ class SeededMapGenerator(
             val line1 = uniqueLines[i]
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
-                val interceptPoint = line1.intersection(line2)
-                if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
-                    correctInterceptionNode(nodes, line1, line2, interceptPoint, uniqueLines)
-                    return true
+                if (!line1.sharesPointWith(line2)) {
+                    val interceptPoint = line1.addOnEachEnd(restrictions.pathTotalWidth)
+                        .intersection(line2.addOnEachEnd(restrictions.pathTotalWidth))
+                    if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
+                        correctInterceptionNode(nodes, uniqueLines[i], uniqueLines[j], interceptPoint, uniqueLines)
+                        return true
+                    }
                 }
             }
         }
@@ -265,7 +273,7 @@ class SeededMapGenerator(
         var intersectionNode: MapNodeBuilder? = null
         for (i in nodes) {
             val newVec = interceptPoint.clone().sub(Vector2(i.x, i.y))
-            if (newVec.len() < 10) {
+            if (newVec.len() < restrictions.pathTotalWidth) {
                 intersectionNode = i
                 break
             }
@@ -301,7 +309,6 @@ class SeededMapGenerator(
         )
         if (curNodes[0] in mainLine.lineNodes && curNodes[1] in mainLine.lineNodes) return line2
         if (curNodes[2] in mainLine.lineNodes && curNodes[3] in mainLine.lineNodes) return line1
-
         if (possibleIntersectionNode == curNodes[0] || possibleIntersectionNode == curNodes[1]) return line2
         if (possibleIntersectionNode == curNodes[2] || possibleIntersectionNode == curNodes[3]) return line1
         return (if (rnd.nextBoolean()) line1 else line2)
@@ -330,13 +337,13 @@ class SeededMapGenerator(
         newNode: MapNodeBuilder,
         uniqueLines: MutableList<Line>
     ) {
+
         val firstNode = nodes.first { a -> a.x == nodesConnection.start.x && a.y == nodesConnection.start.y }
         val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
         firstNode.edgesTo[firstNode.edgesTo.indexOf(secNode)] = newNode
         secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
         newNode.edgesTo.add(firstNode)
         newNode.edgesTo.add(secNode)
-        nodes.add(newNode)
         uniqueLines.remove(nodesConnection)
         uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
         uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
@@ -461,10 +468,10 @@ class SeededMapGenerator(
             oldLine: MapGeneratorLine
         ): ClosedFloatingPointRange<Float> {
             if (oldLineMin) {
-                val a = oldLine.getMinInRange(pointToAdd.x) - 5
+                val a = oldLine.getMinInRange(pointToAdd.x) - restrict.minDistanceBetweenNodes
                 return ((a - restrict.maxWidth)..(a))
             }
-            val a = oldLine.getMaxInRange(pointToAdd.x) + 5
+            val a = oldLine.getMaxInRange(pointToAdd.x) + restrict.minDistanceBetweenNodes
             return ((a)..(a + restrict.maxWidth))
         }
 
@@ -695,7 +702,7 @@ class SeededMapGenerator(
 
 class Line(val start: Vector2, val end: Vector2) {
 
-    fun ang(): Float {
+    private fun ang(): Float {
         return Vector2(start.x, start.y).sub(end).angleRad()
     }
 
@@ -737,6 +744,27 @@ class Line(val start: Vector2, val end: Vector2) {
             Vector2(end.x + a, end.y + b).add(sizeToNodeCenter),
             Vector2(end.x - a, end.y - b).add(sizeToNodeCenter),
         )
+    }
+
+    fun addOnEachEnd(distance: Float): Line {
+        val ang = ang()
+        val result = Line(start.clone(), end.clone())
+        if (start.x < end.x) {
+            result.start.x -= (cos(ang) * distance)
+            result.start.y -= (sin(ang) * distance)
+            result.end.x += (cos(ang) * distance)
+            result.end.y += (sin(ang) * distance)
+        } else {
+            result.start.x += (cos(ang) * distance)
+            result.start.y += (sin(ang) * distance)
+            result.end.x -= (cos(ang) * distance)
+            result.end.y -= (sin(ang) * distance)
+        }
+        return result
+    }
+
+    fun sharesPointWith(line2: Line): Boolean {
+        return line2.start == start || line2.start == end || line2.end == start || line2.end == end
     }
 }
 
@@ -872,6 +900,7 @@ sealed class DecorationDistributionFunction(
         }
 
     }
+
     //TODO add Class for "clusters" (fe forests) only
     abstract fun getPossiblePositions(
         xRange: ClosedFloatingPointRange<Float>,
@@ -886,7 +915,7 @@ sealed class DecorationDistributionFunction(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
-        nodes.forEach { println(it.x.toString() + ", " + it.y + ", " + it.edgesTo.size) }
+//        nodes.forEach { println(it.x.toString() + ", " + it.y + ", " + it.edgesTo.size) }
         val possiblePositions: List<Pair<Vector2, Float>> =
             getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
         return DetailMap.MapDecoration(
@@ -1047,7 +1076,8 @@ data class MapRestriction(
     val optionalEvents: List<Pair<Int, () -> MapEvent>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
-    val pathTotalWidth: Float = 7F,
+    val pathTotalWidth: Float = 7F,  //TODO add onj parameter
+    val minDistanceBetweenNodes: Float = 5F, //TODO add onj parameter
 ) {
 
 
