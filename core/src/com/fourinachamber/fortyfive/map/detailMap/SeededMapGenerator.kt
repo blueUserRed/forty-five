@@ -109,8 +109,10 @@ class SeededMapGenerator(
         areaNodes.add(mainLine.lineNodes.last())
         mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.LEFT
         mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.RIGHT
-        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, false)
-        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, true)
+        mainLine.lineNodes.first().imageName = restrictions.startArea
+        mainLine.lineNodes.last().imageName = restrictions.endArea
+        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
+        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>

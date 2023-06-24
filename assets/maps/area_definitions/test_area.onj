@@ -39,25 +39,11 @@ nodes: [
         y: 90.0,
         isArea: false,
         edgesTo: [1],
+        image: "test_area",
+        imagePos: "right",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
             placeAtEnd: false
-        }
-    },
-    {
-        x: 30.0,
-        y: 40.0,
-        isArea: false,
-        edgesTo: [0],
-        event: $ShopMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-            seed: null,
-            boughtIndices: [],
-            type: "all_included",
-            biome: "no_biome",
-            person: "traveling_merchant",
         }
     },
 ],

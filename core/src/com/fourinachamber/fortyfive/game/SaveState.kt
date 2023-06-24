@@ -32,26 +32,10 @@ object SaveState {
      */
     const val defaultSavefilePath: String = "saves/default_savefile.onj"
 
+    private var _cards: MutableList<String> = mutableListOf()
 
-    // These two variables follow the kotlin naming convention, but the linter for some reason doesn't realise this
-    // https://kotlinlang.org/docs/coding-conventions.html#names-for-backing-properties
-    @Suppress("ObjectPropertyName")
-    private var _additionalCards: MutableMap<String, Int> = mutableMapOf()
-
-    @Suppress("ObjectPropertyName")
-    private var _cardsToDraw: MutableMap<String, Int> = mutableMapOf()
-
-    /**
-     * cards the player has in addition to the cards in the start deck; contains the name of the card and the amount
-     */
-    val additionalCards: Map<String, Int>
-        get() = _additionalCards
-
-    /**
-     * the cards the player can choose on the win screen; contains the name of the card and the amount
-     */
-    val cardsToDraw: Map<String, Int>
-        get() = _cardsToDraw
+    val cards: List<String>
+        get() = _cards
 
     /**
      * counts the amount of reserves used by the player over the whole run
@@ -127,24 +111,6 @@ object SaveState {
     }
 
     /**
-     * removes a card from [cardsToDraw] and adds it to [additionalCards]
-     */
-    fun drawCard(card: Card) {
-        savefileDirty = true
-        if (!_cardsToDraw.containsKey(card.name)) {
-            throw RuntimeException("cannot draw card $card because it dosen't exist")
-        }
-        _cardsToDraw[card.name] = _cardsToDraw[card.name]!! - 1
-        if (_cardsToDraw[card.name]!! <= 0) _cardsToDraw.remove(card.name)
-
-        if (_additionalCards.containsKey(card.name)) {
-            _additionalCards[card.name] = _additionalCards[card.name]!! + 1
-        } else {
-            _additionalCards[card.name] = 1
-        }
-    }
-
-    /**
      * reads the savefile and sets the values
      */
     fun read() {
@@ -157,7 +123,7 @@ object SaveState {
         var obj = try {
             OnjParser.parseFile(file)
         } catch (e: OnjParserException) {
-            FortyFiveLogger.debug(logTag, "Savefile invalid:${e.message}")
+            FortyFiveLogger.debug(logTag, "Savefile invalid: ${e.message}")
             copyDefaultFile()
             OnjParser.parseFile(file)
         }
@@ -172,10 +138,8 @@ object SaveState {
 
         obj as OnjObject
 
-        _additionalCards = readCardArray(obj.get<OnjArray>("additionalCards")).toMutableMap()
-        FortyFiveLogger.debug(logTag, "additional cards: $_additionalCards")
-        _cardsToDraw = readCardArray(obj.get<OnjArray>("cardsToDraw")).toMutableMap()
-        FortyFiveLogger.debug(logTag, "cards to draw: $_cardsToDraw")
+        _cards = obj.get<OnjArray>("cards").value.map { it.value as String }.toMutableList()
+        FortyFiveLogger.debug(logTag, "cards: $_cards")
 
         val stats = obj.get<OnjObject>("stats")
         usedReserves = stats.get<Long>("usedReserves").toInt()
@@ -215,6 +179,11 @@ object SaveState {
         read()
     }
 
+    fun buyCard(card: String) {
+        _cards.add(card)
+        savefileDirty = true
+    }
+
     private fun copyLastRunStats() {
         lastRunEnemiesDefeated = enemiesDefeated
         lastRunUsedReserves = usedReserves
@@ -225,13 +194,6 @@ object SaveState {
         Gdx.files.local(defaultSavefilePath).copyTo(Gdx.files.local(saveFilePath))
     }
 
-    private fun readCardArray(arr: OnjArray): Map<String, Int> = arr
-        .value
-        .associate {
-            it as OnjObject
-            it.get<String>("name") to it.get<Long>("amount").toInt()
-        }
-
     /**
      * writes the values to the savefile
      */
@@ -239,8 +201,7 @@ object SaveState {
         if (!savefileDirty) return
         FortyFiveLogger.debug(logTag, "writing SaveState")
         val obj = buildOnjObject {
-            "additionalCards" with getCardArray(_additionalCards)
-            "cardsToDraw" with getCardArray(_cardsToDraw)
+            "cards" with _cards
             "playerLives" with playerLives
             "playerMoney" with playerMoney
             "stats" with buildOnjObject {
@@ -255,17 +216,6 @@ object SaveState {
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
         savefileDirty = false
-    }
-
-    private fun getCardArray(cards: Map<String, Int>) = cards.entries.map {
-        buildOnjObject {
-            "name" with it.key
-            "amount" with it.value
-        }
-    }
-
-    fun buyCard(cardName: String) {
-        print("$cardName bought")
     }
 
 }
