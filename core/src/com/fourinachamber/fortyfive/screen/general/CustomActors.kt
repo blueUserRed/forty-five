@@ -560,15 +560,21 @@ class CustomScrollableFlexBox(
 
     private val dragListener = object : DragListener() {
 
-        private var startXPos by Delegates.notNull<Float>()
+        private var startPos by Delegates.notNull<Float>()
 
         override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
-            if (isScrollDirectionVertical) {
+            startPos = if (isScrollDirectionVertical) {
+                val relX = (if (scrollbarSide == "left") 0F else width - scrollbarHandle.width)
+                val relY = scrollbarHandle.y - parentPos.y
+                if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
+                    && touchDownY < relY + scrollbarHandle.height && touchDownY > relY
+                ) scrollbarHandle.y
+                else Float.NaN
             } else {
                 val relX = scrollbarHandle.x - parentPos.x
                 val relY = (if (scrollbarSide == "top") height - scrollbarHandle.height else 0F)
-                startXPos = if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
+                if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
                     && touchDownY < relY + scrollbarHandle.height && touchDownY > relY
                 ) scrollbarHandle.x
                 else Float.NaN
@@ -576,17 +582,20 @@ class CustomScrollableFlexBox(
         }
 
         override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-            if (startXPos.isNaN()) return
+            if (startPos.isNaN()) return
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (isScrollDirectionVertical) {
+                val max = lastMax - cutBottom
+                val curSize = height * height / (max + height)
+                scrollbarHandle.y = startPos + (y - touchDownY) + cutTop
+                offset = (-(scrollbarHandle.y - parentPos.x) - curSize) * max / (height - curSize)
             } else {
-                scrollbarHandle.x = (startXPos + x-touchDownX)
+                scrollbarHandle.x = (startPos + x - touchDownX)
                 val max = lastMax
                 val curSize = width * width / (max + width)
                 offset = -(scrollbarHandle.x - parentPos.x) * max / (width - curSize) - cutLeft
             }
             invalidate()
-
         }
     }
 
