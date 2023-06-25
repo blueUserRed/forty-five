@@ -12,7 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -140,7 +139,7 @@ class DetailMapWidget(
             this@DetailMapWidget.screenDragged = false
             if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
             if (movePlayerTo != null) {
-                skipPlayerAnimation()
+                finishMovement()
                 return
             }
             pointToNode?.let { goToNode(it) }
@@ -322,14 +321,7 @@ class DetailMapWidget(
         val curTime = TimeUtils.millis()
         val movementFinishTime = playerMovementStartTime + playerMoveTime
         if (curTime >= movementFinishTime) {
-            this.playerNode = movePlayerTo
-            MapManager.currentMapNode = movePlayerTo
-            MapManager.lastMapNode = playerNode
-            playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
-            setupMapEvent(movePlayerTo.event)
-            updateScreenState(movePlayerTo.event)
-            this.movePlayerTo = null
-            updateDirectionIndicator(lastPointerPosition)
+            finishMovement()
             return
         }
         val percent = (movementFinishTime - curTime) / playerMoveTime.toFloat()
@@ -347,9 +339,12 @@ class DetailMapWidget(
         }
     }
 
-    private fun skipPlayerAnimation() {
+    private fun finishMovement() {
         val movePlayerTo = movePlayerTo ?: return
+        val playerNode = playerNode
         this.playerNode = movePlayerTo
+        MapManager.currentMapNode = movePlayerTo
+        MapManager.lastMapNode = playerNode
         playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
         setupMapEvent(movePlayerTo.event)
         updateScreenState(movePlayerTo.event)
