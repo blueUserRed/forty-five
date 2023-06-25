@@ -7,7 +7,6 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [1],
-
         event: $EmptyMapEvent { }
     },
     {
@@ -15,12 +14,7 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [0, 2, 3],
-//        event: $EmptyMapEvent { }
-        event: $EncounterMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: false,
-            isCompleted: true,
-        }
+        event: $EmptyMapEvent { }
     },
     {
         x: 60.0,
@@ -31,7 +25,7 @@ nodes: [
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
-            npc: 'my_cool_npc',
+            npc: 'Guy from Salem',
         }
     },
     {
@@ -39,7 +33,7 @@ nodes: [
         y: 90.0,
         isArea: false,
         edgesTo: [1],
-        image: "test_area",
+        image: "salem",
         imagePos: "right",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",

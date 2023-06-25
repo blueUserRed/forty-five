@@ -26,14 +26,22 @@ nodes: [
         y: 40.0,
         isArea: false,
         edgesTo: [1],
-        event: $EmptyMapEvent { }
+        event: $NPCMapEvent {
+           currentlyBlocks: false,
+           canBeStarted: true,
+           isCompleted: false,
+           npc: 'mysterious guy',
+       }
     },
     {
         x: 100.0,
         y: 90.0,
         isArea: false,
         edgesTo: [1],
-        event: $EmptyMapEvent { }
+        event: $EnterMapMapEvent {
+            targetMap: "endlessRoad",
+            placeAtEnd: false
+        }
     },
     {
         x: 30.0,
