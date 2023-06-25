@@ -34,6 +34,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.properties.Delegates
 
 
 /**
@@ -558,26 +559,36 @@ class CustomScrollableFlexBox(
     }
 
     private val dragListener = object : DragListener() {
-        override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-            println("Start:$x    $y")
-        }
 
-        override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        private var lastDragPos by Delegates.notNull<Float>()
+
+        override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (isScrollDirectionVertical) {
-            } else { //TODO hier weitermachen
-                val relX = scrollbarHandle.x - scrollbarBackground.x
+            } else {
+                val relX = scrollbarHandle.x - parentPos.x
                 val relY = (if (scrollbarSide == "top") height - scrollbarHandle.height else 0F)
-                if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
+                lastDragPos = if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
                     && touchDownY < relY + scrollbarHandle.height && touchDownY > relY
-                ) {
-//                    offset=
-                    println("now update position")
-                }
+                ) touchDownX
+                else Float.NaN
             }
         }
 
-        override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-            println("End:$x    $y")
+        override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            if (lastDragPos.isNaN()) return
+            val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
+            if (isScrollDirectionVertical) {
+            } else {
+                scrollbarHandle.x += (x - lastDragPos)
+                if ((x - touchDownX ) >= 0 && (x-touchDownX ) < width - scrollbarHandle.width) lastDragPos = x
+
+                val max = lastMax
+                val curSize = width * width / (max + width)
+                offset = -(scrollbarHandle.x - parentPos.x) * max / (width - curSize) - cutLeft
+            }
+            invalidate()
+
         }
     }
 
@@ -635,7 +646,6 @@ class CustomScrollableFlexBox(
                     ?.first()
                     ?.get(it.node)
             })?.value ?: scrollbarWidth
-//        scrollbarHandle.addListener(dragListener)
     }
 
     private fun layoutChildren() {
