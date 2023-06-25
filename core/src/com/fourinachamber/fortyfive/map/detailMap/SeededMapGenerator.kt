@@ -11,7 +11,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
-import java.util.function.BinaryOperator
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -61,7 +60,7 @@ class SeededMapGenerator(
         nodes: List<MapNodeBuilder>,
 //        connections: MutableList<Line>
     ): List<DetailMap.MapDecoration> {
-        val connections=getUniqueLinesFromNodes(nodes)
+        val connections = getUniqueLinesFromNodes(nodes)
         val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
         val xRange =
             ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
@@ -139,7 +138,7 @@ class SeededMapGenerator(
                 event = EnterMapMapEvent(areaName, false),
             )
             borderNodes.random(rnd).connect(newArea, direction)
-            connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))//TODO evtl. falsch oder so
+            connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))
             areaNodes.add(newArea)
         }
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
@@ -275,7 +274,8 @@ class SeededMapGenerator(
     ) {
         var intersectionNode: MapNodeBuilder? = null
         for (i in nodes) {
-            val newVec = interceptPoint.clone().sub(Vector2(i.x, i.y))
+            val newVec = interceptPoint.clone()
+                .sub(Vector2(i.x + restrictions.pathTotalWidth / 2, i.y + restrictions.pathTotalWidth / 2))
             if (newVec.len() < restrictions.pathTotalWidth) {
                 intersectionNode = i
                 break
@@ -574,8 +574,6 @@ class SeededMapGenerator(
                 for (i in lineNodes) {
                     if (i !in nodes) nodes.add(i)
                 }
-//                var lastToTop: Int = -2
-//                var lastToBottom: Int = -2
                 for (i in lineNodes.indices) {
                     val numberOfConnections: Int = getNbrOfConn(
                         rnd,
@@ -705,7 +703,7 @@ class SeededMapGenerator(
 
 class Line(val start: Vector2, val end: Vector2) {
 
-    private fun ang(): Float {
+    fun ang(): Float {
         return Vector2(start.x, start.y).sub(end).angleRad()
     }
 
@@ -777,6 +775,11 @@ enum class Direction {
             return DOWN
         }
 
+        override fun getAngle(): Float {
+            return Math.PI.toFloat()/2
+        }
+
+
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
             return curLine.lineUp
         }
@@ -784,6 +787,9 @@ enum class Direction {
     DOWN {
         override fun getOpposite(): Direction {
             return UP
+        }
+        override fun getAngle(): Float {
+            return Math.PI.toFloat()*3/2
         }
 
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
@@ -795,6 +801,10 @@ enum class Direction {
             return RIGHT
         }
 
+        override fun getAngle(): Float {
+            return Math.PI.toFloat()
+        }
+
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine {
             return curLine
         }
@@ -804,12 +814,17 @@ enum class Direction {
             return LEFT
         }
 
+        override fun getAngle(): Float {
+            return 0F
+        }
+
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
             return LEFT.getOtherLine(curLine)
         }
     };
 
     abstract fun getOpposite(): Direction
+    abstract fun getAngle(): Float
 
     /**
      * returns the line from the opposite direction
@@ -951,7 +966,7 @@ sealed class DecorationDistributionFunction(
         }
         if (!collidesOnlyWithNodes) {
             val size = Vector2(baseWidth * data.second, baseHeight * data.second)
-            val rect = arrayOf(
+            val rectAbs = arrayOf(
                 Vector2(data.first.x, data.first.y),
                 Vector2(data.first.x, data.first.y).add(size.x, 0F),
                 Vector2(data.first.x, data.first.y).add(size.x, size.y),
@@ -959,7 +974,7 @@ sealed class DecorationDistributionFunction(
             )
             for (it in connections) {
                 val tempRect = it.getAsRect(pathTotalWidth, Vector2(2.5F, 2.5F))
-                if (isPolygonsIntersecting(rect, tempRect)) return false
+                if (isPolygonsIntersecting(rectAbs, tempRect)) return false
             }
         }
         return true
