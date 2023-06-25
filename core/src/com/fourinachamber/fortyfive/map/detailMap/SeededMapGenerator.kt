@@ -49,11 +49,9 @@ class SeededMapGenerator(
         addAreas(nodes, connections)
         addEvents(nodes)
 
-        println(nodes.size)
-
-        nodes.forEach { it.scale(.5F, .5F) }    //TODO manche events eher am Dead-Ends spawnen
-        nodes.forEach { it.rotate(restrictions.rotation) }  //TODO Parameter für Weg-breite (mit collision)
-        val decos = generateDecorations(nodes, connections) //TODO Rotations fixen mit decorations
+        nodes.forEach { it.scale(1F, .6F) }    //TODO manche events eher am Dead-Ends spawnen
+        nodes.forEach { it.rotate(restrictions.rotation) }
+        val decos = generateDecorations(nodes)
         this.nodes = nodes
         build()
         return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos)
@@ -61,8 +59,9 @@ class SeededMapGenerator(
 
     private fun generateDecorations(
         nodes: List<MapNodeBuilder>,
-        connections: MutableList<Line>
+//        connections: MutableList<Line>
     ): List<DetailMap.MapDecoration> {
+        val connections=getUniqueLinesFromNodes(nodes)
         val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
         val xRange =
             ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
@@ -209,18 +208,22 @@ class SeededMapGenerator(
                 nodes[0], mutableListOf()
             )
             nodes.removeIf { it !in uniqueNodes }
-            val uniqueLines = mutableListOf<Line>()
-            for (node in uniqueNodes) {
-                for (other in node.edgesTo) {
-                    if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
-                        uniqueLines.add(Line(Vector2(node.x, node.y), Vector2(other.x, other.y)))
-                    }
-                }
-            }
-            println(nodes.size)
+            val uniqueLines = getUniqueLinesFromNodes(uniqueNodes)
             while (checkLinesNotIntercepting(uniqueLines, nodes)) hadErrors = true
             if (!hadErrors) return uniqueLines
         }
+    }
+
+    private fun getUniqueLinesFromNodes(uniqueNodes: List<MapNodeBuilder>): MutableList<Line> {
+        val uniqueLines = mutableListOf<Line>()
+        for (node in uniqueNodes) {
+            for (other in node.edgesTo) {
+                if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
+                    uniqueLines.add(Line(Vector2(node.x, node.y), Vector2(other.x, other.y)))
+                }
+            }
+        }
+        return uniqueLines
     }
 
     /**
