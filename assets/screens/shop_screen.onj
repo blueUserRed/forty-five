@@ -102,7 +102,7 @@ var cardsWidget = $ScrollBox {
     backgroundStretched: false,
     scrollbarBackgroundName: "scrollbar_background",
     scrollbarName: "scrollbar_handle",
-    scrollbarSide: "top",
+    scrollbarSide: "bottom",
     styles: [
         {
             flexWrap: wrap.wrap,
