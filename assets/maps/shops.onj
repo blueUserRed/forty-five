@@ -35,10 +35,44 @@ types: [
                     name: "startDeck"
                 },
                 effect: $Blacklist { }
+            },
+            {
+                select: $ByName {
+                    name: "protectiveBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 10000.0 // make sure it appears in the shop
+                }
             }
         ]
     },
 
+    {
+        name: "rare_shop",
+        cardChanges: [
+                ...rarities,
+                {
+                    select: $ByTag {
+                        name: "startDeck"
+                    },
+                    effect: $Blacklist { }
+                },
+                {
+                    select: $ByTag {
+                        name: "common"
+                    },
+                    effect: $Blacklist { }
+                },
+                {
+                    select: $ByTag {
+                        name: "rare"
+                    },
+                    effect: $PriceMultiplier {
+                        price: 0.5
+                    }
+                }
+       ]
+    },
     {
         name: "no_biome",
         cardChanges: [
@@ -82,6 +116,27 @@ people: [
                 },
                 $Text {
                     text: "Source: Trust me pal\"",
+                },
+            ],
+
+        ],
+        npcImageName: "my_cool_npc",
+    },
+    {
+        name: "rare_merchant",
+        displayName: "Traveling Merchant",
+        defaultShopParameter: "no_biome",
+        texts: [
+            [
+                $Text {
+                    text: "\"I only sell the ",
+                },
+                $Text {
+                    text: "rarest  ",
+                    color: color.viridian,
+                },
+                $Text {
+                    text: "bullets! And that for the cheapest price!\" ",
                 },
             ],
 
