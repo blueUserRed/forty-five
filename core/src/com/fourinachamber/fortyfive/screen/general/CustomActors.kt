@@ -558,6 +558,8 @@ class CustomScrollableFlexBox(
         }
     }
 
+    private var needsScrollbar: Boolean = true
+
     private val dragListener = object : DragListener() {
 
         private var startPos by Delegates.notNull<Float>()
@@ -632,13 +634,15 @@ class CustomScrollableFlexBox(
                 scrollbarBackground = screen.namedActorOrError(scrollbarBackgroundName) as CustomImageActor
                 remove(scrollbarBackground.styleManager?.node)
             }
-            layoutScrollbarBackground()
+            if (needsScrollbar)
+                layoutScrollbarBackground()
         }
         if (scrollbarName != null) {
             if (!this::scrollbarHandle.isInitialized) {
                 initScrollbarHandle()
             }
-            layoutScrollbarHandle()
+            if (needsScrollbar)
+                layoutScrollbarHandle()
         }
     }
 
@@ -658,15 +662,22 @@ class CustomScrollableFlexBox(
     private fun layoutChildren() {
         if (isScrollDirectionVertical) {
             lastMax = children.map { -it.y }.max()
+
             if (0F < lastMax + cutBottom) {
+                needsScrollbar = true
                 offset = offset.between(0F, lastMax + cutBottom)
                 children.forEach { it.y += offset }
+            } else {
+                needsScrollbar = false
             }
         } else {
             lastMax = (children.map { it.x + it.width }.max() - width)
             if (-lastMax - cutRight < -cutLeft / scrollDistance) {
+                needsScrollbar = true
                 offset = offset.between(-lastMax - cutRight, -cutLeft / scrollDistance)
                 children.forEach { it.x += offset }
+            } else {
+                needsScrollbar = false
             }
         }
     }
@@ -747,8 +758,10 @@ class CustomScrollableFlexBox(
         ScissorStack.popScissors()
 
         batch.flush()
-        if (this::scrollbarBackground.isInitialized) scrollbarBackground.draw(batch, alpha)
-        if (this::scrollbarHandle.isInitialized) scrollbarHandle.draw(batch, alpha)
+        if (needsScrollbar) {
+            if (this::scrollbarBackground.isInitialized) scrollbarBackground.draw(batch, alpha)
+            if (this::scrollbarHandle.isInitialized) scrollbarHandle.draw(batch, alpha)
+        }
     }
 
     private fun drawBackgroundStretched(
