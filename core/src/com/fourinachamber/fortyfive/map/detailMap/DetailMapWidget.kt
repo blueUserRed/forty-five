@@ -12,7 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -139,12 +138,19 @@ class DetailMapWidget(
             val screenDragged = screenDragged
             this@DetailMapWidget.screenDragged = false
             if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
-            if (movePlayerTo != null) {
-                skipPlayerAnimation()
-                return
+            pointToNode?.let {
+                if (moveToNextNode(it)) return
             }
-            pointToNode?.let { goToNode(it) }
         }
+    }
+
+    fun moveToNextNode(mapNode: MapNode): Boolean {
+        if (movePlayerTo != null) {
+            skipPlayerAnimation()
+            return true
+        }
+        goToNode(mapNode)
+        return false
     }
 
     init {
@@ -152,6 +158,7 @@ class DetailMapWidget(
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
+        map.curDetailMapWidget = this
     }
 
     private fun onStartButtonClicked() {

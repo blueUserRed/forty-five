@@ -29,6 +29,8 @@ data class DetailMap(
     val decorations: List<MapDecoration>
 ) {
 
+    lateinit var curDetailMapWidget:DetailMapWidget
+
     /**
      * all unique nodes on the map
      */

@@ -59,7 +59,7 @@ var personWidget = $PersonWidget {
     ],
 };
 
-var cardsWidgetTextChild = $Image {       //TODO biome for background
+var cardsWidgetTextChild = $Image {
 
     name: "background_img",
     textureName: "shop_background_no_biome",

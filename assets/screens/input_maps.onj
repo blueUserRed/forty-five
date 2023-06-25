@@ -212,4 +212,32 @@ gameInputMap: [
         action: $DeselectAllKeyAction { }
     },
 
-]
+],
+
+detailMapInputMap: [
+    {
+        keycode: keys.A,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"left",
+        }
+    },{
+        keycode: keys.S,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"down",
+        }
+    },{
+        keycode: keys.W,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"up",
+        }
+    },{
+        keycode: keys.D,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"right",
+        }
+    },
+],

@@ -391,6 +391,9 @@ $KeyAction {
 
     $FireClickEventKeyAction { }
 
+    $MoveInDetailMapKeyAction {
+        direction: string
+    }
 }
 
 viewport: $Viewport,
