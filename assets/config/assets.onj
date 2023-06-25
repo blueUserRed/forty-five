@@ -336,7 +336,7 @@ ninepatches: [
         bottom: 24,
         left: 24,
         right: 24,
-        scale: 0.01
+        scale: 0.04
     }
 ],
 
