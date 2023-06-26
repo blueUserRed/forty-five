@@ -105,7 +105,7 @@ object FortyFive : Game() {
         }
         TemplateString.init()
         FortyFiveLogger.init()
-        resetAllSync()
+//        resetAllSync()
         newRunSync()
         SaveState.read()
         MapManager.init()

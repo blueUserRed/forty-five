@@ -47,6 +47,23 @@ $DecorationDistributionFunction {
         onlyCollidesWithNodes: boolean
     }
 
+    $SingleClusterDistributionFunction{
+        decoration: string,
+        density: float,
+        baseWidth: float,
+        baseHeight: float,
+        scaleMin: float,
+        scaleMax: float,
+        onlyCollidesWithNodes: boolean,
+        minCenterX?: Float,
+        maxCenterX?: Float,
+        minCenterY?: Float,
+        maxCenterY?: Float,
+        innerRadius: Float,
+        outerRadius: Float,
+        nbrOfInnerPoints: Int,
+        nbrOfOuterPoints: Int,
+    }
 }
 
 var mapRestrictions = {

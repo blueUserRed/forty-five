@@ -29,7 +29,6 @@ data class MapNode(
             val ang = Line(Vector2(it.x, it.y), Vector2(x, y)).ang()
             it to min(min(abs(dir.getAngle() - ang), abs(dir.getAngle() + 2 * PI.toFloat() - ang)),abs(dir.getAngle() - 2 * PI.toFloat() - ang))
         }.minBy { it.second }
-        println(possibleNode)
         if (possibleNode.second > Math.PI/2) return null
         return possibleNode.first
     }
@@ -172,7 +171,6 @@ data class MapNodeBuilder(
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
         }
-        println(dirNodes.contentToString())
         return asNode!!
     }
 

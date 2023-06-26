@@ -11,6 +11,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
+import java.util.*
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -776,7 +777,7 @@ enum class Direction {
         }
 
         override fun getAngle(): Float {
-            return Math.PI.toFloat()/2
+            return Math.PI.toFloat() / 2
         }
 
 
@@ -788,8 +789,9 @@ enum class Direction {
         override fun getOpposite(): Direction {
             return UP
         }
+
         override fun getAngle(): Float {
-            return Math.PI.toFloat()*3/2
+            return Math.PI.toFloat() * 3 / 2
         }
 
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
@@ -905,7 +907,8 @@ sealed class DecorationDistributionFunction(
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
             yRange: ClosedFloatingPointRange<Float>,
-            restrict: MapRestriction
+            restrict: MapRestriction,
+            rnd: kotlin.random.Random,
         ): List<Vector2> {
             val positions: MutableList<Vector2> = mutableListOf()
             var pointsLeft: Int = ((xRange.endInclusive - xRange.start) / baseWidth
@@ -916,6 +919,104 @@ sealed class DecorationDistributionFunction(
             }
             return positions
         }
+    }
+
+
+    class SingleCluster(
+        seed: Long,
+        type: String,
+        density: Float,
+        baseWidth: Float,
+        baseHeight: Float,
+        scaleMin: Float,
+        scaleMax: Float,
+        collidesOnlyWithNodes: Boolean,
+        private val minCenterX: Float?,
+        private val maxCenterX: Float?,
+        private val minCenterY: Float?,
+        private val maxCenterY: Float?,
+        private val innerRadius: Float,
+        private val outerRadius: Float,
+        private val nbrOfInnerPoints: Int,
+        private val nbrOfOuterPoints: Int,
+    ) : DecorationDistributionFunction(
+        seed,
+        type,
+        density,
+        baseWidth,
+        baseHeight,
+        scaleMin,
+        scaleMax,
+        collidesOnlyWithNodes
+    ) {
+        override fun getPossiblePositions(
+            xRange: ClosedFloatingPointRange<Float>,
+            yRange: ClosedFloatingPointRange<Float>,
+            restrict: MapRestriction,
+            rnd: kotlin.random.Random,
+        ): List<Vector2> {
+            val positions: MutableList<Vector2> = mutableListOf()
+            val center = getCenter(xRange, yRange, rnd)
+
+            val borders = sequence {
+                for (i in 0 until nbrOfOuterPoints) {
+                    val ang: Double = (rnd.nextDouble() / nbrOfOuterPoints + (i + 0.0) / nbrOfOuterPoints) * Math.PI * 2
+                    val len = rnd.nextDouble() * (outerRadius - innerRadius) + innerRadius
+                    yield(Vector2((center.x + cos(ang) * len).toFloat(), (center.y + sin(ang) * len).toFloat()))
+                }
+            }.take(nbrOfInnerPoints).toList().toTypedArray()
+
+            val centers = sequence {
+                for (i in 0 until nbrOfInnerPoints) {
+                    val ang: Double = (rnd.nextDouble() / nbrOfOuterPoints + (i + 0.0) / nbrOfOuterPoints) * Math.PI * 2
+                    val len = rnd.nextDouble() * (innerRadius)
+                    yield(Vector2((center.x + cos(ang) * len).toFloat(), (center.y + sin(ang) * len).toFloat()))
+                }
+            }.take(nbrOfInnerPoints).toList().toTypedArray()
+
+            for (i in 0 until ((outerRadius * outerRadius * PI) / (baseWidth * baseHeight) * density).toInt()) {
+                val ang = rnd.nextDouble() * Math.PI * 2
+                val len = sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble()))
+                val posPos = Vector2(
+                    (center.x + cos(ang) * len).toFloat(),
+                    (center.y + sin(ang) * len).toFloat()
+                )
+                val distances: Array<Float> = isLegalPos(posPos, centers, borders)
+                if (distances.isNotEmpty()) {
+                    if (rnd.nextDouble() < max(-distances[0] / distances[1] + 1.4, 1.0))
+                        positions.add(posPos)
+                }
+            }
+            return positions
+        }
+
+        private fun isLegalPos(posPos: Vector2, centers: Array<Vector2>, borders: Array<Vector2>): Array<Float> {
+            val closestCenter = centers.minOf { posPos.clone().sub(it).len() }
+            var closestBorder = Float.MAX_VALUE
+            for (border in borders) {
+                val dist: Float = posPos.clone().sub(border).len()
+                if (dist < closestCenter) return arrayOf()
+                if (dist < closestBorder) closestBorder = dist
+            }
+            return arrayOf(closestCenter, closestBorder)
+        }
+
+        private fun getCenter(
+            xRange: ClosedFloatingPointRange<Float>,
+            yRange: ClosedFloatingPointRange<Float>,
+            rnd: kotlin.random.Random
+        ): Vector2 {
+            val center = Vector2()
+            val minX = minCenterX ?: (xRange.start + innerRadius)
+            val minY = minCenterY ?: (yRange.start + innerRadius)
+            val maxX = maxCenterX ?: (xRange.endInclusive - innerRadius)
+            val maxY = maxCenterY ?: (yRange.endInclusive - innerRadius)
+            if (minX < maxX) center.x = (minX..maxX).random(rnd)
+            else center.x = xRange.random(rnd)
+            if (minX < maxX) center.y = (minY..maxY).random(rnd)
+            else center.y = yRange.random(rnd)
+            return center
+        }
 
     }
 
@@ -923,7 +1024,8 @@ sealed class DecorationDistributionFunction(
     abstract fun getPossiblePositions(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>,
-        restrict: MapRestriction
+        restrict: MapRestriction,
+        rnd: kotlin.random.Random,
     ): List<Vector2>
 
     fun getDecoration(
@@ -933,9 +1035,10 @@ sealed class DecorationDistributionFunction(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
-//        nodes.forEach { println(it.x.toString() + ", " + it.y + ", " + it.edgesTo.size) }
         val possiblePositions: List<Pair<Vector2, Float>> =
-            getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
+            getPossiblePositions(xRange, yRange, restrictions, rnd)
+                .filter { xRange.contains(it.x) && yRange.contains(it.y) }
+                .map { it to (scaleMin..scaleMax).random(rnd) }
         return DetailMap.MapDecoration(
             type,
             baseWidth,
@@ -1022,7 +1125,27 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("scaleMax").toFloat(),
                 onj.get<Boolean>("onlyCollidesWithNodes"),
             )
-        }
+        },
+        "SingleClusterDistributionFunction" to { onj, seed ->
+            DecorationDistributionFunction.SingleCluster(
+                seed,
+                onj.get<String>("decoration"),
+                onj.get<Double>("density").toFloat(),
+                onj.get<Double>("baseWidth").toFloat(),
+                onj.get<Double>("baseHeight").toFloat(),
+                onj.get<Double>("scaleMin").toFloat(),
+                onj.get<Double>("scaleMax").toFloat(),
+                onj.get<Boolean>("onlyCollidesWithNodes"),
+                onj.get<Double?>("minCenterX")?.toFloat(),
+                onj.get<Double?>("maxCenterX")?.toFloat(),
+                onj.get<Double?>("minCenterY")?.toFloat(),
+                onj.get<Double?>("maxCenterY")?.toFloat(),
+                onj.get<Double>("innerRadius").toFloat(),
+                onj.get<Double>("outerRadius").toFloat(),
+                onj.get<Long>("nbrOfInnerPoints").toInt(),
+                onj.get<Long>("nbrOfOuterPoints").toInt(),
+            )
+        },
     )
 
     fun get(onj: OnjNamedObject, seed: Long): DecorationDistributionFunction =

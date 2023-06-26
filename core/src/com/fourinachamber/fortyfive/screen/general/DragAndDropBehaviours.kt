@@ -99,33 +99,11 @@ class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject
     }
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        println("Person drag")
 
         if (payload == null) return
-        println("Person drag2")
 
         val obj = payload.obj as CardDragAndDropPayload
         obj.onBuy()
-    }
-
-}
-
-class ShopBuyDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    DropBehaviour(dragAndDrop, actor, onj) {
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean {
-        println("Now dragging something")
-        return true
-    }
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        println("Now dropped something")
-        println(source?.actor)
     }
 
 }
