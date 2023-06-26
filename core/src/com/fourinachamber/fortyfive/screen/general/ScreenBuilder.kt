@@ -52,6 +52,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
+    private val templateObjects: MutableList<OnjNamedObject> = mutableListOf()
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -61,6 +62,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         readAssets(onj)
         doOptions(onj)
+        doTemplates(onj)
 
         val screen = OnjScreen(
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
@@ -103,6 +105,16 @@ class ScreenBuilder(val file: FileHandle) {
         return screen
     }
 
+    private fun doTemplates(onj: OnjObject) {
+        onj.ifHas<OnjArray>("templates") {
+            for (a in it.value) {
+                a as OnjNamedObject
+                templateObjects.add(a)
+            }
+        }
+        println(templateObjects)
+    }
+
     private fun doOptions(onj: OnjObject) {
         val options = onj.get<OnjObject>("options")
         options.ifHas<String>("background") {
@@ -133,7 +145,6 @@ class ScreenBuilder(val file: FileHandle) {
             toBorrow.addAll(cardResources)
             toBorrow.add(ResourceManager.cardAtlasResourceHandle)
         }
-
         borrowed = toBorrow
     }
 
@@ -190,6 +201,24 @@ class ScreenBuilder(val file: FileHandle) {
         else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
 
     }
+
+    /*
+        fun generateTemplateWidget(
+            widgetOnj: OnjNamedObject,
+            parent: FlexBox,
+            screen: OnjScreen,
+        ): Actor = when (widgetOnj.name) {
+            "Image" -> CustomImageActor(
+                widgetOnj.getOr<String?>("textureName", null),
+                screen,
+                widgetOnj.getOr("partOfSelectionHierarchy", false)
+            ).apply {
+                applyImageKeys(this, widgetOnj)
+            }
+
+            else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
+        }
+    */
 
     private fun getWidget(
         widgetOnj: OnjNamedObject,
