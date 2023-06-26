@@ -6,6 +6,16 @@ var mapEventStandardConfig = {
     isCompleted: boolean
 };
 
+var distributionFunctionStandardConfig = {
+    decoration: string,
+    density: float,
+    baseWidth: float,
+    baseHeight: float,
+    scaleMin: float,
+    scaleMax: float,
+    onlyCollidesWithNodes: boolean
+};
+
 $MapEvent {
 
     $EmptyMapEvent { }
@@ -35,26 +45,15 @@ $MapEvent {
 
 }
 
+
 $DecorationDistributionFunction {
 
     $RandomDistributionFunction {
-        decoration: string,
-        density: float,
-        baseWidth: float,
-        baseHeight: float,
-        scaleMin: float,
-        scaleMax: float,
-        onlyCollidesWithNodes: boolean
+        ...distributionFunctionStandardConfig,
     }
 
     $SingleClusterDistributionFunction{
-        decoration: string,
-        density: float,
-        baseWidth: float,
-        baseHeight: float,
-        scaleMin: float,
-        scaleMax: float,
-        onlyCollidesWithNodes: boolean,
+        ...distributionFunctionStandardConfig,
         minCenterX?: Float,
         maxCenterX?: Float,
         minCenterY?: Float,
@@ -63,6 +62,13 @@ $DecorationDistributionFunction {
         outerRadius: Float,
         nbrOfInnerPoints: Int,
         nbrOfOuterPoints: Int,
+    }
+
+    $MultiClusterDistributionFunction {
+        ...distributionFunctionStandardConfig,
+        blockSize: float,
+        prob: float,
+        additionalProbIfNei: float,
     }
 }
 

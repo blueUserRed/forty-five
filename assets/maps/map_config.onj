@@ -70,7 +70,7 @@ generatorConfig: {
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
-                rotation: 1.0,
+                rotation: 1.5,
                 fixedEvents: [
                 ],
                 optionalEvents: [
@@ -107,21 +107,20 @@ generatorConfig: {
 //                        scaleMax: 2.5,
 //                        onlyCollidesWithNodes: false
 //                    },
-                    $SingleClusterDistributionFunction {
+                    $MultiClusterDistributionFunction {
                         decoration: "map_decoration_cactus",
-                        density: 0.1,
+                        density: 4.9,
                         baseWidth: 2.0,
                         baseHeight: 4.0,
                         scaleMin: 1.5,
                         scaleMax: 2.5,
-                        innerRadius: 20.0,
-                        outerRadius: 80.0,
-                        nbrOfInnerPoints: 7,
-                        nbrOfOuterPoints: 15,
+                        blockSize: 20.0,
+                        prob: 0.2,
+                        additionalProbIfNei: 0.1,
                         onlyCollidesWithNodes: false
                     },
                 ],
-                decorationSeed: 230789230789407892340,
+                decorationSeed: 230789230789407892342,
                 decorationPadding: 40.0
             },
         },
