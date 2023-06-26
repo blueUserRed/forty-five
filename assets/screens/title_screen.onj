@@ -38,7 +38,6 @@ viewport: $FitViewport {
 
 options: {
     background: "title_screen_background",
-    postProcessor: "film_shader",
     inputMap: [
         ...(inputMaps.hierarchyBasedNavigationInputMap),
         ...(inputMaps.defaultInputMap)
@@ -109,7 +108,7 @@ root: $Box {
             partOfSelectionHierarchy: true,
             behaviours: [
                 $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/expensive_to_load_screen.onj"
+                    screenPath: "screens/map_screen.onj"
                 }
             ]
         },
