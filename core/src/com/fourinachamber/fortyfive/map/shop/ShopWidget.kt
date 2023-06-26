@@ -171,7 +171,6 @@ class ShopWidget(
     }
 
     private fun applyChancesEffect(selector: OnjNamedObject, effect: OnjNamedObject) {
-        println("" + selector + effect.name)
         val cardsToChange: List<String> = allCards.filter {
             (if (selector.name == "ByName") it.name == selector.get<String>("name") else it.tags.contains(
                 selector.get<String>("name")
