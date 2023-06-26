@@ -58,7 +58,6 @@ class SeededMapGenerator(
 
     private fun generateDecorations(
         nodes: List<MapNodeBuilder>,
-//        connections: MutableList<Line>
     ): List<DetailMap.MapDecoration> {
         val connections = getUniqueLinesFromNodes(nodes)
         val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
@@ -73,14 +72,21 @@ class SeededMapGenerator(
     }
 
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
-        val nodesWithoutEvents: MutableList<MapNodeBuilder> = nodes.filter { a -> a.event == null }.toMutableList()
-        for (curEvent in restrictions.fixedEvents) {
-            if (nodesWithoutEvents.isEmpty()) {
-                break
+        val nodesWithoutEvents = nodes.filter { a -> a.event == null }.toMutableList()
+        val deadEndsWithoutEvents = nodesWithoutEvents.filter { it.edgesTo.size == 1 }.toMutableList()
+        val sortedFixedEvents = restrictions.fixedEvents.sortedBy { !it.second }
+        nodesWithoutEvents.removeAll(deadEndsWithoutEvents)
+        for (curEvent in sortedFixedEvents) {
+            if (nodesWithoutEvents.isEmpty() && deadEndsWithoutEvents.isEmpty()) break
+            if ((curEvent.second && deadEndsWithoutEvents.isNotEmpty()) || nodesWithoutEvents.isEmpty()) {
+                val curNode = deadEndsWithoutEvents.random(rnd)
+                curNode.event = curEvent.first
+                deadEndsWithoutEvents.remove(curNode)
+            } else {
+                val curNode = nodesWithoutEvents.random(rnd)
+                curNode.event = curEvent.first
+                nodesWithoutEvents.remove(curNode)
             }
-            val curNode = nodesWithoutEvents.random(rnd)
-            curNode.event = curEvent
-            nodesWithoutEvents.remove(curNode)
         }
         val maxWeight: Int = restrictions.optionalEvents.sumOf { a -> a.first }
         val allWeightEnds = mutableListOf<Double>()
@@ -1021,7 +1027,7 @@ sealed class DecorationDistributionFunction(
     }
 
 
-    class MultiCluster(    //TODO finish this
+    class MultiCluster(
         seed: Long,
         type: String,
         density: Float,
@@ -1054,9 +1060,10 @@ sealed class DecorationDistributionFunction(
                     * (yRange.endInclusive - yRange.start) / baseHeight * density).toInt()
             val width = xRange.endInclusive - xRange.start
             val height = yRange.endInclusive - yRange.start
-            val size = max(width / blockSize, height / blockSize).toInt() + 1 //TODO maybe seperate into 2 variables to be more efficient
+            val size: Int = max(width / blockSize, height / blockSize).toInt() + 1
+            //TODO maybe separate into 2 variables to be more efficient
             val all: Array<MyBlock> = sequence {
-                for (i in 0 until (width.toInt() / blockSize * (height / blockSize).toInt()).toInt()) {
+                for (i in 0 until (size * size)) {
                     yield(
                         MyBlock(
                             Vector2(
@@ -1073,13 +1080,8 @@ sealed class DecorationDistributionFunction(
 
             while (allPos.size > 0) {
                 val i = allPos[(rnd.nextDouble() * allPos.size).toInt()]
-                all[i].setIsForest(
-                    rnd.nextDouble() < prob + (if (isNeiCluster(
-                            all,
-                            i,
-                            blockSize
-                        )
-                    ) additionalProbIfNei else 0F)
+                all[i].setIsCluster(
+                    rnd.nextDouble() < prob + (if (isNeiCluster(all, i, blockSize)) additionalProbIfNei else 0F)
                 )
                 allPos.remove(i)
             }
@@ -1097,7 +1099,7 @@ sealed class DecorationDistributionFunction(
 
         private fun isNeiCluster(all: Array<MyBlock>, i: Int, blockSize: Float): Boolean {
             for (b in all) {
-                if (b.isForest && b.pos.clone().sub(all[i].pos).len() < blockSize * 2) {
+                if (b.isCluster && b.pos.clone().sub(all[i].pos).len() < blockSize * 2) {
                     return true
                 }
             }
@@ -1111,16 +1113,16 @@ sealed class DecorationDistributionFunction(
                 val cur: Float = b.pos.clone().sub(pos).len()
                 if (cur < curDist) {
                     curDist = cur
-                    curIsForest = b.isForest
+                    curIsForest = b.isCluster
                 }
             }
             return curIsForest
         }
 
         internal class MyBlock(var pos: Vector2) {
-            var isForest = false
-            fun setIsForest(isForest: Boolean) {
-                this.isForest = isForest
+            var isCluster = false
+            fun setIsCluster(isForest: Boolean) {
+                this.isCluster = isForest
             }
         }
     }
@@ -1331,12 +1333,15 @@ data class MapRestriction(
      */
     val rotation: Double,
 
-    val fixedEvents: List<MapEvent>,
+    /**
+     * the boolean means if it is a dead End
+     */
+    val fixedEvents: List<Pair<MapEvent, Boolean>>,
     val optionalEvents: List<Pair<Int, () -> MapEvent>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
-    val pathTotalWidth: Float = 7F,  //TODO add onj parameter
-    val minDistanceBetweenNodes: Float = 5F, //TODO add onj parameter
+    val pathTotalWidth: Float = 7F,
+    val minDistanceBetweenNodes: Float = 5F,
 ) {
 
 
@@ -1363,8 +1368,8 @@ data class MapRestriction(
             otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
             fixedEvents = onj
                 .get<OnjArray>("fixedEvents")
-                .value
-                .map { MapEventFactory.getMapEvent(it as OnjNamedObject) },
+                .value.map { it as OnjObject }
+                .map { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) to it.get<Boolean>("isDeadEnd") },
             optionalEvents = onj
                 .get<OnjArray>("optionalEvents")
                 .value
@@ -1382,7 +1387,9 @@ data class MapRestriction(
                         decoration,
                         onj.get<Long>("decorationSeed") * 289708 * index
                     )
-                }
+                },
+            minDistanceBetweenNodes = onj.get<Double>("minDistanceBetweenNodes").toFloat(),
+            pathTotalWidth = onj.get<Double>("pathTotalWidth").toFloat(),
         )
     }
 }
