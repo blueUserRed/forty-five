@@ -11,7 +11,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
-import java.util.*
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -976,7 +975,8 @@ sealed class DecorationDistributionFunction(
 
             for (i in 0 until ((outerRadius * outerRadius * PI) / (baseWidth * baseHeight) * density).toInt()) {
                 val ang = rnd.nextDouble() * Math.PI * 2
-                val len = sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble()))
+                val len =
+                    sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble())) //TODO maybe log or so for better distribution
                 val posPos = Vector2(
                     (center.x + cos(ang) * len).toFloat(),
                     (center.y + sin(ang) * len).toFloat()
@@ -1020,7 +1020,111 @@ sealed class DecorationDistributionFunction(
 
     }
 
-    //TODO add Class for "clusters" (fe forests) only
+
+    class MultiCluster(    //TODO finish this
+        seed: Long,
+        type: String,
+        density: Float,
+        baseWidth: Float,
+        baseHeight: Float,
+        scaleMin: Float,
+        scaleMax: Float,
+        collidesOnlyWithNodes: Boolean,
+        private val blockSize: Float,
+        private val prob: Float,
+        private val additionalProbIfNei: Float
+    ) : DecorationDistributionFunction(
+        seed,
+        type,
+        density,
+        baseWidth,
+        baseHeight,
+        scaleMin,
+        scaleMax,
+        collidesOnlyWithNodes
+    ) {
+        override fun getPossiblePositions(
+            xRange: ClosedFloatingPointRange<Float>,
+            yRange: ClosedFloatingPointRange<Float>,
+            restrict: MapRestriction,
+            rnd: kotlin.random.Random,
+        ): List<Vector2> {
+            val positions: MutableList<Vector2> = mutableListOf()
+            val pointsToTry: Int = ((xRange.endInclusive - xRange.start) / baseWidth
+                    * (yRange.endInclusive - yRange.start) / baseHeight * density).toInt()
+            val width = xRange.endInclusive - xRange.start
+            val height = yRange.endInclusive - yRange.start
+            val size = max(width / blockSize, height / blockSize).toInt() + 1 //TODO maybe seperate into 2 variables to be more efficient
+            val all: Array<MyBlock> = sequence {
+                for (i in 0 until (width.toInt() / blockSize * (height / blockSize).toInt()).toInt()) {
+                    yield(
+                        MyBlock(
+                            Vector2(
+                                (i / size * blockSize + rnd.nextDouble() * blockSize).toFloat(),
+                                (i % size * blockSize + rnd.nextDouble() * blockSize).toFloat()
+                            )
+                        )
+                    )
+                }
+            }.toList().toTypedArray()
+
+            val allPos: MutableList<Int> = ArrayList()
+            for (i in all.indices) allPos.add(i)
+
+            while (allPos.size > 0) {
+                val i = allPos[(rnd.nextDouble() * allPos.size).toInt()]
+                all[i].setIsForest(
+                    rnd.nextDouble() < prob + (if (isNeiCluster(
+                            all,
+                            i,
+                            blockSize
+                        )
+                    ) additionalProbIfNei else 0F)
+                )
+                allPos.remove(i)
+            }
+            val t0 = System.currentTimeMillis()
+            for (i in 0 until pointsToTry) {
+                val pos = Vector2((rnd.nextDouble() * width).toFloat(), (rnd.nextDouble() * height).toFloat())
+                if (isPlaceable(pos, all)) {
+                    positions.add(pos.add(xRange.start, yRange.start))
+                }
+            }
+            println((System.currentTimeMillis() - t0).toString() + "ms")
+
+            return positions
+        }
+
+        private fun isNeiCluster(all: Array<MyBlock>, i: Int, blockSize: Float): Boolean {
+            for (b in all) {
+                if (b.isForest && b.pos.clone().sub(all[i].pos).len() < blockSize * 2) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        private fun isPlaceable(pos: Vector2, all: Array<MyBlock>): Boolean {
+            var curDist = Float.MAX_VALUE
+            var curIsForest = false
+            for (b in all) {
+                val cur: Float = b.pos.clone().sub(pos).len()
+                if (cur < curDist) {
+                    curDist = cur
+                    curIsForest = b.isForest
+                }
+            }
+            return curIsForest
+        }
+
+        internal class MyBlock(var pos: Vector2) {
+            var isForest = false
+            fun setIsForest(isForest: Boolean) {
+                this.isForest = isForest
+            }
+        }
+    }
+
     abstract fun getPossiblePositions(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>,
@@ -1146,12 +1250,26 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Long>("nbrOfOuterPoints").toInt(),
             )
         },
+        "MultiClusterDistributionFunction" to { onj, seed ->
+            DecorationDistributionFunction.MultiCluster(
+                seed,
+                onj.get<String>("decoration"),
+                onj.get<Double>("density").toFloat(),
+                onj.get<Double>("baseWidth").toFloat(),
+                onj.get<Double>("baseHeight").toFloat(),
+                onj.get<Double>("scaleMin").toFloat(),
+                onj.get<Double>("scaleMax").toFloat(),
+                onj.get<Boolean>("onlyCollidesWithNodes"),
+                onj.get<Double>("blockSize").toFloat(),
+                onj.get<Double>("prob").toFloat(),
+                onj.get<Double>("additionalProbIfNei").toFloat(),
+            )
+        },
     )
 
     fun get(onj: OnjNamedObject, seed: Long): DecorationDistributionFunction =
         functions[onj.name]?.invoke(onj, seed)
             ?: throw RuntimeException("unknown decoration distribution function: ${onj.name}")
-
 }
 
 /**
