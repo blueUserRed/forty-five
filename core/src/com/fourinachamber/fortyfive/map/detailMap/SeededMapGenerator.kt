@@ -69,7 +69,7 @@ class SeededMapGenerator(
             decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
         }
         return decos
-    }
+    }//auf main pushen?, templateWidgets?
 
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
         val nodesWithoutEvents = nodes.filter { a -> a.event == null }.toMutableList()
@@ -1085,15 +1085,12 @@ sealed class DecorationDistributionFunction(
                 )
                 allPos.remove(i)
             }
-            val t0 = System.currentTimeMillis()
             for (i in 0 until pointsToTry) {
                 val pos = Vector2((rnd.nextDouble() * width).toFloat(), (rnd.nextDouble() * height).toFloat())
                 if (isPlaceable(pos, all)) {
                     positions.add(pos.add(xRange.start, yRange.start))
                 }
             }
-            println((System.currentTimeMillis() - t0).toString() + "ms")
-
             return positions
         }
 

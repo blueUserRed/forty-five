@@ -146,7 +146,7 @@ object KeyActionFactory {
         },
 
         "MoveInDetailMap" to {
-            lambda@{ _ ->
+            lambda@{ screen ->
                 val targetNode = when (it.get<String>("direction")) {
                     "right" -> MapManager.currentMapNode.getEdge(Direction.RIGHT)
                     "left" -> MapManager.currentMapNode.getEdge(Direction.LEFT)
