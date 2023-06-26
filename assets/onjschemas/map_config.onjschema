@@ -90,13 +90,18 @@ var mapRestrictions = {
     percentageForAllowedNodesInRangeBetweenLineAndArea: float,
     rotation: float,
     otherAreas: string[],
-    fixedEvents: $MapEvent[],
+    fixedEvents: {
+        isDeadEnd: boolean,
+        event: $MapEvent
+    }[],
     optionalEvents: {
         weight: int,
         event: $MapEvent
     }[],
     decorationSeed: int,
-    decorations: $DecorationDistributionFunction[]
+    decorations: $DecorationDistributionFunction[],
+    pathTotalWidth: float,
+    minDistanceBetweenNodes: float,
 };
 
 mapImages: {

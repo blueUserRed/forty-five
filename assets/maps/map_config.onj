@@ -50,13 +50,11 @@ generatorConfig: {
     maps: [
         {
             name: "roadToSalem",
-            seed: 203,
+            seed: 103,
             restrictions: {
                 maxNodes: 10,
                 minNodes: 5,
-                //                maxSplits: 1,
-                maxSplits: 4,
-                //                splitProbability: 0.5,
+                maxSplits: 1,
                 splitProbability: 0.5,
                 compressProbability: 0.55,
                 averageLengthOfLineInBetween: 26.0,
@@ -70,18 +68,36 @@ generatorConfig: {
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
-                rotation: 1.5,
+                rotation: 1.25,
+                minDistanceBetweenNodes: 5.0,
+                pathTotalWidth: 7.5,
                 fixedEvents: [
-                ],
-                optionalEvents: [
                     {
-                        weight: 20,
+                        isDeadEnd: true,
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false
-                        }
+                        },
                     },
+                    {
+                        isDeadEnd: false,
+                        event: $EncounterMapEvent {
+                            currentlyBlocks: true,
+                            canBeStarted: true,
+                            isCompleted: false
+                        },
+                    },
+                ],
+                optionalEvents: [
+//                    {
+//                        weight: 20,
+//                        event: $EncounterMapEvent {
+//                            currentlyBlocks: true,
+//                            canBeStarted: true,
+//                            isCompleted: false
+//                        }
+//                    },
                     {
                         weight: 20,
                         event: $EmptyMapEvent {
@@ -98,6 +114,7 @@ generatorConfig: {
                         scaleMax: 1.2,
                         onlyCollidesWithNodes: false
                     },
+                    //
 //                    $RandomDistributionFunction {
 //                        decoration: "map_decoration_grass",
 //                        density: 0.01,
@@ -109,7 +126,7 @@ generatorConfig: {
 //                    },
                     $MultiClusterDistributionFunction {
                         decoration: "map_decoration_cactus",
-                        density: 4.9,
+                        density: 0.1,
                         baseWidth: 2.0,
                         baseHeight: 4.0,
                         scaleMin: 1.5,
@@ -119,9 +136,22 @@ generatorConfig: {
                         additionalProbIfNei: 0.1,
                         onlyCollidesWithNodes: false
                     },
+                    $SingleClusterDistributionFunction {
+                        decoration: "map_decoration_grass",
+                        density: 0.1,
+                        baseWidth: 3.0,
+                        baseHeight: 3.0,
+                        scaleMin: 3.5,
+                        scaleMax: 4.5,
+                        innerRadius: 20.0,
+                        outerRadius: 80.0,
+                        nbrOfInnerPoints: 7,
+                        nbrOfOuterPoints: 15,
+                        onlyCollidesWithNodes: false
+                    },
                 ],
                 decorationSeed: 230789230789407892342,
-                decorationPadding: 40.0
+                decorationPadding: 40.0,
             },
         },
         //        {
@@ -135,7 +165,8 @@ generatorConfig: {
 //                compressProbability: 0.55
 //            }
 //        }
-    ]
+
+    ],
 },
 
 
