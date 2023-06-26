@@ -37,7 +37,7 @@ object FortyFive : Game() {
         serviceThread.start()
         if (generateCards) runCardGenerator()
         if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
-        changeToScreen("screens/map_screen.onj")
+        changeToScreen("screens/title_screen.onj")
     }
 
     override fun render() {
@@ -118,7 +118,7 @@ object FortyFive : Game() {
     }
 
     override fun dispose() {
-        FortyFiveLogger.warn(logTag, "game closing")
+        FortyFiveLogger.debug(logTag, "game closing")
         MapManager.write()
         PermaSaveState.write()
         SaveState.write()
