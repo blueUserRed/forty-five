@@ -54,7 +54,7 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 10,
                 minNodes: 5,
-                maxSplits: 1,
+                maxSplits: 4,
                 splitProbability: 0.5,
                 compressProbability: 0.55,
                 averageLengthOfLineInBetween: 26.0,
@@ -69,7 +69,7 @@ generatorConfig: {
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
                 rotation: 1.25,
-                minDistanceBetweenNodes: 5.0,
+                minDistanceBetweenNodes: 15.0,
                 pathTotalWidth: 7.5,
                 fixedEvents: [
                     {

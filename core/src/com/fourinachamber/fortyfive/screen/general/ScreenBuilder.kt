@@ -112,7 +112,7 @@ class ScreenBuilder(val file: FileHandle) {
                 templateObjects.add(a)
             }
         }
-        println(templateObjects)
+//        println(templateObjects)
     }
 
     private fun doOptions(onj: OnjObject) {

@@ -59,8 +59,8 @@ var personWidget = $PersonWidget {
     ],
 };
 
-var cardsWidgetTextChild = $Image {
-
+/*var cardsWidgetTextChild = $Image {  //This comment as an example for scrollable FlexBox
+                                        //if used, be careful of shopWidget, as it uses some parameters which aren't here now
     name: "background_img",
     textureName: "shop_background_no_biome",
     scaleX: 0.0,
@@ -157,9 +157,9 @@ var cardsWidget = $ScrollBox {
     cardsWidgetTextChild,
     scrollBarBackground,
     scrollBar,
-];
+];*/
 
-/*var cardsWidget = $ShopWidget {
+var cardsWidget = $ShopWidget {
     name: "cards_widget",
     texture: "shop_items_background",
     dataFile: "cards/cards.onj",
@@ -178,7 +178,7 @@ var cardsWidget = $ScrollBox {
             height: 69.0#percent,
         }
     ],
-};*/
+};
 
 root: $Box {
     styles: [
