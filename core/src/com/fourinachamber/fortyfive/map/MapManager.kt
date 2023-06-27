@@ -42,7 +42,6 @@ object MapManager {
         )
         set(value) {
             SaveState.currentNode = value.index
-            println("updating currentNode to $value")
         }
 
     var lastMapNode: MapNode?

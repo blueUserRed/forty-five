@@ -5,6 +5,7 @@ import com.fourinachamber.fortyfive.screen.general.*
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
+import ktx.actors.alpha
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Actor
@@ -263,6 +264,26 @@ class AspectRatioStyleProperty<T>(
     override fun get(node: YogaNode): Float = node.aspectRatio
 }
 
+class AlphaStyleProperty<T>(
+    target: T,
+    screen: OnjScreen
+) : StyleProperty<T, Float>(
+    "alpha",
+    target,
+    0f,
+    Float::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor {
+
+    override fun set(data: Float, node: YogaNode) {
+        target.alpha = data
+    }
+
+    override fun get(node: YogaNode): Float = target.alpha
+}
+
 fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     val styleManager = styleManager!!
     styleManager.addStyleProperty(VisibleStyleProperty(this, screen))
@@ -274,6 +295,7 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(PositionTypeStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignSelfStyleProperty(this, screen))
     styleManager.addStyleProperty(AspectRatioStyleProperty(this, screen))
+    styleManager.addStyleProperty(AlphaStyleProperty(this, screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.TOP, "marginTop", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.LEFT, "marginLeft", screen))

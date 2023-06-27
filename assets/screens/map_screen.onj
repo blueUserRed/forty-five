@@ -92,6 +92,7 @@ var mapBox = $Box {
         screenSpeed: 2.5,
         backgroundScale: 0.05,
         leftScreenSideDeadSection: 10.0,
+        disabledDirectionIndicatorAlpha: 0.5,
         startButtonName: "start_button"
     },
 
@@ -145,12 +146,20 @@ var mapBox = $Box {
             styles: [
                 {
                     style_priority: 1,
-                    background: "map_detail_fight_button"
+                    background: "map_detail_fight_button",
+                    disabled: false,
+                    alpha: 1.0,
                 },
                 {
                     style_priority: 2,
                     background: "map_detail_fight_button_hover",
-                    style_condition: hover()
+                    style_condition: hover() and state("canStartEvent")
+                },
+                {
+                    style_priority: 3,
+                    style_condition: not(state("canStartEvent")),
+                    alpha: 0.5,
+                    disabled: true
                 }
             ],
             name: "start_button",

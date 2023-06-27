@@ -77,6 +77,11 @@ abstract class MapEvent {
     open val descriptionText: String = ""
 
     /**
+     * Short text that is displayed instead of [descriptionText] when the event was completed
+     */
+    open val completedDescriptionText: String = ""
+
+    /**
      * the name of the event that is displayed to the user
      */
     open val displayName: String = ""
@@ -144,6 +149,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
 
     override val icon: String = "normal_bullet"
     override val descriptionText: String = "Take on enemies and come out on top!"
+    override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
     init {

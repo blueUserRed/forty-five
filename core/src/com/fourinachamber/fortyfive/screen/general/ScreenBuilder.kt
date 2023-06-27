@@ -290,6 +290,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("background"),
             widgetOnj.get<Double>("screenSpeed").toFloat(),
             widgetOnj.get<Double>("backgroundScale").toFloat(),
+            widgetOnj.get<Double>("disabledDirectionIndicatorAlpha").toFloat(),
             widgetOnj.get<Double>("leftScreenSideDeadSection").toFloat(),
         )
 
@@ -319,6 +320,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("radius").toFloat(),
             widgetOnj.get<Double>("size").toFloat(),
             widgetOnj.get<String>("emptySlotTexture"),
+            widgetOnj.get<Double>("disabledAlpha").toFloat(),
             screen
           )
 
