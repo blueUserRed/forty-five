@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.DragAndDropBehaviourFactory
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.random
 import ktx.actors.alpha
 import onj.parser.OnjParser
@@ -49,7 +50,7 @@ class ShopWidget(
     }
 
 
-    fun addItems(//TODO Logger
+    fun addItems(
         seed: Long,
         boughtIndices: MutableList<Int>,
         dragAndDrop: DragAndDrop
@@ -57,7 +58,8 @@ class ShopWidget(
         this.boughtIndices = boughtIndices
         this.dragAndDrop = dragAndDrop
         val rnd = Random(seed)
-        val nbrOfItems = 12/*(5..8).random(rnd)*/
+        val nbrOfItems = (5..8).random(rnd)
+        FortyFiveLogger.debug(logTag, "Created $nbrOfItems items with seed $rnd")
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)
@@ -82,7 +84,7 @@ class ShopWidget(
         }
 
         for (i in 0..nbrOfItems * 2) {
-            val pos = (0 until  cards.size).random(rnd)
+            val pos = (0 until cards.size).random(rnd)
             val card = cards[pos]
             val label = priceTags[pos]
             cards.removeAt(pos)
@@ -146,6 +148,7 @@ class ShopWidget(
     fun checkAndBuy(card: Card) {
         SaveState.playerMoney -= card.price
         buyCard(cards.indexOf(card))
+        FortyFiveLogger.debug(logTag, "Bought card ${card.name} for a price of ${card.price}")
         SaveState.buyCard(card.name)
     }
 
@@ -202,6 +205,7 @@ class ShopWidget(
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
         }
         lateinit var curShopWidget: ShopWidget
+        const val logTag: String = "ShopWidget"
     }
 
 }
