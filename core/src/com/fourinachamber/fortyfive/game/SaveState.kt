@@ -56,6 +56,7 @@ object SaveState {
     var currentNode: Int = 0
         set(value) {
             field = value
+            println("updating current node to $value")
             savefileDirty = true
         }
 

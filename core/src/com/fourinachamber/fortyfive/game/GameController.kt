@@ -154,8 +154,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
         encounterMapEvent = context
-//        modifier = EncounterModifier.BewitchedMist // TODO: remove
-        SaveState.read()
         curScreen = onjScreen
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
@@ -566,12 +564,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     /**
-     * changes the game to the destroy phase
-     */
-    @MainThreadOnly
-    fun destroyCardPhase() = changeState(GameState.CardDestroy)
-
-    /**
      * destroys a card in the revolver
      */
     @MainThreadOnly
@@ -674,6 +666,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         gameDirector.end()
         FortyFiveLogger.title("game ends")
         FortyFive.currentGame = null
+        if (playerLost) FortyFive.newRun()
         SaveState.write()
     }
 
@@ -690,8 +683,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     private fun completeWin() {
         encounterMapEvent.completed()
-        MapManager.switchToMapScreen()
         SaveState.write()
+        MapManager.switchToMapScreen()
     }
 
     fun loose() {
