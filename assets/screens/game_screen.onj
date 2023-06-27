@@ -168,7 +168,7 @@ var reservesLabel = $TemplateLabel {
 
 var remainingTurnsLabel = $TemplateLabel {
     font: "red_wing",
-    template: "remaining turns: {game.remainingTurns} -- current evaluation {game.curEvaluation}",
+    template: "remaining turns: {game.remainingTurns} ",
     fontScale: 0.09,
     color: color.black,
 };
