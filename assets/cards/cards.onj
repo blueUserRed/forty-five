@@ -206,7 +206,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 5,
-        tags: ["rare"],
+        tags: ["common"],
         price: 90,
         type: $Bullet { }
     },
@@ -222,7 +222,7 @@ cards: [
         highlightType: "standard",
         effects: [ ],
         cost: 2,
-        tags: ["common"],
+        tags: ["rare"],
         price: 50,
         type: $Bullet { }
     },
@@ -238,7 +238,7 @@ cards: [
          highlightType: "standard",
          effects: [ ],
          cost: 0,
-         tags: ["common"],
+         tags: ["rare"],
          price: 50,
          type: $Bullet { }
     },
@@ -358,7 +358,7 @@ cards: [
         effects: [],
         cost: 2,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["common"],
         price: 50,
     },
 
