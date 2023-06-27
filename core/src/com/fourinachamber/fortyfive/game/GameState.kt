@@ -15,7 +15,7 @@ sealed class GameState {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
             if (remainingCardsToDraw == 0) executeTimeline(Timeline.timeline {
-                include(confirmationPopup("Hand reached maximum of $maxCards"))
+                include(maxCardsPopup())
                 action { changeState(Free) }
             }) else {
                 showCardDrawActor()
@@ -61,7 +61,7 @@ sealed class GameState {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in special draw: $remainingCardsToDraw")
             if (remainingCardsToDraw == 0) executeTimeline(Timeline.timeline {
-                include(confirmationPopup("Hand reached maximum of $maxCards"))
+                include(maxCardsPopup())
                 action { changeState(Free) }
             }) else {
                 showCardDrawActor()

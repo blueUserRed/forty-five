@@ -383,6 +383,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         executeTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
     }
 
+    fun maxCardsPopup(): Timeline = confirmationPopup("Hand reached maximum of $maxCards cards")
+
     fun confirmationPopup(text: String): Timeline = Timeline.timeline {
         action {
             curScreen.enterState(showPopupScreenState)

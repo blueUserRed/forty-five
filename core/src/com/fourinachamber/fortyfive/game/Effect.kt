@@ -261,8 +261,7 @@ abstract class Effect(val trigger: Trigger) {
                 addMax = gameController.maxCards - gameController.cardHand.cards.size
             }
             includeLater(
-                // TODO: put string in some central place
-                { gameController.confirmationPopup("Hand reached maximum of ${gameController.maxCards}") },
+                { gameController.maxCardsPopup() },
                 { addMax == 0 }
             )
             action {
@@ -283,7 +282,10 @@ abstract class Effect(val trigger: Trigger) {
             val controller = FortyFive.currentGame!!
             val modifier = Card.CardModifier(
                 0,
-                TemplateString("${card.name} applied everlasting!"), // TODO: GraphicsConfig
+                TemplateString(
+                    GraphicsConfig.rawTemplateString("protectDetailText"),
+                    mapOf("source" to card.title)
+                ),
                 true
             ) { card.inGame }
 
