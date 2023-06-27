@@ -58,8 +58,8 @@ class ShopWidget(
         this.boughtIndices = boughtIndices
         this.dragAndDrop = dragAndDrop
         val rnd = Random(seed)
-        val nbrOfItems = (5..8).random(rnd)
-        FortyFiveLogger.debug(logTag, "Created $nbrOfItems items with seed $rnd")
+        val nbrOfItems = 5/*(5..8).random(rnd)*/
+        FortyFiveLogger.debug(logTag, "Created $nbrOfItems items with seed $seed")
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)
