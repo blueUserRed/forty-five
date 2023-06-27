@@ -139,6 +139,7 @@ $Widget {
         screenSpeed: float,
         backgroundScale: float,
         leftScreenSideDeadSection: float,
+        disabledDirectionIndicatorAlpha: float,
         ...widgetSharedKeys
     }
 
@@ -179,6 +180,7 @@ $Widget {
         radius: float,
         size: float,
         emptySlotTexture: string,
+        disabledAlpha: float,
         ...widgetSharedKeys
     }
 

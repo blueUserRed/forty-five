@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.screen.general.PopupSelectionEvent
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import ktx.actors.alpha
 import ktx.actors.onClick
 import kotlin.math.cos
 import kotlin.math.sin
@@ -17,6 +18,7 @@ class CircularCardSelector(
     val radius: Float,
     val size: Float,
     val emptySlotTexture: ResourceHandle,
+    val disabledAlpha: Float,
     private val screen: OnjScreen
 ) : WidgetGroup(), StyledActor {
 
@@ -29,7 +31,7 @@ class CircularCardSelector(
         val dx = cos(angle) * radius
         val dy = sin(angle) * radius
         actor.setBounds(
-            x + width / 2 + dx.toFloat() + size,
+            x + width / 2 + dx.toFloat() + size * 1.5f,
             y + height / 2 + dy.toFloat() + size,
             size, size
         )
@@ -53,7 +55,12 @@ class CircularCardSelector(
         excludeIndices.clear()
         revolver.slots.forEachIndexed { index, slot ->
             val card = slot.card
-            if (card == exclude || card == null) excludeIndices.add(index)
+            if (card == exclude || card == null) {
+                excludeIndices.add(index)
+                cardActors[index].alpha = disabledAlpha
+            } else {
+                cardActors[index].alpha = 1.0f
+            }
             cardActors[index].backgroundHandle = card?.actor?.backgroundHandle ?: emptySlotTexture
         }
     }

@@ -176,11 +176,13 @@ var remainingTurnsLabel = $TemplateLabel {
 var disableStyles = [
     {
         style_priority: 1,
+        alpha: 1.0,
         disabled: false,
     },
     {
         style_priority: 2,
         style_condition: state("uiFrozen"),
+        alpha: 0.5,
         disabled: true
     }
 ];
@@ -237,26 +239,33 @@ var popupActor = $Box {
         ]
     },
 
-    $CircularCardSelector {
+    $Box {
         styles: [
             {
                 style_priority: 1,
-                visible: false,
-                width: 50#points,
-                height: 50#points,
+                detached: true,
             },
             {
                 style_priority: 2,
                 style_condition: state("showPopupCardSelector"),
-                visible: true
+                detached: false
             }
         ],
-        debug: true,
-        name: "card_selector",
-        emptySlotTexture: "grey_texture",
-        radius: 20.0,
-        size: 357.0 * 0.04
-    }
+    } children [
+        $CircularCardSelector {
+            styles: [
+                {
+                    width: 50#points,
+                    height: 50#points,
+                }
+            ],
+            name: "card_selector",
+            emptySlotTexture: "grey_texture",
+            disabledAlpha: 0.6,
+            radius: 20.0,
+            size: 357.0 * 0.04
+        }
+    ],
 
 ];
 
