@@ -9,6 +9,8 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import kotlin.math.abs
+import kotlin.math.floor
 import kotlin.properties.Delegates
 
 class GameDirector(private val controller: GameController) {
@@ -76,14 +78,15 @@ class GameDirector(private val controller: GameController) {
     private fun adjustDifficulty(): Double {
         if (controller.playerLost) return difficulty // Too late to adjust difficulty of enemy lol
         val usedTurns = controller.turnCounter
-        val targetTurn = turns * (4f / 5f)
+        val targetTurn = floor(turns * (4f / 5f))
         val enemyHealth = enemy.health
         val enemyHealthPerTurn = enemyProto.baseHealthPerTurn * difficulty
         val enemyBaseHealthPerTurn = enemyProto.baseHealthPerTurn
 
-        // TODO: consider overkill-damage
+        val overkillDamage = enemy.currentHealth
+        val additionalTurns = floor(abs(overkillDamage) / enemyHealthPerTurn)
 
-        val turnDiff = usedTurns - targetTurn
+        val turnDiff = usedTurns - additionalTurns - targetTurn
         val idealHealth = enemyHealth - enemyHealthPerTurn * turnDiff
         val baseHealth = enemyBaseHealthPerTurn * turns
         val idealDifficulty = idealHealth / baseHealth

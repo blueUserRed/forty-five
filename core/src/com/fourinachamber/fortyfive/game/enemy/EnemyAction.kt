@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.value.OnjNamedObject
@@ -24,7 +25,7 @@ sealed class EnemyAction {
                 val cardAmount = cardHand.cards.size
                 amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
                 text = TemplateString(
-                    rawText,
+                    GraphicsConfig.rawTemplateString("destroyCardsInHand"),
                     mapOf("amount" to amountToDestroy, "s" to if (amountToDestroy == 1) "s" else "")
                 ).string
             }
@@ -38,10 +39,6 @@ sealed class EnemyAction {
                 }
             }
         }
-
-        companion object {
-            private const val rawText: String = "Haha! Now I'm going to destroy {amount} card{s} in your hand!"
-        }
     }
 
     class RevolverRotation(val maxTurnAmount: Int) : EnemyAction() {
@@ -54,7 +51,11 @@ sealed class EnemyAction {
                 GameController.RevolverRotation.Left(amount)
             }
             val text = TemplateString(
-                if (amount == 1) rawText1Rot else rawTextMoreRot,
+                if (amount == 1) {
+                    GraphicsConfig.rawTemplateString("revolverRotation1Rot")
+                } else {
+                    GraphicsConfig.rawTemplateString("revolverRotationMoreRot")
+                },
                 mapOf("direction" to rotation::class.simpleName!!.lowercase(), "amount" to amount)
             ).string
             include(controller.confirmationPopup(text))
@@ -63,20 +64,13 @@ sealed class EnemyAction {
 
         override fun applicable(controller: GameController): Boolean = true
 
-        companion object {
-            // TODO: move in GraphicsConfig
-            private const val rawText1Rot: String = "Haha! Now I'm going to move you revolver to the {direction}"
-            private const val rawTextMoreRot: String =
-                "Haha! Now I'm going to move you revolver {amount} times to the {direction}"
-        }
-
     }
 
     object ReturnCardToHand : EnemyAction() {
 
         override fun getTimeline(controller: GameController): Timeline = Timeline.timeline {
             include(controller.confirmationPopup(
-                "Haha! Now I'm going to put one card from your revolver into your hand"
+                GraphicsConfig.rawTemplateString("returnCardToHand")
             ))
             action {
                 val card = controller

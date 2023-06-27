@@ -36,15 +36,6 @@ numberChangeAnimation: {
     sinkDistance: float,
 },
 
-bannerAnimation: {
-     duration: float,
-     scaleAnimDuration: float,
-     beginScale: float,
-     endScale: float,
-     playerTurnBanner: string,
-     enemyTurnBanner: string,
-},
-
 var statusIconConfig = {
     icon: string,
     scale: float
@@ -63,6 +54,11 @@ stringTemplates:  {
     rottenDetailText: string,
     buffDetailText: string,
     giftDetailText: string,
+    protectDetailText: string,
+    revolverRotation1Rot: string,
+    revolverRotationMoreRot: string,
+    returnCardToHand: string,
+    destroyCardsInHand: string,
 },
 
 damageOverlay: {
