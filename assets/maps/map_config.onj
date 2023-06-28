@@ -62,19 +62,23 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 14,
                 minNodes: 8,
-//                maxSplits: 1,
+                //                maxSplits: 1,
+
                 maxSplits: 4,
-//                splitProbability: 0.5,
+                //                splitProbability: 0.5,
+
                 splitProbability: 0.6,
                 compressProbability: 0.2,
-//                compressProbability: 0.55,
+                //                compressProbability: 0.55,
+
                 averageLengthOfLineInBetween: 26.0,
                 maxWidth: 40,
                 maxAnglePercent: 0.6,
                 rangeToCheckBetweenNodes: 0.6,
                 startArea: "test_area",
                 endArea: "salem",
-                otherAreas: [],
+                otherAreas: [
+                ],
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
@@ -115,7 +119,8 @@ generatorConfig: {
                     },
                     {
                         weight: 10,
-                        event: $EmptyMapEvent { }
+                        event: $EmptyMapEvent {
+                        }
                     }
                 ],
                 decorations: [
@@ -174,11 +179,14 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 25,
                 minNodes: 20,
-//                maxSplits: 1,
+                //                maxSplits: 1,
+
                 maxSplits: 6,
-//                splitProbability: 0.5,
+                //                splitProbability: 0.5,
+
                 splitProbability: 0.4,
-//                compressProbability: 0.2,
+                //                compressProbability: 0.2,
+
                 compressProbability: 0.55,
                 averageLengthOfLineInBetween: 26.0,
                 maxWidth: 40,
@@ -186,18 +194,25 @@ generatorConfig: {
                 rangeToCheckBetweenNodes: 0.6,
                 startArea: "salem",
                 endArea: "salem",
-                otherAreas: [],
+                otherAreas: [
+                ],
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
                 rotation: 0.0,
+                minDistanceBetweenNodes: 15.0,
+                pathTotalWidth: 7.5,
                 fixedEvents: [
-                    $ShopMapEvent {
-                        seed: null,
-                        boughtIndices: [],
-                        type: "rare_shop",
-                        biome: "no_biome",
-                        person: "rare_merchant",
+                    {
+                        isDeadEnd: false,
+                        event: $ShopMapEvent {
+                            seed: null,
+                            boughtIndices: [
+                            ],
+                            type: "rare_shop",
+                            biome: "no_biome",
+                            person: "rare_merchant",
+                        }
                     }
                 ],
                 optionalEvents: [
