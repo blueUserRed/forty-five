@@ -1,13 +1,17 @@
 package com.fourinachamber.fortyfive.rendering
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.GL20.GL_BLEND
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.GraphicsConfig
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Timeline
 
@@ -30,6 +34,8 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
 
     private var sizeDirty = false
 
+    private var fadeToBlack: Float = 0.0f
+
     override fun init() {
     }
 
@@ -38,8 +44,25 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
             screen.resize(Gdx.graphics.width, Gdx.graphics.height)
             sizeDirty = false
         }
+        if (fadeToBlack != 0f && currentPostProcessingShaders.isNotEmpty()) {
+            TODO("cannot use fadeToBlack while PostProcessors are active")
+        }
         if (currentPostProcessingShaders.isEmpty()) {
             screen.render(delta)
+            if (fadeToBlack != 0f) {
+                val renderer = ShapeRenderer()
+                renderer.begin(ShapeType.Filled)
+                Gdx.gl.glEnable(GL20.GL_BLEND)
+                Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+                renderer.color = Color(0f, 0f, 0f, fadeToBlack)
+                renderer.rect(
+                    0f, 0f,
+                    Gdx.graphics.width.toFloat(),
+                    Gdx.graphics.height.toFloat(),
+                )
+                renderer.end()
+                renderer.dispose()
+            }
             return
         }
 
@@ -50,8 +73,8 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
             return
         }
 
-        fbo.begin()
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
+        fbo.begin()
         screen.stage.viewport.apply()
         screen.render(delta)
         fbo.end()
@@ -84,15 +107,37 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
         fbo.dispose()
     }
 
-    fun enterDestroyMode() {
-        currentPostProcessingShaders.add(0, destroyModeShader)
-        destroyModeShader.resetReferenceTime()
-        sizeDirty = true
-    }
+    fun getOnDeathPostProcessingTimelineAction(): Timeline.TimelineAction = Timeline.timeline {
 
-    fun leaveDestroyMode() {
-        currentPostProcessingShaders.remove(destroyModeShader)
-        sizeDirty = true
+        includeAction(fadeToBlackTimelineAction())
+        action { this@GameRenderPipeline.fadeToBlack = 1f }
+        delay(2000)
+
+    }.asAction()
+
+    fun fadeToBlackTimelineAction(): Timeline.TimelineAction {
+        val duration = 2000
+        return object : Timeline.TimelineAction() {
+
+            var finishesAt: Long = -1
+
+            override fun start(timeline: Timeline) {
+                super.start(timeline)
+                finishesAt = TimeUtils.millis() + duration
+            }
+
+            override fun isFinished(timeline: Timeline): Boolean {
+                val now = TimeUtils.millis()
+                val remaining = (finishesAt - now).toFloat()
+                this@GameRenderPipeline.fadeToBlack = 1f - remaining / duration.toFloat()
+                return now >= finishesAt
+            }
+
+            override fun end(timeline: Timeline) {
+                super.end(timeline)
+                this@GameRenderPipeline.fadeToBlack = 0f
+            }
+        }
     }
 
     fun getOnShotPostProcessingTimelineAction(): Timeline.TimelineAction {

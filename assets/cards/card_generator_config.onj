@@ -110,6 +110,14 @@ assets: {
             name: "enchantedBullet",
             file: "textures/cards/enchantedBullet.png"
         },
+        {
+            name: "bossBullet",
+            file: "textures/cards/placeholderBullet.png"
+        },
+        {
+            name: "protectiveBullet",
+            file: "textures/cards/protectiveBullet.png"
+        },
     ],
     fonts: [
         {
@@ -518,6 +526,42 @@ textures: [
             $TextElement {
                 ...costElementSharedKeys,
                 text: cards.(bulletsOffset + 20).cost#string
+            }
+        ]
+    },
+
+    {
+        name: cards.(bulletsOffset + 21).name,
+        elements: [
+            $ImageElement {
+                textureName: cards.(bulletsOffset + 21).name,
+                ...imageElementSharedKeys
+            },
+            $TextElement {
+                ...valueElementSharedKeys,
+                text: cards.(bulletsOffset + 21).baseDamage#string
+            },
+            $TextElement {
+                ...costElementSharedKeys,
+                text: cards.(bulletsOffset + 21).cost#string
+            }
+        ]
+    },
+
+    {
+        name: cards.(bulletsOffset + 22).name,
+        elements: [
+            $ImageElement {
+                textureName: cards.(bulletsOffset + 22).name,
+                ...imageElementSharedKeys
+            },
+            $TextElement {
+                ...valueElementSharedKeys,
+                text: cards.(bulletsOffset + 22).baseDamage#string
+            },
+            $TextElement {
+                ...costElementSharedKeys,
+                text: cards.(bulletsOffset + 22).cost#string
             }
         ]
     },

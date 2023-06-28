@@ -25,15 +25,6 @@ enemyQuickChargeAnimation: {
     interpolation: "swing"
 },
 
-bannerAnimation: {
-     duration: 1.5,
-     scaleAnimDuration: 0.9,
-     beginScale: 0.12,
-     endScale: 0.09,
-     playerTurnBanner: "player_turn_banner",
-     enemyTurnBanner: "enemy_turn_banner",
-},
-
 statusEffectIcons: {
     burning: {
         icon: "burning_icon",
@@ -60,6 +51,11 @@ stringTemplates:  {
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!",
     buffDetailText: "{source} applied a {text} of {amount}!",
     giftDetailText: "{source} gifted a {text} of {amount}!",
+    protectDetailText: "{source} applied everlasting!",
+    revolverRotation1Rot: "Haha! Now I'm going to move you revolver to the {direction}",
+    revolverRotationMoreRot: "Haha! Now I'm going to move you revolver {amount} times to the {direction}",
+    returnCardToHand: "Haha! Now I'm going to put one card from your revolver into your hand",
+    destroyCardsInHand: "Haha! Now I'm going to destroy {amount} card{s} in your hand!"
 },
 
 insultFadeAnimation: {

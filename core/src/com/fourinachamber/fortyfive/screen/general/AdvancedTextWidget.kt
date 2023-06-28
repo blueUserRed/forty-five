@@ -97,7 +97,10 @@ data class AdvancedText(
 
     fun update() = parts.forEach { it.update() }
 
-    fun resetProgress(): Unit = parts.forEach { it.resetProgress() }
+    fun resetProgress() {
+        currentPartIndex = 0
+        parts.forEach { it.resetProgress() }
+    }
 
     companion object {
 
@@ -295,7 +298,7 @@ class IconAdvancedTextPart(
 
     override fun resetProgress() {
         isShown = false
-        isVisible = false
+        calculatedLayout = false
         iconWidth = 0f
         iconHeight = 0f
     }

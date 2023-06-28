@@ -7,7 +7,8 @@ var poisonDamage = 3;
 var bSelects = {
     allExceptSelf: bNum([1, 2, 3, 4, 5]),
     allBullets: bSelectByName("bullet"),
-    fourButNotSelf: bNum([4])
+    fourButNotSelf: bNum([4]),
+    targetRequiredNotSelf: bSelectTarget(false, false)
 };
 
 cards: [
@@ -28,7 +29,7 @@ cards: [
             giveStatus("shot", burning(3, burningPercent)),
         ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { },
     },
@@ -44,7 +45,7 @@ cards: [
         highlightType: "standard",
         effects: [ reserveGain("round start", 1) ],
         cost: 1,
-        tags: ["rare"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -60,7 +61,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 2,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -76,7 +77,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 1,
-        tags: ["rare"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -92,8 +93,8 @@ cards: [
         highlightType: "standard",
         effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ],
         cost: 3,
-        tags: ["common"],
-        price: 50,
+        tags: ["rare"],
+        price: 100,
         type: $Bullet { }
     },
     {
@@ -108,7 +109,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -126,7 +127,7 @@ cards: [
             giveStatus("shot", burning(2, burningPercent))
         ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -142,7 +143,7 @@ cards: [
         highlightType: "standard",
         effects: [ buffDmg("enter", bSelects.allExceptSelf, 4) ],
         cost: 2,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -158,8 +159,8 @@ cards: [
         highlightType: "glow",
         effects: [ draw("enter", 1), draw("shot", 1) ],
         cost: 1,
-        tags: ["rare"],
-        price: 55,
+        tags: ["common", "startDeck"],
+        price: 50,
         type: $Bullet { }
     },
     {
@@ -174,7 +175,7 @@ cards: [
         highlightType: "standard",
         effects: [],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -190,7 +191,7 @@ cards: [
         highlightType: "standard",
         effects: [ ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -222,7 +223,7 @@ cards: [
         highlightType: "standard",
         effects: [ ],
         cost: 2,
-        tags: ["rare"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
@@ -238,7 +239,7 @@ cards: [
          highlightType: "standard",
          effects: [ ],
          cost: 0,
-         tags: ["rare"],
+         tags: ["common", "startDeck"],
          price: 50,
          type: $Bullet { }
     },
@@ -254,7 +255,7 @@ cards: [
          highlightType: "standard",
          effects: [ ],
          cost: 0,
-         tags: ["common"],
+         tags: ["common", "startDeck"],
          price: 50,
          type: $Bullet { }
     },
@@ -288,7 +289,7 @@ cards: [
          highlightType: "standard",
          effects: [ buffDmg("enter", bSelects.allBullets, 10) ],
          cost: 3,
-         tags: ["common"],
+         tags: ["rare"],
          price: 50,
          type: $Bullet { }
     },
@@ -323,7 +324,7 @@ cards: [
             giftDmg("destroy", bSelects.fourButNotSelf, 5)
         ],
          cost: 2,
-         tags: ["common"],
+         tags: ["rare"],
          price: 50,
          type: $Bullet { }
     },
@@ -341,14 +342,14 @@ cards: [
             giveStatus("shot", poison(3, poisonDamage))
         ],
         cost: 1,
-        tags: ["common"],
+        tags: ["common", "startDeck"],
         price: 50,
         type: $Bullet { }
     },
     {
         name: "enchantedBullet",
         title: "enchanted Bullet",
-        flavourText: "todo",
+        flavourText: "enchanted Bullet",
         description: "todo",
         baseDamage: 14,
         coverValue: 0,
@@ -361,96 +362,43 @@ cards: [
         tags: ["common"],
         price: 50,
     },
+    {
+        name: "bossBullet",
+        title: "boss Bullet",
+        flavourText: "boss Bullet",
+        description: "todo",
+        baseDamage: 10,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            putCardInHand("round start", "workerBullet", 1)
+        ],
+        cost: 2,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "protectiveBullet",
+        title: "protective Bullet",
+        flavourText: "protective Bullet",
+        description: "todo",
+        baseDamage: 6,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            protect("enter", bSelects.targetRequiredNotSelf)
+        ],
+        cost: 3,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
 
 ],
 
 defaultBullet: "bullet",
-
-startDeck: [
-
-    {
-        name: "bullet",
-        amount: 4
-    },
-    {
-        name: "incendiaryBullet",
-        amount: 2
-    },
-    {
-        name: "workerBullet",
-        amount: 1
-    },
-    {
-        name: "bigBullet",
-        amount: 2
-    },
-    {
-        name: "rottenBullet",
-        amount: 1
-    },
-    {
-        name: "diamondBullet",
-        amount: 1
-    },
-    {
-        name: "bewitchedBullet",
-        amount: 1
-    },
-    {
-        name: "explosiveBullet",
-        amount: 1
-    },
-    {
-        name: "leadersBullet",
-        amount: 1
-    },
-    {
-        name: "silverBullet",
-        amount: 1
-    },
-    {
-        name: 'arrow',
-        amount: 1,
-    },
-    {
-        name: 'BFB',
-        amount: 1,
-    },
-    {
-        name: 'obsidianBullet',
-        amount: 1,
-    },
-    {
-        name: 'rustedBullet',
-        amount: 1,
-    },
-    {
-        name: 'invisibleBullet',
-        amount: 1,
-    },
-    {
-        name: 'fakeBullet',
-        amount: 1,
-    },
-    {
-        name: 'bulletBulletBullet',
-        amount: 1,
-    },
-    {
-        name: 'bulletBullet',
-        amount: 1,
-    },
-    {
-        name: 'undeadBullet',
-        amount: 1,
-    },
-    {
-        name: 'poisonBullet',
-        amount: 1,
-    },
-    {
-        name: "enchantedBullet",
-        amount: 1,
-    }
-
-]
