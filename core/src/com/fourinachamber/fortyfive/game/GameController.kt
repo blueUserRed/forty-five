@@ -258,7 +258,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             skipNextTurn = false
             return
         }
-        if (hasWon) completeWin()
+        if (hasWon) {
+            completeWin()
+            return
+        }
         turnCounter++
         if (remainingTurns != -1) {
             FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
