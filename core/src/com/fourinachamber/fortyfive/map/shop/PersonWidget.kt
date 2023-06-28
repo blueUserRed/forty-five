@@ -70,7 +70,7 @@ class PersonWidget(
     }
 
     fun giveResourcesBack() {
-        ResourceManager.giveBack(this, textureName)
+//        ResourceManager.giveBack(this, textureName)
     }
 
 }

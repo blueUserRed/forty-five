@@ -6,26 +6,32 @@ nodes: [
         x: 20.0,
         y: 80.0,
         isArea: false,
-        edgesTo: [1],
-        event: $EmptyMapEvent { }
+        edgesTo: [1, 4],
+        image: "test_area",
+        imagePos: "left",
+        event: $EnterMapMapEvent {
+           targetMap: "roadToSalem",
+           placeAtEnd: true
+       }
     },
     {
         x: 60.0,
         y: 80.0,
         isArea: false,
         edgesTo: [0, 2, 3],
-        event: $EncounterMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: false,
-            isCompleted: true,
-        }
+        event: $EmptyMapEvent { }
     },
     {
         x: 60.0,
         y: 40.0,
         isArea: false,
         edgesTo: [1],
-        event: $EmptyMapEvent { }
+        event: $NPCMapEvent {
+           currentlyBlocks: false,
+           canBeStarted: true,
+           isCompleted: false,
+           npc: 'mysterious guy',
+       }
     },
     {
         x: 100.0,
@@ -33,8 +39,21 @@ nodes: [
         isArea: false,
         edgesTo: [1],
         event: $EnterMapMapEvent {
-            targetMap: "roadToSalem",
-            placeAtEnd: true
+            targetMap: "endlessRoad",
+            placeAtEnd: false
+        }
+    },
+    {
+        x: 30.0,
+        y: 40.0,
+        isArea: false,
+        edgesTo: [0],
+        event: $ShopMapEvent {
+            seed: null,
+            boughtIndices: [],
+            type: "normal",
+            biome: "no_biome",
+            person: "traveling_merchant",
         }
     },
 ],

@@ -1,11 +1,5 @@
 
-var cardDec = {
-    name: string,
-    amount: int
-};
-
-additionalCards: cardDec[],
-cardsToDraw: cardDec[],
+cards: string[],
 
 stats: {
     usedReserves: int,
@@ -13,8 +7,8 @@ stats: {
 },
 
 playerLives: int,
-
 playerMoney: int,
+currentDifficulty: float,
 
 position: {
     map: string,

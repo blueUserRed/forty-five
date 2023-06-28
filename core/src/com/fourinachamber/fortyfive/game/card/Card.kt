@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.Effect
+import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.Trigger
@@ -65,7 +66,6 @@ class Card(
     val shortDescription: String,
     val type: Type,
     val baseDamage: Int,
-    val coverValue: Int,
     val cost: Int,
     var price: Int,
     val effects: List<Effect>,
@@ -132,7 +132,7 @@ class Card(
     private var isRotten: Boolean = false
 
     val shouldRemoveAfterShot: Boolean
-        get() = !isEverlasting
+        get() = !(isEverlasting || modifiers.any { it.everlasting })
 
     private lateinit var rottenModifier: CardModifier
 
@@ -188,10 +188,10 @@ class Card(
             FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
             FortyFive.currentGame!!.cardHand.addCard(this)
         }
-        if (!isEverlasting) leaveGame()
+        if (shouldRemoveAfterShot) leaveGame()
     }
 
-    private fun leaveGame() {
+    fun leaveGame() {
         inGame = false
         modifiers.clear()
         isDamageDirty = true
@@ -211,26 +211,7 @@ class Card(
     /**
      * checks whether this card can currently enter the game
      */
-    fun allowsEnteringGame(): Boolean {
-        // handles special case for Destroy effect
-        for (effect in effects) if (effect is Effect.Destroy && effect.trigger == Trigger.ON_ENTER) {
-            if (!FortyFive.currentGame!!.hasDestroyableCard()) {
-                FortyFiveLogger.debug(
-                    logTag, "card cannot enter game because it has the destroy effect and" +
-                            " no destroyable bullet is present"
-                )
-                return false
-            }
-        }
-        return true
-    }
-
-    /**
-     * called when the coverStack this card is in was destroyed
-     */
-    fun onCoverDestroy() {
-        leaveGame()
-    }
+    fun allowsEnteringGame(controller: GameController): Boolean = !effects.any { it.blocks(controller) }
 
     /**
      * called when this card was destroyed by the destroy effect
@@ -291,7 +272,7 @@ class Card(
         val detail = actor.hoverDetailActor
         detail.description = shortDescription
         detail.flavourText = flavourText
-        detail.statsText = if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "cover value: $coverValue"
+        detail.statsText = if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else ""
 
         val builder = StringBuilder()
         for (modifier in modifiers) if (modifier.description != null) {
@@ -356,7 +337,6 @@ class Card(
                 shortDescription = onj.get<String>("description"),
                 type = cardTypeOrError(onj),
                 baseDamage = onj.get<Long>("baseDamage").toInt(),
-                coverValue = onj.get<Long>("coverValue").toInt(),
                 cost = onj.get<Long>("cost").toInt(),
                 price = onj.get<Long>("price").toInt(),
                 effects = onj.get<OnjArray>("effects")
@@ -428,6 +408,7 @@ class Card(
     data class CardModifier(
         val damage: Int,
         val description: TemplateString?,
+        val everlasting: Boolean = false,
         val validityChecker: () -> Boolean
     )
 

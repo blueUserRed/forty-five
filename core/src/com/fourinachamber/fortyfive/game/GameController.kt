@@ -137,14 +137,23 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var cardsDrawn: Int = 0
         private set
 
+    private var hasWon: Boolean = false
+
+    var playerLost: Boolean = false
+        private set
+
+    /**
+     * the next time the [nextTurn] function is called while this is true, this is set to false and nothing else is
+     * done
+     */
+    private var skipNextTurn: Boolean = false
+
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is EncounterMapEvent) { // TODO: comment back in
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
-//        encounterMapEvent = context
-//        modifier = EncounterModifier.BewitchedMist // TODO: remove
-        SaveState.read()
+        encounterMapEvent = context
         curScreen = onjScreen
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
@@ -159,9 +168,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         // enemy area is initialised by the GameDirector
         gameDirector.init()
 
+        var popupText = ""
+        if (remainingTurns != 1) popupText = "You have $remainingTurns turns!\n"
+        popupText += "If you loose, you take ${enemyArea.enemies[0].damage} damage!"
         executeTimeline(Timeline.timeline {
             includeLater(
-                { confirmationPopup("You have $remainingTurns turns!") },
+                { confirmationPopup(popupText) },
                 { remainingTurns != 1 }
             )
             action {
@@ -181,31 +193,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .toMutableList()
 
         val startDeck: MutableList<Card> = mutableListOf()
-        onj.get<OnjArray>("startDeck").value.forEach { entry ->
-
-            entry as OnjObject
-            val entryName = entry.get<String>("name")
-
-            val card = cardPrototypes.firstOrNull { it.name == entryName }
-                ?: throw RuntimeException("unknown card name is start deck: $entryName")
-
-            repeat(entry.get<Long>("amount").toInt()) {
-                startDeck.add(card.create())
-            }
-        }
 
         cardStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
         _remainingCards = cardStack.size
 
-        SaveState.additionalCards.forEach { entry ->
-            val (cardName, amount) = entry
-
+        SaveState.cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            repeat(amount) {
-                cardStack.add(card.create())
-            }
+            cardStack.add(card.create())
         }
 
         cardStack.shuffle()
@@ -258,6 +254,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun nextTurn() {
+        if (skipNextTurn) {
+            skipNextTurn = false
+            return
+        }
+        if (hasWon) {
+            completeWin()
+            return
+        }
         turnCounter++
         if (remainingTurns != -1) {
             FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
@@ -270,7 +274,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
-        gameDirector.currentEval() // TODO: remove, just for testing
         if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
         updateCount++
 
@@ -327,6 +330,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val cardHandName = cardHandOnj.get<String>("actorName")
         val cardHand = curScreen.namedActorOrError(cardHandName)
         if (cardHand !is CardHand) throw RuntimeException("actor named $cardHandName must be a CardHand")
+        cardHand.init(this)
         this.cardHand = cardHand
     }
 
@@ -370,15 +374,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) {
-        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame()) return
+        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this)) return
         if (revolver.getCardInSlot(slot) != null) return
         if (!cost(card.cost)) return
         cardHand.removeCard(card)
         revolver.setCard(slot, card)
         FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
         card.onEnter()
-        checkEffectsSingleCard(Trigger.ON_ENTER, card)
+        executeTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
     }
+
+    fun maxCardsPopup(): Timeline = confirmationPopup("Hand reached maximum of $maxCards cards")
 
     fun confirmationPopup(text: String): Timeline = Timeline.timeline {
         action {
@@ -395,9 +401,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun cardSelectionPopup(text: String): Timeline = Timeline.timeline {
+    fun cardSelectionPopup(text: String, exclude: Card? = null): Timeline = Timeline.timeline {
         action {
-            cardSelector.setTo(revolver)
+            cardSelector.setTo(revolver, exclude)
             curScreen.enterState(showPopupScreenState)
             curScreen.enterState(showPopupCardSelectorScreenState)
             popupText = text
@@ -540,12 +546,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * damages the player (plays no animation, calls loose when lives go below 0)
      */
     @AllThreadsAllowed
-    fun damagePlayer(damage: Int): Timeline {
-        curPlayerLives -= damage
-        FortyFiveLogger.debug(logTag, "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives")
-        return if (curPlayerLives <= 0) Timeline.timeline {
-            action { loose() }
-        } else Timeline(mutableListOf())
+    fun damagePlayer(damage: Int): Timeline = Timeline.timeline {
+        action {
+            curPlayerLives -= damage
+            FortyFiveLogger.debug(
+                logTag,
+                "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives"
+            )
+            if (curPlayerLives <= 0) playerDied()
+        }
     }
 
     /**
@@ -558,12 +567,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     /**
-     * changes the game to the destroy phase
-     */
-    @MainThreadOnly
-    fun destroyCardPhase() = changeState(GameState.CardDestroy)
-
-    /**
      * destroys a card in the revolver
      */
     @MainThreadOnly
@@ -571,28 +574,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         revolver.removeCard(card)
         card.onDestroy()
         FortyFiveLogger.debug(logTag, "destroyed card: $card")
-        checkEffectsSingleCard(Trigger.ON_DESTROY, card)
+        executeTimeline(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
         currentState.onCardDestroyed(this)
     }
 
-    /**
-     * checks whether a destroyable card is in the game
-     */
-    fun hasDestroyableCard(): Boolean {
-        for (card in createdCards) if (card.inGame && card.type == Card.Type.BULLET) {
-            return true
-        }
-        return false
-    }
-
     @MainThreadOnly
-    private fun checkEffectsSingleCard(trigger: Trigger, card: Card) {
+    private fun checkEffectsSingleCard(trigger: Trigger, card: Card): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        card.checkEffects(trigger)?.let { executeTimeline(it) }
+        return card.checkEffects(trigger) ?: Timeline(mutableListOf())
     }
 
     @MainThreadOnly
-    fun checkEffectsActiveCards(trigger: Trigger) {
+    fun checkEffectsActiveCards(trigger: Trigger): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         val timeline = Timeline.timeline {
             for (card in createdCards) if (card.inGame) {
@@ -600,11 +593,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (timeline != null) include(timeline)
             }
         }
-        executeTimeline(timeline)
+        return timeline
     }
 
     @MainThreadOnly
-    fun checkStatusEffects() {
+    fun checkStatusEffects(): Timeline {
         FortyFiveLogger.debug(logTag, "checking status effects")
         val timeline = Timeline.timeline {
             for (enemy in enemyArea.enemies) {
@@ -612,7 +605,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (timeline != null) include(timeline)
             }
         }
-        executeTimeline(timeline)
+        return timeline
     }
 
     /**
@@ -673,8 +666,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun end() {
+        gameDirector.end()
         FortyFiveLogger.title("game ends")
         FortyFive.currentGame = null
+        if (playerLost) FortyFive.newRun()
         SaveState.write()
     }
 
@@ -684,22 +679,34 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun enemyDefeated(enemy: Enemy) {
         SaveState.enemiesDefeated++
-        win()
-    }
-
-    @MainThreadOnly
-    private fun win() {
+        hasWon = true
         FortyFiveLogger.debug(logTag, "player won")
-        encounterMapEvent.completed()
-        MapManager.switchToMapScreen()
-        SaveState.write()
     }
 
     @MainThreadOnly
-    private fun loose() {
-        FortyFiveLogger.debug(logTag, "player lost")
-        SaveState.reset()
+    private fun completeWin() {
+        encounterMapEvent.completed()
+        SaveState.write()
         MapManager.switchToMapScreen()
+    }
+
+    fun loose() {
+        playerLost = true
+        executeTimeline(damagePlayer(enemyArea.enemies[0].damage))
+    }
+
+    @MainThreadOnly
+    fun playerDied() {
+        executeTimeline(Timeline.timeline {
+            action {
+                FortyFiveLogger.debug(logTag, "player lost")
+                FortyFive.newRun()
+            }
+            includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
+            action {
+                FortyFive.changeToScreen("screens/title_screen.onj")
+            }
+        })
     }
 
     sealed class RevolverRotation {

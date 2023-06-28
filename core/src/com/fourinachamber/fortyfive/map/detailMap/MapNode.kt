@@ -21,8 +21,8 @@ data class MapNode(
     val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
 ) {
 
-    private var loadedImage: Drawable? = null
 
+    private var imageCache: Drawable? = null
     fun getEdge(dir: Direction): MapNode? {
 
         val possibleNode = edgesTo.map {
@@ -36,14 +36,18 @@ data class MapNode(
     @MainThreadOnly
     fun getImage(screen: OnjScreen): Drawable? {
         if (imageName == null) return null
-        if (loadedImage != null) return loadedImage
+        if (imageCache != null) return imageCache
         val handle = getImageData()?.resourceHandle
         if (handle == null) {
             FortyFiveLogger.warn(logTag, "No image data found for $imageName")
             return null
         }
-        loadedImage = ResourceManager.get(screen, handle)
-        return loadedImage
+        imageCache = ResourceManager.get(screen, handle)
+        return imageCache
+    }
+
+    fun invalidateCachedAssets() {
+        imageCache = null
     }
 
     fun getImageData(): MapManager.MapImageData? = MapManager.mapImages.find { it.name == imageName }

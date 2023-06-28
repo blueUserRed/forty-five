@@ -264,7 +264,6 @@ open class OnjScreen @MainThreadOnly constructor(
     @MainThreadOnly
     override fun hide() {
         super.hide()
-        screenController?.end()
         isVisible = false
     }
 

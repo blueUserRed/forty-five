@@ -1,3 +1,4 @@
+use Map;
 var images = {
     testArea: {
         image: "location_sign_aqua_dulche",
@@ -26,6 +27,13 @@ mapImages: [
     },
 ],
 
+screens: {
+    mapScreen: "screens/map_screen.onj",
+    dialogScreen: "screens/dialog_screen.onj",
+    encounterScreen: "screens/game_screen.onj",
+    shopScreen: "screens/shop_screen.onj",
+},
+
 displayNames: [
     {
         name: "test_area",
@@ -40,8 +48,8 @@ displayNames: [
         display: "Road to Salem"
     },
     {
-        name: "test_road",
-        display: "Road to Aqua Dulche"
+        name: "endlessRoad",
+        display: "Endless Road"
     },
 ],
 
@@ -50,21 +58,23 @@ generatorConfig: {
     maps: [
         {
             name: "roadToSalem",
-            seed: 103,
+            seed: runRandom(1),
             restrictions: {
-                maxNodes: 10,
-                minNodes: 5,
+                maxNodes: 14,
+                minNodes: 8,
+//                maxSplits: 1,
                 maxSplits: 4,
-                splitProbability: 0.5,
-                compressProbability: 0.55,
+//                splitProbability: 0.5,
+                splitProbability: 0.6,
+                compressProbability: 0.2,
+//                compressProbability: 0.55,
                 averageLengthOfLineInBetween: 26.0,
                 maxWidth: 40,
                 maxAnglePercent: 0.6,
                 rangeToCheckBetweenNodes: 0.6,
                 startArea: "test_area",
-                endArea: "test_area",
-                otherAreas: [
-                ],
+                endArea: "salem",
+                otherAreas: [],
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
@@ -90,18 +100,22 @@ generatorConfig: {
                     },
                 ],
                 optionalEvents: [
-//                    {
-//                        weight: 20,
-//                        event: $EncounterMapEvent {
-//                            currentlyBlocks: true,
-//                            canBeStarted: true,
-//                            isCompleted: false
-//                        }
-//                    },
+                    {
+                        weight: 20,
+                        event: $EncounterMapEvent {
+                            currentlyBlocks: true,
+                            canBeStarted: true,
+                            isCompleted: false
+                        }
+                    },
                     {
                         weight: 20,
                         event: $EmptyMapEvent {
                         }
+                    },
+                    {
+                        weight: 10,
+                        event: $EmptyMapEvent { }
                     }
                 ],
                 decorations: [
@@ -154,19 +168,74 @@ generatorConfig: {
                 decorationPadding: 40.0,
             },
         },
-        //        {
-//            name: "test_road",
-//            seed: 103,
-//            restrictions: {
-//                maxNodes: 7,
-//                minNodes: 5,
+        {
+            name: "endlessRoad",
+            seed: runRandom(2),
+            restrictions: {
+                maxNodes: 25,
+                minNodes: 20,
 //                maxSplits: 1,
-//                splitProbability: 0.25,
-//                compressProbability: 0.55
-//            }
-//        }
+                maxSplits: 6,
+//                splitProbability: 0.5,
+                splitProbability: 0.4,
+//                compressProbability: 0.2,
+                compressProbability: 0.55,
+                averageLengthOfLineInBetween: 26.0,
+                maxWidth: 40,
+                maxAnglePercent: 0.6,
+                rangeToCheckBetweenNodes: 0.6,
+                startArea: "salem",
+                endArea: "salem",
+                otherAreas: [],
+                minDistanceBetweenAreas: 100.0,
+                distanceFromAreaToLine: 100.0,
+                percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
+                rotation: 0.0,
+                fixedEvents: [
+                    $ShopMapEvent {
+                        seed: null,
+                        boughtIndices: [],
+                        type: "rare_shop",
+                        biome: "no_biome",
+                        person: "rare_merchant",
+                    }
+                ],
+                optionalEvents: [
+                    {
+                        weight: 15,
+                        event: $EncounterMapEvent {
+                            currentlyBlocks: true,
+                            canBeStarted: true,
+                            isCompleted: false
+                        }
+                    },
+                ],
+                decorations: [
+                    $RandomDistributionFunction {
+                        decoration: "map_decoration_grass",
+                        density: 0.2,
+                        baseWidth: 3.0,
+                        baseHeight: 3.0,
+                        scaleMin: 0.6,
+                        scaleMax: 1.2,
+                        onlyCollidesWithNodes: false
+                    },
+                    $RandomDistributionFunction {
+                        decoration: "map_decoration_cactus",
+                        density: 0.01,
+                        baseWidth: 2.0,
+                        baseHeight: 4.0,
+                        scaleMin: 1.5,
+                        scaleMax: 2.5,
+                        onlyCollidesWithNodes: false
+                    }
+                ],
+                decorationSeed: 230789230789407892340,
+                decorationPadding: 40.0
+            }
+        },
+    ]
 
-    ],
 },
 
 

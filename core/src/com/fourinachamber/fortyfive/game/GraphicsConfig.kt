@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -85,6 +84,7 @@ object GraphicsConfig {
 
     fun iconScale(name: String): Float = iconConfig[name]!!.second
 
+    // TODO: can probably be moved to Card
     fun cardHighlightEffect(card: Card): Timeline.TimelineAction = when (card.highlightType) {
 
         Card.HighlightType.STANDARD -> card.actor.growAnimation(false).asAction()
