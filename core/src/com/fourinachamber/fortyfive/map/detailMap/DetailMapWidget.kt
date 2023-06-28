@@ -12,10 +12,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.general.DisableActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.onButtonClick
@@ -47,6 +47,7 @@ class DetailMapWidget(
     var backgroundHandle: ResourceHandle,
     private var screenSpeed: Float,
     private var backgroundScale: Float,
+    private val disabledDirectionIndicatorAlpha: Float,
     private val leftScreenSideDeadSection: Float
 ) : Widget(), ZIndexActor, StyledActor {
 
@@ -140,7 +141,7 @@ class DetailMapWidget(
             this@DetailMapWidget.screenDragged = false
             if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
             if (movePlayerTo != null) {
-                skipPlayerAnimation()
+                finishMovement()
                 return
             }
             pointToNode?.let { goToNode(it) }
@@ -152,6 +153,12 @@ class DetailMapWidget(
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
+        // doesn't work when the map doesn't take up most of the screenspace, but width/height
+        // are not initialised yet
+        mapOffset = Vector2(
+            -playerPos.x + screen.viewport.worldWidth * 0.5f,
+            -playerPos.y + screen.viewport.worldHeight * 0.5f
+        )
     }
 
     private fun onStartButtonClicked() {
@@ -191,7 +198,11 @@ class DetailMapWidget(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (!setupStartButtonListener) {
-            screen.namedActorOrError(startButtonName).onButtonClick { onStartButtonClicked() }
+            val startButton = screen.namedActorOrError(startButtonName)
+            startButton.onButtonClick {
+                if (startButton is DisableActor && startButton.isDisabled) return@onButtonClick
+                onStartButtonClicked()
+            }
             setupStartButtonListener = true
             setupMapEvent(playerNode.event)
         }
@@ -284,6 +295,12 @@ class DetailMapWidget(
         var dx = cos(angleRadians) * indicatorOffset
         if (xDiff < 0) dx = -dx
 
+        val canGoToNode = canGoTo(pointToNode)
+        val old = batch.color.cpy()
+        if (!canGoToNode) {
+            batch.flush()
+            batch.setColor(old.r, old.g, old.b, disabledDirectionIndicatorAlpha)
+        }
         batch.draw(
             directionIndicator,
             x + node.x + mapOffset.x + dx,
@@ -294,9 +311,12 @@ class DetailMapWidget(
             directionIndicator.regionHeight * 0.01f,
             1f,
             1f,
-//            angleRadians.degrees
             if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees + 180f,
         )
+        if (!canGoToNode) {
+            batch.flush()
+            batch.color = old
+        }
     }
 
 
@@ -322,22 +342,15 @@ class DetailMapWidget(
         val curTime = TimeUtils.millis()
         val movementFinishTime = playerMovementStartTime + playerMoveTime
         if (curTime >= movementFinishTime) {
-            this.playerNode = movePlayerTo
-            MapManager.currentMapNode = movePlayerTo
-            MapManager.lastMapNode = playerNode
-            playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
-            setupMapEvent(movePlayerTo.event)
-            updateScreenState(movePlayerTo.event)
-            this.movePlayerTo = null
-            updateDirectionIndicator(lastPointerPosition)
+            finishMovement()
             return
         }
         val percent = (movementFinishTime - curTime) / playerMoveTime.toFloat()
         val movementPath = Vector2(movePlayerTo.x, movePlayerTo.y) - Vector2(playerNode.x, playerNode.y)
         val playerOffset = movementPath * (1f - percent)
         playerPos = Vector2(playerNode.x, playerNode.y) + playerOffset
-        val screenWidth = screen.viewport.worldWidth
-        val screenHeight = screen.viewport.worldHeight
+        val screenWidth = width
+        val screenHeight = height
         val screenRectangle = Rectangle(
             -mapOffset.x - leftScreenSideDeadSection, -mapOffset.y,
             screenWidth - leftScreenSideDeadSection, screenHeight
@@ -347,9 +360,12 @@ class DetailMapWidget(
         }
     }
 
-    private fun skipPlayerAnimation() {
+    private fun finishMovement() {
         val movePlayerTo = movePlayerTo ?: return
+        val playerNode = playerNode
         this.playerNode = movePlayerTo
+        MapManager.currentMapNode = movePlayerTo
+        MapManager.lastMapNode = playerNode
         playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
         setupMapEvent(movePlayerTo.event)
         updateScreenState(movePlayerTo.event)
@@ -360,12 +376,21 @@ class DetailMapWidget(
     private fun setupMapEvent(event: MapEvent?) {
         if (event == null || !event.displayDescription) {
             screen.leaveState(displayEventDetailScreenState)
+            screen.leaveState(eventCanBeStartedScreenState)
         } else {
             screen.enterState(displayEventDetailScreenState)
         }
         event ?: return
+        if (event.canBeStarted) {
+            screen.enterState(eventCanBeStartedScreenState)
+        } else {
+            screen.leaveState(eventCanBeStartedScreenState)
+        }
         TemplateString.updateGlobalParam("map.curEvent.displayName", event.displayName)
-        TemplateString.updateGlobalParam("map.curEvent.description", event.descriptionText)
+        TemplateString.updateGlobalParam(
+            "map.curEvent.description",
+            if (event.isCompleted) event.completedDescriptionText else event.descriptionText
+        )
     }
 
     private fun updateScreenState(event: MapEvent?) {
@@ -416,6 +441,7 @@ class DetailMapWidget(
 
     companion object {
         const val displayEventDetailScreenState: String = "displayEventDetail"
+        const val eventCanBeStartedScreenState: String = "canStartEvent"
     }
 
 }

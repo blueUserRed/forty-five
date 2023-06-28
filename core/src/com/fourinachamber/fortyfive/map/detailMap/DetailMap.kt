@@ -52,6 +52,16 @@ data class DetailMap(
     }
 
     /**
+     * some structures in the map cache assets for easier accessibility. This function marks them as invalid, and they
+     * will be reloaded the next time they are used. Should be called when assets are returned by the ResourceBorrower
+     * (e.g. after a screen transition)
+     */
+    fun invalidateCachedAssets() {
+        uniqueNodes.forEach { it.invalidateCachedAssets() }
+        decorations.forEach { it.invalidateCachedAssets() }
+    }
+
+    /**
      * returns a representation of this map as an OnjObject
      */
     fun asOnjObject(): OnjObject = buildOnjObject {
@@ -149,14 +159,18 @@ data class DetailMap(
         val instances: List<Pair<Vector2 /* = Position */, Float /* = scale */>>
     ) {
 
-        private var drawable: Drawable? = null
+        private var drawableCache: Drawable? = null
 
         @MainThreadOnly
         fun getDrawable(screen: OnjScreen): Drawable {
-            drawable?.let { return it }
+            drawableCache?.let { return it }
             val drawable = ResourceManager.get<Drawable>(screen, drawableHandle)
-            this.drawable = drawable
+            this.drawableCache = drawable
             return drawable
+        }
+
+        fun invalidateCachedAssets() {
+            drawableCache = null
         }
 
         /**

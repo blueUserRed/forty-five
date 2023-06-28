@@ -2,6 +2,7 @@
 assets/textures/packed/
 assets/cards/generated/
 assets/saves/savefile.onj
+assets/saves/perma_savefile.onj
 assets/maps/world_view/generated/*
 assets/logging/forty-five.log
 assets/maps/roads/*

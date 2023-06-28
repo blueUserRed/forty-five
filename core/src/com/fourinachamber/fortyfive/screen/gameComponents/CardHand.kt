@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
+import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -11,6 +12,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.between
+import ktx.actors.alpha
 import ktx.actors.contains
 
 
@@ -21,6 +23,7 @@ import ktx.actors.contains
 class CardHand(
     private val targetWidth: Float,
     private val cardSize: Float,
+    private val opacityIfNotPlayable: Float,
     private val screen: OnjScreen,
 ) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor {
 
@@ -66,8 +69,14 @@ class CardHand(
 
     private var currentHoverDetailActor: CardDetailActor? = null
 
+    private lateinit var controller: GameController
+
     init {
         bindHoverStateListeners(this)
+    }
+
+    fun init(controller: GameController) {
+        this.controller = controller
     }
 
     /**
@@ -115,6 +124,11 @@ class CardHand(
         }
 
         _cards.forEachIndexed { i, card ->
+            if (card.cost > controller.curReserves || !card.allowsEnteringGame(controller)) {
+                card.actor.alpha = opacityIfNotPlayable
+            } else {
+                card.actor.alpha = 1f
+            }
             if (card.actor.isDragged) {
                 card.actor.setScale(1f)
                 doZIndexFor(card.actor, draggedCardZIndex)

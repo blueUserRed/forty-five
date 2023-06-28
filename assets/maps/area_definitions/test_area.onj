@@ -7,7 +7,6 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [1],
-
         event: $EmptyMapEvent { }
     },
     {
@@ -15,12 +14,7 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [0, 2, 3],
-//        event: $EmptyMapEvent { }
-        event: $EncounterMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: false,
-            isCompleted: true,
-        }
+        event: $EmptyMapEvent { }
     },
     {
         x: 60.0,
@@ -31,7 +25,7 @@ nodes: [
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
-            npc: 'my_cool_npc',
+            npc: 'Guy from Salem',
         }
     },
     {
@@ -39,32 +33,18 @@ nodes: [
         y: 90.0,
         isArea: false,
         edgesTo: [1],
+        image: "salem",
+        imagePos: "right",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
             placeAtEnd: false
-        }
-    },
-    {
-        x: 30.0,
-        y: 40.0,
-        isArea: false,
-        edgesTo: [0],
-        event: $ShopMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-            seed: null,
-            boughtIndices: [],
-            type: "all_included",
-            biome: "no_biome",
-            person: "traveling_merchant",
         }
     },
 ],
 
 decorations: [
     {
-        texture: "burning_icon",
+        texture: "map_decoration_cactus",
         baseWidth: 8.0,
         baseHeight: 8.0,
         positions: [

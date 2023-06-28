@@ -4,10 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
-import com.fourinachamber.fortyfive.map.detailMap.DetailMap
-import com.fourinachamber.fortyfive.map.detailMap.MapNode
-import com.fourinachamber.fortyfive.map.detailMap.MapRestriction
-import com.fourinachamber.fortyfive.map.detailMap.SeededMapGenerator
+import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import kotlinx.coroutines.*
@@ -60,6 +57,8 @@ object MapManager {
     lateinit var displayNames: Map<String, String>
         private set
 
+    private lateinit var screenPaths: Map<String, String>
+
     fun init() {
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
@@ -79,9 +78,32 @@ object MapManager {
             .value
             .map { it as OnjObject }
             .associate { it.get<String>("name") to it.get<String>("display")  }
+        screenPaths = onj
+            .get<OnjObject>("screens")
+            .value
+            .mapValues { (_, value) -> value.value as String }
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
         currentDetailMap = DetailMap.readFromFile(map)
+    }
+
+    fun changeToEncounterScreen(event: MapEvent) {
+        FortyFive.changeToScreen(screenPaths["encounterScreen"]!!, event)
+    }
+
+    fun changeToDialogScreen(event: MapEvent) {
+        FortyFive.changeToScreen(screenPaths["dialogScreen"]!!, event)
+    }
+
+    fun changeToShopScreen(event: MapEvent) {
+        FortyFive.changeToScreen(screenPaths["shopScreen"]!!, event)
+    }
+
+    /**
+     * @see DetailMap.invalidateCachedAssets
+     */
+    fun invalidateCachedAssets() {
+        currentDetailMap.invalidateCachedAssets()
     }
 
     fun displayName(internalName: String) = displayNames[internalName] ?: run {
@@ -103,6 +125,7 @@ object MapManager {
     }
 
     fun newRunSync() {
+        this.currentDetailMap
         generateMapsSync()
     }
 
