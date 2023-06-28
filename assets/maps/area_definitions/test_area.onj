@@ -46,9 +46,6 @@ nodes: [
         isArea: false,
         edgesTo: [0],
         event: $ShopMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
             seed: null,
             boughtIndices: [],
             type: "all_included",
