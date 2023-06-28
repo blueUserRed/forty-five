@@ -30,7 +30,6 @@ $MapEvent {
         person: string,
         seed: int?,
         boughtIndices: int[],
-        ...mapEventStandardConfig
     }
 
 }
@@ -75,6 +74,13 @@ var mapRestrictions = {
     decorationSeed: int,
     decorations: $DecorationDistributionFunction[]
 };
+
+screens: {
+    mapScreen: string,
+    dialogScreen: string,
+    encounterScreen: string,
+    shopScreen: string,
+},
 
 mapImages: {
     name: string,

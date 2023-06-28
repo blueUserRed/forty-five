@@ -29,7 +29,6 @@ $MapEvent {
         person: string,
         seed: int?,
         boughtIndices: int[],
-        ...mapEventStandardConfig
     }
 }
 

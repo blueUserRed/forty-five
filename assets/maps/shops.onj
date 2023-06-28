@@ -1,14 +1,11 @@
 import "imports/colors.onj" as color;
 
 use Common;
-use Style;
-use Screen;
-
 
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-var raritys = [
+var rarities = [
     {
         select: $ByTag {
             name: "common"
@@ -28,39 +25,58 @@ var raritys = [
 ];
 
 types: [
+
     {
-        name: "all_included",
+        name: "normal",
         cardChanges: [
-            ...raritys,
-            {
-                select: $ByName {
-                    name: "jewelryBox"
-                },
-                effect: $PriceMultiplier {
-                    price: 1.4,
-                }
-            },
-            {
-                select: $ByName {
-                    name: "casket"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 100.0
-                }
-            },
+            ...rarities,
             {
                 select: $ByTag {
-                    name: "common"
+                    name: "startDeck"
                 },
-                effect: $Blacklist {
+                effect: $Blacklist { }
+            },
+            {
+                select: $ByName {
+                    name: "protectiveBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 10000.0 // make sure it appears in the shop
                 }
             }
         ]
     },
+
+    {
+        name: "rare_shop",
+        cardChanges: [
+                ...rarities,
+                {
+                    select: $ByTag {
+                        name: "startDeck"
+                    },
+                    effect: $Blacklist { }
+                },
+                {
+                    select: $ByTag {
+                        name: "common"
+                    },
+                    effect: $Blacklist { }
+                },
+                {
+                    select: $ByTag {
+                        name: "rare"
+                    },
+                    effect: $PriceMultiplier {
+                        price: 0.5
+                    }
+                }
+       ]
+    },
     {
         name: "no_biome",
         cardChanges: [
-            ...raritys,
+            ...rarities,
             {
                 select: $ByName {
                     name: "workerBullet"
@@ -102,12 +118,27 @@ people: [
                     text: "Source: Trust me pal\"",
                 },
             ],
-            //            [
-//                $Text {
-//                    text: "Greetings Traveler. I have the best products you will ever see.",
-//                    color: color.beige
-//                }
-//            ],
+
+        ],
+        npcImageName: "my_cool_npc",
+    },
+    {
+        name: "rare_merchant",
+        displayName: "Traveling Merchant",
+        defaultShopParameter: "no_biome",
+        texts: [
+            [
+                $Text {
+                    text: "\"I only sell the ",
+                },
+                $Text {
+                    text: "rarest  ",
+                    color: color.viridian,
+                },
+                $Text {
+                    text: "bullets! And that for the cheapest price!\" ",
+                },
+            ],
 
         ],
         npcImageName: "my_cool_npc",
