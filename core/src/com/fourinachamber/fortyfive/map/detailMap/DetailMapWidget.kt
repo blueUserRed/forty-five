@@ -141,6 +141,7 @@ class DetailMapWidget(
             pointToNode?.let {
                 if (moveToNextNode(it)) return
             }
+            pointToNode?.let { goToNode(it) }
         }
     }
 
