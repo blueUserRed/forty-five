@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
@@ -152,11 +153,11 @@ class ShopWidget(
         }
     }
 
-    fun checkAndBuy(card: Card) {
-        SaveState.playerMoney -= card.price
-        buyCard(cards.indexOf(card))
-        FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
-        SaveState.buyCard(card.name)
+    fun checkAndBuy(card: Actor) {
+//        SaveState.playerMoney -= card.price
+//        buyCard(cards.indexOf(card))
+//        FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
+//        SaveState.buyCard(card.name)
     }
 
     fun calculateChances(

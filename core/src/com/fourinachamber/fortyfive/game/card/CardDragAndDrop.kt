@@ -8,10 +8,12 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
+import com.fourinachamber.fortyfive.screen.general.CustomScrollableFlexBox
 import com.fourinachamber.fortyfive.screen.general.DragBehaviour
 import com.fourinachamber.fortyfive.screen.general.DropBehaviour
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
+import kotlin.math.max
 
 /**
  * the DragSource used for dragging a card to the revolver
@@ -140,12 +142,6 @@ class CardDragAndDropPayload(val card: Card) {
         for (task in tasks) task()
     }
 
-    /**
-     * called when the drag is stopped
-     */
-    fun onBuy() = tasks.add {
-        ShopWidget.curShopWidget.checkAndBuy(card)  //TODO ugly
-    }
 }
 
 class ShopDragSource(
@@ -156,19 +152,19 @@ class ShopDragSource(
 
     private val toLast: Boolean
 
+    private var startPos = Vector2()
+
     init {
-        println("Hallo")
         toLast = onj.getOr("moveToLastIndex", false)
     }
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload {
-        println("Hallo2")
-
+        startPos = Vector2(x * actor.scaleX, y * actor.scaleY)
         val payload = Payload()
         dragAndDrop.setKeepWithinStage(false)
 
         payload.dragActor = actor
-
+        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = actor.parent
         if (toLast) actor.toFront()
 
         val obj = DragAndDropPayload(actor)
@@ -179,13 +175,11 @@ class ShopDragSource(
 
 
     override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-        println("Hallo3")
-
         super.drag(event, x, y, pointer)
         val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
         dragAndDrop.setDragActorPosition(
-            -parentOff.x + actor.width - (actor.width * actor.scaleX) / 2,
-            -parentOff.y - (actor.height * actor.scaleY) / 2
+            -parentOff.x + actor.width - startPos.x,
+            -parentOff.y - startPos.y
         )
     }
 
@@ -197,23 +191,16 @@ class ShopDragSource(
         payload: Payload?,
         target: DragAndDrop.Target?
     ) {
-        println("Hall4")
-
         if (payload == null) return
-        if (toLast) actor.zIndex += 1
+        if (toLast) actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as DragAndDropPayload
         obj.onDragStop()
     }
 
 
-
     class DragAndDropPayload(val actor: Actor) {
 
         private val tasks: MutableList<() -> Unit> = mutableListOf()
-
-        init {
-
-        }
 
         fun resetTo(pos: Vector2) = tasks.add {
             println("now hihi")
@@ -223,6 +210,15 @@ class ShopDragSource(
 
         fun onDragStop() {
             for (task in tasks) task()
+        }
+
+
+        /**
+         * called when the drag is stopped
+         */
+        fun onBuy() = tasks.add {
+//            ShopWidget.curShopWidget.checkAndBuy(actor)  //TODO ugly
+            println("now buy stuff") //TODO hier weitermachen
         }
     }
 }
