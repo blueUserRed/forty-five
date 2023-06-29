@@ -48,8 +48,13 @@ var personWidget = $PersonWidget {
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
-    dropBehaviour: $ShopDropTarget {
+    //    dropBehaviour: $ShopDropTarget { //TODO change back
+//        group: "card",
+//    },
+
+    dragAndDrop: $ShopDragSource {
         group: "card",
+        moveToLastIndex: true,
     },
     styles: [
         {
@@ -76,6 +81,7 @@ var personWidget = $PersonWidget {
         }
     ],
 };
+
 var scrollBarBackground = $Image {
 
     name: "scrollbar_background",
@@ -160,27 +166,53 @@ var cardsWidget = $ScrollBox {
 //    cardsWidgetTextChild,
     scrollBarBackground,
     scrollBar,
-];*/
+];
+*/
 
-var cardsWidget = $ShopWidget {
+var cardsWidget = $Box {
     name: "cards_widget",
-    texture: "shop_items_background",
-    dataFile: "cards/cards.onj",
-    dataFontColor: color.dark_brown,
-    dataFont: "red_wing_cm",
-    dataDragBehaviour: $CardDragSource {
-        group: "card",
-        moveToLastIndex: true,
-    },
-    maxPerLine: 4,
-    widthPercentagePerItem: 20.0,
+    //    texture: "shop_items_background",
+//    dataFile: "cards/cards.onj",
+//    dataFontColor: color.dark_brown,
+//    dataFont: "red_wing_cm",
+//    dataDragBehaviour: $CardDragSource {
+//        group: "card",
+//        moveToLastIndex: true,
+//    },
+//    maxPerLine: 4,
+//    widthPercentagePerItem: 20.0,
 
     styles: [
         {
+            background: "shop_items_background",
+            flexWrap: wrap.wrap,
+            flexDirection: flexDirection.column,
+            justifyContent: justify.spaceBetween,
             width: 100.0#percent,
             height: 69.0#percent,
         }
     ],
+//    children: [
+//        $Image {
+//            name: "cardsWidgetTextChild",
+//            textureName: "shop_background_no_biome",
+//            scaleX: 0.00001,
+//            scaleY: 0.00001,
+//            width: worldWidth,
+//            height: worldHeight,
+//            reportDimensionsWithScaling: true,
+//            dragAndDrop: $ShopDragSource {
+//                group: "card",
+//                moveToLastIndex: true,
+//            },
+//            styles: [
+//                {
+//                    width: 45.0#percent,
+//                    height: 85.0#percent,
+//                }
+//            ],
+//        }
+//    ]
 };
 
 root: $Box {
@@ -210,7 +242,7 @@ root: $Box {
     },
 
     sharedComponents.navBar,
-    personWidget,
+    //    personWidget,
     $Image {
         textureName: "shop_dark_background",
         width: worldWidth,
@@ -246,9 +278,6 @@ root: $Box {
             {
                 positionType: positionType.absolute,
                 positionBottom: 0.0#points,
-                //                                width: (20.0/2)#percent,
-//                height: (20.0/2)#percent,
-
             }
         ],
     },
@@ -335,4 +364,73 @@ root: $Box {
             align: "center",
         }
     ]
-]
+],
+
+templates: [
+    $Image {
+        name: "cardsWidgetTextChild",
+        textureName: "shop_background_no_biome",
+        scaleX: 0.001,
+        scaleY: 0.001,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDragSource {
+            group: "card",
+            moveToLastIndex: true,
+        },
+        styles: [
+            {
+                width: 45.0#percent,
+                height: 25.0#percent,
+            }
+        ],
+        behaviours: [
+            $OnClickChangeScreenBehaviour {
+                screenPath: "screens/map_screen.onj"
+            },
+        ],
+    },
+    $Box {
+        name: "cardsParent",
+        styles: [
+            {
+                width: 20.0#percent,
+                height: 35.0#percent,
+            }
+        ],
+        behaviours: [
+            $OnClickChangeScreenBehaviour {
+                screenPath: "screens/map_screen.onj"
+            },
+        ],
+    },
+    $Box {
+        name: "cardsText",
+        styles: [
+            {
+                width: 20.0#percent,
+                height: 35.0#percent,
+            }
+        ],
+        behaviours: [
+            $OnClickChangeScreenBehaviour {
+                screenPath: "screens/map_screen.onj"
+            },
+        ],
+    },
+    $PersonWidget {
+        name: "shop_person_widget",
+        offsetX: 0.0,
+        offsetY: 0.0,
+        scale: 1.0,
+        dragAndDrop: $ShopDragSource {
+            group: "card",
+            moveToLastIndex: true,
+        },
+        styles: [
+            {
+                width: 40.0#percent,
+                height: 100.0#percent,
+            }
+        ],
+    }
+],

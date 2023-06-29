@@ -45,7 +45,8 @@ open class OnjScreen @MainThreadOnly constructor(
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: Map<String, Actor>,
     private val printFrameRate: Boolean,
-    val transitionAwayTime: Int?
+    val transitionAwayTime: Int?,
+    val screenBuilder: ScreenBuilder,
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
 
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()

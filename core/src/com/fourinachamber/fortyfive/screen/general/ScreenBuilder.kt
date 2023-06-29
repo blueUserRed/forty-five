@@ -52,7 +52,11 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
-    private val templateObjects: MutableList<OnjNamedObject> = mutableListOf()
+    private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
+
+    init {
+        curBuilder = this
+    }
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -76,7 +80,8 @@ class ScreenBuilder(val file: FileHandle) {
             namedActors = namedActors,
             printFrameRate = false,
             namedCells = mapOf(),
-            transitionAwayTime = transitionAwayTime
+            transitionAwayTime = transitionAwayTime,
+            screenBuilder = this,
         )
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
@@ -109,10 +114,51 @@ class ScreenBuilder(val file: FileHandle) {
         onj.ifHas<OnjArray>("templates") {
             for (a in it.value) {
                 a as OnjNamedObject
-                templateObjects.add(a)
+                a.ifHas<String>("name") { name ->
+                    templateObjects[name] = a
+                }
             }
         }
-//        println(templateObjects)
+    }
+
+
+    fun generateFromTemplate(name: String, data: Map<String, OnjValue>, parent: FlexBox?, screen: OnjScreen): Actor? {
+        if (!templateObjects.contains(name) || templateObjects[name] == null) return null
+        val curMap = mutableMapOf<String, OnjValue>()
+        val widgetOnj = OnjNamedObject(templateObjects[name]!!.name, curMap)
+        templateObjects[name]!!.value.entries.forEach { curMap[it.key] = getNextValue(it.key, it.value, data) }
+        val oldBehaviours = behavioursToBind.toList()
+        val curActor = getWidget(widgetOnj, parent, screen)
+        val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
+        for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
+        screen.dragAndDrop = doDragAndDrop(screen)
+        screen.invalidateEverything()
+        return curActor
+    }
+
+    private fun getNextValue(key: String, value: OnjValue, data: Map<String, OnjValue>): OnjValue {
+        if (key in data.keys) return data[key]!!
+        return when (value) {
+            is OnjNamedObject -> {
+                val x = mutableMapOf<String, OnjValue>()
+                value.value.entries.forEach { x[it.key] = getNextValue(it.key, it.value, data) }
+                OnjNamedObject(value.name, x)
+            }
+
+            is OnjObject -> {
+                val x = mutableMapOf<String, OnjValue>()
+                value.value.entries.forEach { x[it.key] = getNextValue(it.key, it.value, data) }
+                OnjObject(x)
+            }
+
+            is OnjArray -> {
+                val x = mutableListOf<OnjValue>()
+                value.value.forEach { x.add(getNextValue("", it, data)) }
+                OnjArray(x)
+            }
+
+            else -> value
+        }
     }
 
     private fun doOptions(onj: OnjObject) {
@@ -160,6 +206,8 @@ class ScreenBuilder(val file: FileHandle) {
                     actor,
                     onj
                 )
+                println("${onj.name} \n $onj\n\n\n")
+
                 if (behaviour is Either.Left) dragAndDrop.addSource(behaviour.value)
                 else dragAndDrop.addTarget((behaviour as Either.Right).value)
             }
@@ -359,7 +407,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),
             widgetOnj.get<Double>("scale").toFloat(),
-            widgetOnj.get<OnjNamedObject>("dropBehaviour"),
+            OnjNamedObject("name", mapOf()),//widgetOnj.get<OnjNamedObject>("dropBehaviour") //TODO change back
             screen
         )
 
@@ -522,7 +570,7 @@ class ScreenBuilder(val file: FileHandle) {
         val screenSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/screen.onjschema").file())
         }
-
+        lateinit var curBuilder: ScreenBuilder
     }
 
 }
