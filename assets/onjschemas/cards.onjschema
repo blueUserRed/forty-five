@@ -40,11 +40,4 @@ var card = {
 
 cards: card[],
 
-var startDeckEntry = {
-    name: string,
-    amount: int,
-};
-
 defaultBullet: string,
-
-startDeck: startDeckEntry[]

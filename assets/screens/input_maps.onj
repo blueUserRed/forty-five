@@ -7,7 +7,7 @@ defaultInputMap: [
         modifiers: [],
         action: $ToggleFullscreenKeyAction {
             width: 700,
-            height: 700*9/16
+            height:(700*9)/16
         }
     }
 ],

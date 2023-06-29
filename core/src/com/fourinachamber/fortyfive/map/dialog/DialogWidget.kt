@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
+import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onClick
 
 class DialogWidget(
@@ -53,6 +54,8 @@ class DialogWidget(
 
     private var initialisedOptionsBox: Boolean = false
     private lateinit var optionsBox: CustomFlexBox
+
+    private val optionBoxNodes: MutableList<YogaNode> = mutableListOf()
 
     private var chosenOption: String? = null
     private var currentOptions: Map<String, Int>? = null
@@ -121,18 +124,20 @@ class DialogWidget(
     }
 
     private fun setupOptionsBox() {
+        optionBoxNodes.clear()
         screen.enterState(showOptionsBoxScreenState)
         currentOptions!!.forEach { (option, _) ->
             val actor = CustomLabel(screen, option, Label.LabelStyle(optionsFont, optionsFontColor))
             actor.setFontScale(optionsFontScale)
             actor.onClick { chosenOption = option } // TODO: find some way to use onButtonClick there
-            optionsBox.add(actor)
+            val node = optionsBox.add(actor)
+            optionBoxNodes.add(node)
         }
     }
 
     private fun clearOptionsBox() {
         screen.leaveState(showOptionsBoxScreenState)
-        optionsBox.clear()
+        optionBoxNodes.forEach { optionsBox.remove(it) }
         chosenOption = null
         currentOptions = null
     }

@@ -1,53 +1,25 @@
 import "config/game_config.onj" as gameConfig;
 
-additionalCards: [
-],
-
-cardsToDraw: [
-    {
-        name: "arrow",
-        amount: 1
-    },
-    {
-        name: "BFB",
-        amount: 1
-    },
-    {
-        name: "obsidianBullet",
-        amount: 1
-    },
-    {
-        name: "rustedBullet",
-        amount: 1
-    },
-    {
-        name: "invisibleBullet",
-        amount: 1
-    },
-    {
-        name: "fakeBullet",
-        amount: 1
-    },
-    {
-        name: "bulletBulletBullet",
-        amount: 1
-    },
-    {
-        name: "bulletBullet",
-        amount: 1
-    },
-    {
-        name: "undeadBullet",
-        amount: 1
-    },
-    {
-        name: "poisonBullet",
-        amount: 1
-    }
+cards: [
+    "bullet", "bullet", "bullet", "bullet",
+    "incendiaryBullet",
+    "workerBullet",
+    "bigBullet",
+    "rottenBullet",
+    "bewitchedBullet",
+    "explosiveBullet",
+    "leadersBullet",
+    "silverBullet",
+    "arrow",
+    "obsidianBullet",
+    "rustedBullet",
+    "invisibleBullet",
+    "poisonBullet"
 ],
 
 playerLives: gameConfig.playerConfig.lives,
 playerMoney: 100,
+currentDifficulty: 1.0,
 
 stats: {
     usedReserves: 0,

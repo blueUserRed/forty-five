@@ -1,14 +1,24 @@
 
 use Common;
 
+var enemyActionSharedKeys = {
+    weight: int
+};
+
 $EnemyAction {
 
     $DestroyCardsInHand {
-        maxCards: int
+        maxCards: int,
+        ...enemyActionSharedKeys
     }
 
     $RevolverRotation {
-        maxTurns: int
+        maxTurns: int,
+        ...enemyActionSharedKeys
+    }
+
+    $ReturnCardToHand {
+        ...enemyActionSharedKeys
     }
 
 }

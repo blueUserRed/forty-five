@@ -5,12 +5,9 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.utils.TextureGenerator
 import com.fourinachamber.fortyfive.map.*
-import com.fourinachamber.fortyfive.onjNamespaces.CardsNamespace
-import com.fourinachamber.fortyfive.onjNamespaces.CommonNamespace
+import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
-import com.fourinachamber.fortyfive.onjNamespaces.ScreenNamespace
-import com.fourinachamber.fortyfive.onjNamespaces.StyleNamespace
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.*
@@ -40,7 +37,7 @@ object FortyFive : Game() {
         serviceThread.start()
         if (generateCards) runCardGenerator()
         if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
-        changeToScreen("screens/map_screen.onj")
+        changeToScreen("screens/title_screen.onj")
     }
 
     override fun render() {
@@ -66,17 +63,20 @@ object FortyFive : Game() {
 
         serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
+        fun onScreenChange() {
+            FortyFiveLogger.title("changing screen")
+            currentScreen?.dispose()
+            this.currentScreen = screen
+            currentRenderable = screen
+            setScreen(screen)
+            // TODO: not 100% clean, this function is sometimes called when it isn't necessary
+            MapManager.invalidateCachedAssets()
+        }
+
         if (currentScreen == null) {
-            FortyFiveLogger.title("changing screen")
-            this.currentScreen = screen
-            currentRenderable = screen
-            setScreen(screen)
+            onScreenChange()
         } else currentScreen.afterMs(currentScreen.transitionAwayTime ?: 0) {
-            FortyFiveLogger.title("changing screen")
-            currentScreen.dispose()
-            this.currentScreen = screen
-            currentRenderable = screen
-            setScreen(screen)
+            onScreenChange()
         }
     }
 
@@ -86,12 +86,15 @@ object FortyFive : Game() {
         renderable.init()
     }
 
-    fun newRunSync() {
+    fun newRun() {
+        PermaSaveState.newRun()
         SaveState.reset()
         MapManager.newRunSync()
+        MapManager.init() // re-read and reset things like the current map
     }
 
-    fun resetAllSync() {
+    fun resetAll() {
+        PermaSaveState.reset()
         SaveState.reset()
         MapManager.resetAllSync()
     }
@@ -102,11 +105,13 @@ object FortyFive : Game() {
             registerNameSpace("Cards", CardsNamespace)
             registerNameSpace("Style", StyleNamespace)
             registerNameSpace("Screen", ScreenNamespace)
+            registerNameSpace("Map", MapNamespace)
         }
         TemplateString.init()
         FortyFiveLogger.init()
-        resetAllSync()
-//        newRunSync()
+        resetAll()
+        newRun()
+        PermaSaveState.read()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()
@@ -114,8 +119,9 @@ object FortyFive : Game() {
     }
 
     override fun dispose() {
-        FortyFiveLogger.warn(logTag, "game closing")
+        FortyFiveLogger.debug(logTag, "game closing")
         MapManager.write()
+        PermaSaveState.write()
         SaveState.write()
         currentScreen?.dispose()
         serviceThread.close()

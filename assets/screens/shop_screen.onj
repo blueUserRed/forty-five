@@ -59,7 +59,8 @@ var personWidget = $PersonWidget {
     ],
 };
 
-var cardsWidgetTextChild = $Image {
+/*var cardsWidgetTextChild = $Image {  //This comment as an example for scrollable FlexBox
+                                        //if used, be careful of shopWidget, as it uses some parameters which aren't here now
 
     name: "background_img",
     textureName: "shop_background_no_biome",
@@ -90,7 +91,8 @@ var scrollBar = $Image {
     scaleY: 1.0,
     styles: [
         {
-            width: 5.5#points,
+            //TODO eigene style variable
+
         }
     ],
 };
@@ -102,7 +104,7 @@ var cardsWidget = $ScrollBox {
     backgroundStretched: false,
     scrollbarBackgroundName: "scrollbar_background",
     scrollbarName: "scrollbar_handle",
-    scrollbarSide: "right",
+    scrollbarSide: "top",
     styles: [
         {
             flexWrap: wrap.wrap,
@@ -119,47 +121,48 @@ var cardsWidget = $ScrollBox {
             cuttingRight: 1.75,
             cuttingTop: 2.0,
             cuttingBottom: 3.0,
+            scrollbarWidth: 7.5,
         }
     ],
 } children [
     cardsWidgetTextChild,
     cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
+//    cardsWidgetTextChild,
     scrollBarBackground,
     scrollBar,
-];
+];*/
 
-/*var cardsWidget = $ShopWidget {
+var cardsWidget = $ShopWidget {
     name: "cards_widget",
     texture: "shop_items_background",
     dataFile: "cards/cards.onj",
@@ -178,7 +181,7 @@ var cardsWidget = $ScrollBox {
             height: 69.0#percent,
         }
     ],
-};*/
+};
 
 root: $Box {
     styles: [
@@ -188,8 +191,6 @@ root: $Box {
         }
     ]
 } children [
-
-
     $Image {       //TODO biome for background
 
         name: "background_img",

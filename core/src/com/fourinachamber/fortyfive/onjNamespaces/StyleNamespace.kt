@@ -8,6 +8,7 @@ import onj.customization.Namespace.*
 import onj.customization.OnjFunction.*
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.OnjFloat
+import onj.value.OnjInt
 import onj.value.OnjString
 import onj.value.OnjValue
 import kotlin.reflect.KClass
@@ -84,6 +85,12 @@ object StyleNamespace {
 
     @RegisterOnjFunction(schema = "params: [float]", type = OnjFunctionType.CONVERSION)
     fun points(value: OnjFloat): OnjYogaValue = OnjYogaValue(YogaValue(value.value.toFloat(), YogaUnit.POINT))
+
+    @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
+    fun percent(value: OnjInt): OnjYogaValue = OnjYogaValue(YogaValue(value.value.toFloat(), YogaUnit.PERCENT))
+
+    @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
+    fun points(value: OnjInt): OnjYogaValue = OnjYogaValue(YogaValue(value.value.toFloat(), YogaUnit.POINT))
 
 }
 
