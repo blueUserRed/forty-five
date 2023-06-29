@@ -7,6 +7,7 @@ import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
 import ktx.actors.alpha
+import kotlin.math.absoluteValue
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Actor
@@ -472,7 +473,7 @@ fun <T> T.addScrollFlexBoxStyles(screen: OnjScreen) where T : CustomScrollableFl
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.RIGHT, "cuttingRight"))
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.UP, "cuttingTop"))
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.DOWN, "cuttingBottom"))
-
+    styleManager.addStyleProperty(ScrollbarWidthStyleProperty(this, screen, "scrollbarWidth"))
 }
 
 
@@ -594,4 +595,25 @@ class CuttingStyleProperty(
         Direction.RIGHT -> target.cutRight
         Direction.DOWN -> target.cutBottom
     }
+}
+
+class ScrollbarWidthStyleProperty(
+    target: CustomScrollableFlexBox,
+    screen: OnjScreen,
+    name: String
+) : StyleProperty<CustomScrollableFlexBox, Float>(
+    name,
+    target,
+    5f,
+    Float::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: Float, node: YogaNode) {
+        target.scrollbarWidth = data.absoluteValue
+    }
+
+    override fun get(node: YogaNode): Float = target.scrollbarWidth
 }

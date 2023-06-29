@@ -148,7 +148,7 @@ class ShopWidget(
     fun checkAndBuy(card: Card) {
         SaveState.playerMoney -= card.price
         buyCard(cards.indexOf(card))
-        FortyFiveLogger.debug(logTag, "Bought card ${card.name} for a price of ${card.price}")
+        FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
         SaveState.buyCard(card.name)
     }
 

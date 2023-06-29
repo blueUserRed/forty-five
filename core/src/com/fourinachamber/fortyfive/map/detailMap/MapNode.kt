@@ -196,7 +196,7 @@ data class MapNodeBuilder(
 
     override fun toString(): String {
         val cur = edgesTo.joinToString(separator = ",", transform = { it.toStringRec() })
-        return javaClass.simpleName + "{x: $x, y: $y, neighbours: $cur}"
+        return javaClass.simpleName + "{x: $x, y: $y, neighbors: $cur}"
     }
 
     override fun equals(other: Any?): Boolean {
