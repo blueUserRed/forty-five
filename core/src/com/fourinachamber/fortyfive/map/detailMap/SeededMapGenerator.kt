@@ -1042,7 +1042,7 @@ sealed class DecorationDistributionFunction(
         collidesOnlyWithNodes: Boolean,
         private val blockSize: Float,
         private val prob: Float,
-        private val additionalProbIfNei: Float
+        private val additionalProbIfNeighbor: Float
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -1085,7 +1085,7 @@ sealed class DecorationDistributionFunction(
             while (allPos.size > 0) {
                 val i = allPos[(rnd.nextDouble() * allPos.size).toInt()]
                 all[i].setIsCluster(
-                    rnd.nextDouble() < prob + (if (isNeiCluster(all, i, blockSize)) additionalProbIfNei else 0F)
+                    rnd.nextDouble() < prob + (if (isNeighborCluster(all, i, blockSize)) additionalProbIfNeighbor else 0F)
                 )
                 allPos.remove(i)
             }
@@ -1098,7 +1098,7 @@ sealed class DecorationDistributionFunction(
             return positions
         }
 
-        private fun isNeiCluster(all: Array<MyBlock>, i: Int, blockSize: Float): Boolean {
+        private fun isNeighborCluster(all: Array<MyBlock>, i: Int, blockSize: Float): Boolean {
             for (b in all) {
                 if (b.isCluster && b.pos.clone().sub(all[i].pos).len() < blockSize * 2) {
                     return true
@@ -1265,7 +1265,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Boolean>("onlyCollidesWithNodes"),
                 onj.get<Double>("blockSize").toFloat(),
                 onj.get<Double>("prob").toFloat(),
-                onj.get<Double>("additionalProbIfNei").toFloat(),
+                onj.get<Double>("additionalProbIfNeighbor").toFloat(),
             )
         },
     )

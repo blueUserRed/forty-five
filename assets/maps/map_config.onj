@@ -152,7 +152,7 @@ generatorConfig: {
                         scaleMax: 2.5,
                         blockSize: 20.0,
                         prob: 0.2,
-                        additionalProbIfNei: 0.1,
+                        additionalProbIfNeighbor: 0.1,
                         onlyCollidesWithNodes: false
                     },
                     $SingleClusterDistributionFunction {

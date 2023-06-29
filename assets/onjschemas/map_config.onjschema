@@ -67,7 +67,7 @@ $DecorationDistributionFunction {
         ...distributionFunctionStandardConfig,
         blockSize: float,
         prob: float,
-        additionalProbIfNei: float,
+        additionalProbIfNeighbor: float,
     }
 }
 

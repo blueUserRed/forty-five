@@ -566,19 +566,23 @@ class CustomScrollableFlexBox(
 
         override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
+            if (scrollbarHandle == null) {
+                startPos = Float.NaN
+                return
+            }
             startPos = if (isScrollDirectionVertical) {
-                val relX = (if (scrollbarSide == "left") 0F else width - scrollbarHandle.width)
-                val relY = scrollbarHandle.y - parentPos.y
-                if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
-                    && touchDownY < relY + scrollbarHandle.height && touchDownY > relY
-                ) scrollbarHandle.y
+                val relX = (if (scrollbarSide == "left") 0F else width - scrollbarHandle!!.width)
+                val relY = scrollbarHandle!!.y - parentPos.y
+                if (touchDownX < relX + scrollbarHandle!!.width && touchDownX > relX
+                    && touchDownY < relY + scrollbarHandle!!.height && touchDownY > relY
+                ) scrollbarHandle!!.y
                 else Float.NaN
             } else {
-                val relX = scrollbarHandle.x - parentPos.x
-                val relY = (if (scrollbarSide == "top") height - scrollbarHandle.height else 0F)
-                if (touchDownX < relX + scrollbarHandle.width && touchDownX > relX
-                    && touchDownY < relY + scrollbarHandle.height && touchDownY > relY
-                ) scrollbarHandle.x
+                val relX = scrollbarHandle!!.x - parentPos.x
+                val relY = (if (scrollbarSide == "top") height - scrollbarHandle!!.height else 0F)
+                if (touchDownX < relX + scrollbarHandle!!.width && touchDownX > relX
+                    && touchDownY < relY + scrollbarHandle!!.height && touchDownY > relY
+                ) scrollbarHandle!!.x
                 else Float.NaN
             }
         }
@@ -589,13 +593,13 @@ class CustomScrollableFlexBox(
             if (isScrollDirectionVertical) {
                 val max = lastMax - cutBottom
                 val curSize = height * height / (max + height)
-                scrollbarHandle.y = startPos + (y - touchDownY) + cutTop
-                offset = (-(scrollbarHandle.y - parentPos.x) - curSize) * max / (height - curSize)
+                scrollbarHandle!!.y = startPos + (y - touchDownY) + cutTop
+                offset = (-(scrollbarHandle!!.y - parentPos.x) - curSize) * max / (height - curSize)
             } else {
-                scrollbarHandle.x = (startPos + x - touchDownX)
+                scrollbarHandle!!.x = (startPos + x - touchDownX)
                 val max = lastMax
                 val curSize = width * width / (max + width)
-                offset = -(scrollbarHandle.x - parentPos.x) * max / (width - curSize) - cutLeft
+                offset = -(scrollbarHandle!!.x - parentPos.x) * max / (width - curSize) - cutLeft
             }
             invalidate()
         }
@@ -617,9 +621,9 @@ class CustomScrollableFlexBox(
     var cutTop: Float = 0F
     var cutBottom: Float = 0F
     private var lastMax: Float = 0F
-    private lateinit var scrollbarBackground: CustomImageActor
-    private lateinit var scrollbarHandle: CustomImageActor
-    var scrollbarWidth: Float = 3F
+    private var scrollbarBackground: CustomImageActor? = null
+    private var scrollbarHandle: CustomImageActor? = null
+    var scrollbarWidth: Float = 0F
 
     override fun layout() {
         super.layout()
@@ -630,33 +634,19 @@ class CustomScrollableFlexBox(
 
     private fun layoutScrollBar() {
         if (scrollbarBackgroundName != null) {
-            if (!this::scrollbarBackground.isInitialized) {
+            if (scrollbarBackground == null) {
                 scrollbarBackground = screen.namedActorOrError(scrollbarBackgroundName) as CustomImageActor
-                remove(scrollbarBackground.styleManager?.node)
+                remove(scrollbarBackground?.styleManager?.node)
             }
-            if (needsScrollbar)
-                layoutScrollbarBackground()
+            if (needsScrollbar) layoutScrollbarBackground()
         }
         if (scrollbarName != null) {
-            if (!this::scrollbarHandle.isInitialized) {
-                initScrollbarHandle()
+            if (scrollbarHandle == null) {
+                scrollbarHandle = screen.namedActorOrError(scrollbarName) as CustomImageActor
+                remove(scrollbarHandle?.styleManager?.node)
             }
-            if (needsScrollbar)
-                layoutScrollbarHandle()
+            if (needsScrollbar) layoutScrollbarHandle()
         }
-    }
-
-    private fun initScrollbarHandle() {
-        scrollbarHandle = screen.namedActorOrError(scrollbarName!!) as CustomImageActor
-        remove(scrollbarHandle.styleManager?.node)
-        //get width from style manager
-        scrollbarWidth = (scrollbarHandle.styleManager
-            ?.let {
-                scrollbarHandle.styleManager?.styleProperties
-                    ?.filterIsInstance<WidthStyleProperty<*>>()
-                    ?.first()
-                    ?.get(it.node)
-            })?.value ?: scrollbarWidth
     }
 
     private fun layoutChildren() {
@@ -685,22 +675,22 @@ class CustomScrollableFlexBox(
     private fun layoutScrollbarBackground() {
         if (isScrollDirectionVertical) {
             if (scrollbarSide != null && scrollbarSide == "left") {
-                scrollbarBackground.x = x
+                scrollbarBackground?.x = x
             } else {
-                scrollbarBackground.x = x + width - scrollbarWidth
+                scrollbarBackground?.x = x + width - scrollbarWidth
             }
-            scrollbarBackground.y = y
-            scrollbarBackground.width = scrollbarWidth
-            scrollbarBackground.height = height
+            scrollbarBackground?.y = y
+            scrollbarBackground?.width = scrollbarWidth
+            scrollbarBackground?.height = height
         } else {
             if (scrollbarSide != null && scrollbarSide == "top") {
-                scrollbarBackground.y = y + height - scrollbarWidth
+                scrollbarBackground?.y = y + height - scrollbarWidth
             } else {
-                scrollbarBackground.y = y
+                scrollbarBackground?.y = y
             }
-            scrollbarBackground.x = x
-            scrollbarBackground.width = width
-            scrollbarBackground.height = scrollbarWidth
+            scrollbarBackground?.x = x
+            scrollbarBackground?.width = width
+            scrollbarBackground?.height = scrollbarWidth
         }
     }
 
@@ -710,13 +700,13 @@ class CustomScrollableFlexBox(
             val curSize = height * height / (max + height)
             val curPos = offset / max * (height - curSize)
             if (scrollbarSide != null && scrollbarSide == "left") {
-                scrollbarHandle.x = x
+                scrollbarHandle!!.x = x
             } else {
-                scrollbarHandle.x = x + width - scrollbarWidth
+                scrollbarHandle!!.x = x + width - scrollbarWidth
             }
-            scrollbarHandle.width = scrollbarWidth
-            scrollbarHandle.height = curSize
-            scrollbarHandle.y = y + height - curPos - curSize
+            scrollbarHandle!!.width = scrollbarWidth
+            scrollbarHandle!!.height = curSize
+            scrollbarHandle!!.y = y + height - curPos - curSize
         } else {
             val offset = offset + cutLeft
             val max = lastMax
@@ -725,19 +715,20 @@ class CustomScrollableFlexBox(
             val curPos = offset / max * (width - curSize)
 
             if (scrollbarSide != null && scrollbarSide == "top") {
-                scrollbarHandle.y = y + height - scrollbarWidth
+                scrollbarHandle!!.y = y + height - scrollbarWidth
             } else {
-                scrollbarHandle.y = y
+                scrollbarHandle!!.y = y
             }
-            scrollbarHandle.height = scrollbarWidth
-            scrollbarHandle.width = curSize
-            scrollbarHandle.x = x - curPos
+            scrollbarHandle!!.height = scrollbarWidth
+            scrollbarHandle!!.width = curSize
+            scrollbarHandle!!.x = x - curPos
         }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
         batch.flush()
+
         val viewport = screen.stage.viewport
         val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
         val yPixel =
@@ -745,23 +736,35 @@ class CustomScrollableFlexBox(
         if (isBackgroundStretched) {
             if (drawBackgroundStretched(batch, xPixel, viewport, yPixel, parentAlpha)) return
         } else {
-            super.draw(batch, parentAlpha)
+            background?.draw(batch, x, y, width, height)
+            if (drawItemsWithScissor(xPixel, viewport, yPixel, batch, parentAlpha)) return
         }
+        if (needsScrollbar) {
+            scrollbarBackground?.draw(batch, alpha)
+            scrollbarHandle?.draw(batch, alpha)
+        }
+    }
+
+    private fun drawItemsWithScissor(
+        xPixel: Float,
+        viewport: Viewport,
+        yPixel: Float,
+        batch: Batch,
+        parentAlpha: Float
+    ): Boolean {
         val scissor = Rectangle(
             xPixel * (x + cutLeft) + viewport.leftGutterWidth,
             yPixel * (y + cutBottom) + viewport.topGutterHeight,
             xPixel * (width - cutLeft - cutRight),
             yPixel * (height - cutTop - cutBottom)
         )
-        if (!ScissorStack.pushScissors(scissor)) return
+        batch.flush()
+        super.draw(batch, parentAlpha)
+        if (!ScissorStack.pushScissors(scissor)) return true
         batch.flush()
         ScissorStack.popScissors()
-
         batch.flush()
-        if (needsScrollbar) {
-            if (this::scrollbarBackground.isInitialized) scrollbarBackground.draw(batch, alpha)
-            if (this::scrollbarHandle.isInitialized) scrollbarHandle.draw(batch, alpha)
-        }
+        return false
     }
 
     private fun drawBackgroundStretched(
@@ -771,6 +774,13 @@ class CustomScrollableFlexBox(
         yPixel: Float,
         parentAlpha: Float
     ): Boolean {
+        val scissorBack = Rectangle(
+            xPixel * x + viewport.leftGutterWidth,
+            yPixel * y + viewport.topGutterHeight,
+            xPixel * width,
+            yPixel * height
+        )
+        if (!ScissorStack.pushScissors(scissorBack)) return true
         val backgroundHandle = backgroundHandle
         if (backgroundHandle != null && background == null) background = ResourceManager.get(screen, backgroundHandle)
         validate()
@@ -785,18 +795,15 @@ class CustomScrollableFlexBox(
                 background?.draw(batch, x + offset + cutLeft, y, width + lastMax, height)
             }
         }
-        val scissorBack = Rectangle(
-            xPixel * x + viewport.leftGutterWidth,
-            yPixel * y + viewport.topGutterHeight,
-            xPixel * width,
-            yPixel * height
-        )
-        if (!ScissorStack.pushScissors(scissorBack)) return true
         batch.flush()
         ScissorStack.popScissors()
-        val saveBackground = backgroundHandle
+        batch.flush()
+        val saveBackground = backgroundHandle //TODO push vor drawn,
         this.backgroundHandle = null
-        super.draw(batch, parentAlpha)
+        if (drawItemsWithScissor(xPixel, viewport, yPixel, batch, parentAlpha)) {
+            this.backgroundHandle = saveBackground
+            return true
+        }
         this.backgroundHandle = saveBackground
         return false
     }
