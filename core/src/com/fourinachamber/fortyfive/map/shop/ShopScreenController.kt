@@ -1,14 +1,11 @@
 package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
 import dev.lyze.flexbox.FlexBox
-import ktx.actors.onChange
-import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -39,9 +36,9 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         screen = onjScreen
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
-//        val personWidget = onjScreen.namedActorOrError(personWidgetName)
-//        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
-//        this.personWidget = personWidget
+        val personWidget = onjScreen.namedActorOrError(personWidgetName)
+        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
+        this.personWidget = personWidget
         val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
         shopsSchema.assertMatches(shopFile)
         shopFile as OnjObject
@@ -61,7 +58,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-//        personWidget.setDrawable(imgData)
+        personWidget.setDrawable(imgData)
 //        personWidget.addDropTarget(dragAndDrop)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
@@ -71,22 +68,14 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
 //        addItemWidgets(shopFile, person) //TODO einfügen falls broke
 
-        val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
-        tempMap["name"] = OnjString("Card1")
-        tempMap["textureName"] = OnjString("enemy_texture")
-
-        tempImageActor = screen.screenBuilder.generateFromTemplate(
-            "cardsWidgetTextChild",
-            tempMap,
-            screen.namedActorOrError(shopWidgetNames[0]) as FlexBox,
-            onjScreen
-        )!! as CustomImageActor
-        screen.screenBuilder.generateFromTemplate(
-            "cardsWidgetTextChild",
-            tempMap,
-            screen.namedActorOrError(shopWidgetNames[0]) as FlexBox,
-            onjScreen
-        )
+        for (i in 0 until 20)
+        addCard(onjScreen)
+//        screen.screenBuilder.generateFromTemplate(
+//            "cardsWidgetTextChild",
+//            tempMap,
+//            screen.namedActorOrError(shopWidgetNames[0]) as FlexBox,
+//            onjScreen
+//        )
 //        tempImageActor.invalidateHierarchy()
 //        val shopWidget = screen.namedActorOrError(shopWidgetNames[0]) as ShopWidget
 //        shopWidget.showActorData(tempImageActor)
@@ -95,6 +84,33 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 //        backButton.onButtonClick {
 ////            personWidget.giveResourcesBack()
 //        }
+    }
+
+    private fun addCard(
+        onjScreen: OnjScreen
+    ) {
+        val curParent = screen.screenBuilder.generateFromTemplate(
+            "cardsWidgetParent",
+            mapOf(),
+            screen.namedActorOrError(shopWidgetNames[0]) as CustomScrollableFlexBox,
+            onjScreen
+        )!! as FlexBox
+
+        val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
+        tempMap["name"] = OnjString("Card1")
+        tempMap["textureName"] = OnjString("enemy_texture")
+        screen.screenBuilder.generateFromTemplate(
+            "cardsWidgetImage",
+            tempMap,
+            curParent,
+            onjScreen
+        )
+        screen.screenBuilder.generateFromTemplate(
+            "cardsWidgetPrice",
+            mapOf(),
+            curParent,
+            onjScreen
+        )
     }
 
     private fun addItemWidgets(shopFile: OnjObject, person: OnjObject) {

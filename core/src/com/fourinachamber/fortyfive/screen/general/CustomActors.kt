@@ -605,6 +605,8 @@ class CustomScrollableFlexBox(
         }
     }
 
+    var currentlyDraggedChild: Actor? = null
+
     init {
         addListener(scrollListener)
         addListener(dragListener)
@@ -742,6 +744,14 @@ class CustomScrollableFlexBox(
         if (needsScrollbar) {
             scrollbarBackground?.draw(batch, alpha)
             scrollbarHandle?.draw(batch, alpha)
+        }
+        if (currentlyDraggedChild != null) {
+            val coordinates = localToStageCoordinates(Vector2())
+            currentlyDraggedChild!!.x += coordinates.x
+            currentlyDraggedChild!!.y += coordinates.y
+            currentlyDraggedChild?.draw(batch, alpha)
+            currentlyDraggedChild!!.x -= coordinates.x
+            currentlyDraggedChild!!.y -= coordinates.y
         }
     }
 

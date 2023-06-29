@@ -206,8 +206,6 @@ class ScreenBuilder(val file: FileHandle) {
                     actor,
                     onj
                 )
-                println("${onj.name} \n $onj\n\n\n")
-
                 if (behaviour is Either.Left) dragAndDrop.addSource(behaviour.value)
                 else dragAndDrop.addTarget((behaviour as Either.Right).value)
             }
@@ -249,24 +247,6 @@ class ScreenBuilder(val file: FileHandle) {
         else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
 
     }
-
-    /*
-        fun generateTemplateWidget(
-            widgetOnj: OnjNamedObject,
-            parent: FlexBox,
-            screen: OnjScreen,
-        ): Actor = when (widgetOnj.name) {
-            "Image" -> CustomImageActor(
-                widgetOnj.getOr<String?>("textureName", null),
-                screen,
-                widgetOnj.getOr("partOfSelectionHierarchy", false)
-            ).apply {
-                applyImageKeys(this, widgetOnj)
-            }
-
-            else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
-        }
-    */
 
     private fun getWidget(
         widgetOnj: OnjNamedObject,
