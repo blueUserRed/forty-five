@@ -6,6 +6,16 @@ var mapEventStandardConfig = {
     isCompleted: boolean
 };
 
+var distributionFunctionStandardConfig = {
+    decoration: string,
+    density: float,
+    baseWidth: float,
+    baseHeight: float,
+    scaleMin: float,
+    scaleMax: float,
+    onlyCollidesWithNodes: boolean
+};
+
 $MapEvent {
 
     $EmptyMapEvent { }
@@ -34,18 +44,31 @@ $MapEvent {
 
 }
 
+
 $DecorationDistributionFunction {
 
     $RandomDistributionFunction {
-        decoration: string,
-        density: float,
-        baseWidth: float,
-        baseHeight: float,
-        scaleMin: float,
-        scaleMax: float,
-        onlyCollidesWithNodes: boolean
+        ...distributionFunctionStandardConfig,
     }
 
+    $SingleClusterDistributionFunction{
+        ...distributionFunctionStandardConfig,
+        minCenterX?: Float,
+        maxCenterX?: Float,
+        minCenterY?: Float,
+        maxCenterY?: Float,
+        innerRadius: Float,
+        outerRadius: Float,
+        nbrOfInnerPoints: Int,
+        nbrOfOuterPoints: Int,
+    }
+
+    $MultiClusterDistributionFunction {
+        ...distributionFunctionStandardConfig,
+        blockSize: float,
+        prob: float,
+        additionalProbIfNeighbor: float,
+    }
 }
 
 var mapRestrictions = {
@@ -66,13 +89,18 @@ var mapRestrictions = {
     percentageForAllowedNodesInRangeBetweenLineAndArea: float,
     rotation: float,
     otherAreas: string[],
-    fixedEvents: $MapEvent[],
+    fixedEvents: {
+        isDeadEnd: boolean,
+        event: $MapEvent
+    }[],
     optionalEvents: {
         weight: int,
         event: $MapEvent
     }[],
     decorationSeed: int,
-    decorations: $DecorationDistributionFunction[]
+    decorations: $DecorationDistributionFunction[],
+    pathTotalWidth: float,
+    minDistanceBetweenNodes: float,
 };
 
 screens: {

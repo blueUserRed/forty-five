@@ -328,6 +328,15 @@ ninepatches: [
         left: 16,
         right: 16,
         scale: 0.1
+    },
+    {
+        name: "test_scrollbar_background",
+        file: "textures/ninepatches/test_scrollbar_background.png",
+        top: 24,
+        bottom: 24,
+        left: 24,
+        right: 24,
+        scale: 0.04
     }
 ],
 

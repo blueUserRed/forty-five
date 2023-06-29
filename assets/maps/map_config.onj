@@ -1,6 +1,4 @@
-
 use Map;
-
 var images = {
     testArea: {
         image: "location_sign_aqua_dulche",
@@ -64,27 +62,50 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 14,
                 minNodes: 8,
-//                maxSplits: 1,
+                //                maxSplits: 1,
+
                 maxSplits: 4,
-//                splitProbability: 0.5,
+                //                splitProbability: 0.5,
+
                 splitProbability: 0.6,
                 compressProbability: 0.2,
-//                compressProbability: 0.55,
+                //                compressProbability: 0.55,
+
                 averageLengthOfLineInBetween: 26.0,
                 maxWidth: 40,
                 maxAnglePercent: 0.6,
                 rangeToCheckBetweenNodes: 0.6,
                 startArea: "test_area",
                 endArea: "salem",
-                otherAreas: [],
+                otherAreas: [
+                ],
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
-                rotation: 0.0,
-                fixedEvents: [],
+                rotation: 1.25,
+                minDistanceBetweenNodes: 15.0,
+                pathTotalWidth: 7.5,
+                fixedEvents: [
+                    {
+                        isDeadEnd: true,
+                        event: $EncounterMapEvent {
+                            currentlyBlocks: true,
+                            canBeStarted: true,
+                            isCompleted: false
+                        },
+                    },
+                    {
+                        isDeadEnd: false,
+                        event: $EncounterMapEvent {
+                            currentlyBlocks: true,
+                            canBeStarted: true,
+                            isCompleted: false
+                        },
+                    },
+                ],
                 optionalEvents: [
                     {
-                        weight: 15,
+                        weight: 20,
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
@@ -92,8 +113,14 @@ generatorConfig: {
                         }
                     },
                     {
+                        weight: 20,
+                        event: $EmptyMapEvent {
+                        }
+                    },
+                    {
                         weight: 10,
-                        event: $EmptyMapEvent { }
+                        event: $EmptyMapEvent {
+                        }
                     }
                 ],
                 decorations: [
@@ -106,19 +133,45 @@ generatorConfig: {
                         scaleMax: 1.2,
                         onlyCollidesWithNodes: false
                     },
-                    $RandomDistributionFunction {
+                    //
+//                    $RandomDistributionFunction {
+//                        decoration: "map_decoration_grass",
+//                        density: 0.01,
+//                        baseWidth: 2.0,
+//                        baseHeight: 4.0,
+//                        scaleMin: 1.5,
+//                        scaleMax: 2.5,
+//                        onlyCollidesWithNodes: false
+//                    },
+                    $MultiClusterDistributionFunction {
                         decoration: "map_decoration_cactus",
-                        density: 0.01,
+                        density: 0.1,
                         baseWidth: 2.0,
                         baseHeight: 4.0,
                         scaleMin: 1.5,
                         scaleMax: 2.5,
+                        blockSize: 20.0,
+                        prob: 0.2,
+                        additionalProbIfNeighbor: 0.1,
                         onlyCollidesWithNodes: false
-                    }
+                    },
+                    $SingleClusterDistributionFunction {
+                        decoration: "map_decoration_grass",
+                        density: 0.1,
+                        baseWidth: 3.0,
+                        baseHeight: 3.0,
+                        scaleMin: 3.5,
+                        scaleMax: 4.5,
+                        innerRadius: 20.0,
+                        outerRadius: 80.0,
+                        nbrOfInnerPoints: 7,
+                        nbrOfOuterPoints: 15,
+                        onlyCollidesWithNodes: false
+                    },
                 ],
-                decorationSeed: 230789230789407892340,
-                decorationPadding: 40.0
-            }
+                decorationSeed: 230789230789407892342,
+                decorationPadding: 40.0,
+            },
         },
         {
             name: "endlessRoad",
@@ -126,11 +179,14 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 25,
                 minNodes: 20,
-//                maxSplits: 1,
+                //                maxSplits: 1,
+
                 maxSplits: 6,
-//                splitProbability: 0.5,
+                //                splitProbability: 0.5,
+
                 splitProbability: 0.4,
-//                compressProbability: 0.2,
+                //                compressProbability: 0.2,
+
                 compressProbability: 0.55,
                 averageLengthOfLineInBetween: 26.0,
                 maxWidth: 40,
@@ -138,18 +194,25 @@ generatorConfig: {
                 rangeToCheckBetweenNodes: 0.6,
                 startArea: "salem",
                 endArea: "salem",
-                otherAreas: [],
+                otherAreas: [
+                ],
                 minDistanceBetweenAreas: 100.0,
                 distanceFromAreaToLine: 100.0,
                 percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
                 rotation: 0.0,
+                minDistanceBetweenNodes: 15.0,
+                pathTotalWidth: 7.5,
                 fixedEvents: [
-                    $ShopMapEvent {
-                        seed: null,
-                        boughtIndices: [],
-                        type: "rare_shop",
-                        biome: "no_biome",
-                        person: "rare_merchant",
+                    {
+                        isDeadEnd: false,
+                        event: $ShopMapEvent {
+                            seed: null,
+                            boughtIndices: [
+                            ],
+                            type: "rare_shop",
+                            biome: "no_biome",
+                            person: "rare_merchant",
+                        }
                     }
                 ],
                 optionalEvents: [
@@ -187,6 +250,7 @@ generatorConfig: {
             }
         },
     ]
+
 },
 
 

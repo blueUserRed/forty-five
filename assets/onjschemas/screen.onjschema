@@ -48,6 +48,18 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $ScrollBox {
+        children?: $Widget[],
+        partOfSelectionHierarchy?: boolean,
+        isScrollDirectionVertical: boolean,
+        scrollDistance: float,
+        backgroundStretched: boolean,
+        scrollbarBackgroundName?: string,
+        scrollbarName?: string,
+        scrollbarSide?: string,
+        ...widgetSharedKeys
+    }
+
     $Label {
         text: string,
         font: string,
@@ -360,6 +372,9 @@ $KeyAction {
 
     $FireClickEventKeyAction { }
 
+    $MoveInDetailMapKeyAction {
+        direction: string
+    }
 }
 
 viewport: $Viewport,

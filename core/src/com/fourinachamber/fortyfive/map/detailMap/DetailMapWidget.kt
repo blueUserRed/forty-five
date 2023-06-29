@@ -56,7 +56,7 @@ class DetailMapWidget(
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
 
-    private var mapOffset: Vector2 = Vector2(0f, 50f)
+    private var mapOffset: Vector2 = Vector2(50f, 50f)
 
     private var playerNode: MapNode = MapManager.currentMapNode
     private var playerPos: Vector2 = Vector2(playerNode.x, playerNode.y)
@@ -144,8 +144,15 @@ class DetailMapWidget(
                 finishMovement()
                 return
             }
-            pointToNode?.let { goToNode(it) }
         }
+    }
+
+    fun moveToNextNode(mapNode: MapNode) {
+        if (movePlayerTo != null) {
+            finishMovement()
+            return
+        }
+        goToNode(mapNode)
     }
 
     init {
@@ -153,6 +160,7 @@ class DetailMapWidget(
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
+        map.curDetailMapWidget = this
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
         mapOffset = Vector2(
@@ -216,8 +224,8 @@ class DetailMapWidget(
         val viewport = screen.stage.viewport
         val scissor = Rectangle(
             0f, viewport.bottomGutterHeight.toFloat(),
-            (Gdx.graphics.width / 160f) * width,
-            ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / 90f) * height
+            (Gdx.graphics.width / viewport.worldWidth) * width,
+            ((Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight) * height
         )
         if (!ScissorStack.pushScissors(scissor)) return
         drawBackground(batch)

@@ -45,9 +45,10 @@ class SeededMapGenerator(
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         addEvents(nodes)
-        nodes.forEach { it.scale(1F, .6F) }    //TODO manche events eher am Dead-Ends spawnen
-        nodes.forEach { it.rotate(restrictions.rotation) }  //TODO Parameter für Weg-breite (mit collision)
-        val decos = generateDecorations(nodes, connections) //TODO Rotations fixen mit decorations
+
+//        nodes.forEach { it.scale(1F, .6F) } //TODO add parameter for scaling
+        nodes.forEach { it.rotate(restrictions.rotation) }
+        val decos = generateDecorations(nodes)
         this.nodes = nodes
         build()
         return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos)
@@ -55,8 +56,8 @@ class SeededMapGenerator(
 
     private fun generateDecorations(
         nodes: List<MapNodeBuilder>,
-        connections: MutableList<Line>
     ): List<DetailMap.MapDecoration> {
+        val connections = getUniqueLinesFromNodes(nodes)
         val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
         val xRange =
             ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
@@ -66,17 +67,24 @@ class SeededMapGenerator(
             decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
         }
         return decos
-    }
+    }//auf main pushen?, templateWidgets?
 
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
-        val nodesWithoutEvents: MutableList<MapNodeBuilder> = nodes.filter { a -> a.event == null }.toMutableList()
-        for (curEvent in restrictions.fixedEvents) {
-            if (nodesWithoutEvents.isEmpty()) {
-                break
+        val nodesWithoutEvents = nodes.filter { a -> a.event == null }.toMutableList()
+        val deadEndsWithoutEvents = nodesWithoutEvents.filter { it.edgesTo.size == 1 }.toMutableList()
+        val sortedFixedEvents = restrictions.fixedEvents.sortedBy { !it.second }
+        nodesWithoutEvents.removeAll(deadEndsWithoutEvents)
+        for (curEvent in sortedFixedEvents) {
+            if (nodesWithoutEvents.isEmpty() && deadEndsWithoutEvents.isEmpty()) break
+            if ((curEvent.second && deadEndsWithoutEvents.isNotEmpty()) || nodesWithoutEvents.isEmpty()) {
+                val curNode = deadEndsWithoutEvents.random(rnd)
+                curNode.event = curEvent.first
+                deadEndsWithoutEvents.remove(curNode)
+            } else {
+                val curNode = nodesWithoutEvents.random(rnd)
+                curNode.event = curEvent.first
+                nodesWithoutEvents.remove(curNode)
             }
-            val curNode = nodesWithoutEvents.random(rnd)
-            curNode.event = curEvent
-            nodesWithoutEvents.remove(curNode)
         }
         val maxWeight: Int = restrictions.optionalEvents.sumOf { a -> a.first }
         val allWeightEnds = mutableListOf<Double>()
@@ -136,7 +144,7 @@ class SeededMapGenerator(
                 event = EnterMapMapEvent(areaName, false),
             )
             borderNodes.random(rnd).connect(newArea, direction)
-            connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))//TODO evtl. falsch oder so
+            connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))
             areaNodes.add(newArea)
         }
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
@@ -204,18 +212,23 @@ class SeededMapGenerator(
             val uniqueNodes: MutableList<MapNodeBuilder> = getUniqueNodesFromNodeRecursive(
                 nodes[0], mutableListOf()
             )
-            val uniqueLines = mutableListOf<Line>()
-            for (node in uniqueNodes) {
-                for (other in node.edgesTo) {
-                    if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
-                        uniqueLines.add(Line(Vector2(node.x, node.y), Vector2(other.x, other.y)))
-                    }
-                }
-            }
             nodes.removeIf { it !in uniqueNodes }
+            val uniqueLines = getUniqueLinesFromNodes(uniqueNodes)
             while (checkLinesNotIntercepting(uniqueLines, nodes)) hadErrors = true
             if (!hadErrors) return uniqueLines
         }
+    }
+
+    private fun getUniqueLinesFromNodes(uniqueNodes: List<MapNodeBuilder>): MutableList<Line> {
+        val uniqueLines = mutableListOf<Line>()
+        for (node in uniqueNodes) {
+            for (other in node.edgesTo) {
+                if (Line(Vector2(other.x, other.y), Vector2(node.x, node.y)) !in uniqueLines) {
+                    uniqueLines.add(Line(Vector2(node.x, node.y), Vector2(other.x, other.y)))
+                }
+            }
+        }
+        return uniqueLines
     }
 
     /**
@@ -242,10 +255,13 @@ class SeededMapGenerator(
             val line1 = uniqueLines[i]
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
-                val interceptPoint = line1.intersection(line2)
-                if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
-                    correctInterceptionNode(nodes, line1, line2, interceptPoint, uniqueLines)
-                    return true
+                if (!line1.sharesPointWith(line2)) {
+                    val interceptPoint = line1.addOnEachEnd(restrictions.pathTotalWidth)
+                        .intersection(line2.addOnEachEnd(restrictions.pathTotalWidth))
+                    if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
+                        correctInterceptionNode(nodes, uniqueLines[i], uniqueLines[j], interceptPoint, uniqueLines)
+                        return true
+                    }
                 }
             }
         }
@@ -264,8 +280,9 @@ class SeededMapGenerator(
     ) {
         var intersectionNode: MapNodeBuilder? = null
         for (i in nodes) {
-            val newVec = interceptPoint.clone().sub(Vector2(i.x, i.y))
-            if (newVec.len() < 10) {
+            val newVec = interceptPoint.clone()
+                .sub(Vector2(i.x + restrictions.pathTotalWidth / 2, i.y + restrictions.pathTotalWidth / 2))
+            if (newVec.len() < restrictions.pathTotalWidth) {
                 intersectionNode = i
                 break
             }
@@ -301,7 +318,6 @@ class SeededMapGenerator(
         )
         if (curNodes[0] in mainLine.lineNodes && curNodes[1] in mainLine.lineNodes) return line2
         if (curNodes[2] in mainLine.lineNodes && curNodes[3] in mainLine.lineNodes) return line1
-
         if (possibleIntersectionNode == curNodes[0] || possibleIntersectionNode == curNodes[1]) return line2
         if (possibleIntersectionNode == curNodes[2] || possibleIntersectionNode == curNodes[3]) return line1
         return (if (rnd.nextBoolean()) line1 else line2)
@@ -330,13 +346,13 @@ class SeededMapGenerator(
         newNode: MapNodeBuilder,
         uniqueLines: MutableList<Line>
     ) {
+
         val firstNode = nodes.first { a -> a.x == nodesConnection.start.x && a.y == nodesConnection.start.y }
         val secNode = nodes.first { a -> a.x == nodesConnection.end.x && a.y == nodesConnection.end.y }
         firstNode.edgesTo[firstNode.edgesTo.indexOf(secNode)] = newNode
         secNode.edgesTo[secNode.edgesTo.indexOf(firstNode)] = newNode
         newNode.edgesTo.add(firstNode)
         newNode.edgesTo.add(secNode)
-        nodes.add(newNode)
         uniqueLines.remove(nodesConnection)
         uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
         uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
@@ -461,10 +477,10 @@ class SeededMapGenerator(
             oldLine: MapGeneratorLine
         ): ClosedFloatingPointRange<Float> {
             if (oldLineMin) {
-                val a = oldLine.getMinInRange(pointToAdd.x) - 5
+                val a = oldLine.getMinInRange(pointToAdd.x) - restrict.minDistanceBetweenNodes
                 return ((a - restrict.maxWidth)..(a))
             }
-            val a = oldLine.getMaxInRange(pointToAdd.x) + 5
+            val a = oldLine.getMaxInRange(pointToAdd.x) + restrict.minDistanceBetweenNodes
             return ((a)..(a + restrict.maxWidth))
         }
 
@@ -564,8 +580,6 @@ class SeededMapGenerator(
                 for (i in lineNodes) {
                     if (i !in nodes) nodes.add(i)
                 }
-//                var lastToTop: Int = -2
-//                var lastToBottom: Int = -2
                 for (i in lineNodes.indices) {
                     val numberOfConnections: Int = getNbrOfConn(
                         rnd,
@@ -742,6 +756,27 @@ class Line(val start: Vector2, val end: Vector2) {
             Vector2(end.x - a, end.y - b).add(sizeToNodeCenter),
         )
     }
+
+    fun addOnEachEnd(distance: Float): Line {
+        val ang = ang()
+        val result = Line(start.clone(), end.clone())
+        if (start.x < end.x) {
+            result.start.x -= (cos(ang) * distance)
+            result.start.y -= (sin(ang) * distance)
+            result.end.x += (cos(ang) * distance)
+            result.end.y += (sin(ang) * distance)
+        } else {
+            result.start.x += (cos(ang) * distance)
+            result.start.y += (sin(ang) * distance)
+            result.end.x -= (cos(ang) * distance)
+            result.end.y -= (sin(ang) * distance)
+        }
+        return result
+    }
+
+    fun sharesPointWith(line2: Line): Boolean {
+        return line2.start == start || line2.start == end || line2.end == start || line2.end == end
+    }
 }
 
 enum class Direction {
@@ -750,6 +785,11 @@ enum class Direction {
             return DOWN
         }
 
+        override fun getAngle(): Float {
+            return Math.PI.toFloat() / 2
+        }
+
+
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
             return curLine.lineUp
         }
@@ -757,6 +797,10 @@ enum class Direction {
     DOWN {
         override fun getOpposite(): Direction {
             return UP
+        }
+
+        override fun getAngle(): Float {
+            return Math.PI.toFloat() * 3 / 2
         }
 
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
@@ -768,6 +812,10 @@ enum class Direction {
             return RIGHT
         }
 
+        override fun getAngle(): Float {
+            return Math.PI.toFloat()
+        }
+
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine {
             return curLine
         }
@@ -777,12 +825,17 @@ enum class Direction {
             return LEFT
         }
 
+        override fun getAngle(): Float {
+            return 0F
+        }
+
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
             return LEFT.getOtherLine(curLine)
         }
     };
 
     abstract fun getOpposite(): Direction
+    abstract fun getAngle(): Float
 
     /**
      * returns the line from the opposite direction
@@ -863,7 +916,8 @@ sealed class DecorationDistributionFunction(
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
             yRange: ClosedFloatingPointRange<Float>,
-            restrict: MapRestriction
+            restrict: MapRestriction,
+            rnd: kotlin.random.Random,
         ): List<Vector2> {
             val positions: MutableList<Vector2> = mutableListOf()
             var pointsLeft: Int = ((xRange.endInclusive - xRange.start) / baseWidth
@@ -874,13 +928,211 @@ sealed class DecorationDistributionFunction(
             }
             return positions
         }
+    }
+
+
+    class SingleCluster(
+        seed: Long,
+        type: String,
+        density: Float,
+        baseWidth: Float,
+        baseHeight: Float,
+        scaleMin: Float,
+        scaleMax: Float,
+        collidesOnlyWithNodes: Boolean,
+        private val minCenterX: Float?,
+        private val maxCenterX: Float?,
+        private val minCenterY: Float?,
+        private val maxCenterY: Float?,
+        private val innerRadius: Float,
+        private val outerRadius: Float,
+        private val nbrOfInnerPoints: Int,
+        private val nbrOfOuterPoints: Int,
+    ) : DecorationDistributionFunction(
+        seed,
+        type,
+        density,
+        baseWidth,
+        baseHeight,
+        scaleMin,
+        scaleMax,
+        collidesOnlyWithNodes
+    ) {
+        override fun getPossiblePositions(
+            xRange: ClosedFloatingPointRange<Float>,
+            yRange: ClosedFloatingPointRange<Float>,
+            restrict: MapRestriction,
+            rnd: kotlin.random.Random,
+        ): List<Vector2> {
+            val positions: MutableList<Vector2> = mutableListOf()
+            val center = getCenter(xRange, yRange, rnd)
+
+            val borders = sequence {
+                for (i in 0 until nbrOfOuterPoints) {
+                    val ang: Double = (rnd.nextDouble() / nbrOfOuterPoints + (i + 0.0) / nbrOfOuterPoints) * Math.PI * 2
+                    val len = rnd.nextDouble() * (outerRadius - innerRadius) + innerRadius
+                    yield(Vector2((center.x + cos(ang) * len).toFloat(), (center.y + sin(ang) * len).toFloat()))
+                }
+            }.take(nbrOfInnerPoints).toList().toTypedArray()
+
+            val centers = sequence {
+                for (i in 0 until nbrOfInnerPoints) {
+                    val ang: Double = (rnd.nextDouble() / nbrOfOuterPoints + (i + 0.0) / nbrOfOuterPoints) * Math.PI * 2
+                    val len = rnd.nextDouble() * (innerRadius)
+                    yield(Vector2((center.x + cos(ang) * len).toFloat(), (center.y + sin(ang) * len).toFloat()))
+                }
+            }.take(nbrOfInnerPoints).toList().toTypedArray()
+
+            for (i in 0 until ((outerRadius * outerRadius * PI) / (baseWidth * baseHeight) * density).toInt()) {
+                val ang = rnd.nextDouble() * Math.PI * 2
+                val len =
+                    sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble())) //TODO maybe log or so for better distribution
+                val posPos = Vector2(
+                    (center.x + cos(ang) * len).toFloat(),
+                    (center.y + sin(ang) * len).toFloat()
+                )
+                val distances: Array<Float> = isLegalPos(posPos, centers, borders)
+                if (distances.isNotEmpty()) {
+                    if (rnd.nextDouble() < max(-distances[0] / distances[1] + 1.4, 1.0))
+                        positions.add(posPos)
+                }
+            }
+            return positions
+        }
+
+        private fun isLegalPos(posPos: Vector2, centers: Array<Vector2>, borders: Array<Vector2>): Array<Float> {
+            val closestCenter = centers.minOf { posPos.clone().sub(it).len() }
+            var closestBorder = Float.MAX_VALUE
+            for (border in borders) {
+                val dist: Float = posPos.clone().sub(border).len()
+                if (dist < closestCenter) return arrayOf()
+                if (dist < closestBorder) closestBorder = dist
+            }
+            return arrayOf(closestCenter, closestBorder)
+        }
+
+        private fun getCenter(
+            xRange: ClosedFloatingPointRange<Float>,
+            yRange: ClosedFloatingPointRange<Float>,
+            rnd: kotlin.random.Random
+        ): Vector2 {
+            val center = Vector2()
+            val minX = minCenterX ?: (xRange.start + innerRadius)
+            val minY = minCenterY ?: (yRange.start + innerRadius)
+            val maxX = maxCenterX ?: (xRange.endInclusive - innerRadius)
+            val maxY = maxCenterY ?: (yRange.endInclusive - innerRadius)
+            if (minX < maxX) center.x = (minX..maxX).random(rnd)
+            else center.x = xRange.random(rnd)
+            if (minX < maxX) center.y = (minY..maxY).random(rnd)
+            else center.y = yRange.random(rnd)
+            return center
+        }
 
     }
-    //TODO add Class for "clusters" (fe forests) only
+
+
+    class MultiCluster(
+        seed: Long,
+        type: String,
+        density: Float,
+        baseWidth: Float,
+        baseHeight: Float,
+        scaleMin: Float,
+        scaleMax: Float,
+        collidesOnlyWithNodes: Boolean,
+        private val blockSize: Float,
+        private val prob: Float,
+        private val additionalProbIfNeighbor: Float
+    ) : DecorationDistributionFunction(
+        seed,
+        type,
+        density,
+        baseWidth,
+        baseHeight,
+        scaleMin,
+        scaleMax,
+        collidesOnlyWithNodes
+    ) {
+        override fun getPossiblePositions(
+            xRange: ClosedFloatingPointRange<Float>,
+            yRange: ClosedFloatingPointRange<Float>,
+            restrict: MapRestriction,
+            rnd: kotlin.random.Random,
+        ): List<Vector2> {
+            val positions: MutableList<Vector2> = mutableListOf()
+            val pointsToTry: Int = ((xRange.endInclusive - xRange.start) / baseWidth
+                    * (yRange.endInclusive - yRange.start) / baseHeight * density).toInt()
+            val width = xRange.endInclusive - xRange.start
+            val height = yRange.endInclusive - yRange.start
+            val size: Int = max(width / blockSize, height / blockSize).toInt() + 1
+            //TODO maybe separate into 2 variables to be more efficient
+            val all: Array<MyBlock> = sequence {
+                for (i in 0 until (size * size)) {
+                    yield(
+                        MyBlock(
+                            Vector2(
+                                (i / size * blockSize + rnd.nextDouble() * blockSize).toFloat(),
+                                (i % size * blockSize + rnd.nextDouble() * blockSize).toFloat()
+                            )
+                        )
+                    )
+                }
+            }.toList().toTypedArray()
+
+            val allPos: MutableList<Int> = ArrayList()
+            for (i in all.indices) allPos.add(i)
+
+            while (allPos.size > 0) {
+                val i = allPos[(rnd.nextDouble() * allPos.size).toInt()]
+                all[i].setIsCluster(
+                    rnd.nextDouble() < prob + (if (isNeighborCluster(all, i, blockSize)) additionalProbIfNeighbor else 0F)
+                )
+                allPos.remove(i)
+            }
+            for (i in 0 until pointsToTry) {
+                val pos = Vector2((rnd.nextDouble() * width).toFloat(), (rnd.nextDouble() * height).toFloat())
+                if (isPlaceable(pos, all)) {
+                    positions.add(pos.add(xRange.start, yRange.start))
+                }
+            }
+            return positions
+        }
+
+        private fun isNeighborCluster(all: Array<MyBlock>, i: Int, blockSize: Float): Boolean {
+            for (b in all) {
+                if (b.isCluster && b.pos.clone().sub(all[i].pos).len() < blockSize * 2) {
+                    return true
+                }
+            }
+            return false
+        }
+
+        private fun isPlaceable(pos: Vector2, all: Array<MyBlock>): Boolean {
+            var curDist = Float.MAX_VALUE
+            var curIsForest = false
+            for (b in all) {
+                val cur: Float = b.pos.clone().sub(pos).len()
+                if (cur < curDist) {
+                    curDist = cur
+                    curIsForest = b.isCluster
+                }
+            }
+            return curIsForest
+        }
+
+        internal class MyBlock(var pos: Vector2) {
+            var isCluster = false
+            fun setIsCluster(isForest: Boolean) {
+                this.isCluster = isForest
+            }
+        }
+    }
+
     abstract fun getPossiblePositions(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>,
-        restrict: MapRestriction
+        restrict: MapRestriction,
+        rnd: kotlin.random.Random,
     ): List<Vector2>
 
     fun getDecoration(
@@ -890,9 +1142,10 @@ sealed class DecorationDistributionFunction(
         xRange: ClosedFloatingPointRange<Float>,
         yRange: ClosedFloatingPointRange<Float>
     ): DetailMap.MapDecoration {
-        nodes.forEach { println(it.x.toString() + ", " + it.y + ", " + it.edgesTo.size) }
         val possiblePositions: List<Pair<Vector2, Float>> =
-            getPossiblePositions(xRange, yRange, restrictions).map { it to (scaleMin..scaleMax).random(rnd) }
+            getPossiblePositions(xRange, yRange, restrictions, rnd)
+                .filter { xRange.contains(it.x) && yRange.contains(it.y) }
+                .map { it to (scaleMin..scaleMax).random(rnd) }
         return DetailMap.MapDecoration(
             type,
             baseWidth,
@@ -923,7 +1176,7 @@ sealed class DecorationDistributionFunction(
         }
         if (!collidesOnlyWithNodes) {
             val size = Vector2(baseWidth * data.second, baseHeight * data.second)
-            val rect = arrayOf(
+            val rectAbs = arrayOf(
                 Vector2(data.first.x, data.first.y),
                 Vector2(data.first.x, data.first.y).add(size.x, 0F),
                 Vector2(data.first.x, data.first.y).add(size.x, size.y),
@@ -931,7 +1184,7 @@ sealed class DecorationDistributionFunction(
             )
             for (it in connections) {
                 val tempRect = it.getAsRect(pathTotalWidth, Vector2(2.5F, 2.5F))
-                if (isPolygonsIntersecting(rect, tempRect)) return false
+                if (isPolygonsIntersecting(rectAbs, tempRect)) return false
             }
         }
         return true
@@ -979,13 +1232,47 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("scaleMax").toFloat(),
                 onj.get<Boolean>("onlyCollidesWithNodes"),
             )
-        }
+        },
+        "SingleClusterDistributionFunction" to { onj, seed ->
+            DecorationDistributionFunction.SingleCluster(
+                seed,
+                onj.get<String>("decoration"),
+                onj.get<Double>("density").toFloat(),
+                onj.get<Double>("baseWidth").toFloat(),
+                onj.get<Double>("baseHeight").toFloat(),
+                onj.get<Double>("scaleMin").toFloat(),
+                onj.get<Double>("scaleMax").toFloat(),
+                onj.get<Boolean>("onlyCollidesWithNodes"),
+                onj.get<Double?>("minCenterX")?.toFloat(),
+                onj.get<Double?>("maxCenterX")?.toFloat(),
+                onj.get<Double?>("minCenterY")?.toFloat(),
+                onj.get<Double?>("maxCenterY")?.toFloat(),
+                onj.get<Double>("innerRadius").toFloat(),
+                onj.get<Double>("outerRadius").toFloat(),
+                onj.get<Long>("nbrOfInnerPoints").toInt(),
+                onj.get<Long>("nbrOfOuterPoints").toInt(),
+            )
+        },
+        "MultiClusterDistributionFunction" to { onj, seed ->
+            DecorationDistributionFunction.MultiCluster(
+                seed,
+                onj.get<String>("decoration"),
+                onj.get<Double>("density").toFloat(),
+                onj.get<Double>("baseWidth").toFloat(),
+                onj.get<Double>("baseHeight").toFloat(),
+                onj.get<Double>("scaleMin").toFloat(),
+                onj.get<Double>("scaleMax").toFloat(),
+                onj.get<Boolean>("onlyCollidesWithNodes"),
+                onj.get<Double>("blockSize").toFloat(),
+                onj.get<Double>("prob").toFloat(),
+                onj.get<Double>("additionalProbIfNeighbor").toFloat(),
+            )
+        },
     )
 
     fun get(onj: OnjNamedObject, seed: Long): DecorationDistributionFunction =
         functions[onj.name]?.invoke(onj, seed)
             ?: throw RuntimeException("unknown decoration distribution function: ${onj.name}")
-
 }
 
 /**
@@ -1047,11 +1334,15 @@ data class MapRestriction(
      */
     val rotation: Double,
 
-    val fixedEvents: List<MapEvent>,
+    /**
+     * the boolean means if it is a dead End
+     */
+    val fixedEvents: List<Pair<MapEvent, Boolean>>,
     val optionalEvents: List<Pair<Int, () -> MapEvent>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
     val pathTotalWidth: Float = 7F,
+    val minDistanceBetweenNodes: Float = 5F,
 ) {
 
 
@@ -1078,8 +1369,8 @@ data class MapRestriction(
             otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
             fixedEvents = onj
                 .get<OnjArray>("fixedEvents")
-                .value
-                .map { MapEventFactory.getMapEvent(it as OnjNamedObject) },
+                .value.map { it as OnjObject }
+                .map { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) to it.get<Boolean>("isDeadEnd") },
             optionalEvents = onj
                 .get<OnjArray>("optionalEvents")
                 .value
@@ -1097,7 +1388,9 @@ data class MapRestriction(
                         decoration,
                         onj.get<Long>("decorationSeed") * 289708 * index
                     )
-                }
+                },
+            minDistanceBetweenNodes = onj.get<Double>("minDistanceBetweenNodes").toFloat(),
+            pathTotalWidth = onj.get<Double>("pathTotalWidth").toFloat(),
         )
     }
 }
