@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import onj.value.OnjArray
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -140,6 +141,17 @@ fun OnjArray.toIntRange(): IntRange {
     val second = this.get<Long>(1).toInt()
     if (second <= first) throw RuntimeException("second value must be higher than first when creating an IntRange")
     return IntRange(first, second)
+}
+
+fun <T> Collection<Pair<Int, T>>.weightedRandom(): T {
+    val total = this.sumOf { abs(it.first) }
+    val choice = (0..total).random()
+    var acc = 0
+    this.forEach { (weight, value) ->
+        acc += abs(weight)
+        if (choice <= acc) return value
+    }
+    throw NoSuchElementException("weightedRandom called on an empty collection")
 }
 
 object Utils {

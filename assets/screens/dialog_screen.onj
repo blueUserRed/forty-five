@@ -11,7 +11,8 @@ var worldHeight = 90.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture", "heart_texture"
+        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
+        "heart_texture", "enemy_texture"
     ]
 },
 
@@ -80,8 +81,9 @@ root: $Box {
                 positionRight: 10.0#points,
                 justifyContent: justify.center,
                 flexDirection: flexDirection.column,
-                width: 20.0#points,
+                width: 28.0#points,
                 height: 20.0#points,
+                padding: 2#points,
                 detached: true
             },
             {

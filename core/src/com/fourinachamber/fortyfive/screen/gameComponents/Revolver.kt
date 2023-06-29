@@ -117,6 +117,11 @@ class Revolver(
         return slots[slot - 1].card
     }
 
+    /**
+     * true when at least one bullet is loaded into the revolver
+     */
+    fun isBulletLoaded(): Boolean = slots.any { it.card != null }
+
     fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
         slots = Array(5) {
             val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)

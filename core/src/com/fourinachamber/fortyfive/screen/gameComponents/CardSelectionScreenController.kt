@@ -73,52 +73,53 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     }
 
     private fun addCards(onjScreen: OnjScreen) {
-        val cards = mutableListOf<CardPrototype>()
-        for ((name, amount) in SaveState.cardsToDraw) {
-            val card = cardPrototypes
-                .firstOrNull { it.name == name }
-                ?: throw RuntimeException("unknown card in savefile: $name")
-            repeat(amount) { cards.add(card) }
-        }
-
-        if (cards.isEmpty()) {
-            displayCardsEmptyActor()
-            return
-        }
-
-        cards.shuffle()
-
-        repeat(min(cardsToSelect, cards.size)) {
-            val cardProto = cards.first()
-            cards.removeFirst()
-            val card = cardProto.create()
-            this.cards.add(card)
-
-            card.actor.setScale(cardScale)
-            card.actor.reportDimensionsWithScaling = true
-            card.actor.ignoreScalingWhenDrawing = true
-            card.actor.invalidate()
-            card.actor.partOfHierarchy = true
-            card.actor.onButtonClick { handleClick(card) }
-
-            val cardBehaviour = BehaviourFactory.behaviorOrError(
-                cardBehaviourOnj.name,
-                cardBehaviourOnj,
-                card.actor
-            )
-            cardBehaviour.bindCallbacks(onjScreen)
-
-            val cardSelectionActor = cardSelectionActor
-            if (cardSelectionActor is FlexBox) {
-                cardSelectionActor.add(card.actor)
-            } else {
-                cardSelectionActor.addActor(card.actor)
-            }
-            onjScreen.addActorToRoot(card.actor.hoverDetailActor)
-            card.actor.hoverDetailActor.isVisible = false
-        }
-        cardSelectionActor.invalidateHierarchy()
-        onjScreen.buildKeySelectHierarchy()
+        TODO()
+//        val cards = mutableListOf<CardPrototype>()
+//        for ((name, amount) in SaveState.cardsToDraw) {
+//            val card = cardPrototypes
+//                .firstOrNull { it.name == name }
+//                ?: throw RuntimeException("unknown card in savefile: $name")
+//            repeat(amount) { cards.add(card) }
+//        }
+//
+//        if (cards.isEmpty()) {
+//            displayCardsEmptyActor()
+//            return
+//        }
+//
+//        cards.shuffle()
+//
+//        repeat(min(cardsToSelect, cards.size)) {
+//            val cardProto = cards.first()
+//            cards.removeFirst()
+//            val card = cardProto.create()
+//            this.cards.add(card)
+//
+//            card.actor.setScale(cardScale)
+//            card.actor.reportDimensionsWithScaling = true
+//            card.actor.ignoreScalingWhenDrawing = true
+//            card.actor.invalidate()
+//            card.actor.partOfHierarchy = true
+//            card.actor.onButtonClick { handleClick(card) }
+//
+//            val cardBehaviour = BehaviourFactory.behaviorOrError(
+//                cardBehaviourOnj.name,
+//                cardBehaviourOnj,
+//                card.actor
+//            )
+//            cardBehaviour.bindCallbacks(onjScreen)
+//
+//            val cardSelectionActor = cardSelectionActor
+//            if (cardSelectionActor is FlexBox) {
+//                cardSelectionActor.add(card.actor)
+//            } else {
+//                cardSelectionActor.addActor(card.actor)
+//            }
+//            onjScreen.addActorToRoot(card.actor.hoverDetailActor)
+//            card.actor.hoverDetailActor.isVisible = false
+//        }
+//        cardSelectionActor.invalidateHierarchy()
+//        onjScreen.buildKeySelectHierarchy()
     }
 
     private fun displayCardsEmptyActor() {
@@ -174,7 +175,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
 
     private fun handleClick(card: Card) {
         FortyFiveLogger.debug(logTag, "chose card $card")
-        SaveState.drawCard(card)
+//        SaveState.drawCard(card)
         SaveState.write()
         FortyFive.changeToScreen(nextScreen)
     }

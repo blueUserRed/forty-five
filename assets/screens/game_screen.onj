@@ -28,7 +28,7 @@ assets: {
 
         "game_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
-        "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover",
+        "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
 
         "revolver_cursor",
 
@@ -112,6 +112,7 @@ var cardHand = $CardHand {
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
     draggedCardZIndex: cardZIndicesEnd,
+    opacityIfNotPlayable: 0.5,
     targetWidth: worldWidth * 0.6,
 };
 
@@ -167,7 +168,7 @@ var reservesLabel = $TemplateLabel {
 
 var remainingTurnsLabel = $TemplateLabel {
     font: "red_wing",
-    template: "remaining turns: {game.remainingTurns} -- current evaluation {game.curEvaluation}",
+    template: "remaining turns: {game.remainingTurns} ",
     fontScale: 0.09,
     color: color.black,
 };
@@ -175,11 +176,13 @@ var remainingTurnsLabel = $TemplateLabel {
 var disableStyles = [
     {
         style_priority: 1,
+        alpha: 1.0,
         disabled: false,
     },
     {
         style_priority: 2,
         style_condition: state("uiFrozen"),
+        alpha: 0.5,
         disabled: true
     }
 ];
@@ -236,22 +239,33 @@ var popupActor = $Box {
         ]
     },
 
-    $CircularCardSelector {
+    $Box {
         styles: [
             {
                 style_priority: 1,
-                visible: false
+                detached: true,
             },
             {
                 style_priority: 2,
                 style_condition: state("showPopupCardSelector"),
-                visible: true
+                detached: false
             }
         ],
-        name: "card_selector",
-        radius: 17.0,
-        size: 357.0 * 0.04
-    }
+    } children [
+        $CircularCardSelector {
+            styles: [
+                {
+                    width: 50#points,
+                    height: 50#points,
+                }
+            ],
+            name: "card_selector",
+            emptySlotTexture: "grey_texture",
+            disabledAlpha: 0.6,
+            radius: 20.0,
+            size: 357.0 * 0.04
+        }
+    ],
 
 ];
 
@@ -405,7 +419,7 @@ var gameScreen = $Box {
                     flexDirection: flexDirection.column,
                     width: 30.0#percent,
                     alignItems: align.center,
-                    positionLeft: 5.0#points
+                    positionLeft: 5.0#points,
                 }
             ]
         } children [
@@ -435,7 +449,7 @@ var gameScreen = $Box {
         $EnemyArea {
             styles: [
                 {
-                    flexGrow: 0.5
+                    flexGrow: 1.0
                 }
             ],
             ...enemyArea

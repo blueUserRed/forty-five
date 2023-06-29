@@ -40,7 +40,6 @@ $MapEvent {
         person: string,
         seed: int?,
         boughtIndices: int[],
-        ...mapEventStandardConfig
     }
 
 }
@@ -68,7 +67,7 @@ $DecorationDistributionFunction {
         ...distributionFunctionStandardConfig,
         blockSize: float,
         prob: float,
-        additionalProbIfNei: float,
+        additionalProbIfNeighbor: float,
     }
 }
 
@@ -103,6 +102,13 @@ var mapRestrictions = {
     pathTotalWidth: float,
     minDistanceBetweenNodes: float,
 };
+
+screens: {
+    mapScreen: string,
+    dialogScreen: string,
+    encounterScreen: string,
+    shopScreen: string,
+},
 
 mapImages: {
     name: string,

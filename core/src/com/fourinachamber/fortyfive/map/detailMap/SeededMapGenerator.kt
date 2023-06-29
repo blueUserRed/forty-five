@@ -2,10 +2,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fortyfive.utils.Vector2
-import com.fourinachamber.fortyfive.utils.clone
-import com.fourinachamber.fortyfive.utils.random
-import com.fourinachamber.fortyfive.utils.subListTillMax
+import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -43,12 +40,13 @@ class SeededMapGenerator(
      * generates the line
      */
     fun generate(name: String): DetailMap {
+        FortyFiveLogger.debug(logTag, "generating map $name with seed $seed")
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         addEvents(nodes)
 
-        nodes.forEach { it.scale(1F, .6F) }    //TODO manche events eher am Dead-Ends spawnen
+//        nodes.forEach { it.scale(1F, .6F) } //TODO add parameter for scaling
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
         this.nodes = nodes
@@ -117,8 +115,10 @@ class SeededMapGenerator(
         areaNodes.add(mainLine.lineNodes.last())
         mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.LEFT
         mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.RIGHT
-        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, false)
-        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, true)
+        mainLine.lineNodes.first().imageName = restrictions.startArea
+        mainLine.lineNodes.last().imageName = restrictions.endArea
+        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
+        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>
@@ -705,6 +705,10 @@ class SeededMapGenerator(
         }
     }
 
+    companion object {
+        const val logTag = "MapGenerator"
+    }
+
 }
 
 class Line(val start: Vector2, val end: Vector2) {
@@ -1038,7 +1042,7 @@ sealed class DecorationDistributionFunction(
         collidesOnlyWithNodes: Boolean,
         private val blockSize: Float,
         private val prob: Float,
-        private val additionalProbIfNei: Float
+        private val additionalProbIfNeighbor: Float
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -1081,7 +1085,7 @@ sealed class DecorationDistributionFunction(
             while (allPos.size > 0) {
                 val i = allPos[(rnd.nextDouble() * allPos.size).toInt()]
                 all[i].setIsCluster(
-                    rnd.nextDouble() < prob + (if (isNeiCluster(all, i, blockSize)) additionalProbIfNei else 0F)
+                    rnd.nextDouble() < prob + (if (isNeighborCluster(all, i, blockSize)) additionalProbIfNeighbor else 0F)
                 )
                 allPos.remove(i)
             }
@@ -1094,7 +1098,7 @@ sealed class DecorationDistributionFunction(
             return positions
         }
 
-        private fun isNeiCluster(all: Array<MyBlock>, i: Int, blockSize: Float): Boolean {
+        private fun isNeighborCluster(all: Array<MyBlock>, i: Int, blockSize: Float): Boolean {
             for (b in all) {
                 if (b.isCluster && b.pos.clone().sub(all[i].pos).len() < blockSize * 2) {
                     return true
@@ -1261,7 +1265,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Boolean>("onlyCollidesWithNodes"),
                 onj.get<Double>("blockSize").toFloat(),
                 onj.get<Double>("prob").toFloat(),
-                onj.get<Double>("additionalProbIfNei").toFloat(),
+                onj.get<Double>("additionalProbIfNeighbor").toFloat(),
             )
         },
     )
