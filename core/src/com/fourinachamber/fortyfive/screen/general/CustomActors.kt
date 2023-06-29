@@ -16,27 +16,26 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
-import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import ktx.actors.alpha
-import ktx.actors.onEnter
-import ktx.actors.onExit
-import ktx.actors.onTouchEvent
+import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.properties.Delegates
+
 
 /**
  * an object which is rendered and to which a mask can be applied
@@ -459,7 +458,7 @@ open class CustomFlexBox(
 
     override var fixedZIndex: Int = 0
 
-    private var background: Drawable? = null
+    protected var background: Drawable? = null
 
     override var isHoveredOver: Boolean = false
 
@@ -528,6 +527,289 @@ open class CustomFlexBox(
 
     override fun initStyles(screen: OnjScreen) {
         addFlexBoxStyles(screen)
+        addBackgroundStyles(screen)
+        addDetachableStyles(screen)
+    }
+}
+
+class CustomScrollableFlexBox(
+    private val screen: OnjScreen,
+    private val isScrollDirectionVertical: Boolean,
+    private val scrollDistance: Float,
+    private val isBackgroundStretched: Boolean,
+    private val scrollbarBackgroundName: String?,
+    private val scrollbarName: String?,
+    private val scrollbarSide: String?,
+) : CustomFlexBox(screen) {
+
+    private val scrollListener = object : InputListener() {
+        override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
+            stage.scrollFocus = this@CustomScrollableFlexBox
+        }
+
+        override fun exit(event: InputEvent?, x: Float, y: Float, pointer: Int, toActor: Actor?) {
+            if (x > width || x < 0 || y > height || y < 0)
+                stage.scrollFocus = null
+        }
+
+        override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {
+            this@CustomScrollableFlexBox.scroll(amountY)
+            return super.scrolled(event, x, y, amountX, amountY)
+        }
+    }
+
+    private var needsScrollbar: Boolean = true
+
+    private val dragListener = object : DragListener() {
+
+        private var startPos by Delegates.notNull<Float>()
+
+        override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
+            if (scrollbarHandle == null) {
+                startPos = Float.NaN
+                return
+            }
+            startPos = if (isScrollDirectionVertical) {
+                val relX = (if (scrollbarSide == "left") 0F else width - scrollbarHandle!!.width)
+                val relY = scrollbarHandle!!.y - parentPos.y
+                if (touchDownX < relX + scrollbarHandle!!.width && touchDownX > relX
+                    && touchDownY < relY + scrollbarHandle!!.height && touchDownY > relY
+                ) scrollbarHandle!!.y
+                else Float.NaN
+            } else {
+                val relX = scrollbarHandle!!.x - parentPos.x
+                val relY = (if (scrollbarSide == "top") height - scrollbarHandle!!.height else 0F)
+                if (touchDownX < relX + scrollbarHandle!!.width && touchDownX > relX
+                    && touchDownY < relY + scrollbarHandle!!.height && touchDownY > relY
+                ) scrollbarHandle!!.x
+                else Float.NaN
+            }
+        }
+
+        override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            if (startPos.isNaN()) return
+            val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
+            if (isScrollDirectionVertical) {
+                val max = lastMax - cutBottom
+                val curSize = height * height / (max + height)
+                scrollbarHandle!!.y = startPos + (y - touchDownY) + cutTop
+                offset = (-(scrollbarHandle!!.y - parentPos.x) - curSize) * max / (height - curSize)
+            } else {
+                scrollbarHandle!!.x = (startPos + x - touchDownX)
+                val max = lastMax
+                val curSize = width * width / (max + width)
+                offset = -(scrollbarHandle!!.x - parentPos.x) * max / (width - curSize) - cutLeft
+            }
+            invalidate()
+        }
+    }
+
+    init {
+        addListener(scrollListener)
+        addListener(dragListener)
+    }
+
+    private fun scroll(offset: Float) {
+        this.offset += offset * scrollDistance
+        invalidate()
+    }
+
+    private var offset: Float = 0F
+    var cutLeft: Float = 0F
+    var cutRight: Float = 0F
+    var cutTop: Float = 0F
+    var cutBottom: Float = 0F
+    private var lastMax: Float = 0F
+    private var scrollbarBackground: CustomImageActor? = null
+    private var scrollbarHandle: CustomImageActor? = null
+    var scrollbarWidth: Float = 0F
+
+    override fun layout() {
+        super.layout()
+
+        layoutChildren()
+        layoutScrollBar()
+    }
+
+    private fun layoutScrollBar() {
+        if (scrollbarBackgroundName != null) {
+            if (scrollbarBackground == null) {
+                scrollbarBackground = screen.namedActorOrError(scrollbarBackgroundName) as CustomImageActor
+                remove(scrollbarBackground?.styleManager?.node)
+            }
+            if (needsScrollbar) layoutScrollbarBackground()
+        }
+        if (scrollbarName != null) {
+            if (scrollbarHandle == null) {
+                scrollbarHandle = screen.namedActorOrError(scrollbarName) as CustomImageActor
+                remove(scrollbarHandle?.styleManager?.node)
+            }
+            if (needsScrollbar) layoutScrollbarHandle()
+        }
+    }
+
+    private fun layoutChildren() {
+        if (isScrollDirectionVertical) {
+            lastMax = children.map { -it.y }.max()
+
+            if (0F < lastMax + cutBottom) {
+                needsScrollbar = true
+                offset = offset.between(0F, lastMax + cutBottom)
+                children.forEach { it.y += offset }
+            } else {
+                needsScrollbar = false
+            }
+        } else {
+            lastMax = (children.map { it.x + it.width }.max() - width)
+            if (-lastMax - cutRight < -cutLeft / scrollDistance) {
+                needsScrollbar = true
+                offset = offset.between(-lastMax - cutRight, -cutLeft / scrollDistance)
+                children.forEach { it.x += offset }
+            } else {
+                needsScrollbar = false
+            }
+        }
+    }
+
+    private fun layoutScrollbarBackground() {
+        if (isScrollDirectionVertical) {
+            if (scrollbarSide != null && scrollbarSide == "left") {
+                scrollbarBackground?.x = x
+            } else {
+                scrollbarBackground?.x = x + width - scrollbarWidth
+            }
+            scrollbarBackground?.y = y
+            scrollbarBackground?.width = scrollbarWidth
+            scrollbarBackground?.height = height
+        } else {
+            if (scrollbarSide != null && scrollbarSide == "top") {
+                scrollbarBackground?.y = y + height - scrollbarWidth
+            } else {
+                scrollbarBackground?.y = y
+            }
+            scrollbarBackground?.x = x
+            scrollbarBackground?.width = width
+            scrollbarBackground?.height = scrollbarWidth
+        }
+    }
+
+    private fun layoutScrollbarHandle() {
+        if (isScrollDirectionVertical) {
+            val max = lastMax + cutBottom
+            val curSize = height * height / (max + height)
+            val curPos = offset / max * (height - curSize)
+            if (scrollbarSide != null && scrollbarSide == "left") {
+                scrollbarHandle!!.x = x
+            } else {
+                scrollbarHandle!!.x = x + width - scrollbarWidth
+            }
+            scrollbarHandle!!.width = scrollbarWidth
+            scrollbarHandle!!.height = curSize
+            scrollbarHandle!!.y = y + height - curPos - curSize
+        } else {
+            val offset = offset + cutLeft
+            val max = lastMax
+            val curSize = width * width / (max + width)
+
+            val curPos = offset / max * (width - curSize)
+
+            if (scrollbarSide != null && scrollbarSide == "top") {
+                scrollbarHandle!!.y = y + height - scrollbarWidth
+            } else {
+                scrollbarHandle!!.y = y
+            }
+            scrollbarHandle!!.height = scrollbarWidth
+            scrollbarHandle!!.width = curSize
+            scrollbarHandle!!.x = x - curPos
+        }
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        batch ?: return
+        batch.flush()
+
+        val viewport = screen.stage.viewport
+        val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
+        val yPixel =
+            (Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight
+        if (isBackgroundStretched) {
+            if (drawBackgroundStretched(batch, xPixel, viewport, yPixel, parentAlpha)) return
+        } else {
+            background?.draw(batch, x, y, width, height)
+            if (drawItemsWithScissor(xPixel, viewport, yPixel, batch, parentAlpha)) return
+        }
+        if (needsScrollbar) {
+            scrollbarBackground?.draw(batch, alpha)
+            scrollbarHandle?.draw(batch, alpha)
+        }
+    }
+
+    private fun drawItemsWithScissor(
+        xPixel: Float,
+        viewport: Viewport,
+        yPixel: Float,
+        batch: Batch,
+        parentAlpha: Float
+    ): Boolean {
+        val scissor = Rectangle(
+            xPixel * (x + cutLeft) + viewport.leftGutterWidth,
+            yPixel * (y + cutBottom) + viewport.topGutterHeight,
+            xPixel * (width - cutLeft - cutRight),
+            yPixel * (height - cutTop - cutBottom)
+        )
+        batch.flush()
+        super.draw(batch, parentAlpha)
+        if (!ScissorStack.pushScissors(scissor)) return true
+        batch.flush()
+        ScissorStack.popScissors()
+        batch.flush()
+        return false
+    }
+
+    private fun drawBackgroundStretched(
+        batch: Batch,
+        xPixel: Float,
+        viewport: Viewport,
+        yPixel: Float,
+        parentAlpha: Float
+    ): Boolean {
+        val scissorBack = Rectangle(
+            xPixel * x + viewport.leftGutterWidth,
+            yPixel * y + viewport.topGutterHeight,
+            xPixel * width,
+            yPixel * height
+        )
+        if (!ScissorStack.pushScissors(scissorBack)) return true
+        val backgroundHandle = backgroundHandle
+        if (backgroundHandle != null && background == null) background = ResourceManager.get(screen, backgroundHandle)
+        validate()
+        if (background != null) {
+            if (isScrollDirectionVertical) background?.draw(
+                batch,
+                x,
+                y - lastMax + max(0F, offset) - cutTop,
+                width,
+                height + lastMax
+            ) else {
+                background?.draw(batch, x + offset + cutLeft, y, width + lastMax, height)
+            }
+        }
+        batch.flush()
+        ScissorStack.popScissors()
+        batch.flush()
+        val saveBackground = backgroundHandle //TODO push vor drawn,
+        this.backgroundHandle = null
+        if (drawItemsWithScissor(xPixel, viewport, yPixel, batch, parentAlpha)) {
+            this.backgroundHandle = saveBackground
+            return true
+        }
+        this.backgroundHandle = saveBackground
+        return false
+    }
+
+    override fun initStyles(screen: OnjScreen) {
+        addScrollFlexBoxStyles(screen)
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
     }

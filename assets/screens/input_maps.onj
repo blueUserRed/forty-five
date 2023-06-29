@@ -7,7 +7,7 @@ defaultInputMap: [
         modifiers: [],
         action: $ToggleFullscreenKeyAction {
             width: 700,
-            height: 500
+            height:(700*9)/16
         }
     }
 ],
@@ -212,4 +212,32 @@ gameInputMap: [
         action: $DeselectAllKeyAction { }
     },
 
-]
+],
+
+detailMapInputMap: [
+    {
+        keycode: keys.A,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"left",
+        }
+    },{
+        keycode: keys.S,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"down",
+        }
+    },{
+        keycode: keys.W,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"up",
+        }
+    },{
+        keycode: keys.D,
+        modifiers: [],
+        action: $MoveInDetailMapKeyAction {
+            direction:"right",
+        }
+    },
+],

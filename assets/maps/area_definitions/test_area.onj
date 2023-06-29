@@ -6,7 +6,7 @@ nodes: [
         x: 20.0,
         y: 80.0,
         isArea: false,
-        edgesTo: [1],
+        edgesTo: [1,4],
         event: $EmptyMapEvent { }
     },
     {
@@ -38,6 +38,19 @@ nodes: [
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
             placeAtEnd: false
+        }
+    },
+    {
+        x: 30.0,
+        y: 40.0,
+        isArea: false,
+        edgesTo: [0],
+        event: $ShopMapEvent {
+            seed: null,
+            boughtIndices: [],
+            type: "all_included",
+            biome: "no_biome",
+            person: "traveling_merchant",
         }
     },
 ],

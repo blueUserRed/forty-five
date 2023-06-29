@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.DragAndDropBehaviourFactory
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.random
 import ktx.actors.alpha
 import onj.parser.OnjParser
@@ -57,7 +58,8 @@ class ShopWidget(
         this.boughtIndices = boughtIndices
         this.dragAndDrop = dragAndDrop
         val rnd = Random(seed)
-        val nbrOfItems = (5..8).random(rnd)
+        val nbrOfItems = 5/*(5..8).random(rnd)*/
+        FortyFiveLogger.debug(logTag, "Created $nbrOfItems items with seed $seed")
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)
@@ -79,6 +81,17 @@ class ShopWidget(
                 dataDragBehaviour
             )
             dragAndDrop.addSource(behaviour)
+        }
+
+        for (i in 0..nbrOfItems * 2) {
+            val pos = (0 until cards.size).random(rnd)
+            val card = cards[pos]
+            val label = priceTags[pos]
+            cards.removeAt(pos)
+            priceTags.removeAt(pos)
+            val newPos = (0 until cards.size).random(rnd)
+            cards.add(newPos, card)
+            priceTags.add(newPos, label)
         }
     }
 
@@ -135,6 +148,7 @@ class ShopWidget(
     fun checkAndBuy(card: Card) {
         SaveState.playerMoney -= card.price
         buyCard(cards.indexOf(card))
+        FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
         SaveState.buyCard(card.name)
     }
 
@@ -160,7 +174,6 @@ class ShopWidget(
     }
 
     private fun applyChancesEffect(selector: OnjNamedObject, effect: OnjNamedObject) {
-        println("" + selector + effect.name)
         val cardsToChange: List<String> = allCards.filter {
             (if (selector.name == "ByName") it.name == selector.get<String>("name") else it.tags.contains(
                 selector.get<String>("name")
@@ -185,9 +198,6 @@ class ShopWidget(
         }
     }
 
-    fun giveResourcesBack() {
-
-    }
 
     companion object {
 
@@ -195,6 +205,7 @@ class ShopWidget(
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
         }
         lateinit var curShopWidget: ShopWidget
+        const val logTag: String = "ShopWidget"
     }
 
 }

@@ -52,6 +52,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
+    private val templateObjects: MutableList<OnjNamedObject> = mutableListOf()
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -61,6 +62,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         readAssets(onj)
         doOptions(onj)
+        doTemplates(onj)
 
         val screen = OnjScreen(
             viewport = getViewport(onj.get<OnjNamedObject>("viewport")),
@@ -103,6 +105,16 @@ class ScreenBuilder(val file: FileHandle) {
         return screen
     }
 
+    private fun doTemplates(onj: OnjObject) {
+        onj.ifHas<OnjArray>("templates") {
+            for (a in it.value) {
+                a as OnjNamedObject
+                templateObjects.add(a)
+            }
+        }
+//        println(templateObjects)
+    }
+
     private fun doOptions(onj: OnjObject) {
         val options = onj.get<OnjObject>("options")
         options.ifHas<String>("background") {
@@ -133,7 +145,6 @@ class ScreenBuilder(val file: FileHandle) {
             toBorrow.addAll(cardResources)
             toBorrow.add(ResourceManager.cardAtlasResourceHandle)
         }
-
         borrowed = toBorrow
     }
 
@@ -191,6 +202,24 @@ class ScreenBuilder(val file: FileHandle) {
 
     }
 
+    /*
+        fun generateTemplateWidget(
+            widgetOnj: OnjNamedObject,
+            parent: FlexBox,
+            screen: OnjScreen,
+        ): Actor = when (widgetOnj.name) {
+            "Image" -> CustomImageActor(
+                widgetOnj.getOr<String?>("textureName", null),
+                screen,
+                widgetOnj.getOr("partOfSelectionHierarchy", false)
+            ).apply {
+                applyImageKeys(this, widgetOnj)
+            }
+
+            else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
+        }
+    */
+
     private fun getWidget(
         widgetOnj: OnjNamedObject,
         parent: FlexBox?,
@@ -206,6 +235,8 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         "Box" -> getFlexBox(widgetOnj, screen)
+
+        "ScrollBox" -> getScrollFlexBox(widgetOnj, screen)
 
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
@@ -322,7 +353,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("emptySlotTexture"),
             widgetOnj.get<Double>("disabledAlpha").toFloat(),
             screen
-          )
+        )
 
         "PersonWidget" -> PersonWidget(
             widgetOnj.get<Double>("offsetX").toFloat(),
@@ -376,8 +407,7 @@ class ScreenBuilder(val file: FileHandle) {
                     duration = result.first
                     interpolation = result.second
                 }
-                obj
-                    .value
+                obj.value
                     .filter { !it.key.startsWith("style_") }
                     .forEach { (key, value) ->
                         val data = getDataForStyle(value, key)
@@ -393,6 +423,29 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         return actor
+    }
+
+    private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
+        val flexBox = CustomScrollableFlexBox(
+            screen,
+            widgetOnj.get<Boolean>("isScrollDirectionVertical"),
+            widgetOnj.get<Double>("scrollDistance").toFloat(),
+            widgetOnj.get<Boolean>("backgroundStretched"),
+            widgetOnj.get<String?>("scrollbarBackgroundName"),
+            widgetOnj.get<String?>("scrollbarName"),
+            widgetOnj.get<String?>("scrollbarSide"),
+        )
+        flexBox.root.setPosition(YogaEdge.ALL, 0f)
+        if (widgetOnj.hasKey<OnjArray>("children")) {
+            widgetOnj
+                .get<OnjArray>("children")
+                .value
+                .forEach {
+                    getWidget(it as OnjNamedObject, flexBox, screen)
+                }
+        }
+        flexBox.touchable = Touchable.enabled // TODO: remove
+        return flexBox
     }
 
     private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {

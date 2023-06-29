@@ -125,7 +125,6 @@ object MapManager {
     }
 
     fun newRunSync() {
-        this.currentDetailMap
         generateMapsSync()
     }
 

@@ -7,9 +7,8 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
+import java.util.*
+import kotlin.math.*
 
 data class MapNode(
     val index: Int,
@@ -19,16 +18,19 @@ data class MapNode(
     val y: Float,
     val imageName: String?,
     val imagePos: ImagePosition?,
-    val event: MapEvent? = null // TODO: this will be non-nullable in the future
+    val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
 ) {
 
+
     private var imageCache: Drawable? = null
-    private val dirNodes: Array<Int?> = arrayOfNulls(4)
     fun getEdge(dir: Direction): MapNode? {
-        if (dirNodes[dir.ordinal] != null) {
-            return edgesTo[dirNodes[dir.ordinal]!!]
-        }
-        return null
+
+        val possibleNode = edgesTo.map {
+            val ang = Line(Vector2(it.x, it.y), Vector2(x, y)).ang()
+            it to min(min(abs(dir.getAngle() - ang), abs(dir.getAngle() + 2 * PI.toFloat() - ang)),abs(dir.getAngle() - 2 * PI.toFloat() - ang))
+        }.minBy { it.second }
+        if (possibleNode.second > Math.PI/2) return null
+        return possibleNode.first
     }
 
     @MainThreadOnly
@@ -73,8 +75,12 @@ data class MapNode(
 
     override fun equals(other: Any?): Boolean = this === other
 
+    fun toStringRec(): String {
+        return "(x = $x, y = $y)"
+    }
+
     override fun toString(): String {
-        return "MapNode(x = $x, y = $y, isArea = $isArea)"
+        return "MapNode(x = $x, y = $y, isArea = $isArea, edgesTo = ${edgesTo.map { it.toStringRec() }})"
     }
 
     override fun hashCode(): Int {
@@ -169,7 +175,6 @@ data class MapNodeBuilder(
         for (edge in edgesTo) {
             buildEdges.add(edge.build())
         }
-//        inBuild = false
         return asNode!!
     }
 
@@ -191,7 +196,7 @@ data class MapNodeBuilder(
 
     override fun toString(): String {
         val cur = edgesTo.joinToString(separator = ",", transform = { it.toStringRec() })
-        return javaClass.name + "{x: $x, y: $y, neighbours: $cur}"
+        return javaClass.simpleName + "{x: $x, y: $y, neighbors: $cur}"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -203,7 +208,7 @@ data class MapNodeBuilder(
     }
 
     override fun hashCode(): Int {
-        return super.hashCode()
+        return (x * 100 + y).hashCode()
     }
 
     fun posAsVec(): Vector2 {

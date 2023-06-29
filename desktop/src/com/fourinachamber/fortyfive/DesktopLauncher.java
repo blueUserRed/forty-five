@@ -19,6 +19,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(0);
 		config.setTitle(".forty-five");
+		config.setWindowedMode(900,(900*9)/16);
 		Exception exception = null;
 
 		try {
