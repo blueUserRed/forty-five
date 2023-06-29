@@ -27,7 +27,8 @@ var widgetSharedKeys = {
     visible?: boolean,
     name?: string,
     touchable?: string,
-    styles?: { ...* }[]
+    styles?: { ...* }[],
+    dragAndDrop?: $DragAndDropBehaviour,
 };
 
 //var detailTextSharedKeys = {
@@ -200,12 +201,13 @@ $Widget {
         offsetX:float,
         offsetY:float,
         scale:float,
-        dropBehaviour: $DragAndDropBehaviour,
+        dropBehaviour?: $DragAndDropBehaviour,
         ...widgetSharedKeys
     }
 
     $ShopWidget{
-        name: string,
+        children?: $Widget[],
+//        name: string,
         texture: string,
         dataFile: string,
         dataFont: string,
@@ -397,4 +399,6 @@ options: {
 //    printFrameRate?: boolean
 },
 
-root: $Widget
+root: $Widget,
+
+templates?: $Widget[],

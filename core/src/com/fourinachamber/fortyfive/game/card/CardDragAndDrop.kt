@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
@@ -100,7 +101,7 @@ class RevolverDropTarget(
         return true
     }
 
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
+    override fun drop(source: DragAndDrop.Source?, payload: Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null || source == null) return
 
         val obj = payload.obj!! as CardDragAndDropPayload
@@ -144,5 +145,84 @@ class CardDragAndDropPayload(val card: Card) {
      */
     fun onBuy() = tasks.add {
         ShopWidget.curShopWidget.checkAndBuy(card)  //TODO ugly
+    }
+}
+
+class ShopDragSource(
+    dragAndDrop: DragAndDrop,
+    actor: Actor,
+    onj: OnjNamedObject,
+) : DragBehaviour(dragAndDrop, actor, onj) {
+
+    private val toLast: Boolean
+
+    init {
+        println("Hallo")
+        toLast = onj.getOr("moveToLastIndex", false)
+    }
+
+    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload {
+        println("Hallo2")
+
+        val payload = Payload()
+        dragAndDrop.setKeepWithinStage(false)
+
+        payload.dragActor = actor
+
+        if (toLast) actor.toFront()
+
+        val obj = DragAndDropPayload(actor)
+        payload.obj = obj
+        obj.resetTo(Vector2(actor.x, actor.y))
+        return payload
+    }
+
+
+    override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        println("Hallo3")
+
+        super.drag(event, x, y, pointer)
+        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
+        dragAndDrop.setDragActorPosition(
+            -parentOff.x + actor.width - (actor.width * actor.scaleX) / 2,
+            -parentOff.y - (actor.height * actor.scaleY) / 2
+        )
+    }
+
+    override fun dragStop(
+        event: InputEvent?,
+        x: Float,
+        y: Float,
+        pointer: Int,
+        payload: Payload?,
+        target: DragAndDrop.Target?
+    ) {
+        println("Hall4")
+
+        if (payload == null) return
+        if (toLast) actor.zIndex += 1
+        val obj = payload.obj as DragAndDropPayload
+        obj.onDragStop()
+    }
+
+
+
+    class DragAndDropPayload(val actor: Actor) {
+
+        private val tasks: MutableList<() -> Unit> = mutableListOf()
+
+        init {
+
+        }
+
+        fun resetTo(pos: Vector2) = tasks.add {
+            println("now hihi")
+            actor.x = pos.x
+            actor.y = pos.y
+        }
+
+        fun onDragStop() {
+            for (task in tasks) task()
+        }
     }
 }

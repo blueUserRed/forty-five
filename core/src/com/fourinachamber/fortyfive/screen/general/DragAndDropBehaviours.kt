@@ -31,6 +31,9 @@ object DragAndDropBehaviourFactory {
         dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
             ShopDropTarget(dragAndDrop, actor, onj)
         }
+        dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
+            ShopDragSource(dragAndDrop, actor, onj)
+        }
     }
 
     fun dragBehaviourOrError(
@@ -83,7 +86,6 @@ object DragAndDropBehaviourFactory {
             onj
         )?.eitherRight() ?: throw RuntimeException("Unknown drag or drop behaviour: $name")
     }
-
 }
 
 class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :

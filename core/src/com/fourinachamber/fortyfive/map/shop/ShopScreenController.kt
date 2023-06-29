@@ -1,10 +1,13 @@
 package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
+import dev.lyze.flexbox.FlexBox
+import ktx.actors.onChange
 import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -12,6 +15,7 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjString
+import onj.value.OnjValue
 
 class ShopScreenController(onj: OnjObject) : ScreenController() {
 
@@ -28,15 +32,16 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val backButtonName = "back_button"  //onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
 
     private lateinit var personWidget: PersonWidget
+    private lateinit var tempImageActor: CustomImageActor
     private val dragAndDrop = DragAndDrop()
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
-        val personWidget = onjScreen.namedActorOrError(personWidgetName)
-        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
-        this.personWidget = personWidget
+//        val personWidget = onjScreen.namedActorOrError(personWidgetName)
+//        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
+//        this.personWidget = personWidget
         val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
         shopsSchema.assertMatches(shopFile)
         shopFile as OnjObject
@@ -56,21 +61,40 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
-        personWidget.setDrawable(imgData)
-        personWidget.addDropTarget(dragAndDrop)
+//        personWidget.setDrawable(imgData)
+//        personWidget.addDropTarget(dragAndDrop)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = person.get<OnjArray>("texts").value
         val defaults = shopFile.get<OnjObject>("defaults")
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
-        addItemWidgets(shopFile, person)
+//        addItemWidgets(shopFile, person) //TODO einfügen falls broke
 
+        val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
+        tempMap["name"] = OnjString("Card1")
+        tempMap["textureName"] = OnjString("enemy_texture")
 
+        tempImageActor = screen.screenBuilder.generateFromTemplate(
+            "cardsWidgetTextChild",
+            tempMap,
+            screen.namedActorOrError(shopWidgetNames[0]) as FlexBox,
+            onjScreen
+        )!! as CustomImageActor
+        screen.screenBuilder.generateFromTemplate(
+            "cardsWidgetTextChild",
+            tempMap,
+            screen.namedActorOrError(shopWidgetNames[0]) as FlexBox,
+            onjScreen
+        )
+//        tempImageActor.invalidateHierarchy()
+//        val shopWidget = screen.namedActorOrError(shopWidgetNames[0]) as ShopWidget
+//        shopWidget.showActorData(tempImageActor)
         val backButton = onjScreen.namedActorOrError(backButtonName)
-        backButton.onButtonClick {
-            personWidget.giveResourcesBack()
-        }
+//        tempImageActor.onClick { println("AHSDASD") }
+//        backButton.onButtonClick {
+////            personWidget.giveResourcesBack()
+//        }
     }
 
     private fun addItemWidgets(shopFile: OnjObject, person: OnjObject) {

@@ -11,6 +11,8 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import onj.value.OnjArray
+import onj.value.OnjObject
+import onj.value.OnjValue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.math.min
@@ -70,7 +72,7 @@ fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
 fun Vector2.withMag(mag: Float): Vector2 = this.unit * mag
 fun Vector2.compare(other: Vector2, epsilon: Float = 0.01f): Boolean =
     other.x in (this.x - epsilon)..(this.x + epsilon) &&
-    other.y in (this.y - epsilon)..(this.y + epsilon)
+            other.y in (this.y - epsilon)..(this.y + epsilon)
 
 operator fun Vector2.component1(): Float = this.x
 operator fun Vector2.component2(): Float = this.y
@@ -117,8 +119,9 @@ fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
 public fun <E> List<E>.subListTillMax(toIndex: Int): List<E> {
     return subList(0, min(size, toIndex))
 }
+
 fun Vector2.clone(): Vector2 {
-    return Vector2(x,y)
+    return Vector2(x, y)
 }
 
 operator fun AtomicInteger.inc(): AtomicInteger {

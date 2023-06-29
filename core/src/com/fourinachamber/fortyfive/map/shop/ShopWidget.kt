@@ -1,14 +1,12 @@
 package com.fourinachamber.fortyfive.map.shop
 
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
-import com.fourinachamber.fortyfive.screen.general.CustomLabel
-import com.fourinachamber.fortyfive.screen.general.DragAndDropBehaviourFactory
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.random
 import ktx.actors.alpha
@@ -30,6 +28,12 @@ class ShopWidget(
     val screen: OnjScreen,
 ) : CustomFlexBox(screen) {
 
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        super.draw(batch, parentAlpha)
+//        println(tempImageActor.width)
+//        println(tempImageActor.height)
+    }
+
     private val cards: MutableList<Card> = mutableListOf()
     private val priceTags: MutableList<CustomLabel> = mutableListOf()
     private lateinit var boughtIndices: MutableList<Int>
@@ -38,6 +42,9 @@ class ShopWidget(
 
     private val allCards: MutableList<Card>
     private val chances: HashMap<String, Float> = hashMapOf()
+
+
+//    private lateinit var tempImageActor: CustomImageActor
 
     init {
         backgroundHandle = texture
@@ -197,6 +204,10 @@ class ShopWidget(
             }
         }
     }
+
+//    fun showActorData(tempImageActor: CustomImageActor) {
+////        this.tempImageActor=tempImageActor
+//    }
 
 
     companion object {
