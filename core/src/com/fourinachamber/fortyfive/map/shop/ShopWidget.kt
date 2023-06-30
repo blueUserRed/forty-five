@@ -70,7 +70,6 @@ class ShopWidget(
             add(cards.last().actor)
         }
 
-
         for (i in 0..nbrOfItems * 2) {
             val pos = (0 until cards.size).random(rnd)
             val card = cards[pos]
