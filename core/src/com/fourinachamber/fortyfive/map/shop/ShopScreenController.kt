@@ -64,9 +64,8 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val defaults = shopFile.get<OnjObject>("defaults")
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
-//        addItemWidgets(shopFile, person) //TODO einfügen falls broke
 
-        for (i in 0 until 16) addCard(onjScreen)
+        for (i in 0 until 1) addCard(onjScreen)
         val backButton = onjScreen.namedActorOrError(backButtonName)
 //        backButton.onButtonClick {
 ////            personWidget.giveResourcesBack()

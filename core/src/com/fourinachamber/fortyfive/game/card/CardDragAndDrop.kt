@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
+import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.CustomScrollableFlexBox
 import com.fourinachamber.fortyfive.screen.general.DragBehaviour
 import com.fourinachamber.fortyfive.screen.general.DropBehaviour
@@ -151,6 +152,7 @@ class ShopDragSource(
 ) : DragBehaviour(dragAndDrop, actor, onj) {
 
     private val toLast: Boolean
+    private var isBought: Boolean = false
 
     private var startPos = Vector2()
 
@@ -170,6 +172,8 @@ class ShopDragSource(
         val obj = DragAndDropPayload(actor)
         payload.obj = obj
         obj.resetTo(Vector2(actor.x, actor.y))
+        isBought = !isBought
+        obj.change(isBought)
         return payload
     }
 
@@ -220,6 +224,15 @@ class ShopDragSource(
         fun onBuy() = tasks.add {
 //            ShopWidget.curShopWidget.checkAndBuy(actor)  //TODO ugly
             println("now buy stuff") //TODO hier weitermachen
+        }
+
+        fun change(bought: Boolean) = tasks.add {
+            actor as CustomImageActor
+            if (bought) {
+                actor.styleManager?.enterActorState("unbuyable")
+            } else {
+                actor.styleManager?.leaveActorState("unbuyable")
+            }
         }
     }
 }

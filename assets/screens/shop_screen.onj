@@ -76,7 +76,7 @@ var scrollBar = $Image {
 var cardsWidget = $ScrollBox {
     name: "cards_widget",
     isScrollDirectionVertical: true,
-    scrollDistance: 1.0,
+    scrollDistance: 6.0,
     backgroundStretched: false,
     scrollbarBackgroundName: "scrollbar_background",
     scrollbarName: "scrollbar_handle",
@@ -278,12 +278,13 @@ templates: [
                 style_priority: 1,
                 width: 100.0#percent,
                 height: 75.0#percent,
+//                alpha: 1.0,
             },
             {
                 style_priority: 2,
-                style_condition: state("unbuyable"), //actorstates for stylemanager als string list
+                style_condition: actorState("unbuyable"), //actorstates for stylemanager als string list
                 alpha: 0.5,
-                disabled: true
+//                disabled: true
             }
         ],
     },
