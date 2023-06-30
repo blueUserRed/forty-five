@@ -94,16 +94,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var popupButtonText: String by templateParam("game.popupButtonText", "")
     private var popupEvent: Event? = null
 
-    private val timelines: MutableList<Timeline> = mutableListOf()
-    private val timelinesToStart: MutableList<Timeline> = mutableListOf()
+    private val mainTimeline: Timeline = Timeline(mutableListOf()).apply { startTimeline() }
+
+    private val animTimelines: MutableList<Timeline> = mutableListOf()
+    private val animTimelinesAddBuffer: MutableList<Timeline> = mutableListOf()
 
     private var isUIFrozen: Boolean = false
-
-    /**
-     * the current phase of the game
-     */
-    var currentState: GameState = GameState.Free
-        private set
 
     /**
      * counts up every turn; starts at 0, but gets immediately incremented to one
@@ -142,12 +138,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var playerLost: Boolean = false
         private set
 
-    /**
-     * the next time the [nextTurn] function is called while this is true, this is set to false and nothing else is
-     * done
-     */
-    private var skipNextTurn: Boolean = false
-
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is EncounterMapEvent) { // TODO: comment back in
@@ -169,16 +159,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         gameDirector.init()
 
         var popupText = ""
-        if (remainingTurns != 1) popupText = "You have $remainingTurns turns!\n"
+        if (remainingTurns != -1) popupText = "You have $remainingTurns turns!\n"
         popupText += "If you loose, you take ${enemyArea.enemies[0].damage} damage!"
-        executeTimeline(Timeline.timeline {
+        appendMainTimeline(Timeline.timeline {
+            action { curReserves = baseReserves }
             includeLater(
                 { confirmationPopup(popupText) },
                 { remainingTurns != 1 }
             )
-            action {
-                changeState(GameState.InitialDraw(cardsToDrawInFirstRound))
-            }
+            include(drawCardPopup(cardsToDrawInFirstRound))
         })
         onjScreen.invalidateEverything()
     }
@@ -236,7 +225,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             endTurn()
         }
         is DrawCardEvent -> {
-            drawCard()
+            popupEvent = event
         }
         is PopupConfirmationEvent, is PopupSelectionEvent -> {
             popupEvent = event
@@ -244,20 +233,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         else -> { }
     }
 
-    @MainThreadOnly
-    fun changeState(next: GameState) {
-        if (next == currentState) return
-        FortyFiveLogger.debug(logTag, "changing state from $currentState to $next")
-        currentState.transitionAway(this)
-        currentState = next
-        currentState.transitionTo(this)
-    }
-
     fun nextTurn() {
-        if (skipNextTurn) {
-            skipNextTurn = false
-            return
-        }
         if (hasWon) {
             completeWin()
             return
@@ -267,7 +243,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
             remainingTurns--
         }
-        if (remainingTurns == 0) loose()
+        if (remainingTurns == 0) playerDied()
     }
 
     private var updateCount = 0 //TODO: this is stupid
@@ -277,19 +253,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
         updateCount++
 
+        mainTimeline.updateTimeline()
 
-        timelinesToStart.forEach { timelines.add(it) }
-        timelinesToStart.clear()
-        val iterator = timelines.iterator()
+        animTimelinesAddBuffer.forEach { animTimelines.add(it) }
+        animTimelinesAddBuffer.clear()
+        val iterator = animTimelines.iterator()
         while (iterator.hasNext()) {
             val cur = iterator.next()
             cur.updateTimeline()
             if (!cur.isFinished && !cur.hasBeenStarted) cur.startTimeline()
             if (cur.isFinished) iterator.remove()
         }
-        val areTimelinesFinished = timelines.isEmpty()
-        if (areTimelinesFinished && isUIFrozen) unfreezeUI()
-        if (!areTimelinesFinished && !isUIFrozen) freezeUI()
+        if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
+        if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
 
         updateGameAnimations()
     }
@@ -316,14 +292,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         curGameAnims.add(anim)
     }
 
-    /**
-     * changes the game to the SpecialDraw phase and sets the amount of cards to draw to [amount]
-     */
-    @AllThreadsAllowed
-    fun specialDraw(amount: Int) {
-        if (currentState !is GameState.Free) return
-        changeState(GameState.SpecialDraw(amount))
-    }
+//    /**
+//     * changes the game to the SpecialDraw phase and sets the amount of cards to draw to [amount]
+//     */
+//    @AllThreadsAllowed
+//    fun specialDraw(amount: Int) {
+//        if (currentState !is GameState.Free) return
+//        changeState(GameState.SpecialDraw(amount))
+//    }
 
     private fun initCardHand() {
         val curScreen = curScreen
@@ -381,7 +357,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         revolver.setCard(slot, card)
         FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
         card.onEnter()
-        executeTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
+        appendMainTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
     }
 
     fun maxCardsPopup(): Timeline = confirmationPopup("Hand reached maximum of $maxCards cards")
@@ -418,6 +394,28 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
+    fun drawCardPopup(amount: Int): Timeline = Timeline.timeline {
+        var remainingCardsToDraw = amount
+        action {
+            remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
+            FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
+            if (remainingCardsToDraw != 0) curScreen.enterState(cardDrawActorScreenState)
+        }
+        includeLater({ maxCardsPopup() }, { remainingCardsToDraw == 0 })
+        includeLater({ Timeline.timeline {
+            repeat(remainingCardsToDraw) {
+                delayUntil { popupEvent != null }
+                action {
+                    popupEvent = null
+                    drawCard()
+                }
+            }
+        }}, { remainingCardsToDraw != 0 })
+        action {
+            if (remainingCardsToDraw != 0) curScreen.leaveState(cardDrawActorScreenState)
+        }
+    }
+
     /**
      * creates a new instance of the card named [name] and puts it in the hand of the player
      */
@@ -435,7 +433,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun shoot() {
-        if (!currentState.allowsShooting()) return
         revolverRotationCounter++
 
         val cardToShoot = revolver.getCardInSlot(5)
@@ -458,7 +455,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             enemyDamageTimeline = Timeline.timeline {
                 action {
-                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(5)
+                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
                 }
                 include(enemy.damage(cardToShoot.curDamage))
                 action { cardToShoot.afterShot() }
@@ -498,14 +495,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             includeLater(
                 { damageStatusEffectTimeline!! },
-                { enemy.currentHealth > 0 && damageStatusEffectTimeline != null }
+                { damageStatusEffectTimeline != null }
             )
             includeLater(
                 { effectTimeline!! },
-                { enemy.currentHealth > 0 && effectTimeline != null }
+                { effectTimeline != null }
             )
-
-            include(revolver.rotate(rotationDirection))
 
             action {
                 FortyFiveLogger.debug(logTag, "revolver rotated $rotationDirection")
@@ -523,10 +518,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         }
 
-        executeTimeline(Timeline.timeline {
+        appendMainTimeline(Timeline.timeline {
             parallelActions(
                 timeline.asAction(),
-                gameRenderPipeline.getOnShotPostProcessingTimelineAction()
+                gameRenderPipeline.getOnShotPostProcessingTimelineAction(),
+                revolver.rotate(rotationDirection).asAction()
             )
         })
     }
@@ -539,14 +535,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     fun endTurn() {
-        currentState.onEndTurn(this)
+        appendMainTimeline(Timeline.timeline {
+            action { nextTurn() }
+            include(drawCardPopup(cardsToDraw))
+            includeLater({ checkStatusEffectsAfterTurn() }, { true })
+            includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
+            action { curReserves = baseReserves }
+        })
     }
 
     /**
      * damages the player (plays no animation, calls loose when lives go below 0)
      */
     @AllThreadsAllowed
-    fun damagePlayer(damage: Int): Timeline = Timeline.timeline {
+    fun damagePlayerTimeline(damage: Int): Timeline = Timeline.timeline {
         action {
             curPlayerLives -= damage
             FortyFiveLogger.debug(
@@ -574,8 +576,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         revolver.removeCard(card)
         card.onDestroy()
         FortyFiveLogger.debug(logTag, "destroyed card: $card")
-        executeTimeline(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
-        currentState.onCardDestroyed(this)
+        appendMainTimeline(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
     }
 
     @MainThreadOnly
@@ -597,23 +598,23 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     @MainThreadOnly
-    fun checkStatusEffects(): Timeline {
+    fun checkStatusEffectsAfterTurn(): Timeline {
         FortyFiveLogger.debug(logTag, "checking status effects")
         val timeline = Timeline.timeline {
             for (enemy in enemyArea.enemies) {
-                val timeline = enemy.executeStatusEffects()
+                val timeline = enemy.executeStatusEffectsAfterTurn()
                 if (timeline != null) include(timeline)
             }
         }
         return timeline
     }
 
-    /**
-     * appends a timeline to the current timeline
-     */
-    @AllThreadsAllowed
-    fun executeTimeline(timeline: Timeline) {
-        timelinesToStart.add(timeline)
+    fun appendMainTimeline(timeline: Timeline) {
+        mainTimeline.appendAction(timeline.asAction())
+    }
+
+    fun dispatchAnimTimeline(timeline: Timeline) {
+        animTimelinesAddBuffer.add(timeline)
     }
 
     private fun freezeUI() {
@@ -647,13 +648,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @AllThreadsAllowed
     fun drawCard() {
-        if (!currentState.allowsDrawingCards()) return
         val card = cardStack.removeFirstOrNull() ?: defaultBullet.create()
         _remainingCards = cardStack.size
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++
-        currentState.onCardDrawn(this)
     }
 
     private fun cost(cost: Int): Boolean {
@@ -690,14 +689,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         MapManager.switchToMapScreen()
     }
 
-    fun loose() {
-        playerLost = true
-        executeTimeline(damagePlayer(enemyArea.enemies[0].damage))
-    }
-
     @MainThreadOnly
     fun playerDied() {
-        executeTimeline(Timeline.timeline {
+        appendMainTimeline(Timeline.timeline {
             action {
                 FortyFiveLogger.debug(logTag, "player lost")
                 FortyFive.newRun()

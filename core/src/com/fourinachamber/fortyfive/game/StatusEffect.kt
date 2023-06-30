@@ -121,12 +121,13 @@ abstract class StatusEffect(
         override fun executeAfterRevolverTurn(
             gameController: GameController
         ): Timeline = Timeline.timeline {
-            FortyFiveLogger.debug(logTag, "executing poison effect")
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
-
-            includeAction(shakeActorAction)
-            delay(GraphicsConfig.bufferTime)
-            include(target.damage(damage))
+            // TODO: rework poison
+//            FortyFiveLogger.debug(logTag, "executing poison effect")
+//            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
+//
+//            includeAction(shakeActorAction)
+//            delay(GraphicsConfig.bufferTime)
+//            include(target.damage(damage))
         }
 
         override fun canStackWith(effect: StatusEffect): Boolean {
@@ -169,14 +170,8 @@ abstract class StatusEffect(
             gameController: GameController,
             damage: Int
         ): Timeline = Timeline.timeline {
-
             FortyFiveLogger.debug(logTag, "executing burning effect")
-
             val additionalDamage = floor(damage * percent).toInt()
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
-
-            delay(GraphicsConfig.bufferTime)
-            includeAction(shakeActorAction)
             delay(GraphicsConfig.bufferTime)
             include(target.damage(additionalDamage))
         }
@@ -212,7 +207,7 @@ abstract class StatusEffect(
 //            }
             override fun damage(damage: Int): Timeline {
                 return Timeline.timeline {
-                    include(FortyFive.currentGame!!.damagePlayer(damage))
+                    include(FortyFive.currentGame!!.damagePlayerTimeline(damage))
                 }
             }
         },
