@@ -48,10 +48,6 @@ var personWidget = $PersonWidget {
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
-    //    dropBehaviour: $ShopDropTarget { //TODO change back (maybe not)
-//        group: "card",
-//    },
-
     dragAndDrop: $ShopDropTarget {
         group: "card",
     },
@@ -80,11 +76,11 @@ var scrollBar = $Image {
 var cardsWidget = $ScrollBox {
     name: "cards_widget",
     isScrollDirectionVertical: true,
-    scrollDistance: 6.0,
+    scrollDistance: 1.0,
     backgroundStretched: false,
     scrollbarBackgroundName: "scrollbar_background",
     scrollbarName: "scrollbar_handle",
-    scrollbarSide: "top",
+    scrollbarSide: "right",
     styles: [
         {
             flexWrap: wrap.wrap,
@@ -94,7 +90,7 @@ var cardsWidget = $ScrollBox {
             width: 100.0#percent,
             height: 69.0#percent,
             paddingLeft: 3.0#points,
-            paddingRight: 3.0#points,
+            paddingRight: 10.0#points,
             paddingTop: 3.0#points,
             paddingBottom: 4.0#points,
             cuttingLeft: 1.75,
@@ -263,6 +259,11 @@ root: $Box {
 
 templates: [
     $Image {
+//        templates_key: { //TODO do it so it works like that ❤️
+//            "dragAndDrop.group": "groupName",
+//            "textureName": "textureName1",
+//            "styles.0.width": "width",
+//        },
         name: "cardsWidgetImage",
         textureName: "shop_background_no_biome",
         scaleX: 0.001,
@@ -274,8 +275,15 @@ templates: [
         },
         styles: [
             {
+                style_priority: 1,
                 width: 100.0#percent,
-                height: 87.0#percent,
+                height: 75.0#percent,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("unbuyable"), //actorstates for stylemanager als string list
+                alpha: 0.5,
+                disabled: true
             }
         ],
     },
@@ -283,8 +291,10 @@ templates: [
         name: "cardsWidgetParent",
         styles: [
             {
-                width: 20.0#percent,
-                height: 35.0#percent,
+                width: 21.0#percent,
+                height: 38.0#percent,
+                //                marginBottom: 5.0#points,
+
             }
         ],
     },

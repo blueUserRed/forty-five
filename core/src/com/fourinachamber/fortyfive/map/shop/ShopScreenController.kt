@@ -13,6 +13,7 @@ import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjString
 import onj.value.OnjValue
+import kotlin.random.Random
 
 class ShopScreenController(onj: OnjObject) : ScreenController() {
 
@@ -27,10 +28,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val messageWidgetName = onj.get<String>("messageWidgetName")
     private val shopWidgetNames = onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
     private val backButtonName = "back_button"  //onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
-
     private lateinit var personWidget: PersonWidget
-    private lateinit var tempImageActor: CustomImageActor
-    private val dragAndDrop = DragAndDrop()
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
@@ -68,19 +66,8 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
 //        addItemWidgets(shopFile, person) //TODO einfügen falls broke
 
-        for (i in 0 until 20)
-        addCard(onjScreen)
-//        screen.screenBuilder.generateFromTemplate(
-//            "cardsWidgetTextChild",
-//            tempMap,
-//            screen.namedActorOrError(shopWidgetNames[0]) as FlexBox,
-//            onjScreen
-//        )
-//        tempImageActor.invalidateHierarchy()
-//        val shopWidget = screen.namedActorOrError(shopWidgetNames[0]) as ShopWidget
-//        shopWidget.showActorData(tempImageActor)
+        for (i in 0 until 16) addCard(onjScreen)
         val backButton = onjScreen.namedActorOrError(backButtonName)
-//        tempImageActor.onClick { println("AHSDASD") }
 //        backButton.onButtonClick {
 ////            personWidget.giveResourcesBack()
 //        }
@@ -97,14 +84,17 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         )!! as FlexBox
 
         val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
-        tempMap["name"] = OnjString("Card1")
-        tempMap["textureName"] = OnjString("enemy_texture")
-        screen.screenBuilder.generateFromTemplate(
+        tempMap["name"] = OnjString("Card_${curParent.children.size}")
+        tempMap["textureName"] = OnjString("heart_texture")
+        tempMap["styles.0.width"] = OnjString("heart_texture")
+        val img = screen.screenBuilder.generateFromTemplate(
             "cardsWidgetImage",
             tempMap,
             curParent,
             onjScreen
-        )
+        ) as CustomImageActor
+        val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
+        tempMap2["name"] = OnjString("bought" + Random(100).nextDouble())
         screen.screenBuilder.generateFromTemplate(
             "cardsWidgetPrice",
             mapOf(),
@@ -118,7 +108,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             val shopWidget = screen.namedActorOrError(it)
             if (shopWidget !is ShopWidget) throw RuntimeException("widget with name $it must be of type shopWidget")
             shopWidget.calculateChances(context.type, shopFile, person)
-            shopWidget.addItems(context.seed, context.boughtIndices, dragAndDrop)
+            shopWidget.addItems(context.seed, context.boughtIndices)
         }
     }
 
@@ -135,5 +125,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         }
 
     }
+
 
 }
