@@ -210,8 +210,7 @@ abstract class Effect(val trigger: Trigger) {
             val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             delay(GraphicsConfig.bufferTime)
             includeActionLater(cardHighlight) { card.inGame }
-            action { gameController.specialDraw(amount) }
-            delayUntil { gameController.currentState !is GameState.SpecialDraw }
+            include(gameController.drawCardPopup(amount))
         }
 
         override fun blocks(controller: GameController) = false

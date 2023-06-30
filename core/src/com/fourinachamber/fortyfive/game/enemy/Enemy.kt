@@ -104,7 +104,7 @@ class Enemy(
         actor.displayStatusEffect(effect)
     }
 
-    fun executeStatusEffects(): Timeline? {
+    fun executeStatusEffectsAfterTurn(): Timeline? {
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
@@ -188,7 +188,7 @@ class Enemy(
 //        )
 
         return Timeline.timeline {
-            include(gameController.damagePlayer(damage))
+            include(gameController.damagePlayerTimeline(damage))
 //            parallelActions(shakeAction, textAnimation)
         }
     }
@@ -206,35 +206,37 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-                action {
-                    currentCover -= damage
-                    if (currentCover < 0) currentCover = 0
-                    actor.updateText()
-                }
-                includeAction(GraphicsConfig.numberChangeAnimation(
+                val anim = GraphicsConfig.numberChangeAnimation(
                     actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
                     "-${min(damage, currentCover)}",
                     false,
                     false,
                     gameController.curScreen
-                ))
+                )
+                action {
+                    currentCover -= damage
+                    if (currentCover < 0) currentCover = 0
+                    actor.updateText()
+                    gameController.dispatchAnimTimeline(anim.wrap())
+                }
             } },
             { currentCover != 0 }
         )
 
         includeLater(
             { Timeline.timeline {
-                action {
-                    currentHealth -= remaining
-                    actor.updateText()
-                }
-                includeAction(GraphicsConfig.numberChangeAnimation(
+                val anim = GraphicsConfig.numberChangeAnimation(
                     actor.healthLabel.localToStageCoordinates(Vector2(0f, 0f)),
                     "-$remaining",
                     false,
                     false,
                     gameController.curScreen
-                ))
+                )
+                action {
+                    currentHealth -= remaining
+                    actor.updateText()
+                    gameController.dispatchAnimTimeline(anim.wrap())
+                }
             } },
             { remaining != 0 }
         )
