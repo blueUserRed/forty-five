@@ -18,7 +18,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -34,7 +33,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.properties.Delegates
 
 
 /**
@@ -560,11 +558,65 @@ class CustomScrollableFlexBox(
 
     private var needsScrollbar: Boolean = true
 
-    private val dragListener = object : DragListener() {
 
-        private var startPos by Delegates.notNull<Float>()
+    private val dragListener = object : InputListener() {
+        var startPos = 0f
+        private var touchDownX: Float = -1f
+        private var touchDownY: Float = -1f
+        private var stageTouchDownX: Float = -1f
+        private var stageTouchDownY: Float = -1f
+        private var dragStartX = 0f
+        private var dragStartY: Float = 0f
+        private var dragLastX: Float = 0f
+        private var dragLastY: Float = 0f
+        private var dragX: Float = 0f
+        private var dragY: Float = 0f
+        var pressedPointer = -1
+        val button = 0
+        var dragging = false
 
-        override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+            if (pressedPointer != -1) return false
+            if (pointer == 0 && this.button != -1 && button != this.button) return false
+            pressedPointer = pointer
+            touchDownX = x
+            touchDownY = y
+            stageTouchDownX = event.stageX
+            stageTouchDownY = event.stageY
+            return true
+        }
+
+        override fun touchDragged(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            if (pointer != pressedPointer) return
+            if (!dragging) {
+                dragging = true
+                dragStartX = x
+                dragStartY = y
+                dragStart(event, x, y, pointer)
+                dragX = x
+                dragY = y
+            }
+            if (dragging) {
+                dragLastX = dragX
+                dragLastY = dragY
+                dragX = x
+                dragY = y
+                drag(event, x, y, pointer)
+            }
+        }
+
+        override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+            if (pointer == pressedPointer) {
+                cancel()
+            }
+        }
+
+        fun cancel() {
+            dragging = false
+            pressedPointer = -1
+        }
+
+        fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (scrollbarHandle == null) {
                 startPos = Float.NaN
@@ -587,14 +639,14 @@ class CustomScrollableFlexBox(
             }
         }
 
-        override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (startPos.isNaN()) return
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (isScrollDirectionVertical) {
-                val max = lastMax - cutBottom
+                val max = lastMax + cutBottom
                 val curSize = height * height / (max + height)
-                scrollbarHandle!!.y = startPos + (y - touchDownY) + cutTop
-                offset = (-(scrollbarHandle!!.y - parentPos.x) - curSize) * max / (height - curSize)
+                scrollbarHandle!!.y = startPos + (y - touchDownY)
+                offset = -(scrollbarHandle!!.y - parentPos.y - height + curSize) * max / (height - curSize)
             } else {
                 scrollbarHandle!!.x = (startPos + x - touchDownX)
                 val max = lastMax
@@ -769,8 +821,10 @@ class CustomScrollableFlexBox(
             yPixel * (height - cutTop - cutBottom)
         )
         batch.flush()
-        super.draw(batch, parentAlpha)
         if (!ScissorStack.pushScissors(scissor)) return true
+        currentlyDraggedChild?.isVisible = false
+        super.draw(batch, parentAlpha)
+        currentlyDraggedChild?.isVisible = true
         batch.flush()
         ScissorStack.popScissors()
         batch.flush()

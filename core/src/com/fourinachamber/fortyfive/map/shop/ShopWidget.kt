@@ -29,23 +29,13 @@ class ShopWidget(
     val screen: OnjScreen,
 ) : CustomFlexBox(screen) {
 
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        super.draw(batch, parentAlpha)
-//        println(tempImageActor.width)
-//        println(tempImageActor.height)
-    }
-
     private val cards: MutableList<Card> = mutableListOf()
     private val priceTags: MutableList<CustomLabel> = mutableListOf()
     private lateinit var boughtIndices: MutableList<Int>
 
-    private lateinit var dragAndDrop: DragAndDrop
-
-    private val allCards: MutableList<Card>
+    private val _allCards: MutableList<Card>
     private val chances: HashMap<String, Float> = hashMapOf()
 
-
-//    private lateinit var tempImageActor: CustomImageActor
 
     init {
         backgroundHandle = texture
@@ -53,26 +43,24 @@ class ShopWidget(
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
         val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
-        allCards = cardPrototypes.map { it.create() }.toMutableList()
+        _allCards = cardPrototypes.map { it.create() }.toMutableList()
         curShopWidget = this
     }
 
 
     fun addItems(
         seed: Long,
-        boughtIndices: MutableList<Int>,
-        dragAndDrop: DragAndDrop
+        boughtIndices: MutableList<Int>
     ) {
         this.boughtIndices = boughtIndices
-        this.dragAndDrop = dragAndDrop
         val rnd = Random(seed)
         val nbrOfItems = 5/*(5..8).random(rnd)*/
         FortyFiveLogger.debug(logTag, "Created $nbrOfItems items with seed $seed")
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)
-            cards.add(allCards[cardId])
-            chances.remove(allCards[cardId].name)
+            cards.add(_allCards[cardId])
+            chances.remove(_allCards[cardId].name)
             val stringLabel = CustomLabel(screen, "${cards.last().price}$", dataFont, false)
             stringLabel.setFontScale(0.1F)
             stringLabel.setAlignment(Align.center)
@@ -81,15 +69,7 @@ class ShopWidget(
             add(stringLabel)
             add(cards.last().actor)
         }
-        cards.forEach {
-            val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
-                dataDragBehaviour.name,
-                dragAndDrop,
-                it.actor,
-                dataDragBehaviour
-            )
-            dragAndDrop.addSource(behaviour)
-        }
+
 
         for (i in 0..nbrOfItems * 2) {
             val pos = (0 until cards.size).random(rnd)
@@ -110,7 +90,7 @@ class ShopWidget(
         for (e in chances) {
             curSum += e.value
             if (curSum > value) {
-                return allCards.indexOf(allCards.find { it.name == e.key })
+                return _allCards.indexOf(_allCards.find { it.name == e.key })
             }
         }
         return chances.size - 1
@@ -172,7 +152,7 @@ class ShopWidget(
         } else {
             allTypes.first { it.get<String>("name") == type }.get<OnjArray>("cardChanges").value.map { it as OnjObject }
         }
-        allCards.forEach { chances[it.name] = 0F }
+        _allCards.forEach { chances[it.name] = 0F }
         curTypeChances.forEach {
             applyChancesEffect(
                 it.get<OnjNamedObject>("select"),
@@ -182,7 +162,7 @@ class ShopWidget(
     }
 
     private fun applyChancesEffect(selector: OnjNamedObject, effect: OnjNamedObject) {
-        val cardsToChange: List<String> = allCards.filter {
+        val cardsToChange: List<String> = _allCards.filter {
             (if (selector.name == "ByName") it.name == selector.get<String>("name") else it.tags.contains(
                 selector.get<String>("name")
             ))
@@ -199,7 +179,7 @@ class ShopWidget(
             }
 
             "PriceMultiplier" -> {
-                allCards.filter { it.name in cardsToChange }.forEach {
+                _allCards.filter { it.name in cardsToChange }.forEach {
                     it.price = (it.price * effect.get<Double>("price")).toInt()
                 }
             }

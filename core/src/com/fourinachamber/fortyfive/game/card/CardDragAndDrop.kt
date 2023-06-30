@@ -194,6 +194,7 @@ class ShopDragSource(
         if (payload == null) return
         if (toLast) actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as DragAndDropPayload
+        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
         obj.onDragStop()
     }
 
