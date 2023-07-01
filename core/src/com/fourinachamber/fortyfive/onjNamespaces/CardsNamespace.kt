@@ -113,6 +113,11 @@ object CardsNamespace {
         })
     }
 
+    @RegisterOnjFunction("params: []")
+    fun bSelectSelf(): OnjBulletSelector {
+        return OnjBulletSelector(BulletSelector.ByLambda { self, other, _, _ -> self === other })
+    }
+
     @RegisterOnjFunction(schema = "params: [int, int]")
     fun poison(turns: OnjInt, damage: OnjInt): OnjStatusEffect {
         return OnjStatusEffect(StatusEffect.Poison(
