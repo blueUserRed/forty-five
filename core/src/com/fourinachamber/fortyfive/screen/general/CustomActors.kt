@@ -26,6 +26,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
+import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
@@ -538,7 +539,7 @@ class CustomScrollableFlexBox(
     private val scrollbarBackgroundName: String?,
     private val scrollbarName: String?,
     private val scrollbarSide: String?,
-) : CustomFlexBox(screen) {
+) : CustomFlexBox(screen) { //TODO fix bug with children with fixed size
 
     private val scrollListener = object : InputListener() {
         override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {
@@ -678,10 +679,27 @@ class CustomScrollableFlexBox(
     private var scrollbarBackground: CustomImageActor? = null
     private var scrollbarHandle: CustomImageActor? = null
     var scrollbarWidth: Float = 0F
+//    var maxSizeInScrollDirection: Float = -1F
+//
+//    private val tempChildren = mutableListOf<Actor>()
 
     override fun layout() {
-        super.layout()
 
+//        layoutScrollBar()
+//        if (maxSizeInScrollDirection == -1F) {
+//            while (children.size > 0) {
+//                val childAt =
+//                    root.getChildAt(0); tempChildren.add(children[0]); remove(childAt); children.removeIndex(0)
+//            }
+//            super.layout()
+//            maxSizeInScrollDirection = 1F
+////            tempChildren.forEach{ add(it) }
+//        }
+//        if (height == 54.0F) {
+//            maxSizeInScrollDirection=54F
+//            tempChildren.forEach { add(it) }
+//        }
+        super.layout()
         layoutChildren()
         layoutScrollBar()
     }
@@ -705,7 +723,7 @@ class CustomScrollableFlexBox(
 
     private fun layoutChildren() {
         if (isScrollDirectionVertical) {
-            lastMax = children.map { -it.y }.max()
+            lastMax = children.map { -it.y }.maxOrNull() ?: -cutBottom
 
             if (0F < lastMax + cutBottom) {
                 needsScrollbar = true
@@ -715,7 +733,7 @@ class CustomScrollableFlexBox(
                 needsScrollbar = false
             }
         } else {
-            lastMax = (children.map { it.x + it.width }.max() - width)
+            lastMax = ((children.map { it.x + it.width }.maxOrNull() ?: 0F) - width)
             if (-lastMax - cutRight < -cutLeft / scrollDistance) {
                 needsScrollbar = true
                 offset = offset.between(-lastMax - cutRight, -cutLeft / scrollDistance)
@@ -782,7 +800,7 @@ class CustomScrollableFlexBox(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
         batch.flush()
-
+//        width=82F
         val viewport = screen.stage.viewport
         val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
         val yPixel =

@@ -6,12 +6,11 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.map.shop.ShopScreenController
 import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
-import com.fourinachamber.fortyfive.screen.general.CustomImageActor
-import com.fourinachamber.fortyfive.screen.general.CustomScrollableFlexBox
-import com.fourinachamber.fortyfive.screen.general.DragBehaviour
-import com.fourinachamber.fortyfive.screen.general.DropBehaviour
+import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
 import kotlin.math.max
@@ -152,7 +151,6 @@ class ShopDragSource(
 ) : DragBehaviour(dragAndDrop, actor, onj) {
 
     private val toLast: Boolean
-    private var isBought: Boolean = false
 
     private var startPos = Vector2()
 
@@ -160,7 +158,8 @@ class ShopDragSource(
         toLast = onj.getOr("moveToLastIndex", false)
     }
 
-    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload {
+    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload? {
+        if ((actor !is CustomImageActor) || (actor as CustomImageActor).styleManager?.actorStates?.contains("unbuyable") == true) return null
         startPos = Vector2(x * actor.scaleX, y * actor.scaleY)
         val payload = Payload()
         dragAndDrop.setKeepWithinStage(false)
@@ -172,8 +171,6 @@ class ShopDragSource(
         val obj = DragAndDropPayload(actor)
         payload.obj = obj
         obj.resetTo(Vector2(actor.x, actor.y))
-        isBought = !isBought
-        obj.change(isBought)
         return payload
     }
 
@@ -208,7 +205,6 @@ class ShopDragSource(
         private val tasks: MutableList<() -> Unit> = mutableListOf()
 
         fun resetTo(pos: Vector2) = tasks.add {
-            println("now hihi")
             actor.x = pos.x
             actor.y = pos.y
         }
@@ -222,17 +218,18 @@ class ShopDragSource(
          * called when the drag is stopped
          */
         fun onBuy() = tasks.add {
-//            ShopWidget.curShopWidget.checkAndBuy(actor)  //TODO ugly
+            val scr=(FortyFive.screen as OnjScreen).screenController as ShopScreenController
+            scr.buyCard(actor)
             println("now buy stuff") //TODO hier weitermachen
         }
 
-        fun change(bought: Boolean) = tasks.add {
+/*        fun change(bought: Boolean) = tasks.add {
             actor as CustomImageActor
             if (bought) {
                 actor.styleManager?.enterActorState("unbuyable")
             } else {
                 actor.styleManager?.leaveActorState("unbuyable")
             }
-        }
+        }*/
     }
 }

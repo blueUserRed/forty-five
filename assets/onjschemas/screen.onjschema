@@ -205,19 +205,6 @@ $Widget {
         ...widgetSharedKeys
     }
 
-    $ShopWidget{
-        children?: $Widget[],
-//        name: string,
-        texture: string,
-        dataFile: string,
-        dataFont: string,
-        dataFontColor: Color,
-        dataDragBehaviour: $DragAndDropBehaviour,
-        maxPerLine: int,
-        widthPercentagePerItem: Float,
-        ...widgetSharedKeys,
-    }
-
 }
 
 var advancedTextPartSharedKeys = {
@@ -337,9 +324,10 @@ $ScreenController {
     $ShopScreenController {
         shopsFile: string,
         npcsFile: string,
+        cardsFile: string,
         personWidgetName: string,
         messageWidgetName: string,
-        shopWidgetNames: string[],
+        cardsParentName: string,
     }
 }
 
