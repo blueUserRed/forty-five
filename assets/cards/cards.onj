@@ -8,7 +8,8 @@ var bSelects = {
     allExceptSelf: bNum([1, 2, 3, 4, 5]),
     allBullets: bSelectByName("bullet"),
     fourButNotSelf: bNum([4]),
-    targetRequiredNotSelf: bSelectTarget(false, false)
+    targetRequiredNotSelf: bSelectTarget(false, false),
+    neighbors: bSelectNeighbors(),
 };
 
 cards: [
@@ -394,6 +395,24 @@ cards: [
             protect("enter", bSelects.targetRequiredNotSelf)
         ],
         cost: 3,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "purgeBullet",
+        title: "purge Bullet",
+        flavourText: "purge Bullet",
+        description: "todo",
+        baseDamage: 12,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            destroy("enter", bSelects.neighbors)
+        ],
+        cost: 1,
         type: $Bullet { },
         tags: ["rare"],
         price: 50,

@@ -49,7 +49,7 @@ abstract class Effect(val trigger: Trigger) {
                     .slots
                     .mapIndexed { index, revolverSlot -> index to revolverSlot }
                     .filter { it.second.card != null }
-                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index) }
+                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index, controller) }
                     .map { it.second.card!! }
                 store("selectedCards", cards)
             }
@@ -304,6 +304,26 @@ abstract class Effect(val trigger: Trigger) {
         override fun toString(): String = "Protect(trigger=$trigger)"
     }
 
+    class Destroy(trigger: Trigger, val bulletSelector: BulletSelector) : Effect(trigger) {
+
+        override fun onTrigger(): Timeline = Timeline.timeline {
+            val controller = FortyFive.currentGame!!
+            include(getSelectedBullets(bulletSelector, controller, this@Destroy.card))
+            includeLater(
+                {
+                    get<List<Card>>("selectedCards")
+                        .map { controller.destroyCardTimeline(it) }
+                        .collectTimeline()
+                },
+                { true }
+            )
+        }
+
+        override fun blocks(controller: GameController): Boolean = bulletSelector.blocks(controller, card)
+
+        override fun copy(): Effect = Destroy(trigger, bulletSelector)
+    }
+
 }
 
 /**
@@ -311,7 +331,9 @@ abstract class Effect(val trigger: Trigger) {
  */
 sealed class BulletSelector {
 
-    class ByLambda(val lambda: (self: Card, other: Card, slot: Int) -> Boolean) : BulletSelector() {
+    class ByLambda(
+        val lambda: (self: Card, other: Card, slot: Int, controller: GameController) -> Boolean
+    ) : BulletSelector() {
 
         override fun blocks(controller: GameController, self: Card): Boolean = false
     }
