@@ -35,11 +35,10 @@ options: {
     screenController: $ShopScreenController {
         shopsFile: "maps/shops.onj",
         npcsFile: "maps/npcs.onj",
+        cardsFile: "cards/cards.onj",
         personWidgetName: "shop_person_widget",
         messageWidgetName: "shop_message",
-        shopWidgetNames: [
-            "cards_widget"
-        ],
+        cardsParentName: "cards_widget",
     }
 },
 
@@ -73,6 +72,53 @@ var scrollBar = $Image {
     scaleY: 1.0,
 };
 
+var testWidget = $Image {
+    textureName: "shop_background_no_biome",
+    scaleX: 0.001,
+    scaleY: 0.001,
+    reportDimensionsWithScaling: true,
+    dragAndDrop: $ShopDragSource {
+        group: "card",
+        moveToLastIndex: true,
+    },
+    styles: [
+        {
+            style_priority: 1,
+            width: 100.0#percent,
+            height: 80.0#percent,
+            alpha: 1.0,
+        },
+        {
+            style_priority: 2,
+            style_condition: actorState("unbuyable"),
+            alpha: 0.5,
+        }
+    ],
+};
+
+
+var testWidgetBox = $Box {
+    name: "cardsWidgetParent",
+    styles: [
+        {
+            width: 21.0#percent,
+            height: 35.0#percent,
+            flexDirection: flexDirection.column,
+            background: "heart_texture",
+        }
+    ],
+} children [
+    testWidget,
+    $Label {
+        name: "cardsWidgetPrice",
+        text: "bought",
+        font: "red_wing_cm",
+        color: color.dark_brown,
+        fontScale: 0.08,
+        align: "center",
+    }
+];
+
 var cardsWidget = $ScrollBox {
     name: "cards_widget",
     isScrollDirectionVertical: true,
@@ -85,7 +131,7 @@ var cardsWidget = $ScrollBox {
         {
             flexWrap: wrap.wrap,
             flexDirection: flexDirection.row,
-            justifyContent: justify.spaceBetween,
+            justifyContent: justify.flexStart,
             background: "shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
@@ -101,6 +147,20 @@ var cardsWidget = $ScrollBox {
         }
     ],
     children: [
+        //        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+
         scrollBar,
         scrollBarBackground
     ]
@@ -131,7 +191,6 @@ root: $Box {
             }
         ],
     },
-
     sharedComponents.navBar,
     personWidget,
     $Image {
@@ -259,11 +318,12 @@ root: $Box {
 
 templates: [
     $Image {
-//        templates_key: { //TODO do it so it works like that ❤️
+        //        templates_key: { //TODO do it so it works like that ❤️
 //            "dragAndDrop.group": "groupName",
-//            "textureName": "textureName1",
+//            "textureName": "textureName",
 //            "styles.0.width": "width",
 //        },
+
         name: "cardsWidgetImage",
         textureName: "shop_background_no_biome",
         scaleX: 0.001,
@@ -278,13 +338,12 @@ templates: [
                 style_priority: 1,
                 width: 100.0#percent,
                 height: 75.0#percent,
-//                alpha: 1.0,
+                alpha: 1.0,
             },
             {
                 style_priority: 2,
-                style_condition: actorState("unbuyable"), //actorstates for stylemanager als string list
+                style_condition: actorState("unbuyable"),
                 alpha: 0.5,
-//                disabled: true
             }
         ],
     },
@@ -292,10 +351,10 @@ templates: [
         name: "cardsWidgetParent",
         styles: [
             {
+                marginLeft: 2.0#percent,
+                marginRight: 2.0#percent,
                 width: 21.0#percent,
-                height: 38.0#percent,
-                //                marginBottom: 5.0#points,
-
+                height: 44.5#percent,
             }
         ],
     },
@@ -306,5 +365,22 @@ templates: [
         color: color.dark_brown,
         fontScale: 0.08,
         align: "center",
+        styles: [
+            {
+                style_priority: 1,
+                alpha: 1.0,
+
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("bought"),
+                alpha: 0.9,
+            },
+            {
+                style_priority: 3,
+                style_condition: actorState("poor"),
+                alpha: 0.6,
+            }
+        ],
     },
 ],
