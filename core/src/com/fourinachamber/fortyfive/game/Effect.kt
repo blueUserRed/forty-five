@@ -231,9 +231,11 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(): Timeline = Timeline.timeline {
             action {
                 val game = FortyFive.currentGame!!
+                val enemy = game.enemyArea.getTargetedEnemy()
                 if (game.modifier?.shouldApplyStatusEffects() ?: true) {
-                    game.enemyArea.getTargetedEnemy().applyEffect(statusEffect)
+                    enemy.applyEffect(statusEffect)
                 }
+                statusEffect.applyAnim(enemy)?.let { game.dispatchAnimTimeline(it) }
             }
         }
 

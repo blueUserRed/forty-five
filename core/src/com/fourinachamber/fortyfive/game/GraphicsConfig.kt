@@ -162,9 +162,6 @@ object GraphicsConfig {
     fun shootShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, shootPostProcessor)
     fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
 
-    @MainThreadOnly
-    fun destroyCardShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, destroyCardPostProcessor)
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -253,12 +250,7 @@ object GraphicsConfig {
         val onShootPostProcessor = config.get<OnjObject>("shootPostProcessor")
         shootPostProcessor = onShootPostProcessor.get<String>("name")
         shootPostProcessorDuration = (onShootPostProcessor.get<Double>("duration") * 100).toInt()
-
-        val postProcessors = config.get<OnjObject>("postProcessors")
-        destroyCardPostProcessor = postProcessors.get<String>("destroyCardPostProcessor")
     }
-
-    private lateinit var destroyCardPostProcessor: String
 
     private lateinit var shootPostProcessor: String
     private var shootPostProcessorDuration: Int by Delegates.notNull()

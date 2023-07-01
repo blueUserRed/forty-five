@@ -358,6 +358,12 @@ particles: [
         file: "particles/bubble.particle",
         textureDir: "textures/particles",
         scale: 0.1
+    },
+    {
+        name: "fire_particle",
+        file: "particles/fire.particle",
+        textureDir: "textures/particles",
+        scale: 0.07
     }
 ],
 
