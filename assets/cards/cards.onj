@@ -10,6 +10,7 @@ var bSelects = {
     fourButNotSelf: bNum([4]),
     targetRequiredNotSelf: bSelectTarget(false, false),
     neighbors: bSelectNeighbors(),
+    self: bSelectSelf()
 };
 
 cards: [
@@ -413,6 +414,24 @@ cards: [
             destroy("enter", bSelects.neighbors)
         ],
         cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "deadBullet",
+        title: "dead Bullet",
+        flavourText: "dead Bullet",
+        description: "todo",
+        baseDamage: 0,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            destroy("enter", bSelects.self)
+        ],
+        cost: 0,
         type: $Bullet { },
         tags: ["rare"],
         price: 50,
