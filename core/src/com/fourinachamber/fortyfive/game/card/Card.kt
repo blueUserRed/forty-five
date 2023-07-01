@@ -199,16 +199,6 @@ class Card(
     }
 
     /**
-     * called by gameScreenController when the destroy-phase starts
-     */
-    fun enterDestroyMode() = actor.enterDestroyMode()
-
-    /**
-     * called by gameScreenController the destroy-phase ends
-     */
-    fun leaveDestroyMode() = actor.leaveDestroyMode()
-
-    /**
      * checks whether this card can currently enter the game
      */
     fun allowsEnteringGame(controller: GameController): Boolean = !effects.any { it.blocks(controller) }
@@ -221,7 +211,6 @@ class Card(
             FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being destroyed")
             FortyFive.currentGame!!.cardHand.addCard(this)
         }
-        leaveDestroyMode()
         leaveGame()
     }
 
@@ -490,6 +479,7 @@ class CardActor(
     }
 
     fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
+        // TODO: hardcoded values
         var origScaleX = 0f
         var origScaleY = 0f
         val scaleAction = ScaleToAction()
@@ -503,14 +493,14 @@ class CardActor(
                 -(width * origScaleX * 1.3f - width * origScaleX) / 2,
                 -(height * origScaleY * 1.3f - height * origScaleY) / 2,
             )
-            moveAction.duration = 0.2f
-            scaleAction.duration = 0.2f
+            moveAction.duration = 0.1f
+            scaleAction.duration = 0.1f
             scaleAction.interpolation = interpolation
             moveAction.interpolation = interpolation
             addAction(scaleAction)
             addAction(moveAction)
         }
-        delayUntil { scaleAction.isComplete }
+        delayUntil { scaleAction.isComplete || !card.inGame }
         if (includeGlow) {
             delay(GraphicsConfig.bufferTime)
             include(glowAnimation())
@@ -531,24 +521,12 @@ class CardActor(
             addAction(scaleAction)
             addAction(moveAction)
         }
-        delayUntil { scaleAction.isComplete }
+        delayUntil { scaleAction.isComplete || !card.inGame }
         action {
             removeAction(scaleAction)
             removeAction(moveAction)
         }
         delay(GraphicsConfig.bufferTime)
-    }
-
-    fun enterDestroyMode() {
-        addListener(destroyModeOnClickListener)
-    }
-
-    fun leaveDestroyMode() {
-        removeListener(destroyModeOnClickListener)
-    }
-
-    fun forceEndHover() {
-        isHoveredOver = false
     }
 
 }

@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fortyfive.FortyFive
@@ -132,7 +133,7 @@ class Enemy(
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterRevolverTurn(gameController) ?: continue
+                val timelineToInclude = effect.executeAfterRevolverRotation(gameController) ?: continue
                 hadEffectTimeline = true
                 include(timelineToInclude)
             }
@@ -317,6 +318,10 @@ class EnemyActor(
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
+    private val fireParticles: ParticleEffect by lazy {
+        ResourceManager.get(screen, "fire_particle") // TODO: fix
+    }
+
     init {
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
@@ -338,6 +343,14 @@ class EnemyActor(
         addActor(healthLabel)
         addActor(statusEffectDisplay)
         updateText()
+    }
+
+    fun fireAnim(): Timeline = Timeline.timeline {
+        includeAction(ParticleTimelineAction(
+            fireParticles,
+            image.localToStageCoordinates(Vector2(0f, 0f)) + Vector2(image.width / 2, 0f),
+            screen
+        ))
     }
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)

@@ -536,11 +536,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun endTurn() {
         appendMainTimeline(Timeline.timeline {
-            action { nextTurn() }
+            action {
+                nextTurn()
+                curReserves = baseReserves
+            }
             include(drawCardPopup(cardsToDraw))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
-            action { curReserves = baseReserves }
         })
     }
 
