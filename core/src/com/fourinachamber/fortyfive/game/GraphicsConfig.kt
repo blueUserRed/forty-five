@@ -182,11 +182,6 @@ object GraphicsConfig {
                 obj.get<String>("icon") to obj.get<Double>("scale").toFloat()
             }
 
-        postProcessors = config
-            .get<OnjObject>("postProcessors")
-            .value
-            .mapValues { it.value.value as String }
-
         val damageOverlay = config.get<OnjObject>("damageOverlay")
 
         damageOverlayTexture = damageOverlay.get<String>("overlay")
@@ -266,7 +261,6 @@ object GraphicsConfig {
 
     private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
-    private lateinit var postProcessors: Map<String, String>
 
     var bufferTime by Delegates.notNull<Int>()
         private set

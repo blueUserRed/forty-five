@@ -118,6 +118,10 @@ assets: {
             name: "protectiveBullet",
             file: "textures/cards/protectiveBullet.png"
         },
+        {
+            name: "purgeBullet",
+            file: "textures/cards/purgeBullet.png"
+        },
     ],
     fonts: [
         {
@@ -562,6 +566,24 @@ textures: [
             $TextElement {
                 ...costElementSharedKeys,
                 text: cards.(bulletsOffset + 22).cost#string
+            }
+        ]
+    },
+
+    {
+        name: cards.(bulletsOffset + 23).name,
+        elements: [
+            $ImageElement {
+                textureName: cards.(bulletsOffset + 23).name,
+                ...imageElementSharedKeys
+            },
+            $TextElement {
+                ...valueElementSharedKeys,
+                text: cards.(bulletsOffset + 23).baseDamage#string
+            },
+            $TextElement {
+                ...costElementSharedKeys,
+                text: cards.(bulletsOffset + 23).cost#string
             }
         ]
     },

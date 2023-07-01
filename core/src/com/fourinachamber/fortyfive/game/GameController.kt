@@ -68,7 +68,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     private var _remainingCards: Int by multipleTemplateParam(
-        "game.cardsInStack", cardStack.size,
+        "game.cardsInStack", 0,
         "game.cardsInStackPluralS" to { if (it == 1) "" else "s" }
     )
 
@@ -181,11 +181,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .getFrom(onj.get<OnjArray>("cards"), curScreen, ::initCard)
             .toMutableList()
 
-        val startDeck: MutableList<Card> = mutableListOf()
-
-        cardStack = startDeck.filter { it.type == Card.Type.BULLET }.toMutableList()
-        _remainingCards = cardStack.size
-
         SaveState.cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
@@ -194,6 +189,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
 
         cardStack.shuffle()
+
+        _remainingCards = cardStack.size
 
         FortyFiveLogger.debug(logTag, "card stack: $cardStack")
 
@@ -400,14 +397,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
             if (remainingCardsToDraw != 0) curScreen.enterState(cardDrawActorScreenState)
+            TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount)
+            TemplateString.updateGlobalParam(
+                "game.remainingCardsToDrawPluralS",
+                if (amount == 1) "" else "s"
+            )
         }
         includeLater({ maxCardsPopup() }, { remainingCardsToDraw == 0 })
         includeLater({ Timeline.timeline {
-            repeat(remainingCardsToDraw) {
+            repeat(remainingCardsToDraw) { cur ->
                 delayUntil { popupEvent != null }
                 action {
                     popupEvent = null
                     drawCard()
+                    TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount - cur - 1)
+                    TemplateString.updateGlobalParam(
+                        "game.remainingCardsToDrawPluralS",
+                        if (amount - cur - 1 == 1) "" else "s"
+                    )
                 }
             }
         }}, { remainingCardsToDraw != 0 })
@@ -574,11 +581,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * destroys a card in the revolver
      */
     @MainThreadOnly
-    fun destroyCard(card: Card) {
-        revolver.removeCard(card)
-        card.onDestroy()
-        FortyFiveLogger.debug(logTag, "destroyed card: $card")
-        appendMainTimeline(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
+    fun destroyCardTimeline(card: Card): Timeline = Timeline.timeline {
+        action {
+            revolver.removeCard(card)
+            card.onDestroy()
+            FortyFiveLogger.debug(logTag, "destroyed card: $card")
+        }
+        include(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
     }
 
     @MainThreadOnly

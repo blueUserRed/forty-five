@@ -440,12 +440,6 @@ class CardActor(
         screen = screen
     )
 
-    private val destroyModeOnClickListener: EventListener = EventListener { event ->
-        if (event !is InputEvent || event.type != InputEvent.Type.touchDown) return@EventListener false
-        FortyFive.currentGame!!.destroyCard(card)
-        true
-    }
-
     private var inGlowAnim: Boolean = false
 
     private val glowShader: BetterShader by lazy {

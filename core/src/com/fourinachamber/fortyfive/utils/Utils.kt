@@ -154,6 +154,15 @@ fun <T> Collection<Pair<Int, T>>.weightedRandom(): T {
     throw NoSuchElementException("weightedRandom called on an empty collection")
 }
 
+fun Collection<Timeline>.collectTimeline(): Timeline {
+    val actions = mutableListOf<Timeline.TimelineAction>()
+    forEach {
+        if (it.hasBeenStarted) throw RuntimeException("cannot collect a timeline that has been started already")
+        actions.addAll(it.actions)
+    }
+    return Timeline(actions)
+}
+
 object Utils {
 
     /**

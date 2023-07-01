@@ -28,10 +28,6 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
 
     private val currentPostProcessingShaders = mutableListOf<BetterShader>()
 
-    private val destroyModeShader by lazy {
-        GraphicsConfig.destroyCardShader(screen)
-    }
-
     private var sizeDirty = false
 
     private var fadeToBlack: Float = 0.0f
