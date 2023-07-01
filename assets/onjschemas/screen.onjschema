@@ -365,6 +365,8 @@ $KeyAction {
     $MoveInDetailMapKeyAction {
         direction: string
     }
+
+    $EnterEventDetailMapKeyAction{ }
 }
 
 viewport: $Viewport,
