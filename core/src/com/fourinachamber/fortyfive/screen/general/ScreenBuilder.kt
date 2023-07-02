@@ -20,7 +20,6 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.shop.PersonWidget
-import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
@@ -391,19 +390,6 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
-        "ShopWidget" -> ShopWidget(
-            widgetOnj.get<String>("texture"),
-            widgetOnj.get<String>("dataFile"),
-            Label.LabelStyle(
-                fontOrError(widgetOnj.get<String>("dataFont"), screen),
-                widgetOnj.get<Color>("dataFontColor")
-            ),
-            widgetOnj.get<OnjNamedObject>("dataDragBehaviour"),
-            widgetOnj.get<Long>("maxPerLine").toInt(),
-            widgetOnj.get<OnjFloat>("widthPercentagePerItem").value.toFloat(),
-            screen
-        )
-
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
@@ -449,7 +435,6 @@ class ScreenBuilder(val file: FileHandle) {
                     }
             }
         }
-
         return actor
     }
 

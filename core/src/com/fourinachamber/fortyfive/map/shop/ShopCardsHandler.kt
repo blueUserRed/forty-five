@@ -29,8 +29,8 @@ class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private 
 
     fun addItems(seed: Long) {
         val rnd = Random(seed)
-        val nbrOfItems = 15/*(5..8).random(rnd)*/
-        FortyFiveLogger.debug(ShopWidget.logTag, "Created $nbrOfItems items with seed $seed")
+        val nbrOfItems = (5..16).random(rnd)
+        FortyFiveLogger.debug(ShopCardsHandler.logTag, "Created $nbrOfItems items with seed $seed")
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)
@@ -147,10 +147,6 @@ class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private 
     }
 
     private fun updateCards() {
-//        for (i in boughtIndices){
-//            println(i.javaClass)
-//            println(cards)
-//        }
         for (i in cardWidgets.indices) {
             if (i in boughtIndices) {
                 labels[i].setText("bought")
