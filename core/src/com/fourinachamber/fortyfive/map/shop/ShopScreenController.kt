@@ -85,7 +85,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private fun initWidgets(onjScreen: OnjScreen): PersonWidget {
         val personWidget = onjScreen.namedActorOrError(personWidgetName)
-        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
+        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type personWidget")
         this.personWidget = personWidget
         val cardsParentWidget = onjScreen.namedActorOrError(cardsParentName)
         if (cardsParentWidget !is CustomScrollableFlexBox) throw RuntimeException("widget with name $cardsParentName must be of type CustomScrollableFlexBox")

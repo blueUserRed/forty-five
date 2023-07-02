@@ -44,7 +44,7 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
-        addEvents(nodes)
+        addEvents(nodes)    //TODO check errors with current config
 
 //        nodes.forEach { it.scale(1F, .6F) } //TODO add parameter for scaling
         nodes.forEach { it.rotate(restrictions.rotation) }
