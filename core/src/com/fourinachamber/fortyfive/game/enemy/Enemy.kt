@@ -20,11 +20,11 @@ import java.lang.Integer.min
 data class EnemyPrototype(
     val name: String,
     val baseHealthPerTurn: Int,
-    val baseDamage: Int,
+    val baseDamage: IntRange,
     val turnCount: IntRange,
-    private val creator: (health: Int, damage: Int) -> Enemy
+    private val creator: (health: Int, damage: IntRange) -> Enemy
 ) {
-    fun create(health: Int, damage: Int): Enemy = creator(health, damage)
+    fun create(health: Int, damage: IntRange): Enemy = creator(health, damage)
 }
 
 /**
@@ -48,7 +48,9 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val damage: Int,
+    val damage: IntRange,
+    val attackProbability: Float,
+    val actionProbability: Float,
     val actions: List<Pair<Int, EnemyAction>>,
     private val screen: OnjScreen
 ) {
@@ -129,7 +131,7 @@ class Enemy(
         return if (hadEffectTimeline) timeline else null
     }
 
-    fun executeStatusEffectsAfterRevolverTurn(): Timeline? {
+    fun executeStatusEffectsAfterRevolverRotation(): Timeline? {
         var hadEffectTimeline = false
         val timeline = Timeline.timeline {
             for (effect in statusEffects) {
@@ -156,15 +158,9 @@ class Enemy(
     }
 
     @MainThreadOnly
-    fun damagePlayer(damage: Int, gameController: GameController): Timeline = Timeline.timeline {
-        val screen = gameController.curScreen
+    fun damagePlayerDirectly(damage: Int, gameController: GameController): Timeline = Timeline.timeline {
         val chargeTimeline = GraphicsConfig.chargeTimeline(actor)
-
-        val overlayAction = GraphicsConfig.damageOverlay(screen)
-
         include(chargeTimeline)
-
-        includeAction(overlayAction)
         delay(GraphicsConfig.bufferTime)
         includeLater(
             { getPlayerDamagedTimeline(damage, gameController) },
@@ -254,12 +250,12 @@ class Enemy(
                 EnemyPrototype(
                     it.get<String>("name"),
                     it.get<Long>("baseHealthPerTurn").toInt(),
-                    it.get<Long>("baseDamage").toInt(),
+                    it.get<OnjArray>("baseDamage").toIntRange(),
                     it.get<OnjArray>("fightDuration").toIntRange()
                 ) { health, damage -> readEnemy(it, health, damage) }
             }
         
-        fun readEnemy(onj: OnjObject, health: Int, damage: Int): Enemy {
+        fun readEnemy(onj: OnjObject, health: Int, damage: IntRange): Enemy {
             val gameController = FortyFive.currentGame!!
             val curScreen = gameController.curScreen
             val drawableHandle = onj.get<String>("texture")
@@ -282,6 +278,8 @@ class Enemy(
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
                 damage,
+                onj.get<Double>("attackProbability").toFloat(),
+                onj.get<Double>("actionProbability").toFloat(),
                 actions,
                 curScreen
             )
@@ -305,6 +303,9 @@ class EnemyActor(
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
     private var enemyBox = CustomHorizontalGroup(screen)
+    private val attackIndicator = CustomHorizontalGroup(screen)
+    private val attackIcon = CustomImageActor("normal_bullet", screen, false) // TODO: fix
+    private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
@@ -325,12 +326,21 @@ class EnemyActor(
     init {
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
+        attackLabel.setFontScale(enemy.detailFontScale)
+
         image.setScale(enemy.scaleX, enemy.scaleY)
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
         coverIcon.setScale(enemy.coverIconScale)
+        attackIcon.setScale(enemy.coverIconScale) // TODO: fix
         coverIcon.reportDimensionsWithScaling = true
         coverIcon.ignoreScalingWhenDrawing = true
+        attackIcon.reportDimensionsWithScaling = true
+        attackIcon.ignoreScalingWhenDrawing = true
+
+        attackIndicator.addActor(attackIcon)
+        attackIndicator.addActor(attackLabel)
+        attackIndicator.isVisible = false
 
         val coverInfoBox = CustomVerticalGroup(screen)
         coverInfoBox.addActor(coverIcon)
@@ -339,10 +349,20 @@ class EnemyActor(
         enemyBox.addActor(coverInfoBox)
         enemyBox.addActor(image)
 
+        addActor(attackIndicator)
         addActor(enemyBox)
         addActor(healthLabel)
         addActor(statusEffectDisplay)
         updateText()
+    }
+
+    fun displayAttackIndicator(damage: Int) {
+        attackLabel.setText(damage.toString())
+        attackIndicator.isVisible = true
+    }
+
+    fun hideAttackIndicator() {
+        attackIndicator.isVisible = false
     }
 
     fun fireAnim(): Timeline = Timeline.timeline {
