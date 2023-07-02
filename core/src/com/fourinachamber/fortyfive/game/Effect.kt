@@ -55,7 +55,7 @@ abstract class Effect(val trigger: Trigger) {
             }
 
             is BulletSelector.ByPopup -> {
-                include(controller.cardSelectionPopup(
+                include(controller.cardSelectionPopupTimeline(
                     "Select target:",
                     if (bulletSelector.includeSelf) null else self
                 ))
@@ -210,7 +210,7 @@ abstract class Effect(val trigger: Trigger) {
             val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             delay(GraphicsConfig.bufferTime)
             includeActionLater(cardHighlight) { card.inGame }
-            include(gameController.drawCardPopup(amount))
+            include(gameController.drawCardPopupTimeline(amount))
         }
 
         override fun blocks(controller: GameController) = false
@@ -262,7 +262,7 @@ abstract class Effect(val trigger: Trigger) {
                 addMax = gameController.maxCards - gameController.cardHand.cards.size
             }
             includeLater(
-                { gameController.maxCardsPopup() },
+                { gameController.maxCardsPopupTimeline() },
                 { addMax == 0 }
             )
             action {

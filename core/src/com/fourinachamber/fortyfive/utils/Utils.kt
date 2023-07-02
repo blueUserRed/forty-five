@@ -110,7 +110,7 @@ val Float.radians: Float
 val Float.degrees: Float
     get() = Math.toDegrees(this.toDouble()).toFloat()
 
-fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
+fun ClosedFloatingPointRange<Float>.random(random: Random = Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
 }
 
@@ -164,6 +164,8 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
 }
 
 object Utils {
+
+    fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability
 
     /**
      * sets the currently active cursor

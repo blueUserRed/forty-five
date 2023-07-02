@@ -187,6 +187,54 @@ var disableStyles = [
     }
 ];
 
+var attackPopup = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showAttackPopup"),
+            detached: false
+        }
+    ]
+} children [
+
+    $Label {
+        font: "red_wing",
+        text: "Parry",
+        fontScale: 0.09,
+        color: color.white,
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "ParryEvent"
+            }
+        ]
+    },
+    $Label {
+        font: "red_wing",
+        text: "Dont Parry",
+        fontScale: 0.09,
+        color: color.white,
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "PopupConfirmationEvent"
+            }
+        ]
+    },
+
+];
+
 var popupActor = $Box {
     styles: [
         {
@@ -524,5 +572,5 @@ root: $Box {
         }
     ]
 } children [
-    gameScreen, drawCardActor, popupActor
+    gameScreen, drawCardActor, popupActor, attackPopup
 ]

@@ -75,6 +75,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     val remainingCards: Int
         get() = _remainingCards
 
+    // currently not used, but might be usefull for an encouter modifier later
     var remainingTurns: Int by multipleTemplateParam(
         "game.remainingTurnsRaw", -1,
         "game.remainingTurns" to { if (it == -1) "?" else it.toString() }
@@ -164,10 +165,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         appendMainTimeline(Timeline.timeline {
             action { curReserves = baseReserves }
             includeLater(
-                { confirmationPopup(popupText) },
+                { confirmationPopupTimeline(popupText) },
                 { remainingTurns != 1 }
             )
-            include(drawCardPopup(cardsToDrawInFirstRound))
+            include(drawCardPopupTimeline(cardsToDrawInFirstRound))
         })
         onjScreen.invalidateEverything()
     }
@@ -221,26 +222,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         is EndTurnEvent -> {
             endTurn()
         }
-        is DrawCardEvent -> {
-            popupEvent = event
-        }
-        is PopupConfirmationEvent, is PopupSelectionEvent -> {
+        is PopupConfirmationEvent, is PopupSelectionEvent, is DrawCardEvent, is ParryEvent -> {
             popupEvent = event
         }
         else -> { }
     }
 
     fun nextTurn() {
-        if (hasWon) {
-            completeWin()
-            return
-        }
         turnCounter++
         if (remainingTurns != -1) {
             FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
             remainingTurns--
         }
-        if (remainingTurns == 0) playerDied()
+        gameDirector.onNewTurn()
     }
 
     private var updateCount = 0 //TODO: this is stupid
@@ -357,9 +351,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         appendMainTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
     }
 
-    fun maxCardsPopup(): Timeline = confirmationPopup("Hand reached maximum of $maxCards cards")
+    fun maxCardsPopupTimeline(): Timeline = confirmationPopupTimeline("Hand reached maximum of $maxCards cards")
 
-    fun confirmationPopup(text: String): Timeline = Timeline.timeline {
+    fun confirmationPopupTimeline(text: String): Timeline = Timeline.timeline {
         action {
             curScreen.enterState(showPopupScreenState)
             curScreen.enterState(showPopupConfirmationButtonScreenState)
@@ -374,7 +368,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun cardSelectionPopup(text: String, exclude: Card? = null): Timeline = Timeline.timeline {
+    fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline = Timeline.timeline {
         action {
             cardSelector.setTo(revolver, exclude)
             curScreen.enterState(showPopupScreenState)
@@ -391,7 +385,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun drawCardPopup(amount: Int): Timeline = Timeline.timeline {
+    fun drawCardPopupTimeline(amount: Int): Timeline = Timeline.timeline {
         var remainingCardsToDraw = amount
         action {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
@@ -403,7 +397,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (amount == 1) "" else "s"
             )
         }
-        includeLater({ maxCardsPopup() }, { remainingCardsToDraw == 0 })
+        includeLater({ maxCardsPopupTimeline() }, { remainingCardsToDraw == 0 })
         includeLater({ Timeline.timeline {
             repeat(remainingCardsToDraw) { cur ->
                 delayUntil { popupEvent != null }
@@ -421,6 +415,40 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             if (remainingCardsToDraw != 0) curScreen.leaveState(cardDrawActorScreenState)
         }
+    }
+
+    fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
+        action {
+            curScreen.enterState(showEnemyAttackPopupScreenState)
+        }
+        delayUntil { popupEvent != null }
+        includeLater(
+            { Timeline.timeline {
+                val parryCard = revolver.slots[4].card!!
+                val remainingDamage = damage - parryCard.curDamage
+                action {
+                    revolverRotationCounter++
+                }
+                action {
+                    popupEvent = null
+                    curScreen.leaveState(showEnemyAttackPopupScreenState)
+                    revolver.removeCard(parryCard)
+                }
+                include(revolver.rotate(parryCard.rotationDirection))
+                if (remainingDamage > 0) include(damagePlayerTimeline(remainingDamage))
+            } },
+            { popupEvent is ParryEvent }
+        )
+        includeLater(
+            { Timeline.timeline {
+                action {
+                    popupEvent = null
+                    curScreen.leaveState(showEnemyAttackPopupScreenState)
+                }
+                include(damagePlayerTimeline(damage))
+            } },
+            { popupEvent is PopupConfirmationEvent }
+        )
     }
 
     /**
@@ -470,7 +498,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             damageStatusEffectTimeline =
                 enemy.executeStatusEffectsAfterDamage(cardToShoot.curDamage)
-            turnStatusEffectTimeline = enemy.executeStatusEffectsAfterRevolverTurn()
+            turnStatusEffectTimeline = enemy.executeStatusEffectsAfterRevolverRotation()
 
             effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT)
         }
@@ -489,7 +517,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
         }
 
-        val damagePlayerTimeline = enemy.damagePlayer(shotEmptyDamage, this@GameController)
+        val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
 
@@ -515,12 +543,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             includeLater(
                 { turnStatusEffectTimeline!! },
-                { enemy.currentHealth > 0 && turnStatusEffectTimeline != null }
+                { turnStatusEffectTimeline != null }
             )
 
             includeLater(
                 { finishTimeline },
-                { enemy.currentHealth > 0 }
+                { true }
             )
 
         }
@@ -542,12 +570,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     fun endTurn() {
+        if (hasWon) {
+            completeWin()
+            return
+        }
         appendMainTimeline(Timeline.timeline {
+            include(gameDirector.checkActions())
             action {
                 nextTurn()
                 curReserves = baseReserves
             }
-            include(drawCardPopup(cardsToDraw))
+            include(drawCardPopupTimeline(cardsToDraw))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
@@ -558,6 +591,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @AllThreadsAllowed
     fun damagePlayerTimeline(damage: Int): Timeline = Timeline.timeline {
+        val overlayAction = GraphicsConfig.damageOverlay(curScreen)
+        includeAction(overlayAction)
         action {
             curPlayerLives -= damage
             FortyFiveLogger.debug(
@@ -751,6 +786,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val showPopupScreenState = "showPopup"
         const val showPopupConfirmationButtonScreenState = "showPopupConfirmationButton"
         const val showPopupCardSelectorScreenState = "showPopupCardSelector"
+        const val showEnemyAttackPopupScreenState = "showAttackPopup"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

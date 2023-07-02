@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
@@ -12,19 +13,23 @@ import onj.value.OnjObject
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.properties.Delegates
+import kotlin.random.Random
 
 class GameDirector(private val controller: GameController) {
 
 
-    private var turns by Delegates.notNull<Int>()
+    private var turnEstimate by Delegates.notNull<Int>()
 
-    private var turnRevealTime: Int = -1
-    private var enemyActionTimes: List<Int> = listOf()
+//    private var turnRevealTime: Int = -1
+//    private var enemyActionTimes: List<Int> = listOf()
 
     private var difficulty = 0.0
 
     private lateinit var enemy: Enemy
     private lateinit var enemyProto: EnemyPrototype
+
+    // -1 means EnemyAction, other than -1 means Damage
+    private var nextAction: Int? = null
 
     fun init() {
         val enemiesOnj = OnjParser.parseFile(Gdx.files.internal("config/enemies.onj").file())
@@ -36,37 +41,43 @@ class GameDirector(private val controller: GameController) {
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         enemyProto = chooseEnemy(enemyPrototypes)
         FortyFiveLogger.debug(logTag, "chose enemy ${enemyProto.name}")
-        turns = enemyProto.turnCount.random()
-        FortyFiveLogger.debug(logTag, "chose $turns turns")
-        if (turns >= 12) {
-            turnRevealTime = (turns * (3.0 / 4.0)).toInt()
-            enemyActionTimes = listOf((turns * (1.0 / 4.0)).toInt(), (turns * (2.0 / 4.0)).toInt())
-        } else if (turns >= 9) {
-            turnRevealTime = (turns * (2.0 / 3.0)).toInt()
-            enemyActionTimes = listOf((turns * (1.0 / 3.0)).toInt())
-        } else {
-            controller.remainingTurns = turns
-            enemyActionTimes = listOf((turns / 2.0).toInt())
-        }
-        FortyFiveLogger.debug(logTag, "turnRevealTime = $turnRevealTime; enemyActionTimes = $enemyActionTimes")
+        turnEstimate = enemyProto.turnCount.random()
+        FortyFiveLogger.debug(logTag, "chose $turnEstimate turns")
         enemy = scaleAndCreateEnemy(enemyProto, difficulty)
         FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}; damage = ${enemy.damage}")
         controller.initEnemyArea(enemy)
     }
 
-    fun checkActions(): Timeline {
-        if (controller.turnCounter == turnRevealTime) {
-            return Timeline.timeline {
-                val remainingTurns = turns - controller.turnCounter
-                action {
-                    controller.remainingTurns = remainingTurns
-                }
-                include(controller.confirmationPopup("You have $remainingTurns left!"))
-            }
-        } else if (controller.turnCounter in enemyActionTimes) {
-            return doEnemyAction()
+    fun onNewTurn() {
+        if (Utils.coinFlip(enemy.attackProbability)) {
+            val damage = enemy.damage.random()
+            nextAction = damage
+            enemy.actor.displayAttackIndicator(damage)
+            FortyFiveLogger.debug(logTag, "will attack player with $damage damage the next turn")
+        } else if (Utils.coinFlip(enemy.actionProbability)) {
+            nextAction = -1
+            FortyFiveLogger.debug(logTag, "will execute enemy action the next turn")
         }
-        return Timeline(mutableListOf())
+    }
+
+    fun checkActions(): Timeline {
+        val nextAction = nextAction ?: return Timeline(mutableListOf())
+        this.nextAction = null
+        if (nextAction != -1) {
+            return Timeline.timeline {
+                include(controller.enemyAttackTimeline(nextAction))
+                action { enemy.actor.hideAttackIndicator() }
+            }
+        }
+        val possibleActions = enemy
+            .actions
+            .filter { it.second.applicable(controller) }
+        if (possibleActions.isEmpty()) {
+            FortyFiveLogger.debug(logTag, "wanted to execute enemy action but none where applicable")
+            return Timeline(mutableListOf())
+        }
+        val action = possibleActions.weightedRandom()
+        return action.getTimeline(controller)
     }
 
     fun end() {
@@ -76,9 +87,10 @@ class GameDirector(private val controller: GameController) {
     }
 
     private fun adjustDifficulty(): Double {
+        // TODO: consider how much damage the player took
         if (controller.playerLost) return difficulty // Too late to adjust difficulty of enemy lol
         val usedTurns = controller.turnCounter
-        val targetTurn = floor(turns * (4f / 5f))
+        val targetTurn = turnEstimate
         val enemyHealth = enemy.health
         val enemyHealthPerTurn = enemyProto.baseHealthPerTurn * difficulty
         val enemyBaseHealthPerTurn = enemyProto.baseHealthPerTurn
@@ -88,7 +100,7 @@ class GameDirector(private val controller: GameController) {
 
         val turnDiff = usedTurns - additionalTurns - targetTurn
         val idealHealth = enemyHealth - enemyHealthPerTurn * turnDiff
-        val baseHealth = enemyBaseHealthPerTurn * turns
+        val baseHealth = enemyBaseHealthPerTurn * turnEstimate
         val idealDifficulty = idealHealth / baseHealth
         val difficultyDiff = idealDifficulty - difficulty
         if (difficultyDiff in ((idealDifficulty - 0.2)..(idealDifficulty + 0.2))) {
@@ -97,23 +109,14 @@ class GameDirector(private val controller: GameController) {
         return (if (difficultyDiff < 0.0) difficulty - 0.2 else difficulty + 0.2).coerceAtLeast(0.5)
     }
 
-    private fun doEnemyAction(): Timeline {
-        val enemy = controller.enemyArea.enemies[0]
-        val possibleActions = enemy
-            .actions
-            .filter { it.second.applicable(controller) }
-        if (possibleActions.isEmpty()) return Timeline(mutableListOf())
-        val action = possibleActions.weightedRandom()
-        return action.getTimeline(controller)
-    }
-
     private fun chooseEnemy(prototypes: List<EnemyPrototype>): EnemyPrototype {
         return prototypes.random()
     }
 
     private fun scaleAndCreateEnemy(prototype: EnemyPrototype, difficulty: Double): Enemy {
-        val health = (prototype.baseHealthPerTurn * turns * difficulty).toInt()
-        val damage = (prototype.baseDamage * difficulty).toInt()
+        val health = (prototype.baseHealthPerTurn * turnEstimate * difficulty).toInt()
+        // damage is not scaled because there is currently no way for the player to get more health
+        val damage = prototype.baseDamage
         return prototype.create(health, damage)
     }
 
