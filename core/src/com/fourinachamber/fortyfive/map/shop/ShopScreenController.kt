@@ -28,8 +28,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val personWidgetName = onj.get<String>("personWidgetName")
     private val messageWidgetName = onj.get<String>("messageWidgetName")
     private val cardsParentName = onj.get<OnjString>("cardsParentName").value
-    private val backButtonName =
-        "back_button"  //onj.get<List<OnjString>>("backButtonName").map { it.value } //TODO add paraemeter
     private lateinit var personWidget: PersonWidget
     private lateinit var cardsParentWidget: CustomScrollableFlexBox
     private lateinit var shopCardsHandler: ShopCardsHandler
@@ -83,10 +81,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
         shopCardsHandler.calculateChances(context.type, shopFile, person)
         shopCardsHandler.addItems(context.seed)
-//        val backButton = onjScreen.namedActorOrError(backButtonName)
-//        backButton.onButtonClick {
-////            personWidget.giveResourcesBack()
-//        }
     }
 
     private fun initWidgets(onjScreen: OnjScreen): PersonWidget {
