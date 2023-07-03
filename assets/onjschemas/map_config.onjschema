@@ -91,10 +91,12 @@ var mapRestrictions = {
     otherAreas: string[],
     fixedEvents: {
         isDeadEnd: boolean,
+        nodeTexture: string?,
         event: $MapEvent
     }[],
     optionalEvents: {
         weight: int,
+        nodeTexture: string?,
         event: $MapEvent
     }[],
     decorationSeed: int,

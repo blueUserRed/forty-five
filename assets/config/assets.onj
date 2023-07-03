@@ -158,8 +158,32 @@ textures: [
         file: "textures/map/path.png"
     },
     {
-        name: "map_node",
-        file: "textures/map/node.png"
+        name: "map_node_default",
+        file: "textures/map/nodes/default_node.png"
+    },
+    {
+        name: "map_node_exit_circle",
+        file: "textures/map/nodes/exit_circle.png"
+    },
+    {
+        name: "map_node_exit_rect",
+        file: "textures/map/nodes/exit_rect.png"
+    },
+    {
+        name: "map_node_fight_circle",
+        file: "textures/map/nodes/fight_circle.png"
+    },
+    {
+        name: "map_node_fight_rect",
+        file: "textures/map/nodes/fight_rect.png"
+    },
+    {
+        name: "map_node_shop_circle",
+        file: "textures/map/nodes/shop_circle.png"
+    },
+    {
+        name: "map_node_shop_rect",
+        file: "textures/map/nodes/shop_rect.png"
     },
     {
         name: "map_player",
