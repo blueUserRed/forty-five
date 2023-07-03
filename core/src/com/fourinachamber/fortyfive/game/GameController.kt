@@ -158,6 +158,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCardSelector()
         // enemy area is initialised by the GameDirector
         gameDirector.init()
+        curReserves = baseReserves
         appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
     }
@@ -271,15 +272,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         anim.start()
         curGameAnims.add(anim)
     }
-
-//    /**
-//     * changes the game to the SpecialDraw phase and sets the amount of cards to draw to [amount]
-//     */
-//    @AllThreadsAllowed
-//    fun specialDraw(amount: Int) {
-//        if (currentState !is GameState.Free) return
-//        changeState(GameState.SpecialDraw(amount))
-//    }
 
     private fun initCardHand() {
         val curScreen = curScreen
