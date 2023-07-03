@@ -29,6 +29,7 @@ data class DetailMap(
     val decorations: List<MapDecoration>
 ) {
 
+    // TODO: ugly
     lateinit var curDetailMapWidget:DetailMapWidget
 
     /**

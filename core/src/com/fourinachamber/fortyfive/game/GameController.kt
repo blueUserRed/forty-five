@@ -158,18 +158,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCardSelector()
         // enemy area is initialised by the GameDirector
         gameDirector.init()
-
-        var popupText = ""
-        if (remainingTurns != -1) popupText = "You have $remainingTurns turns!\n"
-        popupText += "If you loose, you take ${enemyArea.enemies[0].damage} damage!"
-        appendMainTimeline(Timeline.timeline {
-            action { curReserves = baseReserves }
-            includeLater(
-                { confirmationPopupTimeline(popupText) },
-                { remainingTurns != 1 }
-            )
-            include(drawCardPopupTimeline(cardsToDrawInFirstRound))
-        })
+        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
     }
 
@@ -418,13 +407,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
+        var parryCard: Card? = null
         action {
+            parryCard = revolver.slots[4].card!!
             curScreen.enterState(showEnemyAttackPopupScreenState)
         }
-        delayUntil { popupEvent != null }
+        delayUntil { popupEvent != null || parryCard == null }
         includeLater(
             { Timeline.timeline {
-                val parryCard = revolver.slots[4].card!!
+                val parryCard = parryCard!!
                 val remainingDamage = damage - parryCard.curDamage
                 action {
                     revolverRotationCounter++
@@ -433,11 +424,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     revolver.removeCard(parryCard)
+                    parryCard.leaveGame()
                 }
                 include(revolver.rotate(parryCard.rotationDirection))
                 if (remainingDamage > 0) include(damagePlayerTimeline(remainingDamage))
             } },
-            { popupEvent is ParryEvent }
+            { popupEvent is ParryEvent && parryCard != null }
         )
         includeLater(
             { Timeline.timeline {
@@ -447,7 +439,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 }
                 include(damagePlayerTimeline(damage))
             } },
-            { popupEvent is PopupConfirmationEvent }
+            { popupEvent is PopupConfirmationEvent || parryCard == null }
         )
     }
 
@@ -740,7 +732,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         appendMainTimeline(Timeline.timeline {
             action {
                 FortyFiveLogger.debug(logTag, "player lost")
-                FortyFive.newRun()
+                playerLost = true
             }
             includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
             action {

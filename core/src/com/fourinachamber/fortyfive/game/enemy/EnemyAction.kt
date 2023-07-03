@@ -62,7 +62,7 @@ sealed class EnemyAction {
             include(controller.revolver.rotate(rotation))
         }
 
-        override fun applicable(controller: GameController): Boolean = true
+        override fun applicable(controller: GameController): Boolean = controller.revolver.slots.any { it.card != null }
 
     }
 
