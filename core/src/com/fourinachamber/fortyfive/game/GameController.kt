@@ -714,9 +714,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     private fun completeWin() {
-        encounterMapEvent.completed()
-        SaveState.write()
-        MapManager.switchToMapScreen()
+        appendMainTimeline(Timeline.timeline {
+            val money = -enemyArea.enemies[0].currentHealth
+            if (money > 0) {
+                include(confirmationPopupTimeline("You won!\nYour overkill damage will be converted to $money$"))
+            }
+            action {
+                SaveState.playerMoney += money
+                encounterMapEvent.completed()
+                SaveState.write()
+                MapManager.switchToMapScreen()
+            }
+        })
     }
 
     @MainThreadOnly

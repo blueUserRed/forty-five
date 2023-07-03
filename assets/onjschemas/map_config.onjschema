@@ -103,6 +103,7 @@ var mapRestrictions = {
     decorations: $DecorationDistributionFunction[],
     pathTotalWidth: float,
     minDistanceBetweenNodes: float,
+    exitNodeTexture: string
 };
 
 screens: {

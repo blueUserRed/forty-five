@@ -123,6 +123,8 @@ class SeededMapGenerator(
         mainLine.lineNodes.last().imageName = restrictions.endArea
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
         mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
+        mainLine.lineNodes.first().nodeTexture = restrictions.exitNodeTexture
+        mainLine.lineNodes.last().nodeTexture = restrictions.exitNodeTexture
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>
@@ -1347,6 +1349,7 @@ data class MapRestriction(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
     val pathTotalWidth: Float = 7F,
     val minDistanceBetweenNodes: Float = 5F,
+    val exitNodeTexture: String
 ) {
 
 
@@ -1404,6 +1407,7 @@ data class MapRestriction(
                 },
             minDistanceBetweenNodes = onj.get<Double>("minDistanceBetweenNodes").toFloat(),
             pathTotalWidth = onj.get<Double>("pathTotalWidth").toFloat(),
+            exitNodeTexture = onj.get<String>("exitNodeTexture")
         )
     }
 }

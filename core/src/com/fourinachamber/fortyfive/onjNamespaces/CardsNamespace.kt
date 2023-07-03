@@ -72,7 +72,7 @@ object CardsNamespace {
                 // convert slot from external representation (1 comes after 5)
                 // to internal representation (4 comes after 5)
                 num = if (num == 5) 5 else 5 - num
-                nums.add(num)
+                nums.add(num - 1)
             }
             is OnjString -> {
                 if (value.value.lowercase() != "this") {
