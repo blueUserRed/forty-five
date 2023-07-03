@@ -86,6 +86,7 @@ generatorConfig: {
                 minDistanceBetweenNodes: 15.0,
                 pathTotalWidth: 7.5,
                 fixedEvents: [],
+                exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
                         weight: 20,
@@ -182,6 +183,7 @@ generatorConfig: {
                 rotation: 0.0,
                 minDistanceBetweenNodes: 15.0,
                 pathTotalWidth: 7.5,
+                exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
                     {
                         isDeadEnd: false,

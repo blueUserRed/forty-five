@@ -434,7 +434,7 @@ cards: [
         cost: 0,
         type: $Bullet { },
         tags: ["rare"],
-        price: 50,
+        price: 25,
     },
 
 ],

@@ -348,8 +348,8 @@ sealed class BulletSelector {
                 .mapNotNull { it.card }
             if (bulletsInRevolver.size >= 2) return false
             if (bulletsInRevolver.isEmpty()) return true
-            if (!includeSelf && bulletsInRevolver[0] === self) return false
-            return true
+            if (!includeSelf && bulletsInRevolver[0] === self) return true
+            return false
         }
     }
 
