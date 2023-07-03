@@ -162,9 +162,6 @@ object GraphicsConfig {
     fun shootShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, shootPostProcessor)
     fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
 
-    @MainThreadOnly
-    fun destroyCardShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, destroyCardPostProcessor)
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,11 +181,6 @@ object GraphicsConfig {
                 val obj = it.value as OnjObject
                 obj.get<String>("icon") to obj.get<Double>("scale").toFloat()
             }
-
-        postProcessors = config
-            .get<OnjObject>("postProcessors")
-            .value
-            .mapValues { it.value.value as String }
 
         val damageOverlay = config.get<OnjObject>("damageOverlay")
 
@@ -253,12 +245,7 @@ object GraphicsConfig {
         val onShootPostProcessor = config.get<OnjObject>("shootPostProcessor")
         shootPostProcessor = onShootPostProcessor.get<String>("name")
         shootPostProcessorDuration = (onShootPostProcessor.get<Double>("duration") * 100).toInt()
-
-        val postProcessors = config.get<OnjObject>("postProcessors")
-        destroyCardPostProcessor = postProcessors.get<String>("destroyCardPostProcessor")
     }
-
-    private lateinit var destroyCardPostProcessor: String
 
     private lateinit var shootPostProcessor: String
     private var shootPostProcessorDuration: Int by Delegates.notNull()
@@ -274,7 +261,6 @@ object GraphicsConfig {
 
     private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
-    private lateinit var postProcessors: Map<String, String>
 
     var bufferTime by Delegates.notNull<Int>()
         private set

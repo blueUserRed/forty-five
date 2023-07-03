@@ -41,7 +41,8 @@ nodes: {
     edgesTo: int[],
     image?: string,
     imagePos?: string,
-    event: $MapEvent?
+    event: $MapEvent?,
+    nodeTexture?: string,
 }[],
 
 decorations: {

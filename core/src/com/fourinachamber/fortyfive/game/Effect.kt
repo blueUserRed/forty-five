@@ -49,13 +49,13 @@ abstract class Effect(val trigger: Trigger) {
                     .slots
                     .mapIndexed { index, revolverSlot -> index to revolverSlot }
                     .filter { it.second.card != null }
-                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index) }
+                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index, controller) }
                     .map { it.second.card!! }
                 store("selectedCards", cards)
             }
 
             is BulletSelector.ByPopup -> {
-                include(controller.cardSelectionPopup(
+                include(controller.cardSelectionPopupTimeline(
                     "Select target:",
                     if (bulletSelector.includeSelf) null else self
                 ))
@@ -210,8 +210,7 @@ abstract class Effect(val trigger: Trigger) {
             val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             delay(GraphicsConfig.bufferTime)
             includeActionLater(cardHighlight) { card.inGame }
-            action { gameController.specialDraw(amount) }
-            delayUntil { gameController.currentState !is GameState.SpecialDraw }
+            include(gameController.drawCardPopupTimeline(amount))
         }
 
         override fun blocks(controller: GameController) = false
@@ -232,9 +231,11 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(): Timeline = Timeline.timeline {
             action {
                 val game = FortyFive.currentGame!!
+                val enemy = game.enemyArea.getTargetedEnemy()
                 if (game.modifier?.shouldApplyStatusEffects() ?: true) {
-                    game.enemyArea.getTargetedEnemy().applyEffect(statusEffect)
+                    enemy.applyEffect(statusEffect)
                 }
+                statusEffect.applyAnim(enemy)?.let { game.dispatchAnimTimeline(it) }
             }
         }
 
@@ -261,7 +262,7 @@ abstract class Effect(val trigger: Trigger) {
                 addMax = gameController.maxCards - gameController.cardHand.cards.size
             }
             includeLater(
-                { gameController.maxCardsPopup() },
+                { gameController.maxCardsPopupTimeline() },
                 { addMax == 0 }
             )
             action {
@@ -303,6 +304,26 @@ abstract class Effect(val trigger: Trigger) {
         override fun toString(): String = "Protect(trigger=$trigger)"
     }
 
+    class Destroy(trigger: Trigger, val bulletSelector: BulletSelector) : Effect(trigger) {
+
+        override fun onTrigger(): Timeline = Timeline.timeline {
+            val controller = FortyFive.currentGame!!
+            include(getSelectedBullets(bulletSelector, controller, this@Destroy.card))
+            includeLater(
+                {
+                    get<List<Card>>("selectedCards")
+                        .map { controller.destroyCardTimeline(it) }
+                        .collectTimeline()
+                },
+                { true }
+            )
+        }
+
+        override fun blocks(controller: GameController): Boolean = bulletSelector.blocks(controller, card)
+
+        override fun copy(): Effect = Destroy(trigger, bulletSelector)
+    }
+
 }
 
 /**
@@ -310,7 +331,9 @@ abstract class Effect(val trigger: Trigger) {
  */
 sealed class BulletSelector {
 
-    class ByLambda(val lambda: (self: Card, other: Card, slot: Int) -> Boolean) : BulletSelector() {
+    class ByLambda(
+        val lambda: (self: Card, other: Card, slot: Int, controller: GameController) -> Boolean
+    ) : BulletSelector() {
 
         override fun blocks(controller: GameController, self: Card): Boolean = false
     }
@@ -325,8 +348,8 @@ sealed class BulletSelector {
                 .mapNotNull { it.card }
             if (bulletsInRevolver.size >= 2) return false
             if (bulletsInRevolver.isEmpty()) return true
-            if (!includeSelf && bulletsInRevolver[0] === self) return false
-            return true
+            if (!includeSelf && bulletsInRevolver[0] === self) return true
+            return false
         }
     }
 

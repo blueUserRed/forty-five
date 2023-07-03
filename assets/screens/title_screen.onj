@@ -55,7 +55,6 @@ root: $Box {
             height: 100.0#percent
         },
     ],
-    debug: true,
 } children [
 
     $Image {
@@ -95,7 +94,6 @@ root: $Box {
             }
         ],
         partOfSelectionHierarchy: true,
-        debug: true
     } children [
 
         $Label {

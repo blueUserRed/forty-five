@@ -30,7 +30,7 @@ sealed class EnemyAction {
                 ).string
             }
             includeLater(
-                { controller.confirmationPopup(text) },
+                { controller.confirmationPopupTimeline(text) },
                 { true }
             )
             action {
@@ -58,18 +58,18 @@ sealed class EnemyAction {
                 },
                 mapOf("direction" to rotation::class.simpleName!!.lowercase(), "amount" to amount)
             ).string
-            include(controller.confirmationPopup(text))
+            include(controller.confirmationPopupTimeline(text))
             include(controller.revolver.rotate(rotation))
         }
 
-        override fun applicable(controller: GameController): Boolean = true
+        override fun applicable(controller: GameController): Boolean = controller.revolver.slots.any { it.card != null }
 
     }
 
     object ReturnCardToHand : EnemyAction() {
 
         override fun getTimeline(controller: GameController): Timeline = Timeline.timeline {
-            include(controller.confirmationPopup(
+            include(controller.confirmationPopupTimeline(
                 GraphicsConfig.rawTemplateString("returnCardToHand")
             ))
             action {

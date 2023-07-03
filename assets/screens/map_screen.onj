@@ -18,8 +18,12 @@ assets: {
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
         "map_background_wasteland_tileable", "location_sign_salem", "nav_bar_background",
-        "map_decoration_cactus", "map_decoration_grass", "map_path", "map_node", "dialog_continue_arrow",
-        "map_player", "location_sign_aqua_dulche", "location_sign_salem"
+        "map_decoration_cactus", "map_decoration_grass", "map_path", "dialog_continue_arrow",
+        "map_player", "location_sign_aqua_dulche", "location_sign_salem",
+        "map_node_default",
+        "map_node_shop_rect", "map_node_shop_circle",
+        "map_node_fight_rect", "map_node_fight_circle",
+        "map_node_exit_rect", "map_node_exit_circle",
     ]
 },
 
@@ -80,10 +84,10 @@ var mapBox = $Box {
         ],
         detailMapProvider: $CurrentMapProvider {
         },
-        nodeSize: 4.0,
+        nodeSize: 6.0,
         lineWidth: 5.5,
         name: "map",
-        nodeTexture: "map_node",
+        defaultNodeTexture: "map_node_default",
         playerTexture: "map_player",
         playerWidth: 1.83 * 3.0,
         playerHeight: 3.0 * 3.0,

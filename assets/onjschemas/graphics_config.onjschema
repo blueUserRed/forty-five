@@ -46,10 +46,6 @@ statusEffectIcons: {
     poison: statusIconConfig
 },
 
-postProcessors: {
-    destroyCardPostProcessor: string
-},
-
 stringTemplates:  {
     rottenDetailText: string,
     buffDetailText: string,

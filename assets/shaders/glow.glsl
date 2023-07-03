@@ -21,7 +21,6 @@ uniform sampler2D u_texture;
 %constArg ca_cardSize float
 
 %uniform u_time
-%uniform u_resolution
 
 float distanceFromGlow(float time, vec2 pos) {
     float dist = abs(length(vec2(time) - pos));
@@ -37,7 +36,6 @@ vec3 glow(float time, vec2 pos, vec3 origColor) {
 }
 
 void main() {
-    u_resolution;
     vec4 baseColor = v_color * texture2D(u_texture, v_texCoords);
 
     float intervall = 1.0;

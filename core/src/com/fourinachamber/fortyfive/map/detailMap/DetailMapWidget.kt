@@ -34,7 +34,7 @@ import kotlin.math.sin
 class DetailMapWidget(
     private val screen: OnjScreen,
     private val map: DetailMap,
-    private val nodeDrawableHandle: ResourceHandle,
+    private val defaultNodeDrawableHandle: ResourceHandle,
     private val edgeTextureHandle: ResourceHandle,
     private val playerDrawableHandle: ResourceHandle,
     private val playerWidth: Float,
@@ -64,7 +64,7 @@ class DetailMapWidget(
     private var playerMovementStartTime: Long = 0L
 
     private val nodeDrawable: Drawable by lazy {
-        ResourceManager.get(screen, nodeDrawableHandle)
+        ResourceManager.get(screen, defaultNodeDrawableHandle)
     }
 
     private val playerDrawable: Drawable by lazy {
@@ -415,7 +415,8 @@ class DetailMapWidget(
         val uniqueNodes = map.uniqueNodes
         for (node in uniqueNodes) {
             val (nodeX, nodeY) = calcNodePosition(node)
-            nodeDrawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
+            val drawable = node.getNodeTexture(screen) ?: nodeDrawable
+            drawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }
     }
 
