@@ -35,6 +35,7 @@ nodes: [
         edgesTo: [1],
         image: "salem",
         imagePos: "right",
+        nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
             placeAtEnd: false
@@ -45,6 +46,7 @@ nodes: [
         y: 40.0,
         isArea: false,
         edgesTo: [0],
+        nodeTexture: "map_node_shop_rect",
         event: $ShopMapEvent {
             seed: null,
             boughtIndices: [],

@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -18,13 +19,15 @@ data class MapNode(
     val y: Float,
     val imageName: String?,
     val imagePos: ImagePosition?,
+    val nodeTexture: ResourceHandle?,
     val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
 ) {
 
 
     private var imageCache: Drawable? = null
-    fun getEdge(dir: Direction): MapNode? {
+    private var nodeTextureCache: Drawable? = null
 
+    fun getEdge(dir: Direction): MapNode? {
         val possibleNode = edgesTo.map {
             val ang = Line(Vector2(it.x, it.y), Vector2(x, y)).ang()
             it to min(min(abs(dir.getAngle() - ang), abs(dir.getAngle() + 2 * PI.toFloat() - ang)),abs(dir.getAngle() - 2 * PI.toFloat() - ang))
@@ -46,8 +49,17 @@ data class MapNode(
         return imageCache
     }
 
+    @MainThreadOnly
+    fun getNodeTexture(screen: OnjScreen): Drawable? {
+        if (nodeTexture == null) return null
+        if (nodeTextureCache != null) return nodeTextureCache
+        nodeTextureCache = ResourceManager.get(screen, nodeTexture)
+        return nodeTextureCache
+    }
+
     fun invalidateCachedAssets() {
         imageCache = null
+        nodeTextureCache = null
     }
 
     fun getImageData(): MapManager.MapImageData? = MapManager.mapImages.find { it.name == imageName }
@@ -132,6 +144,7 @@ data class MapNodeBuilder(
     var isArea: Boolean = false,
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
+    var nodeTexture: ResourceHandle? = null,
     var event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
@@ -170,6 +183,7 @@ data class MapNodeBuilder(
             x, y,
             imageName,
             imagePos,
+            nodeTexture,
             event
         )
         for (edge in edgesTo) {
