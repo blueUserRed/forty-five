@@ -18,6 +18,20 @@ interface StyledActor : HoverStateActor {
 
     fun initStyles(screen: OnjScreen)
 
+    fun enterActorState(s: String) {
+        styleManager?.enterActorState(s)
+    }
+
+    fun leaveActorState(s: String) {
+        styleManager?.leaveActorState(s)
+    }
+
+    /**
+     * checks if the actor is in an actorstate / has an actorstate
+     */
+    fun inActorState(s: String): Boolean {
+        return styleManager?.actorStates?.contains(s) == true
+    }
 }
 
 class StyleManager(val actor: Actor, val node: YogaNode) {
@@ -218,8 +232,8 @@ sealed class StyleCondition {
     }
 
     class ActorState(val state: String) : StyleCondition() {
-        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor{
-             return actor.styleManager?.actorStates?.contains(state) == true
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor {
+            return actor.inActorState(state)
         }
     }
 

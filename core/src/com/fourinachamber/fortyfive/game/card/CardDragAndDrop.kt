@@ -157,7 +157,7 @@ class ShopDragSource(
     }
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload? {
-        if ((actor !is CustomImageActor) || (actor as CustomImageActor).styleManager?.actorStates?.contains("unbuyable") == true) return null
+        if ((actor !is CustomImageActor) || (actor as CustomImageActor).inActorState("unbuyable")) return null
         startPos = Vector2(x * actor.scaleX, y * actor.scaleY)
         val payload = Payload()
         dragAndDrop.setKeepWithinStage(false)

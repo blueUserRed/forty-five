@@ -53,9 +53,6 @@ class ScreenBuilder(val file: FileHandle) {
     private var transitionAwayTime: Int? = null
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
-    init {
-        curBuilder = this
-    }
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -386,7 +383,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),
             widgetOnj.get<Double>("scale").toFloat(),
-            OnjNamedObject("name", mapOf()),//widgetOnj.get<OnjNamedObject>("dropBehaviour") //TODO change back
+            OnjNamedObject("name", mapOf()),
             screen
         )
 
@@ -535,7 +532,6 @@ class ScreenBuilder(val file: FileHandle) {
         val screenSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/screen.onjschema").file())
         }
-        lateinit var curBuilder: ScreenBuilder
     }
 
 }
