@@ -240,4 +240,9 @@ detailMapInputMap: [
             direction:"right",
         }
     },
+    {
+        keycode: keys.Space,
+        modifiers: [],
+        action: $EnterEventDetailMapKeyAction { }
+    },
 ],

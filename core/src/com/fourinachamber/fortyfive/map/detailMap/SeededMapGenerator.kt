@@ -44,7 +44,7 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
-        addEvents(nodes)
+        addEvents(nodes)    //TODO check errors with current config
 
 //        nodes.forEach { it.scale(1F, .6F) } //TODO add parameter for scaling
         nodes.forEach { it.rotate(restrictions.rotation) }
@@ -781,57 +781,50 @@ class Line(val start: Vector2, val end: Vector2) {
 
 enum class Direction {
     UP {
-        override fun getOpposite(): Direction {
-            return DOWN
-        }
+        override fun getOpposite(): Direction = DOWN
 
-        override fun getAngle(): Float {
-            return Math.PI.toFloat() / 2
-        }
+        override fun getAngle(): Float = Math.PI.toFloat() / 2
 
 
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
             return curLine.lineUp
         }
+
+        override fun getNextDirCounterClock(): Direction = LEFT
     },
     DOWN {
-        override fun getOpposite(): Direction {
-            return UP
-        }
+        override fun getOpposite(): Direction = UP
 
-        override fun getAngle(): Float {
-            return Math.PI.toFloat() * 3 / 2
-        }
+        override fun getAngle(): Float = Math.PI.toFloat() * 3 / 2
 
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
             return curLine.lineDown
         }
+
+        override fun getNextDirCounterClock(): Direction = RIGHT
     },
     LEFT {
-        override fun getOpposite(): Direction {
-            return RIGHT
-        }
+        override fun getOpposite(): Direction = RIGHT
 
-        override fun getAngle(): Float {
-            return Math.PI.toFloat()
-        }
+        override fun getAngle(): Float = Math.PI.toFloat()
 
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine {
             return curLine
         }
+
+        override fun getNextDirCounterClock(): Direction = DOWN
     },
     RIGHT {
-        override fun getOpposite(): Direction {
-            return LEFT
-        }
+        override fun getOpposite(): Direction = LEFT
 
-        override fun getAngle(): Float {
-            return 0F
-        }
+        override fun getAngle(): Float = 0F
 
         override fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine? {
             return LEFT.getOtherLine(curLine)
         }
+
+        override fun getNextDirCounterClock(): Direction = UP
+
     };
 
     abstract fun getOpposite(): Direction
@@ -841,6 +834,7 @@ enum class Direction {
      * returns the line from the opposite direction
      */
     abstract fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine?
+    abstract fun getNextDirCounterClock(): Direction
 }
 
 /*class BezierCurve(
@@ -1085,7 +1079,12 @@ sealed class DecorationDistributionFunction(
             while (allPos.size > 0) {
                 val i = allPos[(rnd.nextDouble() * allPos.size).toInt()]
                 all[i].setIsCluster(
-                    rnd.nextDouble() < prob + (if (isNeighborCluster(all, i, blockSize)) additionalProbIfNeighbor else 0F)
+                    rnd.nextDouble() < prob + (if (isNeighborCluster(
+                            all,
+                            i,
+                            blockSize
+                        )
+                    ) additionalProbIfNeighbor else 0F)
                 )
                 allPos.remove(i)
             }

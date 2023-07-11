@@ -18,13 +18,31 @@ interface StyledActor : HoverStateActor {
 
     fun initStyles(screen: OnjScreen)
 
+    fun enterActorState(s: String) {
+        styleManager?.enterActorState(s)
+    }
+
+    fun leaveActorState(s: String) {
+        styleManager?.leaveActorState(s)
+    }
+
+    /**
+     * checks if the actor is in an actorstate / has an actorstate
+     */
+    fun inActorState(s: String): Boolean {
+        return styleManager?.actorStates?.contains(s) == true
+    }
 }
 
 class StyleManager(val actor: Actor, val node: YogaNode) {
 
     private val _styleProperties: MutableList<StyleProperty<*, *>> = mutableListOf()
 
-    val styleProperties: List<StyleProperty<*, *>>
+    private val _actorStates: MutableSet<String> = mutableSetOf()
+
+    val actorStates: Set<String>
+        get() = _actorStates
+    private val styleProperties: List<StyleProperty<*, *>>
         get() = _styleProperties
 
     fun update() {
@@ -50,6 +68,14 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
         return manager
     }
 
+    fun enterActorState(s: String) {
+        _actorStates.add(s)
+    }
+
+    fun leaveActorState(s: String) {
+        _actorStates.remove(s)
+    }
+
     companion object {
 
         const val logTag = "style"
@@ -63,16 +89,20 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
                 is YogaValue -> {
                     to as YogaValue
                     if (to.unit != from.unit || to.unit in arrayOf(YogaUnit.AUTO, YogaUnit.UNDEFINED)) {
-                        FortyFiveLogger.warn(logTag, "attempted to animate a property of type YogaValue, " +
-                                "but the units used are either mixed or set to auto or undefined")
+                        FortyFiveLogger.warn(
+                            logTag, "attempted to animate a property of type YogaValue, " +
+                                    "but the units used are either mixed or set to auto or undefined"
+                        )
                         return null
                     }
                     YogaValue(from.value + (to.value - from.value) * percent, to.unit) as T
                 }
 
                 else -> {
-                    FortyFiveLogger.warn(logTag, "attempted to animate property of type ${type.simpleName}, " +
-                            "which currently cannot be interpolated")
+                    FortyFiveLogger.warn(
+                        logTag, "attempted to animate property of type ${type.simpleName}, " +
+                                "which currently cannot be interpolated"
+                    )
                     null
                 }
             }
@@ -136,9 +166,9 @@ open class StyleInstruction<DataType>(
         get() = data
 
 
-    open fun onControlGained(valueBefore: DataType) { }
+    open fun onControlGained(valueBefore: DataType) {}
 
-    open fun onControlLost() { }
+    open fun onControlLost() {}
 
 }
 
@@ -199,6 +229,12 @@ sealed class StyleCondition {
     class ScreenState(val state: String) : StyleCondition() {
         override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
             state in screen.screenState
+    }
+
+    class ActorState(val state: String) : StyleCondition() {
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor {
+            return actor.inActorState(state)
+        }
     }
 
     class Or(val first: StyleCondition, val second: StyleCondition) : StyleCondition() {

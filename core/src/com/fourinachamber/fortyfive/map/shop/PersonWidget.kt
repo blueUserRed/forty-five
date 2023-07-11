@@ -25,7 +25,7 @@ class PersonWidget(
     private lateinit var personDrawable: Drawable
 
     private var defaultOffsetX: Float = 0F
-    private var defaultOffsetY: Float = 1F
+    private var defaultOffsetY: Float = 0F
     private var defaultScale: Float = 0F
     private lateinit var textureName: String
     override var styleManager: StyleManager? = null
@@ -55,13 +55,21 @@ class PersonWidget(
     }
 
     fun addDropTarget(dragAndDrop: DragAndDrop) {
-        val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-            dropBehaviour.name,
-            dragAndDrop,
-            this,
-            dropBehaviour
-        )
-        dragAndDrop.addTarget(behaviour)
+//        val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+//            dropBehaviour.name,
+//            dragAndDrop,
+//            this,
+//            dropBehaviour
+//        )
+//        dragAndDrop.addTarget(behaviour)//TODO change back
+//        println("${dropBehaviour.name} \n $dropBehaviour\n\n\n")
+//        val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
+//            dropBehaviour.name,
+//            dragAndDrop,
+//            this,
+//            dropBehaviour
+//        )
+//        dragAndDrop.addSource(behaviour)
     }
 
 

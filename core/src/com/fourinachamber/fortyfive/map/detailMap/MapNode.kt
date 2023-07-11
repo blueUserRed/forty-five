@@ -7,7 +7,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
-import java.util.*
 import kotlin.math.*
 
 data class MapNode(
@@ -23,14 +22,87 @@ data class MapNode(
 
 
     private var imageCache: Drawable? = null
+    private var nodePositionsForDirection: List<MapNode?> = listOf()
     fun getEdge(dir: Direction): MapNode? {
+        if (nodePositionsForDirection.size != edgesTo.size) initNodeDirections()
+        return nodePositionsForDirection[dir.ordinal]
+    }
 
-        val possibleNode = edgesTo.map {
-            val ang = Line(Vector2(it.x, it.y), Vector2(x, y)).ang()
-            it to min(min(abs(dir.getAngle() - ang), abs(dir.getAngle() + 2 * PI.toFloat() - ang)),abs(dir.getAngle() - 2 * PI.toFloat() - ang))
-        }.minBy { it.second }
-        if (possibleNode.second > Math.PI/2) return null
-        return possibleNode.first
+    private fun initNodeDirections() {
+        val nodesWithAngles =
+            edgesTo.map { it to (Line(Vector2(it.x, it.y), Vector2(x, y)).ang() + (PI * 2)) % (PI * 2) }
+                .sortedBy { it.second }
+        val finalPositions = arrayOfNulls<MapNode>(4)
+        when (nodesWithAngles.size) {
+            4 -> {
+                val startNode =
+                    nodesWithAngles.minBy { min(abs(it.second % (PI / 2)), (abs((PI / 2) - it.second % (PI / 2)))) }
+                val startDir = Direction.values().minBy { abs(it.getAngle() - (startNode.second % (2 * PI))) }
+                var curAng = startDir
+                val startIndex = nodesWithAngles.indexOf(startNode)
+                for (i in 0 until Direction.values().size) {
+                    finalPositions[curAng.ordinal] = nodesWithAngles[(startIndex + i) % nodesWithAngles.size].first
+                    curAng = curAng.getNextDirCounterClock()
+                }
+                nodePositionsForDirection = finalPositions.toList()
+            }
+
+            2, 3 -> {
+                val bestAngles = calcBestAngles(nodesWithAngles, finalPositions, 0F)
+                for (i in 0 until bestAngles.first.size) {
+                    finalPositions[i] = bestAngles.first[i]
+                }
+
+            }
+        }
+        for (i in finalPositions.indices) {
+            if (finalPositions[i] != null) continue
+            val dir = Direction.values()[i]
+            val possibleNode = edgesTo.map {
+                val ang = Line(Vector2(it.x, it.y), Vector2(x, y)).ang()
+                it to min(
+                    min(abs(dir.getAngle() - ang), abs(dir.getAngle() + 2 * PI.toFloat() - ang)),
+                    abs(dir.getAngle() - 2 * PI.toFloat() - ang)
+                )
+            }.minBy { it.second }
+            if (possibleNode.second <= Math.PI / 2) finalPositions[i] = possibleNode.first
+        }
+        nodePositionsForDirection = finalPositions.toList()
+    }
+
+    private var counter = 0
+    private fun calcBestAngles(
+        nodes: List<Pair<MapNode, Double>>,
+        positions: Array<MapNode?>,
+        distance: Float,
+    ): Pair<Array<MapNode?>, Float> {
+        if (nodes.isEmpty()) return positions to distance
+        var curBestDist = Float.MAX_VALUE
+        var curBestPos = positions
+        for (node in nodes) {
+            for (i in positions.indices) {
+                val curPos = positions.copyOf()
+                val curNodes = nodes.toMutableList()
+                if (positions[i] != null) continue
+                val dir = Direction.values()[i]
+                val dist = min(
+                    min(
+                        abs(dir.getAngle() - node.second),
+                        abs(dir.getAngle() + 2 * PI.toFloat() - node.second)
+                    ),
+                    abs(dir.getAngle() - 2 * PI.toFloat() - node.second)
+                ).toFloat()
+                curPos[dir.ordinal] = node.first
+                curNodes.remove(node)
+                counter += 1
+                val res = calcBestAngles(curNodes, curPos, distance + dist)
+                if (res.second < curBestDist) {
+                    curBestDist = res.second
+                    curBestPos = res.first
+                }
+            }
+        }
+        return curBestPos to (distance + curBestDist)
     }
 
     @MainThreadOnly

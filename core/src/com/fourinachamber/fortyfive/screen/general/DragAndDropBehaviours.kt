@@ -31,6 +31,9 @@ object DragAndDropBehaviourFactory {
         dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
             ShopDropTarget(dragAndDrop, actor, onj)
         }
+        dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
+            ShopDragSource(dragAndDrop, actor, onj)
+        }
     }
 
     fun dragBehaviourOrError(
@@ -83,7 +86,6 @@ object DragAndDropBehaviourFactory {
             onj
         )?.eitherRight() ?: throw RuntimeException("Unknown drag or drop behaviour: $name")
     }
-
 }
 
 class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
@@ -99,13 +101,10 @@ class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject
     }
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-
         if (payload == null) return
-
-        val obj = payload.obj as CardDragAndDropPayload
+        val obj = payload.obj as ShopDragSource.DragAndDropPayload
         obj.onBuy()
     }
-
 }
 
 abstract class DragBehaviour(

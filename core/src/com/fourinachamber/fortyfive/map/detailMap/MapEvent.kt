@@ -18,13 +18,13 @@ object MapEventFactory {
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
-        "ShopMapEvent" to {
+        "ShopMapEvent" to { it ->
             ShopMapEvent(
                 it.get<String>("type"),
                 it.get<String>("biome"),
                 it.get<String>("person"),
                 it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-                it.get<List<OnjInt>>("boughtIndices").map{it.value.toInt()}.toMutableList(),
+                it.get<List<OnjInt>>("boughtIndices").map{it2->it2.value.toInt()}.toMutableSet(),
             )
         },
     )
@@ -246,7 +246,7 @@ class ShopMapEvent(
     private val biome: String,
     val person: String,
     val seed: Long,
-    val boughtIndices: MutableList<Int>
+    val boughtIndices: MutableSet<Int>
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false

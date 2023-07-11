@@ -20,7 +20,6 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.shop.PersonWidget
-import com.fourinachamber.fortyfive.map.shop.ShopWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
@@ -52,7 +51,8 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var transitionAwayTime: Int? = null
-    private val templateObjects: MutableList<OnjNamedObject> = mutableListOf()
+    private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
+
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -76,7 +76,8 @@ class ScreenBuilder(val file: FileHandle) {
             namedActors = namedActors,
             printFrameRate = false,
             namedCells = mapOf(),
-            transitionAwayTime = transitionAwayTime
+            transitionAwayTime = transitionAwayTime,
+            screenBuilder = this,
         )
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
@@ -109,10 +110,51 @@ class ScreenBuilder(val file: FileHandle) {
         onj.ifHas<OnjArray>("templates") {
             for (a in it.value) {
                 a as OnjNamedObject
-                templateObjects.add(a)
+                a.ifHas<String>("name") { name ->
+                    templateObjects[name] = a
+                }
             }
         }
-//        println(templateObjects)
+    }
+
+
+    fun generateFromTemplate(name: String, data: Map<String, OnjValue>, parent: FlexBox?, screen: OnjScreen): Actor? {
+        if (!templateObjects.contains(name) || templateObjects[name] == null) return null
+        val curMap = mutableMapOf<String, OnjValue>()
+        val widgetOnj = OnjNamedObject(templateObjects[name]!!.name, curMap)
+        templateObjects[name]!!.value.entries.forEach { curMap[it.key] = getNextValue(it.key, it.value, data) }
+        val oldBehaviours = behavioursToBind.toList()
+        val curActor = getWidget(widgetOnj, parent, screen)
+        val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
+        for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
+        screen.dragAndDrop = doDragAndDrop(screen)
+        screen.invalidateEverything()
+        return curActor
+    }
+
+    private fun getNextValue(key: String, value: OnjValue, data: Map<String, OnjValue>): OnjValue {
+        if (key in data.keys) return data[key]!!
+        return when (value) {
+            is OnjNamedObject -> {
+                val x = mutableMapOf<String, OnjValue>()
+                value.value.entries.forEach { x[it.key] = getNextValue(it.key, it.value, data) }
+                OnjNamedObject(value.name, x)
+            }
+
+            is OnjObject -> {
+                val x = mutableMapOf<String, OnjValue>()
+                value.value.entries.forEach { x[it.key] = getNextValue(it.key, it.value, data) }
+                OnjObject(x)
+            }
+
+            is OnjArray -> {
+                val x = mutableListOf<OnjValue>()
+                value.value.forEach { x.add(getNextValue("", it, data)) }
+                OnjArray(x)
+            }
+
+            else -> value
+        }
     }
 
     private fun doOptions(onj: OnjObject) {
@@ -201,24 +243,6 @@ class ScreenBuilder(val file: FileHandle) {
         else -> throw RuntimeException("unknown Viewport ${viewportOnj.name}")
 
     }
-
-    /*
-        fun generateTemplateWidget(
-            widgetOnj: OnjNamedObject,
-            parent: FlexBox,
-            screen: OnjScreen,
-        ): Actor = when (widgetOnj.name) {
-            "Image" -> CustomImageActor(
-                widgetOnj.getOr<String?>("textureName", null),
-                screen,
-                widgetOnj.getOr("partOfSelectionHierarchy", false)
-            ).apply {
-                applyImageKeys(this, widgetOnj)
-            }
-
-            else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
-        }
-    */
 
     private fun getWidget(
         widgetOnj: OnjNamedObject,
@@ -359,20 +383,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),
             widgetOnj.get<Double>("scale").toFloat(),
-            widgetOnj.get<OnjNamedObject>("dropBehaviour"),
-            screen
-        )
-
-        "ShopWidget" -> ShopWidget(
-            widgetOnj.get<String>("texture"),
-            widgetOnj.get<String>("dataFile"),
-            Label.LabelStyle(
-                fontOrError(widgetOnj.get<String>("dataFont"), screen),
-                widgetOnj.get<Color>("dataFontColor")
-            ),
-            widgetOnj.get<OnjNamedObject>("dataDragBehaviour"),
-            widgetOnj.get<Long>("maxPerLine").toInt(),
-            widgetOnj.get<OnjFloat>("widthPercentagePerItem").value.toFloat(),
+            OnjNamedObject("name", mapOf()),
             screen
         )
 
@@ -421,7 +432,6 @@ class ScreenBuilder(val file: FileHandle) {
                     }
             }
         }
-
         return actor
     }
 
@@ -522,7 +532,6 @@ class ScreenBuilder(val file: FileHandle) {
         val screenSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/screen.onjschema").file())
         }
-
     }
 
 }
