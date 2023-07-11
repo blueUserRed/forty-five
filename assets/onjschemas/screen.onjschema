@@ -27,7 +27,8 @@ var widgetSharedKeys = {
     visible?: boolean,
     name?: string,
     touchable?: string,
-    styles?: { ...* }[]
+    styles?: { ...* }[],
+    dragAndDrop?: $DragAndDropBehaviour,
 };
 
 //var detailTextSharedKeys = {
@@ -200,20 +201,8 @@ $Widget {
         offsetX:float,
         offsetY:float,
         scale:float,
-        dropBehaviour: $DragAndDropBehaviour,
+        dropBehaviour?: $DragAndDropBehaviour,
         ...widgetSharedKeys
-    }
-
-    $ShopWidget{
-        name: string,
-        texture: string,
-        dataFile: string,
-        dataFont: string,
-        dataFontColor: Color,
-        dataDragBehaviour: $DragAndDropBehaviour,
-        maxPerLine: int,
-        widthPercentagePerItem: Float,
-        ...widgetSharedKeys,
     }
 
 }
@@ -335,9 +324,10 @@ $ScreenController {
     $ShopScreenController {
         shopsFile: string,
         npcsFile: string,
+        cardsFile: string,
         personWidgetName: string,
         messageWidgetName: string,
-        shopWidgetNames: string[],
+        cardsParentName: string,
     }
 }
 
@@ -375,6 +365,8 @@ $KeyAction {
     $MoveInDetailMapKeyAction {
         direction: string
     }
+
+    $EnterEventDetailMapKeyAction{ }
 }
 
 viewport: $Viewport,
@@ -397,4 +389,6 @@ options: {
 //    printFrameRate?: boolean
 },
 
-root: $Widget
+root: $Widget,
+
+templates?: $Widget[],
