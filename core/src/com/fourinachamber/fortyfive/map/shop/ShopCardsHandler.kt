@@ -51,11 +51,11 @@ class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private 
             mapOf(),
             parent,
             screen
-        )!! as FlexBox
+        ) as FlexBox
 
         val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap["name"] = OnjString("Card_${curParent.children.size}")
-        tempMap["textureName"] = OnjString("card%%" + card.name)
+        tempMap["textureName"] = OnjString(Card.cardTexturePrefix + card.name)
         val img = screen.screenBuilder.generateFromTemplate(
             "cardsWidgetImage",
             tempMap,
@@ -150,11 +150,11 @@ class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private 
         for (i in cardWidgets.indices) {
             if (i in boughtIndices) {
                 labels[i].setText("bought")
-                cardWidgets[i].styleManager?.enterActorState("unbuyable")
-                labels[i].styleManager?.enterActorState("bought")
+                cardWidgets[i].enterActorState("unbuyable")
+                labels[i].enterActorState("bought")
             } else if (SaveState.playerMoney < cards[i].price) {
-                cardWidgets[i].styleManager?.enterActorState("unbuyable")
-                labels[i].styleManager?.enterActorState("poor")
+                cardWidgets[i].enterActorState("unbuyable")
+                labels[i].enterActorState("poor")
             }
         }
     }
