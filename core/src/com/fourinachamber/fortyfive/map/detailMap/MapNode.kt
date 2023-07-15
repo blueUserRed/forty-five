@@ -25,15 +25,6 @@ data class MapNode(
 
     private var imageCache: Drawable? = null
     private var nodeTextureCache: Drawable? = null
-
-    fun getEdge(dir: Direction): MapNode? {
-        val possibleNode = edgesTo.map {
-            val ang = Line(Vector2(it.x, it.y), Vector2(x, y)).ang()
-            it to min(min(abs(dir.getAngle() - ang), abs(dir.getAngle() + 2 * PI.toFloat() - ang)),abs(dir.getAngle() - 2 * PI.toFloat() - ang))
-        }.minBy { it.second }
-        if (possibleNode.second > Math.PI/2) return null
-        return possibleNode.first
-
     private var nodePositionsForDirection: List<MapNode?> = listOf()
     
     fun getEdge(dir: Direction): MapNode? {
@@ -83,7 +74,6 @@ data class MapNode(
         nodePositionsForDirection = finalPositions.toList()
     }
 
-    private var counter = 0
     private fun calcBestAngles(
         nodes: List<Pair<MapNode, Double>>,
         positions: Array<MapNode?>,
@@ -107,7 +97,6 @@ data class MapNode(
                 ).toFloat()
                 curPos[dir.ordinal] = node.first
                 curNodes.remove(node)
-                counter += 1
                 val res = calcBestAngles(curNodes, curPos, distance + dist)
                 if (res.second < curBestDist) {
                     curBestDist = res.second
