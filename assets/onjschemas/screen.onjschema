@@ -363,10 +363,13 @@ $KeyAction {
     $FireClickEventKeyAction { }
 
     $MoveInDetailMapKeyAction {
+        mapActor: string,
         direction: string
     }
 
-    $EnterEventDetailMapKeyAction{ }
+    $EnterEventDetailMapKeyAction {
+        mapActor: string
+    }
 }
 
 viewport: $Viewport,

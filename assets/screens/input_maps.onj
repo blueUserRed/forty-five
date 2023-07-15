@@ -219,30 +219,36 @@ detailMapInputMap: [
         keycode: keys.A,
         modifiers: [],
         action: $MoveInDetailMapKeyAction {
-            direction:"left",
+            direction: "left",
+            mapActor: "map"
         }
     },{
         keycode: keys.S,
         modifiers: [],
         action: $MoveInDetailMapKeyAction {
-            direction:"down",
+            direction: "down",
+            mapActor: "map"
         }
     },{
         keycode: keys.W,
         modifiers: [],
         action: $MoveInDetailMapKeyAction {
-            direction:"up",
+            direction: "up",
+            mapActor: "map"
         }
     },{
         keycode: keys.D,
         modifiers: [],
         action: $MoveInDetailMapKeyAction {
-            direction:"right",
+            direction: "right",
+            mapActor: "map"
         }
     },
     {
         keycode: keys.Space,
         modifiers: [],
-        action: $EnterEventDetailMapKeyAction { }
+        action: $EnterEventDetailMapKeyAction {
+            mapActor: "map"
+        }
     },
 ],
