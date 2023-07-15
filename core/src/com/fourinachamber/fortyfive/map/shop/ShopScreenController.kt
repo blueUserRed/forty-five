@@ -1,17 +1,19 @@
 package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
-import ktx.actors.onClick
+import dev.lyze.flexbox.FlexBox
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjString
+import onj.value.OnjValue
+import kotlin.random.Random
 
 class ShopScreenController(onj: OnjObject) : ScreenController() {
 
@@ -22,21 +24,33 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private val shopFilePath = onj.get<String>("shopsFile")
     private val npcsFilePath = onj.get<String>("npcsFile")
+    private val cardsFilePath = onj.get<String>("cardsFile")
     private val personWidgetName = onj.get<String>("personWidgetName")
     private val messageWidgetName = onj.get<String>("messageWidgetName")
-    private val shopWidgetNames = onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
-    private val backButtonName = "back_button"  //onj.get<List<OnjString>>("shopWidgetNames").map { it.value }
-
+    private val cardsParentName = onj.get<OnjString>("cardsParentName").value
     private lateinit var personWidget: PersonWidget
-    private val dragAndDrop = DragAndDrop()
+    private lateinit var cardsParentWidget: CustomScrollableFlexBox
+    private lateinit var shopCardsHandler: ShopCardsHandler
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
+        //Ruchsack-Backpack
+        // mehrere Decks
+        // 1 karte in mehreren Decks haben
+        // actives deck wechseln
+        // deck hat minimal und max. anzahl
+
+        // slots für weight cards(alle decks gleich), locked
+
+        //cards sortieren evtl. (dmg, kosten, alphabet), nur BACKPACK
+
+        //card prebuilds evtl.
+
+        //speichern im savestate
+        //für größe Phillip
         screen = onjScreen
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
-        val personWidget = onjScreen.namedActorOrError(personWidgetName)
-        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type shopWidget")
-        this.personWidget = personWidget
+        val personWidget = initWidgets(onjScreen)
         val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
         shopsSchema.assertMatches(shopFile)
         shopFile as OnjObject
@@ -57,29 +71,30 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             .find { it.get<String>("name") == person.get<String>("npcImageName") }
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
         personWidget.setDrawable(imgData)
-        personWidget.addDropTarget(dragAndDrop)
         TemplateString.updateGlobalParam("map.curEvent.personDisplayName", person.get<String>("displayName"))
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = person.get<OnjArray>("texts").value
         val defaults = shopFile.get<OnjObject>("defaults")
         messageWidget.advancedText =
             AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
-        addItemWidgets(shopFile, person)
 
-
-        val backButton = onjScreen.namedActorOrError(backButtonName)
-        backButton.onButtonClick {
-            personWidget.giveResourcesBack()
-        }
+        shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
+        shopCardsHandler.calculateChances(context.type, shopFile, person)
+        shopCardsHandler.addItems(context.seed)
     }
 
-    private fun addItemWidgets(shopFile: OnjObject, person: OnjObject) {
-        shopWidgetNames.forEach {
-            val shopWidget = screen.namedActorOrError(it)
-            if (shopWidget !is ShopWidget) throw RuntimeException("widget with name $it must be of type shopWidget")
-            shopWidget.calculateChances(context.type, shopFile, person)
-            shopWidget.addItems(context.seed, context.boughtIndices, dragAndDrop)
-        }
+    private fun initWidgets(onjScreen: OnjScreen): PersonWidget {
+        val personWidget = onjScreen.namedActorOrError(personWidgetName)
+        if (personWidget !is PersonWidget) throw RuntimeException("widget with name $personWidgetName must be of type personWidget")
+        this.personWidget = personWidget
+        val cardsParentWidget = onjScreen.namedActorOrError(cardsParentName)
+        if (cardsParentWidget !is CustomScrollableFlexBox) throw RuntimeException("widget with name $cardsParentName must be of type CustomScrollableFlexBox")
+        this.cardsParentWidget = cardsParentWidget
+        return personWidget
+    }
+
+    fun buyCard(actor: Actor) {
+        shopCardsHandler.buyCard(actor as CustomImageActor)
     }
 
     companion object {
@@ -95,5 +110,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         }
 
     }
+
 
 }

@@ -170,7 +170,7 @@ class DetailMapWidget(
         )
     }
 
-    private fun onStartButtonClicked() {
+    fun onStartButtonClicked() {
         playerNode.event?.start()
     }
 

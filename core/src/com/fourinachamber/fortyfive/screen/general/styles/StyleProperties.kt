@@ -79,7 +79,7 @@ class MinWidthStyleProperty<T>(
         }
     }
 
-    override fun get(node: YogaNode): YogaValue = node.width
+    override fun get(node: YogaNode): YogaValue = node.minWidth
 }
 
 class HeightStyleProperty<T>(
@@ -128,7 +128,7 @@ class MinHeightStyleProperty<T>(
         }
     }
 
-    override fun get(node: YogaNode): YogaValue = node.height
+    override fun get(node: YogaNode): YogaValue = node.minHeight
 }
 
 class MarginStyleProperty<T>(
