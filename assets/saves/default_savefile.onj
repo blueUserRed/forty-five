@@ -18,7 +18,7 @@ cards: [
 ],
 
 playerLives: gameConfig.playerConfig.lives,
-playerMoney: 100,
+playerMoney: 0,
 currentDifficulty: 1.0,
 
 stats: {

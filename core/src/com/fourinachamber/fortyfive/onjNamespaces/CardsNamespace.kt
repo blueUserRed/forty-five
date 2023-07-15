@@ -56,6 +56,11 @@ object CardsNamespace {
         return OnjEffect(Effect.Protect(triggerOrError(trigger.value), bulletSelector.value))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
+    fun destroy(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
+        return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value))
+    }
+
     @RegisterOnjFunction(schema = "params: [*[]]")
     fun bNum(onjArr: OnjArray): OnjBulletSelector {
         val nums = mutableSetOf<Int>()
@@ -67,7 +72,7 @@ object CardsNamespace {
                 // convert slot from external representation (1 comes after 5)
                 // to internal representation (4 comes after 5)
                 num = if (num == 5) 5 else 5 - num
-                nums.add(num)
+                nums.add(num - 1)
             }
             is OnjString -> {
                 if (value.value.lowercase() != "this") {
@@ -79,7 +84,7 @@ object CardsNamespace {
         }
 
 
-        return OnjBulletSelector(BulletSelector.ByLambda { self, other, slot ->
+        return OnjBulletSelector(BulletSelector.ByLambda { self, other, slot, _ ->
             // when self === other allowSelf must be true, even if the slot is correct
             if (self === other) allowSelf
             else nums.contains(slot)
@@ -88,12 +93,29 @@ object CardsNamespace {
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun bSelectByName(name: OnjString): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByLambda { _, other, _ -> other.name == name.value })
+        return OnjBulletSelector(BulletSelector.ByLambda { _, other, _, _ -> other.name == name.value })
     }
 
     @RegisterOnjFunction(schema = "params: [boolean, boolean]")
     fun bSelectTarget(includeSelf: OnjBoolean, optional: OnjBoolean): OnjBulletSelector {
         return OnjBulletSelector(BulletSelector.ByPopup(includeSelf.value, optional.value))
+    }
+
+    @RegisterOnjFunction("params: []")
+    fun bSelectNeighbors(): OnjBulletSelector {
+        return OnjBulletSelector(BulletSelector.ByLambda { self, _, slot, controller ->
+            val thisSlot = controller.revolver.slots.indexOfFirst { it.card === self }
+            val neighbors = arrayOf(
+                if (thisSlot == 4) 0 else thisSlot + 1,
+                if (thisSlot == 0) 4 else thisSlot - 1
+            )
+            return@ByLambda slot in neighbors
+        })
+    }
+
+    @RegisterOnjFunction("params: []")
+    fun bSelectSelf(): OnjBulletSelector {
+        return OnjBulletSelector(BulletSelector.ByLambda { self, other, _, _ -> self === other })
     }
 
     @RegisterOnjFunction(schema = "params: [int, int]")

@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -99,8 +100,9 @@ abstract class StatusEffect(
      * returns a timeline containing the actions of this effect; null if this status effect does nothing after the
      * revolver turned
      */
-    open fun executeAfterRevolverTurn(gameController: GameController): Timeline? = null
+    open fun executeAfterRevolverRotation(gameController: GameController): Timeline? = null
 
+    open fun applyAnim(enemy: Enemy): Timeline? = null
 
     /**
      * the poison effect damages the target every revolver turn
@@ -118,15 +120,16 @@ abstract class StatusEffect(
 
         override fun copy(): StatusEffect = Poison(damage, turns, target)
 
-        override fun executeAfterRevolverTurn(
+        override fun executeAfterRevolverRotation(
             gameController: GameController
         ): Timeline = Timeline.timeline {
-            FortyFiveLogger.debug(logTag, "executing poison effect")
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
-
-            includeAction(shakeActorAction)
-            delay(GraphicsConfig.bufferTime)
-            include(target.damage(damage))
+            // TODO: rework poison
+//            FortyFiveLogger.debug(logTag, "executing poison effect")
+//            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
+//
+//            includeAction(shakeActorAction)
+//            delay(GraphicsConfig.bufferTime)
+//            include(target.damage(damage))
         }
 
         override fun canStackWith(effect: StatusEffect): Boolean {
@@ -165,18 +168,14 @@ abstract class StatusEffect(
 
         override fun executeAfterRound(gameController: GameController): Timeline? = null
 
+        override fun applyAnim(enemy: Enemy): Timeline = enemy.actor.fireAnim()
+
         override fun executeAfterDamage(
             gameController: GameController,
             damage: Int
         ): Timeline = Timeline.timeline {
-
             FortyFiveLogger.debug(logTag, "executing burning effect")
-
             val additionalDamage = floor(damage * percent).toInt()
-            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
-
-            delay(GraphicsConfig.bufferTime)
-            includeAction(shakeActorAction)
             delay(GraphicsConfig.bufferTime)
             include(target.damage(additionalDamage))
         }
@@ -207,31 +206,22 @@ abstract class StatusEffect(
 
         @Suppress("unused") // will be needed in the future
         PLAYER {
-//            override fun getLivesActor(): Actor {
-//                return FortyFive.currentGame!!.playerLivesLabel
-//            }
+
             override fun damage(damage: Int): Timeline {
                 return Timeline.timeline {
-                    include(FortyFive.currentGame!!.damagePlayer(damage))
+                    include(FortyFive.currentGame!!.damagePlayerTimeline(damage))
                 }
             }
         },
 
         ENEMY {
-//            override fun getLivesActor(): Actor {
-//                return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().actor.livesLabel
-//            }
 
-            override fun damage(damage: Int): Timeline {
-                return FortyFive.currentGame!!.enemyArea.getTargetedEnemy().damage(damage)
+            override fun damage(damage: Int): Timeline = Timeline.timeline {
+                val enemy = FortyFive.currentGame!!.enemyArea.getTargetedEnemy()
+                include(enemy.damage(damage))
             }
         }
         ;
-
-//        /**
-//         * returns the actor displaying the current and/or base lives of the target
-//         */
-//        abstract fun getLivesActor(): Actor
 
         /**
          * returns a timeline containing the necessary actions to damage the target

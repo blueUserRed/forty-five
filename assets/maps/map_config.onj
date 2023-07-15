@@ -85,27 +85,12 @@ generatorConfig: {
                 rotation: 1.25,
                 minDistanceBetweenNodes: 15.0,
                 pathTotalWidth: 7.5,
-                fixedEvents: [
-                    {
-                        isDeadEnd: true,
-                        event: $EncounterMapEvent {
-                            currentlyBlocks: true,
-                            canBeStarted: true,
-                            isCompleted: false
-                        },
-                    },
-                    {
-                        isDeadEnd: false,
-                        event: $EncounterMapEvent {
-                            currentlyBlocks: true,
-                            canBeStarted: true,
-                            isCompleted: false
-                        },
-                    },
-                ],
+                fixedEvents: [],
+                exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
                         weight: 20,
+                        nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
@@ -114,14 +99,10 @@ generatorConfig: {
                     },
                     {
                         weight: 20,
+                        nodeTexture: null,
                         event: $EmptyMapEvent {
                         }
                     },
-                    {
-                        weight: 10,
-                        event: $EmptyMapEvent {
-                        }
-                    }
                 ],
                 decorations: [
                     $RandomDistributionFunction {
@@ -202,9 +183,11 @@ generatorConfig: {
                 rotation: 0.0,
                 minDistanceBetweenNodes: 15.0,
                 pathTotalWidth: 7.5,
+                exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
                     {
                         isDeadEnd: false,
+                        nodeTexture: "map_node_shop_circle",
                         event: $ShopMapEvent {
                             seed: null,
                             boughtIndices: [
@@ -218,6 +201,7 @@ generatorConfig: {
                 optionalEvents: [
                     {
                         weight: 15,
+                        nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,

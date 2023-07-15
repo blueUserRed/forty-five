@@ -166,13 +166,6 @@ var reservesLabel = $TemplateLabel {
     color: color.white,
 };
 
-var remainingTurnsLabel = $TemplateLabel {
-    font: "red_wing",
-    template: "remaining turns: {game.remainingTurns} ",
-    fontScale: 0.09,
-    color: color.black,
-};
-
 var disableStyles = [
     {
         style_priority: 1,
@@ -185,6 +178,54 @@ var disableStyles = [
         alpha: 0.5,
         disabled: true
     }
+];
+
+var attackPopup = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showAttackPopup"),
+            detached: false
+        }
+    ]
+} children [
+
+    $Label {
+        font: "red_wing",
+        text: "Parry",
+        fontScale: 0.09,
+        color: color.white,
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "ParryEvent"
+            }
+        ]
+    },
+    $Label {
+        font: "red_wing",
+        text: "Dont Parry",
+        fontScale: 0.09,
+        color: color.white,
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "PopupConfirmationEvent"
+            }
+        ]
+    },
+
 ];
 
 var popupActor = $Box {
@@ -391,15 +432,13 @@ var gameScreen = $Box {
 
         playerLivesLabel,
 
-        $Box {
-            styles: [
-                {
-                    flexGrow: 1.0
-                }
-            ]
-        },
-
-        remainingTurnsLabel
+//        $Box {
+//            styles: [
+//                {
+//                    flexGrow: 1.0
+//                }
+//            ]
+//        },
 
     ],
 
@@ -524,5 +563,5 @@ root: $Box {
         }
     ]
 } children [
-    gameScreen, drawCardActor, popupActor
+    gameScreen, drawCardActor, popupActor, attackPopup
 ]

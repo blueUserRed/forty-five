@@ -43,7 +43,7 @@ public class DesktopLauncher {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm-ss");
 		String time = formatter.format(LocalDateTime.now());
 		try {
-			Files.copy(log.toPath(), Paths.get("../error_logs/" + time + ".log"));
+			Files.copy(log.toPath(), Paths.get("./error_logs/" + time + ".log"));
 		} catch (IOException e) {
 			return false;
 		}

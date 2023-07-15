@@ -295,8 +295,7 @@ open class OnjScreen @MainThreadOnly constructor(
 //            }
         }
     } catch (e: Exception) {
-        FortyFiveLogger.severe(logTag, "exception in render function")
-        FortyFiveLogger.stackTrace(e)
+        FortyFiveLogger.fatal(e)
     }
 
     private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {

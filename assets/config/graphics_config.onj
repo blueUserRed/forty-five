@@ -43,10 +43,6 @@ damageOverlay: {
     overlay: "hit_overlay"
 },
 
-postProcessors: {
-    destroyCardPostProcessor: "vignette_shader",
-},
-
 stringTemplates:  {
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!",
     buffDetailText: "{source} applied a {text} of {amount}!",
@@ -102,4 +98,5 @@ gameUsedAssets: [
     "earthquake_shader", "glow_shader", "red_wing", "transparent_black_texture", "white_texture",
     "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon",
     "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
+    "fire_particle",
 ]

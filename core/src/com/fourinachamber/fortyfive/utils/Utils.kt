@@ -112,7 +112,7 @@ val Float.radians: Float
 val Float.degrees: Float
     get() = Math.toDegrees(this.toDouble()).toFloat()
 
-fun ClosedFloatingPointRange<Float>.random(random: Random): Float {
+fun ClosedFloatingPointRange<Float>.random(random: Random = Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
 }
 
@@ -157,7 +157,18 @@ fun <T> Collection<Pair<Int, T>>.weightedRandom(): T {
     throw NoSuchElementException("weightedRandom called on an empty collection")
 }
 
+fun Collection<Timeline>.collectTimeline(): Timeline {
+    val actions = mutableListOf<Timeline.TimelineAction>()
+    forEach {
+        if (it.hasBeenStarted) throw RuntimeException("cannot collect a timeline that has been started already")
+        actions.addAll(it.actions)
+    }
+    return Timeline(actions)
+}
+
 object Utils {
+
+    fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability
 
     /**
      * sets the currently active cursor

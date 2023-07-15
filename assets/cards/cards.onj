@@ -8,7 +8,9 @@ var bSelects = {
     allExceptSelf: bNum([1, 2, 3, 4, 5]),
     allBullets: bSelectByName("bullet"),
     fourButNotSelf: bNum([4]),
-    targetRequiredNotSelf: bSelectTarget(false, false)
+    targetRequiredNotSelf: bSelectTarget(false, false),
+    neighbors: bSelectNeighbors(),
+    self: bSelectSelf()
 };
 
 cards: [
@@ -350,7 +352,7 @@ cards: [
         name: "enchantedBullet",
         title: "enchanted Bullet",
         flavourText: "enchanted Bullet",
-        description: "todo",
+        description: "This bullet turns the revolver 2 to the left",
         baseDamage: 14,
         coverValue: 0,
         traitEffects: [],
@@ -366,7 +368,7 @@ cards: [
         name: "bossBullet",
         title: "boss Bullet",
         flavourText: "boss Bullet",
-        description: "todo",
+        description: "As long as this bullet is in the revolver, when a new turn starts: create 1 card of type ‘worker Bullet’ in your hand",
         baseDamage: 10,
         coverValue: 0,
         traitEffects: [],
@@ -384,7 +386,7 @@ cards: [
         name: "protectiveBullet",
         title: "protective Bullet",
         flavourText: "protective Bullet",
-        description: "todo",
+        description: "When this bullet enters the revolver: give a bullet of choice (required) everlasting while this bullet is in the revolver",
         baseDamage: 6,
         coverValue: 0,
         traitEffects: [],
@@ -397,6 +399,42 @@ cards: [
         type: $Bullet { },
         tags: ["rare"],
         price: 50,
+    },
+    {
+        name: "purgeBullet",
+        title: "purge Bullet",
+        flavourText: "purge Bullet",
+        description: "When this bullet enters the revolver: destroy the neighboring bullets",
+        baseDamage: 12,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            destroy("enter", bSelects.neighbors)
+        ],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "deadBullet",
+        title: "dead Bullet",
+        flavourText: "dead Bullet",
+        description: "When this bullet enters the revolver: destroy this bullet",
+        baseDamage: 0,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            destroy("enter", bSelects.self)
+        ],
+        cost: 0,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 25,
     },
 
 ],

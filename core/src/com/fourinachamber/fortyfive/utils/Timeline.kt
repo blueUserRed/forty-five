@@ -130,6 +130,9 @@ class Timeline(private val _actions: MutableList<TimelineAction>) {
          * called when the action ends
          */
         open fun end(timeline: Timeline) { }
+
+        fun wrap(): Timeline = Timeline(mutableListOf(this))
+
     }
 
     /**
