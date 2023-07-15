@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -17,12 +18,15 @@ data class MapNode(
     val y: Float,
     val imageName: String?,
     val imagePos: ImagePosition?,
+    val nodeTexture: ResourceHandle?,
     val event: MapEvent? = null, // TODO: this will be non-nullable in the future,
 ) {
 
 
     private var imageCache: Drawable? = null
+    private var nodeTextureCache: Drawable? = null
     private var nodePositionsForDirection: List<MapNode?> = listOf()
+    
     fun getEdge(dir: Direction): MapNode? {
         if (nodePositionsForDirection.size != edgesTo.size) initNodeDirections()
         return nodePositionsForDirection[dir.ordinal]
@@ -70,7 +74,6 @@ data class MapNode(
         nodePositionsForDirection = finalPositions.toList()
     }
 
-    private var counter = 0
     private fun calcBestAngles(
         nodes: List<Pair<MapNode, Double>>,
         positions: Array<MapNode?>,
@@ -94,7 +97,6 @@ data class MapNode(
                 ).toFloat()
                 curPos[dir.ordinal] = node.first
                 curNodes.remove(node)
-                counter += 1
                 val res = calcBestAngles(curNodes, curPos, distance + dist)
                 if (res.second < curBestDist) {
                     curBestDist = res.second
@@ -118,8 +120,17 @@ data class MapNode(
         return imageCache
     }
 
+    @MainThreadOnly
+    fun getNodeTexture(screen: OnjScreen): Drawable? {
+        if (nodeTexture == null) return null
+        if (nodeTextureCache != null) return nodeTextureCache
+        nodeTextureCache = ResourceManager.get(screen, nodeTexture)
+        return nodeTextureCache
+    }
+
     fun invalidateCachedAssets() {
         imageCache = null
+        nodeTextureCache = null
     }
 
     fun getImageData(): MapManager.MapImageData? = MapManager.mapImages.find { it.name == imageName }
@@ -204,6 +215,7 @@ data class MapNodeBuilder(
     var isArea: Boolean = false,
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
+    var nodeTexture: ResourceHandle? = null,
     var event: MapEvent? = null // TODO: this will be non-nullable in the future
 ) {
 
@@ -242,6 +254,7 @@ data class MapNodeBuilder(
             x, y,
             imageName,
             imagePos,
+            nodeTexture,
             event
         )
         for (edge in edgesTo) {

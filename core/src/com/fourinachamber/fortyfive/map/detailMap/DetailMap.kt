@@ -29,6 +29,7 @@ data class DetailMap(
     val decorations: List<MapDecoration>
 ) {
 
+    // TODO: ugly
     lateinit var curDetailMapWidget:DetailMapWidget
 
     /**
@@ -83,6 +84,7 @@ data class DetailMap(
                     "isArea" with node.isArea
                     "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
                     "event" with node.event?.asOnjObject()
+                    node.nodeTexture?.let { "nodeTexture" with node.nodeTexture }
                     node.imageName?.let {
                         "image" with it
                         "imagePos" with (node.imagePos?.name ?: "up")
@@ -116,6 +118,7 @@ data class DetailMap(
                         nodeOnj.get<Boolean>("isArea"),
                         nodeOnj.getOr<String?>("image", null),
                         MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
+                        nodeOnj.getOr<String?>("nodeTexture", null),
                         if (nodeOnj.hasKey<OnjNull>("event")) {
                             EmptyMapEvent()
                         } else {

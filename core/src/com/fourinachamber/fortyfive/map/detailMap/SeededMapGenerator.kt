@@ -74,15 +74,17 @@ class SeededMapGenerator(
         val deadEndsWithoutEvents = nodesWithoutEvents.filter { it.edgesTo.size == 1 }.toMutableList()
         val sortedFixedEvents = restrictions.fixedEvents.sortedBy { !it.second }
         nodesWithoutEvents.removeAll(deadEndsWithoutEvents)
-        for (curEvent in sortedFixedEvents) {
+        for ((event, isDeadEnd, nodeTexture) in sortedFixedEvents) {
             if (nodesWithoutEvents.isEmpty() && deadEndsWithoutEvents.isEmpty()) break
-            if ((curEvent.second && deadEndsWithoutEvents.isNotEmpty()) || nodesWithoutEvents.isEmpty()) {
+            if ((isDeadEnd && deadEndsWithoutEvents.isNotEmpty()) || nodesWithoutEvents.isEmpty()) {
                 val curNode = deadEndsWithoutEvents.random(rnd)
-                curNode.event = curEvent.first
+                curNode.event = event
+                curNode.nodeTexture = nodeTexture
                 deadEndsWithoutEvents.remove(curNode)
             } else {
                 val curNode = nodesWithoutEvents.random(rnd)
-                curNode.event = curEvent.first
+                curNode.event = event
+                curNode.nodeTexture = nodeTexture
                 nodesWithoutEvents.remove(curNode)
             }
         }
@@ -99,8 +101,10 @@ class SeededMapGenerator(
             if (restrictions.optionalEvents.isEmpty()) {
                 curNode.event = null
             } else {
-                curNode.event =
-                    restrictions.optionalEvents[allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })].second()
+                val choice = allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })
+                val (_, eventCreator, nodeTexture) = restrictions.optionalEvents[choice]
+                curNode.event = eventCreator()
+                curNode.nodeTexture = nodeTexture
             }
             nodesWithoutEvents.remove(curNode)
         }
@@ -119,6 +123,8 @@ class SeededMapGenerator(
         mainLine.lineNodes.last().imageName = restrictions.endArea
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
         mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
+        mainLine.lineNodes.first().nodeTexture = restrictions.exitNodeTexture
+        mainLine.lineNodes.last().nodeTexture = restrictions.exitNodeTexture
         for (areaName in restrictions.otherAreas) {
             var direction: Direction
             var borderNodes: List<MapNodeBuilder>
@@ -1336,12 +1342,13 @@ data class MapRestriction(
     /**
      * the boolean means if it is a dead End
      */
-    val fixedEvents: List<Pair<MapEvent, Boolean>>,
-    val optionalEvents: List<Pair<Int, () -> MapEvent>>,
+    val fixedEvents: List<Triple<MapEvent, Boolean, String?>>, // TODO: slightly ugly, use data class instead?
+    val optionalEvents: List<Triple<Int, () -> MapEvent, String?>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
     val pathTotalWidth: Float = 7F,
     val minDistanceBetweenNodes: Float = 5F,
+    val exitNodeTexture: String
 ) {
 
 
@@ -1369,14 +1376,23 @@ data class MapRestriction(
             fixedEvents = onj
                 .get<OnjArray>("fixedEvents")
                 .value.map { it as OnjObject }
-                .map { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) to it.get<Boolean>("isDeadEnd") },
+                .map {
+                    Triple(
+                        MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")),
+                        it.get<Boolean>("isDeadEnd"),
+                        it.get<String?>("nodeTexture")
+                    )
+                 },
             optionalEvents = onj
                 .get<OnjArray>("optionalEvents")
                 .value
                 .map { it as OnjObject }
                 .map {
-                    it.get<Long>("weight").toInt() to
-                            { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
+                    Triple(
+                        it.get<Long>("weight").toInt(),
+                        { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) },
+                        it.get<String?>("nodeTexture")
+                    )
                 },
             decorations = onj
                 .get<OnjArray>("decorations")
@@ -1390,6 +1406,7 @@ data class MapRestriction(
                 },
             minDistanceBetweenNodes = onj.get<Double>("minDistanceBetweenNodes").toFloat(),
             pathTotalWidth = onj.get<Double>("pathTotalWidth").toFloat(),
+            exitNodeTexture = onj.get<String>("exitNodeTexture")
         )
     }
 }

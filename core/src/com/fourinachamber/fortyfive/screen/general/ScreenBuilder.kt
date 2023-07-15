@@ -332,7 +332,7 @@ class ScreenBuilder(val file: FileHandle) {
         "Map" -> DetailMapWidget(
             screen,
             MapManager.currentDetailMap,
-            widgetOnj.get<String>("nodeTexture"),
+            widgetOnj.get<String>("defaultNodeTexture"),
             widgetOnj.get<String>("edgeTexture"),
             widgetOnj.get<String>("playerTexture"),
             widgetOnj.get<Double>("playerWidth").toFloat(),
