@@ -160,6 +160,13 @@ object KeyActionFactory {
                 true
             }
         },
+        "EnterEventDetailMap" to {
+            lambda@{ screen ->//TODO check if it event isn't blocked
+
+                MapManager.currentDetailMap.curDetailMapWidget.onStartButtonClicked()
+                true
+            }
+        }
     )
 
     /**

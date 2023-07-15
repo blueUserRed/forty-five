@@ -37,7 +37,7 @@ object FortyFive : Game() {
         serviceThread.start()
         if (generateCards) runCardGenerator()
         if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
-        changeToScreen("screens/title_screen.onj")
+        changeToScreen("screens/map_screen.onj")
     }
 
     override fun render() {

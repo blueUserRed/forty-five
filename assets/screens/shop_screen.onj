@@ -35,11 +35,10 @@ options: {
     screenController: $ShopScreenController {
         shopsFile: "maps/shops.onj",
         npcsFile: "maps/npcs.onj",
+        cardsFile: "cards/cards.onj",
         personWidgetName: "shop_person_widget",
         messageWidgetName: "shop_message",
-        shopWidgetNames: [
-            "cards_widget"
-        ],
+        cardsParentName: "cards_widget",
     }
 },
 
@@ -48,7 +47,7 @@ var personWidget = $PersonWidget {
     offsetX: 0.0,
     offsetY: 0.0,
     scale: 1.0,
-    dropBehaviour: $ShopDropTarget {
+    dragAndDrop: $ShopDropTarget {
         group: "card",
     },
     styles: [
@@ -59,25 +58,7 @@ var personWidget = $PersonWidget {
     ],
 };
 
-/*var cardsWidgetTextChild = $Image {  //This comment as an example for scrollable FlexBox
-                                        //if used, be careful of shopWidget, as it uses some parameters which aren't here now
-
-    name: "background_img",
-    textureName: "shop_background_no_biome",
-    scaleX: 0.0,
-    scaleY: 0.0,
-    width: worldWidth,
-    height: worldHeight,
-    reportDimensionsWithScaling: true,
-    styles: [
-        {
-            width: 45.0#percent,
-            height: 45.0#percent,
-        }
-    ],
-};
 var scrollBarBackground = $Image {
-
     name: "scrollbar_background",
     textureName: "test_scrollbar_background",
     scaleX: 1.0,
@@ -89,32 +70,73 @@ var scrollBar = $Image {
     textureName: "test_scrollbar_background",
     scaleX: 1.0,
     scaleY: 1.0,
+};
+
+var testWidget = $Image {
+    textureName: "shop_background_no_biome",
+    scaleX: 0.001,
+    scaleY: 0.001,
+    reportDimensionsWithScaling: true,
+    dragAndDrop: $ShopDragSource {
+        group: "card",
+        moveToLastIndex: true,
+    },
     styles: [
         {
-            //TODO eigene style variable
-
+            style_priority: 1,
+            width: 100.0#percent,
+            height: 80.0#percent,
+            alpha: 1.0,
+        },
+        {
+            style_priority: 2,
+            style_condition: actorState("unbuyable"),
+            alpha: 0.5,
         }
     ],
 };
 
+
+var testWidgetBox = $Box {
+    name: "cardsWidgetParent",
+    styles: [
+        {
+            width: 21.0#percent,
+            height: 35.0#percent,
+            flexDirection: flexDirection.column,
+            background: "heart_texture",
+        }
+    ],
+} children [
+    testWidget,
+    $Label {
+        name: "cardsWidgetPrice",
+        text: "bought",
+        font: "red_wing_cm",
+        color: color.dark_brown,
+        fontScale: 0.08,
+        align: "center",
+    }
+];
+
 var cardsWidget = $ScrollBox {
-    name: "scroll_box",
-    isScrollDirectionVertical: false,
-    scrollDistance: 2.0,
+    name: "cards_widget",
+    isScrollDirectionVertical: true,
+    scrollDistance: 6.0,
     backgroundStretched: false,
     scrollbarBackgroundName: "scrollbar_background",
     scrollbarName: "scrollbar_handle",
-    scrollbarSide: "top",
+    scrollbarSide: "right",
     styles: [
         {
             flexWrap: wrap.wrap,
-            flexDirection: flexDirection.column,
-            justifyContent: justify.spaceBetween,
+            flexDirection: flexDirection.row,
+            justifyContent: justify.flexStart,
             background: "shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
             paddingLeft: 3.0#points,
-            paddingRight: 3.0#points,
+            paddingRight: 10.0#points,
             paddingTop: 3.0#points,
             paddingBottom: 4.0#points,
             cuttingLeft: 1.75,
@@ -124,63 +146,24 @@ var cardsWidget = $ScrollBox {
             scrollbarWidth: 7.5,
         }
     ],
-} children [
-    cardsWidgetTextChild,
-    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-//    cardsWidgetTextChild,
-    scrollBarBackground,
-    scrollBar,
-];*/
+    children: [
+        //        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
+//        testWidgetBox,
 
-var cardsWidget = $ShopWidget {
-    name: "cards_widget",
-    texture: "shop_items_background",
-    dataFile: "cards/cards.onj",
-    dataFontColor: color.dark_brown,
-    dataFont: "red_wing_cm",
-    dataDragBehaviour: $CardDragSource {
-        group: "card",
-        moveToLastIndex: true,
-    },
-    maxPerLine: 4,
-    widthPercentagePerItem: 20.0,
-
-    styles: [
-        {
-            width: 100.0#percent,
-            height: 69.0#percent,
-        }
-    ],
+        scrollBar,
+        scrollBarBackground
+    ]
 };
 
 root: $Box {
@@ -208,7 +191,6 @@ root: $Box {
             }
         ],
     },
-
     sharedComponents.navBar,
     personWidget,
     $Image {
@@ -246,9 +228,6 @@ root: $Box {
             {
                 positionType: positionType.absolute,
                 positionBottom: 0.0#points,
-                //                                width: (20.0/2)#percent,
-//                height: (20.0/2)#percent,
-
             }
         ],
     },
@@ -335,4 +314,73 @@ root: $Box {
             align: "center",
         }
     ]
-]
+],
+
+templates: [
+    $Image {
+        //        templates_key: { //TODO do it so it works like that ❤️
+//            "dragAndDrop.group": "groupName",
+//            "textureName": "textureName",
+//            "styles.0.width": "width",
+//        },
+
+        name: "cardsWidgetImage",
+        textureName: "shop_background_no_biome",
+        scaleX: 0.001,
+        scaleY: 0.001,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDragSource {
+            group: "card",
+            moveToLastIndex: true,
+        },
+        styles: [
+            {
+                style_priority: 1,
+                width: 100.0#percent,
+                height: 75.0#percent,
+                alpha: 1.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("unbuyable"),
+                alpha: 0.5,
+            }
+        ],
+    },
+    $Box {
+        name: "cardsWidgetParent",
+        styles: [
+            {
+                marginLeft: 2.0#percent,
+                marginRight: 2.0#percent,
+                width: 21.0#percent,
+                height: 44.5#percent,
+            }
+        ],
+    },
+    $Label {
+        name: "cardsWidgetPrice",
+        text: "bought",
+        font: "red_wing_cm",
+        color: color.dark_brown,
+        fontScale: 0.08,
+        align: "center",
+        styles: [
+            {
+                style_priority: 1,
+                alpha: 1.0,
+
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("bought"),
+                alpha: 0.9,
+            },
+            {
+                style_priority: 3,
+                style_condition: actorState("poor"),
+                alpha: 0.6,
+            }
+        ],
+    },
+],
