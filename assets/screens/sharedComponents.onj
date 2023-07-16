@@ -3,7 +3,8 @@ use Style;
 import "imports/colors.onj" as color;
 
 navBarAssests: [
-    "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background"
+    "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
+    "location_name_salem", "statusbar_option",
 ],
 
 navBar: $Box {
@@ -49,8 +50,8 @@ statusBarTemplates: [
     $Image {
         name: "statusbar_sign",
         textureName: "location_sign_salem",
-        scaleX: 0.025,
-        scaleY: 0.025,
+        scaleX: 0.07,
+        scaleY: 0.07,
         reportDimensionsWithScaling: true,
         styles: [
             {
@@ -58,5 +59,30 @@ statusBarTemplates: [
                 marginLeft: 0.2#points,
             }
         ],
+    },
+    $Box {
+        zIndex: 3,
+        name: "statusbar_option",
+        styles: [
+            {
+                width: 33#percent,
+                height: 100#percent,
+                background: "statusbar_option",
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.flexEnd,
+                paddingBottom: 6.5#percent,
+            }
+        ],
+        children: [
+            $Label {
+                name: "statusbar_text",
+                text: "Notebook",
+                font: "red_wing_cm",
+                color: color.forty_white,
+                fontScale: 0.09,
+                align: "center",
+            }
+        ]
     },
 ],

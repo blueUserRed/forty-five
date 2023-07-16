@@ -9,6 +9,16 @@ var images = {
         image: "location_sign_salem",
         width: 20.0,
         height: 20.0
+    },
+    testAreaName: {
+        image: "location_name_aqua_dulche",
+        height: 20.0,
+        width: 20.0
+    },
+    salemName: {
+        image: "location_name_salem",
+        width: 20.0,
+        height: 20.0
     }
 };
 
@@ -24,6 +34,18 @@ mapImages: [
         image: images.salem.image,
         width: images.salem.width,
         height: images.salem.height,
+    },
+    {
+        name: "test_area_name",
+        image: images.testAreaName.image,
+        width: images.testAreaName.width,
+        height: images.testAreaName.height,
+    },
+    {
+        name: "salem_name",
+        image: images.salemName.image,
+        width: images.salemName.width,
+        height: images.salemName.height,
     },
 ],
 

@@ -43,10 +43,14 @@ var widgetSharedKeys = {
 
 $Widget {
 
+    $Backpack{
+        ...widgetSharedKeys,
+    }
 
     $Statusbar{
         inCenter: boolean,
-        map_indicator_name: string,
+        map_indicator_widget_name: string,
+        options_widget_name: string,
         options: {
             actorName: string,
             displayName: string,

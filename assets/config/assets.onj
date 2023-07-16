@@ -138,6 +138,14 @@ textures: [
         file: "textures/location_signs/salem.png"
     },
     {
+        name: "location_name_aqua_dulche",
+        file: "textures/location_names/aqua_dulche.png"
+    },
+    {
+        name: "location_name_salem",
+        file: "textures/location_names/salem.png"
+    },
+    {
         name: "map_detail_background",
         file: "textures/map/detail/background.png"
     },
@@ -232,6 +240,10 @@ textures: [
     {
         name: "statusbar_background",
         file: "textures/statusbar/statusbar_background.png"
+    },
+    {
+        name: "statusbar_option",
+        file: "textures/statusbar/option.png"
     }
 ],
 

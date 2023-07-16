@@ -237,12 +237,19 @@ root: $Box {
         mapBox,
         $Statusbar {
             inCenter: true,
-            map_indicator_name: "map_indicator_parent",
+            map_indicator_widget_name: "map_indicator_parent",
+            options_widget_name: "options_parent",
             options: [
                 {
-                    actorName: "",
-                    displayName: "",
-                }
+                    actorName: "tempActor",
+                    displayName: "Notebook",
+                }, {
+                    actorName: "tempActor",
+                    displayName: "Backpack",
+                }, {
+                    actorName: "tempActor",
+                    displayName: "Settings",
+                },
             ],
             styles: [
                 {
@@ -257,6 +264,7 @@ root: $Box {
             ],
         } children [
             $Box {
+                zIndex: 4,
                 styles: [
                     {
                         width: 60#percent,
@@ -334,8 +342,26 @@ root: $Box {
                     }
                 ],
             ],
+            $Box {
+                name: "options_parent",
+                styles: [
+                    {
+                        width: 55#percent,
+                        height: 75#percent,
+                        marginTop: -2.5#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        justifyContent: justify.center,
+                        paddingLeft: 6#percent,
+                        paddingRight: 6#percent,
+                    }
+                ],
+            },
         ]
-    ]
+    ],
+    $Backpack {
+        name: "tempActor",
+    }
 ],
 
 templates: [
