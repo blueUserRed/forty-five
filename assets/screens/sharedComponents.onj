@@ -259,7 +259,7 @@ statusbar_left_defaults: {
 statusBarTemplates: [
     $Label {
         name: "statusbar_text",
-        text: "",
+        text: "", //template
         font: "red_wing_cm",
         color: color.forty_white,
         fontScale: 0.09,
@@ -283,7 +283,7 @@ statusBarTemplates: [
         name: "statusbar_option",
         styles: [
             {
-                width: 30#percent,
+                width: 0#percent, //template
                 height: 100#percent,
                 background: "statusbar_option",
                 flexDirection: flexDirection.column,
@@ -295,7 +295,7 @@ statusBarTemplates: [
         children: [
             $Label {
                 name: "statusbar_text",
-                text: "Notebook",
+                text: "", //template
                 font: "red_wing_cm",
                 color: color.forty_white,
                 fontScale: 0.07,

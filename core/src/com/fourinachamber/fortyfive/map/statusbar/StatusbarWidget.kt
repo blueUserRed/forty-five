@@ -136,8 +136,8 @@ class StatusbarWidget(
     }
 
     private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) = Timeline.timeline {
-        val dist = 0.02F
-        repeat(100) {
+        val dist = 0.2F
+        repeat(10) {
             action {
                 target.moveBy(0F, if (goUp) dist else -dist)
             }

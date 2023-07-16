@@ -11,7 +11,7 @@ class Backpack(screen: OnjScreen) : CustomFlexBox(screen), StatusbarOption {
             action {
                 println("now opening")
             }
-            delay(2000)
+            delay(200)
             action {
                 println("now open")
             }
@@ -23,7 +23,7 @@ class Backpack(screen: OnjScreen) : CustomFlexBox(screen), StatusbarOption {
             action {
                 println("now closing")
             }
-            delay(2000)
+            delay(200)
             action {
                 println("now closed")
             }
