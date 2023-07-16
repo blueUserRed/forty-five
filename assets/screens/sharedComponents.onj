@@ -6,7 +6,7 @@ import "config/game_config.onj" as gameConfig;
 
 navBarAssests: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
-    "location_name_salem", "statusbar_option",
+    "location_name_salem", "statusbar_option", "reserves_texture",
 ],
 
 navBar: $Box {
@@ -159,12 +159,12 @@ statusbar_left_defaults: {
     styles: [
         {
             style_priority: 1,
-            width: 100#percent,
+            width: 60#percent,
             height: 14#percent,
             flexDirection: flexDirection.column,
             positionType: positionType.absolute,
             marginTop: 0#points,
-            marginLeft: -50#percent,
+            marginLeft: -20#percent,
             alignItems: align.center,
         }
     ],
@@ -173,17 +173,48 @@ statusbar_left_defaults: {
             zIndex: 4,
             styles: [
                 {
-                    width: 60#percent,
+                    width: 100#percent,
                     height: 50#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
                     justifyContent: justify.flexEnd,
                     background: "statusbar_background",
-                    paddingLeft: 6#percent,
-                    paddingRight: 6#percent,
+                    paddingLeft: 0#percent,
+                    paddingRight: 10#percent,
                 }
             ],
         } children [
+            $Box {
+                styles: [
+                    {
+                        width: 20#percent,
+                        height: 84#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        marginRight:2#percent,
+                    }
+                ],
+            } children [
+
+                $Image {
+                    textureName: "reserves_texture",
+                    scaleX: 0.05,
+                    scaleY: 0.05,
+                    reportDimensionsWithScaling: true,
+                    styles: [
+                        {
+                            height: 100#percent,
+                        }
+                    ],
+                },
+                $TemplateLabel {
+                    template: " {game.curReserves}/{game.baseReserves}",
+                    font: "red_wing_cm",
+                    color: color.forty_white,
+                    fontScale: 0.1,
+                    align: "center",
+                }
+            ],
             $Box {
                 styles: [
                     {
@@ -214,43 +245,15 @@ statusbar_left_defaults: {
                     align: "center",
                 }
             ],
-            $Box {
-                styles: [
-                    {
-                        width: 20#percent,
-                        height: 84#percent,
-                        flexDirection: flexDirection.row,
-                        alignItems: align.center,
-                    }
-                ],
-            } children [
-                $Image {
-                    textureName: "heart_texture",
-                    scaleX: 0.01,
-                    scaleY: 0.01,
-                    reportDimensionsWithScaling: true,
-                    styles: [
-                        {
-                            height: 100#percent,
-                        }
-                    ],
-                },
-                $TemplateLabel {
-                    template: "{game.curReserves}/{game.baseReserves}",
-                    font: "red_wing_cm",
-                    color: color.forty_white,
-                    fontScale: 0.1,
-                    align: "center",
-                }
-            ],
         ],
         $Box {
             name: "options_parent",
             styles: [
                 {
-                    width: 55#percent,
+                    width: 140#percent,
                     height: 75#percent,
-                    marginTop: -2.5#percent,
+                    marginTop: -4.75#percent,
+                    marginLeft: -45.5#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
                     justifyContent: justify.flexEnd,
