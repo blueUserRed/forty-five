@@ -20,6 +20,7 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.shop.PersonWidget
+import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
@@ -262,6 +263,8 @@ class ScreenBuilder(val file: FileHandle) {
 
         "ScrollBox" -> getScrollFlexBox(widgetOnj, screen)
 
+        "Statusbar" -> getStatusbar(widgetOnj, screen)
+
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle().apply {
@@ -433,6 +436,25 @@ class ScreenBuilder(val file: FileHandle) {
             }
         }
         return actor
+    }
+    private fun getStatusbar(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
+        val statusbar = StatusbarWidget(
+            widgetOnj.get<String>("map_indicator_name"),
+            widgetOnj.get<Boolean>("inCenter"),
+            widgetOnj.get<OnjArray>("options").value,
+            screen
+        )
+        statusbar.root.setPosition(YogaEdge.ALL, 0f)
+        if (widgetOnj.hasKey<OnjArray>("children")) {
+            widgetOnj
+                .get<OnjArray>("children")
+                .value
+                .forEach {
+                    getWidget(it as OnjNamedObject, statusbar, screen)
+                }
+        }
+        statusbar.initSpecialChildren()
+        return statusbar
     }
 
     private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {

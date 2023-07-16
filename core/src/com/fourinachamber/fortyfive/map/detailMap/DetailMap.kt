@@ -26,11 +26,12 @@ data class DetailMap(
     val name: String,
     val startNode: MapNode,
     val endNode: MapNode,
-    val decorations: List<MapDecoration>
+    val decorations: List<MapDecoration>,
+    val isArea: Boolean
 ) {
 
     // TODO: ugly
-    lateinit var curDetailMapWidget:DetailMapWidget
+    lateinit var curDetailMapWidget: DetailMapWidget
 
     /**
      * all unique nodes on the map
@@ -72,6 +73,7 @@ data class DetailMap(
         "startNode" with startNode.index
         "endNode" with endNode.index
         "decorations" with decorations.map { it.asOnjObject() }
+        "isArea" with isArea
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -110,21 +112,23 @@ data class DetailMap(
                 .value
                 .forEachIndexed { index, nodeOnj ->
                     nodeOnj as OnjObject
-                    nodes.add(MapNodeBuilder(
-                        index,
-                        nodeOnj.get<Double>("x").toFloat(),
-                        nodeOnj.get<Double>("y").toFloat(),
-                        mutableListOf(),
-                        nodeOnj.get<Boolean>("isArea"),
-                        nodeOnj.getOr<String?>("image", null),
-                        MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
-                        nodeOnj.getOr<String?>("nodeTexture", null),
-                        if (nodeOnj.hasKey<OnjNull>("event")) {
-                            EmptyMapEvent()
-                        } else {
-                            MapEventFactory.getMapEvent(nodeOnj.get<OnjNamedObject>("event"))
-                        }
-                    ))
+                    nodes.add(
+                        MapNodeBuilder(
+                            index,
+                            nodeOnj.get<Double>("x").toFloat(),
+                            nodeOnj.get<Double>("y").toFloat(),
+                            mutableListOf(),
+                            nodeOnj.get<Boolean>("isArea"),
+                            nodeOnj.getOr<String?>("image", null),
+                            MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
+                            nodeOnj.getOr<String?>("nodeTexture", null),
+                            if (nodeOnj.hasKey<OnjNull>("event")) {
+                                EmptyMapEvent()
+                            } else {
+                                MapEventFactory.getMapEvent(nodeOnj.get<OnjNamedObject>("event"))
+                            }
+                        )
+                    )
                 }
             val endNodeIndex = onj.get<Long>("endNode").toInt()
             val endNode = nodes.getOrElse(endNodeIndex) {
@@ -141,7 +145,13 @@ data class DetailMap(
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
             val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
-            return DetailMap(file.nameWithoutExtension(), nodes[startNodeIndex].build(), endNode.asNode!!, decorations)
+            return DetailMap(
+                file.nameWithoutExtension(),
+                nodes[startNodeIndex].build(),
+                endNode.asNode!!,
+                decorations,
+                onj.get<Boolean>("isArea")
+            )
         }
 
         private val mapOnjSchema: OnjSchema by lazy {

@@ -51,7 +51,7 @@ class SeededMapGenerator(
         val decos = generateDecorations(nodes)
         this.nodes = nodes
         build()
-        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos)
+        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos,false)
     }
 
     private fun generateDecorations(

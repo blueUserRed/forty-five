@@ -203,7 +203,7 @@ textures: [
     },
     {
         name: "nav_bar_background",
-        file: "textures/nav_bar/background.png"
+        file: "textures/statusbar/background_old.png"
     },
     {
         name: "map_decoration_grass",
@@ -228,6 +228,10 @@ textures: [
     {
         name: "shop_back_button",
         file: "textures/shop/back_button.png"
+    },
+    {
+        name: "statusbar_background",
+        file: "textures/statusbar/statusbar_background.png"
     }
 ],
 

@@ -318,7 +318,7 @@ root: $Box {
 
 templates: [
     $Image {
-        //        templates_key: { //TODO do it so it works like that ❤️
+        //        templates_key: { //TODO do it so it works like that
 //            "dragAndDrop.group": "groupName",
 //            "textureName": "textureName",
 //            "styles.0.width": "width",

@@ -1,8 +1,9 @@
 use Screen;
 use Style;
+import "imports/colors.onj" as color;
 
 navBarAssests: [
-    "nav_bar_background"
+    "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background"
 ],
 
 navBar: $Box {
@@ -33,5 +34,29 @@ navBar: $Box {
                 enter: true
             }
         ]
-    }
+    },
+],
+
+statusBarTemplates: [
+    $Label {
+        name: "statusbar_text",
+        text: "",
+        font: "red_wing_cm",
+        color: color.forty_white,
+        fontScale: 0.1,
+        align: "center",
+    },
+    $Image {
+        name: "statusbar_sign",
+        textureName: "location_sign_salem",
+        scaleX: 0.025,
+        scaleY: 0.025,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                marginTop: 0.1#points,
+                marginLeft: 0.2#points,
+            }
+        ],
+    },
 ],

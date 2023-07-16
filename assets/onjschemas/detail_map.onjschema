@@ -52,4 +52,5 @@ decorations: {
     baseHeight: float,
     positions: float[3][]
 
-}[]
+}[],
+isArea:boolean,

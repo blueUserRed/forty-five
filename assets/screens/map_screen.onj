@@ -2,6 +2,7 @@ import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 import "config/graphics_config.onj" as graphicsConfig;
 import "screens/sharedComponents.onj" as sharedComponents;
+import "config/game_config.onj" as gameConfig;
 
 use Common;
 use Screen;
@@ -17,13 +18,13 @@ assets: {
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
-        "map_background_wasteland_tileable", "location_sign_salem", "nav_bar_background",
+        "map_background_wasteland_tileable", "location_sign_salem",
         "map_decoration_cactus", "map_decoration_grass", "map_path", "dialog_continue_arrow",
         "map_player", "location_sign_aqua_dulche", "location_sign_salem",
         "map_node_default",
         "map_node_shop_rect", "map_node_shop_circle",
         "map_node_fight_rect", "map_node_fight_circle",
-        "map_node_exit_rect", "map_node_exit_circle",
+        "map_node_exit_rect", "map_node_exit_circle", ...(sharedComponents.navBarAssests),
     ]
 },
 
@@ -61,7 +62,7 @@ var worldView = $WorldView {
 var mapBox = $Box {
     styles: [
         {
-            height: 95.0#percent,
+            height: 100.0#percent,
             flexDirection: flexDirection.row,
             alignItems: align.center,
             justifyContent: justify.flexEnd
@@ -233,7 +234,110 @@ root: $Box {
         ],
         zIndex: 1,
     } children [
-        sharedComponents.navBar, mapBox
-    ]
+        mapBox,
+        $Statusbar {
+            inCenter: true,
+            map_indicator_name: "map_indicator_parent",
+            options: [
+                {
+                    actorName: "",
+                    displayName: "",
+                }
+            ],
+            styles: [
+                {
+                    width: 100#percent,
+                    height: 14#percent,
+                    flexDirection: flexDirection.column,
+                    positionType: positionType.absolute,
+                    marginTop: 0#points,
+                    marginLeft: 0#points,
+                    alignItems: align.center,
+                }
+            ],
+        } children [
+            $Box {
+                styles: [
+                    {
+                        width: 60#percent,
+                        height: 50#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        justifyContent: justify.spaceBetween,
+                        background: "statusbar_background",
+                        paddingLeft: 6#percent,
+                        //                        paddingTop: 8#percent,
+//                        paddingBottom: 8#percent,
 
-]
+                        paddingRight: 6#percent,
+                    }
+                ],
+            } children [
+                $Box {
+                    styles: [
+                        {
+                            width: 20#percent,
+                            height: 84#percent,
+                            flexDirection: flexDirection.row,
+                            alignItems: align.center,
+                        }
+                    ],
+                } children [
+                    $Image {
+                        textureName: "heart_texture",
+                        scaleX: 0.01,
+                        scaleY: 0.01,
+                        reportDimensionsWithScaling: true,
+                        styles: [
+                            {
+                                height: 100#percent,
+                            }
+                        ],
+                    },
+                    $TemplateLabel {
+                        template: "{stat.playerLives}/" + (gameConfig.playerConfig.lives#string), //TODO if max_lives change, this needs to be changed
+
+                        font: "red_wing_cm",
+                        color: color.forty_white,
+                        fontScale: 0.1,
+                        align: "center",
+                    }
+                ],
+                $Box {
+                    name: "map_indicator_parent",
+                    styles: [
+                        {
+                            height: 100#percent,
+                            flexDirection: flexDirection.row,
+                            alignItems: align.center,
+                            justifyContent: justify.center,
+                        }
+                    ],
+                },
+                $Box {
+                    styles: [
+                        {
+                            width: 20#percent,
+                            height: 84#percent,
+                            flexDirection: flexDirection.row,
+                            alignItems: align.center,
+                            justifyContent: justify.flexEnd,
+                        }
+                    ],
+                } children [
+                    $TemplateLabel {
+                        template: "{stat.playerMoney}$ ",
+                        font: "red_wing_cm",
+                        color: color.forty_white,
+                        fontScale: 0.1,
+                        align: "center",
+                    }
+                ],
+            ],
+        ]
+    ]
+],
+
+templates: [
+    ...(sharedComponents.statusBarTemplates)
+],
