@@ -147,7 +147,8 @@ class BetterShaderPreProcessor(
 
         private val uniforms: Map<String, String> = mapOf(
             "u_time" to "float",
-            "u_resolution" to "vec2"
+            "u_resolution" to "vec2",
+            "u_perlin512x512" to "sampler2D",
         )
 
     }

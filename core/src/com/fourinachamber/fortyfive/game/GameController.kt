@@ -601,6 +601,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun destroyCardTimeline(card: Card): Timeline = Timeline.timeline {
+        include(card.actor.destroyAnimation())
         action {
             revolver.removeCard(card)
             card.onDestroy()

@@ -441,9 +441,13 @@ class CardActor(
     )
 
     private var inGlowAnim: Boolean = false
+    private var inDestroyAnim: Boolean = false
 
     private val glowShader: BetterShader by lazy {
         ResourceManager.get(screen, "glow_shader") // TODO: fix
+    }
+    private val destroyShader: BetterShader by lazy {
+        ResourceManager.get(screen, "dissolve_shader") // TODO: fix
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -452,15 +456,22 @@ class CardActor(
             super.draw(batch, parentAlpha)
             return
         }
-        if (inGlowAnim) {
+        val shader = if (inGlowAnim) {
+            glowShader
+        } else if (inDestroyAnim) {
+            destroyShader
+        } else {
+            null
+        }
+        shader?.let {
             batch.flush()
-            glowShader.shader.bind()
-            glowShader.prepare(screen)
-            batch.shader = glowShader.shader
+            it.shader.bind()
+            it.prepare(screen)
+            batch.shader = it.shader
         }
         super.draw(batch, parentAlpha)
         batch.flush()
-        if (inGlowAnim) batch.shader = null
+        shader?.let { batch.shader = null }
     }
 
     fun glowAnimation(): Timeline = Timeline.timeline {
@@ -470,6 +481,15 @@ class CardActor(
         }
         delay(1000)
         action { inGlowAnim = false }
+    }
+
+    fun destroyAnimation(): Timeline = Timeline.timeline {
+        action {
+            inDestroyAnim = true
+            destroyShader.resetReferenceTime()
+        }
+        delay(2000)
+        action { inDestroyAnim = false }
     }
 
     fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
