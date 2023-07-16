@@ -2,7 +2,6 @@ import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 import "config/graphics_config.onj" as graphicsConfig;
 import "screens/sharedComponents.onj" as sharedComponents;
-import "config/game_config.onj" as gameConfig;
 
 use Common;
 use Screen;
@@ -236,9 +235,6 @@ root: $Box {
     } children [
         mapBox,
         $Statusbar {
-            inCenter: true,
-            map_indicator_widget_name: "map_indicator_parent",
-            options_widget_name: "options_parent",
             options: [
                 {
                     actorName: "tempActor",
@@ -251,113 +247,8 @@ root: $Box {
                     displayName: "Settings",
                 },
             ],
-            styles: [
-                {
-                    width: 100#percent,
-                    height: 14#percent,
-                    flexDirection: flexDirection.column,
-                    positionType: positionType.absolute,
-                    marginTop: 0#points,
-                    marginLeft: 0#points,
-                    alignItems: align.center,
-                }
-            ],
-        } children [
-            $Box {
-                zIndex: 4,
-                styles: [
-                    {
-                        width: 60#percent,
-                        height: 50#percent,
-                        flexDirection: flexDirection.row,
-                        alignItems: align.center,
-                        justifyContent: justify.spaceBetween,
-                        background: "statusbar_background",
-                        paddingLeft: 6#percent,
-                        //                        paddingTop: 8#percent,
-//                        paddingBottom: 8#percent,
-
-                        paddingRight: 6#percent,
-                    }
-                ],
-            } children [
-                $Box {
-                    styles: [
-                        {
-                            width: 20#percent,
-                            height: 84#percent,
-                            flexDirection: flexDirection.row,
-                            alignItems: align.center,
-                        }
-                    ],
-                } children [
-                    $Image {
-                        textureName: "heart_texture",
-                        scaleX: 0.01,
-                        scaleY: 0.01,
-                        reportDimensionsWithScaling: true,
-                        styles: [
-                            {
-                                height: 100#percent,
-                            }
-                        ],
-                    },
-                    $TemplateLabel {
-                        template: "{stat.playerLives}/" + (gameConfig.playerConfig.lives#string), //TODO if max_lives change, this needs to be changed
-
-                        font: "red_wing_cm",
-                        color: color.forty_white,
-                        fontScale: 0.1,
-                        align: "center",
-                    }
-                ],
-                $Box {
-                    name: "map_indicator_parent",
-                    styles: [
-                        {
-                            height: 100#percent,
-                            flexDirection: flexDirection.row,
-                            alignItems: align.center,
-                            justifyContent: justify.center,
-                        }
-                    ],
-                },
-                $Box {
-                    styles: [
-                        {
-                            width: 20#percent,
-                            height: 84#percent,
-                            flexDirection: flexDirection.row,
-                            alignItems: align.center,
-                            justifyContent: justify.flexEnd,
-                        }
-                    ],
-                } children [
-                    $TemplateLabel {
-                        template: "{stat.playerMoney}$ ",
-                        font: "red_wing_cm",
-                        color: color.forty_white,
-                        fontScale: 0.1,
-                        align: "center",
-                    }
-                ],
-            ],
-            $Box {
-                name: "options_parent",
-                styles: [
-                    {
-                        width: 55#percent,
-                        height: 75#percent,
-                        marginTop: -2.5#percent,
-                        flexDirection: flexDirection.row,
-                        alignItems: align.center,
-                        justifyContent: justify.center,
-                        paddingLeft: 6#percent,
-                        paddingRight: 6#percent,
-                    }
-                ],
-            },
-        ]
+            ...(sharedComponents.statusbar_center_defaults)
+        },
     ],
     $Backpack {
         name: "tempActor",

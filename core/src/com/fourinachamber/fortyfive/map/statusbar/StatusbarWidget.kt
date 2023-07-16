@@ -12,35 +12,76 @@ import onj.value.OnjObject
 import onj.value.OnjString
 
 class StatusbarWidget(
-    private val map_indicator_name: String,
-    private val options_name: String,
-    private val inCenter: Boolean,
+    private val map_indicator_widget_name: String?,
+    private val options_widget_name: String,
     private val options: List<OnjObject>,
     private val screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
     private val timeline: Timeline = Timeline(mutableListOf())
 
+    /**
+     * which option from [optionWidgets] is being "displayed" at the moment (the index of it)
+     */
     private var displayedOptionIndex: Int = -1
 
+    /**
+     * all possible options to open from the statusbar
+     */
     private val optionWidgets: MutableList<Pair<CustomFlexBox, String>> = mutableListOf()
     override fun draw(batch: Batch?, parentAlpha: Float) {
         timeline.updateTimeline()
         super.draw(batch, parentAlpha)
     }
 
-    private var isInited = false
+    private var isInitialised = false
 
     override fun layout() {
-        if (!isInited) {
+        if (!isInitialised) {
             initSpecialChildren()
-            isInited = true
+            isInitialised = true
         }
         super.layout()
     }
 
-    fun initSpecialChildren() {
-        val mapIndicator = screen.namedActorOrError(map_indicator_name) as CustomFlexBox
+    private fun initSpecialChildren() {
+        initMapIndicator()
+        initOptions()
+        resortZIndices()
+        timeline.startTimeline()
+    }
+
+    private fun initOptions() {
+        val optionParent = screen.namedActorOrError(options_widget_name) as CustomFlexBox
+        for (i in options) {
+            val curBox = screen.screenBuilder.generateFromTemplate(
+                "statusbar_option",
+                mapOf("text" to i.get<OnjString>("displayName")),
+                optionParent,
+                screen
+            ) as CustomFlexBox
+            val actorName = i.get<String>("actorName")
+            optionWidgets.add(curBox to actorName)
+            curBox.onButtonClick {
+                if (timeline.isFinished) {
+                    val option = optionWidgets.find { it.first == curBox }!!
+                    when (displayedOptionIndex) {
+                        -1 -> display(option)
+                        optionWidgets.indexOf(option) -> hide(option)
+                        else -> {
+                            hide(optionWidgets[displayedOptionIndex])
+                            display(option)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initMapIndicator(
+    ) {
+        if (map_indicator_widget_name == null) return
+        val mapIndicator = screen.namedActorOrError(map_indicator_widget_name) as CustomFlexBox
         val curImage = MapManager.mapImages.find { it.name == MapManager.currentDetailMap.name + "_name" }
         if (curImage == null || !MapManager.currentDetailMap.isArea) {
             screen.screenBuilder.generateFromTemplate(
@@ -81,40 +122,13 @@ class StatusbarWidget(
                 screen
             )
         }
-
-        val optionParent = screen.namedActorOrError(options_name) as CustomFlexBox
-        for (i in options) {
-            val curBox = screen.screenBuilder.generateFromTemplate(
-                "statusbar_option",
-                mapOf("text" to i.get<OnjString>("displayName")),
-                optionParent,
-                screen
-            ) as CustomFlexBox
-            val actorName = i.get<String>("actorName")
-            optionWidgets.add(curBox to actorName)
-            curBox.onButtonClick {
-                if (timeline.isFinished) {
-                    val option = optionWidgets.find { it.first == curBox }!!
-                    when (displayedOptionIndex) {
-                        -1 -> display(option)
-                        optionWidgets.indexOf(option) -> hide(option)
-                        else -> {
-                            hide(optionWidgets[displayedOptionIndex])
-                            display(option)
-                        }
-                    }
-                }
-            }
-        }
-        resortZIndices()
-        timeline.startTimeline()
     }
 
     private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) = Timeline.timeline {
-        val dist=0.02F
+        val dist = 0.02F
         repeat(100) {
             action {
-                target.moveBy(0F, if (goUp)dist else -dist)
+                target.moveBy(0F, if (goUp) dist else -dist)
             }
             delay(10)
         }
