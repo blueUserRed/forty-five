@@ -228,6 +228,10 @@ textures: [
     {
         name: "shop_back_button",
         file: "textures/shop/back_button.png"
+    },
+    {
+        name: "prerendered_noise_perlin_512x512",
+        file: "textures/prerendered_noise/perlin_512x512.png"
     }
 ],
 
@@ -275,6 +279,15 @@ shaders: [
         name: "fog_shader",
         file: "shaders/fog.glsl",
         constantArgs: { }
+    },
+    {
+        name: "dissolve_shader",
+        file: "shaders/dissolve.glsl",
+        constantArgs: {
+            duration: 2.0,
+            border: 0.2,
+            borderColor: color.black
+        }
     }
 ],
 

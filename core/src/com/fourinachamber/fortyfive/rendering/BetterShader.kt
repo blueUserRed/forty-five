@@ -1,10 +1,13 @@
 package com.fourinachamber.fortyfive.rendering
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 
 // TODO: come up with better name
@@ -21,14 +24,14 @@ class BetterShader(
 
     fun prepare(screen: OnjScreen) {
         shader.setUniformMatrix("u_projTrans", screen.viewport.camera.combined)
-        bindUniforms()
+        bindUniforms(screen)
     }
 
-    private fun bindUniforms() {
-        uniformsToBind.forEach { bindUniform(it) }
+    private fun bindUniforms(screen: OnjScreen) {
+        uniformsToBind.forEach { bindUniform(it, screen) }
     }
 
-    private fun bindUniform(uniform: String) = when (uniform) {
+    private fun bindUniform(uniform: String, screen: OnjScreen) = when (uniform) {
 
         "u_time" -> {
             val uTime = TimeUtils.timeSinceMillis(referenceTime).toFloat() / 1000f
@@ -50,6 +53,14 @@ class BetterShader(
                 "u_resolution",
                 Vector2(Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
             )
+        }
+
+        "u_perlin512x512" -> {
+            // TODO: slightly ugly
+            val texture = ResourceManager.get<Texture>(screen, "prerendered_noise_perlin_512x512")
+            texture.bind(1)
+            shader.setUniformi("u_perlin512x512", 1)
+            Gdx.gl.glActiveTexture(GL_TEXTURE0)
         }
 
         else -> throw RuntimeException("unknown uniform: $uniform")

@@ -32,6 +32,8 @@ assets: {
 
         "revolver_cursor",
 
+        "dissolve_shader", "prerendered_noise_perlin_512x512",
+
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
     ]
