@@ -166,6 +166,8 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
     return Timeline(actions)
 }
 
+fun IntRange.midPoint(): Int = first + ((last - first) * 0.5).toInt()
+
 object Utils {
 
     fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability
