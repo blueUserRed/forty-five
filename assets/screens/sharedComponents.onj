@@ -67,9 +67,6 @@ statusbar_center_defaults: {
                     justifyContent: justify.spaceBetween,
                     background: "statusbar_background",
                     paddingLeft: 6#percent,
-                    //                        paddingTop: 8#percent,
-//                        paddingBottom: 8#percent,
-
                     paddingRight: 6#percent,
                 }
             ],
@@ -100,7 +97,7 @@ statusbar_center_defaults: {
 
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.1,
+                    fontScale: 0.09,
                     align: "center",
                 }
             ],
@@ -130,7 +127,7 @@ statusbar_center_defaults: {
                     template: "{stat.playerMoney}$ ",
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.1,
+                    fontScale: 0.09,
                     align: "center",
                 }
             ],
@@ -211,7 +208,7 @@ statusbar_left_defaults: {
                     template: " {game.curReserves}/{game.baseReserves}",
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.1,
+                    fontScale: 0.09,
                     align: "center",
                 }
             ],
@@ -241,7 +238,7 @@ statusbar_left_defaults: {
 
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.1,
+                    fontScale: 0.09,
                     align: "center",
                 }
             ],
@@ -252,7 +249,7 @@ statusbar_left_defaults: {
                 {
                     width: 140#percent,
                     height: 75#percent,
-                    marginTop: -4.75#percent,
+                    marginTop: -4.95#percent,
                     marginLeft: -45.5#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
@@ -271,7 +268,7 @@ statusBarTemplates: [
         text: "",
         font: "red_wing_cm",
         color: color.forty_white,
-        fontScale: 0.1,
+        fontScale: 0.09,
         align: "center",
     },
     $Image {
@@ -307,7 +304,7 @@ statusBarTemplates: [
                 text: "Notebook",
                 font: "red_wing_cm",
                 color: color.forty_white,
-                fontScale: 0.09,
+                fontScale: 0.07,
                 align: "center",
             }
         ]
