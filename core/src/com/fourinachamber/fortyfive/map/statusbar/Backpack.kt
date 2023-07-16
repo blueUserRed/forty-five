@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
-import com.badlogic.gdx.scenes.scene2d.actions.Actions.action
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.StatusbarOption

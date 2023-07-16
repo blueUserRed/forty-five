@@ -48,8 +48,7 @@ $Widget {
     }
 
     $Statusbar{
-        inCenter: boolean,
-        map_indicator_widget_name: string,
+        map_indicator_widget_name?: string,
         options_widget_name: string,
         options: {
             actorName: string,

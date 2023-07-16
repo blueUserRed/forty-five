@@ -451,9 +451,8 @@ class ScreenBuilder(val file: FileHandle) {
 
     private fun getStatusbar(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
         val statusbar = StatusbarWidget(
-            widgetOnj.get<String>("map_indicator_widget_name"),
+            widgetOnj.get<String?>("map_indicator_widget_name"),
             widgetOnj.get<String>("options_widget_name"),
-            widgetOnj.get<Boolean>("inCenter"),
             widgetOnj.get<OnjArray>("options").value as List<OnjObject>,
             screen
         )
