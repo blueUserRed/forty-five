@@ -239,15 +239,18 @@ root: $Box {
                 {
                     actorName: "tempActor",
                     displayName: "Notebook",
-                }, {
-                    actorName: "tempActor",
-                    displayName: "Backpack",
-                }, {
-                    actorName: "tempActor",
-                    displayName: "Settings",
                 },
+//                {
+//                    actorName: "tempActor",
+//                    displayName: "Backpack",
+//                },
+//                {
+//                    actorName: "tempActor",
+//                    displayName: "Settings",
+//                },
             ],
-            ...(sharedComponents.statusbar_center_defaults)
+            ...(sharedComponents.statusbar_left_defaults)
+//            ...(sharedComponents.statusbar_center_defaults)
         },
     ],
     $Backpack {
