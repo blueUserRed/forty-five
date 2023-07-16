@@ -52,6 +52,9 @@ object CommonNamespace {
         return OnjArray(listOf())
     }
 
+    @RegisterOnjFunction("params: [string,string]",RegisterOnjFunction.OnjFunctionType.OPERATOR)
+    fun plus(s:OnjString, s2: OnjString): OnjString = OnjString(s.value + s2.value)
+
 }
 
 /**
