@@ -3,11 +3,14 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
+import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.StatusbarOption
 import com.fourinachamber.fortyfive.screen.general.onButtonClick
 import com.fourinachamber.fortyfive.utils.Timeline
+import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjObject
 import onj.value.OnjString
 
@@ -56,7 +59,15 @@ class StatusbarWidget(
         for (i in options) {
             val curBox = screen.screenBuilder.generateFromTemplate(
                 "statusbar_option",
-                mapOf("text" to i.get<OnjString>("displayName")),
+                mapOf(
+                    "text" to i.get<OnjString>("displayName"),
+                    "width" to OnjYogaValue(
+                        YogaValue(
+                            (100F - (3 * 2) - ((options.size - 1) * 2)) / options.size,
+                            YogaUnit.PERCENT
+                        )
+                    )
+                ),
                 optionParent,
                 screen
             ) as CustomFlexBox

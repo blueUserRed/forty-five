@@ -242,6 +242,10 @@ textures: [
         file: "textures/statusbar/statusbar_background.png"
     },
     {
+        name: "statusbar_background_left",
+        file: "textures/statusbar/statusbar_background_left.png"
+    },
+    {
         name: "statusbar_option",
         file: "textures/statusbar/option.png"
     }

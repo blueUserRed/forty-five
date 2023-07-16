@@ -6,7 +6,7 @@ import "config/game_config.onj" as gameConfig;
 
 navBarAssests: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
-    "location_name_salem", "statusbar_option", "reserves_texture",
+    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left",
 ],
 
 navBar: $Box {
@@ -45,7 +45,6 @@ statusbar_center_defaults: {
     options_widget_name: "options_parent",
     styles: [
         {
-            style_priority: 1,
             width: 100#percent,
             height: 14#percent,
             flexDirection: flexDirection.column,
@@ -142,8 +141,6 @@ statusbar_center_defaults: {
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
                     justifyContent: justify.center,
-                    paddingLeft: 6#percent,
-                    paddingRight: 6#percent,
                 }
             ],
         },
@@ -155,14 +152,13 @@ statusbar_left_defaults: {
     options_widget_name: "options_parent",
     styles: [
         {
-            style_priority: 1,
-            width: 60#percent,
+            width: 100#percent,
             height: 14#percent,
             flexDirection: flexDirection.column,
             positionType: positionType.absolute,
             marginTop: 0#points,
-            marginLeft: -20#percent,
-            alignItems: align.center,
+            marginLeft: 0#points,
+            alignItems: align.flexStart,
         }
     ],
     children: [
@@ -170,13 +166,12 @@ statusbar_left_defaults: {
             zIndex: 4,
             styles: [
                 {
-                    width: 100#percent,
+                    width: 30#percent,
                     height: 50#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
-                    justifyContent: justify.flexEnd,
-                    background: "statusbar_background",
-                    paddingLeft: 0#percent,
+                    justifyContent: justify.center,
+                    background: "statusbar_background_left",
                     paddingRight: 10#percent,
                 }
             ],
@@ -184,7 +179,7 @@ statusbar_left_defaults: {
             $Box {
                 styles: [
                     {
-                        width: 20#percent,
+                        width: 30#percent,
                         height: 84#percent,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
@@ -195,12 +190,13 @@ statusbar_left_defaults: {
 
                 $Image {
                     textureName: "reserves_texture",
-                    scaleX: 0.05,
-                    scaleY: 0.05,
+                    scaleX: 0.005,
+                    scaleY: 0.005,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 100#percent,
+                            height: 60#percent,
+                            width: 25#percent,
                         }
                     ],
                 },
@@ -215,7 +211,7 @@ statusbar_left_defaults: {
             $Box {
                 styles: [
                     {
-                        width: 20#percent,
+                        width: 30#percent,
                         height: 84#percent,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
@@ -224,12 +220,13 @@ statusbar_left_defaults: {
             } children [
                 $Image {
                     textureName: "heart_texture",
-                    scaleX: 0.01,
-                    scaleY: 0.01,
+                    scaleX: 0.005,
+                    scaleY: 0.005,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 100#percent,
+                            height: 65#percent,
+                            width: 4.2#percent,
                         }
                     ],
                 },
@@ -247,15 +244,12 @@ statusbar_left_defaults: {
             name: "options_parent",
             styles: [
                 {
-                    width: 140#percent,
+                    width: 25#percent,
                     height: 75#percent,
-                    marginTop: -4.95#percent,
-                    marginLeft: -45.5#percent,
+                    marginTop: -2.5#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
-                    justifyContent: justify.flexEnd,
-                    paddingLeft: 6#percent,
-                    paddingRight: 6#percent,
+                    justifyContent: justify.center,
                 }
             ],
         },
@@ -289,7 +283,7 @@ statusBarTemplates: [
         name: "statusbar_option",
         styles: [
             {
-                width: 33#percent,
+                width: 30#percent,
                 height: 100#percent,
                 background: "statusbar_option",
                 flexDirection: flexDirection.column,
