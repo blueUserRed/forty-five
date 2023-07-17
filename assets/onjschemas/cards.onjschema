@@ -35,9 +35,12 @@ var card = {
     price: int,
     type: $CardType,
     effects: Effect[],
+    forceLoadCards: string[],
     tags: string[],
 };
 
 cards: card[],
 
 defaultBullet: string,
+
+alwaysLoadCards: string[],
