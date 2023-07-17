@@ -117,7 +117,8 @@ mapImages: {
     name: string,
     image: string,
     width: float,
-    height: float
+    height: float,
+    type: string,
 }[],
 
 displayNames: {

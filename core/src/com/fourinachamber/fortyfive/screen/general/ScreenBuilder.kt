@@ -20,6 +20,8 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.dialog.DialogWidget
 import com.fourinachamber.fortyfive.map.shop.PersonWidget
+import com.fourinachamber.fortyfive.map.statusbar.Backpack
+import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
@@ -212,6 +214,16 @@ class ScreenBuilder(val file: FileHandle) {
 
     private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
         val flexBox = CustomFlexBox(screen)
+        initFlexBox(flexBox, widgetOnj, screen)
+        flexBox.touchable = Touchable.enabled // TODO: remove
+        return flexBox
+    }
+
+    private fun initFlexBox(
+        flexBox: CustomFlexBox,
+        widgetOnj: OnjObject,
+        screen: OnjScreen
+    ) {
         flexBox.root.setPosition(YogaEdge.ALL, 0f)
         if (widgetOnj.hasKey<OnjArray>("children")) {
             widgetOnj
@@ -221,8 +233,6 @@ class ScreenBuilder(val file: FileHandle) {
                     getWidget(it as OnjNamedObject, flexBox, screen)
                 }
         }
-        flexBox.touchable = Touchable.enabled // TODO: remove
-        return flexBox
     }
 
     private fun getViewport(viewportOnj: OnjNamedObject): Viewport = when (viewportOnj.name) {
@@ -261,6 +271,8 @@ class ScreenBuilder(val file: FileHandle) {
         "Box" -> getFlexBox(widgetOnj, screen)
 
         "ScrollBox" -> getScrollFlexBox(widgetOnj, screen)
+
+        "Statusbar" -> getStatusbar(widgetOnj, screen)
 
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
@@ -387,6 +399,8 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
+        "Backpack" -> Backpack(screen)
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
@@ -435,6 +449,17 @@ class ScreenBuilder(val file: FileHandle) {
         return actor
     }
 
+    private fun getStatusbar(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
+        val statusbar = StatusbarWidget(
+            widgetOnj.get<String?>("mapIndicatorWidgetName"),
+            widgetOnj.get<String>("optionsWidgetName"),
+            widgetOnj.get<OnjArray>("options").value as List<OnjObject>,
+            screen
+        )
+        initFlexBox(statusbar, widgetOnj, screen)
+        return statusbar
+    }
+
     private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
         val flexBox = CustomScrollableFlexBox(
             screen,
@@ -445,15 +470,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String?>("scrollbarName"),
             widgetOnj.get<String?>("scrollbarSide"),
         )
-        flexBox.root.setPosition(YogaEdge.ALL, 0f)
-        if (widgetOnj.hasKey<OnjArray>("children")) {
-            widgetOnj
-                .get<OnjArray>("children")
-                .value
-                .forEach {
-                    getWidget(it as OnjNamedObject, flexBox, screen)
-                }
-        }
+        initFlexBox(flexBox, widgetOnj, screen)
         flexBox.touchable = Touchable.enabled // TODO: remove
         return flexBox
     }

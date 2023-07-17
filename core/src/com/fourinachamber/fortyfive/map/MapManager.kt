@@ -67,17 +67,20 @@ object MapManager {
             .get<OnjArray>("mapImages")
             .value
             .map { it as OnjObject }
-            .map { MapImageData(
-                it.get<String>("name"),
-                it.get<String>("image"),
-                it.get<Double>("width").toFloat(),
-                it.get<Double>("width").toFloat()
-            )}
+            .map {
+                MapImageData(
+                    it.get<String>("name"),
+                    it.get<String>("image"),
+                    it.get<Double>("width").toFloat(),
+                    it.get<Double>("height").toFloat(),
+                    it.get<String>("type"),
+                )
+            }
         displayNames = onj
             .get<OnjArray>("displayNames")
             .value
             .map { it as OnjObject }
-            .associate { it.get<String>("name") to it.get<String>("display")  }
+            .associate { it.get<String>("name") to it.get<String>("display") }
         screenPaths = onj
             .get<OnjObject>("screens")
             .value
@@ -141,9 +144,10 @@ object MapManager {
     }
 
     fun lookupMapFile(mapName: String): FileHandle =
-        lookupMapInDir(Gdx.files.internal(roadMapsPath), mapName) ?:
-        lookupMapInDir(Gdx.files.internal(areaMapsPath), mapName) ?:
-        throw RuntimeException("unknown map $mapName")
+        lookupMapInDir(Gdx.files.internal(roadMapsPath), mapName) ?: lookupMapInDir(
+            Gdx.files.internal(areaMapsPath),
+            mapName
+        ) ?: throw RuntimeException("unknown map $mapName")
 
     private fun lookupMapInDir(dir: FileHandle, mapName: String): FileHandle? {
         val file = dir
@@ -204,7 +208,8 @@ object MapManager {
         val name: String,
         val resourceHandle: ResourceHandle,
         val width: Float,
-        val height: Float
+        val height: Float,
+        val type: String,
     )
 
 }

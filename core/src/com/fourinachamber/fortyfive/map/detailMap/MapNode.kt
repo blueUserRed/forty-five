@@ -26,7 +26,7 @@ data class MapNode(
     private var imageCache: Drawable? = null
     private var nodeTextureCache: Drawable? = null
     private var nodePositionsForDirection: List<MapNode?> = listOf()
-    
+
     fun getEdge(dir: Direction): MapNode? {
         if (nodePositionsForDirection.size != edgesTo.size) initNodeDirections()
         return nodePositionsForDirection[dir.ordinal]
@@ -133,7 +133,8 @@ data class MapNode(
         nodeTextureCache = null
     }
 
-    fun getImageData(): MapManager.MapImageData? = MapManager.mapImages.find { it.name == imageName }
+    fun getImageData(): MapManager.MapImageData? =
+        MapManager.mapImages.find { it.name == imageName && it.type == "sign" }
 
     fun isLinkedTo(node: MapNode): Boolean {
         for (linkedNode in node.edgesTo) {

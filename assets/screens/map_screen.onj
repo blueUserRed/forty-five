@@ -17,13 +17,13 @@ assets: {
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
-        "map_background_wasteland_tileable", "location_sign_salem", "nav_bar_background",
+        "map_background_wasteland_tileable", "location_sign_salem",
         "map_decoration_cactus", "map_decoration_grass", "map_path", "dialog_continue_arrow",
         "map_player", "location_sign_aqua_dulche", "location_sign_salem",
         "map_node_default",
         "map_node_shop_rect", "map_node_shop_circle",
         "map_node_fight_rect", "map_node_fight_circle",
-        "map_node_exit_rect", "map_node_exit_circle",
+        "map_node_exit_rect", "map_node_exit_circle", ...(sharedComponents.navBarAssests),
     ]
 },
 
@@ -61,7 +61,7 @@ var worldView = $WorldView {
 var mapBox = $Box {
     styles: [
         {
-            height: 95.0#percent,
+            height: 100.0#percent,
             flexDirection: flexDirection.row,
             alignItems: align.center,
             justifyContent: justify.flexEnd
@@ -233,7 +233,31 @@ root: $Box {
         ],
         zIndex: 1,
     } children [
-        sharedComponents.navBar, mapBox
-    ]
+        mapBox,
+        $Statusbar {
+            options: [
+                {
+                    actorName: "tempActor",
+                    displayName: "Notebook",
+                },
+                {
+                    actorName: "tempActor",
+                    displayName: "Backpack",
+                },
+                {
+                    actorName: "tempActor",
+                    displayName: "Settings",
+                },
+            ],
+//            ...(sharedComponents.statusbar_left_defaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
+            ...(sharedComponents.statusbar_center_defaults)
+        },
+    ],
+    $Backpack {
+        name: "tempActor",
+    }
+],
 
-]
+templates: [
+    ...(sharedComponents.statusBarTemplates)
+],
