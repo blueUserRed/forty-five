@@ -169,10 +169,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         onj as OnjObject
 
         val cardsArray = onj.get<OnjArray>("cards")
-        cardsArray.value.forEach {
-            it as OnjObject
-            curScreen.borrowResource("${Card.cardTexturePrefix}${it.get<String>("name")}")
+        cardsArray.value.forEach { card ->
+            card as OnjObject
+            curScreen.borrowResource("${Card.cardTexturePrefix}${card.get<String>("name")}")
+            card
+                .get<OnjArray>("forceLoadCards")
+                .value
+                .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}${it.value as String}") }
         }
+        onj
+            .get<OnjArray>("alwaysLoadCards")
+            .value
+            .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}${it.value as String}") }
+
         cardPrototypes = Card
             .getFrom(cardsArray, curScreen, ::initCard)
             .toMutableList()
