@@ -405,6 +405,5 @@ particles: [
 ],
 
 cards: {
-    atlas: "cards/generated/cards.atlas",
-    config: "cards/cards.onj"
+    directory: "textures/cards",
 }

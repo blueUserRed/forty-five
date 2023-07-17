@@ -1,5 +1,4 @@
 baseImage: string,
-outputFile: string,
 
 var cardElementSharedKeys = {
     x: int,
@@ -52,8 +51,19 @@ assets: {
     }[],
 },
 
-packer: {
-    pageWidth: int,
-    pageHeight: int,
-    padding: int,
+$Output {
+
+    $Packer {
+        outputFile: string,
+        pageWidth: int,
+        pageHeight: int,
+        padding: int,
+    }
+
+    $Files {
+        outputDir: string
+    }
+
 }
+
+output: $Output

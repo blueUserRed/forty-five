@@ -21,7 +21,6 @@ var cardZIndicesEnd = cardZIndicesStart + 100;
 var overlayZIndex = 500;
 
 assets: {
-    useCardAtlas: true,
     useAssets: [
 
         "vanilla_whale", "red_wing",
@@ -45,7 +44,7 @@ viewport: $FitViewport {
 },
 
 var controller = $GameScreenController {
-    cardsFile: "cards/cards.onj",
+    cardsFile: "config/cards.onj",
     cardHand: {
         actorName: "card_hand"
     },

@@ -70,7 +70,7 @@ class ScreenBuilder(val file: FileHandle) {
             controllerContext = controllerContext,
             styleManagers = listOf(),
             background = background,
-            useAssets = borrowed,
+            useAssets = borrowed.toMutableList(),
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
@@ -177,15 +177,6 @@ class ScreenBuilder(val file: FileHandle) {
 
         assets.ifHas<OnjArray>("useAssets") { arr ->
             toBorrow.addAll(arr.value.map { (it as OnjString).value })
-        }
-
-        if (assets.getOr("useCardAtlas", false)) {
-            val cardResources = ResourceManager
-                .resources
-                .map { it.handle }
-                .filter { it.startsWith(Card.cardTexturePrefix) }
-            toBorrow.addAll(cardResources)
-            toBorrow.add(ResourceManager.cardAtlasResourceHandle)
         }
         borrowed = toBorrow
     }
