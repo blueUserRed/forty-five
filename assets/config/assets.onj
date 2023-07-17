@@ -138,6 +138,14 @@ textures: [
         file: "textures/location_signs/salem.png"
     },
     {
+        name: "location_name_aqua_dulche",
+        file: "textures/location_names/aqua_dulche.png"
+    },
+    {
+        name: "location_name_salem",
+        file: "textures/location_names/salem.png"
+    },
+    {
         name: "map_detail_background",
         file: "textures/map/detail/background.png"
     },
@@ -203,7 +211,7 @@ textures: [
     },
     {
         name: "nav_bar_background",
-        file: "textures/nav_bar/background.png"
+        file: "textures/statusbar/background_old.png"
     },
     {
         name: "map_decoration_grass",
@@ -228,6 +236,18 @@ textures: [
     {
         name: "shop_back_button",
         file: "textures/shop/back_button.png"
+    },
+    {
+        name: "statusbar_background",
+        file: "textures/statusbar/statusbar_background.png"
+    },
+    {
+        name: "statusbar_background_left",
+        file: "textures/statusbar/statusbar_background_left.png"
+    },
+    {
+        name: "statusbar_option",
+        file: "textures/statusbar/option.png"
     }
 ],
 

@@ -43,6 +43,22 @@ var widgetSharedKeys = {
 
 $Widget {
 
+    $Backpack{
+        ...widgetSharedKeys,
+    }
+
+    $Statusbar{
+        mapIndicatorWidgetName?: string,
+        optionsWidgetName: string,
+        options: {
+            actorName: string,
+            displayName: string,
+        }[],
+        partOfSelectionHierarchy?: boolean,
+        children?: $Widget[],
+         ...widgetSharedKeys,
+    }
+
     $Box {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,
