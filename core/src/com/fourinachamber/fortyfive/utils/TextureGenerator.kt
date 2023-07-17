@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.PixmapIO
 import com.badlogic.gdx.graphics.g2d.PixmapPacker
 import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
 import com.badlogic.gdx.utils.Disposable
@@ -26,6 +27,7 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
     private lateinit var pixmaps: Map<String, Pixmap>
     private lateinit var baseImage: Pixmap
     private lateinit var fonts: Map<String, CustomFont>
+    private var packerConfig: OnjObject? = null
 
     private var wasPrepared: Boolean = false
 
@@ -42,7 +44,17 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
         onj as OnjObject
         this.onj = onj
 
-        outputFile = Gdx.files.getFileHandle(onj.get<String>("outputFile"), Files.FileType.Local)
+        val output = onj.get<OnjNamedObject>("output")
+        when (output.name) {
+            "Packer" -> {
+                outputFile = Gdx.files.getFileHandle(output.get<String>("outputFile"), Files.FileType.Local)
+                packerConfig = output
+            }
+
+            "Files" -> {
+                outputFile = Gdx.files.getFileHandle(output.get<String>("outputDirectory"), Files.FileType.Local)
+            }
+        }
 
         pixmaps = readPixmaps(onj.get<OnjObject>("assets").get<OnjArray>("pixmaps"))
 
@@ -74,36 +86,45 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
 
         if (!wasPrepared) throw RuntimeException("CardGenerator must be prepared before generateCards() is called")
 
-        val cards = onj.get<OnjArray>("textures").value.map { it as OnjObject }
-        val packerOnj = onj.get<OnjObject>("packer")
+        val textures = onj.get<OnjArray>("textures").value.map { it as OnjObject }
 
-        val packer = PixmapPacker(
-            packerOnj.get<Long>("pageWidth").toInt(),
-            packerOnj.get<Long>("pageHeight").toInt(),
-            Pixmap.Format.RGBA8888,
-            packerOnj.get<Long>("padding").toInt(),
-            true,
-            PixmapPacker.SkylineStrategy()
-        )
-
+        // TODO: this is kinda chaotic
         runBlocking {
             CoroutineScope(Dispatchers.Default).launch {
 
-                val deferreds = cards.map {
-                    async { generateCard(it) }
+                val deferreds = textures.map {
+                    async {
+                        val card = generateCard(it)
+                        if (packerConfig == null) {
+                            val file = outputFile.child("${it.get<String>("name")}.png")
+                            PixmapIO.writePNG(file, card)
+                        }
+                        card
+                    }
                 }.toTypedArray()
 
                 val cardPixmaps = awaitAll(*deferreds)
-                cards.indices.forEach { packer.pack(cards[it].get<String>("name"), cardPixmaps[it]) }
+                if (packerConfig != null) saveAtlas(cardPixmaps, textures)
+                cardPixmaps.forEach { it.dispose() }
             }.join()
         }
 
+        wasPrepared = false
+    }
 
+    private fun saveAtlas(pixmaps: List<Pixmap>, textures: List<OnjObject>) {
+        val packerConfig = packerConfig!!
+        val packer = PixmapPacker(
+            packerConfig.get<Long>("pageWidth").toInt(),
+            packerConfig.get<Long>("pageHeight").toInt(),
+            Pixmap.Format.RGBA8888,
+            packerConfig.get<Long>("padding").toInt(),
+            true,
+            PixmapPacker.SkylineStrategy()
+        )
+        textures.indices.forEach { packer.pack(textures[it].get<String>("name"), pixmaps[it]) }
         PixmapPackerIO().save(outputFile, packer)
         packer.dispose()
-
-        wasPrepared = false
-
     }
 
     private fun generateCard(card: OnjObject): Pixmap {

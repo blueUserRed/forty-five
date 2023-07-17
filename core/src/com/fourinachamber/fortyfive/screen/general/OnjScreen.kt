@@ -24,6 +24,7 @@ import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.utils.*
@@ -38,7 +39,7 @@ open class OnjScreen @MainThreadOnly constructor(
     batch: Batch,
     private val background: String?,
     private val controllerContext: Any?,
-    private val useAssets: List<String>,
+    private val useAssets: MutableList<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,
@@ -231,11 +232,6 @@ open class OnjScreen @MainThreadOnly constructor(
         "no actor named $name"
     )
 
-    @AllThreadsAllowed
-    fun namedCellOrError(name: String): Cell<*> = namedCells[name] ?: throw RuntimeException(
-        "no cell named $name"
-    )
-
     private fun updateCallbacks() {
         val curTime = TimeUtils.millis()
         val iterator = callbacks.iterator()
@@ -254,6 +250,11 @@ open class OnjScreen @MainThreadOnly constructor(
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
+    }
+
+    fun borrowResource(handle: ResourceHandle) {
+        useAssets.add(handle)
+        ResourceManager.borrow(this, handle)
     }
 
     fun transitionAway() {

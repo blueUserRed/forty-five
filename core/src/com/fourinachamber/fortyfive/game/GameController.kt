@@ -168,8 +168,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
+        val cardsArray = onj.get<OnjArray>("cards")
+        cardsArray.value.forEach {
+            it as OnjObject
+            curScreen.borrowResource("${Card.cardTexturePrefix}${it.get<String>("name")}")
+        }
         cardPrototypes = Card
-            .getFrom(onj.get<OnjArray>("cards"), curScreen, ::initCard)
+            .getFrom(cardsArray, curScreen, ::initCard)
             .toMutableList()
 
         SaveState.cards.forEach { cardName ->
