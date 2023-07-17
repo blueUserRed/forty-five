@@ -41,8 +41,8 @@ navBar: $Box {
 ],
 
 statusbar_center_defaults: {
-    map_indicator_widget_name: "map_indicator_parent",
-    options_widget_name: "options_parent",
+    mapIndicatorWidgetName: "map_indicator_parent",
+    optionsWidgetName: "options_parent",
     styles: [
         {
             width: 100#percent,
@@ -149,7 +149,7 @@ statusbar_center_defaults: {
 
 
 statusbar_left_defaults: {
-    options_widget_name: "options_parent",
+    optionsWidgetName: "options_parent",
     styles: [
         {
             width: 100#percent,

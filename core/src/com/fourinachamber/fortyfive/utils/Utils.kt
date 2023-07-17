@@ -8,8 +8,11 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
@@ -164,6 +167,10 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
         actions.addAll(it.actions)
     }
     return Timeline(actions)
+}
+
+fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
+    return OnjYogaValue(YogaValue(this, unit))
 }
 
 object Utils {

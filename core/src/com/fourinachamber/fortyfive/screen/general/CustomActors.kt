@@ -26,7 +26,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
@@ -113,7 +112,7 @@ interface ZIndexGroup {
  * A Class for all possible widgets which want to be shown by [com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget],
  * so that it can call the display and hide timelines when pressing the corresponding button
  */
-interface StatusbarOption {
+interface InOutAnimationActor {
 
     fun display(): Timeline
 

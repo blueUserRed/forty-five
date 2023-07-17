@@ -48,8 +48,8 @@ $Widget {
     }
 
     $Statusbar{
-        map_indicator_widget_name?: string,
-        options_widget_name: string,
+        mapIndicatorWidgetName?: string,
+        optionsWidgetName: string,
         options: {
             actorName: string,
             displayName: string,

@@ -3,20 +3,19 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
-import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.StatusbarOption
+import com.fourinachamber.fortyfive.screen.general.InOutAnimationActor
 import com.fourinachamber.fortyfive.screen.general.onButtonClick
 import com.fourinachamber.fortyfive.utils.Timeline
-import io.github.orioncraftmc.meditate.YogaValue
+import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjObject
 import onj.value.OnjString
 
 class StatusbarWidget(
-    private val map_indicator_widget_name: String?,
-    private val options_widget_name: String,
+    private val mapIndicatorWidgetName: String?,
+    private val optionsWidgetName: String,
     private val options: List<OnjObject>,
     private val screen: OnjScreen
 ) : CustomFlexBox(screen) {
@@ -55,35 +54,32 @@ class StatusbarWidget(
     }
 
     private fun initOptions() {
-        val optionParent = screen.namedActorOrError(options_widget_name) as CustomFlexBox
+        val optionParent = screen.namedActorOrError(optionsWidgetName) as CustomFlexBox
         for (i in options) {
             val curBox = screen.screenBuilder.generateFromTemplate(
                 "statusbar_option",
                 mapOf(
                     "text" to i.get<OnjString>("displayName"),
-                    "width" to OnjYogaValue(
-                        YogaValue(
-                            (100F - (3 * 2) - ((options.size - 1) * 2)) / options.size,
-                            YogaUnit.PERCENT
-                        )
-                    )
+                    "width" to ((100F - (3 * 2) - ((options.size - 1) * 2)) / options.size).toOnjYoga(YogaUnit.PERCENT)
                 ),
                 optionParent,
                 screen
             ) as CustomFlexBox
             val actorName = i.get<String>("actorName")
             optionWidgets.add(curBox to actorName)
-            curBox.onButtonClick {
-                if (timeline.isFinished) {
-                    val option = optionWidgets.find { it.first == curBox }!!
-                    when (displayedOptionIndex) {
-                        -1 -> display(option)
-                        optionWidgets.indexOf(option) -> hide(option)
-                        else -> {
-                            hide(optionWidgets[displayedOptionIndex])
-                            display(option)
-                        }
-                    }
+            curBox.onButtonClick { buttonClicked(curBox) }
+        }
+    }
+
+    private fun buttonClicked(clickedBox: CustomFlexBox) {
+        if (timeline.isFinished) {
+            val option = optionWidgets.find { it.first == clickedBox }!!
+            when (displayedOptionIndex) {
+                -1 -> display(option)
+                optionWidgets.indexOf(option) -> hide(option)
+                else -> {
+                    hide(optionWidgets[displayedOptionIndex])
+                    display(option)
                 }
             }
         }
@@ -91,9 +87,9 @@ class StatusbarWidget(
 
     private fun initMapIndicator(
     ) {
-        if (map_indicator_widget_name == null) return
-        val mapIndicator = screen.namedActorOrError(map_indicator_widget_name) as CustomFlexBox
-        val curImage = MapManager.mapImages.find { it.name == MapManager.currentDetailMap.name + "_name" }
+        if (mapIndicatorWidgetName == null) return
+        val mapIndicator = screen.namedActorOrError(mapIndicatorWidgetName) as CustomFlexBox
+        val curImage = getImageData(MapManager.currentDetailMap.name)
         if (curImage == null || !MapManager.currentDetailMap.isArea) {
             screen.screenBuilder.generateFromTemplate(
                 "statusbar_text",
@@ -105,7 +101,11 @@ class StatusbarWidget(
                 "statusbar_sign",
                 mapOf(
                     "textureName" to
-                            OnjString(MapManager.mapImages.find { it.name == (MapManager.currentDetailMap.startNode.event as EnterMapMapEvent).targetMap + "_name" }!!.resourceHandle)
+                            OnjString(
+                                getImageData(
+                                    (MapManager.currentDetailMap.startNode.event as EnterMapMapEvent).targetMap
+                                )!!.resourceHandle
+                            )
                 ),
                 mapIndicator,
                 screen
@@ -120,7 +120,11 @@ class StatusbarWidget(
                 "statusbar_sign",
                 mapOf(
                     "textureName" to
-                            OnjString(MapManager.mapImages.find { it.name == (MapManager.currentDetailMap.endNode.event as EnterMapMapEvent).targetMap + "_name" }!!.resourceHandle)
+                            OnjString(
+                                getImageData(
+                                    (MapManager.currentDetailMap.endNode.event as EnterMapMapEvent).targetMap
+                                )!!.resourceHandle
+                            )
                 ),
                 mapIndicator,
                 screen
@@ -135,6 +139,9 @@ class StatusbarWidget(
         }
     }
 
+    private fun getImageData(name: String) =
+        MapManager.mapImages.find { it.name == name && it.type == "name" }
+
     private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) = Timeline.timeline {
         val dist = 0.2F
         repeat(10) {
@@ -147,15 +154,18 @@ class StatusbarWidget(
 
     private fun hide(option: Pair<CustomFlexBox, String>) {
         val boxAction = getOptionTimeline(option.first, true).asAction()
-        val widgetAction = (screen.namedActorOrError(option.second) as StatusbarOption).hide().asAction()
+        val widgetAction = getStatusbar(option).hide().asAction()
         timeline.appendAction(Timeline.timeline { parallelActions(widgetAction, boxAction) }.asAction())
         displayedOptionIndex = -1
     }
 
     private fun display(option: Pair<CustomFlexBox, String>) {
         val boxAction = getOptionTimeline(option.first, false).asAction()
-        val widgetAction = (screen.namedActorOrError(option.second) as StatusbarOption).display().asAction()
+        val widgetAction = getStatusbar(option).display().asAction()
         timeline.appendAction(Timeline.timeline { parallelActions(widgetAction, boxAction) }.asAction())
         displayedOptionIndex = optionWidgets.indexOf(option)
     }
+
+    private fun getStatusbar(option: Pair<CustomFlexBox, String>) =
+        screen.namedActorOrError(option.second) as InOutAnimationActor
 }
