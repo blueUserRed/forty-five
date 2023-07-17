@@ -2,10 +2,10 @@ package com.fourinachamber.fortyfive.map.statusbar
 
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.StatusbarOption
+import com.fourinachamber.fortyfive.screen.general.InOutAnimationActor
 import com.fourinachamber.fortyfive.utils.Timeline
 
-class Backpack(screen: OnjScreen) : CustomFlexBox(screen), StatusbarOption {
+class Backpack(screen: OnjScreen) : CustomFlexBox(screen), InOutAnimationActor {
     override fun display(): Timeline {
         return Timeline.timeline {
             action {
