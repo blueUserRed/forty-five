@@ -143,14 +143,14 @@ class CardHand(
         }
 
         if (detailCard != null) {
-            if (currentHoverDetailActor === detailCard.actor.hoverDetailActor) return
-            currentHoverDetailActor?.isVisible = false
-            removeActor(currentHoverDetailActor)
-            currentHoverDetailActor = detailCard.actor.hoverDetailActor
-            addActor(currentHoverDetailActor)
-            currentHoverDetailActor!!.isVisible = true
-            invalidate()
-            return
+//            if (currentHoverDetailActor === detailCard.actor.hoverDetailActor) return
+//            currentHoverDetailActor?.isVisible = false
+//            removeActor(currentHoverDetailActor)
+//            currentHoverDetailActor = detailCard.actor.hoverDetailActor
+//            addActor(currentHoverDetailActor)
+//            currentHoverDetailActor!!.isVisible = true
+//            invalidate()
+//            return
         }
         if (currentHoverDetailActor != null) {
             currentHoverDetailActor?.isVisible = false
@@ -189,7 +189,8 @@ class CardHand(
                 curX += cardSize + cardSpacing + xDistanceOffset
                 continue
             }
-            if (currentHoverDetailActor == card.actor.hoverDetailActor) {
+            if (false) {
+//            if (currentHoverDetailActor == card.actor.hoverDetailActor) {
                 val detailActor = currentHoverDetailActor!!
                 val detailWidth = hoveredCardWidth * 2
                 detailActor.forcedWidth = detailWidth

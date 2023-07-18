@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
+import com.fourinachamber.fortyfive.utils.PixmapFont
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -441,5 +442,28 @@ class NinepatchResource(
         pixmap?.dispose()
         pixmap = null
         super.dispose()
+    }
+}
+
+class PixmapFontResource(
+    handle: ResourceHandle,
+    private val fontFile: String,
+) : Resource(handle) {
+
+    private var font: PixmapFont? = null
+
+    override fun loadDirectMainThread() {
+        val font = PixmapFont(Gdx.files.internal(fontFile))
+        variants = listOf(font)
+        disposables = listOf(font)
+    }
+
+    override fun prepareLoadingAllThreads() {
+        font = PixmapFont(Gdx.files.internal(fontFile))
+    }
+
+    override fun finishLoadingMainThread() {
+        variants = listOf(font!!)
+        disposables = listOf(font!!)
     }
 }

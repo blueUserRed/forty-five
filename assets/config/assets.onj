@@ -24,6 +24,13 @@ fonts: [
 
 ],
 
+pixmapFonts: [
+    {
+        name: "card_character",
+        fontFile: "fonts/card_character.fnt"
+    }
+],
+
 textureAtlases: [
 
     {

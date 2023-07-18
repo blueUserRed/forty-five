@@ -74,13 +74,10 @@ numberChangeAnimation: {
     sinkDistance: -20.0
 },
 
-cardDetailText: {
-    font: "red_wing",
-    fontScale: 0.07,
-    fontColor: color.white,
-    background: "transparent_black_texture",
-    separator: "white_texture",
-    spacing: 1.8
+cardText: {
+    font: "card_character",
+    fontScale: 1.5,
+    fontColor: color.black,
 },
 
 keySelect: {
@@ -98,5 +95,5 @@ gameUsedAssets: [
     "earthquake_shader", "glow_shader", "red_wing", "transparent_black_texture", "white_texture",
     "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon",
     "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
-    "fire_particle",
+    "fire_particle", "card_character"
 ]

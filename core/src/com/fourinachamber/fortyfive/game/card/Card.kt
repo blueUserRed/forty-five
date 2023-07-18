@@ -1,14 +1,15 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.EventListener
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
+import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.Effect
 import com.fourinachamber.fortyfive.game.GameController
@@ -19,9 +20,7 @@ import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.gameComponents.CardDetailActor
-import com.fourinachamber.fortyfive.screen.general.CustomImageActor
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -72,11 +71,9 @@ class Card(
     val rotationDirection: RevolverRotation,
     val highlightType: HighlightType,
     val tags: List<String>,
-    detailFont: BitmapFont,
-    detailFontColor: Color,
-    detailFontScale: Float,
-    detailBackgroundHandle: ResourceHandle,
-    detailSpacing: Float,
+    font: PixmapFont,
+    fontColor: Color,
+    fontScale: Float,
     screen: OnjScreen
 ) {
 
@@ -90,11 +87,9 @@ class Card(
      */
     val actor = CardActor(
         this,
-        detailFont,
-        detailFontColor,
-        detailFontScale,
-        detailBackgroundHandle,
-        detailSpacing,
+        font,
+        fontColor,
+        fontScale,
         screen
     )
 
@@ -142,6 +137,7 @@ class Card(
 
     init {
         updateText()
+        updateTexture()
     }
 
     private fun initRottenModifier() {
@@ -162,6 +158,7 @@ class Card(
         modifiers.add(rottenModifier)
         isDamageDirty = true
         updateText()
+        updateTexture()
     }
 
     /**
@@ -169,15 +166,18 @@ class Card(
      */
     fun checkModifierValidity() {
         val iterator = modifiers.iterator()
+        var textureDirty = false
         while (iterator.hasNext()) {
             val modifier = iterator.next()
             if (!modifier.validityChecker()) {
                 FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
                 iterator.remove()
                 isDamageDirty = true
+                if (modifier.damage != 0) textureDirty = true
             }
         }
         if (isDamageDirty) updateText()
+        if (textureDirty) updateTexture()
     }
 
     /**
@@ -196,6 +196,7 @@ class Card(
         modifiers.clear()
         isDamageDirty = true
         updateText()
+        updateTexture()
     }
 
     /**
@@ -222,6 +223,7 @@ class Card(
         modifiers.add(modifier)
         isDamageDirty = true
         updateText()
+        if (modifier.damage != 0) updateTexture()
     }
 
     /**
@@ -258,18 +260,20 @@ class Card(
     }
 
     private fun updateText() {
-        val detail = actor.hoverDetailActor
-        detail.description = shortDescription
-        detail.flavourText = flavourText
-        detail.statsText = if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else ""
-
-        val builder = StringBuilder()
-        for (modifier in modifiers) if (modifier.description != null) {
-            builder.append(modifier.description.string).append("\n")
-        }
-        val modifiersText = builder.toString()
-        detail.statsChangedText = modifiersText
+//        val detail = actor.hoverDetailActor
+//        detail.description = shortDescription
+//        detail.flavourText = flavourText
+//        detail.statsText = if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else ""
+//
+//        val builder = StringBuilder()
+//        for (modifier in modifiers) if (modifier.description != null) {
+//            builder.append(modifier.description.string).append("\n")
+//        }
+//        val modifiersText = builder.toString()
+//        detail.statsChangedText = modifiersText
     }
+
+    private fun updateTexture() = actor.redrawPixmap()
 
     override fun toString(): String {
         return "card: $name"
@@ -335,11 +339,9 @@ class Card(
                 highlightType = HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
                 tags = onj.get<OnjArray>("tags").value.map { it.value as String },
                 //TODO: CardDetailActor could call these functions itself
-                detailFont = GraphicsConfig.cardDetailFont(onjScreen),
-                detailFontColor = GraphicsConfig.cardDetailFontColor(),
-                detailFontScale = GraphicsConfig.cardDetailFontScale(),
-                detailBackgroundHandle = GraphicsConfig.cardDetailBackground(),
-                detailSpacing = GraphicsConfig.cardDetailSpacing(),
+                font = GraphicsConfig.cardFont(onjScreen),
+                fontColor = GraphicsConfig.cardFontColor(),
+                fontScale = GraphicsConfig.cardFontScale(),
                 screen = onjScreen
             )
 
@@ -408,37 +410,23 @@ class Card(
  */
 class CardActor(
     val card: Card,
-    font: BitmapFont,
-    fontColor: Color,
-    fontScale: Float,
-    detailBackgroundHandle: ResourceHandle,
-    detailSpacing: Float,
+    val font: PixmapFont,
+    val fontColor: Color,
+    val fontScale: Float,
     private val screen: OnjScreen
-) : CustomImageActor(card.drawableHandle, screen) {
+) : Widget(), ZIndexActor, HoverStateActor, KeySelectableActor {
+
+    override var fixedZIndex: Int = 0
+
+    override var isHoveredOver: Boolean = false
 
     override var isSelected: Boolean = false
-
     override var partOfHierarchy: Boolean = true
 
     /**
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fortyfive.game.card.CardDragSource]
      */
     var isDragged: Boolean = false
-
-    val hoverDetailActor = CardDetailActor(
-        card = card,
-        initialFlavourText = "",
-        initialDescription = "",
-        initialStatsText = "",
-        initialStatsChangedText = "",
-        font = font,
-        fontColor = fontColor,
-        fontScale = fontScale,
-        initialForcedWidth = 0f,
-        backgroundHandle = detailBackgroundHandle,
-        spacing = detailSpacing,
-        screen = screen
-    )
 
     private var inGlowAnim: Boolean = false
     private var inDestroyAnim: Boolean = false
@@ -450,12 +438,24 @@ class CardActor(
         ResourceManager.get(screen, "dissolve_shader") // TODO: fix
     }
 
+    private val cardTexture: Texture = ResourceManager.get(screen, card.drawableHandle)
+
+    private val pixmap: Pixmap = Pixmap(cardTexture.width, cardTexture.height, Pixmap.Format.RGBA8888)
+
+    var pixmapTexture: Texture? = null
+        private set
+
+    private val cardTexturePixmap: Pixmap
+
+    init {
+        bindHoverStateListeners(this)
+        if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
+        cardTexturePixmap = cardTexture.textureData.consumePixmap()
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        validate()
-        if (batch == null || drawable == null) {
-            super.draw(batch, parentAlpha)
-            return
-        }
+        batch ?: return
+        val texture = pixmapTexture ?: return
         val shader = if (inGlowAnim) {
             glowShader
         } else if (inDestroyAnim) {
@@ -469,9 +469,22 @@ class CardActor(
             it.prepare(screen)
             batch.shader = it.shader
         }
-        super.draw(batch, parentAlpha)
+        batch.draw(texture, x, y, width, height)
         batch.flush()
         shader?.let { batch.shader = null }
+    }
+
+    fun redrawPixmap() {
+        pixmap.drawPixmap(cardTexturePixmap, 0, 0)
+        font.write(pixmap, card.curDamage.toString(), 35, 480, fontScale, fontColor)
+        font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
+        pixmapTexture?.dispose()
+        pixmapTexture = Texture(pixmap)
+    }
+
+    override fun getHighlightArea(): Rectangle {
+        val (x, y) = localToScreenCoordinates(Vector2(0f, 0f))
+        return Rectangle(x, y, width, height)
     }
 
     fun glowAnimation(): Timeline = Timeline.timeline {

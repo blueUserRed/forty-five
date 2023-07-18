@@ -1,8 +1,12 @@
 package com.fourinachamber.fortyfive.screen.gameComponents
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.PopupSelectionEvent
@@ -17,7 +21,7 @@ import kotlin.math.sin
 class CircularCardSelector(
     val radius: Float,
     val size: Float,
-    val emptySlotTexture: ResourceHandle,
+    val emptySlotTextureHandle: ResourceHandle,
     val disabledAlpha: Float,
     private val screen: OnjScreen
 ) : WidgetGroup(), StyledActor {
@@ -40,6 +44,10 @@ class CircularCardSelector(
 
     private var excludeIndices: MutableList<Int> = mutableListOf()
 
+    private val emptySlotTexture: Drawable by lazy {
+        ResourceManager.get(screen, emptySlotTextureHandle)
+    }
+
     init {
         bindHoverStateListeners(this)
         cardActors.forEachIndexed { index, card ->
@@ -61,7 +69,11 @@ class CircularCardSelector(
             } else {
                 cardActors[index].alpha = 1.0f
             }
-            cardActors[index].backgroundHandle = card?.actor?.backgroundHandle ?: emptySlotTexture
+            cardActors[index].drawable = if (card != null) {
+                TextureRegionDrawable(TextureRegion(card.actor.pixmapTexture!!))
+            } else {
+                emptySlotTexture
+            }
         }
     }
 

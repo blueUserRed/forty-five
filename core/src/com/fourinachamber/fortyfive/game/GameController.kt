@@ -415,7 +415,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
         var parryCard: Card? = null
         action {
-            parryCard = revolver.slots[4].card!!
+            parryCard = revolver.slots[4].card
             curScreen.enterState(showEnemyAttackPopupScreenState)
         }
         delayUntil { popupEvent != null || parryCard == null }
