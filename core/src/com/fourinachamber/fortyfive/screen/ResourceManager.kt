@@ -92,6 +92,14 @@ object ResourceManager {
             ))
         }
 
+        assets.get<OnjArray>("pixmapFonts").value.forEach {
+            it as OnjObject
+            resources.add(PixmapFontResource(
+                it.get<String>("name"),
+                it.get<String>("fontFile")
+            ))
+        }
+
         assets.get<OnjArray>("textureAtlases").value.forEach { obj ->
             obj as OnjObject
             val name = obj.get<String>("name")

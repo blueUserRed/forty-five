@@ -15,6 +15,10 @@ fonts: {
     color?: Color,
     markupEnabled?: boolean
 }[],
+pixmapFonts: {
+    name: string,
+    fontFile: string
+}[],
 textureAtlases: {
     name: string,
     file: string,

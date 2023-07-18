@@ -73,13 +73,10 @@ insultFadeAnimation: {
     fadeOut: float,
 },
 
-cardDetailText: {
+cardText: {
     font: string,
     fontScale: float,
     fontColor: Color,
-    background: string,
-    separator: string,
-    spacing: float
 },
 
 keySelect: {

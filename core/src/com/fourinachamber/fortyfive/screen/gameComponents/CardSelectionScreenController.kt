@@ -135,14 +135,14 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
     override fun update() {
         var isCardHoveredOver = false
         for (card in cards) if (card.actor.isHoveredOver) {
-            isCardHoveredOver = true
-            if (currentHoverDetail === card.actor.hoverDetailActor) break
-            currentHoverDetail?.isVisible = false
-            currentHoverDetail?.let { onjScreen.removeActorFromRoot(it) }
-            currentHoverDetail = card.actor.hoverDetailActor
-            onjScreen.addActorToRoot(currentHoverDetail!!)
-            currentHoverDetail!!.isVisible = true
-            layoutHoverDetail(currentHoverDetail!!, card)
+//            isCardHoveredOver = true
+//            if (currentHoverDetail === card.actor.hoverDetailActor) break
+//            currentHoverDetail?.isVisible = false
+//            currentHoverDetail?.let { onjScreen.removeActorFromRoot(it) }
+//            currentHoverDetail = card.actor.hoverDetailActor
+//            onjScreen.addActorToRoot(currentHoverDetail!!)
+//            currentHoverDetail!!.isVisible = true
+//            layoutHoverDetail(currentHoverDetail!!, card)
             break
         }
         if (!isCardHoveredOver && currentHoverDetail != null) {

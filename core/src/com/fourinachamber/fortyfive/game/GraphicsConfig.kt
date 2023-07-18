@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -144,16 +143,9 @@ object GraphicsConfig {
     }
 
     @MainThreadOnly
-    fun cardDetailFont(screen: OnjScreen): BitmapFont = ResourceManager.get(screen, cardDetailFont)
-    fun cardDetailFontScale(): Float = cardDetailFontScale
-    fun cardDetailFontColor(): Color = cardDetailFontColor
-
-    @MainThreadOnly
-    fun cardDetailSeparator(screen: OnjScreen): Drawable = ResourceManager.get(screen, cardDetailSeparator)
-    fun cardDetailSpacing(): Float = cardDetailSpacing
-
-    @MainThreadOnly
-    fun cardDetailBackground(): ResourceHandle = cardDetailBackground
+    fun cardFont(screen: OnjScreen): PixmapFont = ResourceManager.get(screen, cardFont)
+    fun cardFontScale(): Float = cardFontScale
+    fun cardFontColor(): Color = cardFontColor
 
     @MainThreadOnly
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
@@ -231,13 +223,10 @@ object GraphicsConfig {
         fadeIn = (fadeOnj.get<Double>("fadeIn") * 1000).toInt()
         fadeOut = (fadeOnj.get<Double>("fadeOut") * 1000).toInt()
 
-        val cardDetailOnj = config.get<OnjObject>("cardDetailText")
-        cardDetailFont = cardDetailOnj.get<String>("font")
-        cardDetailFontScale = cardDetailOnj.get<Double>("fontScale").toFloat()
-        cardDetailFontColor = cardDetailOnj.get<Color>("fontColor")
-        cardDetailBackground = cardDetailOnj.get<String>("background")
-        cardDetailSeparator = cardDetailOnj.get<String>("separator")
-        cardDetailSpacing = cardDetailOnj.get<Double>("spacing").toFloat()
+        val cardOnj = config.get<OnjObject>("cardText")
+        cardFont = cardOnj.get<String>("font")
+        cardFontScale = cardOnj.get<Double>("fontScale").toFloat()
+        cardFontColor = cardOnj.get<Color>("fontColor")
 
         val keySelect = config.get<OnjObject>("keySelect")
         keySelectDrawable = keySelect.get<OnjString>("drawable").value
@@ -252,12 +241,9 @@ object GraphicsConfig {
 
     private lateinit var keySelectDrawable: String
 
-    private var cardDetailFont by Delegates.notNull<String>()
-    private var cardDetailFontScale by Delegates.notNull<Float>()
-    private var cardDetailFontColor by Delegates.notNull<Color>()
-    private var cardDetailSpacing by Delegates.notNull<Float>()
-    private lateinit var cardDetailBackground: String
-    private lateinit var cardDetailSeparator: String
+    private var cardFont by Delegates.notNull<String>()
+    private var cardFontScale by Delegates.notNull<Float>()
+    private var cardFontColor by Delegates.notNull<Color>()
 
     private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
