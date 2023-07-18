@@ -292,8 +292,9 @@ shaders: [
         file: "shaders/dissolve.glsl",
         constantArgs: {
             duration: 2.0,
-            border: 0.2,
-            borderColor: color.black
+            border: 0.1,
+            borderColor: color.black,
+            noiseTexScale: 0.5
         }
     }
 ],
