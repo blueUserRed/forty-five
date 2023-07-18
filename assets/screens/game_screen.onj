@@ -96,7 +96,7 @@ var revolver = $Revolver {
     fontColor: color.white,
     fontScale: 0.25,
     slotScale: 0.04,
-    cardScale: 0.8,
+    cardScale: 0.9,
     animationDuration: 0.2,
     radius: 17.0,
     radiusExtension: 7.0,
