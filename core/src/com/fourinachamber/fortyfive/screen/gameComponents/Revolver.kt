@@ -81,7 +81,10 @@ class Revolver(
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         card?.isDraggable = false
         slots[slot - 1].card = card
-        card?.actor?.setScale(cardScale)
+        card?.actor?.let {
+            it.width = slots[0].width * cardScale
+            it.height = slots[0].width * cardScale
+        }
         card?.actor?.fixedZIndex = cardZIndex
         if (card != null && card.actor !in this) addActor(card.actor)
         invalidate()
