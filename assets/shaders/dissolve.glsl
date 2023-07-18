@@ -23,13 +23,14 @@ uniform sampler2D u_texture;
 %constArg ca_duration float
 %constArg ca_border float
 %constArg ca_borderColor color
+%constArg ca_noiseTexScale float
 
 void main() {
     float duration = 1.5;
     float border = 0.2;
 
     float progress = u_time / ca_duration;
-    float noise = texture2D(u_perlin512x512, v_texCoords).r;
+    float noise = texture2D(u_perlin512x512, v_texCoords * ca_noiseTexScale).r;
     vec4 baseColor = texture2D(u_texture, v_texCoords);
 
 
