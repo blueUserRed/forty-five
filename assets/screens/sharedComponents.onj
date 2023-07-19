@@ -1,8 +1,12 @@
 use Screen;
 use Style;
+use Common;
+import "imports/colors.onj" as color;
+import "config/game_config.onj" as gameConfig;
 
 navBarAssests: [
-    "nav_bar_background"
+    "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
+    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left",
 ],
 
 navBar: $Box {
@@ -33,5 +37,270 @@ navBar: $Box {
                 enter: true
             }
         ]
-    }
+    },
+],
+
+statusbar_center_defaults: {
+    mapIndicatorWidgetName: "map_indicator_parent",
+    optionsWidgetName: "options_parent",
+    styles: [
+        {
+            width: 100#percent,
+            height: 14#percent,
+            flexDirection: flexDirection.column,
+            positionType: positionType.absolute,
+            marginTop: 0#points,
+            marginLeft: 0#points,
+            alignItems: align.center,
+        }
+    ],
+    children: [
+        $Box {
+            zIndex: 4,
+            styles: [
+                {
+                    width: 60#percent,
+                    height: 50#percent,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.center,
+                    justifyContent: justify.spaceBetween,
+                    background: "statusbar_background",
+                    paddingLeft: 6#percent,
+                    paddingRight: 6#percent,
+                }
+            ],
+        } children [
+            $Box {
+                styles: [
+                    {
+                        width: 20#percent,
+                        height: 84#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                    }
+                ],
+            } children [
+                $Image {
+                    textureName: "heart_texture",
+                    scaleX: 0.01,
+                    scaleY: 0.01,
+                    reportDimensionsWithScaling: true,
+                    styles: [
+                        {
+                            height: 100#percent,
+                        }
+                    ],
+                },
+                $TemplateLabel {
+                    template: "{stat.playerLives}/" + (gameConfig.playerConfig.lives#string), //TODO if max_lives change, this needs to be changed
+
+                    font: "red_wing_cm",
+                    color: color.forty_white,
+                    fontScale: 0.09,
+                    align: "center",
+                }
+            ],
+            $Box {
+                name: "map_indicator_parent",
+                styles: [
+                    {
+                        height: 100#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        justifyContent: justify.center,
+                    }
+                ],
+            },
+            $Box {
+                styles: [
+                    {
+                        width: 20#percent,
+                        height: 84#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        justifyContent: justify.flexEnd,
+                    }
+                ],
+            } children [
+                $TemplateLabel {
+                    template: "{stat.playerMoney}$ ",
+                    font: "red_wing_cm",
+                    color: color.forty_white,
+                    fontScale: 0.09,
+                    align: "center",
+                }
+            ],
+        ],
+        $Box {
+            name: "options_parent",
+            styles: [
+                {
+                    width: 55#percent,
+                    height: 75#percent,
+                    marginTop: -2.5#percent,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                }
+            ],
+        },
+    ]
+},
+
+
+statusbar_left_defaults: {
+    optionsWidgetName: "options_parent",
+    styles: [
+        {
+            width: 100#percent,
+            height: 14#percent,
+            flexDirection: flexDirection.column,
+            positionType: positionType.absolute,
+            marginTop: 0#points,
+            marginLeft: 0#points,
+            alignItems: align.flexStart,
+        }
+    ],
+    children: [
+        $Box {
+            zIndex: 4,
+            styles: [
+                {
+                    width: 30#percent,
+                    height: 50#percent,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                    background: "statusbar_background_left",
+                    paddingRight: 10#percent,
+                }
+            ],
+        } children [
+            $Box {
+                styles: [
+                    {
+                        width: 30#percent,
+                        height: 84#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        marginRight:2#percent,
+                    }
+                ],
+            } children [
+
+                $Image {
+                    textureName: "reserves_texture",
+                    scaleX: 0.005,
+                    scaleY: 0.005,
+                    reportDimensionsWithScaling: true,
+                    styles: [
+                        {
+                            height: 60#percent,
+                            width: 25#percent,
+                        }
+                    ],
+                },
+                $TemplateLabel {
+                    template: " {game.curReserves}/{game.baseReserves}",
+                    font: "red_wing_cm",
+                    color: color.forty_white,
+                    fontScale: 0.09,
+                    align: "center",
+                }
+            ],
+            $Box {
+                styles: [
+                    {
+                        width: 30#percent,
+                        height: 84#percent,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                    }
+                ],
+            } children [
+                $Image {
+                    textureName: "heart_texture",
+                    scaleX: 0.005,
+                    scaleY: 0.005,
+                    reportDimensionsWithScaling: true,
+                    styles: [
+                        {
+                            height: 65#percent,
+                            width: 4.2#percent,
+                        }
+                    ],
+                },
+                $TemplateLabel {
+                    template: "{stat.playerLives}/" + (gameConfig.playerConfig.lives#string), //TODO if max_lives change, this needs to be changed
+
+                    font: "red_wing_cm",
+                    color: color.forty_white,
+                    fontScale: 0.09,
+                    align: "center",
+                }
+            ],
+        ],
+        $Box {
+            name: "options_parent",
+            styles: [
+                {
+                    width: 25#percent,
+                    height: 75#percent,
+                    marginTop: -2.5#percent,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                }
+            ],
+        },
+    ]
+},
+
+statusBarTemplates: [
+    $Label {
+        name: "statusbar_text",
+        text: "", //template
+        font: "red_wing_cm",
+        color: color.forty_white,
+        fontScale: 0.09,
+        align: "center",
+    },
+    $Image {
+        name: "statusbar_sign",
+        textureName: "location_sign_salem",
+        scaleX: 0.07,
+        scaleY: 0.07,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                marginTop: 0.1#points,
+                marginLeft: 0.2#points,
+            }
+        ],
+    },
+    $Box {
+        zIndex: 3,
+        name: "statusbar_option",
+        styles: [
+            {
+                width: 0#percent, //template
+                height: 100#percent,
+                background: "statusbar_option",
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.flexEnd,
+                paddingBottom: 6.5#percent,
+            }
+        ],
+        children: [
+            $Label {
+                name: "statusbar_text",
+                text: "", //template
+                font: "red_wing_cm",
+                color: color.forty_white,
+                fontScale: 0.07,
+                align: "center",
+            }
+        ]
+    },
 ],
