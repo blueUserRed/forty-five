@@ -69,4 +69,5 @@ decorations: [
             [ 90.0, 30.0, 2.0 ],
         ]
     }
-]
+],
+isArea:true,
