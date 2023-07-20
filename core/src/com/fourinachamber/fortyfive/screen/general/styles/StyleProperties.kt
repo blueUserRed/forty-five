@@ -286,6 +286,26 @@ class AlphaStyleProperty<T>(
     override fun get(node: YogaNode): Float = target.alpha
 }
 
+class RotationStyleProperty<T>(
+    target: T,
+    screen: OnjScreen
+) : StyleProperty<T, Float>(
+    "rotation",
+    target,
+    0f,
+    Float::class,
+    false,
+    true,
+    screen
+) where T : Actor, T : StyledActor {
+
+    override fun set(data: Float, node: YogaNode) {
+        target.rotation = data
+    }
+
+    override fun get(node: YogaNode): Float = target.rotation
+}
+
 fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     val styleManager = styleManager!!
     styleManager.addStyleProperty(VisibleStyleProperty(this, screen))
@@ -298,6 +318,7 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(AlignSelfStyleProperty(this, screen))
     styleManager.addStyleProperty(AspectRatioStyleProperty(this, screen))
     styleManager.addStyleProperty(AlphaStyleProperty(this, screen))
+    styleManager.addStyleProperty(RotationStyleProperty(this, screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.TOP, "marginTop", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.LEFT, "marginLeft", screen))

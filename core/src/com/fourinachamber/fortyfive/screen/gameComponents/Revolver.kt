@@ -12,6 +12,9 @@ import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
@@ -30,7 +33,12 @@ class Revolver(
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor {
+) : WidgetGroup(), ZIndexActor, StyledActor {
+
+
+    override var styleManager: StyleManager? = null
+
+    override var isHoveredOver: Boolean = false
 
     override var fixedZIndex: Int = 0
 
@@ -71,6 +79,10 @@ class Revolver(
 
     private val background: Drawable by lazy {
         ResourceManager.get(screen, backgroundHandle)
+    }
+
+    init {
+        bindHoverStateListeners(this)
     }
 
     /**
@@ -255,6 +267,10 @@ class Revolver(
     override fun getMinHeight(): Float = prefHeight
     override fun getPrefWidth(): Float = prefWidth
     override fun getPrefHeight(): Float = prefHeight
+
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+    }
 
     companion object {
         private const val slotAngleOff: Double = ((2 * Math.PI) / 5)

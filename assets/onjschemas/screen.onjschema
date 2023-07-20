@@ -62,6 +62,7 @@ $Widget {
     $Box {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,
+        enableTransform?: boolean,
         ...widgetSharedKeys
     }
 
