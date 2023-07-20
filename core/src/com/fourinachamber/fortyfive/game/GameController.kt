@@ -141,10 +141,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        if (context !is EncounterMapEvent) { // TODO: comment back in
-            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
-        }
-        encounterMapEvent = context
+//        if (context !is EncounterMapEvent) { // TODO: comment back in
+//            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
+//        }
+//        encounterMapEvent = context
         curScreen = onjScreen
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
@@ -152,14 +152,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         FortyFiveLogger.title("game starting")
 
-        initCards()
-        initCardHand()
+//        initCards()
+//        initCardHand()
         initRevolver()
         initCardSelector()
         // enemy area is initialised by the GameDirector
         gameDirector.init()
         curReserves = baseReserves
-        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
+//        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
     }
 

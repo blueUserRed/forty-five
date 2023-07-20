@@ -121,6 +121,10 @@ textureAtlases: [
             },
             {   handle: "draw_cover",
                 regionName: "draw_cover"
+            },
+            {
+                handle: "player_bar",
+                regionName: "player_bar"
             }
         ]
     }
