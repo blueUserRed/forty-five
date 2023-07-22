@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.PixmapIO
 import com.badlogic.gdx.graphics.g2d.PixmapPacker
 import com.badlogic.gdx.graphics.g2d.PixmapPackerIO
 import com.badlogic.gdx.utils.Disposable
@@ -25,7 +26,8 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
     private lateinit var outputFile: FileHandle
     private lateinit var pixmaps: Map<String, Pixmap>
     private lateinit var baseImage: Pixmap
-    private lateinit var fonts: Map<String, CustomFont>
+    private lateinit var fonts: Map<String, PixmapFont>
+    private var packerConfig: OnjObject? = null
 
     private var wasPrepared: Boolean = false
 
@@ -42,7 +44,17 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
         onj as OnjObject
         this.onj = onj
 
-        outputFile = Gdx.files.getFileHandle(onj.get<String>("outputFile"), Files.FileType.Local)
+        val output = onj.get<OnjNamedObject>("output")
+        when (output.name) {
+            "Packer" -> {
+                outputFile = Gdx.files.getFileHandle(output.get<String>("outputFile"), Files.FileType.Local)
+                packerConfig = output
+            }
+
+            "Files" -> {
+                outputFile = Gdx.files.getFileHandle(output.get<String>("outputDirectory"), Files.FileType.Local)
+            }
+        }
 
         pixmaps = readPixmaps(onj.get<OnjObject>("assets").get<OnjArray>("pixmaps"))
 
@@ -54,7 +66,7 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
             .value
             .associate {
                 it as OnjObject
-                it.get<String>("name") to CustomFont(Gdx.files.internal(it.get<String>("file")))
+                it.get<String>("name") to PixmapFont(Gdx.files.internal(it.get<String>("file")))
             }
 
         wasPrepared = true
@@ -74,36 +86,45 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
 
         if (!wasPrepared) throw RuntimeException("CardGenerator must be prepared before generateCards() is called")
 
-        val cards = onj.get<OnjArray>("textures").value.map { it as OnjObject }
-        val packerOnj = onj.get<OnjObject>("packer")
+        val textures = onj.get<OnjArray>("textures").value.map { it as OnjObject }
 
-        val packer = PixmapPacker(
-            packerOnj.get<Long>("pageWidth").toInt(),
-            packerOnj.get<Long>("pageHeight").toInt(),
-            Pixmap.Format.RGBA8888,
-            packerOnj.get<Long>("padding").toInt(),
-            true,
-            PixmapPacker.SkylineStrategy()
-        )
-
+        // TODO: this is kinda chaotic
         runBlocking {
             CoroutineScope(Dispatchers.Default).launch {
 
-                val deferreds = cards.map {
-                    async { generateCard(it) }
+                val deferreds = textures.map {
+                    async {
+                        val card = generateCard(it)
+                        if (packerConfig == null) {
+                            val file = outputFile.child("${it.get<String>("name")}.png")
+                            PixmapIO.writePNG(file, card)
+                        }
+                        card
+                    }
                 }.toTypedArray()
 
                 val cardPixmaps = awaitAll(*deferreds)
-                cards.indices.forEach { packer.pack(cards[it].get<String>("name"), cardPixmaps[it]) }
+                if (packerConfig != null) saveAtlas(cardPixmaps, textures)
+                cardPixmaps.forEach { it.dispose() }
             }.join()
         }
 
+        wasPrepared = false
+    }
 
+    private fun saveAtlas(pixmaps: List<Pixmap>, textures: List<OnjObject>) {
+        val packerConfig = packerConfig!!
+        val packer = PixmapPacker(
+            packerConfig.get<Long>("pageWidth").toInt(),
+            packerConfig.get<Long>("pageHeight").toInt(),
+            Pixmap.Format.RGBA8888,
+            packerConfig.get<Long>("padding").toInt(),
+            true,
+            PixmapPacker.SkylineStrategy()
+        )
+        textures.indices.forEach { packer.pack(textures[it].get<String>("name"), pixmaps[it]) }
         PixmapPackerIO().save(outputFile, packer)
         packer.dispose()
-
-        wasPrepared = false
-
     }
 
     private fun generateCard(card: OnjObject): Pixmap {
@@ -164,7 +185,7 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
         return pixmaps[name] ?: throw RuntimeException("unknown pixmap name: $name")
     }
 
-    private fun fontOrError(name: String): CustomFont {
+    private fun fontOrError(name: String): PixmapFont {
         return fonts[name] ?: throw RuntimeException("unknown font name: $name")
     }
 
@@ -179,114 +200,6 @@ class TextureGenerator @AllThreadsAllowed constructor(private val config: FileHa
 
         val schema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal(schemaPath).file())
-        }
-
-    }
-
-
-    /**
-     * libgdx's BitmapFont uses the Texture-class, which doesn't work on a non-openGL thread, so I had to write a custom
-     * Font class which was a great experience and a lot of Fun. I love multithreading in libgdx!
-     */
-    class CustomFont @AllThreadsAllowed constructor(fntFile: FileHandle) : Disposable {
-
-        private val pixmap: Pixmap
-        private val letters: List<Letter>
-        private val size: Int
-
-        init {
-            val text = fntFile.readString()
-            val result = Regex("file=\"(.*?)\"").find(text)!!
-            size = Integer.parseInt(Regex("size=(-?\\d+)").find(text)!!.groupValues[1])
-            val imgFile = "${fntFile.parent().path()}/${result.groupValues[1]}"
-            val letters = mutableListOf<Letter>()
-            pixmap = Pixmap(Gdx.files.internal(imgFile))
-
-            text
-                .split('\n')
-                .filter { it.startsWith("char ") }
-                .forEach { line ->
-                    val id = Integer.parseInt(idRegex.find(line)!!.groupValues[1])
-                    val x = Integer.parseInt(xRegex.find(line)!!.groupValues[1])
-                    val y = Integer.parseInt(yRegex.find(line)!!.groupValues[1])
-                    val width = Integer.parseInt(widthRegex.find(line)!!.groupValues[1])
-                    val height = Integer.parseInt(heightRegex.find(line)!!.groupValues[1])
-                    val xOffset = Integer.parseInt(xOffsetRegex.find(line)!!.groupValues[1])
-                    val yOffset = Integer.parseInt(yOffsetRegex.find(line)!!.groupValues[1])
-                    val xAdvance = Integer.parseInt(xAdvanceRegex.find(line)!!.groupValues[1])
-
-                    letters.add(
-                        Letter(
-                            id.toChar(),
-                            x, y,
-                            width, height,
-                            xOffset, yOffset,
-                            xAdvance
-                        )
-                    )
-                }
-            this.letters = letters
-        }
-
-        /**
-         * writes text to a pixmap
-         */
-        @AllThreadsAllowed
-        fun write(on: Pixmap, text: String, x: Int, y: Int, scale: Float = 1f) {
-            var curX = x
-            var curY = y
-            text.forEach { char ->
-
-                if (char == '\n') {
-                    curY += (size * scale).toInt()
-                    curX = x
-                    return@forEach
-                }
-
-                val letter = getLetter(char)
-                on.drawPixmap(
-                    pixmap,
-                    letter.x, letter.y,
-                    letter.width, letter.height,
-                    curX + (letter.xOffset * scale).toInt(),
-                    curY + (letter.yOffset * scale).toInt(),
-                    (letter.width * scale).toInt(), (letter.height * scale).toInt()
-                )
-                curX += (letter.xAdvance * scale).toInt()
-            }
-        }
-
-        private fun getLetter(char: Char): Letter = letters.firstOrNull { it.char == char } ?: run {
-            throw RuntimeException("letter $char not in font")
-        }
-
-        override fun dispose() {
-            pixmap.dispose()
-        }
-
-        /**
-         * a letter of the font
-         */
-        data class Letter(
-            val char: Char,
-            val x: Int,
-            val y: Int,
-            val width: Int,
-            val height: Int,
-            val xOffset: Int,
-            val yOffset: Int,
-            val xAdvance: Int
-        )
-
-        private companion object {
-            val idRegex = Regex("id=(-?\\d+)")
-            val xRegex = Regex("x=(-?\\d+)")
-            val yRegex = Regex("y=(-?\\d+)")
-            val widthRegex = Regex("width=(-?\\d+)")
-            val heightRegex = Regex("height=(-?\\d+)")
-            val xOffsetRegex = Regex("xoffset=(-?\\d+)")
-            val yOffsetRegex = Regex("yoffset=(-?\\d+)")
-            val xAdvanceRegex = Regex("xadvance=(-?\\d+)")
         }
 
     }

@@ -92,6 +92,14 @@ object ResourceManager {
             ))
         }
 
+        assets.get<OnjArray>("pixmapFonts").value.forEach {
+            it as OnjObject
+            resources.add(PixmapFontResource(
+                it.get<String>("name"),
+                it.get<String>("fontFile")
+            ))
+        }
+
         assets.get<OnjArray>("textureAtlases").value.forEach { obj ->
             obj as OnjObject
             val name = obj.get<String>("name")
@@ -159,25 +167,18 @@ object ResourceManager {
             ))
         }
 
-        assets.ifHas<OnjObject>("cards") { onj ->
-            val atlasFile = onj.get<String>("atlas")
-            val configFile = onj.get<String>("config")
-            val cardPrefix = Card.cardTexturePrefix
-            val atlasResource = AtlasResource(cardAtlasResourceHandle, atlasFile)
-            val config = OnjParser.parseFile(Gdx.files.internal(configFile).file())
-            cardConfigSchema.assertMatches(config)
-            config as OnjObject
-            val regionResources = config.get<OnjArray>("cards").value.map {
-                it as OnjObject
-                AtlasRegionResource(
-                    "${cardPrefix}${it.get<String>("name")}",
-                    it.get<String>("name"),
-                    atlasResource.handle
-                )
+        val cardsFile = assets.access<String>(".cards.directory")
+        Gdx.files.internal(cardsFile)
+            .file()
+            .walk()
+            .forEach {
+                resources.add(TextureResource(
+                    "${Card.cardTexturePrefix}${it.nameWithoutExtension}",
+                    it.path,
+                    false,
+                    1f
+                ))
             }
-            resources.add(atlasResource)
-            resources.addAll(regionResources)
-        }
 
         this.resources = resources
     }

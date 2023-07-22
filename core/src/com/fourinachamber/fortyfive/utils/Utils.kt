@@ -169,6 +169,8 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
     return Timeline(actions)
 }
 
+fun IntRange.midPoint(): Int = first + ((last - first) * 0.5).toInt()
+
 fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
     return OnjYogaValue(YogaValue(this, unit))
 }

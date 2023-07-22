@@ -12,6 +12,9 @@ import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
@@ -30,7 +33,12 @@ class Revolver(
     private val slotDrawableHandle: ResourceHandle,
     private val radiusExtension: Float,
     private val screen: OnjScreen
-) : WidgetGroup(), ZIndexActor {
+) : WidgetGroup(), ZIndexActor, StyledActor {
+
+
+    override var styleManager: StyleManager? = null
+
+    override var isHoveredOver: Boolean = false
 
     override var fixedZIndex: Int = 0
 
@@ -73,6 +81,10 @@ class Revolver(
         ResourceManager.get(screen, backgroundHandle)
     }
 
+    init {
+        bindHoverStateListeners(this)
+    }
+
     /**
      * assigns a card to a slot in the revolver; [card] can be set to null, but consider using [removeCard] instead to
      * remove a card
@@ -81,7 +93,10 @@ class Revolver(
         if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
         card?.isDraggable = false
         slots[slot - 1].card = card
-        card?.actor?.setScale(cardScale)
+        card?.actor?.let {
+            it.width = slots[0].width * cardScale
+            it.height = slots[0].width * cardScale
+        }
         card?.actor?.fixedZIndex = cardZIndex
         if (card != null && card.actor !in this) addActor(card.actor)
         invalidate()
@@ -147,19 +162,19 @@ class Revolver(
         var isCardHoveredOver = false
         for (slot in slots) if (slot.card?.actor?.isHoveredOver ?: false) {
             isCardHoveredOver = true
-            if (currentHoverDetailActor === slot.card?.actor?.hoverDetailActor) break
-            currentHoverDetailActor?.isVisible = false
-            removeActor(currentHoverDetailActor)
-            currentHoverDetailActor = slot.card?.actor?.hoverDetailActor
-            addActor(currentHoverDetailActor)
-            currentHoverDetailActor!!.isVisible = true
-            invalidate()
+//            if (currentHoverDetailActor === slot.card?.actor?.hoverDetailActor) break
+//            currentHoverDetailActor?.isVisible = false
+//            removeActor(currentHoverDetailActor)
+//            currentHoverDetailActor = slot.card?.actor?.hoverDetailActor
+//            addActor(currentHoverDetailActor)
+//            currentHoverDetailActor!!.isVisible = true
+//            invalidate()
             break
         }
         if (!isCardHoveredOver && currentHoverDetailActor != null) {
-            currentHoverDetailActor?.isVisible = false
-            removeActor(currentHoverDetailActor)
-            currentHoverDetailActor = null
+//            currentHoverDetailActor?.isVisible = false
+//            removeActor(currentHoverDetailActor)
+//            currentHoverDetailActor = null
             invalidate()
         }
     }
@@ -252,6 +267,10 @@ class Revolver(
     override fun getMinHeight(): Float = prefHeight
     override fun getPrefWidth(): Float = prefWidth
     override fun getPrefHeight(): Float = prefHeight
+
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+    }
 
     companion object {
         private const val slotAngleOff: Double = ((2 * Math.PI) / 5)

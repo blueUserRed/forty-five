@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
@@ -154,16 +155,14 @@ object KeyActionFactory {
                     "down" -> MapManager.currentMapNode.getEdge(Direction.DOWN)
                     else -> null
                 }
-                targetNode?.let { it1 ->
-                    MapManager.currentDetailMap.curDetailMapWidget.moveToNextNode(it1)
-                }
+                targetNode ?: return@lambda true
+                (screen.namedActorOrError(it.get<String>("mapActor")) as DetailMapWidget).moveToNextNode(targetNode)
                 true
             }
         },
         "EnterEventDetailMap" to {
             lambda@{ screen ->//TODO check if it event isn't blocked
-
-                MapManager.currentDetailMap.curDetailMapWidget.onStartButtonClicked()
+                (screen.namedActorOrError(it.get<String>("mapActor")) as DetailMapWidget).onStartButtonClicked()
                 true
             }
         }

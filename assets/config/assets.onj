@@ -24,6 +24,13 @@ fonts: [
 
 ],
 
+pixmapFonts: [
+    {
+        name: "card_character",
+        fontFile: "fonts/card_character.fnt"
+    }
+],
+
 textureAtlases: [
 
     {
@@ -114,6 +121,10 @@ textureAtlases: [
             },
             {   handle: "draw_cover",
                 regionName: "draw_cover"
+            },
+            {
+                handle: "player_bar",
+                regionName: "player_bar"
             }
         ]
     }
@@ -238,6 +249,10 @@ textures: [
         file: "textures/shop/back_button.png"
     },
     {
+        name: "prerendered_noise_perlin_512x512",
+        file: "textures/prerendered_noise/perlin_512x512.png"
+    },
+    {
         name: "statusbar_background",
         file: "textures/statusbar/statusbar_background.png"
     },
@@ -287,7 +302,7 @@ shaders: [
         name: "glow_shader",
         file: "shaders/glow.glsl",
         constantArgs: {
-            texSize: 2000.0,
+            texSize: 569.0,
             cardSize: 569.0
         }
     },
@@ -295,6 +310,16 @@ shaders: [
         name: "fog_shader",
         file: "shaders/fog.glsl",
         constantArgs: { }
+    },
+    {
+        name: "dissolve_shader",
+        file: "shaders/dissolve.glsl",
+        constantArgs: {
+            duration: 2.0,
+            border: 0.1,
+            borderColor: color.black,
+            noiseTexScale: 0.5
+        }
     }
 ],
 
@@ -412,6 +437,5 @@ particles: [
 ],
 
 cards: {
-    atlas: "cards/generated/cards.atlas",
-    config: "cards/cards.onj"
+    directory: "textures/cards",
 }

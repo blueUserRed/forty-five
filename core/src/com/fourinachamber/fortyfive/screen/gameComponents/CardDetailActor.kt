@@ -133,15 +133,15 @@ class CardDetailActor @MainThreadOnly constructor(
 
         super.draw(batch, parentAlpha)
 
-        val separator = GraphicsConfig.cardDetailSeparator(screen)
-        separatorPositions.forEach { position ->
-            val lineWidth = forcedWidth * lineWidthMultiplier
-            separator.draw(
-                batch,
-                x + forcedWidth / 2 - lineWidth / 2, y + position,
-                lineWidth, lineHeight
-            )
-        }
+//        val separator = GraphicsConfig.cardDetailSeparator(screen)
+//        separatorPositions.forEach { position ->
+//            val lineWidth = forcedWidth * lineWidthMultiplier
+//            separator.draw(
+//                batch,
+//                x + forcedWidth / 2 - lineWidth / 2, y + position,
+//                lineWidth, lineHeight
+//            )
+//        }
     }
 
     override fun layout() {
