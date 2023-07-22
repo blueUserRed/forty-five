@@ -115,6 +115,7 @@ object MapManager {
     }
 
     fun switchToMap(newMap: String, placeAtEnd: Boolean = false) {
+        write()
         val map = lookupMapFile(newMap)
         currentMapFile = map
         currentDetailMap = DetailMap.readFromFile(map)

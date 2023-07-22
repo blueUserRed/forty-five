@@ -161,7 +161,6 @@ class DetailMapWidget(
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
-        map.curDetailMapWidget = this
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
         mapOffset = Vector2(

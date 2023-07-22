@@ -30,9 +30,6 @@ data class DetailMap(
     val isArea: Boolean
 ) {
 
-    // TODO: ugly
-    lateinit var curDetailMapWidget: DetailMapWidget
-
     /**
      * all unique nodes on the map
      */

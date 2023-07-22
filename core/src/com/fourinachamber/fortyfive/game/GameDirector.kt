@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.enemy.Enemy
-import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
@@ -13,15 +12,11 @@ import onj.value.OnjObject
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.properties.Delegates
-import kotlin.random.Random
 
 class GameDirector(private val controller: GameController) {
 
 
     private var turnEstimate by Delegates.notNull<Int>()
-
-//    private var turnRevealTime: Int = -1
-//    private var enemyActionTimes: List<Int> = listOf()
 
     private var difficulty = 0.0
 
@@ -45,7 +40,7 @@ class GameDirector(private val controller: GameController) {
         FortyFiveLogger.debug(logTag, "chose $turnEstimate turns")
         enemy = scaleAndCreateEnemy(enemyProto, difficulty)
         FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}; damage = ${enemy.damage}")
-        controller.initEnemyArea(enemy)
+//        controller.initEnemyArea(enemy)
     }
 
     fun onNewTurn() {
@@ -87,22 +82,35 @@ class GameDirector(private val controller: GameController) {
     }
 
     private fun adjustDifficulty(): Double {
-        // TODO: consider how much damage the player took
         if (controller.playerLost) return difficulty // Too late to adjust difficulty of enemy lol
         val usedTurns = controller.turnCounter
         val targetTurn = turnEstimate
         val enemyHealth = enemy.health
-        val enemyHealthPerTurn = enemyProto.baseHealthPerTurn * difficulty
+        val enemyHealthPerTurn = scaleEnemyHealthPerTurn(enemyProto.baseHealthPerTurn, difficulty)
         val enemyBaseHealthPerTurn = enemyProto.baseHealthPerTurn
 
         val overkillDamage = enemy.currentHealth
-        val additionalTurns = floor(abs(overkillDamage) / enemyHealthPerTurn)
-
+        val additionalTurns = abs(overkillDamage) / enemyHealthPerTurn
         val turnDiff = usedTurns - additionalTurns - targetTurn
         val idealHealth = enemyHealth - enemyHealthPerTurn * turnDiff
         val baseHealth = enemyBaseHealthPerTurn * turnEstimate
-        val idealDifficulty = idealHealth / baseHealth
+        val idealDifficultyBasedOnTurns = idealHealth / baseHealth
+
+        val damageEstimate = turnEstimate * 0.5
+        val damage = controller.playerLivesAtStart - controller.curPlayerLives
+        val damageDiff = damageEstimate - damage
+        val baseDamageDiff = damageDiff / turnEstimate
+        val idealDifficultyBasedOnDamage = difficulty + baseDamageDiff
+
+        val idealDifficulty = (idealDifficultyBasedOnTurns / 2) + (idealDifficultyBasedOnDamage / 2)
         val difficultyDiff = idealDifficulty - difficulty
+
+        FortyFiveLogger.debug(logTag, "difficulty calculation: " +
+                "idealDifficultyBasedOnTurns = $idealDifficultyBasedOnTurns, " +
+                "idealDifficultyBasedOnDamage = $idealDifficultyBasedOnDamage, " +
+                "idealDifficulty = $idealDifficulty")
+
+
         if (difficultyDiff in ((idealDifficulty - 0.2)..(idealDifficulty + 0.2))) {
             return idealDifficulty.coerceAtLeast(0.5)
         }
@@ -114,10 +122,21 @@ class GameDirector(private val controller: GameController) {
     }
 
     private fun scaleAndCreateEnemy(prototype: EnemyPrototype, difficulty: Double): Enemy {
-        val health = (prototype.baseHealthPerTurn * turnEstimate * difficulty).toInt()
-        // damage is not scaled because there is currently no way for the player to get more health
-        val damage = prototype.baseDamage
+        val health = scaleEnemyHealthPerTurn(prototype.baseHealthPerTurn, difficulty) * turnEstimate
+        val damage = scaleEnemyDamage(prototype.baseDamage, difficulty)
         return prototype.create(health, damage)
+    }
+
+    private fun scaleEnemyHealthPerTurn(healthPerTurn: Int, difficulty: Double): Int =
+        (healthPerTurn * difficulty).toInt()
+
+    private fun scaleEnemyDamage(baseDamage: IntRange, difficulty: Double): IntRange {
+        val adjustedDifficulty = if (difficulty > 1.0) {
+            1 + ((difficulty - 1) * 0.5) // difficulty scales slower for damage than for health
+        } else {
+            difficulty
+        }
+        return IntRange((baseDamage.first * adjustedDifficulty).toInt(), (baseDamage.last * adjustedDifficulty).toInt())
     }
 
     companion object {

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -72,7 +73,7 @@ class ScreenBuilder(val file: FileHandle) {
             controllerContext = controllerContext,
             styleManagers = listOf(),
             background = background,
-            useAssets = borrowed,
+            useAssets = borrowed.toMutableList(),
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
             namedActors = namedActors,
@@ -180,15 +181,6 @@ class ScreenBuilder(val file: FileHandle) {
         assets.ifHas<OnjArray>("useAssets") { arr ->
             toBorrow.addAll(arr.value.map { (it as OnjString).value })
         }
-
-        if (assets.getOr("useCardAtlas", false)) {
-            val cardResources = ResourceManager
-                .resources
-                .map { it.handle }
-                .filter { it.startsWith(Card.cardTexturePrefix) }
-            toBorrow.addAll(cardResources)
-            toBorrow.add(ResourceManager.cardAtlasResourceHandle)
-        }
         borrowed = toBorrow
     }
 
@@ -233,6 +225,8 @@ class ScreenBuilder(val file: FileHandle) {
                     getWidget(it as OnjNamedObject, flexBox, screen)
                 }
         }
+        flexBox.isTransform = widgetOnj.getOr("enableTransform", false)
+        flexBox.resortZIndices()
     }
 
     private fun getViewport(viewportOnj: OnjNamedObject): Viewport = when (viewportOnj.name) {

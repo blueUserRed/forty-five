@@ -141,10 +141,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        if (context !is EncounterMapEvent) { // TODO: comment back in
-            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
-        }
-        encounterMapEvent = context
+//        if (context !is EncounterMapEvent) { // TODO: comment back in
+//            throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
+//        }
+//        encounterMapEvent = context
         curScreen = onjScreen
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
@@ -152,14 +152,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         FortyFiveLogger.title("game starting")
 
-        initCards()
-        initCardHand()
+//        initCards()
+//        initCardHand()
         initRevolver()
         initCardSelector()
         // enemy area is initialised by the GameDirector
         gameDirector.init()
         curReserves = baseReserves
-        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
+//        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
     }
 
@@ -168,8 +168,22 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
+        val cardsArray = onj.get<OnjArray>("cards")
+        cardsArray.value.forEach { card ->
+            card as OnjObject
+            curScreen.borrowResource("${Card.cardTexturePrefix}${card.get<String>("name")}")
+            card
+                .get<OnjArray>("forceLoadCards")
+                .value
+                .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}${it.value as String}") }
+        }
+        onj
+            .get<OnjArray>("alwaysLoadCards")
+            .value
+            .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}${it.value as String}") }
+
         cardPrototypes = Card
-            .getFrom(onj.get<OnjArray>("cards"), curScreen, ::initCard)
+            .getFrom(cardsArray, curScreen, ::initCard)
             .toMutableList()
 
         SaveState.cards.forEach { cardName ->
@@ -401,7 +415,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
         var parryCard: Card? = null
         action {
-            parryCard = revolver.slots[4].card!!
+            parryCard = revolver.slots[4].card
             curScreen.enterState(showEnemyAttackPopupScreenState)
         }
         delayUntil { popupEvent != null || parryCard == null }
@@ -601,6 +615,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun destroyCardTimeline(card: Card): Timeline = Timeline.timeline {
+        include(card.actor.destroyAnimation())
         action {
             revolver.removeCard(card)
             card.onDestroy()
