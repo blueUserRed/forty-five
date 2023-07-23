@@ -263,6 +263,34 @@ textures: [
     {
         name: "statusbar_option",
         file: "textures/statusbar/option.png"
+    },
+    {
+        name: "backpack_1",
+        file: "textures/backpack/1.png"
+    },
+    {
+        name: "backpack_2",
+        file: "textures/backpack/2.png"
+    },
+    {
+        name: "backpack_3",
+        file: "textures/backpack/3.png"
+    },
+    {
+        name: "backpack_4",
+        file: "textures/backpack/4.png"
+    },
+    {
+        name: "backpack_5",
+        file: "textures/backpack/5.png"
+    },
+    {
+        name: "backpack_deck_background",
+        file: "textures/backpack/deck_background.png"
+    },
+    {
+        name: "backpack_backpack_background",
+        file: "textures/backpack/backpack_background.png"
     }
 ],
 
@@ -406,6 +434,24 @@ ninepatches: [
         left: 24,
         right: 24,
         scale: 0.04
+    },
+    {
+        name: "backpack_scrollbar_background",
+        file: "textures/backpack/scrollbar_background.png",
+        top: 5,
+        bottom: 5,
+        left: 5,
+        right: 5,
+        scale: 0.1
+    },
+    {
+        name: "backpack_scrollbar",
+        file: "textures/backpack/scrollbar.png",
+        top: 5,
+        bottom: 5,
+        left: 5,
+        right: 5,
+        scale: 0.1
     }
 ],
 

@@ -4,17 +4,17 @@ ownedCards: [
     "bullet", "bullet", "bullet", "bullet",
     "incendiaryBullet",
     "workerBullet",
-    "bigBullet",
-    "rottenBullet",
-    "bewitchedBullet",
-    "explosiveBullet",
-    "leadersBullet",
-    "silverBullet",
-    "arrow",
-    "obsidianBullet",
-    "rustedBullet",
-    "invisibleBullet",
-    "poisonBullet"
+//    "bigBullet",
+//    "rottenBullet",
+//    "bewitchedBullet",
+//    "explosiveBullet",
+//    "leadersBullet",
+//    "silverBullet",
+//    "arrow",
+//    "obsidianBullet",
+//    "rustedBullet",
+//    "invisibleBullet",
+//    "poisonBullet"
 ],
 decks: [
     {
