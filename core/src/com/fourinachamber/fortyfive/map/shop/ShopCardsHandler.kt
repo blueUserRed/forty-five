@@ -1,5 +1,7 @@
 package com.fourinachamber.fortyfive.map.shop
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
@@ -62,6 +64,7 @@ class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private 
             curParent,
             screen
         ) as CustomImageActor
+        img.drawable = TextureRegionDrawable(TextureRegion(card.actor.pixmapTexture))
         val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap2["name"] = OnjString("CardLabel" + parent.children.size)
         tempMap2["text"] = OnjString("" + card.price + "$")

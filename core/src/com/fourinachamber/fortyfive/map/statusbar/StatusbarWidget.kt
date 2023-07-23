@@ -85,8 +85,7 @@ class StatusbarWidget(
         }
     }
 
-    private fun initMapIndicator(
-    ) {
+    private fun initMapIndicator() {
         if (mapIndicatorWidgetName == null) return
         val mapIndicator = screen.namedActorOrError(mapIndicatorWidgetName) as CustomFlexBox
         val curImage = getImageData(MapManager.currentDetailMap.name)
@@ -154,18 +153,18 @@ class StatusbarWidget(
 
     private fun hide(option: Pair<CustomFlexBox, String>) {
         val boxAction = getOptionTimeline(option.first, true).asAction()
-        val widgetAction = getStatusbar(option).hide().asAction()
+        val widgetAction = getStatusbarOption(option).hide().asAction()
         timeline.appendAction(Timeline.timeline { parallelActions(widgetAction, boxAction) }.asAction())
         displayedOptionIndex = -1
     }
 
     private fun display(option: Pair<CustomFlexBox, String>) {
         val boxAction = getOptionTimeline(option.first, false).asAction()
-        val widgetAction = getStatusbar(option).display().asAction()
+        val widgetAction = getStatusbarOption(option).display().asAction()
         timeline.appendAction(Timeline.timeline { parallelActions(widgetAction, boxAction) }.asAction())
         displayedOptionIndex = optionWidgets.indexOf(option)
     }
 
-    private fun getStatusbar(option: Pair<CustomFlexBox, String>) =
+    private fun getStatusbarOption(option: Pair<CustomFlexBox, String>) =
         screen.namedActorOrError(option.second) as InOutAnimationActor
 }

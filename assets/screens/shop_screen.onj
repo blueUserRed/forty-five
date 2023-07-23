@@ -12,11 +12,10 @@ var worldWidth = 160.0;
 var worldHeight = 90.0;
 
 assets: {
-    useCardAtlas: true,
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
         "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
-        "shop_back_button", "test_scrollbar_background",
+        "shop_back_button", "test_scrollbar_background", "card_character",
         ...(sharedComponents.navBarAssests),
     ]
 },
@@ -35,7 +34,7 @@ options: {
     screenController: $ShopScreenController {
         shopsFile: "maps/shops.onj",
         npcsFile: "maps/npcs.onj",
-        cardsFile: "cards/cards.onj",
+        cardsFile: "config/cards.onj",
         personWidgetName: "shop_person_widget",
         messageWidgetName: "shop_message",
         cardsParentName: "cards_widget",
@@ -325,7 +324,6 @@ templates: [
 //        },
 
         name: "cardsWidgetImage",
-        textureName: "shop_background_no_biome",
         scaleX: 0.001,
         scaleY: 0.001,
         reportDimensionsWithScaling: true,
