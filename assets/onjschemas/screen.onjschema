@@ -127,6 +127,7 @@ $Widget {
         hoveredCardScale: float,
         targetWidth: float,
         opacityIfNotPlayable: float,
+        centerGap: float,
 //        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }

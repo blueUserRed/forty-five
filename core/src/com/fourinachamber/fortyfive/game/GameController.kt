@@ -152,14 +152,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         FortyFiveLogger.title("game starting")
 
-//        initCards()
-//        initCardHand()
+        initCards()
+        initCardHand()
         initRevolver()
         initCardSelector()
         // enemy area is initialised by the GameDirector
         gameDirector.init()
         curReserves = baseReserves
-//        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
+        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
     }
 
