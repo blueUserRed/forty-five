@@ -158,7 +158,7 @@ class ShopDragSource(
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload? {
         if ((actor !is CustomImageActor) || (actor as CustomImageActor).inActorState("unbuyable")) return null
-        startPos = Vector2(x * actor.scaleX, y * actor.scaleY)
+//        startPos = Vector2(x * actor.scaleX, y * actor.scaleY)
         val payload = Payload()
         dragAndDrop.setKeepWithinStage(false)
 
@@ -177,8 +177,8 @@ class ShopDragSource(
         super.drag(event, x, y, pointer)
         val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
         dragAndDrop.setDragActorPosition(
-            -parentOff.x + actor.width - startPos.x,
-            -parentOff.y - startPos.y
+            -parentOff.x + actor.width/2 - startPos.x,
+            -parentOff.y - startPos.y -actor.height/2
         )
     }
 

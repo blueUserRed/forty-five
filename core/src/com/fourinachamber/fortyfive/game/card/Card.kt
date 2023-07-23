@@ -321,7 +321,7 @@ class Card(
             initializer: (Card) -> Unit
         ): Card {
             val name = onj.get<String>("name")
-
+            onjScreen.borrowResource(cardTexturePrefix + name)
             val card = Card(
                 name = name,
                 title = onj.get<String>("title"),
