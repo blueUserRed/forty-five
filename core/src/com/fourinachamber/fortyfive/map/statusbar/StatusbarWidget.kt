@@ -1,6 +1,9 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
@@ -12,6 +15,7 @@ import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjObject
 import onj.value.OnjString
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction
 
 class StatusbarWidget(
     private val mapIndicatorWidgetName: String?,
@@ -92,7 +96,7 @@ class StatusbarWidget(
         if (curImage == null || !MapManager.currentDetailMap.isArea) {
             screen.screenBuilder.generateFromTemplate(
                 "statusbar_text",
-                mapOf("text" to OnjString("Road from ")),
+                mapOf("text" to OnjString("Road between ")),
                 mapIndicator,
                 screen
             )
@@ -111,10 +115,10 @@ class StatusbarWidget(
             )
             screen.screenBuilder.generateFromTemplate(
                 "statusbar_text",
-                mapOf("text" to OnjString(" to ")),
+                mapOf("text" to OnjString(" and ")),
                 mapIndicator,
                 screen
-            );
+            )
             screen.screenBuilder.generateFromTemplate(
                 "statusbar_sign",
                 mapOf(
@@ -142,13 +146,13 @@ class StatusbarWidget(
         MapManager.mapImages.find { it.name == name && it.type == "name" }
 
     private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) = Timeline.timeline {
-        val dist = 0.2F
-        repeat(10) {
-            action {
-                target.moveBy(0F, if (goUp) dist else -dist)
-            }
-            delay(10)
-        }
+
+        val action = MoveByAction()
+        action.amountY = 2F * (if (goUp) 1 else -1)
+        action.duration = 0.2F
+        action.interpolation= Interpolation.exp10Out
+        target.addAction(action)
+        delayUntil { action.isComplete }
     }
 
     private fun hide(option: Pair<CustomFlexBox, String>) {
