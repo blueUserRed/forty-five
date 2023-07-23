@@ -4,10 +4,26 @@ use Common;
 import "imports/colors.onj" as color;
 import "config/game_config.onj" as gameConfig;
 
+var worldWidth = 160.0;
+var worldHeight = 90.0;
+
 navBarAssests: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
-    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left",
+    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left"
 ],
+
+backpackAssets: [
+    "backpack_1",
+    "backpack_2",
+    "backpack_3",
+    "backpack_4",
+    "backpack_5",
+    "backpack_deck_background",
+    "backpack_backpack_background", //This name intended, not an error
+"backpack_scrollbar_background",
+"backpack_scrollbar",
+],
+
 
 navBar: $Box {
     styles: [
@@ -183,7 +199,7 @@ statusbar_left_defaults: {
                         height: 84#percent,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
-                        marginRight:2#percent,
+                        marginRight: 2#percent,
                     }
                 ],
             } children [
@@ -260,6 +276,7 @@ statusBarTemplates: [
     $Label {
         name: "statusbar_text",
         text: "", //template
+
         font: "red_wing_cm",
         color: color.forty_white,
         fontScale: 0.09,
@@ -284,6 +301,7 @@ statusBarTemplates: [
         styles: [
             {
                 width: 0#percent, //template
+
                 height: 100#percent,
                 background: "statusbar_option",
                 flexDirection: flexDirection.column,
@@ -296,6 +314,7 @@ statusBarTemplates: [
             $Label {
                 name: "statusbar_text",
                 text: "", //template
+
                 font: "red_wing_cm",
                 color: color.forty_white,
                 fontScale: 0.07,
@@ -303,4 +322,189 @@ statusBarTemplates: [
             }
         ]
     },
+],
+
+
+var exampleCard = $Box {
+    styles: [
+        {
+            marginTop: 2#percent,
+            width: 23#percent,
+            height: 21#percent,
+            background: "card%%bullet",
+        }
+    ]
+};
+var scrollBarBackgroundDeck = $Image {
+    name: "deck_scrollbar_background",
+    textureName: "backpack_scrollbar_background",
+    scaleX: 1.0,
+    scaleY: 1.0,
+    reportDimensionsWithScaling: true,
+};
+var scrollBarDeck = $Image {
+    name: "deck_scrollbar_handle",
+    textureName: "backpack_scrollbar",
+    scaleX: 1.0,
+    scaleY: 1.0
+};
+
+backpack: $Backpack {
+    cardsFile: "config/cards.onj",
+    name: "tempActor",
+    zIndex: 5,
+    styles: [
+        {
+            width: 150#points,
+            height: 77#points,
+            flexDirection: flexDirection.row,
+            positionType: positionType.absolute,
+            marginTop: 13#points,
+            marginLeft: 5#points,
+            justifyContent: justify.spaceBetween,
+
+        }
+    ],
+} children [
+    $Box {
+        styles: [
+            {
+                width: 73#points,
+                height: 100#percent,
+                flexDirection: flexDirection.column,
+                paddingTop: 3#points,
+                paddingLeft: 3#points,
+                paddingRight: 3#points,
+                background: "backpack_deck_background",
+            }
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    width: 100#percent,
+                    height: 10#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    alignItems: align.center,
+                    paddingLeft: 3#points,
+                    paddingRight: 3#points,
+                }
+            ],
+        } children [
+            $TemplateLabel {
+                font: "red_wing",
+                template: "{deck.name}",
+                fontScale: 0.09,
+                color: color.white,
+            },
+            $Box {
+                styles: [
+                    {
+                        height: 10#percent,
+                        flexDirection: flexDirection.row,
+                        justifyContent: justify.flexEnd,
+                        alignItems: align.center,
+                    }
+                ],
+            } children [
+                $Image {
+                    textureName: "backpack_1",
+                    scaleX: 0.1,
+                    scaleY: 0.1,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_2",
+                    scaleX: 0.1,
+                    scaleY: 0.1,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_3",
+                    scaleX: 0.1,
+                    scaleY: 0.1,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_4",
+                    scaleX: 0.1,
+                    scaleY: 0.1,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_5",
+                    scaleX: 0.1,
+                    scaleY: 0.1,
+                    reportDimensionsWithScaling: true,
+                }
+            ]
+        ],
+        $ScrollBox {
+            isScrollDirectionVertical: true,
+            scrollDistance: 3.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "deck_scrollbar_background",
+            scrollbarName: "deck_scrollbar_handle",
+
+            scrollbarSide: "right",
+            styles: [
+                {
+                    flexWrap: wrap.wrap,
+                    width: 98#percent,
+                    height: 90#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceAround,
+                    alignItems: align.flexStart,
+//                    paddingLeft: 3#points,
+                    paddingRight: 2#points,
+//                    cuttingLeft: 1.75,
+                    cuttingRight: 1.75,
+                    scrollbarWidth: 1.25,
+                }
+            ],
+        } children [
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            exampleCard, exampleCard, exampleCard, exampleCard,
+            scrollBarBackgroundDeck, scrollBarDeck
+        ],
+    ],
+    $Box {
+        styles: [
+            {
+                width: 73#points,
+                height: 100#percent,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.spaceAround,
+                background: "backpack_backpack_background",
+            }
+        ],
+    }
 ],

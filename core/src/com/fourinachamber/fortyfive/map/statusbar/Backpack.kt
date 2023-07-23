@@ -1,12 +1,31 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
-import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.InOutAnimationActor
+import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.map.shop.ShopCardsHandler
+import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
+import onj.parser.OnjParser
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
+import onj.value.OnjArray
+import onj.value.OnjObject
 
-class Backpack(screen: OnjScreen) : CustomFlexBox(screen), InOutAnimationActor {
+class Backpack(screen: OnjScreen, dataFile: String) : CustomFlexBox(screen), InOutAnimationActor {
+
+    private val _allCards: MutableList<Card>
+    private val cardImgs: MutableList<CustomImageActor> = mutableListOf()
+    init {
+        val onj = OnjParser.parseFile(dataFile)
+        cardsFileSchema.assertMatches(onj)
+        onj as OnjObject
+        val cardPrototypes = (Card.getFrom(onj.get<OnjArray>("cards"), screen) {}).filter { it.name in SaveState.cards }
+        _allCards = cardPrototypes.map { it.create() }.toMutableList()
+    }
+
     override fun display(): Timeline {
+        TemplateString.updateGlobalParam("deck.name",SaveState.curDeck.name)
         return Timeline.timeline {
             action {
                 println("now opening")
@@ -28,5 +47,13 @@ class Backpack(screen: OnjScreen) : CustomFlexBox(screen), InOutAnimationActor {
                 println("now closed")
             }
         }
+    }
+
+    companion object {
+
+        private val cardsFileSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
+        }
+        const val logTag: String = "Backpack"
     }
 }

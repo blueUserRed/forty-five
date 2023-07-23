@@ -190,7 +190,7 @@ object SaveState {
                     "currentNode = $currentNode"
         )
 
-        savefileDirty = true
+        savefileDirty = false
     }
 
     /**
@@ -248,44 +248,47 @@ object SaveState {
     class Deck(onj: OnjObject) {
         val name: String
         val id: Int
-        private val _cards: MutableMap<Int, String> = mutableMapOf()
+        private val _cardPositions: MutableMap<Int, String> = mutableMapOf()
 
-        val cards: Map<Int, String>
-            get() = _cards
+        val cardPosition: Map<Int, String>
+            get() = _cardPositions
+
+        val cards: List<String>
+            get() = _cardPositions.map { it.value }
 
         init {
             id = onj.get<Long>("index").toInt()
             name = onj.get<String?>("name") ?: "Deck $id"
             onj.get<OnjArray>("cards").value.forEach {
                 it as OnjObject
-                _cards[it.get<Long>("positionId").toInt()] = it.get<String>("cardName")
+                _cardPositions[it.get<Long>("positionId").toInt()] = it.get<String>("cardName")
             }
         }
 
         fun swapCards(i1: Int, i2: Int) {
-            val old1 = cards[i1]
-            val old2 = cards[i2]
+            val old1 = _cardPositions[i1]
+            val old2 = _cardPositions[i2]
 
-            if (old1 == null) _cards.remove(i2)
-            else _cards[i2] = old1
-            if (old2 == null) _cards.remove(i1)
-            else _cards[i1] = old2
+            if (old1 == null) _cardPositions.remove(i2)
+            else _cardPositions[i2] = old1
+            if (old2 == null) _cardPositions.remove(i1)
+            else _cardPositions[i1] = old2
             savefileDirty = true
         }
 
         fun addToDeck(index: Int, name: String) {
-            _cards[index] = name
+            _cardPositions[index] = name
             savefileDirty = true
         }
 
         fun removeFromDeck(index: Int) {
-            _cards.remove(index)
+            _cardPositions.remove(index)
             savefileDirty = true
         }
 
         fun asOnjObject(): OnjObject {
             val deck = mutableListOf<OnjObject>()
-            cards.forEach {
+            _cardPositions.forEach {
                 deck.add(buildOnjObject {
                     "positionId" with it.key
                     "cardName" with it.value

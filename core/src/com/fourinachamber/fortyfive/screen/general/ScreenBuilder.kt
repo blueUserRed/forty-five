@@ -266,7 +266,14 @@ class ScreenBuilder(val file: FileHandle) {
 
         "ScrollBox" -> getScrollFlexBox(widgetOnj, screen)
 
-        "Statusbar" -> getStatusbar(widgetOnj, screen)
+        "Statusbar" -> StatusbarWidget(
+            widgetOnj.get<String?>("mapIndicatorWidgetName"),
+            widgetOnj.get<String>("optionsWidgetName"),
+            widgetOnj.get<OnjArray>("options").value as List<OnjObject>,
+            screen
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+        }
 
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
@@ -393,7 +400,7 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
-        "Backpack" -> Backpack(screen)
+        "Backpack" -> Backpack(screen,widgetOnj.get<String>("cardsFile")).apply { initFlexBox(this, widgetOnj, screen) }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
@@ -443,16 +450,7 @@ class ScreenBuilder(val file: FileHandle) {
         return actor
     }
 
-    private fun getStatusbar(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
-        val statusbar = StatusbarWidget(
-            widgetOnj.get<String?>("mapIndicatorWidgetName"),
-            widgetOnj.get<String>("optionsWidgetName"),
-            widgetOnj.get<OnjArray>("options").value as List<OnjObject>,
-            screen
-        )
-        initFlexBox(statusbar, widgetOnj, screen)
-        return statusbar
-    }
+
 
     private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
         val flexBox = CustomScrollableFlexBox(
