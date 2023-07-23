@@ -292,6 +292,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("targetWidth").toFloat(),
             widgetOnj.get<Double>("cardSize").toFloat(),
             widgetOnj.get<Double>("opacityIfNotPlayable").toFloat(),
+            widgetOnj.get<Double>("centerGap").toFloat(),
             screen
         ).apply {
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()

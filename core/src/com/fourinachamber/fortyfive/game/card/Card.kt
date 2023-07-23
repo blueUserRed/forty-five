@@ -479,6 +479,7 @@ class CardActor(
         font.write(pixmap, card.curDamage.toString(), 35, 480, fontScale, fontColor)
         font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
         pixmapTexture?.dispose()
+        // TODO: memory leak
         pixmapTexture = Texture(pixmap)
     }
 
