@@ -85,13 +85,7 @@ class Card(
     /**
      * the actor for representing the card on the screen
      */
-    val actor = CardActor(
-        this,
-        font,
-        fontColor,
-        fontScale,
-        screen
-    )
+    val actor: CardActor
 
     //TODO: isDraggable and inAnimation should be in the actor class
 
@@ -136,6 +130,14 @@ class Card(
     private var isDamageDirty: Boolean = true
 
     init {
+        screen.borrowResource(cardTexturePrefix + name)
+        actor = CardActor(
+            this,
+            font,
+            fontColor,
+            fontScale,
+            screen
+        )
         updateText()
         updateTexture()
     }
@@ -321,7 +323,6 @@ class Card(
             initializer: (Card) -> Unit
         ): Card {
             val name = onj.get<String>("name")
-            onjScreen.borrowResource(cardTexturePrefix + name)
             val card = Card(
                 name = name,
                 title = onj.get<String>("title"),

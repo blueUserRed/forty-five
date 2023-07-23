@@ -1,6 +1,6 @@
 import "config/game_config.onj" as gameConfig;
 
-cards: [
+ownedCards: [
     "bullet", "bullet", "bullet", "bullet",
     "incendiaryBullet",
     "workerBullet",
@@ -16,9 +16,31 @@ cards: [
     "invisibleBullet",
     "poisonBullet"
 ],
-
+decks: [
+    {
+        index: 1,
+        cards: [
+            {
+                cardName: "bullet",
+                positionId: 0
+            },
+            {
+                cardName: "bullet",
+                positionId: 1
+            },
+            {
+                cardName: "bullet",
+                positionId: 3
+            },
+            {
+                cardName: "incendiaryBullet",
+                positionId: 4
+            },
+        ]
+    },
+],
 playerLives: gameConfig.playerConfig.lives,
-playerMoney: 0,
+playerMoney: 110,
 currentDifficulty: 1.0,
 
 stats: {
@@ -30,4 +52,5 @@ position: {
     map: "test_area",
     node: 0,
     lastNode: null
-}
+},
+curDeck: 1,
