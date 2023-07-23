@@ -330,7 +330,7 @@ var exampleCard = $Box {
         {
             marginTop: 2#percent,
             width: 23#percent,
-            height: 21#percent,
+            height: 20.9#percent,
             background: "card%%bullet",
         }
     ]
@@ -456,9 +456,7 @@ backpack: $Backpack {
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceAround,
                     alignItems: align.flexStart,
-//                    paddingLeft: 3#points,
                     paddingRight: 2#points,
-//                    cuttingLeft: 1.75,
                     cuttingRight: 1.75,
                     scrollbarWidth: 1.25,
                 }
