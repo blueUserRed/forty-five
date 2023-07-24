@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -442,7 +443,7 @@ class CardActor(
 
     private val pixmap: Pixmap = Pixmap(cardTexture.width, cardTexture.height, Pixmap.Format.RGBA8888)
 
-    var pixmapTexture: Texture? = null
+    var pixmapTextureRegion: TextureRegion? = null
         private set
 
     private val cardTexturePixmap: Pixmap
@@ -455,7 +456,7 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
-        val texture = pixmapTexture ?: return
+        val texture = pixmapTextureRegion ?: return
         val shader = if (inGlowAnim) {
             glowShader
         } else if (inDestroyAnim) {
@@ -469,7 +470,14 @@ class CardActor(
             it.prepare(screen)
             batch.shader = it.shader
         }
-        batch.draw(texture, x, y, width, height)
+        batch.draw(
+            pixmapTextureRegion,
+            x, y,
+            width / 2, height / 2,
+            width, height,
+            1f, 1f,
+            rotation
+        )
         batch.flush()
         shader?.let { batch.shader = null }
     }
@@ -478,9 +486,9 @@ class CardActor(
         pixmap.drawPixmap(cardTexturePixmap, 0, 0)
         font.write(pixmap, card.curDamage.toString(), 35, 480, fontScale, fontColor)
         font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
-        pixmapTexture?.dispose()
+        pixmapTextureRegion?.texture?.dispose()
         // TODO: memory leak
-        pixmapTexture = Texture(pixmap)
+        pixmapTextureRegion = TextureRegion(Texture(pixmap))
     }
 
     override fun getHighlightArea(): Rectangle {

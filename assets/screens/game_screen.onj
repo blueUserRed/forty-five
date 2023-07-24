@@ -110,7 +110,7 @@ var cardHand = $CardHand {
     name: "card_hand",
     cardSize: cardHeight,
     hoveredCardScale: 1.3,
-    cardSpacing: 1.0,
+    maxCardSpacing: 10.0,
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
     draggedCardZIndex: cardZIndicesEnd,
@@ -504,7 +504,7 @@ var gameScreen = $Box {
             {
                 width: 100#percent,
                 height: 10#points,
-                positionBottom: -70#points,
+                positionBottom: -68#points,
             }
         ],
         zIndex: 200,

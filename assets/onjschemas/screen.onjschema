@@ -120,7 +120,7 @@ $Widget {
 
     $CardHand {
         cardSize: float,
-        cardSpacing: float,
+        maxCardSpacing: float,
         startCardZIndicesAt: int,
         hoveredCardZIndex: int,
         draggedCardZIndex: int,
