@@ -4,16 +4,14 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
-import com.fourinachamber.fortyfive.utils.between
-import ktx.actors.alpha
 import ktx.actors.contains
+import kotlin.math.pow
 
 
 /**
@@ -42,7 +40,7 @@ class CardHand(
     /**
      * the spacing between the cards
      */
-    var cardSpacing: Float = 0.0f
+    var maxCardSpacing: Float = 0.0f
 
     /**
      * the z-index of any card in the hand that is not hovered over
@@ -118,7 +116,7 @@ class CardHand(
     private fun layoutSide(fromIndex: Int, toIndex: Int, fromX: Float, toX: Float, reverseDirection: Boolean) {
         val sideWidth = toX - fromX
         val amountCards = toIndex - fromIndex
-        val spacePerCard = sideWidth / amountCards
+        val spacePerCard = (sideWidth / amountCards).coerceAtMost(maxCardSpacing)
         var i = if (reverseDirection) toIndex - 1 else fromIndex
         var x = if (reverseDirection) toX else fromX
         while (
@@ -126,7 +124,8 @@ class CardHand(
             (reverseDirection && i >= fromIndex)
         ) {
             val curCard = _cards[i]
-            curCard.actor.setBounds(x, y, cardSize, cardSize)
+            curCard.actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
+            curCard.actor.rotation = cardHeightFuncDerivative(x) * 50
             curCard.actor.fixedZIndex = if (reverseDirection) {
                 startCardZIndicesAt + i
             } else {
@@ -142,6 +141,10 @@ class CardHand(
         }
         resortZIndices()
     }
+
+    private fun cardHeightFuncDerivative(x: Float): Float = 0.144f - 0.0018f * x
+
+    private fun cardHeightFunc(x: Float): Float = -(0.03f * (x - 80f)).pow(2)
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->

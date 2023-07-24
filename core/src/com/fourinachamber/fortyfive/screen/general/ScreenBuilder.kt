@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -15,7 +14,6 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
@@ -296,7 +294,7 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         ).apply {
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
-            cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
+            maxCardSpacing = widgetOnj.get<Double>("maxCardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
             hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()
             draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()

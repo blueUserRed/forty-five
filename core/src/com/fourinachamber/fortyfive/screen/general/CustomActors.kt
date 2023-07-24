@@ -20,6 +20,7 @@ import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
+import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -372,7 +373,14 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         if (mask == null) {
             val c = batch.color.cpy()
             batch.setColor(c.r, c.g, c.b, alpha)
-            drawable.draw(batch, x, y, width, height)
+            if (rotation != 0f) {
+                val drawable = drawable
+                if (drawable !is TransformDrawable) throw RuntimeException("attempted to rotate an image, but the " +
+                        "drawable does not implement TransformDrawable")
+                drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
+            } else {
+                drawable.draw(batch, x, y, width, height)
+            }
             batch.color = c
             return
         }
