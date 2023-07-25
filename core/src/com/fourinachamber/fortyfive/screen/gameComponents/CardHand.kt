@@ -83,9 +83,8 @@ class CardHand(
      * adds a card to the hand
      */
     fun addCard(card: Card) {
-        _cards.add(card)
+        _cards.add((_cards.size / 2), card)
         if (card.actor !in this) addActor(card.actor)
-        updateCards()
         invalidateHierarchy()
     }
 
@@ -95,7 +94,6 @@ class CardHand(
     fun removeCard(card: Card) {
         _cards.remove(card)
         removeActor(card.actor)
-        updateCards()
         invalidateHierarchy()
     }
 
@@ -161,7 +159,7 @@ class CardHand(
             if (hoveredOver) {
                 card.actor.setBounds(
                     x.between(0f, width - cardSize * hoveredCardScale),
-                    cardHeightFunc(x).between(0f, height),
+                    cardHeightFunc(x).coerceAtLeast(0f),
                     cardSize * hoveredCardScale,
                     cardSize * hoveredCardScale
                 )

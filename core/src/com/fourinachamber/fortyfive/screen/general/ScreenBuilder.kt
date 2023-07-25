@@ -464,7 +464,6 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String?>("scrollbarSide"),
         )
         initFlexBox(flexBox, widgetOnj, screen)
-        flexBox.touchable = Touchable.enabled // TODO: remove
         return flexBox
     }
 
