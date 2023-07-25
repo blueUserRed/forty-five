@@ -496,7 +496,7 @@ var gameScreen = $Box {
             justifyContent: justify.flexEnd,
         }
     ],
-    debug: true
+//    debug: true
 } children [
 
     $CardHand {

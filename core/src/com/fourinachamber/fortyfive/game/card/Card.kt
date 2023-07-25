@@ -471,11 +471,11 @@ class CardActor(
             batch.shader = it.shader
         }
         batch.draw(
-            pixmapTextureRegion,
+            texture,
             x, y,
             width / 2, height / 2,
             width, height,
-            1f, 1f,
+            scaleX, scaleY,
             rotation
         )
         batch.flush()
