@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.screen.general.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.utils.between
 import ktx.actors.contains
 import kotlin.math.pow
 
@@ -104,33 +105,70 @@ class CardHand(
     }
 
     private fun updateCards() {
-    }
-
-    override fun layout() {
+        if (_cards.size == 0) return
         val cardsLeft = _cards.size / 2
         val spacePerSide = (width - centerGap) / 2f
-        layoutSide(0, cardsLeft, -cardSize / 2, spacePerSide - cardSize, true)
-        layoutSide(cardsLeft, _cards.size, spacePerSide + centerGap, width - cardSize / 2, false)
+        val zIndexChanged =
+            layoutSide(0, cardsLeft, -cardSize / 2, spacePerSide - cardSize, true) ||
+            layoutSide(cardsLeft, _cards.size, spacePerSide + centerGap, width - cardSize / 2, false)
+        if (zIndexChanged) resortZIndices()
     }
 
-    private fun layoutSide(fromIndex: Int, toIndex: Int, fromX: Float, toX: Float, reverseDirection: Boolean) {
+    private fun layoutSide(fromIndex: Int, toIndex: Int, fromX: Float, toX: Float, reverseDirection: Boolean): Boolean {
         val sideWidth = toX - fromX
         val amountCards = toIndex - fromIndex
         val spacePerCard = (sideWidth / amountCards).coerceAtMost(maxCardSpacing)
+
+        var zIndexChanged = false
+
+        fun doZIndexFor(card: Card, zIndex: Int) {
+            if (card.actor.fixedZIndex == zIndex) return
+            card.actor.fixedZIndex = zIndex
+            zIndexChanged = true
+        }
+
         var i = if (reverseDirection) toIndex - 1 else fromIndex
         var x = if (reverseDirection) toX else fromX
         while (
             (!reverseDirection && i < toIndex) ||
             (reverseDirection && i >= fromIndex)
         ) {
-            val curCard = _cards[i]
-            curCard.actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
-            curCard.actor.rotation = cardHeightFuncDerivative(x) * 50
-            curCard.actor.fixedZIndex = if (reverseDirection) {
-                startCardZIndicesAt + i
-            } else {
-                startCardZIndicesAt + fromIndex + (amountCards - (i - fromIndex))
+            val card = _cards[i]
+
+            if (card.actor.isDragged) {
+                doZIndexFor(card, draggedCardZIndex)
+                if (reverseDirection) {
+                    x -= spacePerCard
+                    i--
+                } else {
+                    x += spacePerCard
+                    i++
+                }
+                continue
             }
+
+            val hoveredOver = card.actor.isHoveredOver
+            doZIndexFor(
+                card,
+                if (hoveredOver) {
+                    hoveredCardZIndex
+                } else if (reverseDirection) {
+                    startCardZIndicesAt + i
+                } else {
+                    startCardZIndicesAt + fromIndex + (amountCards - (i - fromIndex))
+                }
+            )
+            if (hoveredOver) {
+                card.actor.setBounds(
+                    x.between(0f, width - cardSize * hoveredCardScale),
+                    cardHeightFunc(x).between(0f, height),
+                    cardSize * hoveredCardScale,
+                    cardSize * hoveredCardScale
+                )
+            } else {
+                card.actor.setBounds(x, cardHeightFunc(x), cardSize, cardSize)
+            }
+            card.actor.rotation = if (hoveredOver) 0f else cardHeightFuncDerivative(card.actor.x) * 50
             if (reverseDirection) {
                 x -= spacePerCard
                 i--
@@ -139,7 +177,7 @@ class CardHand(
                 i++
             }
         }
-        resortZIndices()
+        return zIndexChanged
     }
 
     private fun cardHeightFuncDerivative(x: Float): Float = 0.144f - 0.0018f * x
