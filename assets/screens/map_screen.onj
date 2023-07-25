@@ -1,7 +1,7 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 import "config/graphics_config.onj" as graphicsConfig;
-import "screens/sharedComponents.onj" as sharedComponents;
+import "screens/shared_components.onj" as sharedComponents;
 
 use Common;
 use Screen;
@@ -249,8 +249,8 @@ root: $Box {
                     displayName: "Settings",
                 },
             ],
-//            ...(sharedComponents.statusbar_left_defaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
-            ...(sharedComponents.statusbar_center_defaults)
+//            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
+            ...(sharedComponents.statusbarCenterDefaults)
         },
     ],
     $Backpack {

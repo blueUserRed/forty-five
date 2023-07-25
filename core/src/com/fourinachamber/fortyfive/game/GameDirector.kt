@@ -40,7 +40,7 @@ class GameDirector(private val controller: GameController) {
         FortyFiveLogger.debug(logTag, "chose $turnEstimate turns")
         enemy = scaleAndCreateEnemy(enemyProto, difficulty)
         FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}; damage = ${enemy.damage}")
-//        controller.initEnemyArea(enemy)
+        controller.initEnemyArea(enemy)
     }
 
     fun onNewTurn() {

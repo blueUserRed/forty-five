@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.Effect
 import com.fourinachamber.fortyfive.game.GameController
@@ -76,7 +77,7 @@ class Card(
     fontColor: Color,
     fontScale: Float,
     screen: OnjScreen
-) {
+): Disposable {
 
     /**
      * used for logging
@@ -275,6 +276,8 @@ class Card(
     }
 
     private fun updateTexture() = actor.redrawPixmap()
+
+    override fun dispose() = actor.disposeTexture()
 
     override fun toString(): String {
         return "card: $name"
@@ -482,13 +485,20 @@ class CardActor(
         shader?.let { batch.shader = null }
     }
 
+    fun disposeTexture() {
+        pixmapTextureRegion?.texture?.dispose()
+        pixmap.dispose()
+        pixmapTextureRegion = null
+    }
+
     fun redrawPixmap() {
         pixmap.drawPixmap(cardTexturePixmap, 0, 0)
         font.write(pixmap, card.curDamage.toString(), 35, 480, fontScale, fontColor)
         font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
         pixmapTextureRegion?.texture?.dispose()
-        // TODO: memory leak
-        pixmapTextureRegion = TextureRegion(Texture(pixmap))
+        val texture = Texture(pixmap, true)
+        texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
+        pixmapTextureRegion = TextureRegion(texture)
     }
 
     override fun getHighlightArea(): Rectangle {
