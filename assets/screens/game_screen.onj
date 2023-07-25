@@ -503,7 +503,7 @@ var gameScreen = $Box {
         styles: [
             {
                 width: 100#percent,
-                height: 10#points,
+                height: 0#points,
                 positionBottom: -68#points,
             }
         ],
