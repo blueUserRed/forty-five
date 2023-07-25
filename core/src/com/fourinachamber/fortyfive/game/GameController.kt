@@ -241,11 +241,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         gameDirector.onNewTurn()
     }
 
-    private var updateCount = 0 //TODO: this is stupid
+    private var updateCount = 0 // TODO: this is stupid
 
     @MainThreadOnly
     override fun update() {
-        if (updateCount == 3) curScreen.invalidateEverything() //TODO: this is stupid
+        if (updateCount < 4) curScreen.invalidateEverything() // TODO: this is stupid
         updateCount++
 
         mainTimeline.updateTimeline()
@@ -431,8 +431,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     revolver.removeCard(parryCard)
                     parryCard.leaveGame()
+
                 }
                 include(revolver.rotate(parryCard.rotationDirection))
+                action { onRevolverTurnActions() }
                 if (remainingDamage > 0) include(damagePlayerTimeline(remainingDamage))
             } },
             { popupEvent is ParryEvent && parryCard != null }
@@ -501,20 +503,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT)
         }
 
-        val finishTimeline = Timeline.timeline {
-            action {
-
-                checkCardModifierValidity()
-
-                revolver
-                    .slots
-                    .mapNotNull { it.card }
-                    .forEach(Card::onRevolverTurn)
-
-                enemyArea.enemies.forEach(Enemy::onRevolverTurn)
-            }
-        }
-
         val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
@@ -544,11 +532,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 { turnStatusEffectTimeline != null }
             )
 
-            includeLater(
-                { finishTimeline },
-                { true }
-            )
-
+            action { onRevolverTurnActions() }
         }
 
         appendMainTimeline(Timeline.timeline {
@@ -558,6 +542,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 revolver.rotate(rotationDirection).asAction()
             )
         })
+    }
+
+    /**
+     * updates components of the game that respond to revolver rotations, e.g. card modifiers, status effects
+     */
+    private fun onRevolverTurnActions() {
+        checkCardModifierValidity()
+        revolver
+            .slots
+            .mapNotNull { it.card }
+            .forEach(Card::onRevolverTurn)
+        enemyArea.enemies.forEach(Enemy::onRevolverTurn)
     }
 
     @AllThreadsAllowed
@@ -710,6 +706,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     override fun end() {
+        createdCards.forEach { it.dispose() }
         gameDirector.end()
         FortyFiveLogger.title("game ends")
         FortyFive.currentGame = null
