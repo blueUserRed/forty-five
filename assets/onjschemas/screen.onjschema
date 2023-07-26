@@ -19,6 +19,8 @@ $Viewport {
 }
 
 var widgetSharedKeys = {
+    template_name?: string,
+    template_keys?: { ...* },
     debug?: boolean,
     behaviours?: $Behaviour[],
     width?: float,
