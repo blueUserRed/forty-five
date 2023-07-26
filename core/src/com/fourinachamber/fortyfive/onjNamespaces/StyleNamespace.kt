@@ -138,7 +138,8 @@ class OnjYogaValue(
 ) : OnjValue() {
 
     override fun stringify(info: ToStringInformation) {
-        info.builder.append("'--yoga-value--'")
+        info.builder.append("'$value'")
+//        info.builder.append("'--yoga-value--'")
     }
 }
 
