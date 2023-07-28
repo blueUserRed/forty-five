@@ -29,7 +29,7 @@ assets: {
         "title_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
-        "player_bar",
+        "player_bar", "warning_label_background_red",
 
         "revolver_cursor",
 
@@ -37,7 +37,8 @@ assets: {
 
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
-        ...(sharedComponents.navBarAssests),
+        ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets)
     ]
 },
 
@@ -82,6 +83,10 @@ options: {
         ...(inputMaps.defaultInputMap)
     ]
 },
+
+templates: [
+    sharedComponents.warningLabelTemplate
+],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
     useSystemCursor: true,
@@ -711,7 +716,8 @@ root: $Box {
     styles: [
         {
             width: 100.0#percent,
-            height: 100.0#percent
+            height: 100.0#percent,
+            flexDirection: flexDirection.column
         }
     ]
 } children [
@@ -721,6 +727,18 @@ root: $Box {
         ],
         ...(sharedComponents.statusbarLeftDefaults)
     },
+//
+//    $FromTemplate {
+//        generateFrom: "warning_label_template",
+//        data: {
+//            symbol: "!!!",
+//            title: "Hard maximum handsize reached",
+//            body: "You can't draw any more cards this turn. After this turn, put all but 12 Cards at the bottom of your deck.",
+//            background: "warning_label_background_red",
+//            width: 8#percent,
+//        }
+//    },
+
     gameScreen,
     drawCardActor,
     popupActor,

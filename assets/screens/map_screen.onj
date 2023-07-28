@@ -23,7 +23,8 @@ assets: {
         "map_node_default",
         "map_node_shop_rect", "map_node_shop_circle",
         "map_node_fight_rect", "map_node_fight_circle",
-        "map_node_exit_rect", "map_node_exit_circle", ...(sharedComponents.navBarAssests),
+        "map_node_exit_rect", "map_node_exit_circle",
+        ...(sharedComponents.navBarUsedAssets),
     ]
 },
 

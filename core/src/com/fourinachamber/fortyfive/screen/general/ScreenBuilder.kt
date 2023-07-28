@@ -414,6 +414,13 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Backpack" -> Backpack(screen)
 
+        "FromTemplate" -> generateFromTemplate(
+            widgetOnj.get<String>("generateFrom"),
+            widgetOnj.get<OnjObject>("data").value,
+            parent,
+            screen
+        )!!
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
