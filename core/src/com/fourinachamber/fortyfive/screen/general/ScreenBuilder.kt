@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -15,7 +14,6 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
@@ -113,19 +111,19 @@ class ScreenBuilder(val file: FileHandle) {
         onj.ifHas<OnjArray>("templates") {
             for (a in it.value) {
                 a as OnjNamedObject
-                a.ifHas<String>("name") { name ->
-                    templateObjects[name] = a
+                if (!a.hasKey<String>("template_name") || !a.hasKey<OnjObject>("template_keys")) {
+                    throw RuntimeException("templates must define both template_name and template_keys!")
                 }
+                templateObjects[a.get<String>("template_name")] = a
             }
         }
     }
 
-
     fun generateFromTemplate(name: String, data: Map<String, OnjValue>, parent: FlexBox?, screen: OnjScreen): Actor? {
-        if (!templateObjects.contains(name) || templateObjects[name] == null) return null
-        val curMap = mutableMapOf<String, OnjValue>()
-        val widgetOnj = OnjNamedObject(templateObjects[name]!!.name, curMap)
-        templateObjects[name]!!.value.entries.forEach { curMap[it.key] = getNextValue(it.key, it.value, data) }
+        val template = templateObjects[name] ?: return null
+        val combinedData = combineTemplateValues(template.get<OnjObject>("template_keys"), data)
+        val widgetOnj = generateTemplateOnjValue(template, combinedData, "")
+        widgetOnj as OnjNamedObject
         val oldBehaviours = behavioursToBind.toList()
         val curActor = getWidget(widgetOnj, parent, screen)
         val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
@@ -135,30 +133,50 @@ class ScreenBuilder(val file: FileHandle) {
         return curActor
     }
 
-    private fun getNextValue(key: String, value: OnjValue, data: Map<String, OnjValue>): OnjValue {
-        if (key in data.keys) return data[key]!!
-        return when (value) {
-            is OnjNamedObject -> {
-                val x = mutableMapOf<String, OnjValue>()
-                value.value.entries.forEach { x[it.key] = getNextValue(it.key, it.value, data) }
-                OnjNamedObject(value.name, x)
-            }
+    private fun generateTemplateOnjValue(
+        original: OnjValue,
+        combinedData: Map<String, OnjValue>,
+        name: String
+    ): OnjValue = when (original) {
 
-            is OnjObject -> {
-                val x = mutableMapOf<String, OnjValue>()
-                value.value.entries.forEach { x[it.key] = getNextValue(it.key, it.value, data) }
-                OnjObject(x)
+        is OnjObject -> {
+            val new = original.value.mapValues { (key, value) ->
+                val childKey = if (name == "") key else "$name.$key"
+                combinedData[childKey] ?: generateTemplateOnjValue(value, combinedData, childKey)
             }
-
-            is OnjArray -> {
-                val x = mutableListOf<OnjValue>()
-                value.value.forEach { x.add(getNextValue("", it, data)) }
-                OnjArray(x)
-            }
-
-            else -> value
+            if (original is OnjNamedObject) OnjNamedObject(original.name, new) else OnjObject(new)
         }
+
+        is OnjArray -> {
+            val new = original.value.mapIndexed { index, value ->
+                val childKey = "$name.$index"
+                combinedData[childKey] ?: generateTemplateOnjValue(value, combinedData, childKey)
+            }
+            OnjArray(new)
+        }
+
+        else -> original
+
     }
+
+    private fun combineTemplateValues(templateKeys: OnjObject, data: Map<String, OnjValue>): Map<String, OnjValue> {
+        val result = mutableMapOf<String, OnjValue>()
+        val keys = templateKeys
+            .value
+            .mapValues { (_, value) ->
+                if (value !is OnjString) throw RuntimeException("template_keys can only contain OnjStrings!")
+                value
+            }
+        data.forEach { (dataPointName, value) ->
+            val key = keys.entries.find { it.value.value == dataPointName }?.key
+                ?: throw RuntimeException(
+                    "cannot set $dataPointName in template because it is not defined in the template keys"
+                )
+            result[key] = value
+        }
+        return result
+    }
+
 
     private fun doOptions(onj: OnjObject) {
         val options = onj.get<OnjObject>("options")
@@ -292,10 +310,11 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("targetWidth").toFloat(),
             widgetOnj.get<Double>("cardSize").toFloat(),
             widgetOnj.get<Double>("opacityIfNotPlayable").toFloat(),
+            widgetOnj.get<Double>("centerGap").toFloat(),
             screen
         ).apply {
             hoveredCardScale = widgetOnj.get<Double>("hoveredCardScale").toFloat()
-            cardSpacing = widgetOnj.get<Double>("cardSpacing").toFloat()
+            maxCardSpacing = widgetOnj.get<Double>("maxCardSpacing").toFloat()
             startCardZIndicesAt = widgetOnj.get<Long>("startCardZIndicesAt").toInt()
             hoveredCardZIndex = widgetOnj.get<Long>("hoveredCardZIndex").toInt()
             draggedCardZIndex = widgetOnj.get<Long>("draggedCardZIndex").toInt()
@@ -395,6 +414,13 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Backpack" -> Backpack(screen)
 
+        "FromTemplate" -> generateFromTemplate(
+            widgetOnj.get<String>("generateFrom"),
+            widgetOnj.get<OnjObject>("data").value,
+            parent,
+            screen
+        )!!
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
@@ -465,7 +491,6 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String?>("scrollbarSide"),
         )
         initFlexBox(flexBox, widgetOnj, screen)
-        flexBox.touchable = Touchable.enabled // TODO: remove
         return flexBox
     }
 

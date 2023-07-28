@@ -4,12 +4,14 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.Effect
 import com.fourinachamber.fortyfive.game.GameController
@@ -75,7 +77,7 @@ class Card(
     fontColor: Color,
     fontScale: Float,
     screen: OnjScreen
-) {
+): Disposable {
 
     /**
      * used for logging
@@ -275,6 +277,8 @@ class Card(
 
     private fun updateTexture() = actor.redrawPixmap()
 
+    override fun dispose() = actor.disposeTexture()
+
     override fun toString(): String {
         return "card: $name"
     }
@@ -442,7 +446,7 @@ class CardActor(
 
     private val pixmap: Pixmap = Pixmap(cardTexture.width, cardTexture.height, Pixmap.Format.RGBA8888)
 
-    var pixmapTexture: Texture? = null
+    var pixmapTextureRegion: TextureRegion? = null
         private set
 
     private val cardTexturePixmap: Pixmap
@@ -455,7 +459,7 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
-        val texture = pixmapTexture ?: return
+        val texture = pixmapTextureRegion ?: return
         val shader = if (inGlowAnim) {
             glowShader
         } else if (inDestroyAnim) {
@@ -469,17 +473,32 @@ class CardActor(
             it.prepare(screen)
             batch.shader = it.shader
         }
-        batch.draw(texture, x, y, width, height)
+        batch.draw(
+            texture,
+            x, y,
+            width / 2, height / 2,
+            width, height,
+            scaleX, scaleY,
+            rotation
+        )
         batch.flush()
         shader?.let { batch.shader = null }
+    }
+
+    fun disposeTexture() {
+        pixmapTextureRegion?.texture?.dispose()
+        pixmap.dispose()
+        pixmapTextureRegion = null
     }
 
     fun redrawPixmap() {
         pixmap.drawPixmap(cardTexturePixmap, 0, 0)
         font.write(pixmap, card.curDamage.toString(), 35, 480, fontScale, fontColor)
         font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
-        pixmapTexture?.dispose()
-        pixmapTexture = Texture(pixmap)
+        pixmapTextureRegion?.texture?.dispose()
+        val texture = Texture(pixmap, true)
+        texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
+        pixmapTextureRegion = TextureRegion(texture)
     }
 
     override fun getHighlightArea(): Rectangle {

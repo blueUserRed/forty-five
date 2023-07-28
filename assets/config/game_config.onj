@@ -5,7 +5,7 @@ import "config/graphics_config.onj" as graphicsConfig;
 cardDrawConfig: {
     firstRound: 6,
     roundStart: 2,
-    maxCards: 10,
+    maxCards: 20,
 },
 
 playerConfig: {

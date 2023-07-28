@@ -12,7 +12,12 @@ import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
-class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private val parent: CustomScrollableFlexBox, private val boughtIndices: MutableSet<Int>) {
+class ShopCardsHandler(
+    dataFile: String,
+    private val screen: OnjScreen,
+    private val parent: CustomScrollableFlexBox,
+    private val boughtIndices: MutableSet<Int>
+) {
     private val _allCards: MutableList<Card>
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
