@@ -263,6 +263,10 @@ textures: [
     {
         name: "statusbar_option",
         file: "textures/statusbar/option.png"
+    },
+    {
+        name: "warning_label_background_red",
+        file: "textures/warning_label/background_red.png"
     }
 ],
 
