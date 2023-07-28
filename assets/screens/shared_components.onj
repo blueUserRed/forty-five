@@ -4,7 +4,7 @@ use Common;
 import "imports/colors.onj" as color;
 import "config/game_config.onj" as gameConfig;
 
-navBarAssests: [
+navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
     "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left",
 ],
@@ -284,16 +284,30 @@ statusBarTemplates: [
 ],
 
 warningLabelTemplate: $Box {
+    template_name: "warning_label_template",
+    template_keys: {
+        "children.0.text": "symbol",
+        "children.1.0.text": "title",
+        "children.1.2.text": "body",
+        "styles.0.background": "background",
+        "styles.0.width": "width",
+    },
     styles: [
         {
-            flexDirection: flexDirection.row
+            flexDirection: flexDirection.row,
+            width: 0#points,
+            background: ""
         }
     ]
 } children [
 
     $Label {
-        name: "statusbar_text",
-        text: "!!!",
+        styles: [
+            {
+                width: 10#percent
+            }
+        ],
+        text: "!",
         font: "red_wing",
         color: color.forty_white,
         fontScale: 0.07,
@@ -303,11 +317,41 @@ warningLabelTemplate: $Box {
     $Box {
         styles: [
             {
-
-                flexDirection: flexDirection.column
+                flexDirection: flexDirection.column,
+                flexGrow: 1.0
             }
-        ]
+        ],
+        debug: true
     } children [
 
+        $Label {
+            text: "",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 0.07,
+            align: "center",
+        },
+
+        $Box {
+            styles: [
+                {
+                    background: "forty_white_texture",
+                    width: 100#percent,
+                    height: 1#points
+                }
+            ]
+        },
+
+        $Label {
+            text: "",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 0.07,
+            align: "left",
+            wrap: true
+        },
+
     ]
-]
+],
+
+warningLabelUsedAssets: [ "forty_white_texture" ]

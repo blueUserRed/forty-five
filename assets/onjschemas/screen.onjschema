@@ -217,12 +217,17 @@ $Widget {
         ...widgetSharedKeys
     }
 
-    $PersonWidget{
+    $PersonWidget {
         offsetX:float,
         offsetY:float,
         scale:float,
         dropBehaviour?: $DragAndDropBehaviour,
         ...widgetSharedKeys
+    }
+
+    $FromTemplate {
+        generateFrom: string,
+        data: { ...* }
     }
 
 }
