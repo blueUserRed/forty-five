@@ -291,6 +291,10 @@ textures: [
     {
         name: "backpack_backpack_background",
         file: "textures/backpack/backpack_background.png"
+    },
+    {
+        name: "backpack_empty_deck_slot",
+        file: "textures/backpack/empty_deck_slot.png"
     }
 ],
 
