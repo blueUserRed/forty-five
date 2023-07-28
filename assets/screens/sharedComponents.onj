@@ -20,8 +20,9 @@ backpackAssets: [
     "backpack_5",
     "backpack_deck_background",
     "backpack_backpack_background", //This name intended, not an error
-"backpack_scrollbar_background",
-"backpack_scrollbar",
+    "backpack_scrollbar_background",
+    "backpack_scrollbar",
+    "backpack_empty_deck_slot",
 ],
 
 
@@ -331,10 +332,55 @@ var exampleCard = $Box {
             marginTop: 2#percent,
             width: 23#percent,
             height: 20.9#percent,
-            background: "card%%bullet",
         }
     ]
-};
+} children [
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                marginTop: 2#percent,
+                width: 100#percent,
+                height: 100#percent,
+                background: "backpack_empty_deck_slot",
+            }
+        ]
+    },
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                marginTop: 2#percent,
+                width: 100#percent,
+                height: 100#percent,
+                background: "card%%bullet",
+            }
+        ]
+    }
+];
+
+var exampleSlot = $Box {
+    styles: [
+        {
+            marginTop: 2#percent,
+            width: 23#percent,
+            height: 20.9#percent,
+        }
+    ]
+} children [
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                marginTop: 2#percent,
+                width: 100#percent,
+                height: 100#percent,
+                background: "backpack_empty_deck_slot",
+            }
+        ]
+    }
+];
+
 var scrollBarBackgroundDeck = $Image {
     name: "deck_scrollbar_background",
     textureName: "backpack_scrollbar_background",
@@ -349,9 +395,55 @@ var scrollBarDeck = $Image {
     scaleY: 1.0
 };
 
+var scrollBarBackgroundBackpack = $Image {
+    name: "backpack_scrollbar_background",
+    textureName: "backpack_scrollbar_background",
+    scaleX: 1.0,
+    scaleY: 1.0,
+    reportDimensionsWithScaling: true,
+};
+var scrollBarBackpack = $Image {
+    name: "backpack_scrollbar_handle",
+    textureName: "backpack_scrollbar",
+    scaleX: 1.0,
+    scaleY: 1.0
+};
+
+var listExampleChildren = [
+    exampleCard, exampleSlot, exampleSlot, exampleSlot,
+    exampleCard, exampleCard, exampleSlot, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleSlot,
+    exampleCard, exampleSlot, exampleSlot, exampleCard,
+    exampleSlot, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleSlot, exampleCard,
+    exampleSlot, exampleCard, exampleCard, exampleSlot,
+    exampleCard, exampleSlot, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard,
+    exampleCard, exampleCard, exampleCard, exampleCard
+];
+
 backpack: $Backpack {
-    cardsFile: "config/cards.onj",
     name: "tempActor",
+    cardsFile: "config/cards.onj",
     zIndex: 5,
     styles: [
         {
@@ -362,7 +454,6 @@ backpack: $Backpack {
             marginTop: 13#points,
             marginLeft: 5#points,
             justifyContent: justify.spaceBetween,
-
         }
     ],
 } children [
@@ -462,35 +553,7 @@ backpack: $Backpack {
                 }
             ],
         } children [
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
-            exampleCard, exampleCard, exampleCard, exampleCard,
+            ...listExampleChildren,
             scrollBarBackgroundDeck, scrollBarDeck
         ],
     ],
@@ -499,10 +562,58 @@ backpack: $Backpack {
             {
                 width: 73#points,
                 height: 100#percent,
-                flexDirection: flexDirection.row,
-                justifyContent: justify.spaceAround,
+                flexDirection: flexDirection.column,
+                paddingTop: 3#points,
+                paddingLeft: 3#points,
+                paddingRight: 3#points,
                 background: "backpack_backpack_background",
             }
         ],
-    }
-],
+    } children [
+        $Box {
+            styles: [
+                {
+                    width: 100#percent,
+                    height: 10#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    alignItems: align.center,
+                    paddingLeft: 3#points,
+                    paddingRight: 3#points,
+                }
+            ],
+        } children [
+            $Label {
+                text: "Backpack",
+                font: "red_wing",
+                fontScale: 0.09,
+                color: color.white,
+            }
+        ],
+        $ScrollBox {
+            isScrollDirectionVertical: true,
+            scrollDistance: 3.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "backpack_scrollbar_background",
+            scrollbarName: "backpack_scrollbar_handle",
+
+            scrollbarSide: "right",
+            styles: [
+                {
+                    flexWrap: wrap.wrap,
+                    width: 98#percent,
+                    height: 90#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceAround,
+                    alignItems: align.flexStart,
+                    paddingRight: 2#points,
+                    cuttingRight: 1.75,
+                    scrollbarWidth: 1.25,
+                }
+            ],
+        } children [
+            ...listExampleChildren,
+            scrollBarBackgroundBackpack, scrollBarBackpack
+        ]
+    ]
+]

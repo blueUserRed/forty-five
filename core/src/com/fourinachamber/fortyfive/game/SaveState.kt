@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
+import kotlinx.coroutines.newFixedThreadPoolContext
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
@@ -35,7 +36,7 @@ object SaveState {
     val cards: List<String>
         get() = _ownedCards
 
-    private var _decks: MutableList<Deck> = mutableListOf()
+    private var _decks: MutableSet<Deck> = mutableSetOf()
 
     val curDeck: Deck
         get() = _decks.find { it.id == curDeckNbr }!!
@@ -98,7 +99,10 @@ object SaveState {
         set(value) {
             if (curDeckNbr != value) {
                 savefileDirty = true
-                if (_decks.find { it.id == value } == null) _decks.add(_decks.find { it.id == 1 }!!)
+                if (_decks.find { it.id == value } == null) {
+                    val curDeck = _decks.find { it.id == 1 }!!
+                    _decks.add(Deck("Deck $value", value, curDeck.cardPosition.toMutableMap()))
+                }
             }
             field = value
         }
@@ -160,7 +164,7 @@ object SaveState {
         _ownedCards = obj.get<OnjArray>("ownedCards").value.map { it.value as String }.toMutableList()
         FortyFiveLogger.debug(logTag, "cards: $_ownedCards")
 
-        obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck(it as OnjObject)) }
+        obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck.getFromOnj(it as OnjObject)) }
         curDeckNbr = obj.get<Long>("curDeck").toInt()
 
         val stats = obj.get<OnjObject>("stats")
@@ -190,7 +194,7 @@ object SaveState {
                     "currentNode = $currentNode"
         )
 
-        savefileDirty = false
+        savefileDirty = true
     }
 
     /**
@@ -245,25 +249,13 @@ object SaveState {
     }
 
 
-    class Deck(onj: OnjObject) {
-        val name: String
-        val id: Int
-        private val _cardPositions: MutableMap<Int, String> = mutableMapOf()
-
+    class Deck(val name: String, val id: Int, private val _cardPositions: MutableMap<Int, String>) {
         val cardPosition: Map<Int, String>
             get() = _cardPositions
 
         val cards: List<String>
             get() = _cardPositions.map { it.value }
 
-        init {
-            id = onj.get<Long>("index").toInt()
-            name = onj.get<String?>("name") ?: "Deck $id"
-            onj.get<OnjArray>("cards").value.forEach {
-                it as OnjObject
-                _cardPositions[it.get<Long>("positionId").toInt()] = it.get<String>("cardName")
-            }
-        }
 
         fun swapCards(i1: Int, i2: Int) {
             val old1 = _cardPositions[i1]
@@ -299,6 +291,27 @@ object SaveState {
                 "index" with id
                 "name" with name
                 "cards" with OnjArray(deck)
+            }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is Deck && other.id == this.id
+        }
+
+        override fun hashCode(): Int {
+            return id.hashCode()
+        }
+
+        companion object {
+            fun getFromOnj(onj: OnjObject): Deck {
+                val id = onj.get<Long>("index").toInt()
+                val name = onj.get<String?>("name") ?: "Deck $id"
+                val cardPositions: MutableMap<Int, String> = mutableMapOf()
+                onj.get<OnjArray>("cards").value.forEach {
+                    it as OnjObject
+                    cardPositions[it.get<Long>("positionId").toInt()] = it.get<String>("cardName")
+                }
+                return Deck(name, id, cardPositions)
             }
         }
     }
