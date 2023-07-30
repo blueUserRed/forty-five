@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
+import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.map.shop.ShopCardsHandler
@@ -16,6 +17,7 @@ class Backpack(screen: OnjScreen, dataFile: String) : CustomFlexBox(screen), InO
 
     private val _allCards: MutableList<Card>
     private val cardImgs: MutableList<CustomImageActor> = mutableListOf()
+
     init {
         val onj = OnjParser.parseFile(dataFile)
         cardsFileSchema.assertMatches(onj)
@@ -25,7 +27,7 @@ class Backpack(screen: OnjScreen, dataFile: String) : CustomFlexBox(screen), InO
     }
 
     override fun display(): Timeline {
-        TemplateString.updateGlobalParam("deck.name",SaveState.curDeck.name)
+        TemplateString.updateGlobalParam("deck.name", SaveState.curDeck.name)
         return Timeline.timeline {
             action {
                 println("now opening")
@@ -50,7 +52,9 @@ class Backpack(screen: OnjScreen, dataFile: String) : CustomFlexBox(screen), InO
     }
 
     companion object {
-
+        private val backpackFileSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
+        }
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
         }

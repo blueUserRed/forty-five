@@ -150,8 +150,10 @@ class StatusbarWidget(
         val action = MoveByAction()
         action.amountY = 2F * (if (goUp) 1 else -1)
         action.duration = 0.2F
-        action.interpolation= Interpolation.exp10Out
-        target.addAction(action)
+        action.interpolation = Interpolation.exp10Out
+//        action{
+            target.addAction(action)
+//        }
         delayUntil { action.isComplete }
     }
 
