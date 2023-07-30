@@ -96,6 +96,7 @@ class Revolver(
         card?.actor?.let {
             it.width = slots[0].width * cardScale
             it.height = slots[0].width * cardScale
+            it.rotation = 0f
         }
         card?.actor?.fixedZIndex = cardZIndex
         if (card != null && card.actor !in this) addActor(card.actor)

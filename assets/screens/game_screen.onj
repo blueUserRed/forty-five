@@ -3,6 +3,7 @@ import "config/game_config.onj" as gameConfig;
 import "config/graphics_config.onj" as graphicsConfig;
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
 
 use Common;
 use Screen;
@@ -13,7 +14,7 @@ var pi = 3.141;
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-var cardScale = 0.028;
+var cardScale = 0.022;
 var cardHeight = 596.0 * cardScale;
 
 var cardZIndicesStart = 100;
@@ -25,10 +26,10 @@ assets: {
 
         "vanilla_whale", "red_wing",
 
-        "game_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
+        "title_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
-        "player_bar",
+        "player_bar", "warning_label_background_red",
 
         "revolver_cursor",
 
@@ -36,6 +37,8 @@ assets: {
 
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
+        ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets)
     ]
 },
 
@@ -73,13 +76,17 @@ var controller = $GameScreenController {
 };
 
 options: {
-    background: "game_screen_background",
+    background: "title_screen_background",
     screenController: controller,
     inputMap: [
         ...(inputMaps.gameInputMap),
         ...(inputMaps.defaultInputMap)
     ]
 },
+
+templates: [
+    sharedComponents.warningLabelTemplate
+],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
     useSystemCursor: true,
@@ -110,11 +117,13 @@ var cardHand = $CardHand {
     name: "card_hand",
     cardSize: cardHeight,
     hoveredCardScale: 1.3,
-    cardSpacing: 1.0,
+    maxCardSpacing: 10.0,
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
     draggedCardZIndex: cardZIndicesEnd,
     opacityIfNotPlayable: 0.5,
+    centerGap: 30.0,
+//    centerGap: 19.0,
     targetWidth: worldWidth * 0.6,
 };
 
@@ -127,8 +136,8 @@ var shootButton = $Image {
     name: "shoot_button_texture",
     textureName: "shoot_button_texture",
     reportDimensionsWithScaling: true,
-    scaleX: 0.03,
-    scaleY: 0.03,
+    scaleX: 0.025,
+    scaleY: 0.025,
     behaviours: [
         buttonHoverBehaviour,
         $CatchEventAndEmitBehaviour {
@@ -140,9 +149,10 @@ var shootButton = $Image {
 
 var endTurnButton = $Image {
     name: "end_turn_button",
+    textureName: "end_turn_button_texture",
     reportDimensionsWithScaling: true,
-    scaleX: 0.03,
-    scaleY: 0.03,
+    scaleX: 0.025,
+    scaleY: 0.025,
     behaviours: [
         buttonHoverBehaviour,
         $CatchEventAndEmitBehaviour {
@@ -398,12 +408,12 @@ var drawCardActor = $Box {
     ]
 
 ];
-
+// TODO: fix pixelated looking textures
 var playerBar = $Box {
     styles: [
         {
             width: 100#percent,
-            height: 20#points,
+            height: 22#points,
             background: "player_bar",
             flexDirection: flexDirection.row,
             alignItems: align.center
@@ -439,8 +449,47 @@ var playerBar = $Box {
             scaleY: 0.002
         },
         reservesLabel,
-    ]
+    ],
 
+    $Box {
+        styles: [
+            {
+                positionLeft: 32#points,
+                positionBottom: 3#points,
+                rotation: 4.0
+            }
+        ],
+        enableTransform: true
+    } children [
+        shootButton
+    ],
+
+    $Box {
+        styles: [
+            {
+                width: 15#points,
+                height: 8#points,
+                positionLeft: 80#points,
+                positionBottom: 3#points,
+                rotation: -4.0
+            }
+        ],
+        enableTransform: true,
+        debug: true
+    },
+
+    $Box {
+        styles: [
+            {
+                positionLeft: 107#points,
+                positionBottom: 2#points,
+                rotation: -6.0,
+            }
+        ],
+        enableTransform: true,
+    } children [
+        endTurnButton
+    ]
 ];
 
 var gameScreen = $Box {
@@ -454,8 +503,42 @@ var gameScreen = $Box {
             justifyContent: justify.flexEnd,
         }
     ],
-    debug: true
+//    debug: true
 } children [
+
+    $Box {
+        styles: [
+            {
+                flexGrow: 1.0
+            }
+        ]
+    },
+
+    $EnemyArea {
+        styles: [
+            {
+                width: 10#points,
+                height: 10#points,
+                positionLeft: 50#points,
+                positionBottom: -10#points,
+            }
+        ],
+        debug: true,
+        ...enemyArea
+    },
+
+    $CardHand {
+        styles: [
+            {
+                width: 100#percent,
+                height: 0#points,
+                positionBottom: -68#points,
+            }
+        ],
+        zIndex: 200,
+        debug: true,
+        ...cardHand
+    },
 
     $Revolver {
         styles: [
@@ -633,9 +716,31 @@ root: $Box {
     styles: [
         {
             width: 100.0#percent,
-            height: 100.0#percent
+            height: 100.0#percent,
+            flexDirection: flexDirection.column
         }
     ]
 } children [
-    gameScreen, drawCardActor, popupActor, attackPopup
+
+    $Statusbar {
+        options: [
+        ],
+        ...(sharedComponents.statusbarLeftDefaults)
+    },
+//
+//    $FromTemplate {
+//        generateFrom: "warning_label_template",
+//        data: {
+//            symbol: "!!!",
+//            title: "Hard maximum handsize reached",
+//            body: "You can't draw any more cards this turn. After this turn, put all but 12 Cards at the bottom of your deck.",
+//            background: "warning_label_background_red",
+//            width: 8#percent,
+//        }
+//    },
+
+    gameScreen,
+    drawCardActor,
+    popupActor,
+    attackPopup
 ]

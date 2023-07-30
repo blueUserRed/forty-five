@@ -1,14 +1,14 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 import "config/graphics_config.onj" as graphicsConfig;
-import "screens/sharedComponents.onj" as sharedComponents;
+import "screens/shared_components.onj" as sharedComponents;
 
 use Common;
 use Screen;
 use Style;
 
 
-var worldWidth = 160.0;
+var worldWidth = 160.0;s
 var worldHeight = 90.0;
 
 assets: {
@@ -25,8 +25,8 @@ assets: {
         "map_node_fight_rect", "map_node_fight_circle",
         "map_node_exit_rect", "map_node_exit_circle",
         "card_character",
-        ...(sharedComponents.navBarAssests),
         ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.navBarUsedAssets),
     ]
 },
 
@@ -252,8 +252,8 @@ root: $Box {
                     displayName: "Settings",
                 },
             ],
-//            ...(sharedComponents.statusbar_left_defaults) //Hint to use on left side: use this command instead of next, and comment 2 out of the 3 actors in the options out
-            ...(sharedComponents.statusbar_center_defaults)
+//            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
+            ...(sharedComponents.statusbarCenterDefaults)
         },
         sharedComponents.backpack,
     ],

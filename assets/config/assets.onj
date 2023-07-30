@@ -1,4 +1,3 @@
-
 import "imports/colors.onj" as color;
 
 use Common;
@@ -65,61 +64,80 @@ textureAtlases: [
                 handle: "game_screen_background",
                 regionName: "background"
             },
-            {   handle: "revolver_slot_texture",
+            {
+                handle: "revolver_slot_texture",
                 regionName: "revolver_slot"
             },
-            {   handle: "enemy_texture",
+            {
+                handle: "enemy_texture",
                 regionName: "enemy"
             },
-            {   handle: "normal_bullet",
+            {
+                handle: "normal_bullet",
                 regionName: "normal_bullet"
             },
-            {   handle: "end_turn_button_texture",
+            {
+                handle: "end_turn_button_texture",
                 regionName: "end_turn"
             },
-            {   handle: "end_turn_button_texture_hover",
+            {
+                handle: "end_turn_button_texture_hover",
                 regionName: "end_turn_hover"
             },
-            {   handle: "shoot_button_texture",
+            {
+                handle: "shoot_button_texture",
                 regionName: "shoot"
             },
-            {   handle: "shoot_button_texture_hover",
+            {
+                handle: "shoot_button_texture_hover",
                 regionName: "shoot_hover"
             },
-            {   handle: "enemy_turn_banner",
+            {
+                handle: "enemy_turn_banner",
                 regionName: "enemy_turn_banner"
             },
-            {   handle: "player_turn_banner",
+            {
+                handle: "player_turn_banner",
                 regionName: "player_turn_banner"
             },
-            {   handle: "revolver_drum",
+            {
+                handle: "revolver_drum",
                 regionName: "revolver_drum"
             },
-            {   handle: "heart_texture",
+            {
+                handle: "heart_texture",
                 regionName: "heart"
             },
-            {   handle: "reserves_texture",
+            {
+                handle: "reserves_texture",
                 regionName: "reserves"
             },
-            {   handle: "hit_overlay",
+            {
+                handle: "hit_overlay",
                 regionName: "hit_overlay"
             },
-            {   handle: "burning_icon",
+            {
+                handle: "burning_icon",
                 regionName: "burning_icon"
             },
-            {   handle: "insult_icon",
+            {
+                handle: "insult_icon",
                 regionName: "insult_icon"
             },
-            {   handle: "shield_icon",
+            {
+                handle: "shield_icon",
                 regionName: "shield_icon"
             },
-            {   handle: "poison_icon",
+            {
+                handle: "poison_icon",
                 regionName: "poison_icon"
             },
-            {   handle: "draw_bullet",
+            {
+                handle: "draw_bullet",
                 regionName: "draw_bullet"
             },
-            {   handle: "draw_cover",
+            {
+                handle: "draw_cover",
                 regionName: "draw_cover"
             },
             {
@@ -295,6 +313,10 @@ textures: [
     {
         name: "backpack_empty_deck_slot",
         file: "textures/backpack/empty_deck_slot.png"
+    },
+    {
+        name: "warning_label_background_red",
+        file: "textures/warning_label/background_red.png"
     }
 ],
 
@@ -317,6 +339,7 @@ shaders: [
     },
     {
         name: "vignette_shader", // TODO: fix
+
         file: "shaders/vignette.glsl",
         constantArgs: {
             color: color.red,
@@ -328,7 +351,8 @@ shaders: [
     {
         name: "film_shader",
         file: "shaders/film.glsl",
-        constantArgs: { }
+        constantArgs: {
+        }
     },
     {
         name: "glow_shader",
@@ -341,7 +365,8 @@ shaders: [
     {
         name: "fog_shader",
         file: "shaders/fog.glsl",
-        constantArgs: { }
+        constantArgs: {
+        }
     },
     {
         name: "dissolve_shader",
@@ -355,7 +380,8 @@ shaders: [
     }
 ],
 
-animations: [],
+animations: [
+],
 
 colorTextures: [
     {
@@ -385,7 +411,7 @@ colorTextures: [
 ],
 
 ninepatches: [
-     {
+    {
         name: "cover_hook",
         file: "textures/ninepatches/cover_hook.png",
         top: 1,

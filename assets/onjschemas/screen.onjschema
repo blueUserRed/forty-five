@@ -19,6 +19,8 @@ $Viewport {
 }
 
 var widgetSharedKeys = {
+    template_name?: string,
+    template_keys?: { ...* },
     debug?: boolean,
     behaviours?: $Behaviour[],
     width?: float,
@@ -122,13 +124,14 @@ $Widget {
 
     $CardHand {
         cardSize: float,
-        cardSpacing: float,
+        maxCardSpacing: float,
         startCardZIndicesAt: int,
         hoveredCardZIndex: int,
         draggedCardZIndex: int,
         hoveredCardScale: float,
         targetWidth: float,
         opacityIfNotPlayable: float,
+        centerGap: float,
 //        ...detailTextSharedKeys,
         ...widgetSharedKeys
     }
@@ -216,12 +219,17 @@ $Widget {
         ...widgetSharedKeys
     }
 
-    $PersonWidget{
+    $PersonWidget {
         offsetX:float,
         offsetY:float,
         scale:float,
         dropBehaviour?: $DragAndDropBehaviour,
         ...widgetSharedKeys
+    }
+
+    $FromTemplate {
+        generateFrom: string,
+        data: { ...* }
     }
 
 }

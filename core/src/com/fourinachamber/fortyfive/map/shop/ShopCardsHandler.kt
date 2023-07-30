@@ -14,7 +14,12 @@ import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
-class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private val parent: CustomScrollableFlexBox, private val boughtIndices: MutableSet<Int>) {
+class ShopCardsHandler(
+    dataFile: String,
+    private val screen: OnjScreen,
+    private val parent: CustomScrollableFlexBox,
+    private val boughtIndices: MutableSet<Int>
+) {
     private val _allCards: MutableList<Card>
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
@@ -64,7 +69,7 @@ class ShopCardsHandler(dataFile: String, private val screen: OnjScreen, private 
             curParent,
             screen
         ) as CustomImageActor
-        img.drawable = TextureRegionDrawable(TextureRegion(card.actor.pixmapTexture))
+        img.drawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
         val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap2["name"] = OnjString("CardLabel" + parent.children.size)
         tempMap2["text"] = OnjString("" + card.price + "$")

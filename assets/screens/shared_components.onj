@@ -7,7 +7,7 @@ import "config/game_config.onj" as gameConfig;
 var worldWidth = 160.0;
 var worldHeight = 90.0;
 
-navBarAssests: [
+navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
     "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left"
 ],
@@ -57,7 +57,7 @@ navBar: $Box {
     },
 ],
 
-statusbar_center_defaults: {
+statusbarCenterDefaults: {
     mapIndicatorWidgetName: "map_indicator_parent",
     optionsWidgetName: "options_parent",
     styles: [
@@ -164,8 +164,7 @@ statusbar_center_defaults: {
     ]
 },
 
-
-statusbar_left_defaults: {
+statusbarLeftDefaults: {
     optionsWidgetName: "options_parent",
     styles: [
         {
@@ -200,38 +199,42 @@ statusbar_left_defaults: {
                         height: 84#percent,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
-                        marginRight: 2#percent,
-                    }
-                ],
-            } children [
+                        //<<<<<<< HEAD:assets/screens/sharedComponents.onj
+//                        marginRight: 2#percent,
+//                    }
+//                ], //TODO marvin fragen
+//            } children [
+//
+//                $Image {
+//                    textureName: "reserves_texture",
+//                    scaleX: 0.005,
+//                    scaleY: 0.005,
+//                    reportDimensionsWithScaling: true,
+//                    styles: [
+//                        {
+//                            height: 60#percent,
+//                            width: 25#percent,
+//                        }
+//                    ],
+//                },
+//                $TemplateLabel {
+//                    template: " {game.curReserves}/{game.baseReserves}",
+//                    font: "red_wing_cm",
+//                    color: color.forty_white,
+//                    fontScale: 0.09,
+//                    align: "center",
+//                }
+//            ],
+//            $Box {
+//                styles: [
+//                    {
+//                        width: 30#percent,
+//                        height: 84#percent,
+//                        flexDirection: flexDirection.row,
+//                        alignItems: align.center,
+//=======
+//>>>>>>> main:assets/screens/shared_components.onj
 
-                $Image {
-                    textureName: "reserves_texture",
-                    scaleX: 0.005,
-                    scaleY: 0.005,
-                    reportDimensionsWithScaling: true,
-                    styles: [
-                        {
-                            height: 60#percent,
-                            width: 25#percent,
-                        }
-                    ],
-                },
-                $TemplateLabel {
-                    template: " {game.curReserves}/{game.baseReserves}",
-                    font: "red_wing_cm",
-                    color: color.forty_white,
-                    fontScale: 0.09,
-                    align: "center",
-                }
-            ],
-            $Box {
-                styles: [
-                    {
-                        width: 30#percent,
-                        height: 84#percent,
-                        flexDirection: flexDirection.row,
-                        alignItems: align.center,
                     }
                 ],
             } children [
@@ -275,8 +278,11 @@ statusbar_left_defaults: {
 
 statusBarTemplates: [
     $Label {
-        name: "statusbar_text",
-        text: "", //template
+        template_keys: {
+            "text": "text"
+        },
+        template_name: "statusbar_text",
+        text: "", // template
 
         font: "red_wing_cm",
         color: color.forty_white,
@@ -284,7 +290,10 @@ statusBarTemplates: [
         align: "center",
     },
     $Image {
-        name: "statusbar_sign",
+        template_name: "statusbar_sign",
+        template_keys: {
+            "textureName": "textureName"
+        },
         textureName: "location_sign_salem",
         scaleX: 0.07,
         scaleY: 0.07,
@@ -298,10 +307,14 @@ statusBarTemplates: [
     },
     $Box {
         zIndex: 3,
-        name: "statusbar_option",
+        template_name: "statusbar_option",
+        template_keys: {
+            "styles.0.width": "width",
+            "children.0.text": "text"
+        },
         styles: [
             {
-                width: 0#percent, //template
+                width: 0#percent, // template
 
                 height: 100#percent,
                 background: "statusbar_option",
@@ -324,7 +337,6 @@ statusBarTemplates: [
         ]
     },
 ],
-
 
 var exampleCard = $Box {
     styles: [
@@ -616,4 +628,79 @@ backpack: $Backpack {
             scrollBarBackgroundBackpack, scrollBarBackpack
         ]
     ]
-]
+],
+
+warningLabelTemplate: $Box {
+    template_name: "warning_label_template",
+    template_keys: {
+        "children.0.text": "symbol",
+        "children.1.0.text": "title",
+        "children.1.2.text": "body",
+        "styles.0.background": "background",
+        "styles.0.width": "width",
+    },
+    styles: [
+        {
+            flexDirection: flexDirection.row,
+            width: 0#points,
+            background: ""
+        }
+    ]
+} children [
+
+    $Label {
+        styles: [
+            {
+                width: 10#percent
+            }
+        ],
+        text: "!",
+        font: "red_wing",
+        color: color.forty_white,
+        fontScale: 0.07,
+        align: "center",
+    },
+
+    $Box {
+        styles: [
+            {
+                flexDirection: flexDirection.column,
+                flexGrow: 1.0
+            }
+        ],
+        debug: true
+    } children [
+
+        $Label {
+            text: "",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 0.07,
+            align: "center",
+        },
+
+        $Box {
+            styles: [
+                {
+                    background: "forty_white_texture",
+                    width: 100#percent,
+                    height: 1#points
+                }
+            ]
+        },
+
+        $Label {
+            text: "",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 0.07,
+            align: "left",
+            wrap: true
+        },
+
+    ]
+],
+
+warningLabelUsedAssets: [
+    "forty_white_texture"
+],
