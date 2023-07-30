@@ -456,7 +456,8 @@ var listExampleChildren = [
 backpack: $Backpack {
     name: "tempActor",
     cardsFile: "config/cards.onj",
-    zIndex: 5,
+    backpackFile: "maps/backpack_config.onj",
+    zIndex: 7,
     styles: [
         {
             width: 150#points,
