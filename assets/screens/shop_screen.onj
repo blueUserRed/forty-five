@@ -32,8 +32,8 @@ options: {
         ...(inputMaps.defaultInputMap)
     ],
     screenController: $ShopScreenController {
-        shopsFile: "maps/shops.onj",
-        npcsFile: "maps/npcs.onj",
+        shopsFile: "maps/events/shops.onj",
+        npcsFile: "maps/events/npcs.onj",
         cardsFile: "config/cards.onj",
         personWidgetName: "shop_person_widget",
         messageWidgetName: "shop_message",
@@ -289,7 +289,7 @@ root: $Box {
             font: "red_wing",
             parts: [
             ],
-            defaults: { //defaults actually defined in map/shops.onj
+            defaults: { //defaults actually defined in map/events/shops.onj
 
                 font: "red_wing",
                 fontScale: 0.08,

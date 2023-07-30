@@ -28,7 +28,7 @@ options: {
         ...(inputMaps.defaultInputMap)
     ],
     screenController: $DialogScreenController {
-        npcsFile: "maps/npcs.onj",
+        npcsFile: "maps/events/npcs.onj",
         dialogWidgetName: "dialog_widget"
     }
 },

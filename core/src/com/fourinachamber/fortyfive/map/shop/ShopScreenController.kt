@@ -108,8 +108,5 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val npcsSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal(schemaPathNpcs).file())
         }
-
     }
-
-
 }

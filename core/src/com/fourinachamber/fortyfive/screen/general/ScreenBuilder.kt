@@ -264,7 +264,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Box" -> getFlexBox(widgetOnj, screen)
 
-        "ScrollBox" -> getScrollFlexBox(widgetOnj, screen)
+        "ScrollBox" -> getScrollFlexBox(widgetOnj, screen) //TODO this
 
         "Statusbar" -> StatusbarWidget(
             widgetOnj.get<String?>("mapIndicatorWidgetName"),
