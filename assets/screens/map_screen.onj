@@ -8,7 +8,7 @@ use Screen;
 use Style;
 
 
-var worldWidth = 160.0;s
+var worldWidth = 160.0;
 var worldHeight = 90.0;
 
 assets: {
