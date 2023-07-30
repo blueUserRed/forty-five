@@ -16,7 +16,7 @@ assets: {
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
         "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         "shop_back_button", "test_scrollbar_background", "card_character",
-        ...(sharedComponents.navBarAssests),
+        ...(sharedComponents.navBarUsedAssets),
     ]
 },
 
@@ -317,13 +317,11 @@ root: $Box {
 
 templates: [
     $Image {
-        //        templates_key: { //TODO do it so it works like that
-//            "dragAndDrop.group": "groupName",
-//            "textureName": "textureName",
-//            "styles.0.width": "width",
-//        },
-
-        name: "cardsWidgetImage",
+        template_keys: {
+        },
+        template_name: "cardsWidgetImage",
+        name: "",
+        textureName: "shop_background_no_biome",
         scaleX: 0.001,
         scaleY: 0.001,
         reportDimensionsWithScaling: true,
@@ -346,7 +344,11 @@ templates: [
         ],
     },
     $Box {
-        name: "cardsWidgetParent",
+        template_name: "cardsWidgetParent",
+        template_keys: {
+            "name": "name",
+            "textureName": "textureName"
+        },
         styles: [
             {
                 marginLeft: 2.0#percent,
@@ -357,7 +359,12 @@ templates: [
         ],
     },
     $Label {
-        name: "cardsWidgetPrice",
+        template_name: "cardsWidgetPrice",
+        template_keys: {
+            "name": "name",
+            "text": "text"
+        },
+        name: "",
         text: "bought",
         font: "red_wing_cm",
         color: color.dark_brown,

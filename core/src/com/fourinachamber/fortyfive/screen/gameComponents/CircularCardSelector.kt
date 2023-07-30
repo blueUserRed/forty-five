@@ -70,7 +70,7 @@ class CircularCardSelector(
                 cardActors[index].alpha = 1.0f
             }
             cardActors[index].drawable = if (card != null) {
-                TextureRegionDrawable(TextureRegion(card.actor.pixmapTexture!!))
+                TextureRegionDrawable(TextureRegion(card.actor.pixmapTextureRegion!!))
             } else {
                 emptySlotTexture
             }
