@@ -222,12 +222,6 @@ class ScreenBuilder(val file: FileHandle) {
         return dragAndDrops
     }
 
-    private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
-        val flexBox = CustomFlexBox(screen)
-        initFlexBox(flexBox, widgetOnj, screen)
-        flexBox.touchable = Touchable.enabled // TODO: remove
-        return flexBox
-    }
 
     private fun initFlexBox(
         flexBox: CustomFlexBox,
@@ -280,9 +274,22 @@ class ScreenBuilder(val file: FileHandle) {
             applyImageKeys(this, widgetOnj)
         }
 
-        "Box" -> getFlexBox(widgetOnj, screen)
+        "Box" -> CustomFlexBox(screen).apply {
+            initFlexBox(this, widgetOnj, screen)
+        }
 
-        "ScrollBox" -> getScrollFlexBox(widgetOnj, screen) //TODO this
+        "ScrollBox" -> CustomScrollableFlexBox(
+            screen,
+            widgetOnj.get<Boolean>("isScrollDirectionVertical"),
+            widgetOnj.get<Double>("scrollDistance").toFloat(),
+            widgetOnj.get<Boolean>("backgroundStretched"),
+            widgetOnj.get<String?>("scrollbarBackgroundName"),
+            widgetOnj.get<String?>("scrollbarName"),
+            widgetOnj.get<String?>("scrollbarSide"),
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+            this.touchable = Touchable.enabled
+        }
 
         "Statusbar" -> StatusbarWidget(
             widgetOnj.get<String?>("mapIndicatorWidgetName"),
@@ -419,7 +426,13 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
-        "Backpack" -> Backpack(screen,widgetOnj.get<String>("cardsFile")).apply { initFlexBox(this, widgetOnj, screen) }
+        "Backpack" -> Backpack(
+            screen,
+            widgetOnj.get<String>("cardsFile"),
+            widgetOnj.get<String>("backpackFile")
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+        }
 
         "FromTemplate" -> generateFromTemplate(
             widgetOnj.get<String>("generateFrom"),
@@ -476,21 +489,6 @@ class ScreenBuilder(val file: FileHandle) {
         return actor
     }
 
-
-
-    private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
-        val flexBox = CustomScrollableFlexBox(
-            screen,
-            widgetOnj.get<Boolean>("isScrollDirectionVertical"),
-            widgetOnj.get<Double>("scrollDistance").toFloat(),
-            widgetOnj.get<Boolean>("backgroundStretched"),
-            widgetOnj.get<String?>("scrollbarBackgroundName"),
-            widgetOnj.get<String?>("scrollbarName"),
-            widgetOnj.get<String?>("scrollbarSide"),
-        )
-        initFlexBox(flexBox, widgetOnj, screen)
-        return flexBox
-    }
 
     private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {
         return (animation.get<Double>("duration") * 1000).toInt() to animation.get<Interpolation>("interpolation")

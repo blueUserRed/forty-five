@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.map.shop.ShopCardsHandler
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -13,17 +12,26 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 
-class Backpack(screen: OnjScreen, dataFile: String) : CustomFlexBox(screen), InOutAnimationActor {
+class Backpack(screen: OnjScreen, cardsFile: String, backpackFile: String) : CustomFlexBox(screen),
+    InOutAnimationActor {
 
     private val _allCards: MutableList<Card>
     private val cardImgs: MutableList<CustomImageActor> = mutableListOf()
+    private val minDecksize: Int
+    private val numberOfSlots: Int
 
     init {
-        val onj = OnjParser.parseFile(dataFile)
-        cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
-        val cardPrototypes = (Card.getFrom(onj.get<OnjArray>("cards"), screen) {}).filter { it.name in SaveState.cards }
+        val cardsOnj = OnjParser.parseFile(cardsFile)
+        cardsFileSchema.assertMatches(cardsOnj)
+        cardsOnj as OnjObject
+        val cardPrototypes =
+            (Card.getFrom(cardsOnj.get<OnjArray>("cards"), screen) {}).filter { it.name in SaveState.cards }
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
+        val onj = OnjParser.parseFile(backpackFile)
+        backpackFileSchema.assertMatches(onj)
+        onj as OnjObject
+        minDecksize = onj.get<Long>("minCardsPerDeck").toInt()
+        numberOfSlots = onj.get<Long>("slotsPerDeck").toInt()
     }
 
     override fun display(): Timeline {

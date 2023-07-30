@@ -47,6 +47,7 @@ $Widget {
 
     $Backpack{
         cardsFile: string,
+        backpackFile: string,
         ...widgetSharedKeys,
          children?: $Widget[],
     }
