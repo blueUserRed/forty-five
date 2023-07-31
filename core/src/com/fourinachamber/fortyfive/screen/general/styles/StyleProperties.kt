@@ -1,9 +1,11 @@
 package com.fourinachamber.fortyfive.screen.general.styles
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
@@ -359,6 +361,58 @@ fun <T> T.addLabelStyles(screen: OnjScreen) where T : CustomLabel, T : StyledAct
     addActorStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(FontScaleStyleProperty(this, screen))
+}
+
+///////////////////////////////////////////////////////////////////
+// TextInput
+///////////////////////////////////////////////////////////////////
+
+class SelectionColorStyleProperty(
+    target: CustomInputField,
+    screen: OnjScreen
+) : StyleProperty<CustomInputField, Color>(
+    "selectionColor",
+    target,
+    Color(0F, 0F, 1F, 0.7F),
+    Color::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: Color, node: YogaNode) {
+        target.selectionRect.color = data
+        println("now set to $data")
+    }
+
+    override fun get(node: YogaNode): Color = target.selectionRect.color
+}
+
+class CursorColorStyleProperty(
+    target: CustomInputField,
+    screen: OnjScreen
+) : StyleProperty<CustomInputField, Color>(
+    "cursorColor",
+    target,
+    Color.BLACK,
+    Color::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: Color, node: YogaNode) {
+        target.cursorRect.color = data
+    }
+
+    override fun get(node: YogaNode): Color = target.cursorRect.color
+}
+
+fun <T> T.addTextInputStyles(screen: OnjScreen) where T : CustomInputField, T : StyledActor {
+    addLabelStyles(screen)
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(SelectionColorStyleProperty(this, screen))
+    styleManager.addStyleProperty(CursorColorStyleProperty(this, screen))
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -324,19 +325,13 @@ class ScreenBuilder(val file: FileHandle) {
 
         "InputField" -> CustomInputField(
             defText = widgetOnj.get<String>("text"),
-            fieldStyle = CustomInputField.InputFieldStyle().apply {
+            labelStyle = LabelStyle().apply {
                 font = fontOrError(
                     widgetOnj.get<String>("font"),
                     screen
                 ) // TODO: figure out how to not load the font immediatley
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
-                }
-                widgetOnj.ifHas<Color>("selectionColor") {
-                    selectionColor = it
-                }
-                widgetOnj.ifHas<Color>("cursorColor") {
-                    cursorColor = it
                 }
             },
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),

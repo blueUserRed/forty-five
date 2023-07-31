@@ -1,7 +1,7 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 //import "dialog/dialog.onj" as dialogs;
-import "screens/sharedComponents.onj" as sharedComponents;
+import "screens/shared_components.onj" as sharedComponents;
 
 
 use Common;
@@ -318,10 +318,12 @@ root: $Box {
 templates: [
     $Image {
         template_keys: {
+            "name": "name",
+            "textureName": "textureName",
         },
         template_name: "cardsWidgetImage",
-        name: "",
-        textureName: "shop_background_no_biome",
+//        name: "",
+//        textureName: "shop_background_no_biome",
         scaleX: 0.001,
         scaleY: 0.001,
         reportDimensionsWithScaling: true,

@@ -60,7 +60,6 @@ class Backpack(
         deckCardsWidget = screen.namedActorOrError(deckCardsWidgetName) as CustomScrollableFlexBox
         backPackCardsWidget = screen.namedActorOrError(backPackCardsWidgetName) as CustomScrollableFlexBox
         deckSelectionParentWidget = screen.namedActorOrError(deckSelectionParentWidgetName) as CustomFlexBox
-        println(maxNameSize)
         deckNameWidget.maxLength = maxNameSize
     }
 

@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.screen.general.customActor
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
@@ -19,6 +18,10 @@ import com.badlogic.gdx.utils.Pools
 import com.badlogic.gdx.utils.Timer
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.styles.addBackgroundStyles
+import com.fourinachamber.fortyfive.screen.general.styles.addDisableStyles
+import com.fourinachamber.fortyfive.screen.general.styles.addTextInputStyles
+import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.substringTillEnd
 import kotlin.math.abs
 import kotlin.math.max
@@ -29,12 +32,13 @@ import kotlin.math.min
 open class CustomInputField(
     screen: OnjScreen,
     defText: String,
-    fieldStyle: InputFieldStyle,
+    val labelStyle: LabelStyle,
     override val partOfHierarchy: Boolean = false
-) : CustomLabel(screen, defText, fieldStyle, partOfHierarchy) {
+) : CustomLabel(screen, defText, labelStyle, partOfHierarchy) {
     //TODO ctrl+A
     //TODO ctrl+Z
     //TODO fix if leaved prob
+    //TODO fix wrap and maxWidth
     protected val BACKSPACE = '\b'
     protected val CARRIAGE_RETURN = '\r'
     protected val NEWLINE = '\n'
@@ -76,8 +80,8 @@ open class CustomInputField(
     private var blinkTime = 0.32f
     private val blinkTask: Timer.Task
     private var programmaticChangeEvents = false
-    private val selectionRect = CustomRectangle(0F, 0F, 1F, 1F, fieldStyle.selectionColor)
-    private val cursorRect = CustomRectangle(0F, 0F, 1F, 1F, fieldStyle.cursorColor)
+    val selectionRect = CustomRectangle(Color(0F, 0F, 1F, 0.7F))
+    val cursorRect = CustomRectangle(Color.valueOf("2A2424"))
     private val keyRepeatTask: KeyRepeatTask
 
 
@@ -105,9 +109,11 @@ open class CustomInputField(
     private var countFrames: Int = 0
     private var lastCursorPosition: Int = 0
 
+    @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) return
         validate()
+        drawBackground(batch)
         val pos = localToStageCoordinates(Vector2())
         val yPosCursor = pos.y + (height - glyphLayout.height) / 2
         if (hasSelection) {
@@ -118,7 +124,11 @@ open class CustomInputField(
             )
             selectionRect.draw(batch, parentAlpha)
         }
+        //selection-rect has to be drawn after background, that's why its so "interesting"
+        val background = backgroundHandle
+        backgroundHandle = null
         super.draw(batch, parentAlpha)
+        backgroundHandle = background
         val cursorWidth = 3F * fontScaleX
         if ((focused || hasKeyboardFocus()) && !isDisabled) {
             countFrames = if (lastCursorPosition == cursor) {
@@ -703,6 +713,7 @@ open class CustomInputField(
         }
         if (text.toString() == newText) return
         super.setText(newText)
+        if (cursor > newText.length) cursor = newText.length
         invalidate()
     }
 
@@ -755,26 +766,9 @@ open class CustomInputField(
         fun keyTyped(e: Event, ch: Char)
     }
 
-
-    class InputFieldStyle() : LabelStyle() {
-        var selectionColor: Color = Color(0F, 0F, 1F, 0.7F)
-        var cursorColor: Color = Color.valueOf("2D2424ff")
-
-        constructor(font: BitmapFont?, fontColor: Color?, selectionColor: Color?, cursorColor: Color?) : this() {
-            this.font = font
-            this.fontColor = fontColor
-            if (selectionColor != null) this.selectionColor = selectionColor
-            if (cursorColor != null) this.cursorColor = cursorColor
-        }
-
-        constructor(style: InputFieldStyle) : this() {
-            font = style.font
-            if (style.fontColor != null) {
-                fontColor = Color(style.fontColor)
-            }
-            background = style.background
-            selectionColor = style.selectionColor
-            cursorColor = style.cursorColor
-        }
+    override fun initStyles(screen: OnjScreen) {
+        addTextInputStyles(screen)
+        addBackgroundStyles(screen)
+        addDisableStyles(screen)
     }
 }
