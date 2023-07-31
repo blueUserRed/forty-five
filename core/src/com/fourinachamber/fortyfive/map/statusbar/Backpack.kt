@@ -1,36 +1,42 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.assets.loaders.AssetLoader
-import com.badlogic.gdx.assets.loaders.BitmapFontLoader
-import com.badlogic.gdx.graphics.PixmapIO.PNG
-import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.badlogic.gdx.scenes.scene2d.ui.TextField
-import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
-import dev.lyze.flexbox.FlexBox
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-import java.io.ByteArrayOutputStream
 
 
-class Backpack(private val screen: OnjScreen, cardsFile: String, backpackFile: String) : CustomFlexBox(screen),
+class Backpack(
+    private val screen: OnjScreen,
+    cardsFile: String,
+    backpackFile: String,
+    private val deckNameWidgetName: String,
+    private val deckSelectionParentWidgetName: String,
+    private val deckCardsWidgetName: String,
+    private val backPackCardsWidgetName: String,
+) :
+    CustomFlexBox(screen),
     InOutAnimationActor {
 
     private val _allCards: MutableList<Card>
     private val cardImgs: MutableList<CustomImageActor> = mutableListOf()
-    private val minDecksize: Int
+    private val minDeckSize: Int
     private val numberOfSlots: Int
     private val minNameSize: Int
     private val maxNameSize: Int
+
+    private lateinit var deckNameWidget: CustomInputField
+    private lateinit var deckCardsWidget: CustomScrollableFlexBox
+    private lateinit var backPackCardsWidget: CustomScrollableFlexBox
+    private lateinit var deckSelectionParentWidget: CustomFlexBox
 
     init {
         val cardsOnj = OnjParser.parseFile(cardsFile)
@@ -42,11 +48,20 @@ class Backpack(private val screen: OnjScreen, cardsFile: String, backpackFile: S
         val onj = OnjParser.parseFile(backpackFile)
         backpackFileSchema.assertMatches(onj)
         onj as OnjObject
-        minDecksize = onj.get<Long>("minCardsPerDeck").toInt()
+        minDeckSize = onj.get<Long>("minCardsPerDeck").toInt()
         numberOfSlots = onj.get<Long>("slotsPerDeck").toInt()
-        val nameOnj = onj.get<OnjObject>("decknameDef")
+        val nameOnj = onj.get<OnjObject>("deckNameDef")
         minNameSize = nameOnj.get<Long>("minLength").toInt()
         maxNameSize = nameOnj.get<Long>("maxLength").toInt()
+    }
+
+    override fun initAfterChildrenExist() {
+        deckNameWidget = screen.namedActorOrError(deckNameWidgetName) as CustomInputField
+        deckCardsWidget = screen.namedActorOrError(deckCardsWidgetName) as CustomScrollableFlexBox
+        backPackCardsWidget = screen.namedActorOrError(backPackCardsWidgetName) as CustomScrollableFlexBox
+        deckSelectionParentWidget = screen.namedActorOrError(deckSelectionParentWidgetName) as CustomFlexBox
+        println(maxNameSize)
+        deckNameWidget.maxLength = maxNameSize
     }
 
     override fun display(): Timeline {

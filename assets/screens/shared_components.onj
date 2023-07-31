@@ -314,8 +314,7 @@ statusBarTemplates: [
         },
         styles: [
             {
-                width: 0#percent, // template
-
+                width: 0#percent,
                 height: 100#percent,
                 background: "statusbar_option",
                 flexDirection: flexDirection.column,
@@ -328,8 +327,7 @@ statusBarTemplates: [
         children: [
             $Label {
                 name: "statusbar_text",
-                text: "", //template
-
+                text: "",
                 font: "red_wing_cm",
                 color: color.forty_white,
                 fontScale: 0.07,
@@ -458,6 +456,10 @@ backpack: $Backpack {
     name: "tempActor",
     cardsFile: "config/cards.onj",
     backpackFile: "maps/backpack_config.onj",
+    deckNameWidgetName: "deckName",
+    deckSelectionParentWidgetName: "deckSelectionParent",
+    deckCardsWidgetName: "deckCards",
+    backPackCardsWidgetName: "backPackCards",
     zIndex: 7,
     styles: [
         {
@@ -498,12 +500,14 @@ backpack: $Backpack {
             ],
         } children [
             $InputField {
+                name: "deckName",
                 text: "Testing",
                 font: "red_wing",
-                fontScale: 0.2,
+                fontScale: 0.09,
                 color: color.forty_white,
             },
             $Box {
+                name: "deckSelectionParent",
                 styles: [
                     {
                         height: 10#percent,
@@ -546,6 +550,7 @@ backpack: $Backpack {
             ]
         ],
         $ScrollBox {
+            name: "deckCards",
             isScrollDirectionVertical: true,
             scrollDistance: 3.0,
             backgroundStretched: false,
@@ -604,6 +609,7 @@ backpack: $Backpack {
             }
         ],
         $ScrollBox {
+            name: "backPackCards",
             isScrollDirectionVertical: true,
             scrollDistance: 3.0,
             backgroundStretched: false,

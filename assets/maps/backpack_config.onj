@@ -1,4 +1,4 @@
-decknameDef: {
+deckNameDef: {
     minLength: 3,
     maxLength: 20,
 //    regEx: "[^\n]*",
