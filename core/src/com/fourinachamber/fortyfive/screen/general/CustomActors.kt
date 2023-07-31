@@ -247,12 +247,16 @@ open class CustomLabel @AllThreadsAllowed constructor(
             super.draw(null, parentAlpha)
             return
         }
-        val background = getBackground()
-        background?.draw(batch, x, y, width, height)
+        drawBackground(batch)
         val prevShader = batch.shader
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
         batch.shader = prevShader
+    }
+
+    protected fun drawBackground(batch: Batch) {
+        val background = getBackground()
+        background?.draw(batch, x, y, width, height)
     }
 
     override fun initStyles(screen: OnjScreen) {

@@ -505,6 +505,14 @@ backpack: $Backpack {
                 font: "red_wing",
                 fontScale: 0.09,
                 color: color.forty_white,
+                styles: [
+                    {
+                        width: 40#percent,
+                        background: "backpack_1",
+//                        selectionColor: color.green,
+//                        cursorColor: color.yellow,
+                    }
+                ]
             },
             $Box {
                 name: "deckSelectionParent",

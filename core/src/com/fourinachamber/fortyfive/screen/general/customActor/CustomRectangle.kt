@@ -8,17 +8,25 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import kotlin.math.max
 
 
-class CustomRectangle(x: Float, y: Float, width: Float, height: Float, color: Color) :
+class CustomRectangle() :
     Actor() {
     private var texture: Texture? = null
 
+    override fun setColor(color: Color) {
+        super.setColor(color)
+        updateTexture(1, 1, color)
+    }
+
     init {
-        println(color)
-        updateTexture(width.toInt(), height.toInt(), color)
-        setX(x)
-        setY(y)
-        setWidth(width)
-        setHeight(height)
+        x = 1F
+        y = 1F
+        width = 1F
+        height = 1F
+        if (color != null) updateTexture(width.toInt(), height.toInt(), color)
+    }
+
+    constructor(color: Color) : this() {
+        setColor(color)
     }
 
     fun updateTexture(width: Int, height: Int, color: Color) {
@@ -30,8 +38,6 @@ class CustomRectangle(x: Float, y: Float, width: Float, height: Float, color: Co
     }
 
     override fun draw(batch: Batch, parentAlpha: Float) {
-        val color: Color = color
-        batch.setColor(color.r, color.g, color.b, color.a * parentAlpha)
         batch.draw(texture, x, y, width, height)
     }
 }
