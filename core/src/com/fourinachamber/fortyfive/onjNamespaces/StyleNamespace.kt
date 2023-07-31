@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.screen.general.styles.StyleCondition
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
@@ -57,6 +58,11 @@ object StyleNamespace {
             "noWrap" with OnjFlexWrap(YogaWrap.NO_WRAP)
             "wrap" with OnjFlexWrap(YogaWrap.WRAP)
             "wrapReverse" with OnjFlexWrap(YogaWrap.WRAP_REVERSE)
+        },
+        "touchable" to buildOnjObject {
+            "enabled" with OnjTouchable(Touchable.enabled)
+            "disabled" with OnjTouchable(Touchable.disabled)
+            "childrenOnly" with OnjTouchable(Touchable.childrenOnly)
         }
     )
 
@@ -149,6 +155,14 @@ class OnjFlexWrap(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--yoga-wrap--'")
+    }
+}
+
+class OnjTouchable(
+    override val value: Touchable
+) : OnjValue() {
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--touchable--'")
     }
 }
 

@@ -322,6 +322,7 @@ statusBarTemplates: [
                 alignItems: align.center,
                 justifyContent: justify.flexEnd,
                 paddingBottom: 6.5#percent,
+                touchable: touchable.enabled,
             }
         ],
         children: [
@@ -496,11 +497,11 @@ backpack: $Backpack {
                 }
             ],
         } children [
-            $TemplateLabel {
+            $InputField {
+                text: "Testing",
                 font: "red_wing",
-                template: "{deck.name}",
-                fontScale: 0.09,
-                color: color.white,
+                fontScale: 0.2,
+                color: color.forty_white,
             },
             $Box {
                 styles: [
@@ -550,7 +551,6 @@ backpack: $Backpack {
             backgroundStretched: false,
             scrollbarBackgroundName: "deck_scrollbar_background",
             scrollbarName: "deck_scrollbar_handle",
-
             scrollbarSide: "right",
             styles: [
                 {
