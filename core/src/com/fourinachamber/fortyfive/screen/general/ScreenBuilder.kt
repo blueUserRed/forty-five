@@ -27,6 +27,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -309,6 +310,32 @@ class ScreenBuilder(val file: FileHandle) {
                 ) // TODO: figure out how to not load the font immediatley
                 if (!widgetOnj.get<OnjValue>("color").isNull()) {
                     fontColor = widgetOnj.get<Color>("color")
+                }
+            },
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
+            screen = screen
+        ).apply {
+            setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
+            widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
+            widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
+            widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
+        }
+
+        "InputField" -> CustomInputField(
+            defText = widgetOnj.get<String>("text"),
+            fieldStyle = CustomInputField.InputFieldStyle().apply {
+                font = fontOrError(
+                    widgetOnj.get<String>("font"),
+                    screen
+                ) // TODO: figure out how to not load the font immediatley
+                if (!widgetOnj.get<OnjValue>("color").isNull()) {
+                    fontColor = widgetOnj.get<Color>("color")
+                }
+                widgetOnj.ifHas<Color>("selectionColor") {
+                    selectionColor = it
+                }
+                widgetOnj.ifHas<Color>("cursorColor") {
+                    cursorColor = it
                 }
             },
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),

@@ -464,9 +464,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
             }
             program
         }
-
     }
-
 }
 
 open class CustomFlexBox(

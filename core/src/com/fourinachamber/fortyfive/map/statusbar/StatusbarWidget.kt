@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.fourinachamber.fortyfive.map.MapManager
@@ -152,7 +153,7 @@ class StatusbarWidget(
         action.duration = 0.2F
         action.interpolation = Interpolation.exp10Out
 //        action{
-            target.addAction(action)
+        target.addAction(action)
 //        }
         delayUntil { action.isComplete }
     }

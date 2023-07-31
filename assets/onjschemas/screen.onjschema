@@ -83,6 +83,20 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $InputField{
+        text: string,
+        font: string,
+        color: Color?,
+        selectionColor?: Color,
+        cursorColor?: Color,
+        fontScale?: float,
+        backgroundTexture?: string,
+        align?: string,
+        wrap?: boolean,
+        partOfSelectionHierarchy?: boolean,
+        ...widgetSharedKeys
+    }
+
     $Label {
         text: string,
         font: string,

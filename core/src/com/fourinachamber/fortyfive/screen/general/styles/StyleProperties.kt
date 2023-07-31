@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general.styles
 
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.general.*
 import io.github.orioncraftmc.meditate.YogaNode
@@ -364,6 +365,25 @@ fun <T> T.addLabelStyles(screen: OnjScreen) where T : CustomLabel, T : StyledAct
 // FlexBox
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+class TouchableStyleProperty(
+    target: CustomFlexBox,
+    screen: OnjScreen
+) : StyleProperty<CustomFlexBox, Touchable>(
+    "touchable",
+    target,
+    Touchable.disabled,
+    Touchable::class,
+    false,
+    true,
+    screen
+) {
+    override fun set(data: Touchable, node: YogaNode) {
+        target.touchable = data
+    }
+
+    override fun get(node: YogaNode): Touchable = target.touchable
+}
+
 class FlexDirectionStyleProperty(
     target: CustomFlexBox,
     screen: OnjScreen
@@ -477,6 +497,7 @@ fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : Style
     addActorStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, screen))
+    styleManager.addStyleProperty(TouchableStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, screen))
     styleManager.addStyleProperty(FlexWrapStyleProperty(this, screen))
