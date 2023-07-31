@@ -175,6 +175,10 @@ fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
     return OnjYogaValue(YogaValue(this, unit))
 }
 
+fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
+    return substring(start, min(end, length - 1))
+}
+
 object Utils {
 
     fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability

@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.Pools
 import com.badlogic.gdx.utils.Timer
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.substringTillEnd
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -65,7 +66,11 @@ open class CustomInputField(
     var renderOffset = 0f
     private var visibleTextStart = 0
     private var visibleTextEnd = 0
-    private var maxLength = 0
+    var maxLength = -1
+        set(value) {
+            field = value
+            setText(text.toString().substringTillEnd(0, value))
+        }
     var focused = false
     var cursorOn = false
     private var blinkTime = 0.32f
@@ -77,7 +82,6 @@ open class CustomInputField(
 
 
     init {
-        maxLength = 15
         blinkTask = object : Timer.Task() {
             override fun run() {
                 if (stage == null) {
@@ -105,7 +109,7 @@ open class CustomInputField(
         if (batch == null) return
         validate()
         val pos = localToStageCoordinates(Vector2())
-        val yPosCursor = pos.y + glyphLayout.height * 0.33F
+        val yPosCursor = pos.y + (height - glyphLayout.height) / 2
         if (hasSelection) {
             selectionRect.setPosition(pos.x + glyphPositions.get(max(selectionStart, 0)), yPosCursor)
             selectionRect.setSize(
@@ -115,7 +119,7 @@ open class CustomInputField(
             selectionRect.draw(batch, parentAlpha)
         }
         super.draw(batch, parentAlpha)
-        val cursorWidth = 0.5F
+        val cursorWidth = 3F * fontScaleX
         if ((focused || hasKeyboardFocus()) && !isDisabled) {
             countFrames = if (lastCursorPosition == cursor) {
                 countFrames++

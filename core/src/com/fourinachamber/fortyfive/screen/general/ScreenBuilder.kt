@@ -238,6 +238,7 @@ class ScreenBuilder(val file: FileHandle) {
                     getWidget(it as OnjNamedObject, flexBox, screen)
                 }
         }
+        flexBox.initAfterChildrenExist()
         flexBox.isTransform = widgetOnj.getOr("enableTransform", false)
         flexBox.resortZIndices()
     }
@@ -456,7 +457,11 @@ class ScreenBuilder(val file: FileHandle) {
         "Backpack" -> Backpack(
             screen,
             widgetOnj.get<String>("cardsFile"),
-            widgetOnj.get<String>("backpackFile")
+            widgetOnj.get<String>("backpackFile"),
+            widgetOnj.get<String>("deckNameWidgetName"),
+            widgetOnj.get<String>("deckSelectionParentWidgetName"),
+            widgetOnj.get<String>("deckCardsWidgetName"),
+            widgetOnj.get<String>("backPackCardsWidgetName"),
         ).apply {
             initFlexBox(this, widgetOnj, screen)
         }

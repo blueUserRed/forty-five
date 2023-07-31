@@ -48,6 +48,10 @@ $Widget {
     $Backpack{
         cardsFile: string,
         backpackFile: string,
+        deckNameWidgetName: string,
+        deckSelectionParentWidgetName: string,
+        deckCardsWidgetName: string,
+        backPackCardsWidgetName: string,
         ...widgetSharedKeys,
          children?: $Widget[],
     }

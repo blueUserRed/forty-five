@@ -540,6 +540,8 @@ open class CustomFlexBox(
         super.draw(batch, parentAlpha)
     }
 
+    open fun initAfterChildrenExist(){}
+
     override fun initStyles(screen: OnjScreen) {
         addFlexBoxStyles(screen)
         addBackgroundStyles(screen)
