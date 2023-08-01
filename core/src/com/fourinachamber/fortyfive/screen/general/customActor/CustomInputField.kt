@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -25,7 +24,6 @@ import com.fourinachamber.fortyfive.screen.general.styles.addTextInputStyles
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.substringTillEnd
 import io.github.orioncraftmc.meditate.YogaValue
-import io.github.orioncraftmc.meditate.enums.YogaUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -43,17 +41,12 @@ open class CustomInputField(
 ) : CustomLabel(screen, defText, labelStyle, partOfHierarchy) {
     //TODO ctrl+A
     //TODO ctrl+Z
-    //TODO fix if leaved prob
-    //TODO fix wrap and maxWidth
-    protected val BACKSPACE = '\b'
-    protected val CARRIAGE_RETURN = '\r'
-    protected val NEWLINE = '\n'
-    protected val TAB = '\t'
-    protected val DELETE = '\u007f'
-    protected val BULLET = '\u0095'
-    private val tmp1 = Vector2() //exists, to theoretically get the next field
-    private val tmp2 = Vector2()
-    private val tmp3 = Vector2()
+    //TODO fix if leaved / unfocused
+    //TODO add on
+
+    //    private val tmp1 = Vector2() //exists, to theoretically get the next field
+//    private val tmp2 = Vector2()
+//    private val tmp3 = Vector2()
     var keyRepeatInitialTime = 0.4f
     var keyRepeatTime = 0.05f
     protected var cursor = 0
@@ -62,14 +55,14 @@ open class CustomInputField(
     protected var writeEnters = false
     private val glyphPositions = com.badlogic.gdx.utils.FloatArray()
     private var displayText: CharSequence? = null
-    var clipboard: Clipboard? = null
-    val inputListener: InputListener
-    var listener: CustomInputFieldListener? = null
+    private val clipboard: Clipboard = Gdx.app.clipboard
+    private val inputListener: InputListener
+    var keyslistener: CustomInputFieldListener? = null
     var limitListener: CustomMaxReachedListener? = null
     var filter: InputFieldFilter? = null
     var focusTraversal = false // TODO add if "true" is set
     var onlyFontChars = true //TODO add if "false" is set
-    var undoText: String
+    private var undoText: String
     var lastChangeTime: Long = 0
     private var passwordMode = false //TODO add if "true" is set
     private var fontOffset = 0f
@@ -82,11 +75,7 @@ open class CustomInputField(
             field = value
             setText(text.toString().substringTillEnd(0, value))
         }
-    var focused = false
-    var cursorOn = false
-    private var blinkTime = 0.32f
-    private val blinkTask: Timer.Task
-    private var programmaticChangeEvents = false
+    private var focused = false
     val selectionRect = CustomRectangle(Color(0F, 0F, 1F, 0.7F))
     val cursorRect = CustomRectangle(Color.valueOf("2A2424"))
     private val keyRepeatTask: KeyRepeatTask
@@ -95,17 +84,6 @@ open class CustomInputField(
 
 
     init {
-        blinkTask = object : Timer.Task() {
-            override fun run() {
-                if (stage == null) {
-                    cancel()
-                } else {
-                    cursorOn = !cursorOn
-                    Gdx.graphics.requestRendering()
-                }
-            }
-        }
-        clipboard = Gdx.app.clipboard
         setText(text)
         setSize(prefWidth, prefHeight)
         inputListener = InputFieldClickListener(this)
@@ -128,8 +106,8 @@ open class CustomInputField(
         var selectionEnd = selectionEndInit
         require(selectionStart >= 0) { "selectionStart must be >= 0" }
         require(selectionEnd >= 0) { "selectionEnd must be >= 0" }
-        selectionStart = Math.min(this.text!!.length, selectionStart)
-        selectionEnd = Math.min(this.text!!.length, selectionEnd)
+        selectionStart = this.text!!.length.coerceAtMost(selectionStart)
+        selectionEnd = this.text!!.length.coerceAtMost(selectionEnd)
         if (selectionEnd == selectionStart) {
             clearSelection()
         } else {
@@ -159,7 +137,7 @@ open class CustomInputField(
     }
 
     protected open fun isWordCharacter(c: Char): Boolean {
-        return Character.isLetterOrDigit(c)
+        return !Character.isWhitespace(c)
     }
 
     open fun selectAll() {
@@ -270,7 +248,7 @@ open class CustomInputField(
                 if (++cursor >= limit) {
                     break
                 }
-            } else if (--cursor <= limit) {
+            } else if (--cursor <= 0) {
                 break
             }
         } while (jump && this.continueCursor(cursor, charOffset))
@@ -291,17 +269,10 @@ open class CustomInputField(
 
     open fun copy() {
         if (hasSelection && !passwordMode) {
-            clipboard!!.contents = text.substring(
-                Math.min(cursor, selectionStart), Math.max(
-                    cursor,
-                    selectionStart
-                )
+            clipboard.contents = text.substring(
+                cursor.coerceAtMost(selectionStart), cursor.coerceAtLeast(selectionStart)
             )
         }
-    }
-
-    open fun cut() {
-        this.cut(this.programmaticChangeEvents)
     }
 
     open fun cut(fireChangeEvent: Boolean) {
@@ -383,8 +354,12 @@ open class CustomInputField(
 
     open class InputFieldClickListener(protected val field: CustomInputField) : ClickListener() {
         override fun clicked(event: InputEvent, x: Float, y: Float) {
+            if (field.isDisabled) {
+                field.clearSelection()
+                return
+            }
             val count = tapCount % 4
-            if (count == 0) {
+            if (count <= 1) {
                 field.clearSelection()
             }
             if (count == 2) {
@@ -427,11 +402,11 @@ open class CustomInputField(
 
         protected open fun setCursorPosition(x: Float, y: Float) {
             field.cursor = field.letterUnderCursor(x)
-            field.cursorOn = field.focused
-            field.blinkTask.cancel()
-            if (field.focused) {
-                Timer.schedule(field.blinkTask, field.blinkTime, field.blinkTime)
-            }
+//            field.cursorOn = field.focused
+//            field.blinkTask.cancel()
+//            if (field.focused) {
+//                Timer.schedule(field.blinkTask, field.blinkTime, field.blinkTime)
+//            }
         }
 
         protected open fun goHome(jump: Boolean) {
@@ -446,11 +421,11 @@ open class CustomInputField(
             return if (field.isDisabled) {
                 false
             } else {
-                field.cursorOn = field.focused
-                field.blinkTask.cancel()
-                if (field.focused) {
-                    Timer.schedule(field.blinkTask, field.blinkTime, field.blinkTime)
-                }
+//                field.cursorOn = field.focused
+//                field.blinkTask.cancel()
+//                if (field.focused) {
+//                    Timer.schedule(field.blinkTask, field.blinkTime, field.blinkTime)
+//                }
                 if (!field.hasKeyboardFocus()) {
                     false
                 } else {
@@ -471,7 +446,7 @@ open class CustomInputField(
                             }
 
                             50 -> {
-                                field.paste(field.clipboard?.contents, true)
+                                field.paste(field.clipboard.contents, true)
                                 repeat = true
                             }
 
@@ -597,7 +572,7 @@ open class CustomInputField(
                 false
             } else {
                 when (character) {
-                    field.BACKSPACE, field.TAB, field.NEWLINE, field.CARRIAGE_RETURN -> {}
+                    BACKSPACE, TAB, NEWLINE, CARRIAGE_RETURN -> {}
                     '\u000b', '\u000C' -> return false
 
                     else -> if (character < ' ') {
@@ -613,9 +588,9 @@ open class CustomInputField(
 //                        field.next(UIUtils.shift())
                         println("NOW TRAVERSE (NOT IMPLEMENTED)")
                     } else {
-                        val enter = character == field.CARRIAGE_RETURN || character == field.NEWLINE
-                        val delete = character == field.DELETE
-                        val backspace = character == field.BACKSPACE
+                        val enter = character == CARRIAGE_RETURN || character == NEWLINE
+                        val delete = character == DELETE
+                        val backspace = character == BACKSPACE
                         val add =
                             if (enter) field.writeEnters else !field.onlyFontChars || field.style.font.data
                                 .hasGlyph(character)
@@ -653,7 +628,7 @@ open class CustomInputField(
                                         field,
                                         character
                                     )
-                                ) return true;
+                                ) return true
                                 if (!field.withinMaxLength(
                                         field.text.length - if (field.hasSelection) abs(
                                             field.cursor - field.selectionStart
@@ -678,7 +653,7 @@ open class CustomInputField(
                             }
                         }
                     }
-                    field.listener?.keyTyped(event, character)
+                    field.keyslistener?.keyTyped(event, character)
                     true
                 }
             }
@@ -706,7 +681,7 @@ open class CustomInputField(
         }
         super.layout()
         updateDisplayText()
-        if (glyphLayout.runs.size > 1) { //has multiple lines /wrap //kinda trash solution, but idk any better, i tried for a bit but nothing worked
+        if (glyphLayout.runs.size > 1) { //has multiple lines /wrap //kinda trash solution, but IDK any better, I tried for a bit but nothing worked
             super.layout()
             updateDisplayText()
         }
@@ -774,13 +749,13 @@ open class CustomInputField(
         return minIndex
     }
 
-    interface InputFieldFilter {
+    interface InputFieldFilter {//isn't really well working
         fun acceptChar(textField: CustomInputField?, ch: Char): Boolean
-        class DigitsOnlyFilter : InputFieldFilter {
-            override fun acceptChar(textField: CustomInputField?, ch: Char): Boolean {
-                return Character.isDigit(ch)
-            }
-        }
+//        class DigitsOnlyFilter : InputFieldFilter {
+//            override fun acceptChar(textField: CustomInputField?, ch: Char): Boolean {
+//                return Character.isDigit(ch)
+//            }
+//        }
     }
 
     class KeyRepeatTask(val field: CustomInputField) : Timer.Task() {
@@ -795,7 +770,7 @@ open class CustomInputField(
     }
 
     interface CustomInputFieldListener {
-        fun keyTyped(e: Event, ch: Char)
+        fun keyTyped(e: InputEvent, ch: Char)
     }
 
     interface CustomMaxReachedListener {
@@ -806,5 +781,15 @@ open class CustomInputField(
         addTextInputStyles(screen)
         addBackgroundStyles(screen)
         addDisableStyles(screen)
+    }
+
+
+    companion object {
+        const val BACKSPACE = '\b'
+        const val CARRIAGE_RETURN = '\r'
+        const val NEWLINE = '\n'
+        const val TAB = '\t'
+        const val DELETE = '\u007f'
+//        const val BULLET = '\u0095' //Maybe needed later or so
     }
 }
