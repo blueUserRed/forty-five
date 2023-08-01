@@ -280,7 +280,6 @@ open class CustomInputField(
             copy()
             cursor = delete(fireChangeEvent)
             invalidate()
-//            updateDisplayText()
         }
     }
 
@@ -674,11 +673,12 @@ open class CustomInputField(
 
 
     override fun layout() {
-        if (styleManager!!.styleProperties.find { it is WidthStyleProperty }!!
-                .get(styleManager!!.node) != YogaValue.parse("auto")
-        ) {
-            wrap = true
-        }
+        if ((styleManager!!.styleProperties
+                .find { it is WidthStyleProperty }!!
+                .get(styleManager!!.node)
+                != YogaValue.parse("auto")) && !wrap
+        ) wrap = true
+
         super.layout()
         updateDisplayText()
         if (glyphLayout.runs.size > 1) { //has multiple lines /wrap //kinda trash solution, but IDK any better, I tried for a bit but nothing worked
@@ -749,7 +749,8 @@ open class CustomInputField(
         return minIndex
     }
 
-    interface InputFieldFilter {//isn't really well working
+    interface InputFieldFilter {
+        //isn't really well working
         fun acceptChar(textField: CustomInputField?, ch: Char): Boolean
 //        class DigitsOnlyFilter : InputFieldFilter {
 //            override fun acceptChar(textField: CustomInputField?, ch: Char): Boolean {

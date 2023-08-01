@@ -54,6 +54,8 @@ $Widget {
         backPackCardsWidgetName: string,
         ...widgetSharedKeys,
          children?: $Widget[],
+         partOfSelectionHierarchy?: boolean,
+
     }
 
     $Statusbar{
