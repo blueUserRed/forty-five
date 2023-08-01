@@ -249,7 +249,7 @@ object SaveState {
     }
 
 
-    class Deck(val name: String, val id: Int, private val _cardPositions: MutableMap<Int, String>) {
+    class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap<Int, String>) {
         val cardPosition: Map<Int, String>
             get() = _cardPositions
 
