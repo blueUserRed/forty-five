@@ -42,7 +42,7 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
 
     val actorStates: Set<String>
         get() = _actorStates
-    private val styleProperties: List<StyleProperty<*, *>>
+    val styleProperties: List<StyleProperty<*, *>>
         get() = _styleProperties
 
     fun update() {

@@ -18,17 +18,23 @@ import com.badlogic.gdx.utils.Pools
 import com.badlogic.gdx.utils.Timer
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.styles.WidthStyleProperty
 import com.fourinachamber.fortyfive.screen.general.styles.addBackgroundStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addDisableStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addTextInputStyles
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.substringTillEnd
+import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
 
 @Suppress("LeakingThis")
+/**
+ * Represents a ONE LINE input from a user (not the best, but it's okay)
+ */
 open class CustomInputField(
     screen: OnjScreen,
     defText: String,
@@ -59,6 +65,7 @@ open class CustomInputField(
     var clipboard: Clipboard? = null
     val inputListener: InputListener
     var listener: CustomInputFieldListener? = null
+    var limitListener: CustomMaxReachedListener? = null
     var filter: InputFieldFilter? = null
     var focusTraversal = false // TODO add if "true" is set
     var onlyFontChars = true //TODO add if "false" is set
@@ -83,6 +90,8 @@ open class CustomInputField(
     val selectionRect = CustomRectangle(Color(0F, 0F, 1F, 0.7F))
     val cursorRect = CustomRectangle(Color.valueOf("2A2424"))
     private val keyRepeatTask: KeyRepeatTask
+    private var lastCorrectText: String = text.toString()
+    private var lastCorrectCursor: Int = cursor
 
 
     init {
@@ -109,42 +118,6 @@ open class CustomInputField(
     private var countFrames: Int = 0
     private var lastCursorPosition: Int = 0
 
-    @MainThreadOnly
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (batch == null) return
-        validate()
-        drawBackground(batch)
-        val pos = localToStageCoordinates(Vector2())
-        val yPosCursor = pos.y + (height - glyphLayout.height) / 2
-        if (hasSelection) {
-            selectionRect.setPosition(pos.x + glyphPositions.get(max(selectionStart, 0)), yPosCursor)
-            selectionRect.setSize(
-                glyphPositions.get(cursor) - glyphPositions.get(max(selectionStart, 0)),
-                glyphLayout.height
-            )
-            selectionRect.draw(batch, parentAlpha)
-        }
-        //selection-rect has to be drawn after background, that's why its so "interesting"
-        val background = backgroundHandle
-        backgroundHandle = null
-        super.draw(batch, parentAlpha)
-        backgroundHandle = background
-        val cursorWidth = 3F * fontScaleX
-        if ((focused || hasKeyboardFocus()) && !isDisabled) {
-            countFrames = if (lastCursorPosition == cursor) {
-                countFrames++
-                countFrames and 127
-            } else {
-                0
-            }
-            if (((countFrames shr 6)) == 0) {
-                cursorRect.setPosition(pos.x + glyphPositions.get(cursor) - cursorWidth / 2, yPosCursor)
-                cursorRect.setSize(cursorWidth, glyphLayout.height)
-                cursorRect.draw(batch, parentAlpha)
-            }
-        }
-        lastCursorPosition = cursor
-    }
 
     fun clearSelection() {
         hasSelection = false
@@ -261,8 +234,14 @@ open class CustomInputField(
         glyphPositions.add(x)
         visibleTextStart = visibleTextStart.coerceAtMost(glyphPositions.size - 1)
         visibleTextEnd = MathUtils.clamp(visibleTextEnd, visibleTextStart, glyphPositions.size - 1)
-        if (selectionStart > newDisplayText.length) {
-            selectionStart = textLength
+        if (selectionStart > newDisplayText.length) selectionStart = textLength
+        if (text.length >= glyphPositions.size && !glyphLayout.runs.isEmpty) {
+            setText(lastCorrectText)
+            cursor = lastCorrectCursor
+            limitListener?.maxReached(this, text)
+        } else {
+            lastCorrectText = text
+            lastCorrectCursor = cursor
         }
     }
 
@@ -329,7 +308,8 @@ open class CustomInputField(
         if (hasSelection && !passwordMode) {
             copy()
             cursor = delete(fireChangeEvent)
-            updateDisplayText()
+            invalidate()
+//            updateDisplayText()
         }
     }
 
@@ -363,7 +343,7 @@ open class CustomInputField(
             } else {
                 setText(insert(cursor, content, text.toString()))
             }
-            updateDisplayText()
+            invalidate()
             cursor += content.length
         }
     }
@@ -708,19 +688,71 @@ open class CustomInputField(
     override fun setText(newText: CharSequence?) {
         if (newText == null) {
             text.clear()
-            invalidate()
+            super.setText(null)
+            invalidateHierarchy()
             return
         }
         if (text.toString() == newText) return
         super.setText(newText)
         if (cursor > newText.length) cursor = newText.length
-        invalidate()
     }
 
 
     override fun layout() {
+        if (styleManager!!.styleProperties.find { it is WidthStyleProperty }!!
+                .get(styleManager!!.node) != YogaValue.parse("auto")
+        ) {
+            wrap = true
+        }
         super.layout()
         updateDisplayText()
+        if (glyphLayout.runs.size > 1) { //has multiple lines /wrap //kinda trash solution, but idk any better, i tried for a bit but nothing worked
+            super.layout()
+            updateDisplayText()
+        }
+        if (prefHeight < height) {
+            val dif = height - prefHeight.toInt()
+            height = prefHeight.toInt().toFloat()
+            y += dif / 2
+        }
+    }
+
+    @MainThreadOnly
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (batch == null) return
+        validate()
+        drawBackground(batch)
+        val pos = localToStageCoordinates(Vector2())
+        val ySize = glyphLayout.height * 1.2F
+        val yPosCursor = pos.y + (height - ySize) / 2
+        if (hasSelection) {
+            selectionRect.setPosition(pos.x + glyphPositions.get(max(selectionStart, 0)), yPosCursor)
+            selectionRect.setSize(
+                glyphPositions.get(cursor) - glyphPositions.get(max(selectionStart, 0)),
+                ySize
+            )
+            selectionRect.draw(batch, parentAlpha)
+        }
+        //selection-rect has to be drawn after background, that's why its like that
+        val background = backgroundHandle
+        backgroundHandle = null
+        super.draw(batch, parentAlpha)
+        backgroundHandle = background
+        val cursorWidth = 3F * fontScaleX
+        if ((focused || hasKeyboardFocus()) && !isDisabled) {
+            countFrames = if (lastCursorPosition == cursor) {
+                countFrames++
+                countFrames and 127
+            } else {
+                0
+            }
+            if (((countFrames shr 6)) == 0) {
+                cursorRect.setPosition(pos.x + glyphPositions.get(cursor) - cursorWidth / 2, yPosCursor)
+                cursorRect.setSize(cursorWidth, ySize)
+                cursorRect.draw(batch, parentAlpha)
+            }
+        }
+        lastCursorPosition = cursor
     }
 
     open fun delete(fireChangeEvent: Boolean): Int {
@@ -764,6 +796,10 @@ open class CustomInputField(
 
     interface CustomInputFieldListener {
         fun keyTyped(e: Event, ch: Char)
+    }
+
+    interface CustomMaxReachedListener {
+        fun maxReached(field: CustomInputField, wrong: String)
     }
 
     override fun initStyles(screen: OnjScreen) {
