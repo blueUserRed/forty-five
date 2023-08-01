@@ -18,6 +18,11 @@ backpackAssets: [
     "backpack_3",
     "backpack_4",
     "backpack_5",
+    "backpack_1_hover",
+    "backpack_2_hover",
+    "backpack_3_hover",
+    "backpack_4_hover",
+    "backpack_5_hover",
     "backpack_deck_background",
     "backpack_backpack_background", //This name intended, not an error
     "backpack_scrollbar_background",
@@ -461,9 +466,10 @@ backpack: $Backpack {
     deckCardsWidgetName: "deckCards",
     backPackCardsWidgetName: "backPackCards",
     zIndex: 7,
+    visible: false,
     styles: [
         {
-            width: 150#points,
+            width: (150)#points,
             height: 77#points,
             flexDirection: flexDirection.row,
             positionType: positionType.absolute,
@@ -508,9 +514,10 @@ backpack: $Backpack {
                 styles: [
                     {
                         width: 40#percent,
-//                        background: "backpack_1",
+                        //                        background: "backpack_1",
 //                        selectionColor: color.green,
 //                        cursorColor: color.yellow,
+
                     }
                 ]
             },
@@ -527,32 +534,32 @@ backpack: $Backpack {
             } children [
                 $Image {
                     textureName: "backpack_1",
-                    scaleX: 0.1,
-                    scaleY: 0.1,
+                    scaleX: 0.041,
+                    scaleY: 0.041,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_2",
-                    scaleX: 0.1,
-                    scaleY: 0.1,
+                    scaleX: 0.041,
+                    scaleY: 0.041,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_3",
-                    scaleX: 0.1,
-                    scaleY: 0.1,
+                    scaleX: 0.041,
+                    scaleY: 0.041,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_4",
-                    scaleX: 0.1,
-                    scaleY: 0.1,
+                    scaleX: 0.041,
+                    scaleY: 0.041,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_5",
-                    scaleX: 0.1,
-                    scaleY: 0.1,
+                    scaleX: 0.041,
+                    scaleY: 0.041,
                     reportDimensionsWithScaling: true,
                 }
             ]

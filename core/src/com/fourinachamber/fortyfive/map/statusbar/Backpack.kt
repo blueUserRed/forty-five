@@ -7,7 +7,6 @@ import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
-import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -76,8 +75,11 @@ class Backpack(
 
     private fun changeDeckTo(newDeckId: Int, firstInit: Boolean = false) {
         if (SaveState.curDeck.id != newDeckId || firstInit) {
+            val oldActor = deckSelectionParentWidget.children[SaveState.curDeck.id - 1] as CustomImageActor
+            oldActor.backgroundHandle = oldActor.backgroundHandle?.replace("_hover", "")
             SaveState.curDeckNbr = newDeckId
             resetDeckNameField()
+            (deckSelectionParentWidget.children[newDeckId - 1] as CustomImageActor).backgroundHandle += "_hover"
         }
     }
 
@@ -97,8 +99,7 @@ class Backpack(
 
         deckNameWidget.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                println(tapCount)
-                if (deckNameWidget.isDisabled && tapCount == 2) enterDeckName()
+                if (deckNameWidget.isDisabled && tapCount == 2) editDeckName()
             }
         })
     }
@@ -115,7 +116,7 @@ class Backpack(
         SaveState.curDeck.name = deckNameWidget.text.toString()
     }
 
-    private fun enterDeckName() {
+    private fun editDeckName() {
         deckNameWidget.isDisabled = false
         stage.keyboardFocus = (deckNameWidget)
     }
@@ -123,25 +124,36 @@ class Backpack(
     override fun display(): Timeline {
         changeDeckTo(SaveState.curDeck.id, true)
         return Timeline.timeline {
-            action {
-                println("now opening")
+            parallelActions(
+                getInOutTimeLine(true, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
+                getInOutTimeLine(true, true, this@Backpack.children[1] as CustomFlexBox).asAction()
+            )
+        }
+    }
+
+    private fun getInOutTimeLine(isGoingIn: Boolean, goingRight: Boolean, target: CustomFlexBox) = Timeline.timeline {
+        val amount = stage.viewport.worldWidth / 2
+        action {
+            isVisible = true
+            if (isGoingIn) {
+                target.offsetX = amount * (if (goingRight) 1 else -1)
             }
-            delay(200)
+        }
+        repeat(amount.toInt() / 4) {
             action {
-                println("now open")
+                println(target.x)
+                target.offsetX += 4F * (if (goingRight) -1 else 1) * (if (isGoingIn) 1 else -1)
             }
+            delay(1)
         }
     }
 
     override fun hide(): Timeline {
         return Timeline.timeline {
-            action {
-                println("now closing")
-            }
-            delay(200)
-            action {
-                println("now closed")
-            }
+            parallelActions(
+                getInOutTimeLine(false, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
+                getInOutTimeLine(false, true, this@Backpack.children[1] as CustomFlexBox).asAction()
+            )
         }
     }
 

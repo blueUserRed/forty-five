@@ -379,8 +379,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
             batch.setColor(c.r, c.g, c.b, alpha)
             if (rotation != 0f) {
                 val drawable = drawable
-                if (drawable !is TransformDrawable) throw RuntimeException("attempted to rotate an image, but the " +
-                        "drawable does not implement TransformDrawable")
+                if (drawable !is TransformDrawable) throw RuntimeException(
+                    "attempted to rotate an image, but the " +
+                            "drawable does not implement TransformDrawable"
+                )
                 drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
                 drawable.draw(batch, x, y, width, height)
@@ -483,6 +485,9 @@ open class CustomFlexBox(
 
     override var styleManager: StyleManager? = null
 
+    var offsetX: Float = 0F
+    var offsetY: Float = 0F
+
     override var backgroundHandle: String? = null
         set(value) {
             if (field != value) background = null
@@ -538,13 +543,15 @@ open class CustomFlexBox(
             background = ResourceManager.get(screen, backgroundHandle)
         }
         validate()
+        x += offsetX
+        y += offsetY
         if (batch != null && background != null) {
             background?.draw(batch, x, y, width, height)
         }
         super.draw(batch, parentAlpha)
     }
 
-    open fun initAfterChildrenExist(){}
+    open fun initAfterChildrenExist() {}
 
     override fun initStyles(screen: OnjScreen) {
         addFlexBoxStyles(screen)

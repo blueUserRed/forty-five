@@ -303,6 +303,26 @@ textures: [
         file: "textures/backpack/5.png"
     },
     {
+        name: "backpack_1_hover",
+        file: "textures/backpack/1_hover.png"
+    },
+    {
+        name: "backpack_2_hover",
+        file: "textures/backpack/2_hover.png"
+    },
+    {
+        name: "backpack_3_hover",
+        file: "textures/backpack/3_hover.png"
+    },
+    {
+        name: "backpack_4_hover",
+        file: "textures/backpack/4_hover.png"
+    },
+    {
+        name: "backpack_5_hover",
+        file: "textures/backpack/5_hover.png"
+    },
+    {
         name: "backpack_deck_background",
         file: "textures/backpack/deck_background.png"
     },
