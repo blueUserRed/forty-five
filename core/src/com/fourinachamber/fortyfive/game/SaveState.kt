@@ -95,7 +95,7 @@ object SaveState {
         savefileDirty = true
     }
 
-    private var curDeckNbr = 1
+    var curDeckNbr = 1
         set(value) {
             if (curDeckNbr != value) {
                 savefileDirty = true

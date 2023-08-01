@@ -359,7 +359,7 @@ open class CustomInputField(
                 return
             }
             val count = tapCount % 4
-            if (count <= 1) {
+            if (count == 0) {
                 field.clearSelection()
             }
             if (count == 2) {

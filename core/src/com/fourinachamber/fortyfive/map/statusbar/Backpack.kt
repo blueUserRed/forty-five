@@ -1,13 +1,10 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.keyInput.Keycode
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -17,7 +14,6 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-import java.awt.event.KeyEvent
 
 
 class Backpack(
@@ -68,36 +64,49 @@ class Backpack(
         deckSelectionParentWidget = screen.namedActorOrError(deckSelectionParentWidgetName) as CustomFlexBox
         deckNameWidget.maxLength = maxNameSize
         initDeckName()
+        initDeckSelection()
+    }
+
+    private fun initDeckSelection() {
+        for (i in 0 until deckSelectionParentWidget.children.size) {
+            val child = deckSelectionParentWidget.children.get(i)
+            child.onButtonClick { changeDeckTo(i + 1) }
+        }
+    }
+
+    private fun changeDeckTo(newDeckId: Int, firstInit: Boolean = false) {
+        if (SaveState.curDeck.id != newDeckId || firstInit) {
+            SaveState.curDeckNbr = newDeckId
+            resetDeckNameField()
+        }
     }
 
     private fun initDeckName() {
-        deckNameWidget.setText(SaveState.curDeck.name)
-        deckNameWidget.isDisabled = true
+        resetDeckNameField()
         deckNameWidget.limitListener = object : CustomInputField.CustomMaxReachedListener {
             override fun maxReached(field: CustomInputField, wrong: String) {
-                println("max reached, string $wrong too long")
+                println("max reached, name '$wrong' too long") //TODO this with error-block
             }
         }
 
         deckNameWidget.keyslistener = object : CustomInputField.CustomInputFieldListener {
             override fun keyTyped(e: InputEvent, ch: Char) {
-                if (ch == '\n' || ch == '\r') {
-                    saveCurrentDeckName()
-                }
+                if (ch == '\n' || ch == '\r') saveCurrentDeckName()
             }
         }
 
         deckNameWidget.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                super.clicked(event, x, y)
-                if (deckNameWidget.isDisabled) {
-                    val count = tapCount
-                    if (count == 2) {
-                        enterDeckName()
-                    }
-                }
+                println(tapCount)
+                if (deckNameWidget.isDisabled && tapCount == 2) enterDeckName()
             }
         })
+    }
+
+    private fun resetDeckNameField() {
+        deckNameWidget.setText(SaveState.curDeck.name)
+        deckNameWidget.isDisabled = true
+        deckNameWidget.clearSelection()
     }
 
     private fun saveCurrentDeckName() {
@@ -112,7 +121,7 @@ class Backpack(
     }
 
     override fun display(): Timeline {
-        TemplateString.updateGlobalParam("deck.name", SaveState.curDeck.name)
+        changeDeckTo(SaveState.curDeck.id, true)
         return Timeline.timeline {
             action {
                 println("now opening")
