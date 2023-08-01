@@ -508,7 +508,7 @@ backpack: $Backpack {
                 styles: [
                     {
                         width: 40#percent,
-                        background: "backpack_1",
+//                        background: "backpack_1",
 //                        selectionColor: color.green,
 //                        cursorColor: color.yellow,
                     }

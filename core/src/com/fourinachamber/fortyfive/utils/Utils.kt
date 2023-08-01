@@ -18,6 +18,7 @@ import onj.value.OnjObject
 import onj.value.OnjValue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -176,7 +177,7 @@ fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
 }
 
 fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
-    return substring(start, min(end, length - 1))
+    return substring(max(start, 0), min(max(end, 0), length - 1))
 }
 
 object Utils {
