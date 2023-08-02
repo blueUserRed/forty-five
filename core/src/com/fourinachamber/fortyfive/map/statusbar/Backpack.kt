@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -72,14 +73,14 @@ class Backpack(
     }
 
     private fun initDeckLayout() {
-        println(deckCardsWidget.children)
+//        println(deckCardsWidget.children)
         for (i in 0 until numberOfSlots) {
             (screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
-                mapOf() ,
+                mapOf(),
                 deckCardsWidget,
                 screen
-            ) as CustomFlexBox).backgroundHandle="backpack_empty_deck_slot"
+            ) as CustomFlexBox).backgroundHandle = "backpack_empty_deck_slot"
         }
         deckCardsWidget.invalidate()
     }
@@ -119,13 +120,13 @@ class Backpack(
                 TextureRegionDrawable(_allCards.find { card -> card.name == it.value }!!.actor.pixmapTextureRegion)
             unplacedCards.remove(currentSelection)
         }
-        deckCardsWidget.invalidateHierarchy()
+        deckCardsWidget.invalidate()
 
 
         //Backpack
-        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { println(it.remove()) }
+        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { it.remove() /*println(it.remove()) */ }
         val backpackChildren = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
-        println(backpackCardsWidget.children.size)
+//        println(backpackCardsWidget.children.size) //TODO this, understand why children are always getting further placed
         for (i in 0 until unplacedCards.size - backpackChildren.size) {
             val cur = (screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
@@ -136,7 +137,7 @@ class Backpack(
         }
 
         sortBackpack(BackpackSorting.Reserves().sort(_allCards, unplacedCards))
-        backpackCardsWidget.invalidateHierarchy()
+        backpackCardsWidget.invalidate()
     }
 
     private fun sortBackpack(sortedCards: List<String>) {
@@ -198,7 +199,8 @@ class Backpack(
     private fun getInOutTimeLine(isGoingIn: Boolean, goingRight: Boolean, target: CustomFlexBox) = Timeline.timeline {
         val amount = stage.viewport.worldWidth / 2
         action {
-            isVisible = true
+            if (isGoingIn) isVisible = true
+            hasFinished = true
             if (isGoingIn) {
                 target.offsetX = amount * (if (goingRight) 1 else -1)
             }
@@ -208,6 +210,11 @@ class Backpack(
                 target.offsetX += 4F * (if (goingRight) -1 else 1) * (if (isGoingIn) 1 else -1)
             }
             delay(1)
+        }
+        action {
+            if (!isGoingIn) isVisible = false
+            deckCardsWidget.invalidate()
+            backpackCardsWidget.invalidate()
         }
     }
 
@@ -221,6 +228,8 @@ class Backpack(
     }
 
     companion object {
+        var hasFinished = false
+
         private val backpackFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
         }
