@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -9,14 +8,13 @@ import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
-import onj.value.OnjNull
 import onj.value.OnjObject
-import onj.value.OnjString
 
 
 class Backpack(
@@ -42,8 +40,17 @@ class Backpack(
     private lateinit var backpackCardsWidget: CustomScrollableFlexBox
     private lateinit var deckSelectionParent: CustomFlexBox
 
+    private var sortingSystem = BackpackSorting.Damage(false)
+
 
     init {
+        //TODO
+        // 1. Cards drag and drop (both direction)
+        // 2. automatic add to deck on double click or on press space or so
+        // 3. automatic add to deck if deck doesn't have enough cards
+        // 4. stop cards from moving if you don't have enough cards
+        // 5. sorting system
+
         val backpackOnj = OnjParser.parseFile(backpackFile)
         backpackFileSchema.assertMatches(backpackOnj)
         backpackOnj as OnjObject
@@ -94,11 +101,16 @@ class Backpack(
 
     private fun changeDeckTo(newDeckId: Int, firstInit: Boolean = false) {
         if (SaveState.curDeck.id != newDeckId || firstInit) {
+            if (!firstInit) FortyFiveLogger.log(
+                FortyFiveLogger.LogLevel.DEBUG,
+                logTag,
+                "Changing Deck from ${SaveState.curDeck.id} to $newDeckId"
+            )
             val oldActor = deckSelectionParent.children[SaveState.curDeck.id - 1] as CustomImageActor
             oldActor.backgroundHandle = oldActor.backgroundHandle?.replace("_hover", "")        //TODO ugly
             SaveState.curDeckNbr = newDeckId
             resetDeckNameField()
-            (deckSelectionParent.children[newDeckId - 1] as CustomImageActor).backgroundHandle += "_hover" //TODO ugly
+            (deckSelectionParent.children[newDeckId - 1] as CustomImageActor).backgroundHandle += "_hover"
             reloadDeck()
         }
     }
@@ -124,19 +136,17 @@ class Backpack(
 
 
         //Backpack
-        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { it.remove() /*println(it.remove()) */ }
-        val backpackChildren = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
-//        println(backpackCardsWidget.children.size) //TODO this, understand why children are always getting further placed
-        for (i in 0 until unplacedCards.size - backpackChildren.size) {
-            val cur = (screen.screenBuilder.generateFromTemplate(
+        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+            .forEach { backpackCardsWidget.remove(it.styleManager!!.node) }
+        for (i in 0 until unplacedCards.size) {
+            screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
                 mapOf(),
                 backpackCardsWidget,
                 screen
-            ) as CustomFlexBox)
+            )
         }
-
-        sortBackpack(BackpackSorting.Reserves().sort(_allCards, unplacedCards))
+        sortBackpack(sortingSystem.sort(_allCards, unplacedCards))
         backpackCardsWidget.invalidate()
     }
 
@@ -190,8 +200,8 @@ class Backpack(
         changeDeckTo(SaveState.curDeck.id, true)
         return Timeline.timeline {
             parallelActions(
-                getInOutTimeLine(true, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
-                getInOutTimeLine(true, true, this@Backpack.children[1] as CustomFlexBox).asAction()
+                getInOutTimeLine(isGoingIn = true, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
+                getInOutTimeLine(isGoingIn = true, true, this@Backpack.children[1] as CustomFlexBox).asAction()
             )
         }
     }
@@ -199,9 +209,8 @@ class Backpack(
     private fun getInOutTimeLine(isGoingIn: Boolean, goingRight: Boolean, target: CustomFlexBox) = Timeline.timeline {
         val amount = stage.viewport.worldWidth / 2
         action {
-            if (isGoingIn) isVisible = true
-            hasFinished = true
             if (isGoingIn) {
+                isVisible = true
                 target.offsetX = amount * (if (goingRight) 1 else -1)
             }
         }
@@ -221,14 +230,13 @@ class Backpack(
     override fun hide(): Timeline {
         return Timeline.timeline {
             parallelActions(
-                getInOutTimeLine(false, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
-                getInOutTimeLine(false, true, this@Backpack.children[1] as CustomFlexBox).asAction()
+                getInOutTimeLine(isGoingIn = false, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
+                getInOutTimeLine(isGoingIn = false, true, this@Backpack.children[1] as CustomFlexBox).asAction()
             )
         }
     }
 
     companion object {
-        var hasFinished = false
 
         private val backpackFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
@@ -244,9 +252,9 @@ class Backpack(
         var isReverse: Boolean
         fun sort(cardData: List<Card>, cards: List<String>): List<String>
 
-        class Reserves(override var isReverse: Boolean = false) : BackpackSorting {
+        class Damage(override var isReverse: Boolean = false) : BackpackSorting {
             override fun sort(cardData: List<Card>, cards: List<String>): List<String> {
-                val list = cards.sortedBy { name -> cardData.find { name == it.name }?.cost ?: 1 }
+                val list = cards.sortedBy { name -> -(cardData.find { name == it.name }!!.baseDamage) }
                 return if (isReverse) list.reversed() else list
             }
         }

@@ -738,10 +738,6 @@ class CustomScrollableFlexBox(
 //    private val tempChildren = mutableListOf<Actor>()
 
     override fun layout() {
-        println(Backpack.hasFinished)
-        if (Backpack.hasFinished) {
-            Backpack.hasFinished = false
-        }
 //        layoutScrollBar()
 //        if (maxSizeInScrollDirection == -1F) {
 //            while (children.size > 0) {
