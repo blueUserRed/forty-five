@@ -2,9 +2,6 @@ package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
@@ -16,7 +13,6 @@ import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjObject
 import onj.value.OnjString
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MoveAction
 
 class StatusbarWidget(
     private val mapIndicatorWidgetName: String?,
@@ -147,15 +143,18 @@ class StatusbarWidget(
         MapManager.mapImages.find { it.name == name && it.type == "name" }
 
     private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) = Timeline.timeline {
-
-        val action = MoveByAction()
-        action.amountY = 2F * (if (goUp) 1 else -1)
-        action.duration = 0.2F
-        action.interpolation = Interpolation.exp10Out
-//        action{
-        target.addAction(action)
-//        }
-        delayUntil { action.isComplete }
+        val exp = Interpolation.exp10Out
+        val amount = 2F * (if (goUp) 1 else -1)
+        val duration = 200
+        var i = 0.0F
+        val startOff = target.offsetY
+        repeat(10) {
+            action {
+                target.offsetY = startOff + amount * exp.apply(i)
+                i += 0.1F
+            }
+            delay((duration * 0.1).toInt())
+        }
     }
 
     private fun hide(option: Pair<CustomFlexBox, String>) {

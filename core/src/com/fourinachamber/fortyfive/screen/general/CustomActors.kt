@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -194,6 +195,15 @@ interface Detachable {
 
     fun detach()
     fun reattach()
+}
+
+interface OffSettable {
+    var offsetX: Float
+    var offsetY: Float
+
+    fun reattach(){
+
+    }
 }
 
 /**
@@ -475,7 +485,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 open class CustomFlexBox(
     private val screen: OnjScreen
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable {
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable {
 
     override var fixedZIndex: Int = 0
 
@@ -485,8 +495,8 @@ open class CustomFlexBox(
 
     override var styleManager: StyleManager? = null
 
-    var offsetX: Float = 0F
-    var offsetY: Float = 0F
+    override var offsetX: Float = 0F
+    override var offsetY: Float = 0F
 
     override var backgroundHandle: String? = null
         set(value) {
@@ -728,7 +738,10 @@ class CustomScrollableFlexBox(
 //    private val tempChildren = mutableListOf<Actor>()
 
     override fun layout() {
-
+        println(Backpack.hasFinished)
+        if (Backpack.hasFinished) {
+            Backpack.hasFinished = false
+        }
 //        layoutScrollBar()
 //        if (maxSizeInScrollDirection == -1F) {
 //            while (children.size > 0) {
