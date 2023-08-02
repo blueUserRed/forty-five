@@ -479,7 +479,7 @@ open class CustomFlexBox(
 
     override var fixedZIndex: Int = 0
 
-    protected var background: Drawable? = null
+    var background: Drawable? = null
 
     override var isHoveredOver: Boolean = false
 
@@ -557,6 +557,21 @@ open class CustomFlexBox(
         addFlexBoxStyles(screen)
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
+    }
+
+
+    protected fun getTotalOffset(): Vector2 {
+        val res = Vector2()
+        var cur: Group = this
+        while (cur.parent != null) {
+            val parent = cur.parent
+            if (parent is CustomFlexBox) {
+                res.x += parent.offsetX
+                res.y += parent.offsetY
+            }
+            cur = parent
+        }
+        return res
     }
 }
 
@@ -826,6 +841,8 @@ class CustomScrollableFlexBox(
         }
     }
 
+    private var lastOffset = Vector2()
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
         batch.flush()
@@ -841,8 +858,18 @@ class CustomScrollableFlexBox(
             if (drawItemsWithScissor(xPixel, viewport, yPixel, batch, parentAlpha)) return
         }
         if (needsScrollbar) {
-            scrollbarBackground?.draw(batch, alpha)
-            scrollbarHandle?.draw(batch, alpha)
+            val off = getTotalOffset()
+            scrollbarBackground?.let {
+                it.x += off.x - lastOffset.x
+                it.y += off.y - lastOffset.y
+                it.draw(batch, parentAlpha)
+            }
+            scrollbarHandle?.let {
+                it.x += off.x - lastOffset.x
+                it.y += off.y - lastOffset.y
+                it.draw(batch, parentAlpha)
+            }
+            lastOffset = off
         }
         if (currentlyDraggedChild != null) {
             val coordinates = localToStageCoordinates(Vector2())
