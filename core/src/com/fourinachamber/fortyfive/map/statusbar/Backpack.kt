@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
@@ -12,7 +13,9 @@ import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
+import onj.value.OnjNull
 import onj.value.OnjObject
+import onj.value.OnjString
 
 
 class Backpack(
@@ -28,7 +31,6 @@ class Backpack(
     InOutAnimationActor {
 
     private val _allCards: MutableList<Card>
-    private val cardImgs: MutableList<CustomImageActor> = mutableListOf()
     private val minDeckSize: Int
     private val numberOfSlots: Int
     private val minNameSize: Int
@@ -36,50 +38,112 @@ class Backpack(
 
     private lateinit var deckNameWidget: CustomInputField
     private lateinit var deckCardsWidget: CustomScrollableFlexBox
-    private lateinit var backPackCardsWidget: CustomScrollableFlexBox
-    private lateinit var deckSelectionParentWidget: CustomFlexBox
+    private lateinit var backpackCardsWidget: CustomScrollableFlexBox
+    private lateinit var deckSelectionParent: CustomFlexBox
+
 
     init {
+        val backpackOnj = OnjParser.parseFile(backpackFile)
+        backpackFileSchema.assertMatches(backpackOnj)
+        backpackOnj as OnjObject
+        minDeckSize = backpackOnj.get<Long>("minCardsPerDeck").toInt()
+        numberOfSlots = backpackOnj.get<Long>("slotsPerDeck").toInt()
+        val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
+        minNameSize = nameOnj.get<Long>("minLength").toInt()
+        maxNameSize = nameOnj.get<Long>("maxLength").toInt()
+
         val cardsOnj = OnjParser.parseFile(cardsFile)
         cardsFileSchema.assertMatches(cardsOnj)
         cardsOnj as OnjObject
         val cardPrototypes =
             (Card.getFrom(cardsOnj.get<OnjArray>("cards"), screen) {}).filter { it.name in SaveState.cards }
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
-        val onj = OnjParser.parseFile(backpackFile)
-        backpackFileSchema.assertMatches(onj)
-        onj as OnjObject
-        minDeckSize = onj.get<Long>("minCardsPerDeck").toInt()
-        numberOfSlots = onj.get<Long>("slotsPerDeck").toInt()
-        val nameOnj = onj.get<OnjObject>("deckNameDef")
-        minNameSize = nameOnj.get<Long>("minLength").toInt()
-        maxNameSize = nameOnj.get<Long>("maxLength").toInt()
     }
 
     override fun initAfterChildrenExist() {
         deckNameWidget = screen.namedActorOrError(deckNameWidgetName) as CustomInputField
         deckCardsWidget = screen.namedActorOrError(deckCardsWidgetName) as CustomScrollableFlexBox
-        backPackCardsWidget = screen.namedActorOrError(backPackCardsWidgetName) as CustomScrollableFlexBox
-        deckSelectionParentWidget = screen.namedActorOrError(deckSelectionParentWidgetName) as CustomFlexBox
+        backpackCardsWidget = screen.namedActorOrError(backPackCardsWidgetName) as CustomScrollableFlexBox
+        deckSelectionParent = screen.namedActorOrError(deckSelectionParentWidgetName) as CustomFlexBox
         deckNameWidget.maxLength = maxNameSize
         initDeckName()
+        initDeckLayout()
         initDeckSelection()
     }
 
+    private fun initDeckLayout() {
+        println(deckCardsWidget.children)
+        for (i in 0 until numberOfSlots) {
+            (screen.screenBuilder.generateFromTemplate(
+                "backpack_slot",
+                mapOf() ,
+                deckCardsWidget,
+                screen
+            ) as CustomFlexBox).backgroundHandle="backpack_empty_deck_slot"
+        }
+        deckCardsWidget.invalidate()
+    }
+
     private fun initDeckSelection() {
-        for (i in 0 until deckSelectionParentWidget.children.size) {
-            val child = deckSelectionParentWidget.children.get(i)
+        for (i in 0 until deckSelectionParent.children.size) {
+            val child = deckSelectionParent.children.get(i)
             child.onButtonClick { changeDeckTo(i + 1) }
         }
     }
 
     private fun changeDeckTo(newDeckId: Int, firstInit: Boolean = false) {
         if (SaveState.curDeck.id != newDeckId || firstInit) {
-            val oldActor = deckSelectionParentWidget.children[SaveState.curDeck.id - 1] as CustomImageActor
-            oldActor.backgroundHandle = oldActor.backgroundHandle?.replace("_hover", "")
+            val oldActor = deckSelectionParent.children[SaveState.curDeck.id - 1] as CustomImageActor
+            oldActor.backgroundHandle = oldActor.backgroundHandle?.replace("_hover", "")        //TODO ugly
             SaveState.curDeckNbr = newDeckId
             resetDeckNameField()
-            (deckSelectionParentWidget.children[newDeckId - 1] as CustomImageActor).backgroundHandle += "_hover"
+            (deckSelectionParent.children[newDeckId - 1] as CustomImageActor).backgroundHandle += "_hover" //TODO ugly
+            reloadDeck()
+        }
+    }
+
+    private fun reloadDeck() {
+        //Deck
+        val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
+        children.forEach {
+            while (it.children.size >= 2)
+                it.children[1].remove()
+        }
+        val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
+        SaveState.curDeck.cardPositions.forEach {
+            val curParent = children[it.key]
+            val currentSelection = unplacedCards.find { card -> it.value == card }!!
+            val cur =
+                screen.screenBuilder.generateFromTemplate("backpack_card", mapOf(), curParent, screen) as CustomFlexBox
+            cur.background =
+                TextureRegionDrawable(_allCards.find { card -> card.name == it.value }!!.actor.pixmapTextureRegion)
+            unplacedCards.remove(currentSelection)
+        }
+        deckCardsWidget.invalidateHierarchy()
+
+
+        //Backpack
+        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { println(it.remove()) }
+        val backpackChildren = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+        println(backpackCardsWidget.children.size)
+        for (i in 0 until unplacedCards.size - backpackChildren.size) {
+            val cur = (screen.screenBuilder.generateFromTemplate(
+                "backpack_slot",
+                mapOf(),
+                backpackCardsWidget,
+                screen
+            ) as CustomFlexBox)
+        }
+
+        sortBackpack(BackpackSorting.Reserves().sort(_allCards, unplacedCards))
+        backpackCardsWidget.invalidateHierarchy()
+    }
+
+    private fun sortBackpack(sortedCards: List<String>) {
+        val allPos = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+        for (i in sortedCards.indices) {
+            val curCard = _allCards.find { it.name == sortedCards[i] }!!
+            allPos[i].background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
         }
     }
 
@@ -141,7 +205,6 @@ class Backpack(
         }
         repeat(amount.toInt() / 4) {
             action {
-                println(target.x)
                 target.offsetX += 4F * (if (goingRight) -1 else 1) * (if (isGoingIn) 1 else -1)
             }
             delay(1)
@@ -165,5 +228,18 @@ class Backpack(
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
         }
         const val logTag: String = "Backpack"
+    }
+
+    interface BackpackSorting {
+
+        var isReverse: Boolean
+        fun sort(cardData: List<Card>, cards: List<String>): List<String>
+
+        class Reserves(override var isReverse: Boolean = false) : BackpackSorting {
+            override fun sort(cardData: List<Card>, cards: List<String>): List<String> {
+                val list = cards.sortedBy { name -> cardData.find { name == it.name }?.cost ?: 1 }
+                return if (isReverse) list.reversed() else list
+            }
+        }
     }
 }

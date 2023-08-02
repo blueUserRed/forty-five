@@ -93,6 +93,16 @@ fun Float.between(min: Float, max: Float): Float {
 /**
  * makes sure that [this] is between [min] and [max] (inclusive)
  */
+fun Int.between(min: Int, max: Int): Int {
+    if (this < min) return min
+    if (this > max) return max
+    return this
+}
+
+
+/**
+ * makes sure that [this] is between [min] and [max] (inclusive)
+ */
 fun Double.between(min: Double, max: Double): Double {
     if (this < min) return min
     if (this > max) return max

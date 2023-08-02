@@ -260,5 +260,6 @@ root: $Box {
 ],
 
 templates: [
-    ...(sharedComponents.statusBarTemplates)
+    ...(sharedComponents.statusBarTemplates),
+    ...(sharedComponents.backpackTemplates),
 ],

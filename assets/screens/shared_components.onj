@@ -586,7 +586,6 @@ backpack: $Backpack {
                 }
             ],
         } children [
-            ...listExampleChildren,
             scrollBarBackgroundDeck, scrollBarDeck
         ],
     ],
@@ -646,10 +645,48 @@ backpack: $Backpack {
                 }
             ],
         } children [
-            ...listExampleChildren,
             scrollBarBackgroundBackpack, scrollBarBackpack
         ]
     ]
+],
+
+
+backpackTemplates: [
+    $Box {
+        template_name: "backpack_slot",
+        template_keys: {
+        },
+        styles: [
+            {
+                marginTop: 2#percent,
+                width: 23#percent,
+                height: 20.9#percent,
+            }
+        ]
+    } children [
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    marginTop: 2#percent,
+                    width: 100#percent,
+                    height: 100#percent,
+                }
+            ]
+        }
+    ],
+    $Box {
+        template_name: "backpack_card",
+        template_keys: { },
+        styles: [
+            {
+                positionType: positionType.absolute,
+                marginTop: 2#percent,
+                width: 100#percent,
+                height: 100#percent,
+            }
+        ]
+    },
 ],
 
 warningLabelTemplate: $Box {

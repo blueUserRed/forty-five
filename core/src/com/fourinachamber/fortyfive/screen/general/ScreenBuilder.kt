@@ -158,7 +158,6 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         else -> original
-
     }
 
     private fun combineTemplateValues(templateKeys: OnjObject, data: Map<String, OnjValue>): Map<String, OnjValue> {

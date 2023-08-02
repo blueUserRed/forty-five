@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
-import kotlinx.coroutines.newFixedThreadPoolContext
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
@@ -101,7 +100,7 @@ object SaveState {
                 savefileDirty = true
                 if (_decks.find { it.id == value } == null) {
                     val curDeck = _decks.find { it.id == 1 }!!
-                    _decks.add(Deck("Deck $value", value, curDeck.cardPosition.toMutableMap()))
+                    _decks.add(Deck("Deck $value", value, curDeck.cardPositions.toMutableMap()))
                 }
             }
             field = value
@@ -250,7 +249,7 @@ object SaveState {
 
 
     class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap<Int, String>) {
-        val cardPosition: Map<Int, String>
+        val cardPositions: Map<Int, String>
             get() = _cardPositions
 
         val cards: List<String>
