@@ -567,7 +567,7 @@ backpack: $Backpack {
         $ScrollBox {
             name: "deckCards",
             isScrollDirectionVertical: true,
-            scrollDistance: 3.0,
+            scrollDistance: 9.0,
             backgroundStretched: false,
             scrollbarBackgroundName: "deck_scrollbar_background",
             scrollbarName: "deck_scrollbar_handle",
@@ -578,7 +578,7 @@ backpack: $Backpack {
                     width: 98#percent,
                     height: 90#percent,
                     flexDirection: flexDirection.row,
-                    justifyContent: justify.spaceAround,
+//                    justifyContent: justify.spaceAround,
                     alignItems: align.flexStart,
                     paddingRight: 2#points,
                     cuttingRight: 1.75,
@@ -625,7 +625,7 @@ backpack: $Backpack {
         $ScrollBox {
             name: "backPackCards",
             isScrollDirectionVertical: true,
-            scrollDistance: 3.0,
+            scrollDistance: 9.0,
             backgroundStretched: false,
             scrollbarBackgroundName: "backpack_scrollbar_background",
             scrollbarName: "backpack_scrollbar_handle",
@@ -637,7 +637,7 @@ backpack: $Backpack {
                     width: 98#percent,
                     height: 90#percent,
                     flexDirection: flexDirection.row,
-                    justifyContent: justify.spaceAround,
+//                    justifyContent: justify.spaceAround,
                     alignItems: align.flexStart,
                     paddingRight: 2#points,
                     cuttingRight: 1.75,
@@ -659,7 +659,8 @@ backpackTemplates: [
         styles: [
             {
                 marginTop: 2#percent,
-                width: 23#percent,
+                marginLeft: 2#percent,
+                width: 22#percent,
                 height: 20.9#percent,
             }
         ]
