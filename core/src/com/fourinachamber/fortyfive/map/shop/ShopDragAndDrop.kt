@@ -18,7 +18,8 @@ class ShopDragSource(
 ) : CenterDragged(dragAndDrop, actor, onj) {
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
-        if ((actor !is CustomImageActor) || (actor as CustomImageActor).inActorState("unbuyable")) return null
+        val actor = this.actor
+        if ((actor !is CustomImageActor) || actor.inActorState("unbuyable")) return null
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
 

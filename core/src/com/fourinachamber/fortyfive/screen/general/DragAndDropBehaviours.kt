@@ -5,6 +5,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.map.Backpack.BackpackDragSource
+import com.fourinachamber.fortyfive.map.Backpack.BackpackDropTarget
+import com.fourinachamber.fortyfive.map.Backpack.DeckSlotDropTarget
 import com.fourinachamber.fortyfive.map.shop.ShopDragSource
 import com.fourinachamber.fortyfive.map.shop.ShopDropTarget
 import com.fourinachamber.fortyfive.utils.Either
@@ -37,9 +40,15 @@ object DragAndDropBehaviourFactory {
         dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
             ShopDragSource(dragAndDrop, actor, onj)
         }
-//        dragBehaviours["BackpackDragSource"] = { dragAndDrop, actor, onj ->
-//            BackpackDragSource(dragAndDrop, actor, onj)
-//        }
+        dragBehaviours["BackpackDragSource"] = { dragAndDrop, actor, onj ->
+            BackpackDragSource(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["DeckSlotDropTarget"] = { dragAndDrop, actor, onj ->
+            DeckSlotDropTarget(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["BackpackDropTarget"] = { dragAndDrop, actor, onj ->
+            BackpackDropTarget(dragAndDrop, actor, onj)
+        }
     }
 
     fun dragBehaviourOrError(

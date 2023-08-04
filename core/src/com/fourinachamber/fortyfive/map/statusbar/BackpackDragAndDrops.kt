@@ -1,38 +1,35 @@
-package com.fourinachamber.fortyfive.map.statusbar
+package com.fourinachamber.fortyfive.map.Backpack
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.map.shop.ShopScreenController
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
 import kotlin.math.max
+
 
 class BackpackDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
 ) : CenterDragged(dragAndDrop, actor, onj) {
-
-    private val toLast: Boolean
-
-    init {
-        toLast = onj.getOr("moveToLastIndex", false)
-    }
-
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
-        if ((actor !is CustomImageActor) || (actor as CustomImageActor).inActorState("unbuyable")) return null
+        val actor = this.actor
+        if ((actor !is CustomFlexBox)) return null
+        println("DRAGGING: ${actor.name}")
+        println("DRAGGING: ${(actor.parent as CustomFlexBox).background}")
+
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
-
         payload.dragActor = actor
-        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = actor.parent
-        if (toLast) actor.toFront()
+        val curFlex = actor.parent.parent as CustomScrollableFlexBox
+        curFlex.currentlyDraggedChild = actor
+        actor.fixedZIndex = 10
+        curFlex.resortZIndices()
 
-        val obj = ShopDragPayload(actor)
+        val obj = BackpackDragPayload(actor)
         payload.obj = obj
         obj.resetTo(actor, Vector2(actor.x, actor.y))
         return payload
@@ -47,19 +44,61 @@ class BackpackDragSource(
         target: DragAndDrop.Target?
     ) {
         if (payload == null) return
-        if (toLast) actor.zIndex = max(actor.zIndex - 1, 0)
-        val obj = payload.obj as ShopDragPayload
+        actor.zIndex = max(actor.zIndex - 1, 0)
+        val obj = payload.obj as BackpackDragPayload
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
         obj.onDragStop()
     }
 }
 
-class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
-    /**
-     * called when the drag is stopped
-     */
-    fun onBuy() = tasks.add {
-        val scr = (FortyFive.screen as OnjScreen).screenController as ShopScreenController
-        scr.buyCard(actor)
+class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
+    fun cardsPlacedOn(card: CustomFlexBox, slot: CustomFlexBox) {
+        println("now to deck from: ${card.parent.parent.children.indexOf(card.parent)}")
+//        println("now to deck to:   ${slot.parent.parent.children.indexOf(card.parent)}")
+        println()
+    }
+
+    fun backToBackpack(card: CustomFlexBox) {
+        println("now to backpack: ${card.parent.children.indexOf(card.parent)}")
+        println()
+    }
+}
+
+class DeckSlotDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
+    DropBehaviour(dragAndDrop, actor, onj) {
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: DragAndDrop.Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
+        if (payload == null || source == null) return
+        val obj = payload.obj as BackpackDragPayload
+        obj.cardsPlacedOn(source.actor as CustomFlexBox, actor as CustomFlexBox)
+    }
+}
+
+
+class BackpackDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
+    DropBehaviour(dragAndDrop, actor, onj) {
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: DragAndDrop.Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
+        if (payload == null || source == null) return
+        val obj = payload.obj as BackpackDragPayload
+        obj.backToBackpack(source.actor as CustomFlexBox)
     }
 }

@@ -22,7 +22,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
-import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -201,7 +200,7 @@ interface OffSettable {
     var offsetX: Float
     var offsetY: Float
 
-    fun reattach(){
+    fun reattach() {
 
     }
 }
@@ -755,6 +754,7 @@ class CustomScrollableFlexBox(
         super.layout()
         layoutChildren()
         layoutScrollBar()
+        println("layout")
     }
 
     private fun layoutScrollBar() {
@@ -855,7 +855,6 @@ class CustomScrollableFlexBox(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
         batch.flush()
-//        width=82F
         val viewport = screen.stage.viewport
         val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
         val yPixel =
@@ -880,13 +879,14 @@ class CustomScrollableFlexBox(
             }
             lastOffset = off
         }
-        if (currentlyDraggedChild != null) {
-            val coordinates = localToStageCoordinates(Vector2())
-            currentlyDraggedChild!!.x += coordinates.x
-            currentlyDraggedChild!!.y += coordinates.y
-            currentlyDraggedChild?.draw(batch, alpha)
-            currentlyDraggedChild!!.x -= coordinates.x
-            currentlyDraggedChild!!.y -= coordinates.y
+        val curChild = this.currentlyDraggedChild
+        if (curChild is CustomFlexBox) {
+            val coordinates = curChild.parent.localToStageCoordinates(Vector2())
+            curChild.x += coordinates.x
+            curChild.y += coordinates.y
+            curChild.draw(batch, alpha)
+            curChild.x -= coordinates.x
+            curChild.y -= coordinates.y
         }
     }
 

@@ -52,7 +52,11 @@ $DragAndDropBehaviour {
         ...dragAndDropBehaviourSharedKeys
     }
 
-    $BackpackDragTarget{
+    $DeckSlotDropTarget{
+        ...dragAndDropBehaviourSharedKeys
+    }
+
+    $BackpackDropTarget{
         ...dragAndDropBehaviourSharedKeys
     }
 }

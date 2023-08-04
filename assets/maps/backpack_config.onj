@@ -4,5 +4,5 @@ deckNameDef: {
 //    regEx: "[^\n]*",
 },
 
-slotsPerDeck: 35,
+slotsPerDeck: 8,
 minCardsPerDeck: 12,
