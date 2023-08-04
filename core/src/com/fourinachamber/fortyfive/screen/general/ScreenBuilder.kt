@@ -48,6 +48,7 @@ class ScreenBuilder(val file: FileHandle) {
 
     private val behavioursToBind: MutableList<Behaviour> = mutableListOf()
     private var actorsWithDragAndDrop: MutableMap<String, MutableList<Pair<Actor, OnjNamedObject>>> = mutableMapOf()
+    private val addedActorsDragAndDrops: MutableMap<String, MutableList<Actor>> = mutableMapOf()
 
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
@@ -55,7 +56,6 @@ class ScreenBuilder(val file: FileHandle) {
     private var background: String? = null
     private var transitionAwayTime: Int? = null
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
-
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -96,8 +96,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         screen.screenController = screenController
 
-        val dragAndDrops = doDragAndDrop(screen)
-        screen.dragAndDrop = dragAndDrops
+        doDragAndDrop(screen)
 
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
@@ -130,7 +129,7 @@ class ScreenBuilder(val file: FileHandle) {
         val curActor = getWidget(widgetOnj, parent, screen)
         val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
         for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
-        screen.dragAndDrop = doDragAndDrop(screen)
+        doDragAndDrop(screen)
         screen.invalidateEverything()
         return curActor
     }
@@ -203,11 +202,16 @@ class ScreenBuilder(val file: FileHandle) {
         borrowed = toBorrow
     }
 
-    private fun doDragAndDrop(screen: OnjScreen): MutableMap<String, DragAndDrop> {
-        val dragAndDrops = mutableMapOf<String, DragAndDrop>()
+    private fun doDragAndDrop(screen: OnjScreen) {
+        val dragAndDrops = screen.dragAndDrop.toMutableMap()
         for ((group, actors) in actorsWithDragAndDrop) {
-            val dragAndDrop = DragAndDrop()
+
+            if (addedActorsDragAndDrops[group] == null) addedActorsDragAndDrops[group] = mutableListOf()
+
+            val dragAndDrop = dragAndDrops[group] ?: DragAndDrop()
             for ((actor, onj) in actors) {
+                if (actor in addedActorsDragAndDrops[group]!!) continue
+
                 val behaviour = DragAndDropBehaviourFactory.behaviourOrError(
                     onj.name,
                     dragAndDrop,
@@ -217,10 +221,12 @@ class ScreenBuilder(val file: FileHandle) {
                 )
                 if (behaviour is Either.Left) dragAndDrop.addSource(behaviour.value)
                 else dragAndDrop.addTarget((behaviour as Either.Right).value)
+
+                addedActorsDragAndDrops[group]!!.add(actor)
             }
             dragAndDrops[group] = dragAndDrop
         }
-        return dragAndDrops
+        screen.dragAndDrop = dragAndDrops
     }
 
 

@@ -502,6 +502,9 @@ backpack: $Backpack {
         ],
     ],
     $Box {
+        dragAndDrop: $BackpackDropTarget {
+            group: "backpack"
+        },
         styles: [
             {
                 width: 73#points,
@@ -567,22 +570,27 @@ backpackTemplates: [
         template_name: "backpack_slot",
         template_keys: {
         },
-        dragAndDrop: $DeckSlotDropTarget {
-            group: "backpack"
-        },
+        dragAndDrop:
+            $DeckSlotDropTarget {
+                group: "backpack"
+            }
+        ,
         styles: [
             {
                 marginTop: 2#percent,
                 marginLeft: 2#percent,
                 width: 22#percent,
                 height: 20.9#percent,
+                touchable: touchable.enabled,
             }
         ]
     } children [
         $Box {
-            dragAndDrop: $BackpackDragSource {
-                group: "backpack"
-            },
+            dragAndDrop:
+                $BackpackDragSource {
+                    group: "backpack"
+                },
+
             styles: [
                 {
                     positionType: positionType.absolute,
@@ -594,19 +602,6 @@ backpackTemplates: [
             ]
         }
     ],
-//    $Box {
-//        template_name: "backpack_card",
-//        template_keys: {
-//        },
-//        styles: [
-//            {
-//                positionType: positionType.absolute,
-//                marginTop: 2#percent,
-//                width: 100#percent,
-//                height: 100#percent,
-//            }
-//        ]
-//    },
 ],
 
 warningLabelTemplate: $Box {

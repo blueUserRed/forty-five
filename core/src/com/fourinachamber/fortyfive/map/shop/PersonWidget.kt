@@ -54,7 +54,7 @@ class PersonWidget(
         personDrawable = ResourceManager.get(this, textureName)
     }
 
-    fun addDropTarget(dragAndDrop: DragAndDrop) {
+//    fun addDropTarget(dragAndDrop: DragAndDrop) {
 //        val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
 //            dropBehaviour.name,
 //            dragAndDrop,
@@ -70,7 +70,7 @@ class PersonWidget(
 //            dropBehaviour
 //        )
 //        dragAndDrop.addSource(behaviour)
-    }
+//    }
 
 
     override fun initStyles(screen: OnjScreen) {
