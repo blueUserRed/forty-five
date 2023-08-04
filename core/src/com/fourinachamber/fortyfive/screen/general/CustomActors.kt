@@ -733,7 +733,6 @@ class CustomScrollableFlexBox(
     private var scrollbarHandle: CustomImageActor? = null
     var scrollbarWidth: Float = 0F
 //    var maxSizeInScrollDirection: Float = -1F
-//
 //    private val tempChildren = mutableListOf<Actor>()
 
     override fun layout() {
@@ -754,7 +753,6 @@ class CustomScrollableFlexBox(
         super.layout()
         layoutChildren()
         layoutScrollBar()
-        println("layout")
     }
 
     private fun layoutScrollBar() {

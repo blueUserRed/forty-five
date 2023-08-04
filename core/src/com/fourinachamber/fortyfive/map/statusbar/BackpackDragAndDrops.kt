@@ -18,9 +18,6 @@ class BackpackDragSource(
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = this.actor
         if ((actor !is CustomFlexBox)) return null
-        println("DRAGGING: ${actor.name}")
-        println("DRAGGING: ${(actor.parent as CustomFlexBox).background}")
-
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
         payload.dragActor = actor
