@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
@@ -43,23 +45,29 @@ class BackpackDragSource(
         actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as BackpackDragPayload
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
-        obj.onDragStop()
         actor.parent.parent.parent.zIndex -= 1
-        println(target)
-        println()
+        obj.invalidateParents(actor)
+        obj.onDragStop()
     }
 }
 
 class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
-    fun cardsPlacedOn(card: CustomFlexBox, slot: CustomFlexBox) {
-        println("now to deck from: ${card.parent.parent.children.indexOf(card.parent)}")
-        println("now to deck to:   ${slot.parent.children.indexOf(card.parent)}")
-//        println()
+    fun switchOrPlaceCard(card: CustomFlexBox, slot: CustomFlexBox) {
+        val dataSource = card.name.split(Backpack.nameSeparatorStr)
+        val sourceIndex = dataSource[2].toInt()
+        val targetIndex = slot.parent.children.indexOf(slot)
+        val curDeck = SaveState.curDeck
+        if (dataSource[1] == "deck") curDeck.swapCards(sourceIndex, targetIndex)
+        else if (dataSource[1] == "backpack") curDeck.addToDeck(targetIndex, dataSource[0])
     }
 
     fun backToBackpack(card: CustomFlexBox) {
-        println("now to backpack: ${card.parent.children.indexOf(card.parent)}")
-//        println()
+        val fromDeck = card.name.split(Backpack.nameSeparatorStr)[1] == "deck"
+        if (fromDeck) SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
+    }
+
+    fun invalidateParents(card: Actor) {
+        (card.parent.parent.parent.parent as Backpack).invalidateHierarchy()
     }
 }
 
@@ -78,7 +86,7 @@ class DeckSlotDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedOb
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null || source == null) return
         val obj = payload.obj as BackpackDragPayload
-        obj.cardsPlacedOn(source.actor as CustomFlexBox, actor as CustomFlexBox)
+        obj.switchOrPlaceCard(source.actor as CustomFlexBox, actor as CustomFlexBox)
     }
 }
 
