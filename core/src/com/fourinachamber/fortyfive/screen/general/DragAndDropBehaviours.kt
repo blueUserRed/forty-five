@@ -1,9 +1,12 @@
 package com.fourinachamber.fortyfive.screen.general
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.map.shop.ShopDragSource
+import com.fourinachamber.fortyfive.map.shop.ShopDropTarget
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
 import com.fourinachamber.fortyfive.utils.eitherRight
@@ -91,24 +94,6 @@ object DragAndDropBehaviourFactory {
     }
 }
 
-class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    DropBehaviour(dragAndDrop, actor, onj) {
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean {
-        return true
-    }
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        if (payload == null) return
-        val obj = payload.obj as ShopDragSource.ShopPayload
-        obj.onBuy()
-    }
-}
 
 abstract class DragBehaviour(
     protected val dragAndDrop: DragAndDrop,
@@ -117,13 +102,70 @@ abstract class DragBehaviour(
     onj: OnjNamedObject
 ) : DragAndDrop.Source(actor)
 
+@Suppress("unused", "UNUSED_PARAMETER") // may be necessary in the future, also for symmetry with DragBehaviour
 abstract class DropBehaviour(
-    @Suppress("unused") // may be necessary in the future, also for symmetry with DragBehaviour
     protected val dragAndDrop: DragAndDrop,
 //    protected val onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
 ) : DragAndDrop.Target(actor)
+
+/**
+ * drags the object in the center
+ */
+abstract class CenterDragged(
+    dragAndDrop: DragAndDrop,
+    actor: Actor,
+    onj: OnjNamedObject,
+) : DragBehaviour(dragAndDrop, actor, onj) {
+
+    override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        super.drag(event, x, y, pointer)
+        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
+        dragAndDrop.setDragActorPosition(
+            -parentOff.x + actor.width / 2,
+            -parentOff.y - actor.height / 2
+        )
+        //if there are any errors, it might be because of scaling //see files at commit 17278a0ddd6f821358af53ba331443958292d872
+    }
+
+    override fun dragStop(
+        event: InputEvent?,
+        x: Float,
+        y: Float,
+        pointer: Int,
+        payload: DragAndDrop.Payload?,
+        target: DragAndDrop.Target?
+    ) {
+        if (payload == null) return
+        val obj = payload.obj as ExecutionPayload
+        obj.onDragStop()
+    }
+}
+
+open class ExecutionPayload { //TODO maybe interface, but idk how to set "tasks" default value to mutableListOf()
+
+    /**
+     * get executed on DragStop
+     */
+    val tasks: MutableList<() -> Unit> = mutableListOf()
+
+    /**
+     * called when the drag is stopped
+     */
+    fun onDragStop() {
+        for (task in tasks) task()
+    }
+
+    /**
+     * when the drag is stopped, the actor will be reset to [pos]
+     */
+    fun resetTo(actor: Actor, pos: Vector2) = tasks.add {
+        actor.setPosition(pos.x, pos.y)
+    }
+}
+
+
 
 class SlotDragSource(
     dragAndDrop: DragAndDrop,
@@ -164,7 +206,6 @@ class SlotDragSource(
         val (actorX, actorY) = (map["resetPosition"] ?: return) as Pair<*, *>
         actor.setPosition(actorX as Float, actorY as Float)
     }
-
 }
 
 class SlotDropTarget(
@@ -191,8 +232,8 @@ class SlotDropTarget(
         val posY = actor.y + actor.height / 2 - source.actor.height / 2
         obj["resetPosition"] = posX to posY
     }
-
 }
 
 typealias DragBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DragBehaviour
 typealias DropBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DropBehaviour
+
