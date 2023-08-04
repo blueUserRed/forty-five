@@ -567,9 +567,9 @@ backpackTemplates: [
         template_name: "backpack_slot",
         template_keys: {
         },
-//        dragAndDrop: $BackpackDragTarget {
-//            group: "backpack_deck_change"
-//        },
+        dragAndDrop: $DeckSlotDropTarget {
+            group: "backpack"
+        },
         styles: [
             {
                 marginTop: 2#percent,
@@ -580,12 +580,16 @@ backpackTemplates: [
         ]
     } children [
         $Box {
+            dragAndDrop: $BackpackDragSource {
+                group: "backpack"
+            },
             styles: [
                 {
                     positionType: positionType.absolute,
                     marginTop: 2#percent,
                     width: 100#percent,
                     height: 100#percent,
+                    touchable: touchable.enabled,
                 }
             ]
         }
@@ -594,9 +598,6 @@ backpackTemplates: [
         template_name: "backpack_card",
         template_keys: {
         },
-//        dragAndDrop: $BackpackDragSource {
-//            group: "backpack_deck_change"
-//        },
         styles: [
             {
                 positionType: positionType.absolute,

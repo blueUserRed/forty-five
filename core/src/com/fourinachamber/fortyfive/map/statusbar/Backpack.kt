@@ -15,6 +15,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import onj.value.OnjString
 
 
 class Backpack(
@@ -83,12 +84,12 @@ class Backpack(
     private fun initDeckLayout() {
 //        println(deckCardsWidget.children)
         for (i in 0 until numberOfSlots) {
-            (screen.screenBuilder.generateFromTemplate(
+            ((screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
                 mapOf(),
                 deckCardsWidget,
                 screen
-            ) as CustomFlexBox).backgroundHandle = "backpack_empty_deck_slot"
+            )as CustomFlexBox ).children[0] as CustomFlexBox).backgroundHandle = "backpack_empty_deck_slot"
         }
         deckCardsWidget.invalidate()
     }
@@ -120,8 +121,9 @@ class Backpack(
         //Deck
         val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
         children.forEach {
-            while (it.children.size >= 2)
-                deckCardsWidget.remove((it.children[1] as CustomFlexBox).styleManager!!.node)
+            if (it.children.size >= 2) {
+                removeChildCompletely(it.children[1] as CustomFlexBox)
+            }
         }
         val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
         SaveState.curDeck.cardPositions.forEach {
@@ -151,11 +153,16 @@ class Backpack(
         backpackCardsWidget.invalidate()
     }
 
+    private fun removeChildCompletely(child: CustomFlexBox) {
+        (child.parent as CustomFlexBox).remove(child.styleManager!!.node)
+        child.remove()
+    }
+
     private fun sortBackpack(sortedCards: List<String>) {
         val allPos = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in sortedCards.indices) {
             val curCard = _allCards.find { it.name == sortedCards[i] }!!
-            allPos[i].background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
+            (allPos[i].children[0] as CustomFlexBox).background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
         }
     }
 
