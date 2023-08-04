@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.builder.buildOnjObject
@@ -256,10 +257,38 @@ object SaveState {
             get() = _cardPositions.map { it.value }
 
 
+        fun checkMinimum() {
+            if (cardPositions.size < Backpack.minDeckSize && cardPositions.size < SaveState.cards.size) {
+                val onlyBackpackCards = mutableListOf<String>()
+                val curDeck = cards.toMutableList()
+                for (i in SaveState.cards) {
+                    if (i in curDeck) {
+                        curDeck.removeAt(curDeck.indexOf(i))
+                    } else {
+                        onlyBackpackCards.add(i)
+                    }
+                }
+                while (cards.size < Backpack.minDeckSize && onlyBackpackCards.isNotEmpty()) {
+                    val cur = onlyBackpackCards[0]
+                    _cardPositions[nextFreeSlot()] = cur
+                    onlyBackpackCards.removeAt(onlyBackpackCards.indexOf(cur))
+                }
+                savefileDirty = true
+            }
+        }
+
+        fun nextFreeSlot(): Int {
+            val keys = cardPositions.keys
+            if (keys.size >= Backpack.numberOfSlots) return -1
+            for (i in keys.indices) {
+                if (!keys.contains(i)) return i
+            }
+            return keys.size
+        }
+
         fun swapCards(i1: Int, i2: Int) {
             val old1 = _cardPositions[i1]
             val old2 = _cardPositions[i2]
-
             if (old1 == null) _cardPositions.remove(i2)
             else _cardPositions[i2] = old1
             if (old2 == null) _cardPositions.remove(i1)
@@ -268,8 +297,10 @@ object SaveState {
         }
 
         fun addToDeck(index: Int, name: String) {
-            _cardPositions[index] = name
-            savefileDirty = true
+            if (index >= 0) {
+                _cardPositions[index] = name
+                savefileDirty = true
+            }
         }
 
         fun removeFromDeck(index: Int) {

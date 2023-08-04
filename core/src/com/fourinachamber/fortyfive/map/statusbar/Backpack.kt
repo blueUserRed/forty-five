@@ -30,8 +30,6 @@ class Backpack(
     InOutAnimationActor {
 
     private val _allCards: MutableList<Card>
-    private val minDeckSize: Int
-    private val numberOfSlots: Int
     private val minNameSize: Int
     private val maxNameSize: Int
 
@@ -45,18 +43,18 @@ class Backpack(
 
     init {
         //TODO
-        // 0. background stop
-        // 1. Cards drag and drop (both direction)
-        // 2. automatic add to deck on double click or on press space or so
-        // 3. automatic add to deck if deck doesn't have enough cards
-        // 4. stop cards from moving if you don't have enough cards
-        // 5. sorting system
-
+//         0. background stop
+//         1. (done) Cards drag and drop (both direction)
+//         2. automatic add to deck on double click or on press space or so
+//         3. (done) automatic add to deck if deck doesn't have enough cards
+//         4. (done (half (waiting for marvin))) stop cards from moving if you don't have enough cards
+//         5. sorting system (ui missing)
         val backpackOnj = OnjParser.parseFile(backpackFile)
         backpackFileSchema.assertMatches(backpackOnj)
         backpackOnj as OnjObject
-        minDeckSize = backpackOnj.get<Long>("minCardsPerDeck").toInt()
-        numberOfSlots = backpackOnj.get<Long>("slotsPerDeck").toInt()
+
+        _minDeckSize = backpackOnj.get<Long>("minCardsPerDeck").toInt()
+        _numberOfSlots = backpackOnj.get<Long>("slotsPerDeck").toInt()
         val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
         minNameSize = nameOnj.get<Long>("minLength").toInt()
         maxNameSize = nameOnj.get<Long>("maxLength").toInt()
@@ -143,8 +141,12 @@ class Backpack(
     }
 
     private fun reloadDeck() {
+        SaveState.curDeck.checkMinimum()
+
+        //"Reset" Deck
         val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
         children.forEach { (it.children[0] as CustomFlexBox).isVisible = false }
+
         //Deck
         val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
         SaveState.curDeck.cardPositions.forEach {
@@ -159,9 +161,10 @@ class Backpack(
         deckCardsWidget.invalidate()
 
 
-        //Backpack
+        //Reset Backpack
         backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
             .forEach { removeChildCompletely(it) }
+        //Backpack
         for (i in 0 until unplacedCards.size) {
             screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
@@ -177,6 +180,7 @@ class Backpack(
     private fun removeChildCompletely(child: CustomFlexBox) {
         (child.parent as CustomFlexBox).remove(child.styleManager!!.node)
         child.remove()
+        //theoretically remove from screen with like behaviour and dragAndDrop, but idc
     }
 
     private fun sortBackpack(sortedCards: List<String>) {
@@ -269,7 +273,17 @@ class Backpack(
     }
 
     companion object {
-        const val nameSeparatorStr = "_-_"
+        private var _minDeckSize: Int = 0
+        private var _numberOfSlots: Int = 0
+
+        val minDeckSize: Int
+            get() = _minDeckSize
+
+        val numberOfSlots: Int
+            get() = _numberOfSlots
+
+        const
+        val nameSeparatorStr = "_-_"
         private val backpackFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
         }

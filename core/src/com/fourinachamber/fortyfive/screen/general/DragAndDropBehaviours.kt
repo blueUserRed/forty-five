@@ -6,9 +6,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Array
 import com.fourinachamber.fortyfive.game.card.*
-import com.fourinachamber.fortyfive.map.Backpack.BackpackDragSource
-import com.fourinachamber.fortyfive.map.Backpack.BackpackDropTarget
-import com.fourinachamber.fortyfive.map.Backpack.DeckSlotDropTarget
+import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
+import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
+import com.fourinachamber.fortyfive.map.statusbar.DeckSlotDropTarget
 import com.fourinachamber.fortyfive.map.shop.ShopDragSource
 import com.fourinachamber.fortyfive.map.shop.ShopDropTarget
 import com.fourinachamber.fortyfive.utils.Either

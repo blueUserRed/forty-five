@@ -1,11 +1,10 @@
-package com.fourinachamber.fortyfive.map.Backpack
+package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.SaveState
-import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
@@ -25,7 +24,7 @@ class BackpackDragSource(
         val curFlex = actor.parent.parent as CustomScrollableFlexBox
         curFlex.currentlyDraggedChild = actor
 
-        actor.parent.parent.parent.toFront()
+        actor.parent.parent.parent.toFront() //the side which say if its backpack or deck
 
         val obj = BackpackDragPayload(actor)
         payload.obj = obj
@@ -62,8 +61,12 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     }
 
     fun backToBackpack(card: CustomFlexBox) {
-        val fromDeck = card.name.split(Backpack.nameSeparatorStr)[1] == "deck"
-        if (fromDeck) SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
+        if (SaveState.curDeck.cards.size > Backpack.minDeckSize) {
+            val fromDeck = card.name.split(Backpack.nameSeparatorStr)[1] == "deck"
+            if (fromDeck) SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
+        }else{
+            println("Deck size (${SaveState.curDeck.cardPositions.size} cards) is too small, a min. of ${Backpack.minDeckSize+1} is required to remove cards!")
+        }
     }
 
     fun invalidateParents(card: Actor) {
