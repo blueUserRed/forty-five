@@ -342,61 +342,6 @@ statusBarTemplates: [
     },
 ],
 
-var exampleCard = $Box {
-    styles: [
-        {
-            marginTop: 2#percent,
-            width: 23#percent,
-            height: 20.9#percent,
-        }
-    ]
-} children [
-    $Box {
-        styles: [
-            {
-                positionType: positionType.absolute,
-                marginTop: 2#percent,
-                width: 100#percent,
-                height: 100#percent,
-                background: "backpack_empty_deck_slot",
-            }
-        ]
-    },
-    $Box {
-        styles: [
-            {
-                positionType: positionType.absolute,
-                marginTop: 2#percent,
-                width: 100#percent,
-                height: 100#percent,
-                background: "card%%bullet",
-            }
-        ]
-    }
-];
-
-var exampleSlot = $Box {
-    styles: [
-        {
-            marginTop: 2#percent,
-            width: 23#percent,
-            height: 20.9#percent,
-        }
-    ]
-} children [
-    $Box {
-        styles: [
-            {
-                positionType: positionType.absolute,
-                marginTop: 2#percent,
-                width: 100#percent,
-                height: 100#percent,
-                background: "backpack_empty_deck_slot",
-            }
-        ]
-    }
-];
-
 var scrollBarBackgroundDeck = $Image {
     name: "deck_scrollbar_background",
     textureName: "backpack_scrollbar_background",
@@ -424,38 +369,6 @@ var scrollBarBackpack = $Image {
     scaleX: 1.0,
     scaleY: 1.0
 };
-
-var listExampleChildren = [
-    exampleCard, exampleSlot, exampleSlot, exampleSlot,
-    exampleCard, exampleCard, exampleSlot, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleSlot,
-    exampleCard, exampleSlot, exampleSlot, exampleCard,
-    exampleSlot, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleSlot, exampleCard,
-    exampleSlot, exampleCard, exampleCard, exampleSlot,
-    exampleCard, exampleSlot, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard,
-    exampleCard, exampleCard, exampleCard, exampleCard
-];
 
 backpack: $Backpack {
     name: "tempActor",
@@ -654,6 +567,9 @@ backpackTemplates: [
         template_name: "backpack_slot",
         template_keys: {
         },
+//        dragAndDrop: $BackpackDragTarget {
+//            group: "backpack_deck_change"
+//        },
         styles: [
             {
                 marginTop: 2#percent,
@@ -676,7 +592,11 @@ backpackTemplates: [
     ],
     $Box {
         template_name: "backpack_card",
-        template_keys: { },
+        template_keys: {
+        },
+//        dragAndDrop: $BackpackDragSource {
+//            group: "backpack_deck_change"
+//        },
         styles: [
             {
                 positionType: positionType.absolute,

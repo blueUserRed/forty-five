@@ -14,13 +14,72 @@ import onj.value.OnjNamedObject
 import kotlin.math.max
 
 /**
+ * drags the object in the center
+ */
+open class CenterDragged(
+    dragAndDrop: DragAndDrop,
+    actor: Actor,
+    onj: OnjNamedObject,
+) : DragBehaviour(dragAndDrop, actor, onj) {
+    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload? {
+        return null
+    }
+
+    override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        super.drag(event, x, y, pointer)
+        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
+        dragAndDrop.setDragActorPosition(
+            -parentOff.x + actor.width / 2,
+            -parentOff.y - actor.height / 2
+        )
+        //if there are any errors, it might be because of scaling //see files before commit 17278a0ddd6f821358af53ba331443958292d872
+    }
+
+    override fun dragStop(
+        event: InputEvent?,
+        x: Float,
+        y: Float,
+        pointer: Int,
+        payload: Payload?,
+        target: DragAndDrop.Target?
+    ) {
+        if (payload == null) return
+        val obj = payload.obj as ExecutionPayload
+        obj.onDragStop()
+    }
+}
+
+open class ExecutionPayload { //TODO maybe interface, but idk how to set "tasks" default value to mutableListOf()
+
+    /**
+     * get executed on DragStop
+     */
+    val tasks: MutableList<() -> Unit> = mutableListOf()
+
+    /**
+     * called when the drag is stopped
+     */
+    fun onDragStop() {
+        for (task in tasks) task()
+    }
+
+    /**
+     * when the drag is stopped, the actor will be reset to [pos]
+     */
+    fun resetTo(actor: Actor, pos: Vector2) = tasks.add {
+        actor.setPosition(pos.x, pos.y)
+    }
+}
+
+
+/**
  * the DragSource used for dragging a card to the revolver
  */
 open class CardDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
-) : DragBehaviour(dragAndDrop, actor, onj) {
+) : CenterDragged(dragAndDrop, actor, onj) {
 
     private val card: Card
     private val toLast: Boolean
@@ -31,12 +90,12 @@ open class CardDragSource(
         toLast = onj.getOr("moveToLastIndex", false)
     }
 
-    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
+    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload? {
 
         if (!card.isDraggable) return null
 
         card.actor.isDragged = true
-        val payload = DragAndDrop.Payload()
+        val payload = Payload()
         dragAndDrop.setKeepWithinStage(false)
 
         payload.dragActor = actor
@@ -45,17 +104,8 @@ open class CardDragSource(
 
         val obj = CardDragAndDropPayload(card)
         payload.obj = obj
-        obj.resetTo(Vector2(actor.x, actor.y))
+        obj.resetTo(card.actor, Vector2(actor.x, actor.y))
         return payload
-    }
-
-    override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-        super.drag(event, x, y, pointer)
-        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
-        dragAndDrop.setDragActorPosition(
-            -parentOff.x + actor.width - (actor.width * actor.scaleX) / 2,
-            -parentOff.y - (actor.height * actor.scaleY) / 2
-        )
     }
 
     override fun dragStop(
@@ -63,16 +113,14 @@ open class CardDragSource(
         x: Float,
         y: Float,
         pointer: Int,
-        payload: DragAndDrop.Payload?,
+        payload: Payload?,
         target: DragAndDrop.Target?
     ) {
         card.actor.isDragged = false
+        super.dragStop(event, x, y, pointer, payload, target)
         if (payload == null) return
         if (toLast) card.actor.zIndex -= 1
-        val obj = payload.obj as CardDragAndDropPayload
-        obj.onDragStop()
     }
-
 }
 
 /**
@@ -93,7 +141,7 @@ class RevolverDropTarget(
 
     override fun drag(
         source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
+        payload: Payload?,
         x: Float,
         y: Float,
         pointer: Int
@@ -114,16 +162,7 @@ class RevolverDropTarget(
  * used as a payload for [CardDragSource] and [RevolverDropTarget].
  * Automatically resets cards, loads into revolver, etc.
  */
-class CardDragAndDropPayload(val card: Card) {
-
-    private val tasks: MutableList<() -> Unit> = mutableListOf()
-
-    /**
-     * when the drag is stopped, the card will be reset to [pos]
-     */
-    fun resetTo(pos: Vector2) = tasks.add {
-        card.actor.setPosition(pos.x, pos.y)
-    }
+class CardDragAndDropPayload(val card: Card) : ExecutionPayload() {
 
     /**
      * when the drag is stopped, the card will be loaded into the revolver in [slot]
@@ -131,26 +170,15 @@ class CardDragAndDropPayload(val card: Card) {
     fun loadIntoRevolver(slot: Int) = tasks.add {
         FortyFive.currentGame!!.loadBulletInRevolver(card, slot)  //TODO ugly
     }
-
-
-    /**
-     * called when the drag is stopped
-     */
-    fun onDragStop() {
-        for (task in tasks) task()
-    }
-
 }
 
 class ShopDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
-) : DragBehaviour(dragAndDrop, actor, onj) {
+) : CenterDragged(dragAndDrop, actor, onj) {
 
     private val toLast: Boolean
-
-    private var startPos = Vector2()
 
     init {
         toLast = onj.getOr("moveToLastIndex", false)
@@ -158,7 +186,6 @@ class ShopDragSource(
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Payload? {
         if ((actor !is CustomImageActor) || (actor as CustomImageActor).inActorState("unbuyable")) return null
-//        startPos = Vector2(x * actor.scaleX, y * actor.scaleY)
         val payload = Payload()
         dragAndDrop.setKeepWithinStage(false)
 
@@ -166,20 +193,10 @@ class ShopDragSource(
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = actor.parent
         if (toLast) actor.toFront()
 
-        val obj = DragAndDropPayload(actor)
+        val obj = ShopPayload(actor)
         payload.obj = obj
-        obj.resetTo(Vector2(actor.x, actor.y))
+        obj.resetTo(actor,Vector2(actor.x, actor.y))
         return payload
-    }
-
-
-    override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-        super.drag(event, x, y, pointer)
-        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
-        dragAndDrop.setDragActorPosition(
-            -parentOff.x + actor.width/2 - startPos.x,
-            -parentOff.y - startPos.y -actor.height/2
-        )
     }
 
     override fun dragStop(
@@ -192,42 +209,18 @@ class ShopDragSource(
     ) {
         if (payload == null) return
         if (toLast) actor.zIndex = max(actor.zIndex - 1, 0)
-        val obj = payload.obj as DragAndDropPayload
+        val obj = payload.obj as ShopPayload
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
         obj.onDragStop()
     }
-
-
-    class DragAndDropPayload(val actor: Actor) {
-
-        private val tasks: MutableList<() -> Unit> = mutableListOf()
-
-        fun resetTo(pos: Vector2) = tasks.add {
-            actor.x = pos.x
-            actor.y = pos.y
-        }
-
-        fun onDragStop() {
-            for (task in tasks) task()
-        }
-
+    class ShopPayload(val actor: Actor) : ExecutionPayload() {
 
         /**
          * called when the drag is stopped
          */
         fun onBuy() = tasks.add {
-            val scr=(FortyFive.screen as OnjScreen).screenController as ShopScreenController
+            val scr = (FortyFive.screen as OnjScreen).screenController as ShopScreenController
             scr.buyCard(actor)
-            println("now buy stuff") //TODO hier weitermachen
         }
-
-/*        fun change(bought: Boolean) = tasks.add {
-            actor as CustomImageActor
-            if (bought) {
-                actor.styleManager?.enterActorState("unbuyable")
-            } else {
-                actor.styleManager?.leaveActorState("unbuyable")
-            }
-        }*/
     }
 }
