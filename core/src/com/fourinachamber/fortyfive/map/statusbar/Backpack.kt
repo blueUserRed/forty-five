@@ -15,7 +15,6 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-import onj.value.OnjString
 
 
 class Backpack(
@@ -81,6 +80,33 @@ class Backpack(
         initDeckSelection()
     }
 
+    override fun layout() {
+        checkDeck()
+        super.layout()
+    }
+
+    private fun checkDeck() {
+        //checks for the number of visible cards
+        val deckSlots = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
+        val nbrOfSeenCards = deckSlots.filter { it.children[0].isVisible }.size
+        if (nbrOfSeenCards != SaveState.curDeck.cards.size) {
+            reloadDeck()
+            return
+        }
+
+        //checks for all the cards that should be visible
+        val nbrOfCorrectPlacedChildren =
+            SaveState.curDeck.cardPositions.map { deckSlots[it.key].children[0] to it.value }
+                .filter { it.first.isVisible }
+                .filter { it.first.name != null }
+                .filter { it.second == it.first.name.split(nameSeparatorStr)[0] }
+                .size
+        if (nbrOfCorrectPlacedChildren != SaveState.curDeck.cards.size) {
+            reloadDeck()
+            return
+        }
+    }
+
     private fun initDeckLayout() {
         for (i in 0 until numberOfSlots) {
             (screen.screenBuilder.generateFromTemplate(
@@ -127,6 +153,7 @@ class Backpack(
             cur.isVisible = true
             cur.background =
                 TextureRegionDrawable(_allCards.find { card -> card.name == it.value }!!.actor.pixmapTextureRegion)
+            cur.name = "${it.value}${nameSeparatorStr}deck${nameSeparatorStr}${it.key}"
             unplacedCards.remove(currentSelection)
         }
         deckCardsWidget.invalidate()
@@ -156,8 +183,10 @@ class Backpack(
         val allPos = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in sortedCards.indices) {
             val curCard = _allCards.find { it.name == sortedCards[i] }!!
-            (allPos[i].children[0] as CustomFlexBox).background =
-                TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
+            val curActor = allPos[i].children[0] as CustomFlexBox
+            curActor.background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
+            curActor.name = "${curCard.name}${nameSeparatorStr}backpack${nameSeparatorStr}${i}"
+
         }
     }
 
@@ -240,7 +269,7 @@ class Backpack(
     }
 
     companion object {
-
+        const val nameSeparatorStr = "_-_"
         private val backpackFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
         }
