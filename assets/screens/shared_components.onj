@@ -594,19 +594,19 @@ backpackTemplates: [
             ]
         }
     ],
-    $Box {
-        template_name: "backpack_card",
-        template_keys: {
-        },
-        styles: [
-            {
-                positionType: positionType.absolute,
-                marginTop: 2#percent,
-                width: 100#percent,
-                height: 100#percent,
-            }
-        ]
-    },
+//    $Box {
+//        template_name: "backpack_card",
+//        template_keys: {
+//        },
+//        styles: [
+//            {
+//                positionType: positionType.absolute,
+//                marginTop: 2#percent,
+//                width: 100#percent,
+//                height: 100#percent,
+//            }
+//        ]
+//    },
 ],
 
 warningLabelTemplate: $Box {

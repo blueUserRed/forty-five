@@ -82,14 +82,13 @@ class Backpack(
     }
 
     private fun initDeckLayout() {
-//        println(deckCardsWidget.children)
         for (i in 0 until numberOfSlots) {
-            ((screen.screenBuilder.generateFromTemplate(
+            (screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
                 mapOf(),
                 deckCardsWidget,
                 screen
-            )as CustomFlexBox ).children[0] as CustomFlexBox).backgroundHandle = "backpack_empty_deck_slot"
+            ) as CustomFlexBox).backgroundHandle = "backpack_empty_deck_slot"
         }
         deckCardsWidget.invalidate()
     }
@@ -109,7 +108,7 @@ class Backpack(
                 "Changing Deck from ${SaveState.curDeck.id} to $newDeckId"
             )
             val oldActor = deckSelectionParent.children[SaveState.curDeck.id - 1] as CustomImageActor
-            oldActor.backgroundHandle = oldActor.backgroundHandle?.replace("_hover", "")        //TODO ugly
+            oldActor.backgroundHandle = oldActor.backgroundHandle?.replace("_hover", "")
             SaveState.curDeckNbr = newDeckId
             resetDeckNameField()
             (deckSelectionParent.children[newDeckId - 1] as CustomImageActor).backgroundHandle += "_hover"
@@ -118,19 +117,14 @@ class Backpack(
     }
 
     private fun reloadDeck() {
-        //Deck
         val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
-        children.forEach {
-            if (it.children.size >= 2) {
-                removeChildCompletely(it.children[1] as CustomFlexBox)
-            }
-        }
+        children.forEach { (it.children[0] as CustomFlexBox).isVisible = false }
+        //Deck
         val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
         SaveState.curDeck.cardPositions.forEach {
-            val curParent = children[it.key]
             val currentSelection = unplacedCards.find { card -> it.value == card }!!
-            val cur =
-                screen.screenBuilder.generateFromTemplate("backpack_card", mapOf(), curParent, screen) as CustomFlexBox
+            val cur = children[it.key].children[0] as CustomFlexBox
+            cur.isVisible = true
             cur.background =
                 TextureRegionDrawable(_allCards.find { card -> card.name == it.value }!!.actor.pixmapTextureRegion)
             unplacedCards.remove(currentSelection)
@@ -140,7 +134,7 @@ class Backpack(
 
         //Backpack
         backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
-            .forEach { backpackCardsWidget.remove(it.styleManager!!.node) }
+            .forEach { removeChildCompletely(it) }
         for (i in 0 until unplacedCards.size) {
             screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
@@ -162,7 +156,8 @@ class Backpack(
         val allPos = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in sortedCards.indices) {
             val curCard = _allCards.find { it.name == sortedCards[i] }!!
-            (allPos[i].children[0] as CustomFlexBox).background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
+            (allPos[i].children[0] as CustomFlexBox).background =
+                TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
         }
     }
 
