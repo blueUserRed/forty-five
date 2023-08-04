@@ -34,6 +34,9 @@ object DragAndDropBehaviourFactory {
         dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
             ShopDragSource(dragAndDrop, actor, onj)
         }
+//        dragBehaviours["BackpackDragSource"] = { dragAndDrop, actor, onj ->
+//            BackpackDragSource(dragAndDrop, actor, onj)
+//        }
     }
 
     fun dragBehaviourOrError(
@@ -102,7 +105,7 @@ class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null) return
-        val obj = payload.obj as ShopDragSource.DragAndDropPayload
+        val obj = payload.obj as ShopDragSource.ShopPayload
         obj.onBuy()
     }
 }

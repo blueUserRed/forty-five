@@ -40,11 +40,12 @@ class Backpack(
     private lateinit var backpackCardsWidget: CustomScrollableFlexBox
     private lateinit var deckSelectionParent: CustomFlexBox
 
-    private var sortingSystem = BackpackSorting.Damage(false)
+    private var sortingSystem = BackpackSorting.Damage()
 
 
     init {
         //TODO
+        // 0. background stop
         // 1. Cards drag and drop (both direction)
         // 2. automatic add to deck on double click or on press space or so
         // 3. automatic add to deck if deck doesn't have enough cards
@@ -103,7 +104,7 @@ class Backpack(
         if (SaveState.curDeck.id != newDeckId || firstInit) {
             if (!firstInit) FortyFiveLogger.log(
                 FortyFiveLogger.LogLevel.DEBUG,
-                logTag,
+                LOG_TAG,
                 "Changing Deck from ${SaveState.curDeck.id} to $newDeckId"
             )
             val oldActor = deckSelectionParent.children[SaveState.curDeck.id - 1] as CustomImageActor
@@ -120,7 +121,7 @@ class Backpack(
         val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
         children.forEach {
             while (it.children.size >= 2)
-                it.children[1].remove()
+                deckCardsWidget.remove((it.children[1] as CustomFlexBox).styleManager!!.node)
         }
         val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
         SaveState.curDeck.cardPositions.forEach {
@@ -244,7 +245,7 @@ class Backpack(
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
         }
-        const val logTag: String = "Backpack"
+        const val LOG_TAG: String = "Backpack"
     }
 
     interface BackpackSorting {

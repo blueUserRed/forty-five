@@ -48,4 +48,12 @@ $DragAndDropBehaviour {
             moveToLastIndex?: boolean,
         ...dragAndDropBehaviourSharedKeys
     }
+
+    $BackpackDragSource{
+        ...dragAndDropBehaviourSharedKeys
+    }
+
+    $BackpackDragTarget{
+        ...dragAndDropBehaviourSharedKeys
+    }
 }
