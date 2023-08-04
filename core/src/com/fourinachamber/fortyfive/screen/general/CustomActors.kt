@@ -626,12 +626,12 @@ class CustomScrollableFlexBox(
         private var dragX: Float = 0f
         private var dragY: Float = 0f
         var pressedPointer = -1
-        val button = 0
+//        val button = -1
         var dragging = false
 
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
             if (pressedPointer != -1) return false
-            if (pointer == 0 && this.button != -1 && button != this.button) return false
+//            if (pointer == 0 && this.button != -1 && button != this.button) return false
             pressedPointer = pointer
             touchDownX = x
             touchDownY = y
@@ -646,7 +646,7 @@ class CustomScrollableFlexBox(
                 dragging = true
                 dragStartX = x
                 dragStartY = y
-                dragStart(event, x, y, pointer)
+                dragStart()
                 dragX = x
                 dragY = y
             }
@@ -655,7 +655,7 @@ class CustomScrollableFlexBox(
                 dragLastY = dragY
                 dragX = x
                 dragY = y
-                drag(event, x, y, pointer)
+                drag()
             }
         }
 
@@ -670,7 +670,7 @@ class CustomScrollableFlexBox(
             pressedPointer = -1
         }
 
-        fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        fun dragStart() {
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (scrollbarHandle == null) {
                 startPos = Float.NaN
@@ -693,7 +693,7 @@ class CustomScrollableFlexBox(
             }
         }
 
-        fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        fun drag() {
             if (startPos.isNaN()) return
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (isScrollDirectionVertical) {

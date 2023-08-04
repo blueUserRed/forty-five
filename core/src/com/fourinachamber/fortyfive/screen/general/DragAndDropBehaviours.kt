@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.utils.Array
 import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.map.Backpack.BackpackDragSource
 import com.fourinachamber.fortyfive.map.Backpack.BackpackDropTarget
@@ -173,7 +174,6 @@ open class ExecutionPayload { //TODO maybe interface, but idk how to set "tasks"
         actor.setPosition(pos.x, pos.y)
     }
 }
-
 
 
 class SlotDragSource(

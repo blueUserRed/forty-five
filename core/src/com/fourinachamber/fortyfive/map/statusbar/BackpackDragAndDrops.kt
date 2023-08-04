@@ -16,15 +16,14 @@ class BackpackDragSource(
     onj: OnjNamedObject,
 ) : CenterDragged(dragAndDrop, actor, onj) {
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
-        val actor = this.actor
         if ((actor !is CustomFlexBox)) return null
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
         payload.dragActor = actor
         val curFlex = actor.parent.parent as CustomScrollableFlexBox
         curFlex.currentlyDraggedChild = actor
-        actor.fixedZIndex = 10
-        curFlex.resortZIndices()
+
+        actor.parent.parent.parent.toFront()
 
         val obj = BackpackDragPayload(actor)
         payload.obj = obj
@@ -45,19 +44,22 @@ class BackpackDragSource(
         val obj = payload.obj as BackpackDragPayload
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
         obj.onDragStop()
+        actor.parent.parent.parent.zIndex -= 1
+        println(target)
+        println()
     }
 }
 
 class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     fun cardsPlacedOn(card: CustomFlexBox, slot: CustomFlexBox) {
         println("now to deck from: ${card.parent.parent.children.indexOf(card.parent)}")
-//        println("now to deck to:   ${slot.parent.parent.children.indexOf(card.parent)}")
-        println()
+        println("now to deck to:   ${slot.parent.children.indexOf(card.parent)}")
+//        println()
     }
 
     fun backToBackpack(card: CustomFlexBox) {
         println("now to backpack: ${card.parent.children.indexOf(card.parent)}")
-        println()
+//        println()
     }
 }
 

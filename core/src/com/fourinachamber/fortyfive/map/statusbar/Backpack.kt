@@ -203,8 +203,8 @@ class Backpack(
         changeDeckTo(SaveState.curDeck.id, true)
         return Timeline.timeline {
             parallelActions(
-                getInOutTimeLine(isGoingIn = true, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
-                getInOutTimeLine(isGoingIn = true, true, this@Backpack.children[1] as CustomFlexBox).asAction()
+                getInOutTimeLine(isGoingIn = true, false, deckCardsWidget.parent as CustomFlexBox).asAction(),
+                getInOutTimeLine(isGoingIn = true, true, backpackCardsWidget.parent as CustomFlexBox).asAction()
             )
         }
     }
@@ -233,8 +233,8 @@ class Backpack(
     override fun hide(): Timeline {
         return Timeline.timeline {
             parallelActions(
-                getInOutTimeLine(isGoingIn = false, false, this@Backpack.children[0] as CustomFlexBox).asAction(),
-                getInOutTimeLine(isGoingIn = false, true, this@Backpack.children[1] as CustomFlexBox).asAction()
+                getInOutTimeLine(isGoingIn = false, false, deckCardsWidget.parent as CustomFlexBox).asAction(),
+                getInOutTimeLine(isGoingIn = false, true, backpackCardsWidget.parent as CustomFlexBox).asAction()
             )
         }
     }
