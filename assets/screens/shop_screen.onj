@@ -78,7 +78,6 @@ var testWidget = $Image {
     reportDimensionsWithScaling: true,
     dragAndDrop: $ShopDragSource {
         group: "card",
-        moveToLastIndex: true,
     },
     styles: [
         {
@@ -329,7 +328,6 @@ templates: [
         reportDimensionsWithScaling: true,
         dragAndDrop: $ShopDragSource {
             group: "card",
-            moveToLastIndex: true,
         },
         styles: [
             {

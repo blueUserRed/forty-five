@@ -45,7 +45,6 @@ $DragAndDropBehaviour {
     }
 
     $ShopDragSource{
-            moveToLastIndex?: boolean,
         ...dragAndDropBehaviourSharedKeys
     }
 
