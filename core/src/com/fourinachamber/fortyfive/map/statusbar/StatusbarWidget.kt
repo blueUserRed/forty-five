@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.InOutAnimationActor
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.screen.general.onButtonClick
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.toOnjYoga
@@ -18,7 +19,7 @@ class StatusbarWidget(
     private val mapIndicatorWidgetName: String?,
     private val optionsWidgetName: String,
     private val options: List<OnjObject>,
-    private val screen: OnjScreen
+    screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
     private val timeline: Timeline = Timeline(mutableListOf())
@@ -142,20 +143,13 @@ class StatusbarWidget(
     private fun getImageData(name: String) =
         MapManager.mapImages.find { it.name == name && it.type == "name" }
 
-    private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) = Timeline.timeline {
-        val exp = Interpolation.exp10Out
-        val amount = 2F * (if (goUp) 1 else -1)
-        val duration = 200
-        var i = 0.0F
-        val startOff = target.offsetY
-        repeat(10) {
-            action {
-                target.offsetY = startOff + amount * exp.apply(i)
-                i += 0.1F
-            }
-            delay((duration * 0.1).toInt())
-        }
-    }
+    private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) =
+        CustomMoveByAction(
+            target,
+            Interpolation.exp10Out,
+            relY = 2F * (if (goUp) 1 else -1),
+            duration = 200
+        ).getTimeline()
 
     private fun hide(option: Pair<CustomFlexBox, String>) {
         val boxAction = getOptionTimeline(option.first, true).asAction()

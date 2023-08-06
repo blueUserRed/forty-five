@@ -27,6 +27,7 @@ assets: {
         "card_character",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets),
     ]
 },
 
@@ -229,8 +230,6 @@ root: $Box {
             },
             {
                 style_priority: 2,
-                //                detached: true,
-
                 style_condition: state("show_world_view")
             }
         ],
@@ -252,14 +251,17 @@ root: $Box {
                     displayName: "Settings",
                 },
             ],
-//            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
+            //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
+
             ...(sharedComponents.statusbarCenterDefaults)
         },
         sharedComponents.backpack,
     ],
+    sharedComponents.warningParent,
 ],
 
 templates: [
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),
+    ...(sharedComponents.warningLabelTemplates),
 ],

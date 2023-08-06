@@ -483,7 +483,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 }
 
 open class CustomFlexBox(
-    private val screen: OnjScreen
+    protected val screen: OnjScreen
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable {
 
     override var fixedZIndex: Int = 0
@@ -558,6 +558,8 @@ open class CustomFlexBox(
             background?.draw(batch, x, y, width, height)
         }
         super.draw(batch, parentAlpha)
+        x -= offsetX
+        y -= offsetY
     }
 
     open fun initAfterChildrenExist() {}
@@ -585,7 +587,7 @@ open class CustomFlexBox(
 }
 
 class CustomScrollableFlexBox(
-    private val screen: OnjScreen,
+    screen: OnjScreen,
     private val isScrollDirectionVertical: Boolean,
     private val scrollDistance: Float,
     private val isBackgroundStretched: Boolean,

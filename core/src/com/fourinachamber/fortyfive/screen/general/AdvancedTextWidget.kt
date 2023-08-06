@@ -25,7 +25,7 @@ import kotlin.math.sin
 
 open class AdvancedTextWidget(
     advancedText: AdvancedText,
-    private val screen: OnjScreen
+    screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
     private var nodesOfCurrentText: List<YogaNode> = listOf()

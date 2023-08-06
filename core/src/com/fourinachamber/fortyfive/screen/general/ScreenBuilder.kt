@@ -29,6 +29,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -465,6 +466,8 @@ class ScreenBuilder(val file: FileHandle) {
         ).apply {
             initFlexBox(this, widgetOnj, screen)
         }
+
+        "WarningParent" -> CustomWarningParent(screen).apply { initFlexBox(this, widgetOnj, screen) }
 
         "FromTemplate" -> generateFromTemplate(
             widgetOnj.get<String>("generateFrom"),
