@@ -26,7 +26,7 @@ var buttonStyles = [
     {
         style_priority: 1,
         width: 10.0#percent,
-        marginTop: 0.3#points,
+        marginTop: (0.3*10)#points,
         fontScale: buttonBaseScale,
     }
 ];
@@ -63,8 +63,8 @@ root: $Box {
                 style_priority: 1,
                 aspectRatio: 880.0 / 161.0,
                 width: 40.0#percent,
-                marginRight: 2.5#points,
-                marginTop: 5.0#points
+                marginRight: (2.5*10)#points,
+                marginTop: (5.0*10)#points
             }
         ],
         reportDimensionsWithScaling: true,
@@ -79,14 +79,14 @@ root: $Box {
                 style_priority: 1,
                 flexDirection: flexDirection.column,
                 alignItems: align.flexEnd,
-                marginRight: 1.0#points,
-                marginBottom: 2.5#points,
-                positionLeft: 0.0#points
+                marginRight: (1.0*10)#points,
+                marginBottom: (2.5*10)#points,
+                positionLeft: (0.0*10)#points
             },
             {
                 style_priority: 2,
                 style_condition: state("transition away"),
-                positionLeft: 35.0#points,
+                positionLeft: (35.0*10)#points,
                 style_animation: {
                     duration: transitionAwayTime,
                     interpolation: interpolation.linear

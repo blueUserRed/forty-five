@@ -140,16 +140,19 @@ class StatusbarWidget(
         }
     }
 
-    private fun getImageData(name: String) =
-        MapManager.mapImages.find { it.name == name && it.type == "name" }
+    private fun getImageData(name: String) = MapManager.mapImages.find { it.name == name && it.type == "name" }
 
     private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) =
-        CustomMoveByAction(
-            target,
-            Interpolation.exp10Out,
-            relY = 2F * (if (goUp) 1 else -1),
-            duration = 200
-        ).getTimeline()
+        Timeline.timeline {
+            val action = CustomMoveByAction(
+                target,
+                Interpolation.exp10Out,
+                relY = 2F * (if (goUp) 1 else -1),
+                duration = 200F
+            )
+            action { target.addAction(action) }
+            delayUntil { action.isComplete }
+        }
 
     private fun hide(option: Pair<CustomFlexBox, String>) {
         val boxAction = getOptionTimeline(option.first, true).asAction()

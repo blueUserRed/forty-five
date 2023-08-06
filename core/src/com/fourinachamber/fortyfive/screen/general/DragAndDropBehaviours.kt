@@ -23,12 +23,6 @@ object DragAndDropBehaviourFactory {
     private val dropBehaviours: MutableMap<String, DropBehaviourCreator> = mutableMapOf()
 
     init {
-        dragBehaviours["SlotDragSource"] = { dragAndDrop, actor, onj ->
-            SlotDragSource(dragAndDrop, actor, onj)
-        }
-        dropBehaviours["SlotDropTarget"] = { dragAndDrop, actor, onj ->
-            SlotDropTarget(dragAndDrop, actor, onj)
-        }
         dragBehaviours["CardDragSource"] = { dragAndDrop, actor, onj ->
             CardDragSource(dragAndDrop, actor, onj)
         }
@@ -175,73 +169,6 @@ open class ExecutionPayload { //TODO maybe interface, but idk how to set "tasks"
     }
 }
 
-
-class SlotDragSource(
-    dragAndDrop: DragAndDrop,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DragBehaviour(dragAndDrop, actor, onj) {
-
-    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload {
-        val payload = DragAndDrop.Payload()
-        dragAndDrop.setKeepWithinStage(false)
-
-        payload.dragActor = actor
-
-        payload.setObject(
-            mutableMapOf(
-                "resetPosition" to (actor.x to actor.y)
-            )
-        )
-
-        dragAndDrop.setDragActorPosition(
-            actor.width - (actor.width * actor.scaleX / 2),
-            -(actor.height * actor.scaleY) / 2
-        )
-        return payload
-    }
-
-    override fun dragStop(
-        event: InputEvent?,
-        x: Float,
-        y: Float,
-        pointer: Int,
-        payload: DragAndDrop.Payload?,
-        target: DragAndDrop.Target?
-    ) {
-        if (payload == null) return
-        val map = payload.`object` as Map<*, *>
-
-        val (actorX, actorY) = (map["resetPosition"] ?: return) as Pair<*, *>
-        actor.setPosition(actorX as Float, actorY as Float)
-    }
-}
-
-class SlotDropTarget(
-    dragAndDrop: DragAndDrop,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
-
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean {
-        return true
-    }
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        if (payload == null || source == null) return
-        @Suppress("UNCHECKED_CAST")
-        val obj = payload.`object`!! as MutableMap<String, Any?>
-        val posX = actor.x + actor.width / 2 - source.actor.width / 2
-        val posY = actor.y + actor.height / 2 - source.actor.height / 2
-        obj["resetPosition"] = posX to posY
-    }
-}
 
 typealias DragBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DragBehaviour
 typealias DropBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DropBehaviour

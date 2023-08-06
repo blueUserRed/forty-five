@@ -4,8 +4,8 @@ use Common;
 import "imports/colors.onj" as color;
 import "config/game_config.onj" as gameConfig;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
 
 navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
@@ -50,8 +50,8 @@ navBar: $Box {
             }
         ],
         textureName: "heart_texture",
-        scaleX: 0.01,
-        scaleY: 0.01,
+        scaleX: 0.1,
+        scaleY: 0.1,
         reportDimensionsWithScaling: true,
         behaviours: [
             $OnClickChangeScreenStateBehaviour {
@@ -71,8 +71,8 @@ statusbarCenterDefaults: {
             height: 14#percent,
             flexDirection: flexDirection.column,
             positionType: positionType.absolute,
-            marginTop: 0#points,
-            marginLeft: 0#points,
+            marginTop: (0 * 10)#points,
+            marginLeft: (0 * 10)#points,
             alignItems: align.center,
         }
     ],
@@ -104,8 +104,8 @@ statusbarCenterDefaults: {
             } children [
                 $Image {
                     textureName: "heart_texture",
-                    scaleX: 0.01,
-                    scaleY: 0.01,
+                    scaleX: 0.1,
+                    scaleY: 0.1,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
@@ -118,7 +118,7 @@ statusbarCenterDefaults: {
 
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.09,
+                    fontScale: 0.9,
                     align: "center",
                 }
             ],
@@ -148,7 +148,7 @@ statusbarCenterDefaults: {
                     template: "{stat.playerMoney}$ ",
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.09,
+                    fontScale: 0.9,
                     align: "center",
                 }
             ],
@@ -177,8 +177,8 @@ statusbarLeftDefaults: {
             height: 14#percent,
             flexDirection: flexDirection.column,
             positionType: positionType.absolute,
-            marginTop: 0#points,
-            marginLeft: 0#points,
+            marginTop: (0 * 10)#points,
+            marginLeft: (0 * 10)#points,
             alignItems: align.flexStart,
         }
     ],
@@ -260,7 +260,7 @@ statusbarLeftDefaults: {
 
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.09,
+                    fontScale: 0.9,
                     align: "center",
                 }
             ],
@@ -291,7 +291,7 @@ statusBarTemplates: [
 
         font: "red_wing_cm",
         color: color.forty_white,
-        fontScale: 0.09,
+        fontScale: 0.9,
         align: "center",
     },
     $Image {
@@ -300,13 +300,13 @@ statusBarTemplates: [
             "textureName": "textureName"
         },
         textureName: "location_sign_salem",
-        scaleX: 0.07,
-        scaleY: 0.07,
+        scaleX: 0.7,
+        scaleY: 0.7,
         reportDimensionsWithScaling: true,
         styles: [
             {
-                marginTop: 0.1#points,
-                marginLeft: 0.2#points,
+                marginTop: (0.1 * 10)#points,
+                marginLeft: (0.2 * 10)#points,
             }
         ],
     },
@@ -335,7 +335,7 @@ statusBarTemplates: [
                 text: "",
                 font: "red_wing_cm",
                 color: color.forty_white,
-                fontScale: 0.07,
+                fontScale: 0.7,
                 align: "center",
             }
         ]
@@ -383,11 +383,11 @@ backpack: $Backpack {
     styles: [
         {
             width: (150)#points,
-            height: 77#points,
+            height: (77 * 10)#points,
             flexDirection: flexDirection.row,
             positionType: positionType.absolute,
-            marginTop: 13#points,
-            marginLeft: 5#points,
+            marginTop: (13 * 10)#points,
+            marginLeft: (5 * 10)#points,
             justifyContent: justify.spaceBetween,
         }
     ],
@@ -395,12 +395,12 @@ backpack: $Backpack {
     $Box {
         styles: [
             {
-                width: 73#points,
+                width: (73 * 10)#points,
                 height: 100#percent,
                 flexDirection: flexDirection.column,
-                paddingTop: 3#points,
-                paddingLeft: 3#points,
-                paddingRight: 3#points,
+                paddingTop: (3 * 10)#points,
+                paddingLeft: (3 * 10)#points,
+                paddingRight: (3 * 10)#points,
                 background: "backpack_deck_background",
             }
         ],
@@ -413,8 +413,8 @@ backpack: $Backpack {
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceBetween,
                     alignItems: align.center,
-                    paddingLeft: 3#points,
-                    paddingRight: 3#points,
+                    paddingLeft: (3 * 10)#points,
+                    paddingRight: (3 * 10)#points,
                 }
             ],
         } children [
@@ -422,14 +422,15 @@ backpack: $Backpack {
                 name: "deckName",
                 text: "Testing",
                 font: "red_wing",
-                fontScale: 0.09,
+                fontScale: 0.9,
                 color: color.forty_white,
                 styles: [
                     {
                         width: 40#percent,
-                        //                        background: "backpack_1",
-//                        selectionColor: color.green,
-//                        cursorColor: color.yellow,
+                        //
+                        //background: "backpack_1",
+                        //selectionColor: color.green,
+                        //cursorColor: color.yellow,
 
                     }
                 ]
@@ -447,32 +448,32 @@ backpack: $Backpack {
             } children [
                 $Image {
                     textureName: "backpack_1",
-                    scaleX: 0.041,
-                    scaleY: 0.041,
+                    scaleX: 0.41,
+                    scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_2",
-                    scaleX: 0.041,
-                    scaleY: 0.041,
+                    scaleX: 0.41,
+                    scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_3",
-                    scaleX: 0.041,
-                    scaleY: 0.041,
+                    scaleX: 0.41,
+                    scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_4",
-                    scaleX: 0.041,
-                    scaleY: 0.041,
+                    scaleX: 0.41,
+                    scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 },
                 $Image {
                     textureName: "backpack_5",
-                    scaleX: 0.041,
-                    scaleY: 0.041,
+                    scaleX: 0.41,
+                    scaleY: 0.41,
                     reportDimensionsWithScaling: true,
                 }
             ]
@@ -480,7 +481,7 @@ backpack: $Backpack {
         $ScrollBox {
             name: "deckCards",
             isScrollDirectionVertical: true,
-            scrollDistance: 9.0,
+            scrollDistance: 90.0,
             backgroundStretched: false,
             scrollbarBackgroundName: "deck_scrollbar_background",
             scrollbarName: "deck_scrollbar_handle",
@@ -492,9 +493,9 @@ backpack: $Backpack {
                     height: 90#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.flexStart,
-                    paddingRight: 2#points,
-                    cuttingRight: 1.75,
-                    scrollbarWidth: 1.25,
+                    paddingRight: (2 * 10)#points,
+                    cuttingRight: 17.5,
+                    scrollbarWidth: 12.5,
                 }
             ],
         } children [
@@ -507,12 +508,12 @@ backpack: $Backpack {
         },
         styles: [
             {
-                width: 73#points,
+                width: (73 * 10)#points,
                 height: 100#percent,
                 flexDirection: flexDirection.column,
-                paddingTop: 3#points,
-                paddingLeft: 3#points,
-                paddingRight: 3#points,
+                paddingTop: (3 * 10)#points,
+                paddingLeft: (3 * 10)#points,
+                paddingRight: (3 * 10)#points,
                 background: "backpack_backpack_background",
             }
         ],
@@ -525,22 +526,22 @@ backpack: $Backpack {
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceBetween,
                     alignItems: align.center,
-                    paddingLeft: 3#points,
-                    paddingRight: 3#points,
+                    paddingLeft: (3 * 10)#points,
+                    paddingRight: (3 * 10)#points,
                 }
             ],
         } children [
             $Label {
                 text: "Backpack",
                 font: "red_wing",
-                fontScale: 0.09,
+                fontScale: 0.9,
                 color: color.white,
             }
         ],
         $ScrollBox {
             name: "backPackCards",
             isScrollDirectionVertical: true,
-            scrollDistance: 9.0,
+            scrollDistance: 90.0,
             backgroundStretched: false,
             scrollbarBackgroundName: "backpack_scrollbar_background",
             scrollbarName: "backpack_scrollbar_handle",
@@ -553,9 +554,9 @@ backpack: $Backpack {
                     height: 90#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.flexStart,
-                    paddingRight: 2#points,
-                    cuttingRight: 1.75,
-                    scrollbarWidth: 1.25,
+                    paddingRight: (2 * 10)#points,
+                    cuttingRight: 17.5,
+                    scrollbarWidth: 12.5,
                 }
             ],
         } children [
@@ -593,7 +594,7 @@ backpackTemplates: [
             styles: [
                 {
                     positionType: positionType.absolute,
-                    marginTop: 2#percent,
+//                    marginTop: 2#percent,
                     width: 100#percent,
                     height: 100#percent,
                     touchable: touchable.enabled,
@@ -606,11 +607,16 @@ backpackTemplates: [
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
     debug: true,
-    zIndex: 1000,
+    zIndex: 1152921504606846976, // 2^60
+
     styles: [
         {
             positionType: positionType.absolute,
             background: "title_screen_background",
+            positionBottom: 65#percent,
+            positionLeft: -15#percent,
+            width: 35#percent,
+            height: 35#percent,
         }
     ]
 },
@@ -629,10 +635,10 @@ warningLabelTemplates: [
         styles: [
             {
                 flexDirection: flexDirection.row,
-                width: 0#points,
+                width: (0 * 10)#points,
                 background: "",
                 positionType: positionType.absolute,
-                padding: 1#points,
+                padding: (1 * 10)#points,
             }
         ],
         debug: true,
@@ -641,13 +647,13 @@ warningLabelTemplates: [
         $Label {
             styles: [
                 {
-                    width: 2.78#points
+                    width: (2.78 * 10)#points
                 }
             ],
             text: "!",
             font: "red_wing",
             color: color.forty_white,
-            fontScale: 0.07,
+            fontScale: 0.7,
             align: "center",
         },
 
@@ -656,8 +662,8 @@ warningLabelTemplates: [
                 {
                     flexDirection: flexDirection.column,
                     flexGrow: 1.0,
-                    //                margin: 1#points,
-//                marginRight: 1#points,
+                    //                margin: (1*10)#points,
+//                marginRight: (1*10)#points,
 
                 }
             ],
@@ -667,7 +673,7 @@ warningLabelTemplates: [
                 text: "Todesstrafe",
                 font: "red_wing",
                 color: color.forty_white,
-                fontScale: 0.07,
+                fontScale: 0.7,
                 align: "center",
             },
 
@@ -676,7 +682,7 @@ warningLabelTemplates: [
                     {
                         background: "forty_white_texture",
                         width: 100#percent,
-                        height: 1#points,
+                        height: (1 * 10)#points,
                     }
                 ]
             },
@@ -685,12 +691,12 @@ warningLabelTemplates: [
                 text: "Testing Text... du hast etwas illlegales gemacht, und jetzt hast du die Todesstrafe verdient, ich hoffe, dass du einen schönen Qualvollen tod erleidest",
                 font: "red_wing",
                 color: color.forty_white,
-                fontScale: 0.05,
+                fontScale: 0.5,
                 align: "left",
                 wrap: true,
                 styles: [
                     {
-                        marginBottom: 1#points,
+                        marginBottom: (1 * 10)#points,
                     }
                 ]
             },
