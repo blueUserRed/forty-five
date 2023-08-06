@@ -18,7 +18,7 @@ import onj.value.OnjObject
 
 
 class Backpack(
-    private val screen: OnjScreen,
+    screen: OnjScreen,
     cardsFile: String,
     backpackFile: String,
     private val deckNameWidgetName: String,

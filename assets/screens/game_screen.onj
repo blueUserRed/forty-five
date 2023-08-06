@@ -85,7 +85,7 @@ options: {
 },
 
 templates: [
-    sharedComponents.warningLabelTemplate
+    ...(sharedComponents.warningLabelTemplates),
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {

@@ -77,6 +77,12 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $WarningParent {
+        partOfSelectionHierarchy?: boolean,
+        enableTransform?: boolean,
+        ...widgetSharedKeys
+    }
+
     $ScrollBox {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,

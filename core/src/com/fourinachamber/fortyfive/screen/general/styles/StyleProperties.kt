@@ -326,6 +326,7 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.LEFT, "marginLeft", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.RIGHT, "marginRight", screen))
+    styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.ALL, "margin", screen))
     styleManager.addStyleProperty(PositionStyleProperty(this, YogaEdge.TOP, "positionTop", screen))
     styleManager.addStyleProperty(PositionStyleProperty(this, YogaEdge.BOTTOM, "positionBottom", screen))
     styleManager.addStyleProperty(PositionStyleProperty(this, YogaEdge.LEFT, "positionLeft", screen))

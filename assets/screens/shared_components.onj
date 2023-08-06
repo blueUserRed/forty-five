@@ -571,10 +571,9 @@ backpackTemplates: [
         template_keys: {
         },
         dragAndDrop:
-            $DeckSlotDropTarget {
-                group: "backpack"
-            }
-        ,
+        $DeckSlotDropTarget {
+            group: "backpack"
+        },
         styles: [
             {
                 marginTop: 2#percent,
@@ -587,9 +586,9 @@ backpackTemplates: [
     } children [
         $Box {
             dragAndDrop:
-                $BackpackDragSource {
-                    group: "backpack"
-                },
+            $BackpackDragSource {
+                group: "backpack"
+            },
 
             styles: [
                 {
@@ -604,49 +603,48 @@ backpackTemplates: [
     ],
 ],
 
-warningLabelTemplate: $Box {
-    template_name: "warning_label_template",
-    template_keys: {
-        "children.0.text": "symbol",
-        "children.1.0.text": "title",
-        "children.1.2.text": "body",
-        "styles.0.background": "background",
-        "styles.0.width": "width",
-    },
+warningParent: $WarningParent {
+    name: "WARNING_PARENT",
+    debug: true,
+    zIndex: 1000,
     styles: [
         {
-            flexDirection: flexDirection.row,
-            width: 0#points,
-            background: ""
+            positionType: positionType.absolute,
+            background: "title_screen_background",
         }
     ]
-} children [
+},
 
-    $Label {
-        styles: [
-            {
-                width: 10#percent
-            }
-        ],
-        text: "!",
-        font: "red_wing",
-        color: color.forty_white,
-        fontScale: 0.07,
-        align: "center",
-    },
-
+warningLabelTemplates: [
     $Box {
+        template_name: "warning_label_template",
+        template_keys: {
+            "children.0.text": "symbol",
+            "children.1.0.text": "title",
+            "children.1.2.text": "body",
+            "styles.0.background": "background",
+            "styles.0.width": "width",
+        },
+        zIndex: 100,
         styles: [
             {
-                flexDirection: flexDirection.column,
-                flexGrow: 1.0
+                flexDirection: flexDirection.row,
+                width: 0#points,
+                background: "",
+                positionType: positionType.absolute,
+                padding: 1#points,
             }
         ],
-        debug: true
+        debug: true,
     } children [
 
         $Label {
-            text: "",
+            styles: [
+                {
+                    width: 2.78#points
+                }
+            ],
+            text: "!",
             font: "red_wing",
             color: color.forty_white,
             fontScale: 0.07,
@@ -656,25 +654,51 @@ warningLabelTemplate: $Box {
         $Box {
             styles: [
                 {
-                    background: "forty_white_texture",
-                    width: 100#percent,
-                    height: 1#points
+                    flexDirection: flexDirection.column,
+                    flexGrow: 1.0,
+                    //                margin: 1#points,
+//                marginRight: 1#points,
+
                 }
-            ]
-        },
+            ],
+        } children [
 
-        $Label {
-            text: "",
-            font: "red_wing",
-            color: color.forty_white,
-            fontScale: 0.07,
-            align: "left",
-            wrap: true
-        },
+            $Label {
+                text: "Todesstrafe",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.07,
+                align: "center",
+            },
 
+            $Box {
+                styles: [
+                    {
+                        background: "forty_white_texture",
+                        width: 100#percent,
+                        height: 1#points,
+                    }
+                ]
+            },
+
+            $Label {
+                text: "Testing Text... du hast etwas illlegales gemacht, und jetzt hast du die Todesstrafe verdient, ich hoffe, dass du einen schönen Qualvollen tod erleidest",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.05,
+                align: "left",
+                wrap: true,
+                styles: [
+                    {
+                        marginBottom: 1#points,
+                    }
+                ]
+            },
+
+        ]
     ]
 ],
 
 warningLabelUsedAssets: [
-    "forty_white_texture"
+    "forty_white_texture", "warning_label_background_red", "title_screen_background"
 ],
