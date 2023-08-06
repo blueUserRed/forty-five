@@ -5,11 +5,12 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.utils.Disposable
 import kotlin.math.max
 
 
 class CustomRectangle() :
-    Actor() {
+    Actor(), Disposable {
     private var texture: Texture? = null
 
     override fun setColor(color: Color) {
@@ -39,5 +40,9 @@ class CustomRectangle() :
 
     override fun draw(batch: Batch, parentAlpha: Float) {
         batch.draw(texture, x, y, width, height)
+    }
+
+    override fun dispose() {
+        texture?.dispose()
     }
 }

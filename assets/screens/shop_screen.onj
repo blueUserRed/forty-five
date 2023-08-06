@@ -8,8 +8,8 @@ use Common;
 use Screen;
 use Style;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
 
 assets: {
     useAssets: [
@@ -73,8 +73,8 @@ var scrollBar = $Image {
 
 var testWidget = $Image {
     textureName: "shop_background_no_biome",
-    scaleX: 0.001,
-    scaleY: 0.001,
+    scaleX: 0.01,
+    scaleY: 0.01,
     reportDimensionsWithScaling: true,
     dragAndDrop: $ShopDragSource {
         group: "card",
@@ -112,7 +112,7 @@ var testWidgetBox = $Box {
         text: "bought",
         font: "red_wing_cm",
         color: color.dark_brown,
-        fontScale: 0.08,
+        fontScale: 0.8,
         align: "center",
     }
 ];
@@ -120,7 +120,7 @@ var testWidgetBox = $Box {
 var cardsWidget = $ScrollBox {
     name: "cards_widget",
     isScrollDirectionVertical: true,
-    scrollDistance: 6.0,
+    scrollDistance: 60.0,
     backgroundStretched: false,
     scrollbarBackgroundName: "scrollbar_background",
     scrollbarName: "scrollbar_handle",
@@ -133,15 +133,15 @@ var cardsWidget = $ScrollBox {
             background: "shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
-            paddingLeft: 3.0#points,
-            paddingRight: 10.0#points,
-            paddingTop: 3.0#points,
-            paddingBottom: 4.0#points,
-            cuttingLeft: 1.75,
-            cuttingRight: 1.75,
-            cuttingTop: 2.0,
-            cuttingBottom: 3.0,
-            scrollbarWidth: 7.5,
+            paddingLeft: (3.0*10)#points,
+            paddingRight: (10.0*10)#points,
+            paddingTop: (3.0*10)#points,
+            paddingBottom: (4.0*10)#points,
+            cuttingLeft: 17.5,
+            cuttingRight: 17.5,
+            cuttingTop: 20.0,
+            cuttingBottom: 30.0,
+            scrollbarWidth: 75.0,
         }
     ],
     children: [
@@ -202,8 +202,8 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionRight: 0.0#points,
-                positionBottom: 0.0#points,
+                positionRight: (0.0*10)#points,
+                positionBottom: (0.0*10)#points,
                 width: 93.0#percent,
                 height: 93.0#percent,
             }
@@ -214,8 +214,8 @@ root: $Box {
 
         name: "back_button",
         textureName: "shop_back_button",
-        scaleX: 0.08,
-        scaleY: 0.08,
+        scaleX: 0.8,
+        scaleY: 0.8,
         reportDimensionsWithScaling: true,
         behaviours: [
             $OnClickChangeScreenBehaviour {
@@ -225,7 +225,7 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionBottom: 0.0#points,
+                positionBottom: (0.0*10)#points,
             }
         ],
     },
@@ -245,8 +245,8 @@ root: $Box {
             styles: [
                 {
                     positionType: positionType.relative,
-                    positionTop: 2.0#points,
-                    positionRight: 0.0#points,
+                    positionTop: (2.0*10)#points,
+                    positionRight: (0.0*10)#points,
                     width: 100.0#percent,
                     height: 17.125#percent,
                     flexDirection: flexDirection.row,
@@ -260,14 +260,14 @@ root: $Box {
                 template: "{map.curEvent.personDisplayName}",
                 font: "red_wing",
                 color: color.forty_white,
-                fontScale: 0.2
+                fontScale: 2.0
             },
             $TemplateLabel {
                 align: "right",
                 template: "{stat.playerMoney}$ ",
                 font: "red_wing",
                 color: color.forty_white,
-                fontScale: 0.2
+                fontScale: 2.0
             },
         ],
 
@@ -279,7 +279,7 @@ root: $Box {
                 {
                     positionType: positionType.relative,
                     width: 100.0#percent,
-                    height: 0.02#points,
+                    height: 2#points,
                 }
             ],
         },
@@ -291,7 +291,7 @@ root: $Box {
             defaults: { //defaults actually defined in map/events/shops.onj
 
                 font: "red_wing",
-                fontScale: 0.08,
+                fontScale: 0.8,
                 color: color.forty_white,
             },
             styles: [
@@ -308,7 +308,7 @@ root: $Box {
             text: "drag to the merchant to confirm your purchase and add it to your backpack",
             font: "red_wing_cm",
             color: color.forty_white,
-            fontScale: 0.07,
+            fontScale: 0.7,
             align: "center",
         }
     ]
@@ -323,8 +323,8 @@ templates: [
         template_name: "cardsWidgetImage",
 //        name: "",
 //        textureName: "shop_background_no_biome",
-        scaleX: 0.001,
-        scaleY: 0.001,
+        scaleX: 0.01,
+        scaleY: 0.01,
         reportDimensionsWithScaling: true,
         dragAndDrop: $ShopDragSource {
             group: "card",
@@ -368,7 +368,7 @@ templates: [
         text: "bought",
         font: "red_wing_cm",
         color: color.dark_brown,
-        fontScale: 0.08,
+        fontScale: 0.8,
         align: "center",
         styles: [
             {

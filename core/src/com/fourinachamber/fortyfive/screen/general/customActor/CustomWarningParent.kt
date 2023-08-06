@@ -13,22 +13,21 @@ import onj.value.OnjString
 class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
 
     override fun layout() {
-        addStyleProperty("width", YogaValue(28F, YogaUnit.PERCENT))
-        addStyleProperty("height", YogaValue(100 - Y_POS_PERCENTAGE * 100, YogaUnit.POINT))
+//        addStyleProperty("width", YogaValue(28F, YogaUnit.PERCENT))
+//        addStyleProperty("height", YogaValue(100 - Y_POS_PERCENTAGE * 100, YogaUnit.POINT))
         super.layout()
     }
 
     private fun setOffsetsCorrect() { // this is ugly, but there is no way to fix this because of marvin
-        val pos = localToStageCoordinates(Vector2())
-        offsetX = -pos.x
-        offsetY = -pos.y + stage.viewport.worldHeight * Y_POS_PERCENTAGE
+//        val pos = localToStageCoordinates(Vector2())
+//        offsetX = -pos.x
+//        offsetY = -pos.y + stage.viewport.worldHeight * Y_POS_PERCENTAGE
     }
 
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         setOffsetsCorrect()
         super.draw(batch, parentAlpha)
-//        println("$x  $y $offsetX  $offsetY")
     }
 
     private fun addStyleProperty(name: String, any: Any) {
@@ -37,17 +36,21 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         if (property == null || property.instructions.isNotEmpty()) return
         val instruction = StyleInstruction(any, 1, StyleCondition.Always, any::class)
         styleManager.addInstruction(name, instruction, any::class)
-        @Suppress("MemberVisibilityCanBePrivate")
         addWarning(screen, "Test", "testing2")
     }
 
-    enum class InfoType {
-        INFO {
+    enum class Severity {
+        LOW {
             override fun getSymbol(): String = "i"
 
             override fun getBackground(): String = "forty_white_texture"
         },
-        WARNING {
+        MIDDLE {
+            override fun getSymbol(): String = "!"
+
+            override fun getBackground(): String = "warning_label_background_red"
+        },
+        HIGH {
             override fun getSymbol(): String = "!!!"
 
             override fun getBackground(): String = "warning_label_background_red"
@@ -63,14 +66,14 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         screen: OnjScreen,
         title: String,
         body: String,
-        infoType: InfoType = InfoType.WARNING,
+        severity: Severity = Severity.MIDDLE,
         width: YogaValue = YogaValue(100F, YogaUnit.PERCENT),
     ) {
         val data = mapOf(
-            "symbol" to OnjString(infoType.getSymbol()),
+            "symbol" to OnjString(severity.getSymbol()),
             "title" to OnjString(title),
             "body" to OnjString(body),
-            "background" to OnjString(infoType.getBackground()),
+            "background" to OnjString(severity.getBackground()),
             "width" to width.value.toOnjYoga(width.unit),
         )
         val current =

@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
@@ -8,6 +9,7 @@ import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.parser.OnjParser
@@ -190,7 +192,6 @@ class Backpack(
             val curActor = allPos[i].children[0] as CustomFlexBox
             curActor.background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
             curActor.name = "${curCard.name}${nameSeparatorStr}backpack${nameSeparatorStr}${i}"
-
         }
     }
 
@@ -250,16 +251,21 @@ class Backpack(
                 target.offsetX = amount * (if (goingRight) 1 else -1)
             }
         }
-        repeat(amount.toInt() / 4) {
-            action {
-                target.offsetX += 4F * (if (goingRight) -1 else 1) * (if (isGoingIn) 1 else -1)
-            }
-            delay(1)
-        }
+        val action = CustomMoveByAction(
+            target,
+            (if (isGoingIn) Interpolation.exp10Out else Interpolation.exp5In),
+            relX = amount * (if (goingRight) -1 else 1) * (if (isGoingIn) 1 else -1),
+            duration = 200F
+        )
+        action { target.addAction(action) }
+        delayUntil { action.isComplete }
         action {
             if (!isGoingIn) isVisible = false
-            deckCardsWidget.invalidate()
-            backpackCardsWidget.invalidate()
+            else {
+                deckCardsWidget.invalidate()
+                backpackCardsWidget.invalidate()
+                println("now invaildating")
+            }
         }
     }
 
