@@ -614,7 +614,6 @@ class CustomScrollableFlexBox(
 
     private var needsScrollbar: Boolean = true
 
-
     private val dragListener = object : InputListener() {
         var startPos = 0f
         private var touchDownX: Float = -1f
@@ -628,7 +627,6 @@ class CustomScrollableFlexBox(
         private var dragX: Float = 0f
         private var dragY: Float = 0f
         var pressedPointer = -1
-//        val button = -1
         var dragging = false
 
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
@@ -657,7 +655,7 @@ class CustomScrollableFlexBox(
                 dragLastY = dragY
                 dragX = x
                 dragY = y
-                drag()
+                drag(x,y)
             }
         }
 
@@ -695,7 +693,7 @@ class CustomScrollableFlexBox(
             }
         }
 
-        fun drag() {
+        fun drag(x: Float, y: Float) {
             if (startPos.isNaN()) return
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (isScrollDirectionVertical) {
@@ -836,9 +834,7 @@ class CustomScrollableFlexBox(
             val offset = offset + cutLeft
             val max = lastMax
             val curSize = width * width / (max + width)
-
             val curPos = offset / max * (width - curSize)
-
             if (scrollbarSide != null && scrollbarSide == "top") {
                 scrollbarHandle!!.y = y + height - scrollbarWidth
             } else {
@@ -849,8 +845,6 @@ class CustomScrollableFlexBox(
             scrollbarHandle!!.x = x - curPos
         }
     }
-
-    private var lastOffset = Vector2()
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
@@ -868,19 +862,22 @@ class CustomScrollableFlexBox(
         if (needsScrollbar) {
             val off = getTotalOffset()
             scrollbarBackground?.let {
-                it.x += off.x - lastOffset.x
-                it.y += off.y - lastOffset.y
+                it.x += off.x
+                it.y += off.y
                 it.draw(batch, parentAlpha)
+                it.x -= off.x
+                it.y -= off.y
             }
             scrollbarHandle?.let {
-                it.x += off.x - lastOffset.x
-                it.y += off.y - lastOffset.y
+                it.x += off.x
+                it.y += off.y
                 it.draw(batch, parentAlpha)
+                it.x -= off.x
+                it.y -= off.y
             }
-            lastOffset = off
         }
         val curChild = this.currentlyDraggedChild
-        if (curChild is CustomFlexBox) {
+        if (curChild != null) {
             val coordinates = curChild.parent.localToStageCoordinates(Vector2())
             curChild.x += coordinates.x
             curChild.y += coordinates.y

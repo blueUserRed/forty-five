@@ -264,7 +264,6 @@ class Backpack(
             else {
                 deckCardsWidget.invalidate()
                 backpackCardsWidget.invalidate()
-                println("now invaildating")
             }
         }
     }
