@@ -590,11 +590,9 @@ backpackTemplates: [
             $BackpackDragSource {
                 group: "backpack"
             },
-
             styles: [
                 {
                     positionType: positionType.absolute,
-//                    marginTop: 2#percent,
                     width: 100#percent,
                     height: 100#percent,
                     touchable: touchable.enabled,
@@ -606,17 +604,15 @@ backpackTemplates: [
 
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
-    debug: true,
-    zIndex: 1152921504606846976, // 2^60
+    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason
 
     styles: [
         {
             positionType: positionType.absolute,
-            background: "title_screen_background",
-            positionBottom: 65#percent,
-            positionLeft: -15#percent,
-            width: 35#percent,
-            height: 35#percent,
+            positionBottom: 70#percent,
+            positionLeft: 0#percent,
+            width: 25#percent,
+            height: 30#percent,
         }
     ]
 },
@@ -626,55 +622,53 @@ warningLabelTemplates: [
         template_name: "warning_label_template",
         template_keys: {
             "children.0.text": "symbol",
-            "children.1.0.text": "title",
-            "children.1.2.text": "body",
+            "children.0.color": "color",
+            "children.1.children.0.text": "title",
+            "children.1.children.0.color": "color",
+            "children.1.children.2.text": "body",
+            "children.1.children.2.color": "color",
             "styles.0.background": "background",
             "styles.0.width": "width",
         },
-        zIndex: 100,
         styles: [
             {
+                style_priority: 1,
                 flexDirection: flexDirection.row,
-                width: (0 * 10)#points,
-                background: "",
+                width: 100#percent,
                 positionType: positionType.absolute,
-                padding: (1 * 10)#points,
+                padding: 10#points,
+                background: "",
+                positionLeft: -100#percent,
             }
         ],
-        debug: true,
     } children [
-
         $Label {
             styles: [
                 {
                     width: (2.78 * 10)#points
                 }
             ],
-            text: "!",
+            text: "",
             font: "red_wing",
             color: color.forty_white,
             fontScale: 0.7,
             align: "center",
         },
-
         $Box {
             styles: [
                 {
                     flexDirection: flexDirection.column,
                     flexGrow: 1.0,
-                    //                margin: (1*10)#points,
-//                marginRight: (1*10)#points,
-
                 }
             ],
         } children [
 
             $Label {
-                text: "Todesstrafe",
+                text: "",
                 font: "red_wing",
                 color: color.forty_white,
                 fontScale: 0.7,
-                align: "center",
+                align: "left",
             },
 
             $Box {
@@ -682,25 +676,19 @@ warningLabelTemplates: [
                     {
                         background: "forty_white_texture",
                         width: 100#percent,
-                        height: (1 * 10)#points,
+                        height: 3#points,
                     }
                 ]
             },
 
             $Label {
-                text: "Testing Text... du hast etwas illlegales gemacht, und jetzt hast du die Todesstrafe verdient, ich hoffe, dass du einen schönen Qualvollen tod erleidest",
+                text: "",
                 font: "red_wing",
                 color: color.forty_white,
                 fontScale: 0.5,
                 align: "left",
                 wrap: true,
-                styles: [
-                    {
-                        marginBottom: (1 * 10)#points,
-                    }
-                ]
             },
-
         ]
     ]
 ],

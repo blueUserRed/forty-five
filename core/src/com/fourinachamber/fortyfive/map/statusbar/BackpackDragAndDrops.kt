@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
 import kotlin.math.max
@@ -65,7 +66,12 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
             val fromDeck = card.name.split(Backpack.nameSeparatorStr)[1] == "deck"
             if (fromDeck) SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
         }else{
-            println("Deck size (${SaveState.curDeck.cardPositions.size} cards) is too small, a min. of ${Backpack.minDeckSize+1} is required to remove cards!")
+            CustomWarningParent.getWarning(card.screen).addWarning(
+                card.screen,
+                "Not enough cards",
+                "The minimum decksize is ${Backpack.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                CustomWarningParent.Severity.MIDDLE
+            )
         }
     }
 
