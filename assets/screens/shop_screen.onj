@@ -117,51 +117,49 @@ var testWidgetBox = $Box {
     }
 ];
 
-var cardsWidget = $ScrollBox {
-    name: "cards_widget",
-    isScrollDirectionVertical: false,
-    scrollDistance: 60.0,
-    backgroundStretched: false,
-    scrollbarBackgroundName: "scrollbar_background",
-    scrollbarName: "scrollbar_handle",
-    scrollbarSide: "left",
+var cardsWidget = $Box {
     styles: [
         {
-            flexWrap: wrap.wrap,
-            flexDirection: flexDirection.column,
-            justifyContent: justify.flexStart,
             background: "shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
-            paddingLeft: (3.0 * 10)#points,
-            paddingRight: (10.0 * 10)#points,
-            paddingTop: (3.0 * 10)#points,
-            paddingBottom: (4.0 * 10)#points,
-            cuttingLeft: 17.5,
-            cuttingRight: 17.5,
-            cuttingTop: 20.0,
-            cuttingBottom: 30.0,
-            scrollbarWidth: 15.0,
-            scrollbarLength: 90.0#percent,
+
         }
     ],
-    children: [
-        //        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
 
-        scrollBar,
-        scrollBarBackground
+    children: [
+        $ScrollBox {
+            name: "cards_widget",
+            isScrollDirectionVertical: true,
+            scrollDistance: 60.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "scrollbar_background",
+            scrollbarName: "scrollbar_handle",
+            scrollbarSide: "right",
+            styles: [
+                {
+                    flexWrap: wrap.wrap,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.flexStart,
+                    width: 94.0#percent,
+                    height: 100.0#percent,
+                    paddingLeft: (3.0 * 15)#points,
+                    paddingRight: (35.0)#points,
+                    paddingTop: (3.0 * 10)#points,
+                    paddingBottom: (4.0 * 10)#points,
+                    cuttingLeft: 17.5,
+                    cuttingRight: 17.5,
+                    cuttingTop: 20.0,
+                    cuttingBottom: 20.0,
+                    scrollbarWidth: 15.0,
+                    scrollbarLength: 90.0#percent,
+                }
+            ],
+            children: [
+                scrollBar,
+                scrollBarBackground
+            ]
+        }
     ]
 };
 
