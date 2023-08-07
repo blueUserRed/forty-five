@@ -169,11 +169,10 @@ class ScreenBuilder(val file: FileHandle) {
                 value
             }
         data.forEach { (dataPointName, value) ->
-            val key = keys.entries.find { it.value.value == dataPointName }?.key
-                ?: throw RuntimeException(
-                    "cannot set $dataPointName in template because it is not defined in the template keys"
-                )
-            result[key] = value
+            val curKeys = keys.entries.filter { it.value.value == dataPointName }.map { it.key }
+            if (curKeys.isEmpty())
+                throw RuntimeException("cannot set $dataPointName in template because it is not defined in the template keys")
+            curKeys.forEach { result[it] = value }
         }
         return result
     }
@@ -245,7 +244,6 @@ class ScreenBuilder(val file: FileHandle) {
                     getWidget(it as OnjNamedObject, flexBox, screen)
                 }
         }
-        flexBox.initAfterChildrenExist()
         flexBox.isTransform = widgetOnj.getOr("enableTransform", false)
         flexBox.resortZIndices()
     }
@@ -465,6 +463,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("backPackCardsWidgetName"),
         ).apply {
             initFlexBox(this, widgetOnj, screen)
+            initAfterChildrenExist()
         }
 
         "WarningParent" -> CustomWarningParent(screen).apply { initFlexBox(this, widgetOnj, screen) }

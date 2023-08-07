@@ -10,6 +10,7 @@ import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import onj.parser.OnjParser
@@ -69,7 +70,7 @@ class Backpack(
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
     }
 
-    override fun initAfterChildrenExist() {
+    fun initAfterChildrenExist() {
         deckNameWidget = screen.namedActorOrError(deckNameWidgetName) as CustomInputField
         deckCardsWidget = screen.namedActorOrError(deckCardsWidgetName) as CustomScrollableFlexBox
         backpackCardsWidget = screen.namedActorOrError(backPackCardsWidgetName) as CustomScrollableFlexBox
@@ -199,7 +200,13 @@ class Backpack(
         resetDeckNameField()
         deckNameWidget.limitListener = object : CustomInputField.CustomMaxReachedListener {
             override fun maxReached(field: CustomInputField, wrong: String) {
-                println("max reached, name '$wrong' too long") //TODO this with error-block
+                CustomWarningParent.getWarning(screen).setLimit("Name limit reached",3)
+                CustomWarningParent.getWarning(screen).addWarning(
+                    this@Backpack.screen,
+                    "Name limit reached",
+                    "The name \"$wrong\", which you are trying to enter is too long!",
+                    CustomWarningParent.Severity.LOW
+                )
             }
         }
 

@@ -257,7 +257,7 @@ root: $Box {
         },
         sharedComponents.backpack,
     ],
-//    sharedComponents.warningParent,
+    sharedComponents.warningParent,
 ],
 
 templates: [

@@ -483,7 +483,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 }
 
 open class CustomFlexBox(
-    protected val screen: OnjScreen
+    val screen: OnjScreen
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable {
 
     override var fixedZIndex: Int = 0
@@ -562,7 +562,6 @@ open class CustomFlexBox(
         y -= offsetY
     }
 
-    open fun initAfterChildrenExist() {}
 
     override fun initStyles(screen: OnjScreen) {
         addFlexBoxStyles(screen)
@@ -655,7 +654,7 @@ class CustomScrollableFlexBox(
                 dragLastY = dragY
                 dragX = x
                 dragY = y
-                drag(x,y)
+                drag(x, y)
             }
         }
 
