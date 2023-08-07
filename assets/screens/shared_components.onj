@@ -204,10 +204,8 @@ statusbarLeftDefaults: {
                         height: 84#percent,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
-                        //<<<<<<< HEAD:assets/screens/sharedComponents.onj
-//                        marginRight: 2#percent,
 //                    }
-//                ], //TODO marvin fragen
+//                ],
 //            } children [
 //
 //                $Image {
@@ -237,16 +235,14 @@ statusbarLeftDefaults: {
 //                        height: 84#percent,
 //                        flexDirection: flexDirection.row,
 //                        alignItems: align.center,
-//=======
-//>>>>>>> main:assets/screens/shared_components.onj
 
                     }
                 ],
             } children [
                 $Image {
                     textureName: "heart_texture",
-                    scaleX: 0.005,
-                    scaleY: 0.005,
+                    scaleX: 0.07,
+                    scaleY: 0.07,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
@@ -645,13 +641,14 @@ warningLabelTemplates: [
         $Label {
             styles: [
                 {
-                    width: (2.78 * 10)#points
+                    width: (2.78 * 10)#points,
+                    marginRight: 10#points,
                 }
             ],
             text: "",
             font: "red_wing",
             color: color.forty_white,
-            fontScale: 0.7,
+            fontScale: 1.0,
             align: "center",
         },
         $Box {
