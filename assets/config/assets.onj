@@ -477,31 +477,22 @@ ninepatches: [
         scale: 0.1
     },
     {
-        name: "test_scrollbar_background",
-        file: "textures/ninepatches/test_scrollbar_background.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.04
-    },
-    {
         name: "backpack_scrollbar_background",
         file: "textures/backpack/scrollbar_background.png",
-        top: 5,
-        bottom: 5,
-        left: 5,
-        right: 5,
-        scale: 0.1
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
     },
     {
         name: "backpack_scrollbar",
         file: "textures/backpack/scrollbar.png",
-        top: 5,
-        bottom: 5,
-        left: 5,
-        right: 5,
-        scale: 0.1
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
     }
 ],
 

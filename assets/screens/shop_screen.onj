@@ -15,7 +15,7 @@ assets: {
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
         "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
-        "shop_back_button", "test_scrollbar_background", "card_character",
+        "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         ...(sharedComponents.navBarUsedAssets),
     ]
 },
@@ -59,14 +59,14 @@ var personWidget = $PersonWidget {
 
 var scrollBarBackground = $Image {
     name: "scrollbar_background",
-    textureName: "test_scrollbar_background",
+    textureName: "backpack_scrollbar_background",
     scaleX: 1.0,
     scaleY: 1.0,
     reportDimensionsWithScaling: true,
 };
 var scrollBar = $Image {
     name: "scrollbar_handle",
-    textureName: "test_scrollbar_background",
+    textureName: "backpack_scrollbar",
     scaleX: 1.0,
     scaleY: 1.0,
 };
@@ -119,29 +119,30 @@ var testWidgetBox = $Box {
 
 var cardsWidget = $ScrollBox {
     name: "cards_widget",
-    isScrollDirectionVertical: true,
+    isScrollDirectionVertical: false,
     scrollDistance: 60.0,
     backgroundStretched: false,
     scrollbarBackgroundName: "scrollbar_background",
     scrollbarName: "scrollbar_handle",
-    scrollbarSide: "right",
+    scrollbarSide: "left",
     styles: [
         {
             flexWrap: wrap.wrap,
-            flexDirection: flexDirection.row,
+            flexDirection: flexDirection.column,
             justifyContent: justify.flexStart,
             background: "shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
-            paddingLeft: (3.0*10)#points,
-            paddingRight: (10.0*10)#points,
-            paddingTop: (3.0*10)#points,
-            paddingBottom: (4.0*10)#points,
+            paddingLeft: (3.0 * 10)#points,
+            paddingRight: (10.0 * 10)#points,
+            paddingTop: (3.0 * 10)#points,
+            paddingBottom: (4.0 * 10)#points,
             cuttingLeft: 17.5,
             cuttingRight: 17.5,
             cuttingTop: 20.0,
             cuttingBottom: 30.0,
-            scrollbarWidth: 75.0,
+            scrollbarWidth: 15.0,
+            scrollbarLength: 90.0#percent,
         }
     ],
     children: [
@@ -202,8 +203,8 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionRight: (0.0*10)#points,
-                positionBottom: (0.0*10)#points,
+                positionRight: (0.0 * 10)#points,
+                positionBottom: (0.0 * 10)#points,
                 width: 93.0#percent,
                 height: 93.0#percent,
             }
@@ -225,7 +226,7 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionBottom: (0.0*10)#points,
+                positionBottom: (0.0 * 10)#points,
             }
         ],
     },
@@ -245,8 +246,8 @@ root: $Box {
             styles: [
                 {
                     positionType: positionType.relative,
-                    positionTop: (2.0*10)#points,
-                    positionRight: (0.0*10)#points,
+                    positionTop: (2.0 * 10)#points,
+                    positionRight: (0.0 * 10)#points,
                     width: 100.0#percent,
                     height: 17.125#percent,
                     flexDirection: flexDirection.row,
@@ -321,8 +322,9 @@ templates: [
             "textureName": "textureName",
         },
         template_name: "cardsWidgetImage",
-//        name: "",
+        //        name: "",
 //        textureName: "shop_background_no_biome",
+
         scaleX: 0.01,
         scaleY: 0.01,
         reportDimensionsWithScaling: true,

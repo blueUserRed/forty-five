@@ -571,6 +571,7 @@ fun <T> T.addScrollFlexBoxStyles(screen: OnjScreen) where T : CustomScrollableFl
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.UP, "cuttingTop"))
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.DOWN, "cuttingBottom"))
     styleManager.addStyleProperty(ScrollbarWidthStyleProperty(this, screen, "scrollbarWidth"))
+    styleManager.addStyleProperty(ScrollbarLengthStyleProperty(this, screen, "scrollbarLength"))
 }
 
 
@@ -713,4 +714,25 @@ class ScrollbarWidthStyleProperty(
     }
 
     override fun get(node: YogaNode): Float = target.scrollbarWidth
+}
+
+class ScrollbarLengthStyleProperty(
+    target: CustomScrollableFlexBox,
+    screen: OnjScreen,
+    name: String
+) : StyleProperty<CustomScrollableFlexBox, YogaValue>(
+    name,
+    target,
+    YogaValue(100F, YogaUnit.PERCENT),
+    YogaValue::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: YogaValue, node: YogaNode) {
+        target.scrollbarLength = data
+    }
+
+    override fun get(node: YogaNode): YogaValue = target.scrollbarLength
 }
