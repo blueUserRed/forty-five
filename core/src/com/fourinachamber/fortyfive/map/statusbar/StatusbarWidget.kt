@@ -147,7 +147,7 @@ class StatusbarWidget(
             val action = CustomMoveByAction(
                 target,
                 Interpolation.exp10Out,
-                relY = 2F * (if (goUp) 1 else -1),
+                relY = 20F * (if (goUp) 1 else -1),
                 duration = 200F
             )
             action { target.addAction(action) }
