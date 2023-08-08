@@ -414,6 +414,8 @@ $KeyAction {
 
     $FireClickEventKeyAction { }
 
+    $ForwardKeyKeyAction { }
+
     $MoveInDetailMapKeyAction {
         mapActor: string,
         direction: string
