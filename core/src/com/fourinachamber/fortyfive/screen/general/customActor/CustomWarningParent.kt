@@ -95,7 +95,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             override fun getBackground(): String = "warning_label_background_red"
 
             override fun getColor(screen: OnjScreen): Color = Color.valueOf("F0EADD")
-            // forty_white from color.onj hardcoded, because IDK if I should access directly
+            // forty_white from color.onj hardcoded, because IDK if I should access directly and read the files
         },
         HIGH {
             override fun getSymbol(): String = "!!!"

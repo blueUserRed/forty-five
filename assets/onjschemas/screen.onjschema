@@ -3,6 +3,7 @@ import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKe
 
 use Common;
 use Style;
+use Screen;
 
 $Viewport {
 
@@ -433,9 +434,14 @@ options: {
     background?: string,
     screenController?: $ScreenController,
     inputMap?: {
-        keycode: int,
-        modifiers: int[],
-        action: $KeyAction
+        priority?: int,
+        condition?: KeyInputCondition,
+        triggers: {
+            keycode: int,
+            modifiers: int[],
+            action?: $KeyAction,
+        }[],
+        action?: $KeyAction,
     }[],
     postProcessor?: string,
     transitionAwayTime?: float

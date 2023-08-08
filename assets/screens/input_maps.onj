@@ -1,37 +1,66 @@
-
 use Screen;
 
 defaultInputMap: [
     {
-        keycode: keys.F,
-        modifiers: [],
-        action: $ToggleFullscreenKeyAction {
-            width: 700,
-            height:(700*9)/16
-        }
+        triggers: [
+            {
+                keycode: keys.F,
+                modifiers: [
+                ],
+                action: $ToggleFullscreenKeyAction {
+                    width: 700,
+                    height: (700 * 9) / 16
+                }
+            }
+        ],
     }
 ],
+//(\s+keycode: keys.(\w*),\s*modifiers: \[.*?\],\s*action:\s*(\$\w+\s*\{[^\t]*?\})\s*)
 
 hierarchyBasedNavigationInputMap: [
     {
-        keycode: keys.Right,
-        modifiers: [],
-        action: $NextInHierarchyKeyAction { }
+        triggers: [
+            {
+                keycode: keys.Right,
+                modifiers: [
+                ],
+                action: $NextInHierarchyKeyAction {
+                }
+            }
+        ],
     },
     {
-        keycode: keys.Left,
-        modifiers: [],
-        action: $PreviousInHierarchyKeyAction { }
+        triggers: [
+            {
+                keycode: keys.Left,
+                modifiers: [
+                ],
+                action: $PreviousInHierarchyKeyAction {
+                }
+            }
+        ],
     },
     {
-        keycode: keys.Escape,
-        modifiers: [],
-        action: $DeselectAllKeyAction { }
+        triggers: [
+            {
+                keycode: keys.Escape,
+                modifiers: [
+                ],
+                action: $DeselectAllKeyAction {
+                }
+            }
+        ],
     },
     {
-        keycode: keys.Enter,
-        modifiers: [],
-        action: $FireClickEventKeyAction { }
+        triggers: [
+            {
+                keycode: keys.Enter,
+                modifiers: [
+                ],
+                action: $FireClickEventKeyAction {
+                }
+            }
+        ],
     }
 ],
 
@@ -40,215 +69,349 @@ gameInputMap: [
     // selecting cards in the hand
 
     {
-        keycode: keys."1",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 1
-        }
+        triggers: [
+            {
+                keycode: keys."1",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 1
+                }
+            }
+        ],
     },
     {
-        keycode: keys."2",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 2
-        }
+        triggers: [
+            {
+                keycode: keys."2",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 2
+                }
+            }
+        ],
     },
     {
-        keycode: keys."3",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 3
-        }
+        triggers: [
+            {
+                keycode: keys."3",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 3
+                }
+            }
+        ],
     },
     {
-        keycode: keys."4",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 4
-        }
+        triggers: [
+            {
+                keycode: keys."4",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 4
+                }
+            }
+        ],
     },
     {
-        keycode: keys."5",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 5
-        }
+        triggers: [
+            {
+                keycode: keys."5",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 5
+                }
+            }
+        ],
     },
     {
-        keycode: keys."6",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 6
-        }
+        triggers: [
+            {
+                keycode: keys."6",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 6
+                }
+            }
+        ],
     },
     {
-        keycode: keys."7",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 7
-        }
+        triggers: [
+            {
+                keycode: keys."7",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 7
+                }
+            }
+        ],
     },
     {
-        keycode: keys."8",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 8
-        }
+        triggers: [
+            {
+                keycode: keys."8",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 8
+                }
+            }
+        ],
     },
     {
-        keycode: keys."9",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 9
-        }
+        triggers: [
+            {
+                keycode: keys."9",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 9
+                }
+            }
+        ],
     },
     {
-        keycode: keys."0",
-        modifiers: [],
-        action: $SelectCardInHandKeyAction {
-            num: 10
-        }
+        triggers: [
+            {
+                keycode: keys."0",
+                modifiers: [
+                ],
+                action: $SelectCardInHandKeyAction {
+                    num: 10
+                }
+            }
+        ],
     },
 
     // selecting revolver slots
 
     {
-        keycode: keys.F1,
-        modifiers: [],
-        action: $SelectRevolverSlotKeyAction {
-            num: 1
-        }
+        triggers: [
+            {
+                keycode: keys.F1,
+                modifiers: [
+                ],
+                action: $SelectRevolverSlotKeyAction {
+                    num: 1
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F2,
-        modifiers: [],
-        action: $SelectRevolverSlotKeyAction {
-            num: 2
-        }
+        triggers: [
+            {
+                keycode: keys.F2,
+                modifiers: [
+                ],
+                action: $SelectRevolverSlotKeyAction {
+                    num: 2
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F3,
-        modifiers: [],
-        action: $SelectRevolverSlotKeyAction {
-            num: 3
-        }
+        triggers: [
+            {
+                keycode: keys.F3,
+                modifiers: [
+                ],
+                action: $SelectRevolverSlotKeyAction {
+                    num: 3
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F4,
-        modifiers: [],
-        action: $SelectRevolverSlotKeyAction {
-            num: 4
-        }
+        triggers: [
+            {
+                keycode: keys.F4,
+                modifiers: [
+                ],
+                action: $SelectRevolverSlotKeyAction {
+                    num: 4
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F5,
-        modifiers: [],
-        action: $SelectRevolverSlotKeyAction {
-            num: 5
-        }
+        triggers: [
+            {
+                keycode: keys.F5,
+                modifiers: [
+                ],
+                action: $SelectRevolverSlotKeyAction {
+                    num: 5
+                }
+            }
+        ],
     },
 
 
     // selecting adjacent
 
     {
-        keycode: keys.Left,
-        modifiers: [],
-        action: $SelectAdjacentKeyAction {
-            direction: "left"
-        }
+        triggers: [
+            {
+                keycode: keys.Left,
+                modifiers: [
+                ],
+                action: $SelectAdjacentKeyAction {
+                    direction: "left"
+                }
+            }
+        ],
     },
     {
-        keycode: keys.Right,
-        modifiers: [],
-        action: $SelectAdjacentKeyAction {
-            direction: "right"
-        }
+        triggers: [
+            {
+                keycode: keys.Right,
+                modifiers: [
+                ],
+                action: $SelectAdjacentKeyAction {
+                    direction: "right"
+                }
+            }
+        ],
     },
 
     // loading bullets
 
     {
-        keycode: keys.F1,
-        modifiers: [ keys."L-Shift" ],
-        action: $PlaceSelectedCardInRevolverKeyAction {
-            revolverSlot: 1
-        }
+        triggers: [
+            {
+                keycode: keys.F1,
+                modifiers: [
+                    keys."L-Shift"
+                ],
+                action: $PlaceSelectedCardInRevolverKeyAction {
+                    revolverSlot: 1
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F2,
-        modifiers: [ keys."L-Shift" ],
-        action: $PlaceSelectedCardInRevolverKeyAction {
-            revolverSlot: 2
-        }
+        triggers: [
+            {
+                keycode: keys.F2,
+                modifiers: [
+                    keys."L-Shift"
+                ],
+                action: $PlaceSelectedCardInRevolverKeyAction {
+                    revolverSlot: 2
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F3,
-        modifiers: [ keys."L-Shift" ],
-        action: $PlaceSelectedCardInRevolverKeyAction {
-            revolverSlot: 3
-        }
+        triggers: [
+            {
+                keycode: keys.F3,
+                modifiers: [
+                    keys."L-Shift"
+                ],
+                action: $PlaceSelectedCardInRevolverKeyAction {
+                    revolverSlot: 3
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F4,
-        modifiers: [ keys."L-Shift" ],
-        action: $PlaceSelectedCardInRevolverKeyAction {
-            revolverSlot: 4
-        }
+        triggers: [
+            {
+                keycode: keys.F4,
+                modifiers: [
+                    keys."L-Shift"
+                ],
+                action: $PlaceSelectedCardInRevolverKeyAction {
+                    revolverSlot: 4
+                }
+            }
+        ],
     },
     {
-        keycode: keys.F5,
-        modifiers: [ keys."L-Shift" ],
-        action: $PlaceSelectedCardInRevolverKeyAction {
-            revolverSlot: 5
-        }
+        triggers: [
+            {
+                keycode: keys.F5,
+                modifiers: [
+                    keys."L-Shift"
+                ],
+                action: $PlaceSelectedCardInRevolverKeyAction {
+                    revolverSlot: 5
+                }
+            }
+        ],
     },
 
     // deselecting all
 
     {
-        keycode: keys.Escape,
-        modifiers: [],
-        action: $DeselectAllKeyAction { }
+        triggers: [
+            {
+                keycode: keys.Escape,
+                modifiers: [
+                ],
+                action: $DeselectAllKeyAction {
+                }
+            }
+        ],
     },
 
 ],
 
 detailMapInputMap: [
     {
-        keycode: keys.A,
-        modifiers: [],
-        action: $MoveInDetailMapKeyAction {
-            direction: "left",
-            mapActor: "map"
-        }
-    },{
-        keycode: keys.S,
-        modifiers: [],
-        action: $MoveInDetailMapKeyAction {
-            direction: "down",
-            mapActor: "map"
-        }
-    },{
-        keycode: keys.W,
-        modifiers: [],
-        action: $MoveInDetailMapKeyAction {
-            direction: "up",
-            mapActor: "map"
-        }
-    },{
-        keycode: keys.D,
-        modifiers: [],
-        action: $MoveInDetailMapKeyAction {
-            direction: "right",
-            mapActor: "map"
-        }
-    },
-    {
-        keycode: keys.Space,
-        modifiers: [],
-        action: $EnterEventDetailMapKeyAction {
-            mapActor: "map"
-        }
+        condition: not(screenState("inStatusbarOverlay")),
+        triggers: [
+            {
+                keycode: keys.A,
+                modifiers: [
+                ],
+                action: $MoveInDetailMapKeyAction {
+                    direction: "left",
+                    mapActor: "map"
+                }
+            },
+            {
+                keycode: keys.S,
+                modifiers: [
+                ],
+                action: $MoveInDetailMapKeyAction {
+                    direction: "down",
+                    mapActor: "map"
+                }
+            },
+            {
+                keycode: keys.W,
+                modifiers: [
+                ],
+                action: $MoveInDetailMapKeyAction {
+                    direction: "up",
+                    mapActor: "map"
+                }
+            },
+            {
+                keycode: keys.D,
+                modifiers: [
+                ],
+                action: $MoveInDetailMapKeyAction {
+                    direction: "right",
+                    mapActor: "map"
+                }
+            },
+            {
+                keycode: keys.Space,
+                modifiers: [
+                ],
+                action: $EnterEventDetailMapKeyAction {
+                    mapActor: "map"
+                }
+            }
+        ],
     },
 ],

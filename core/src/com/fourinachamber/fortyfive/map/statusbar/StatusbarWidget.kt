@@ -77,8 +77,14 @@ class StatusbarWidget(
         if (timeline.isFinished) {
             val option = optionWidgets.find { it.first == clickedBox }!!
             when (displayedOptionIndex) {
-                -1 -> display(option)
-                optionWidgets.indexOf(option) -> hide(option)
+                -1 -> {
+                    screen.enterState("inStatusbarOverlay")
+                    display(option)
+                }
+                optionWidgets.indexOf(option) -> {
+                    hide(option)
+                    screen.leaveState("inStatusbarOverlay")
+                }
                 else -> {
                     hide(optionWidgets[displayedOptionIndex])
                     display(option)
