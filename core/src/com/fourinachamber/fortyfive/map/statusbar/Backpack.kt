@@ -64,11 +64,11 @@ class Backpack(
                 } else {
                     if (SaveState.curDeck.cards.size > minDeckSize) {
                         val fromDeck = targetName[1] == "deck"
-                        if (fromDeck){
+                        if (fromDeck) {
                             SaveState.curDeck.removeFromDeck(targetName[2].toInt())
                             invalidate()
                         }
-                    }else{
+                    } else {
                         CustomWarningParent.getWarning(screen).addWarning(
                             screen,
                             "Not enough cards",
@@ -83,7 +83,7 @@ class Backpack(
 
     init {
         //TODO
-//         0. background stop //rework input system
+//         0. (done(mostly)) background stop //rework input system
 //         1. (done) Cards drag and drop (both direction)
 //         2. (done) automatic add to deck on double click or on press space or so
 //         3. (done) automatic add to deck if deck doesn't have enough cards
@@ -147,7 +147,7 @@ class Backpack(
 
     private fun initDeckLayout() {
         for (i in 0 until numberOfSlots) {
-           val cur= (screen.screenBuilder.generateFromTemplate(
+            val cur = (screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
                 mapOf(),
                 deckCardsWidget,
@@ -249,16 +249,14 @@ class Backpack(
                 )
             }
         }
-
         deckNameWidget.typedListener = object : CustomInputField.CustomInputFieldListener {
             override fun keyTyped(e: InputEvent, ch: Char) {
                 if (ch == '\n' || ch == '\r') saveCurrentDeckName()
             }
         }
-
         deckNameWidget.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                if (deckNameWidget.isDisabled && tapCount == 2) editDeckName()
+                if (deckNameWidget.isDisabled && tapCount == 2) deckNameWidget.isDisabled = false
             }
         })
     }
@@ -275,10 +273,6 @@ class Backpack(
         SaveState.curDeck.name = deckNameWidget.text.toString()
     }
 
-    private fun editDeckName() {
-        deckNameWidget.isDisabled = false
-        stage.keyboardFocus = (deckNameWidget)
-    }
 
     override fun display(): Timeline {
         changeDeckTo(SaveState.curDeck.id, true)

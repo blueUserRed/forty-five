@@ -23,6 +23,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.addTextInputStyles
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.substringTillEnd
 import io.github.orioncraftmc.meditate.YogaValue
+import ktx.actors.onKeyboardFocusEvent
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -55,7 +56,7 @@ open class CustomInputField(
     private val glyphPositions = com.badlogic.gdx.utils.FloatArray()
     private var displayText: CharSequence? = null
     private val clipboard: Clipboard = Gdx.app.clipboard
-    val inputListener: InputFieldClickListener
+    private val inputListener: InputFieldClickListener
     var typedListener: CustomInputFieldListener? = null
     var limitListener: CustomMaxReachedListener? = null
     var filter: InputFieldFilter? = null
@@ -80,7 +81,11 @@ open class CustomInputField(
     private val keyRepeatTask: KeyRepeatTask
     private var lastCorrectText: String = text.toString()
     private var lastCorrectCursor: Int = cursor
-
+    override var isDisabled: Boolean = true
+        set(value) {
+            updateKeyboardFocus(value)
+            field = value
+        }
 
     init {
         setText(text)
@@ -90,6 +95,26 @@ open class CustomInputField(
         keyRepeatTask = KeyRepeatTask(this)
         updateDisplayText()
         undoText = text.toString()
+        addKeyboardFocusListener()
+    }
+
+    private fun addKeyboardFocusListener() {
+        onKeyboardFocusEvent {
+            val keyboardFocus = stage.keyboardFocus
+            if (it.isFocused) {
+                screen.enterState(SPECIAL_SCREEN_STATE)
+            } else if (keyboardFocus !is CustomInputField || keyboardFocus == this@CustomInputField) {
+                screen.leaveState(SPECIAL_SCREEN_STATE)
+            }
+        }
+    }
+
+    private fun updateKeyboardFocus(isDisabled: Boolean) {
+        if (stage != null) {
+            if (isDisabled) {
+                if (hasKeyboardFocus()) stage.keyboardFocus = null
+            } else stage.keyboardFocus = this
+        }
     }
 
     private var countFrames: Int = 0
@@ -579,7 +604,6 @@ open class CustomInputField(
                 } else {
                     if (checkFocusTraversal(character)) {
 //                        field.next(UIUtils.shift())
-                        println("NOW TRAVERSE (NOT IMPLEMENTED)")
                     } else {
                         val enter = character == CARRIAGE_RETURN || character == NEWLINE
                         val delete = character == DELETE
@@ -686,8 +710,6 @@ open class CustomInputField(
         }
     }
 
-    var hadLastKeyboardFocus: Boolean = false
-
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) return
@@ -711,8 +733,6 @@ open class CustomInputField(
         backgroundHandle = background
         val cursorWidth = 3F * fontScaleX
         if ((focused || hasKeyboardFocus()) && !isDisabled) {
-            if (!hadLastKeyboardFocus) hadLastKeyboardFocus = true
-            screen.enterState(SPECIAL_SCREEN_STATE)
             countFrames = if (lastCursorPosition == cursor) {
                 countFrames++
                 countFrames and 127
@@ -723,11 +743,6 @@ open class CustomInputField(
                 cursorRect.setPosition(pos.x + glyphPositions.get(cursor) - cursorWidth / 2, yPosCursor)
                 cursorRect.setSize(cursorWidth, ySize)
                 cursorRect.draw(batch, parentAlpha)
-            }
-        } else if (hadLastKeyboardFocus) {
-            hadLastKeyboardFocus = false
-            if (stage.keyboardFocus !is CustomInputField) {
-                screen.leaveState(SPECIAL_SCREEN_STATE)
             }
         }
         lastCursorPosition = cursor
