@@ -76,7 +76,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     }
 
     fun invalidateParents(card: Actor) {
-        (card.parent.parent.parent.parent as Backpack).invalidateHierarchy()
+        (card.parent.parent.parent.parent as Backpack).invalidate()
     }
 }
 
