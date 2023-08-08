@@ -2,10 +2,10 @@ use Screen;
 
 defaultInputMap: [
     {
-        priority: (2.0 pow 30.0)#int,
+        priority: (2.0 pow 30.0)#int +1,
         triggers: [
             {
-                keycode: keys.F11,
+                keycode: keys.F,
                 modifiers: [
                 ],
                 action: $ToggleFullscreenKeyAction {
