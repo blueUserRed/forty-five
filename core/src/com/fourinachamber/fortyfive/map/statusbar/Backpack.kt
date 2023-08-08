@@ -43,14 +43,51 @@ class Backpack(
 
     private var sortingSystem = BackpackSorting.Damage()
 
+    private val quickAddRemoveListener = object : ClickListener() {
+        override fun clicked(event: InputEvent?, x: Float, y: Float) {
+            super.clicked(event, x, y)
+            val targetName = (event!!.target as CustomFlexBox).name.split(nameSeparatorStr)
+            if ((tapCount and 1) == 0) {
+                if (targetName[1] == "backpack") {
+                    val pos = SaveState.curDeck.nextFreeSlot()
+                    if (pos != -1) {
+                        SaveState.curDeck.addToDeck(pos, targetName[0])
+                        invalidate()
+                    } else {
+                        CustomWarningParent.getWarning(screen).addWarning(
+                            screen,
+                            "Deck full",
+                            "The max decksize is $numberOfSlots. Since you already have $numberOfSlots cards in your Deck, you can't add a new card.",
+                            CustomWarningParent.Severity.MIDDLE
+                        )
+                    }
+                } else {
+                    if (SaveState.curDeck.cards.size > minDeckSize) {
+                        val fromDeck = targetName[1] == "deck"
+                        if (fromDeck){
+                            SaveState.curDeck.removeFromDeck(targetName[2].toInt())
+                            invalidate()
+                        }
+                    }else{
+                        CustomWarningParent.getWarning(screen).addWarning(
+                            screen,
+                            "Not enough cards",
+                            "The minimum decksize is $minDeckSize. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                            CustomWarningParent.Severity.MIDDLE
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     init {
         //TODO
-//         0. background stop
+//         0. background stop //rework input system
 //         1. (done) Cards drag and drop (both direction)
-//         2. automatic add to deck on double click or on press space or so
+//         2. (done) automatic add to deck on double click or on press space or so
 //         3. (done) automatic add to deck if deck doesn't have enough cards
-//         4. (done (half (waiting for marvin))) stop cards from moving if you don't have enough cards
+//         4. (done) stop cards from moving if you don't have enough cards
 //         5. sorting system (ui missing)
         val backpackOnj = OnjParser.parseFile(backpackFile)
         backpackFileSchema.assertMatches(backpackOnj)
@@ -110,12 +147,14 @@ class Backpack(
 
     private fun initDeckLayout() {
         for (i in 0 until numberOfSlots) {
-            (screen.screenBuilder.generateFromTemplate(
+           val cur= (screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
                 mapOf(),
                 deckCardsWidget,
                 screen
-            ) as CustomFlexBox).backgroundHandle = "backpack_empty_deck_slot"
+            ) as CustomFlexBox)
+            cur.backgroundHandle = "backpack_empty_deck_slot"
+            cur.addListener(quickAddRemoveListener)
         }
         deckCardsWidget.invalidate()
     }
@@ -169,12 +208,13 @@ class Backpack(
             .forEach { removeChildCompletely(it) }
         //Backpack
         for (i in 0 until unplacedCards.size) {
-            screen.screenBuilder.generateFromTemplate(
+            val cur = screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
                 mapOf(),
                 backpackCardsWidget,
                 screen
-            )
+            ) as CustomFlexBox
+            cur.addListener(quickAddRemoveListener)
         }
         sortBackpack(sortingSystem.sort(_allCards, unplacedCards))
         backpackCardsWidget.invalidate()
@@ -200,7 +240,7 @@ class Backpack(
         resetDeckNameField()
         deckNameWidget.limitListener = object : CustomInputField.CustomMaxReachedListener {
             override fun maxReached(field: CustomInputField, wrong: String) {
-                CustomWarningParent.getWarning(screen).setLimit("Name limit reached",3)
+                CustomWarningParent.getWarning(screen).setLimit("Name limit reached", 3)
                 CustomWarningParent.getWarning(screen).addWarning(
                     this@Backpack.screen,
                     "Name limit reached",
