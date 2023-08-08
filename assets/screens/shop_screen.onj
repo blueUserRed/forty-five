@@ -14,7 +14,7 @@ var worldHeight = 900.0;
 assets: {
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
+        "heart_texture", "shop_npcs_default", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         ...(sharedComponents.navBarUsedAssets),
     ]
@@ -35,27 +35,11 @@ options: {
         shopsFile: "maps/events/shops.onj",
         npcsFile: "maps/events/npcs.onj",
         cardsFile: "config/cards.onj",
-        personWidgetName: "shop_person_widget",
         messageWidgetName: "shop_message",
         cardsParentName: "cards_widget",
     }
 },
 
-var personWidget = $PersonWidget {
-    name: "shop_person_widget",
-    offsetX: 0.0,
-    offsetY: 0.0,
-    scale: 1.0,
-    dragAndDrop: $ShopDropTarget {
-        group: "card",
-    },
-    styles: [
-        {
-            width: 40.0#percent,
-            height: 100.0#percent,
-        }
-    ],
-};
 
 var scrollBarBackground = $Image {
     name: "scrollbar_background",
@@ -189,8 +173,8 @@ root: $Box {
         ],
     },
     sharedComponents.navBar,
-    personWidget,
     $Image {
+        zIndex: 20,
         textureName: "shop_dark_background",
         width: worldWidth,
         height: worldHeight,
@@ -211,6 +195,7 @@ root: $Box {
 
     $Image {       //TODO biome for back (evtl)
 
+        zIndex: 20,
         name: "back_button",
         textureName: "shop_back_button",
         scaleX: 0.8,
@@ -229,6 +214,7 @@ root: $Box {
         ],
     },
     $Box {
+        zIndex: 30,
         styles: [
             {
                 positionType: positionType.absolute,
@@ -250,7 +236,6 @@ root: $Box {
                     height: 17.125#percent,
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceBetween,
-
                 }
             ]
         } children [
@@ -388,4 +373,30 @@ templates: [
             }
         ],
     },
+
+    $Image {
+        name: "personWidget",
+        zIndex: 15,
+        template_name: "personWidget",
+        template_keys: {
+            "styles.0.background": "textureName",
+            "scaleX": "scale",
+            "scaleY": "scale",
+            "styles.0.positionLeft": "offsetX",
+        },
+        scaleX: 0.0,
+        scaleY: 0.0,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDropTarget {
+            group: "card",
+        },
+        styles: [
+            {
+                positionType: positionType.absolute,
+                background: "",
+                positionBottom: 0#points,
+                positionLeft: 0#points,
+            }
+        ],
+    }
 ],

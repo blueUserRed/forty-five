@@ -337,6 +337,10 @@ textures: [
     {
         name: "warning_label_background_red",
         file: "textures/warning_label/background_red.png"
+    },
+    {
+        name: "shop_npcs_default",
+        file: "textures/shop/npcs/default.png",
     }
 ],
 
