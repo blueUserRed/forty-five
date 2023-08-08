@@ -377,7 +377,6 @@ $ScreenController {
         shopsFile: string,
         npcsFile: string,
         cardsFile: string,
-        personWidgetName: string,
         messageWidgetName: string,
         cardsParentName: string,
     }

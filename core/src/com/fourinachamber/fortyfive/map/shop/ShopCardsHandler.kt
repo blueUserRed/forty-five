@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
@@ -19,7 +20,7 @@ class ShopCardsHandler(
     private val screen: OnjScreen,
     private val parent: CustomScrollableFlexBox,
     private val boughtIndices: MutableSet<Int>
-) {
+) : Disposable {
     private val _allCards: MutableList<Card>
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
@@ -166,6 +167,8 @@ class ShopCardsHandler(
             }
         }
     }
+
+    override fun dispose() = _allCards.forEach { it.dispose() }
 
     companion object {
 
