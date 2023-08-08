@@ -2,17 +2,29 @@ use Screen;
 
 defaultInputMap: [
     {
+        priority: (2.0 pow 30.0)#int,
         triggers: [
             {
-                keycode: keys.F,
+                keycode: keys.F11,
                 modifiers: [
                 ],
                 action: $ToggleFullscreenKeyAction {
                     width: 700,
                     height: (700 * 9) / 16
                 }
-            }
+            },
         ],
+    },
+    {
+        priority: (2.0 pow 30.0)#int,
+        condition: screenState("inInputField"),
+        triggers: [
+            {
+                keycode: keys.ASCII,
+                modifiers: [
+                ],
+            }
+        ]
     }
 ],
 //(\s+keycode: keys.(\w*),\s*modifiers: \[.*?\],\s*action:\s*(\$\w+\s*\{[^\t]*?\})\s*)

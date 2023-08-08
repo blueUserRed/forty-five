@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.badlogic.gdx.Input.Keys
+import com.fourinachamber.fortyfive.keyInput.InputKeyRange
 import com.fourinachamber.fortyfive.keyInput.KeyInputCondition
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
@@ -23,6 +24,9 @@ object ScreenNamespace {
         "keys" to buildOnjObject {
             for (code in 0..(Keys.MAX_KEYCODE)) {
                 (Keys.toString(code) ?: continue) with OnjInt(code.toLong())
+            }
+            for (entry in InputKeyRange.values()) {
+                entry.name with OnjInt(entry.getCode().toLong())
             }
         }
     )

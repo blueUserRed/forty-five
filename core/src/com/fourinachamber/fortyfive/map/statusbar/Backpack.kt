@@ -250,7 +250,7 @@ class Backpack(
             }
         }
 
-        deckNameWidget.keyslistener = object : CustomInputField.CustomInputFieldListener {
+        deckNameWidget.typedListener = object : CustomInputField.CustomInputFieldListener {
             override fun keyTyped(e: InputEvent, ch: Char) {
                 if (ch == '\n' || ch == '\r') saveCurrentDeckName()
             }

@@ -44,17 +44,20 @@ class KeyInputMap(
     private val modifiers: MutableSet<Keycode> = mutableSetOf()
 
     override fun keyDown(keycode: Keycode): Boolean {
-        println(entries.sumOf { it.singleKeys.size })
         if (keycode in modifierKeys) {
             modifiers.add(keycode)
             return true
         }
         var bestCandidate: KeyAction? = null
         var bestCandidatePriority: Int = Int.MAX_VALUE
+        val inputRanges = InputKeyRange.values()
         entries.filter { it.condition.check(screen) }
             .forEach { entryList ->
                 entryList.singleKeys
-                    .filter { it.keycode == keycode }
+                    .filter {
+                        it.keycode == keycode || (inputRanges.find { range -> it.keycode == range.getCode() }
+                            ?.inRange(keycode) ?: false)
+                    }
                     .filter { areAllModifiersPressed(it.modifierKeys) }
                     .forEach { keyEntry ->
                         if (bestCandidatePriority != entryList.priority) {
@@ -66,7 +69,11 @@ class KeyInputMap(
                         }
                     }
             }
-        return bestCandidate?.invoke(screen) ?: false
+        return bestCandidate?.invoke(screen, keycode) ?: false
+    }
+
+    override fun keyTyped(character: Char): Boolean {
+        return false
     }
 
     private fun areAllModifiersPressed(modifierKeys: List<Keycode>): Boolean {
@@ -82,9 +89,6 @@ class KeyInputMap(
         return true
     }
 
-    override fun keyTyped(character: Char): Boolean {
-        return false
-    }
 
     override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
         return false
@@ -109,7 +113,6 @@ class KeyInputMap(
     companion object {
 
         const val logTag: String = "KeyInputMap"
-
 
         /**
          * array of all keys that are considered to be modifiers
@@ -159,6 +162,18 @@ class KeyInputMap(
     }
 }
 
+enum class InputKeyRange {
+    ASCII {
+        override fun inRange(nbr: Keycode): Boolean = nbr in (0 .. 128)
+          //not correct, because Keys are weird, but it works fine enough
+    },
+    DIGIT {
+        override fun inRange(nbr: Keycode): Boolean = nbr.toInt() in (Keys.NUM_0..Keys.NUM_9)
+    };
+
+    abstract fun inRange(nbr: Keycode): Boolean
+    fun getCode(): Int = Keys.MAX_KEYCODE + 100 + ordinal
+}
 
 sealed class KeyInputCondition {
     object Always : KeyInputCondition() {

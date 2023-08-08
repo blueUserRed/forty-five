@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
@@ -56,8 +55,8 @@ open class CustomInputField(
     private val glyphPositions = com.badlogic.gdx.utils.FloatArray()
     private var displayText: CharSequence? = null
     private val clipboard: Clipboard = Gdx.app.clipboard
-    private val inputListener: InputListener
-    var keyslistener: CustomInputFieldListener? = null
+    val inputListener: InputFieldClickListener
+    var typedListener: CustomInputFieldListener? = null
     var limitListener: CustomMaxReachedListener? = null
     var filter: InputFieldFilter? = null
     var focusTraversal = false // TODO add if "true" is set
@@ -420,11 +419,6 @@ open class CustomInputField(
             return if (field.isDisabled) {
                 false
             } else {
-//                field.cursorOn = field.focused
-//                field.blinkTask.cancel()
-//                if (field.focused) {
-//                    Timer.schedule(field.blinkTask, field.blinkTime, field.blinkTime)
-//                }
                 if (!field.hasKeyboardFocus()) {
                     false
                 } else {
@@ -652,7 +646,7 @@ open class CustomInputField(
                             }
                         }
                     }
-                    field.keyslistener?.keyTyped(event, character)
+                    field.typedListener?.keyTyped(event, character)
                     true
                 }
             }
@@ -676,7 +670,7 @@ open class CustomInputField(
         if ((styleManager!!.styleProperties
                 .find { it is WidthStyleProperty }!!
                 .get(styleManager!!.node)
-                != YogaValue.parse("auto")) && !wrap
+                    != YogaValue.parse("auto")) && !wrap
         ) wrap = true
 
         super.layout()
@@ -691,6 +685,8 @@ open class CustomInputField(
             y += dif / 2
         }
     }
+
+    var hadLastKeyboardFocus: Boolean = false
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -715,6 +711,8 @@ open class CustomInputField(
         backgroundHandle = background
         val cursorWidth = 3F * fontScaleX
         if ((focused || hasKeyboardFocus()) && !isDisabled) {
+            if (!hadLastKeyboardFocus) hadLastKeyboardFocus = true
+            screen.enterState(SPECIAL_SCREEN_STATE)
             countFrames = if (lastCursorPosition == cursor) {
                 countFrames++
                 countFrames and 127
@@ -725,6 +723,11 @@ open class CustomInputField(
                 cursorRect.setPosition(pos.x + glyphPositions.get(cursor) - cursorWidth / 2, yPosCursor)
                 cursorRect.setSize(cursorWidth, ySize)
                 cursorRect.draw(batch, parentAlpha)
+            }
+        } else if (hadLastKeyboardFocus) {
+            hadLastKeyboardFocus = false
+            if (stage.keyboardFocus !is CustomInputField) {
+                screen.leaveState(SPECIAL_SCREEN_STATE)
             }
         }
         lastCursorPosition = cursor
@@ -786,6 +789,7 @@ open class CustomInputField(
 
 
     companion object {
+        const val SPECIAL_SCREEN_STATE = "inInputField"
         const val BACKSPACE = '\b'
         const val CARRIAGE_RETURN = '\r'
         const val NEWLINE = '\n'
