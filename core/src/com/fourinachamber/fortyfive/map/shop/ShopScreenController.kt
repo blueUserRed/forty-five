@@ -71,7 +71,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController(){
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
         val data = imgData.value.toMutableMap()
         data["offsetX"] = ((data["offsetX"] as OnjFloat?)?.value?.toFloat() ?: 0F).toOnjYoga(YogaUnit.POINT)
-        ResourceManager.borrow(screen, imgData.get<String>("textureName"))
+        screen.borrowResource(imgData.get<String>("textureName"))
         val flexParent =
             highestFlexParent(onjScreen.namedActorOrError(messageWidgetName))!!.children[0] as CustomFlexBox
         val person = onjScreen.screenBuilder.generateFromTemplate(
@@ -82,8 +82,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController(){
         ) as CustomImageActor
         this.person = person
         flexParent.resortZIndices()
-
-
         val cardsParentWidget = onjScreen.namedActorOrError(cardsParentName)
         if (cardsParentWidget !is CustomScrollableFlexBox) throw RuntimeException("widget with name $cardsParentName must be of type CustomScrollableFlexBox")
         this.cardsParentWidget = cardsParentWidget
@@ -106,7 +104,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController(){
     override fun end() {
         super.end()
         shopCardsHandler.dispose()
-        person.backgroundHandle?.let { ResourceManager.giveBack(screen, it) }
     }
 
     companion object {

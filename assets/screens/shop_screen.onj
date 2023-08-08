@@ -14,7 +14,7 @@ var worldHeight = 900.0;
 assets: {
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "shop_npcs_default", "shop_dark_background", "forty_white_rounded", "shop_items_background",
+        "heart_texture","shop_dark_background", "forty_white_rounded", "shop_items_background",
         "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         ...(sharedComponents.navBarUsedAssets),
     ]

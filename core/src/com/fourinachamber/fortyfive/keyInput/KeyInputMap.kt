@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.keyInput
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputProcessor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.value.OnjArray
 import onj.value.OnjInt
 import onj.value.OnjNamedObject
@@ -11,10 +12,23 @@ import onj.value.OnjObject
 /**
  * an entry for the [KeyInputMap]
  */
-data class KeyInputMapEntry(
+data class KeyInputMapKeyEntry(
     val keycode: Keycode,
-    val action: KeyAction,
+    val action: KeyAction?,
     val modifierKeys: List<Keycode>
+)
+
+/**
+ * an entry for the [KeyInputMap]
+ */
+data class KeyInputMapEntry(
+    /**
+     * highest prio wins
+     */
+    val priority: Int,
+    val condition: KeyInputCondition,
+    val singleKeys: List<KeyInputMapKeyEntry>,
+    val defaultAction: KeyAction?,
 )
 
 typealias Keycode = Int
@@ -30,21 +44,28 @@ class KeyInputMap(
     private val modifiers: MutableSet<Keycode> = mutableSetOf()
 
     override fun keyDown(keycode: Keycode): Boolean {
+        println(entries.sumOf { it.singleKeys.size })
         if (keycode in modifierKeys) {
             modifiers.add(keycode)
             return true
         }
-
         var bestCandidate: KeyAction? = null
-        var bestCandidateModifierCount = -1
-        for (entry in entries) {
-            if (entry.keycode != keycode) continue
-            if (!areAllModifiersPressed(entry.modifierKeys)) continue
-            if (entry.modifierKeys.size > bestCandidateModifierCount) {
-                bestCandidate = entry.action
-                bestCandidateModifierCount = entry.modifierKeys.size
+        var bestCandidatePriority: Int = Int.MAX_VALUE
+        entries.filter { it.condition.check(screen) }
+            .forEach { entryList ->
+                entryList.singleKeys
+                    .filter { it.keycode == keycode }
+                    .filter { areAllModifiersPressed(it.modifierKeys) }
+                    .forEach { keyEntry ->
+                        if (bestCandidatePriority != entryList.priority) {
+                            bestCandidate = keyEntry.action ?: entryList.defaultAction
+                            bestCandidatePriority = entryList.priority
+                        } else {
+                            FortyFiveLogger.severe(logTag, "There are multiple valid keys with the same priority!")
+                            return false
+                        }
+                    }
             }
-        }
         return bestCandidate?.invoke(screen) ?: false
     }
 
@@ -87,6 +108,9 @@ class KeyInputMap(
 
     companion object {
 
+        const val logTag: String = "KeyInputMap"
+
+
         /**
          * array of all keys that are considered to be modifiers
          */
@@ -105,27 +129,57 @@ class KeyInputMap(
         fun readFromOnj(actions: OnjArray, screen: OnjScreen): KeyInputMap {
             val entries = actions
                 .value
-                .map { obj ->
-
-                    obj as OnjObject
-                    val action = KeyActionFactory.getAction(obj.get<OnjNamedObject>("action"))
-                    val modifiers = obj
-                        .get<OnjArray>("modifiers")
-                        .value
-                        .map {
-                            (it as OnjInt).value.toInt()
-                        }
-
-                    KeyInputMapEntry(
-                        obj.get<Long>("keycode").toInt(),
-                        action,
-                        modifiers
-                    )
+                .map { entry ->
+                    entry as OnjObject
+                    val defaultActions = entry.get<OnjNamedObject?>("action")?.let { KeyActionFactory.getAction(it) }
+                    val entries = mutableListOf<KeyInputMapKeyEntry>()
+                    entry.get<OnjArray>("triggers").value.forEach { obj ->
+                        obj as OnjObject
+                        val option = obj.get<OnjNamedObject?>("action")?.let { KeyActionFactory.getAction(it) }
+                        val modifiers = obj
+                            .get<OnjArray>("modifiers")
+                            .value
+                            .map {
+                                (it as OnjInt).value.toInt()
+                            }
+                        entries.add(
+                            KeyInputMapKeyEntry(
+                                obj.get<Long>("keycode").toInt(),
+                                option,
+                                modifiers
+                            )
+                        )
+                    }
+                    val priority = (entry.get<Long?>("priority") ?: 0).toInt()
+                    val condition = entry.get<KeyInputCondition?>("condition") ?: KeyInputCondition.Always
+                    KeyInputMapEntry(priority, condition, entries, defaultActions)
                 }
-
             return KeyInputMap(entries, screen)
         }
+    }
+}
 
+
+sealed class KeyInputCondition {
+    object Always : KeyInputCondition() {
+        override fun check(screen: OnjScreen): Boolean = true
     }
 
+    class ScreenState(val state: String) : KeyInputCondition() {
+        override fun check(screen: OnjScreen): Boolean = state in screen.screenState
+    }
+
+    class Or(val first: KeyInputCondition, val second: KeyInputCondition) : KeyInputCondition() {
+        override fun check(screen: OnjScreen): Boolean = first.check(screen) || second.check(screen)
+    }
+
+    class And(val first: KeyInputCondition, val second: KeyInputCondition) : KeyInputCondition() {
+        override fun check(screen: OnjScreen): Boolean = first.check(screen) && second.check(screen)
+    }
+
+    class Not(val first: KeyInputCondition) : KeyInputCondition() {
+        override fun check(screen: OnjScreen): Boolean = !first.check(screen)
+    }
+
+    abstract fun check(screen: OnjScreen): Boolean
 }
