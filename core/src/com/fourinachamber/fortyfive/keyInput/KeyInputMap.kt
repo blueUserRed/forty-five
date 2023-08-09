@@ -69,7 +69,6 @@ class KeyInputMap(
                         }
                     }
             }
-        println(screen.screenState)
         return bestCandidate?.invoke(screen, keycode) ?: false
     }
 

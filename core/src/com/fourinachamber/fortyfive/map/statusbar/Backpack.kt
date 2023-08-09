@@ -28,6 +28,7 @@ class Backpack(
     private val deckSelectionParentWidgetName: String,
     private val deckCardsWidgetName: String,
     private val backPackCardsWidgetName: String,
+    private val backpackEditIndicationWidgetName: String,
 ) :
     CustomFlexBox(screen),
     InOutAnimationActor {
@@ -40,6 +41,7 @@ class Backpack(
     private lateinit var deckCardsWidget: CustomScrollableFlexBox
     private lateinit var backpackCardsWidget: CustomScrollableFlexBox
     private lateinit var deckSelectionParent: CustomFlexBox
+    private lateinit var backpackEditIndication: CustomFlexBox
 
     private var sortingSystem = BackpackSorting.Damage()
 
@@ -112,6 +114,7 @@ class Backpack(
         deckCardsWidget = screen.namedActorOrError(deckCardsWidgetName) as CustomScrollableFlexBox
         backpackCardsWidget = screen.namedActorOrError(backPackCardsWidgetName) as CustomScrollableFlexBox
         deckSelectionParent = screen.namedActorOrError(deckSelectionParentWidgetName) as CustomFlexBox
+        backpackEditIndication = screen.namedActorOrError(backpackEditIndicationWidgetName) as CustomFlexBox
         deckNameWidget.maxLength = maxNameSize
         initDeckName()
         initDeckLayout()
@@ -256,18 +259,37 @@ class Backpack(
         }
         deckNameWidget.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                if (deckNameWidget.isDisabled && tapCount == 2) deckNameWidget.isDisabled = false
+                if (deckNameWidget.isDisabled && tapCount == 2) {
+                    startEditDeckName()
+                }
+            }
+        })
+        backpackEditIndication.addListener(object : ClickListener() {
+            override fun clicked(event: InputEvent?, x: Float, y: Float) {
+                println("clicked")
+                if (backpackEditIndication.inActorState("inEdit")){
+                    saveCurrentDeckName()
+                }else{
+                    startEditDeckName()
+                }
             }
         })
     }
 
+    private fun startEditDeckName() {
+        deckNameWidget.isDisabled = false
+        backpackEditIndication.enterActorState("inEdit")
+    }
+
     private fun resetDeckNameField() {
+        backpackEditIndication.leaveActorState("inEdit")
         deckNameWidget.setText(SaveState.curDeck.name)
         deckNameWidget.isDisabled = true
         deckNameWidget.clearSelection()
     }
 
     private fun saveCurrentDeckName() {
+        backpackEditIndication.leaveActorState("inEdit")
         deckNameWidget.clearSelection()
         deckNameWidget.isDisabled = true
         SaveState.curDeck.name = deckNameWidget.text.toString()

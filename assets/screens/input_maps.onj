@@ -15,7 +15,7 @@ defaultInputMap: [
             },
         ],
     },
-    {
+    { // block everything else, if you are in an inputfield (has no action, but a high priority)
         priority: (2.0 pow 30.0)#int,
         condition: screenState("inInputField"),
         triggers: [

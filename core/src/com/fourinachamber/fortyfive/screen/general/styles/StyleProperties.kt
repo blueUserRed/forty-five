@@ -383,7 +383,6 @@ class SelectionColorStyleProperty(
 
     override fun set(data: Color, node: YogaNode) {
         target.selectionRect.color = data
-        println("now set to $data")
     }
 
     override fun get(node: YogaNode): Color = target.selectionRect.color

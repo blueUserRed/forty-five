@@ -46,13 +46,14 @@ var widgetSharedKeys = {
 
 $Widget {
 
-    $Backpack{
+    $Backpack {
         cardsFile: string,
         backpackFile: string,
         deckNameWidgetName: string,
         deckSelectionParentWidgetName: string,
         deckCardsWidgetName: string,
         backPackCardsWidgetName: string,
+        backpackEditIndicationWidgetName: string,
         ...widgetSharedKeys,
          children?: $Widget[],
          partOfSelectionHierarchy?: boolean,

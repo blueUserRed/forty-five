@@ -28,6 +28,8 @@ backpackAssets: [
     "backpack_scrollbar_background",
     "backpack_scrollbar",
     "backpack_empty_deck_slot",
+    "backpack_save",
+    "backpack_edit",
 ],
 
 
@@ -204,7 +206,7 @@ statusbarLeftDefaults: {
                         height: 84#percent,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
-//                    }
+                        //                    }
 //                ],
 //            } children [
 //
@@ -374,6 +376,7 @@ backpack: $Backpack {
     deckSelectionParentWidgetName: "deckSelectionParent",
     deckCardsWidgetName: "deckCards",
     backPackCardsWidgetName: "backPackCards",
+    backpackEditIndicationWidgetName: "saveEditIcon",
     zIndex: 7,
     visible: false,
     styles: [
@@ -409,8 +412,8 @@ backpack: $Backpack {
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceBetween,
                     alignItems: align.center,
-                    paddingLeft: (3 * 10)#points,
-                    paddingRight: (3 * 10)#points,
+                    paddingLeft: (30)#points,
+                    paddingRight: (30)#points,
                 }
             ],
         } children [
@@ -422,8 +425,7 @@ backpack: $Backpack {
                 color: color.forty_white,
                 styles: [
                     {
-                        width: 40#percent,
-                        //
+                        width: 38#percent,
                         //background: "backpack_1",
                         //selectionColor: color.green,
                         //cursorColor: color.yellow,
@@ -432,10 +434,28 @@ backpack: $Backpack {
                 ]
             },
             $Box {
+                debug: true,
+                name: "saveEditIcon",
+                zIndex: 55,
+                styles: [
+                    {
+                        style_priority: 1,
+                        height: 40#percent,
+                        width: 5#percent,
+                        background: "backpack_edit"
+                    }, {
+                        style_priority: 2,
+                        style_condition: actorState("inEdit"),
+                        background: "backpack_save"
+                    }
+                ],
+            },
+            $Box {
                 name: "deckSelectionParent",
                 styles: [
                     {
                         height: 10#percent,
+                        width: 56#percent,
                         flexDirection: flexDirection.row,
                         justifyContent: justify.flexEnd,
                         alignItems: align.center,
@@ -489,7 +509,7 @@ backpack: $Backpack {
                     height: 90#percent,
                     flexDirection: flexDirection.row,
                     alignItems: align.flexStart,
-                    paddingRight: (2 * 10)#points,
+                    paddingRight: (20)#points,
                     cuttingRight: 17.5,
                     scrollbarWidth: 12.5,
                 }
