@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
@@ -264,14 +265,11 @@ class Backpack(
                 }
             }
         })
+
         backpackEditIndication.addListener(object : ClickListener() {
             override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                println("clicked")
-                if (backpackEditIndication.inActorState("inEdit")){
-                    saveCurrentDeckName()
-                }else{
-                    startEditDeckName()
-                }
+                if (backpackEditIndication.inActorState("inEdit")) saveCurrentDeckName()
+                else startEditDeckName()
             }
         })
     }

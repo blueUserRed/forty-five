@@ -413,7 +413,7 @@ backpack: $Backpack {
                     justifyContent: justify.spaceBetween,
                     alignItems: align.center,
                     paddingLeft: (30)#points,
-                    paddingRight: (30)#points,
+                    paddingRight: (10)#points,
                 }
             ],
         } children [
@@ -425,7 +425,7 @@ backpack: $Backpack {
                 color: color.forty_white,
                 styles: [
                     {
-                        width: 38#percent,
+                        width: 40#percent,
                         //background: "backpack_1",
                         //selectionColor: color.green,
                         //cursorColor: color.yellow,
@@ -434,14 +434,13 @@ backpack: $Backpack {
                 ]
             },
             $Box {
-                debug: true,
                 name: "saveEditIcon",
-                zIndex: 55,
                 styles: [
                     {
                         style_priority: 1,
                         height: 40#percent,
                         width: 5#percent,
+                        touchable: touchable.enabled,
                         background: "backpack_edit"
                     }, {
                         style_priority: 2,
@@ -454,8 +453,8 @@ backpack: $Backpack {
                 name: "deckSelectionParent",
                 styles: [
                     {
-                        height: 10#percent,
-                        width: 56#percent,
+                        height: 80#percent,
+                        width: 53#percent,
                         flexDirection: flexDirection.row,
                         justifyContent: justify.flexEnd,
                         alignItems: align.center,
