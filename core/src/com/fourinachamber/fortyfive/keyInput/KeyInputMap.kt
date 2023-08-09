@@ -49,7 +49,7 @@ class KeyInputMap(
             return true
         }
         var bestCandidate: KeyAction? = null
-        var bestCandidatePriority: Int = Int.MAX_VALUE
+        var bestCandidatePriority: Int = Int.MIN_VALUE
         val inputRanges = InputKeyRange.values()
         entries.filter { it.condition.check(screen) }
             .forEach { entryList ->
@@ -60,10 +60,10 @@ class KeyInputMap(
                     }
                     .filter { areAllModifiersPressed(it.modifierKeys) }
                     .forEach { keyEntry ->
-                        if (bestCandidatePriority != entryList.priority) {
+                        if (bestCandidatePriority < entryList.priority) {
                             bestCandidate = keyEntry.action ?: entryList.defaultAction
                             bestCandidatePriority = entryList.priority
-                        } else {
+                        } else if(bestCandidatePriority == entryList.priority){
                             FortyFiveLogger.severe(logTag, "There are multiple valid keys with the same priority!")
                             return false
                         }
