@@ -460,6 +460,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("deckSelectionParentWidgetName"),
             widgetOnj.get<String>("deckCardsWidgetName"),
             widgetOnj.get<String>("backPackCardsWidgetName"),
+            widgetOnj.get<String>("backpackEditIndicationWidgetName"),
         ).apply {
             initFlexBox(this, widgetOnj, screen)
             initAfterChildrenExist()

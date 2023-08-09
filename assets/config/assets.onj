@@ -267,6 +267,10 @@ textures: [
         file: "textures/shop/back_button.png"
     },
     {
+        name: "shop_npcs_default",
+        file: "textures/shop/npcs/default.png",
+    },
+    {
         name: "prerendered_noise_perlin_512x512",
         file: "textures/prerendered_noise/perlin_512x512.png"
     },
@@ -335,12 +339,16 @@ textures: [
         file: "textures/backpack/empty_deck_slot.png"
     },
     {
-        name: "warning_label_background_red",
-        file: "textures/warning_label/background_red.png"
+        name: "backpack_save",
+        file: "textures/backpack/save.png"
     },
     {
-        name: "shop_npcs_default",
-        file: "textures/shop/npcs/default.png",
+        name: "backpack_edit",
+        file: "textures/backpack/edit.png"
+    },
+    {
+        name: "warning_label_background_red",
+        file: "textures/warning_label/background_red.png"
     }
 ],
 
