@@ -6,8 +6,8 @@ let currentPage = 1;
 let scrollToPosition = null;
 
 function main() {
-    document.getElementById("prev-page-button").addEventListener("click", prevPage);
-    document.getElementById("next-page-button").addEventListener("click", nextPage);
+    // document.getElementById("prev-page-button").addEventListener("click", prevPage);
+    // document.getElementById("next-page-button").addEventListener("click", nextPage);
     updateScroll();
 }
 
