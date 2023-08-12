@@ -34,11 +34,25 @@ header {
   display: flex;
   flex-direction: row;
   width: 300%;
+  background-image: url("../assets/background.png");
 }
 
 section.sub-page {
   width: 100%;
   height: 150cm;
+}
+
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("../assets/overlay.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
 }
 
 /*# sourceMappingURL=index.css.map */
