@@ -1,6 +1,12 @@
 
+@use "mixins" as *;
+
 $num-subpages: 3;
 $forty-white: #f2ecdf;
+
+$header-zindex: 500;
+
+$our-project-break: 950px;
 
 body {
     margin: 0 0 0 0;
@@ -18,14 +24,14 @@ header {
     background-image: url("../assets/header_texture.png");
     background-repeat: no-repeat;
     background-size: cover;
-
     display: flex;
     flex-direction: row;
     align-items: center;
     padding: 5px;
+    z-index: $header-zindex;
 
     * + * {
-        margin-left: 2cm;
+        margin-left: 5%;
     }
 
     .logo {
@@ -48,28 +54,13 @@ header {
             background-image: url("../assets/download_button.png");
             background-repeat: no-repeat;
             background-size: 100%;
-            // background-size: cover;
             background-clip: border-box;
         }
+
+        @include hamburgerMenu {
+            display: none;
+        }
     }
-}
-
-#test1 {
-    width: 3cm;
-    height: 3cm;
-    background-color: red;
-}
-
-#test2 {
-    width: 3cm;
-    height: 3cm;
-    background-color: blue;
-}
-
-#test3 {
-    width: 3cm;
-    height: 3cm;
-    background-color: green;
 }
 
 #main-content-container {
@@ -96,4 +87,63 @@ section.sub-page {
     background-position: center;
     pointer-events: none;
     opacity: 0.8;
+}
+
+#main-page {
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    #our-project {
+        position: relative;
+        width: 12cm;
+        left: 30%;
+        margin-top: -4cm;
+        z-index: $header-zindex - 100;
+        transition: top 0.2s;
+
+        &:hover {
+            top: 1cm;
+        }
+
+        @include hamburgerMenu {
+            display: none;
+        }
+
+        @include break($our-project-break) {
+            left: 0%;
+        }
+    }
+
+    #our-project-standin {
+        display: none;
+        height: 5.8cm;
+
+        @include hamburgerMenu {
+            display: block;
+        }
+    }
+
+    #title-map {
+        background-image: url("../assets/map.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 90%;
+        margin-top: -5cm;
+        aspect-ratio: 1.646;
+
+        @include narrow {
+            width: 100%;
+        }
+
+        @include wide {
+            width: 26cm;
+        }
+
+        // @include break($our-project-break) {
+        //     width: 20cm;
+        // }
+    }
+
 }

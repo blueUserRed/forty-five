@@ -6,23 +6,20 @@ let currentPage = 1;
 let scrollToPosition = null;
 
 function main() {
-    // document.getElementById("prev-page-button").addEventListener("click", prevPage);
-    // document.getElementById("next-page-button").addEventListener("click", nextPage);
+    bindEventListeners(document.getElementsByClassName("to-main-page"), 1);
+    bindEventListeners(document.getElementsByClassName("to-about-page"), 2);
+    bindEventListeners(document.getElementsByClassName("to-imprint-page"), 3);
+
     updateScroll();
 }
 
-function nextPage() {
-    if (currentPage >= numPages) return;
-    if (scrollToPosition != null) return;
-    currentPage++;
-    updateScroll();
-}
-
-function prevPage() {
-    if (currentPage <= 1) return;
-    if (scrollToPosition != null) return;
-    currentPage--;
-    updateScroll();
+function bindEventListeners(elements, pageNumber) {
+    Array.from(elements).forEach(element => {
+        element.addEventListener("click", () => {
+            currentPage = pageNumber;
+            updateScroll();
+        });
+    });
 }
 
 function updateScroll() {
