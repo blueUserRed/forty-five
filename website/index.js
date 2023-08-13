@@ -10,7 +10,7 @@ function main() {
     bindEventListeners(document.getElementsByClassName("to-about-page"), 2);
     bindEventListeners(document.getElementsByClassName("to-imprint-page"), 3);
 
-    updateScroll();
+    // updateScroll();
 }
 
 function bindEventListeners(elements, pageNumber) {

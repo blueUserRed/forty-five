@@ -22,3 +22,9 @@
         @content
     } 
 };
+
+@mixin very-wide {
+    @media screen and (min-width: 1300px) {
+        @content
+    } 
+};
