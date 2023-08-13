@@ -18,9 +18,10 @@ header {
   flex-direction: row;
   align-items: center;
   padding: 5px;
+  z-index: 500;
 }
 header * + * {
-  margin-left: 2cm;
+  margin-left: 5%;
 }
 header .logo {
   height: 100%;
@@ -42,23 +43,10 @@ header a.download {
   background-size: 100%;
   background-clip: border-box;
 }
-
-#test1 {
-  width: 3cm;
-  height: 3cm;
-  background-color: red;
-}
-
-#test2 {
-  width: 3cm;
-  height: 3cm;
-  background-color: blue;
-}
-
-#test3 {
-  width: 3cm;
-  height: 3cm;
-  background-color: green;
+@media screen and (max-width: 790px) {
+  header a {
+    display: none;
+  }
 }
 
 #main-content-container {
@@ -85,6 +73,60 @@ section.sub-page {
   background-position: center;
   pointer-events: none;
   opacity: 0.8;
+}
+
+#main-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#main-page #our-project {
+  position: relative;
+  width: 12cm;
+  left: 30%;
+  margin-top: -4cm;
+  z-index: 400;
+  transition: top 0.2s;
+}
+#main-page #our-project:hover {
+  top: 1cm;
+}
+@media screen and (max-width: 790px) {
+  #main-page #our-project {
+    display: none;
+  }
+}
+@media screen and (max-width: 950px) {
+  #main-page #our-project {
+    left: 0%;
+  }
+}
+#main-page #our-project-standin {
+  display: none;
+  height: 5.8cm;
+}
+@media screen and (max-width: 790px) {
+  #main-page #our-project-standin {
+    display: block;
+  }
+}
+#main-page #title-map {
+  background-image: url("../assets/map.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 90%;
+  margin-top: -5cm;
+  aspect-ratio: 1.646;
+}
+@media screen and (max-width: 750px) {
+  #main-page #title-map {
+    width: 100%;
+  }
+}
+@media screen and (min-width: 1100px) {
+  #main-page #title-map {
+    width: 26cm;
+  }
 }
 
 /*# sourceMappingURL=index.css.map */
