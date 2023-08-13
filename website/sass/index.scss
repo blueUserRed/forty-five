@@ -5,8 +5,31 @@ $num-subpages: 3;
 $forty-white: #f2ecdf;
 
 $header-zindex: 500;
+$overlay-zindex: 300;
 
 $our-project-break: 950px;
+
+.download {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    background-image: url("../assets/download_button.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-clip: border-box;
+    font-size: 0.6cm;
+    color: $forty-white;
+    text-decoration: none;
+    text-align: center;
+}
+
+.paper-text-box {
+    background-image: url("../assets/text_background.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-clip: border-box;
+}
 
 body {
     margin: 0 0 0 0;
@@ -46,17 +69,6 @@ header {
         color: $forty-white;
         text-decoration: none;
 
-        &.download {
-            padding-left: 20px;
-            padding-right: 20px;
-            padding-bottom: 4px;
-            padding-top: 4px;
-            background-image: url("../assets/download_button.png");
-            background-repeat: no-repeat;
-            background-size: 100%;
-            background-clip: border-box;
-        }
-
         @include hamburgerMenu {
             display: none;
         }
@@ -87,6 +99,7 @@ section.sub-page {
     background-position: center;
     pointer-events: none;
     opacity: 0.8;
+    z-index: $overlay-zindex;
 }
 
 #main-page {
@@ -100,6 +113,7 @@ section.sub-page {
         width: 12cm;
         left: 30%;
         margin-top: -4cm;
+        top: 0;
         z-index: $header-zindex - 100;
         transition: top 0.2s;
 
@@ -133,6 +147,50 @@ section.sub-page {
         margin-top: -5cm;
         aspect-ratio: 1.646;
 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        @include narrow {
+            width: 100%;
+            margin-top: -4.5cm;
+        }
+
+        @include very-wide {
+            width: 33cm;
+        }
+
+        img {
+            width: 40%;
+            margin-top: 23%;
+        }
+
+        .download {
+            width: 10%;
+            margin-top: 9%;
+            font-size: 2vw;
+
+            @include wide {
+                font-size: 0.6cm;
+            }
+
+        }
+
+    }
+
+    #trailer-container {
+        background-image: url("../assets/trailer_container_bg.png");
+        background-repeat: no-repeat;
+        background-size: contain;
+        width: 90%;
+        background-clip: border-box;
+        background-position-y: center;
+        background-position-x: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
         @include narrow {
             width: 100%;
         }
@@ -141,9 +199,46 @@ section.sub-page {
             width: 26cm;
         }
 
-        // @include break($our-project-break) {
-        //     width: 20cm;
-        // }
+        iframe {
+            width: 70%;
+            aspect-ratio: 16 / 9;
+            margin-top: 3cm;
+            margin-bottom: 3cm;
+            transform: rotate(2deg);
+            z-index: $overlay-zindex + 100;
+        }
+
+    }
+
+    #main-description {
+        width: 110%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: -4.2cm;
+        transform: rotate(-1deg);
+        z-index: 0;
+
+        @include narrow {
+            width: 120%;
+        }
+
+        @include wide {
+            width: 32cm;
+        }
+
+        p {
+            color: black;
+            font-size: 0.8cm;
+            padding: 3cm 19% 8cm 19%;
+
+            @include narrow {
+                font-size: 4vw;
+                padding-bottom: 4cm;
+            }
+        }
+
     }
 
 }
