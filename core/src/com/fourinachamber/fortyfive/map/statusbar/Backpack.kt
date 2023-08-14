@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.map.statusbar
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
@@ -13,7 +12,9 @@ import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
+import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -30,6 +31,8 @@ class Backpack(
     private val deckCardsWidgetName: String,
     private val backPackCardsWidgetName: String,
     private val backpackEditIndicationWidgetName: String,
+    private val sortWidgetName: String,
+    private val sortReverseWidgetName: String,
 ) :
     CustomFlexBox(screen),
     InOutAnimationActor {
@@ -44,7 +47,7 @@ class Backpack(
     private lateinit var deckSelectionParent: CustomFlexBox
     private lateinit var backpackEditIndication: CustomFlexBox
 
-    private var sortingSystem = BackpackSorting.Damage()
+    private var sortingSystem: BackpackSorting = BackpackSorting.Damage()
 
     private val quickAddRemoveListener = object : ClickListener() {
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
@@ -86,7 +89,7 @@ class Backpack(
 
     init {
         //TODO
-//         0. (done(mostly)) background stop //rework input system
+//         0. (done(mostly)) background stop //mouse still active in background
 //         1. (done) Cards drag and drop (both direction)
 //         2. (done) automatic add to deck on double click or on press space or so
 //         3. (done) automatic add to deck if deck doesn't have enough cards
@@ -120,6 +123,20 @@ class Backpack(
         initDeckName()
         initDeckLayout()
         initDeckSelection()
+        initSortBy()
+    }
+
+    private fun initSortBy() {
+        (screen.namedActorOrError(sortWidgetName) as CustomFlexBox).onClick {
+            sortingSystem = sortingSystem.getNext()
+            invalidateHierarchy()
+        }
+        val cur = screen.namedActorOrError(sortReverseWidgetName) as CustomFlexBox
+        cur.onClick {
+            sortingSystem.isReverse = !sortingSystem.isReverse
+            invalidateHierarchy()
+            this.children[0].rotateBy(180F)
+        }
     }
 
     override fun layout() {
@@ -130,8 +147,8 @@ class Backpack(
     private fun checkDeck() {
         //checks for the number of visible cards
         val deckSlots = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
-        val nbrOfSeenCards = deckSlots.filter { it.children[0].isVisible }.size
-        if (nbrOfSeenCards != SaveState.curDeck.cards.size) {
+        val seenCards = deckSlots.map { it.children[0] }.filter { it.isVisible }
+        if (seenCards.size != SaveState.curDeck.cards.size) {
             reloadDeck()
             return
         }
@@ -147,6 +164,12 @@ class Backpack(
             reloadDeck()
             return
         }
+
+        //maybe check before actually sorting if needed, but I think it doesn't matter
+        val unplacedCards = SaveState.cards.toMutableList()
+        seenCards.forEach { unplacedCards.remove(it.name.split(nameSeparatorStr)[0]) }
+        TemplateString.updateGlobalParam("overlay.backpack.sortByName", sortingSystem.getDisplayName())
+        sortBackpack(sortingSystem.sort(_allCards, unplacedCards))
     }
 
     private fun initDeckLayout() {
@@ -221,7 +244,6 @@ class Backpack(
             cur.addListener(quickAddRemoveListener)
         }
         sortBackpack(sortingSystem.sort(_allCards, unplacedCards))
-        backpackCardsWidget.invalidate()
     }
 
     private fun removeChildCompletely(child: CustomFlexBox) {
@@ -238,6 +260,7 @@ class Backpack(
             curActor.background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
             curActor.name = "${curCard.name}${nameSeparatorStr}backpack${nameSeparatorStr}${i}"
         }
+        backpackCardsWidget.invalidate()
     }
 
     private fun initDeckName() {
@@ -348,8 +371,8 @@ class Backpack(
         val numberOfSlots: Int
             get() = _numberOfSlots
 
-        const
-        val nameSeparatorStr = "_-_"
+        const val nameSeparatorStr = "_-_"
+
         private val backpackFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
         }
@@ -362,12 +385,43 @@ class Backpack(
     interface BackpackSorting {
 
         var isReverse: Boolean
-        fun sort(cardData: List<Card>, cards: List<String>): List<String>
+
+        fun sort(cardData: List<Card>, cards: List<String>): List<String> {
+            val list = cards.map { name -> cardData.find { name == it.name }!! }.sortedWith { a, b ->
+                run {
+                    val comp = compare(b, a)
+                    if (comp != 0) comp
+                    else a.name.compareTo(b.name)
+                }
+            }.map { it.name }
+            return if (isReverse) list.reversed() else list
+        }
+
+        fun compare(a: Card, b: Card): Int
+
+        fun getDisplayName(): String = this.javaClass.simpleName
+        fun getNext(): BackpackSorting {
+            val all = arrayOf(
+                "Damage" to { Damage(isReverse) },
+                "Reserves" to { Reserves(isReverse) },
+                "Name" to { Name(isReverse) },)
+            return all[(all.indexOfFirst { it.first == this.getDisplayName() } + 1) % all.size].second.invoke()
+        }
 
         class Damage(override var isReverse: Boolean = false) : BackpackSorting {
-            override fun sort(cardData: List<Card>, cards: List<String>): List<String> {
-                val list = cards.sortedBy { name -> -(cardData.find { name == it.name }!!.baseDamage) }
-                return if (isReverse) list.reversed() else list
+            override fun compare(a: Card, b: Card): Int {
+                return a.baseDamage.compareTo(b.baseDamage)
+            }
+        }
+
+        class Reserves(override var isReverse: Boolean = false) : BackpackSorting {
+            override fun compare(a: Card, b: Card): Int {
+                return a.cost.compareTo(b.cost)
+            }
+        }
+        class Name(override var isReverse: Boolean = false) : BackpackSorting {
+            override fun compare(a: Card, b: Card): Int {
+                return 0
             }
         }
     }
