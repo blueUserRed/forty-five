@@ -33,6 +33,7 @@ backpackAssets: [
     "backpack_sort_background",
     "backpack_type_hover",
     "backpack_direction_hover",
+    "backpack_direction_arrow",
 ],
 
 
@@ -380,6 +381,8 @@ backpack: $Backpack {
     deckCardsWidgetName: "deckCards",
     backPackCardsWidgetName: "backPackCards",
     backpackEditIndicationWidgetName: "saveEditIcon",
+    sortWidgetName: "sortWidget",
+    sortReverseWidgetName: "sortReverseWidget",
     zIndex: 7,
     visible: false,
     styles: [
@@ -556,11 +559,10 @@ backpack: $Backpack {
                 color: color.white,
             },
             $Box {
-                name: "sortByActor",
                 styles: [
                     {
                         background: "backpack_sort_background",
-                        width: 40#percent,
+                        width: 45#percent,
                         height: 70#percent,
                         flexDirection: flexDirection.row,
                         paddingLeft: 6#percent,
@@ -582,7 +584,7 @@ backpack: $Backpack {
                             {
                                 style_priority: 1,
                                 height: 80#percent,
-                                width: 55#percent,
+                                width: 45#percent,
                                 alignItems: align.center,
                                 justifyContent: justify.center,
                                 background: "%%--null%%--",
@@ -596,7 +598,7 @@ backpack: $Backpack {
                         ],
                         children: [
                             $TemplateLabel {
-                                template: "Quantitiy",
+                                template: "{overlay.backpack.sortByName}",
                                 font: "red_wing",
                                 fontScale: 0.9,
                                 color: color.red,
@@ -609,6 +611,33 @@ backpack: $Backpack {
                         fontScale: 0.9,
                         color: color.white,
                     },
+                    $Box {
+                        name: "sortReverseWidget",
+                        styles: [
+                            {
+                                style_priority: 1,
+                                height: 80#percent,
+                                width: 14#percent,
+                                alignItems: align.center,
+                                justifyContent: justify.center,
+                                background: "%%--null%%--",
+                                touchable: touchable.enabled,
+                            },
+                            {
+                                style_priority: 2,
+                                style_condition: hover(),
+                                background: "backpack_direction_hover",
+                            }
+                        ],
+                        children: [
+                            $Image {
+                                textureName: "backpack_direction_arrow",
+                                scaleX: 0.04,
+                                scaleY: 0.04,
+                                reportDimensionsWithScaling: true,
+                            }
+                        ],
+                    }
                 ]
             }
         ],

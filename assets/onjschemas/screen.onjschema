@@ -54,6 +54,8 @@ $Widget {
         deckCardsWidgetName: string,
         backPackCardsWidgetName: string,
         backpackEditIndicationWidgetName: string,
+        sortWidgetName: string,
+        sortReverseWidgetName: string,
         ...widgetSharedKeys,
          children?: $Widget[],
          partOfSelectionHierarchy?: boolean,

@@ -359,6 +359,10 @@ textures: [
         file: "textures/backpack/sort_direction_hover.png"
     },
     {
+        name: "backpack_direction_arrow",
+        file: "textures/backpack/sort_direction_arrow.png"
+    },
+    {
         name: "warning_label_background_red",
         file: "textures/warning_label/background_red.png"
     }
