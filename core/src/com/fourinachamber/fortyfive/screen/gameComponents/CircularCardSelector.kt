@@ -28,6 +28,7 @@ class CircularCardSelector(
 
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     private val cardActors: Array<CustomImageActor> = Array(5) {
         val actor = CustomImageActor(null, screen, true)

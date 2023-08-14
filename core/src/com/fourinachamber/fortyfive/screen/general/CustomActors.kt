@@ -166,11 +166,21 @@ interface HoverStateActor {
     var isHoveredOver: Boolean
 
     /**
+     * if it was clicked and therefore is still hovered over (so it doesn't stop showing hover if it )
+     */
+    var isClicked: Boolean
+
+    /**
      * binds listeners to [actor] that automatically assign [isHoveredOver]
      */
     fun bindHoverStateListeners(actor: Actor) {
         actor.onEnter { isHoveredOver = true }
-        actor.onExit { isHoveredOver = false }
+        actor.onClick { isClicked = true }
+        actor.onExit {
+            if (!isClicked) isHoveredOver = false
+
+            isClicked = false
+        }
     }
 
 }
@@ -226,6 +236,8 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override var isSelected: Boolean = false
 
     override var isHoveredOver: Boolean = false
+
+    override var isClicked: Boolean=false
 
     override var styleManager: StyleManager? = null
 
@@ -321,6 +333,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
+    override var isClicked: Boolean=false
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -495,6 +508,7 @@ open class CustomFlexBox(
     override var isHoveredOver: Boolean = false
 
     override var styleManager: StyleManager? = null
+    override var isClicked: Boolean=false
 
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
@@ -1163,6 +1177,7 @@ open class CustomVerticalGroup(
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     override var backgroundHandle: String? = null
         set(value) {

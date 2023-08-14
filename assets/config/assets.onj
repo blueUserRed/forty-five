@@ -347,6 +347,18 @@ textures: [
         file: "textures/backpack/edit.png"
     },
     {
+        name: "backpack_sort_background",
+        file: "textures/backpack/sort_background.png"
+    },
+    {
+        name: "backpack_type_hover",
+        file: "textures/backpack/sort_type_hover.png"
+    },
+    {
+        name: "backpack_direction_hover",
+        file: "textures/backpack/sort_direction_hover.png"
+    },
+    {
         name: "warning_label_background_red",
         file: "textures/warning_label/background_red.png"
     }

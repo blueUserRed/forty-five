@@ -427,6 +427,7 @@ class CardActor(
 
     override var isSelected: Boolean = false
     override var partOfHierarchy: Boolean = true
+    override var isClicked: Boolean=false
 
     /**
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fortyfive.game.card.CardDragSource]

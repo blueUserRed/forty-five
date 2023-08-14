@@ -39,6 +39,7 @@ class Revolver(
     override var styleManager: StyleManager? = null
 
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     override var fixedZIndex: Int = 0
 
