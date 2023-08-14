@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.map.shop
 
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.game.SaveState
@@ -35,10 +34,9 @@ class ShopCardsHandler(
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
     }
 
-    fun addItems(seed: Long) {
-        val rnd = Random(seed)
+    fun addItems(rnd: Random) {
         val nbrOfItems = (5..16).random(rnd)
-        FortyFiveLogger.debug(ShopCardsHandler.logTag, "Created $nbrOfItems items with seed $seed")
+        FortyFiveLogger.debug(logTag, "Created $nbrOfItems items")
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)

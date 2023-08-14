@@ -46,12 +46,12 @@ class SeededMapGenerator(
         addAreas(nodes, connections)
         addEvents(nodes)    //TODO check errors with current config
 
-//        nodes.forEach { it.scale(1F, .6F) } //TODO add parameter for scaling
+        nodes.forEach { it.scale(restrictions.scaleWidth, restrictions.scaleLength) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
         this.nodes = nodes
         build()
-        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos,false)
+        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos, false)
     }
 
     private fun generateDecorations(
@@ -1288,52 +1288,60 @@ data class MapRestriction(
      * minimum number of nodes for main line
      */
     val maxNodes: Int,
+
     /**
      * maximum number of nodes for main line
      */
     val minNodes: Int,
+
     /**
      * how many lines are generated and are therefore possible
      */
     val maxLines: Int,
+
     /**
      * how likely it is for nodes to split (min. of 0.3 is recommended)
      */
     val splitProb: Float,
-    /**
-     * how far it spreads into the "y" direction or is compressed
-     */
-    val compressProb: Float,
+
+    val scaleWidth: Float,
+    val scaleLength: Float,
+
     /**
      * the average length between two nodes on one line (actually only preferred length, not avg.)
      */
-    val averageLengthOfLineInBetween: Float,
+    val averageLengthOfLineInBetween: Float = 26F,
 
     /**
      * max "y" width for first line, and for other lines: max distance for the x Point from one line to the x Point of another line
      */
-    val maxWidth: Int,
+    val maxWidth: Int = 40,
+
     /**
      * how strong the random points can go up and down (0 means straight to the right, 1 means 180 Degree)
      */
-    val maxAnglePercent: Float,
+    val maxAnglePercent: Float = 0.6F,
+
     /**
      * the range from where nodes are checked if there are any other from another line
      */
-    val rangeToCheckBetweenNodes: Float,
+    val rangeToCheckBetweenNodes: Float = 0.6F,
+
     val startArea: String,
     val endArea: String,
     val otherAreas: List<String>,
-    val minDistanceBetweenAreas: Float,
+    val minDistanceBetweenAreas: Float = 100F,
+
     /**
      * how far the areas are from the highest/lowest point of the road in a close area around the area
      */
-    val distanceFromAreaToLine: Float,
+    val distanceFromAreaToLine: Float = 100F,
 
     /**
      * how far the nodes can be away from the area to be selected as the connected node to that area (formula [MapRestriction.distanceFromAreaToLine] * (1+thisValue)
      */
-    val percentageForAllowedNodesInRangeBetweenLineAndArea: Float,
+    val percentageForAllowedNodesInRangeBetweenLineAndArea: Float = 0.4F,
+
     /**
      * the rotation of the road (0 means looking right, PI/2 means looking up, and so on)
      */
@@ -1343,11 +1351,12 @@ data class MapRestriction(
      * the boolean means if it is a dead End
      */
     val fixedEvents: List<Triple<MapEvent, Boolean, String?>>, // TODO: slightly ugly, use data class instead?
+
     val optionalEvents: List<Triple<Int, () -> MapEvent, String?>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
-    val pathTotalWidth: Float = 7F,
-    val minDistanceBetweenNodes: Float = 5F,
+    val pathTotalWidth: Float = 7.5F,
+    val minDistanceBetweenNodes: Float = 15F,
     val exitNodeTexture: String
 ) {
 
@@ -1359,20 +1368,14 @@ data class MapRestriction(
             minNodes = onj.get<Long>("minNodes").toInt(),
             maxLines = onj.get<Long>("maxSplits").toInt(),
             splitProb = onj.get<Double>("splitProbability").toFloat(),
-            compressProb = onj.get<Double>("compressProbability").toFloat(),
-            averageLengthOfLineInBetween = onj.get<Double>("averageLengthOfLineInBetween").toFloat(),
             decorationPadding = onj.get<Double>("decorationPadding").toFloat(),
-            distanceFromAreaToLine = onj.get<Double>("distanceFromAreaToLine").toFloat(),
+            scaleLength = (onj.get<Double?>("scaleLength") ?: 1).toFloat(),
+            scaleWidth = (onj.get<Double?>("scaleWidth") ?: 1).toFloat(),
             endArea = onj.get<String>("endArea"),
             startArea = onj.get<String>("startArea"),
-            maxAnglePercent = onj.get<Double>("maxAnglePercent").toFloat(),
-            maxWidth = onj.get<Long>("maxWidth").toInt(),
-            minDistanceBetweenAreas = onj.get<Double>("minDistanceBetweenAreas").toFloat(),
-            rangeToCheckBetweenNodes = onj.get<Double>("rangeToCheckBetweenNodes").toFloat(),
-            percentageForAllowedNodesInRangeBetweenLineAndArea =
-            onj.get<Double>("percentageForAllowedNodesInRangeBetweenLineAndArea").toFloat(),
             rotation = onj.get<Double>("rotation"),
-            otherAreas = onj.get<OnjArray>("otherAreas").value.map { it.value as String },
+            otherAreas = (onj.get<OnjArray?>("otherAreas")
+                ?: OnjArray(listOf())).value.map { it.value as String },
             fixedEvents = onj
                 .get<OnjArray>("fixedEvents")
                 .value.map { it as OnjObject }
@@ -1382,7 +1385,7 @@ data class MapRestriction(
                         it.get<Boolean>("isDeadEnd"),
                         it.get<String?>("nodeTexture")
                     )
-                 },
+                },
             optionalEvents = onj
                 .get<OnjArray>("optionalEvents")
                 .value
@@ -1404,9 +1407,7 @@ data class MapRestriction(
                         onj.get<Long>("decorationSeed") * 289708 * index
                     )
                 },
-            minDistanceBetweenNodes = onj.get<Double>("minDistanceBetweenNodes").toFloat(),
-            pathTotalWidth = onj.get<Double>("pathTotalWidth").toFloat(),
-            exitNodeTexture = onj.get<String>("exitNodeTexture")
+            exitNodeTexture = onj.get<String>("exitNodeTexture"),
         )
     }
 }
