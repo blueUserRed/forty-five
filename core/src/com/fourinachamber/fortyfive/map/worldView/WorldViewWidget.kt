@@ -26,6 +26,7 @@ class WorldViewWidget(config: OnjObject, val screen: OnjScreen) : Widget(), Styl
 
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     private val locationIndicatorDrawableHandle: ResourceHandle = config
         .get<OnjObject>("worldView")

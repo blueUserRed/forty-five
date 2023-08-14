@@ -30,6 +30,9 @@ backpackAssets: [
     "backpack_empty_deck_slot",
     "backpack_save",
     "backpack_edit",
+    "backpack_sort_background",
+    "backpack_type_hover",
+    "backpack_direction_hover",
 ],
 
 
@@ -541,8 +544,8 @@ backpack: $Backpack {
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceBetween,
                     alignItems: align.center,
-                    paddingLeft: (3 * 10)#points,
-                    paddingRight: (3 * 10)#points,
+                    paddingLeft: (30)#points,
+                    paddingRight: (10)#points,
                 }
             ],
         } children [
@@ -551,6 +554,62 @@ backpack: $Backpack {
                 font: "red_wing",
                 fontScale: 0.9,
                 color: color.white,
+            },
+            $Box {
+                name: "sortByActor",
+                styles: [
+                    {
+                        background: "backpack_sort_background",
+                        width: 40#percent,
+                        height: 70#percent,
+                        flexDirection: flexDirection.row,
+                        paddingLeft: 6#percent,
+                        paddingRight: 6#percent,
+                        alignItems: align.center,
+                        justifyContent: justify.spaceBetween,
+                    }
+                ],
+                children: [
+                    $Label {
+                        text: "Sort by:",
+                        font: "red_wing",
+                        fontScale: 0.9,
+                        color: color.white,
+                    },
+                    $Box {
+                        name: "sortWidget",
+                        styles: [
+                            {
+                                style_priority: 1,
+                                height: 80#percent,
+                                width: 55#percent,
+                                alignItems: align.center,
+                                justifyContent: justify.center,
+                                background: "%%--null%%--",
+                                touchable: touchable.enabled,
+                            },
+                            {
+                                style_priority: 2,
+                                style_condition: hover(),
+                                background: "backpack_type_hover",
+                            }
+                        ],
+                        children: [
+                            $TemplateLabel {
+                                template: "Quantitiy",
+                                font: "red_wing",
+                                fontScale: 0.9,
+                                color: color.red,
+                            }
+                        ]
+                    },
+                    $Label {
+                        text: "|",
+                        font: "red_wing",
+                        fontScale: 0.9,
+                        color: color.white,
+                    },
+                ]
             }
         ],
         $ScrollBox {

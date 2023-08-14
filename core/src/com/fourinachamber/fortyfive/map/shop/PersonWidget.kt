@@ -29,6 +29,7 @@ class PersonWidget(
     private lateinit var textureName: String
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     init {
         bindHoverStateListeners(this)
