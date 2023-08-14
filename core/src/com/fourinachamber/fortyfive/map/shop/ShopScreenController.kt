@@ -3,8 +3,6 @@ package com.fourinachamber.fortyfive.map.shop
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
-import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.toOnjYoga
@@ -13,6 +11,7 @@ import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
+import kotlin.random.Random
 
 class ShopScreenController(onj: OnjObject) : ScreenController(){
 
@@ -60,12 +59,13 @@ class ShopScreenController(onj: OnjObject) : ScreenController(){
         val text = personData.get<OnjArray>("texts").value
         val defaults = shopFile.get<OnjObject>("defaults")
 
+        val rnd = Random(context.seed)
         messageWidget.advancedText =
-            AdvancedText.readFromOnj(text[(Math.random() * text.size).toInt()] as OnjArray, onjScreen, defaults)
+            AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
 
         shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
         shopCardsHandler.calculateChances(context.type, shopFile, personData)
-        shopCardsHandler.addItems(context.seed)
+        shopCardsHandler.addItems(rnd)
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
