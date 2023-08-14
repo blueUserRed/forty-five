@@ -44,7 +44,7 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
-        addEvents(nodes)    //TODO check errors with current config
+        addEvents(nodes)
 
         nodes.forEach { it.scale(restrictions.scaleWidth, restrictions.scaleLength) }
         nodes.forEach { it.rotate(restrictions.rotation) }
@@ -117,8 +117,28 @@ class SeededMapGenerator(
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
-        mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.LEFT
-        mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.RIGHT
+        when (restrictions.rotation) {
+            in ((PI / 4).toFloat()..(PI * 3 / 4).toFloat()) -> {
+                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.DOWN
+                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.UP
+            }
+
+            in ((PI * 3 / 4).toFloat()..(PI * 5 / 4).toFloat()) -> {
+                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.RIGHT
+                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.LEFT
+            }
+
+            in ((PI * 5 / 4).toFloat()..(PI * 7 / 4).toFloat()) -> {
+                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.UP
+                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.DOWN
+            }
+
+            else -> {
+                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.LEFT
+                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.RIGHT
+            }
+        }
+
         mainLine.lineNodes.first().imageName = restrictions.startArea
         mainLine.lineNodes.last().imageName = restrictions.endArea
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
