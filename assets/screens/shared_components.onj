@@ -383,7 +383,7 @@ backpack: $Backpack {
     backpackEditIndicationWidgetName: "saveEditIcon",
     sortWidgetName: "sortWidget",
     sortReverseWidgetName: "sortReverseWidget",
-    zIndex: 7,
+    zIndex: 10_000,
     visible: false,
     styles: [
         {

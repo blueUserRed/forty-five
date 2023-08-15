@@ -17,7 +17,9 @@ assets: {
         "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         "shop_add_to_backpack", "shop_add_to_deck",
+        ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets),
     ]
 },
 
@@ -57,52 +59,6 @@ var scrollBar = $Image {
     scaleX: 1.0,
     scaleY: 1.0,
 };
-
-var testWidget = $Image {
-    textureName: "shop_background_no_biome",
-    scaleX: 0.01,
-    scaleY: 0.01,
-    reportDimensionsWithScaling: true,
-    dragAndDrop: $ShopDragSource {
-        group: "card",
-    },
-    styles: [
-        {
-            style_priority: 1,
-            width: 100.0#percent,
-            height: 80.0#percent,
-            alpha: 1.0,
-        },
-        {
-            style_priority: 2,
-            style_condition: actorState("unbuyable"),
-            alpha: 0.5,
-        }
-    ],
-};
-
-
-var testWidgetBox = $Box {
-    name: "cardsWidgetParent",
-    styles: [
-        {
-            width: 21.0#percent,
-            height: 35.0#percent,
-            flexDirection: flexDirection.column,
-            background: "heart_texture",
-        }
-    ],
-} children [
-    testWidget,
-    $Label {
-        name: "cardsWidgetPrice",
-        text: "bought",
-        font: "red_wing_cm",
-        color: color.dark_brown,
-        fontScale: 0.8,
-        align: "center",
-    }
-];
 
 var cardsWidget = $Box {
     styles: [
@@ -175,7 +131,6 @@ root: $Box {
             }
         ],
     },
-    sharedComponents.navBar,
     $Image {
         zIndex: 20,
         textureName: "shop_dark_background",
@@ -189,9 +144,9 @@ root: $Box {
             {
                 positionType: positionType.absolute,
                 positionRight: (0.0 * 10)#points,
-                positionBottom: (0.0 * 10)#points,
+                positionTop: (13)#percent,
                 width: 93.0#percent,
-                height: 93.0#percent,
+                height: 88.0#percent,
             }
         ],
     },
@@ -293,7 +248,7 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 7.0#percent,
+                positionTop: 10.0#percent,
                 positionRight: 5.0#percent,
                 width: 54.4#percent,
                 height: 86.0#percent,
@@ -371,6 +326,27 @@ root: $Box {
             align: "center",
         }
     ],
+    $Statusbar {
+        zIndex:400,
+        options: [
+            {
+                actorName: "tempActor",
+                displayName: "Notebook",
+            },
+            {
+                actorName: "tempActor",
+                displayName: "Backpack",
+            },
+            {
+                actorName: "tempActor",
+                displayName: "Settings",
+            },
+        ],
+        //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
+
+        ...(sharedComponents.statusbarCenterDefaults)
+    },
+    sharedComponents.backpack,
 ],
 
 templates: [
@@ -470,5 +446,8 @@ templates: [
                 positionLeft: 0#points,
             }
         ],
-    }
+    },
+    ...(sharedComponents.statusBarTemplates),
+    ...(sharedComponents.backpackTemplates),
+    ...(sharedComponents.warningLabelTemplates),
 ],
