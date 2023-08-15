@@ -14,8 +14,9 @@ var worldHeight = 900.0;
 assets: {
     useAssets: [
         "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture","shop_dark_background", "forty_white_rounded", "shop_items_background",
+        "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
+        "shop_add_to_backpack", "shop_add_to_deck",
         ...(sharedComponents.navBarUsedAssets),
     ]
 },
@@ -35,8 +36,10 @@ options: {
         shopsFile: "maps/events/shops.onj",
         npcsFile: "maps/events/npcs.onj",
         cardsFile: "config/cards.onj",
-        messageWidgetName: "shop_message",
-        cardsParentName: "cards_widget",
+        messageWidgetName: "shopMessage",
+        cardsParentName: "cardsWidget",
+        addToBackpackWidgetName: "addToBackpackWidget",
+        addToDeckWidgetName: "addToDeckWidget",
     }
 },
 
@@ -113,7 +116,7 @@ var cardsWidget = $Box {
 
     children: [
         $ScrollBox {
-            name: "cards_widget",
+            name: "cardsWidget",
             isScrollDirectionVertical: true,
             scrollDistance: 60.0,
             backgroundStretched: false,
@@ -213,8 +216,80 @@ root: $Box {
             }
         ],
     },
+    $Image {
+        zIndex: 200,
+        name: "addToDeckWidget",
+        textureName: "shop_add_to_deck",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDropTarget {
+            group: "card",
+            isToDeck: true,
+        },
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 10.0#percent,
+                width: 30#percent,
+                height: 40.0#percent,
+            },
+            {
+                style_condition: actorState("display"),
+                positionLeft: 0#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
+            },
+            {
+                style_condition: not(actorState("display")),
+                positionLeft: -30#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
+            }
+        ],
+    },
+    $Image {
+        zIndex: 200,
+        name: "addToBackpackWidget",
+        textureName: "shop_add_to_deck",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDropTarget {
+            group: "card",
+            isToDeck: false,
+        },
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 54.0#percent,
+                width: 30#percent,
+                height: 40.0#percent,
+            },
+            {
+                style_condition: actorState("display"),
+                positionLeft: 0#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
+            },
+            {
+                style_condition: not(actorState("display")),
+                positionLeft: -30#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
+            }
+        ],
+    },
     $Box {
-        zIndex: 30,
+        zIndex: 300,
         styles: [
             {
                 positionType: positionType.absolute,
@@ -268,7 +343,7 @@ root: $Box {
             ],
         },
         $AdvancedText {
-            name: "shop_message",
+            name: "shopMessage",
             font: "red_wing",
             parts: [
             ],
@@ -295,7 +370,7 @@ root: $Box {
             fontScale: 0.7,
             align: "center",
         }
-    ]
+    ],
 ],
 
 templates: [
@@ -387,9 +462,6 @@ templates: [
         scaleX: 0.0,
         scaleY: 0.0,
         reportDimensionsWithScaling: true,
-        dragAndDrop: $ShopDropTarget {
-            group: "card",
-        },
         styles: [
             {
                 positionType: positionType.absolute,

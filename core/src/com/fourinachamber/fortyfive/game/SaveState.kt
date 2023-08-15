@@ -258,7 +258,7 @@ object SaveState {
 
 
         fun checkMinimum() {
-            if (cardPositions.size < Backpack.minDeckSize && cardPositions.size < SaveState.cards.size) {
+            if (cardPositions.size < minDeckSize && cardPositions.size < SaveState.cards.size) {
                 val onlyBackpackCards = mutableListOf<String>()
                 val curDeck = cards.toMutableList()
                 for (i in SaveState.cards) {
@@ -268,7 +268,7 @@ object SaveState {
                         onlyBackpackCards.add(i)
                     }
                 }
-                while (cards.size < Backpack.minDeckSize && onlyBackpackCards.isNotEmpty()) {
+                while (cards.size < minDeckSize && onlyBackpackCards.isNotEmpty()) {
                     val cur = onlyBackpackCards[0]
                     _cardPositions[nextFreeSlot()] = cur
                     onlyBackpackCards.removeAt(onlyBackpackCards.indexOf(cur))
@@ -279,7 +279,7 @@ object SaveState {
 
         fun nextFreeSlot(): Int {
             val keys = cardPositions.keys
-            if (keys.size >= Backpack.numberOfSlots) return -1
+            if (keys.size >= numberOfSlots) return -1
             for (i in keys.indices) {
                 if (!keys.contains(i)) return i
             }
@@ -343,6 +343,9 @@ object SaveState {
                 }
                 return Deck(name, id, cardPositions)
             }
+
+            const val minDeckSize = 12
+            const val numberOfSlots = 35
         }
     }
 }
