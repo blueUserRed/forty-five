@@ -53,7 +53,7 @@ class Backpack(
     private val quickAddRemoveListener = object : ClickListener() {
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
-            val targetName = (event!!.target as CustomFlexBox).name.split(nameSeparatorStr)
+            val targetName = (event!!.target as CustomFlexBox).name.split(NAME_SEPARATOR_STRING)
             if ((tapCount and 1) == 0) {
                 if (targetName[1] == "backpack") {
                     val pos = SaveState.curDeck.nextFreeSlot()
@@ -64,7 +64,7 @@ class Backpack(
                         CustomWarningParent.getWarning(screen).addWarning(
                             screen,
                             "Deck full",
-                            "The max decksize is ${SaveState.Deck.numberOfSlots}. Since you already have ${SaveState.Deck.numberOfSlots} cards in your Deck, you can't add a new card.",
+                            "The max deck size is ${SaveState.Deck.numberOfSlots}. Since you already have ${SaveState.Deck.numberOfSlots} cards in your Deck, you can't add a new card.",
                             CustomWarningParent.Severity.MIDDLE
                         )
                     }
@@ -79,7 +79,7 @@ class Backpack(
                         CustomWarningParent.getWarning(screen).addWarning(
                             screen,
                             "Not enough cards",
-                            "The minimum decksize is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                            "The minimum deck size is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
                             CustomWarningParent.Severity.MIDDLE
                         )
                     }
@@ -156,7 +156,7 @@ class Backpack(
             SaveState.curDeck.cardPositions.map { deckSlots[it.key].children[0] to it.value }
                 .filter { it.first.isVisible }
                 .filter { it.first.name != null }
-                .filter { it.second == it.first.name.split(nameSeparatorStr)[0] }
+                .filter { it.second == it.first.name.split(NAME_SEPARATOR_STRING)[0] }
                 .size
         if (nbrOfCorrectPlacedChildren != SaveState.curDeck.cards.size) {
             reloadDeck()
@@ -165,9 +165,9 @@ class Backpack(
 
         //maybe check before actually sorting if needed, but I think it doesn't matter
         val unplacedCards = SaveState.cards.toMutableList()
-        seenCards.forEach { unplacedCards.remove(it.name.split(nameSeparatorStr)[0]) }
+        seenCards.forEach { unplacedCards.remove(it.name.split(NAME_SEPARATOR_STRING)[0]) }
         TemplateString.updateGlobalParam("overlay.backpack.sortByName", sortingSystem.getDisplayName())
-        sortBackpack(sortingSystem.sort(_allCards, unplacedCards))
+        sortBackpack(sortingSystem.sort(this, unplacedCards))
     }
 
     private fun initDeckLayout() {
@@ -222,7 +222,7 @@ class Backpack(
             cur.isVisible = true
             cur.background =
                 TextureRegionDrawable(getCard(it.value).actor.pixmapTextureRegion)
-            cur.name = "${it.value}${nameSeparatorStr}deck${nameSeparatorStr}${it.key}"
+            cur.name = "${it.value}${NAME_SEPARATOR_STRING}deck${NAME_SEPARATOR_STRING}${it.key}"
             unplacedCards.remove(currentSelection)
         }
         deckCardsWidget.invalidate()
@@ -241,7 +241,7 @@ class Backpack(
             ) as CustomFlexBox
             cur.addListener(quickAddRemoveListener)
         }
-        sortBackpack(sortingSystem.sort(_allCards, unplacedCards))
+        sortBackpack(sortingSystem.sort(this, unplacedCards))
     }
 
     private fun getCard(name: String): Card {
@@ -262,7 +262,7 @@ class Backpack(
             val curCard = getCard(sortedCards[i])
             val curActor = allPos[i].children[0] as CustomFlexBox
             curActor.background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
-            curActor.name = "${curCard.name}${nameSeparatorStr}backpack${nameSeparatorStr}${i}"
+            curActor.name = "${curCard.name}${NAME_SEPARATOR_STRING}backpack${NAME_SEPARATOR_STRING}${i}"
         }
         backpackCardsWidget.invalidate()
     }
@@ -366,7 +366,7 @@ class Backpack(
     }
 
     companion object {
-        const val nameSeparatorStr = "_-_"
+        const val NAME_SEPARATOR_STRING = "_-_"
 
         private val backpackFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
@@ -381,8 +381,8 @@ class Backpack(
 
         var isReverse: Boolean
 
-        fun sort(cardData: List<Card>, cards: List<String>): List<String> {
-            val list = cards.map { name -> cardData.find { name == it.name }!! }.sortedWith { a, b ->
+        fun sort(cardData: Backpack, cards: List<String>): List<String> {
+            val list = cards.map { name -> cardData.getCard(name) }.sortedWith { a, b ->
                 run {
                     val comp = compare(b, a)
                     if (comp != 0) comp
