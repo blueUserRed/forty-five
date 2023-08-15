@@ -53,7 +53,7 @@ class BackpackDragSource(
 
 class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     fun switchOrPlaceCard(card: CustomFlexBox, slot: CustomFlexBox) {
-        val dataSource = card.name.split(Backpack.nameSeparatorStr)
+        val dataSource = card.name.split(Backpack.NAME_SEPARATOR_STRING)
         val sourceIndex = dataSource[2].toInt()
         val targetIndex = slot.parent.children.indexOf(slot)
         val curDeck = SaveState.curDeck
@@ -62,7 +62,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     }
 
     fun backToBackpack(card: CustomFlexBox) {
-        val fromDeck = card.name.split(Backpack.nameSeparatorStr)[1] == "deck"
+        val fromDeck = card.name.split(Backpack.NAME_SEPARATOR_STRING)[1] == "deck"
         if (fromDeck) {
             if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
                 SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
