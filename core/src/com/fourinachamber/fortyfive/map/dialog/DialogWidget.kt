@@ -23,7 +23,7 @@ class DialogWidget(
     private val optionsFont: BitmapFont,
     private val optionsFontColor: Color,
     private val optionsFontScale: Float,
-    private val screen: OnjScreen
+    screen: OnjScreen
 ) : AdvancedTextWidget(AdvancedText.EMPTY, screen) {
 
     private var isAnimFinished: Boolean = false

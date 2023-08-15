@@ -15,10 +15,9 @@ npcs: [
             }
         },
         image: {
-            textureName: "enemy_texture",
-            offsetX: -4.0,
-            offsetY: -37.5,
-            scale: 0.225
+            textureName: "shop_npcs_default",
+//            offsetX: 20.0,
+            scale: 2.48
         }
     },
 
@@ -63,10 +62,9 @@ npcs: [
             }
         },
         image: {
-            textureName: "enemy_texture",
-            offsetX: -4.0,
-            offsetY: -37.5,
-            scale: 0.225
+            textureName: "shop_npcs_default",
+            //            offsetX: 20.0,
+            scale: 2.48
         }
     },
 
@@ -175,10 +173,9 @@ npcs: [
             }
         },
         image: {
-            textureName: "enemy_texture",
-            offsetX: -4.0,
-            offsetY: -37.5,
-            scale: 0.225
+            textureName: "shop_npcs_default",
+            //            offsetX: 20.0,
+            scale: 2.48
         }
     },
 

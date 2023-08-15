@@ -45,10 +45,10 @@ root: $Box {
     styles: [
         {
             positionType: positionType.absolute,
-            positionLeft: 68.0#points,
-            positionTop: 6.5#points,
-            height: 80.0#points,
-            width: 85.0#points
+            positionLeft: (68.0*10)#points,
+            positionTop: (6.5*10)#points,
+            height: (80.0*10)#points,
+            width: (85.0*10)#points
         }
     ]
 } children [
@@ -58,7 +58,7 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 10.0#points
+                positionTop: (10.0*10)#points
             }
         ],
         align: "left",
@@ -72,7 +72,7 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 36.0#points
+                positionTop: (36.0*10)#points
             }
         ],
         align: "left",
@@ -86,7 +86,7 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 70.0#points,
+                positionTop: (70.0*10)#points,
                 width: 100.0#percent
             }
         ],

@@ -28,7 +28,7 @@ options: {
         ...(inputMaps.defaultInputMap)
     ],
     screenController: $DialogScreenController {
-        npcsFile: "maps/npcs.onj",
+        npcsFile: "maps/events/npcs.onj",
         dialogWidgetName: "dialog_widget"
     }
 },
@@ -40,15 +40,15 @@ var dialogWidget = $DialogWidget {
             background: "hover_detail_background",
             width: 80.0#percent,
             height: 25.0#percent,
-//                minHeight: 5.0#points,
-            positionBottom: 2.0#points,
+//                minHeight: (5.0*10)#points,
+            positionBottom: (2.0*10)#points,
             alignItems: align.center,
             justifyContent: justify.center,
             flexWrap: wrap.wrap,
-            paddingLeft: 13.0#points,
-            paddingRight: 13.0#points,
-            paddingTop: 3.0#points,
-            paddingBottom: 3.0#points,
+            paddingLeft: (13.0*10)#points,
+            paddingRight: (13.0*10)#points,
+            paddingTop: (3.0*10)#points,
+            paddingBottom: (3.0*10)#points,
         }
     ],
     progressTime: 0.01,
@@ -77,13 +77,13 @@ root: $Box {
                 style_priority: 1,
                 background: "hover_detail_background",
                 positionType: positionType.absolute,
-                positionTop: 35.0#points,
-                positionRight: 10.0#points,
+                positionTop: (35.0*10)#points,
+                positionRight: (10.0*10)#points,
                 justifyContent: justify.center,
                 flexDirection: flexDirection.column,
-                width: 28.0#points,
-                height: 20.0#points,
-                padding: 2#points,
+                width: (28.0*10)#points,
+                height: (20.0*10)#points,
+                padding: (2*10)#points,
                 detached: true
             },
             {
@@ -99,8 +99,8 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 0.0#points,
-                positionRight: 0.0#points,
+                positionTop: (0.0*10)#points,
+                positionRight: (0.0*10)#points,
                 width: 100.0#percent,
                 height: 100.0#percent,
                 flexDirection: flexDirection.row,

@@ -11,8 +11,8 @@ use Style;
 
 var pi = 3.141;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
 
 var cardScale = 0.022;
 var cardHeight = 596.0 * cardScale;
@@ -85,7 +85,7 @@ options: {
 },
 
 templates: [
-    sharedComponents.warningLabelTemplate
+    ...(sharedComponents.warningLabelTemplates),
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -308,8 +308,8 @@ var popupActor = $Box {
         $CircularCardSelector {
             styles: [
                 {
-                    width: 50#points,
-                    height: 50#points,
+                    width: (50*10)#points,
+                    height: (50*10)#points,
                 }
             ],
             name: "card_selector",
@@ -378,8 +378,8 @@ var drawCardActor = $Box {
             $TemplateLabel {
                 styles: [
                     {
-                        marginTop: 6.0#points,
-                        marginBottom: -6.0#points
+                        marginTop: (6.0*10)#points,
+                        marginBottom: -(6.0*10)#points
                     }
                 ],
                 font: "red_wing",
@@ -413,7 +413,7 @@ var playerBar = $Box {
     styles: [
         {
             width: 100#percent,
-            height: 22#points,
+            height: (22*10)#points,
             background: "player_bar",
             flexDirection: flexDirection.row,
             alignItems: align.center
@@ -427,11 +427,11 @@ var playerBar = $Box {
                 flexDirection: flexDirection.row,
                 alignItems: align.center,
                 justifyContent: justify.center,
-                height: 4#points,
-                width: 9#points,
+                height: (4*10)#points,
+                width: (9*10)#points,
                 rotation: 6.0,
-                positionBottom: -0.6#points,
-                positionLeft: 2.0#points
+                positionBottom: -(0.6*10)#points,
+                positionLeft: (2.0*10)#points
             }
         ],
         enableTransform: true,
@@ -440,7 +440,7 @@ var playerBar = $Box {
             styles: [
                 {
                     aspectRatio: 1.0,
-                    width: 4.0#points
+                    width: (4.0*10)#points
                 }
             ],
             reportDimensionsWithScaling: true,
@@ -454,8 +454,8 @@ var playerBar = $Box {
     $Box {
         styles: [
             {
-                positionLeft: 32#points,
-                positionBottom: 3#points,
+                positionLeft: (32*10)#points,
+                positionBottom: (3*10)#points,
                 rotation: 4.0
             }
         ],
@@ -467,10 +467,10 @@ var playerBar = $Box {
     $Box {
         styles: [
             {
-                width: 15#points,
-                height: 8#points,
-                positionLeft: 80#points,
-                positionBottom: 3#points,
+                width: (15*10)#points,
+                height: (8*10)#points,
+                positionLeft: (80*10)#points,
+                positionBottom: (3*10)#points,
                 rotation: -4.0
             }
         ],
@@ -481,8 +481,8 @@ var playerBar = $Box {
     $Box {
         styles: [
             {
-                positionLeft: 107#points,
-                positionBottom: 2#points,
+                positionLeft: (107*10)#points,
+                positionBottom: (2*10)#points,
                 rotation: -6.0,
             }
         ],
@@ -517,10 +517,10 @@ var gameScreen = $Box {
     $EnemyArea {
         styles: [
             {
-                width: 10#points,
-                height: 10#points,
-                positionLeft: 50#points,
-                positionBottom: -10#points,
+                width: (10*10)#points,
+                height: (10*10)#points,
+                positionLeft: (50*10)#points,
+                positionBottom: -(10*10)#points,
             }
         ],
         debug: true,
@@ -531,8 +531,8 @@ var gameScreen = $Box {
         styles: [
             {
                 width: 100#percent,
-                height: 0#points,
-                positionBottom: -68#points,
+                height: (0*10)#points,
+                positionBottom: -(68*10)#points,
             }
         ],
         zIndex: 200,
@@ -543,7 +543,7 @@ var gameScreen = $Box {
     $Revolver {
         styles: [
             {
-                positionBottom: -25#points
+                positionBottom: -(25*10)#points
             }
         ],
         zIndex: 100,
@@ -615,7 +615,7 @@ var gameScreen = $Box {
 //                    flexDirection: flexDirection.column,
 //                    width: 30.0#percent,
 //                    alignItems: align.center,
-//                    positionLeft: 5.0#points,
+//                    positionLeft: (5.0*10)#points,
 //                }
 //            ]
 //        } children [
@@ -627,7 +627,7 @@ var gameScreen = $Box {
 //                    {
 //                        style_priority: 1,
 //                        aspectRatio: 569.0 / 164.0,
-//                        height: 5.0#points,
+//                        height: (5.0*10)#points,
 //                        background: "shoot_button_texture"
 //                    },
 //                    {
@@ -669,7 +669,7 @@ var gameScreen = $Box {
 //            styles: [
 //                {
 //                    aspectRatio: 1.0,
-//                    width: 8.0#points
+//                    width: (8.0*10)#points
 //                }
 //            ],
 //            reportDimensionsWithScaling: true,
@@ -695,7 +695,7 @@ var gameScreen = $Box {
 //                {
 //                    style_priority: 1,
 //                    aspectRatio: 569.0 / 164.0,
-//                    height: 5.0#points,
+//                    height: (5.0*10)#points,
 //                    background: "end_turn_button_texture"
 //                },
 //                {

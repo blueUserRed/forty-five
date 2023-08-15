@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.keyInput
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
@@ -10,12 +11,13 @@ import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import com.fourinachamber.fortyfive.utils.eitherRight
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
-typealias KeyAction = @MainThreadOnly (screen: OnjScreen) -> Boolean
+typealias KeyAction = @MainThreadOnly (screen: OnjScreen, event: Keycode?) -> Boolean
 
 /**
  * creates [KeyAction]s using an OnjObject
@@ -27,7 +29,7 @@ object KeyActionFactory {
         "ToggleFullscreen" to { obj ->
             val width = obj.get<Long>("width").toInt()
             val height = obj.get<Long>("height").toInt()
-            ; {
+            ; { _, _ ->
             if (!Gdx.graphics.isFullscreen) {
                 Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
             } else {
@@ -39,7 +41,7 @@ object KeyActionFactory {
 
         "SelectCardInHand" to { obj ->
             val num = obj.get<Long>("num").toInt() - 1 // covert from one-indexed to 0-indexed
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val game = FortyFive.currentGame ?: return@lambda false
                 val card = game.cardHand.cards.getOrElse(num) { return@lambda false }
                 screen.selectedActor = card.actor
@@ -51,7 +53,7 @@ object KeyActionFactory {
             var num = obj.get<Long>("num").toInt()
             num = if (num == 5) 5 else 5 - num
             num--
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val game = FortyFive.currentGame ?: return@lambda false
                 val slot = game.revolver.slots.getOrElse(num) { return@lambda false }
                 screen.selectedActor = slot
@@ -61,7 +63,7 @@ object KeyActionFactory {
 
         "SelectAdjacent" to { obj ->
             val isLeft = obj.get<String>("direction") == "left"
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val curSelected = screen.selectedActor ?: return@lambda false
                 val curGame = FortyFive.currentGame ?: return@lambda false
                 when (curSelected) {
@@ -92,7 +94,7 @@ object KeyActionFactory {
         "PlaceSelectedCardInRevolver" to { obj ->
             var num = obj.get<Long>("revolverSlot").toInt()
             num = if (num == 5) 5 else 5 - num
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val curSelected = screen.selectedActor ?: return@lambda false
                 if (curSelected !is CardActor) return@lambda false
                 val game = FortyFive.currentGame ?: return@lambda false
@@ -105,14 +107,14 @@ object KeyActionFactory {
         },
 
         "DeselectAll" to {
-            { screen ->
+            { screen, _ ->
                 screen.selectedActor = null
                 true
             }
         },
 
         "NextInHierarchy" to {
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
                 if (screen.selectedNode == null) {
                     screen.selectedNode = hierarchy.getFirstSelectableNodeInHierarchy()
@@ -125,7 +127,7 @@ object KeyActionFactory {
         },
 
         "PreviousInHierarchy" to {
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val hierarchy = screen.keySelectionHierarchy ?: return@lambda false
                 if (screen.selectedNode == null) {
                     screen.selectedNode = hierarchy.getLastSelectableNodeInHierarchy()
@@ -138,7 +140,7 @@ object KeyActionFactory {
         },
 
         "FireClickEvent" to {
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val selected = screen.selectedActor ?: return@lambda false
                 selected as Actor
                 selected.fire(ButtonClickEvent())
@@ -147,7 +149,7 @@ object KeyActionFactory {
         },
 
         "MoveInDetailMap" to {
-            lambda@{ screen ->
+            lambda@{ screen, _ ->
                 val targetNode = when (it.get<String>("direction")) {
                     "right" -> MapManager.currentMapNode.getEdge(Direction.RIGHT)
                     "left" -> MapManager.currentMapNode.getEdge(Direction.LEFT)
@@ -161,7 +163,7 @@ object KeyActionFactory {
             }
         },
         "EnterEventDetailMap" to {
-            lambda@{ screen ->//TODO check if it event isn't blocked
+            lambda@{ screen, _ ->//TODO check if it event isn't blocked
                 (screen.namedActorOrError(it.get<String>("mapActor")) as DetailMapWidget).onStartButtonClicked()
                 true
             }
@@ -176,5 +178,4 @@ object KeyActionFactory {
             "unknown key action ${obj.name}"
         )
     }
-
 }

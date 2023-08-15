@@ -18,7 +18,6 @@ class PersonWidget(
     private val offsetX: Float,
     private val offsetY: Float,
     val scale: Float,
-    private val dropBehaviour: OnjNamedObject,
     val screen: OnjScreen,
 ) : Widget(), ResourceBorrower, StyledActor {
 
@@ -30,6 +29,7 @@ class PersonWidget(
     private lateinit var textureName: String
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     init {
         bindHoverStateListeners(this)
@@ -54,23 +54,6 @@ class PersonWidget(
         personDrawable = ResourceManager.get(this, textureName)
     }
 
-    fun addDropTarget(dragAndDrop: DragAndDrop) {
-//        val behaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
-//            dropBehaviour.name,
-//            dragAndDrop,
-//            this,
-//            dropBehaviour
-//        )
-//        dragAndDrop.addTarget(behaviour)//TODO change back
-//        println("${dropBehaviour.name} \n $dropBehaviour\n\n\n")
-//        val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
-//            dropBehaviour.name,
-//            dragAndDrop,
-//            this,
-//            dropBehaviour
-//        )
-//        dragAndDrop.addSource(behaviour)
-    }
 
 
     override fun initStyles(screen: OnjScreen) {

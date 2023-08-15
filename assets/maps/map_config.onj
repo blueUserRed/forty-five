@@ -88,34 +88,21 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 14,
                 minNodes: 8,
-                //                maxSplits: 1,
-
                 maxSplits: 4,
-                //                splitProbability: 0.5,
-
                 splitProbability: 0.6,
-                compressProbability: 0.2,
-                //                compressProbability: 0.55,
-
-                averageLengthOfLineInBetween: 26.0,
-                maxWidth: 40,
-                maxAnglePercent: 0.6,
-                rangeToCheckBetweenNodes: 0.6,
                 startArea: "test_area",
                 endArea: "salem",
+                scaleWidth: 0.4,
+                scaleLength: 0.4,
                 otherAreas: [
                 ],
-                minDistanceBetweenAreas: 100.0,
-                distanceFromAreaToLine: 100.0,
-                percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
                 rotation: 1.25,
-                minDistanceBetweenNodes: 15.0,
-                pathTotalWidth: 7.5,
-                fixedEvents: [],
+                fixedEvents: [
+                ],
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
-                        weight: 20,
+                        weight: 0,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -186,29 +173,13 @@ generatorConfig: {
             restrictions: {
                 maxNodes: 25,
                 minNodes: 20,
-                //                maxSplits: 1,
-
                 maxSplits: 6,
-                //                splitProbability: 0.5,
-
                 splitProbability: 0.4,
-                //                compressProbability: 0.2,
-
-                compressProbability: 0.55,
-                averageLengthOfLineInBetween: 26.0,
-                maxWidth: 40,
-                maxAnglePercent: 0.6,
-                rangeToCheckBetweenNodes: 0.6,
                 startArea: "salem",
                 endArea: "salem",
                 otherAreas: [
                 ],
-                minDistanceBetweenAreas: 100.0,
-                distanceFromAreaToLine: 100.0,
-                percentageForAllowedNodesInRangeBetweenLineAndArea: 0.4,
                 rotation: 0.0,
-                minDistanceBetweenNodes: 15.0,
-                pathTotalWidth: 7.5,
                 exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
                     {

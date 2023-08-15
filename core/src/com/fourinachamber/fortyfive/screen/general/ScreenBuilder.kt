@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -27,6 +28,8 @@ import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
 import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -46,6 +49,7 @@ class ScreenBuilder(val file: FileHandle) {
 
     private val behavioursToBind: MutableList<Behaviour> = mutableListOf()
     private var actorsWithDragAndDrop: MutableMap<String, MutableList<Pair<Actor, OnjNamedObject>>> = mutableMapOf()
+    private val addedActorsDragAndDrops: MutableMap<String, MutableList<Actor>> = mutableMapOf()
 
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
@@ -53,7 +57,6 @@ class ScreenBuilder(val file: FileHandle) {
     private var background: String? = null
     private var transitionAwayTime: Int? = null
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
-
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
@@ -94,8 +97,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         screen.screenController = screenController
 
-        val dragAndDrops = doDragAndDrop(screen)
-        screen.dragAndDrop = dragAndDrops
+        doDragAndDrop(screen)
 
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
@@ -128,7 +130,7 @@ class ScreenBuilder(val file: FileHandle) {
         val curActor = getWidget(widgetOnj, parent, screen)
         val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
         for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
-        screen.dragAndDrop = doDragAndDrop(screen)
+        doDragAndDrop(screen)
         screen.invalidateEverything()
         return curActor
     }
@@ -156,7 +158,6 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         else -> original
-
     }
 
     private fun combineTemplateValues(templateKeys: OnjObject, data: Map<String, OnjValue>): Map<String, OnjValue> {
@@ -168,11 +169,10 @@ class ScreenBuilder(val file: FileHandle) {
                 value
             }
         data.forEach { (dataPointName, value) ->
-            val key = keys.entries.find { it.value.value == dataPointName }?.key
-                ?: throw RuntimeException(
-                    "cannot set $dataPointName in template because it is not defined in the template keys"
-                )
-            result[key] = value
+            val curKeys = keys.entries.filter { it.value.value == dataPointName }.map { it.key }
+            if (curKeys.isEmpty())
+                throw RuntimeException("cannot set $dataPointName in template because it is not defined in the template keys")
+            curKeys.forEach { result[it] = value }
         }
         return result
     }
@@ -202,11 +202,16 @@ class ScreenBuilder(val file: FileHandle) {
         borrowed = toBorrow
     }
 
-    private fun doDragAndDrop(screen: OnjScreen): MutableMap<String, DragAndDrop> {
-        val dragAndDrops = mutableMapOf<String, DragAndDrop>()
+    private fun doDragAndDrop(screen: OnjScreen) {
+        val dragAndDrops = screen.dragAndDrop.toMutableMap()
         for ((group, actors) in actorsWithDragAndDrop) {
-            val dragAndDrop = DragAndDrop()
+
+            if (addedActorsDragAndDrops[group] == null) addedActorsDragAndDrops[group] = mutableListOf()
+
+            val dragAndDrop = dragAndDrops[group] ?: DragAndDrop()
             for ((actor, onj) in actors) {
+                if (actor in addedActorsDragAndDrops[group]!!) continue
+
                 val behaviour = DragAndDropBehaviourFactory.behaviourOrError(
                     onj.name,
                     dragAndDrop,
@@ -216,18 +221,14 @@ class ScreenBuilder(val file: FileHandle) {
                 )
                 if (behaviour is Either.Left) dragAndDrop.addSource(behaviour.value)
                 else dragAndDrop.addTarget((behaviour as Either.Right).value)
+
+                addedActorsDragAndDrops[group]!!.add(actor)
             }
             dragAndDrops[group] = dragAndDrop
         }
-        return dragAndDrops
+        screen.dragAndDrop = dragAndDrops
     }
 
-    private fun getFlexBox(widgetOnj: OnjObject, screen: OnjScreen): FlexBox {
-        val flexBox = CustomFlexBox(screen)
-        initFlexBox(flexBox, widgetOnj, screen)
-        flexBox.touchable = Touchable.enabled // TODO: remove
-        return flexBox
-    }
 
     private fun initFlexBox(
         flexBox: CustomFlexBox,
@@ -280,15 +281,55 @@ class ScreenBuilder(val file: FileHandle) {
             applyImageKeys(this, widgetOnj)
         }
 
-        "Box" -> getFlexBox(widgetOnj, screen)
+        "Box" -> CustomFlexBox(screen).apply {
+            initFlexBox(this, widgetOnj, screen)
+        }
 
-        "ScrollBox" -> getScrollFlexBox(widgetOnj, screen)
+        "ScrollBox" -> CustomScrollableFlexBox(
+            screen,
+            widgetOnj.get<Boolean>("isScrollDirectionVertical"),
+            widgetOnj.get<Double>("scrollDistance").toFloat(),
+            widgetOnj.get<Boolean>("backgroundStretched"),
+            widgetOnj.get<String?>("scrollbarBackgroundName"),
+            widgetOnj.get<String?>("scrollbarName"),
+            widgetOnj.get<String?>("scrollbarSide"),
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+            this.touchable = Touchable.enabled
+        }
 
-        "Statusbar" -> getStatusbar(widgetOnj, screen)
+        "Statusbar" -> StatusbarWidget(
+            widgetOnj.get<String?>("mapIndicatorWidgetName"),
+            widgetOnj.get<String>("optionsWidgetName"),
+            widgetOnj.get<OnjArray>("options").value as List<OnjObject>,
+            screen
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+        }
 
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
             labelStyle = Label.LabelStyle().apply {
+                font = fontOrError(
+                    widgetOnj.get<String>("font"),
+                    screen
+                ) // TODO: figure out how to not load the font immediatley
+                if (!widgetOnj.get<OnjValue>("color").isNull()) {
+                    fontColor = widgetOnj.get<Color>("color")
+                }
+            },
+            partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
+            screen = screen
+        ).apply {
+            setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
+            widgetOnj.ifHas<String>("backgroundTexture") { backgroundHandle = it }
+            widgetOnj.ifHas<String>("align") { setAlignment(alignmentOrError(it)) }
+            widgetOnj.ifHas<Boolean>("wrap") { wrap = it }
+        }
+
+        "InputField" -> CustomInputField(
+            defText = widgetOnj.get<String>("text"),
+            labelStyle = LabelStyle().apply {
                 font = fontOrError(
                     widgetOnj.get<String>("font"),
                     screen
@@ -408,11 +449,26 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),
             widgetOnj.get<Double>("scale").toFloat(),
-            OnjNamedObject("name", mapOf()),
             screen
         )
 
-        "Backpack" -> Backpack(screen)
+        "Backpack" -> Backpack(
+            screen,
+            widgetOnj.get<String>("cardsFile"),
+            widgetOnj.get<String>("backpackFile"),
+            widgetOnj.get<String>("deckNameWidgetName"),
+            widgetOnj.get<String>("deckSelectionParentWidgetName"),
+            widgetOnj.get<String>("deckCardsWidgetName"),
+            widgetOnj.get<String>("backPackCardsWidgetName"),
+            widgetOnj.get<String>("backpackEditIndicationWidgetName"),
+            widgetOnj.get<String>("sortWidgetName"),
+            widgetOnj.get<String>("sortReverseWidgetName"),
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+            initAfterChildrenExist()
+        }
+
+        "WarningParent" -> CustomWarningParent(screen).apply { initFlexBox(this, widgetOnj, screen) }
 
         "FromTemplate" -> generateFromTemplate(
             widgetOnj.get<String>("generateFrom"),
@@ -469,30 +525,6 @@ class ScreenBuilder(val file: FileHandle) {
         return actor
     }
 
-    private fun getStatusbar(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
-        val statusbar = StatusbarWidget(
-            widgetOnj.get<String?>("mapIndicatorWidgetName"),
-            widgetOnj.get<String>("optionsWidgetName"),
-            widgetOnj.get<OnjArray>("options").value as List<OnjObject>,
-            screen
-        )
-        initFlexBox(statusbar, widgetOnj, screen)
-        return statusbar
-    }
-
-    private fun getScrollFlexBox(widgetOnj: OnjNamedObject, screen: OnjScreen): Actor {
-        val flexBox = CustomScrollableFlexBox(
-            screen,
-            widgetOnj.get<Boolean>("isScrollDirectionVertical"),
-            widgetOnj.get<Double>("scrollDistance").toFloat(),
-            widgetOnj.get<Boolean>("backgroundStretched"),
-            widgetOnj.get<String?>("scrollbarBackgroundName"),
-            widgetOnj.get<String?>("scrollbarName"),
-            widgetOnj.get<String?>("scrollbarSide"),
-        )
-        initFlexBox(flexBox, widgetOnj, screen)
-        return flexBox
-    }
 
     private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {
         return (animation.get<Double>("duration") * 1000).toInt() to animation.get<Interpolation>("interpolation")

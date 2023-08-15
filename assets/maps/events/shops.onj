@@ -147,6 +147,6 @@ people: [
 
 defaults: {
     font: "red_wing",
-    fontScale: 0.08,
+    fontScale: 0.8,
     color: color.forty_white
 },
