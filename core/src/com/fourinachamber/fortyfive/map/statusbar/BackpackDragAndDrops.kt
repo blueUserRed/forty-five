@@ -64,13 +64,13 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     fun backToBackpack(card: CustomFlexBox) {
         val fromDeck = card.name.split(Backpack.nameSeparatorStr)[1] == "deck"
         if (fromDeck) {
-            if (SaveState.curDeck.cards.size > Backpack.minDeckSize) {
+            if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
                 SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
             } else {
                 CustomWarningParent.getWarning(card.screen).addWarning(
                     card.screen,
                     "Not enough cards",
-                    "The minimum decksize is ${Backpack.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                    "The minimum decksize is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
                     CustomWarningParent.Severity.MIDDLE
                 )
             }

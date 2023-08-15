@@ -37,6 +37,7 @@ $DragAndDropBehaviour {
     }
 
     $ShopDropTarget{
+        isToDeck: boolean,
         ...dragAndDropBehaviourSharedKeys
     }
 

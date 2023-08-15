@@ -63,12 +63,12 @@ class Backpack(
                         CustomWarningParent.getWarning(screen).addWarning(
                             screen,
                             "Deck full",
-                            "The max decksize is $numberOfSlots. Since you already have $numberOfSlots cards in your Deck, you can't add a new card.",
+                            "The max decksize is ${SaveState.Deck.numberOfSlots}. Since you already have ${SaveState.Deck.numberOfSlots} cards in your Deck, you can't add a new card.",
                             CustomWarningParent.Severity.MIDDLE
                         )
                     }
                 } else {
-                    if (SaveState.curDeck.cards.size > minDeckSize) {
+                    if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
                         val fromDeck = targetName[1] == "deck"
                         if (fromDeck) {
                             SaveState.curDeck.removeFromDeck(targetName[2].toInt())
@@ -78,7 +78,7 @@ class Backpack(
                         CustomWarningParent.getWarning(screen).addWarning(
                             screen,
                             "Not enough cards",
-                            "The minimum decksize is $minDeckSize. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                            "The minimum decksize is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
                             CustomWarningParent.Severity.MIDDLE
                         )
                     }
@@ -99,8 +99,6 @@ class Backpack(
         backpackFileSchema.assertMatches(backpackOnj)
         backpackOnj as OnjObject
 
-        _minDeckSize = backpackOnj.get<Long>("minCardsPerDeck").toInt()
-        _numberOfSlots = backpackOnj.get<Long>("slotsPerDeck").toInt()
         val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
         minNameSize = nameOnj.get<Long>("minLength").toInt()
         maxNameSize = nameOnj.get<Long>("maxLength").toInt()
@@ -173,7 +171,7 @@ class Backpack(
     }
 
     private fun initDeckLayout() {
-        for (i in 0 until numberOfSlots) {
+        for (i in 0 until SaveState.Deck.numberOfSlots) {
             val cur = (screen.screenBuilder.generateFromTemplate(
                 "backpack_slot",
                 mapOf(),
@@ -362,15 +360,6 @@ class Backpack(
     }
 
     companion object {
-        private var _minDeckSize: Int = 0
-        private var _numberOfSlots: Int = 0
-
-        val minDeckSize: Int
-            get() = _minDeckSize
-
-        val numberOfSlots: Int
-            get() = _numberOfSlots
-
         const val nameSeparatorStr = "_-_"
 
         private val backpackFileSchema: OnjSchema by lazy {

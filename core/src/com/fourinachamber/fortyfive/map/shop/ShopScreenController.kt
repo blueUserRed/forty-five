@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.shop
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -13,24 +14,27 @@ import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
-class ShopScreenController(onj: OnjObject) : ScreenController(){
+class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var screen: OnjScreen
     private lateinit var context: ShopMapEvent
-
-//    private lateinit var personData: OnjObject
-//
     private val shopFilePath = onj.get<String>("shopsFile")
     private val npcsFilePath = onj.get<String>("npcsFile")
     private val cardsFilePath = onj.get<String>("cardsFile")
     private val messageWidgetName = onj.get<String>("messageWidgetName")
-    private val cardsParentName = onj.get<OnjString>("cardsParentName").value
+    private val cardsParentName = onj.get<String>("cardsParentName")
+    private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
+    private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
     private lateinit var person: CustomImageActor
     private lateinit var cardsParentWidget: CustomScrollableFlexBox
     private lateinit var shopCardsHandler: ShopCardsHandler
+    private lateinit var addToDeckWidget: CustomImageActor
+    private lateinit var addToBackpackWidget: CustomImageActor
 
-    override fun init(onjScreen: OnjScreen, context: Any?) {
+    override fun init(onjScreen: OnjScreen, context: Any?) { //TODO change image for "to_deck.png"
         screen = onjScreen
+        addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
+        addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
         val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
@@ -97,13 +101,28 @@ class ShopScreenController(onj: OnjObject) : ScreenController(){
         return ladder.last { it is CustomFlexBox } as CustomFlexBox?
     }
 
-    fun buyCard(actor: Actor) {
-        shopCardsHandler.buyCard(actor as CustomImageActor)
+    fun buyCard(actor: Actor, addToDeck: Boolean) {
+        shopCardsHandler.buyCard(actor as CustomImageActor,addToDeck)
     }
 
     override fun end() {
         super.end()
         shopCardsHandler.dispose()
+    }
+
+    fun displayBuyPopups() {
+        val curDeck = SaveState.curDeck
+        if (curDeck.nextFreeSlot() != -1) {
+            addToDeckWidget.enterActorState("display")
+        }
+        if (curDeck.cardPositions.size >= SaveState.Deck.minDeckSize) {
+            addToBackpackWidget.enterActorState("display")
+        }
+    }
+
+    fun closeBuyPopups() {
+        addToDeckWidget.leaveActorState("display")
+        addToBackpackWidget.leaveActorState("display")
     }
 
     companion object {

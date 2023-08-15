@@ -30,6 +30,9 @@ class ShopDragSource(
         val obj = ShopDragPayload(actor)
         payload.obj = obj
         obj.resetTo(actor, Vector2(actor.x, actor.y))
+        val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
+        controller.displayBuyPopups()
+        obj.closePopups(controller)
         return payload
     }
 
@@ -53,14 +56,21 @@ class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
     /**
      * called when the drag is stopped
      */
-    fun onBuy() = tasks.add {
+    fun onBuy(addToDeck: Boolean) = tasks.add {
         val scr = (FortyFive.screen as OnjScreen).screenController as ShopScreenController
-        scr.buyCard(actor)
+        scr.buyCard(actor,addToDeck)
+    }
+
+    fun closePopups(controller: ShopScreenController) = tasks.add {
+        controller.closeBuyPopups()
     }
 }
 
 class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
     DropBehaviour(dragAndDrop, actor, onj) {
+
+    private val isToDeck: Boolean= onj.get<Boolean>("isToDeck")
+
     override fun drag(
         source: DragAndDrop.Source?,
         payload: DragAndDrop.Payload?,
@@ -74,7 +84,7 @@ class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null) return
         val obj = payload.obj as ShopDragPayload
-        obj.onBuy()
+        obj.onBuy(isToDeck)
     }
 }
 

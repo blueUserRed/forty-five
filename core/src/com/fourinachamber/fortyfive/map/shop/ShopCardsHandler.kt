@@ -143,6 +143,7 @@ class ShopCardsHandler(
 
     fun buyCard(
         cardImg: CustomImageActor,
+        addToDeck: Boolean,
     ) {
         val i = cardWidgets.indexOf(cardImg)
         if (i !in boughtIndices) boughtIndices.add(i)
@@ -151,6 +152,7 @@ class ShopCardsHandler(
         updateCards()
         FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
         SaveState.buyCard(card.name)
+        if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card.name)
     }
 
     private fun updateCards() {

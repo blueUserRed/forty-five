@@ -267,6 +267,14 @@ textures: [
         file: "textures/shop/back_button.png"
     },
     {
+        name: "shop_add_to_backpack",
+        file: "textures/shop/to_backpack.png"
+    },
+    {
+        name: "shop_add_to_deck",
+        file: "textures/shop/to_deck.png"
+    },
+    {
         name: "shop_npcs_default",
         file: "textures/shop/npcs/default.png",
     },
