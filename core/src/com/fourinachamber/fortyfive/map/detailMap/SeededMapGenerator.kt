@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -47,6 +48,7 @@ class SeededMapGenerator(
         addEvents(nodes)
 
         nodes.forEach { it.scale(restrictions.scaleWidth, restrictions.scaleLength) }
+//        println("${restrictions.scaleWidth}     ${restrictions.scaleLength}")
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
         this.nodes = nodes
@@ -215,14 +217,15 @@ class SeededMapGenerator(
     private fun generateNodesPositions(): MutableList<MapNodeBuilder> {
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
-        mainLine = MapGeneratorLine(seed, restrictions, rnd, nbrOfPoints = nbrOfNodes)
+        mainLine = MapGeneratorLine(seed, restrictions, rnd, nbrOfPoints = nbrOfNodes, maxLength = -1F)
+        val maxLength = mainLine.lineNodes.last().x
         var curDown = mainLine
         var curUp = mainLine
         for (i in 1 until restrictions.maxLines) {
             if (rnd.nextBoolean()) {
-                curDown = curDown.generateNextLine(true)!!
+                curDown = curDown.generateNextLine(true, maxLength)!!
             } else {
-                curUp = curUp.generateNextLine(false)!!
+                curUp = curUp.generateNextLine(false, maxLength)!!
             }
         }
         mainLine.connectWithEachOther(null, nodes)
@@ -382,7 +385,6 @@ class SeededMapGenerator(
         uniqueLines.remove(nodesConnection)
         uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
         uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
-        //TODO set directions for the "node in between"
     }
 
     /*    fun generateBezier(): DetailMap {
@@ -440,6 +442,11 @@ class SeededMapGenerator(
          */
         isOldLineMin: Boolean = false,
         val nbrOfPoints: Int = 15,
+
+        /**
+         * the length of the main line, so that no other line is longer
+         */
+        maxLength: Float,
     ) {
         val lineNodes: List<MapNodeBuilder>
         var lineUp: MapGeneratorLine? = null
@@ -453,11 +460,10 @@ class SeededMapGenerator(
                 } else {
                     lineDown = oldLine
                 }
-                calcPointsForAdditionalLines(points, oldLine, isOldLineMin)
+                calcPointsForAdditionalLines(points, oldLine, isOldLineMin, maxLength)
             } else {
                 calcPointsForFirstLine(points)
             }
-
             val nodesList: MutableList<MapNodeBuilder> = mutableListOf()
             points.forEach { p -> nodesList.add(MapNodeBuilder(0, p.x, p.y)) }
             this.lineNodes = nodesList
@@ -469,11 +475,13 @@ class SeededMapGenerator(
         private fun calcPointsForAdditionalLines(
             points: MutableList<Vector2>,
             oldLine: MapGeneratorLine,
-            isOldLineMin: Boolean
+            isOldLineMin: Boolean,
+            maxLength: Float
         ) {
             points.add(Vector2(oldLine.lineNodes[0].x, oldLine.lineNodes[0].y))
             for (i in 1 until nbrOfPoints) {
                 val (pointToAdd: Vector2, posRange) = calcPointToAdd(points, isOldLineMin, oldLine)
+                if (pointToAdd.x >= maxLength) break
                 if (pointToAdd.y !in posRange) {
                     points.add(Vector2(pointToAdd.x, posRange.random(rnd)))
                 } else {
@@ -571,21 +579,21 @@ class SeededMapGenerator(
             return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
         }
 
-        fun generateNextLine(generateUp: Boolean = true): MapGeneratorLine? {
+        fun generateNextLine(generateUp: Boolean = true, maxLength: Float): MapGeneratorLine? {
             if (lineDown != null && lineUp == null) {
-                lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
+                lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1, maxLength)
                 return lineUp
             }
             if (lineUp != null && lineDown == null) {
-                lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
+                lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1, maxLength)
                 return lineDown
             }
             if (lineUp == null) {
                 return if (generateUp) {
-                    lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
+                    lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1, maxLength)
                     lineUp
                 } else {
-                    lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
+                    lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1, maxLength)
                     lineDown
                 }
             }
@@ -1006,7 +1014,7 @@ sealed class DecorationDistributionFunction(
             for (i in 0 until ((outerRadius * outerRadius * PI) / (baseWidth * baseHeight) * density).toInt()) {
                 val ang = rnd.nextDouble() * Math.PI * 2
                 val len =
-                    sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble())) //TODO maybe log or so for better distribution
+                    sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble()))
                 val posPos = Vector2(
                     (center.x + cos(ang) * len).toFloat(),
                     (center.y + sin(ang) * len).toFloat()
@@ -1375,9 +1383,12 @@ data class MapRestriction(
     val optionalEvents: List<Triple<Int, () -> MapEvent, String?>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
+    /**
+     * width of the path, needed for checking if textures are overlapping
+     */
     val pathTotalWidth: Float = 7.5F,
     val minDistanceBetweenNodes: Float = 15F,
-    val exitNodeTexture: String
+    val exitNodeTexture: ResourceHandle
 ) {
 
 
