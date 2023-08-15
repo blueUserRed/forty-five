@@ -63,8 +63,8 @@ class KeyInputMap(
                         if (bestCandidatePriority < entryList.priority) {
                             bestCandidate = keyEntry.action ?: entryList.defaultAction
                             bestCandidatePriority = entryList.priority
-                        } else if(bestCandidatePriority == entryList.priority){
-                            FortyFiveLogger.severe(logTag, "There are multiple valid keys with the same priority!")
+                        } else if (bestCandidatePriority == entryList.priority) {
+                            FortyFiveLogger.warn(logTag, "There are multiple valid keys with the same priority!")
                             return false
                         }
                     }
@@ -164,8 +164,8 @@ class KeyInputMap(
 
 enum class InputKeyRange {
     ASCII {
-        override fun inRange(nbr: Keycode): Boolean = nbr in (0 .. 128)
-          //not correct, because Keys are weird, but it works fine enough
+        override fun inRange(nbr: Keycode): Boolean = nbr in (0..128)
+        //not correct, because Keys are weird, but it works fine enough
     },
     DIGIT {
         override fun inRange(nbr: Keycode): Boolean = nbr.toInt() in (Keys.NUM_0..Keys.NUM_9)

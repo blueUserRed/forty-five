@@ -281,7 +281,6 @@ open class OnjScreen @MainThreadOnly constructor(
     override fun render(delta: Float) = try {
         for (styleTarget in styleManagers) styleTarget.update()
         if (printFrameRate) FortyFiveLogger.fps()
-     //   Thread.sleep(100) //TODO remove IMPORTANT that you tell me if you see that in an pr MARVIN
         screenController?.update()
         updateCallbacks()
         lastRenderTime = measureTimeMillis {

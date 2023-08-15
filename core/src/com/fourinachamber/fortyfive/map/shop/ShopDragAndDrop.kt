@@ -15,7 +15,7 @@ class ShopDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
-) : CenterDragged(dragAndDrop, actor, onj) {
+) : CenteredDragSource(dragAndDrop, actor, onj) {
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = this.actor

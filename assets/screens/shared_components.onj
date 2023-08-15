@@ -373,7 +373,7 @@ var scrollBarBackpack = $Image {
 };
 
 backpack: $Backpack {
-    name: "tempActor",
+    name: "backpackActor",
     cardsFile: "config/cards.onj",
     backpackFile: "maps/backpack_config.onj",
     deckNameWidgetName: "deckName",

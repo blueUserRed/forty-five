@@ -239,15 +239,15 @@ root: $Box {
         $Statusbar {
             options: [
                 {
-                    actorName: "tempActor",
+                    actorName: "backpackActor",
                     displayName: "Notebook",
                 },
                 {
-                    actorName: "tempActor",
+                    actorName: "backpackActor",
                     displayName: "Backpack",
                 },
                 {
-                    actorName: "tempActor",
+                    actorName: "backpackActor",
                     displayName: "Settings",
                 },
             ],

@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.utils.Array
 import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
@@ -117,7 +116,7 @@ abstract class DropBehaviour(
 /**
  * drags the object in the center
  */
-abstract class CenterDragged(
+abstract class CenteredDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,

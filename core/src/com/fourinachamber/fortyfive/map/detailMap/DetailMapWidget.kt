@@ -55,7 +55,7 @@ class DetailMapWidget(
 
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     private var mapOffset: Vector2 = Vector2(50f, 50f)
 

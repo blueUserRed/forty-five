@@ -97,12 +97,11 @@ object SaveState {
 
     var curDeckNbr = 1
         set(value) {
-            if (curDeckNbr != value) {
-                savefileDirty = true
-                if (_decks.find { it.id == value } == null) {
-                    val curDeck = _decks.find { it.id == 1 }!!
-                    _decks.add(Deck("Deck $value", value, curDeck.cardPositions.toMutableMap()))
-                }
+            if (field == value) return
+            savefileDirty = true
+            if (_decks.find { it.id == value } == null) {
+                val curDeck = _decks.find { it.id == field }!!
+                _decks.add(Deck("Deck $value", value, curDeck.cardPositions.toMutableMap()))
             }
             field = value
         }
@@ -194,7 +193,7 @@ object SaveState {
                     "currentNode = $currentNode"
         )
 
-        savefileDirty = true
+        savefileDirty = false
     }
 
     /**
