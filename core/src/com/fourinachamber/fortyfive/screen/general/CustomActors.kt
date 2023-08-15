@@ -27,6 +27,8 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
+import io.github.orioncraftmc.meditate.YogaValue
+import io.github.orioncraftmc.meditate.enums.YogaUnit
 import ktx.actors.*
 import onj.value.OnjArray
 import onj.value.OnjFloat
@@ -164,11 +166,21 @@ interface HoverStateActor {
     var isHoveredOver: Boolean
 
     /**
+     * if it was clicked and therefore is still hovered over (so it doesn't stop showing hover if it )
+     */
+    var isClicked: Boolean
+
+    /**
      * binds listeners to [actor] that automatically assign [isHoveredOver]
      */
     fun bindHoverStateListeners(actor: Actor) {
         actor.onEnter { isHoveredOver = true }
-        actor.onExit { isHoveredOver = false }
+        actor.onClick { isClicked = true }
+        actor.onExit {
+            if (!isClicked) isHoveredOver = false
+
+            isClicked = false
+        }
     }
 
 }
@@ -196,6 +208,11 @@ interface Detachable {
     fun reattach()
 }
 
+interface OffSettable {
+    var offsetX: Float
+    var offsetY: Float
+}
+
 /**
  * Label that uses a custom shader to render distance-field fonts correctly
  * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
@@ -215,6 +232,8 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override var isSelected: Boolean = false
 
     override var isHoveredOver: Boolean = false
+
+    override var isClicked: Boolean=false
 
     override var styleManager: StyleManager? = null
 
@@ -247,12 +266,16 @@ open class CustomLabel @AllThreadsAllowed constructor(
             super.draw(null, parentAlpha)
             return
         }
-        val background = getBackground()
-        background?.draw(batch, x, y, width, height)
+        drawBackground(batch)
         val prevShader = batch.shader
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
         batch.shader = prevShader
+    }
+
+    protected fun drawBackground(batch: Batch) {
+        val background = getBackground()
+        background?.draw(batch, x, y, width, height)
     }
 
     override fun initStyles(screen: OnjScreen) {
@@ -306,6 +329,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
+    override var isClicked: Boolean=false
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -375,8 +399,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
             batch.setColor(c.r, c.g, c.b, alpha)
             if (rotation != 0f) {
                 val drawable = drawable
-                if (drawable !is TransformDrawable) throw RuntimeException("attempted to rotate an image, but the " +
-                        "drawable does not implement TransformDrawable")
+                if (drawable !is TransformDrawable) throw RuntimeException(
+                    "attempted to rotate an image, but the " +
+                            "drawable does not implement TransformDrawable"
+                )
                 drawable.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
                 drawable.draw(batch, x, y, width, height)
@@ -464,22 +490,24 @@ open class CustomImageActor @AllThreadsAllowed constructor(
             }
             program
         }
-
     }
-
 }
 
 open class CustomFlexBox(
-    private val screen: OnjScreen
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable {
+    val screen: OnjScreen
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable {
 
     override var fixedZIndex: Int = 0
 
-    protected var background: Drawable? = null
+    var background: Drawable? = null
 
     override var isHoveredOver: Boolean = false
 
     override var styleManager: StyleManager? = null
+    override var isClicked: Boolean=false
+
+    override var offsetX: Float = 0F
+    override var offsetY: Float = 0F
 
     override var backgroundHandle: String? = null
         set(value) {
@@ -536,21 +564,41 @@ open class CustomFlexBox(
             background = ResourceManager.get(screen, backgroundHandle)
         }
         validate()
+        x += offsetX
+        y += offsetY
         if (batch != null && background != null) {
             background?.draw(batch, x, y, width, height)
         }
         super.draw(batch, parentAlpha)
+        x -= offsetX
+        y -= offsetY
     }
+
 
     override fun initStyles(screen: OnjScreen) {
         addFlexBoxStyles(screen)
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
     }
+
+
+    protected fun getTotalOffset(): Vector2 {
+        val res = Vector2()
+        var cur: Group = this
+        while (cur.parent != null) {
+            val parent = cur.parent
+            if (parent is CustomFlexBox) {
+                res.x += parent.offsetX
+                res.y += parent.offsetY
+            }
+            cur = parent
+        }
+        return res
+    }
 }
 
 class CustomScrollableFlexBox(
-    private val screen: OnjScreen,
+    screen: OnjScreen,
     private val isScrollDirectionVertical: Boolean,
     private val scrollDistance: Float,
     private val isBackgroundStretched: Boolean,
@@ -577,7 +625,6 @@ class CustomScrollableFlexBox(
 
     private var needsScrollbar: Boolean = true
 
-
     private val dragListener = object : InputListener() {
         var startPos = 0f
         private var touchDownX: Float = -1f
@@ -591,12 +638,11 @@ class CustomScrollableFlexBox(
         private var dragX: Float = 0f
         private var dragY: Float = 0f
         var pressedPointer = -1
-        val button = 0
         var dragging = false
 
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
             if (pressedPointer != -1) return false
-            if (pointer == 0 && this.button != -1 && button != this.button) return false
+//            if (pointer == 0 && this.button != -1 && button != this.button) return false
             pressedPointer = pointer
             touchDownX = x
             touchDownY = y
@@ -611,7 +657,7 @@ class CustomScrollableFlexBox(
                 dragging = true
                 dragStartX = x
                 dragStartY = y
-                dragStart(event, x, y, pointer)
+                dragStart()
                 dragX = x
                 dragY = y
             }
@@ -620,7 +666,7 @@ class CustomScrollableFlexBox(
                 dragLastY = dragY
                 dragX = x
                 dragY = y
-                drag(event, x, y, pointer)
+                drag(x, y)
             }
         }
 
@@ -635,7 +681,7 @@ class CustomScrollableFlexBox(
             pressedPointer = -1
         }
 
-        fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        fun dragStart() {
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (scrollbarHandle == null) {
                 startPos = Float.NaN
@@ -658,19 +704,26 @@ class CustomScrollableFlexBox(
             }
         }
 
-        fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        fun drag(x: Float, y: Float) {
             if (startPos.isNaN()) return
             val parentPos = this@CustomScrollableFlexBox.localToStageCoordinates(Vector2(0, 0))
             if (isScrollDirectionVertical) {
+                val curHeight =
+                    (if (scrollbarLength.unit == YogaUnit.PERCENT) height * scrollbarLength.value / 100F else scrollbarLength.value)
                 val max = lastMax + cutBottom
-                val curSize = height * height / (max + height)
+                val curSize = curHeight * curHeight / (max + curHeight)
                 scrollbarHandle!!.y = startPos + (y - touchDownY)
-                offset = -(scrollbarHandle!!.y - parentPos.y - height + curSize) * max / (height - curSize)
+                offset =
+                    -(scrollbarHandle!!.y - parentPos.y - curHeight - (height - curHeight) / 2 + curSize) * max / (curHeight - curSize)
             } else {
+                val curWidth =
+                    (if (scrollbarLength.unit == YogaUnit.PERCENT) width * scrollbarLength.value / 100F else scrollbarLength.value)
+
                 scrollbarHandle!!.x = (startPos + x - touchDownX)
                 val max = lastMax
-                val curSize = width * width / (max + width)
-                offset = -(scrollbarHandle!!.x - parentPos.x) * max / (width - curSize) - cutLeft
+                val curSize = curWidth * curWidth / (max + curWidth)
+                offset =
+                    -(scrollbarHandle!!.x - parentPos.x - (width - curWidth) / 2) * max / (curWidth - curSize) - cutLeft
             }
             invalidate()
         }
@@ -697,12 +750,9 @@ class CustomScrollableFlexBox(
     private var scrollbarBackground: CustomImageActor? = null
     private var scrollbarHandle: CustomImageActor? = null
     var scrollbarWidth: Float = 0F
-//    var maxSizeInScrollDirection: Float = -1F
-//
-//    private val tempChildren = mutableListOf<Actor>()
+    var scrollbarLength: YogaValue = YogaValue(100F, YogaUnit.PERCENT)
 
     override fun layout() {
-
 //        layoutScrollBar()
 //        if (maxSizeInScrollDirection == -1F) {
 //            while (children.size > 0) {
@@ -769,17 +819,19 @@ class CustomScrollableFlexBox(
             } else {
                 scrollbarBackground?.x = x + width - scrollbarWidth
             }
-            scrollbarBackground?.y = y
+            scrollbarBackground?.height =
+                (if (scrollbarLength.unit == YogaUnit.PERCENT) height * scrollbarLength.value / 100F else scrollbarLength.value)
+            scrollbarBackground?.y = y + (height - scrollbarBackground!!.height) / 2
             scrollbarBackground?.width = scrollbarWidth
-            scrollbarBackground?.height = height
         } else {
             if (scrollbarSide != null && scrollbarSide == "top") {
                 scrollbarBackground?.y = y + height - scrollbarWidth
             } else {
                 scrollbarBackground?.y = y
             }
-            scrollbarBackground?.x = x
-            scrollbarBackground?.width = width
+            scrollbarBackground?.width =
+                (if (scrollbarLength.unit == YogaUnit.PERCENT) width * scrollbarLength.value / 100F else scrollbarLength.value)
+            scrollbarBackground?.x = x + (width - scrollbarBackground!!.width) / 2
             scrollbarBackground?.height = scrollbarWidth
         }
     }
@@ -787,8 +839,10 @@ class CustomScrollableFlexBox(
     private fun layoutScrollbarHandle() {
         if (isScrollDirectionVertical) {
             val max = lastMax + cutBottom
-            val curSize = height * height / (max + height)
-            val curPos = offset / max * (height - curSize)
+            val maxSize =
+                (if (scrollbarLength.unit == YogaUnit.PERCENT) height * scrollbarLength.value / 100F else scrollbarLength.value)
+            val curSize = maxSize * maxSize / (max + maxSize)
+            val curPos = offset / max * (maxSize - curSize)
             if (scrollbarSide != null && scrollbarSide == "left") {
                 scrollbarHandle!!.x = x
             } else {
@@ -796,14 +850,14 @@ class CustomScrollableFlexBox(
             }
             scrollbarHandle!!.width = scrollbarWidth
             scrollbarHandle!!.height = curSize
-            scrollbarHandle!!.y = y + height - curPos - curSize
+            scrollbarHandle!!.y = y + (height + maxSize) / 2 - curPos - curSize
         } else {
             val offset = offset + cutLeft
             val max = lastMax
-            val curSize = width * width / (max + width)
-
-            val curPos = offset / max * (width - curSize)
-
+            val curWidth =
+                (if (scrollbarLength.unit == YogaUnit.PERCENT) width * scrollbarLength.value / 100F else scrollbarLength.value)
+            val curSize = curWidth * curWidth / (max + curWidth)
+            val curPos = offset / max * (curWidth - curSize)
             if (scrollbarSide != null && scrollbarSide == "top") {
                 scrollbarHandle!!.y = y + height - scrollbarWidth
             } else {
@@ -811,14 +865,13 @@ class CustomScrollableFlexBox(
             }
             scrollbarHandle!!.height = scrollbarWidth
             scrollbarHandle!!.width = curSize
-            scrollbarHandle!!.x = x - curPos
+            scrollbarHandle!!.x = x - curPos + (width - curWidth) / 2
         }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
         batch.flush()
-//        width=82F
         val viewport = screen.stage.viewport
         val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
         val yPixel =
@@ -830,16 +883,30 @@ class CustomScrollableFlexBox(
             if (drawItemsWithScissor(xPixel, viewport, yPixel, batch, parentAlpha)) return
         }
         if (needsScrollbar) {
-            scrollbarBackground?.draw(batch, alpha)
-            scrollbarHandle?.draw(batch, alpha)
+            val off = getTotalOffset()
+            scrollbarBackground?.let {
+                it.x += off.x
+                it.y += off.y
+                it.draw(batch, parentAlpha)
+                it.x -= off.x
+                it.y -= off.y
+            }
+            scrollbarHandle?.let {
+                it.x += off.x
+                it.y += off.y
+                it.draw(batch, parentAlpha)
+                it.x -= off.x
+                it.y -= off.y
+            }
         }
-        if (currentlyDraggedChild != null) {
-            val coordinates = localToStageCoordinates(Vector2())
-            currentlyDraggedChild!!.x += coordinates.x
-            currentlyDraggedChild!!.y += coordinates.y
-            currentlyDraggedChild?.draw(batch, alpha)
-            currentlyDraggedChild!!.x -= coordinates.x
-            currentlyDraggedChild!!.y -= coordinates.y
+        val curChild = this.currentlyDraggedChild
+        if (curChild != null) {
+            val coordinates = curChild.parent.localToStageCoordinates(Vector2())
+            curChild.x += coordinates.x
+            curChild.y += coordinates.y
+            curChild.draw(batch, alpha)
+            curChild.x -= coordinates.x
+            curChild.y -= coordinates.y
         }
     }
 
@@ -1106,6 +1173,7 @@ open class CustomVerticalGroup(
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     override var backgroundHandle: String? = null
         set(value) {

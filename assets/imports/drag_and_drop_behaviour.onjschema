@@ -37,6 +37,7 @@ $DragAndDropBehaviour {
     }
 
     $ShopDropTarget{
+        isToDeck: boolean,
         ...dragAndDropBehaviourSharedKeys
     }
 
@@ -45,7 +46,18 @@ $DragAndDropBehaviour {
     }
 
     $ShopDragSource{
-            moveToLastIndex?: boolean,
+        ...dragAndDropBehaviourSharedKeys
+    }
+
+    $BackpackDragSource{
+        ...dragAndDropBehaviourSharedKeys
+    }
+
+    $DeckSlotDropTarget{
+        ...dragAndDropBehaviourSharedKeys
+    }
+
+    $BackpackDropTarget{
         ...dragAndDropBehaviourSharedKeys
     }
 }

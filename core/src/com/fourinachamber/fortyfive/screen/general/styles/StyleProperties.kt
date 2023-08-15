@@ -1,8 +1,11 @@
 package com.fourinachamber.fortyfive.screen.general.styles
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
@@ -323,6 +326,7 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.LEFT, "marginLeft", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.RIGHT, "marginRight", screen))
+    styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.ALL, "margin", screen))
     styleManager.addStyleProperty(PositionStyleProperty(this, YogaEdge.TOP, "positionTop", screen))
     styleManager.addStyleProperty(PositionStyleProperty(this, YogaEdge.BOTTOM, "positionBottom", screen))
     styleManager.addStyleProperty(PositionStyleProperty(this, YogaEdge.LEFT, "positionLeft", screen))
@@ -360,9 +364,79 @@ fun <T> T.addLabelStyles(screen: OnjScreen) where T : CustomLabel, T : StyledAct
     styleManager.addStyleProperty(FontScaleStyleProperty(this, screen))
 }
 
+///////////////////////////////////////////////////////////////////
+// TextInput
+///////////////////////////////////////////////////////////////////
+
+class SelectionColorStyleProperty(
+    target: CustomInputField,
+    screen: OnjScreen
+) : StyleProperty<CustomInputField, Color>(
+    "selectionColor",
+    target,
+    Color(0F, 0F, 1F, 0.7F),
+    Color::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: Color, node: YogaNode) {
+        target.selectionRect.color = data
+    }
+
+    override fun get(node: YogaNode): Color = target.selectionRect.color
+}
+
+class CursorColorStyleProperty(
+    target: CustomInputField,
+    screen: OnjScreen
+) : StyleProperty<CustomInputField, Color>(
+    "cursorColor",
+    target,
+    Color.BLACK,
+    Color::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: Color, node: YogaNode) {
+        target.cursorRect.color = data
+    }
+
+    override fun get(node: YogaNode): Color = target.cursorRect.color
+}
+
+fun <T> T.addTextInputStyles(screen: OnjScreen) where T : CustomInputField, T : StyledActor {
+    addLabelStyles(screen)
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(SelectionColorStyleProperty(this, screen))
+    styleManager.addStyleProperty(CursorColorStyleProperty(this, screen))
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // FlexBox
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class TouchableStyleProperty(
+    target: CustomFlexBox,
+    screen: OnjScreen
+) : StyleProperty<CustomFlexBox, Touchable>(
+    "touchable",
+    target,
+    Touchable.disabled,
+    Touchable::class,
+    false,
+    true,
+    screen
+) {
+    override fun set(data: Touchable, node: YogaNode) {
+        target.touchable = data
+    }
+
+    override fun get(node: YogaNode): Touchable = target.touchable
+}
 
 class FlexDirectionStyleProperty(
     target: CustomFlexBox,
@@ -477,6 +551,7 @@ fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : Style
     addActorStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, screen))
+    styleManager.addStyleProperty(TouchableStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, screen))
     styleManager.addStyleProperty(FlexWrapStyleProperty(this, screen))
@@ -495,6 +570,7 @@ fun <T> T.addScrollFlexBoxStyles(screen: OnjScreen) where T : CustomScrollableFl
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.UP, "cuttingTop"))
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.DOWN, "cuttingBottom"))
     styleManager.addStyleProperty(ScrollbarWidthStyleProperty(this, screen, "scrollbarWidth"))
+    styleManager.addStyleProperty(ScrollbarLengthStyleProperty(this, screen, "scrollbarLength"))
 }
 
 
@@ -637,4 +713,25 @@ class ScrollbarWidthStyleProperty(
     }
 
     override fun get(node: YogaNode): Float = target.scrollbarWidth
+}
+
+class ScrollbarLengthStyleProperty(
+    target: CustomScrollableFlexBox,
+    screen: OnjScreen,
+    name: String
+) : StyleProperty<CustomScrollableFlexBox, YogaValue>(
+    name,
+    target,
+    YogaValue(100F, YogaUnit.PERCENT),
+    YogaValue::class,
+    true,
+    false,
+    screen
+) {
+
+    override fun set(data: YogaValue, node: YogaNode) {
+        target.scrollbarLength = data
+    }
+
+    override fun get(node: YogaNode): YogaValue = target.scrollbarLength
 }

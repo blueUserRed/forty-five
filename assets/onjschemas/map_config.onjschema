@@ -76,19 +76,13 @@ var mapRestrictions = {
     minNodes: int,
     maxSplits: int,
     splitProbability: float,
-    compressProbability: float,
-    averageLengthOfLineInBetween: float,
     decorationPadding: float,
-    distanceFromAreaToLine: float,
     startArea: string,
     endArea: string,
-    maxAnglePercent: float,
-    maxWidth: int,
-    minDistanceBetweenAreas: float,
-    rangeToCheckBetweenNodes: float,
-    percentageForAllowedNodesInRangeBetweenLineAndArea: float,
     rotation: float,
-    otherAreas: string[],
+    scaleLength?: float,
+    scaleWidth?: float,
+    otherAreas?: string[],
     fixedEvents: {
         isDeadEnd: boolean,
         nodeTexture: string?,
@@ -101,8 +95,6 @@ var mapRestrictions = {
     }[],
     decorationSeed: int,
     decorations: $DecorationDistributionFunction[],
-    pathTotalWidth: float,
-    minDistanceBetweenNodes: float,
     exitNodeTexture: string
 };
 

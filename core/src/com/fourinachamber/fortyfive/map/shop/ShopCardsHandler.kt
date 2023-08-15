@@ -1,5 +1,7 @@
 package com.fourinachamber.fortyfive.map.shop
 
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.*
@@ -17,7 +19,7 @@ class ShopCardsHandler(
     private val screen: OnjScreen,
     private val parent: CustomScrollableFlexBox,
     private val boughtIndices: MutableSet<Int>
-) {
+) : Disposable {
     private val _allCards: MutableList<Card>
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
@@ -32,10 +34,9 @@ class ShopCardsHandler(
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
     }
 
-    fun addItems(seed: Long) {
-        val rnd = Random(seed)
+    fun addItems(rnd: Random) {
         val nbrOfItems = (5..16).random(rnd)
-        FortyFiveLogger.debug(ShopCardsHandler.logTag, "Created $nbrOfItems items with seed $seed")
+        FortyFiveLogger.debug(logTag, "Created $nbrOfItems items")
         for (i in 0 until nbrOfItems) {
             if (chances.size == 0) break
             val cardId = getCardToAddWithChances(rnd)
@@ -67,6 +68,7 @@ class ShopCardsHandler(
             curParent,
             screen
         ) as CustomImageActor
+        img.drawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
         val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap2["name"] = OnjString("CardLabel" + parent.children.size)
         tempMap2["text"] = OnjString("" + card.price + "$")
@@ -141,6 +143,7 @@ class ShopCardsHandler(
 
     fun buyCard(
         cardImg: CustomImageActor,
+        addToDeck: Boolean,
     ) {
         val i = cardWidgets.indexOf(cardImg)
         if (i !in boughtIndices) boughtIndices.add(i)
@@ -149,6 +152,7 @@ class ShopCardsHandler(
         updateCards()
         FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
         SaveState.buyCard(card.name)
+        if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card.name)
     }
 
     private fun updateCards() {
@@ -162,7 +166,10 @@ class ShopCardsHandler(
                 labels[i].enterActorState("poor")
             }
         }
+        //TODO move cards to back after bought, so that they are at the end
     }
+
+    override fun dispose() = _allCards.forEach { it.dispose() }
 
     companion object {
 
