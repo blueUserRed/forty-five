@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
@@ -20,7 +21,6 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-
 
 class Backpack(
     screen: OnjScreen,
@@ -37,6 +37,7 @@ class Backpack(
     CustomFlexBox(screen),
     InOutAnimationActor {
 
+    private val cardPrototypes: List<CardPrototype>
     private val _allCards: MutableList<Card>
     private val minNameSize: Int
     private val maxNameSize: Int
@@ -106,9 +107,8 @@ class Backpack(
         val cardsOnj = OnjParser.parseFile(cardsFile)
         cardsFileSchema.assertMatches(cardsOnj)
         cardsOnj as OnjObject
-        val cardPrototypes =
-            (Card.getFrom(cardsOnj.get<OnjArray>("cards"), screen) {}).filter { it.name in SaveState.cards }
-        _allCards = cardPrototypes.map { it.create() }.toMutableList()
+        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), screen) {})
+        _allCards = cardPrototypes.filter { it.name in SaveState.cards }.map { it.create() }.toMutableList()
     }
 
     fun initAfterChildrenExist() {
@@ -221,7 +221,7 @@ class Backpack(
             val cur = children[it.key].children[0] as CustomFlexBox
             cur.isVisible = true
             cur.background =
-                TextureRegionDrawable(_allCards.find { card -> card.name == it.value }!!.actor.pixmapTextureRegion)
+                TextureRegionDrawable(getCard(it.value).actor.pixmapTextureRegion)
             cur.name = "${it.value}${nameSeparatorStr}deck${nameSeparatorStr}${it.key}"
             unplacedCards.remove(currentSelection)
         }
@@ -244,6 +244,12 @@ class Backpack(
         sortBackpack(sortingSystem.sort(_allCards, unplacedCards))
     }
 
+    private fun getCard(name: String): Card {
+        val card = _allCards.find { card -> card.name == name } ?: cardPrototypes.find { it.name == name }!!.create()
+        if (card !in _allCards) _allCards.add(card)
+        return card
+    }
+
     private fun removeChildCompletely(child: CustomFlexBox) {
         (child.parent as CustomFlexBox).remove(child.styleManager!!.node)
         child.remove()
@@ -253,7 +259,7 @@ class Backpack(
     private fun sortBackpack(sortedCards: List<String>) {
         val allPos = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in sortedCards.indices) {
-            val curCard = _allCards.find { it.name == sortedCards[i] }!!
+            val curCard = getCard(sortedCards[i])
             val curActor = allPos[i].children[0] as CustomFlexBox
             curActor.background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
             curActor.name = "${curCard.name}${nameSeparatorStr}backpack${nameSeparatorStr}${i}"
@@ -393,7 +399,8 @@ class Backpack(
             val all = arrayOf(
                 "Damage" to { Damage(isReverse) },
                 "Reserves" to { Reserves(isReverse) },
-                "Name" to { Name(isReverse) },)
+                "Name" to { Name(isReverse) },
+            )
             return all[(all.indexOfFirst { it.first == this.getDisplayName() } + 1) % all.size].second.invoke()
         }
 
@@ -408,6 +415,7 @@ class Backpack(
                 return a.cost.compareTo(b.cost)
             }
         }
+
         class Name(override var isReverse: Boolean = false) : BackpackSorting {
             override fun compare(a: Card, b: Card): Int {
                 return 0
@@ -415,3 +423,5 @@ class Backpack(
         }
     }
 }
+
+
