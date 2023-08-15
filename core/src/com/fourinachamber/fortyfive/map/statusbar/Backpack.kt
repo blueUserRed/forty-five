@@ -55,36 +55,47 @@ class Backpack(
             super.clicked(event, x, y)
             val targetName = (event!!.target as CustomFlexBox).name.split(NAME_SEPARATOR_STRING)
             if ((tapCount and 1) == 0) {
-                if (targetName[1] == "backpack") {
-                    val pos = SaveState.curDeck.nextFreeSlot()
-                    if (pos != -1) {
-                        SaveState.curDeck.addToDeck(pos, targetName[0])
-                        invalidate()
-                    } else {
-                        CustomWarningParent.getWarning(screen).addWarning(
-                            screen,
-                            "Deck full",
-                            "The max deck size is ${SaveState.Deck.numberOfSlots}. Since you already have ${SaveState.Deck.numberOfSlots} cards in your Deck, you can't add a new card.",
-                            CustomWarningParent.Severity.MIDDLE
-                        )
-                    }
-                } else {
-                    if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
-                        val fromDeck = targetName[1] == "deck"
-                        if (fromDeck) {
-                            SaveState.curDeck.removeFromDeck(targetName[2].toInt())
-                            invalidate()
-                        }
-                    } else {
-                        CustomWarningParent.getWarning(screen).addWarning(
-                            screen,
-                            "Not enough cards",
-                            "The minimum deck size is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
-                            CustomWarningParent.Severity.MIDDLE
-                        )
-                    }
-                }
+                if (targetName[1] == "backpack") quickAddToBackpack(targetName, screen)
+                else quickAddToDeck(targetName, screen)
             }
+        }
+    }
+
+    private fun quickAddToDeck(
+        targetName: List<String>,
+        screen: OnjScreen
+    ) {
+        if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
+            val fromDeck = targetName[1] == "deck"
+            if (fromDeck) {
+                SaveState.curDeck.removeFromDeck(targetName[2].toInt())
+                invalidate()
+            }
+        } else {
+            CustomWarningParent.getWarning(screen).addWarning(
+                screen,
+                "Not enough cards",
+                "The minimum deck size is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                CustomWarningParent.Severity.MIDDLE
+            )
+        }
+    }
+
+    private fun quickAddToBackpack(
+        targetName: List<String>,
+        screen: OnjScreen
+    ) {
+        val pos = SaveState.curDeck.nextFreeSlot()
+        if (pos != -1) {
+            SaveState.curDeck.addToDeck(pos, targetName[0])
+            invalidate()
+        } else {
+            CustomWarningParent.getWarning(screen).addWarning(
+                screen,
+                "Deck full",
+                "The max deck size is ${SaveState.Deck.numberOfSlots}. Since you already have ${SaveState.Deck.numberOfSlots} cards in your Deck, you can't add a new card.",
+                CustomWarningParent.Severity.MIDDLE
+            )
         }
     }
 

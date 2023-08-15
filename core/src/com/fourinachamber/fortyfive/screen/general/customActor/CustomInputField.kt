@@ -1,6 +1,8 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
+import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.GlyphLayout.GlyphRun
@@ -39,7 +41,6 @@ open class CustomInputField(
     val labelStyle: LabelStyle,
     override val partOfHierarchy: Boolean = false
 ) : CustomLabel(screen, defText, labelStyle, partOfHierarchy) {
-    //TODO ctrl+A
     //TODO ctrl+Z
     //TODO fix if leaved / unfocused
     //TODO add on
@@ -265,17 +266,16 @@ open class CustomInputField(
     }
 
     protected open fun moveCursor(forward: Boolean, jump: Boolean) {
-        val limit = if (forward) text.length else 0
-        val charOffset = if (forward) 0 else -1
-        do {
-            if (forward) {
-                if (++cursor >= limit) {
-                    break
-                }
-            } else if (--cursor <= 0) {
-                break
-            }
-        } while (jump && this.continueCursor(cursor, charOffset))
+        if (forward) {
+            val limit = text.length
+            do {
+                if (++cursor >= limit) break
+            } while (jump && this.continueCursor(cursor, 0))
+        } else {
+            do {
+                if (--cursor <= 0) break
+            } while (jump && this.continueCursor(cursor, -1))
+        }
     }
 
     protected open fun continueCursor(index: Int, offset: Int): Boolean {
@@ -453,27 +453,28 @@ open class CustomInputField(
                     var handled = true
                     if (ctrl) {
                         when (keycode) {
-                            29 -> {
+//                            29 -> {
+                            Keys.A -> {
                                 field.selectAll()
                                 return true
                             }
 
-                            31, 124 -> {
+                            Keys.C, Keys.INSERT -> {
                                 field.copy()
                                 return true
                             }
 
-                            50 -> {
+                            Keys.V -> {
                                 field.paste(field.clipboard.contents, true)
                                 repeat = true
                             }
 
-                            52 -> {
+                            Keys.X -> {
                                 field.cut(true)
                                 return true
                             }
 
-                            54 -> {
+                            Keys.Z, Keys.Y -> {
                                 val oldText: String = field.text.toString()
                                 field.setText(field.undoText)
                                 field.undoText = oldText
@@ -491,24 +492,24 @@ open class CustomInputField(
 //                            }
                             val temp: Int = field.cursor
                             when (keycode) {
-                                3 -> {
+                                Keys.HOME -> {
                                     goHome(jump)
                                     handled = true
                                 }
 
-                                21 -> {
+                                Keys.LEFT -> {
                                     field.moveCursor(false, jump)
                                     repeat = true
                                     handled = true
                                 }
 
-                                22 -> {
+                                Keys.RIGHT -> {
                                     field.moveCursor(true, jump)
                                     repeat = true
                                     handled = true
                                 }
 
-                                123 -> {
+                                Keys.END -> {
                                     goEnd(jump)
                                     handled = true
                                 }
@@ -522,13 +523,13 @@ open class CustomInputField(
                         }
                     } else {
                         when (keycode) {
-                            3 -> {
+                            Keys.HOME -> {
                                 goHome(jump)
                                 field.clearSelection()
                                 handled = true
                             }
 
-                            21 -> {
+                            Keys.LEFT -> {
                                 if (field.hasSelection) field.cursor = min(field.cursor, field.selectionStart)
                                 else field.moveCursor(false, jump)
                                 field.clearSelection()
@@ -536,7 +537,7 @@ open class CustomInputField(
                                 handled = true
                             }
 
-                            22 -> {
+                            Keys.RIGHT -> {
                                 if (field.hasSelection) field.cursor = max(field.cursor, field.selectionStart)
                                 else field.moveCursor(true, jump)
                                 field.clearSelection()
@@ -544,7 +545,7 @@ open class CustomInputField(
                                 handled = true
                             }
 
-                            123 -> {
+                            Keys.END -> {
                                 goEnd(jump)
                                 field.clearSelection()
                                 handled = true

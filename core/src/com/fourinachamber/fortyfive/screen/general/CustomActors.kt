@@ -211,10 +211,6 @@ interface Detachable {
 interface OffSettable {
     var offsetX: Float
     var offsetY: Float
-
-    fun reattach() {
-
-    }
 }
 
 /**

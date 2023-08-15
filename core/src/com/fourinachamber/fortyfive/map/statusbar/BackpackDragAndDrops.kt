@@ -16,7 +16,7 @@ class BackpackDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
-) : CenterDragged(dragAndDrop, actor, onj) {
+) : CenteredDragSource(dragAndDrop, actor, onj) {
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         if ((actor !is CustomFlexBox)) return null
         val payload = DragAndDrop.Payload()
