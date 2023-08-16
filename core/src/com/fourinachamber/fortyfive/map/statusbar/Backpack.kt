@@ -53,7 +53,8 @@ class Backpack(
     private val quickAddRemoveListener = object : ClickListener() {
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
             super.clicked(event, x, y)
-            val targetName = (event!!.target as CustomFlexBox).name.split(NAME_SEPARATOR_STRING)
+            if ((event!!.target as CustomFlexBox).name == null) return
+            val targetName = (event.target as CustomFlexBox).name.split(NAME_SEPARATOR_STRING)
             if ((tapCount and 1) == 0) {
                 if (targetName[1] == "backpack") quickAddToBackpack(targetName, screen)
                 else quickAddToDeck(targetName, screen)
