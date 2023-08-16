@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.dialog
+package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch

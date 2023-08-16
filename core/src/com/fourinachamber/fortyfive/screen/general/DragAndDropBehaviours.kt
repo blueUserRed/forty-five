@@ -8,8 +8,8 @@ import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.DeckSlotDropTarget
-import com.fourinachamber.fortyfive.map.shop.ShopDragSource
-import com.fourinachamber.fortyfive.map.shop.ShopDropTarget
+import com.fourinachamber.fortyfive.map.events.shop.ShopDragSource
+import com.fourinachamber.fortyfive.map.events.shop.ShopDropTarget
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
 import com.fourinachamber.fortyfive.utils.eitherRight

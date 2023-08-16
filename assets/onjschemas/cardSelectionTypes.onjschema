@@ -1,0 +1,33 @@
+use Common;
+
+$CardSelector{
+    $ByName{
+        name: string
+    }
+    $ByTag{
+        name: string
+    }
+}
+
+$CardEffect{
+    $Blacklist{}
+
+    $ProbabilityAddition{
+        weight: float
+    }
+
+    $PriceMultiplier{
+        price: float
+    }
+}
+
+var shopParameter = {
+    cardChanges: {
+        select: $CardSelector,
+        effect: $CardEffect
+    }[],
+    name: string
+};
+
+
+types: shopParameter[],

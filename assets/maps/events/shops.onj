@@ -2,100 +2,8 @@ import "imports/colors.onj" as color;
 
 use Common;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
-
-var rarities = [
-    {
-        select: $ByTag {
-            name: "common"
-        },
-        effect: $ProbabilityAddition {
-            weight: 20.0
-        }
-    },
-    {
-        select: $ByTag {
-            name: "rare"
-        },
-        effect: $ProbabilityAddition {
-            weight: 1.0
-        }
-    }
-];
-
-types: [
-
-    {
-        name: "normal",
-        cardChanges: [
-            ...rarities,
-            {
-                select: $ByTag {
-                    name: "startDeck"
-                },
-                effect: $Blacklist { }
-            },
-            {
-                select: $ByName {
-                    name: "protectiveBullet"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 10000.0 // make sure it appears in the shop
-                }
-            }
-        ]
-    },
-
-    {
-        name: "rare_shop",
-        cardChanges: [
-                ...rarities,
-                {
-                    select: $ByTag {
-                        name: "startDeck"
-                    },
-                    effect: $Blacklist { }
-                },
-                {
-                    select: $ByTag {
-                        name: "common"
-                    },
-                    effect: $Blacklist { }
-                },
-                {
-                    select: $ByTag {
-                        name: "rare"
-                    },
-                    effect: $PriceMultiplier {
-                        price: 0.5
-                    }
-                }
-       ]
-    },
-    {
-        name: "no_biome",
-        cardChanges: [
-            ...rarities,
-            {
-                select: $ByName {
-                    name: "workerBullet"
-                },
-                effect: $Blacklist {
-                }
-            },
-            {
-                select: $ByName {
-                    name: "incendiaryBullet"
-                },
-                effect: $ProbabilityAddition {
-                    weight: 1.0
-                }
-            }
-        ]
-    },
-],
-
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
 
 people: [
     {
@@ -112,13 +20,24 @@ people: [
                     color: color.viridian,
                 },
                 $Text {
-                    text: "goods south from Dunkelwald. You'll find deals like this NO where else!",
+                    text: "goods south from Dunkelwald. You'll find deals like this NO where else!\"",
                 },
                 $Text {
-                    text: "Source: Trust me pal\"",
+                    text: "Source: Trust me pal",
                 },
             ],
-
+            [
+                $Text {
+                    text: "You'll find prices like here ",
+                },
+                $Text {
+                    text: "NOWHERE  ",
+                    color: color.red,
+                },
+                $Text {
+                    text: "else! So by as much as you can!!!",
+                },
+            ],
         ],
         npcImageName: "my_cool_npc",
     },

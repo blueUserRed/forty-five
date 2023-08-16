@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.shop
+package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -64,12 +64,10 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val defaults = shopFile.get<OnjObject>("defaults")
 
         val rnd = Random(context.seed)
-        messageWidget.advancedText =
-            AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
-
+        println(context.person)
         shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
-        shopCardsHandler.calculateChances(context.type, shopFile, personData)
-        shopCardsHandler.addItems(rnd)
+        shopCardsHandler.addItems(rnd, context.type, personData.get<String>("defaultShopParameter"))
+        messageWidget.advancedText = AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
@@ -102,7 +100,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
-        shopCardsHandler.buyCard(actor as CustomImageActor,addToDeck)
+        shopCardsHandler.buyCard(actor as CustomImageActor, addToDeck)
     }
 
     override fun end() {
