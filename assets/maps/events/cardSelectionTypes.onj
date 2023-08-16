@@ -1,0 +1,92 @@
+use Common;
+
+var rarities = [
+    {
+        select: $ByTag {
+            name: "common"
+        },
+        effect: $ProbabilityAddition {
+            weight: 20.0
+        }
+    },
+    {
+        select: $ByTag {
+            name: "rare"
+        },
+        effect: $ProbabilityAddition {
+            weight: 1.0
+        }
+    }
+];
+
+types: [
+
+    {
+        name: "normal",
+        cardChanges: [
+            ...rarities,
+            {
+                select: $ByTag {
+                    name: "startDeck"
+                },
+                effect: $Blacklist { }
+            },
+            {
+                select: $ByName {
+                    name: "protectiveBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 10000.0 // make sure it appears in the shop
+                }
+            }
+        ]
+    },
+
+    {
+        name: "rare_shop",
+        cardChanges: [
+            ...rarities,
+            {
+                select: $ByTag {
+                    name: "startDeck"
+                },
+                effect: $Blacklist { }
+            },
+            {
+                select: $ByTag {
+                    name: "common"
+                },
+                effect: $Blacklist { }
+            },
+            {
+                select: $ByTag {
+                    name: "rare"
+                },
+                effect: $PriceMultiplier {
+                    price: 0.5
+                }
+            }
+        ]
+    },
+    {
+        name: "no_biome",
+        cardChanges: [
+            ...rarities,
+            {
+                select: $ByName {
+                    name: "workerBullet"
+                },
+                effect: $Blacklist {
+                }
+            },
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 1000.0
+                }
+            }
+        ]
+    },
+],

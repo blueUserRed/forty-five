@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.shop
+package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.Widget

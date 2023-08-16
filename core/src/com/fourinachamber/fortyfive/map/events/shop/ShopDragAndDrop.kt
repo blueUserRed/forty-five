@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.shop
+package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
