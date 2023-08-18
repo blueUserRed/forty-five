@@ -5,6 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDragSource
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.DeckSlotDropTarget
@@ -28,11 +30,11 @@ object DragAndDropBehaviourFactory {
         dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
             RevolverDropTarget(dragAndDrop, actor, onj)
         }
-        dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
-            ShopDropTarget(dragAndDrop, actor, onj)
-        }
         dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
             ShopDragSource(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
+            ShopDropTarget(dragAndDrop, actor, onj)
         }
         dragBehaviours["BackpackDragSource"] = { dragAndDrop, actor, onj ->
             BackpackDragSource(dragAndDrop, actor, onj)
@@ -42,6 +44,12 @@ object DragAndDropBehaviourFactory {
         }
         dropBehaviours["BackpackDropTarget"] = { dragAndDrop, actor, onj ->
             BackpackDropTarget(dragAndDrop, actor, onj)
+        }
+        dragBehaviours["ChooseCardDragSource"] = { dragAndDrop, actor, onj ->
+            ChooseCardDragSource(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["ChooseCardDropTarget"] = { dragAndDrop, actor, onj ->
+            ChooseCardDropTarget(dragAndDrop, actor, onj)
         }
     }
 

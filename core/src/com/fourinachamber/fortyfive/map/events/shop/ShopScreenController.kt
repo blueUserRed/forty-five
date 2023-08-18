@@ -64,7 +64,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val defaults = shopFile.get<OnjObject>("defaults")
 
         val rnd = Random(context.seed)
-        println(context.person)
         shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
         shopCardsHandler.addItems(rnd, context.type, personData.get<String>("defaultShopParameter"))
         messageWidget.advancedText = AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)

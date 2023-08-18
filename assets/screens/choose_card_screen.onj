@@ -11,8 +11,8 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "choose_card_add_to_backpack",
-        "choose_card_add_to_deck",
+        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "chooseCard_add_to_backpack",
+        "chooseCard_add_to_deck",
         "shop_background_no_biome", /*temp -> */ "card%%bullet",
         "chooseCard_cardsBackground",
         ...(sharedComponents.backpackAssets),
@@ -81,9 +81,9 @@ root: $Box {
         ],
     },
     $Image {
-        zIndex: 200,
+        zIndex: 150,
         name: "addToDeckWidget",
-        textureName: "choose_card_add_to_deck",
+        textureName: "chooseCard_add_to_deck",
         scaleX: 0.9,
         scaleY: 0.9,
         reportDimensionsWithScaling: true,
@@ -110,9 +110,9 @@ root: $Box {
         ],
     },
     $Image {
-        zIndex: 200,
+        zIndex: 150,
         name: "addToBackpackWidget",
-        textureName: "choose_card_add_to_backpack",
+        textureName: "chooseCard_add_to_backpack",
         scaleX: 0.9,
         scaleY: 0.9,
         reportDimensionsWithScaling: true,
@@ -184,27 +184,6 @@ root: $Box {
                 },
             ],
             children: [
-                $FromTemplate {
-                    generateFrom: "cardTemplate",
-                    data: {
-                        rotation: 7.0,
-                        bottom: -2.0#percent,
-                    }
-                },
-                $FromTemplate {
-                    generateFrom: "cardTemplate",
-                    data: {
-                        rotation: 0.0,
-                        bottom: 0.0#percent,
-                    }
-                },
-                $FromTemplate {
-                    generateFrom: "cardTemplate",
-                    data: {
-                        rotation: -7.0,
-                        bottom: -2.0#percent,
-                    }
-                },
             ],
         },
         $Label {
@@ -214,7 +193,7 @@ root: $Box {
             fontScale: 0.7,
             align: "center",
         },
-//        $Label {   //this one not used because of phillip beeing indesicive
+        //        $Label {   //this one not used because of phillip beeing indesicive
 //            name: "leaveLabel",
 //            text: "Take no Bullet",
 //            font: "red_wing_cm",
@@ -227,6 +206,7 @@ root: $Box {
 //                },
 //            ],
 //        },
+
     ],
     $Statusbar {
         zIndex: 400,
@@ -256,11 +236,16 @@ templates: [
         template_keys: {
             "styles.0.rotation": "rotation",
             "styles.0.positionBottom": "bottom",
+            "textureName": "textureName",
         },
         textureName: "card%%bullet",
         scaleX: 0.31,
         scaleY: 0.31,
         reportDimensionsWithScaling: true,
+        dragAndDrop: $ChooseCardDragSource {
+            group: "card",
+        },
+        zIndex: 10000,
         styles: [
             {
                 width: 150.0#points,
