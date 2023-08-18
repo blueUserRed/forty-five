@@ -1,11 +1,14 @@
 package com.fourinachamber.fortyfive.map.events.chooseCard
 
+import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.map.detailMap.ChooseCardMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.map.events.shop.ShopCardsHandler
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
+import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -34,7 +37,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
-    private lateinit var context: ChooseCardMapEvent
+    private var context: ChooseCardMapEvent? = null
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is ChooseCardMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         this.context = context
@@ -55,6 +58,15 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
             logTag,
             "Generated with seed $seed and the types $types the following cards: ${cards.map { it.name }}"
         )
+        addListener(screen)
+    }
+
+    private fun addListener(screen: OnjScreen) {
+        (screen.namedActorOrError(leaveButtonName) as CustomLabel).addListener(object : ClickListener() {
+            override fun clicked(event: InputEvent?, x: Float, y: Float) {
+                context?.complete()
+            }
+        })
     }
 
     private fun initDropTargets(screen: OnjScreen) {
@@ -67,6 +79,6 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     }
 
     companion object {
-        var logTag: String = this.javaClass.simpleName
+        var logTag: String = "ChooseCardScreenController"
     }
 }

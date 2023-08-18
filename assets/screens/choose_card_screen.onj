@@ -34,7 +34,7 @@ options: {
     ],
     screenController: $ChooseCardScreenController {
         cardsFile: "config/cards.onj",
-        leaveButtonName: "shopMessage",
+        leaveButtonName: "leaveLabel",
         cardsParentName: "cardsWidget",
         addToBackpackWidgetName: "addToBackpackWidget",
         addToDeckWidgetName: "addToDeckWidget",
@@ -197,11 +197,17 @@ root: $Box {
             align: "center",
         },
         $Label {
+            name: "leaveLabel",
             text: "Take no Bullet",
             font: "red_wing_cm",
             color: color.red,
             fontScale: 0.7,
             align: "center",
+            behaviours: [
+                $OnClickChangeScreenBehaviour {
+                    screenPath: "screens/map_screen.onj"
+                },
+            ],
         },
     ],
     $Statusbar {
