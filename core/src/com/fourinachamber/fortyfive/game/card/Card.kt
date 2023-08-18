@@ -24,6 +24,8 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -38,6 +40,7 @@ import onj.value.OnjObject
 class CardPrototype(
     val name: String,
     val type: Card.Type,
+    val tags: List<String>,
     private val creator: () -> Card
 ) {
 
@@ -313,7 +316,8 @@ class Card(
                     onj as OnjObject
                     val prototype = CardPrototype(
                         onj.get<String>("name"),
-                        cardTypeOrError(onj)
+                        cardTypeOrError(onj),
+                        onj.get<OnjArray>("tags").value.map { it.value as String },
                     ) { getCardFrom(onj, onjScreen, initializer) }
                     prototypes.add(prototype)
                 }
@@ -382,6 +386,9 @@ class Card(
             }
         }
 
+        val cardsFileSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
+        }
     }
 
     /**

@@ -101,6 +101,9 @@ object MapManager {
     fun changeToShopScreen(event: MapEvent) {
         FortyFive.changeToScreen(screenPaths["shopScreen"]!!, event)
     }
+    fun changeToChooseCardScreen(event: MapEvent) {
+        FortyFive.changeToScreen(screenPaths["chooseCardScreen"]!!, event)
+    }
 
     /**
      * @see DetailMap.invalidateCachedAssets

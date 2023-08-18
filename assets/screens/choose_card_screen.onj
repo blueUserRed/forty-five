@@ -1,0 +1,248 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "shop_add_to_backpack",
+        "shop_add_to_deck",
+        "shop_background_no_biome", /*temp -> */ "card%%bullet",
+        "chooseCard_cardsBackground",
+        ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets),
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    transitionAwayTime: 1.0,
+    background: "hover_detail_background",
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $ChooseCardScreenController {
+        cardsFile: "config/cards.onj",
+        leaveButtonName: "shopMessage",
+        cardsParentName: "cardsWidget",
+        addToBackpackWidgetName: "addToBackpackWidget",
+        addToDeckWidgetName: "addToDeckWidget",
+    }
+},
+
+
+var templateCard = $Image {
+    textureName: "card%%bullet",
+    scaleX: 0.35,
+    scaleY: 0.35,
+    reportDimensionsWithScaling: true,
+    styles: [
+        {
+            width: 150.0#points,
+            height: 150.0#points,
+        }
+    ]
+};
+
+root: $Box {
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent,
+        }
+    ]
+} children [
+    $Image {       //TODO biome for background
+
+        name: "background_img",
+        textureName: "shop_background_no_biome",
+        scaleX: 0.0,
+        scaleY: 0.0,
+        width: worldWidth,
+        height: worldHeight,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                width: (worldWidth)#points,
+                height: (worldHeight)#points,
+            }
+        ],
+    },
+    $Image {
+        zIndex: 200,
+        name: "addToDeckWidget",
+        textureName: "shop_add_to_deck",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDropTarget {
+            group: "card",
+            isToDeck: true,
+        },
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionTop: 10.0#percent,
+                positionLeft: 0#percent,
+                width: 30#percent,
+                height: 40.0#percent,
+                alpha: 1.0,
+
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("disabled"),
+                alpha: 0.7,
+            }
+        ],
+    },
+    $Image {
+        zIndex: 200,
+        name: "addToBackpackWidget",
+        textureName: "shop_add_to_backpack",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDropTarget {
+            group: "card",
+            isToDeck: false,
+        },
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionTop: 54.0#percent,
+                positionLeft: 0#percent,
+                width: 30#percent,
+                height: 40.0#percent,
+                alpha: 1.0,
+
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("disabled"),
+                alpha: 0.7,
+            }
+        ],
+    },
+    $Image {
+        textureName: "chooseCard_cardsBackground",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 25#percent,
+                positionRight: 32#percent,
+                width: 30#percent,
+                height: 40#percent,
+            }
+        ],
+    },
+    $Box {
+        zIndex: 300,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 28.5#percent,
+                positionLeft: 30.0#percent,
+                width: 40#percent,
+                height: 40#percent,
+                flexDirection: flexDirection.column,
+            }
+        ],
+    } children [
+        $Label {
+            text: "Choose one Bullet",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.9,
+            align: "center",
+        },
+        $Box {
+            styles: [
+                {
+                    width: 100#percent,
+                    height: 63#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    alignItems: align.center,
+                },
+            ],
+            children: [
+                templateCard,
+                templateCard,
+                templateCard,
+            ],
+        },
+        $Label {
+            text: "Drag it to add it to your Deck or Backpack.",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.7,
+            align: "center",
+        },
+        $Label {
+            text: "Take no Bullet",
+            font: "red_wing_cm",
+            color: color.red,
+            fontScale: 0.7,
+            align: "center",
+        },
+    ],
+    $Statusbar {
+        zIndex: 400,
+        options: [
+            {
+                actorName: "backpackActor",
+                displayName: "Notebook",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Backpack",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Settings",
+            },
+        ],
+        ...(sharedComponents.statusbarCenterDefaults)
+    },
+    sharedComponents.backpack,
+    sharedComponents.warningParent,
+],
+
+templates: [
+    $Box {
+        template_name: "cardsWidgetParent",
+        template_keys: {
+            "name": "name",
+            "textureName": "textureName"
+        },
+        styles: [
+            {
+                marginLeft: 2.0#percent,
+                marginRight: 2.0#percent,
+                width: 21.0#percent,
+                height: 44.5#percent,
+            }
+        ],
+    },
+    ...(sharedComponents.statusBarTemplates),
+    ...(sharedComponents.backpackTemplates),
+    ...(sharedComponents.warningLabelTemplates),
+],

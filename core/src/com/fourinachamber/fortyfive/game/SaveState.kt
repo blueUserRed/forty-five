@@ -331,6 +331,10 @@ object SaveState {
             return id.hashCode()
         }
 
+        fun canRemoveCards(): Boolean = cards.size > minDeckSize
+
+        fun canAddCards(): Boolean = cards.size < numberOfSlots
+
         companion object {
             fun getFromOnj(onj: OnjObject): Deck {
                 val id = onj.get<Long>("index").toInt()

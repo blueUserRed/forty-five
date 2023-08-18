@@ -42,6 +42,12 @@ $MapEvent {
         boughtIndices: int[],
     }
 
+    $ChooseCardMapEvent {
+        types: string[],
+        biome: string,
+        seed: int?,
+        ...mapEventStandardConfig
+    }
 }
 
 
@@ -103,6 +109,7 @@ screens: {
     dialogScreen: string,
     encounterScreen: string,
     shopScreen: string,
+    chooseCardScreen: string,
 },
 
 mapImages: {

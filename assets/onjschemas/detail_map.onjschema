@@ -30,6 +30,13 @@ $MapEvent {
         seed: int?,
         boughtIndices: int[],
     }
+
+    $ChooseCardMapEvent {
+        types: string[],
+        biome: string,
+        seed: int?,
+        ...mapEventStandardConfig
+    }
 }
 
 startNode: int,

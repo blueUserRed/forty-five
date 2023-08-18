@@ -56,17 +56,18 @@ class Backpack(
             if ((event!!.target as CustomFlexBox).name == null) return
             val targetName = (event.target as CustomFlexBox).name.split(NAME_SEPARATOR_STRING)
             if ((tapCount and 1) == 0) {
-                if (targetName[1] == "backpack") quickAddToBackpack(targetName, screen)
-                else quickAddToDeck(targetName, screen)
+                //if==true means that it is from backpack
+                if (targetName[1] == "backpack") quickAddToDeck(targetName, screen)
+                else quickAddToBackpack(targetName, screen)
             }
         }
     }
 
-    private fun quickAddToDeck(
+    private fun quickAddToBackpack(
         targetName: List<String>,
         screen: OnjScreen
     ) {
-        if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
+        if (SaveState.curDeck.canRemoveCards()) {
             val fromDeck = targetName[1] == "deck"
             if (fromDeck) {
                 SaveState.curDeck.removeFromDeck(targetName[2].toInt())
@@ -82,12 +83,12 @@ class Backpack(
         }
     }
 
-    private fun quickAddToBackpack(
+    private fun quickAddToDeck(
         targetName: List<String>,
         screen: OnjScreen
     ) {
-        val pos = SaveState.curDeck.nextFreeSlot()
-        if (pos != -1) {
+        if (SaveState.curDeck.canAddCards()) {
+            val pos = SaveState.curDeck.nextFreeSlot()
             SaveState.curDeck.addToDeck(pos, targetName[0])
             invalidate()
         } else {

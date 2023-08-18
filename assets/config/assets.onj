@@ -373,6 +373,10 @@ textures: [
     {
         name: "warning_label_background_red",
         file: "textures/warning_label/background_red.png"
+    },
+    {
+        name: "chooseCard_cardsBackground",
+        file: "textures/chooseCard/cards_background.png"
     }
 ],
 
