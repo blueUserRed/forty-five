@@ -4,13 +4,10 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.detailMap.ChooseCardMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
-import com.fourinachamber.fortyfive.map.events.shop.ShopCardsHandler
-import com.fourinachamber.fortyfive.screen.general.CustomImageActor
-import com.fourinachamber.fortyfive.screen.general.CustomLabel
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.value.OnjArray
@@ -58,7 +55,13 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
             logTag,
             "Generated with seed $seed and the types $types the following cards: ${cards.map { it.name }}"
         )
-        addListener(screen)
+//        addListener(screen) //phillip said for now not this feature bec he is indecisive
+        initCards(screen,cards)
+    }
+
+    private fun initCards(screen: OnjScreen, cardPrototypes: List<CardPrototype>) {
+        val parent= screen.namedActorOrError(cardsParentName) as CustomFlexBox
+        val childs= parent.children.filterIsInstance<CustomImageActor>()
     }
 
     private fun addListener(screen: OnjScreen) {

@@ -475,7 +475,10 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<OnjObject>("data").value,
             parent,
             screen
-        )!!
+        )!!.apply {
+            //needed, because otherwise stylemanager gets overwritten
+            return this
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
