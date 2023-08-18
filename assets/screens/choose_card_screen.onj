@@ -11,8 +11,8 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "shop_add_to_backpack",
-        "shop_add_to_deck",
+        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "choose_card_add_to_backpack",
+        "choose_card_add_to_deck",
         "shop_background_no_biome", /*temp -> */ "card%%bullet",
         "chooseCard_cardsBackground",
         ...(sharedComponents.backpackAssets),
@@ -35,7 +35,7 @@ options: {
     screenController: $ChooseCardScreenController {
         cardsFile: "config/cards.onj",
         leaveButtonName: "leaveLabel",
-        cardsParentName: "cardsWidget",
+        cardsParentName: "cardsParent",
         addToBackpackWidgetName: "addToBackpackWidget",
         addToDeckWidgetName: "addToDeckWidget",
     }
@@ -83,11 +83,11 @@ root: $Box {
     $Image {
         zIndex: 200,
         name: "addToDeckWidget",
-        textureName: "shop_add_to_deck",
+        textureName: "choose_card_add_to_deck",
         scaleX: 0.9,
         scaleY: 0.9,
         reportDimensionsWithScaling: true,
-        dragAndDrop: $ShopDropTarget {
+        dragAndDrop: $ChooseCardDropTarget {
             group: "card",
             isToDeck: true,
         },
@@ -112,11 +112,11 @@ root: $Box {
     $Image {
         zIndex: 200,
         name: "addToBackpackWidget",
-        textureName: "shop_add_to_backpack",
+        textureName: "choose_card_add_to_backpack",
         scaleX: 0.9,
         scaleY: 0.9,
         reportDimensionsWithScaling: true,
-        dragAndDrop: $ShopDropTarget {
+        dragAndDrop: $ChooseCardDropTarget {
             group: "card",
             isToDeck: false,
         },
@@ -129,7 +129,6 @@ root: $Box {
                 width: 30#percent,
                 height: 40.0#percent,
                 alpha: 1.0,
-
             },
             {
                 style_priority: 2,
@@ -146,9 +145,9 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 25#percent,
+                positionTop: 20#percent,
                 positionRight: 32#percent,
-                width: 30#percent,
+                width: 27#percent,
                 height: 40#percent,
             }
         ],
@@ -158,9 +157,9 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 28.5#percent,
-                positionLeft: 30.0#percent,
-                width: 40#percent,
+                positionTop: 23.5#percent,
+                positionLeft: 32.0#percent,
+                width: 36#percent,
                 height: 40#percent,
                 flexDirection: flexDirection.column,
             }
@@ -174,6 +173,7 @@ root: $Box {
             align: "center",
         },
         $Box {
+            name: "cardsParent",
             styles: [
                 {
                     width: 100#percent,
@@ -184,9 +184,27 @@ root: $Box {
                 },
             ],
             children: [
-                templateCard,
-                templateCard,
-                templateCard,
+                $FromTemplate {
+                    generateFrom: "cardTemplate",
+                    data: {
+                        rotation: 7.0,
+                        bottom: -2.0#percent,
+                    }
+                },
+                $FromTemplate {
+                    generateFrom: "cardTemplate",
+                    data: {
+                        rotation: 0.0,
+                        bottom: 0.0#percent,
+                    }
+                },
+                $FromTemplate {
+                    generateFrom: "cardTemplate",
+                    data: {
+                        rotation: -7.0,
+                        bottom: -2.0#percent,
+                    }
+                },
             ],
         },
         $Label {
@@ -196,19 +214,19 @@ root: $Box {
             fontScale: 0.7,
             align: "center",
         },
-        $Label {
-            name: "leaveLabel",
-            text: "Take no Bullet",
-            font: "red_wing_cm",
-            color: color.red,
-            fontScale: 0.7,
-            align: "center",
-            behaviours: [
-                $OnClickChangeScreenBehaviour {
-                    screenPath: "screens/map_screen.onj"
-                },
-            ],
-        },
+//        $Label {   //this one not used because of phillip beeing indesicive
+//            name: "leaveLabel",
+//            text: "Take no Bullet",
+//            font: "red_wing_cm",
+//            color: color.red,
+//            fontScale: 0.7,
+//            align: "center",
+//            behaviours: [
+//                $OnClickChangeScreenBehaviour {
+//                    screenPath: "screens/map_screen.onj"
+//                },
+//            ],
+//        },
     ],
     $Statusbar {
         zIndex: 400,
@@ -233,20 +251,24 @@ root: $Box {
 ],
 
 templates: [
-    $Box {
-        template_name: "cardsWidgetParent",
+    $Image {
+        template_name: "cardTemplate",
         template_keys: {
-            "name": "name",
-            "textureName": "textureName"
+            "styles.0.rotation": "rotation",
+            "styles.0.positionBottom": "bottom",
         },
+        textureName: "card%%bullet",
+        scaleX: 0.31,
+        scaleY: 0.31,
+        reportDimensionsWithScaling: true,
         styles: [
             {
-                marginLeft: 2.0#percent,
-                marginRight: 2.0#percent,
-                width: 21.0#percent,
-                height: 44.5#percent,
+                width: 150.0#points,
+                height: 150.0#points,
+                rotation: 0.0,
+                positionBottom: 0#points,
             }
-        ],
+        ]
     },
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),

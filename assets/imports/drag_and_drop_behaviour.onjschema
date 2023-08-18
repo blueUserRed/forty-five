@@ -49,6 +49,15 @@ $DragAndDropBehaviour {
         ...dragAndDropBehaviourSharedKeys
     }
 
+    $ChooseCardDragSource{
+        ...dragAndDropBehaviourSharedKeys
+    }
+
+   $ChooseCardDropTarget{
+        isToDeck: boolean,
+        ...dragAndDropBehaviourSharedKeys
+    }
+
     $BackpackDragSource{
         ...dragAndDropBehaviourSharedKeys
     }
