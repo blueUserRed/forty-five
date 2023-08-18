@@ -377,6 +377,14 @@ textures: [
     {
         name: "chooseCard_cardsBackground",
         file: "textures/chooseCard/cards_background.png"
+    },
+    {
+        name: "chooseCard_add_to_backpack",
+        file: "textures/chooseCard/to_backpack.png"
+    },
+    {
+        name: "chooseCard_add_to_deck",
+        file: "textures/chooseCard/to_deck.png"
     }
 ],
 

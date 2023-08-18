@@ -124,7 +124,7 @@ object MapManager {
         currentDetailMap = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
         SaveState.currentNode = if (placeAtEnd) currentDetailMap.endNode.index else currentDetailMap.startNode.index
-        switchToMapScreen()
+        changeToMapScreen()
     }
 
     fun write() {
@@ -143,7 +143,7 @@ object MapManager {
         )
     }
 
-    fun switchToMapScreen() {
+    fun changeToMapScreen() {
         FortyFive.changeToScreen(mapScreenPath)
     }
 
