@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
@@ -170,7 +171,9 @@ class DetailMapWidget(
         )
     }
 
-    fun onStartButtonClicked() {
+    fun onStartButtonClicked(startButton: Actor? = null) {
+        val btn = startButton ?: screen.namedActorOrError(startButtonName)
+        if (btn is DisableActor && btn.isDisabled) return
         playerNode.event?.start()
     }
 
@@ -209,8 +212,7 @@ class DetailMapWidget(
         if (!setupStartButtonListener) {
             val startButton = screen.namedActorOrError(startButtonName)
             startButton.onButtonClick {
-                if (startButton is DisableActor && startButton.isDisabled) return@onButtonClick
-                onStartButtonClicked()
+                onStartButtonClicked(startButton)
             }
             setupStartButtonListener = true
             setupMapEvent(playerNode.event)
