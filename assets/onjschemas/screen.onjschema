@@ -386,6 +386,14 @@ $ScreenController {
         addToDeckWidgetName: string,
         addToBackpackWidgetName: string,
     }
+
+    $ChooseCardScreenController {
+        cardsFile: string,
+        leaveButtonName: string,
+        cardsParentName: string,
+        addToDeckWidgetName: string,
+        addToBackpackWidgetName: string,
+    }
 }
 
 $KeyAction {

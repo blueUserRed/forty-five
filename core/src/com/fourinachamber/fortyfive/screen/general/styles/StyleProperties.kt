@@ -598,7 +598,7 @@ class BackgroundStyleProperty<T>(
     override fun get(node: YogaNode): String = target.backgroundHandle ?: nullHandle
 
     companion object {
-        const val nullHandle = "%%--null%%--" // lets hope nobody names their texture this
+        const val nullHandle = "%%--null%%--" // let's hope nobody names their texture this
     }
 
 }

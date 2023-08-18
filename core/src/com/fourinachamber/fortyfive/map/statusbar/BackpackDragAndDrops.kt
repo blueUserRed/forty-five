@@ -64,7 +64,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     fun backToBackpack(card: CustomFlexBox) {
         val fromDeck = card.name.split(Backpack.NAME_SEPARATOR_STRING)[1] == "deck"
         if (fromDeck) {
-            if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
+            if (SaveState.curDeck.canRemoveCards()) {
                 SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
             } else {
                 CustomWarningParent.getWarning(card.screen).addWarning(

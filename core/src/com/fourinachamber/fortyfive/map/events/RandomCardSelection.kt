@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.events
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.utils.random
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -13,6 +14,9 @@ import java.lang.Exception
 import kotlin.random.Random
 
 @Suppress("MemberVisibilityCanBePrivate")
+/**
+ * generates with the [getRandomCards] method for [Card] and [CardPrototype] random values with certain types and restrictions
+ */
 object RandomCardSelection {
 
     private var allTypes: Map<String, List<CardChange>> = mapOf()
@@ -52,26 +56,26 @@ object RandomCardSelection {
      * @param nbrOfCards how many cards you want. However, there can be fewer cards remaining after applying the effects
      * @throws Exception if a type is not known
      */
-    fun getRandomCards(
-        cards: List<Card>,
+    fun <T> getRandomCards(
+        cards: List<T>,
         changeNames: List<String>,
         cardsMaxOnce: Boolean = false,
         nbrOfCards: Int,
         rnd: Random = Random(0),
-    ): List<Card> {
+    ): List<T> {
         if (nbrOfCards >= cards.size && cardsMaxOnce) return cards
         val (tempCards, tempChances) = getCardsWithChances(cards.toMutableList(), changeNames)
         return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, cardsMaxOnce)
     }
 
-    fun getCardsFromChances(
+    fun <T> getCardsFromChances(
         nbrOfCards: Int,
-        tempCards: MutableList<Card>,
+        tempCards: MutableList<T>,
         tempChances: MutableList<Float>,
         rnd: Random,
         cardsMaxOnce: Boolean
-    ): MutableList<Card> {
-        val res: MutableList<Card> = mutableListOf()
+    ): MutableList<T> {
+        val res: MutableList<T> = mutableListOf()
         for (i in 0 until nbrOfCards) {
             if (tempCards.size == 0) break
             val index = getRandomIndex(tempChances, rnd)
@@ -84,10 +88,10 @@ object RandomCardSelection {
         return res
     }
 
-    fun getCardsWithChances(
-        cards: List<Card>,
+    fun <T> getCardsWithChances(
+        cards: List<T>,
         changeNames: List<String>
-    ): Pair<MutableList<Card>, MutableList<Float>> {
+    ): Pair<MutableList<T>, MutableList<Float>> {
         val tempCards = cards.toMutableList()
         val tempChances = tempCards.map { 0F }.toMutableList()
         changeNames.forEach { name ->
@@ -113,7 +117,7 @@ object RandomCardSelection {
 interface CardChange {
     val selector: Selector
 
-    fun applyEffects(cards: MutableList<Card>, chances: MutableList<Float>)
+    fun <T> applyEffects(cards: MutableList<T>, chances: MutableList<Float>)
 
     companion object {
         fun getFromOnj(onj: OnjObject): CardChange {
@@ -138,7 +142,7 @@ interface CardChange {
     }
 
     class BlackList(override val selector: Selector) : CardChange {
-        override fun applyEffects(cards: MutableList<Card>, chances: MutableList<Float>) {
+        override fun <T> applyEffects(cards: MutableList<T>, chances: MutableList<Float>) {
             var i = 0
             while (i < cards.size) {
                 if (selector.isPartOf(cards[i])) {
@@ -150,7 +154,7 @@ interface CardChange {
     }
 
     class ProbabilityAddition(override val selector: Selector, private val probChange: Float) : CardChange {
-        override fun applyEffects(cards: MutableList<Card>, chances: MutableList<Float>) {
+        override fun <T> applyEffects(cards: MutableList<T>, chances: MutableList<Float>) {
             for (i in cards.indices) {
                 if (selector.isPartOf(cards[i])) chances[i] += probChange
             }
@@ -158,8 +162,8 @@ interface CardChange {
     }
 
     class PriceMultiplier(override val selector: Selector, private val priceMulti: Double) : CardChange {
-        override fun applyEffects(cards: MutableList<Card>, chances: MutableList<Float>) {
-            cards.filter { selector.isPartOf(it) }.forEach {
+        override fun <T> applyEffects(cards: MutableList<T>, chances: MutableList<Float>) {
+            cards.filterIsInstance<Card>().filter { selector.isPartOf(it) }.forEach {
                 it.price = (it.price * priceMulti).toInt()
             }
         }
@@ -167,7 +171,7 @@ interface CardChange {
 }
 
 interface Selector {
-    fun isPartOf(card: Card): Boolean
+    fun <T> isPartOf(card: T): Boolean
 
     companion object {
         fun getFromOnj(onj: OnjNamedObject): Selector {
@@ -181,12 +185,13 @@ interface Selector {
     }
 
     class ByNameSelector(private val name: String) : Selector {
-        override fun isPartOf(card: Card): Boolean = card.name == name
+        override fun <T> isPartOf(card: T): Boolean =
+            if (card is Card) card.name == name else if (card is CardPrototype) card.name == name else false
 
     }
 
     class ByTagSelector(private val name: String) : Selector {
-        override fun isPartOf(card: Card): Boolean = name in card.tags
-
+        override fun <T> isPartOf(card: T): Boolean =
+            if (card is Card)  name in card.tags else if (card is CardPrototype) name in card.tags else false
     }
 }

@@ -29,7 +29,7 @@ class ShopCardsHandler(
 
     init {
         val onj = OnjParser.parseFile(dataFile)
-        cardsFileSchema.assertMatches(onj)
+        Card.cardsFileSchema.assertMatches(onj)
         onj as OnjObject
         val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
@@ -113,9 +113,6 @@ class ShopCardsHandler(
 
     companion object {
 
-        private val cardsFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
-        }
         const val logTag: String = "ShopCardsHandler"
     }
 }

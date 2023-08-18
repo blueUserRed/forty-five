@@ -110,12 +110,8 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     fun displayBuyPopups() {
         val curDeck = SaveState.curDeck
-        if (curDeck.nextFreeSlot() != -1) {
-            addToDeckWidget.enterActorState("display")
-        }
-        if (curDeck.cardPositions.size >= SaveState.Deck.minDeckSize) {
-            addToBackpackWidget.enterActorState("display")
-        }
+        if (curDeck.canAddCards()) addToDeckWidget.enterActorState("display")
+        if (curDeck.canRemoveCards()) addToBackpackWidget.enterActorState("display")
     }
 
     fun closeBuyPopups() {
