@@ -20,6 +20,16 @@
   background-clip: border-box;
 }
 
+.deco-card {
+  position: absolute;
+  width: 10%;
+}
+@media screen and (max-width: 750px) {
+  .deco-card {
+    width: 15%;
+  }
+}
+
 body {
   margin: 0 0 0 0;
   overflow-y: scroll;
@@ -70,6 +80,7 @@ header a {
 
 section.sub-page {
   width: 100%;
+  position: relative;
 }
 
 #overlay {
@@ -83,7 +94,7 @@ section.sub-page {
   background-size: cover;
   background-position: center;
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 1;
   z-index: 300;
 }
 
@@ -124,6 +135,7 @@ section.sub-page {
   }
 }
 #main-page #title-map {
+  position: relative;
   background-image: url("../assets/map.png");
   background-repeat: no-repeat;
   background-size: cover;
@@ -140,12 +152,12 @@ section.sub-page {
     margin-top: -4.5cm;
   }
 }
-@media screen and (min-width: 1300px) {
+@media screen and (min-width: 1400px) {
   #main-page #title-map {
-    width: 33cm;
+    width: 31.5cm;
   }
 }
-#main-page #title-map img {
+#main-page #title-map #main-logo {
   width: 40%;
   margin-top: 23%;
 }
@@ -154,9 +166,49 @@ section.sub-page {
   margin-top: 9%;
   font-size: 2vw;
 }
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 1150px) {
   #main-page #title-map .download {
     font-size: 0.6cm;
+  }
+}
+#main-page #title-map #deco-revolver {
+  position: absolute;
+  width: 38%;
+  transform: rotate(-78deg) translate(-70%, -180%);
+}
+#main-page #title-map #deco-card-1 {
+  top: 8%;
+  left: -10%;
+  transform: rotate(120deg);
+}
+@media screen and (max-width: 750px) {
+  #main-page #title-map #deco-card-1 {
+    left: -2%;
+  }
+}
+#main-page #title-map #deco-card-2 {
+  top: 90%;
+  left: -12%;
+  transform: rotate(10deg);
+}
+@media screen and (max-width: 750px) {
+  #main-page #title-map #deco-card-2 {
+    left: -4%;
+  }
+}
+#main-page #title-map #deco-card-3 {
+  top: 18%;
+  left: 100%;
+  transform: rotate(30deg);
+}
+@media screen and (min-width: 1400px) {
+  #main-page #title-map #deco-card-3 {
+    left: 108%;
+  }
+}
+@media screen and (max-width: 750px) {
+  #main-page #title-map #deco-card-3 {
+    left: 95%;
   }
 }
 #main-page #trailer-container {
@@ -177,7 +229,7 @@ section.sub-page {
     width: 100%;
   }
 }
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 1150px) {
   #main-page #trailer-container {
     width: 26cm;
   }
@@ -191,6 +243,7 @@ section.sub-page {
   z-index: 400;
 }
 #main-page #main-description {
+  position: relative;
   width: 110%;
   display: flex;
   flex-direction: column;
@@ -205,7 +258,7 @@ section.sub-page {
     width: 120%;
   }
 }
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 1150px) {
   #main-page #main-description {
     width: 32cm;
   }
@@ -220,6 +273,101 @@ section.sub-page {
     font-size: 4vw;
     padding-bottom: 4cm;
   }
+}
+#main-page #main-description #deco-card-4 {
+  top: 20%;
+  left: 0%;
+  transform: rotate(10deg);
+}
+#main-page #main-description #deco-card-5 {
+  top: 40%;
+  left: 90%;
+  transform: rotate(15deg);
+}
+@media screen and (min-width: 1150px) {
+  #main-page #main-description #deco-card-5 {
+    left: 100%;
+  }
+}
+@media screen and (min-width: 1400px) {
+  #main-page #main-description #deco-card-5 {
+    left: 107%;
+  }
+}
+@media screen and (max-width: 750px) {
+  #main-page #main-description #deco-card-5 {
+    left: 90%;
+  }
+}
+#main-page #main-description #deco-card-6 {
+  width: 15%;
+  top: 70%;
+  left: -8%;
+  transform: rotate(32deg);
+  z-index: 3;
+}
+@media screen and (max-width: 750px) {
+  #main-page #main-description #deco-card-6 {
+    width: 20%;
+    left: 4%;
+    top: 78%;
+  }
+}
+#main-page #main-description #deco-card-7 {
+  width: 15%;
+  top: 88%;
+  left: -8%;
+  transform: rotate(-10deg);
+  z-index: 2;
+}
+@media screen and (max-width: 750px) {
+  #main-page #main-description #deco-card-7 {
+    width: 20%;
+    left: 4%;
+  }
+}
+#main-page #main-description #deco-card-8 {
+  width: 12%;
+  top: 88%;
+  left: 3%;
+  transform: rotate(10deg);
+  z-index: 3;
+}
+@media screen and (max-width: 750px) {
+  #main-page #main-description #deco-card-8 {
+    width: 16%;
+    left: 15%;
+  }
+}
+#main-page #main-description #micro-comic-container {
+  background-image: url("../assets/bg_grey.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+  height: 35%;
+  top: 70%;
+  left: 60%;
+}
+@media screen and (min-width: 1400px) {
+  #main-page #main-description #micro-comic-container {
+    left: 80%;
+    height: 40%;
+  }
+}
+@media screen and (max-width: 750px) {
+  #main-page #main-description #micro-comic-container {
+    height: 30%;
+    top: 80%;
+    left: 55%;
+  }
+}
+#main-page #main-description #micro-comic-container #deco-micro-comic {
+  width: 70%;
 }
 
 footer {
@@ -252,7 +400,7 @@ footer .links a {
   text-decoration: none;
   font-size: 3vw;
 }
-@media screen and (min-width: 1100px) {
+@media screen and (min-width: 1150px) {
   footer .links a {
     font-size: 0.6cm;
   }
