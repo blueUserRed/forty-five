@@ -297,7 +297,7 @@ class ChooseCardMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = "You can choose one of three cards or choose to take none."
+    override val descriptionText: String = "You can choose one of three cards."
     override val displayName: String = "Ominous person"
 
     override fun start() {

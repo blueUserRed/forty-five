@@ -90,7 +90,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
                 screen
             )!! as CustomImageActor
             curActor.name = curCard.name
-            curActor.drawable = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
+            curActor.programmedDrawable = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
         }
     }
 
