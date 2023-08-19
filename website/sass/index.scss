@@ -44,6 +44,7 @@ $our-project-break: 950px;
 body {
     margin: 0 0 0 0;
     overflow-y: scroll;
+    // overflow-x: scroll;
     overflow-x: clip;
     font-family: "Bahnschrift";
     color: $forty-white;
@@ -95,6 +96,28 @@ header {
 section.sub-page {
     width: 100%;
     position: relative;
+}
+
+section.sub-page .title-card {
+    position: relative;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 90%;
+    margin-top: -5cm;
+    aspect-ratio: 1.646;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    @include narrow {
+        width: 100%;
+        margin-top: -4.5cm;
+    }
+
+    @include very-wide {
+        width: 31.5cm;
+    }
 }
 
 #overlay {
@@ -150,26 +173,13 @@ section.sub-page {
     }
 
     #title-map {
-        position: relative;
         background-image: url("../assets/map.png");
-        background-repeat: no-repeat;
-        background-size: cover;
-        width: 90%;
-        margin-top: -5cm;
-        aspect-ratio: 1.646;
 
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
+        
         @include narrow {
-            width: 100%;
             margin-top: -4.5cm;
         }
 
-        @include very-wide {
-            width: 31.5cm;
-        }
 
         #main-logo {
             width: 40%;
@@ -386,6 +396,127 @@ section.sub-page {
                 width: 70%;
             }
 
+        }
+
+    }
+
+}
+
+#about-page {
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    #about-page-title {
+        background-image: url("../assets/about_page_title.png");
+        background-size: 100% 100%;
+        margin-top: -1.3cm;
+        aspect-ratio: 910 / 686;
+    }
+
+    #about-description {
+        position: relative;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: -4.2cm;
+        margin-left: -15%;
+        transform: rotate(-3deg);
+        z-index: 0;
+
+        @include narrow {
+            width: 90%;
+            margin-top: -2cm;
+        }
+
+        @include wide {
+            width: 28cm;
+        }
+
+        p {
+            color: black;
+            font-size: 0.6cm;
+            padding: 3cm 19% 8cm 19%;
+
+            @include narrow {
+                font-size: 3.4vw;
+                padding-bottom: 4cm;
+            }
+
+        }
+
+        #group-picture-description {
+            position: absolute;
+            width: 40%;
+            top: 30%;
+            left: 85%;
+            transform: rotate(10deg);
+
+            @include narrow {
+                display: none;
+            }
+        }
+    }
+
+    #group-picture-standalone {
+        display: none;
+        width: 60%;
+        transform: rotate(-10deg);
+        margin-top: -4cm;
+
+        @include narrow {
+            display: block;
+        }
+    }
+
+    #member-pictures {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        align-content: space-between;
+        flex-wrap: wrap;
+        width: 80%;
+
+        @include narrow {
+            margin-top: 2cm;
+        }
+
+        .member-picture {
+            width: 20%;
+            margin: 4%;
+
+            @include very-wide {
+                margin: 2cm;
+            }
+
+            @include wide {
+                margin: 1.2cm;
+            }
+
+        }
+
+        #member-picture-1 {
+            transform: rotate(-10deg);
+        }
+
+        #member-picture-2 {
+            transform: rotate(4deg);
+        }
+
+        #member-picture-3 {
+            transform: rotate(0deg);
+        }
+
+        #member-picture-4 {
+            transform: rotate(-6deg);
+        }
+
+        #member-picture-5 {
+            transform: rotate(10deg);
         }
 
     }
