@@ -411,6 +411,7 @@ backpack: $Backpack {
         ],
     } children [
         $Box {
+            zIndex: 5,
             styles: [
                 {
                     width: 100#percent,
