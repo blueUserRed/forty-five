@@ -21,17 +21,17 @@ import onj.value.OnjString
 import kotlin.random.Random
 
 //BIOME
-        // road generation beeinflussen
-        // decorations mehr
+// road generation beeinflussen
+// decorations mehr
 
-        // backgrounds
-        // event-backgrounds
+// backgrounds
+// event-backgrounds
 
 // evtl. straßen different
 
 // encounter modifier wahrscheinlicher
 
-        // cards wahrscheinlicher
+// cards wahrscheinlicher
 
 
 //TODO Asking marvin:
@@ -44,13 +44,15 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
     private var context: ChooseCardMapEvent? = null
+    private lateinit var addToDeckWidget: CustomImageActor
+    private lateinit var addToBackpackWidget: CustomImageActor
+    private var screen: OnjScreen? = null
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is ChooseCardMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         this.context = context
         val types = context.types.toMutableList()
         types.add(context.biome)
         init(onjScreen, context.seed, types)
-        initDropTargets(onjScreen)
     }
 
     private fun init(screen: OnjScreen, seed: Long, types: MutableList<String>) {
@@ -66,6 +68,15 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         )
 //        addListener(screen) //phillip said for now not this feature bec he is indecisive
         initCards(screen, cards)
+        this.screen = screen
+        this.addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
+        this.addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
+        updateDropTargets()
+    }
+
+    override fun update() {
+        super.update()
+        updateDropTargets()
     }
 
     private fun initCards(screen: OnjScreen, cardPrototypes: List<CardPrototype>) {
@@ -102,13 +113,12 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         })
     }
 
-    private fun initDropTargets(screen: OnjScreen) {
-        if (!SaveState.curDeck.canAddCards()) (screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor).enterActorState(
-            "disabled"
-        )
-        if (!SaveState.curDeck.canRemoveCards()) (screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor).enterActorState(
-            "disabled"
-        )
+    private fun updateDropTargets() {
+        if (!SaveState.curDeck.canAddCards()) addToDeckWidget.enterActorState("disabled")
+//        else addToDeckWidget.leaveActorState("disabled")
+
+        if (!SaveState.curDeck.canRemoveCards()) addToBackpackWidget.enterActorState("disabled")
+//        else  addToBackpackWidget.leaveActorState("disabled")
     }
 
     fun getCard(card: String, addToDeck: Boolean) {

@@ -22,7 +22,6 @@ class ShopCardsHandler(
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
     private val labels: MutableList<CustomLabel> = mutableListOf()
-    private val chances: HashMap<String, Float> = hashMapOf()
 
     init {
         val onj = OnjParser.parseFile(dataFile)
@@ -43,7 +42,6 @@ class ShopCardsHandler(
         cards.addAll(cardsToAdd)
         cards.shuffle(rnd)
         cards.forEach { addCard(it) }
-        _allCards.clear()
         updateCards()
     }
 
