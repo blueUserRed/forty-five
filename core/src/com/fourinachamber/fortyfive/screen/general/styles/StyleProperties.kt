@@ -322,6 +322,7 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(AspectRatioStyleProperty(this, screen))
     styleManager.addStyleProperty(AlphaStyleProperty(this, screen))
     styleManager.addStyleProperty(RotationStyleProperty(this, screen))
+    styleManager.addStyleProperty(TouchableStyleProperty(this, screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.TOP, "marginTop", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.LEFT, "marginLeft", screen))
@@ -419,10 +420,10 @@ fun <T> T.addTextInputStyles(screen: OnjScreen) where T : CustomInputField, T : 
 // FlexBox
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TouchableStyleProperty(
-    target: CustomFlexBox,
+class TouchableStyleProperty<Target>(
+    target: Target,
     screen: OnjScreen
-) : StyleProperty<CustomFlexBox, Touchable>(
+) : StyleProperty<Target, Touchable> (
     "touchable",
     target,
     Touchable.disabled,
@@ -430,7 +431,7 @@ class TouchableStyleProperty(
     false,
     true,
     screen
-) {
+) where Target : Actor, Target : StyledActor {
     override fun set(data: Touchable, node: YogaNode) {
         target.touchable = data
     }
@@ -551,7 +552,6 @@ fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : Style
     addActorStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, screen))
-    styleManager.addStyleProperty(TouchableStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, screen))
     styleManager.addStyleProperty(FlexWrapStyleProperty(this, screen))
@@ -562,7 +562,7 @@ fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : Style
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.ALL, "padding"))
 }
 
-fun <T> T.addScrollFlexBoxStyles(screen: OnjScreen) where T : CustomScrollableFlexBox, T : StyledActor {
+fun CustomScrollableFlexBox.addScrollFlexBoxStyles(screen: OnjScreen) {
     addFlexBoxStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.LEFT, "cuttingLeft"))

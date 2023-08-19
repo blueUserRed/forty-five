@@ -26,10 +26,13 @@ class BackpackDragSource(
         curFlex.currentlyDraggedChild = actor
 
         actor.parent.parent.parent.toFront() //the side which say if its backpack or deck
-
         val obj = BackpackDragPayload(actor)
         payload.obj = obj
         obj.resetTo(actor, Vector2(actor.x, actor.y))
+
+        curFlex.fixedZIndex = 10
+        (curFlex.parent as ZIndexGroup).resortZIndices()
+        obj.resetZIndex(curFlex)
         return payload
     }
 
@@ -79,6 +82,11 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
 
     fun invalidateParents(card: Actor) {
         (card as CustomFlexBox).invalidateHierarchy()
+    }
+
+    fun resetZIndex(curFlex: CustomScrollableFlexBox)=tasks.add {
+        curFlex.fixedZIndex = 0
+        (curFlex.parent as ZIndexGroup).resortZIndices()
     }
 }
 
