@@ -7,11 +7,8 @@ import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.random
 import dev.lyze.flexbox.FlexBox
 import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
@@ -67,7 +64,7 @@ class ShopCardsHandler(
             curParent,
             screen
         ) as CustomImageActor
-        img.drawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
+        img.programmedDrawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
         val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap2["name"] = OnjString("CardLabel" + parent.children.size)
         tempMap2["text"] = OnjString("" + card.price + "$")

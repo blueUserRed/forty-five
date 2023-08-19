@@ -233,7 +233,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     override var isHoveredOver: Boolean = false
 
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var styleManager: StyleManager? = null
 
@@ -329,7 +329,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -341,9 +341,16 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override var backgroundHandle: String? = drawableHandle
         set(value) {
-            if (field != value) drawable = null
+            if (field != value) loadedDrawable = null
             field = value
         }
+    protected var loadedDrawable: Drawable? = null
+        private set
+
+    /**
+     * overrites and ignores the background handle and the loaded drawable
+     */
+    var programmedDrawable: Drawable? = null
 
     override var isSelected: Boolean = false
 
@@ -374,13 +381,12 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
         val backgroundHandle = backgroundHandle
-
-        if (backgroundHandle != null && drawable == null) {
-            drawable = ResourceManager.get(screen, backgroundHandle)
-            drawable = drawable
+        if (programmedDrawable != null) drawable = programmedDrawable
+        else if (backgroundHandle != null && loadedDrawable == null) {
+            loadedDrawable = ResourceManager.get(screen, backgroundHandle)
+            drawable = loadedDrawable
             invalidateHierarchy()
         }
-
         if (batch == null || drawable == null) {
             super.draw(batch, parentAlpha)
             return
@@ -428,8 +434,9 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     fun forceLoadDrawable() {
         val backgroundHandle = backgroundHandle
-        if (backgroundHandle == null || drawable != null) return
-        drawable = ResourceManager.get(screen, backgroundHandle)
+        if (backgroundHandle == null || loadedDrawable != null) return
+        loadedDrawable = ResourceManager.get(screen, backgroundHandle)
+        drawable = loadedDrawable
         invalidateHierarchy()
     }
 
@@ -500,7 +507,7 @@ open class CustomFlexBox(
     override var isHoveredOver: Boolean = false
 
     override var styleManager: StyleManager? = null
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
@@ -869,7 +876,8 @@ class CustomScrollableFlexBox(
         batch ?: return
         batch.flush()
         val viewport = screen.stage.viewport
-        val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
+        val xPixel =
+            (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
         val yPixel =
             (Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight
         if (isBackgroundStretched) {
@@ -945,7 +953,8 @@ class CustomScrollableFlexBox(
         )
         if (!ScissorStack.pushScissors(scissorBack)) return true
         val backgroundHandle = backgroundHandle
-        if (backgroundHandle != null && background == null) background = ResourceManager.get(screen, backgroundHandle)
+        if (backgroundHandle != null && background == null) background =
+            ResourceManager.get(screen, backgroundHandle)
         validate()
         if (background != null) {
             if (isScrollDirectionVertical) background?.draw(
@@ -1027,7 +1036,8 @@ class RotatableImageActor(
         onTouchEvent { event ->
             when (event.type) {
                 InputEvent.Type.touchDown -> {
-                    lastPos = viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
+                    lastPos =
+                        viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
                 }
 
                 InputEvent.Type.touchUp -> lastPos = null
@@ -1169,7 +1179,7 @@ open class CustomVerticalGroup(
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var backgroundHandle: String? = null
         set(value) {

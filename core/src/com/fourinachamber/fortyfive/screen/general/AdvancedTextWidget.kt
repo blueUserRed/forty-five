@@ -269,7 +269,7 @@ class IconAdvancedTextPart(
     private fun recalcLayout() {
         val layout = GlyphLayout(font, "qh")
         iconHeight = layout.height * dialogFontScale * 1.5f
-        val drawable = drawable!!
+        val drawable = loadedDrawable!!
         val aspectRatio = drawable.minWidth / drawable.minHeight
         iconWidth = aspectRatio * iconHeight
     }
@@ -280,11 +280,12 @@ class IconAdvancedTextPart(
     }
 
     override fun update() {
+        if (loadedDrawable == null) forceLoadDrawable()
         if (drawable == null) forceLoadDrawable()
         if (calculatedLayout && !isVisible) {
             isVisible = true
         }
-        if (!calculatedLayout && drawable != null && isShown) {
+        if (!calculatedLayout && loadedDrawable != null && isShown) {
             recalcLayout()
             calculatedLayout = true
             invalidateHierarchy()

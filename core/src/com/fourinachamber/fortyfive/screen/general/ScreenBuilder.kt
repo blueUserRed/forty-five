@@ -567,8 +567,11 @@ class ScreenBuilder(val file: FileHandle) {
             fixedZIndex = it.toInt()
         }
 
+        widgetOnj.ifHas<String>("name") {
+            namedActors[it] = this
+            this.name = it
+        }
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
-        widgetOnj.ifHas<String>("name") { namedActors[it] = this }
         widgetOnj.ifHas<String>("touchable") { touchable = Touchable.valueOf(it) }
 
         onClick { fire(ButtonClickEvent()) }
