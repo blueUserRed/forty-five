@@ -31,6 +31,16 @@ $our-project-break: 950px;
     background-clip: border-box;
 }
 
+.deco-card {
+    position: absolute;
+    width: 10%;
+
+    @include narrow {
+        width: 15%;
+    }
+
+}
+
 body {
     margin: 0 0 0 0;
     overflow-y: scroll;
@@ -84,6 +94,7 @@ header {
 
 section.sub-page {
     width: 100%;
+    position: relative;
 }
 
 #overlay {
@@ -97,7 +108,7 @@ section.sub-page {
     background-size: cover;
     background-position: center;
     pointer-events: none;
-    opacity: 0.8;
+    opacity: 1.0;
     z-index: $overlay-zindex;
 }
 
@@ -139,6 +150,7 @@ section.sub-page {
     }
 
     #title-map {
+        position: relative;
         background-image: url("../assets/map.png");
         background-repeat: no-repeat;
         background-size: cover;
@@ -156,10 +168,10 @@ section.sub-page {
         }
 
         @include very-wide {
-            width: 33cm;
+            width: 31.5cm;
         }
 
-        img {
+        #main-logo {
             width: 40%;
             margin-top: 23%;
         }
@@ -173,6 +185,46 @@ section.sub-page {
                 font-size: 0.6cm;
             }
 
+        }
+
+        #deco-revolver {
+            position: absolute;
+            width: 38%;
+            transform: rotate(-78deg) translate(-70%, -180%);
+        }
+
+        #deco-card-1 {
+            top: 8%;
+            left: -10%;
+            transform: rotate(120deg);
+
+            @include narrow {
+                left: -2%;
+            }
+        }
+    
+        #deco-card-2 {
+            top: 90%;
+            left: -12%;
+            transform: rotate(10deg);
+
+            @include narrow {
+                left: -4%;
+            }
+        }
+    
+        #deco-card-3 {
+            top: 18%;
+            left: 100%;
+            transform: rotate(30deg);
+
+            @include very-wide {
+                left: 108%;
+            }
+
+            @include narrow {
+                left: 95%;
+            }
         }
 
     }
@@ -210,6 +262,7 @@ section.sub-page {
     }
 
     #main-description {
+        position: relative;
         width: 110%;
         display: flex;
         flex-direction: column;
@@ -236,6 +289,103 @@ section.sub-page {
                 font-size: 4vw;
                 padding-bottom: 4cm;
             }
+
+        }
+
+        #deco-card-4 {
+            top: 20%;
+            left: -0%;
+            transform: rotate(10deg);
+        }
+
+        #deco-card-5 {
+            top: 40%;
+            left: 90%;
+            transform: rotate(15deg);
+
+            @include wide {
+                left: 100%;
+            }
+
+            @include very-wide {
+                left: 107%;
+            }
+
+            @include narrow {
+                left: 90%;
+            }
+        }
+
+        #deco-card-6 {
+            width: 15%;
+            top: 70%;
+            left: -8%;
+            transform: rotate(32deg);
+            z-index: 3;
+
+            @include narrow {
+                width: 20%;
+                left: 4%;
+                top: 78%;
+            }
+        }
+
+        #deco-card-7 {
+            width: 15%;
+            top: 88%;
+            left: -8%;
+            transform: rotate(-10deg);
+            z-index: 2;
+
+            @include narrow {
+                width: 20%;
+                left: 4%;
+            }
+        }
+
+        #deco-card-8 {
+            width: 12%;
+            top: 88%;
+            left: 3%;
+            transform: rotate(10deg);
+            z-index: 3;
+
+            @include narrow {
+                width: 16%;
+                left: 15%;
+            }
+        }
+
+        #micro-comic-container {
+            background-image: url("../assets/bg_grey.png");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            position: absolute;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            // padding: 2cm;
+            width: 40%;
+            height: 35%;
+            top: 70%;
+            left: 60%;
+
+            @include very-wide {
+                left: 80%;
+                height: 40%;
+            }
+
+            @include narrow {
+                height: 30%;
+                top: 80%;
+                left: 55%;
+            }
+
+            #deco-micro-comic {
+                width: 70%;
+            }
+
         }
 
     }
