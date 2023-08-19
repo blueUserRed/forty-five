@@ -5,11 +5,15 @@ const numPages = 3;
 let currentPage = 1;
 let scrollToPosition = null;
 
+let lastYScrollPosition = 0;
+
 function main() {
     bindEventListeners(document.getElementsByClassName("to-main-page"), 1);
     bindEventListeners(document.getElementsByClassName("to-about-page"), 2);
     bindEventListeners(document.getElementsByClassName("to-imprint-page"), 3);
 
+    addEventListener("scroll", () => lastYScrollPosition = window.scrollY);
+    addEventListener("resize", () => fixScroll());
     // updateScroll();
 }
 
@@ -28,6 +32,15 @@ function updateScroll() {
         top: 0,
         left: pageWidth * (currentPage - 1),
         behavior: "smooth"
+    });
+}
+
+function fixScroll() {
+    const pageWidth = document.documentElement.scrollWidth / 3;
+    window.scroll({
+        top: lastYScrollPosition,
+        left: pageWidth * (currentPage - 1),
+        behavior: "instant"
     });
 }
 
