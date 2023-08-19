@@ -117,7 +117,7 @@ object MapManager {
         internalName
     }
 
-    fun switchToMap(newMap: String, placeAtEnd: Boolean = false) {
+    fun changeToMap(newMap: String, placeAtEnd: Boolean = false) {
         write()
         val map = lookupMapFile(newMap)
         currentMapFile = map

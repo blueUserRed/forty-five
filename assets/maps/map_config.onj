@@ -93,8 +93,8 @@ generatorConfig: {
                 splitProbability: 0.6,
                 startArea: "test_area",
                 endArea: "salem",
-                scaleWidth: 0.4,
-                scaleLength: 0.4,
+                scaleWidth: 1.0,
+                scaleLength: 1.0,
                 otherAreas: [
                 ],
                 rotation: 1.25,
@@ -121,7 +121,7 @@ generatorConfig: {
                 decorations: [
                     $RandomDistributionFunction {
                         decoration: "map_decoration_grass",
-                        density: 0.2,
+                        density: 0.002,
                         baseWidth: 3.0,
                         baseHeight: 3.0,
                         scaleMin: 0.6,
@@ -140,7 +140,7 @@ generatorConfig: {
 //                    },
                     $MultiClusterDistributionFunction {
                         decoration: "map_decoration_cactus",
-                        density: 0.1,
+                        density: 0.001,
                         baseWidth: 2.0,
                         baseHeight: 4.0,
                         scaleMin: 1.5,
@@ -152,7 +152,7 @@ generatorConfig: {
                     },
                     $SingleClusterDistributionFunction {
                         decoration: "map_decoration_grass",
-                        density: 0.1,
+                        density: 0.001,
                         baseWidth: 3.0,
                         baseHeight: 3.0,
                         scaleMin: 3.5,
