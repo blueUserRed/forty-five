@@ -21,20 +21,22 @@ import onj.value.OnjString
 import kotlin.random.Random
 
 //BIOME
-// road generation beeinflussungen
-// decorations mehr
-// backgrounds
-// event-backgrounds
+        // road generation beeinflussen
+        // decorations mehr
+
+        // backgrounds
+        // event-backgrounds
+
 // evtl. straßen different
+
 // encounter modifier wahrscheinlicher
-// cards wahrscheindlicher
+
+        // cards wahrscheinlicher
 
 
 //TODO Asking marvin:
-// 1. how to make black overlay without images
-// 2. how to make this screen also sometimes from a win-screen
-// 3. system with biomes (my idea is, to have all data for the current biome stored somewhere publicly, or all biome data is stored separately (fe. background different than encounter modifier)
-// 4. problem with overlay for text (if definded after)
+// 1. //solved how to make black overlay without images
+
 class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val cardsFilePath = onj.get<String>("cardsFile")
     private val leaveButtonName = onj.get<String>("leaveButtonName")
@@ -82,7 +84,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
                 mapOf(
                     "rotation" to OnjFloat(curData.first.toDouble()),
                     "bottom" to curData.second.toFloat().toOnjYoga(YogaUnit.PERCENT),
-                    "textureName" to OnjString(Card.cardTexturePrefix + curCard.name)
+                    "textureName" to OnjString(Card.cardTexturePrefix + "bullet")
                 ),
                 parent,
                 screen

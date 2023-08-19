@@ -18,9 +18,12 @@ class ChooseCardDragSource(
     onj: OnjNamedObject,
 ) : CenteredDragSource(dragAndDrop, actor, onj) {
 
+    override fun getActor(): CustomImageActor {
+        return super.getActor() as CustomImageActor
+    }
+
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = this.actor
-        if ((actor !is CustomImageActor)) return null
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
         payload.dragActor = actor
@@ -28,6 +31,8 @@ class ChooseCardDragSource(
         val obj = ChooseCardDragPayload(actor)
         payload.obj = obj
         obj.resetTo(actor, Vector2(actor.x, actor.y))
+        actor.enterActorState("dragged")
+        obj.resetActorState(actor)
         return payload
     }
 
@@ -50,10 +55,12 @@ class ChooseCardDragPayload(val actor: Actor) : ExecutionPayload() {
     /**
      * called when the drag is stopped
      */
-    fun onBuy(addToDeck: Boolean) = tasks.add {
+    fun onDrop(addToDeck: Boolean) = tasks.add {
         val scr = (FortyFive.screen as OnjScreen).screenController as ChooseCardScreenController
         scr.getCard((actor as CustomImageActor).name!!, addToDeck)
     }
+
+    fun resetActorState(actor: CustomImageActor) = tasks.add { actor.leaveActorState("dragged") }
 }
 
 class ChooseCardDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
@@ -61,21 +68,28 @@ class ChooseCardDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamed
 
     private val isToDeck: Boolean = onj.get<Boolean>("isToDeck")
 
+    override fun getActor(): CustomImageActor = super.getActor() as CustomImageActor
+
     override fun drag(
         source: DragAndDrop.Source?,
         payload: DragAndDrop.Payload?,
         x: Float,
         y: Float,
         pointer: Int
-    ): Boolean {
-        return true
+    ): Boolean = if (actor.inActorState("disabled")) {
+        false
+    } else {
+        actor.enterActorState("draggedHover")
+        true
     }
+
+    override fun reset(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?) =
+        actor.leaveActorState("draggedHover")
 
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null) return
         val obj = payload.obj as ChooseCardDragPayload
-        val actor = this.actor
-        if (actor is CustomImageActor && !actor.inActorState("disabled")) obj.onBuy(isToDeck)
+        obj.onDrop(isToDeck)
     }
 }
 

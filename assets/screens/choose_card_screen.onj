@@ -15,6 +15,7 @@ assets: {
         "chooseCard_add_to_deck",
         "shop_background_no_biome", /*temp -> */ "card%%bullet",
         "chooseCard_cardsBackground",
+        "transparent_black_texture",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
@@ -55,28 +56,24 @@ var templateCard = $Image {
     ]
 };
 
-root: $Box {
+root: $Box { //TODO bioms
+
     styles: [
         {
             width: 100.0#percent,
             height: 100.0#percent,
+            background: "shop_background_no_biome",
         }
     ]
 } children [
-    $Image {       //TODO biome for background
-
-        name: "background_img",
-        textureName: "shop_background_no_biome",
-        scaleX: 0.0,
-        scaleY: 0.0,
-        width: worldWidth,
-        height: worldHeight,
-        reportDimensionsWithScaling: true,
+    $Image {
+        scaleX: 1.0,
+        scaleY: 1.0,
+        textureName: "transparent_black_texture",
         styles: [
             {
-                positionType: positionType.absolute,
-                width: (worldWidth)#points,
-                height: (worldHeight)#points,
+                width: 100#percent,
+                height: 100#percent,
             }
         ],
     },
@@ -84,8 +81,8 @@ root: $Box {
         zIndex: 150,
         name: "addToDeckWidget",
         textureName: "chooseCard_add_to_deck",
-        scaleX: 0.9,
-        scaleY: 0.9,
+        scaleX: 0.81,
+        scaleY: 0.81,
         reportDimensionsWithScaling: true,
         dragAndDrop: $ChooseCardDropTarget {
             group: "card",
@@ -95,26 +92,41 @@ root: $Box {
             {
                 style_priority: 1,
                 positionType: positionType.absolute,
-                positionTop: 10.0#percent,
-                positionLeft: 0#percent,
-                width: 30#percent,
-                height: 40.0#percent,
+                positionLeft: 24#percent,
+                width: 18#percent,
+                height: 25.0#percent,
                 alpha: 1.0,
-
             },
             {
                 style_priority: 2,
                 style_condition: actorState("disabled"),
-                alpha: 0.7,
-            }
+                alpha: 0.3,
+            },
+            {
+                style_priority: 2,
+                positionBottom: -5#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                },
+            },
+            {
+                style_priority: 3,
+                style_condition: actorState("draggedHover"),
+                positionBottom: 0#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                },
+            },
         ],
     },
     $Image {
         zIndex: 150,
         name: "addToBackpackWidget",
         textureName: "chooseCard_add_to_backpack",
-        scaleX: 0.9,
-        scaleY: 0.9,
+        scaleX: 0.81,
+        scaleY: 0.81,
         reportDimensionsWithScaling: true,
         dragAndDrop: $ChooseCardDropTarget {
             group: "card",
@@ -124,17 +136,33 @@ root: $Box {
             {
                 style_priority: 1,
                 positionType: positionType.absolute,
-                positionTop: 54.0#percent,
-                positionLeft: 0#percent,
-                width: 30#percent,
-                height: 40.0#percent,
+                positionRight: 24#percent,
+                width: 18#percent,
+                height: 25.0#percent,
                 alpha: 1.0,
             },
             {
                 style_priority: 2,
                 style_condition: actorState("disabled"),
-                alpha: 0.7,
-            }
+                alpha: 0.3,
+            },
+            {
+                style_priority: 2,
+                positionBottom: -5#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                },
+            },
+            {
+                style_priority: 3,
+                style_condition: actorState("draggedHover"),
+                positionBottom: 0#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                },
+            },
         ],
     },
     $Image {
@@ -153,7 +181,7 @@ root: $Box {
         ],
     },
     $Box {
-        zIndex: 300,
+        zIndex: 150,
         styles: [
             {
                 positionType: positionType.absolute,
@@ -173,6 +201,7 @@ root: $Box {
             align: "center",
         },
         $Box {
+            zIndex: 10000,
             name: "cardsParent",
             styles: [
                 {
@@ -245,13 +274,18 @@ templates: [
         dragAndDrop: $ChooseCardDragSource {
             group: "card",
         },
-        zIndex: 10000,
         styles: [
             {
+                style_priority: 1,
                 width: 150.0#points,
                 height: 150.0#points,
                 rotation: 0.0,
                 positionBottom: 0#points,
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("dragged"),
+                rotation: 0.0,
             }
         ]
     },

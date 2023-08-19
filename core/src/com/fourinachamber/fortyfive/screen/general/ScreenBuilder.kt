@@ -476,7 +476,6 @@ class ScreenBuilder(val file: FileHandle) {
             parent,
             screen
         )!!.apply {
-            //needed, because otherwise stylemanager gets overwritten
             return this
         }
 

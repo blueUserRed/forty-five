@@ -341,12 +341,9 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override var backgroundHandle: String? = drawableHandle
         set(value) {
-            if (field != value) loadedDrawable = null
+            if (field != value) drawable = null
             field = value
         }
-
-    protected var loadedDrawable: Drawable? = null
-        private set
 
     override var isSelected: Boolean = false
 
@@ -378,9 +375,9 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         val mask = mask
         val backgroundHandle = backgroundHandle
 
-        if (backgroundHandle != null && loadedDrawable == null) {
-            loadedDrawable = ResourceManager.get(screen, backgroundHandle)
-            drawable = loadedDrawable
+        if (backgroundHandle != null && drawable == null) {
+            drawable = ResourceManager.get(screen, backgroundHandle)
+            drawable = drawable
             invalidateHierarchy()
         }
 
@@ -431,9 +428,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     fun forceLoadDrawable() {
         val backgroundHandle = backgroundHandle
-        if (backgroundHandle == null || loadedDrawable != null) return
-        loadedDrawable = ResourceManager.get(screen, backgroundHandle)
-        drawable = loadedDrawable
+        if (backgroundHandle == null || drawable != null) return
+        drawable = ResourceManager.get(screen, backgroundHandle)
         invalidateHierarchy()
     }
 

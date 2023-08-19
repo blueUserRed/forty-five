@@ -198,7 +198,7 @@ class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEven
     }
 
     override fun start() {
-        MapManager.switchToMap(targetMap, placeAtEnd)
+        MapManager.changeToMap(targetMap, placeAtEnd)
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
