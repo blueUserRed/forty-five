@@ -209,6 +209,7 @@ class ScreenBuilder(val file: FileHandle) {
             if (addedActorsDragAndDrops[group] == null) addedActorsDragAndDrops[group] = mutableListOf()
 
             val dragAndDrop = dragAndDrops[group] ?: DragAndDrop()
+            dragAndDrop.dragTime = 10
             for ((actor, onj) in actors) {
                 if (actor in addedActorsDragAndDrops[group]!!) continue
 
