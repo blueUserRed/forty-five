@@ -15,7 +15,7 @@ class ShopDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
-) : CenteredDragSource(dragAndDrop, actor, onj) {
+) : CenteredDragSource(dragAndDrop, actor, onj, true) {
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = this.actor
@@ -33,6 +33,7 @@ class ShopDragSource(
         val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
         controller.displayBuyPopups()
         obj.closePopups(controller)
+        startReal()
         return payload
     }
 
@@ -50,6 +51,23 @@ class ShopDragSource(
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
         obj.onDragStop()
     }
+
+    override fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean {
+        val actor = this.actor
+        if ((actor !is CustomImageActor) || actor.inActorState("unbuyable")) return false
+        dragAndDrop.setKeepWithinStage(false)
+
+        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = actor.parent
+        actor.toFront()
+        val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
+        controller.displayBuyPopups()
+        return true
+    }
+
+    override fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
+        controller.closeBuyPopups()
+    }
 }
 
 class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
@@ -58,7 +76,7 @@ class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
      */
     fun onBuy(addToDeck: Boolean) = tasks.add {
         val scr = (FortyFive.screen as OnjScreen).screenController as ShopScreenController
-        scr.buyCard(actor,addToDeck)
+        scr.buyCard(actor, addToDeck)
     }
 
     fun closePopups(controller: ShopScreenController) = tasks.add {
@@ -69,7 +87,7 @@ class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
 class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
     DropBehaviour(dragAndDrop, actor, onj) {
 
-    private val isToDeck: Boolean= onj.get<Boolean>("isToDeck")
+    private val isToDeck: Boolean = onj.get<Boolean>("isToDeck")
 
     override fun drag(
         source: DragAndDrop.Source?,

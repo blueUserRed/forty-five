@@ -48,7 +48,6 @@ class SeededMapGenerator(
         addEvents(nodes)
 
         nodes.forEach { it.scale(restrictions.scaleWidth, restrictions.scaleLength) }
-//        println("${restrictions.scaleWidth}     ${restrictions.scaleLength}")
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
         this.nodes = nodes

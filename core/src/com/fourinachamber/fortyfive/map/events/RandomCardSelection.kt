@@ -46,7 +46,6 @@ object RandomCardSelection {
             allTypes[name] = changes
         }
         this.allTypes = allTypes
-        println(allTypes.keys)
     }
 
     /**

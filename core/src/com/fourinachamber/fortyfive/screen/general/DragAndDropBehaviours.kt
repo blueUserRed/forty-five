@@ -2,16 +2,20 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.InputListener
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.game.card.CardDragSource
+import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDragSource
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDropTarget
+import com.fourinachamber.fortyfive.map.events.shop.ShopDragSource
+import com.fourinachamber.fortyfive.map.events.shop.ShopDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
 import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
 import com.fourinachamber.fortyfive.map.statusbar.DeckSlotDropTarget
-import com.fourinachamber.fortyfive.map.events.shop.ShopDragSource
-import com.fourinachamber.fortyfive.map.events.shop.ShopDropTarget
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
 import com.fourinachamber.fortyfive.utils.eitherRight
@@ -128,7 +132,18 @@ abstract class CenteredDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
+    showClickHint: Boolean = false
 ) : DragBehaviour(dragAndDrop, actor, onj) {
+
+    private val centerOnClick = OnClickToCenter(this)
+
+    init {
+        if (actor is OffSettable && showClickHint) actor.addListener(centerOnClick)
+    }
+
+    open fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean = true
+
+    open fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {}
 
     override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
         super.drag(event, x, y, pointer)
@@ -139,6 +154,8 @@ abstract class CenteredDragSource(
         )
         //if there are any errors, it might be because of scaling //see files at commit 17278a0ddd6f821358af53ba331443958292d872
     }
+
+    protected fun startReal() { centerOnClick.realStart = true }
 
     override fun dragStop(
         event: InputEvent?,
@@ -180,3 +197,37 @@ open class ExecutionPayload { //TODO maybe interface, but idk how to set "tasks"
 typealias DragBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DragBehaviour
 typealias DropBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DropBehaviour
 
+class OnClickToCenter(private val src: CenteredDragSource) : ClickListener() {
+
+    var realStart = false
+    private var startOffset: Vector2? = Vector2()
+    override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+        if (button == 0) {
+            if (src.fakeStart(event, x, y, pointer)) {
+                realStart = false
+                startOffset = Vector2(
+                    x * src.actor.scaleX - (src.actor.width / 2),
+                    y * src.actor.scaleY - (src.actor.height / 2)
+                )
+                startOffset?.let {
+                    val actor=src.actor as OffSettable
+                    actor.offsetX += it.x
+                    actor.offsetY += it.y
+                }
+            }
+        }
+        return super.touchDown(event, x, y, pointer, button)
+    }
+    override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+        startOffset?.let {
+            val actor=src.actor as OffSettable
+            actor.offsetX -= it.x
+            actor.offsetY -= it.y
+            if (!realStart){
+                src.fakeStop(event, x, y, pointer)
+            }
+        }
+        startOffset = null
+        super.touchUp(event, x, y, pointer, button)
+    }
+}

@@ -16,13 +16,14 @@ class ChooseCardDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
-) : CenteredDragSource(dragAndDrop, actor, onj) {
+) : CenteredDragSource(dragAndDrop, actor, onj, true) {
 
     override fun getActor(): CustomImageActor {
         return super.getActor() as CustomImageActor
     }
 
-    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
+
+    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload {
         val actor = this.actor
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
@@ -33,6 +34,7 @@ class ChooseCardDragSource(
         obj.resetTo(actor, Vector2(actor.x, actor.y))
         actor.enterActorState("dragged")
         obj.resetActorState(actor)
+        startReal()
         return payload
     }
 
@@ -48,6 +50,18 @@ class ChooseCardDragSource(
         actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as ChooseCardDragPayload
         obj.onDragStop()
+    }
+
+    override fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean {
+        val actor = this.actor
+        dragAndDrop.setKeepWithinStage(false)
+        actor.toFront()
+        actor.enterActorState("dragged")
+        return true
+    }
+
+    override fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        actor.leaveActorState("dragged")
     }
 }
 

@@ -325,7 +325,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     drawableHandle: ResourceHandle?,
     private val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false
-) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor {
+) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor, OffSettable {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -338,6 +338,9 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override var maskOffsetX: Float = 0f
     override var maskOffsetY: Float = 0f
     var tintColor: Color? = null
+
+    override var offsetX: Float = 0F
+    override var offsetY: Float = 0F
 
     override var backgroundHandle: String? = drawableHandle
         set(value) {
@@ -393,7 +396,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         }
 
         validate()
-
+        x += offsetX
+        y += offsetY
         val width = if (ignoreScalingWhenDrawing) width else width * scaleX
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
@@ -430,6 +434,9 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         batch.flush()
 
         batch.shader = prevShader
+
+        x -= offsetX
+        y -= offsetY
     }
 
     fun forceLoadDrawable() {
