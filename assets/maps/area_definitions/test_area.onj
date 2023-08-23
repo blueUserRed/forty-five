@@ -1,6 +1,6 @@
 startNode: 0,
 endNode: 3,
-biome: "wasteland",
+biome: "snow",
 nodes: [
     {
         x: 20.0,
@@ -78,7 +78,7 @@ nodes: [
         event: $ChooseCardMapEvent {
             seed: null,
             types: [
-                "wasteland"
+                "defType"
             ],
             currentlyBlocks: false,
             canBeStarted: true,
