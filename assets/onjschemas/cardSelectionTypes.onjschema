@@ -20,14 +20,18 @@ $CardEffect{
         price: float
     }
 }
-
-var shopParameter = {
-    cardChanges: {
-        select: $CardSelector,
-        effect: $CardEffect
-    }[],
-    name: string
+var cardChange= {
+    select: $CardSelector,
+    effect: $CardEffect
 };
 
+types: {
+    cardChanges: cardChange[],
+    name: string
+}[],
 
-types: shopParameter[],
+biomes: {
+    name:string,
+    shop: cardChange[],
+    chooseCard: cardChange[],
+}[],

@@ -13,7 +13,7 @@ assets: {
     useAssets: [
         "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "chooseCard_add_to_backpack",
         "chooseCard_add_to_deck",
-        "shop_background_no_biome", /*temp -> */ "card%%bullet",
+        "shop_background_wasteland", /*temp -> */ "card%%bullet",
         "chooseCard_cardsBackground",
         "transparent_black_texture",
         ...(sharedComponents.backpackAssets),
@@ -62,7 +62,7 @@ root: $Box { //TODO bioms
         {
             width: 100.0#percent,
             height: 100.0#percent,
-            background: "shop_background_no_biome",
+            background: "shop_background_wasteland",
         }
     ]
 } children [

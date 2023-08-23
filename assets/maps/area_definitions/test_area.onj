@@ -1,6 +1,6 @@
 startNode: 0,
 endNode: 3,
-biome: "hello",
+biome: "wasteland",
 nodes: [
     {
         x: 20.0,
@@ -64,7 +64,6 @@ nodes: [
             boughtIndices: [
             ],
             type: "all_included",
-            biome: "no_biome",
             person: "traveling_merchant",
         }
     },
@@ -79,9 +78,8 @@ nodes: [
         event: $ChooseCardMapEvent {
             seed: null,
             types: [
-                "no_biome"
+                "wasteland"
             ],
-            biome: "no_biome",
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,

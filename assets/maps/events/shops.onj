@@ -9,7 +9,7 @@ people: [
     {
         name: "traveling_merchant",
         displayName: "Traveling Merchant",
-        defaultShopParameter: "no_biome",
+        defaultShopParameter: "wasteland",
         texts: [
             [
                 $Text {
@@ -44,7 +44,7 @@ people: [
     {
         name: "rare_merchant",
         displayName: "Traveling Merchant",
-        defaultShopParameter: "no_biome",
+        defaultShopParameter: "wasteland",
         texts: [
             [
                 $Text {

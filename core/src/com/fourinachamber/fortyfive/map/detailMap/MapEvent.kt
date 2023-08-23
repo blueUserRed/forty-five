@@ -18,7 +18,6 @@ object MapEventFactory {
         "ShopMapEvent" to {
             ShopMapEvent(
                 it.get<String>("type"),
-                it.get<String>("biome"),
                 it.get<String>("person"),
                 it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
                 it.get<List<OnjInt>>("boughtIndices").map{it2->it2.value.toInt()}.toMutableSet(),
@@ -27,7 +26,6 @@ object MapEventFactory {
         "ChooseCardMapEvent" to {
             ChooseCardMapEvent(
                 it.get<OnjArray>("types").value.map {t-> (t as OnjString).value },
-                it.get<String>("biome"),
                 it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             )
         },
@@ -243,11 +241,9 @@ class NPCMapEvent(val npc: String) : MapEvent() {
 /**
  * event that opens a shop where the player can buy up to 8 cards
  * @param type which type the restrictions are
- * @param biome in what biome the shop is
  */
 class ShopMapEvent(
     val type: String,
-    private val biome: String,
     val person: String,
     val seed: Long,
     val boughtIndices: MutableSet<Int>
@@ -273,7 +269,6 @@ class ShopMapEvent(
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
         ("type" with type)
-        ("biome" with biome)
         ("person" with person)
         ("seed" with seed)
         ("boughtIndices" with boughtIndices)
@@ -283,11 +278,9 @@ class ShopMapEvent(
 /**
  * event that opens a shop where the player can buy up to 8 cards
  * @param types which type the restrictions are
- * @param biome in what biome the shop is
  */
 class ChooseCardMapEvent(
     val types: List<String>,
-    val biome: String,
     val seed: Long,
 ) : MapEvent() {
 
@@ -313,7 +306,6 @@ class ChooseCardMapEvent(
         name("ChooseCardMapEvent")
         includeStandardConfig()
         ("types" with types)
-        ("biome" with biome)
         ("seed" with seed)
     }
 }

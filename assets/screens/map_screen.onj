@@ -89,14 +89,14 @@ var mapBox = $Box {
             },
             {
                 style_priority: 2,
-                style_condition: biome("hello"),
+                style_condition: biome("snow"),
                 backgroundScale: 0.25,
                 background: "map_background_snow_tileable",
                 // i hope its okay to abuse this, if not, then please say
             },
             {
                 style_priority: 2,
-                style_condition: biome("Dunkelwald"),
+                style_condition: biome("dunkelwald"),
                 backgroundScale: 0.05,
                 background: "map_background_grass_tileable",
             }

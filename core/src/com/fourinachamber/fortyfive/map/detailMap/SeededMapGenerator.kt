@@ -290,28 +290,12 @@ class SeededMapGenerator(
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
                 if (!line1.sharesPointWith(line2)) {
-                    val interceptPoint = line1/*.addOnEachEnd(restrictions.pathTotalWidth)*/
-                        .intersection(line2/*.addOnEachEnd(restrictions.pathTotalWidth)*/)
-                    val interceptPoint2 = line1.addOnEachEnd(restrictions.pathTotalWidth)
+                    val interceptPoint = line1.addOnEachEnd(restrictions.pathTotalWidth)
                         .intersection(line2.addOnEachEnd(restrictions.pathTotalWidth))
 
                     if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
                         correctInterceptionNode(nodes, uniqueLines[i], uniqueLines[j], interceptPoint, uniqueLines)
                         return true
-                    } else {
-                        if (interceptPoint2 != null) {
-                            println(
-                                "$interceptPoint2     ${
-                                    nodes.filter { a -> abs(a.x - interceptPoint2.x) < 10 && abs(a.y - interceptPoint2.y) < 10 }
-                                        .map { Vector2(it.x, it.y) }
-                                }"
-                            )
-                            correctInterceptionNode(
-                                nodes, uniqueLines[i], uniqueLines[j],
-                                interceptPoint2, uniqueLines, true
-                            )
-                            return true
-                        }
                     }
                 }
             }
@@ -340,7 +324,6 @@ class SeededMapGenerator(
             }
         }
 
-        if (testingVal) println(intersectionNode)
         if (intersectionNode == null) {
             val newNode = MapNodeBuilder(0, interceptPoint.x, interceptPoint.y)
             addNodeInBetween(line1, nodes, newNode, uniqueLines)

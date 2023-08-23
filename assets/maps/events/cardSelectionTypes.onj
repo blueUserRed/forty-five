@@ -24,12 +24,12 @@ types: [
     {
         name: "normal",
         cardChanges: [
-            ...rarities,
             {
                 select: $ByTag {
                     name: "startDeck"
                 },
-                effect: $Blacklist { }
+                effect: $Blacklist {
+                }
             },
             {
                 select: $ByName {
@@ -37,6 +37,7 @@ types: [
                 },
                 effect: $ProbabilityAddition {
                     weight: 10000.0 // make sure it appears in the shop
+
                 }
             }
         ]
@@ -45,18 +46,19 @@ types: [
     {
         name: "rare_shop",
         cardChanges: [
-            ...rarities,
             {
                 select: $ByTag {
                     name: "startDeck"
                 },
-                effect: $Blacklist { }
+                effect: $Blacklist {
+                }
             },
             {
                 select: $ByTag {
                     name: "common"
                 },
-                effect: $Blacklist { }
+                effect: $Blacklist {
+                }
             },
             {
                 select: $ByTag {
@@ -69,9 +71,8 @@ types: [
         ]
     },
     {
-        name: "no_biome",
+        name: "wasteland",
         cardChanges: [
-            ...rarities,
             {
                 select: $ByName {
                     name: "workerBullet"
@@ -91,8 +92,75 @@ types: [
     },
 ],
 
-//bioms:{
-//    "wald": {
-//        shop:
-//    }
-//}
+biomes: [
+    {
+        name: "snow",
+        shop: [
+            ...rarities,
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $Blacklist {
+                }
+            },
+            {
+                select: $ByName {
+                    name: "diamondBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 1000.0
+                }
+            }
+        ],
+        chooseCard: [
+            ...rarities,
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $Blacklist {
+                }
+            }
+        ]
+    },
+    {
+        name: "wasteland",
+        shop: [
+            ...rarities,
+            {
+                select: $ByName {
+                    name: "workerBullet"
+                },
+                effect: $Blacklist {
+                }
+            },
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 1000.0
+                }
+            }
+        ],
+        chooseCard: [
+            ...rarities,
+            {
+                select: $ByName {
+                    name: "workerBullet"
+                },
+                effect: $Blacklist {
+                }
+            },
+            {
+                select: $ByName {
+                    name: "incendiaryBullet"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 1000.0
+                }
+            }
+        ]
+    },
+]
