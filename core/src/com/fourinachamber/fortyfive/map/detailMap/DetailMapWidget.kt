@@ -72,7 +72,6 @@ class DetailMapWidget(
 
     override var backgroundHandle: ResourceHandle? = null
         set(value) {
-            println("hallo")
             field = value
             background = if (value == null) {
                 null

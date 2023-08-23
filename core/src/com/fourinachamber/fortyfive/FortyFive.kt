@@ -110,7 +110,7 @@ object FortyFive : Game() {
         }
         TemplateString.init()
         FortyFiveLogger.init()
-        resetAll()
+//        resetAll()
         newRun()
         PermaSaveState.read()
         SaveState.read()

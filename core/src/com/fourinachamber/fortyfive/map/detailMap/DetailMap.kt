@@ -145,7 +145,6 @@ data class DetailMap(
             val startNodeIndex = onj.get<Long>("startNode").toInt()
             val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
             val biomeName = onj.get<String?>("biome")
-            println(biomeName)
             return DetailMap(
                 file.nameWithoutExtension(),
                 nodes[startNodeIndex].build(),
