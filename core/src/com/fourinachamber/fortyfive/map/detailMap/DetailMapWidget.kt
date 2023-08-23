@@ -16,13 +16,11 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.general.DisableActor
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.onButtonClick
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.screen.general.styles.addMapStyles
 import com.fourinachamber.fortyfive.utils.*
 import kotlin.math.asin
 import kotlin.math.ceil
@@ -45,12 +43,11 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
-    var backgroundHandle: ResourceHandle,
     private var screenSpeed: Float,
-    private var backgroundScale: Float,
+//    private var backgroundScale: Float,
     private val disabledDirectionIndicatorAlpha: Float,
     private val leftScreenSideDeadSection: Float
-) : Widget(), ZIndexActor, StyledActor {
+) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
 
@@ -73,9 +70,20 @@ class DetailMapWidget(
         ResourceManager.get(screen, playerDrawableHandle)
     }
 
-    private val background: Drawable by lazy {
-        ResourceManager.get(screen, backgroundHandle)
-    }
+    override var backgroundHandle: ResourceHandle? = null
+        set(value) {
+            println("hallo")
+            field = value
+            background = if (value == null) {
+                null
+            } else {
+                ResourceManager.get(screen, value)
+            }
+        }
+
+    private var background: Drawable? = null
+
+    var backgroundScale: Float = 1F
 
     private val edgeTexture: TextureRegion by lazy {
         ResourceManager.get(screen, edgeTextureHandle)
@@ -254,6 +262,7 @@ class DetailMapWidget(
     }
 
     private fun drawBackground(batch: Batch) {
+        val background = background ?: return
         val minWidth = background.minWidth * backgroundScale
         val minHeight = background.minHeight * backgroundScale
         val amountX = ceil(width / minWidth).toInt() + 2
@@ -449,6 +458,7 @@ class DetailMapWidget(
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
+        addMapStyles(screen)
     }
 
     companion object {

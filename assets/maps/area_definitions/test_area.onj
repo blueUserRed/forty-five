@@ -1,5 +1,6 @@
 startNode: 0,
 endNode: 3,
+biome: "hello",
 nodes: [
     {
         x: 20.0,

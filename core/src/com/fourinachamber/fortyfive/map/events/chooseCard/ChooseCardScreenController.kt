@@ -33,10 +33,6 @@ import kotlin.random.Random
 
 // cards wahrscheinlicher
 
-
-//TODO Asking marvin:
-// 1. //solved how to make black overlay without images
-
 class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val cardsFilePath = onj.get<String>("cardsFile")
     private val leaveButtonName = onj.get<String>("leaveButtonName")

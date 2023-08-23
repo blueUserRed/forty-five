@@ -130,6 +130,7 @@ generatorConfig: {
     maps: {
         name: string,
         seed: int,
+        biome: string,
         restrictions: mapRestrictions
     }[]
 },

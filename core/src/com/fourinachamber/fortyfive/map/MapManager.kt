@@ -194,9 +194,10 @@ object MapManager {
 
     private fun generateMap(onj: OnjObject, outputDir: File) {
         val name = onj.get<String>("name")
+        val biome = onj.get<String>("biome")
         val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
         val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
-        val map = generator.generate(name)
+        val map = generator.generate(name, biome)
         val path = "${outputDir.toPath()}/$name.onj"
         val file = File(path)
         if (!File(file.parent).exists()) File(file.parent).mkdirs()
