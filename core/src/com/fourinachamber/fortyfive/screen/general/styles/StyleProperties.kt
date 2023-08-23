@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.general.styles
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
@@ -336,6 +337,36 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Map
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class BackgroundScaleStyleProperty(
+    target: DetailMapWidget,
+    screen: OnjScreen
+) : StyleProperty<DetailMapWidget, Float>(
+    "backgroundScale",
+    target,
+    1f,
+    Float::class,
+    false,
+    true,
+    screen
+) {
+
+    override fun set(data: Float, node: YogaNode) {
+        target.backgroundScale = data
+    }
+
+    override fun get(node: YogaNode): Float = target.backgroundScale
+}
+
+fun DetailMapWidget.addMapStyles(screen: OnjScreen) {
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(BackgroundStyleProperty(this, screen))
+    styleManager.addStyleProperty(BackgroundScaleStyleProperty(this, screen))
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Label
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -423,7 +454,7 @@ fun <T> T.addTextInputStyles(screen: OnjScreen) where T : CustomInputField, T : 
 class TouchableStyleProperty<Target>(
     target: Target,
     screen: OnjScreen
-) : StyleProperty<Target, Touchable> (
+) : StyleProperty<Target, Touchable>(
     "touchable",
     target,
     Touchable.disabled,

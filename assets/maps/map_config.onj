@@ -84,6 +84,7 @@ generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [
         {
+            biome: "Dunkelwald",
             name: "roadToSalem",
             seed: runRandom(1),
             restrictions: {
@@ -170,6 +171,7 @@ generatorConfig: {
         },
         {
             name: "endlessRoad",
+            biome: "Dunkelsong",
             seed: runRandom(2),
             restrictions: {
                 maxNodes: 25,
@@ -232,7 +234,6 @@ generatorConfig: {
             }
         },
     ]
-
 },
 
 

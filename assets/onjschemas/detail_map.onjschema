@@ -60,4 +60,5 @@ decorations: {
     positions: float[3][]
 
 }[],
+biome: string,
 isArea:boolean,

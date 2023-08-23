@@ -84,7 +84,22 @@ var mapBox = $Box {
                 positionRight: (0.0 * 10)#points,
                 positionTop: (0.0 * 10)#points,
                 positionBottom: (0.0 * 10)#points,
+                backgroundScale: 0.25,
+                background: "map_background_wasteland_tileable",
             },
+            {
+                style_priority: 2,
+                style_condition: biome("hello"),
+                backgroundScale: 0.25,
+                background: "map_background_snow_tileable",
+                // i hope its okay to abuse this, if not, then please say
+            },
+            {
+                style_priority: 2,
+                style_condition: biome("Dunkelwald"),
+                backgroundScale: 0.05,
+                background: "map_background_grass_tileable",
+            }
         ],
         detailMapProvider: $CurrentMapProvider {
         },
@@ -95,12 +110,10 @@ var mapBox = $Box {
         playerTexture: "map_player",
         playerWidth: 1.83 * 3.0,
         playerHeight: 3.0 * 3.0,
-        background: "map_background_wasteland_tileable",
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
         directionIndicator: "dialog_continue_arrow",
         screenSpeed: 2.5,
-        backgroundScale: 0.05,
         leftScreenSideDeadSection: 10.0,
         disabledDirectionIndicatorAlpha: 0.5,
         startButtonName: "start_button"

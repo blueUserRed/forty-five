@@ -40,7 +40,7 @@ class SeededMapGenerator(
     /**
      * generates the line
      */
-    fun generate(name: String): DetailMap {
+    fun generate(name: String, biome: String): DetailMap {
         FortyFiveLogger.debug(logTag, "generating map $name with seed $seed")
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
@@ -52,7 +52,7 @@ class SeededMapGenerator(
         val decos = generateDecorations(nodes)
         this.nodes = nodes
         build()
-        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos, false)
+        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos, false, biome)
     }
 
     private fun generateDecorations(
