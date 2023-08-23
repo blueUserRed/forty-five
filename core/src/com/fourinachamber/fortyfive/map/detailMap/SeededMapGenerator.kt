@@ -47,12 +47,19 @@ class SeededMapGenerator(
         addAreas(nodes, connections)
         addEvents(nodes)
 
-        nodes.forEach { it.scale(restrictions.scaleWidth, restrictions.scaleLength) }
+        nodes.forEach { it.scale(restrictions.scaleLength, restrictions.scaleWidth) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
         this.nodes = nodes
         build()
-        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos, false, biome)
+        return DetailMap(
+            name,
+            mainLine.lineNodes.first().asNode!!,
+            mainLine.lineNodes.last().asNode!!,
+            decos,
+            false,
+            biome
+        )
     }
 
     private fun generateDecorations(
@@ -68,7 +75,7 @@ class SeededMapGenerator(
             decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
         }
         return decos
-    }//auf main pushen?, templateWidgets?
+    }
 
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
         val nodesWithoutEvents = nodes.filter { a -> a.event == null }.toMutableList()
@@ -236,13 +243,12 @@ class SeededMapGenerator(
      */
     private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>): MutableList<Line> {
         while (true) {
-            var hadErrors = false
             val uniqueNodes: MutableList<MapNodeBuilder> = getUniqueNodesFromNodeRecursive(
                 nodes[0], mutableListOf()
             )
             nodes.removeIf { it !in uniqueNodes }
             val uniqueLines = getUniqueLinesFromNodes(uniqueNodes)
-            while (checkLinesNotIntercepting(uniqueLines, nodes)) hadErrors = true
+            val hadErrors = checkLinesNotIntercepting(uniqueLines, nodes) //sadly needed to do it like that
             if (!hadErrors) return uniqueLines
         }
     }
@@ -284,11 +290,28 @@ class SeededMapGenerator(
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
                 if (!line1.sharesPointWith(line2)) {
-                    val interceptPoint = line1.addOnEachEnd(restrictions.pathTotalWidth)
+                    val interceptPoint = line1/*.addOnEachEnd(restrictions.pathTotalWidth)*/
+                        .intersection(line2/*.addOnEachEnd(restrictions.pathTotalWidth)*/)
+                    val interceptPoint2 = line1.addOnEachEnd(restrictions.pathTotalWidth)
                         .intersection(line2.addOnEachEnd(restrictions.pathTotalWidth))
+
                     if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
                         correctInterceptionNode(nodes, uniqueLines[i], uniqueLines[j], interceptPoint, uniqueLines)
                         return true
+                    } else {
+                        if (interceptPoint2 != null) {
+                            println(
+                                "$interceptPoint2     ${
+                                    nodes.filter { a -> abs(a.x - interceptPoint2.x) < 10 && abs(a.y - interceptPoint2.y) < 10 }
+                                        .map { Vector2(it.x, it.y) }
+                                }"
+                            )
+                            correctInterceptionNode(
+                                nodes, uniqueLines[i], uniqueLines[j],
+                                interceptPoint2, uniqueLines, true
+                            )
+                            return true
+                        }
                     }
                 }
             }
@@ -304,17 +327,20 @@ class SeededMapGenerator(
         line1: Line,
         line2: Line,
         interceptPoint: Vector2,
-        uniqueLines: MutableList<Line>
+        uniqueLines: MutableList<Line>,
+        testingVal: Boolean = false
     ) {
         var intersectionNode: MapNodeBuilder? = null
         for (i in nodes) {
             val newVec = interceptPoint.clone()
-                .sub(Vector2(i.x + restrictions.pathTotalWidth / 2, i.y + restrictions.pathTotalWidth / 2))
-            if (newVec.len() < restrictions.pathTotalWidth) {
+                .sub(Vector2(i.x, i.y))
+            if (newVec.len() < restrictions.minDistanceBetweenNodes) {
                 intersectionNode = i
                 break
             }
         }
+
+        if (testingVal) println(intersectionNode)
         if (intersectionNode == null) {
             val newNode = MapNodeBuilder(0, interceptPoint.x, interceptPoint.y)
             addNodeInBetween(line1, nodes, newNode, uniqueLines)

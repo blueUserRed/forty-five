@@ -94,8 +94,8 @@ generatorConfig: {
                 splitProbability: 0.6,
                 startArea: "test_area",
                 endArea: "salem",
-                scaleWidth: 1.0,
-                scaleLength: 1.0,
+                scaleWidth: 2.5,
+                scaleLength: 2.5,
                 otherAreas: [
                 ],
                 rotation: 1.25,
