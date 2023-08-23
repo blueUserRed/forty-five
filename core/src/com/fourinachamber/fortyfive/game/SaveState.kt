@@ -256,6 +256,10 @@ object SaveState {
             get() = _cardPositions.map { it.value }
 
 
+        init {
+            checkMinimum()
+        }
+
         fun checkMinimum() {
             if (cardPositions.size < minDeckSize && cardPositions.size < SaveState.cards.size) {
                 val onlyBackpackCards = mutableListOf<String>()
@@ -332,6 +336,7 @@ object SaveState {
         }
 
         fun canRemoveCards(): Boolean = cards.size > minDeckSize
+        fun hasEnoughCards(): Boolean = cards.size >= minDeckSize
 
         fun canAddCards(): Boolean = cards.size < numberOfSlots
 

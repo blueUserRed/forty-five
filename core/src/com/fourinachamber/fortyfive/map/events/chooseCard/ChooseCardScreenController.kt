@@ -20,18 +20,9 @@ import onj.value.OnjObject
 import onj.value.OnjString
 import kotlin.random.Random
 
-//BIOME
-// road generation beeinflussen
-// decorations mehr
-
-// backgrounds
-// event-backgrounds
-
+//TODO BIOME
 // evtl. straßen different
-
-// encounter modifier wahrscheinlicher
-
-// cards wahrscheinlicher
+// encounter modifier (wahrscheinlicher)
 
 class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val cardsFilePath = onj.get<String>("cardsFile")
@@ -46,9 +37,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is ChooseCardMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         this.context = context
-        val types = context.types.toMutableList()
-        types.add(context.biome)
-        init(onjScreen, context.seed, types)
+        init(onjScreen, context.seed, context.types.toMutableList())
     }
 
     private fun init(screen: OnjScreen, seed: Long, types: MutableList<String>) {
@@ -57,12 +46,20 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         Card.cardsFileSchema.assertMatches(onj)
         onj as OnjObject
         val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
-        val cards = RandomCardSelection.getRandomCards(cardPrototypes, types, true, 3, rnd)
+        val cards = RandomCardSelection.getRandomCards(
+            cardPrototypes,
+            types,
+            true,
+            3,
+            rnd,
+            MapManager.currentDetailMap.biome,
+            "chooseCard"
+        )
         FortyFiveLogger.debug(
             logTag,
             "Generated with seed $seed and the types $types the following cards: ${cards.map { it.name }}"
         )
-//        addListener(screen) //phillip said for now not this feature bec he is indecisive
+//        addListener(screen) //philip said for now not this feature bec he is indecisive
         initCards(screen, cards)
         this.screen = screen
         this.addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
@@ -111,10 +108,10 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
 
     private fun updateDropTargets() {
         if (!SaveState.curDeck.canAddCards()) addToDeckWidget.enterActorState("disabled")
-//        else addToDeckWidget.leaveActorState("disabled")
+        else addToDeckWidget.leaveActorState("disabled")
 
-        if (!SaveState.curDeck.canRemoveCards()) addToBackpackWidget.enterActorState("disabled")
-//        else  addToBackpackWidget.leaveActorState("disabled")
+        if (!SaveState.curDeck.hasEnoughCards()) addToBackpackWidget.enterActorState("disabled")
+        else  addToBackpackWidget.leaveActorState("disabled")
     }
 
     fun getCard(card: String, addToDeck: Boolean) {

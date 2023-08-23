@@ -19,7 +19,8 @@ import kotlin.random.Random
  */
 object RandomCardSelection {
 
-    private var allTypes: Map<String, List<CardChange>> = mapOf()
+    private var types: Map<String, List<CardChange>> = mapOf()
+    private var biomes: Map<String, Map<String, List<CardChange>>> = mapOf()
 
     /**
      * the path to the file from which the data is read from
@@ -45,7 +46,23 @@ object RandomCardSelection {
                 .map { e -> CardChange.getFromOnj(e) }
             allTypes[name] = changes
         }
-        this.allTypes = allTypes
+        this.types = allTypes
+
+
+        val allBiomes: MutableMap<String, Map<String, List<CardChange>>> = mutableMapOf()
+        val allBiomesOnj = file.get<OnjArray>("biomes").value.map { it as OnjObject }
+        allBiomesOnj.forEach { biome ->
+            val name = biome.get<String>("name")
+            val tempMap: MutableMap<String, List<CardChange>> = mutableMapOf()
+            biome.value.filter { t -> t.key != "name" }.forEach {
+                val changes = (it.value as OnjArray).value
+                    .map { e -> e as OnjObject }
+                    .map { e -> CardChange.getFromOnj(e) }
+                tempMap[it.key] = changes
+            }
+            allBiomes[name] = tempMap
+        }
+        this.biomes = allBiomes
     }
 
     /**
@@ -60,10 +77,12 @@ object RandomCardSelection {
         changeNames: List<String>,
         cardsMaxOnce: Boolean = false,
         nbrOfCards: Int,
-        rnd: Random = Random(0),
+        rnd: Random,
+        biome: String,
+        occasion: String,
     ): List<T> {
         if (nbrOfCards >= cards.size && cardsMaxOnce) return cards
-        val (tempCards, tempChances) = getCardsWithChances(cards.toMutableList(), changeNames)
+        val (tempCards, tempChances) = getCardsWithChances(cards.toMutableList(), changeNames, biome, occasion)
         return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, cardsMaxOnce)
     }
 
@@ -88,17 +107,22 @@ object RandomCardSelection {
     }
 
     fun <T> getCardsWithChances(
-        cards: List<T>,
-        changeNames: List<String>
+        cards: MutableList<T>,
+        changeNames: List<String>,
+        biome: String,
+        occasion: String
     ): Pair<MutableList<T>, MutableList<Float>> {
         val tempCards = cards.toMutableList()
         val tempChances = tempCards.map { 0F }.toMutableList()
         changeNames.forEach { name ->
-            allTypes[name]!!.forEach {
+            types[name]!!.forEach {
                 it.applyEffects(tempCards, tempChances)
             }
         }
-        return Pair(tempCards, tempChances)
+        biomes[biome]?.get(occasion)?.forEach {
+            it.applyEffects(tempCards, tempChances)
+        }
+        return tempCards to tempChances
     }
 
     private fun getRandomIndex(chances: MutableList<Float>, rnd: Random): Int {
@@ -191,6 +215,6 @@ interface Selector {
 
     class ByTagSelector(private val name: String) : Selector {
         override fun <T> isPartOf(card: T): Boolean =
-            if (card is Card)  name in card.tags else if (card is CardPrototype) name in card.tags else false
+            if (card is Card) name in card.tags else if (card is CardPrototype) name in card.tags else false
     }
 }

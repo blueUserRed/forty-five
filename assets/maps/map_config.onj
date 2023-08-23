@@ -84,8 +84,8 @@ generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [
         {
-            biome: "Dunkelwald",
             name: "roadToSalem",
+            biome: "dunkelwald",
             seed: runRandom(1),
             restrictions: {
                 maxNodes: 14,
@@ -129,7 +129,6 @@ generatorConfig: {
                         scaleMax: 1.2,
                         onlyCollidesWithNodes: false
                     },
-                    //
 //                    $RandomDistributionFunction {
 //                        decoration: "map_decoration_grass",
 //                        density: 0.01,
@@ -171,7 +170,7 @@ generatorConfig: {
         },
         {
             name: "endlessRoad",
-            biome: "Dunkelsong",
+            biome: "wasteland",
             seed: runRandom(2),
             restrictions: {
                 maxNodes: 25,
@@ -193,7 +192,6 @@ generatorConfig: {
                             boughtIndices: [
                             ],
                             type: "rare_shop",
-                            biome: "no_biome",
                             person: "rare_merchant",
                         }
                     }

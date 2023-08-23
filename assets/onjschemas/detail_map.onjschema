@@ -25,7 +25,6 @@ $MapEvent {
 
     $ShopMapEvent {
         type: string,
-        biome: string,
         person: string,
         seed: int?,
         boughtIndices: int[],
@@ -33,7 +32,6 @@ $MapEvent {
 
     $ChooseCardMapEvent {
         types: string[],
-        biome: string,
         seed: int?,
         ...mapEventStandardConfig
     }

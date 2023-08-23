@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -31,13 +32,29 @@ class ShopCardsHandler(
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
     }
 
-    fun addItems(rnd: Random, contextType: String, defaultType: String) {//TODO biomes, when they are added
+    fun addItems(rnd: Random, contextType: String, defaultType: String) {
         val nbrOfItems = (5..16).random(rnd)
         FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
         val cardsToAdd = try {
-            RandomCardSelection.getRandomCards(_allCards, listOf(contextType), true, nbrOfItems)
+            RandomCardSelection.getRandomCards(
+                _allCards,
+                listOf(contextType),
+                true,
+                nbrOfItems,
+                rnd,
+                MapManager.currentDetailMap.biome,
+                "shop"
+            )
         } catch (e: Exception) {
-            RandomCardSelection.getRandomCards(_allCards, listOf(defaultType), true, nbrOfItems)
+            RandomCardSelection.getRandomCards(
+                _allCards,
+                listOf(defaultType),
+                true,
+                nbrOfItems,
+                rnd,
+                MapManager.currentDetailMap.biome,
+                "shop"
+            )
         }
         cards.addAll(cardsToAdd)
         cards.shuffle(rnd)
@@ -104,6 +121,7 @@ class ShopCardsHandler(
         //TODO move cards to back after bought, so that they are at the end
     }
 
+    //TODO fix bug with these (same as game controller, maybe check there)
     override fun dispose() = _allCards.forEach { it.dispose() }
 
     companion object {
