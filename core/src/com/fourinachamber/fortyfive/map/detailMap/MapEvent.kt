@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
+import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.map.MapManager
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -20,12 +21,12 @@ object MapEventFactory {
                 it.get<String>("type"),
                 it.get<String>("person"),
                 it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-                it.get<List<OnjInt>>("boughtIndices").map{it2->it2.value.toInt()}.toMutableSet(),
+                it.get<List<OnjInt>>("boughtIndices").map { it2 -> it2.value.toInt() }.toMutableSet(),
             )
         },
         "ChooseCardMapEvent" to {
             ChooseCardMapEvent(
-                it.get<OnjArray>("types").value.map {t-> (t as OnjString).value },
+                it.get<OnjArray>("types").value.map { t -> (t as OnjString).value },
                 it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             )
         },
@@ -154,9 +155,15 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
+    val encounterModifier: List<EncounterModifier>
+        get() = encounterModifierNames.map { EncounterModifier.getFromName(it) }
+
+    var encounterModifierNames: Set<String>
+
     init {
         setStandardValuesFromConfig(obj)
 //        currentlyBlocks = false
+        encounterModifierNames = obj.get<OnjArray?>("encounterModifier")?.value?.map { ((it as OnjString).value)}?.toSet()?: setOf()
     }
 
     override fun start() {
@@ -172,6 +179,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EncounterMapEvent")
         includeStandardConfig()
+        "encounterModifier" with encounterModifierNames
     }
 }
 

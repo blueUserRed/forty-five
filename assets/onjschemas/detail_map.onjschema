@@ -10,7 +10,8 @@ $MapEvent {
     $EmptyMapEvent { }
 
     $EncounterMapEvent {
-        ...mapEventStandardConfig
+        ...mapEventStandardConfig,
+        encounterModifier:String[],
     }
 
     $EnterMapMapEvent {
