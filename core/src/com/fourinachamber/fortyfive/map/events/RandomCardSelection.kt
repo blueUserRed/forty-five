@@ -125,7 +125,7 @@ object RandomCardSelection {
         return tempCards to tempChances
     }
 
-    private fun getRandomIndex(chances: MutableList<Float>, rnd: Random): Int {
+    fun getRandomIndex(chances: MutableList<Float>, rnd: Random): Int {
         val maxWeight = chances.sum()
         val value = (0.0F..maxWeight).random(rnd)
         var curSum = 0.0

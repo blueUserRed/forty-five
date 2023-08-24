@@ -101,10 +101,19 @@ generatorConfig: {
                 rotation: 1.25,
                 fixedEvents: [
                 ],
+                encounters: [
+                    {
+                        name: "Rain",
+                        weight: 10,
+                    }, {
+                        name: "Frost",
+                        weight: 1,
+                    }
+                ],
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
-                        weight: 0,
+                        weight: 10,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -113,7 +122,7 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 20,
+                        weight: 0,
                         nodeTexture: null,
                         event: $EmptyMapEvent {
                         }
@@ -129,7 +138,7 @@ generatorConfig: {
                         scaleMax: 1.2,
                         onlyCollidesWithNodes: false
                     },
-//                    $RandomDistributionFunction {
+                    //                    $RandomDistributionFunction {
 //                        decoration: "map_decoration_grass",
 //                        density: 0.01,
 //                        baseWidth: 2.0,
@@ -180,6 +189,8 @@ generatorConfig: {
                 startArea: "salem",
                 endArea: "salem",
                 otherAreas: [
+                ],
+                encounters: [
                 ],
                 rotation: 0.0,
                 exitNodeTexture: "map_node_exit_circle",

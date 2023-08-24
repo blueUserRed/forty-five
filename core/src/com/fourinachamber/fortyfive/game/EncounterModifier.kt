@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
+import java.lang.Exception
 
 sealed class EncounterModifier {
 
@@ -24,4 +25,12 @@ sealed class EncounterModifier {
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
     open fun shouldApplyStatusEffects(): Boolean = true
 
+    companion object {
+        fun getFromName(name: String) = when (name.lowercase()) {
+            "rain" -> Rain
+            "frost" -> Frost
+            "bewitchedmist" -> BewitchedMist
+            else -> throw Exception("Unknown Encounter Modifier: ${name.lowercase()}")
+        }
+    }
 }

@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.game.EncounterModifier
+import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
@@ -9,6 +11,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
+import kotlin.Exception
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -46,7 +49,6 @@ class SeededMapGenerator(
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         addEvents(nodes)
-
         nodes.forEach { it.scale(restrictions.scaleLength, restrictions.scaleWidth) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
@@ -112,11 +114,35 @@ class SeededMapGenerator(
                 val choice = allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })
                 val (_, eventCreator, nodeTexture) = restrictions.optionalEvents[choice]
                 curNode.event = eventCreator()
+                val event = curNode.event
+                if (event is EncounterMapEvent) event.encounterModifierNames = getModifier()
                 curNode.nodeTexture = nodeTexture
             }
             nodesWithoutEvents.remove(curNode)
         }
     }
+
+    private fun getModifier(): Set<String> {
+        val encounterProps = restrictions.encounterProps.toMutableList()
+        val res: MutableSet<String> = mutableSetOf()
+        val nbrOfEncounterIndex =
+            RandomCardSelection.getRandomIndex(restrictions.nbrOfEncounters.map { it.second.toFloat() }
+                .toMutableList(), rnd)
+        repeat(restrictions.nbrOfEncounters[max(nbrOfEncounterIndex, 0)].first) {
+            if (encounterProps.isEmpty()) return res
+            val encIndex = RandomCardSelection.getRandomIndex(encounterProps.map { it.second.toFloat() }
+                .toMutableList(), rnd)
+            try {
+                res.add((encounterProps[encIndex].first))
+            } catch (e: Exception) {
+                throw Exception("Unknown encounter Modifier: ${encounterProps[encIndex]}. Possibilities")
+            }
+            encounterProps.removeAt(encIndex)
+        }
+
+        return res
+    }
+
 
     /**
      * adds the areas at the end, after all other nodes were placed
@@ -1396,9 +1422,22 @@ data class MapRestriction(
      */
     val pathTotalWidth: Float = 7.5F,
     val minDistanceBetweenNodes: Float = 15F,
-    val exitNodeTexture: ResourceHandle
+    val exitNodeTexture: ResourceHandle,
+    /**
+     * has the encounter Probabilities for this map with the weight for each possibility
+     */
+    val encounterProps: List<Pair<String, Int>>,
+    private val avgNbrOfEncounters: Int,
 ) {
+    val nbrOfEncounters: List<Pair<Int, Int>>
 
+    init {
+        val nbrOfEncounters: MutableList<Pair<Int, Int>> = mutableListOf()
+        for (i in -2..2) {
+            nbrOfEncounters.add(avgNbrOfEncounters + i to 3 - abs(i))
+        }
+        this.nbrOfEncounters = nbrOfEncounters
+    }
 
     companion object {
 
@@ -1447,6 +1486,11 @@ data class MapRestriction(
                     )
                 },
             exitNodeTexture = onj.get<String>("exitNodeTexture"),
+            encounterProps = onj.get<OnjArray>("encounters").value.map { it as OnjObject }.map {
+                it.get<String>("name") to
+                        it.get<Long>("weight").toInt()
+            },
+            avgNbrOfEncounters = 3,
         )
     }
 }

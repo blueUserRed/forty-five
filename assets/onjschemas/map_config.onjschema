@@ -99,7 +99,11 @@ var mapRestrictions = {
     }[],
     decorationSeed: int,
     decorations: $DecorationDistributionFunction[],
-    exitNodeTexture: string
+    exitNodeTexture: string,
+    encounters: {
+        name: string,
+        weight: int,
+    }[],
 };
 
 screens: {
