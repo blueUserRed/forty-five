@@ -5,6 +5,12 @@
     }    
 };
 
+@mixin navbarOpen {
+    &.navbar-open {
+        @content
+    }
+};
+
 @mixin narrow {
     @media screen and (max-width: 750px) {
         @content
