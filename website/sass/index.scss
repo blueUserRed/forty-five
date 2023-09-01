@@ -34,10 +34,10 @@ $our-project-break: 950px;
 
 .deco-card {
     position: absolute;
-    width: 10%;
+    width: 15%;
 
     @include narrow {
-        width: 15%;
+        width: 20%;
     }
 
 }
@@ -103,6 +103,10 @@ header {
         @include hamburgerMenu {
             display: block;
         }
+
+        @include navbarOpen {
+            display: none;
+        }
     }
 }
 
@@ -110,17 +114,38 @@ nav {
     display: none;
     position: fixed;
     height: 100vh;
-    width: 50vw;
-    margin-left: 50%;
-    background-color: $forty-brown;
+    width: 65vw;
+    margin-left: 110%;
     z-index: $header-zindex + 100;
+
+    background-image: url("../assets/hamburger_background.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
 
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
+
+    transition: margin-left 0.3s;
+
+    @include hamburgerMenu {
+        display: flex;
+    }
 
     @include navbarOpen {
-        display: flex;
+        margin-left: 35%;
+    }
+
+    &:nth-child(1) {
+        margin-top: -1cm;
+    }
+
+    span {
+        font-size: 0.7cm;
+    }
+
+    * + * {
+        margin-top: 0.8cm;
     }
 }
 
@@ -180,7 +205,7 @@ section.sub-page .title-card {
     align-items: center;
 
     &.cur-page-2, &.cur-page-3 {
-        height: 90vh;
+        height: 50vh;
     }
 
     #our-project {
@@ -247,7 +272,7 @@ section.sub-page .title-card {
 
         #deco-card-1 {
             top: 8%;
-            left: -10%;
+            left: -14%;
             transform: rotate(120deg);
 
             @include narrow {
@@ -300,6 +325,10 @@ section.sub-page .title-card {
 
         @include wide {
             width: 26cm;
+        }
+
+        &.cur-page-2, &.cur-page-3 {
+            display: none;
         }
 
         img { // TODO: change back
@@ -452,7 +481,7 @@ section.sub-page .title-card {
     align-items: center;
 
     &.cur-page-1, &.cur-page-3 {
-        height: 90vh;
+        height: 50vh;
     }
 
     #about-page-title {
@@ -544,6 +573,10 @@ section.sub-page .title-card {
                 margin: 1.2cm;
             }
 
+            &.cur-page-1, &.cur-page-3 {
+                display: none;
+            }
+
         }
 
         #member-picture-1 {
@@ -568,6 +601,53 @@ section.sub-page .title-card {
 
     }
 
+}
+
+#imprint-page {
+  
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    &.cur-page-1, &.cur-page-2 {
+        height: 50vh;
+    }
+
+    #imprint-text {
+        position: relative;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 0;
+        margin-top: 2cm;
+
+        @include narrow {
+            width: 90%;
+        }
+
+        @include wide {
+            width: 28cm;
+        }
+
+        p {
+            color: black;
+            font-size: 0.6cm;
+            padding: 3cm 19% 8cm 19%;
+
+            @include narrow {
+                font-size: 3.4vw;
+                padding-bottom: 4cm;
+            }
+
+        }
+
+    }
+
+    footer {
+        margin-top: 10cm;
+    }
 }
 
 footer {
