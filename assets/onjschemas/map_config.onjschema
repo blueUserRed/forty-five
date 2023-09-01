@@ -100,7 +100,7 @@ var mapRestrictions = {
     decorationSeed: int,
     decorations: $DecorationDistributionFunction[],
     exitNodeTexture: string,
-    encounters: {
+    encounterModifiers: {
         name: string,
         weight: int,
     }[],

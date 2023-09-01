@@ -1486,11 +1486,11 @@ data class MapRestriction(
                     )
                 },
             exitNodeTexture = onj.get<String>("exitNodeTexture"),
-            encounterProps = onj.get<OnjArray>("encounters").value.map { it as OnjObject }.map {
+            encounterProps = onj.get<OnjArray>("encounterModifiers").value.map { it as OnjObject }.map {
                 it.get<String>("name") to
                         it.get<Long>("weight").toInt()
             },
-            avgNbrOfEncounters = 3,
+            avgNbrOfEncounters = onj.get<Long>("avgNbrOfEncounters").toInt(),
         )
     }
 }
