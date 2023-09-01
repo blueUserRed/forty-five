@@ -104,6 +104,7 @@ var mapRestrictions = {
         name: string,
         weight: int,
     }[],
+    avgNbrOfEncounters: int,
 };
 
 screens: {
