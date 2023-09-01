@@ -3,6 +3,7 @@
 
 $num-subpages: 3;
 $forty-white: #f2ecdf;
+$forty-brown: #0d0907;
 
 $header-zindex: 500;
 $overlay-zindex: 300;
@@ -84,6 +85,43 @@ header {
             display: none;
         }
     }
+
+    #header-spacer {
+        display: none;
+        flex-grow: 1.0;
+
+        @include hamburgerMenu {
+            display: block;
+        }
+    }
+
+    #hamburger-menu {
+        height: 0.8cm;
+        display: none;
+        margin-right: 2%;
+
+        @include hamburgerMenu {
+            display: block;
+        }
+    }
+}
+
+nav {
+    display: none;
+    position: fixed;
+    height: 100vh;
+    width: 50vw;
+    margin-left: 50%;
+    background-color: $forty-brown;
+    z-index: $header-zindex + 100;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    @include navbarOpen {
+        display: flex;
+    }
 }
 
 #main-content-container {
@@ -140,6 +178,10 @@ section.sub-page .title-card {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    &.cur-page-2, &.cur-page-3 {
+        height: 90vh;
+    }
 
     #our-project {
         position: relative;
@@ -260,7 +302,8 @@ section.sub-page .title-card {
             width: 26cm;
         }
 
-        iframe {
+        img { // TODO: change back
+        // iframe {
             width: 70%;
             aspect-ratio: 16 / 9;
             margin-top: 3cm;
@@ -407,6 +450,10 @@ section.sub-page .title-card {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    &.cur-page-1, &.cur-page-3 {
+        height: 90vh;
+    }
 
     #about-page-title {
         background-image: url("../assets/about_page_title.png");

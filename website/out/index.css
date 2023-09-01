@@ -70,6 +70,41 @@ header a {
     display: none;
   }
 }
+header #header-spacer {
+  display: none;
+  flex-grow: 1;
+}
+@media screen and (max-width: 790px) {
+  header #header-spacer {
+    display: block;
+  }
+}
+header #hamburger-menu {
+  height: 0.8cm;
+  display: none;
+  margin-right: 2%;
+}
+@media screen and (max-width: 790px) {
+  header #hamburger-menu {
+    display: block;
+  }
+}
+
+nav {
+  display: none;
+  position: fixed;
+  height: 100vh;
+  width: 50vw;
+  margin-left: 50%;
+  background-color: #0d0907;
+  z-index: 600;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+nav.navbar-open {
+  display: flex;
+}
 
 #main-content-container {
   display: flex;
@@ -125,6 +160,9 @@ section.sub-page .title-card {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+#main-page.cur-page-2, #main-page.cur-page-3 {
+  height: 90vh;
 }
 #main-page #our-project {
   position: relative;
@@ -242,7 +280,7 @@ section.sub-page .title-card {
     width: 26cm;
   }
 }
-#main-page #trailer-container iframe {
+#main-page #trailer-container img {
   width: 70%;
   aspect-ratio: 16/9;
   margin-top: 3cm;
@@ -382,6 +420,9 @@ section.sub-page .title-card {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+#about-page.cur-page-1, #about-page.cur-page-3 {
+  height: 90vh;
 }
 #about-page #about-page-title {
   background-image: url("../assets/about_page_title.png");
