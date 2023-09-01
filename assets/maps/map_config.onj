@@ -101,7 +101,7 @@ generatorConfig: {
                 rotation: 1.25,
                 fixedEvents: [
                 ],
-                encounters: [
+                encounterModifiers: [
                     {
                         name: "Rain",
                         weight: 10,
@@ -110,6 +110,7 @@ generatorConfig: {
                         weight: 1,
                     }
                 ],
+                avgNbrOfEncounters: 1,
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
@@ -190,8 +191,9 @@ generatorConfig: {
                 endArea: "salem",
                 otherAreas: [
                 ],
-                encounters: [
+                encounterModifiers: [
                 ],
+                avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
                 rotation: 0.0,
                 exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
@@ -239,7 +241,7 @@ generatorConfig: {
                     }
                 ],
                 decorationSeed: 230789230789407892340,
-                decorationPadding: 40.0
+                decorationPadding: 40.0,
             }
         },
     ]
