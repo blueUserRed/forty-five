@@ -203,6 +203,7 @@ section.sub-page .title-card {
     display: flex;
     flex-direction: column;
     align-items: center;
+    // z-index: 1;
 
     &.cur-page-2, &.cur-page-3 {
         height: 50vh;
@@ -264,7 +265,7 @@ section.sub-page .title-card {
 
         }
 
-        #deco-revolver {
+        #deco-revolver-1 {
             position: absolute;
             width: 38%;
             transform: rotate(-78deg) translate(-70%, -180%);
@@ -327,10 +328,6 @@ section.sub-page .title-card {
             width: 26cm;
         }
 
-        &.cur-page-2, &.cur-page-3 {
-            display: none;
-        }
-
         img { // TODO: change back
         // iframe {
             width: 70%;
@@ -372,12 +369,38 @@ section.sub-page .title-card {
                 padding-bottom: 4cm;
             }
 
+            &.cur-page-2, &.cur-page-3 {
+                padding-bottom: 0;
+                font-size: 0.6cm;
+            }
+        }
+
+        #deco-hat {
+            position: absolute;
+            display: none;
+            z-index: $overlay-zindex - 100;
+
+            @include wide {
+                display: block;
+                width: 30%;
+                transform: translate(145%, -90%);
+            }
+
+            @include very-wide {
+                display: block;
+                width: 48%;
+                transform: translate(115%, -80%);
+            }
+
         }
 
         #deco-card-4 {
             top: 20%;
             left: -0%;
             transform: rotate(10deg);
+            @include narrow {
+                display: none;
+            }
         }
 
         #deco-card-5 {
@@ -485,10 +508,22 @@ section.sub-page .title-card {
     }
 
     #about-page-title {
+        position: relative;
         background-image: url("../assets/about_page_title.png");
         background-size: 100% 100%;
         margin-top: -1.3cm;
         aspect-ratio: 910 / 686;
+
+        #deco-revolver-2 {
+            position: absolute;
+            width: 38%;
+            transform: rotate(-8deg) translate(-160%, 170%);
+            z-index: 200;
+
+            @include narrow {
+                transform: rotate(-8deg) translate(-120%, 170%);
+            }
+        }
     }
 
     #about-description {
@@ -535,6 +570,7 @@ section.sub-page .title-card {
                 display: none;
             }
         }
+
     }
 
     #group-picture-standalone {
