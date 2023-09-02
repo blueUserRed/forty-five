@@ -237,7 +237,7 @@ section.sub-page .title-card {
     font-size: 0.6cm;
   }
 }
-#main-page #title-map #deco-revolver {
+#main-page #title-map #deco-revolver-1 {
   position: absolute;
   width: 38%;
   transform: rotate(-78deg) translate(-70%, -180%);
@@ -300,9 +300,6 @@ section.sub-page .title-card {
     width: 26cm;
   }
 }
-#main-page #trailer-container.cur-page-2, #main-page #trailer-container.cur-page-3 {
-  display: none;
-}
 #main-page #trailer-container img {
   width: 70%;
   aspect-ratio: 16/9;
@@ -343,10 +340,38 @@ section.sub-page .title-card {
     padding-bottom: 4cm;
   }
 }
+#main-page #main-description p.cur-page-2, #main-page #main-description p.cur-page-3 {
+  padding-bottom: 0;
+  font-size: 0.6cm;
+}
+#main-page #main-description #deco-hat {
+  position: absolute;
+  display: none;
+  z-index: 200;
+}
+@media screen and (min-width: 1150px) {
+  #main-page #main-description #deco-hat {
+    display: block;
+    width: 30%;
+    transform: translate(145%, -90%);
+  }
+}
+@media screen and (min-width: 1400px) {
+  #main-page #main-description #deco-hat {
+    display: block;
+    width: 48%;
+    transform: translate(115%, -80%);
+  }
+}
 #main-page #main-description #deco-card-4 {
   top: 20%;
   left: 0%;
   transform: rotate(10deg);
+}
+@media screen and (max-width: 750px) {
+  #main-page #main-description #deco-card-4 {
+    display: none;
+  }
 }
 #main-page #main-description #deco-card-5 {
   top: 40%;
@@ -448,10 +473,22 @@ section.sub-page .title-card {
   height: 50vh;
 }
 #about-page #about-page-title {
+  position: relative;
   background-image: url("../assets/about_page_title.png");
   background-size: 100% 100%;
   margin-top: -1.3cm;
   aspect-ratio: 910/686;
+}
+#about-page #about-page-title #deco-revolver-2 {
+  position: absolute;
+  width: 38%;
+  transform: rotate(-8deg) translate(-160%, 170%);
+  z-index: 200;
+}
+@media screen and (max-width: 750px) {
+  #about-page #about-page-title #deco-revolver-2 {
+    transform: rotate(-8deg) translate(-120%, 170%);
+  }
 }
 #about-page #about-description {
   position: relative;
