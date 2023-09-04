@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.*
@@ -11,7 +10,6 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 import java.lang.Float.min
-import kotlin.Exception
 import kotlin.math.*
 import kotlin.random.Random
 
@@ -135,11 +133,10 @@ class SeededMapGenerator(
             try {
                 res.add((encounterProps[encIndex].first))
             } catch (e: Exception) {
-                throw Exception("Unknown encounter Modifier: ${encounterProps[encIndex]}. Possibilities")
+                throw Exception("Unknown encounter Modifier: ${encounterProps[encIndex]}.", e)
             }
             encounterProps.removeAt(encIndex)
         }
-
         return res
     }
 

@@ -26,7 +26,7 @@ object MapEventFactory {
         },
         "ChooseCardMapEvent" to { onjObject ->
             ChooseCardMapEvent(
-                onjObject.get<OnjArray>("types").value.map { t -> (t as OnjString).value },
+                onjObject.get<OnjArray>("types").value.map { (it as OnjString).value },
                 onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             )
         },
