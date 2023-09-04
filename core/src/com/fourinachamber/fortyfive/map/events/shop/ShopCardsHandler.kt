@@ -1,16 +1,15 @@
-package com.fourinachamber.fortyfive.map.shop
+package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.random
 import dev.lyze.flexbox.FlexBox
 import onj.parser.OnjParser
-import onj.parser.OnjSchemaParser
-import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.random.Random
 
@@ -19,35 +18,47 @@ class ShopCardsHandler(
     private val screen: OnjScreen,
     private val parent: CustomScrollableFlexBox,
     private val boughtIndices: MutableSet<Int>
-) : Disposable {
+) {
     private val _allCards: MutableList<Card>
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
     private val labels: MutableList<CustomLabel> = mutableListOf()
-    private val chances: HashMap<String, Float> = hashMapOf()
 
     init {
         val onj = OnjParser.parseFile(dataFile)
-        cardsFileSchema.assertMatches(onj)
+        Card.cardsFileSchema.assertMatches(onj)
         onj as OnjObject
         val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
     }
 
-    fun addItems(rnd: Random) {
+    fun addItems(rnd: Random, contextType: String, defaultType: String) {
         val nbrOfItems = (5..16).random(rnd)
-        FortyFiveLogger.debug(logTag, "Created $nbrOfItems items")
-        for (i in 0 until nbrOfItems) {
-            if (chances.size == 0) break
-            val cardId = getCardToAddWithChances(rnd)
-            val curCard = _allCards[cardId]
-            _allCards.removeAt(cardId)
-            chances.remove(curCard.name)
-            cards.add(curCard)
+        FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
+        val cardsToAdd = if (RandomCardSelection.hasType(contextType)){
+            RandomCardSelection.getRandomCards(
+                _allCards,
+                listOf(contextType),
+                true,
+                nbrOfItems,
+                rnd,
+                MapManager.currentDetailMap.biome,
+                "shop"
+            )
+        } else {
+            RandomCardSelection.getRandomCards(
+                _allCards,
+                listOf(defaultType),
+                true,
+                nbrOfItems,
+                rnd,
+                MapManager.currentDetailMap.biome,
+                "shop"
+            )
         }
+        cards.addAll(cardsToAdd)
         cards.shuffle(rnd)
         cards.forEach { addCard(it) }
-        _allCards.clear()
         updateCards()
     }
 
@@ -68,7 +79,7 @@ class ShopCardsHandler(
             curParent,
             screen
         ) as CustomImageActor
-        img.drawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
+        img.programmedDrawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
         val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap2["name"] = OnjString("CardLabel" + parent.children.size)
         tempMap2["text"] = OnjString("" + card.price + "$")
@@ -80,65 +91,6 @@ class ShopCardsHandler(
         ) as CustomLabel
         cardWidgets.add(img)
         labels.add(label)
-    }
-
-    private fun getCardToAddWithChances(rnd: Random): Int {
-        val maxWeight = chances.map { (_, b) -> b }.sum()
-        val value = (0.0F..maxWeight).random(rnd)
-        var curSum = 0.0
-        for (e in chances) {
-            curSum += e.value
-            if (curSum > value) {
-                return _allCards.indexOf(_allCards.find { it.name == e.key })
-            }
-        }
-        return chances.size - 1
-    }
-
-    fun calculateChances(
-        type: String,
-        shopFile: OnjObject,
-        person: OnjObject
-    ) { //TODO biome, when they are added
-        val allTypes = shopFile.get<OnjArray>("types").value.map { it as OnjObject }
-        val curTypeChances = if (type !in allTypes.map { it.get<String>("name") }) {
-            allTypes.first { it.get<String>("name") == person.get<String>("defaultShopParameter") }
-                .get<OnjArray>("cardChanges").value.map { it as OnjObject }
-        } else {
-            allTypes.first { it.get<String>("name") == type }.get<OnjArray>("cardChanges").value.map { it as OnjObject }
-        }
-        _allCards.forEach { chances[it.name] = 0F }
-        curTypeChances.forEach {
-            applyChancesEffect(
-                it.get<OnjNamedObject>("select"),
-                it.get<OnjNamedObject>("effect")
-            )
-        }
-    }
-
-    private fun applyChancesEffect(selector: OnjNamedObject, effect: OnjNamedObject) {
-        val cardsToChange: List<String> = _allCards.filter {
-            (if (selector.name == "ByName") it.name == selector.get<String>("name") else it.tags.contains(
-                selector.get<String>("name")
-            ))
-        }.map { it.name }
-        when (effect.name) {
-            "Blacklist" -> {
-                cardsToChange.forEach { chances.remove(it) }
-            }
-
-            "ProbabilityAddition" -> {
-                chances.map { (a, _) -> a }.filter { it in cardsToChange }.forEach {
-                    chances[it] = chances[it]!! + effect.get<Double>("weight").toFloat()
-                }
-            }
-
-            "PriceMultiplier" -> {
-                _allCards.filter { it.name in cardsToChange }.forEach {
-                    it.price = (it.price * effect.get<Double>("price")).toInt()
-                }
-            }
-        }
     }
 
     fun buyCard(
@@ -169,13 +121,8 @@ class ShopCardsHandler(
         //TODO move cards to back after bought, so that they are at the end
     }
 
-    override fun dispose() = _allCards.forEach { it.dispose() }
-
     companion object {
 
-        private val cardsFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
-        }
         const val logTag: String = "ShopCardsHandler"
     }
 }

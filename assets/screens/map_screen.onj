@@ -81,10 +81,25 @@ var mapBox = $Box {
                 width: 100.0#percent,
                 height: 100.0#percent,
                 positionType: positionType.absolute,
-                positionRight: (0.0*10)#points,
-                positionTop: (0.0*10)#points,
-                positionBottom: (0.0*10)#points,
+                positionRight: (0.0 * 10)#points,
+                positionTop: (0.0 * 10)#points,
+                positionBottom: (0.0 * 10)#points,
+                backgroundScale: 0.25,
+                background: "map_background_wasteland_tileable",
             },
+            {
+                style_priority: 2,
+                style_condition: biome("snow"),
+                backgroundScale: 0.25,
+                background: "map_background_snow_tileable",
+                // i hope its okay to abuse this, if not, then please say
+            },
+            {
+                style_priority: 2,
+                style_condition: biome("dunkelwald"),
+                backgroundScale: 0.05,
+                background: "map_background_grass_tileable",
+            }
         ],
         detailMapProvider: $CurrentMapProvider {
         },
@@ -95,12 +110,10 @@ var mapBox = $Box {
         playerTexture: "map_player",
         playerWidth: 1.83 * 3.0,
         playerHeight: 3.0 * 3.0,
-        background: "map_background_wasteland_tileable",
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
         directionIndicator: "dialog_continue_arrow",
         screenSpeed: 2.5,
-        backgroundScale: 0.05,
         leftScreenSideDeadSection: 10.0,
         disabledDirectionIndicatorAlpha: 0.5,
         startButtonName: "start_button"
@@ -115,7 +128,7 @@ var mapBox = $Box {
                 height: 90.0#percent,
                 width: 30.0#percent,
                 positionLeft: 100.0#percent,
-                paddingLeft: (13.0*10)#points,
+                paddingLeft: (13.0 * 10)#points,
                 background: "map_detail_background"
             },
             {
@@ -124,7 +137,7 @@ var mapBox = $Box {
                     duration: 0.2,
                     interpolation: interpolation.linear
                 },
-                positionLeft: (25.0*10)#points,
+                positionLeft: (25.0 * 10)#points,
             },
             {
                 style_priority: 3,
@@ -133,7 +146,7 @@ var mapBox = $Box {
                     duration: 0.2,
                     interpolation: interpolation.linear
                 },
-                positionLeft: (0.0*10)#points,
+                positionLeft: (0.0 * 10)#points,
             },
         ],
     } children [
@@ -150,6 +163,12 @@ var mapBox = $Box {
             template: "{map.curEvent.description}",
             fontScale: 0.7,
             color: color.white,
+            wrap: true,
+            styles: [
+                {
+                    width: 90#percent,
+                }
+            ]
         },
 
         $Image {

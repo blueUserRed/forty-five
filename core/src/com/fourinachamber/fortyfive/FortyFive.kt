@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.utils.TextureGenerator
 import com.fourinachamber.fortyfive.map.*
+import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
@@ -116,6 +117,7 @@ object FortyFive : Game() {
         MapManager.init()
         GraphicsConfig.init()
         ResourceManager.init()
+        RandomCardSelection.init()
     }
 
     override fun dispose() {

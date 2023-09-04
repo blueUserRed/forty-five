@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.dialog
+package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.map.detailMap.NPCMapEvent

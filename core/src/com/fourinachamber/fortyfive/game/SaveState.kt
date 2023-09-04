@@ -256,6 +256,10 @@ object SaveState {
             get() = _cardPositions.map { it.value }
 
 
+        init {
+            checkMinimum()
+        }
+
         fun checkMinimum() {
             if (cardPositions.size < minDeckSize && cardPositions.size < SaveState.cards.size) {
                 val onlyBackpackCards = mutableListOf<String>()
@@ -330,6 +334,11 @@ object SaveState {
         override fun hashCode(): Int {
             return id.hashCode()
         }
+
+        fun canRemoveCards(): Boolean = cards.size > minDeckSize
+        fun hasEnoughCards(): Boolean = cards.size >= minDeckSize
+
+        fun canAddCards(): Boolean = cards.size < numberOfSlots
 
         companion object {
             fun getFromOnj(onj: OnjObject): Deck {

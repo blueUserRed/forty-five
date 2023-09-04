@@ -36,12 +36,16 @@ $MapEvent {
 
     $ShopMapEvent {
         type: string,
-        biome: string,
         person: string,
         seed: int?,
         boughtIndices: int[],
     }
 
+    $ChooseCardMapEvent {
+        types: string[],
+        seed: int?,
+        ...mapEventStandardConfig
+    }
 }
 
 
@@ -95,7 +99,12 @@ var mapRestrictions = {
     }[],
     decorationSeed: int,
     decorations: $DecorationDistributionFunction[],
-    exitNodeTexture: string
+    exitNodeTexture: string,
+    encounterModifiers: {
+        name: string,
+        weight: int,
+    }[],
+    avgNbrOfEncounters: int,
 };
 
 screens: {
@@ -103,6 +112,7 @@ screens: {
     dialogScreen: string,
     encounterScreen: string,
     shopScreen: string,
+    chooseCardScreen: string,
 },
 
 mapImages: {
@@ -123,6 +133,7 @@ generatorConfig: {
     maps: {
         name: string,
         seed: int,
+        biome: string,
         restrictions: mapRestrictions
     }[]
 },

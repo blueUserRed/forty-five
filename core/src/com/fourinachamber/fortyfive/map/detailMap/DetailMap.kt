@@ -27,7 +27,8 @@ data class DetailMap(
     val startNode: MapNode,
     val endNode: MapNode,
     val decorations: List<MapDecoration>,
-    val isArea: Boolean
+    val isArea: Boolean,
+    val biome: String
 ) {
 
     /**
@@ -71,6 +72,7 @@ data class DetailMap(
         "endNode" with endNode.index
         "decorations" with decorations.map { it.asOnjObject() }
         "isArea" with isArea
+        "biome" with biome
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -142,13 +144,15 @@ data class DetailMap(
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
             val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
+            val biomeName = onj.get<String?>("biome")
             return DetailMap(
                 file.nameWithoutExtension(),
                 nodes[startNodeIndex].build(),
                 endNode.asNode!!,
                 decorations,
-                onj.get<Boolean>("isArea")
-            )
+                onj.get<Boolean>("isArea"),
+                onj.get<String>("biome"),
+                )
         }
 
         private val mapOnjSchema: OnjSchema by lazy {

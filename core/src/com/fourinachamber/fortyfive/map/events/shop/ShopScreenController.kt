@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.shop
+package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -18,16 +18,22 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var screen: OnjScreen
     private lateinit var context: ShopMapEvent
+
     private val shopFilePath = onj.get<String>("shopsFile")
     private val npcsFilePath = onj.get<String>("npcsFile")
     private val cardsFilePath = onj.get<String>("cardsFile")
+
     private val messageWidgetName = onj.get<String>("messageWidgetName")
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
+
     private lateinit var person: CustomImageActor
+
     private lateinit var cardsParentWidget: CustomScrollableFlexBox
+
     private lateinit var shopCardsHandler: ShopCardsHandler
+
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
 
@@ -64,12 +70,9 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val defaults = shopFile.get<OnjObject>("defaults")
 
         val rnd = Random(context.seed)
-        messageWidget.advancedText =
-            AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
-
         shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
-        shopCardsHandler.calculateChances(context.type, shopFile, personData)
-        shopCardsHandler.addItems(rnd)
+        shopCardsHandler.addItems(rnd, context.type, personData.get<String>("defaultShopParameter"))
+        messageWidget.advancedText = AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
@@ -102,22 +105,13 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
-        shopCardsHandler.buyCard(actor as CustomImageActor,addToDeck)
-    }
-
-    override fun end() {
-        super.end()
-        shopCardsHandler.dispose()
+        shopCardsHandler.buyCard(actor as CustomImageActor, addToDeck)
     }
 
     fun displayBuyPopups() {
         val curDeck = SaveState.curDeck
-        if (curDeck.nextFreeSlot() != -1) {
-            addToDeckWidget.enterActorState("display")
-        }
-        if (curDeck.cardPositions.size >= SaveState.Deck.minDeckSize) {
-            addToBackpackWidget.enterActorState("display")
-        }
+        if (curDeck.canAddCards()) addToDeckWidget.enterActorState("display")
+        if (curDeck.canRemoveCards()) addToBackpackWidget.enterActorState("display")
     }
 
     fun closeBuyPopups() {

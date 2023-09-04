@@ -230,7 +230,7 @@ data class MapNodeBuilder(
     val dirNodes: Array<Int?> = arrayOfNulls(4)
 
 
-    fun scale(xScale: Float = 1F, yScale: Float = 1F) {
+    fun scale(xScale: Float, yScale: Float) {
         x *= xScale
         y *= yScale
     }

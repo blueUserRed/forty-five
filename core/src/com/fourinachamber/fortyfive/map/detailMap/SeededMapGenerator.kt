@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Intersector
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.map.events.RandomCardSelection
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -39,19 +41,25 @@ class SeededMapGenerator(
     /**
      * generates the line
      */
-    fun generate(name: String): DetailMap {
+    fun generate(name: String, biome: String): DetailMap {
         FortyFiveLogger.debug(logTag, "generating map $name with seed $seed")
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         addEvents(nodes)
-
-        nodes.forEach { it.scale(restrictions.scaleWidth, restrictions.scaleLength) }
+        nodes.forEach { it.scale(restrictions.scaleLength, restrictions.scaleWidth) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
         this.nodes = nodes
         build()
-        return DetailMap(name, mainLine.lineNodes.first().asNode!!, mainLine.lineNodes.last().asNode!!, decos, false)
+        return DetailMap(
+            name,
+            mainLine.lineNodes.first().asNode!!,
+            mainLine.lineNodes.last().asNode!!,
+            decos,
+            false,
+            biome
+        )
     }
 
     private fun generateDecorations(
@@ -67,7 +75,7 @@ class SeededMapGenerator(
             decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
         }
         return decos
-    }//auf main pushen?, templateWidgets?
+    }
 
     private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
         val nodesWithoutEvents = nodes.filter { a -> a.event == null }.toMutableList()
@@ -104,11 +112,34 @@ class SeededMapGenerator(
                 val choice = allWeightEnds.indexOf(allWeightEnds.first { it >= rndMy })
                 val (_, eventCreator, nodeTexture) = restrictions.optionalEvents[choice]
                 curNode.event = eventCreator()
+                val event = curNode.event
+                if (event is EncounterMapEvent) event.encounterModifierNames = getModifier()
                 curNode.nodeTexture = nodeTexture
             }
             nodesWithoutEvents.remove(curNode)
         }
     }
+
+    private fun getModifier(): Set<String> {
+        val encounterProps = restrictions.encounterProps.toMutableList()
+        val res: MutableSet<String> = mutableSetOf()
+        val nbrOfEncounterIndex =
+            RandomCardSelection.getRandomIndex(restrictions.nbrOfEncounters.map { it.second.toFloat() }
+                .toMutableList(), rnd)
+        repeat(restrictions.nbrOfEncounters[max(nbrOfEncounterIndex, 0)].first) {
+            if (encounterProps.isEmpty()) return res
+            val encIndex = RandomCardSelection.getRandomIndex(encounterProps.map { it.second.toFloat() }
+                .toMutableList(), rnd)
+            try {
+                res.add((encounterProps[encIndex].first))
+            } catch (e: Exception) {
+                throw Exception("Unknown encounter Modifier: ${encounterProps[encIndex]}.", e)
+            }
+            encounterProps.removeAt(encIndex)
+        }
+        return res
+    }
+
 
     /**
      * adds the areas at the end, after all other nodes were placed
@@ -215,14 +246,15 @@ class SeededMapGenerator(
     private fun generateNodesPositions(): MutableList<MapNodeBuilder> {
         val nodes: MutableList<MapNodeBuilder> = mutableListOf()
         val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
-        mainLine = MapGeneratorLine(seed, restrictions, rnd, nbrOfPoints = nbrOfNodes)
+        mainLine = MapGeneratorLine(seed, restrictions, rnd, nbrOfPoints = nbrOfNodes, maxLength = -1F)
+        val maxLength = mainLine.lineNodes.last().x
         var curDown = mainLine
         var curUp = mainLine
         for (i in 1 until restrictions.maxLines) {
             if (rnd.nextBoolean()) {
-                curDown = curDown.generateNextLine(true)!!
+                curDown = curDown.generateNextLine(true, maxLength)!!
             } else {
-                curUp = curUp.generateNextLine(false)!!
+                curUp = curUp.generateNextLine(false, maxLength)!!
             }
         }
         mainLine.connectWithEachOther(null, nodes)
@@ -234,13 +266,12 @@ class SeededMapGenerator(
      */
     private fun checkAndChangeConnectionIntersection(nodes: MutableList<MapNodeBuilder>): MutableList<Line> {
         while (true) {
-            var hadErrors = false
             val uniqueNodes: MutableList<MapNodeBuilder> = getUniqueNodesFromNodeRecursive(
                 nodes[0], mutableListOf()
             )
             nodes.removeIf { it !in uniqueNodes }
             val uniqueLines = getUniqueLinesFromNodes(uniqueNodes)
-            while (checkLinesNotIntercepting(uniqueLines, nodes)) hadErrors = true
+            val hadErrors = checkLinesNotIntercepting(uniqueLines, nodes) //sadly needed to do it like that
             if (!hadErrors) return uniqueLines
         }
     }
@@ -284,6 +315,7 @@ class SeededMapGenerator(
                 if (!line1.sharesPointWith(line2)) {
                     val interceptPoint = line1.addOnEachEnd(restrictions.pathTotalWidth)
                         .intersection(line2.addOnEachEnd(restrictions.pathTotalWidth))
+
                     if (interceptPoint != null && nodes.none { a -> a.x == interceptPoint.x && a.y == interceptPoint.y }) {
                         correctInterceptionNode(nodes, uniqueLines[i], uniqueLines[j], interceptPoint, uniqueLines)
                         return true
@@ -302,17 +334,19 @@ class SeededMapGenerator(
         line1: Line,
         line2: Line,
         interceptPoint: Vector2,
-        uniqueLines: MutableList<Line>
+        uniqueLines: MutableList<Line>,
+        testingVal: Boolean = false
     ) {
         var intersectionNode: MapNodeBuilder? = null
         for (i in nodes) {
             val newVec = interceptPoint.clone()
-                .sub(Vector2(i.x + restrictions.pathTotalWidth / 2, i.y + restrictions.pathTotalWidth / 2))
-            if (newVec.len() < restrictions.pathTotalWidth) {
+                .sub(Vector2(i.x, i.y))
+            if (newVec.len() < restrictions.minDistanceBetweenNodes) {
                 intersectionNode = i
                 break
             }
         }
+
         if (intersectionNode == null) {
             val newNode = MapNodeBuilder(0, interceptPoint.x, interceptPoint.y)
             addNodeInBetween(line1, nodes, newNode, uniqueLines)
@@ -382,7 +416,6 @@ class SeededMapGenerator(
         uniqueLines.remove(nodesConnection)
         uniqueLines.add(Line(Vector2(firstNode.x, firstNode.y), Vector2(newNode.x, newNode.y)))
         uniqueLines.add(Line(Vector2(newNode.x, newNode.y), Vector2(secNode.x, secNode.y)))
-        //TODO set directions for the "node in between"
     }
 
     /*    fun generateBezier(): DetailMap {
@@ -440,6 +473,11 @@ class SeededMapGenerator(
          */
         isOldLineMin: Boolean = false,
         val nbrOfPoints: Int = 15,
+
+        /**
+         * the length of the main line, so that no other line is longer
+         */
+        maxLength: Float,
     ) {
         val lineNodes: List<MapNodeBuilder>
         var lineUp: MapGeneratorLine? = null
@@ -453,11 +491,10 @@ class SeededMapGenerator(
                 } else {
                     lineDown = oldLine
                 }
-                calcPointsForAdditionalLines(points, oldLine, isOldLineMin)
+                calcPointsForAdditionalLines(points, oldLine, isOldLineMin, maxLength)
             } else {
                 calcPointsForFirstLine(points)
             }
-
             val nodesList: MutableList<MapNodeBuilder> = mutableListOf()
             points.forEach { p -> nodesList.add(MapNodeBuilder(0, p.x, p.y)) }
             this.lineNodes = nodesList
@@ -469,11 +506,13 @@ class SeededMapGenerator(
         private fun calcPointsForAdditionalLines(
             points: MutableList<Vector2>,
             oldLine: MapGeneratorLine,
-            isOldLineMin: Boolean
+            isOldLineMin: Boolean,
+            maxLength: Float
         ) {
             points.add(Vector2(oldLine.lineNodes[0].x, oldLine.lineNodes[0].y))
             for (i in 1 until nbrOfPoints) {
                 val (pointToAdd: Vector2, posRange) = calcPointToAdd(points, isOldLineMin, oldLine)
+                if (pointToAdd.x >= maxLength) break
                 if (pointToAdd.y !in posRange) {
                     points.add(Vector2(pointToAdd.x, posRange.random(rnd)))
                 } else {
@@ -571,21 +610,21 @@ class SeededMapGenerator(
             return a * a * (a * ((0.2F..1.05F).random(rnd))) / 10 / 5 + 1
         }
 
-        fun generateNextLine(generateUp: Boolean = true): MapGeneratorLine? {
+        fun generateNextLine(generateUp: Boolean = true, maxLength: Float): MapGeneratorLine? {
             if (lineDown != null && lineUp == null) {
-                lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
+                lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1, maxLength)
                 return lineUp
             }
             if (lineUp != null && lineDown == null) {
-                lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
+                lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1, maxLength)
                 return lineDown
             }
             if (lineUp == null) {
                 return if (generateUp) {
-                    lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1)
+                    lineUp = MapGeneratorLine(seed, restrict, rnd, this, false, nbrOfPoints - 1, maxLength)
                     lineUp
                 } else {
-                    lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1)
+                    lineDown = MapGeneratorLine(seed, restrict, rnd, this, true, nbrOfPoints - 1, maxLength)
                     lineDown
                 }
             }
@@ -1006,7 +1045,7 @@ sealed class DecorationDistributionFunction(
             for (i in 0 until ((outerRadius * outerRadius * PI) / (baseWidth * baseHeight) * density).toInt()) {
                 val ang = rnd.nextDouble() * Math.PI * 2
                 val len =
-                    sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble())) //TODO maybe log or so for better distribution
+                    sqrt(rnd.nextDouble(outerRadius * outerRadius.toDouble()))
                 val posPos = Vector2(
                     (center.x + cos(ang) * len).toFloat(),
                     (center.y + sin(ang) * len).toFloat()
@@ -1375,11 +1414,27 @@ data class MapRestriction(
     val optionalEvents: List<Triple<Int, () -> MapEvent, String?>>,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
+    /**
+     * width of the path, needed for checking if textures are overlapping
+     */
     val pathTotalWidth: Float = 7.5F,
     val minDistanceBetweenNodes: Float = 15F,
-    val exitNodeTexture: String
+    val exitNodeTexture: ResourceHandle,
+    /**
+     * has the encounter Probabilities for this map with the weight for each possibility
+     */
+    val encounterProps: List<Pair<String, Int>>,
+    private val avgNbrOfEncounters: Int,
 ) {
+    val nbrOfEncounters: List<Pair<Int, Int>>
 
+    init {
+        val nbrOfEncounters: MutableList<Pair<Int, Int>> = mutableListOf()
+        for (i in -2..2) {
+            nbrOfEncounters.add(avgNbrOfEncounters + i to 3 - abs(i))
+        }
+        this.nbrOfEncounters = nbrOfEncounters
+    }
 
     companion object {
 
@@ -1428,6 +1483,11 @@ data class MapRestriction(
                     )
                 },
             exitNodeTexture = onj.get<String>("exitNodeTexture"),
+            encounterProps = onj.get<OnjArray>("encounterModifiers").value.map { it as OnjObject }.map {
+                it.get<String>("name") to
+                        it.get<Long>("weight").toInt()
+            },
+            avgNbrOfEncounters = onj.get<Long>("avgNbrOfEncounters").toInt(),
         )
     }
 }

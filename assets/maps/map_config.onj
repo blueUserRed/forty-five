@@ -58,6 +58,7 @@ screens: {
     dialogScreen: "screens/dialog_screen.onj",
     encounterScreen: "screens/game_screen.onj",
     shopScreen: "screens/shop_screen.onj",
+    chooseCardScreen: "screens/choose_card_screen.onj",
 },
 
 displayNames: [
@@ -84,6 +85,7 @@ generatorConfig: {
     maps: [
         {
             name: "roadToSalem",
+            biome: "dunkelwald",
             seed: runRandom(1),
             restrictions: {
                 maxNodes: 14,
@@ -92,17 +94,27 @@ generatorConfig: {
                 splitProbability: 0.6,
                 startArea: "test_area",
                 endArea: "salem",
-                scaleWidth: 0.4,
-                scaleLength: 0.4,
+                scaleWidth: 2.5,
+                scaleLength: 2.5,
                 otherAreas: [
                 ],
                 rotation: 1.25,
                 fixedEvents: [
                 ],
+                encounterModifiers: [
+                    {
+                        name: "Rain",
+                        weight: 10,
+                    }, {
+                        name: "Frost",
+                        weight: 1,
+                    }
+                ],
+                avgNbrOfEncounters: 1,
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
-                        weight: 0,
+                        weight: 10,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -111,7 +123,7 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 20,
+                        weight: 0,
                         nodeTexture: null,
                         event: $EmptyMapEvent {
                         }
@@ -120,15 +132,14 @@ generatorConfig: {
                 decorations: [
                     $RandomDistributionFunction {
                         decoration: "map_decoration_grass",
-                        density: 0.2,
+                        density: 0.002,
                         baseWidth: 3.0,
                         baseHeight: 3.0,
                         scaleMin: 0.6,
                         scaleMax: 1.2,
                         onlyCollidesWithNodes: false
                     },
-                    //
-//                    $RandomDistributionFunction {
+                    //                    $RandomDistributionFunction {
 //                        decoration: "map_decoration_grass",
 //                        density: 0.01,
 //                        baseWidth: 2.0,
@@ -139,7 +150,7 @@ generatorConfig: {
 //                    },
                     $MultiClusterDistributionFunction {
                         decoration: "map_decoration_cactus",
-                        density: 0.1,
+                        density: 0.001,
                         baseWidth: 2.0,
                         baseHeight: 4.0,
                         scaleMin: 1.5,
@@ -151,7 +162,7 @@ generatorConfig: {
                     },
                     $SingleClusterDistributionFunction {
                         decoration: "map_decoration_grass",
-                        density: 0.1,
+                        density: 0.001,
                         baseWidth: 3.0,
                         baseHeight: 3.0,
                         scaleMin: 3.5,
@@ -169,6 +180,7 @@ generatorConfig: {
         },
         {
             name: "endlessRoad",
+            biome: "flameing",
             seed: runRandom(2),
             restrictions: {
                 maxNodes: 25,
@@ -179,6 +191,9 @@ generatorConfig: {
                 endArea: "salem",
                 otherAreas: [
                 ],
+                encounterModifiers: [
+                ],
+                avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
                 rotation: 0.0,
                 exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
@@ -190,7 +205,6 @@ generatorConfig: {
                             boughtIndices: [
                             ],
                             type: "rare_shop",
-                            biome: "no_biome",
                             person: "rare_merchant",
                         }
                     }
@@ -227,11 +241,10 @@ generatorConfig: {
                     }
                 ],
                 decorationSeed: 230789230789407892340,
-                decorationPadding: 40.0
+                decorationPadding: 40.0,
             }
         },
     ]
-
 },
 
 

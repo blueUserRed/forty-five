@@ -190,7 +190,7 @@ $Widget {
     $Map {
         detailMapProvider: $DetailMapProvider,
         defaultNodeTexture: string,
-        background: string,
+ //       background: string,
         playerTexture: string,
         playerWidth: float,
         playerHeight: float,
@@ -201,7 +201,6 @@ $Widget {
         directionIndicator: string,
         startButtonName: string,
         screenSpeed: float,
-        backgroundScale: float,
         leftScreenSideDeadSection: float,
         disabledDirectionIndicatorAlpha: float,
         ...widgetSharedKeys
@@ -382,6 +381,14 @@ $ScreenController {
         npcsFile: string,
         cardsFile: string,
         messageWidgetName: string,
+        cardsParentName: string,
+        addToDeckWidgetName: string,
+        addToBackpackWidgetName: string,
+    }
+
+    $ChooseCardScreenController {
+        cardsFile: string,
+        leaveButtonName: string,
         cardsParentName: string,
         addToDeckWidgetName: string,
         addToBackpackWidgetName: string,

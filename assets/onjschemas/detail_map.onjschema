@@ -10,7 +10,8 @@ $MapEvent {
     $EmptyMapEvent { }
 
     $EncounterMapEvent {
-        ...mapEventStandardConfig
+        ...mapEventStandardConfig,
+        encounterModifier:String[],
     }
 
     $EnterMapMapEvent {
@@ -25,10 +26,15 @@ $MapEvent {
 
     $ShopMapEvent {
         type: string,
-        biome: string,
         person: string,
         seed: int?,
         boughtIndices: int[],
+    }
+
+    $ChooseCardMapEvent {
+        types: string[],
+        seed: int?,
+        ...mapEventStandardConfig
     }
 }
 
@@ -53,4 +59,5 @@ decorations: {
     positions: float[3][]
 
 }[],
+biome: string,
 isArea:boolean,
