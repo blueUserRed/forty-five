@@ -2,9 +2,7 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.InputListener
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.card.CardDragSource
@@ -155,7 +153,9 @@ abstract class CenteredDragSource(
         //if there are any errors, it might be because of scaling //see files at commit 17278a0ddd6f821358af53ba331443958292d872
     }
 
-    protected fun startReal() { centerOnClick.realStart = true }
+    protected fun startReal() {
+        centerOnClick.realStart = true
+    }
 
     override fun dragStop(
         event: InputEvent?,
@@ -202,28 +202,27 @@ class OnClickToCenter(private val src: CenteredDragSource) : ClickListener() {
     var realStart = false
     private var startOffset: Vector2? = Vector2()
     override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
-        if (button == 0) {
-            if (src.fakeStart(event, x, y, pointer)) {
-                realStart = false
-                startOffset = Vector2(
-                    x * src.actor.scaleX - (src.actor.width / 2),
-                    y * src.actor.scaleY - (src.actor.height / 2)
-                )
-                startOffset?.let {
-                    val actor=src.actor as OffSettable
-                    actor.offsetX += it.x
-                    actor.offsetY += it.y
-                }
-            }
+        if (button != 0 || !src.fakeStart(event, x, y, pointer)) return super.touchDown(event, x, y, pointer, button)
+
+        realStart = false
+        startOffset = Vector2(
+            x * src.actor.scaleX - (src.actor.width / 2),
+            y * src.actor.scaleY - (src.actor.height / 2)
+        )
+        startOffset?.let {
+            val actor = src.actor as OffSettable
+            actor.offsetX += it.x
+            actor.offsetY += it.y
         }
         return super.touchDown(event, x, y, pointer, button)
     }
+
     override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
         startOffset?.let {
-            val actor=src.actor as OffSettable
+            val actor = src.actor as OffSettable
             actor.offsetX -= it.x
             actor.offsetY -= it.y
-            if (!realStart){
+            if (!realStart) {
                 src.fakeStop(event, x, y, pointer)
             }
         }
