@@ -1,35 +1,5 @@
 use Common;
 
-$CardSelector{
-    $ByName{
-        name: string
-    }
-    $ByTag{
-        name: string
-    }
-}
-
-$CardEffect{
-    $Blacklist{}
-
-    $ProbabilityAddition{
-        weight: float
-    }
-
-    $PriceMultiplier{
-        price: float
-    }
-}
-
-var shopParameter = {
-    cardChanges: {
-        select: $CardSelector,
-        effect: $CardEffect
-    }[],
-    name: string
-};
-
-
 var advancedTextPartSharedKeys = {
     actions?: $AdvancedTextPartAction[]
 };
@@ -63,8 +33,6 @@ $AdvancedTextPartAction {
 
 }
 
-
-types: shopParameter[],
 
 people: {
     name: string,

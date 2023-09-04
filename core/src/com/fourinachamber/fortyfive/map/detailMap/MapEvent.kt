@@ -1,12 +1,10 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
-import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.map.MapManager
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
-import onj.value.OnjInt
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
+import onj.value.*
 
 /**
  * used for dynamically creating events
@@ -18,13 +16,18 @@ object MapEventFactory {
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
-        "ShopMapEvent" to { it ->
+        "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
-                it.get<String>("type"),
-                it.get<String>("biome"),
-                it.get<String>("person"),
-                it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-                it.get<List<OnjInt>>("boughtIndices").map{it2->it2.value.toInt()}.toMutableSet(),
+                onjObject.get<String>("type"),
+                onjObject.get<String>("person"),
+                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+                onjObject.get<List<OnjInt>>("boughtIndices").map { it -> it.value.toInt() }.toMutableSet(),
+            )
+        },
+        "ChooseCardMapEvent" to { onjObject ->
+            ChooseCardMapEvent(
+                onjObject.get<OnjArray>("types").value.map { (it as OnjString).value },
+                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             )
         },
     )
@@ -152,9 +155,15 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
+    val encounterModifier: List<EncounterModifier>
+        get() = encounterModifierNames.map { EncounterModifier.getFromName(it) }
+
+    var encounterModifierNames: Set<String>
+
     init {
         setStandardValuesFromConfig(obj)
 //        currentlyBlocks = false
+        encounterModifierNames = obj.get<OnjArray?>("encounterModifier")?.value?.map { ((it as OnjString).value)}?.toSet()?: setOf()
     }
 
     override fun start() {
@@ -170,6 +179,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EncounterMapEvent")
         includeStandardConfig()
+        "encounterModifier" with encounterModifierNames
     }
 }
 
@@ -194,7 +204,7 @@ class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEven
     }
 
     override fun start() {
-        MapManager.switchToMap(targetMap, placeAtEnd)
+        MapManager.changeToMap(targetMap, placeAtEnd)
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
@@ -239,11 +249,9 @@ class NPCMapEvent(val npc: String) : MapEvent() {
 /**
  * event that opens a shop where the player can buy up to 8 cards
  * @param type which type the restrictions are
- * @param biome in what biome the shop is
  */
 class ShopMapEvent(
     val type: String,
-    private val biome: String,
     val person: String,
     val seed: Long,
     val boughtIndices: MutableSet<Int>
@@ -269,9 +277,43 @@ class ShopMapEvent(
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
         ("type" with type)
-        ("biome" with biome)
         ("person" with person)
         ("seed" with seed)
         ("boughtIndices" with boughtIndices)
+    }
+}
+
+/**
+ * event that opens a shop where the player can buy up to 8 cards
+ * @param types which type the restrictions are
+ */
+class ChooseCardMapEvent(
+    val types: List<String>,
+    val seed: Long,
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "You can choose one of three cards."
+    override val displayName: String = "Ominous person"
+
+    override fun start() {
+        MapManager.changeToChooseCardScreen(this)
+    }
+
+    fun complete() {
+        isCompleted = true
+        canBeStarted = false
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("ChooseCardMapEvent")
+        includeStandardConfig()
+        ("types" with types)
+        ("seed" with seed)
     }
 }

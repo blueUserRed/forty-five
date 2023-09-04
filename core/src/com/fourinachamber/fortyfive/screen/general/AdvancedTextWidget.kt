@@ -281,6 +281,7 @@ class IconAdvancedTextPart(
 
     override fun update() {
         if (loadedDrawable == null) forceLoadDrawable()
+        if (drawable == null) forceLoadDrawable()
         if (calculatedLayout && !isVisible) {
             isVisible = true
         }

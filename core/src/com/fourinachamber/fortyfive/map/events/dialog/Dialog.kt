@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.dialog
+package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.fourinachamber.fortyfive.screen.general.AdvancedText
 import com.fourinachamber.fortyfive.screen.general.OnjScreen

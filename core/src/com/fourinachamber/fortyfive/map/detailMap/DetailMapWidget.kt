@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
@@ -15,13 +16,11 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.general.DisableActor
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.onButtonClick
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
+import com.fourinachamber.fortyfive.screen.general.styles.addMapStyles
 import com.fourinachamber.fortyfive.utils.*
 import kotlin.math.asin
 import kotlin.math.ceil
@@ -44,12 +43,11 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
-    var backgroundHandle: ResourceHandle,
     private var screenSpeed: Float,
-    private var backgroundScale: Float,
+//    private var backgroundScale: Float,
     private val disabledDirectionIndicatorAlpha: Float,
     private val leftScreenSideDeadSection: Float
-) : Widget(), ZIndexActor, StyledActor {
+) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
 
@@ -72,9 +70,19 @@ class DetailMapWidget(
         ResourceManager.get(screen, playerDrawableHandle)
     }
 
-    private val background: Drawable by lazy {
-        ResourceManager.get(screen, backgroundHandle)
-    }
+    override var backgroundHandle: ResourceHandle? = null
+        set(value) {
+            field = value
+            background = if (value == null) {
+                null
+            } else {
+                ResourceManager.get(screen, value)
+            }
+        }
+
+    private var background: Drawable? = null
+
+    var backgroundScale: Float = 1F
 
     private val edgeTexture: TextureRegion by lazy {
         ResourceManager.get(screen, edgeTextureHandle)
@@ -170,7 +178,9 @@ class DetailMapWidget(
         )
     }
 
-    fun onStartButtonClicked() {
+    fun onStartButtonClicked(startButton: Actor? = null) {
+        val btn = startButton ?: screen.namedActorOrError(startButtonName)
+        if (btn is DisableActor && btn.isDisabled) return
         playerNode.event?.start()
     }
 
@@ -209,8 +219,7 @@ class DetailMapWidget(
         if (!setupStartButtonListener) {
             val startButton = screen.namedActorOrError(startButtonName)
             startButton.onButtonClick {
-                if (startButton is DisableActor && startButton.isDisabled) return@onButtonClick
-                onStartButtonClicked()
+                onStartButtonClicked(startButton)
             }
             setupStartButtonListener = true
             setupMapEvent(playerNode.event)
@@ -252,6 +261,7 @@ class DetailMapWidget(
     }
 
     private fun drawBackground(batch: Batch) {
+        val background = background ?: return
         val minWidth = background.minWidth * backgroundScale
         val minHeight = background.minHeight * backgroundScale
         val amountX = ceil(width / minWidth).toInt() + 2
@@ -447,6 +457,7 @@ class DetailMapWidget(
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
+        addMapStyles(screen)
     }
 
     companion object {

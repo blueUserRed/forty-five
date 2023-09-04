@@ -233,7 +233,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     override var isHoveredOver: Boolean = false
 
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var styleManager: StyleManager? = null
 
@@ -325,11 +325,11 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     drawableHandle: ResourceHandle?,
     private val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false
-) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor {
+) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor, OffSettable {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -339,14 +339,21 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override var maskOffsetY: Float = 0f
     var tintColor: Color? = null
 
+    override var offsetX: Float = 0F
+    override var offsetY: Float = 0F
+
     override var backgroundHandle: String? = drawableHandle
         set(value) {
             if (field != value) loadedDrawable = null
             field = value
         }
-
     protected var loadedDrawable: Drawable? = null
         private set
+
+    /**
+     * overrides and ignores the background handle and the loaded drawable
+     */
+    var programmedDrawable: Drawable? = null
 
     override var isSelected: Boolean = false
 
@@ -377,20 +384,20 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val mask = mask
         val backgroundHandle = backgroundHandle
-
-        if (backgroundHandle != null && loadedDrawable == null) {
+        if (programmedDrawable != null) drawable = programmedDrawable
+        else if (backgroundHandle != null && loadedDrawable == null) {
             loadedDrawable = ResourceManager.get(screen, backgroundHandle)
             drawable = loadedDrawable
             invalidateHierarchy()
         }
-
         if (batch == null || drawable == null) {
             super.draw(batch, parentAlpha)
             return
         }
 
         validate()
-
+        x += offsetX
+        y += offsetY
         val width = if (ignoreScalingWhenDrawing) width else width * scaleX
         val height = if (ignoreScalingWhenDrawing) height else height * scaleY
 
@@ -427,6 +434,9 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         batch.flush()
 
         batch.shader = prevShader
+
+        x -= offsetX
+        y -= offsetY
     }
 
     fun forceLoadDrawable() {
@@ -504,7 +514,7 @@ open class CustomFlexBox(
     override var isHoveredOver: Boolean = false
 
     override var styleManager: StyleManager? = null
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
@@ -873,7 +883,8 @@ class CustomScrollableFlexBox(
         batch ?: return
         batch.flush()
         val viewport = screen.stage.viewport
-        val xPixel = (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
+        val xPixel =
+            (Gdx.graphics.width - viewport.leftGutterWidth - viewport.rightGutterWidth) / viewport.worldWidth
         val yPixel =
             (Gdx.graphics.height - viewport.topGutterHeight - viewport.bottomGutterHeight) / viewport.worldHeight
         if (isBackgroundStretched) {
@@ -949,7 +960,8 @@ class CustomScrollableFlexBox(
         )
         if (!ScissorStack.pushScissors(scissorBack)) return true
         val backgroundHandle = backgroundHandle
-        if (backgroundHandle != null && background == null) background = ResourceManager.get(screen, backgroundHandle)
+        if (backgroundHandle != null && background == null) background =
+            ResourceManager.get(screen, backgroundHandle)
         validate()
         if (background != null) {
             if (isScrollDirectionVertical) background?.draw(
@@ -1031,7 +1043,8 @@ class RotatableImageActor(
         onTouchEvent { event ->
             when (event.type) {
                 InputEvent.Type.touchDown -> {
-                    lastPos = viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
+                    lastPos =
+                        viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
                 }
 
                 InputEvent.Type.touchUp -> lastPos = null
@@ -1173,7 +1186,7 @@ open class CustomVerticalGroup(
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     override var backgroundHandle: String? = null
         set(value) {

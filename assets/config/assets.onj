@@ -259,8 +259,8 @@ textures: [
         file: "textures/shop/items_background.png"
     },
     {
-        name: "shop_background_no_biome",
-        file: "textures/shop/biomeBackgrounds/no_biome.png"
+        name: "shop_background_wasteland",
+        file: "textures/shop/biomeBackgrounds/wasteland.png"
     },
     {
         name: "shop_back_button",
@@ -373,6 +373,18 @@ textures: [
     {
         name: "warning_label_background_red",
         file: "textures/warning_label/background_red.png"
+    },
+    {
+        name: "chooseCard_cardsBackground",
+        file: "textures/chooseCard/cards_background.png"
+    },
+    {
+        name: "chooseCard_add_to_backpack",
+        file: "textures/chooseCard/to_backpack.png"
+    },
+    {
+        name: "chooseCard_add_to_deck",
+        file: "textures/chooseCard/to_deck.png"
     }
 ],
 

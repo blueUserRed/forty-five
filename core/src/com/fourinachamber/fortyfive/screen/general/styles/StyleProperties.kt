@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.general.styles
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
@@ -322,6 +323,7 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(AspectRatioStyleProperty(this, screen))
     styleManager.addStyleProperty(AlphaStyleProperty(this, screen))
     styleManager.addStyleProperty(RotationStyleProperty(this, screen))
+    styleManager.addStyleProperty(TouchableStyleProperty(this, screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.TOP, "marginTop", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.BOTTOM, "marginBottom", screen))
     styleManager.addStyleProperty(MarginStyleProperty(this, YogaEdge.LEFT, "marginLeft", screen))
@@ -333,6 +335,36 @@ fun <T> T.addActorStyles(screen: OnjScreen) where T : Actor, T : StyledActor {
     styleManager.addStyleProperty(PositionStyleProperty(this, YogaEdge.RIGHT, "positionRight", screen))
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Map
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class BackgroundScaleStyleProperty(
+    target: DetailMapWidget,
+    screen: OnjScreen
+) : StyleProperty<DetailMapWidget, Float>(
+    "backgroundScale",
+    target,
+    1f,
+    Float::class,
+    false,
+    true,
+    screen
+) {
+
+    override fun set(data: Float, node: YogaNode) {
+        target.backgroundScale = data
+    }
+
+    override fun get(node: YogaNode): Float = target.backgroundScale
+}
+
+fun DetailMapWidget.addMapStyles(screen: OnjScreen) {
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(BackgroundStyleProperty(this, screen))
+    styleManager.addStyleProperty(BackgroundScaleStyleProperty(this, screen))
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Label
@@ -419,10 +451,10 @@ fun <T> T.addTextInputStyles(screen: OnjScreen) where T : CustomInputField, T : 
 // FlexBox
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class TouchableStyleProperty(
-    target: CustomFlexBox,
+class TouchableStyleProperty<Target>(
+    target: Target,
     screen: OnjScreen
-) : StyleProperty<CustomFlexBox, Touchable>(
+) : StyleProperty<Target, Touchable>(
     "touchable",
     target,
     Touchable.disabled,
@@ -430,7 +462,7 @@ class TouchableStyleProperty(
     false,
     true,
     screen
-) {
+) where Target : Actor, Target : StyledActor {
     override fun set(data: Touchable, node: YogaNode) {
         target.touchable = data
     }
@@ -551,7 +583,6 @@ fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : Style
     addActorStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(FlexDirectionStyleProperty(this, screen))
-    styleManager.addStyleProperty(TouchableStyleProperty(this, screen))
     styleManager.addStyleProperty(AlignItemsStyleProperty(this, screen))
     styleManager.addStyleProperty(JustifyContentStyleProperty(this, screen))
     styleManager.addStyleProperty(FlexWrapStyleProperty(this, screen))
@@ -562,7 +593,7 @@ fun <T> T.addFlexBoxStyles(screen: OnjScreen) where T : CustomFlexBox, T : Style
     styleManager.addStyleProperty(PaddingStyleProperty(this, screen, YogaEdge.ALL, "padding"))
 }
 
-fun <T> T.addScrollFlexBoxStyles(screen: OnjScreen) where T : CustomScrollableFlexBox, T : StyledActor {
+fun CustomScrollableFlexBox.addScrollFlexBoxStyles(screen: OnjScreen) {
     addFlexBoxStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(CuttingStyleProperty(this, screen, Direction.LEFT, "cuttingLeft"))
@@ -598,7 +629,7 @@ class BackgroundStyleProperty<T>(
     override fun get(node: YogaNode): String = target.backgroundHandle ?: nullHandle
 
     companion object {
-        const val nullHandle = "%%--null%%--" // lets hope nobody names their texture this
+        const val nullHandle = "%%--null%%--" // let's hope nobody names their texture this
     }
 
 }

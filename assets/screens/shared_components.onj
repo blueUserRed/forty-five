@@ -9,7 +9,7 @@ var worldHeight = 900.0;
 
 navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
-    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left"
+    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left", "heart_texture",
 ],
 
 backpackAssets: [
@@ -411,6 +411,7 @@ backpack: $Backpack {
         ],
     } children [
         $Box {
+            zIndex: 5,
             styles: [
                 {
                     width: 100#percent,
@@ -556,7 +557,7 @@ backpack: $Backpack {
                 text: "Backpack",
                 font: "red_wing",
                 fontScale: 0.9,
-                color: color.white,
+                color: color.forty_white,
             },
             $Box {
                 styles: [
@@ -576,7 +577,7 @@ backpack: $Backpack {
                         text: "Sort by:",
                         font: "red_wing",
                         fontScale: 0.9,
-                        color: color.white,
+                        color: color.forty_white,
                     },
                     $Box {
                         name: "sortWidget",
@@ -609,7 +610,7 @@ backpack: $Backpack {
                         text: "|",
                         font: "red_wing",
                         fontScale: 0.9,
-                        color: color.white,
+                        color: color.forty_white,
                     },
                     $Box {
                         name: "sortReverseWidget",

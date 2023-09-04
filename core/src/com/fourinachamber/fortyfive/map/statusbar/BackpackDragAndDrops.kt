@@ -16,7 +16,7 @@ class BackpackDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
     onj: OnjNamedObject,
-) : CenteredDragSource(dragAndDrop, actor, onj) {
+) : CenteredDragSource(dragAndDrop, actor, onj, true) {
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         if ((actor !is CustomFlexBox)) return null
         val payload = DragAndDrop.Payload()
@@ -26,13 +26,17 @@ class BackpackDragSource(
         curFlex.currentlyDraggedChild = actor
 
         actor.parent.parent.parent.toFront() //the side which say if its backpack or deck
-
         val obj = BackpackDragPayload(actor)
         payload.obj = obj
         obj.resetTo(actor, Vector2(actor.x, actor.y))
+
+        curFlex.fixedZIndex = 10
+        (curFlex.parent as ZIndexGroup).resortZIndices()
+        obj.resetZIndex(curFlex)
+        startReal()
+
         return payload
     }
-
     override fun dragStop(
         event: InputEvent?,
         x: Float,
@@ -45,9 +49,26 @@ class BackpackDragSource(
         actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as BackpackDragPayload
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
-        actor.parent.parent.parent.zIndex -= 1
+        actor.parent.parent.parent.zIndex = max(actor.parent.parent.parent.zIndex - 1, 0)
         obj.invalidateParents(actor)
         obj.onDragStop()
+    }
+
+    override fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean {
+        if ((actor !is CustomFlexBox)) return false
+        val curFlex = actor.parent.parent as CustomScrollableFlexBox
+        curFlex.currentlyDraggedChild = actor
+        actor.parent.parent.parent.toFront() //the side which say if its backpack or deck
+        curFlex.fixedZIndex = 10
+        (curFlex.parent as ZIndexGroup).resortZIndices()
+        return true
+    }
+
+    override fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        actor.zIndex = max(actor.zIndex - 1, 0)
+        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
+        actor.parent.parent.parent.zIndex = max(actor.parent.parent.parent.zIndex - 1, 0)
+        (actor.parent.parent.parent.parent as ZIndexGroup).resortZIndices()
     }
 }
 
@@ -64,7 +85,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     fun backToBackpack(card: CustomFlexBox) {
         val fromDeck = card.name.split(Backpack.NAME_SEPARATOR_STRING)[1] == "deck"
         if (fromDeck) {
-            if (SaveState.curDeck.cards.size > SaveState.Deck.minDeckSize) {
+            if (SaveState.curDeck.canRemoveCards()) {
                 SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
             } else {
                 CustomWarningParent.getWarning(card.screen).addWarning(
@@ -79,6 +100,11 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
 
     fun invalidateParents(card: Actor) {
         (card as CustomFlexBox).invalidateHierarchy()
+    }
+
+    fun resetZIndex(curFlex: CustomScrollableFlexBox) = tasks.add {
+        curFlex.fixedZIndex = 0
+        (curFlex.parent as ZIndexGroup).resortZIndices()
     }
 }
 

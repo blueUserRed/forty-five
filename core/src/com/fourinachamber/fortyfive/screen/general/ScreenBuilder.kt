@@ -18,8 +18,8 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
-import com.fourinachamber.fortyfive.map.dialog.DialogWidget
-import com.fourinachamber.fortyfive.map.shop.PersonWidget
+import com.fourinachamber.fortyfive.map.events.dialog.DialogWidget
+import com.fourinachamber.fortyfive.map.events.shop.PersonWidget
 import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
@@ -209,6 +209,7 @@ class ScreenBuilder(val file: FileHandle) {
             if (addedActorsDragAndDrops[group] == null) addedActorsDragAndDrops[group] = mutableListOf()
 
             val dragAndDrop = dragAndDrops[group] ?: DragAndDrop()
+            dragAndDrop.dragTime = 10
             for ((actor, onj) in actors) {
                 if (actor in addedActorsDragAndDrops[group]!!) continue
 
@@ -408,9 +409,8 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             widgetOnj.get<String>("directionIndicator"),
             widgetOnj.get<String>("startButtonName"),
-            widgetOnj.get<String>("background"),
             widgetOnj.get<Double>("screenSpeed").toFloat(),
-            widgetOnj.get<Double>("backgroundScale").toFloat(),
+//            widgetOnj.get<Double>("backgroundScale").toFloat(),
             widgetOnj.get<Double>("disabledDirectionIndicatorAlpha").toFloat(),
             widgetOnj.get<Double>("leftScreenSideDeadSection").toFloat(),
         )
@@ -475,7 +475,9 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<OnjObject>("data").value,
             parent,
             screen
-        )!!
+        )!!.apply {
+            return this
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
@@ -565,8 +567,11 @@ class ScreenBuilder(val file: FileHandle) {
             fixedZIndex = it.toInt()
         }
 
+        widgetOnj.ifHas<String>("name") {
+            namedActors[it] = this
+            this.name = it
+        }
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
-        widgetOnj.ifHas<String>("name") { namedActors[it] = this }
         widgetOnj.ifHas<String>("touchable") { touchable = Touchable.valueOf(it) }
 
         onClick { fire(ButtonClickEvent()) }

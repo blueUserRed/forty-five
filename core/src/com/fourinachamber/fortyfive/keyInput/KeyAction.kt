@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.keyInput
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
@@ -11,9 +10,7 @@ import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
-import com.fourinachamber.fortyfive.utils.eitherRight
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 
@@ -163,7 +160,7 @@ object KeyActionFactory {
             }
         },
         "EnterEventDetailMap" to {
-            lambda@{ screen, _ ->//TODO check if it event isn't blocked
+            lambda@{ screen, _ ->
                 (screen.namedActorOrError(it.get<String>("mapActor")) as DetailMapWidget).onStartButtonClicked()
                 true
             }
