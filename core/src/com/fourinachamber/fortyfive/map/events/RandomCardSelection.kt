@@ -59,7 +59,7 @@ object RandomCardSelection {
         allBiomesOnj.forEach { biome ->
             val name = biome.get<String>("name")
             val tempMap: MutableMap<String, List<CardChange>> = mutableMapOf()
-            biome.value.filter { t -> t.key != "name" }.forEach {
+            biome.value.filter { it.key != "name" }.forEach {
                 val changes = (it.value as OnjArray).value
                     .map { e -> e as OnjObject }
                     .map { e -> CardChange.getFromOnj(e) }
