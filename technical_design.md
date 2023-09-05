@@ -1,6 +1,13 @@
 
 # .forty-five Technical design
 
+### what this document is and isn't
+
+This document is not meant to be a detailed documentation of all the features,
+functions and classes of the game. Rather, it is meant to give a high level
+overview over how different parts of the game are implemented, and to explain
+the terminology used.
+
 ### important links:
 - LibGdx wiki: https://libgdx.com/wiki/
 - YogaLayout Playground https://yogalayout.com/playground/
@@ -25,11 +32,13 @@
   - [The inner workings of the ResourceManager](#the-inner-workings-of-the-resourcemanager)
 - [The encounter (core gameplay)](#the-encounter-core-gameplay)
   - [The GameController](#the-gamecontroller)
+  - [The GameDirector](#the-gamedirector)
   - [GameAnimations](#gameanimations)
   - [Cards](#cards)
   - [Effects](#effects)
   - [Trait effects](#trait-effects)
   - [Status effects](#status-effects)
+  - [Encounter modifiers](#encounter-modifiers)
 - [The SaveState](#the-savestate)
 - [Maps](#maps)
   - [DetailMap](#detailmap)
@@ -43,10 +52,14 @@
    - [Timeline](#timeline)
    - [The TexturePacker](#the-texturepacker)
    - [BetterShader](#bettershader)
+   - [Advanced text](#advanced-text)
+
+## Overview
+
+TODO
+
 
 ## Creating and styling screens
-
-----
 
 ### ScreenBuilder
 
@@ -75,7 +88,7 @@ want to change the z-index of an Actor you should always use the
 is changed, it is necessary to resort the actors using the
 `resortZIndices` function of the parent.
 
-> Important:
+> [!IMPORTANT]
 > The z-index of the parent takes precedence over the z-index of the
 > child. Consider the following structure: <br>
 > ``|-A zIndex: 1``<br>
@@ -94,7 +107,7 @@ Ports to both Java and LibGdx are available and used in this project.
 
 ### Styling
 
-_relevent Namespace for onj-files: Style_
+_relevant Namespace for onj-files: Style_
 
 To allow for the easy and dynamic styling of the screen, a custom 
 styling system was created. Its features include assigning
@@ -175,7 +188,7 @@ Example from map_screen.onj:
 For combining multiple style-conditions, the and/or/not functions
 can be used.
 
-> Note: <br>
+> [!NOTE]
 > Properties like width, height, positionLeft, etc. don't take float,
 > but a YogaValue instead. to create a YogaValue in onj, the `#points`
 > or `#percent` conversion functions can be used. Most other custom types
@@ -200,6 +213,9 @@ a screen and manipulate it.
 
 ### Keyboard input
 
+> [!IMPORTANT]
+> this section is outdated
+
 In its options, a screen can define an input map, that tells it how to respond
 to key presses. An entry into the input map consists of the key, modifiers
 (e.g. ctrl, shift), and the action to be executed. If multiple entries match,
@@ -215,7 +231,7 @@ it must implement the KeySelectableActor interface. Most selectable actors requi
 you to set the `partOfSelectionHierarchy` property in the screen-file before being
 able to select them.
 
-> Note: <br>
+> [!NOTE]
 > You should always use the ButtonClickEvent defined in the Events.kt file instead
 > of the default event provided by LibGdx when you want to listen for click events,
 > because the ButtonClickEvent will also get fired when the button is activated using
@@ -237,8 +253,6 @@ creating various post-processing effects. When the screen is changed, the render
 pipeline is reset.
 
 ## ResourceManager
-
-----
 
 The ResourceManager is used for keeping track of assets and
 loading/disposing them accordingly.
@@ -276,7 +290,7 @@ back when they're done. Assets are identified using a ResourceHandle, which is
 just a string. In order to signal that a string is used for identifying
 resources the ResourceHandle typealias can be used.
 
-> Note: <br>
+> [!NOTE]
 > The ResourceManager guarantees that a Resource is loaded after `get` was called
 > the first time and that the reference will stay valid until `giveBack` is called.
 > However, beyond that, no guarantees about the state of resources are made.
@@ -328,16 +342,21 @@ at loading asynchronously.
 
 ## The encounter (core gameplay)
 
-----
-
 ### The GameController
 
 The GameController is a [ScreenController](#screencontroller). Together with
 the GameState class it is responsible for managing the flow of the encounter.
-The GameController manages and changes the actors on the screen and provides
-functions like `shoot` that can be called from other parts of the application.
-The GameState class is used to keep track of the current phase of the game
-(a phase is for example Free (the main game phase) or EnemyAction).
+The GameController manages and changes the actors on the screen and handles 
+the core game logic. It makes heavy use of the [Timeline](#timeline) class,
+which provides an easy way of keeping the state of the screen in sync with
+the internal logic.
+
+### The GameDirector
+
+While the GameController acts on the level of an individual encounter,
+the GameDirector is used to provide a good experience across multiple
+encounters. Its most important jobs include choosing the enemy or
+scaling the difficulty after an encounter.
 
 ### GameAnimations
 
@@ -357,16 +376,19 @@ _relevant namespace for onj-files: Card_
 
 The cards are managed by cards/cards.onj file. It records the name of the
 card, how much damage it does, how much it costs and description/flavour
-texts. In addition, it defines the start deck and what card to draw when
-the deck goes empty. The textures of the cards do not include the statistics
-(cost, damage) in order to make balancing changes quicker. Instead, the
-[TextureGenerator](#the-texturegenerator) is used to write the text onto
-the card and pack them in an atlas. This generation process can be toggled
-on/off in the FortyFive object.
+texts. In addition, each card defines an array of tags, where each tag
+can be an arbitrary string. This can be used to group similar cards together,
+to e.g. change the chance that they appear in a certain shop.
 
 The GameController uses the cards.onj file to create a CardPrototype for each
 type of card. These prototypes are then stored and can be used to create a new
 instance of a card at any time.
+
+The textures of the cards do not include the cost and the damage values, because
+they can change at runtime, for example, when a buff is applied. Instead, the
+texture is created by the CardActor class when the constructor is called or when
+the cost/damage changes. This also means that cards implement the Disposable interface,
+and the `dispose` function must be called when the card is no longer in use.
 
 ### Effects
 
@@ -412,7 +434,7 @@ bullet. The bSelectByName selects all bullets that have the given name.
 
 Trait effects are a special kind of effects, that are different because
 they do not need a trigger. They usually describe some property of a card.
-Examples are the rotten effect or the left-turning effect.
+Examples are the rotten effect or the undead effect.
 
 ### Status effects
 
@@ -421,9 +443,13 @@ the player) can. However, a bullet can have an effect that gives the enemy
 a status effect. Status effects are only active for a given number of 
 revolver-rotations, after which the status effect disappears.
 
-## The SaveState
+### Encounter modifiers
 
-----
+Encounter modifiers can be added to an encounter to change its rules.
+This mechanic makes the game more interesting to play and provides more
+variety.
+
+## The SaveState
 
 The savefile (saves/savefile.onj) stores information that persists for the
 entire run. That includes: the collected cards, the health of the player,
@@ -433,8 +459,6 @@ or the run ends, the savefile is replaced with the default savefile
 found or corrupt.
 
 ## Maps
-
-----
 
 ### DetailMap
 
@@ -464,9 +488,7 @@ is stored in maps/areas.
 ### WorldView
 
 The WorldView is a static image that shows the entire structure made up
-of areas and roads to the player. To make the process of changing location
-signs easier, the WorldView is drawn by the
-[TextureGenerator](#the-texturegenerator). Additionally, a player icon is
+of areas and roads to the player. Additionally, a player icon is
 displayed on the part of the map where the player is currently at. The
 locations of the player icon can be configured in maps/map_config.onj.
 
@@ -475,8 +497,6 @@ locations of the player icon can be configured in maps/map_config.onj.
 TODO
 
 ## Utility classes
-
-----
 
 ### The TextureGenerator
 
@@ -623,3 +643,12 @@ It has the following features:
  - constArgs: You can declare a constArg with a type in a shader. The value this
    argument takes on is always the same and can be defined in assets.onj. <br>
    Example: ``%constArg ca_speed float``
+
+### Advanced text
+
+The AdvancedTextWidget provides a more flexible way of displaying text to the
+user. This includes changing color, adding icons into the flow of the text or
+adding actions (like shaking) to parts of the text. The text for the
+AdvancedTextWidget is defined as an array of parts, each with different properties.
+Because the AdvancedTextWidget will use a label to display each part,
+currently line breaks can only be inserted at part boundaries. 
