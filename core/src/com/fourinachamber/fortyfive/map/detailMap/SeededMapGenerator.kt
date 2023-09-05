@@ -48,7 +48,7 @@ class SeededMapGenerator(
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
         val lastNode = addEvents(nodes)
-        setImagePos(mainLine.lineNodes.first(), lastNode)
+        setImagePosForBorderAreas(mainLine.lineNodes.first(), lastNode)
         nodes.forEach { it.scale(restrictions.scaleLength, restrictions.scaleWidth) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
@@ -204,7 +204,7 @@ class SeededMapGenerator(
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
     }
 
-    private fun setImagePos(first: MapNodeBuilder, last: MapNodeBuilder) {
+    private fun setImagePosForBorderAreas(first: MapNodeBuilder, last: MapNodeBuilder) {
         when (restrictions.rotation) {
             in ((PI / 4).toFloat()..(PI * 3 / 4).toFloat()) -> {
                 first.imagePos = MapNode.ImagePosition.DOWN
