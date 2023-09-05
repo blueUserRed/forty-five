@@ -188,7 +188,7 @@ generatorConfig: {
         },
         {
             name: "endlessRoad",
-            biome: "wasteland",
+            biome: "flameing",
             seed: runRandom(2),
             restrictions: {
                 maxNodes: 25,

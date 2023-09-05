@@ -18,16 +18,22 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var screen: OnjScreen
     private lateinit var context: ShopMapEvent
+
     private val shopFilePath = onj.get<String>("shopsFile")
     private val npcsFilePath = onj.get<String>("npcsFile")
     private val cardsFilePath = onj.get<String>("cardsFile")
+
     private val messageWidgetName = onj.get<String>("messageWidgetName")
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
+
     private lateinit var person: CustomImageActor
+
     private lateinit var cardsParentWidget: CustomScrollableFlexBox
+
     private lateinit var shopCardsHandler: ShopCardsHandler
+
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
 
@@ -100,11 +106,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
         shopCardsHandler.buyCard(actor as CustomImageActor, addToDeck)
-    }
-
-    override fun end() {
-        super.end()
-        shopCardsHandler.dispose()
     }
 
     fun displayBuyPopups() {

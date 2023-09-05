@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.events
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
+import com.fourinachamber.fortyfive.map.events.RandomCardSelection.getRandomCards
 import com.fourinachamber.fortyfive.utils.random
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -10,12 +11,16 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import java.lang.Exception
 import kotlin.random.Random
 
 @Suppress("MemberVisibilityCanBePrivate")
 /**
  * generates with the [getRandomCards] method for [Card] and [CardPrototype] random values with certain types and restrictions
+ *
+ * Word Definition:
+ *
+ *  Type: a named List with instructions to change the probability of certain items
+ *   (fe. add weight of incendiary bullet and blacklist workerBullet are the type "flameing")
  */
 object RandomCardSelection {
 
@@ -25,11 +30,11 @@ object RandomCardSelection {
     /**
      * the path to the file from which the data is read from
      */
-    private const val TYPES_FILE_PATH: String = "maps/events/cardSelectionTypes.onj"
+    private const val TYPES_FILE_PATH: String = "maps/events/card_selection_types.onj"
 
 
     private val cardSelectionSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/cardSelectionTypes.onjschema").file())
+        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/card_selection_types.onjschema").file())
     }
 
     fun init() {
@@ -54,7 +59,7 @@ object RandomCardSelection {
         allBiomesOnj.forEach { biome ->
             val name = biome.get<String>("name")
             val tempMap: MutableMap<String, List<CardChange>> = mutableMapOf()
-            biome.value.filter { t -> t.key != "name" }.forEach {
+            biome.value.filter { it.key != "name" }.forEach {
                 val changes = (it.value as OnjArray).value
                     .map { e -> e as OnjObject }
                     .map { e -> CardChange.getFromOnj(e) }
@@ -66,27 +71,35 @@ object RandomCardSelection {
     }
 
     /**
+     * It takes a set of cards or cardprototypes, the applies the "type"(definition found at [RandomCardSelection]) changes
+     * to them and then return cards with these changes. It is possible to have the same card twice, which essentially says
+     * this card can exist twice AND has double the chance to appear. If [itemMaxOnce] is true, then it only has double the chance to appear,
+     * but it can exist an infinite number of times
+     *
      * @param cards the cards to take as source (can have doubles)
-     * @param changeNames the names of the types you want to apply to
-     * @param cardsMaxOnce if true, then all chosen cards will be removed from the remaining selection and can therefore be there only once
+     * @param typeNames the names of the types you want to apply to
+     * @param itemMaxOnce if true, then all chosen cards will be removed from the remaining selection and can therefore be there only once
      * @param nbrOfCards how many cards you want. However, there can be fewer cards remaining after applying the effects
      * @throws Exception if a type is not known
      */
     fun <T> getRandomCards(
         cards: List<T>,
-        changeNames: List<String>,
-        cardsMaxOnce: Boolean = false,
+        typeNames: List<String>,
+        itemMaxOnce: Boolean = false,
         nbrOfCards: Int,
         rnd: Random,
         biome: String,
         occasion: String,
     ): List<T> {
-        if (nbrOfCards >= cards.size && cardsMaxOnce) return cards
-        val (tempCards, tempChances) = getCardsWithChances(cards.toMutableList(), changeNames, biome, occasion)
-        return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, cardsMaxOnce)
+        if (nbrOfCards >= cards.size && itemMaxOnce) return cards
+        val (tempCards, tempChances) = getCardsWithChances(cards.toMutableList(), typeNames, biome, occasion)
+        return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, itemMaxOnce)
     }
 
-    fun <T> getCardsFromChances(
+    /**
+     * returns [nbrOfCards] cards with the chances
+     */
+    private fun <T> getCardsFromChances(
         nbrOfCards: Int,
         tempCards: MutableList<T>,
         tempChances: MutableList<Float>,
@@ -106,7 +119,10 @@ object RandomCardSelection {
         return res
     }
 
-    fun <T> getCardsWithChances(
+    /**
+     * applies the effects from the "types" on the cards
+     */
+    private fun <T> getCardsWithChances(
         cards: MutableList<T>,
         changeNames: List<String>,
         biome: String,
@@ -134,6 +150,10 @@ object RandomCardSelection {
             if (curSum > value) return i
         }
         return chances.size - 1
+    }
+
+    fun hasType(type: String): Boolean {
+        return types.containsKey(type)
     }
 }
 

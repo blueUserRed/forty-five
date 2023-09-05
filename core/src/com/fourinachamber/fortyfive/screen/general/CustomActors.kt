@@ -351,7 +351,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         private set
 
     /**
-     * overrites and ignores the background handle and the loaded drawable
+     * overrides and ignores the background handle and the loaded drawable
      */
     var programmedDrawable: Drawable? = null
 
