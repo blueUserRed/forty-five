@@ -159,7 +159,7 @@ class CardHand(
             if (hoveredOver) {
                 card.actor.setBounds(
                     x.between(0f, width - cardSize * hoveredCardScale),
-                    cardHeightFunc(x).coerceAtLeast(0f),
+                    cardHeightFunc(x).coerceAtLeast(-2f),
                     cardSize * hoveredCardScale,
                     cardSize * hoveredCardScale
                 )
