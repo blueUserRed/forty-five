@@ -1,0 +1,36 @@
+
+@mixin hamburgerMenu {
+    @media screen and (max-width: 790px) {
+        @content
+    }    
+};
+
+@mixin navbarOpen {
+    &.navbar-open {
+        @content
+    }
+};
+
+@mixin narrow {
+    @media screen and (max-width: 750px) {
+        @content
+    }
+};
+
+@mixin break($at) {
+    @media screen and (max-width: $at) {
+        @content
+    } 
+};
+
+@mixin wide {
+    @media screen and (min-width: 1150px) {
+        @content
+    } 
+};
+
+@mixin very-wide {
+    @media screen and (min-width: 1400px) {
+        @content
+    } 
+};
