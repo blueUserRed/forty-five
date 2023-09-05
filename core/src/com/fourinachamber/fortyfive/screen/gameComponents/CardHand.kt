@@ -178,9 +178,9 @@ class CardHand(
         return zIndexChanged
     }
 
-    private fun cardHeightFuncDerivative(x: Float): Float = 0.144f - 0.0018f * x
+    private fun cardHeightFuncDerivative(x: Float): Float = 0.16f - 0.0002f * x
 
-    private fun cardHeightFunc(x: Float): Float = -(0.03f * (x - 80f)).pow(2)
+    private fun cardHeightFunc(x: Float): Float = -(0.01f * (x - 800f)).pow(2)
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->
