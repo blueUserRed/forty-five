@@ -114,7 +114,7 @@ generatorConfig: {
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
-                        weight: 10,
+                        weight: 0,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -123,12 +123,20 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 0,
+                        weight: 10,
                         nodeTexture: null,
                         event: $EmptyMapEvent {
                         }
                     },
                 ],
+                finalEvent: {
+                    nodeTexture: "map_node_fight_circle",
+                    event: $EncounterMapEvent {
+                        currentlyBlocks: true,
+                        canBeStarted: true,
+                        isCompleted: false
+                    }
+                },
                 decorations: [
                     $RandomDistributionFunction {
                         decoration: "map_decoration_grass",
@@ -194,6 +202,7 @@ generatorConfig: {
                 encounterModifiers: [
                 ],
                 avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
+
                 rotation: 0.0,
                 exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
