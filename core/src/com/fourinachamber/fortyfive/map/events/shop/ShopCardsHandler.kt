@@ -18,7 +18,7 @@ class ShopCardsHandler(
     private val screen: OnjScreen,
     private val parent: CustomScrollableFlexBox,
     private val boughtIndices: MutableSet<Int>
-) : Disposable {
+) {
     private val _allCards: MutableList<Card>
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
@@ -35,7 +35,7 @@ class ShopCardsHandler(
     fun addItems(rnd: Random, contextType: String, defaultType: String) {
         val nbrOfItems = (5..16).random(rnd)
         FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
-        val cardsToAdd = try {
+        val cardsToAdd = if (RandomCardSelection.hasType(contextType)){
             RandomCardSelection.getRandomCards(
                 _allCards,
                 listOf(contextType),
@@ -45,7 +45,7 @@ class ShopCardsHandler(
                 MapManager.currentDetailMap.biome,
                 "shop"
             )
-        } catch (e: Exception) {
+        } else {
             RandomCardSelection.getRandomCards(
                 _allCards,
                 listOf(defaultType),
@@ -120,9 +120,6 @@ class ShopCardsHandler(
         }
         //TODO move cards to back after bought, so that they are at the end
     }
-
-    //TODO fix bug with these (same as game controller, maybe check there)
-    override fun dispose() = _allCards.forEach { it.dispose() }
 
     companion object {
 

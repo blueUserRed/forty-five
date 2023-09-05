@@ -16,18 +16,18 @@ object MapEventFactory {
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
-        "ShopMapEvent" to {
+        "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
-                it.get<String>("type"),
-                it.get<String>("person"),
-                it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-                it.get<List<OnjInt>>("boughtIndices").map { it2 -> it2.value.toInt() }.toMutableSet(),
+                onjObject.get<String>("type"),
+                onjObject.get<String>("person"),
+                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+                onjObject.get<List<OnjInt>>("boughtIndices").map { it -> it.value.toInt() }.toMutableSet(),
             )
         },
-        "ChooseCardMapEvent" to {
+        "ChooseCardMapEvent" to { onjObject ->
             ChooseCardMapEvent(
-                it.get<OnjArray>("types").value.map { t -> (t as OnjString).value },
-                it.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+                onjObject.get<OnjArray>("types").value.map { (it as OnjString).value },
+                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
             )
         },
     )

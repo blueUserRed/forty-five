@@ -1,7 +1,5 @@
 package com.fourinachamber.fortyfive.map.events.chooseCard
 
-import com.badlogic.gdx.scenes.scene2d.InputEvent
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -99,11 +97,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     }
 
     private fun addListener(screen: OnjScreen) {
-        (screen.namedActorOrError(leaveButtonName) as CustomLabel).addListener(object : ClickListener() {
-            override fun clicked(event: InputEvent?, x: Float, y: Float) {
-                context?.complete()
-            }
-        })
+        (screen.namedActorOrError(leaveButtonName) as CustomLabel).onButtonClick { context?.complete() }
     }
 
     private fun updateDropTargets() {
@@ -111,7 +105,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         else addToDeckWidget.leaveActorState("disabled")
 
         if (!SaveState.curDeck.hasEnoughCards()) addToBackpackWidget.enterActorState("disabled")
-        else  addToBackpackWidget.leaveActorState("disabled")
+        else addToBackpackWidget.leaveActorState("disabled")
     }
 
     fun getCard(card: String, addToDeck: Boolean) {
