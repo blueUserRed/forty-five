@@ -104,7 +104,7 @@ var revolver = $Revolver {
     fontColor: color.white,
     fontScale: 2.5,
     slotScale: 0.34,
-    cardScale: 9.0,
+    cardScale: 0.9,
     animationDuration: 0.2,
     radius: 140.0,
     radiusExtension: 60.0,
@@ -475,7 +475,6 @@ var playerBar = $Box {
             }
         ],
         enableTransform: true,
-        debug: true
     },
 
     $Box {
@@ -503,7 +502,6 @@ var gameScreen = $Box {
             justifyContent: justify.flexEnd,
         }
     ],
-//    debug: true
 } children [
 
     $Box {
@@ -523,7 +521,6 @@ var gameScreen = $Box {
                 positionBottom: -100#points,
             }
         ],
-        debug: true,
         ...enemyArea
     },
 
@@ -536,7 +533,6 @@ var gameScreen = $Box {
             }
         ],
         zIndex: 200,
-        debug: true,
         ...cardHand
     },
 
