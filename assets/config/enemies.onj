@@ -11,11 +11,11 @@ enemies: [
         fightDuration: [4, 6],
         texture: "enemy_texture",
         coverIcon: "shield_icon",
-        coverIconScale: 0.03,
-        scaleX: 0.025,
-        scaleY: 0.025,
+        coverIconScale: 0.3,
+        scaleX: 0.25,
+        scaleY: 0.25,
         detailFont: "red_wing",
-        detailFontScale: 0.06,
+        detailFontScale: 0.6,
         actions: [
             $DestroyCardsInHand {
                 maxCards: 2,

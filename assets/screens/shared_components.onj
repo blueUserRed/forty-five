@@ -188,13 +188,14 @@ statusbarLeftDefaults: {
             } children [
                 $Image {
                     textureName: "heart_texture",
-                    scaleX: 0.005,
-                    scaleY: 0.005,
+                    scaleX: 0.08,
+                    scaleY: 0.08,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
                             height: 65#percent,
                             width: 4.2#percent,
+                            aspectRatio: 1.0
                         }
                     ],
                 },
@@ -203,7 +204,7 @@ statusbarLeftDefaults: {
 
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.09,
+                    fontScale: 0.9,
                     align: "center",
                 }
             ],
