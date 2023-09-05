@@ -1,0 +1,738 @@
+
+@use "mixins" as *;
+
+$num-subpages: 3;
+$forty-white: #f2ecdf;
+$forty-brown: #0d0907;
+
+$header-zindex: 500;
+$overlay-zindex: 300;
+
+$our-project-break: 950px;
+
+.download {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    background-image: url("../assets/download_button.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-clip: border-box;
+    font-size: 0.6cm;
+    color: $forty-white;
+    text-decoration: none;
+    text-align: center;
+}
+
+.paper-text-box {
+    background-image: url("../assets/text_background.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-clip: border-box;
+}
+
+.deco-card {
+    position: absolute;
+    width: 15%;
+
+    @include narrow {
+        width: 20%;
+    }
+
+}
+
+body {
+    margin: 0 0 0 0;
+    overflow-y: scroll;
+    // overflow-x: scroll;
+    overflow-x: clip;
+    font-family: "Bahnschrift";
+    color: $forty-white;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    background-color: #000000;
+    width: 100%;
+    background-image: url("../assets/header_texture.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px;
+    z-index: $header-zindex;
+
+    * + * {
+        margin-left: 5%;
+    }
+
+    .logo {
+        height: 100%;
+        
+    }
+
+    a {
+        margin-top: 0.0;
+        margin-bottom: 0;
+        font-size: 0.6cm;
+        color: $forty-white;
+        text-decoration: none;
+
+        @include hamburgerMenu {
+            display: none;
+        }
+    }
+
+    #header-spacer {
+        display: none;
+        flex-grow: 1.0;
+
+        @include hamburgerMenu {
+            display: block;
+        }
+    }
+
+    #hamburger-menu {
+        height: 0.8cm;
+        display: none;
+        margin-right: 2%;
+
+        @include hamburgerMenu {
+            display: block;
+        }
+
+        @include navbarOpen {
+            display: none;
+        }
+    }
+}
+
+nav {
+    display: none;
+    position: fixed;
+    height: 100vh;
+    width: 65vw;
+    margin-left: 110%;
+    z-index: $header-zindex + 100;
+
+    background-image: url("../assets/hamburger_background.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    transition: margin-left 0.3s;
+
+    @include hamburgerMenu {
+        display: flex;
+    }
+
+    @include navbarOpen {
+        margin-left: 35%;
+    }
+
+    &:nth-child(1) {
+        margin-top: -1cm;
+    }
+
+    span {
+        font-size: 0.7cm;
+    }
+
+    * + * {
+        margin-top: 0.8cm;
+    }
+}
+
+#main-content-container {
+    display: flex;
+    flex-direction: row;
+    width: 100% * $num-subpages;
+    background-image: url("../assets/background.png");
+}
+
+section.sub-page {
+    width: 100%;
+    position: relative;
+}
+
+section.sub-page .title-card {
+    position: relative;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 90%;
+    margin-top: -5cm;
+    aspect-ratio: 1.646;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    @include narrow {
+        width: 100%;
+        margin-top: -4.5cm;
+    }
+
+    @include very-wide {
+        width: 31.5cm;
+    }
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("../assets/overlay.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    pointer-events: none;
+    opacity: 1.0;
+    z-index: $overlay-zindex;
+}
+
+#main-page {
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    // z-index: 1;
+
+    &.cur-page-2, &.cur-page-3 {
+        height: 50vh;
+    }
+
+    #our-project {
+        position: relative;
+        width: 12cm;
+        left: 30%;
+        margin-top: -4cm;
+        top: 0;
+        z-index: $header-zindex - 100;
+        transition: top 0.2s;
+
+        &:hover {
+            top: 1cm;
+        }
+
+        @include hamburgerMenu {
+            display: none;
+        }
+
+        @include break($our-project-break) {
+            left: 0%;
+        }
+    }
+
+    #our-project-standin {
+        display: none;
+        height: 5.8cm;
+
+        @include hamburgerMenu {
+            display: block;
+        }
+    }
+
+    #title-map {
+        background-image: url("../assets/map.png");
+
+        
+        @include narrow {
+            margin-top: -4.5cm;
+        }
+
+
+        #main-logo {
+            width: 40%;
+            margin-top: 23%;
+        }
+
+        .download {
+            width: 10%;
+            margin-top: 9%;
+            font-size: 2vw;
+
+            @include wide {
+                font-size: 0.6cm;
+            }
+
+        }
+
+        #deco-revolver-1 {
+            position: absolute;
+            width: 38%;
+            transform: rotate(-78deg) translate(-70%, -180%);
+        }
+
+        #deco-card-1 {
+            top: 8%;
+            left: -14%;
+            transform: rotate(120deg);
+
+            @include narrow {
+                left: -2%;
+            }
+        }
+    
+        #deco-card-2 {
+            top: 90%;
+            left: -12%;
+            transform: rotate(10deg);
+
+            @include narrow {
+                left: -4%;
+            }
+        }
+    
+        #deco-card-3 {
+            top: 18%;
+            left: 100%;
+            transform: rotate(30deg);
+
+            @include very-wide {
+                left: 108%;
+            }
+
+            @include narrow {
+                left: 95%;
+            }
+        }
+
+    }
+
+    #trailer-container {
+        background-image: url("../assets/trailer_container_bg.png");
+        background-repeat: no-repeat;
+        background-size: contain;
+        width: 90%;
+        background-clip: border-box;
+        background-position-y: center;
+        background-position-x: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        @include narrow {
+            width: 100%;
+        }
+
+        @include wide {
+            width: 26cm;
+        }
+
+        img { // TODO: change back
+        // iframe {
+            width: 70%;
+            aspect-ratio: 16 / 9;
+            margin-top: 3cm;
+            margin-bottom: 3cm;
+            transform: rotate(2deg);
+            z-index: $overlay-zindex + 100;
+        }
+
+    }
+
+    #main-description {
+        position: relative;
+        width: 110%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: -4.2cm;
+        transform: rotate(-1deg);
+        z-index: 0;
+
+        @include narrow {
+            width: 120%;
+        }
+
+        @include wide {
+            width: 32cm;
+        }
+
+        p {
+            color: black;
+            font-size: 0.8cm;
+            padding: 3cm 19% 8cm 19%;
+
+            @include narrow {
+                font-size: 4vw;
+                padding-bottom: 4cm;
+            }
+
+            &.cur-page-2, &.cur-page-3 {
+                padding-bottom: 0;
+                font-size: 0.6cm;
+            }
+        }
+
+        #deco-hat {
+            position: absolute;
+            display: none;
+            z-index: $overlay-zindex - 100;
+
+            @include wide {
+                display: block;
+                width: 30%;
+                transform: translate(145%, -90%);
+            }
+
+            @include very-wide {
+                display: block;
+                width: 48%;
+                transform: translate(115%, -80%);
+            }
+
+        }
+
+        #deco-card-4 {
+            top: 20%;
+            left: -0%;
+            transform: rotate(10deg);
+            @include narrow {
+                display: none;
+            }
+        }
+
+        #deco-card-5 {
+            top: 40%;
+            left: 90%;
+            transform: rotate(15deg);
+
+            @include wide {
+                left: 100%;
+            }
+
+            @include very-wide {
+                left: 107%;
+            }
+
+            @include narrow {
+                left: 90%;
+            }
+        }
+
+        #deco-card-6 {
+            width: 15%;
+            top: 70%;
+            left: -8%;
+            transform: rotate(32deg);
+            z-index: 3;
+
+            @include narrow {
+                width: 20%;
+                left: 4%;
+                top: 78%;
+            }
+        }
+
+        #deco-card-7 {
+            width: 15%;
+            top: 88%;
+            left: -8%;
+            transform: rotate(-10deg);
+            z-index: 2;
+
+            @include narrow {
+                width: 20%;
+                left: 4%;
+            }
+        }
+
+        #deco-card-8 {
+            width: 12%;
+            top: 88%;
+            left: 3%;
+            transform: rotate(10deg);
+            z-index: 3;
+
+            @include narrow {
+                width: 16%;
+                left: 15%;
+            }
+        }
+
+        #micro-comic-container {
+            background-image: url("../assets/bg_grey.png");
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            position: absolute;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            // padding: 2cm;
+            width: 40%;
+            height: 35%;
+            top: 70%;
+            left: 60%;
+
+            @include very-wide {
+                left: 80%;
+                height: 40%;
+            }
+
+            @include narrow {
+                height: 30%;
+                top: 80%;
+                left: 55%;
+            }
+
+            #deco-micro-comic {
+                width: 70%;
+            }
+
+        }
+
+    }
+
+}
+
+#about-page {
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &.cur-page-1, &.cur-page-3 {
+        height: 50vh;
+    }
+
+    #about-page-title {
+        position: relative;
+        background-image: url("../assets/about_page_title.png");
+        background-size: 100% 100%;
+        margin-top: -1.3cm;
+        aspect-ratio: 910 / 686;
+
+        #deco-revolver-2 {
+            position: absolute;
+            width: 38%;
+            transform: rotate(-8deg) translate(-160%, 170%);
+            z-index: 200;
+
+            @include narrow {
+                transform: rotate(-8deg) translate(-120%, 170%);
+            }
+        }
+    }
+
+    #about-description {
+        position: relative;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: -4.2cm;
+        margin-left: -15%;
+        transform: rotate(-3deg);
+        z-index: 0;
+
+        @include narrow {
+            width: 90%;
+            margin-top: -2cm;
+        }
+
+        @include wide {
+            width: 28cm;
+        }
+
+        p {
+            color: black;
+            font-size: 0.6cm;
+            padding: 3cm 19% 8cm 19%;
+
+            @include narrow {
+                font-size: 3.4vw;
+                padding-bottom: 4cm;
+            }
+
+        }
+
+        #group-picture-description {
+            position: absolute;
+            width: 40%;
+            top: 30%;
+            left: 85%;
+            transform: rotate(10deg);
+
+            @include narrow {
+                display: none;
+            }
+        }
+
+    }
+
+    #group-picture-standalone {
+        display: none;
+        width: 60%;
+        transform: rotate(-10deg);
+        margin-top: -4cm;
+
+        @include narrow {
+            display: block;
+        }
+    }
+
+    #member-pictures {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        align-content: space-between;
+        flex-wrap: wrap;
+        width: 80%;
+
+        @include narrow {
+            margin-top: 2cm;
+        }
+
+        .member-picture {
+            width: 20%;
+            margin: 4%;
+
+            @include very-wide {
+                margin: 2cm;
+            }
+
+            @include wide {
+                margin: 1.2cm;
+            }
+
+            &.cur-page-1, &.cur-page-3 {
+                display: none;
+            }
+
+        }
+
+        #member-picture-1 {
+            transform: rotate(-10deg);
+        }
+
+        #member-picture-2 {
+            transform: rotate(4deg);
+        }
+
+        #member-picture-3 {
+            transform: rotate(0deg);
+        }
+
+        #member-picture-4 {
+            transform: rotate(-6deg);
+        }
+
+        #member-picture-5 {
+            transform: rotate(10deg);
+        }
+
+    }
+
+}
+
+#imprint-page {
+  
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    &.cur-page-1, &.cur-page-2 {
+        height: 50vh;
+    }
+
+    #imprint-text {
+        position: relative;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 0;
+        margin-top: 2cm;
+
+        @include narrow {
+            width: 90%;
+        }
+
+        @include wide {
+            width: 28cm;
+        }
+
+        p {
+            color: black;
+            font-size: 0.6cm;
+            padding: 3cm 19% 8cm 19%;
+
+            @include narrow {
+                font-size: 3.4vw;
+                padding-bottom: 4cm;
+            }
+
+        }
+
+    }
+
+    footer {
+        margin-top: 10cm;
+    }
+}
+
+footer {
+    background-image: url("../assets/footer.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: 100%;
+    height: 10cm;
+    // height: 20vw;
+    z-index: $header-zindex;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    @include narrow {
+        height: 5cm;
+    }
+
+    .links {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        width: 100%;
+        flex-grow: 1.0;
+        
+        a {
+            color: $forty-white;
+            text-decoration: none;
+    
+            font-size: 3vw;
+    
+            @include wide {
+                font-size: 0.6cm;
+            }
+
+        }
+
+    }
+
+    .copyright {
+        background-image: url("../assets/copyright.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        width: 100%;
+        height: 1.2cm;
+        line-height: 1.2cm;
+        text-align: center;
+    }
+
+}
