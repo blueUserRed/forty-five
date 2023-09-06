@@ -1,7 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
-import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.builder.buildOnjObject
@@ -9,9 +9,7 @@ import onj.parser.OnjParser
 import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
-import onj.value.OnjArray
-import onj.value.OnjObject
-import kotlin.math.log
+import onj.value.*
 
 /**
  * stores data about the current run and can read/write it to a file
@@ -33,10 +31,15 @@ object SaveState {
      */
     const val defaultSavefilePath: String = "saves/default_savefile.onj"
 
-    private var _cards: MutableList<String> = mutableListOf()
+    private var _ownedCards: MutableList<String> = mutableListOf()
 
     val cards: List<String>
-        get() = _cards
+        get() = _ownedCards
+
+    private var _decks: MutableSet<Deck> = mutableSetOf()
+
+    val curDeck: Deck
+        get() = _decks.find { it.id == curDeckNbr }!!
 
     /**
      * counts the amount of reserves used by the player over the whole run
@@ -65,7 +68,7 @@ object SaveState {
             savefileDirty = true
         }
 
-    /**    
+    /**
      * how many enemies the player has defeated this run
      */
     var enemiesDefeated: Int by templateParam("stat.enemiesDefeated", 0) {
@@ -91,6 +94,17 @@ object SaveState {
     var playerMoney: Int by templateParam("stat.playerMoney", 0) {
         savefileDirty = true
     }
+
+    var curDeckNbr = 1
+        set(value) {
+            if (field == value) return
+            savefileDirty = true
+            if (_decks.find { it.id == value } == null) {
+                val curDeck = _decks.find { it.id == field }!!
+                _decks.add(Deck("Deck $value", value, curDeck.cardPositions.toMutableMap()))
+            }
+            field = value
+        }
 
     var currentDifficulty: Double = 1.0
         set(value) {
@@ -146,8 +160,11 @@ object SaveState {
 
         obj as OnjObject
 
-        _cards = obj.get<OnjArray>("cards").value.map { it.value as String }.toMutableList()
-        FortyFiveLogger.debug(logTag, "cards: $_cards")
+        _ownedCards = obj.get<OnjArray>("ownedCards").value.map { it.value as String }.toMutableList()
+        FortyFiveLogger.debug(logTag, "cards: $_ownedCards")
+
+        obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck.getFromOnj(it as OnjObject)) }
+        curDeckNbr = obj.get<Long>("curDeck").toInt()
 
         val stats = obj.get<OnjObject>("stats")
         usedReserves = stats.get<Long>("usedReserves").toInt()
@@ -189,7 +206,7 @@ object SaveState {
     }
 
     fun buyCard(card: String) {
-        _cards.add(card)
+        _ownedCards.add(card)
         savefileDirty = true
     }
 
@@ -210,7 +227,7 @@ object SaveState {
         if (!savefileDirty) return
         FortyFiveLogger.debug(logTag, "writing SaveState")
         val obj = buildOnjObject {
-            "cards" with _cards
+            "ownedCards" with _ownedCards
             "playerLives" with playerLives
             "playerMoney" with playerMoney
             "currentDifficulty" with currentDifficulty
@@ -223,9 +240,120 @@ object SaveState {
                 "node" with currentNode
                 "lastNode" with lastNode
             }
+            "decks" with OnjArray(_decks.map { it.asOnjObject() })
+            "curDeck" with curDeckNbr
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
         savefileDirty = false
     }
 
+
+    class Deck(var name: String, val id: Int, private val _cardPositions: MutableMap<Int, String>) {
+        val cardPositions: Map<Int, String>
+            get() = _cardPositions
+
+        val cards: List<String>
+            get() = _cardPositions.map { it.value }
+
+
+        init {
+            checkMinimum()
+        }
+
+        fun checkMinimum() {
+            if (cardPositions.size < minDeckSize && cardPositions.size < SaveState.cards.size) {
+                val onlyBackpackCards = mutableListOf<String>()
+                val curDeck = cards.toMutableList()
+                for (i in SaveState.cards) {
+                    if (i in curDeck) {
+                        curDeck.removeAt(curDeck.indexOf(i))
+                    } else {
+                        onlyBackpackCards.add(i)
+                    }
+                }
+                while (cards.size < minDeckSize && onlyBackpackCards.isNotEmpty()) {
+                    val cur = onlyBackpackCards[0]
+                    _cardPositions[nextFreeSlot()] = cur
+                    onlyBackpackCards.removeAt(onlyBackpackCards.indexOf(cur))
+                }
+                savefileDirty = true
+            }
+        }
+
+        fun nextFreeSlot(): Int {
+            val keys = cardPositions.keys
+            if (keys.size >= numberOfSlots) return -1
+            for (i in keys.indices) {
+                if (!keys.contains(i)) return i
+            }
+            return keys.size
+        }
+
+        fun swapCards(i1: Int, i2: Int) {
+            val old1 = _cardPositions[i1]
+            val old2 = _cardPositions[i2]
+            if (old1 == null) _cardPositions.remove(i2)
+            else _cardPositions[i2] = old1
+            if (old2 == null) _cardPositions.remove(i1)
+            else _cardPositions[i1] = old2
+            savefileDirty = true
+        }
+
+        fun addToDeck(index: Int, name: String) {
+            if (index >= 0) {
+                _cardPositions[index] = name
+                savefileDirty = true
+            }
+        }
+
+        fun removeFromDeck(index: Int) {
+            _cardPositions.remove(index)
+            savefileDirty = true
+        }
+
+        fun asOnjObject(): OnjObject {
+            val deck = mutableListOf<OnjObject>()
+            _cardPositions.forEach {
+                deck.add(buildOnjObject {
+                    "positionId" with it.key
+                    "cardName" with it.value
+                })
+            }
+            deck.sortBy { it.get<Long>("positionId") }
+            return buildOnjObject {
+                "index" with id
+                "name" with name
+                "cards" with OnjArray(deck)
+            }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is Deck && other.id == this.id
+        }
+
+        override fun hashCode(): Int {
+            return id.hashCode()
+        }
+
+        fun canRemoveCards(): Boolean = cards.size > minDeckSize
+        fun hasEnoughCards(): Boolean = cards.size >= minDeckSize
+
+        fun canAddCards(): Boolean = cards.size < numberOfSlots
+
+        companion object {
+            fun getFromOnj(onj: OnjObject): Deck {
+                val id = onj.get<Long>("index").toInt()
+                val name = onj.get<String?>("name") ?: "Deck $id"
+                val cardPositions: MutableMap<Int, String> = mutableMapOf()
+                onj.get<OnjArray>("cards").value.forEach {
+                    it as OnjObject
+                    cardPositions[it.get<Long>("positionId").toInt()] = it.get<String>("cardName")
+                }
+                return Deck(name, id, cardPositions)
+            }
+
+            const val minDeckSize = 12
+            const val numberOfSlots = 35
+        }
+    }
 }

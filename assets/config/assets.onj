@@ -1,4 +1,3 @@
-
 import "imports/colors.onj" as color;
 
 use Common;
@@ -65,61 +64,80 @@ textureAtlases: [
                 handle: "game_screen_background",
                 regionName: "background"
             },
-            {   handle: "revolver_slot_texture",
+            {
+                handle: "revolver_slot_texture",
                 regionName: "revolver_slot"
             },
-            {   handle: "enemy_texture",
+            {
+                handle: "enemy_texture",
                 regionName: "enemy"
             },
-            {   handle: "normal_bullet",
+            {
+                handle: "normal_bullet",
                 regionName: "normal_bullet"
             },
-            {   handle: "end_turn_button_texture",
+            {
+                handle: "end_turn_button_texture",
                 regionName: "end_turn"
             },
-            {   handle: "end_turn_button_texture_hover",
+            {
+                handle: "end_turn_button_texture_hover",
                 regionName: "end_turn_hover"
             },
-            {   handle: "shoot_button_texture",
+            {
+                handle: "shoot_button_texture",
                 regionName: "shoot"
             },
-            {   handle: "shoot_button_texture_hover",
+            {
+                handle: "shoot_button_texture_hover",
                 regionName: "shoot_hover"
             },
-            {   handle: "enemy_turn_banner",
+            {
+                handle: "enemy_turn_banner",
                 regionName: "enemy_turn_banner"
             },
-            {   handle: "player_turn_banner",
+            {
+                handle: "player_turn_banner",
                 regionName: "player_turn_banner"
             },
-            {   handle: "revolver_drum",
+            {
+                handle: "revolver_drum",
                 regionName: "revolver_drum"
             },
-            {   handle: "heart_texture",
+            {
+                handle: "heart_texture",
                 regionName: "heart"
             },
-            {   handle: "reserves_texture",
+            {
+                handle: "reserves_texture",
                 regionName: "reserves"
             },
-            {   handle: "hit_overlay",
+            {
+                handle: "hit_overlay",
                 regionName: "hit_overlay"
             },
-            {   handle: "burning_icon",
+            {
+                handle: "burning_icon",
                 regionName: "burning_icon"
             },
-            {   handle: "insult_icon",
+            {
+                handle: "insult_icon",
                 regionName: "insult_icon"
             },
-            {   handle: "shield_icon",
+            {
+                handle: "shield_icon",
                 regionName: "shield_icon"
             },
-            {   handle: "poison_icon",
+            {
+                handle: "poison_icon",
                 regionName: "poison_icon"
             },
-            {   handle: "draw_bullet",
+            {
+                handle: "draw_bullet",
                 regionName: "draw_bullet"
             },
-            {   handle: "draw_cover",
+            {
+                handle: "draw_cover",
                 regionName: "draw_cover"
             },
             {
@@ -241,12 +259,24 @@ textures: [
         file: "textures/shop/items_background.png"
     },
     {
-        name: "shop_background_no_biome",
-        file: "textures/shop/biomeBackgrounds/no_biome.png"
+        name: "shop_background_wasteland",
+        file: "textures/shop/biomeBackgrounds/wasteland.png"
     },
     {
         name: "shop_back_button",
         file: "textures/shop/back_button.png"
+    },
+    {
+        name: "shop_add_to_backpack",
+        file: "textures/shop/to_backpack.png"
+    },
+    {
+        name: "shop_add_to_deck",
+        file: "textures/shop/to_deck.png"
+    },
+    {
+        name: "shop_npcs_default",
+        file: "textures/shop/npcs/default.png",
     },
     {
         name: "prerendered_noise_perlin_512x512",
@@ -265,8 +295,96 @@ textures: [
         file: "textures/statusbar/option.png"
     },
     {
+        name: "backpack_1",
+        file: "textures/backpack/1.png"
+    },
+    {
+        name: "backpack_2",
+        file: "textures/backpack/2.png"
+    },
+    {
+        name: "backpack_3",
+        file: "textures/backpack/3.png"
+    },
+    {
+        name: "backpack_4",
+        file: "textures/backpack/4.png"
+    },
+    {
+        name: "backpack_5",
+        file: "textures/backpack/5.png"
+    },
+    {
+        name: "backpack_1_hover",
+        file: "textures/backpack/1_hover.png"
+    },
+    {
+        name: "backpack_2_hover",
+        file: "textures/backpack/2_hover.png"
+    },
+    {
+        name: "backpack_3_hover",
+        file: "textures/backpack/3_hover.png"
+    },
+    {
+        name: "backpack_4_hover",
+        file: "textures/backpack/4_hover.png"
+    },
+    {
+        name: "backpack_5_hover",
+        file: "textures/backpack/5_hover.png"
+    },
+    {
+        name: "backpack_deck_background",
+        file: "textures/backpack/deck_background.png"
+    },
+    {
+        name: "backpack_backpack_background",
+        file: "textures/backpack/backpack_background.png"
+    },
+    {
+        name: "backpack_empty_deck_slot",
+        file: "textures/backpack/empty_deck_slot.png"
+    },
+    {
+        name: "backpack_save",
+        file: "textures/backpack/save.png"
+    },
+    {
+        name: "backpack_edit",
+        file: "textures/backpack/edit.png"
+    },
+    {
+        name: "backpack_sort_background",
+        file: "textures/backpack/sort_background.png"
+    },
+    {
+        name: "backpack_type_hover",
+        file: "textures/backpack/sort_type_hover.png"
+    },
+    {
+        name: "backpack_direction_hover",
+        file: "textures/backpack/sort_direction_hover.png"
+    },
+    {
+        name: "backpack_direction_arrow",
+        file: "textures/backpack/sort_direction_arrow.png"
+    },
+    {
         name: "warning_label_background_red",
         file: "textures/warning_label/background_red.png"
+    },
+    {
+        name: "chooseCard_cardsBackground",
+        file: "textures/chooseCard/cards_background.png"
+    },
+    {
+        name: "chooseCard_add_to_backpack",
+        file: "textures/chooseCard/to_backpack.png"
+    },
+    {
+        name: "chooseCard_add_to_deck",
+        file: "textures/chooseCard/to_deck.png"
     }
 ],
 
@@ -289,6 +407,7 @@ shaders: [
     },
     {
         name: "vignette_shader", // TODO: fix
+
         file: "shaders/vignette.glsl",
         constantArgs: {
             color: color.red,
@@ -300,7 +419,8 @@ shaders: [
     {
         name: "film_shader",
         file: "shaders/film.glsl",
-        constantArgs: { }
+        constantArgs: {
+        }
     },
     {
         name: "glow_shader",
@@ -313,7 +433,8 @@ shaders: [
     {
         name: "fog_shader",
         file: "shaders/fog.glsl",
-        constantArgs: { }
+        constantArgs: {
+        }
     },
     {
         name: "dissolve_shader",
@@ -327,7 +448,8 @@ shaders: [
     }
 ],
 
-animations: [],
+animations: [
+],
 
 colorTextures: [
     {
@@ -357,7 +479,7 @@ colorTextures: [
 ],
 
 ninepatches: [
-     {
+    {
         name: "cover_hook",
         file: "textures/ninepatches/cover_hook.png",
         top: 1,
@@ -403,13 +525,22 @@ ninepatches: [
         scale: 0.1
     },
     {
-        name: "test_scrollbar_background",
-        file: "textures/ninepatches/test_scrollbar_background.png",
-        top: 24,
-        bottom: 24,
-        left: 24,
-        right: 24,
-        scale: 0.04
+        name: "backpack_scrollbar_background",
+        file: "textures/backpack/scrollbar_background.png",
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
+    },
+    {
+        name: "backpack_scrollbar",
+        file: "textures/backpack/scrollbar.png",
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+        scale: 0.5
     }
 ],
 

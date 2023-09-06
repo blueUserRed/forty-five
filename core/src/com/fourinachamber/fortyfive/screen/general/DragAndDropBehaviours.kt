@@ -1,9 +1,19 @@
 package com.fourinachamber.fortyfive.screen.general
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.game.card.CardDragSource
+import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDragSource
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDropTarget
+import com.fourinachamber.fortyfive.map.events.shop.ShopDragSource
+import com.fourinachamber.fortyfive.map.events.shop.ShopDropTarget
+import com.fourinachamber.fortyfive.map.statusbar.BackpackDragSource
+import com.fourinachamber.fortyfive.map.statusbar.BackpackDropTarget
+import com.fourinachamber.fortyfive.map.statusbar.DeckSlotDropTarget
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
 import com.fourinachamber.fortyfive.utils.eitherRight
@@ -16,23 +26,32 @@ object DragAndDropBehaviourFactory {
     private val dropBehaviours: MutableMap<String, DropBehaviourCreator> = mutableMapOf()
 
     init {
-        dragBehaviours["SlotDragSource"] = { dragAndDrop, actor, onj ->
-            SlotDragSource(dragAndDrop, actor, onj)
-        }
-        dropBehaviours["SlotDropTarget"] = { dragAndDrop, actor, onj ->
-            SlotDropTarget(dragAndDrop, actor, onj)
-        }
         dragBehaviours["CardDragSource"] = { dragAndDrop, actor, onj ->
             CardDragSource(dragAndDrop, actor, onj)
         }
         dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
             RevolverDropTarget(dragAndDrop, actor, onj)
         }
+        dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
+            ShopDragSource(dragAndDrop, actor, onj)
+        }
         dropBehaviours["ShopDropTarget"] = { dragAndDrop, actor, onj ->
             ShopDropTarget(dragAndDrop, actor, onj)
         }
-        dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
-            ShopDragSource(dragAndDrop, actor, onj)
+        dragBehaviours["BackpackDragSource"] = { dragAndDrop, actor, onj ->
+            BackpackDragSource(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["DeckSlotDropTarget"] = { dragAndDrop, actor, onj ->
+            DeckSlotDropTarget(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["BackpackDropTarget"] = { dragAndDrop, actor, onj ->
+            BackpackDropTarget(dragAndDrop, actor, onj)
+        }
+        dragBehaviours["ChooseCardDragSource"] = { dragAndDrop, actor, onj ->
+            ChooseCardDragSource(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["ChooseCardDropTarget"] = { dragAndDrop, actor, onj ->
+            ChooseCardDropTarget(dragAndDrop, actor, onj)
         }
     }
 
@@ -88,24 +107,6 @@ object DragAndDropBehaviourFactory {
     }
 }
 
-class ShopDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :
-    DropBehaviour(dragAndDrop, actor, onj) {
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean {
-        return true
-    }
-
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        if (payload == null) return
-        val obj = payload.obj as ShopDragSource.DragAndDropPayload
-        obj.onBuy()
-    }
-}
 
 abstract class DragBehaviour(
     protected val dragAndDrop: DragAndDrop,
@@ -114,37 +115,46 @@ abstract class DragBehaviour(
     onj: OnjNamedObject
 ) : DragAndDrop.Source(actor)
 
+@Suppress("unused", "UNUSED_PARAMETER") // may be necessary in the future, also for symmetry with DragBehaviour
 abstract class DropBehaviour(
-    @Suppress("unused") // may be necessary in the future, also for symmetry with DragBehaviour
     protected val dragAndDrop: DragAndDrop,
 //    protected val onjScreen: OnjScreen,
     actor: Actor,
     onj: OnjNamedObject
 ) : DragAndDrop.Target(actor)
 
-class SlotDragSource(
+/**
+ * drags the object in the center
+ */
+abstract class CenteredDragSource(
     dragAndDrop: DragAndDrop,
     actor: Actor,
-    onj: OnjNamedObject
+    onj: OnjNamedObject,
+    showClickHint: Boolean = false
 ) : DragBehaviour(dragAndDrop, actor, onj) {
 
-    override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload {
-        val payload = DragAndDrop.Payload()
-        dragAndDrop.setKeepWithinStage(false)
+    private val centerOnClick = OnClickToCenter(this)
 
-        payload.dragActor = actor
+    init {
+        if (actor is OffSettable && showClickHint) actor.addListener(centerOnClick)
+    }
 
-        payload.setObject(
-            mutableMapOf(
-                "resetPosition" to (actor.x to actor.y)
-            )
-        )
+    open fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean = true
 
+    open fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {}
+
+    override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+        super.drag(event, x, y, pointer)
+        val parentOff = actor.parent.localToStageCoordinates(Vector2(0f, 0f))
         dragAndDrop.setDragActorPosition(
-            actor.width - (actor.width * actor.scaleX / 2),
-            -(actor.height * actor.scaleY) / 2
+            -parentOff.x + actor.width / 2,
+            -parentOff.y - actor.height / 2
         )
-        return payload
+        //if there are any errors, it might be because of scaling //see files at commit 17278a0ddd6f821358af53ba331443958292d872
+    }
+
+    protected fun startReal() {
+        centerOnClick.realStart = true
     }
 
     override fun dragStop(
@@ -156,40 +166,67 @@ class SlotDragSource(
         target: DragAndDrop.Target?
     ) {
         if (payload == null) return
-        val map = payload.`object` as Map<*, *>
-
-        val (actorX, actorY) = (map["resetPosition"] ?: return) as Pair<*, *>
-        actor.setPosition(actorX as Float, actorY as Float)
+        val obj = payload.obj as ExecutionPayload
+        obj.onDragStop()
     }
-
 }
 
-class SlotDropTarget(
-    dragAndDrop: DragAndDrop,
-    actor: Actor,
-    onj: OnjNamedObject
-) : DropBehaviour(dragAndDrop, actor, onj) {
+open class ExecutionPayload { //TODO maybe interface, but idk how to set "tasks" default value to mutableListOf()
 
-    override fun drag(
-        source: DragAndDrop.Source?,
-        payload: DragAndDrop.Payload?,
-        x: Float,
-        y: Float,
-        pointer: Int
-    ): Boolean {
-        return true
+    /**
+     * get executed on DragStop
+     */
+    val tasks: MutableList<() -> Unit> = mutableListOf()
+
+    /**
+     * called when the drag is stopped
+     */
+    fun onDragStop() {
+        for (task in tasks) task()
     }
 
-    override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
-        if (payload == null || source == null) return
-        @Suppress("UNCHECKED_CAST")
-        val obj = payload.`object`!! as MutableMap<String, Any?>
-        val posX = actor.x + actor.width / 2 - source.actor.width / 2
-        val posY = actor.y + actor.height / 2 - source.actor.height / 2
-        obj["resetPosition"] = posX to posY
+    /**
+     * when the drag is stopped, the actor will be reset to [pos]
+     */
+    fun resetTo(actor: Actor, pos: Vector2) = tasks.add {
+        actor.setPosition(pos.x, pos.y)
     }
-
 }
+
 
 typealias DragBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DragBehaviour
 typealias DropBehaviourCreator = (DragAndDrop, Actor, OnjNamedObject) -> DropBehaviour
+
+class OnClickToCenter(private val src: CenteredDragSource) : ClickListener() {
+
+    var realStart = false
+    private var startOffset: Vector2? = Vector2()
+    override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+        if (button != 0 || !src.fakeStart(event, x, y, pointer)) return super.touchDown(event, x, y, pointer, button)
+
+        realStart = false
+        startOffset = Vector2(
+            x * src.actor.scaleX - (src.actor.width / 2),
+            y * src.actor.scaleY - (src.actor.height / 2)
+        )
+        startOffset?.let {
+            val actor = src.actor as OffSettable
+            actor.offsetX += it.x
+            actor.offsetY += it.y
+        }
+        return super.touchDown(event, x, y, pointer, button)
+    }
+
+    override fun touchUp(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int) {
+        startOffset?.let {
+            val actor = src.actor as OffSettable
+            actor.offsetX -= it.x
+            actor.offsetY -= it.y
+            if (!realStart) {
+                src.fakeStop(event, x, y, pointer)
+            }
+        }
+        startOffset = null
+        super.touchUp(event, x, y, pointer, button)
+    }
+}

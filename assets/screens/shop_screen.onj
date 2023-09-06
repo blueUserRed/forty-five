@@ -1,23 +1,25 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
 //import "dialog/dialog.onj" as dialogs;
-import "screens/sharedComponents.onj" as sharedComponents;
+import "screens/shared_components.onj" as sharedComponents;
 
 
 use Common;
 use Screen;
 use Style;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
 
 assets: {
-    useCardAtlas: true,
     useAssets: [
-        "shop_background_no_biome", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "enemy_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
-        "shop_back_button", "test_scrollbar_background",
-        ...(sharedComponents.navBarAssests),
+        "shop_background_wasteland", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
+        "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
+        "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
+        "shop_add_to_backpack", "shop_add_to_deck",
+        ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets),
     ]
 },
 
@@ -33,136 +35,74 @@ options: {
         ...(inputMaps.defaultInputMap)
     ],
     screenController: $ShopScreenController {
-        shopsFile: "maps/shops.onj",
-        npcsFile: "maps/npcs.onj",
-        cardsFile: "cards/cards.onj",
-        personWidgetName: "shop_person_widget",
-        messageWidgetName: "shop_message",
-        cardsParentName: "cards_widget",
+        shopsFile: "maps/events/shops.onj",
+        npcsFile: "maps/events/npcs.onj",
+        cardsFile: "config/cards.onj",
+        messageWidgetName: "shopMessage",
+        cardsParentName: "cardsWidget",
+        addToBackpackWidgetName: "addToBackpackWidget",
+        addToDeckWidgetName: "addToDeckWidget",
     }
 },
 
-var personWidget = $PersonWidget {
-    name: "shop_person_widget",
-    offsetX: 0.0,
-    offsetY: 0.0,
-    scale: 1.0,
-    dragAndDrop: $ShopDropTarget {
-        group: "card",
-    },
-    styles: [
-        {
-            width: 40.0#percent,
-            height: 100.0#percent,
-        }
-    ],
-};
 
 var scrollBarBackground = $Image {
     name: "scrollbar_background",
-    textureName: "test_scrollbar_background",
+    textureName: "backpack_scrollbar_background",
     scaleX: 1.0,
     scaleY: 1.0,
     reportDimensionsWithScaling: true,
 };
 var scrollBar = $Image {
     name: "scrollbar_handle",
-    textureName: "test_scrollbar_background",
+    textureName: "backpack_scrollbar",
     scaleX: 1.0,
     scaleY: 1.0,
 };
 
-var testWidget = $Image {
-    textureName: "shop_background_no_biome",
-    scaleX: 0.001,
-    scaleY: 0.001,
-    reportDimensionsWithScaling: true,
-    dragAndDrop: $ShopDragSource {
-        group: "card",
-        moveToLastIndex: true,
-    },
+var cardsWidget = $Box {
     styles: [
         {
-            style_priority: 1,
-            width: 100.0#percent,
-            height: 80.0#percent,
-            alpha: 1.0,
-        },
-        {
-            style_priority: 2,
-            style_condition: actorState("unbuyable"),
-            alpha: 0.5,
-        }
-    ],
-};
-
-
-var testWidgetBox = $Box {
-    name: "cardsWidgetParent",
-    styles: [
-        {
-            width: 21.0#percent,
-            height: 35.0#percent,
-            flexDirection: flexDirection.column,
-            background: "heart_texture",
-        }
-    ],
-} children [
-    testWidget,
-    $Label {
-        name: "cardsWidgetPrice",
-        text: "bought",
-        font: "red_wing_cm",
-        color: color.dark_brown,
-        fontScale: 0.08,
-        align: "center",
-    }
-];
-
-var cardsWidget = $ScrollBox {
-    name: "cards_widget",
-    isScrollDirectionVertical: true,
-    scrollDistance: 6.0,
-    backgroundStretched: false,
-    scrollbarBackgroundName: "scrollbar_background",
-    scrollbarName: "scrollbar_handle",
-    scrollbarSide: "right",
-    styles: [
-        {
-            flexWrap: wrap.wrap,
-            flexDirection: flexDirection.row,
-            justifyContent: justify.flexStart,
             background: "shop_items_background",
             width: 100.0#percent,
             height: 69.0#percent,
-            paddingLeft: 3.0#points,
-            paddingRight: 10.0#points,
-            paddingTop: 3.0#points,
-            paddingBottom: 4.0#points,
-            cuttingLeft: 1.75,
-            cuttingRight: 1.75,
-            cuttingTop: 2.0,
-            cuttingBottom: 3.0,
-            scrollbarWidth: 7.5,
+
         }
     ],
-    children: [
-        //        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
-//        testWidgetBox,
 
-        scrollBar,
-        scrollBarBackground
+    children: [
+        $ScrollBox {
+            name: "cardsWidget",
+            isScrollDirectionVertical: true,
+            scrollDistance: 60.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "scrollbar_background",
+            scrollbarName: "scrollbar_handle",
+            scrollbarSide: "right",
+            styles: [
+                {
+                    flexWrap: wrap.wrap,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.flexStart,
+                    width: 94.0#percent,
+                    height: 100.0#percent,
+                    paddingLeft: (3.0 * 15)#points,
+                    paddingRight: (35.0)#points,
+                    paddingTop: (3.0 * 10)#points,
+                    paddingBottom: (4.0 * 10)#points,
+                    cuttingLeft: 17.5,
+                    cuttingRight: 17.5,
+                    cuttingTop: 20.0,
+                    cuttingBottom: 20.0,
+                    scrollbarWidth: 15.0,
+                    scrollbarLength: 90.0#percent,
+                }
+            ],
+            children: [
+                scrollBar,
+                scrollBarBackground
+            ]
+        }
     ]
 };
 
@@ -177,7 +117,7 @@ root: $Box {
     $Image {       //TODO biome for background
 
         name: "background_img",
-        textureName: "shop_background_no_biome",
+        textureName: "shop_background_wasteland",
         scaleX: 0.0,
         scaleY: 0.0,
         width: worldWidth,
@@ -191,9 +131,8 @@ root: $Box {
             }
         ],
     },
-    sharedComponents.navBar,
-    personWidget,
     $Image {
+        zIndex: 20,
         textureName: "shop_dark_background",
         width: worldWidth,
         height: worldHeight,
@@ -204,20 +143,21 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionRight: 0.0#points,
-                positionBottom: 0.0#points,
+                positionRight: (0.0 * 10)#points,
+                positionTop: (13)#percent,
                 width: 93.0#percent,
-                height: 93.0#percent,
+                height: 88.0#percent,
             }
         ],
     },
 
     $Image {       //TODO biome for back (evtl)
 
+        zIndex: 20,
         name: "back_button",
         textureName: "shop_back_button",
-        scaleX: 0.08,
-        scaleY: 0.08,
+        scaleX: 0.8,
+        scaleY: 0.8,
         reportDimensionsWithScaling: true,
         behaviours: [
             $OnClickChangeScreenBehaviour {
@@ -227,15 +167,88 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionBottom: 0.0#points,
+                positionBottom: (0.0 * 10)#points,
+            }
+        ],
+    },
+    $Image {
+        zIndex: 200,
+        name: "addToDeckWidget",
+        textureName: "shop_add_to_deck",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDropTarget {
+            group: "card",
+            isToDeck: true,
+        },
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 10.0#percent,
+                width: 30#percent,
+                height: 40.0#percent,
+            },
+            {
+                style_condition: actorState("display"),
+                positionLeft: 0#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
+            },
+            {
+                style_condition: not(actorState("display")),
+                positionLeft: -30#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
+            }
+        ],
+    },
+    $Image {
+        zIndex: 200,
+        name: "addToBackpackWidget",
+        textureName: "shop_add_to_backpack",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ShopDropTarget {
+            group: "card",
+            isToDeck: false,
+        },
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 54.0#percent,
+                width: 30#percent,
+                height: 40.0#percent,
+            },
+            {
+                style_condition: actorState("display"),
+                positionLeft: 0#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
+            },
+            {
+                style_condition: not(actorState("display")),
+                positionLeft: -30#percent,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.swing_out
+                },
             }
         ],
     },
     $Box {
+        zIndex: 300,
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 7.0#percent,
+                positionTop: 10.0#percent,
                 positionRight: 5.0#percent,
                 width: 54.4#percent,
                 height: 86.0#percent,
@@ -247,13 +260,12 @@ root: $Box {
             styles: [
                 {
                     positionType: positionType.relative,
-                    positionTop: 2.0#points,
-                    positionRight: 0.0#points,
+                    positionTop: (2.0 * 10)#points,
+                    positionRight: (0.0 * 10)#points,
                     width: 100.0#percent,
                     height: 17.125#percent,
                     flexDirection: flexDirection.row,
                     justifyContent: justify.spaceBetween,
-
                 }
             ]
         } children [
@@ -262,14 +274,14 @@ root: $Box {
                 template: "{map.curEvent.personDisplayName}",
                 font: "red_wing",
                 color: color.forty_white,
-                fontScale: 0.2
+                fontScale: 2.0
             },
             $TemplateLabel {
                 align: "right",
                 template: "{stat.playerMoney}$ ",
                 font: "red_wing",
                 color: color.forty_white,
-                fontScale: 0.2
+                fontScale: 2.0
             },
         ],
 
@@ -281,19 +293,19 @@ root: $Box {
                 {
                     positionType: positionType.relative,
                     width: 100.0#percent,
-                    height: 0.02#points,
+                    height: 2#points,
                 }
             ],
         },
         $AdvancedText {
-            name: "shop_message",
+            name: "shopMessage",
             font: "red_wing",
             parts: [
             ],
-            defaults: { //defaults actually defined in map/shops.onj
+            defaults: { //defaults actually defined in map/events/shops.onj
 
                 font: "red_wing",
-                fontScale: 0.08,
+                fontScale: 0.8,
                 color: color.forty_white,
             },
             styles: [
@@ -310,25 +322,49 @@ root: $Box {
             text: "drag to the merchant to confirm your purchase and add it to your backpack",
             font: "red_wing_cm",
             color: color.forty_white,
-            fontScale: 0.07,
+            fontScale: 0.7,
             align: "center",
         }
-    ]
+    ],
+    $Statusbar {
+        zIndex:400,
+        options: [
+            {
+                actorName: "backpackActor",
+                displayName: "Notebook",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Backpack",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Settings",
+            },
+        ],
+        //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
+
+        ...(sharedComponents.statusbarCenterDefaults)
+    },
+    sharedComponents.backpack,
+    sharedComponents.warningParent,
 ],
 
 templates: [
     $Image {
         template_keys: {
+            "name": "name",
+            "textureName": "textureName",
         },
         template_name: "cardsWidgetImage",
-        name: "",
-        textureName: "shop_background_no_biome",
-        scaleX: 0.001,
-        scaleY: 0.001,
+        //        name: "",
+//        textureName: "shop_background_wasteland",
+
+        scaleX: 0.01,
+        scaleY: 0.01,
         reportDimensionsWithScaling: true,
         dragAndDrop: $ShopDragSource {
             group: "card",
-            moveToLastIndex: true,
         },
         styles: [
             {
@@ -369,7 +405,7 @@ templates: [
         text: "bought",
         font: "red_wing_cm",
         color: color.dark_brown,
-        fontScale: 0.08,
+        fontScale: 0.8,
         align: "center",
         styles: [
             {
@@ -389,4 +425,30 @@ templates: [
             }
         ],
     },
+
+    $Image {
+        name: "personWidget",
+        zIndex: 15,
+        template_name: "personWidget",
+        template_keys: {
+            "styles.0.background": "textureName",
+            "scaleX": "scale",
+            "scaleY": "scale",
+            "styles.0.positionLeft": "offsetX",
+        },
+        scaleX: 0.0,
+        scaleY: 0.0,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                background: "",
+                positionBottom: 0#points,
+                positionLeft: 0#points,
+            }
+        ],
+    },
+    ...(sharedComponents.statusBarTemplates),
+    ...(sharedComponents.backpackTemplates),
+    ...(sharedComponents.warningLabelTemplates),
 ],

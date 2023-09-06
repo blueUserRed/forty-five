@@ -85,7 +85,7 @@ options: {
 },
 
 templates: [
-    sharedComponents.warningLabelTemplate
+    ...(sharedComponents.warningLabelTemplates),
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -308,8 +308,8 @@ var popupActor = $Box {
         $CircularCardSelector {
             styles: [
                 {
-                    width: 50#points,
-                    height: 50#points,
+                    width: (50*10)#points,
+                    height: (50*10)#points,
                 }
             ],
             name: "card_selector",

@@ -1,4 +1,4 @@
-package com.fourinachamber.fortyfive.map.dialog
+package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -23,7 +23,7 @@ class DialogWidget(
     private val optionsFont: BitmapFont,
     private val optionsFontColor: Color,
     private val optionsFontScale: Float,
-    private val screen: OnjScreen
+    screen: OnjScreen
 ) : AdvancedTextWidget(AdvancedText.EMPTY, screen) {
 
     private var isAnimFinished: Boolean = false

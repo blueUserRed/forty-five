@@ -38,25 +38,24 @@ data class MapNode(
                 .sortedBy { it.second }
         val finalPositions = arrayOfNulls<MapNode>(4)
         when (nodesWithAngles.size) {
-            4 -> {
-                val startNode =
-                    nodesWithAngles.minBy { min(abs(it.second % (PI / 2)), (abs((PI / 2) - it.second % (PI / 2)))) }
-                val startDir = Direction.values().minBy { abs(it.getAngle() - (startNode.second % (2 * PI))) }
-                var curAng = startDir
-                val startIndex = nodesWithAngles.indexOf(startNode)
-                for (i in 0 until Direction.values().size) {
-                    finalPositions[curAng.ordinal] = nodesWithAngles[(startIndex + i) % nodesWithAngles.size].first
-                    curAng = curAng.getNextDirCounterClock()
-                }
-                nodePositionsForDirection = finalPositions.toList()
-            }
+//            4 -> {
+//                val startNode =
+//                    nodesWithAngles.minBy { min(abs(it.second % (PI / 2)), (abs((PI / 2) - it.second % (PI / 2)))) }
+//                val startDir = Direction.values().minBy { abs(it.getAngle() - (startNode.second % (2 * PI))) }
+//                var curAng = startDir
+//                val startIndex = nodesWithAngles.indexOf(startNode)
+//                for (i in 0 until Direction.values().size) {
+//                    finalPositions[curAng.ordinal] = nodesWithAngles[(startIndex + i) % nodesWithAngles.size].first
+//                    curAng = curAng.getNextDirCounterClock()
+//                }
+//                nodePositionsForDirection = finalPositions.toList()
+//            }
 
-            2, 3 -> {
+            2, 3,4 -> {
                 val bestAngles = calcBestAngles(nodesWithAngles, finalPositions, 0F)
                 for (i in 0 until bestAngles.first.size) {
                     finalPositions[i] = bestAngles.first[i]
                 }
-
             }
         }
         for (i in finalPositions.indices) {
@@ -95,7 +94,8 @@ data class MapNode(
                     ),
                     abs(dir.getAngle() - 2 * PI.toFloat() - node.second)
                 ).toFloat()
-                curPos[dir.ordinal] = node.first
+                if (dist > PI / 2) continue
+                    curPos[dir.ordinal] = node.first
                 curNodes.remove(node)
                 val res = calcBestAngles(curNodes, curPos, distance + dist)
                 if (res.second < curBestDist) {
@@ -230,7 +230,7 @@ data class MapNodeBuilder(
     val dirNodes: Array<Int?> = arrayOfNulls(4)
 
 
-    fun scale(xScale: Float = 1F, yScale: Float = 1F) {
+    fun scale(xScale: Float, yScale: Float) {
         x *= xScale
         y *= yScale
     }
