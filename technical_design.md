@@ -15,6 +15,10 @@ the terminology used.
 
 ### table of contents
 
+- [Overview](#overview)
+  - [Basics](#basics)
+  - [Screens](#screens)
+  - [The folder structure](#the-folder-structure)
 - [Creating and styling screen](#creating-and-styling-screens)
   - [ScreenBuilder](#screenbuilder)
   - [Custom Actors](#custom-actors)
@@ -56,8 +60,43 @@ the terminology used.
 
 ## Overview
 
-TODO
+### Basics
 
+This game is written in the programming language Kotlin. If you are
+unfamiliar with the language, you can get more information in the 
+[Kotlin docs](https://kotlinlang.org/docs/). Additionally, the 
+framework LibGdx is used. LibGdx provides useful abstractions over
+plain openGl while still maintaining a lot of low level control. This
+project also makes heavy use of the scenes package, which provides a
+way of displaying UIs and has useful features such as an event system.
+Gradle is used as a build system.
+
+### Screens
+
+The game consists of multiple screens, written in onj. For more information
+about onj, visit the [onj repository](https://github.com/blueUserRed/Onj).
+These screens are read by the application, built into a LibGdx compatible
+screen and then displayed. Screens can define behaviours and a controller
+that handle interactions with the player, update internal state and more.
+Screens have a hierarchical structure consisting of Boxes (=FlexBoxes) as
+Groups that can contain other Boxes or Actors/Widgets.
+
+> [!NOTE]
+> The terms Actor and Widget have slightly different semantics in the 
+> context of LibGdx, but are used interchangeably in this program.
+> All actors in this game also extend Widget.
+
+### The folder structure
+
+Because LibGdx is a multiplatform library, the code is split up in multiple
+packages. Most of the important code can be found in the core package, which
+contains the code that remains unchanged between platforms. There are additional
+packages for each supported platform that contain platform specific code. This
+program only supports desktop, so only a desktop package exists. It contains some
+simple logic for starting the game and copying log files.
+
+The assets directory contains all textures, fonts and similar graphics. Also, it is
+where the screens, all config files and shaders are located.
 
 ## Creating and styling screens
 
@@ -190,7 +229,7 @@ can be used.
 
 > [!NOTE]
 > Properties like width, height, positionLeft, etc. don't take float,
-> but a YogaValue instead. to create a YogaValue in onj, the `#points`
+> but a YogaValue instead. To create a YogaValue in onj, the `#points`
 > or `#percent` conversion functions can be used. Most other custom types
 > provided by YogaLayout (like YogaFlexDirection) can be accessed using
 > global Variables.
@@ -560,7 +599,7 @@ var lastRunEnemiesDefeated: Int by templateParam("stat.lastRun.enemiesDefeated",
 ```
 
 If multiple parameters depend on one property, the `multipleTemplateParam` 
-propertey delegate can be used. It works like `templateParam`, but takes
+property delegate can be used. It works like `templateParam`, but takes
 additional parameters of type `Pair<String, (T) -> Any?>`. The first value
 is the name of the dependent property, the second one is a lambda that
 transforms the value.
