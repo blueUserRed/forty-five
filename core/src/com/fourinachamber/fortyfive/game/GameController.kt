@@ -735,7 +735,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 SaveState.playerMoney += money
                 encounterMapEvent.completed()
                 SaveState.write()
-                MapManager.switchToMapScreen()
+                MapManager.changeToMapScreen()
             }
         })
     }

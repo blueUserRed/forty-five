@@ -4,10 +4,38 @@ use Common;
 import "imports/colors.onj" as color;
 import "config/game_config.onj" as gameConfig;
 
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
 navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
-    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left",
+    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left", "heart_texture",
 ],
+
+backpackAssets: [
+    "backpack_1",
+    "backpack_2",
+    "backpack_3",
+    "backpack_4",
+    "backpack_5",
+    "backpack_1_hover",
+    "backpack_2_hover",
+    "backpack_3_hover",
+    "backpack_4_hover",
+    "backpack_5_hover",
+    "backpack_deck_background",
+    "backpack_backpack_background", //This name intended, not an error
+    "backpack_scrollbar_background",
+    "backpack_scrollbar",
+    "backpack_empty_deck_slot",
+    "backpack_save",
+    "backpack_edit",
+    "backpack_sort_background",
+    "backpack_type_hover",
+    "backpack_direction_hover",
+    "backpack_direction_arrow",
+],
+
 
 navBar: $Box {
     styles: [
@@ -28,8 +56,8 @@ navBar: $Box {
             }
         ],
         textureName: "heart_texture",
-        scaleX: 0.01,
-        scaleY: 0.01,
+        scaleX: 0.1,
+        scaleY: 0.1,
         reportDimensionsWithScaling: true,
         behaviours: [
             $OnClickChangeScreenStateBehaviour {
@@ -82,8 +110,8 @@ statusbarCenterDefaults: {
             } children [
                 $Image {
                     textureName: "heart_texture",
-                    scaleX: 0.01,
-                    scaleY: 0.01,
+                    scaleX: 0.1,
+                    scaleY: 0.1,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
@@ -96,7 +124,7 @@ statusbarCenterDefaults: {
 
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.09,
+                    fontScale: 0.9,
                     align: "center",
                 }
             ],
@@ -126,7 +154,7 @@ statusbarCenterDefaults: {
                     template: "{stat.playerMoney}$ ",
                     font: "red_wing_cm",
                     color: color.forty_white,
-                    fontScale: 0.09,
+                    fontScale: 0.9,
                     align: "center",
                 }
             ],
@@ -146,7 +174,6 @@ statusbarCenterDefaults: {
         },
     ]
 },
-
 
 statusbarLeftDefaults: {
     optionsWidgetName: "options_parent",
@@ -232,9 +259,10 @@ statusBarTemplates: [
         },
         template_name: "statusbar_text",
         text: "", // template
+
         font: "red_wing_cm",
         color: color.forty_white,
-        fontScale: 0.09,
+        fontScale: 0.9,
         align: "center",
     },
     $Image {
@@ -243,13 +271,13 @@ statusBarTemplates: [
             "textureName": "textureName"
         },
         textureName: "location_sign_salem",
-        scaleX: 0.07,
-        scaleY: 0.07,
+        scaleX: 0.7,
+        scaleY: 0.7,
         reportDimensionsWithScaling: true,
         styles: [
             {
-                marginTop: 0.1#points,
-                marginLeft: 0.2#points,
+                marginTop: 1#points,
+                marginLeft: 2#points,
             }
         ],
     },
@@ -262,13 +290,14 @@ statusBarTemplates: [
         },
         styles: [
             {
-                width: 0#percent, // template
+                width: 0#percent,
                 height: 100#percent,
                 background: "statusbar_option",
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 justifyContent: justify.flexEnd,
                 paddingBottom: 6.5#percent,
+                touchable: touchable.enabled,
             }
         ],
         children: [
@@ -277,82 +306,467 @@ statusBarTemplates: [
                 text: "", //template
                 font: "red_wing_cm",
                 color: color.forty_white,
-                fontScale: 0.07,
+                fontScale: 0.7,
                 align: "center",
             }
         ]
     },
 ],
 
-warningLabelTemplate: $Box {
-    template_name: "warning_label_template",
-    template_keys: {
-        "children.0.text": "symbol",
-        "children.1.0.text": "title",
-        "children.1.2.text": "body",
-        "styles.0.background": "background",
-        "styles.0.width": "width",
-    },
+var scrollBarBackgroundDeck = $Image {
+    name: "deck_scrollbar_background",
+    textureName: "backpack_scrollbar_background",
+    scaleX: 1.0,
+    scaleY: 1.0,
+    reportDimensionsWithScaling: true,
+};
+var scrollBarDeck = $Image {
+    name: "deck_scrollbar_handle",
+    textureName: "backpack_scrollbar",
+    scaleX: 1.0,
+    scaleY: 1.0
+};
+
+var scrollBarBackgroundBackpack = $Image {
+    name: "backpack_scrollbar_background",
+    textureName: "backpack_scrollbar_background",
+    scaleX: 1.0,
+    scaleY: 1.0,
+    reportDimensionsWithScaling: true,
+};
+var scrollBarBackpack = $Image {
+    name: "backpack_scrollbar_handle",
+    textureName: "backpack_scrollbar",
+    scaleX: 1.0,
+    scaleY: 1.0
+};
+
+backpack: $Backpack {
+    name: "backpackActor",
+    cardsFile: "config/cards.onj",
+    backpackFile: "maps/backpack_config.onj",
+    deckNameWidgetName: "deckName",
+    deckSelectionParentWidgetName: "deckSelectionParent",
+    deckCardsWidgetName: "deckCards",
+    backPackCardsWidgetName: "backPackCards",
+    backpackEditIndicationWidgetName: "saveEditIcon",
+    sortWidgetName: "sortWidget",
+    sortReverseWidgetName: "sortReverseWidget",
+    zIndex: 10_000,
+    visible: false,
     styles: [
         {
+            width: (150)#points,
+            height: (77 * 10)#points,
             flexDirection: flexDirection.row,
-            width: 0#points,
-            background: ""
+            positionType: positionType.absolute,
+            marginTop: (13 * 10)#points,
+            marginLeft: (5 * 10)#points,
+            justifyContent: justify.spaceBetween,
         }
-    ]
+    ],
 } children [
-
-    $Label {
-        styles: [
-            {
-                width: 10#percent
-            }
-        ],
-        text: "!",
-        font: "red_wing",
-        color: color.forty_white,
-        fontScale: 0.07,
-        align: "center",
-    },
-
     $Box {
         styles: [
             {
+                width: (73 * 10)#points,
+                height: 100#percent,
                 flexDirection: flexDirection.column,
-                flexGrow: 1.0
+                paddingTop: (3 * 10)#points,
+                paddingLeft: (3 * 10)#points,
+                paddingRight: (3 * 10)#points,
+                background: "backpack_deck_background",
             }
         ],
-        debug: true
     } children [
+        $Box {
+            zIndex: 5,
+            styles: [
+                {
+                    width: 100#percent,
+                    height: 10#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    alignItems: align.center,
+                    paddingLeft: (30)#points,
+                    paddingRight: (10)#points,
+                }
+            ],
+        } children [
+            $InputField {
+                name: "deckName",
+                text: "Testing",
+                font: "red_wing",
+                fontScale: 0.9,
+                color: color.forty_white,
+                styles: [
+                    {
+                        width: 40#percent,
+                        //background: "backpack_1",
+                        //selectionColor: color.green,
+                        //cursorColor: color.yellow,
 
-        $Label {
-            text: "",
-            font: "red_wing",
-            color: color.forty_white,
-            fontScale: 0.07,
-            align: "center",
+                    }
+                ]
+            },
+            $Box {
+                name: "saveEditIcon",
+                styles: [
+                    {
+                        style_priority: 1,
+                        height: 40#percent,
+                        width: 5#percent,
+                        touchable: touchable.enabled,
+                        background: "backpack_edit"
+                    }, {
+                        style_priority: 2,
+                        style_condition: actorState("inEdit"),
+                        background: "backpack_save"
+                    }
+                ],
+            },
+            $Box {
+                name: "deckSelectionParent",
+                styles: [
+                    {
+                        height: 80#percent,
+                        width: 53#percent,
+                        flexDirection: flexDirection.row,
+                        justifyContent: justify.flexEnd,
+                        alignItems: align.center,
+                    }
+                ],
+            } children [
+                $Image {
+                    textureName: "backpack_1",
+                    scaleX: 0.41,
+                    scaleY: 0.41,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_2",
+                    scaleX: 0.41,
+                    scaleY: 0.41,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_3",
+                    scaleX: 0.41,
+                    scaleY: 0.41,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_4",
+                    scaleX: 0.41,
+                    scaleY: 0.41,
+                    reportDimensionsWithScaling: true,
+                },
+                $Image {
+                    textureName: "backpack_5",
+                    scaleX: 0.41,
+                    scaleY: 0.41,
+                    reportDimensionsWithScaling: true,
+                }
+            ]
+        ],
+        $ScrollBox {
+            name: "deckCards",
+            isScrollDirectionVertical: true,
+            scrollDistance: 90.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "deck_scrollbar_background",
+            scrollbarName: "deck_scrollbar_handle",
+            scrollbarSide: "right",
+            styles: [
+                {
+                    flexWrap: wrap.wrap,
+                    width: 98#percent,
+                    height: 90#percent,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.flexStart,
+                    paddingRight: (20)#points,
+                    cuttingRight: 17.5,
+                    scrollbarWidth: 12.5,
+                }
+            ],
+        } children [
+            scrollBarBackgroundDeck, scrollBarDeck
+        ],
+    ],
+    $Box {
+        dragAndDrop: $BackpackDropTarget {
+            group: "backpack"
         },
-
+        styles: [
+            {
+                width: (73 * 10)#points,
+                height: 100#percent,
+                flexDirection: flexDirection.column,
+                paddingTop: (3 * 10)#points,
+                paddingLeft: (3 * 10)#points,
+                paddingRight: (3 * 10)#points,
+                background: "backpack_backpack_background",
+            }
+        ],
+    } children [
         $Box {
             styles: [
                 {
-                    background: "forty_white_texture",
                     width: 100#percent,
-                    height: 1#points
+                    height: 10#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    alignItems: align.center,
+                    paddingLeft: (30)#points,
+                    paddingRight: (10)#points,
                 }
-            ]
-        },
+            ],
+        } children [
+            $Label {
+                text: "Backpack",
+                font: "red_wing",
+                fontScale: 0.9,
+                color: color.forty_white,
+            },
+            $Box {
+                styles: [
+                    {
+                        background: "backpack_sort_background",
+                        width: 45#percent,
+                        height: 70#percent,
+                        flexDirection: flexDirection.row,
+                        paddingLeft: 6#percent,
+                        paddingRight: 6#percent,
+                        alignItems: align.center,
+                        justifyContent: justify.spaceBetween,
+                    }
+                ],
+                children: [
+                    $Label {
+                        text: "Sort by:",
+                        font: "red_wing",
+                        fontScale: 0.9,
+                        color: color.forty_white,
+                    },
+                    $Box {
+                        name: "sortWidget",
+                        styles: [
+                            {
+                                style_priority: 1,
+                                height: 80#percent,
+                                width: 45#percent,
+                                alignItems: align.center,
+                                justifyContent: justify.center,
+                                background: "%%--null%%--",
+                                touchable: touchable.enabled,
+                            },
+                            {
+                                style_priority: 2,
+                                style_condition: hover(),
+                                background: "backpack_type_hover",
+                            }
+                        ],
+                        children: [
+                            $TemplateLabel {
+                                template: "{overlay.backpack.sortByName}",
+                                font: "red_wing",
+                                fontScale: 0.9,
+                                color: color.red,
+                            }
+                        ]
+                    },
+                    $Label {
+                        text: "|",
+                        font: "red_wing",
+                        fontScale: 0.9,
+                        color: color.forty_white,
+                    },
+                    $Box {
+                        name: "sortReverseWidget",
+                        styles: [
+                            {
+                                style_priority: 1,
+                                height: 80#percent,
+                                width: 14#percent,
+                                alignItems: align.center,
+                                justifyContent: justify.center,
+                                background: "%%--null%%--",
+                                touchable: touchable.enabled,
+                            },
+                            {
+                                style_priority: 2,
+                                style_condition: hover(),
+                                background: "backpack_direction_hover",
+                            }
+                        ],
+                        children: [
+                            $Image {
+                                textureName: "backpack_direction_arrow",
+                                scaleX: 0.04,
+                                scaleY: 0.04,
+                                reportDimensionsWithScaling: true,
+                            }
+                        ],
+                    }
+                ]
+            }
+        ],
+        $ScrollBox {
+            name: "backPackCards",
+            isScrollDirectionVertical: true,
+            scrollDistance: 90.0,
+            backgroundStretched: false,
+            scrollbarBackgroundName: "backpack_scrollbar_background",
+            scrollbarName: "backpack_scrollbar_handle",
 
-        $Label {
-            text: "",
-            font: "red_wing",
-            color: color.forty_white,
-            fontScale: 0.07,
-            align: "left",
-            wrap: true
-        },
-
+            scrollbarSide: "right",
+            styles: [
+                {
+                    flexWrap: wrap.wrap,
+                    width: 98#percent,
+                    height: 90#percent,
+                    flexDirection: flexDirection.row,
+                    alignItems: align.flexStart,
+                    paddingRight: (2 * 10)#points,
+                    cuttingRight: 17.5,
+                    scrollbarWidth: 12.5,
+                }
+            ],
+        } children [
+            scrollBarBackgroundBackpack, scrollBarBackpack
+        ]
     ]
 ],
 
-warningLabelUsedAssets: [ "forty_white_texture" ]
+
+backpackTemplates: [
+    $Box {
+        template_name: "backpack_slot",
+        template_keys: {
+        },
+        dragAndDrop:
+        $DeckSlotDropTarget {
+            group: "backpack"
+        },
+        styles: [
+            {
+                marginTop: 2#percent,
+                marginLeft: 2#percent,
+                width: 22#percent,
+                height: 20.9#percent,
+                touchable: touchable.enabled,
+            }
+        ]
+    } children [
+        $Box {
+            dragAndDrop:
+            $BackpackDragSource {
+                group: "backpack"
+            },
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 100#percent,
+                    height: 100#percent,
+                    touchable: touchable.enabled,
+                }
+            ]
+        }
+    ],
+],
+
+warningParent: $WarningParent {
+    name: "WARNING_PARENT",
+    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason
+
+    styles: [
+        {
+            positionType: positionType.absolute,
+            positionBottom: 70#percent,
+            positionLeft: 0#percent,
+            width: 25#percent,
+            height: 30#percent,
+        }
+    ]
+},
+
+warningLabelTemplates: [
+    $Box {
+        template_name: "warning_label_template",
+        template_keys: {
+            "children.0.text": "symbol",
+            "children.0.color": "color",
+            "children.1.children.0.text": "title",
+            "children.1.children.0.color": "color",
+            "children.1.children.2.text": "body",
+            "children.1.children.2.color": "color",
+            "styles.0.background": "background",
+            "styles.0.width": "width",
+        },
+        styles: [
+            {
+                style_priority: 1,
+                flexDirection: flexDirection.row,
+                width: 100#percent,
+                positionType: positionType.absolute,
+                padding: 10#points,
+                background: "",
+                positionLeft: -100#percent,
+            }
+        ],
+    } children [
+        $Label {
+            styles: [
+                {
+                    width: (2.78 * 10)#points,
+                    marginRight: 10#points,
+                }
+            ],
+            text: "",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 1.0,
+            align: "center",
+        },
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column,
+                    flexGrow: 1.0,
+                }
+            ],
+        } children [
+
+            $Label {
+                text: "",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.7,
+                align: "left",
+            },
+
+            $Box {
+                styles: [
+                    {
+                        background: "forty_white_texture",
+                        width: 100#percent,
+                        height: 3#points,
+                    }
+                ]
+            },
+
+            $Label {
+                text: "",
+                font: "red_wing",
+                color: color.forty_white,
+                fontScale: 0.5,
+                align: "left",
+                wrap: true,
+            },
+        ]
+    ]
+],
+
+warningLabelUsedAssets: [
+    "forty_white_texture", "warning_label_background_red", "title_screen_background"
+],

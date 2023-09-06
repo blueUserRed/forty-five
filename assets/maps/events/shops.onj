@@ -1,0 +1,71 @@
+import "imports/colors.onj" as color;
+
+use Common;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+people: [
+    {
+        name: "traveling_merchant",
+        displayName: "Traveling Merchant",
+        defaultShopParameter: "flameing",
+        texts: [
+            [
+                $Text {
+                    text: "\"I sell the ",
+                },
+                $Text {
+                    text: "BEST  ",
+                    color: color.viridian,
+                },
+                $Text {
+                    text: "goods south from Dunkelwald. You'll find deals like this NO where else!\"",
+                },
+                $Text {
+                    text: "Source: Trust me pal",
+                },
+            ],
+            [
+                $Text {
+                    text: "You'll find prices like here ",
+                },
+                $Text {
+                    text: "NOWHERE  ",
+                    color: color.red,
+                },
+                $Text {
+                    text: "else! So by as much as you can!!!",
+                },
+            ],
+        ],
+        npcImageName: "my_cool_npc",
+    },
+    {
+        name: "rare_merchant",
+        displayName: "Traveling Merchant",
+        defaultShopParameter: "flameing",
+        texts: [
+            [
+                $Text {
+                    text: "\"I only sell the ",
+                },
+                $Text {
+                    text: "rarest  ",
+                    color: color.viridian,
+                },
+                $Text {
+                    text: "bullets! And that for the cheapest price!\" ",
+                },
+            ],
+
+        ],
+        npcImageName: "my_cool_npc",
+    }
+],
+
+defaults: {
+    font: "red_wing",
+    fontScale: 0.8,
+    color: color.forty_white
+},

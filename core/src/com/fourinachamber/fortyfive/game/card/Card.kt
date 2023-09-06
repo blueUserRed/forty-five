@@ -24,6 +24,8 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
+import onj.parser.OnjSchemaParser
+import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -38,6 +40,7 @@ import onj.value.OnjObject
 class CardPrototype(
     val name: String,
     val type: Card.Type,
+    val tags: List<String>,
     private val creator: () -> Card
 ) {
 
@@ -87,13 +90,7 @@ class Card(
     /**
      * the actor for representing the card on the screen
      */
-    val actor = CardActor(
-        this,
-        font,
-        fontColor,
-        fontScale,
-        screen
-    )
+    val actor: CardActor
 
     //TODO: isDraggable and inAnimation should be in the actor class
 
@@ -138,6 +135,14 @@ class Card(
     private var isDamageDirty: Boolean = true
 
     init {
+        screen.borrowResource(cardTexturePrefix + name)
+        actor = CardActor(
+            this,
+            font,
+            fontColor,
+            fontScale,
+            screen
+        )
         updateText()
         updateTexture()
     }
@@ -311,7 +316,8 @@ class Card(
                     onj as OnjObject
                     val prototype = CardPrototype(
                         onj.get<String>("name"),
-                        cardTypeOrError(onj)
+                        cardTypeOrError(onj),
+                        onj.get<OnjArray>("tags").value.map { it.value as String },
                     ) { getCardFrom(onj, onjScreen, initializer) }
                     prototypes.add(prototype)
                 }
@@ -325,7 +331,6 @@ class Card(
             initializer: (Card) -> Unit
         ): Card {
             val name = onj.get<String>("name")
-
             val card = Card(
                 name = name,
                 title = onj.get<String>("title"),
@@ -381,6 +386,9 @@ class Card(
             }
         }
 
+        val cardsFileSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
+        }
     }
 
     /**
@@ -426,6 +434,7 @@ class CardActor(
 
     override var isSelected: Boolean = false
     override var partOfHierarchy: Boolean = true
+    override var isClicked: Boolean=false
 
     /**
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fortyfive.game.card.CardDragSource]

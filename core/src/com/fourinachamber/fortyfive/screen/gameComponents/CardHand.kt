@@ -32,6 +32,7 @@ class CardHand(
     override var styleManager: StyleManager? = null
 
     override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean=false
 
     /**
      * scaling applied to the card when hovered over

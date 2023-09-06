@@ -18,6 +18,7 @@ import onj.value.OnjObject
 import onj.value.OnjValue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
@@ -88,6 +89,16 @@ fun Float.between(min: Float, max: Float): Float {
     if (this > max) return max
     return this
 }
+
+/**
+ * makes sure that [this] is between [min] and [max] (inclusive)
+ */
+fun Int.between(min: Int, max: Int): Int {
+    if (this < min) return min
+    if (this > max) return max
+    return this
+}
+
 
 /**
  * makes sure that [this] is between [min] and [max] (inclusive)
@@ -173,6 +184,10 @@ fun IntRange.midPoint(): Int = first + ((last - first) * 0.5).toInt()
 
 fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
     return OnjYogaValue(YogaValue(this, unit))
+}
+
+fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
+    return substring(max(start, 0), min(max(end, 0), length - 1))
 }
 
 object Utils {

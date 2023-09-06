@@ -1,0 +1,37 @@
+use Common;
+
+$CardSelector{
+    $ByName{
+        name: string
+    }
+    $ByTag{
+        name: string
+    }
+}
+
+$CardEffect{
+    $Blacklist{}
+
+    $ProbabilityAddition{
+        weight: float
+    }
+
+    $PriceMultiplier{
+        price: float
+    }
+}
+var cardChange= {
+    select: $CardSelector,
+    effect: $CardEffect
+};
+
+types: {
+    cardChanges: cardChange[],
+    name: string
+}[],
+
+biomes: {
+    name:string,
+    shop: cardChange[],
+    chooseCard: cardChange[],
+}[],

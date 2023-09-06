@@ -1,5 +1,5 @@
 
-cards: string[],
+ownedCards: string[],
 
 stats: {
     usedReserves: int,
@@ -14,4 +14,15 @@ position: {
     map: string,
     node: int,
     lastNode: int?
-}
+},
+
+decks: {
+    index: int,
+    name?: string,
+    cards: {
+        positionId: int,
+        cardName: string,
+    }[]
+}[],
+
+curDeck: Int,

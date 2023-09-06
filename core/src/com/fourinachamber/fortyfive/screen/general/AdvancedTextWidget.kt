@@ -25,7 +25,7 @@ import kotlin.math.sin
 
 open class AdvancedTextWidget(
     advancedText: AdvancedText,
-    private val screen: OnjScreen
+    screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
     private var nodesOfCurrentText: List<YogaNode> = listOf()
@@ -281,6 +281,7 @@ class IconAdvancedTextPart(
 
     override fun update() {
         if (loadedDrawable == null) forceLoadDrawable()
+        if (drawable == null) forceLoadDrawable()
         if (calculatedLayout && !isVisible) {
             isVisible = true
         }

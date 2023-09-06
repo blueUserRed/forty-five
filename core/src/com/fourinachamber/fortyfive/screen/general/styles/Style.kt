@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -42,7 +43,7 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
 
     val actorStates: Set<String>
         get() = _actorStates
-    private val styleProperties: List<StyleProperty<*, *>>
+    val styleProperties: List<StyleProperty<*, *>>
         get() = _styleProperties
 
     fun update() {
@@ -229,6 +230,11 @@ sealed class StyleCondition {
     class ScreenState(val state: String) : StyleCondition() {
         override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
             state in screen.screenState
+    }
+
+    class InBiome(val name: String) : StyleCondition() {
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
+            name == MapManager.currentDetailMap.biome
     }
 
     class ActorState(val state: String) : StyleCondition() {

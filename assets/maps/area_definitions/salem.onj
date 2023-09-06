@@ -1,5 +1,6 @@
 startNode: 0,
 endNode: 3,
+biome: "snow",
 nodes: [
     {
         x: 20.0,
@@ -66,7 +67,6 @@ nodes: [
             boughtIndices: [
             ],
             type: "normal",
-            biome: "no_biome",
             person: "traveling_merchant",
         }
     },

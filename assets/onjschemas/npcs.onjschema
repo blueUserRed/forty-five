@@ -71,8 +71,8 @@ var dialog = {
 
 var image = {
         textureName: string,
-        offsetX: float,
-        offsetY: float,
+        offsetX?: float,
+        offsetY?: float,
         scale: float,
 };
 

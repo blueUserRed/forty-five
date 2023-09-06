@@ -3,6 +3,7 @@ import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKe
 
 use Common;
 use Style;
+use Screen;
 
 $Viewport {
 
@@ -45,8 +46,20 @@ var widgetSharedKeys = {
 
 $Widget {
 
-    $Backpack{
+    $Backpack {
+        cardsFile: string,
+        backpackFile: string,
+        deckNameWidgetName: string,
+        deckSelectionParentWidgetName: string,
+        deckCardsWidgetName: string,
+        backPackCardsWidgetName: string,
+        backpackEditIndicationWidgetName: string,
+        sortWidgetName: string,
+        sortReverseWidgetName: string,
         ...widgetSharedKeys,
+         children?: $Widget[],
+         partOfSelectionHierarchy?: boolean,
+
     }
 
     $Statusbar{
@@ -68,6 +81,12 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $WarningParent {
+        partOfSelectionHierarchy?: boolean,
+        enableTransform?: boolean,
+        ...widgetSharedKeys
+    }
+
     $ScrollBox {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,
@@ -77,6 +96,18 @@ $Widget {
         scrollbarBackgroundName?: string,
         scrollbarName?: string,
         scrollbarSide?: string,
+        ...widgetSharedKeys
+    }
+
+    $InputField{
+        text: string,
+        font: string,
+        color: Color?,
+        fontScale?: float,
+        backgroundTexture?: string,
+        align?: string,
+        wrap?: boolean,
+        partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
 
@@ -159,7 +190,7 @@ $Widget {
     $Map {
         detailMapProvider: $DetailMapProvider,
         defaultNodeTexture: string,
-        background: string,
+ //       background: string,
         playerTexture: string,
         playerWidth: float,
         playerHeight: float,
@@ -170,7 +201,6 @@ $Widget {
         directionIndicator: string,
         startButtonName: string,
         screenSpeed: float,
-        backgroundScale: float,
         leftScreenSideDeadSection: float,
         disabledDirectionIndicatorAlpha: float,
         ...widgetSharedKeys
@@ -350,9 +380,18 @@ $ScreenController {
         shopsFile: string,
         npcsFile: string,
         cardsFile: string,
-        personWidgetName: string,
         messageWidgetName: string,
         cardsParentName: string,
+        addToDeckWidgetName: string,
+        addToBackpackWidgetName: string,
+    }
+
+    $ChooseCardScreenController {
+        cardsFile: string,
+        leaveButtonName: string,
+        cardsParentName: string,
+        addToDeckWidgetName: string,
+        addToBackpackWidgetName: string,
     }
 }
 
@@ -387,6 +426,8 @@ $KeyAction {
 
     $FireClickEventKeyAction { }
 
+    $ForwardKeyKeyAction { }
+
     $MoveInDetailMapKeyAction {
         mapActor: string,
         direction: string
@@ -407,9 +448,14 @@ options: {
     background?: string,
     screenController?: $ScreenController,
     inputMap?: {
-        keycode: int,
-        modifiers: int[],
-        action: $KeyAction
+        priority?: int,
+        condition?: KeyInputCondition,
+        triggers: {
+            keycode: int,
+            modifiers: int[],
+            action?: $KeyAction,
+        }[],
+        action?: $KeyAction,
     }[],
     postProcessor?: string,
     transitionAwayTime?: float

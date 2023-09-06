@@ -1,0 +1,295 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "chooseCard_add_to_backpack",
+        "chooseCard_add_to_deck",
+        "shop_background_wasteland", /*temp -> */ "card%%bullet",
+        "chooseCard_cardsBackground",
+        "transparent_black_texture",
+        ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets),
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    transitionAwayTime: 1.0,
+    background: "hover_detail_background",
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $ChooseCardScreenController {
+        cardsFile: "config/cards.onj",
+        leaveButtonName: "leaveLabel",
+        cardsParentName: "cardsParent",
+        addToBackpackWidgetName: "addToBackpackWidget",
+        addToDeckWidgetName: "addToDeckWidget",
+    }
+},
+
+
+var templateCard = $Image {
+    textureName: "card%%bullet",
+    scaleX: 0.35,
+    scaleY: 0.35,
+    reportDimensionsWithScaling: true,
+    styles: [
+        {
+            width: 150.0#points,
+            height: 150.0#points,
+        }
+    ]
+};
+
+root: $Box { //TODO bioms
+
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent,
+            background: "shop_background_wasteland",
+        }
+    ]
+} children [
+    $Image {
+        scaleX: 1.0,
+        scaleY: 1.0,
+        textureName: "transparent_black_texture",
+        styles: [
+            {
+                width: 100#percent,
+                height: 100#percent,
+            }
+        ],
+    },
+    $Image {
+        zIndex: 150,
+        name: "addToDeckWidget",
+        textureName: "chooseCard_add_to_deck",
+        scaleX: 0.81,
+        scaleY: 0.81,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ChooseCardDropTarget {
+            group: "card",
+            isToDeck: true,
+        },
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionLeft: 24#percent,
+                width: 18#percent,
+                height: 25.0#percent,
+                alpha: 1.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("disabled"),
+                alpha: 0.3,
+            },
+            {
+                style_priority: 2,
+                positionBottom: -5#percent,
+                style_animation: {
+                    duration: 0.1,
+                    interpolation: interpolation.linear
+                },
+            },
+            {
+                style_priority: 3,
+                style_condition: actorState("draggedHover"),
+                positionBottom: 0#percent,
+                style_animation: {
+                    duration: 0.1,
+                    interpolation: interpolation.linear
+                },
+            },
+        ],
+    },
+    $Image {
+        zIndex: 150,
+        name: "addToBackpackWidget",
+        textureName: "chooseCard_add_to_backpack",
+        scaleX: 0.81,
+        scaleY: 0.81,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ChooseCardDropTarget {
+            group: "card",
+            isToDeck: false,
+        },
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionRight: 24#percent,
+                width: 18#percent,
+                height: 25.0#percent,
+                alpha: 1.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("disabled"),
+                alpha: 0.3,
+            },
+            {
+                style_priority: 2,
+                positionBottom: -5#percent,
+                style_animation: {
+                    duration: 0.1,
+                    interpolation: interpolation.linear
+                },
+            },
+            {
+                style_priority: 3,
+                style_condition: actorState("draggedHover"),
+                positionBottom: 0#percent,
+                style_animation: {
+                    duration: 0.1,
+                    interpolation: interpolation.linear
+                },
+            },
+        ],
+    },
+    $Image {
+        textureName: "chooseCard_cardsBackground",
+        scaleX: 0.9,
+        scaleY: 0.9,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 20#percent,
+                positionRight: 32#percent,
+                width: 27#percent,
+                height: 40#percent,
+            }
+        ],
+    },
+    $Box {
+        zIndex: 150,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 23.5#percent,
+                positionLeft: 32.0#percent,
+                width: 36#percent,
+                height: 40#percent,
+                flexDirection: flexDirection.column,
+            }
+        ],
+    } children [
+        $Label {
+            text: "Choose one Bullet",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.9,
+            align: "center",
+        },
+        $Box {
+            zIndex: 10000,
+            name: "cardsParent",
+            styles: [
+                {
+                    width: 100#percent,
+                    height: 63#percent,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    alignItems: align.center,
+                },
+            ],
+            children: [
+            ],
+        },
+        $Label {
+            text: "Drag it to add it to your Deck or Backpack.",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.7,
+            align: "center",
+        },
+        //        $Label {   //this one not used because of phillip beeing indesicive
+//            name: "leaveLabel",
+//            text: "Take no Bullet",
+//            font: "red_wing_cm",
+//            color: color.red,
+//            fontScale: 0.7,
+//            align: "center",
+//            behaviours: [
+//                $OnClickChangeScreenBehaviour {
+//                    screenPath: "screens/map_screen.onj"
+//                },
+//            ],
+//        },
+
+    ],
+    $Statusbar {
+        zIndex: 400,
+        options: [
+            {
+                actorName: "backpackActor",
+                displayName: "Notebook",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Backpack",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Settings",
+            },
+        ],
+        ...(sharedComponents.statusbarCenterDefaults)
+    },
+    sharedComponents.backpack,
+    sharedComponents.warningParent,
+],
+
+templates: [
+    $Image {
+        template_name: "cardTemplate",
+        template_keys: {
+            "styles.0.rotation": "rotation",
+            "styles.0.positionBottom": "bottom",
+            "textureName": "textureName",
+        },
+        textureName: "card%%bullet",
+        scaleX: 0.31,
+        scaleY: 0.31,
+        reportDimensionsWithScaling: true,
+        dragAndDrop: $ChooseCardDragSource {
+            group: "card",
+        },
+        styles: [
+            {
+                style_priority: 1,
+                width: 150.0#points,
+                height: 150.0#points,
+                rotation: 0.0,
+                positionBottom: 0#points,
+            },
+            {
+                style_priority: 2,
+                style_condition: actorState("dragged"),
+                rotation: 0.0,
+            }
+        ]
+    },
+    ...(sharedComponents.statusBarTemplates),
+    ...(sharedComponents.backpackTemplates),
+    ...(sharedComponents.warningLabelTemplates),
+],
