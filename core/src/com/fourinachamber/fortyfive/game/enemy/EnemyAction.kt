@@ -86,7 +86,7 @@ sealed class EnemyAction {
         }
 
         override fun applicable(controller: GameController): Boolean =
-            controller.revolver.isBulletLoaded() && controller.cardHand.cards.size < controller.maxCards
+            controller.revolver.isBulletLoaded() && controller.cardHand.cards.size < controller.hardMaxCards
     }
 
     companion object {

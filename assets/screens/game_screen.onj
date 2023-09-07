@@ -29,7 +29,7 @@ assets: {
         "title_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
-        "player_bar", "warning_label_background_red",
+        "player_bar", "warning_label_background_red", "under_deck_background",
 
         "revolver_cursor",
 
@@ -67,9 +67,11 @@ var controller = $GameScreenController {
     cardDragBehaviour: $CardDragSource {
         group: "card"
     },
+    warningParentName: "WARNING_PARENT",
     cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
-    maxCards: gameConfig.cardDrawConfig.maxCards,
+    softMaxCards: gameConfig.cardDrawConfig.softMaxCards,
+    hardMaxCards: gameConfig.cardDrawConfig.hardMaxCards,
     playerLives: gameConfig.playerConfig.lives,
     reservesAtRoundBegin: gameConfig.reservesConfig.roundStart,
     shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
@@ -85,6 +87,7 @@ options: {
 },
 
 templates: [
+    ...(sharedComponents.warningLabelTemplates),
     ...(sharedComponents.warningLabelTemplates),
 ],
 
@@ -408,6 +411,53 @@ var drawCardActor = $Box {
     ]
 
 ];
+
+var putCardsUnderDeckActor = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            touchable: touchable.enabled,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showPutCardsUnderDeckActor"),
+            detached: false
+        }
+    ],
+    zIndex: overlayZIndex - 1,
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: 30#percent,
+                height: 30#percent,
+                background: "under_deck_background",
+                flexDirection: flexDirection.row,
+                alignItems: align.flexStart
+            }
+        ]
+    } children [
+
+            $Image {
+                textureName: "draw_bullet",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.4,
+                scaleY: 0.4,
+            }
+
+    ]
+
+];
+
 // TODO: fix pixelated looking textures
 var playerBar = $Box {
     styles: [
@@ -576,9 +626,10 @@ root: $Box {
 //            width: 8#percent,
 //        }
 //    },
-
+    sharedComponents.warningParent,
     gameScreen,
     drawCardActor,
     popupActor,
-    attackPopup
+    attackPopup,
+    putCardsUnderDeckActor
 ]

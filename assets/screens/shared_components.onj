@@ -677,7 +677,7 @@ backpackTemplates: [
 
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
-    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason
+    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason // the reason is called integer overflow
 
     styles: [
         {
