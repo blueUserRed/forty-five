@@ -29,6 +29,8 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
     private val limits: MutableMap<String, Long> = mutableMapOf()
     private val curLimits: MutableMap<String, MutableList<Long>> = mutableMapOf()
 
+    private val permanentsShown: MutableMap<Int, CustomFlexBox> = mutableMapOf()
+
     fun setLimit(title: String, limit: Long) {
         limits[title] = limit
     }
@@ -54,17 +56,18 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         var i = 0
         while (i < curShown.size) {
             val cur = curShown[i]
-            if (cur.offsetY >= cur.height) {
+            if (cur.offsetY >= cur.height && cur !in permanentsShown.values) {
                 cur.isVisible = false
                 curShown.remove(cur)
                 continue
             }
             i++
         }
-        curDeadTimers.filter { it.value < System.currentTimeMillis() }.forEach { addFading(it.key) }
+        curDeadTimers.filter { it.value <= System.currentTimeMillis() }.forEach { addFading(it.key) }
     }
 
     private fun addFading(target: CustomFlexBox) {
+        //TODO fix bug with permanents staying where they are, even if temporaries are gone below
         curDeadTimers.remove(target)
         deadTimeline.appendAction(Timeline.timeline {
             val action =
@@ -75,6 +78,10 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             delayUntil { action.isComplete }
             action {
                 curShown.remove(target)
+                val perma = permanentsShown.entries.find { it.value == target }?.key
+                if (perma != null) {
+                    permanentsShown.remove(perma)
+                }
                 target.remove()
                 remove(target.styleManager!!.node)
             }
@@ -111,7 +118,6 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
     }
 
 
-    @Suppress("MemberVisibilityCanBePrivate")
     fun addWarning(
         screen: OnjScreen,
         title: String,
@@ -120,10 +126,10 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         width: YogaValue = YogaValue(100F, YogaUnit.PERCENT),
     ) {
         if (!(limits[title] == null || curLimits[title] == null || curLimits[title]!!.count { it > System.currentTimeMillis() } < limits[title]!!)) return
-
         if (curLimits[title] == null) curLimits[title] = mutableListOf()
         else curLimits[title]!!.removeIf { it <= System.currentTimeMillis() }
         curLimits[title]!!.add(System.currentTimeMillis() + TIME_BETWEEN_LIMIT)
+        println("adding normal")
 
         val data = mapOf(
             "symbol" to OnjString(severity.getSymbol()),
@@ -135,13 +141,52 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         )
         val current =
             screen.screenBuilder.generateFromTemplate("warning_label_template", data, this, screen) as CustomFlexBox
-        timeline.appendAction(getAddingTimeline(current, title, body).asAction())
+        timeline.appendAction(getAddingTimeline(current, title, body, false).asAction())
+    }
+
+    fun addPermanentWarning(
+        screen: OnjScreen,
+        title: String,
+        body: String,
+        severity: Severity = Severity.MIDDLE,
+        width: YogaValue = YogaValue(100F, YogaUnit.PERCENT),
+    ): Int {
+        //TODO make this return one of the displayed limits on this if
+        if (!(limits[title] == null || curLimits[title] == null || curLimits[title]!!.count { it > System.currentTimeMillis() } < limits[title]!!)) return -1
+
+        if (curLimits[title] == null) curLimits[title] = mutableListOf()
+        else curLimits[title]!!.removeIf { it <= System.currentTimeMillis() }
+        curLimits[title]!!.add(System.currentTimeMillis() + TIME_BETWEEN_LIMIT)
+        println("adding perma")
+
+        val data = mapOf(
+            "symbol" to OnjString(severity.getSymbol()),
+            "title" to OnjString(title),
+            "body" to OnjString(body),
+            "background" to OnjString(severity.getBackground()),
+            "width" to width.value.toOnjYoga(width.unit),
+            "color" to OnjColor(severity.getColor(screen)),
+        )
+        val current =
+            screen.screenBuilder.generateFromTemplate("warning_label_template", data, this, screen) as CustomFlexBox
+        timeline.appendAction(getAddingTimeline(current, title, body, true).asAction())
+
+        val index = (if (permanentsShown.isEmpty()) 0 else permanentsShown.keys.max() + 1)
+        permanentsShown[index] = current
+        return index
+    }
+
+    fun removePermanentWarning(id: Int) {
+        permanentsShown[id]?.let {
+            curDeadTimers[it] = System.currentTimeMillis()
+        }
     }
 
     private fun getAddingTimeline(
         current: CustomFlexBox,
         title: String,
-        body: String
+        body: String,
+        isPermanent: Boolean,
     ) = Timeline.timeline {
         val heights = arrayOf(0F)
         delayUntil { //due to layout the height changes even after it is zero, that why this code waits
@@ -153,7 +198,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             addMarginBottom(current)
             curShown.add(current)
             parallelActions(
-                getMoveRightTimeline(current, title.length * 2 + body.length).asAction(),
+                getMoveRightTimeline(current, title.length * 2 + body.length, isPermanent).asAction(),
                 ParallelTimelineAction(curShown.map { moveUpTimeline(it, current.height).asAction() })
             )
         }
@@ -171,11 +216,11 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             action {
                 target.addAction(action)
             }
-            delayUntil { action.isComplete }
+            delayUntil { action.isComplete || target !in curShown }
         }
     }
 
-    private fun getMoveRightTimeline(target: CustomFlexBox, textLength: Int): Timeline {
+    private fun getMoveRightTimeline(target: CustomFlexBox, textLength: Int, isPermanent: Boolean): Timeline {
         return Timeline.timeline {
             action {
                 target.offsetY = -height - DIST_BETWEEN_BLOCKS
@@ -183,8 +228,10 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             val action = CustomMoveByAction(target, Interpolation.exp10Out, relX = target.width, duration = 200F)
             action {
                 target.addAction(action)
+                if (!isPermanent) {
                 curDeadTimers[target] =
                     System.currentTimeMillis() + INITIAL_DISPLAYED_TIME + ADDITIONAL_DISPLAYED_TIME_PER_CHAR * textLength
+                }
             }
             delayUntil { action.isComplete }
         }
@@ -201,6 +248,6 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
 
         private const val DIST_BETWEEN_BLOCKS = 5
 
-        private const val TIME_BETWEEN_LIMIT = 5000
+        private const val TIME_BETWEEN_LIMIT = 500
     }
 }
