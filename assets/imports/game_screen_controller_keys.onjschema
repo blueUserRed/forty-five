@@ -17,10 +17,12 @@ enemyArea: {
 cardSelector: {
     actorName: string
 },
+warningParentName: string,
 cardDragBehaviour: $DragAndDropBehaviour,
 cardsToDrawInFirstRound: int,
 cardsToDraw: int,
-maxCards: int,
+softMaxCards: int,
+hardMaxCards: int,
 playerLives: int,
 reservesAtRoundBegin: int,
 shotEmptyDamage: int,

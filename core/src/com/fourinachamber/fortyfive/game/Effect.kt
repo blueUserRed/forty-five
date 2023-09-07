@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.game
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.utils.*
-import java.lang.Integer.min
 
 /**
  * represents an effect a card can have
@@ -256,18 +255,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(): Timeline = Timeline.timeline {
             val gameController = FortyFive.currentGame!!
-            var addMax = 0
             includeAction(GraphicsConfig.cardHighlightEffect(card))
-            action {
-                addMax = gameController.maxCards - gameController.cardHand.cards.size
-            }
-            includeLater(
-                { gameController.maxCardsPopupTimeline() },
-                { addMax == 0 }
-            )
-            action {
-                repeat(min(amount, addMax)) { gameController.putCardInHand(cardName) }
-            }
+            include(gameController.tryToPutCardsInHand(cardName, amount))
         }
 
         override fun blocks(controller: GameController) = false

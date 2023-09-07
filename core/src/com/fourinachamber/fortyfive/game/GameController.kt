@@ -14,6 +14,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
 import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
 import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -22,6 +23,7 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
+import java.lang.Integer.min
 
 /**
  * the Controller for the main game screen
@@ -36,6 +38,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
     private val cardSelectorOnj = onj.get<OnjObject>("cardSelector")
+    private val warningParentName = onj.get<String>("warningParentName")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -44,7 +47,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         "game.baseReserves", onj.get<Long>("reservesAtRoundBegin").toInt()
     )
 
-    val maxCards = onj.get<Long>("maxCards").toInt()
+    val softMaxCards = onj.get<Long>("softMaxCards").toInt()
+    val hardMaxCards = onj.get<Long>("hardMaxCards").toInt()
+
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
     /**
@@ -60,6 +65,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var enemyArea: EnemyArea
         private set
     lateinit var cardSelector: CircularCardSelector
+        private set
+    lateinit var warningParent: CustomWarningParent
         private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
@@ -152,6 +159,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         FortyFiveLogger.title("game starting")
 
+        warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent
+            ?: throw RuntimeException("actor named $warningParentName must be of type CustomWarningParent")
         initCards()
         initCardHand()
         initRevolver()
@@ -346,7 +355,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         appendMainTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
     }
 
-    fun maxCardsPopupTimeline(): Timeline = confirmationPopupTimeline("Hand reached maximum of $maxCards cards")
+    private fun maxCardsPopupTimeline(): Timeline =
+        confirmationPopupTimeline("Hand reached maximum of $hardMaxCards cards")
 
     fun confirmationPopupTimeline(text: String): Timeline = Timeline.timeline {
         action {
@@ -383,7 +393,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun drawCardPopupTimeline(amount: Int): Timeline = Timeline.timeline {
         var remainingCardsToDraw = amount
         action {
-            remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(maxCards - cardHand.cards.size)
+            remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
             if (remainingCardsToDraw != 0) curScreen.enterState(cardDrawActorScreenState)
             TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount)
@@ -408,7 +418,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
         }}, { remainingCardsToDraw != 0 })
         action {
-            if (remainingCardsToDraw != 0) curScreen.leaveState(cardDrawActorScreenState)
+            if (remainingCardsToDraw == 0) return@action
+            curScreen.leaveState(cardDrawActorScreenState)
+            checkCardMaximums()
         }
     }
 
@@ -455,12 +467,49 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * creates a new instance of the card named [name] and puts it in the hand of the player
      */
     @AllThreadsAllowed
-    fun putCardInHand(name: String) {
-        val cardProto = cardPrototypes
-            .firstOrNull { it.name == name }
-            ?: throw RuntimeException("unknown card: $name")
-        cardHand.addCard(cardProto.create())
-        FortyFiveLogger.debug(logTag, "card $name entered hand")
+    fun tryToPutCardsInHand(name: String, amount: Int = 1): Timeline = Timeline.timeline {
+        var cardsToDraw = 0
+        action {
+            val maxCards = hardMaxCards - cardHand.cards.size
+            cardsToDraw = min(maxCards, amount)
+        }
+        includeLater(
+            { maxCardsPopupTimeline() },
+            { cardsToDraw == 0 }
+        )
+        action {
+            if (cardsToDraw == 0) return@action
+            val cardProto = cardPrototypes
+                .firstOrNull { it.name == name }
+                ?: throw RuntimeException("unknown card: $name")
+            repeat(cardsToDraw) {
+                cardHand.addCard(cardProto.create())
+            }
+            FortyFiveLogger.debug(logTag, "card $name entered hand")
+            checkCardMaximums()
+        }
+    }
+
+    private fun checkCardMaximums() {
+        val cards = cardHand.cards.size
+        if (cards > hardMaxCards) {
+            warningParent.addWarning(
+                curScreen,
+                "Hard Maximum Card Number Reached",
+                "You can't draw any more cards in this turn. After this turn, " +
+                        "put all but $softMaxCards cards at the bottom of your deck.",
+                CustomWarningParent.Severity.HIGH
+            )
+        } else if (cards > softMaxCards) {
+            warningParent.addWarning(
+                curScreen,
+                "Maximum Card Number Reached",
+                "After this turn, put all but $softMaxCards cards at the bottom of your deck.",
+                CustomWarningParent.Severity.MIDDLE
+            )
+        } else {
+            // TODO: remove warnings
+        }
     }
 
     /**
