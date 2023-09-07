@@ -19,9 +19,6 @@ import onj.customization.OnjConfig
  */
 object FortyFive : Game() {
 
-    const val generateCards: Boolean = false
-    const val generateWorldViewBackground: Boolean = false
-
     const val logTag = "forty-five"
 
     private var currentRenderable: Renderable? = null
@@ -36,25 +33,11 @@ object FortyFive : Game() {
     override fun create() {
         init()
         serviceThread.start()
-        if (generateCards) runCardGenerator()
-        if (generateWorldViewBackground) runWorldViewBackgroundGenerator()
         changeToScreen("screens/map_screen.onj")
     }
 
     override fun render() {
         currentRenderable?.render(Gdx.graphics.deltaTime)
-    }
-
-    private fun runCardGenerator() {
-        val cardGenerator = TextureGenerator(Gdx.files.internal("cards/card_generator_config.onj"))
-        cardGenerator.prepare()
-        cardGenerator.generate()
-    }
-
-    private fun runWorldViewBackgroundGenerator() {
-        val textureGenerator = TextureGenerator(Gdx.files.internal("maps/world_view/background_generator_config.onj"))
-        textureGenerator.prepare()
-        textureGenerator.generate()
     }
 
     fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
@@ -110,8 +93,8 @@ object FortyFive : Game() {
         }
         TemplateString.init()
         FortyFiveLogger.init()
-        resetAll()
-        newRun()
+//        resetAll()
+//        newRun()
         PermaSaveState.read()
         SaveState.read()
         MapManager.init()
