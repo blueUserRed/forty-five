@@ -46,7 +46,8 @@ class SeededMapGenerator(
         val nodes: MutableList<MapNodeBuilder> = generateNodesPositions()
         val connections = checkAndChangeConnectionIntersection(nodes)
         addAreas(nodes, connections)
-        addEvents(nodes)
+        val lastNode = addEvents(nodes)
+        setImagePosForBorderAreas(mainLine.lineNodes.first(), lastNode)
         nodes.forEach { it.scale(restrictions.scaleLength, restrictions.scaleWidth) }
         nodes.forEach { it.rotate(restrictions.rotation) }
         val decos = generateDecorations(nodes)
@@ -55,7 +56,7 @@ class SeededMapGenerator(
         return DetailMap(
             name,
             mainLine.lineNodes.first().asNode!!,
-            mainLine.lineNodes.last().asNode!!,
+            lastNode.asNode!!,
             decos,
             false,
             biome
@@ -77,7 +78,7 @@ class SeededMapGenerator(
         return decos
     }
 
-    private fun addEvents(nodes: MutableList<MapNodeBuilder>) {
+    private fun addEvents(nodes: MutableList<MapNodeBuilder>): MapNodeBuilder {
         val nodesWithoutEvents = nodes.filter { a -> a.event == null }.toMutableList()
         val deadEndsWithoutEvents = nodesWithoutEvents.filter { it.edgesTo.size == 1 }.toMutableList()
         val sortedFixedEvents = restrictions.fixedEvents.sortedBy { !it.second }
@@ -92,6 +93,7 @@ class SeededMapGenerator(
             } else {
                 val curNode = nodesWithoutEvents.random(rnd)
                 curNode.event = event
+                if (event is EncounterMapEvent) event.encounterModifierNames = getModifier()
                 curNode.nodeTexture = nodeTexture
                 nodesWithoutEvents.remove(curNode)
             }
@@ -118,6 +120,23 @@ class SeededMapGenerator(
             }
             nodesWithoutEvents.remove(curNode)
         }
+
+        val lastMainNode = mainLine.lineNodes.last()
+        val endEvent = restrictions.finalEvent.invoke() ?: return lastMainNode
+
+        val lastPos = lastMainNode.posAsVec()
+        val posVec: Vector2 = mainLine.generateRandomPoint()
+        if (abs(lastPos.y + posVec.y) > restrictions.maxWidth / 2) posVec.y *= -1
+        val newPos = posVec.add(lastPos)
+        val newEndNode = MapNodeBuilder(0, newPos.x, newPos.y)
+        lastMainNode.connect(newEndNode, Direction.RIGHT)
+
+        newEndNode.event = lastMainNode.event
+        newEndNode.nodeTexture = lastMainNode.nodeTexture
+        lastMainNode.event = endEvent.first
+        lastMainNode.nodeTexture = endEvent.second
+        nodes.add(newEndNode)
+        return newEndNode
     }
 
     private fun getModifier(): Set<String> {
@@ -148,30 +167,6 @@ class SeededMapGenerator(
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
-        when (restrictions.rotation) {
-            in ((PI / 4).toFloat()..(PI * 3 / 4).toFloat()) -> {
-                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.DOWN
-                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.UP
-            }
-
-            in ((PI * 3 / 4).toFloat()..(PI * 5 / 4).toFloat()) -> {
-                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.RIGHT
-                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.LEFT
-            }
-
-            in ((PI * 5 / 4).toFloat()..(PI * 7 / 4).toFloat()) -> {
-                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.UP
-                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.DOWN
-            }
-
-            else -> {
-                mainLine.lineNodes.first().imagePos = MapNode.ImagePosition.LEFT
-                mainLine.lineNodes.last().imagePos = MapNode.ImagePosition.RIGHT
-            }
-        }
-
-        mainLine.lineNodes.first().imageName = restrictions.startArea
-        mainLine.lineNodes.last().imageName = restrictions.endArea
         mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
         mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
         mainLine.lineNodes.first().nodeTexture = restrictions.exitNodeTexture
@@ -205,6 +200,32 @@ class SeededMapGenerator(
             areaNodes.add(newArea)
         }
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
+    }
+
+    private fun setImagePosForBorderAreas(first: MapNodeBuilder, last: MapNodeBuilder) {
+        when (restrictions.rotation) {
+            in ((PI / 4).toFloat()..(PI * 3 / 4).toFloat()) -> {
+                first.imagePos = MapNode.ImagePosition.DOWN
+                last.imagePos = MapNode.ImagePosition.UP
+            }
+
+            in ((PI * 3 / 4).toFloat()..(PI * 5 / 4).toFloat()) -> {
+                first.imagePos = MapNode.ImagePosition.RIGHT
+                last.imagePos = MapNode.ImagePosition.LEFT
+            }
+
+            in ((PI * 5 / 4).toFloat()..(PI * 7 / 4).toFloat()) -> {
+                first.imagePos = MapNode.ImagePosition.UP
+                last.imagePos = MapNode.ImagePosition.DOWN
+            }
+
+            else -> {
+                first.imagePos = MapNode.ImagePosition.LEFT
+                last.imagePos = MapNode.ImagePosition.RIGHT
+            }
+        }
+        first.imageName = restrictions.startArea
+        last.imageName = restrictions.endArea
     }
 
     /**
@@ -334,8 +355,7 @@ class SeededMapGenerator(
         line1: Line,
         line2: Line,
         interceptPoint: Vector2,
-        uniqueLines: MutableList<Line>,
-        testingVal: Boolean = false
+        uniqueLines: MutableList<Line>
     ) {
         var intersectionNode: MapNodeBuilder? = null
         for (i in nodes) {
@@ -420,7 +440,7 @@ class SeededMapGenerator(
 
     /*    fun generateBezier(): DetailMap {
             val nodes: MutableList<MapNodeBuilder> = mutableListOf()
-            val nbrOfNodes = (restrictions.minNodes..restrictions.maxNodes).random(rnd)
+            val nbrOfNodes = (restrictions.minNodes.restrictions.maxNodes).random(rnd)
     //        val boundary: Float = 50F
             nodes.add(MapNodeBuilder(0F, 0F))
     //        nodes.add(MapNodeBuilder(boundary, 0F))
@@ -593,7 +613,7 @@ class SeededMapGenerator(
         /**
          * generates a possible new Vector to go to
          */
-        private fun generateRandomPoint(): Vector2 {
+        fun generateRandomPoint(): Vector2 {
             val length: Float =
                 getMultiplier() * restrict.averageLengthOfLineInBetween * (1 + (rnd.nextFloat() * 0.1F))
             val angle: Float =
@@ -633,7 +653,7 @@ class SeededMapGenerator(
 
 
         /**
-         * creates lines of connection for the nodes (like seperate paths)
+         * creates lines of connection for the nodes (like separate paths)
          */
         fun connectWithEachOther(lastOne: MapGeneratorLine?, nodes: MutableList<MapNodeBuilder>) {
             if (lastOne == null) {
@@ -951,7 +971,7 @@ sealed class DecorationDistributionFunction(
     private val scaleMax: Float,
     private val collidesOnlyWithNodes: Boolean,
 ) {
-    protected val rnd: kotlin.random.Random = Random(seed)
+    private val rnd: kotlin.random.Random = Random(seed)
 
     class Random(
         seed: Long,
@@ -1258,8 +1278,8 @@ sealed class DecorationDistributionFunction(
         for (rect in arrayOf(a, b)) {
             for (i1 in rect.indices) {
                 val i2: Int = (i1 + 1) % rect.size
-                val p1: Vector2 = rect.get(i1)
-                val p2: Vector2 = rect.get(i2)
+                val p1: Vector2 = rect[i1]
+                val p2: Vector2 = rect[i2]
                 val normal = Vector2(p2.y - p1.y, p1.x - p2.x)
                 var minA = Float.POSITIVE_INFINITY
                 var maxA = Float.NEGATIVE_INFINITY
@@ -1412,6 +1432,8 @@ data class MapRestriction(
     val fixedEvents: List<Triple<MapEvent, Boolean, String?>>, // TODO: slightly ugly, use data class instead?
 
     val optionalEvents: List<Triple<Int, () -> MapEvent, String?>>,
+
+    val finalEvent: () -> Pair<MapEvent, String>?,
     val decorations: List<DecorationDistributionFunction>,// = listOf(
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
     /**
@@ -1472,6 +1494,11 @@ data class MapRestriction(
                         it.get<String?>("nodeTexture")
                     )
                 },
+            finalEvent = {
+                val x = onj.get<OnjObject?>("finalEvent")
+                if (x == null) null
+                else MapEventFactory.getMapEvent(x.get<OnjNamedObject>("event")) to x.get<String>("nodeTexture")
+            },
             decorations = onj
                 .get<OnjArray>("decorations")
                 .value
