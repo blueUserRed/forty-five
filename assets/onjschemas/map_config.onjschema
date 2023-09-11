@@ -97,6 +97,10 @@ var mapRestrictions = {
         nodeTexture: string?,
         event: $MapEvent
     }[],
+    finalEvent?: {
+        nodeTexture: string?,
+        event: $MapEvent
+    },
     decorationSeed: int,
     decorations: $DecorationDistributionFunction[],
     exitNodeTexture: string,
