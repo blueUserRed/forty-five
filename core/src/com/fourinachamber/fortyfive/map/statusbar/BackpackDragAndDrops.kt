@@ -88,7 +88,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
             if (SaveState.curDeck.canRemoveCards()) {
                 SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
             } else {
-                CustomWarningParent.getWarning(card.screen).addWarning(
+                CustomWarningParent.getWarning(card.screen).addPermanentWarning(
                     card.screen,
                     "Not enough cards",
                     "The minimum decksize is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
