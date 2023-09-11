@@ -146,6 +146,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var playerLost: Boolean = false
         private set
 
+    private val permanentWarningIds = mutableListOf<Int>()
+
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
 //        if (context !is EncounterMapEvent) { // TODO: comment back in
@@ -352,7 +354,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         revolver.setCard(slot, card)
         FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
         card.onEnter()
+        checkCardMaximums()
         appendMainTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
+    }
+
+    fun putCardFromRevolverBackInHand(card: Card) {
+        revolver.removeCard(card)
+        card.leaveGame()
+        cardHand.addCard(card)
+        checkCardMaximums()
+    }
+
+    fun destroyCardInHand(card: Card) {
+        cardHand.removeCard(card)
+        checkCardMaximums()
     }
 
     private fun maxCardsPopupTimeline(): Timeline =
@@ -491,24 +506,26 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun checkCardMaximums() {
+        permanentWarningIds.forEach { warningParent.removePermanentWarning(it) }
+        permanentWarningIds.clear()
         val cards = cardHand.cards.size
         if (cards > hardMaxCards) {
-            warningParent.addWarning(
+            val id = warningParent.addPermanentWarning(
                 curScreen,
                 "Hard Maximum Card Number Reached",
                 "You can't draw any more cards in this turn. After this turn, " +
                         "put all but $softMaxCards cards at the bottom of your deck.",
                 CustomWarningParent.Severity.HIGH
             )
+            permanentWarningIds.add(id)
         } else if (cards > softMaxCards) {
-            warningParent.addWarning(
+            val id = warningParent.addPermanentWarning(
                 curScreen,
                 "Maximum Card Number Reached",
                 "After this turn, put all but $softMaxCards cards at the bottom of your deck.",
                 CustomWarningParent.Severity.MIDDLE
             )
-        } else {
-            // TODO: remove warnings
+            permanentWarningIds.add(id)
         }
     }
 

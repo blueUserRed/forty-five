@@ -35,7 +35,8 @@ sealed class EnemyAction {
             )
             action {
                 repeat(amountToDestroy) {
-                    cardHand.removeCard(cardHand.cards[(0 until cardHand.cards.size).random()])
+                    val card = cardHand.cards[(0 until cardHand.cards.size).random()]
+                    controller.destroyCardInHand(card)
                 }
             }
         }
@@ -79,9 +80,7 @@ sealed class EnemyAction {
                     .filter { it.card != null }
                     .random()
                     .card!!
-                controller.revolver.removeCard(card)
-                card.leaveGame()
-                controller.cardHand.addCard(card)
+                controller.putCardFromRevolverBackInHand(card)
             }
         }
 
