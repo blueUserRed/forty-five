@@ -46,7 +46,8 @@ class DetailMapWidget(
     private var screenSpeed: Float,
 //    private var backgroundScale: Float,
     private val disabledDirectionIndicatorAlpha: Float,
-    private val leftScreenSideDeadSection: Float
+    private val leftScreenSideDeadSection: Float,
+    private val mapScale: Float
 ) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
@@ -58,7 +59,7 @@ class DetailMapWidget(
     private var mapOffset: Vector2 = Vector2(50f, 50f)
 
     private var playerNode: MapNode = MapManager.currentMapNode
-    private var playerPos: Vector2 = Vector2(playerNode.x, playerNode.y)
+    private var playerPos: Vector2 = scaledNodePos(playerNode)
     private var movePlayerTo: MapNode? = null
     private var playerMovementStartTime: Long = 0L
 
@@ -187,10 +188,10 @@ class DetailMapWidget(
     private fun updateDirectionIndicator(pointerPosition: Vector2) {
         var bestMatch: MapNode? = null
         var bestMatchValue = -1f
-        val playerNodePosition = Vector2(playerNode.x, playerNode.y)
+        val playerNodePosition = scaledNodePos(playerNode)
         val mouseDirection = ((pointerPosition - mapOffset) - playerNodePosition).unit
         playerNode.edgesTo.forEach { node ->
-            val nodeDirection = (Vector2(node.x, node.y) - playerNodePosition).unit
+            val nodeDirection = (scaledNodePos(node) - playerNodePosition).unit
             val result = mouseDirection dot nodeDirection
             if (result > bestMatchValue) {
                 bestMatch = node
@@ -257,7 +258,7 @@ class DetailMapWidget(
         val moveScreenToPoint = moveScreenToPoint ?: return
         val movement = (moveScreenToPoint - mapOffset).withMag(screenSpeed)
         mapOffset += movement
-        if (mapOffset.compare(moveScreenToPoint, 6f)) this.moveScreenToPoint = null
+        if (mapOffset.compare(moveScreenToPoint, 60f)) this.moveScreenToPoint = null
     }
 
     private fun drawBackground(batch: Batch) {
@@ -285,10 +286,11 @@ class DetailMapWidget(
             val image = node.getImage(screen) ?: return@forEach
             val imageData = node.getImageData() ?: return@forEach
             val offset = getNodeImageOffset(node.imagePos ?: return@forEach, imageData.width, imageData.height)
+            val (nodeX, nodeY) = scaledNodePos(node)
             image.draw(
                 batch,
-                x + mapOffset.x + node.x + offset.x,
-                y + mapOffset.y + node.y + offset.y,
+                x + mapOffset.x + nodeX + offset.x,
+                y + mapOffset.y + nodeY + offset.y,
                 imageData.width, imageData.height
             )
         }
@@ -303,11 +305,14 @@ class DetailMapWidget(
     private fun drawDirectionIndicator(batch: Batch) {
         val pointToNode = pointToNode ?: return
         val node = playerNode
-        val indicatorOffset = 10f
+        val indicatorOffset = 100f
 
-        val yDiff = pointToNode.y - node.y
-        val xDiff = pointToNode.x - node.x
-        val length = (Vector2(pointToNode.x, pointToNode.y) - Vector2(node.x, node.y)).len()
+        val (pointToNodeX, pointToNodeY) = scaledNodePos(pointToNode)
+        val (nodeX, nodeY) = scaledNodePos(node)
+
+        val yDiff = pointToNodeY - nodeY
+        val xDiff = pointToNodeX - nodeX
+        val length = (Vector2(pointToNodeX, pointToNodeY) - Vector2(nodeX, nodeY)).len()
         val angleRadians = asin((yDiff / length).toDouble()).toFloat()
 
         val dy = sin(angleRadians) * indicatorOffset
@@ -322,12 +327,12 @@ class DetailMapWidget(
         }
         batch.draw(
             directionIndicator,
-            x + node.x + mapOffset.x + dx,
-            y + node.y + mapOffset.y + dy,
-            (directionIndicator.regionWidth * 0.01f) / 2,
-            (directionIndicator.regionHeight * 0.01f) / 2,
-            directionIndicator.regionWidth * 0.01f,
-            directionIndicator.regionHeight * 0.01f,
+            x + nodeX + mapOffset.x + dx,
+            y + nodeY + mapOffset.y + dy,
+            (directionIndicator.regionWidth * 0.1f) / 2,
+            (directionIndicator.regionHeight * 0.1f) / 2,
+            directionIndicator.regionWidth * 0.1f,
+            directionIndicator.regionHeight * 0.1f,
             1f,
             1f,
             if (xDiff >= 0) angleRadians.degrees else 360f - angleRadians.degrees + 180f,
@@ -348,7 +353,7 @@ class DetailMapWidget(
             decoration.instances.forEach { instance ->
                 drawable.draw(
                     batch,
-                    x + offX + instance.first.x, y + offY + instance.first.y,
+                    x + offX + instance.first.x * mapScale, y + offY + instance.first.y + mapScale,
                     width * instance.second, height * instance.second
                 )
             }
@@ -365,9 +370,9 @@ class DetailMapWidget(
             return
         }
         val percent = (movementFinishTime - curTime) / playerMoveTime.toFloat()
-        val movementPath = Vector2(movePlayerTo.x, movePlayerTo.y) - Vector2(playerNode.x, playerNode.y)
+        val movementPath = scaledNodePos(movePlayerTo) - scaledNodePos(playerNode)
         val playerOffset = movementPath * (1f - percent)
-        playerPos = Vector2(playerNode.x, playerNode.y) + playerOffset
+        playerPos = scaledNodePos(playerNode) + playerOffset
         val screenWidth = width
         val screenHeight = height
         val screenRectangle = Rectangle(
@@ -385,7 +390,7 @@ class DetailMapWidget(
         this.playerNode = movePlayerTo
         MapManager.currentMapNode = movePlayerTo
         MapManager.lastMapNode = playerNode
-        playerPos = Vector2(movePlayerTo.x, movePlayerTo.y)
+        playerPos = scaledNodePos(movePlayerTo)
         setupMapEvent(movePlayerTo.event)
         updateScreenState(movePlayerTo.event)
         this.movePlayerTo = null
@@ -424,7 +429,7 @@ class DetailMapWidget(
     private fun drawNodes(batch: Batch) {
         val uniqueNodes = map.uniqueNodes
         for (node in uniqueNodes) {
-            val (nodeX, nodeY) = calcNodePosition(node)
+            val (nodeX, nodeY) = scaledNodePos(node) + mapOffset
             val drawable = node.getNodeTexture(screen) ?: nodeDrawable
             drawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }
@@ -433,15 +438,17 @@ class DetailMapWidget(
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges
         for ((node1, node2) in uniqueEdges) {
-            val dy = node2.y - node1.y
-            val dx = node2.x - node1.x
+            val node1Pos = scaledNodePos(node1)
+            val node2Pos = scaledNodePos(node2)
+            val dy = node2Pos.y - node1Pos.y
+            val dx = node2Pos.x - node1Pos.x
             val length = Vector2(dx, dy).len()
             var angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
             if (dx < 0) angle = 360 - angle
             batch.draw(
                 edgeTexture,
-                x + node1.x + mapOffset.x + nodeSize / 2 - lineWidth / 2,
-                y + node1.y + mapOffset.y + nodeSize / 2,
+                x + node1Pos.x + mapOffset.x + nodeSize / 2 - lineWidth / 2,
+                y + node1Pos.y + mapOffset.y + nodeSize / 2,
                 lineWidth / 2, 0f,
                 lineWidth,
                 length,
@@ -451,9 +458,7 @@ class DetailMapWidget(
         }
     }
 
-    private fun calcNodePosition(node: MapNode): Vector2 {
-        return Vector2(node.x, node.y) + mapOffset
-    }
+    private fun scaledNodePos(node: MapNode): Vector2 = Vector2(node.x, node.y) * mapScale
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
