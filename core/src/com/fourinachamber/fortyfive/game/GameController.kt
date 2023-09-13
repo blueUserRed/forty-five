@@ -146,7 +146,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var playerLost: Boolean = false
         private set
 
-    private val permanentWarningIds = mutableListOf<Int>()
+    private var permanentWarningId: Int? = null
+    private var isPermanentWarningHard: Boolean = false
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
@@ -506,10 +507,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun checkCardMaximums() {
-        permanentWarningIds.forEach { warningParent.removePermanentWarning(it) }
-        permanentWarningIds.clear()
         val cards = cardHand.cards.size
-        if (cards > hardMaxCards) {
+        val permanentWarningId = permanentWarningId
+        if (cards == hardMaxCards) {
+            if (permanentWarningId != null) {
+                if (isPermanentWarningHard) return
+                warningParent.removePermanentWarning(permanentWarningId)
+            }
             val id = warningParent.addPermanentWarning(
                 curScreen,
                 "Hard Maximum Card Number Reached",
@@ -517,15 +521,21 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         "put all but $softMaxCards cards at the bottom of your deck.",
                 CustomWarningParent.Severity.HIGH
             )
-            permanentWarningIds.add(id)
-        } else if (cards > softMaxCards) {
+            this.permanentWarningId = id
+            isPermanentWarningHard = true
+        } else if (cards >= softMaxCards) {
+            if (permanentWarningId != null) {
+                if (!isPermanentWarningHard) return
+                warningParent.removePermanentWarning(permanentWarningId)
+            }
             val id = warningParent.addPermanentWarning(
                 curScreen,
                 "Maximum Card Number Reached",
                 "After this turn, put all but $softMaxCards cards at the bottom of your deck.",
                 CustomWarningParent.Severity.MIDDLE
             )
-            permanentWarningIds.add(id)
+            this.permanentWarningId = id
+            isPermanentWarningHard = false
         }
     }
 
