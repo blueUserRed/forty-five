@@ -440,7 +440,6 @@ var putCardsUnderDeckActor = $Box {
             {
                 width: 30#percent,
                 height: 30#percent,
-                background: "under_deck_background",
                 flexDirection: flexDirection.row,
                 alignItems: align.flexStart
             }
@@ -452,6 +451,19 @@ var putCardsUnderDeckActor = $Box {
                 reportDimensionsWithScaling: true,
                 scaleX: 0.4,
                 scaleY: 0.4,
+            },
+
+            $PutCardsUnderDeckWidget {
+                styles: [
+                    {
+                        width: 90#percent,
+                        height: 90#percent,
+                        background: "under_deck_background",
+                    }
+                ],
+                debug: true,
+                cardSize: cardHeight,
+                cardSpacing: 10.0,
             }
 
     ]
