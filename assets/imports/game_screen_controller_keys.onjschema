@@ -18,6 +18,7 @@ cardSelector: {
     actorName: string
 },
 warningParentName: string,
+putCardsUnderDeckWidgetName: string,
 cardDragBehaviour: $DragAndDropBehaviour,
 cardsToDrawInFirstRound: int,
 cardsToDraw: int,

@@ -1,4 +1,5 @@
 import "imports/font_group.onjschema" as _;
+// this also imports DragAndDropBehaviours
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 
 use Common;
@@ -259,6 +260,12 @@ $Widget {
     $FromTemplate {
         generateFrom: string,
         data: { ...* }
+    }
+
+    $PutCardsUnderDeckWidget {
+        cardSize: float,
+        cardSpacing: float,
+        ...widgetSharedKeys
     }
 
 }

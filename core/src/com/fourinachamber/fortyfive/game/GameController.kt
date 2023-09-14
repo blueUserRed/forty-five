@@ -9,10 +9,7 @@ import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
-import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
-import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
-import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
-import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
+import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.*
@@ -39,6 +36,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
     private val cardSelectorOnj = onj.get<OnjObject>("cardSelector")
     private val warningParentName = onj.get<String>("warningParentName")
+    private val putCardsUnderDeckWidgetName = onj.get<String>("putCardsUnderDeckWidgetName")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -68,6 +66,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         private set
     lateinit var warningParent: CustomWarningParent
         private set
+    lateinit var putCardsUnderDeckWidget: PutCardsUnderDeckWidget
+        private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
     val createdCards: MutableList<Card> = mutableListOf()
@@ -82,7 +82,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     val remainingCards: Int
         get() = _remainingCards
 
-    // currently not used, but might be usefull for an encouter modifier later
+    // currently not used, but might be useful for an encouter modifier later
     var remainingTurns: Int by multipleTemplateParam(
         "game.remainingTurnsRaw", -1,
         "game.remainingTurns" to { if (it == -1) "?" else it.toString() }
@@ -164,6 +164,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent
             ?: throw RuntimeException("actor named $warningParentName must be of type CustomWarningParent")
+        putCardsUnderDeckWidget = onjScreen.namedActorOrError(putCardsUnderDeckWidgetName) as? PutCardsUnderDeckWidget
+            ?: throw RuntimeException("actor named $putCardsUnderDeckWidgetName must be of type PutCardsUnderDeckWidget")
         initCards()
         initCardHand()
         initRevolver()
@@ -645,6 +647,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             return
         }
         appendMainTimeline(Timeline.timeline {
+            includeLater(
+                { putCardsUnderDeckTimeline() },
+                { cardHand.cards.size >= softMaxCards }
+            )
             include(gameDirector.checkActions())
             action {
                 nextTurn()
@@ -656,8 +662,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
+    private fun putCardsUnderDeckTimeline(): Timeline = Timeline.timeline {
+        action { curScreen.enterState(showPutCardsUnderDeckActorScreenState) }
+        delayUntil { putCardsUnderDeckWidget.isFinished }
+    }
+
     /**
-     * damages the player (plays no animation, calls loose when lives go below 0)
+     * damages the player
      */
     @AllThreadsAllowed
     fun damagePlayerTimeline(damage: Int): Timeline = Timeline.timeline {
@@ -868,6 +879,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val showPopupConfirmationButtonScreenState = "showPopupConfirmationButton"
         const val showPopupCardSelectorScreenState = "showPopupCardSelector"
         const val showEnemyAttackPopupScreenState = "showAttackPopup"
+        const val showPutCardsUnderDeckActorScreenState = "showPutCardsUnderDeckActor"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
