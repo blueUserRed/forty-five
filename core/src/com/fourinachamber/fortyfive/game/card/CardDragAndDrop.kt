@@ -112,7 +112,7 @@ class PutCardsUnderDeckDropTarget(
 
     init {
         if (actor !is PutCardsUnderDeckWidget) {
-            throw RuntimeException("PutCardsUnderDeckDropTarget can only be used on a rPutCardsUnderDeckWidget")
+            throw RuntimeException("PutCardsUnderDeckDropTarget can only be used on a PutCardsUnderDeckWidget")
         }
         putCardsUnderDeckWidget = actor
     }
