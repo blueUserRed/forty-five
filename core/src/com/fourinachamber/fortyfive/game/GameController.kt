@@ -36,7 +36,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
     private val cardSelectorOnj = onj.get<OnjObject>("cardSelector")
     private val warningParentName = onj.get<String>("warningParentName")
-    private val putCardsUnderDeckWidgetName = onj.get<String>("putCardsUnderDeckWidgetName")
+    private val putCardsUnderDeckWidgetOnj = onj.get<OnjObject>("putCardsUnderDeckWidget")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -164,12 +164,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent
             ?: throw RuntimeException("actor named $warningParentName must be of type CustomWarningParent")
-        putCardsUnderDeckWidget = onjScreen.namedActorOrError(putCardsUnderDeckWidgetName) as? PutCardsUnderDeckWidget
-            ?: throw RuntimeException("actor named $putCardsUnderDeckWidgetName must be of type PutCardsUnderDeckWidget")
         initCards()
         initCardHand()
         initRevolver()
         initCardSelector()
+        initPutCardsUnderDeckWidget()
         // enemy area is initialised by the GameDirector
         gameDirector.init()
         curReserves = baseReserves
@@ -259,8 +258,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
-        if (updateCount < 4) curScreen.invalidateEverything() // TODO: this is stupid
+        if (updateCount < 6) curScreen.invalidateEverything() // TODO: this is stupid
         updateCount++
+
+        if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
+        if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
 
         mainTimeline.updateTimeline()
 
@@ -273,8 +275,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             if (!cur.isFinished && !cur.hasBeenStarted) cur.startTimeline()
             if (cur.isFinished) iterator.remove()
         }
-        if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
-        if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
 
         updateGameAnimations()
     }
@@ -311,13 +311,21 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun initRevolver() {
-        val curScreen = curScreen
         val revolverName = revolverOnj.get<String>("actorName")
         val revolver = curScreen.namedActorOrError(revolverName)
         if (revolver !is Revolver) throw RuntimeException("actor named $revolverName must be a Revolver")
         val dropOnj = revolverOnj.get<OnjNamedObject>("dropBehaviour")
         revolver.initDragAndDrop(cardDragAndDrop to dropOnj)
         this.revolver = revolver
+    }
+
+    private fun initPutCardsUnderDeckWidget() {
+        val name = putCardsUnderDeckWidgetOnj.get<String>("actorName")
+        val actor = curScreen.namedActorOrError(name) as? PutCardsUnderDeckWidget
+            ?: throw RuntimeException("actor named $name must be of type PutCardsUnderDeckWidget")
+        val dropOnj = putCardsUnderDeckWidgetOnj.get<OnjNamedObject>("dropBehaviour")
+        actor.initDragAndDrop(cardDragAndDrop, dropOnj)
+        this.putCardsUnderDeckWidget = actor
     }
 
     private fun initCardSelector() {
@@ -663,8 +671,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun putCardsUnderDeckTimeline(): Timeline = Timeline.timeline {
-        action { curScreen.enterState(showPutCardsUnderDeckActorScreenState) }
+        action {
+            putCardsUnderDeckWidget.targetSize = cardHand.cards.size - softMaxCards
+            curScreen.enterState(showPutCardsUnderDeckActorScreenState)
+            cardHand.attachToActor("putCardsUnderDeckActor") // TODO: fix
+            cardHand.unfreeze() // force cards to be draggable
+        }
         delayUntil { putCardsUnderDeckWidget.isFinished }
+        action {
+            curScreen.leaveState(showPutCardsUnderDeckActorScreenState)
+            cardHand.reattachToOriginalParent()
+            val cards = putCardsUnderDeckWidget.complete()
+            cards.forEach { cardStack.add(it) }
+        }
     }
 
     /**
@@ -748,27 +767,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun freezeUI() {
         isUIFrozen = true
         FortyFiveLogger.debug(logTag, "froze UI")
-        for (card in cardHand.cards) card.isDraggable = false
+        cardHand.freeze()
         curScreen.enterState(freezeUIScreenState)
     }
 
     private fun unfreezeUI() {
         isUIFrozen = false
         FortyFiveLogger.debug(logTag, "unfroze UI")
-        for (card in cardHand.cards) card.isDraggable = true
+        cardHand.unfreeze()
         curScreen.leaveState(freezeUIScreenState)
-    }
-
-    @AllThreadsAllowed
-    fun showCardDrawActor() {
-        FortyFiveLogger.debug(logTag, "displaying card draw actor")
-        curScreen.enterState(cardDrawActorScreenState)
-    }
-
-    @AllThreadsAllowed
-    fun hideCardDrawActor() {
-        FortyFiveLogger.debug(logTag, "hiding card draw actor")
-        curScreen.leaveState(cardDrawActorScreenState)
     }
 
     /**

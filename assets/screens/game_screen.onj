@@ -55,7 +55,13 @@ var controller = $GameScreenController {
     revolver: {
         actorName: "revolver",
         dropBehaviour: $RevolverDropTarget {
-          group: "card"
+            group: "card"
+        }
+    },
+    putCardsUnderDeckWidget: {
+        actorName: "putCardsUnderDeckWidget",
+        dropBehaviour: $PutCardsUnderDeckDropTarget {
+            group: "card"
         }
     },
     enemyArea: {
@@ -433,6 +439,7 @@ var putCardsUnderDeckActor = $Box {
         }
     ],
     zIndex: overlayZIndex - 1,
+    name: "putCardsUnderDeckActor"
 } children [
 
     $Box {
@@ -461,9 +468,10 @@ var putCardsUnderDeckActor = $Box {
                         background: "under_deck_background",
                     }
                 ],
+                name: "putCardsUnderDeckWidget",
                 debug: true,
                 cardSize: cardHeight,
-                cardSpacing: 10.0,
+                cardSpacing: 10.0
             }
 
     ]
@@ -586,18 +594,6 @@ var gameScreen = $Box {
         ...enemyArea
     },
 
-    $CardHand {
-        styles: [
-            {
-                width: 100#percent,
-                height: 0#points,
-                positionBottom: -680#points,
-            }
-        ],
-        zIndex: 200,
-        ...cardHand
-    },
-
     $Revolver {
         styles: [
             {
@@ -608,7 +604,22 @@ var gameScreen = $Box {
         ...revolver
     },
 
-    playerBar
+    playerBar,
+
+    $CardHand {
+        styles: [
+            {
+                width: 100#percent,
+                height: 0#points,
+            },
+            {
+                style_condition: state("showPutCardsUnderDeckActor"),
+                positionTop: 314#points,
+            }
+        ],
+        zIndex: 200,
+        ...cardHand
+    },
 
 ];
 
