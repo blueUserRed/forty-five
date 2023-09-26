@@ -64,6 +64,41 @@ open class CardDragSource(
     }
 }
 
+class CardDropTarget(
+    dragAndDrop: DragAndDrop,
+    actor: Actor,
+    onj: OnjNamedObject
+) : DropBehaviour(dragAndDrop, actor, onj) {
+
+
+    private val card: Card
+
+    init {
+        if (actor !is CardActor) throw RuntimeException("CardDropTarget can only be used on a cardActor")
+        card = actor.card
+    }
+
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: Payload?, x: Float, y: Float, pointer: Int) {
+        if (payload == null || source == null) return
+
+        val obj = payload.obj!! as CardDragAndDropPayload
+        val revolver = FortyFive.currentGame!!.revolver
+        val slot = revolver.slots.find { it.card === card }?.num ?: return
+        obj.loadIntoRevolver(slot)
+    }
+
+}
+
 /**
  * used for dropping a card into the revolver
  */

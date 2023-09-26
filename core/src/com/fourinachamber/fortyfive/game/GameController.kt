@@ -30,7 +30,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     val gameDirector = GameDirector(this)
 
     private val cardConfigFile = onj.get<String>("cardsFile")
-    private val cardDragAndDropBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
+    private val cardDragBehaviour = onj.get<OnjNamedObject>("cardDragBehaviour")
+    private val cardDropBehaviour = onj.get<OnjNamedObject>("cardDropBehaviour")
     private val cardHandOnj = onj.get<OnjObject>("cardHand")
     private val revolverOnj = onj.get<OnjObject>("revolver")
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
@@ -222,13 +223,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun initCard(card: Card) {
-        val behaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
-            cardDragAndDropBehaviour.name,
+        val dragBehaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
+            cardDragBehaviour.name,
             cardDragAndDrop,
             card.actor,
-            cardDragAndDropBehaviour
+            cardDragBehaviour
         )
-        cardDragAndDrop.addSource(behaviour)
+        val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
+            cardDropBehaviour.name,
+            cardDragAndDrop,
+            card.actor,
+            cardDropBehaviour
+        )
+        cardDragAndDrop.addSource(dragBehaviour)
+        cardDragAndDrop.addTarget(dropBehaviour)
         createdCards.add(card)
     }
 
@@ -357,17 +365,29 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * puts [card] in [slot] of the revolver (checks if the card is a bullet)
      */
     @MainThreadOnly
-    fun loadBulletInRevolver(card: Card, slot: Int) {
-        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this)) return
-        if (revolver.getCardInSlot(slot) != null) return
+    fun loadBulletInRevolver(card: Card, slot: Int) = appendMainTimeline(Timeline.timeline {
+        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this@GameController)) return
+        val cardInSlot = revolver.getCardInSlot(slot)
+        if (!(cardInSlot?.isReplaceable ?: true)) return
         if (!cost(card.cost)) return
-        cardHand.removeCard(card)
-        revolver.setCard(slot, card)
-        FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
-        card.onEnter()
-        checkCardMaximums()
-        appendMainTimeline(checkEffectsSingleCard(Trigger.ON_ENTER, card))
-    }
+        action {
+            cardHand.removeCard(card)
+        }
+        includeLater(
+            { destroyCardTimeline(cardInSlot!!) },
+            { cardInSlot != null }
+        )
+        action {
+            revolver.setCard(slot, card)
+            FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
+            card.onEnter()
+            checkCardMaximums()
+        }
+        includeLater(
+            { checkEffectsSingleCard(Trigger.ON_ENTER, card) },
+            { true }
+        )
+    })
 
     fun putCardFromRevolverBackInHand(card: Card) {
         revolver.removeCard(card)

@@ -73,6 +73,9 @@ var controller = $GameScreenController {
     cardDragBehaviour: $CardDragSource {
         group: "card"
     },
+    cardDropBehaviour: $CardDropTarget {
+        group: "card"
+    },
     warningParentName: "WARNING_PARENT",
     cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
