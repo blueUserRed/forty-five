@@ -5,7 +5,7 @@
   padding-top: 4px;
   background-image: url("../assets/download_button.png");
   background-repeat: no-repeat;
-  background-size: 100%;
+  background-size: 100% 105%;
   background-clip: border-box;
   font-size: 0.6cm;
   color: #f2ecdf;
@@ -98,7 +98,7 @@ nav {
   position: fixed;
   height: 100vh;
   width: 65vw;
-  margin-left: 110%;
+  margin-left: 110vw;
   z-index: 600;
   background-image: url("../assets/hamburger_background.png");
   background-repeat: no-repeat;
@@ -108,13 +108,26 @@ nav {
   justify-content: center;
   transition: margin-left 0.3s;
 }
+nav a {
+  color: #f2ecdf;
+  text-decoration: none;
+  font-size: 0.7cm;
+}
 @media screen and (max-width: 790px) {
   nav {
     display: flex;
   }
 }
 nav.navbar-open {
-  margin-left: 35%;
+  margin-left: 35vw;
+}
+@media screen and (max-width: 750px) {
+  nav {
+    width: 80vw;
+  }
+  nav.navbar-open {
+    margin-left: 20vw;
+  }
 }
 nav:nth-child(1) {
   margin-top: -1cm;
@@ -129,6 +142,7 @@ nav * + * {
 #main-content-container {
   display: flex;
   flex-direction: row;
+  align-items: stretch;
   width: 300%;
   background-image: url("../assets/background.png");
 }
@@ -181,9 +195,6 @@ section.sub-page .title-card {
   flex-direction: column;
   align-items: center;
 }
-#main-page.cur-page-2, #main-page.cur-page-3 {
-  height: 50vh;
-}
 #main-page #our-project {
   position: relative;
   width: 12cm;
@@ -229,7 +240,7 @@ section.sub-page .title-card {
 }
 #main-page #title-map .download {
   width: 10%;
-  margin-top: 9%;
+  margin-top: 10%;
   font-size: 2vw;
 }
 @media screen and (min-width: 1150px) {
@@ -240,7 +251,7 @@ section.sub-page .title-card {
 #main-page #title-map #deco-revolver-1 {
   position: absolute;
   width: 38%;
-  transform: rotate(-78deg) translate(-70%, -180%);
+  transform: rotate(-75deg) translate(-70%, -210%);
 }
 #main-page #title-map #deco-card-1 {
   top: 8%;
@@ -302,7 +313,6 @@ section.sub-page .title-card {
 }
 #main-page #trailer-container img {
   width: 70%;
-  aspect-ratio: 16/9;
   margin-top: 3cm;
   margin-bottom: 3cm;
   transform: rotate(2deg);
@@ -340,10 +350,6 @@ section.sub-page .title-card {
     padding-bottom: 4cm;
   }
 }
-#main-page #main-description p.cur-page-2, #main-page #main-description p.cur-page-3 {
-  padding-bottom: 0;
-  font-size: 0.6cm;
-}
 #main-page #main-description #deco-hat {
   position: absolute;
   display: none;
@@ -352,14 +358,14 @@ section.sub-page .title-card {
 @media screen and (min-width: 1150px) {
   #main-page #main-description #deco-hat {
     display: block;
-    width: 30%;
+    width: 35%;
     transform: translate(145%, -90%);
   }
 }
 @media screen and (min-width: 1400px) {
   #main-page #main-description #deco-hat {
     display: block;
-    width: 48%;
+    width: 53%;
     transform: translate(115%, -80%);
   }
 }
@@ -469,15 +475,17 @@ section.sub-page .title-card {
   flex-direction: column;
   align-items: center;
 }
-#about-page.cur-page-1, #about-page.cur-page-3 {
-  height: 50vh;
-}
 #about-page #about-page-title {
   position: relative;
   background-image: url("../assets/about_page_title.png");
   background-size: 100% 100%;
   margin-top: -1.3cm;
   aspect-ratio: 910/686;
+}
+@media screen and (max-width: 750px) {
+  #about-page #about-page-title {
+    margin-top: -0.3cm;
+  }
 }
 #about-page #about-page-title #deco-revolver-2 {
   position: absolute;
@@ -575,9 +583,6 @@ section.sub-page .title-card {
     margin: 1.2cm;
   }
 }
-#about-page #member-pictures .member-picture.cur-page-1, #about-page #member-pictures .member-picture.cur-page-3 {
-  display: none;
-}
 #about-page #member-pictures #member-picture-1 {
   transform: rotate(-10deg);
 }
@@ -598,9 +603,6 @@ section.sub-page .title-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-#imprint-page.cur-page-1, #imprint-page.cur-page-2 {
-  height: 50vh;
 }
 #imprint-page #imprint-text {
   position: relative;
@@ -625,7 +627,7 @@ section.sub-page .title-card {
 #imprint-page #imprint-text p {
   color: black;
   font-size: 0.6cm;
-  padding: 3cm 19% 8cm 19%;
+  padding: 6cm 19% 8cm 19%;
 }
 @media screen and (max-width: 750px) {
   #imprint-page #imprint-text p {
@@ -633,8 +635,9 @@ section.sub-page .title-card {
     padding-bottom: 4cm;
   }
 }
-#imprint-page footer {
-  margin-top: 10cm;
+
+.footer-spacer {
+  flex-grow: 1;
 }
 
 footer {
@@ -652,6 +655,28 @@ footer {
 @media screen and (max-width: 750px) {
   footer {
     height: 5cm;
+  }
+}
+footer .easy-name-logo {
+  color: #f2ecdf;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0.3cm;
+  font-size: 0.7cm;
+  line-height: 1.5cm;
+}
+footer .easy-name-logo img {
+  width: 4cm;
+}
+@media screen and (max-width: 750px) {
+  footer .easy-name-logo {
+    font-size: 0.35cm;
+    line-height: 0.75cm;
+  }
+  footer .easy-name-logo img {
+    width: 2cm;
   }
 }
 footer .links {
@@ -680,6 +705,13 @@ footer .copyright {
   height: 1.2cm;
   line-height: 1.2cm;
   text-align: center;
+}
+@media screen and (max-width: 750px) {
+  footer .copyright {
+    font-size: 3vw;
+    line-height: 6vw;
+    height: 6vw;
+  }
 }
 
 /*# sourceMappingURL=index.css.map */

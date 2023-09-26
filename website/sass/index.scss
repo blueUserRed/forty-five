@@ -17,7 +17,7 @@ $our-project-break: 950px;
     padding-top: 4px;
     background-image: url("../assets/download_button.png");
     background-repeat: no-repeat;
-    background-size: 100%;
+    background-size: 100% 105%;
     background-clip: border-box;
     font-size: 0.6cm;
     color: $forty-white;
@@ -115,7 +115,7 @@ nav {
     position: fixed;
     height: 100vh;
     width: 65vw;
-    margin-left: 110%;
+    margin-left: 110vw;
     z-index: $header-zindex + 100;
 
     background-image: url("../assets/hamburger_background.png");
@@ -128,12 +128,27 @@ nav {
 
     transition: margin-left 0.3s;
 
+    a {
+        color: $forty-white;
+        text-decoration: none;
+        font-size: 0.7cm;
+    }
+
     @include hamburgerMenu {
         display: flex;
     }
 
     @include navbarOpen {
-        margin-left: 35%;
+        margin-left: 35vw;
+    }
+
+    @include narrow {
+        width: 80vw;
+
+        @include navbarOpen {
+            margin-left: 20vw;
+        }
+    
     }
 
     &:nth-child(1) {
@@ -152,6 +167,7 @@ nav {
 #main-content-container {
     display: flex;
     flex-direction: row;
+    align-items: stretch;
     width: 100% * $num-subpages;
     background-image: url("../assets/background.png");
 }
@@ -205,9 +221,9 @@ section.sub-page .title-card {
     align-items: center;
     // z-index: 1;
 
-    &.cur-page-2, &.cur-page-3 {
-        height: 50vh;
-    }
+    // &.cur-page-2, &.cur-page-3 {
+    //     height: 50vh;
+    // }
 
     #our-project {
         position: relative;
@@ -256,7 +272,7 @@ section.sub-page .title-card {
 
         .download {
             width: 10%;
-            margin-top: 9%;
+            margin-top: 10%;
             font-size: 2vw;
 
             @include wide {
@@ -268,7 +284,7 @@ section.sub-page .title-card {
         #deco-revolver-1 {
             position: absolute;
             width: 38%;
-            transform: rotate(-78deg) translate(-70%, -180%);
+            transform: rotate(-75deg) translate(-70%, -210%);
         }
 
         #deco-card-1 {
@@ -331,7 +347,7 @@ section.sub-page .title-card {
         img { // TODO: change back
         // iframe {
             width: 70%;
-            aspect-ratio: 16 / 9;
+            // aspect-ratio: 16 / 9;
             margin-top: 3cm;
             margin-bottom: 3cm;
             transform: rotate(2deg);
@@ -369,10 +385,10 @@ section.sub-page .title-card {
                 padding-bottom: 4cm;
             }
 
-            &.cur-page-2, &.cur-page-3 {
-                padding-bottom: 0;
-                font-size: 0.6cm;
-            }
+            // &.cur-page-2, &.cur-page-3 {
+            //     padding-bottom: 0;
+            //     font-size: 0.6cm;
+            // }
         }
 
         #deco-hat {
@@ -382,13 +398,13 @@ section.sub-page .title-card {
 
             @include wide {
                 display: block;
-                width: 30%;
+                width: 35%;
                 transform: translate(145%, -90%);
             }
 
             @include very-wide {
                 display: block;
-                width: 48%;
+                width: 53%;
                 transform: translate(115%, -80%);
             }
 
@@ -503,9 +519,9 @@ section.sub-page .title-card {
     flex-direction: column;
     align-items: center;
 
-    &.cur-page-1, &.cur-page-3 {
-        height: 50vh;
-    }
+    // &.cur-page-1, &.cur-page-3 {
+    //     height: 50vh;
+    // }
 
     #about-page-title {
         position: relative;
@@ -513,6 +529,10 @@ section.sub-page .title-card {
         background-size: 100% 100%;
         margin-top: -1.3cm;
         aspect-ratio: 910 / 686;
+
+        @include narrow {
+            margin-top: -0.3cm;
+        }
 
         #deco-revolver-2 {
             position: absolute;
@@ -609,9 +629,9 @@ section.sub-page .title-card {
                 margin: 1.2cm;
             }
 
-            &.cur-page-1, &.cur-page-3 {
-                display: none;
-            }
+            // &.cur-page-1, &.cur-page-3 {
+            //     display: none;
+            // }
 
         }
 
@@ -645,9 +665,9 @@ section.sub-page .title-card {
     flex-direction: column;
     align-items: center;
     
-    &.cur-page-1, &.cur-page-2 {
-        height: 50vh;
-    }
+    // &.cur-page-1, &.cur-page-2 {
+    //     height: 50vh;
+    // }
 
     #imprint-text {
         position: relative;
@@ -670,7 +690,7 @@ section.sub-page .title-card {
         p {
             color: black;
             font-size: 0.6cm;
-            padding: 3cm 19% 8cm 19%;
+            padding: 6cm 19% 8cm 19%;
 
             @include narrow {
                 font-size: 3.4vw;
@@ -681,9 +701,10 @@ section.sub-page .title-card {
 
     }
 
-    footer {
-        margin-top: 10cm;
-    }
+}
+
+.footer-spacer {
+    flex-grow: 1.0;
 }
 
 footer {
@@ -701,6 +722,29 @@ footer {
 
     @include narrow {
         height: 5cm;
+    }
+
+    .easy-name-logo {
+        color: $forty-white;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 0.3cm;
+        font-size: 0.7cm;
+        line-height: 1.5cm;
+
+        img {
+            width: 4cm;
+        }
+
+        @include narrow {
+            font-size: 0.35cm;
+            line-height: 0.75cm;
+            img {
+                width: 2cm;
+            }
+        }
     }
 
     .links {
@@ -733,6 +777,12 @@ footer {
         height: 1.2cm;
         line-height: 1.2cm;
         text-align: center;
+
+        @include narrow {
+            font-size: 3vw;
+            line-height: 6vw;
+            height: 6vw;
+        }
     }
 
 }
