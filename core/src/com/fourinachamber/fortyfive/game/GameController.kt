@@ -683,6 +683,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardHand.reattachToOriginalParent()
             val cards = putCardsUnderDeckWidget.complete()
             cards.forEach { cardStack.add(it) }
+            _remainingCards = cardStack.size
         }
     }
 

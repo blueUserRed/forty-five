@@ -9,22 +9,21 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.general.BackgroundActor
-import com.fourinachamber.fortyfive.screen.general.DragAndDropBehaviourFactory
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addBackgroundStyles
+import com.fourinachamber.fortyfive.utils.random
 import ktx.actors.contains
 import onj.value.OnjNamedObject
+import kotlin.random.Random
 
 class PutCardsUnderDeckWidget(
     private val screen: OnjScreen,
     private val cardSize: Float,
     private val cardSpacing: Float,
-) : WidgetGroup(), ZIndexActor, StyledActor, BackgroundActor {
+) : WidgetGroup(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor {
 
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
@@ -40,7 +39,6 @@ class PutCardsUnderDeckWidget(
             field = value
             loadedBackground = null
         }
-
 
     val isFinished: Boolean
         get() = cards.size >= targetSize
@@ -71,14 +69,21 @@ class PutCardsUnderDeckWidget(
 
     override fun layout() {
         super.layout()
-        var curX = 0f
+        val random = Random(237689)
+        val amountCards = cards.size
+        val spacePerCard = (width - cardSize) / amountCards
+
+        var curX = cardSize / 4
+        var curZIndex = 0
         cards.forEach { card ->
             card.actor.setBounds(
-                curX,
-                height / 2 - cardSize / 2,
+                curX, height / 2 - cardSize / 2,
                 cardSize, cardSize
             )
-            curX += cardSize + cardSpacing
+            card.actor.fixedZIndex = curZIndex
+            card.actor.rotation = (-10f..10f).random(random)
+            curZIndex++
+            curX += spacePerCard
         }
     }
 
@@ -101,6 +106,13 @@ class PutCardsUnderDeckWidget(
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
         addBackgroundStyles(screen)
+    }
+
+    override fun resortZIndices() {
+        children.sort { el1, el2 ->
+            (if (el1 is ZIndexActor) el1.fixedZIndex else -1) -
+                    (if (el2 is ZIndexActor) el2.fixedZIndex else -1)
+        }
     }
 
 }
