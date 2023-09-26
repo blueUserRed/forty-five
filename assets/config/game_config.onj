@@ -3,8 +3,8 @@ import "imports/colors.onj" as color;
 import "config/graphics_config.onj" as graphicsConfig;
 
 cardDrawConfig: {
-    firstRound: 10,
-    roundStart: 4,
+    firstRound: 5,
+    roundStart: 2,
     softMaxCards: 12,
     hardMaxCards: 20,
 },
