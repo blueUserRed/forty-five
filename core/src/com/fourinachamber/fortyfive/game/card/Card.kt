@@ -121,9 +121,14 @@ class Card(
             return cur
         }
 
-    private var isEverlasting: Boolean = false
-    private var isUndead: Boolean = false
-    private var isRotten: Boolean = false
+    var isEverlasting: Boolean = false
+        private set
+    var isUndead: Boolean = false
+        private set
+    var isRotten: Boolean = false
+        private set
+    var isReplaceable: Boolean = false
+        private set
 
     val shouldRemoveAfterShot: Boolean
         get() = !(isEverlasting || modifiers.any { it.everlasting })
@@ -377,6 +382,7 @@ class Card(
 
                 "everlasting" -> card.isEverlasting = true
                 "undead" -> card.isUndead = true
+                "replaceable" -> card.isReplaceable = true
                 "rotten" -> {
                     card.isRotten = true
                     card.initRottenModifier()

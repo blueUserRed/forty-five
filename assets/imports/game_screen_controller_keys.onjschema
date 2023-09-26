@@ -23,6 +23,7 @@ cardSelector: {
 },
 warningParentName: string,
 cardDragBehaviour: $DragAndDropBehaviour,
+cardDropBehaviour: $DragAndDropBehaviour,
 cardsToDrawInFirstRound: int,
 cardsToDraw: int,
 softMaxCards: int,

@@ -32,6 +32,10 @@ $DragAndDropBehaviour {
         ...dragAndDropBehaviourSharedKeys
     }
 
+    $CardDropTarget {
+        ...dragAndDropBehaviourSharedKeys
+    }
+
     $CoverAreaDropTarget {
         ...dragAndDropBehaviourSharedKeys
     }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.card.CardDragSource
+import com.fourinachamber.fortyfive.game.card.CardDropTarget
 import com.fourinachamber.fortyfive.game.card.PutCardsUnderDeckDropTarget
 import com.fourinachamber.fortyfive.game.card.RevolverDropTarget
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardDragSource
@@ -32,6 +33,9 @@ object DragAndDropBehaviourFactory {
         }
         dropBehaviours["RevolverDropTarget"] = { dragAndDrop, actor, onj ->
             RevolverDropTarget(dragAndDrop, actor, onj)
+        }
+        dropBehaviours["CardDropTarget"] = { dragAndDrop, actor, onj ->
+            CardDropTarget(dragAndDrop, actor, onj)
         }
         dragBehaviours["ShopDragSource"] = { dragAndDrop, actor, onj ->
             ShopDragSource(dragAndDrop, actor, onj)

@@ -461,6 +461,23 @@ cards: [
         tags: ["rare"],
         price: 25,
     },
+    {
+        name: "cowardBullet",
+        title: "coward Bullet",
+        flavourText: "coward Bullet",
+        description: "todo",
+        baseDamage: 1,
+        coverValue: 0,
+        traitEffects: [ "replaceable" ],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 25,
+    },
 
 ],
 
