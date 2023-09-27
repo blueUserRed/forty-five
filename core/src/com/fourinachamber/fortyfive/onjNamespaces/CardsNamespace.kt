@@ -61,6 +61,11 @@ object CardsNamespace {
         return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value))
     }
 
+    @RegisterOnjFunction(schema = "params: [string, int]")
+    fun damageDirect(trigger: OnjString, damage: OnjInt): OnjEffect {
+        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value.toInt()))
+    }
+
     @RegisterOnjFunction(schema = "params: [*[]]")
     fun bNum(onjArr: OnjArray): OnjBulletSelector {
         val nums = mutableSetOf<Int>()
