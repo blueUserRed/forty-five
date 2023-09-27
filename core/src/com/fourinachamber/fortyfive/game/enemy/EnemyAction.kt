@@ -4,6 +4,8 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.toIntRange
+import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import kotlin.random.Random
 
@@ -88,12 +90,24 @@ sealed class EnemyAction {
             controller.revolver.isBulletLoaded() && controller.cardHand.cards.size < controller.hardMaxCards
     }
 
+    class TakeCover(val cover: IntRange) : EnemyAction() {
+
+        override fun getTimeline(controller: GameController): Timeline = Timeline.timeline {
+            action {
+                controller.enemyArea.enemies[0].currentCover += cover.random()
+            }
+        }
+
+        override fun applicable(controller: GameController): Boolean = true
+    }
+
     companion object {
 
         fun fromOnj(obj: OnjNamedObject): EnemyAction = when (obj.name) {
 
             "DestroyCardsInHand" -> DestroyCardsInHand(obj.get<Long>("maxCards").toInt())
             "RevolverRotation" -> RevolverRotation(obj.get<Long>("maxTurns").toInt())
+            "TakeCover" -> TakeCover(obj.get<OnjArray>("cover").toIntRange())
             "ReturnCardToHand" -> ReturnCardToHand
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")

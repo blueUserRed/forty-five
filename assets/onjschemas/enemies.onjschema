@@ -21,6 +21,11 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
+    $TakeCover {
+        cover: int[2],
+        ...enemyActionSharedKeys
+    }
+
 }
 
 var enemy = {

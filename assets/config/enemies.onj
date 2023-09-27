@@ -19,17 +19,21 @@ enemies: [
         detailFont: "red_wing",
         detailFontScale: 0.6,
         actions: [
-            $DestroyCardsInHand {
-                maxCards: 2,
-                weight: 10
-            },
-
-            $RevolverRotation {
-                maxTurns: 3,
-                weight: 10
-            },
-            $ReturnCardToHand {
-                weight: 20
+//            $DestroyCardsInHand {
+//                maxCards: 2,
+//                weight: 10
+//            },
+//
+//            $RevolverRotation {
+//                maxTurns: 3,
+//                weight: 10
+//            },
+//            $ReturnCardToHand {
+//                weight: 20
+//            },
+            $TakeCover {
+                cover: [ 5, 10 ],
+                weight: 40
             }
         ],
         detailFontColor: color.black
