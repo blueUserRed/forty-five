@@ -313,6 +313,18 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = Destroy(trigger, bulletSelector)
     }
 
+    class DamageDirectly(trigger: Trigger, val damage: Int) : Effect(trigger) {
+
+        override fun onTrigger(): Timeline = Timeline.timeline {
+            val controller = FortyFive.currentGame!!
+            include(controller.enemyArea.enemies[0].damage(damage))
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = DamageDirectly(trigger, damage)
+    }
+
 }
 
 /**
