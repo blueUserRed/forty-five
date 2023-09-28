@@ -368,7 +368,7 @@ sealed class BulletSelector {
  */
 enum class Trigger {
 
-    ON_ENTER, ON_SHOT, ON_ROUND_START, ON_DESTROY, ON_CARDS_DRAWN
+    ON_ENTER, ON_SHOT, ON_TURN_START, ON_DESTROY, ON_CARDS_DRAWN, ON_REVOLVER_ROTATION
 
 }
 
