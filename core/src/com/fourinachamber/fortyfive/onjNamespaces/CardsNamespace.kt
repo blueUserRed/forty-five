@@ -146,7 +146,9 @@ object CardsNamespace {
         "enter" -> Trigger.ON_ENTER
         "shot" -> Trigger.ON_SHOT
         "destroy" -> Trigger.ON_DESTROY
-        "round start" -> Trigger.ON_ROUND_START
+        "turn start" -> Trigger.ON_TURN_START
+        "rotation" -> Trigger.ON_REVOLVER_ROTATION
+        "card drawn" -> Trigger.ON_CARDS_DRAWN
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

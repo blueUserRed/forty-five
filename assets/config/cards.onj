@@ -46,7 +46,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ reserveGain("round start", 1) ],
+        effects: [ reserveGain("turn start", 1) ],
         forceLoadCards: [],
         cost: 1,
         tags: ["common", "startDeck"],
@@ -396,7 +396,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            putCardInHand("round start", "workerBullet", 1)
+            putCardInHand("turn start", "workerBullet", 1)
         ],
         forceLoadCards: [ "workerBullet" ],
         cost: 2,
@@ -490,6 +490,44 @@ cards: [
         highlightType: "standard",
         effects: [
             damageDirect("enter", 10)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "bull_et",
+        title: "Bull et",
+        flavourText: "Bull et",
+        description: "todo",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            damageDirect("rotation", 2)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "unpleasantGradientBullet",
+        title: "Unpleasant Gradient Bullet",
+        flavourText: "Unpleasent Gradient Bullet",
+        description: "todo",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            damageDirect("turn start", 4)
         ],
         forceLoadCards: [],
         cost: 1,

@@ -491,8 +491,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     parryCard.leaveGame()
 
                 }
-                include(revolver.rotate(parryCard.rotationDirection))
-                action { onRevolverTurnActions() }
+                include(rotateRevolver(parryCard.rotationDirection))
                 if (remainingDamage > 0) include(damagePlayerTimeline(remainingDamage))
             } },
             { popupEvent is ParryEvent && parryCard != null }
@@ -577,8 +576,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         revolverRotationCounter++
 
         val cardToShoot = revolver.getCardInSlot(5)
-        var rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
-        if (modifier != null) rotationDirection = modifier!!.modifyRevolverRotation(rotationDirection)
+        val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
         val enemy = enemyArea.getTargetedEnemy()
 
         FortyFiveLogger.debug(logTag,
@@ -606,7 +604,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 enemy.executeStatusEffectsAfterDamage(cardToShoot.curDamage)
             turnStatusEffectTimeline = enemy.executeStatusEffectsAfterRevolverRotation()
 
-            effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT, TriggerInformation())
+            effectTimeline = checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
         }
 
         val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
@@ -637,29 +635,32 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 { turnStatusEffectTimeline!! },
                 { turnStatusEffectTimeline != null }
             )
-
-            action { onRevolverTurnActions() }
+            include(rotateRevolver(rotationDirection))
         }
 
         appendMainTimeline(Timeline.timeline {
             parallelActions(
                 timeline.asAction(),
-                gameRenderPipeline.getOnShotPostProcessingTimelineAction(),
-                revolver.rotate(rotationDirection).asAction()
+                gameRenderPipeline.getOnShotPostProcessingTimelineAction()
             )
         })
     }
 
-    /**
-     * updates components of the game that respond to revolver rotations, e.g. card modifiers, status effects
-     */
-    private fun onRevolverTurnActions() {
-        checkCardModifierValidity()
-        revolver
-            .slots
-            .mapNotNull { it.card }
-            .forEach(Card::onRevolverTurn)
-        enemyArea.enemies.forEach(Enemy::onRevolverTurn)
+    fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
+        include(revolver.rotate(rotation))
+        action {
+            checkCardModifierValidity()
+            revolver
+                .slots
+                .mapNotNull { it.card }
+                .forEach(Card::onRevolverTurn)
+            enemyArea.enemies.forEach(Enemy::onRevolverTurn)
+        }
+        if (rotation.amount != 0) {
+            val info = TriggerInformation(multiplier = rotation.amount)
+            include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
+        }
+        enemyArea.getTargetedEnemy().executeStatusEffectsAfterRevolverRotation()?.let { include(it) }
     }
 
     @AllThreadsAllowed
@@ -686,7 +687,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             include(drawCardPopupTimeline(cardsToDraw))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
-            includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
+            includeLater({ checkEffectsActiveCards(Trigger.ON_TURN_START) }, { true })
         })
     }
 
@@ -763,13 +764,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
-        val timeline = Timeline.timeline {
-            for (card in createdCards) if (card.inGame) {
-                val timeline = card.checkEffects(trigger, triggerInformation)
-                if (timeline != null) include(timeline)
-            }
-        }
-        return timeline
+        return createdCards
+            .filter { it.inGame }
+            .mapNotNull { it.checkEffects(trigger, triggerInformation) }
+            .collectTimeline()
     }
 
     @MainThreadOnly
@@ -877,15 +875,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     sealed class RevolverRotation {
-        class Right(val amount: Int) : RevolverRotation() {
+
+        abstract val amount: Int
+
+        class Right(override val amount: Int) : RevolverRotation() {
 
             override fun toString(): String = "Right($amount)"
         }
-        class Left(val amount: Int) : RevolverRotation() {
+        class Left(override val amount: Int) : RevolverRotation() {
 
             override fun toString(): String = "Left($amount)"
         }
         object None : RevolverRotation() {
+
+            override val amount: Int = 0
 
             override fun toString(): String = "None"
         }

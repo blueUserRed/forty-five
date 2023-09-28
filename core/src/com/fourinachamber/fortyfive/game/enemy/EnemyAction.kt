@@ -62,7 +62,7 @@ sealed class EnemyAction {
                 mapOf("direction" to rotation::class.simpleName!!.lowercase(), "amount" to amount)
             ).string
             include(controller.confirmationPopupTimeline(text))
-            include(controller.revolver.rotate(rotation))
+            include(controller.rotateRevolver(rotation))
         }
 
         override fun applicable(controller: GameController): Boolean = controller.revolver.slots.any { it.card != null }
