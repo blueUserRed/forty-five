@@ -13,11 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.game.Effect
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
-import com.fourinachamber.fortyfive.game.GraphicsConfig
-import com.fourinachamber.fortyfive.game.Trigger
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -257,11 +254,11 @@ class Card(
      * effects; null if no effect was triggered
      */
     @MainThreadOnly
-    fun checkEffects(trigger: Trigger): Timeline? {
+    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation): Timeline? {
         var wasEffectWithTimelineTriggered = false
         val timeline = Timeline.timeline {
             for (effect in effects) {
-                val effectTimeline = effect.checkTrigger(trigger)
+                val effectTimeline = effect.checkTrigger(trigger, triggerInformation)
                 if (effectTimeline != null) {
                     include(effectTimeline)
                     wasEffectWithTimelineTriggered = true

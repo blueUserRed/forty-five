@@ -606,7 +606,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 enemy.executeStatusEffectsAfterDamage(cardToShoot.curDamage)
             turnStatusEffectTimeline = enemy.executeStatusEffectsAfterRevolverRotation()
 
-            effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT)
+            effectTimeline = cardToShoot.checkEffects(Trigger.ON_SHOT, TriggerInformation())
         }
 
         val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
@@ -748,17 +748,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     @MainThreadOnly
-    private fun checkEffectsSingleCard(trigger: Trigger, card: Card): Timeline {
+    private fun checkEffectsSingleCard(
+        trigger: Trigger,
+        card: Card,
+        triggerInformation: TriggerInformation = TriggerInformation()
+    ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        return card.checkEffects(trigger) ?: Timeline(mutableListOf())
+        return card.checkEffects(trigger, triggerInformation) ?: Timeline(mutableListOf())
     }
 
     @MainThreadOnly
-    fun checkEffectsActiveCards(trigger: Trigger): Timeline {
+    fun checkEffectsActiveCards(
+        trigger: Trigger,
+        triggerInformation: TriggerInformation = TriggerInformation()
+    ): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         val timeline = Timeline.timeline {
             for (card in createdCards) if (card.inGame) {
-                val timeline = card.checkEffects(trigger)
+                val timeline = card.checkEffects(trigger, triggerInformation)
                 if (timeline != null) include(timeline)
             }
         }
