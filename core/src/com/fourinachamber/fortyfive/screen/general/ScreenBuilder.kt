@@ -483,6 +483,13 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("cardSpacing").toFloat(),
         )
 
+        "StatusEffectDisplay" -> StatusEffectDisplay(
+            screen,
+            fontOrError(widgetOnj.get<String>("font"), screen),
+            widgetOnj.get<Color>("fontColor"),
+            widgetOnj.get<Double>("fontScale").toFloat()
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->

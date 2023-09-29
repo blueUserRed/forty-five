@@ -1,50 +1,22 @@
 package com.fourinachamber.fortyfive.game
 
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import kotlin.math.floor
 
-/**
- * a status effect that can be applied to a [target]
- */
 abstract class StatusEffect(
     private val iconHandle: ResourceHandle,
-    _turns: Int,
-    protected val target: StatusEffectTarget,
     private val iconScale: Float
 ) {
-
-    /**
-     * the total amount of revolver-turns this effect will stay active for
-     */
-    var turns: Int = _turns
-        protected set
-
-    private lateinit var gameController: GameController
-
-    /**
-     * the remaining amount of revolver-turns this effect will stay active for
-     */
-    val remainingTurns: Int
-        get() = (startTurn + turns) - gameController.revolverRotationCounter
-
-    private var startTurn: Int = 0
 
     lateinit var icon: CustomImageActor
         private set
 
-    protected var isIconInitialised: Boolean = false
-        private set
+    private var isIconInitialised: Boolean = false
 
-
-    /**
-     * creates a copy of this status effect
-     */
-    abstract fun copy(): StatusEffect
+    protected lateinit var controller: GameController
 
     fun initIcon(gameController: GameController) {
         icon = CustomImageActor(iconHandle, gameController.curScreen)
@@ -54,179 +26,117 @@ abstract class StatusEffect(
         isIconInitialised = true
     }
 
-    /**
-     * called after the revolver turned
-     */
-    open fun onRevolverTurn(gameController: GameController) { }
-
-    /**
-     * called after the status effect got applied
-     */
-    open fun start(gameController: GameController) {
-        this.gameController = gameController
-        startTurn = gameController.revolverRotationCounter
+    open fun start(controller: GameController) {
+        this.controller = controller
     }
 
-    /**
-     * checks whether this status effect is still valid or should be removed
-     */
-    open fun isStillValid(): Boolean = remainingTurns > 0
+    open fun executeAfterRotation(rotation: GameController.RevolverRotation, target: StatusEffectTarget): Timeline? = null
 
-    /**
-     * checks if [effect] can be stacked with this
-     */
-    abstract fun canStackWith(effect: StatusEffect): Boolean
+    open fun executeOnNewTurn(target: StatusEffectTarget): Timeline? = null
 
-    /**
-     * stacks an effect onto this one. check using [canStackWith] first
-     */
-    abstract fun stack(effect: StatusEffect)
+    open fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline? = null
 
-    /**
-     * returns a timeline containing the actions of this effect; null if this status effect does nothing after a round
-     * finished
-     */
-    open fun executeAfterRound(gameController: GameController): Timeline? = null
+    abstract fun canStackWith(other: StatusEffect): Boolean
 
+    abstract fun stack(other: StatusEffect)
 
-    /**
-     * returns a timeline containing the actions of this effect; null if this status effect does nothing after the
-     * target got damaged
-     */
-    open fun executeAfterDamage(gameController: GameController, damage: Int): Timeline? = null
+    abstract fun isStillValid(): Boolean
 
+    abstract fun getDisplayText(): String
 
-    /**
-     * returns a timeline containing the actions of this effect; null if this status effect does nothing after the
-     * revolver turned
-     */
-    open fun executeAfterRevolverRotation(gameController: GameController): Timeline? = null
+    abstract fun copy(): StatusEffect
+}
 
-    open fun applyAnim(enemy: Enemy): Timeline? = null
+abstract class RotationBasedStatusEffect(
+    iconHandle: ResourceHandle,
+    iconScale: Float,
+    duration: Int
+) : StatusEffect(iconHandle, iconScale) {
 
-    /**
-     * the poison effect damages the target every revolver turn
-     */
-    class Poison(
-        val damage: Int,
-        turns: Int,
-        target: StatusEffectTarget,
-    ) : StatusEffect(
-        GraphicsConfig.iconName("poison"),
-        turns,
-        target,
-        GraphicsConfig.iconScale("poison")
-    ) {
+    var duration: Int = duration
+        private set
 
-        override fun copy(): StatusEffect = Poison(damage, turns, target)
+    private var rotationOnEffectStart = -1
 
-        override fun executeAfterRevolverRotation(
-            gameController: GameController
-        ): Timeline = Timeline.timeline {
-            // TODO: rework poison
-//            FortyFiveLogger.debug(logTag, "executing poison effect")
-//            val shakeActorAction = GraphicsConfig.shakeActorAnimation(icon, true)
-//
-//            includeAction(shakeActorAction)
-//            delay(GraphicsConfig.bufferTime)
-//            include(target.damage(damage))
-        }
-
-        override fun canStackWith(effect: StatusEffect): Boolean {
-            return effect is Poison && effect.damage == damage
-        }
-
-        override fun stack(effect: StatusEffect) {
-            effect as Poison
-            turns += effect.turns
-        }
-
-        override fun toString(): String {
-            return "Poison(turns=$turns, damage=$damage)"
-        }
-
-        companion object {
-            const val logTag = "StatusEffect-Poison"
-        }
+    override fun start(controller: GameController) {
+        super.start(controller)
+        rotationOnEffectStart = controller.revolverRotationCounter
     }
 
-    /**
-     * the burning status increases the damage the target takes by a percentage
-     */
-    class Burning(
-        turns: Int,
-        private val percent: Float,
-        target: StatusEffectTarget,
-    ) : StatusEffect(
-        GraphicsConfig.iconName("burning"),
-        turns,
-        target,
-        GraphicsConfig.iconScale("burning"),
-    ) {
+    override fun isStillValid(): Boolean =
+        controller.revolverRotationCounter < rotationOnEffectStart + duration
 
-        override fun copy(): StatusEffect = Burning(turns, percent, target)
+    override fun getDisplayText(): String =
+        "${rotationOnEffectStart + duration - controller.revolverRotationCounter} rotations"
 
-        override fun executeAfterRound(gameController: GameController): Timeline? = null
+    protected fun extendDuration(extension: Int) {
+        duration += extension
+    }
+}
 
-        override fun applyAnim(enemy: Enemy): Timeline = enemy.actor.fireAnim()
+abstract class TurnBasedStatusEffect(
+    iconHandle: ResourceHandle,
+    iconScale: Float,
+    duration: Int
+) : StatusEffect(iconHandle, iconScale) {
 
-        override fun executeAfterDamage(
-            gameController: GameController,
-            damage: Int
-        ): Timeline = Timeline.timeline {
-            FortyFiveLogger.debug(logTag, "executing burning effect")
-            val additionalDamage = floor(damage * percent).toInt()
-            delay(GraphicsConfig.bufferTime)
-            include(target.damage(additionalDamage))
-        }
+    private var turnOnEffectStart = -1
 
-        override fun canStackWith(effect: StatusEffect): Boolean {
-            return effect is Burning && effect.percent == percent
-        }
+    var duration: Int = duration
+        private set
 
-        override fun stack(effect: StatusEffect) {
-            effect as Burning
-            turns += effect.turns
-        }
-
-        override fun toString(): String {
-            return "Burning(turns=$turns, percent=$percent)"
-        }
-
-        companion object {
-            const val logTag = "StatusEffect-Burning"
-        }
+    override fun start(controller: GameController) {
+        super.start(controller)
+        turnOnEffectStart = controller.turnCounter
     }
 
+    override fun isStillValid(): Boolean =
+        controller.turnCounter < turnOnEffectStart + duration
 
-    /**
-     * represents a possible target a status effect can be applied to
-     */
-    enum class StatusEffectTarget {
+    override fun getDisplayText(): String =
+        "${turnOnEffectStart + duration - controller.turnCounter} turns"
 
-        @Suppress("unused") // will be needed in the future
-        PLAYER {
-
-            override fun damage(damage: Int): Timeline {
-                return Timeline.timeline {
-                    include(FortyFive.currentGame!!.damagePlayerTimeline(damage))
-                }
-            }
-        },
-
-        ENEMY {
-
-            override fun damage(damage: Int): Timeline = Timeline.timeline {
-                val enemy = FortyFive.currentGame!!.enemyArea.getTargetedEnemy()
-                include(enemy.damage(damage))
-            }
-        }
-        ;
-
-        /**
-         * returns a timeline containing the necessary actions to damage the target
-         */
-        abstract fun damage(damage: Int): Timeline
+    protected fun extendDuration(extension: Int) {
+        duration += extension
     }
+}
+
+class Burning(
+    rotations: Int,
+    private val percent: Float,
+) : RotationBasedStatusEffect(
+    GraphicsConfig.iconName("burning"),
+    GraphicsConfig.iconScale("burning"),
+    rotations,
+) {
+
+    override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
+        val additionalDamage = floor(damage * percent).toInt()
+        include(target.damage(additionalDamage, controller))
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Burning && other.percent == percent
+
+    override fun stack(other: StatusEffect) {
+        other as Burning
+        extendDuration(other.duration)
+    }
+
+    override fun copy(): StatusEffect = Burning(duration, percent)
+}
+
+sealed class StatusEffectTarget {
+
+    class EnemyTarget(val enemy: Enemy) : StatusEffectTarget() {
+
+        override fun damage(damage: Int, controller: GameController) = enemy.damage(damage)
+    }
+
+    object PlayerTarget : StatusEffectTarget() {
+
+        override fun damage(damage: Int, controller: GameController): Timeline = controller.damagePlayerTimeline(damage)
+    }
+
+    abstract fun damage(damage: Int, controller: GameController): Timeline
 
 }

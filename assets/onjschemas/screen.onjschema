@@ -268,6 +268,12 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $StatusEffectDisplay {
+        font: string,
+        fontColor: Color,
+        fontScale: float
+    }
+
 }
 
 var advancedTextPartSharedKeys = {
