@@ -252,6 +252,65 @@ var attackPopup = $Box {
 
 ];
 
+var enemyActionPopup = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.row,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state(""),
+            detached: false
+        }
+    ],
+} children [
+
+    $Box {
+        styles: [
+            {
+                rotation: 4.0,
+                width: 60#percent,
+                positionLeft: 10#points
+            }
+        ],
+        enableTransform: true
+    } children [
+        $TemplateLabel {
+            font: "red_wing",
+            template: "Nice Slot you have there... Would be a real shame if somebody...",
+            wrap: true,
+//            template: "{game.enemyActionPhrase}",
+            fontScale: 1.8,
+            color: color.black,
+        },
+    ],
+
+    $Box {
+        styles: [
+            {
+//                rotation: -10.0
+            }
+        ],
+//        enableTransform: true
+    } children [
+        $Image {
+            textureName: "enemy_texture",
+            reportDimensionsWithScaling: true,
+            scaleX: 1.5,
+            scaleY: 1.5,
+        }
+    ]
+
+];
+
 var popupActor = $Box {
     styles: [
         {
@@ -657,5 +716,6 @@ root: $Box {
     drawCardActor,
     popupActor,
     attackPopup,
-    putCardsUnderDeckActor
+    putCardsUnderDeckActor,
+    enemyActionPopup
 ]
