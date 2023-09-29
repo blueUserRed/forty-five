@@ -134,7 +134,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var gameRenderPipeline: GameRenderPipeline
     private lateinit var encounterMapEvent: EncounterMapEvent
 
-    var modifier: EncounterModifier? = null
+    private val encounterModifier: MutableList<EncounterModifier> = mutableListOf()
 
     var reservesSpent: Int = 0
         private set
@@ -646,8 +646,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
+    fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect): Timeline = Timeline.timeline {
+        if (encounterModifier.any { !it.shouldApplyStatusEffects() }) return Timeline(mutableListOf())
+        action {
+            enemyArea.getTargetedEnemy().applyEffect(statusEffect)
+        }
+        statusEffect.applyAnim(enemyArea.getTargetedEnemy())?.let { include(it) }
+    }
+
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
-        include(revolver.rotate(rotation))
+        val newRotation = modify(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
+        include(revolver.rotate(newRotation))
         action {
             checkCardModifierValidity()
             revolver
@@ -656,11 +665,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 .forEach(Card::onRevolverTurn)
             enemyArea.enemies.forEach(Enemy::onRevolverTurn)
         }
-        if (rotation.amount != 0) {
-            val info = TriggerInformation(multiplier = rotation.amount)
+        if (newRotation.amount != 0) {
+            val info = TriggerInformation(multiplier = newRotation.amount)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
         }
         enemyArea.getTargetedEnemy().executeStatusEffectsAfterRevolverRotation()?.let { include(it) }
+    }
+
+    private fun <T> modify(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
+        var cur = initial
+        encounterModifier.forEach { cur = transformer(it, cur) }
+        return cur
     }
 
     @AllThreadsAllowed
