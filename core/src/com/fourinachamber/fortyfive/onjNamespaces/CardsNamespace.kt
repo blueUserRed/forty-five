@@ -1,9 +1,6 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
-import com.fourinachamber.fortyfive.game.BulletSelector
-import com.fourinachamber.fortyfive.game.Effect
-import com.fourinachamber.fortyfive.game.StatusEffect
-import com.fourinachamber.fortyfive.game.Trigger
+import com.fourinachamber.fortyfive.game.*
 import onj.customization.Namespace.OnjNamespaceDatatypes
 import onj.customization.Namespace.OnjNamespace
 import onj.customization.OnjFunction.RegisterOnjFunction
@@ -125,19 +122,17 @@ object CardsNamespace {
 
     @RegisterOnjFunction(schema = "params: [int, int]")
     fun poison(turns: OnjInt, damage: OnjInt): OnjStatusEffect {
-        return OnjStatusEffect(StatusEffect.Poison(
-            damage.value.toInt(),
+        return OnjStatusEffect(Burning( // TODO: fix
             turns.value.toInt(),
-            StatusEffect.StatusEffectTarget.ENEMY
+            0.5f,
         ))
     }
 
     @RegisterOnjFunction(schema = "params: [int, float]")
-    fun burning(turns: OnjInt, percent: OnjFloat): OnjStatusEffect {
-        return OnjStatusEffect(StatusEffect.Burning(
-            turns.value.toInt(),
+    fun burning(rotations: OnjInt, percent: OnjFloat): OnjStatusEffect {
+        return OnjStatusEffect(Burning(
+            rotations.value.toInt(),
             percent.value.toFloat(),
-            StatusEffect.StatusEffectTarget.ENEMY
         ))
     }
 

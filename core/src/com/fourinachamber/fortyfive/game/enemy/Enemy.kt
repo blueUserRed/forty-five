@@ -107,54 +107,25 @@ class Enemy(
         actor.displayStatusEffect(effect)
     }
 
-    fun executeStatusEffectsAfterTurn(): Timeline? {
-        var hadEffectTimeline = false
-        val timeline = Timeline.timeline {
-            for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterRound(gameController) ?: continue
-                hadEffectTimeline = true
-                include(timelineToInclude)
-            }
-        }
-        return if (hadEffectTimeline) timeline else null
-    }
+    fun executeStatusEffectsAfterTurn(): Timeline = statusEffects
+        .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.EnemyTarget(this)) }
+        .collectTimeline()
 
-    fun executeStatusEffectsAfterDamage(damage: Int): Timeline? {
-        var hadEffectTimeline = false
-        val timeline = Timeline.timeline {
-            for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterDamage(gameController, damage) ?: continue
-                hadEffectTimeline = true
-                include(timelineToInclude)
-            }
-        }
-        return if (hadEffectTimeline) timeline else null
-    }
+    fun executeStatusEffectsAfterDamage(damage: Int): Timeline = statusEffects
+        .mapNotNull { it.executeAfterDamage(damage, StatusEffectTarget.EnemyTarget(this)) }
+        .collectTimeline()
 
-    fun executeStatusEffectsAfterRevolverRotation(): Timeline? {
-        var hadEffectTimeline = false
-        val timeline = Timeline.timeline {
-            for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterRevolverRotation(gameController) ?: continue
-                hadEffectTimeline = true
-                include(timelineToInclude)
-            }
-        }
-        return if (hadEffectTimeline) timeline else null
-    }
+    fun executeStatusEffectsAfterRevolverRotation(rotation: GameController.RevolverRotation): Timeline = statusEffects
+        .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.EnemyTarget(this)) }
+        .collectTimeline()
 
-    fun onRevolverTurn() {
-        val iterator = statusEffects.iterator()
-        while (iterator.hasNext()) {
-            val effect = iterator.next()
-            effect.onRevolverTurn(gameController)
-            if (!effect.isStillValid()) {
-                FortyFiveLogger.debug(logTag, "status effect $effect no longer valid")
-                actor.removeStatusEffect(effect)
-                iterator.remove()
+    fun update() {
+        statusEffects
+            .filter { !it.isStillValid() }
+            .forEach {
+                actor.removeStatusEffect(it)
             }
-        }
-        actor.onRevolverTurn()
+        statusEffects.removeIf { !it.isStillValid() }
     }
 
     @MainThreadOnly
@@ -375,7 +346,6 @@ class EnemyActor(
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
     fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
-    fun onRevolverTurn() = statusEffectDisplay.updateRemainingTurns()
 
     /**
      * updates the description text of the actor

@@ -80,9 +80,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         "game.cardsInStackPluralS" to { if (it == 1) "" else "s" }
     )
 
-    val remainingCards: Int
-        get() = _remainingCards
-
     // currently not used, but might be useful for an encouter modifier later
     var remainingTurns: Int by multipleTemplateParam(
         "game.remainingTurnsRaw", -1,
@@ -131,7 +128,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private lateinit var defaultBullet: CardPrototype
 
-    lateinit var gameRenderPipeline: GameRenderPipeline
+    private lateinit var gameRenderPipeline: GameRenderPipeline
     private lateinit var encounterMapEvent: EncounterMapEvent
 
     private val encounterModifier: MutableList<EncounterModifier> = mutableListOf()
@@ -146,6 +143,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     var playerLost: Boolean = false
         private set
+
+    private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
 
     private var permanentWarningId: Int? = null
     private var isPermanentWarningHard: Boolean = false
@@ -482,9 +481,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 val parryCard = parryCard!!
                 val remainingDamage = damage - parryCard.curDamage
                 action {
-                    revolverRotationCounter++
-                }
-                action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     revolver.removeCard(parryCard)
@@ -573,21 +569,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun shoot() {
-        revolverRotationCounter++
-
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
         val enemy = enemyArea.getTargetedEnemy()
 
         FortyFiveLogger.debug(logTag,
             "revolver is shooting;" +
-                    "revolverRotationCounter = $revolverRotationCounter;" +
                     "cardToShoot = $cardToShoot"
         )
 
         var enemyDamageTimeline: Timeline? = null
         var damageStatusEffectTimeline: Timeline? = null
-        var turnStatusEffectTimeline: Timeline? = null
         var effectTimeline: Timeline? = null
 
         if (cardToShoot != null) {
@@ -602,7 +594,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             damageStatusEffectTimeline =
                 enemy.executeStatusEffectsAfterDamage(cardToShoot.curDamage)
-            turnStatusEffectTimeline = enemy.executeStatusEffectsAfterRevolverRotation()
 
             effectTimeline = checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
         }
@@ -616,26 +607,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 { cardToShoot == null }
             )
 
+            include(rotateRevolver(rotationDirection))
+
             enemyDamageTimeline?.let { include(it) }
 
             includeLater(
                 { damageStatusEffectTimeline!! },
                 { damageStatusEffectTimeline != null }
             )
+
             includeLater(
                 { effectTimeline!! },
                 { effectTimeline != null }
             )
-
-            action {
-                FortyFiveLogger.debug(logTag, "revolver rotated $rotationDirection")
-            }
-
-            includeLater(
-                { turnStatusEffectTimeline!! },
-                { turnStatusEffectTimeline != null }
-            )
-            include(rotateRevolver(rotationDirection))
         }
 
         appendMainTimeline(Timeline.timeline {
@@ -651,25 +635,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             enemyArea.getTargetedEnemy().applyEffect(statusEffect)
         }
-        statusEffect.applyAnim(enemyArea.getTargetedEnemy())?.let { include(it) }
     }
 
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
         val newRotation = modify(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
         include(revolver.rotate(newRotation))
         action {
+            revolverRotationCounter += newRotation.amount
             checkCardModifierValidity()
             revolver
                 .slots
                 .mapNotNull { it.card }
                 .forEach(Card::onRevolverTurn)
-            enemyArea.enemies.forEach(Enemy::onRevolverTurn)
         }
         if (newRotation.amount != 0) {
             val info = TriggerInformation(multiplier = newRotation.amount)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
         }
-        enemyArea.getTargetedEnemy().executeStatusEffectsAfterRevolverRotation()?.let { include(it) }
+        include(enemyArea.getTargetedEnemy().executeStatusEffectsAfterRevolverRotation(newRotation))
     }
 
     private fun <T> modify(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
@@ -786,15 +769,22 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     @MainThreadOnly
-    fun checkStatusEffectsAfterTurn(): Timeline {
-        FortyFiveLogger.debug(logTag, "checking status effects")
-        val timeline = Timeline.timeline {
-            for (enemy in enemyArea.enemies) {
-                val timeline = enemy.executeStatusEffectsAfterTurn()
-                if (timeline != null) include(timeline)
-            }
-        }
-        return timeline
+    fun checkStatusEffectsAfterTurn(): Timeline = enemyArea
+        .enemies
+        .map { it.executeStatusEffectsAfterTurn() }
+        .collectTimeline()
+
+    fun applyStatusEffectToPlayer(effect: StatusEffect) {
+        playerStatusEffects.add(effect)
+    }
+
+    private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
+        playerStatusEffects
+            .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.PlayerTarget) }
+            .collectTimeline()
+
+    private fun updateStatusEffects() {
+
     }
 
     fun appendMainTimeline(timeline: Timeline) {

@@ -700,17 +700,6 @@ root: $Box {
         ],
         ...(sharedComponents.statusbarLeftDefaults)
     },
-//
-//    $FromTemplate {
-//        generateFrom: "warning_label_template",
-//        data: {
-//            symbol: "!!!",
-//            title: "Hard maximum handsize reached",
-//            body: "You can't draw any more cards this turn. After this turn, put all but 12 Cards at the bottom of your deck.",
-//            background: "warning_label_background_red",
-//            width: 8#percent,
-//        }
-//    },
     sharedComponents.warningParent,
     gameScreen,
     drawCardActor,
