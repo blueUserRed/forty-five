@@ -22,6 +22,7 @@ cardSelector: {
     actorName: string
 },
 warningParentName: string,
+statusEffectDisplayName: string,
 cardDragBehaviour: $DragAndDropBehaviour,
 cardDropBehaviour: $DragAndDropBehaviour,
 cardsToDrawInFirstRound: int,

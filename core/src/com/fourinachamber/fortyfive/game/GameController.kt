@@ -37,6 +37,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val enemyAreaOnj = onj.get<OnjObject>("enemyArea")
     private val cardSelectorOnj = onj.get<OnjObject>("cardSelector")
     private val warningParentName = onj.get<String>("warningParentName")
+    private val statusEffectDisplayName = onj.get<String>("statusEffectDisplayName")
     private val putCardsUnderDeckWidgetOnj = onj.get<OnjObject>("putCardsUnderDeckWidget")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
@@ -68,6 +69,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var warningParent: CustomWarningParent
         private set
     lateinit var putCardsUnderDeckWidget: PutCardsUnderDeckWidget
+        private set
+    lateinit var statusEffectDisplay: StatusEffectDisplay
         private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
@@ -164,6 +167,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent
             ?: throw RuntimeException("actor named $warningParentName must be of type CustomWarningParent")
+        statusEffectDisplay = onjScreen.namedActorOrError(statusEffectDisplayName) as? StatusEffectDisplay
+            ?: throw RuntimeException("actor named $statusEffectDisplayName must be of type StatusEffectDisplay")
         initCards()
         initCardHand()
         initRevolver()
@@ -283,6 +288,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             if (cur.isFinished) iterator.remove()
         }
 
+        updateStatusEffects()
         updateGameAnimations()
     }
 
@@ -653,6 +659,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
         }
         include(enemyArea.getTargetedEnemy().executeStatusEffectsAfterRevolverRotation(newRotation))
+        include(executePlayerStatusEffectsAfterRevolverRotation(newRotation))
     }
 
     private fun <T> modify(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
@@ -679,12 +686,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 { cardHand.cards.size >= softMaxCards }
             )
             include(gameDirector.checkActions())
+            include(executePlayerStatusEffectsOnNewTurn())
             action {
                 nextTurn()
                 curReserves = baseReserves
             }
             include(drawCardPopupTimeline(cardsToDraw))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
+            includeLater({ checkEffectsActiveCards(Trigger.ON_TURN_START) }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_TURN_START) }, { true })
         })
     }
@@ -710,9 +719,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * damages the player
      */
     @AllThreadsAllowed
-    fun damagePlayerTimeline(damage: Int): Timeline = Timeline.timeline {
-        val overlayAction = GraphicsConfig.damageOverlay(curScreen)
-        includeAction(overlayAction)
+    fun damagePlayerTimeline(damage: Int, suppressStatusEffects: Boolean = false): Timeline = Timeline.timeline {
+        if (!suppressStatusEffects) {
+            val overlayAction = GraphicsConfig.damageOverlay(curScreen)
+            includeAction(overlayAction)
+        }
         action {
             curPlayerLives -= damage
             FortyFiveLogger.debug(
@@ -721,6 +732,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
             if (curPlayerLives <= 0) playerDied()
         }
+        if (!suppressStatusEffects) include(executePlayerStatusEffectsAfterDamage(damage))
     }
 
     /**
@@ -775,7 +787,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         .collectTimeline()
 
     fun applyStatusEffectToPlayer(effect: StatusEffect) {
+        FortyFiveLogger.debug(logTag, "status effect $effect applied to player")
+        playerStatusEffects
+            .find { it.canStackWith(effect) }
+            ?.let {
+                FortyFiveLogger.debug(logTag, "stacked with $it")
+                it.stack(effect)
+                return
+            }
+        effect.start(this)
+        effect.initIcon(this)
         playerStatusEffects.add(effect)
+        statusEffectDisplay.displayEffect(effect)
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
@@ -783,8 +806,26 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.PlayerTarget) }
             .collectTimeline()
 
-    private fun updateStatusEffects() {
+    private fun executePlayerStatusEffectsAfterDamage(damage: Int): Timeline = playerStatusEffects
+        .mapNotNull { it.executeAfterDamage(damage, StatusEffectTarget.PlayerTarget) }
+        .collectTimeline()
 
+    private fun executePlayerStatusEffectsOnNewTurn(): Timeline = playerStatusEffects
+        .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.PlayerTarget) }
+        .collectTimeline()
+
+    private fun updateStatusEffects() {
+        playerStatusEffects
+            .filter { !it.isStillValid() }
+            .forEach {
+                statusEffectDisplay.removeEffect(it)
+            }
+        playerStatusEffects.removeIf { !it.isStillValid() }
+    }
+
+    fun isStatusEffectApplicable(effect: StatusEffect): Boolean {
+        val collision = playerStatusEffects.find { it == effect } ?: return true
+        return collision.canStackWith(effect)
     }
 
     fun appendMainTimeline(timeline: Timeline) {

@@ -77,6 +77,7 @@ var controller = $GameScreenController {
         group: "card"
     },
     warningParentName: "WARNING_PARENT",
+    statusEffectDisplayName: "status_effect_display",
     cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
     softMaxCards: gameConfig.cardDrawConfig.softMaxCards,
@@ -695,11 +696,36 @@ root: $Box {
     ]
 } children [
 
-    $Statusbar {
-        options: [
-        ],
-        ...(sharedComponents.statusbarLeftDefaults)
-    },
+//    $Box {
+//        styles: [
+//            {
+//                flexDirection: flexDirection.row,
+//                positionTop: 10#points
+//            }
+//        ]
+//    } children [
+
+        $Statusbar {
+            options: [
+            ],
+            ...(sharedComponents.statusbarLeftDefaults)
+        },
+
+        $StatusEffectDisplay {
+            styles: [
+                {
+                    positionLeft: 30#percent
+                }
+            ],
+            name: "status_effect_display",
+            font: "red_wing",
+            fontColor: color.black,
+            fontScale: 0.6,
+            debug: true
+        },
+
+//    ],
+
     sharedComponents.warningParent,
     gameScreen,
     drawCardActor,

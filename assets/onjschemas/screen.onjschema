@@ -271,7 +271,8 @@ $Widget {
     $StatusEffectDisplay {
         font: string,
         fontColor: Color,
-        fontScale: float
+        fontScale: float,
+        ...widgetSharedKeys
     }
 
 }
