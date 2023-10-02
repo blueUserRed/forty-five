@@ -1,14 +1,16 @@
 
 import "imports/colors.onj" as color;
 
+use Cards; // include Card namespace for status effects
+
 enemies: [
     {
         name: "Test Enemy",
         baseHealthPerTurn: 10,
-        attackProbability: 0.4,
-        actionProbability: 0.8,
-//        attackProbability: 0.6,
-//        actionProbability: 0.5,
+        attackProbability: 0.5,
+        actionProbability: 1.0,
+//        attackProbability: 0.4,
+//        actionProbability: 0.8,
         baseDamage: [5, 13],
         fightDuration: [4, 6],
         texture: "enemy_texture",
@@ -31,10 +33,16 @@ enemies: [
 //            $ReturnCardToHand {
 //                weight: 20
 //            },
-            $TakeCover {
-                cover: [ 5, 10 ],
-                weight: 40
+//            $TakeCover {
+//                cover: [ 5, 10 ],
+//                weight: 40
+//            }
+
+            $GivePlayerStatusEffect {
+                statusEffect: burning(5, 0.5),
+                weight: 400
             }
+
         ],
         detailFontColor: color.black
     },

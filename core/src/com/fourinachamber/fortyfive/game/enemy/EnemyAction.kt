@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game.enemy
 
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.toIntRange
@@ -101,6 +102,17 @@ sealed class EnemyAction {
         override fun applicable(controller: GameController): Boolean = true
     }
 
+    class GivePlayerStatusEffect(val statusEffect: StatusEffect) : EnemyAction() {
+
+        override fun getTimeline(controller: GameController): Timeline = Timeline.timeline {
+            action {
+                controller.applyStatusEffectToPlayer(statusEffect.copy())
+            }
+        }
+
+        override fun applicable(controller: GameController): Boolean = controller.isStatusEffectApplicable(statusEffect)
+    }
+
     companion object {
 
         fun fromOnj(obj: OnjNamedObject): EnemyAction = when (obj.name) {
@@ -108,6 +120,7 @@ sealed class EnemyAction {
             "DestroyCardsInHand" -> DestroyCardsInHand(obj.get<Long>("maxCards").toInt())
             "RevolverRotation" -> RevolverRotation(obj.get<Long>("maxTurns").toInt())
             "TakeCover" -> TakeCover(obj.get<OnjArray>("cover").toIntRange())
+            "GivePlayerStatusEffect" -> GivePlayerStatusEffect(obj.get<StatusEffect>("statusEffect"))
             "ReturnCardToHand" -> ReturnCardToHand
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")

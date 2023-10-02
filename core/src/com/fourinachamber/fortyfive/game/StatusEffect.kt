@@ -45,6 +45,8 @@ abstract class StatusEffect(
     abstract fun getDisplayText(): String
 
     abstract fun copy(): StatusEffect
+
+    abstract override fun equals(other: Any?): Boolean
 }
 
 abstract class RotationBasedStatusEffect(
@@ -123,6 +125,8 @@ class Burning(
     }
 
     override fun copy(): StatusEffect = Burning(duration, percent)
+
+    override fun equals(other: Any?): Boolean = other is Burning
 }
 
 sealed class StatusEffectTarget {
@@ -134,7 +138,8 @@ sealed class StatusEffectTarget {
 
     object PlayerTarget : StatusEffectTarget() {
 
-        override fun damage(damage: Int, controller: GameController): Timeline = controller.damagePlayerTimeline(damage)
+        override fun damage(damage: Int, controller: GameController): Timeline =
+            controller.damagePlayerTimeline(damage, suppressStatusEffects = true)
     }
 
     abstract fun damage(damage: Int, controller: GameController): Timeline

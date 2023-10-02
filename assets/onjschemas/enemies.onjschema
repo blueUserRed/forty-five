@@ -1,5 +1,6 @@
 
 use Common;
+use Cards; // include Card namespace for status effects
 
 var enemyActionSharedKeys = {
     weight: int
@@ -23,6 +24,11 @@ $EnemyAction {
 
     $TakeCover {
         cover: int[2],
+        ...enemyActionSharedKeys
+    }
+
+    $GivePlayerStatusEffect {
+        statusEffect: StatusEffect,
         ...enemyActionSharedKeys
     }
 
