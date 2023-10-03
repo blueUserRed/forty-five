@@ -9,6 +9,8 @@ assets/maps/roads/*
 assets/maps/areas/*
 /onj/build
 assets/error_logs/*
+website/out/*
+website/assets/*
 
 ## Java
 
