@@ -11,7 +11,7 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import kotlin.random.Random
 
-sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) {
+sealed class EnemyAction(val showProbability: Float) {
 
     var scaleFactor: Float = 1f
 
@@ -21,9 +21,8 @@ sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) 
 
     class DamagePlayer(
         val damage: IntRange,
-        showProbability: Float,
-        canBeInCombo: Boolean
-    ) : EnemyAction(showProbability, canBeInCombo) {
+        showProbability: Float
+    ) : EnemyAction(showProbability) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             include(controller.enemyAttackTimeline(damage.scale(scale * scaleFactor).random()))
@@ -35,8 +34,7 @@ sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) 
     class DestroyCardsInHand(
         val maxCards: Int,
         showProbability: Float,
-        canBeInCombo: Boolean
-    ) : EnemyAction(showProbability, canBeInCombo) {
+    ) : EnemyAction(showProbability) {
 
         override fun applicable(controller: GameController): Boolean = controller.cardHand.cards.isNotEmpty()
 
@@ -67,9 +65,8 @@ sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) 
 
     class RevolverRotation(
         val maxTurnAmount: Int,
-        showProbability: Float,
-        canBeInCombo: Boolean
-    ) : EnemyAction(showProbability, canBeInCombo) {
+        showProbability: Float
+    ) : EnemyAction(showProbability) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             val amount = (1..maxTurnAmount).random()
@@ -94,7 +91,7 @@ sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) 
 
     }
 
-    class ReturnCardToHand(showProbability: Float, canBeInCombo: Boolean) : EnemyAction(showProbability, canBeInCombo) {
+    class ReturnCardToHand(showProbability: Float) : EnemyAction(showProbability) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             include(controller.confirmationPopupTimeline(
@@ -117,9 +114,8 @@ sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) 
 
     class TakeCover(
         val cover: IntRange,
-        showProbability: Float,
-        canBeInCombo: Boolean
-    ) : EnemyAction(showProbability, canBeInCombo) {
+        showProbability: Float
+    ) : EnemyAction(showProbability) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             action {
@@ -132,9 +128,8 @@ sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) 
 
     class GivePlayerStatusEffect(
         val statusEffect: StatusEffect,
-        showProbability: Float,
-        canBeInCombo: Boolean
-    ) : EnemyAction(showProbability, canBeInCombo) {
+        showProbability: Float
+    ) : EnemyAction(showProbability) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             action {
@@ -152,31 +147,25 @@ sealed class EnemyAction(val showProbability: Float, val canBeInCombo: Boolean) 
             "DestroyCardsInHand" -> DestroyCardsInHand(
                 obj.get<Long>("maxCards").toInt(),
                 obj.get<Long>("showProbability").toFloat(),
-                obj.get<Boolean>("canBeInCombo"),
             )
             "RevolverRotation" -> RevolverRotation(
                 obj.get<Long>("maxTurns").toInt(),
-                obj.get<Long>("showProbability").toFloat(),
-                obj.get<Boolean>("canBeInCombo"),
+                obj.get<Long>("showProbability").toFloat()
             )
             "TakeCover" -> TakeCover(
                 obj.get<OnjArray>("cover").toIntRange(),
-                obj.get<Long>("showProbability").toFloat(),
-                obj.get<Boolean>("canBeInCombo"),
+                obj.get<Long>("showProbability").toFloat()
             )
             "GivePlayerStatusEffect" -> GivePlayerStatusEffect(
                 obj.get<StatusEffect>("statusEffect"),
-                obj.get<Long>("showProbability").toFloat(),
-                obj.get<Boolean>("canBeInCombo"),
+                obj.get<Long>("showProbability").toFloat()
             )
             "ReturnCardToHand" -> ReturnCardToHand(
-                obj.get<Long>("showProbability").toFloat(),
-                obj.get<Boolean>("canBeInCombo"),
+                obj.get<Long>("showProbability").toFloat()
             )
             "DamagePlayer" -> DamagePlayer(
                 obj.get<OnjArray>("damage").toIntRange(),
-                obj.get<Long>("showProbability").toFloat(),
-                obj.get<Boolean>("canBeInCombo"),
+                obj.get<Long>("showProbability").toFloat()
             )
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")

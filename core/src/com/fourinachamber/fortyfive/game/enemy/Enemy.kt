@@ -19,8 +19,7 @@ import java.lang.Integer.min
 
 data class EnemyPrototype(
     val name: String,
-    val baseHealthPerTurn: Int,
-    val turnCount: IntRange,
+    val baseHealth: Int,
     private val creator: (health: Int) -> Enemy
 ) {
     fun create(health: Int): Enemy = creator(health)
@@ -222,8 +221,7 @@ class Enemy(
             .map {
                 EnemyPrototype(
                     it.get<String>("name"),
-                    it.get<Long>("baseHealthPerTurn").toInt(),
-                    it.get<OnjArray>("fightDuration").toIntRange()
+                    it.get<Long>("baseHealth").toInt(),
                 ) { health -> readEnemy(it, health) }
             }
         

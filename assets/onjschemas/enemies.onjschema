@@ -5,7 +5,6 @@ use Cards; // include Card namespace for status effects
 var enemyActionSharedKeys = {
     weight: int,
     showProbability: float,
-    canBeInCombo: boolean,
     scaleFactor?: float
 };
 
@@ -44,8 +43,7 @@ $EnemyAction {
 
 var enemy = {
     name: string,
-    baseHealthPerTurn: int,
-    fightDuration: int[2],
+    baseHealth: int,
     texture: string,
     coverIcon: string,
     scaleX: float,
