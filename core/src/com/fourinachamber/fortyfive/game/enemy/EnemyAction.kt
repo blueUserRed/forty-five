@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.GamePredicate
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -15,9 +16,17 @@ sealed class EnemyAction(val showProbability: Float) {
 
     var scaleFactor: Float = 1f
 
+    private val predicates: MutableList<GamePredicate> = mutableListOf()
+
+    fun addPredicate(predicate: GamePredicate) {
+        predicates.add(predicate)
+    }
+
+    fun checkPredicates(controller: GameController): Boolean = predicates.all { it.check(controller) }
+
     abstract fun getTimeline(controller: GameController, scale: Double): Timeline
 
-    abstract fun applicable(controller: GameController): Boolean
+    open fun applicable(controller: GameController): Boolean = checkPredicates(controller)
 
     class DamagePlayer(
         val damage: IntRange,
@@ -28,7 +37,6 @@ sealed class EnemyAction(val showProbability: Float) {
             include(controller.enemyAttackTimeline(damage.scale(scale * scaleFactor).random()))
         }
 
-        override fun applicable(controller: GameController): Boolean = true
     }
 
     class DestroyCardsInHand(
@@ -36,7 +44,8 @@ sealed class EnemyAction(val showProbability: Float) {
         showProbability: Float,
     ) : EnemyAction(showProbability) {
 
-        override fun applicable(controller: GameController): Boolean = controller.cardHand.cards.isNotEmpty()
+        override fun applicable(controller: GameController): Boolean =
+            checkPredicates(controller) && controller.cardHand.cards.isNotEmpty()
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             var text = ""
@@ -87,7 +96,8 @@ sealed class EnemyAction(val showProbability: Float) {
             include(controller.rotateRevolver(rotation))
         }
 
-        override fun applicable(controller: GameController): Boolean = controller.revolver.slots.any { it.card != null }
+        override fun applicable(controller: GameController): Boolean =
+            checkPredicates(controller) && controller.revolver.slots.any { it.card != null }
 
     }
 
@@ -109,7 +119,9 @@ sealed class EnemyAction(val showProbability: Float) {
         }
 
         override fun applicable(controller: GameController): Boolean =
-            controller.revolver.isBulletLoaded() && controller.cardHand.cards.size < controller.hardMaxCards
+            checkPredicates(controller) &&
+            controller.revolver.isBulletLoaded() &&
+            controller.cardHand.cards.size < controller.hardMaxCards
     }
 
     class TakeCover(
@@ -123,7 +135,6 @@ sealed class EnemyAction(val showProbability: Float) {
             }
         }
 
-        override fun applicable(controller: GameController): Boolean = true
     }
 
     class GivePlayerStatusEffect(
@@ -137,12 +148,13 @@ sealed class EnemyAction(val showProbability: Float) {
             }
         }
 
-        override fun applicable(controller: GameController): Boolean = controller.isStatusEffectApplicable(statusEffect)
+        override fun applicable(controller: GameController): Boolean =
+            checkPredicates(controller) && controller.isStatusEffectApplicable(statusEffect)
     }
 
     companion object {
 
-        fun fromOnj(obj: OnjNamedObject): EnemyAction = when (obj.name) {
+        fun fromOnj(obj: OnjNamedObject, forEnemy: Enemy): EnemyAction = when (obj.name) {
 
             "DestroyCardsInHand" -> DestroyCardsInHand(
                 obj.get<Long>("maxCards").toInt(),
@@ -172,6 +184,11 @@ sealed class EnemyAction(val showProbability: Float) {
 
         }.apply {
             scaleFactor = obj.getOr("scaleFactor", 1f)
+            val predicates = obj.getOr<OnjArray?>("predicates", null) ?: return@apply
+            predicates
+                .value
+                .map { GamePredicate.fromOnj(it as OnjNamedObject, forEnemy) }
+                .forEach { addPredicate(it) }
         }
 
     }
