@@ -147,7 +147,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var playerLost: Boolean = false
         private set
 
-    private val playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
+    private val _playerStatusEffects: MutableList<StatusEffect> = mutableListOf()
+
+    val playerStatusEffects: List<StatusEffect>
+        get() = _playerStatusEffects
 
     private var permanentWarningId: Int? = null
     private var isPermanentWarningHard: Boolean = false
@@ -779,7 +782,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun applyStatusEffectToPlayer(effect: StatusEffect) {
         FortyFiveLogger.debug(logTag, "status effect $effect applied to player")
-        playerStatusEffects
+        _playerStatusEffects
             .find { it.canStackWith(effect) }
             ?.let {
                 FortyFiveLogger.debug(logTag, "stacked with $it")
@@ -788,34 +791,34 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
         effect.start(this)
         effect.initIcon(this)
-        playerStatusEffects.add(effect)
+        _playerStatusEffects.add(effect)
         statusEffectDisplay.displayEffect(effect)
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
-        playerStatusEffects
+        _playerStatusEffects
             .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.PlayerTarget) }
             .collectTimeline()
 
-    private fun executePlayerStatusEffectsAfterDamage(damage: Int): Timeline = playerStatusEffects
+    private fun executePlayerStatusEffectsAfterDamage(damage: Int): Timeline = _playerStatusEffects
         .mapNotNull { it.executeAfterDamage(damage, StatusEffectTarget.PlayerTarget) }
         .collectTimeline()
 
-    private fun executePlayerStatusEffectsOnNewTurn(): Timeline = playerStatusEffects
+    private fun executePlayerStatusEffectsOnNewTurn(): Timeline = _playerStatusEffects
         .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.PlayerTarget) }
         .collectTimeline()
 
     private fun updateStatusEffects() {
-        playerStatusEffects
+        _playerStatusEffects
             .filter { !it.isStillValid() }
             .forEach {
                 statusEffectDisplay.removeEffect(it)
             }
-        playerStatusEffects.removeIf { !it.isStillValid() }
+        _playerStatusEffects.removeIf { !it.isStillValid() }
     }
 
     fun isStatusEffectApplicable(effect: StatusEffect): Boolean {
-        val collision = playerStatusEffects.find { it == effect } ?: return true
+        val collision = _playerStatusEffects.find { it == effect } ?: return true
         return collision.canStackWith(effect)
     }
 

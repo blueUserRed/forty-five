@@ -84,7 +84,10 @@ class Enemy(
             actor.updateText()
         }
 
-    private val statusEffects: MutableList<StatusEffect> = mutableListOf()
+    private val _statusEffects: MutableList<StatusEffect> = mutableListOf()
+
+    val statusEffect: List<StatusEffect>
+        get() = _statusEffects
 
     init {
         actor = EnemyActor(this, screen)
@@ -92,36 +95,36 @@ class Enemy(
 
     fun applyEffect(effect: StatusEffect) {
         FortyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
-        for (effectToTest in statusEffects) if (effectToTest.canStackWith(effect)) {
+        for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {
             FortyFiveLogger.debug(logTag, "stacked with $effectToTest")
             effectToTest.stack(effect)
             return
         }
         effect.start(gameController)
         effect.initIcon(gameController)
-        statusEffects.add(effect)
+        _statusEffects.add(effect)
         actor.displayStatusEffect(effect)
     }
 
-    fun executeStatusEffectsAfterTurn(): Timeline = statusEffects
+    fun executeStatusEffectsAfterTurn(): Timeline = _statusEffects
         .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 
-    fun executeStatusEffectsAfterDamage(damage: Int): Timeline = statusEffects
+    fun executeStatusEffectsAfterDamage(damage: Int): Timeline = _statusEffects
         .mapNotNull { it.executeAfterDamage(damage, StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 
-    fun executeStatusEffectsAfterRevolverRotation(rotation: GameController.RevolverRotation): Timeline = statusEffects
+    fun executeStatusEffectsAfterRevolverRotation(rotation: GameController.RevolverRotation): Timeline = _statusEffects
         .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.EnemyTarget(this)) }
         .collectTimeline()
 
     fun update() {
-        statusEffects
+        _statusEffects
             .filter { !it.isStillValid() }
             .forEach {
                 actor.removeStatusEffect(it)
             }
-        statusEffects.removeIf { !it.isStillValid() }
+        _statusEffects.removeIf { !it.isStillValid() }
     }
 
     @MainThreadOnly

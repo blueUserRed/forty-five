@@ -122,20 +122,25 @@ object CardsNamespace {
 
     @RegisterOnjFunction(schema = "params: [int, int]")
     fun poison(turns: OnjInt, damage: OnjInt): OnjStatusEffect {
-        return OnjStatusEffect(Burning( // TODO: fix
+        return OnjStatusEffect(Poison(
             turns.value.toInt(),
-            0.5f,
+            damage.value.toInt()
         ))
     }
 
-    @RegisterOnjFunction(schema = "params: [int, float]")
-    fun burning(rotations: OnjInt, percent: OnjFloat): OnjStatusEffect {
+    @RegisterOnjFunction(schema = "params: [int?, float]")
+    fun burning(rotations: OnjValue, percent: OnjFloat): OnjStatusEffect {
         return OnjStatusEffect(Burning(
-            rotations.value.toInt(),
+            if (rotations.isInt()) (rotations.value as Long).toInt() else 0,
             percent.value.toFloat(),
+            rotations.isNull()
         ))
     }
 
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun fireResistance(turns: OnjInt): OnjStatusEffect {
+        return OnjStatusEffect(FireResistance(turns.value.toInt()))
+    }
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER

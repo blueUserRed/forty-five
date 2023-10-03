@@ -18,6 +18,10 @@ abstract class StatusEffect(
 
     protected lateinit var controller: GameController
 
+    abstract val damageType: StatusEffectDamageType
+
+    open val blocksStatusEffects: List<StatusEffectDamageType> = listOf()
+
     fun initIcon(gameController: GameController) {
         icon = CustomImageActor(iconHandle, gameController.curScreen)
         icon.setScale(iconScale)
@@ -48,7 +52,6 @@ abstract class StatusEffect(
 
     abstract override fun equals(other: Any?): Boolean
 }
-
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
     iconScale: Float,
@@ -58,7 +61,11 @@ abstract class RotationBasedStatusEffect(
     var duration: Int = duration
         private set
 
-    private var rotationOnEffectStart = -1
+    var continueForever: Boolean = false
+        private set
+
+    var rotationOnEffectStart = -1
+        private set
 
     override fun start(controller: GameController) {
         super.start(controller)
@@ -66,15 +73,28 @@ abstract class RotationBasedStatusEffect(
     }
 
     override fun isStillValid(): Boolean =
-        controller.revolverRotationCounter < rotationOnEffectStart + duration
+        continueForever || controller.revolverRotationCounter < rotationOnEffectStart + duration
 
-    override fun getDisplayText(): String =
+    override fun getDisplayText(): String = if (!continueForever) {
         "${rotationOnEffectStart + duration - controller.revolverRotationCounter} rotations"
+    } else {
+        "∞"
+    }
 
     protected fun extendDuration(extension: Int) {
         duration += extension
     }
+
+    protected fun continueForever() {
+        continueForever = true
+    }
+
+    protected fun stackRotationEffect(other: RotationBasedStatusEffect) {
+        duration += other.duration
+        if (other.continueForever) continueForever = true
+    }
 }
+
 
 abstract class TurnBasedStatusEffect(
     iconHandle: ResourceHandle,
@@ -82,9 +102,13 @@ abstract class TurnBasedStatusEffect(
     duration: Int
 ) : StatusEffect(iconHandle, iconScale) {
 
-    private var turnOnEffectStart = -1
+    var turnOnEffectStart = -1
+        private set
 
     var duration: Int = duration
+        private set
+
+    var continueForever: Boolean = false
         private set
 
     override fun start(controller: GameController) {
@@ -93,26 +117,46 @@ abstract class TurnBasedStatusEffect(
     }
 
     override fun isStillValid(): Boolean =
-        controller.turnCounter < turnOnEffectStart + duration
+        continueForever || controller.turnCounter < turnOnEffectStart + duration
 
-    override fun getDisplayText(): String =
+    override fun getDisplayText(): String = if (!continueForever) {
         "${turnOnEffectStart + duration - controller.turnCounter} turns"
+    } else {
+        "∞"
+    }
 
     protected fun extendDuration(extension: Int) {
         duration += extension
+    }
+
+    protected fun continueForever() {
+        continueForever = true
+    }
+
+    protected fun stackTurnEffect(other: TurnBasedStatusEffect) {
+        duration += other.duration
+        if (other.continueForever) continueForever = true
     }
 }
 
 class Burning(
     rotations: Int,
     private val percent: Float,
+    continueForever: Boolean
 ) : RotationBasedStatusEffect(
     GraphicsConfig.iconName("burning"),
     GraphicsConfig.iconScale("burning"),
     rotations,
 ) {
 
+    init {
+        if (continueForever) continueForever()
+    }
+
+    override val damageType: StatusEffectDamageType = StatusEffectDamageType.FIRE
+
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
+        if (target.isBlocked(this@Burning, controller)) return Timeline()
         val additionalDamage = floor(damage * percent).toInt()
         include(target.damage(additionalDamage, controller))
     }
@@ -121,12 +165,72 @@ class Burning(
 
     override fun stack(other: StatusEffect) {
         other as Burning
-        extendDuration(other.duration)
+        stackRotationEffect(other)
     }
 
-    override fun copy(): StatusEffect = Burning(duration, percent)
+    override fun copy(): StatusEffect = Burning(duration, percent, continueForever)
 
     override fun equals(other: Any?): Boolean = other is Burning
+}
+
+class Poison(
+    turns: Int,
+    private var damage: Int
+) : TurnBasedStatusEffect(
+    GraphicsConfig.iconName("poison"),
+    GraphicsConfig.iconScale("poison"),
+    turns
+) {
+
+    override val damageType: StatusEffectDamageType = StatusEffectDamageType.POISON
+
+    override fun executeOnNewTurn(target: StatusEffectTarget): Timeline {
+        if (target.isBlocked(this, controller)) return Timeline()
+        return target.damage(damage, controller)
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Poison
+
+    override fun stack(other: StatusEffect) {
+        other as Poison
+        stackTurnEffect(other)
+        damage += other.damage
+    }
+
+    override fun getDisplayText(): String =
+        "$damage damage / ${if (continueForever) "∞" else "${turnOnEffectStart + duration - controller.turnCounter} turns"}"
+
+    override fun copy(): StatusEffect = Poison(duration, damage)
+
+    override fun equals(other: Any?): Boolean = other is Poison
+}
+
+class FireResistance(
+    turns: Int
+) : TurnBasedStatusEffect(
+    GraphicsConfig.iconName("fireResistance"),
+    GraphicsConfig.iconScale("fireResistance"),
+    turns
+) {
+
+    override val damageType: StatusEffectDamageType = StatusEffectDamageType.BLOCKING
+    override val blocksStatusEffects: List<StatusEffectDamageType> = listOf(StatusEffectDamageType.FIRE)
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is FireResistance
+
+    override fun stack(other: StatusEffect) {
+        other as FireResistance
+        stackTurnEffect(other)
+    }
+
+    override fun copy(): StatusEffect = FireResistance(duration)
+
+    override fun equals(other: Any?): Boolean = other is FireResistance
+
+}
+
+enum class StatusEffectDamageType {
+    FIRE, POISON, OTHER, BLOCKING
 }
 
 sealed class StatusEffectTarget {
@@ -135,14 +239,24 @@ sealed class StatusEffectTarget {
 
         override fun damage(damage: Int, controller: GameController) =
             enemy.damage(damage, triggeredByStatusEffect = true)
+
+        override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean =
+            enemy.statusEffect.any { effect.damageType in it.blocksStatusEffects }
     }
 
     object PlayerTarget : StatusEffectTarget() {
 
         override fun damage(damage: Int, controller: GameController): Timeline =
             controller.damagePlayerTimeline(damage, triggeredByStatusEffect = true)
+
+        override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean = controller
+            .playerStatusEffects
+            .any { effect.damageType in it.blocksStatusEffects }
+
     }
 
     abstract fun damage(damage: Int, controller: GameController): Timeline
+
+    abstract fun isBlocked(effect: StatusEffect, controller: GameController): Boolean
 
 }
