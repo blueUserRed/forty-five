@@ -1,11 +1,14 @@
 
+import "imports/game_predicates.onjschema" as _;
+
 use Common;
 use Cards; // include Card namespace for status effects
 
 var enemyActionSharedKeys = {
     weight: int,
     showProbability: float,
-    scaleFactor?: float
+    scaleFactor?: float,
+    predicates?: $GamePredicate[]
 };
 
 $EnemyAction {

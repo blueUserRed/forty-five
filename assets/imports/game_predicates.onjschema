@@ -1,0 +1,16 @@
+
+$GamePredicate {
+
+    $PlayerHealthLowerThan {
+        value: int
+    }
+
+    $EnemyHealthLowerThanPercent {
+        value: float
+    }
+
+    $EnemyCountIn {
+        value: int[2]
+    }
+
+}

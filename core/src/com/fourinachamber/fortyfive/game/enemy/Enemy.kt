@@ -47,7 +47,6 @@ class Enemy(
     val detailFontScale: Float,
     val detailFontColor: Color,
     val actionProbability: Float,
-    val actions: List<Pair<Int, EnemyAction>>,
     private val screen: OnjScreen
 ) {
 
@@ -61,6 +60,11 @@ class Enemy(
     val actor: EnemyActor
 
     private val gameController = FortyFive.currentGame!!
+
+    private val _actions: MutableList<Pair<Int, EnemyAction>> = mutableListOf()
+
+    val actions: List<Pair<Int, EnemyAction>>
+        get() = _actions
 
     /**
      * the current lives of this enemy
@@ -91,6 +95,10 @@ class Enemy(
 
     init {
         actor = EnemyActor(this, screen)
+    }
+
+    fun addEnemyAction(weight: Int, action: EnemyAction) {
+        _actions.add(weight to action)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -234,12 +242,7 @@ class Enemy(
             val drawableHandle = onj.get<String>("texture")
             val coverIconHandle = onj.get<String>("coverIcon")
             val detailFont = ResourceManager.get<BitmapFont>(curScreen, onj.get<String>("detailFont"))
-            val actions = onj
-                .get<OnjArray>("actions")
-                .value
-                .map { it as OnjNamedObject }
-                .map { it.get<Long>("weight").toInt() to EnemyAction.fromOnj(it) }
-            return Enemy(
+            val enemy = Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
                 coverIconHandle,
@@ -251,9 +254,15 @@ class Enemy(
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
                 onj.get<Double>("actionProbability").toFloat(),
-                actions,
                 curScreen
             )
+            onj
+                .get<OnjArray>("actions")
+                .value
+                .map { it as OnjNamedObject }
+                .map { it.get<Long>("weight").toInt() to EnemyAction.fromOnj(it, enemy) }
+                .forEach { (weight, action) -> enemy.addEnemyAction(weight, action) }
+            return enemy
         }
 
     }
