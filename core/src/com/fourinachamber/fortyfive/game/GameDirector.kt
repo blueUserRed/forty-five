@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
@@ -10,7 +11,6 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import kotlin.math.abs
-import kotlin.math.floor
 import kotlin.properties.Delegates
 
 class GameDirector(private val controller: GameController) {
@@ -23,8 +23,7 @@ class GameDirector(private val controller: GameController) {
     private lateinit var enemy: Enemy
     private lateinit var enemyProto: EnemyPrototype
 
-    // -1 means EnemyAction, other than -1 means Damage
-    private var nextAction: Int? = null
+    private var nextAction: NextAction = NextAction.None
 
     fun init() {
         val enemiesOnj = OnjParser.parseFile(Gdx.files.internal("config/enemies.onj").file())
@@ -39,41 +38,75 @@ class GameDirector(private val controller: GameController) {
         turnEstimate = enemyProto.turnCount.random()
         FortyFiveLogger.debug(logTag, "chose $turnEstimate turns")
         enemy = scaleAndCreateEnemy(enemyProto, difficulty)
-        FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}; damage = ${enemy.damage}")
+        FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}")
         controller.initEnemyArea(enemy)
     }
 
     fun onNewTurn() {
-        if (Utils.coinFlip(enemy.attackProbability)) {
-            val damage = enemy.damage.random()
-            nextAction = damage
-            enemy.actor.displayAttackIndicator(damage)
-            FortyFiveLogger.debug(logTag, "will attack player with $damage damage the next turn")
-        } else if (Utils.coinFlip(enemy.actionProbability)) {
-            nextAction = -1
-            FortyFiveLogger.debug(logTag, "will execute enemy action the next turn")
+        if (!Utils.coinFlip(enemy.actionProbability)) {
+            nextAction = NextAction.None
+            return
         }
+        val chosenAction = enemy
+            .actions
+            .weightedRandom()
+        val isShown = Utils.coinFlip(chosenAction.showProbability)
+        nextAction = if (isShown) {
+            NextAction.ShownEnemyAction(chosenAction)
+        } else {
+            NextAction.HiddenEnemyAction
+        }
+
+//        if (Utils.coinFlip(enemy.attackProbability)) {
+//            val damage = enemy.damage.random()
+//            nextAction = damage
+//            enemy.actor.displayAttackIndicator(damage)
+//            FortyFiveLogger.debug(logTag, "will attack player with $damage damage the next turn")
+//        } else if (Utils.coinFlip(enemy.actionProbability)) {
+//            nextAction = -1
+//            FortyFiveLogger.debug(logTag, "will execute enemy action the next turn")
+//        }
     }
 
-    fun checkActions(): Timeline {
-        val nextAction = nextAction ?: return Timeline(mutableListOf())
-        this.nextAction = null
-        if (nextAction != -1) {
-            return Timeline.timeline {
-                include(controller.enemyAttackTimeline(nextAction))
-                action { enemy.actor.hideAttackIndicator() }
+    fun checkActions(): Timeline = when (val nextAction = nextAction) {
+
+        is NextAction.None -> Timeline()
+
+        is NextAction.ShownEnemyAction -> {
+            if (!nextAction.action.applicable(controller)) {
+                FortyFiveLogger.warn(logTag, "Enemy action ${nextAction.action} was chosen to be shown " +
+                        "but when the applicable function was checked it returned false; bailing out")
+                Timeline()
+            } else {
+                nextAction.action.getTimeline(controller, difficulty)
             }
         }
-        val possibleActions = enemy
-            .actions
-            .filter { it.second.applicable(controller) }
-        if (possibleActions.isEmpty()) {
-            FortyFiveLogger.debug(logTag, "wanted to execute enemy action but none where applicable")
-            return Timeline(mutableListOf())
+
+        is NextAction.HiddenEnemyAction -> {
+            Timeline()
         }
-        val action = possibleActions.weightedRandom()
-        return action.getTimeline(controller)
+
     }
+
+//    fun checkActions(): Timeline {
+//        val nextAction = nextAction ?: return Timeline(mutableListOf())
+//        this.nextAction = null
+//        if (nextAction != -1) {
+//            return Timeline.timeline {
+//                include(controller.enemyAttackTimeline(nextAction))
+//                action { enemy.actor.hideAttackIndicator() }
+//            }
+//        }
+//        val possibleActions = enemy
+//            .actions
+//            .filter { it.second.applicable(controller) }
+//        if (possibleActions.isEmpty()) {
+//            FortyFiveLogger.debug(logTag, "wanted to execute enemy action but none where applicable")
+//            return Timeline(mutableListOf())
+//        }
+//        val action = possibleActions.weightedRandom()
+//        return action.getTimeline(controller, difficulty)
+//    }
 
     fun end() {
         val newDifficulty = adjustDifficulty()
@@ -123,20 +156,20 @@ class GameDirector(private val controller: GameController) {
 
     private fun scaleAndCreateEnemy(prototype: EnemyPrototype, difficulty: Double): Enemy {
         val health = scaleEnemyHealthPerTurn(prototype.baseHealthPerTurn, difficulty) * turnEstimate
-        val damage = scaleEnemyDamage(prototype.baseDamage, difficulty)
-        return prototype.create(health, damage)
+        return prototype.create(health)
     }
 
     private fun scaleEnemyHealthPerTurn(healthPerTurn: Int, difficulty: Double): Int =
         (healthPerTurn * difficulty).toInt()
 
-    private fun scaleEnemyDamage(baseDamage: IntRange, difficulty: Double): IntRange {
-        val adjustedDifficulty = if (difficulty > 1.0) {
-            1 + ((difficulty - 1) * 0.5) // difficulty scales slower for damage than for health
-        } else {
-            difficulty
-        }
-        return IntRange((baseDamage.first * adjustedDifficulty).toInt(), (baseDamage.last * adjustedDifficulty).toInt())
+    sealed class NextAction {
+
+        object None : NextAction()
+
+        class ShownEnemyAction(val action: EnemyAction) : NextAction()
+
+        object HiddenEnemyAction : NextAction()
+
     }
 
     companion object {

@@ -20,11 +20,10 @@ import java.lang.Integer.min
 data class EnemyPrototype(
     val name: String,
     val baseHealthPerTurn: Int,
-    val baseDamage: IntRange,
     val turnCount: IntRange,
-    private val creator: (health: Int, damage: IntRange) -> Enemy
+    private val creator: (health: Int) -> Enemy
 ) {
-    fun create(health: Int, damage: IntRange): Enemy = creator(health, damage)
+    fun create(health: Int): Enemy = creator(health)
 }
 
 /**
@@ -48,8 +47,6 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val damage: IntRange,
-    val attackProbability: Float,
     val actionProbability: Float,
     val actions: List<Pair<Int, EnemyAction>>,
     private val screen: OnjScreen
@@ -165,7 +162,7 @@ class Enemy(
     /**
      * reduces the enemies lives by [damage]
      */
-    fun damage(damage: Int): Timeline = Timeline.timeline {
+    fun damage(damage: Int, triggeredByStatusEffect: Boolean = false): Timeline = Timeline.timeline {
         var remaining = 0
 
         action {
@@ -208,6 +205,11 @@ class Enemy(
             } },
             { remaining != 0 }
         )
+
+        includeLater(
+            { executeStatusEffectsAfterDamage(damage) },
+            { remaining != 0 }
+        )
     }
 
     companion object {
@@ -221,12 +223,11 @@ class Enemy(
                 EnemyPrototype(
                     it.get<String>("name"),
                     it.get<Long>("baseHealthPerTurn").toInt(),
-                    it.get<OnjArray>("baseDamage").toIntRange(),
                     it.get<OnjArray>("fightDuration").toIntRange()
-                ) { health, damage -> readEnemy(it, health, damage) }
+                ) { health -> readEnemy(it, health) }
             }
         
-        fun readEnemy(onj: OnjObject, health: Int, damage: IntRange): Enemy {
+        fun readEnemy(onj: OnjObject, health: Int): Enemy {
             val gameController = FortyFive.currentGame!!
             val curScreen = gameController.curScreen
             val drawableHandle = onj.get<String>("texture")
@@ -248,8 +249,6 @@ class Enemy(
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
-                damage,
-                onj.get<Double>("attackProbability").toFloat(),
                 onj.get<Double>("actionProbability").toFloat(),
                 actions,
                 curScreen

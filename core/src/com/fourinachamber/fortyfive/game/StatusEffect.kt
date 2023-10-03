@@ -133,13 +133,14 @@ sealed class StatusEffectTarget {
 
     class EnemyTarget(val enemy: Enemy) : StatusEffectTarget() {
 
-        override fun damage(damage: Int, controller: GameController) = enemy.damage(damage)
+        override fun damage(damage: Int, controller: GameController) =
+            enemy.damage(damage, triggeredByStatusEffect = true)
     }
 
     object PlayerTarget : StatusEffectTarget() {
 
         override fun damage(damage: Int, controller: GameController): Timeline =
-            controller.damagePlayerTimeline(damage, suppressStatusEffects = true)
+            controller.damagePlayerTimeline(damage, triggeredByStatusEffect = true)
     }
 
     abstract fun damage(damage: Int, controller: GameController): Timeline

@@ -585,7 +585,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         )
 
         var enemyDamageTimeline: Timeline? = null
-        var damageStatusEffectTimeline: Timeline? = null
         var effectTimeline: Timeline? = null
 
         if (cardToShoot != null) {
@@ -597,9 +596,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 include(enemy.damage(cardToShoot.curDamage))
                 action { cardToShoot.afterShot() }
             }
-
-            damageStatusEffectTimeline =
-                enemy.executeStatusEffectsAfterDamage(cardToShoot.curDamage)
 
             effectTimeline = checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
         }
@@ -616,11 +612,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             include(rotateRevolver(rotationDirection))
 
             enemyDamageTimeline?.let { include(it) }
-
-            includeLater(
-                { damageStatusEffectTimeline!! },
-                { damageStatusEffectTimeline != null }
-            )
 
             includeLater(
                 { effectTimeline!! },
@@ -719,11 +710,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * damages the player
      */
     @AllThreadsAllowed
-    fun damagePlayerTimeline(damage: Int, suppressStatusEffects: Boolean = false): Timeline = Timeline.timeline {
-        if (!suppressStatusEffects) {
-            val overlayAction = GraphicsConfig.damageOverlay(curScreen)
-            includeAction(overlayAction)
-        }
+    fun damagePlayerTimeline(damage: Int, triggeredByStatusEffect: Boolean = false): Timeline = Timeline.timeline {
+//        if (!triggeredByStatusEffect) {
+//            val overlayAction = GraphicsConfig.damageOverlay(curScreen)
+//            includeAction(overlayAction)
+//        }
         action {
             curPlayerLives -= damage
             FortyFiveLogger.debug(
@@ -732,7 +723,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
             if (curPlayerLives <= 0) playerDied()
         }
-        if (!suppressStatusEffects) include(executePlayerStatusEffectsAfterDamage(damage))
+        if (!triggeredByStatusEffect) include(executePlayerStatusEffectsAfterDamage(damage))
     }
 
     /**
