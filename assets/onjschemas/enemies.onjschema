@@ -3,10 +3,18 @@ use Common;
 use Cards; // include Card namespace for status effects
 
 var enemyActionSharedKeys = {
-    weight: int
+    weight: int,
+    showProbability: float,
+    canBeInCombo: boolean,
+    scaleFactor?: float
 };
 
 $EnemyAction {
+
+    $DamagePlayer {
+        damage: int[2],
+        ...enemyActionSharedKeys
+    }
 
     $DestroyCardsInHand {
         maxCards: int,
@@ -37,13 +45,11 @@ $EnemyAction {
 var enemy = {
     name: string,
     baseHealthPerTurn: int,
-    baseDamage: int[2],
     fightDuration: int[2],
     texture: string,
     coverIcon: string,
     scaleX: float,
     scaleY: float,
-    attackProbability: float,
     actionProbability: float,
     coverIconScale: float,
     detailFont: string,

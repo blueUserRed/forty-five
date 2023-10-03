@@ -15,7 +15,7 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
  * tool for timing tasks. can be created directly using a list of TimelineActions or using
  * [timeline]
  */
-class Timeline(private val _actions: MutableList<TimelineAction>) {
+class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf()) {
 
     /**
      * true when the timeline has finished

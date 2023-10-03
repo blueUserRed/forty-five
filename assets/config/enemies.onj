@@ -7,11 +7,7 @@ enemies: [
     {
         name: "Test Enemy",
         baseHealthPerTurn: 10,
-        attackProbability: 0.5,
-        actionProbability: 1.0,
-//        attackProbability: 0.4,
-//        actionProbability: 0.8,
-        baseDamage: [5, 13],
+        actionProbability: 0.8,
         fightDuration: [4, 6],
         texture: "enemy_texture",
         coverIcon: "shield_icon",
@@ -21,26 +17,24 @@ enemies: [
         detailFont: "red_wing",
         detailFontScale: 0.6,
         actions: [
-//            $DestroyCardsInHand {
-//                maxCards: 2,
-//                weight: 10
-//            },
-//
-//            $RevolverRotation {
-//                maxTurns: 3,
-//                weight: 10
-//            },
-//            $ReturnCardToHand {
-//                weight: 20
-//            },
-//            $TakeCover {
-//                cover: [ 5, 10 ],
-//                weight: 40
-//            }
+            $DamagePlayer {
+                damage: [ 5, 10 ],
+                showProbability: 1.0,
+                scaleFactor: 0.5,
+                canBeInCombo: true,
+            },
+            $TakeCover {
+                cover: [ 5, 10 ],
+                weight: 10,
+                showProbability: 1.0,
+                canBeInCombo: true
+            },
 
             $GivePlayerStatusEffect {
                 statusEffect: burning(5, 0.5),
-                weight: 400
+                weight: 10,
+                showProbability: 0.5,
+                canBeInCombo: true
             }
 
         ],
