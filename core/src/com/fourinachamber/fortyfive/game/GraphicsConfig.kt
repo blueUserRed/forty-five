@@ -167,7 +167,7 @@ object GraphicsConfig {
             .mapValues { it.value.value as String }
 
         iconConfig = config
-            .get<OnjObject>("statusEffectIcons")
+            .get<OnjObject>("icons")
             .value
             .mapValues {
                 val obj = it.value as OnjObject

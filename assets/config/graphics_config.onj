@@ -25,13 +25,17 @@ enemyQuickChargeAnimation: {
     interpolation: "swing"
 },
 
-statusEffectIcons: {
+icons: {
     burning: {
         icon: "burning_icon",
         scale: 0.25
     },
     poison: {
         icon: "poison_icon",
+        scale: 0.25
+    },
+    fireResistance: {
+        icon: "buning_icon",
         scale: 0.25
     }
 },

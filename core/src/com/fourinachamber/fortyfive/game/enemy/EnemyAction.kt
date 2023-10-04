@@ -177,36 +177,36 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
 
             "DestroyCardsInHand" -> DestroyCardsInHand(
                 obj.get<Long>("maxCards").toInt(),
-                obj.get<Long>("showProbability").toFloat(),
+                obj.get<Double>("showProbability").toFloat(),
                 forEnemy
             )
             "RevolverRotation" -> RevolverRotation(
                 obj.get<Long>("maxTurns").toInt(),
-                obj.get<Long>("showProbability").toFloat(),
+                obj.get<Double>("showProbability").toFloat(),
                 forEnemy
             )
             "TakeCover" -> TakeCover(
                 obj.get<OnjArray>("cover").toIntRange(),
-                obj.get<Long>("showProbability").toFloat(),
+                obj.get<Double>("showProbability").toFloat(),
                 forEnemy
             )
             "GivePlayerStatusEffect" -> GivePlayerStatusEffect(
                 obj.get<StatusEffect>("statusEffect"),
-                obj.get<Long>("showProbability").toFloat(),
+                obj.get<Double>("showProbability").toFloat(),
                 forEnemy
             )
             "ReturnCardToHand" -> ReturnCardToHand(
-                obj.get<Long>("showProbability").toFloat(),
+                obj.get<Double>("showProbability").toFloat(),
                 forEnemy
             )
             "DamagePlayer" -> DamagePlayer(
                 obj.get<OnjArray>("damage").toIntRange(),
-                obj.get<Long>("showProbability").toFloat(),
+                obj.get<Double>("showProbability").toFloat(),
                 forEnemy
             )
             "GiveSelfStatusEffect" -> GiveSelfStatusEffect(
                 obj.get<StatusEffect>("statusEffect"),
-                obj.get<Long>("showProbability").toFloat(),
+                obj.get<Double>("showProbability").toFloat(),
                 forEnemy
             )
 

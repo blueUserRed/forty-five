@@ -218,7 +218,7 @@ class Enemy(
 
         includeLater(
             { executeStatusEffectsAfterDamage(damage) },
-            { remaining != 0 }
+            { remaining != 0 && !triggeredByStatusEffect }
         )
     }
 
