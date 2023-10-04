@@ -42,6 +42,11 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
+    $GiveSelfStatusEffect {
+        statusEffect: StatusEffect,
+        ...enemyActionSharedKeys
+    }
+
 }
 
 var enemy = {

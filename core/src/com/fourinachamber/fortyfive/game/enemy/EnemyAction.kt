@@ -12,7 +12,7 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import kotlin.random.Random
 
-sealed class EnemyAction(val showProbability: Float) {
+sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy) {
 
     var scaleFactor: Float = 1f
 
@@ -30,8 +30,9 @@ sealed class EnemyAction(val showProbability: Float) {
 
     class DamagePlayer(
         val damage: IntRange,
-        showProbability: Float
-    ) : EnemyAction(showProbability) {
+        showProbability: Float,
+        enemy: Enemy,
+    ) : EnemyAction(showProbability, enemy) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             include(controller.enemyAttackTimeline(damage.scale(scale * scaleFactor).random()))
@@ -42,7 +43,8 @@ sealed class EnemyAction(val showProbability: Float) {
     class DestroyCardsInHand(
         val maxCards: Int,
         showProbability: Float,
-    ) : EnemyAction(showProbability) {
+        enemy: Enemy,
+    ) : EnemyAction(showProbability, enemy) {
 
         override fun applicable(controller: GameController): Boolean =
             checkPredicates(controller) && controller.cardHand.cards.isNotEmpty()
@@ -74,8 +76,9 @@ sealed class EnemyAction(val showProbability: Float) {
 
     class RevolverRotation(
         val maxTurnAmount: Int,
-        showProbability: Float
-    ) : EnemyAction(showProbability) {
+        showProbability: Float,
+        enemy: Enemy,
+    ) : EnemyAction(showProbability, enemy) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             val amount = (1..maxTurnAmount).random()
@@ -101,7 +104,7 @@ sealed class EnemyAction(val showProbability: Float) {
 
     }
 
-    class ReturnCardToHand(showProbability: Float) : EnemyAction(showProbability) {
+    class ReturnCardToHand(showProbability: Float, enemy: Enemy) : EnemyAction(showProbability, enemy) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             include(controller.confirmationPopupTimeline(
@@ -126,8 +129,9 @@ sealed class EnemyAction(val showProbability: Float) {
 
     class TakeCover(
         val cover: IntRange,
-        showProbability: Float
-    ) : EnemyAction(showProbability) {
+        showProbability: Float,
+        enemy: Enemy,
+    ) : EnemyAction(showProbability, enemy) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             action {
@@ -139,8 +143,9 @@ sealed class EnemyAction(val showProbability: Float) {
 
     class GivePlayerStatusEffect(
         val statusEffect: StatusEffect,
-        showProbability: Float
-    ) : EnemyAction(showProbability) {
+        showProbability: Float,
+        enemy: Enemy,
+    ) : EnemyAction(showProbability, enemy) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             action {
@@ -152,6 +157,20 @@ sealed class EnemyAction(val showProbability: Float) {
             checkPredicates(controller) && controller.isStatusEffectApplicable(statusEffect)
     }
 
+    class GiveSelfStatusEffect(
+        val statusEffect: StatusEffect,
+        showProbability: Float,
+        enemy: Enemy,
+    ) : EnemyAction(showProbability, enemy) {
+
+        override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
+            action {
+                enemy.applyEffect(statusEffect)
+            }
+        }
+
+    }
+
     companion object {
 
         fun fromOnj(obj: OnjNamedObject, forEnemy: Enemy): EnemyAction = when (obj.name) {
@@ -159,25 +178,36 @@ sealed class EnemyAction(val showProbability: Float) {
             "DestroyCardsInHand" -> DestroyCardsInHand(
                 obj.get<Long>("maxCards").toInt(),
                 obj.get<Long>("showProbability").toFloat(),
+                forEnemy
             )
             "RevolverRotation" -> RevolverRotation(
                 obj.get<Long>("maxTurns").toInt(),
-                obj.get<Long>("showProbability").toFloat()
+                obj.get<Long>("showProbability").toFloat(),
+                forEnemy
             )
             "TakeCover" -> TakeCover(
                 obj.get<OnjArray>("cover").toIntRange(),
-                obj.get<Long>("showProbability").toFloat()
+                obj.get<Long>("showProbability").toFloat(),
+                forEnemy
             )
             "GivePlayerStatusEffect" -> GivePlayerStatusEffect(
                 obj.get<StatusEffect>("statusEffect"),
-                obj.get<Long>("showProbability").toFloat()
+                obj.get<Long>("showProbability").toFloat(),
+                forEnemy
             )
             "ReturnCardToHand" -> ReturnCardToHand(
-                obj.get<Long>("showProbability").toFloat()
+                obj.get<Long>("showProbability").toFloat(),
+                forEnemy
             )
             "DamagePlayer" -> DamagePlayer(
                 obj.get<OnjArray>("damage").toIntRange(),
-                obj.get<Long>("showProbability").toFloat()
+                obj.get<Long>("showProbability").toFloat(),
+                forEnemy
+            )
+            "GiveSelfStatusEffect" -> GiveSelfStatusEffect(
+                obj.get<StatusEffect>("statusEffect"),
+                obj.get<Long>("showProbability").toFloat(),
+                forEnemy
             )
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")

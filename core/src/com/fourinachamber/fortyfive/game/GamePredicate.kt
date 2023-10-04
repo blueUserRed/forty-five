@@ -4,6 +4,7 @@ import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
+import kotlin.reflect.KClass
 
 fun interface GamePredicate {
 
@@ -19,8 +20,16 @@ fun interface GamePredicate {
             enemy.currentHealth / enemy.health < percent
         } }
 
-        val enemyCountIn = { range: IntRange -> GamePredicate { controller ->
-            controller.enemyArea.enemies.size in range
+        val aliveEnemyCountIn = { range: IntRange -> GamePredicate { controller ->
+            controller.enemyArea.enemies.filter { !it.isDefeated }.size in range
+        } }
+
+        val anyEnemyHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
+            controller.enemyArea.enemies.any { statusEffect in it.statusEffect }
+        } }
+
+        val enemyDoesNotHaveStatusEffect = { statusEffect: StatusEffect, enemy: Enemy -> GamePredicate {
+            statusEffect in enemy.statusEffect
         } }
 
 
@@ -32,7 +41,13 @@ fun interface GamePredicate {
                 inContextOfEnemy ?: throw RuntimeException("EnemyLowerThanPercent Predicate can only be created when" +
                         " an enemy is passed into the fromOnj function")
             )
-            "EnemyCountIn" -> enemyCountIn(obj.get<OnjArray>("value").toIntRange())
+            "AliveEnemyCountIn" -> aliveEnemyCountIn(obj.get<OnjArray>("value").toIntRange())
+            "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffect>("value"))
+            "EnemyDoesNotHaveStatusEffect" -> enemyDoesNotHaveStatusEffect(
+                obj.get<StatusEffect>("value"),
+                inContextOfEnemy ?: throw RuntimeException("EnemyDoesNotHaveStatusEffect Predicate can only be created" +
+                        " when an enemy is passed into the fromOnj function")
+            )
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

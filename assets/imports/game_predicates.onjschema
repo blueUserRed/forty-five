@@ -1,4 +1,6 @@
 
+use Card;
+
 $GamePredicate {
 
     $PlayerHealthLowerThan {
@@ -9,8 +11,16 @@ $GamePredicate {
         value: float
     }
 
-    $EnemyCountIn {
+    $AliveEnemyCountIn {
         value: int[2]
+    }
+
+    $AnyEnemyHasStatusEffect {
+        value: StatusEffect
+    }
+
+    $EnemyDoesNotHaveStatusEffect {
+        value: StatusEffect
     }
 
 }
