@@ -20,6 +20,7 @@ enemies: [
             $DamagePlayer {
                 damage: [ 5, 10 ],
                 showProbability: 1.0,
+                weight: 10,
                 scaleFactor: 0.5,
             },
             $TakeCover {
@@ -47,6 +48,7 @@ enemies: [
             $DamagePlayer {
                 damage: [ 5, 10 ],
                 showProbability: 1.0,
+                weight: 10,
                 scaleFactor: 0.5,
             },
             $TakeCover {

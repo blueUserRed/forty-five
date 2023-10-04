@@ -36,7 +36,7 @@ fun interface GamePredicate {
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null) = when (obj.name) {
 
             "PlayerHealthLowerThan" -> playerHealthLowerThan(obj.get<Long>("value").toInt())
-            "EnemyLowerThanPercent" -> enemyHealthLowerThanPercent(
+            "EnemyHealthLowerThanPercent" -> enemyHealthLowerThanPercent(
                 obj.get<Double>("value").toFloat(),
                 inContextOfEnemy ?: throw RuntimeException("EnemyLowerThanPercent Predicate can only be created when" +
                         " an enemy is passed into the fromOnj function")

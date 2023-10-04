@@ -36,14 +36,15 @@ numberChangeAnimation: {
     sinkDistance: float,
 },
 
-var statusIconConfig = {
+var iconConfig = {
     icon: string,
     scale: float
 };
 
-statusEffectIcons: {
-    burning: statusIconConfig,
-    poison: statusIconConfig
+icons: {
+    burning: iconConfig,
+    poison: iconConfig,
+    fireResistance: iconConfig
 },
 
 stringTemplates:  {
