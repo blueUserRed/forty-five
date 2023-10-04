@@ -54,7 +54,37 @@ enemies: [
                 weight: 10,
                 showProbability: 1.0,
             },
-
+            $GivePlayerStatusEffect {
+                statusEffect: burning(5, 0.5),
+                weight: 10,
+                showProbability: 0.5,
+            },
+            $GiveSelfStatusEffect {
+                statusEffect: fireResistance(5),
+                weight: 40,
+                showProbability: 0.0,
+                predicates: [
+                    $AnyEnemyHasStatusEffect {
+                        value: burning(0, 0.5)
+                    },
+                    $EnemyDoesNotHaveStatusEffect {
+                        value: fireResistance(0)
+                    }
+                ]
+            },
+            $GivePlayerStatusEffect {
+                statusEffect: burning(null, 0.5),
+                weight: 40,
+                showProbability: 0.0,
+                predicates: [
+                    $EnemyHealthLowerThanPercent {
+                        value: 25.0
+                    },
+                    $AliveEnemyCountIn {
+                        value: [2, 10]
+                    }
+                ]
+            }
         ],
         detailFontColor: color.black
     },
