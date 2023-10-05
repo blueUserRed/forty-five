@@ -198,19 +198,57 @@ section.sub-page .title-card {
     }
 }
 
-#overlay {
+#overlays {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url("../assets/overlay.png");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    // background-image: url("../assets/overlay.png");
+    // background-repeat: no-repeat;
+    // background-size: cover;
+    // background-position: center;
     pointer-events: none;
     opacity: 1.0;
     z-index: $overlay-zindex;
+    // background-color: red;
+
+    * {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    #overlay-multiply {
+        background-image: url("../assets/overlay_multiply.png");
+        background-blend-mode: multiply;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        z-index: $overlay-zindex + 1;
+        // background-size: 100% 100%;
+    }
+
+    #overlay-vignette {
+        background-image: url("../assets/overlay_vignette.png");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        z-index: $overlay-zindex + 2;
+    }
+
+    #overlay-shadow {
+        background-image: url("../assets/overlay_cowboy_shadow.png");
+        width: 20cm;
+        left: 50%;
+        transform: translate(-50%, 0%);
+        background-size: contain;
+        background-position: center bottom;
+        background-repeat: no-repeat;
+        z-index: $overlay-zindex + 3;
+    }
+
 }
 
 #main-page {
@@ -227,10 +265,12 @@ section.sub-page .title-card {
     #our-project {
         position: relative;
         width: 12cm;
+//         height: 5.8cm;
         left: 30%;
         margin-top: -4cm;
         top: 0;
-        z-index: $header-zindex - 100;
+        z-index: 100;
+        // z-index: $header-zindex - 100;
         transition: top 0.2s;
 
         &:hover {
@@ -256,22 +296,30 @@ section.sub-page .title-card {
     }
 
     #title-map {
+        position: relative;
         background-image: url("../assets/map.png");
-
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        margin-top: -4.0cm;
+        width: 68%;
+        background-clip: border-box;
+        background-position-y: center;
+        background-position-x: 0;
         
         @include narrow {
-            margin-top: -4.5cm;
+            width: 90%;
+            margin-top: -3.5cm;
+            // margin-top: -4.5cm;
         }
-
 
         #main-logo {
             width: 40%;
-            margin-top: 23%;
+            margin-top: 20%;
         }
 
         .download {
             width: 10%;
-            margin-top: 5%;
+            margin-top: 8%;
             font-size: 2vw;
 
             @include wide {
@@ -323,9 +371,9 @@ section.sub-page .title-card {
     }
 
     #trailer-container {
-        background-image: url("../assets/trailer_container_bg.png");
+        background-image: url("../assets/trailer_container_background.png");
         background-repeat: no-repeat;
-        background-size: contain;
+        background-size: 100% 100%;
         width: 90%;
         background-clip: border-box;
         background-position-y: center;
@@ -350,7 +398,7 @@ section.sub-page .title-card {
             margin-top: 3cm;
             margin-bottom: 3cm;
             transform: rotate(2deg);
-            z-index: $overlay-zindex + 100;
+            // z-index: $overlay-zindex + 100;
         }
 
     }
@@ -477,7 +525,7 @@ section.sub-page .title-card {
         }
 
         #micro-comic-container {
-            background-image: url("../assets/bg_grey.png");
+            background-image: url("../assets/background_grey.png");
             background-repeat: no-repeat;
             background-size: 100% 100%;
             position: absolute;
@@ -487,9 +535,13 @@ section.sub-page .title-card {
             justify-content: center;
             // padding: 2cm;
             width: 40%;
-            height: 35%;
+            height: 45%;
             top: 70%;
             left: 60%;
+
+            @include wide {
+                // margin-bottom: 1cm;
+            }
 
             @include very-wide {
                 left: 80%;
@@ -498,13 +550,14 @@ section.sub-page .title-card {
             }
 
             @include narrow {
-                height: 30%;
+                height: 40%;
+                // width: 50%;
                 top: 80%;
                 left: 55%;
             }
 
             #deco-micro-comic {
-                width: 70%;
+                width: 60%;
             }
 
         }
@@ -668,7 +721,7 @@ section.sub-page .title-card {
 
     #imprint-text {
         position: relative;
-        width: 80%;
+        width: 90%;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -677,11 +730,11 @@ section.sub-page .title-card {
         margin-top: 2cm;
 
         @include narrow {
-            width: 90%;
+            width: 100%;
         }
 
         @include wide {
-            width: 28cm;
+            width: 40cm;
         }
 
         p {
