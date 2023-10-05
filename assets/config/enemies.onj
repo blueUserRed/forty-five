@@ -1,64 +1,94 @@
 
 import "imports/colors.onj" as color;
 
+use Cards; // include Card namespace for status effects
+
 enemies: [
+
     {
         name: "Test Enemy",
-        baseHealthPerTurn: 10,
-        attackProbability: 0.6,
+        baseHealth: 100,
         actionProbability: 0.8,
-        baseDamage: [5, 13],
-        fightDuration: [4, 6],
         texture: "enemy_texture",
         coverIcon: "shield_icon",
-        coverIconScale: 0.03,
-        scaleX: 0.025,
-        scaleY: 0.025,
+        coverIconScale: 0.3,
+        scaleX: 0.25,
+        scaleY: 0.25,
         detailFont: "red_wing",
-        detailFontScale: 0.06,
+        detailFontScale: 0.6,
         actions: [
-            $DestroyCardsInHand {
-                maxCards: 2,
-                weight: 10
+            $DamagePlayer {
+                damage: [ 5, 10 ],
+                showProbability: 1.0,
+                weight: 10,
+                scaleFactor: 0.5,
+            },
+            $TakeCover {
+                cover: [ 5, 10 ],
+                weight: 10,
+                showProbability: 1.0,
             },
 
-            $RevolverRotation {
-                maxTurns: 3,
-                weight: 10
+        ],
+        detailFontColor: color.black
+    },
+
+    {
+        name: "Pyro",
+        baseHealth: 100,
+        actionProbability: 0.8,
+        texture: "enemy_texture",
+        coverIcon: "shield_icon",
+        coverIconScale: 0.3,
+        scaleX: 0.25,
+        scaleY: 0.25,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        actions: [
+            $DamagePlayer {
+                damage: [ 5, 10 ],
+                showProbability: 1.0,
+                weight: 10,
+                scaleFactor: 0.5,
             },
-            $ReturnCardToHand {
-                weight: 20
+            $TakeCover {
+                cover: [ 5, 10 ],
+                weight: 10,
+                showProbability: 1.0,
+            },
+            $GivePlayerStatusEffect {
+                statusEffect: burning(5, 0.5),
+                weight: 10,
+                showProbability: 0.5,
+            },
+            $GiveSelfStatusEffect {
+                statusEffect: fireResistance(5),
+                weight: 40,
+                showProbability: 0.0,
+                predicates: [
+                    $AnyEnemyHasStatusEffect {
+                        value: burning(0, 0.5)
+                    },
+                    $EnemyDoesNotHaveStatusEffect {
+                        value: fireResistance(0)
+                    }
+                ]
+            },
+            $GivePlayerStatusEffect {
+                statusEffect: burning(null, 0.5),
+                weight: 40,
+                showProbability: 0.0,
+                predicates: [
+                    $EnemyHealthLowerThanPercent {
+                        value: 25.0
+                    },
+                    $AliveEnemyCountIn {
+                        value: [2, 10]
+                    }
+                ]
             }
         ],
         detailFontColor: color.black
     },
-//    {
-//        name: "Test Enemy 2",
-//        baseHealthPerTurn: 15,
-//        baseDamage: 120,
-//        fightDuration: [10, 15],
-//        texture: "enemy_texture",
-//        coverIcon: "shield_icon",
-//        coverIconScale: 0.03,
-//        scaleX: 0.025,
-//        scaleY: 0.025,
-//        detailFont: "red_wing",
-//        detailFontScale: 0.06,
-//        actions: [
-//            $DestroyCardsInHand {
-//                maxCards: 4,
-//                weight: 10
-//            },
-//
-//            $RevolverRotation {
-//                maxTurns: 3,
-//                weight: 10
-//            },
-//            $ReturnCardToHand {
-//                weight: 10
-//            }
-//        ],
-//        detailFontColor: color.black
-//    },
 
 ]

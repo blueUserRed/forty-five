@@ -19,12 +19,10 @@ import java.lang.Integer.min
 
 data class EnemyPrototype(
     val name: String,
-    val baseHealthPerTurn: Int,
-    val baseDamage: IntRange,
-    val turnCount: IntRange,
-    private val creator: (health: Int, damage: IntRange) -> Enemy
+    val baseHealth: Int,
+    private val creator: (health: Int) -> Enemy
 ) {
-    fun create(health: Int, damage: IntRange): Enemy = creator(health, damage)
+    fun create(health: Int): Enemy = creator(health)
 }
 
 /**
@@ -48,10 +46,7 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val damage: IntRange,
-    val attackProbability: Float,
     val actionProbability: Float,
-    val actions: List<Pair<Int, EnemyAction>>,
     private val screen: OnjScreen
 ) {
 
@@ -65,6 +60,11 @@ class Enemy(
     val actor: EnemyActor
 
     private val gameController = FortyFive.currentGame!!
+
+    private val _actions: MutableList<Pair<Int, EnemyAction>> = mutableListOf()
+
+    val actions: List<Pair<Int, EnemyAction>>
+        get() = _actions
 
     /**
      * the current lives of this enemy
@@ -88,73 +88,51 @@ class Enemy(
             actor.updateText()
         }
 
-    private val statusEffects: MutableList<StatusEffect> = mutableListOf()
+    private val _statusEffects: MutableList<StatusEffect> = mutableListOf()
+
+    val statusEffect: List<StatusEffect>
+        get() = _statusEffects
 
     init {
         actor = EnemyActor(this, screen)
     }
 
+    fun addEnemyAction(weight: Int, action: EnemyAction) {
+        _actions.add(weight to action)
+    }
+
     fun applyEffect(effect: StatusEffect) {
         FortyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
-        for (effectToTest in statusEffects) if (effectToTest.canStackWith(effect)) {
+        for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {
             FortyFiveLogger.debug(logTag, "stacked with $effectToTest")
             effectToTest.stack(effect)
             return
         }
         effect.start(gameController)
         effect.initIcon(gameController)
-        statusEffects.add(effect)
+        _statusEffects.add(effect)
         actor.displayStatusEffect(effect)
     }
 
-    fun executeStatusEffectsAfterTurn(): Timeline? {
-        var hadEffectTimeline = false
-        val timeline = Timeline.timeline {
-            for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterRound(gameController) ?: continue
-                hadEffectTimeline = true
-                include(timelineToInclude)
-            }
-        }
-        return if (hadEffectTimeline) timeline else null
-    }
+    fun executeStatusEffectsAfterTurn(): Timeline = _statusEffects
+        .mapNotNull { it.executeOnNewTurn(StatusEffectTarget.EnemyTarget(this)) }
+        .collectTimeline()
 
-    fun executeStatusEffectsAfterDamage(damage: Int): Timeline? {
-        var hadEffectTimeline = false
-        val timeline = Timeline.timeline {
-            for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterDamage(gameController, damage) ?: continue
-                hadEffectTimeline = true
-                include(timelineToInclude)
-            }
-        }
-        return if (hadEffectTimeline) timeline else null
-    }
+    fun executeStatusEffectsAfterDamage(damage: Int): Timeline = _statusEffects
+        .mapNotNull { it.executeAfterDamage(damage, StatusEffectTarget.EnemyTarget(this)) }
+        .collectTimeline()
 
-    fun executeStatusEffectsAfterRevolverRotation(): Timeline? {
-        var hadEffectTimeline = false
-        val timeline = Timeline.timeline {
-            for (effect in statusEffects) {
-                val timelineToInclude = effect.executeAfterRevolverRotation(gameController) ?: continue
-                hadEffectTimeline = true
-                include(timelineToInclude)
-            }
-        }
-        return if (hadEffectTimeline) timeline else null
-    }
+    fun executeStatusEffectsAfterRevolverRotation(rotation: GameController.RevolverRotation): Timeline = _statusEffects
+        .mapNotNull { it.executeAfterRotation(rotation, StatusEffectTarget.EnemyTarget(this)) }
+        .collectTimeline()
 
-    fun onRevolverTurn() {
-        val iterator = statusEffects.iterator()
-        while (iterator.hasNext()) {
-            val effect = iterator.next()
-            effect.onRevolverTurn(gameController)
-            if (!effect.isStillValid()) {
-                FortyFiveLogger.debug(logTag, "status effect $effect no longer valid")
-                actor.removeStatusEffect(effect)
-                iterator.remove()
+    fun update() {
+        _statusEffects
+            .filter { !it.isStillValid() }
+            .forEach {
+                actor.removeStatusEffect(it)
             }
-        }
-        actor.onRevolverTurn()
+        _statusEffects.removeIf { !it.isStillValid() }
     }
 
     @MainThreadOnly
@@ -194,7 +172,7 @@ class Enemy(
     /**
      * reduces the enemies lives by [damage]
      */
-    fun damage(damage: Int): Timeline = Timeline.timeline {
+    fun damage(damage: Int, triggeredByStatusEffect: Boolean = false): Timeline = Timeline.timeline {
         var remaining = 0
 
         action {
@@ -237,6 +215,11 @@ class Enemy(
             } },
             { remaining != 0 }
         )
+
+        includeLater(
+            { executeStatusEffectsAfterDamage(damage) },
+            { remaining != 0 && !triggeredByStatusEffect }
+        )
     }
 
     companion object {
@@ -249,24 +232,17 @@ class Enemy(
             .map {
                 EnemyPrototype(
                     it.get<String>("name"),
-                    it.get<Long>("baseHealthPerTurn").toInt(),
-                    it.get<OnjArray>("baseDamage").toIntRange(),
-                    it.get<OnjArray>("fightDuration").toIntRange()
-                ) { health, damage -> readEnemy(it, health, damage) }
+                    it.get<Long>("baseHealth").toInt(),
+                ) { health -> readEnemy(it, health) }
             }
         
-        fun readEnemy(onj: OnjObject, health: Int, damage: IntRange): Enemy {
+        fun readEnemy(onj: OnjObject, health: Int): Enemy {
             val gameController = FortyFive.currentGame!!
             val curScreen = gameController.curScreen
             val drawableHandle = onj.get<String>("texture")
             val coverIconHandle = onj.get<String>("coverIcon")
             val detailFont = ResourceManager.get<BitmapFont>(curScreen, onj.get<String>("detailFont"))
-            val actions = onj
-                .get<OnjArray>("actions")
-                .value
-                .map { it as OnjNamedObject }
-                .map { it.get<Long>("weight").toInt() to EnemyAction.fromOnj(it) }
-            return Enemy(
+            val enemy = Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
                 coverIconHandle,
@@ -277,12 +253,16 @@ class Enemy(
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
-                damage,
-                onj.get<Double>("attackProbability").toFloat(),
                 onj.get<Double>("actionProbability").toFloat(),
-                actions,
                 curScreen
             )
+            onj
+                .get<OnjArray>("actions")
+                .value
+                .map { it as OnjNamedObject }
+                .map { it.get<Long>("weight").toInt() to EnemyAction.fromOnj(it, enemy) }
+                .forEach { (weight, action) -> enemy.addEnemyAction(weight, action) }
+            return enemy
         }
 
     }
@@ -375,7 +355,6 @@ class EnemyActor(
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)
     fun removeStatusEffect(effect: StatusEffect) = statusEffectDisplay.removeEffect(effect)
-    fun onRevolverTurn() = statusEffectDisplay.updateRemainingTurns()
 
     /**
      * updates the description text of the actor

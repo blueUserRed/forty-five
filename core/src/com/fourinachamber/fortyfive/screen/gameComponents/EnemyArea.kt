@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -64,6 +65,7 @@ class EnemyArea(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
+        enemies.forEach(Enemy::update)
         val enemy = selectedEnemy ?: return
         enemySelectionDrawable.draw(
             batch,

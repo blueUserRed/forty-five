@@ -143,7 +143,11 @@ textureAtlases: [
             {
                 handle: "player_bar",
                 regionName: "player_bar"
-            }
+            },
+            {
+                handle: "under_deck_background",
+                regionName: "under_deck_background"
+            },
         ]
     }
 

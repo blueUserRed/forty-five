@@ -16,10 +16,12 @@ import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjValue
+import java.lang.Math.round
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
@@ -181,6 +183,11 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
 }
 
 fun IntRange.midPoint(): Int = first + ((last - first) * 0.5).toInt()
+
+fun IntRange.scale(factor: Double): IntRange = IntRange(
+    (this.first * factor).roundToInt(),
+    (this.last * factor).roundToInt()
+)
 
 fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
     return OnjYogaValue(YogaValue(this, unit))

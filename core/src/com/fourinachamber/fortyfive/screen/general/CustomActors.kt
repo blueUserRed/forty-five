@@ -623,8 +623,7 @@ class CustomScrollableFlexBox(
         }
 
         override fun exit(event: InputEvent?, x: Float, y: Float, pointer: Int, toActor: Actor?) {
-            if (x > width || x < 0 || y > height || y < 0)
-                stage.scrollFocus = null
+            if (x > width || x < 0 || y > height || y < 0) stage?.scrollFocus = null
         }
 
         override fun scrolled(event: InputEvent?, x: Float, y: Float, amountX: Float, amountY: Float): Boolean {

@@ -1,9 +1,6 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
-import com.fourinachamber.fortyfive.game.BulletSelector
-import com.fourinachamber.fortyfive.game.Effect
-import com.fourinachamber.fortyfive.game.StatusEffect
-import com.fourinachamber.fortyfive.game.Trigger
+import com.fourinachamber.fortyfive.game.*
 import onj.customization.Namespace.OnjNamespaceDatatypes
 import onj.customization.Namespace.OnjNamespace
 import onj.customization.OnjFunction.RegisterOnjFunction
@@ -59,6 +56,11 @@ object CardsNamespace {
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
     fun destroy(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
         return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string, int]")
+    fun damageDirect(trigger: OnjString, damage: OnjInt): OnjEffect {
+        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value.toInt()))
     }
 
     @RegisterOnjFunction(schema = "params: [*[]]")
@@ -120,28 +122,33 @@ object CardsNamespace {
 
     @RegisterOnjFunction(schema = "params: [int, int]")
     fun poison(turns: OnjInt, damage: OnjInt): OnjStatusEffect {
-        return OnjStatusEffect(StatusEffect.Poison(
-            damage.value.toInt(),
+        return OnjStatusEffect(Poison(
             turns.value.toInt(),
-            StatusEffect.StatusEffectTarget.ENEMY
+            damage.value.toInt()
         ))
     }
 
-    @RegisterOnjFunction(schema = "params: [int, float]")
-    fun burning(turns: OnjInt, percent: OnjFloat): OnjStatusEffect {
-        return OnjStatusEffect(StatusEffect.Burning(
-            turns.value.toInt(),
+    @RegisterOnjFunction(schema = "params: [int?, float]")
+    fun burning(rotations: OnjValue, percent: OnjFloat): OnjStatusEffect {
+        return OnjStatusEffect(Burning(
+            if (rotations.isInt()) (rotations.value as Long).toInt() else 0,
             percent.value.toFloat(),
-            StatusEffect.StatusEffectTarget.ENEMY
+            rotations.isNull()
         ))
     }
 
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun fireResistance(turns: OnjInt): OnjStatusEffect {
+        return OnjStatusEffect(FireResistance(turns.value.toInt()))
+    }
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER
         "shot" -> Trigger.ON_SHOT
         "destroy" -> Trigger.ON_DESTROY
-        "round start" -> Trigger.ON_ROUND_START
+        "turn start" -> Trigger.ON_TURN_START
+        "rotation" -> Trigger.ON_REVOLVER_ROTATION
+        "card drawn" -> Trigger.ON_CARDS_DRAWN
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

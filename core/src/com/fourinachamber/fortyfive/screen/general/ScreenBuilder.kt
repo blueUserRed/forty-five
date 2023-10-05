@@ -24,10 +24,7 @@ import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.gameComponents.CardHand
-import com.fourinachamber.fortyfive.screen.gameComponents.CircularCardSelector
-import com.fourinachamber.fortyfive.screen.gameComponents.EnemyArea
-import com.fourinachamber.fortyfive.screen.gameComponents.Revolver
+import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -413,6 +410,7 @@ class ScreenBuilder(val file: FileHandle) {
 //            widgetOnj.get<Double>("backgroundScale").toFloat(),
             widgetOnj.get<Double>("disabledDirectionIndicatorAlpha").toFloat(),
             widgetOnj.get<Double>("leftScreenSideDeadSection").toFloat(),
+            widgetOnj.get<Double>("mapScale").toFloat(),
         )
 
         "AdvancedText" -> AdvancedTextWidget(
@@ -478,6 +476,19 @@ class ScreenBuilder(val file: FileHandle) {
         )!!.apply {
             return this
         }
+
+        "PutCardsUnderDeckWidget" -> PutCardsUnderDeckWidget(
+            screen,
+            widgetOnj.get<Double>("cardSize").toFloat(),
+            widgetOnj.get<Double>("cardSpacing").toFloat(),
+        )
+
+        "StatusEffectDisplay" -> StatusEffectDisplay(
+            screen,
+            fontOrError(widgetOnj.get<String>("font"), screen),
+            widgetOnj.get<Color>("fontColor"),
+            widgetOnj.get<Double>("fontScale").toFloat()
+        )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 

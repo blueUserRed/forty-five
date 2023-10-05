@@ -1,0 +1,26 @@
+
+use Cards;
+
+$GamePredicate {
+
+    $PlayerHealthLowerThan {
+        value: int
+    }
+
+    $EnemyHealthLowerThanPercent {
+        value: float
+    }
+
+    $AliveEnemyCountIn {
+        value: int[2]
+    }
+
+    $AnyEnemyHasStatusEffect {
+        value: StatusEffect
+    }
+
+    $EnemyDoesNotHaveStatusEffect {
+        value: StatusEffect
+    }
+
+}

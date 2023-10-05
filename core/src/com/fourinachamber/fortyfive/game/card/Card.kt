@@ -13,11 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.game.Effect
-import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
-import com.fourinachamber.fortyfive.game.GraphicsConfig
-import com.fourinachamber.fortyfive.game.Trigger
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -121,9 +118,14 @@ class Card(
             return cur
         }
 
-    private var isEverlasting: Boolean = false
-    private var isUndead: Boolean = false
-    private var isRotten: Boolean = false
+    var isEverlasting: Boolean = false
+        private set
+    var isUndead: Boolean = false
+        private set
+    var isRotten: Boolean = false
+        private set
+    var isReplaceable: Boolean = false
+        private set
 
     val shouldRemoveAfterShot: Boolean
         get() = !(isEverlasting || modifiers.any { it.everlasting })
@@ -252,11 +254,11 @@ class Card(
      * effects; null if no effect was triggered
      */
     @MainThreadOnly
-    fun checkEffects(trigger: Trigger): Timeline? {
+    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation): Timeline? {
         var wasEffectWithTimelineTriggered = false
         val timeline = Timeline.timeline {
             for (effect in effects) {
-                val effectTimeline = effect.checkTrigger(trigger)
+                val effectTimeline = effect.checkTrigger(trigger, triggerInformation)
                 if (effectTimeline != null) {
                     include(effectTimeline)
                     wasEffectWithTimelineTriggered = true
@@ -377,6 +379,7 @@ class Card(
 
                 "everlasting" -> card.isEverlasting = true
                 "undead" -> card.isUndead = true
+                "replaceable" -> card.isReplaceable = true
                 "rotten" -> {
                     card.isRotten = true
                     card.initRottenModifier()

@@ -11,16 +11,24 @@ revolver: {
     actorName: string,
     dropBehaviour: $DragAndDropBehaviour
 },
+putCardsUnderDeckWidget: {
+    actorName: string,
+    dropBehaviour: $DragAndDropBehaviour
+},
 enemyArea: {
     actorName: string,
 },
 cardSelector: {
     actorName: string
 },
+warningParentName: string,
+statusEffectDisplayName: string,
 cardDragBehaviour: $DragAndDropBehaviour,
+cardDropBehaviour: $DragAndDropBehaviour,
 cardsToDrawInFirstRound: int,
 cardsToDraw: int,
-maxCards: int,
+softMaxCards: int,
+hardMaxCards: int,
 playerLives: int,
 reservesAtRoundBegin: int,
 shotEmptyDamage: int,

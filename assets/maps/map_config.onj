@@ -2,23 +2,23 @@ use Map;
 var images = {
     testArea: {
         image: "location_sign_aqua_dulche",
-        height: 20.0,
-        width: 20.0
+        height: 200.0,
+        width: 200.0
     },
     salem: {
         image: "location_sign_salem",
-        width: 30.0,
-        height: 20.0
+        width: 300.0,
+        height: 200.0
     },
     testAreaName: {
         image: "location_name_aqua_dulche",
-        height: 20.0,
-        width: 20.0
+        height: 200.0,
+        width: 200.0
     },
     salemName: {
         image: "location_name_salem",
-        width: 20.0,
-        height: 20.0
+        width: 200.0,
+        height: 200.0
     }
 };
 
@@ -114,7 +114,7 @@ generatorConfig: {
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
-                        weight: 0,
+                        weight: 10000,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,

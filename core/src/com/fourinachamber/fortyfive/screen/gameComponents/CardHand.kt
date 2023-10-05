@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.ZIndexGroup
@@ -71,6 +72,8 @@ class CardHand(
     private var currentHoverDetailActor: CardDetailActor? = null
 
     private lateinit var controller: GameController
+
+    private var originalParent: CustomFlexBox? = null
 
     init {
         bindHoverStateListeners(this)
@@ -160,7 +163,7 @@ class CardHand(
             if (hoveredOver) {
                 card.actor.setBounds(
                     x.between(0f, width - cardSize * hoveredCardScale),
-                    cardHeightFunc(x).coerceAtLeast(0f),
+                    cardHeightFunc(x).coerceAtLeast(-2f),
                     cardSize * hoveredCardScale,
                     cardSize * hoveredCardScale
                 )
@@ -179,9 +182,32 @@ class CardHand(
         return zIndexChanged
     }
 
-    private fun cardHeightFuncDerivative(x: Float): Float = 0.144f - 0.0018f * x
+    private fun cardHeightFuncDerivative(x: Float): Float = 0.16f - 0.0002f * x
 
-    private fun cardHeightFunc(x: Float): Float = -(0.03f * (x - 80f)).pow(2)
+    private fun cardHeightFunc(x: Float): Float = -(0.01f * (x - 800f)).pow(2)
+
+    fun attachToActor(name: String) {
+        if (originalParent == null) originalParent = parent as CustomFlexBox
+        val target = screen.namedActorOrError(name) as? CustomFlexBox
+            ?: throw RuntimeException("CardHand can only attach to CustomFlexBox")
+        attachTo(target)
+    }
+
+    fun reattachToOriginalParent() {
+        val target = originalParent
+            ?: throw RuntimeException("attachToActor must be called before reattachToOriginalParent")
+        attachTo(target)
+    }
+
+    private fun attachTo(target: CustomFlexBox) {
+        val node = target.add(this)
+        val oldManager = styleManager
+        styleManager = oldManager!!.copyWithNode(node)
+        screen.swapStyleManager(oldManager, styleManager!!)
+    }
+
+    fun unfreeze() = cards.forEach { it.isDraggable = true }
+    fun freeze() = cards.forEach { it.isDraggable = false }
 
     override fun resortZIndices() {
         children.sort { el1, el2 ->

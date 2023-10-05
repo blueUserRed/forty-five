@@ -14,7 +14,7 @@ var pi = 3.141;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-var cardScale = 0.022;
+var cardScale = 0.22;
 var cardHeight = 596.0 * cardScale;
 
 var cardZIndicesStart = 100;
@@ -29,7 +29,7 @@ assets: {
         "title_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
-        "player_bar", "warning_label_background_red",
+        "player_bar", "warning_label_background_red", "under_deck_background",
 
         "revolver_cursor",
 
@@ -55,7 +55,13 @@ var controller = $GameScreenController {
     revolver: {
         actorName: "revolver",
         dropBehaviour: $RevolverDropTarget {
-          group: "card"
+            group: "card"
+        }
+    },
+    putCardsUnderDeckWidget: {
+        actorName: "putCardsUnderDeckWidget",
+        dropBehaviour: $PutCardsUnderDeckDropTarget {
+            group: "card"
         }
     },
     enemyArea: {
@@ -67,9 +73,15 @@ var controller = $GameScreenController {
     cardDragBehaviour: $CardDragSource {
         group: "card"
     },
+    cardDropBehaviour: $CardDropTarget {
+        group: "card"
+    },
+    warningParentName: "WARNING_PARENT",
+    statusEffectDisplayName: "status_effect_display",
     cardsToDrawInFirstRound: gameConfig.cardDrawConfig.firstRound,
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
-    maxCards: gameConfig.cardDrawConfig.maxCards,
+    softMaxCards: gameConfig.cardDrawConfig.softMaxCards,
+    hardMaxCards: gameConfig.cardDrawConfig.hardMaxCards,
     playerLives: gameConfig.playerConfig.lives,
     reservesAtRoundBegin: gameConfig.reservesConfig.roundStart,
     shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
@@ -102,12 +114,12 @@ var revolver = $Revolver {
     slotTexture: "revolver_slot_texture",
     font: "vanilla_whale",
     fontColor: color.white,
-    fontScale: 0.25,
-    slotScale: 0.034,
+    fontScale: 2.5,
+    slotScale: 0.34,
     cardScale: 0.9,
     animationDuration: 0.2,
-    radius: 14.0,
-    radiusExtension: 6.0,
+    radius: 140.0,
+    radiusExtension: 60.0,
     cardZIndex: cardZIndicesStart,
     rotationOff: (pi / 2.0) + (2.0 * pi) / 5.0,
     background: "revolver_drum",
@@ -117,12 +129,12 @@ var cardHand = $CardHand {
     name: "card_hand",
     cardSize: cardHeight,
     hoveredCardScale: 1.3,
-    maxCardSpacing: 10.0,
+    maxCardSpacing: 100.0,
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,
     draggedCardZIndex: cardZIndicesEnd,
     opacityIfNotPlayable: 0.5,
-    centerGap: 30.0,
+    centerGap: 300.0,
 //    centerGap: 19.0,
     targetWidth: worldWidth * 0.6,
 };
@@ -136,8 +148,8 @@ var shootButton = $Image {
     name: "shoot_button_texture",
     textureName: "shoot_button_texture",
     reportDimensionsWithScaling: true,
-    scaleX: 0.025,
-    scaleY: 0.025,
+    scaleX: 0.25,
+    scaleY: 0.25,
     behaviours: [
         buttonHoverBehaviour,
         $CatchEventAndEmitBehaviour {
@@ -151,8 +163,8 @@ var endTurnButton = $Image {
     name: "end_turn_button",
     textureName: "end_turn_button_texture",
     reportDimensionsWithScaling: true,
-    scaleX: 0.025,
-    scaleY: 0.025,
+    scaleX: 0.25,
+    scaleY: 0.25,
     behaviours: [
         buttonHoverBehaviour,
         $CatchEventAndEmitBehaviour {
@@ -166,7 +178,7 @@ var playerLivesLabel = $TemplateLabel {
     name: "player_lives_label",
     font: "vanilla_whale",
     template: "{stat.playerLives}/{game.basePlayerLives}",
-    fontScale: 0.09,
+    fontScale: 0.9,
     color: color.white,
 };
 
@@ -174,7 +186,7 @@ var reservesLabel = $TemplateLabel {
     name: "reserves_label",
     font: "vanilla_whale",
     template: "{game.curReserves}/{game.baseReserves}",
-    fontScale: 0.09,
+    fontScale: 0.9,
     color: color.white,
 };
 
@@ -216,7 +228,7 @@ var attackPopup = $Box {
     $Label {
         font: "red_wing",
         text: "Parry",
-        fontScale: 0.09,
+        fontScale: 0.9,
         color: color.white,
         behaviours: [
             $CatchEventAndEmitBehaviour {
@@ -228,7 +240,7 @@ var attackPopup = $Box {
     $Label {
         font: "red_wing",
         text: "Dont Parry",
-        fontScale: 0.09,
+        fontScale: 0.9,
         color: color.white,
         behaviours: [
             $CatchEventAndEmitBehaviour {
@@ -237,6 +249,59 @@ var attackPopup = $Box {
             }
         ]
     },
+
+];
+
+var enemyActionPopup = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.row,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state(""),
+            detached: false
+        }
+    ],
+} children [
+
+    $Box {
+        styles: [
+            {
+                rotation: 4.0,
+                width: 60#percent,
+                positionLeft: 10#points
+            }
+        ],
+        enableTransform: true
+    } children [
+        $TemplateLabel {
+            font: "red_wing",
+            template: "Nice Slot you have there... Would be a real shame if somebody...",
+            wrap: true,
+//            template: "{game.enemyActionPhrase}",
+            fontScale: 1.8,
+            color: color.black,
+        },
+    ],
+
+    $Box {
+    } children [
+        $Image {
+            textureName: "enemy_texture",
+            reportDimensionsWithScaling: true,
+            scaleX: 1.5,
+            scaleY: 1.5,
+        }
+    ]
 
 ];
 
@@ -264,7 +329,7 @@ var popupActor = $Box {
     $TemplateLabel {
         font: "red_wing",
         template: "{game.popupText}",
-        fontScale: 0.09,
+        fontScale: 0.9,
         color: color.white,
     },
 
@@ -282,7 +347,7 @@ var popupActor = $Box {
         ],
         font: "red_wing",
         template: "{game.popupButtonText}",
-        fontScale: 0.09,
+        fontScale: 0.9,
         color: color.white,
         behaviours: [
             $CatchEventAndEmitBehaviour {
@@ -315,8 +380,8 @@ var popupActor = $Box {
             name: "card_selector",
             emptySlotTexture: "grey_texture",
             disabledAlpha: 0.6,
-            radius: 20.0,
-            size: 357.0 * 0.04
+            radius: 200.0,
+            size: 3570.0 * 0.04
         }
     ],
 
@@ -351,7 +416,7 @@ var drawCardActor = $Box {
         ],
         font: "red_wing",
         template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
-        fontScale: 0.18,
+        fontScale: 1.8,
         align: "center",
         wrap: true,
         color: color.white
@@ -378,14 +443,14 @@ var drawCardActor = $Box {
             $TemplateLabel {
                 styles: [
                     {
-                        marginTop: (6.0*10)#points,
-                        marginBottom: -(6.0*10)#points
+                        marginTop: 6.0#points,
+                        marginBottom: -6.0#points
                     }
                 ],
                 font: "red_wing",
                 template: "{game.cardsInStack} card{game.cardsInStackPluralS} remaining in stack",
                 wrap: true,
-                fontScale: 0.13,
+                fontScale: 1.3,
                 align: "center",
                 color: color.white
             },
@@ -393,8 +458,8 @@ var drawCardActor = $Box {
             $Image {
                 textureName: "draw_bullet",
                 reportDimensionsWithScaling: true,
-                scaleX: 0.08,
-                scaleY: 0.08,
+                scaleX: 0.8,
+                scaleY: 0.8,
                 behaviours: [
                     $CatchEventAndEmitBehaviour {
                         catch: "ButtonClickEvent",
@@ -408,12 +473,73 @@ var drawCardActor = $Box {
     ]
 
 ];
+
+var putCardsUnderDeckActor = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: 100.0#percent,
+            height: 100.0#percent,
+            touchable: touchable.enabled,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showPutCardsUnderDeckActor"),
+            detached: false
+        }
+    ],
+    zIndex: overlayZIndex - 1,
+    name: "putCardsUnderDeckActor"
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: 30#percent,
+                height: 30#percent,
+                flexDirection: flexDirection.row,
+                alignItems: align.flexStart
+            }
+        ]
+    } children [
+
+            $Image {
+                textureName: "draw_bullet",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.4,
+                scaleY: 0.4,
+            },
+
+            $PutCardsUnderDeckWidget {
+                styles: [
+                    {
+                        width: 90#percent,
+                        height: 90#percent,
+                        background: "under_deck_background",
+                    }
+                ],
+                name: "putCardsUnderDeckWidget",
+                debug: true,
+                cardSize: cardHeight,
+                cardSpacing: 10.0
+            }
+
+    ]
+
+];
+
 // TODO: fix pixelated looking textures
 var playerBar = $Box {
     styles: [
         {
             width: 100#percent,
-            height: (22*10)#points,
+            height: 220#points,
             background: "player_bar",
             flexDirection: flexDirection.row,
             alignItems: align.center
@@ -427,11 +553,11 @@ var playerBar = $Box {
                 flexDirection: flexDirection.row,
                 alignItems: align.center,
                 justifyContent: justify.center,
-                height: (4*10)#points,
-                width: (9*10)#points,
+                height: 40#points,
+                width: 90#points,
                 rotation: 6.0,
-                positionBottom: -(0.6*10)#points,
-                positionLeft: (2.0*10)#points
+                positionBottom: -6.0#points,
+                positionLeft: 20.0#points
             }
         ],
         enableTransform: true,
@@ -440,13 +566,13 @@ var playerBar = $Box {
             styles: [
                 {
                     aspectRatio: 1.0,
-                    width: (4.0*10)#points
+                    width: 40.0#points
                 }
             ],
             reportDimensionsWithScaling: true,
             textureName: "reserves_texture",
-            scaleX: 0.002,
-            scaleY: 0.002
+            scaleX: 0.02,
+            scaleY: 0.02
         },
         reservesLabel,
     ],
@@ -454,8 +580,8 @@ var playerBar = $Box {
     $Box {
         styles: [
             {
-                positionLeft: (32*10)#points,
-                positionBottom: (3*10)#points,
+                positionLeft: 320#points,
+                positionBottom: 30#points,
                 rotation: 4.0
             }
         ],
@@ -467,22 +593,21 @@ var playerBar = $Box {
     $Box {
         styles: [
             {
-                width: (15*10)#points,
-                height: (8*10)#points,
-                positionLeft: (80*10)#points,
-                positionBottom: (3*10)#points,
+                width: 150#points,
+                height: 80#points,
+                positionLeft: 800#points,
+                positionBottom: 30#points,
                 rotation: -4.0
             }
         ],
         enableTransform: true,
-        debug: true
     },
 
     $Box {
         styles: [
             {
-                positionLeft: (107*10)#points,
-                positionBottom: (2*10)#points,
+                positionLeft: 1070#points,
+                positionBottom: 20#points,
                 rotation: -6.0,
             }
         ],
@@ -503,7 +628,6 @@ var gameScreen = $Box {
             justifyContent: justify.flexEnd,
         }
     ],
-//    debug: true
 } children [
 
     $Box {
@@ -517,200 +641,43 @@ var gameScreen = $Box {
     $EnemyArea {
         styles: [
             {
-                width: (10*10)#points,
-                height: (10*10)#points,
-                positionLeft: (50*10)#points,
-                positionBottom: -(10*10)#points,
+                width: 100#points,
+                height: 100#points,
+                positionLeft: 500#points,
+                positionBottom: -100#points,
             }
         ],
-        debug: true,
         ...enemyArea
-    },
-
-    $CardHand {
-        styles: [
-            {
-                width: 100#percent,
-                height: (0*10)#points,
-                positionBottom: -(68*10)#points,
-            }
-        ],
-        zIndex: 200,
-        debug: true,
-        ...cardHand
     },
 
     $Revolver {
         styles: [
             {
-                positionBottom: -(25*10)#points
+                positionBottom: -250#points
             }
         ],
         zIndex: 100,
         ...revolver
     },
 
-    playerBar
+    playerBar,
+
+    $CardHand {
+        styles: [
+            {
+                width: 100#percent,
+                height: 0#points,
+            },
+            {
+                style_condition: state("showPutCardsUnderDeckActor"),
+                positionTop: 314#points,
+            }
+        ],
+        zIndex: 200,
+        ...cardHand
+    },
 
 ];
-
-//var gameScreen = $Box {
-//    styles: [
-//        {
-//            positionType: positionType.absolute,
-//            flexDirection: flexDirection.column,
-//            width: 100.0#percent,
-//            height: 100.0#percent
-//        }
-//    ]
-//} children [
-//
-//    $Box {
-//        styles: [
-//            {
-//                width: 100.0#percent,
-//                flexDirection: flexDirection.row
-//            }
-//        ],
-//    } children [
-//
-//        $Image {
-//            styles: [
-//                {
-//                    aspectRatio: 1.0,
-//                    height: 90.0#percent,
-//                }
-//            ],
-//            reportDimensionsWithScaling: true,
-//            textureName: "heart_texture",
-//            scaleX: 0.003,
-//            scaleY: 0.003,
-//        },
-//
-//        playerLivesLabel,
-//
-////        $Box {
-////            styles: [
-////                {
-////                    flexGrow: 1.0
-////                }
-////            ]
-////        },
-//
-//    ],
-//
-//    $Box {
-//        styles: [
-//            {
-//                flexDirection: flexDirection.row,
-//                width: 100.0#percent,
-//                flexGrow: 1.0
-//            }
-//        ]
-//    } children [
-//
-//        $Box {
-//            styles: [
-//                {
-//                    flexDirection: flexDirection.column,
-//                    width: 30.0#percent,
-//                    alignItems: align.center,
-//                    positionLeft: (5.0*10)#points,
-//                }
-//            ]
-//        } children [
-//
-//            revolver,
-//
-//            $Image {
-//                styles: [
-//                    {
-//                        style_priority: 1,
-//                        aspectRatio: 569.0 / 164.0,
-//                        height: (5.0*10)#points,
-//                        background: "shoot_button_texture"
-//                    },
-//                    {
-//                        style_priority: 2,
-//                        style_condition: hover(),
-//                        background: "shoot_button_texture_hover"
-//                    },
-//                    ...disableStyles
-//                ],
-//                ...shootButton
-//            }
-//
-//        ],
-//
-//        $EnemyArea {
-//            styles: [
-//                {
-//                    flexGrow: 1.0
-//                }
-//            ],
-//            ...enemyArea
-//        }
-//
-//    ],
-//
-//    $Box {
-//        styles: [
-//            {
-//                flexDirection: flexDirection.row,
-//                width: 100.0#percent,
-//                height: (cardHeight + 5.0)#points,
-//                justifyContent: justify.center,
-//                alignItems: align.center
-//            }
-//        ]
-//    } children [
-//
-//        $Image {
-//            styles: [
-//                {
-//                    aspectRatio: 1.0,
-//                    width: (8.0*10)#points
-//                }
-//            ],
-//            reportDimensionsWithScaling: true,
-//            textureName: "reserves_texture",
-//            scaleX: 0.002,
-//            scaleY: 0.002
-//        },
-//
-//        reservesLabel,
-//
-//        $CardHand {
-//            styles: [
-//                {
-//                    flexGrow: 1.0,
-//                    height: cardHeight#points,
-//                }
-//            ],
-//            ...cardHand
-//        },
-//
-//        $Image {
-//            styles: [
-//                {
-//                    style_priority: 1,
-//                    aspectRatio: 569.0 / 164.0,
-//                    height: (5.0*10)#points,
-//                    background: "end_turn_button_texture"
-//                },
-//                {
-//                    style_priority: 2,
-//                    style_condition: hover(),
-//                    background: "end_turn_button_texture_hover"
-//                },
-//                ...disableStyles
-//            ],
-//            ...endTurnButton
-//        }
-//
-//    ]
-//
-//];
 
 root: $Box {
     styles: [
@@ -722,25 +689,41 @@ root: $Box {
     ]
 } children [
 
-    $Statusbar {
-        options: [
-        ],
-        ...(sharedComponents.statusbarLeftDefaults)
-    },
-//
-//    $FromTemplate {
-//        generateFrom: "warning_label_template",
-//        data: {
-//            symbol: "!!!",
-//            title: "Hard maximum handsize reached",
-//            body: "You can't draw any more cards this turn. After this turn, put all but 12 Cards at the bottom of your deck.",
-//            background: "warning_label_background_red",
-//            width: 8#percent,
-//        }
-//    },
+//    $Box {
+//        styles: [
+//            {
+//                flexDirection: flexDirection.row,
+//                positionTop: 10#points
+//            }
+//        ]
+//    } children [
 
+        $Statusbar {
+            options: [
+            ],
+            ...(sharedComponents.statusbarLeftDefaults)
+        },
+
+        $StatusEffectDisplay {
+            styles: [
+                {
+                    positionLeft: 30#percent
+                }
+            ],
+            name: "status_effect_display",
+            font: "red_wing",
+            fontColor: color.black,
+            fontScale: 0.6,
+            debug: true
+        },
+
+//    ],
+
+    sharedComponents.warningParent,
     gameScreen,
     drawCardActor,
     popupActor,
-    attackPopup
+    attackPopup,
+    putCardsUnderDeckActor,
+    enemyActionPopup
 ]

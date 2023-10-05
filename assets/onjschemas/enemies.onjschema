@@ -1,11 +1,22 @@
 
+import "imports/game_predicates.onjschema" as _;
+
 use Common;
+use Cards; // include Card namespace for status effects
 
 var enemyActionSharedKeys = {
-    weight: int
+    weight: int,
+    showProbability: float,
+    scaleFactor?: float,
+    predicates?: $GamePredicate[]
 };
 
 $EnemyAction {
+
+    $DamagePlayer {
+        damage: int[2],
+        ...enemyActionSharedKeys
+    }
 
     $DestroyCardsInHand {
         maxCards: int,
@@ -21,18 +32,30 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
+    $TakeCover {
+        cover: int[2],
+        ...enemyActionSharedKeys
+    }
+
+    $GivePlayerStatusEffect {
+        statusEffect: StatusEffect,
+        ...enemyActionSharedKeys
+    }
+
+    $GiveSelfStatusEffect {
+        statusEffect: StatusEffect,
+        ...enemyActionSharedKeys
+    }
+
 }
 
 var enemy = {
     name: string,
-    baseHealthPerTurn: int,
-    baseDamage: int[2],
-    fightDuration: int[2],
+    baseHealth: int,
     texture: string,
     coverIcon: string,
     scaleX: float,
     scaleY: float,
-    attackProbability: float,
     actionProbability: float,
     coverIconScale: float,
     detailFont: string,
