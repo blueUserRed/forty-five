@@ -297,7 +297,7 @@ cards: [
     },
     {
         name: "bulletBulletBullet",
-        title: "Bullet Bullet bullet",
+        title: "Bullet Bullet Bullet",
         flavourText: "It's getting old...",
         description: "When this bullet enters the revolver: apply a buff of +10 to all bullets of type ‘Bullet’ while this bullet is in the revolver",
         baseDamage: 16,
@@ -314,7 +314,7 @@ cards: [
     },
     {
         name: "bulletBullet",
-        title: "Bullet bullet",
+        title: "Bullet Bullet",
         flavourText: "Daaaamn, can i put ma Bulllet in ya Bullet? ",
         description: "When this bullet enters the revolver: create 3 cards of type ‘bullet’ in your hand",
         baseDamage: 16,
