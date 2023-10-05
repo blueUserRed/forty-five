@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.screen.gameComponents.PutCardsUnderDeckWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.obj
@@ -63,6 +64,41 @@ open class CardDragSource(
     }
 }
 
+class CardDropTarget(
+    dragAndDrop: DragAndDrop,
+    actor: Actor,
+    onj: OnjNamedObject
+) : DropBehaviour(dragAndDrop, actor, onj) {
+
+
+    private val card: Card
+
+    init {
+        if (actor !is CardActor) throw RuntimeException("CardDropTarget can only be used on a cardActor")
+        card = actor.card
+    }
+
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: Payload?, x: Float, y: Float, pointer: Int) {
+        if (payload == null || source == null) return
+
+        val obj = payload.obj!! as CardDragAndDropPayload
+        val revolver = FortyFive.currentGame!!.revolver
+        val slot = revolver.slots.find { it.card === card }?.num ?: return
+        obj.loadIntoRevolver(slot)
+    }
+
+}
+
 /**
  * used for dropping a card into the revolver
  */
@@ -99,6 +135,43 @@ class RevolverDropTarget(
 }
 
 /**
+ * used for dropping a card into the revolver
+ */
+class PutCardsUnderDeckDropTarget(
+    dragAndDrop: DragAndDrop,
+    actor: Actor,
+    onj: OnjNamedObject
+) : DropBehaviour(dragAndDrop, actor, onj) {
+
+    private val putCardsUnderDeckWidget: PutCardsUnderDeckWidget
+
+    init {
+        if (actor !is PutCardsUnderDeckWidget) {
+            throw RuntimeException("PutCardsUnderDeckDropTarget can only be used on a PutCardsUnderDeckWidget")
+        }
+        putCardsUnderDeckWidget = actor
+    }
+
+    override fun drag(
+        source: DragAndDrop.Source?,
+        payload: Payload?,
+        x: Float,
+        y: Float,
+        pointer: Int
+    ): Boolean {
+        return true
+    }
+
+    override fun drop(source: DragAndDrop.Source?, payload: Payload?, x: Float, y: Float, pointer: Int) {
+        if (payload == null || source == null) return
+
+        val obj = payload.obj!! as CardDragAndDropPayload
+        obj.putCardUnderDeck(putCardsUnderDeckWidget)
+    }
+
+}
+
+/**
  * used as a payload for [CardDragSource] and [RevolverDropTarget].
  * Automatically resets cards, loads into revolver, etc.
  */
@@ -109,5 +182,9 @@ class CardDragAndDropPayload(val card: Card) : ExecutionPayload() {
      */
     fun loadIntoRevolver(slot: Int) = tasks.add {
         FortyFive.currentGame!!.loadBulletInRevolver(card, slot)  //TODO ugly
+    }
+
+    fun putCardUnderDeck(widget: PutCardsUnderDeckWidget) = tasks.add {
+        widget.addCard(card)
     }
 }

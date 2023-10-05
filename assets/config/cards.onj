@@ -19,7 +19,7 @@ cards: [
 
     {
         name: "incendiaryBullet",
-        title: "incendiary Bullet",
+        title: "Incendiary Bullet",
         flavourText: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime"',
         description: 'When this bullet is shot: the enemy gets the status burning for 4 revolver rotations',
         baseDamage: 7,
@@ -38,7 +38,7 @@ cards: [
     },
     {
         name: "workerBullet",
-        title: "worker Bullet",
+        title: "Worker Bullet",
         flavourText: "backup on the way",
         description: "As long as this bullet is in the revolver, when a new turn starts: gain 1 reserve",
         baseDamage: 5,
@@ -46,7 +46,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ reserveGain("round start", 1) ],
+        effects: [ reserveGain("turn start", 1) ],
         forceLoadCards: [],
         cost: 1,
         tags: ["common", "startDeck"],
@@ -55,7 +55,7 @@ cards: [
     },
     {
         name: "bigBullet",
-        title: "big Bullet",
+        title: "Big Bullet",
         flavourText: "bullet but like... idk bigger",
         description: "",
         baseDamage: 16,
@@ -72,7 +72,7 @@ cards: [
     },
     {
         name: "rottenBullet",
-        title: "rotten Bullet",
+        title: "Rotten Bullet",
         flavourText: "might have forgotten it in my sattlebag...",
         description: "Looses 1 damage every time this bullet turns in the revolver",
         baseDamage: 16,
@@ -89,7 +89,7 @@ cards: [
     },
     {
         name: "diamondBullet",
-        title: "diamond Bullet",
+        title: "Diamond Bullet",
         flavourText: "Shiny",
         description: "When this bullet enters the revolver: draw 2 cards;\nWhen this bullet leaves the revolver: draw 1 cards",
         baseDamage: 23,
@@ -106,7 +106,7 @@ cards: [
     },
     {
         name: "bewitchedBullet",
-        title: "bewitched Bullet",
+        title: "Bewitched Bullet",
         flavourText: "Can you burn a Bullet on a pyre? We can try",
         description: "This bullet turns the revolver to the left instead of the the right",
         baseDamage: 7,
@@ -123,7 +123,7 @@ cards: [
     },
     {
         name: "explosiveBullet",
-        title: "explosive Bullet",
+        title: "Explosive Bullet",
         flavourText: "Holds its promise. Just ask the residents of New Hemingway. Wait, you can't",
         description: "When this bullet is shot: the enemy gets the status burning for 2 revolver rotations",
         baseDamage: 15,
@@ -142,7 +142,7 @@ cards: [
     },
     {
         name: "leadersBullet",
-        title: "leaders Bullet",
+        title: "Leaders Bullet",
         flavourText: "Just don't ask what it was doing in 1939-1945",
         description: "When this bullet enters the revolver: apply a buff of +4 to all other bullets while this bullet is in the revolver",
         baseDamage: 15,
@@ -159,7 +159,7 @@ cards: [
     },
     {
         name: "silverBullet",
-        title: "silver Bullet",
+        title: "Silver Bullet",
         flavourText: "This Bullet is silver and silence is golden",
         description: "When this Bullet enters the revolver or when it is shot: draw 1 card",
         baseDamage: 7,
@@ -176,7 +176,7 @@ cards: [
     },
     {
         name: "bullet",
-        title: "bullet",
+        title: "Bullet",
         flavourText: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright",
         description: "",
         baseDamage: 6,
@@ -193,7 +193,7 @@ cards: [
     },
     {
         name: "arrow",
-        title: "arrow",
+        title: "Arrow",
         flavourText: "Have you actually shot an arrow with a revolver? No? Then stop saying it won't work",
         description: "This bullet will stay in the revolver even after it was shot",
         baseDamage: 5,
@@ -227,7 +227,7 @@ cards: [
     },
     {
         name: "obsidianBullet",
-        title: "obsidian Bullet",
+        title: "Obsidian Bullet",
         flavourText: "no, you CAN'T make a portal out of it",
         description: "",
         baseDamage: 20,
@@ -244,7 +244,7 @@ cards: [
     },
     {
         name: "rustedBullet",
-        title: "rusted Bullet",
+        title: "Rusted Bullet",
         flavourText: "those fucking kids with their rain dances",
         description: "Looses 1 damage every time this bullet turns in the revolver",
         baseDamage: 10,
@@ -261,7 +261,7 @@ cards: [
     },
     {
         name: "invisibleBullet",
-        title: "invisible Bullet",
+        title: "Invisible Bullet",
         flavourText: '"        "',
         description: "",
         baseDamage: 0,
@@ -278,7 +278,7 @@ cards: [
     },
     {
         name: "fakeBullet",
-        title: "fake Bullet",
+        title: "Fake Bullet",
         flavourText: "yeah, that's how I felt when  I bought it. Scammed. At least I got some value out of it",
         description: "When this bullet is shot: gain four reserves",
         baseDamage: 0,
@@ -297,7 +297,7 @@ cards: [
     },
     {
         name: "bulletBulletBullet",
-        title: "bullet bullet bullet",
+        title: "Bullet Bullet Bullet",
         flavourText: "It's getting old...",
         description: "When this bullet enters the revolver: apply a buff of +10 to all bullets of type ‘Bullet’ while this bullet is in the revolver",
         baseDamage: 16,
@@ -314,7 +314,7 @@ cards: [
     },
     {
         name: "bulletBullet",
-        title: "bullet bullet",
+        title: "Bullet Bullet",
         flavourText: "Daaaamn, can i put ma Bulllet in ya Bullet? ",
         description: "When this bullet enters the revolver: create 3 cards of type ‘bullet’ in your hand",
         baseDamage: 16,
@@ -331,7 +331,7 @@ cards: [
     },
     {
         name: "undeadBullet",
-        title: "undead Bullet",
+        title: "Undead Bullet",
         flavourText: "does that happen to all ma bullets? The witch didn't mention thaat.",
         description: "If this Bullet dies or is destroyed: Put it in your hand. When this Bullet dies: the Bullet that is in slot 4 at the time this Bullet is fired gets +5 dmg",
         baseDamage: 12,
@@ -351,7 +351,7 @@ cards: [
     },
     {
         name: "poisonBullet",
-        title: "poison Bullet",
+        title: "Poison Bullet",
         flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
         description: "When this bullet is shot: the enemy gets the status poison for 3 revolver rotations",
         baseDamage: 9,
@@ -370,7 +370,7 @@ cards: [
     },
     {
         name: "enchantedBullet",
-        title: "enchanted Bullet",
+        title: "Enchanted Bullet",
         flavourText: "enchanted Bullet",
         description: "This bullet turns the revolver 2 to the left",
         baseDamage: 14,
@@ -387,7 +387,7 @@ cards: [
     },
     {
         name: "bossBullet",
-        title: "boss Bullet",
+        title: "Boss Bullet",
         flavourText: "boss Bullet",
         description: "As long as this bullet is in the revolver, when a new turn starts: create 1 card of type ‘worker Bullet’ in your hand",
         baseDamage: 10,
@@ -396,7 +396,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            putCardInHand("round start", "workerBullet", 1)
+            putCardInHand("turn start", "workerBullet", 1)
         ],
         forceLoadCards: [ "workerBullet" ],
         cost: 2,
@@ -406,7 +406,7 @@ cards: [
     },
     {
         name: "protectiveBullet",
-        title: "protective Bullet",
+        title: "Protective Bullet",
         flavourText: "protective Bullet",
         description: "When this bullet enters the revolver: give a bullet of choice (required) everlasting while this bullet is in the revolver",
         baseDamage: 6,
@@ -425,7 +425,7 @@ cards: [
     },
     {
         name: "purgeBullet",
-        title: "purge Bullet",
+        title: "Purge Bullet",
         flavourText: "purge Bullet",
         description: "When this bullet enters the revolver: destroy the neighboring bullets",
         baseDamage: 12,
@@ -444,7 +444,7 @@ cards: [
     },
     {
         name: "deadBullet",
-        title: "dead Bullet",
+        title: "Dead Bullet",
         flavourText: "dead Bullet",
         description: "When this bullet enters the revolver: destroy this bullet",
         baseDamage: 0,
@@ -460,6 +460,80 @@ cards: [
         type: $Bullet { },
         tags: ["rare"],
         price: 25,
+    },
+    {
+        name: "cowardBullet",
+        title: "Coward Bullet",
+        flavourText: "coward Bullet",
+        description: "todo",
+        baseDamage: 1,
+        coverValue: 0,
+        traitEffects: [ "replaceable" ],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "luckyLukesBullet",
+        title: "Lucky Lukes Bullet",
+        flavourText: "Lucky Lukes Bullet",
+        description: "todo",
+        baseDamage: 10,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            damageDirect("enter", 10)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "bull_et",
+        title: "Bull et",
+        flavourText: "Bull et",
+        description: "todo",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            damageDirect("rotation", 2)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
+    },
+    {
+        name: "unpleasantGradientBullet",
+        title: "Unpleasant Gradient Bullet",
+        flavourText: "Unpleasent Gradient Bullet",
+        description: "todo",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            damageDirect("turn start", 4)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["rare"],
+        price: 50,
     },
 
 ],

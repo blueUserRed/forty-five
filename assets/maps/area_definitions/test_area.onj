@@ -90,8 +90,8 @@ nodes: [
 decorations: [
     {
         texture: "map_decoration_cactus",
-        baseWidth: 8.0,
-        baseHeight: 8.0,
+        baseWidth: 80.0,
+        baseHeight: 80.0,
         positions: [
             [
                 30.0, 30.0, 1.5

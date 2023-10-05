@@ -77,8 +77,8 @@ statusbarCenterDefaults: {
             height: 14#percent,
             flexDirection: flexDirection.column,
             positionType: positionType.absolute,
-            marginTop: (0 * 10)#points,
-            marginLeft: (0 * 10)#points,
+            marginTop: 0#points,
+            marginLeft: 0#points,
             alignItems: align.center,
         }
     ],
@@ -183,8 +183,8 @@ statusbarLeftDefaults: {
             height: 14#percent,
             flexDirection: flexDirection.column,
             positionType: positionType.absolute,
-            marginTop: (0 * 10)#points,
-            marginLeft: (0 * 10)#points,
+            marginTop: 0#points,
+            marginLeft: 0#points,
             alignItems: align.flexStart,
         }
     ],
@@ -210,50 +210,19 @@ statusbarLeftDefaults: {
                         height: 84#percent,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
-                        //                    }
-//                ],
-//            } children [
-//
-//                $Image {
-//                    textureName: "reserves_texture",
-//                    scaleX: 0.005,
-//                    scaleY: 0.005,
-//                    reportDimensionsWithScaling: true,
-//                    styles: [
-//                        {
-//                            height: 60#percent,
-//                            width: 25#percent,
-//                        }
-//                    ],
-//                },
-//                $TemplateLabel {
-//                    template: " {game.curReserves}/{game.baseReserves}",
-//                    font: "red_wing_cm",
-//                    color: color.forty_white,
-//                    fontScale: 0.09,
-//                    align: "center",
-//                }
-//            ],
-//            $Box {
-//                styles: [
-//                    {
-//                        width: 30#percent,
-//                        height: 84#percent,
-//                        flexDirection: flexDirection.row,
-//                        alignItems: align.center,
-
                     }
                 ],
             } children [
                 $Image {
                     textureName: "heart_texture",
-                    scaleX: 0.07,
-                    scaleY: 0.07,
+                    scaleX: 0.08,
+                    scaleY: 0.08,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
                             height: 65#percent,
                             width: 4.2#percent,
+                            aspectRatio: 1.0
                         }
                     ],
                 },
@@ -307,8 +276,8 @@ statusBarTemplates: [
         reportDimensionsWithScaling: true,
         styles: [
             {
-                marginTop: (0.1 * 10)#points,
-                marginLeft: (0.2 * 10)#points,
+                marginTop: 1#points,
+                marginLeft: 2#points,
             }
         ],
     },
@@ -334,7 +303,7 @@ statusBarTemplates: [
         children: [
             $Label {
                 name: "statusbar_text",
-                text: "",
+                text: "", //template
                 font: "red_wing_cm",
                 color: color.forty_white,
                 fontScale: 0.7,
@@ -708,7 +677,7 @@ backpackTemplates: [
 
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
-    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason
+    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason // the reason is called integer overflow
 
     styles: [
         {

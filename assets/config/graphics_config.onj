@@ -25,14 +25,18 @@ enemyQuickChargeAnimation: {
     interpolation: "swing"
 },
 
-statusEffectIcons: {
+icons: {
     burning: {
         icon: "burning_icon",
-        scale: 0.025
+        scale: 0.25
     },
     poison: {
         icon: "poison_icon",
-        scale: 0.025
+        scale: 0.25
+    },
+    fireResistance: {
+        icon: "buning_icon",
+        scale: 0.25
     }
 },
 
@@ -67,11 +71,11 @@ numberChangeAnimation: {
     font: "vanilla_whale",
     negativeFontColor: color.red,
     positiveFontColor: color.green,
-    fontScale: 0.2,
+    fontScale: 2.0,
     duration: 1.5,
     startFadeoutAt: 1.0,
-    raiseDistance: 20.0,
-    sinkDistance: -20.0
+    raiseDistance: 200.0,
+    sinkDistance: -200.0
 },
 
 cardText: {
