@@ -98,7 +98,6 @@ options: {
 
 templates: [
     ...(sharedComponents.warningLabelTemplates),
-    ...(sharedComponents.warningLabelTemplates),
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -295,12 +294,6 @@ var enemyActionPopup = $Box {
     ],
 
     $Box {
-        styles: [
-            {
-//                rotation: -10.0
-            }
-        ],
-//        enableTransform: true
     } children [
         $Image {
             textureName: "enemy_texture",

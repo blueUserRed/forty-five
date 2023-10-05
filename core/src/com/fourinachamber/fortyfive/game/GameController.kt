@@ -688,7 +688,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             include(drawCardPopupTimeline(cardsToDraw))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_TURN_START) }, { true })
-            includeLater({ checkEffectsActiveCards(Trigger.ON_TURN_START) }, { true })
         })
     }
 
