@@ -8,9 +8,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -20,12 +22,11 @@ import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
-import onj.value.OnjArray
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
+import onj.value.*
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -268,18 +269,21 @@ class Card(
         return if (wasEffectWithTimelineTriggered) timeline else null
     }
 
-    private fun updateText() {
-//        val detail = actor.hoverDetailActor
-//        detail.description = shortDescription
-//        detail.flavourText = flavourText
-//        detail.statsText = if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else ""
-//
-//        val builder = StringBuilder()
-//        for (modifier in modifiers) if (modifier.description != null) {
-//            builder.append(modifier.description.string).append("\n")
-//        }
-//        val modifiersText = builder.toString()
-//        detail.statsChangedText = modifiersText
+    fun updateText() {
+        if (actor.detailActor == null) return // hover detail of card is not displayed
+        val text = StringBuilder()
+        text
+            .append(shortDescription)
+            .append("\n")
+            .append(flavourText)
+            .append("\n")
+            .append(if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "")
+
+        modifiers
+            .mapNotNull { it.description }
+            .forEach { text.append(it.string).append("\n") }
+
+        TemplateString.updateGlobalParam("game.selectedCard.hoverText", text.toString())
     }
 
     private fun updateTexture() = actor.redrawPixmap()
@@ -429,7 +433,10 @@ class CardActor(
     val fontColor: Color,
     val fontScale: Float,
     private val screen: OnjScreen
-) : Widget(), ZIndexActor, HoverStateActor, KeySelectableActor {
+) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor {
+
+    override val actorTemplate: String = "TEST_hover_detail"
+    override var detailActor: Actor? = null
 
     override var fixedZIndex: Int = 0
 
@@ -465,11 +472,13 @@ class CardActor(
 
     init {
         bindHoverStateListeners(this)
+        registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        setBoundsOfHoverDetailActor(this)
         batch ?: return
         val texture = pixmapTextureRegion ?: return
         val shader = if (inGlowAnim) {
@@ -587,4 +596,38 @@ class CardActor(
         delay(GraphicsConfig.bufferTime)
     }
 
+    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
+        "text" to OnjString("{game.selectedCard.hoverText}")
+    )
+
+    override fun setBoundsOfHoverDetailActor(actor: Actor) {
+        val detailActor = detailActor
+        if (detailActor !is Layout) return
+//        val prefWidth = width * 1.5f
+//        detailActor.layout()
+//        detailActor.width = prefWidth
+        val prefHeight = detailActor.prefHeight
+        val prefWidth = detailActor.prefWidth
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+//        detailActor.setPosition(
+        detailActor.setBounds(
+            x + actor.width / 2 - detailActor.width / 2,
+            y + actor.height,
+            if (prefWidth == 0f) detailActor.width else prefWidth,
+            prefHeight
+        )
+        detailActor.layout()
+    }
+
+    override fun onDetailDisplayStarted() = card.updateText()
+
+    override fun positionChanged() {
+        super.positionChanged()
+        setBoundsOfHoverDetailActor(this)
+    }
+
+    override fun sizeChanged() {
+        super.sizeChanged()
+        setBoundsOfHoverDetailActor(this)
+    }
 }

@@ -38,7 +38,8 @@ assets: {
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
         ...(sharedComponents.navBarUsedAssets),
-        ...(sharedComponents.warningLabelUsedAssets)
+        ...(sharedComponents.warningLabelUsedAssets),
+        ...(sharedComponents.hoverDetailUsedAssets)
     ]
 },
 
@@ -98,6 +99,7 @@ options: {
 
 templates: [
     ...(sharedComponents.warningLabelTemplates),
+    sharedComponents.hoverDetail
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -129,6 +131,7 @@ var cardHand = $CardHand {
     name: "card_hand",
     cardSize: cardHeight,
     hoveredCardScale: 1.3,
+//    hoveredCardScale: 1.3,
     maxCardSpacing: 100.0,
     startCardZIndicesAt: cardZIndicesStart,
     hoveredCardZIndex: cardZIndicesEnd - 1,

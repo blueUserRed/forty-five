@@ -768,5 +768,45 @@ warningLabelTemplates: [
 ],
 
 warningLabelUsedAssets: [
-    "forty_white_texture", "warning_label_background_red", "title_screen_background"
+    "forty_white_texture", "warning_label_background_red", "title_screen_background", "red_wing"
 ],
+
+hoverDetail: $Box {
+    template_name: "TEST_hover_detail",
+    template_keys: {
+        "children.0.children.0.template": "text"
+    },
+    width: 300.0
+} children [
+
+    $Box {
+        styles: [
+            {
+                background: "transparent_black_texture",
+                width: 300#points
+            }
+        ],
+        width: 300.0
+    } children [
+
+        $TemplateLabel {
+            styles: [
+                {
+                    width: 300#points
+                }
+            ],
+            template: "",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 0.5,
+            align: "left",
+            wrap: true,
+            width: 300.0
+        }
+
+    ]
+],
+
+hoverDetailUsedAssets: [
+    "red_wing", "transparent_black_texture"
+]
