@@ -9,23 +9,23 @@
 <body>
     
     <header>
-        <img class="logo to-main-page" src="assets/logo_white.png" />
-        <a href="javascript:alert('coming soon!')" class="download">Coming soon!</a>
-        <a href="https://github.com/blueUserRed/forty-five" >We are open source!</a>
+        <img class="logo to-main-page hover-pointer" src="assets/logo_white.png" />
+        <a href="javascript:alert('coming soon!')" class="download hover-pointer">Coming soon!</a>
+        <a href="https://github.com/blueUserRed/forty-five" class="hover-pointer">We are open source!</a>
         <!-- <a href="#" >Support us!</a> -->
         <div id="header-spacer"></div>
-        <img id="hamburger-menu" class="opens-navbar navbar-dependent" src="assets/hamburger.png" />
+        <img id="hamburger-menu" class="opens-navbar navbar-dependent hover-pointer" src="assets/hamburger.png" />
     </header>
 
     <nav class="navbar-dependent">
-        <a href="javascript:alert('coming soon!')">Download</a>
-        <span class="to-about-page">Our Project</span>
-        <a href="https://github.com/blueUserRed/forty-five">We are open source!</a>
+        <a href="javascript:alert('coming soon!')" class="hover-pointer">Download</a>
+        <span class="to-about-page hover-pointer">Our Project</span>
+        <a href="https://github.com/blueUserRed/forty-five" class="hover-pointer">We are open source!</a>
         <!-- <span>Support us!</span> -->
     </nav>
 
     <div id="overlays">
-        <div id="overlay-multiply"></div>
+        <!-- <div id="overlay-multiply"></div> -->
         <div id="overlay-vignette"></div>
         <div id="overlay-shadow"></div>
     </div>
@@ -33,7 +33,7 @@
     <main id="main-content-container">
         
         <section class="sub-page cur-page-dependent" id="main-page">
-            <img id="our-project" class="to-about-page" src="./assets/our_project.png" />
+            <img id="our-project" class="to-about-page hover-pointer" src="./assets/our_project.png" />
             <div id="our-project-standin"></div>
             <article class="title-card" id="title-map">
                 <img class="deco-card" id="deco-card-1" src="./assets/arrow.png" /> 
@@ -45,13 +45,6 @@
             </article>
             <article id="trailer-container">
                 <img src="./assets/group_picture.jpg" />
-                <!-- <iframe
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                    title="YouTube video player"
-                    frameborder="0"
-                    allow="clipboard-write; encrypted-media; picture-in-picture; web-share"
-                    allowfullscreen
-                ></iframe> -->
             </article>
             <article class="paper-text-box" id="main-description">
                 <img src="assets/hat.png" id="deco-hat" />
@@ -63,18 +56,70 @@
                 <div id="micro-comic-container">
                     <img id="deco-micro-comic" src="./assets/micro_comic_sprint_planning.png" />
                 </div>
-                <p class="cur-page-dependent">
-                    Forty-Five is a magnificent Wild West card game where players gather cards in the shape of bullets to outgun their adversaries. You can stock up on new cards at various trading posts, embark on thrilling adventures through a diverse landscape on a dynamic map, and even craft your very own decks of cards. Brace yourself for thrilling showdowns that will transport you straight into the heart of the Wild West!
+                <div id="main-description-text-container">
+                    <p class="emphasis">
+                        A perfect mix of card game, rogue-lite, and pure wild west mayhem. Explore an ever-changing map, collect interesting cards, and battle enemies.
+                    </p>
+                    <h3>Explore and Collect</h3>
+                    <p>
+                        Explore the Frontier and add powerful cards - bullets - to your collection. Each one equipped with its own unique effect.
+                    </p>
+
+                    <h3>Build</h3>
+                    <p>
+                        Each bullet has an individual effect, used to create powerful synergies. Use them to build your deck and to become an Outlaw Legend!
+                    </p>
+                    <h3>Load and shoot to kill!</h3>
+                    <p>
+                        Load your cards into the revolver and use the effects to your advantage, while also utilizing the limited amount of chambers and the rotations of the revolver. Then, shoot the enemies and send them 6 feet deep!
+                        But watch out, he won't just stand there letting you shoot him down so easily…
+                    </p>
+                </div>
+            </article>
+            <article class="paper-text-box-alternate" id="feature-list">
+                <h3>Features</h3>
+                <ul>
+                    <li><b>It's completely free</b>: And thats a great price if you ask me. No ads or any kind of microtransactions, I promise.</li>
+                    <li><b>Over 100 unique cards</b>, some serious and some … a little bit … less serious.</li>
+                    <li><b>Innovative gameplay</b>, allowing the player to achieve creative combos with the revolvers rotation.</li>
+                    <li><b>100% handdrawn assets</b>, I might not be the next picasso, but hey, I'm trying okay …</li>
+                    <li><b>A procedurally generated map</b>, ever-changing, guaranteeing a new experience every run.</li>
+                    <li><b>Deckbuilding</b>, to truly personalize your way of … shooting people.</li>
+                    <li><b>Different enemy types</b>, so you'll never run out of things to shoot at.</li>
+                    <li><b>Unique biomes</b>, each … you know what just download and find out it's free.</li>
+                </ul>
+            </article>
+            <article class="paper-text-box" id="open-source-description">
+                <h3>We are open source!</h3>
+                <p>
+                    The source code of .forty-five is public under the GPLv3 license. But what does
+                    that actually mean? It means that anyone is free to view and share the code of
+                    the game. Also, everyone can make their own modified versions of our game and
+                    redistribute it, as long as they maintain the GPLv3.0 license. 
+
+                    <br />
+                    <br />
+
+                    Want to know more? Read about the license <a href="https://choosealicense.com/licenses/gpl-3.0/">here</a>.
+
+                    <br />
+                    <br />
+
+                    Want to take a look at our code? Visit our <a href="https://github.com/blueUserRed/forty-five">Github</a>.
+
                 </p>
+                <img class="deco-card" id="deco-card-9" src="./assets/workerBullet.png" />
+                <img class="deco-card" id="deco-card-10" src="./assets/workerBullet.png" />
+                <img class="deco-card" id="deco-card-11" src="./assets/workerBullet.png" />
             </article>
             <div class="footer-spacer"></div>
             <footer>
                 <div class="links">
-                    <a class="to-imprint-page">IMPRINT</a>
+                    <a class="to-imprint-page hover-pointer">IMPRINT</a>
                     <!-- <a href="">SUPPORT US</a> -->
-                    <a href="https://github.com/blueUserRed/forty-five">GITHUB</a>
+                    <a href="https://github.com/blueUserRed/forty-five" class="hover-pointer">GITHUB</a>
                 </div>
-                <a href="https://www.easyname.at/en" class="easy-name-logo">
+                <a href="https://www.easyname.at/en" class="easy-name-logo hover-pointer">
                     Hosted by:
                     <img src="./assets/easy_name.svg">
                 </a>
@@ -86,28 +131,116 @@
             <article class="title-card" id="about-page-title">
                 <img id="deco-revolver-2" src="./assets/revolver.png" />
             </article>
-            <article class="paper-text-box" id="about-description">
+            <article class="paper-text-box" id="behind-the-project">
+                <h3>
+                    Behind the Project
+                </h3>
                 <p>
-                    Forty-Five is a magnificent Wild West card game where players gather cards in the shape of bullets to outgun their adversaries. You can stock up on new cards at various trading posts, embark on thrilling adventures through a diverse landscape on a dynamic map, and even craft your very own decks of cards. Brace yourself for thrilling showdowns that will transport you straight into the heart of the Wild West!
+                    .forty-five is being created as part of a final school project of a
+                    higher technical school (<a href="https://www.htlrennweg.at/">HTL Rennweg</a>)
+                    located in Vienna, Austria.
+                    In the final year of the school, every student in an austrian higher
+                    vocational school has to do a diploma thesis and a project alongside it.
+                    Our project, .forty-five, includes implementing and creating everything necessary
+                    for the game, applying the project management skills learned during the five
+                    years of school, as well as ensuring a successful release on Steam.
+
+                    <br />
+                    <br />
+
+                    For the Team, .forty-five is a creative playground in which the team pours its
+                    soul trying to bring the best and most fun experience to the player. Additionally,
+                    no AI is involved in the process. All ideas and designs are 100% human-made,
+                    as weird as they might sound :)
                 </p>
                 <img src="assets/group_picture.jpg" id="group-picture-description">
             </article>
             <img src="assets/group_picture.jpg" id="group-picture-standalone">
+            <article class="paper-text-box" id="project-history">
+                <h3>
+                    History
+                </h3>
+                <p>
+                    It all started in January 2022 when Philip Jankovic, the team's creative lead,
+                    had the idea to create a card game set in the Wild West after previously playing
+                    "Inscription" and "Red Dead Redemption 2". After brainstorming, he came up with
+                    the idea to have a revolver drum as the playing field and different kinds of
+                    bullets as cards. Utilizing the revolver chambers and the rotation of the drum
+                    after firing, he created the first paper prototype.
+
+                    <br />
+                    <br />
+
+                    The first prototype was played in a 1v1 setting and the gameplay was quite
+                    different from what it is now. Both players had revolvers and would shoot each
+                    other's bullets. It was fun for a short while, but generally didn't work very well.
+                    However, many cards that can be seen in the game now were already part of that
+                    first experiment, such as Bewitched Bullet or Incendiary Bullet. But the gameplay
+                    concept still had a long way to go.
+
+                    <br />
+                    <br />
+
+                    After a lot of trial and error and brainstorming, the game was changed to a
+                    single-player game in the roguelite deckbuilder genre, which was just a better
+                    fit for the revolver gameplay. So, as a small software development project
+                    Philip Jankovic togther with his classmate David Angelo created an early prototype.
+                    The prototype still had a lot of problems gamedesign wise. However it was a step
+                    in the right direction.
+
+                    <br />
+                    <br />
+
+                    On the school event days in 2022, Philip found himself in a room with Marvin Kurka,
+                    a programmer, with whom he shared ideas. This resulted in them working together in
+                    the fall of 2022 ot start the next project with the goal of creating a working demo.
+                    This was done in the context of the subject 'ITP', where the students learn project
+                    management. Together with Dylan Calderon and Christoph Allmer, a demo was created and
+                    presented. In that version of the game, a complete revamp of the rules was done, including
+                    the introduction of "Cover", so that the player can protect themselves from the enemy. The
+                    effect system of the cards was revamped as well, allowing for cohesive and interesting
+                    effects to be implemented. Additionally, the visual part of the game was developed further,
+                    the color scheme was introduced and the first rendition of the art style was created. For
+                    Philip Jankovic, who did not have any prior experience with drawing, .forty-five was a big
+                    step into the unknown.
+
+                    <br />
+                    <br />
+
+                    In the first half of 2023, Dylan and Christoph left the team, and new people
+                    joined in their place. Nils Hubman joined and is responsible for marketing as
+                    well as project management. To support Philip in the visual department, Markus
+                    Böheim joined, providing the needed contrast to Philip Jankovic's very messy
+                    design style with clean and organized designs. The fifth person to join was
+                    Felix Zwicklestorfer, a second programmer, needed to keep up with the amount
+                    of workload the team set itself. The team worked on the second-semester
+                    project in ITP, this time implementing the map system for the game.
+
+                    <br />
+                    <br />
+
+                    In the summer of 2023, .forty-five was proposed as a diploma project by the
+                    five team members.  The project includes a deck-building system, numerous new
+                    cards, various enemy types, and ultimately, the release on Steam. There is
+                    still a lot of work to be done, but the team is looking forward to continuing
+                    their efforts!
+                </p>
+            </article>
             <article id="member-pictures">
-                <img class="member-picture cur-page-dependent" id="member-picture-1" src="assets/wantedposter_philip.png">
-                <img class="member-picture cur-page-dependent" id="member-picture-2" src="assets/wantedposter_nils.png">
-                <img class="member-picture cur-page-dependent" id="member-picture-3" src="assets/wantedposter_marvin.png">
-                <img class="member-picture cur-page-dependent" id="member-picture-4" src="assets/wantedposter_markus.png">
-                <img class="member-picture cur-page-dependent" id="member-picture-5" src="assets/wantedposter_zwicki.png">
+                <img class="member-picture" id="member-picture-1" src="assets/wantedposter_philip.png">
+                <img class="member-picture" id="member-picture-2" src="assets/wantedposter_nils.png">
+                <img class="member-picture" id="member-picture-3" src="assets/wantedposter_marvin.png">
+                <img class="member-picture" id="member-picture-4" src="assets/wantedposter_markus.png">
+                <img class="member-picture" id="member-picture-5" src="assets/wantedposter_zwicki.png">
             </article>
             <div class="footer-spacer"></div>
             <footer>
                 <div class="links">
-                    <a class="to-imprint-page">IMPRINT</a>
+                    <a class="to-imprint-page hover-pointer">IMPRINT</a>
                     <!-- <a href="">SUPPORT US</a> -->
-                    <a href="https://github.com/blueUserRed/forty-five">GITHUB</a>
+                    <a href="https://github.com/blueUserRed/forty-five" class="hover-pointer">GITHUB</a>
                 </div>
-                <a href="https://www.easyname.at/en" class="easy-name-logo">
+                <a href="https://www.easyname.at/en" class="easy-name-logo hover-pointer">
                     Hosted by:
                     <img src="./assets/easy_name.svg">
                 </a>
@@ -141,10 +274,11 @@
             <div class="footer-spacer"></div>
             <footer>
                 <div class="links">
-                    <a href="#">SUPPORT US</a>
-                    <a href="#">GITHUB</a>
+                    <!-- <a href="#" class="hover-pointer">SUPPORT US</a> -->
+                    <span class="to-main-page hover-pointer">TO MAIN PAGE</span>
+                    <a href="https://github.com/blueUserRed/forty-five" class="hover-pointer">GITHUB</a>
                 </div>
-                <a href="https://www.easyname.at/en" class="easy-name-logo">
+                <a href="https://www.easyname.at/en" class="easy-name-logo hover-pointer">
                     Hosted by:
                     <img src="./assets/easy_name.svg">
                 </a>
