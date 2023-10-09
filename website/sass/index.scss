@@ -113,12 +113,7 @@ $our-project-break: 950px;
 
 .deco-card {
     position: absolute;
-    width: 15%;
-
-    @include narrow {
-        width: 20%;
-    }
-
+    width: 18%;
 }
 
 body {
@@ -695,18 +690,30 @@ section.sub-page .title-card {
             left: 115%;
             top: 25%;
             transform: rotate(-30deg);
+
+            @include narrow {
+                display: none;
+            }
         }
 
         #deco-card-10 {
             left: 120%;
             top: 15%;
             transform: rotate(-40deg);
+            
+            @include narrow {
+                display: none;
+            }
         }
 
         #deco-card-11 {
             left: 125%;
             top: 35%;
             transform: rotate(20deg);
+            
+            @include narrow {
+                display: none;
+            }
         }
 
     }
