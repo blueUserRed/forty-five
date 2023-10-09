@@ -21,7 +21,7 @@ function main() {
     addEventListener("scroll", () => lastYScrollPosition = window.scrollY);
     addEventListener("resize", () => fixScroll());
 
-    updateScroll();
+    // updateScroll();
 }
 
 function doNavbarListeners() {

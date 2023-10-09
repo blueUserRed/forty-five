@@ -30,6 +30,85 @@ $our-project-break: 950px;
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-clip: border-box;
+
+    @include narrow {
+        background-image: url("../assets/text_background_narrow.png");
+    }
+
+    span, p, ul {
+
+        padding-left: 12%;
+        padding-right: 12%;
+
+        color: black;
+        font-size: 0.5cm;
+
+        @include narrow {
+            font-size: 3.5vw;
+        }
+
+    }
+
+    a {
+        color: $forty-brown;
+        font-style: italic;
+    }
+
+    a:hover {
+        cursor: pointer;
+        color: #5f4334;
+    }
+
+    h3 {
+        color: black;
+        font-size: 0.8cm;
+
+        @include narrow {
+            font-size: 4vw;
+        }
+    }
+
+}
+
+.emphasis {
+    font-weight: bold;            
+}
+
+.paper-text-box-alternate {
+    background-image: url("../assets/text_background_alternate.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-clip: border-box;
+
+    span, p, ul {
+
+        color: black;
+        font-size: 0.5cm;
+
+        @include narrow {
+            font-size: 3.5vw;
+        }
+    }
+
+    a {
+        color: $forty-brown;
+        font-style: italic;
+    }
+
+    a:hover {
+        cursor: pointer;
+        color: #5f4334;
+    }
+
+    h3 {
+        margin-left: 4%;
+        color: black;
+        font-size: 0.8cm;
+
+        @include narrow {
+            font-size: 4vw;
+        }
+    }
 }
 
 .deco-card {
@@ -172,7 +251,7 @@ nav {
 }
 
 section.sub-page {
-    width: 100%;
+    width: 33.3333%;
     position: relative;
 }
 
@@ -256,21 +335,18 @@ section.sub-page .title-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    // z-index: 1;
-
-    // &.cur-page-2, &.cur-page-3 {
-    //     height: 50vh;
-    // }
 
     #our-project {
         position: relative;
         width: 12cm;
-//         height: 5.8cm;
         left: 30%;
         margin-top: -4cm;
         top: 0;
         z-index: 100;
-        // z-index: $header-zindex - 100;
+        // animation-name: our-project-animation;
+        animation-duration: 1s;
+        animation-iteration-count: infinite;
+        animation-timing-function: ease-in-out;
         transition: top 0.2s;
 
         &:hover {
@@ -331,6 +407,7 @@ section.sub-page .title-card {
         #deco-revolver-1 {
             position: absolute;
             width: 38%;
+            filter: drop-shadow(-5px 5px rgba(0, 0, 0, 0.377));
             transform: rotate(-75deg) translate(-70%, -210%);
         }
 
@@ -391,51 +468,59 @@ section.sub-page .title-card {
             width: 26cm;
         }
 
-        img { // TODO: change back
-        // iframe {
+        img {
             width: 70%;
-            // aspect-ratio: 16 / 9;
             margin-top: 3cm;
             margin-bottom: 3cm;
             transform: rotate(2deg);
-            // z-index: $overlay-zindex + 100;
         }
 
     }
 
     #main-description {
         position: relative;
-        width: 110%;
+        width: 90%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-top: -4.2cm;
+        margin-top: -2cm;
         transform: rotate(-1deg);
         z-index: 0;
 
         @include narrow {
-            width: 120%;
+            width: 100%;
         }
 
         @include wide {
-            width: 32cm;
+            width: 29cm;
+        }
+
+        #main-description-text-container {
+            padding: 1cm 10% 2cm 10%;
+
+            @include narrow {
+                padding-top: 2.5cm;
+                padding-bottom: 6cm;
+            }
         }
 
         p {
             color: black;
+            font-size: 0.5cm;
+
+            @include narrow {
+                font-size: 3.5vw;
+            }
+        }
+
+        h3 {
+            color: black;
             font-size: 0.8cm;
-            padding: 3cm 19% 8cm 19%;
 
             @include narrow {
                 font-size: 4vw;
-                padding-bottom: 4cm;
             }
-
-            // &.cur-page-2, &.cur-page-3 {
-            //     padding-bottom: 0;
-            //     font-size: 0.6cm;
-            // }
         }
 
         #deco-hat {
@@ -459,7 +544,7 @@ section.sub-page .title-card {
 
         #deco-card-4 {
             top: 20%;
-            left: -0%;
+            left: -10%;
             transform: rotate(10deg);
             @include narrow {
                 display: none;
@@ -486,7 +571,7 @@ section.sub-page .title-card {
 
         #deco-card-6 {
             width: 15%;
-            top: 70%;
+            top: 75%;
             left: -8%;
             transform: rotate(32deg);
             z-index: 3;
@@ -494,19 +579,20 @@ section.sub-page .title-card {
             @include narrow {
                 width: 20%;
                 left: 4%;
-                top: 78%;
+                top: 85%;
             }
         }
 
         #deco-card-7 {
             width: 15%;
             top: 88%;
-            left: -8%;
+            left: -16%;
             transform: rotate(-10deg);
             z-index: 2;
 
             @include narrow {
                 width: 20%;
+                top: 92%;
                 left: 4%;
             }
         }
@@ -514,12 +600,13 @@ section.sub-page .title-card {
         #deco-card-8 {
             width: 12%;
             top: 88%;
-            left: 3%;
+            left: -5%;
             transform: rotate(10deg);
             z-index: 3;
 
             @include narrow {
                 width: 16%;
+                top: 92%;
                 left: 15%;
             }
         }
@@ -533,33 +620,93 @@ section.sub-page .title-card {
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            // padding: 2cm;
-            width: 40%;
-            height: 45%;
-            top: 70%;
-            left: 60%;
+            width: 35%;
+            aspect-ratio: 1;
+            top: 78%;
+            left: 75%;
+
+            @include narrow {
+                top: 80%;
+                left: 40%;
+                width: 52%;
+            }
 
             @include wide {
-                // margin-bottom: 1cm;
+                width: 40%;
+                top: 73%;
+                left: 70%;
             }
 
             @include very-wide {
-                left: 80%;
-                top: 65%;
-                height: 50%;
-            }
-
-            @include narrow {
-                height: 40%;
-                // width: 50%;
-                top: 80%;
-                left: 55%;
+                width: 40%;
+                top: 70%;
+                left: 85%;
             }
 
             #deco-micro-comic {
                 width: 60%;
             }
 
+        }
+
+    }
+
+    #feature-list {
+
+        width: 80%;
+        padding-top: 2cm;
+        padding-bottom: 2cm;
+        margin-top: 2cm;
+        margin-bottom: 3cm;
+
+        transform: rotate(3deg);
+
+        @include wide {
+            width: 60%;
+        }
+
+        @include narrow {
+            width: 100%;
+        }
+
+        ul {
+            padding-left: 12%;
+            padding-right: 12%;
+        }
+
+    }
+
+    #open-source-description {
+        
+        width: 50%;
+        padding-top: 1cm;
+        padding-bottom: 1cm;
+        padding-left: 2.0cm;
+        margin-left: -5cm;
+        margin-top: 1cm;
+        transform: rotate(-2deg);
+
+        @include narrow {
+            width: 70%;
+            margin-left: -1cm;
+        }
+
+        #deco-card-9 {
+            left: 115%;
+            top: 25%;
+            transform: rotate(-30deg);
+        }
+
+        #deco-card-10 {
+            left: 120%;
+            top: 15%;
+            transform: rotate(-40deg);
+        }
+
+        #deco-card-11 {
+            left: 125%;
+            top: 35%;
+            transform: rotate(20deg);
         }
 
     }
@@ -581,7 +728,7 @@ section.sub-page .title-card {
         aspect-ratio: 1540 / 1061;
 
         @include narrow {
-            margin-top: -0.3cm;
+            margin-top: 1cm;
         }
 
         #deco-revolver-2 {
@@ -596,44 +743,34 @@ section.sub-page .title-card {
         }
     }
 
-    #about-description {
+    #behind-the-project {
         position: relative;
         width: 80%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        margin-top: -2cm;
-        margin-left: -15%;
-        transform: rotate(-3deg);
+        margin-top: 1cm;
+        // margin-left: -15%;
+        padding-top: 1cm;
+        padding-bottom: 1.5cm;
+        // transform: rotate(-3deg);
         z-index: 0;
 
         @include narrow {
             width: 90%;
-            margin-top: -2cm;
+            margin-top: 2cm;
         }
 
         @include wide {
             width: 28cm;
         }
 
-        p {
-            color: black;
-            font-size: 0.6cm;
-            padding: 3cm 19% 8cm 19%;
-
-            @include narrow {
-                font-size: 3.4vw;
-                padding-bottom: 4cm;
-            }
-
-        }
-
         #group-picture-description {
             position: absolute;
             width: 40%;
             top: 30%;
-            left: 85%;
+            left: 88%;
             transform: rotate(10deg);
 
             @include narrow {
@@ -647,11 +784,63 @@ section.sub-page .title-card {
         display: none;
         width: 60%;
         transform: rotate(-10deg);
-        margin-top: -4cm;
+        margin-top: 0cm;
 
         @include narrow {
             display: block;
         }
+    }
+
+    #project-history {
+        position: relative;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1.5cm;
+        padding-top: 1.5cm;
+        padding-bottom: 1.5cm;
+        z-index: 0;
+
+        @include narrow {
+            width: 100%;
+            padding-top: 2cm;
+            margin-top: 2cm;
+        }
+
+        @include wide {
+            width: 28cm;
+        }
+
+        p {    
+            font-size: 0.5cm;
+    
+            @include narrow {
+                font-size: 3.0vw;
+            }
+        }
+    
+        h3 {
+            font-size: 0.8cm;
+    
+            @include narrow {
+                font-size: 3.6vw;
+            }
+        }
+
+        #group-picture-description {
+            position: absolute;
+            width: 40%;
+            top: 30%;
+            left: 88%;
+            transform: rotate(10deg);
+
+            @include narrow {
+                display: none;
+            }
+        }
+    
     }
 
     #member-pictures {
@@ -662,10 +851,6 @@ section.sub-page .title-card {
         align-content: space-between;
         flex-wrap: wrap;
         width: 80%;
-
-        @include narrow {
-            margin-top: 2cm;
-        }
 
         .member-picture {
             width: 20%;
@@ -679,9 +864,9 @@ section.sub-page .title-card {
                 margin: 1.2cm;
             }
 
-            // &.cur-page-1, &.cur-page-3 {
-            //     display: none;
-            // }
+            @include narrow {
+                width: 30%;
+            }
 
         }
 
@@ -714,39 +899,25 @@ section.sub-page .title-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    
-    // &.cur-page-1, &.cur-page-2 {
-    //     height: 50vh;
-    // }
 
     #imprint-text {
         position: relative;
-        width: 90%;
+        width: 80%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 0;
         margin-top: 2cm;
+        padding-bottom: 2cm;
+        padding-top: 2cm;
 
         @include narrow {
             width: 100%;
         }
 
         @include wide {
-            width: 40cm;
-        }
-
-        p {
-            color: black;
-            font-size: 0.6cm;
-            padding: 6cm 19% 8cm 19%;
-
-            @include narrow {
-                font-size: 3.4vw;
-                padding-bottom: 4cm;
-            }
-
+            width: 30cm;
         }
 
     }
@@ -805,7 +976,7 @@ footer {
         width: 100%;
         flex-grow: 1.0;
         
-        a {
+        a, span {
             color: $forty-white;
             text-decoration: none;
     
@@ -831,6 +1002,26 @@ footer {
             line-height: 6vw;
             height: 6vw;
         }
+    }
+
+}
+
+.hover-pointer:hover {
+    cursor: pointer;
+}
+
+@keyframes our-project-animation {
+
+    0% {
+        top: 0cm;
+    }
+
+    50% {
+        top: 0.2cm;
+    }
+
+    100% {
+        top: 0cm;
     }
 
 }
