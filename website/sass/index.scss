@@ -128,15 +128,14 @@ body {
 header {
     position: fixed;
     top: 0;
-    background-color: #000000;
     width: 100%;
-    background-image: url("../assets/header_texture.png");
+    background-image: url("../assets/header.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    // padding: 5px;
+    padding-bottom: 7px;
     z-index: $header-zindex;
 
     * + * {
@@ -402,7 +401,7 @@ section.sub-page .title-card {
         #deco-revolver-1 {
             position: absolute;
             width: 38%;
-            filter: drop-shadow(-5px 5px rgba(0, 0, 0, 0.377));
+            filter: drop-shadow(-15px 15px 10px rgba(0, 0, 0, 0.978));
             transform: rotate(-75deg) translate(-70%, -210%);
         }
 
@@ -742,6 +741,7 @@ section.sub-page .title-card {
             position: absolute;
             width: 38%;
             transform: rotate(-8deg) translate(-160%, 170%);
+            filter: drop-shadow(15px 15px 10px rgba(0, 0, 0, 0.978));
             z-index: 200;
 
             @include narrow {
@@ -858,6 +858,7 @@ section.sub-page .title-card {
         align-content: space-between;
         flex-wrap: wrap;
         width: 80%;
+        filter: drop-shadow(15px 15px 10px rgba(0, 0, 0, 0.978));
 
         .member-picture {
             width: 20%;
