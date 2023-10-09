@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -30,10 +31,7 @@ import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import ktx.actors.*
-import onj.value.OnjArray
-import onj.value.OnjFloat
-import onj.value.OnjNamedObject
-import onj.value.OnjObject
+import onj.value.*
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -211,6 +209,38 @@ interface Detachable {
 interface OffSettable {
     var offsetX: Float
     var offsetY: Float
+}
+
+interface DisplayDetailsOnHoverActor {
+
+    val actorTemplate: String
+    var detailActor: Actor?
+
+    fun <T> registerOnHoverDetailActor(
+        actor: T,
+        screen: OnjScreen
+    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
+
+    fun setBoundsOfHoverDetailActor(actor: Actor) {
+        val detailActor = detailActor
+        if (detailActor !is Layout) return
+        detailActor.layout()
+        val prefWidth = detailActor.prefWidth
+        val prefHeight = detailActor.prefHeight
+        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+        detailActor.setBounds(
+            x + actor.width / 2 - prefWidth / 2,
+            y + actor.height,
+            prefWidth,
+            prefHeight
+        )
+    }
+
+    fun getHoverDetailData(): Map<String, OnjValue>
+
+    fun onDetailDisplayStarted() { }
+    fun onDetailDisplayEnded() { }
+
 }
 
 /**

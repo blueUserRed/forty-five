@@ -585,6 +585,8 @@ class ScreenBuilder(val file: FileHandle) {
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
         widgetOnj.ifHas<String>("touchable") { touchable = Touchable.valueOf(it) }
 
+        widgetOnj.ifHas<Double>("width") { width = it.toFloat() }
+
         onClick { fire(ButtonClickEvent()) }
     }
 
