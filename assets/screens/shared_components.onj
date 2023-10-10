@@ -776,7 +776,7 @@ hoverDetail: $Box {
     template_keys: {
         "children.0.children.0.template": "text"
     },
-    width: 300.0
+    width: 300.0,
 } children [
 
     $Box {
@@ -786,7 +786,7 @@ hoverDetail: $Box {
                 width: 300#points
             }
         ],
-        width: 300.0
+        width: 300.0,
     } children [
 
         $TemplateLabel {
