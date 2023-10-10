@@ -15,7 +15,7 @@ $our-project-break: 950px;
     padding-right: 20px;
     padding-bottom: 4px;
     padding-top: 4px;
-    background-image: url("../assets/download_button.png");
+    background-image: url("../assets/download_button.webp");
     background-repeat: no-repeat;
     background-size: 100% 105%;
     background-clip: border-box;
@@ -26,13 +26,13 @@ $our-project-break: 950px;
 }
 
 .paper-text-box {
-    background-image: url("../assets/text_background.png");
+    background-image: url("../assets/text_background.webp");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-clip: border-box;
 
     @include narrow {
-        background-image: url("../assets/text_background_narrow.png");
+        background-image: url("../assets/text_background_narrow.webp");
     }
 
     span, p, ul {
@@ -75,7 +75,7 @@ $our-project-break: 950px;
 }
 
 .paper-text-box-alternate {
-    background-image: url("../assets/text_background_alternate.png");
+    background-image: url("../assets/text_background_alternate.webp");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-clip: border-box;
@@ -129,7 +129,7 @@ header {
     position: fixed;
     top: 0;
     width: 100%;
-    background-image: url("../assets/header.png");
+    background-image: url("../assets/header.webp");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     display: flex;
@@ -190,7 +190,7 @@ nav {
     margin-left: 110vw;
     z-index: $header-zindex + 100;
 
-    background-image: url("../assets/hamburger_background.png");
+    background-image: url("../assets/hamburger_background.webp");
     background-repeat: no-repeat;
     background-size: 100% 100%;
 
@@ -241,7 +241,7 @@ nav {
     flex-direction: row;
     align-items: stretch;
     width: 100% * $num-subpages;
-    background-image: url("../assets/background.png");
+    background-image: url("../assets/background.webp");
 }
 
 section.sub-page {
@@ -277,7 +277,7 @@ section.sub-page .title-card {
     left: 0;
     width: 100%;
     height: 100%;
-    // background-image: url("../assets/overlay.png");
+    // background-image: url("../assets/overlay.webp");
     // background-repeat: no-repeat;
     // background-size: cover;
     // background-position: center;
@@ -296,7 +296,7 @@ section.sub-page .title-card {
     }
 
     #overlay-multiply {
-        background-image: url("../assets/overlay_multiply.png");
+        background-image: url("../assets/overlay_multiply.webp");
         background-blend-mode: multiply;
         background-size: 100% 100%;
         background-repeat: no-repeat;
@@ -305,14 +305,14 @@ section.sub-page .title-card {
     }
 
     #overlay-vignette {
-        background-image: url("../assets/overlay_vignette.png");
+        background-image: url("../assets/overlay_vignette.webp");
         background-size: 100% 100%;
         background-repeat: no-repeat;
         z-index: $overlay-zindex + 2;
     }
 
     #overlay-shadow {
-        background-image: url("../assets/overlay_cowboy_shadow.png");
+        background-image: url("../assets/overlay_cowboy_shadow.webp");
         width: 20cm;
         left: 50%;
         transform: translate(-50%, 0%);
@@ -367,7 +367,7 @@ section.sub-page .title-card {
 
     #title-map {
         position: relative;
-        background-image: url("../assets/map.png");
+        background-image: url("../assets/map.webp");
         background-repeat: no-repeat;
         background-size: 100% 100%;
         margin-top: -4.0cm;
@@ -442,7 +442,7 @@ section.sub-page .title-card {
     }
 
     #trailer-container {
-        background-image: url("../assets/trailer_container_background.png");
+        background-image: url("../assets/trailer_container_background.webp");
         background-repeat: no-repeat;
         background-size: 100% 100%;
         width: 90%;
@@ -606,7 +606,7 @@ section.sub-page .title-card {
         }
 
         #micro-comic-container {
-            background-image: url("../assets/background_grey.png");
+            background-image: url("../assets/background_grey.webp");
             background-repeat: no-repeat;
             background-size: 100% 100%;
             position: absolute;
@@ -727,7 +727,7 @@ section.sub-page .title-card {
 
     #about-page-title {
         position: relative;
-        background-image: url("../assets/about_page_title.png");
+        background-image: url("../assets/about_page_title.webp");
         background-size: 100% 100%;
         margin-top: -1.1cm;
         width: 70%;
@@ -937,7 +937,7 @@ section.sub-page .title-card {
 }
 
 footer {
-    background-image: url("../assets/footer.png");
+    background-image: url("../assets/footer.webp");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     width: 100%;
