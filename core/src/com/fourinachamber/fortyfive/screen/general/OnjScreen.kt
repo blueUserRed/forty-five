@@ -129,7 +129,7 @@ open class OnjScreen @MainThreadOnly constructor(
     var keySelectionHierarchy: KeySelectionHierarchyNode? = null
         private set
 
-    private var currentHoverDetail: Actor? = null
+    var currentHoverDetail: Actor? = null // TODO: make private
     private var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
 
     init {
@@ -323,6 +323,7 @@ open class OnjScreen @MainThreadOnly constructor(
         if (printFrameRate) FortyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()
+        if (currentHoverDetail == null) println("no hoverdetail")
         lastRenderTime = measureTimeMillis {
             stage.act(Gdx.graphics.deltaTime)
             ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)

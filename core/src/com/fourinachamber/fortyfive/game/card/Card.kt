@@ -603,13 +603,9 @@ class CardActor(
     override fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
-//        val prefWidth = width * 1.5f
-//        detailActor.layout()
-//        detailActor.width = prefWidth
         val prefHeight = detailActor.prefHeight
         val prefWidth = detailActor.prefWidth
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-//        detailActor.setPosition(
         detailActor.setBounds(
             x + actor.width / 2 - detailActor.width / 2,
             y + actor.height,
