@@ -8,8 +8,6 @@ $forty-brown: #0d0907;
 $header-zindex: 500;
 $overlay-zindex: 300;
 
-$our-project-break: 950px;
-
 .download {
     padding-left: 20px;
     padding-right: 20px;
@@ -23,6 +21,47 @@ $our-project-break: 950px;
     color: $forty-white;
     text-decoration: none;
     text-align: center;
+}
+
+.paper-text-box-always-narrow {
+    background-image: url("../assets/text_background_narrow.webp");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-clip: border-box;
+
+    span, p, ul {
+
+        padding-left: 12%;
+        padding-right: 12%;
+
+        color: black;
+        font-size: 0.5cm;
+
+        @include narrow {
+            font-size: 3.5vw;
+        }
+
+    }
+
+    a {
+        color: $forty-brown;
+        font-style: italic;
+    }
+
+    a:hover {
+        cursor: pointer;
+        color: #5f4334;
+    }
+
+    h3 {
+        color: black;
+        font-size: 0.8cm;
+
+        @include narrow {
+            font-size: 4vw;
+        }
+    }
+
 }
 
 .paper-text-box {
@@ -146,7 +185,7 @@ header {
         height: 2.0cm;
     }
 
-    a {
+    a, span {
         margin-top: 0.0;
         margin-bottom: 0;
         font-size: 0.6cm;
@@ -156,15 +195,18 @@ header {
         @include hamburgerMenu {
             display: none;
         }
+
+        &:hover {
+            text-decoration: underline;
+        }
     }
 
     #header-spacer {
-        display: none;
         flex-grow: 1.0;
+    }
 
-        @include hamburgerMenu {
-            display: block;
-        }
+    #header-download {
+        margin-right: 0.5cm;
     }
 
     #hamburger-menu {
@@ -180,6 +222,15 @@ header {
             display: none;
         }
     }
+
+    #header-our-project.cur-page-2, #header-our-project.cur-page-3 {
+        display: none;
+    }
+
+    #header-to-main.cur-page-1 {
+        display: none;
+    }
+
 }
 
 nav {
@@ -254,7 +305,6 @@ section.sub-page .title-card {
     background-repeat: no-repeat;
     background-size: cover;
     width: 90%;
-    margin-top: -5cm;
     aspect-ratio: 1.646;
 
     display: flex;
@@ -330,56 +380,19 @@ section.sub-page .title-card {
     flex-direction: column;
     align-items: center;
 
-    #our-project {
-        position: relative;
-        width: 12cm;
-        left: 30%;
-        margin-top: -4cm;
-        top: 0;
-        z-index: 100;
-        // animation-name: our-project-animation;
-        animation-duration: 1s;
-        animation-iteration-count: infinite;
-        animation-timing-function: ease-in-out;
-        transition: top 0.2s;
-
-        &:hover {
-            top: 1cm;
-        }
-
-        @include hamburgerMenu {
-            display: none;
-        }
-
-        @include break($our-project-break) {
-            left: 0%;
-        }
-    }
-
-    #our-project-standin {
-        display: none;
-        height: 5.8cm;
-
-        @include hamburgerMenu {
-            display: block;
-        }
-    }
-
     #title-map {
         position: relative;
         background-image: url("../assets/map.webp");
         background-repeat: no-repeat;
         background-size: 100% 100%;
-        margin-top: -4.0cm;
         width: 68%;
+        margin-top: 2cm;
         background-clip: border-box;
         background-position-y: center;
         background-position-x: 0;
         
         @include narrow {
             width: 90%;
-            margin-top: -3.5cm;
-            // margin-top: -4.5cm;
         }
 
         #main-logo {
@@ -729,7 +742,7 @@ section.sub-page .title-card {
         position: relative;
         background-image: url("../assets/about_page_title.webp");
         background-size: 100% 100%;
-        margin-top: -1.1cm;
+        margin-top: -0.5cm;
         width: 70%;
         aspect-ratio: 1540 / 1061;
 
@@ -739,8 +752,8 @@ section.sub-page .title-card {
 
         #deco-revolver-2 {
             position: absolute;
-            width: 38%;
-            transform: rotate(-8deg) translate(-160%, 170%);
+            width: 45%;
+            transform: rotate(-8deg) translate(-130%, 170%);
             filter: drop-shadow(15px 15px 10px rgba(0, 0, 0, 0.978));
             z-index: 200;
 
@@ -1016,20 +1029,4 @@ footer {
 
 .hover-pointer:hover {
     cursor: pointer;
-}
-
-@keyframes our-project-animation {
-
-    0% {
-        top: 0cm;
-    }
-
-    50% {
-        top: 0.2cm;
-    }
-
-    100% {
-        top: 0cm;
-    }
-
 }
