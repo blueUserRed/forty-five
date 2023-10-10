@@ -10,10 +10,12 @@
     
     <header>
         <img class="logo to-main-page hover-pointer" src="assets/logo_white.webp" />
-        <a href="javascript:alert('coming soon!')" class="download hover-pointer">Coming soon!</a>
+        <span id="header-our-project" class="to-about-page hover-pointer cur-page-dependent">Our Project</span>
+        <span id="header-to-main" class="to-main-page hover-pointer cur-page-dependent">Home</span>
         <a href="https://github.com/blueUserRed/forty-five" class="hover-pointer">We are open source!</a>
         <!-- <a href="#" >Support us!</a> -->
         <div id="header-spacer"></div>
+        <a id="header-download" href="javascript:alert('coming soon!')" class="download hover-pointer">Coming soon!</a>
         <img id="hamburger-menu" class="opens-navbar navbar-dependent hover-pointer" src="assets/hamburger.webp" />
     </header>
 
@@ -33,8 +35,6 @@
     <main id="main-content-container">
         
         <section class="sub-page cur-page-dependent" id="main-page">
-            <img id="our-project" class="to-about-page hover-pointer" src="./assets/our_project.webp" />
-            <div id="our-project-standin"></div>
             <article class="title-card" id="title-map">
                 <img class="deco-card" id="deco-card-1" src="./assets/arrow.webp" /> 
                 <img class="deco-card" id="deco-card-2" src="./assets/explosiveBullet.webp" /> 
@@ -156,7 +156,7 @@
                 <img src="assets/group_picture.webp" id="group-picture-description">
             </article>
             <img src="assets/group_picture.webp" id="group-picture-standalone">
-            <article class="paper-text-box" id="project-history">
+            <article class="paper-text-box-always-narrow" id="project-history">
                 <h3>
                     History
                 </h3>
