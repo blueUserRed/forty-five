@@ -783,7 +783,8 @@ hoverDetail: $Box {
         styles: [
             {
                 background: "transparent_black_texture",
-                width: 300#points
+                width: 300#points,
+                height: 100#percent
             }
         ],
         width: 300.0,
