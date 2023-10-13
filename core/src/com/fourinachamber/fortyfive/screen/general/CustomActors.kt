@@ -176,7 +176,6 @@ interface HoverStateActor {
         actor.onClick { isClicked = true }
         actor.onExit {
             if (!isClicked) isHoveredOver = false
-
             isClicked = false
         }
     }
@@ -276,6 +275,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
     private var background: Drawable? = null
 
     init {
+        @Suppress("LeakingThis")
         bindHoverStateListeners(this)
     }
 
