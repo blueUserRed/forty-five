@@ -7,78 +7,128 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.math.Affine2
 import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyleCondition
-import com.fourinachamber.fortyfive.screen.general.styles.StyleInstruction
-import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fortyfive.screen.general.styles.*
+import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
-import io.github.orioncraftmc.meditate.YogaNode
+import com.fourinachamber.fortyfive.utils.splitAt
+import com.fourinachamber.fortyfive.utils.zip
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
-import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.math.sin
 
 open class AdvancedTextWidget(
-    advancedText: AdvancedText,
-    screen: OnjScreen
-) : CustomFlexBox(screen) {
+    private val defaults: OnjObject,
+    val screen: OnjScreen,
+) : WidgetGroup(), ZIndexActor, HoverStateActor, StyledActor {
 
-    private var nodesOfCurrentText: List<YogaNode> = listOf()
+    override var fixedZIndex: Int = -1
 
-    open var advancedText: AdvancedText = advancedText
+    override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean = false
+    override var styleManager: StyleManager? = null
+
+    open var advancedText: AdvancedText = AdvancedText.EMPTY
         set(value) {
             field = value
             clearText()
-            initNodes(value)
+            initText(value)
         }
+
+    private var initialisedStyleInstruction: Boolean = false
 
     init {
-        initNodes(advancedText)
+        @Suppress("LeakingThis")
+        bindHoverStateListeners(this)
+        @Suppress("LeakingThis")
+        initText(advancedText)
     }
 
-    private fun initNodes(value: AdvancedText) {
-        nodesOfCurrentText = value.parts.map { part ->
-            val node = add(part.actor)
-            if (part is StyledActor && part is Actor) { // TODO: .actor is stupid now
-                val oldManager = part.styleManager
-                val newManager = StyleManager(part, node)
-                part.styleManager = newManager
-                part.initStyles(screen)
-                newManager.addInstruction( // TODO: this is ugly
-                    "marginLeft",
-                    StyleInstruction(
-                        YogaValue(0.1f, YogaUnit.POINT),
-                        1,
-                        StyleCondition.Always,
-                        YogaValue::class
-                    ),
-                    YogaValue::class
-                )
-                if (oldManager == null) {
-                    screen.addStyleManager(newManager)
-                } else {
-                    screen.swapStyleManager(oldManager, newManager)
-                }
+    fun setRawText(text: String) {
+        advancedText = AdvancedTextParser(text, screen, defaults).parse()
+    }
+
+    override fun layout() {
+        super.layout()
+
+        children
+            .filterIsInstance<Layout>()
+            .onEach(Layout::validate)
+            .forEach { child ->
+                child as Actor
+                child.width = child.prefWidth
+                child.height = child.prefHeight
             }
-            node
-        }
+
+        var curX = 0f
+        val lines = advancedText
+            .parts
+            .splitAt { part ->
+                val child = part.actor
+                val shouldSplit = curX + child.width > width
+                if (shouldSplit) {
+                    curX = 0f
+                } else if (part.breakLine) {
+                    curX = width + 1f
+                }
+                curX += child.width
+                shouldSplit
+            }
+            .map { line -> line.map { it.actor } }
+
+        var curY = 0f
+        curX = 0f
+        lines
+            .reversed()
+            .zip { line -> line.maxOf { it.height } }
+            .forEach { (line, height) ->
+                line.forEach { actor ->
+                    actor.setPosition(curX, curY)
+                    curX += actor.width
+                }
+                curX = 0f
+                curY += height
+            }
+
+        height = curY
+    }
+
+    private fun initText(value: AdvancedText) {
+        value
+            .parts
+            .forEach { part -> addActor(part.actor) }
+        invalidateHierarchy()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (!initialisedStyleInstruction) {
+            styleManager!!.addInstruction(
+                "height",
+                ObservingStyleInstruction(
+                    Integer.MAX_VALUE,
+                    StyleCondition.Always,
+                    YogaValue::class,
+                    observer = { YogaValue(height, YogaUnit.POINT) }
+                ),
+                YogaValue::class
+            )
+            initialisedStyleInstruction = true
+        }
         advancedText.update()
         super.draw(batch, parentAlpha)
     }
 
-    fun clearText() {
-        nodesOfCurrentText.forEach { remove(it) }
-        nodesOfCurrentText = listOf()
-    }
+    private fun clearText() = advancedText.parts.forEach { removeActor(it.actor) }
 
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+    }
 }
 
 data class AdvancedText(
@@ -103,47 +153,7 @@ data class AdvancedText(
     }
 
     companion object {
-
         val EMPTY = AdvancedText(listOf())
-
-        fun readFromOnj(partsOnj: OnjArray, screen: OnjScreen, defaults: OnjObject): AdvancedText {
-            val defaultFontName = defaults.get<String>("font")
-            val defaultFont = ResourceManager.get<BitmapFont>(screen, defaultFontName)
-            val defaultColor = defaults.get<Color>("color")
-            val defaultFontScale = defaults.get<Double>("fontScale").toFloat()
-            val parts = partsOnj.value.map { obj ->
-                obj as OnjNamedObject
-                val part = when (obj.name) {
-                    "Text" -> TextAdvancedTextPart(
-                        obj.get<String>("text"),
-                        obj.getOr<String?>("font", null)?.let { ResourceManager.get(screen, it) }
-                            ?: defaultFont,
-                        obj.getOr<Color?>("color", null) ?: defaultColor,
-                        obj.getOr<Double?>("fontScale", null)?.toFloat() ?: defaultFontScale,
-                        screen
-                    )
-                    "Icon" -> IconAdvancedTextPart(
-                        obj.get<String>("icon"),
-                        obj.getOr<String?>("font", null)?.let { ResourceManager.get(screen, it) }
-                            ?: defaultFont,
-                        screen,
-                        obj.getOr<Double?>("fontScale", null)?.toFloat() ?: defaultFontScale
-                    )
-                    else -> throw RuntimeException("unknown text part ${obj.name}")
-                }
-                obj.ifHas<OnjArray>("actions") { arr ->
-                    arr
-                        .value
-                        .forEach {
-                            it as OnjNamedObject
-                            val action = AdvancedTextPartActionFactory.getAction(it)
-                            part.addDialogAction(action)
-                        }
-                }
-                part
-            }
-            return AdvancedText(parts)
-        }
     }
 
 }
@@ -154,6 +164,8 @@ interface AdvancedTextPart {
 
     var xOffset: Float?
     var yOffset: Float?
+
+    val breakLine: Boolean
 
     fun progress(): Boolean
     fun resetProgress()
@@ -177,8 +189,9 @@ class TextAdvancedTextPart(
     font: BitmapFont,
     fontColor: Color,
     fontScale: Float,
-    screen: OnjScreen
-) : CustomLabel(screen, rawText, LabelStyle(font, fontColor)), AdvancedTextPart {
+    screen: OnjScreen,
+    override val breakLine: Boolean
+) : TemplateStringLabel(screen, TemplateString(rawText), LabelStyle(font, fontColor)), AdvancedTextPart {
 
     override val actor: Actor = this
 
@@ -244,6 +257,7 @@ class IconAdvancedTextPart(
     private val font: BitmapFont,
     private val screen: OnjScreen,
     private val dialogFontScale: Float,
+    override val breakLine: Boolean
 ) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart {
 
 
