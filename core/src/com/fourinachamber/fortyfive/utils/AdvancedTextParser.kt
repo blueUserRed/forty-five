@@ -3,10 +3,7 @@ package com.fourinachamber.fortyfive.utils
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.fourinachamber.fortyfive.screen.ResourceManager
-import com.fourinachamber.fortyfive.screen.general.AdvancedText
-import com.fourinachamber.fortyfive.screen.general.AdvancedTextPart
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.TextAdvancedTextPart
+import com.fourinachamber.fortyfive.screen.general.*
 import onj.value.OnjObject
 
 class AdvancedTextParser(val code: String, private val screen: OnjScreen, defaults: OnjObject) {
@@ -25,7 +22,7 @@ class AdvancedTextParser(val code: String, private val screen: OnjScreen, defaul
         while (!end()) {
             nextChar()
         }
-
+        finishText()
         return AdvancedText(parts)
     }
 

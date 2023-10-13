@@ -129,7 +129,7 @@ open class OnjScreen @MainThreadOnly constructor(
     var keySelectionHierarchy: KeySelectionHierarchyNode? = null
         private set
 
-    var currentHoverDetail: Actor? = null // TODO: make private
+    private var currentHoverDetail: Actor? = null
     private var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
 
     init {
@@ -239,29 +239,22 @@ open class OnjScreen @MainThreadOnly constructor(
         }
     }
 
-//    private var todel: YogaNode? = null
-
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
         if (currentHoverDetail != null) hideHoverDetail()
-//        val flexBoxRoot = stage.root.children[0] as CustomFlexBox
         val detail = screenBuilder.generateFromTemplate(
             detailTemplate,
             displayDetailActor.getHoverDetailData(),
             null,
             this
         )!!
-//        todel = (detail as StyledActor).styleManager!!.node
         displayDetailActor.detailActor = detail
         displayDetailActor.setBoundsOfHoverDetailActor(actor)
         currentHoverDetail = detail
-//        addActorToRoot(detail)
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()
     }
 
     private fun hideHoverDetail() {
-//        (stage.root.children[0] as CustomFlexBox).remove(todel)
-//        removeActorFromRoot(currentHoverDetail ?: return)
         currentHoverDetail = null
         currentDisplayDetailActor?.detailActor = null
         currentDisplayDetailActor?.onDetailDisplayEnded()

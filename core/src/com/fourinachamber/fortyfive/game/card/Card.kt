@@ -273,7 +273,6 @@ class Card(
     }
 
     fun updateText() {
-        if (actor.detailActor == null) return // hover detail of card is not displayed
         val text = StringBuilder()
         text
             .append(shortDescription)
@@ -615,7 +614,7 @@ class CardActor(
             if (prefWidth == 0f) detailActor.width else prefWidth,
             prefHeight
         )
-        detailActor.layout()
+        detailActor.invalidateHierarchy()
     }
 
     override fun onDetailDisplayStarted() = card.updateText()
