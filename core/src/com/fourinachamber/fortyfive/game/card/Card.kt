@@ -437,7 +437,7 @@ class CardActor(
     private val screen: OnjScreen
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor {
 
-    override val actorTemplate: String = "TEST_hover_detail"
+    override val actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
 
     override var fixedZIndex: Int = 0
