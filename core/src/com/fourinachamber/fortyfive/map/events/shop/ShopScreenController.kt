@@ -72,7 +72,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val rnd = Random(context.seed)
         shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
         shopCardsHandler.addItems(rnd, context.type, personData.get<String>("defaultShopParameter"))
-        messageWidget.advancedText = AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
+//        messageWidget.advancedText = AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {

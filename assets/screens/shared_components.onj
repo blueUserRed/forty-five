@@ -774,7 +774,7 @@ warningLabelUsedAssets: [
 hoverDetail: $Box {
     template_name: "TEST_hover_detail",
     template_keys: {
-        "children.0.children.0.template": "text"
+        "children.0.children.0.rawText": "text"
     },
     width: 300.0,
 } children [
@@ -788,22 +788,39 @@ hoverDetail: $Box {
             }
         ],
         width: 300.0,
+        debug: true
     } children [
 
-        $TemplateLabel {
-            styles: [
-                {
-                    width: 300#points
-                }
-            ],
-            template: "",
+        $AdvancedText {
             font: "red_wing",
-            color: color.forty_white,
-            fontScale: 0.5,
-            align: "left",
-            wrap: true,
-            width: 300.0
+            rawText: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36",
+//            parts: [
+//                $Text { text: "with the blood of the gang!" },
+//                $Icon { icon: "reserves_texture" }
+//            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.5,
+                color: color.forty_white
+            },
+            debug: true
         }
+
+//        $TemplateLabel {
+//            styles: [
+//                {
+//                    width: 300#points,
+//                    height: 100#percent
+//                }
+//            ],
+//            template: "",
+//            font: "red_wing",
+//            color: color.forty_white,
+//            fontScale: 0.5,
+//            align: "left",
+//            wrap: true,
+//            width: 300.0
+//        }
 
     ]
 ],

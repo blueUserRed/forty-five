@@ -137,6 +137,9 @@ class Card(
 
     private var isDamageDirty: Boolean = true
 
+    var currentHoverText: String = ""
+        private set
+
     init {
         screen.borrowResource(cardTexturePrefix + name)
         actor = CardActor(
@@ -283,7 +286,7 @@ class Card(
             .mapNotNull { it.description }
             .forEach { text.append(it.string).append("\n") }
 
-        TemplateString.updateGlobalParam("game.selectedCard.hoverText", text.toString())
+        currentHoverText = text.toString()
     }
 
     private fun updateTexture() = actor.redrawPixmap()
@@ -597,7 +600,7 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-        "text" to OnjString("{game.selectedCard.hoverText}")
+        "text" to OnjString(card.currentHoverText)
     )
 
     override fun setBoundsOfHoverDetailActor(actor: Actor) {

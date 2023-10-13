@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -414,12 +415,13 @@ class ScreenBuilder(val file: FileHandle) {
         )
 
         "AdvancedText" -> AdvancedTextWidget(
-            AdvancedText.readFromOnj(widgetOnj.get<OnjArray>("parts"), screen, widgetOnj.get<OnjObject>("defaults")),
+            widgetOnj.get<OnjObject>("defaults"),
             screen
-        )
+        ).apply {
+            setRawText(widgetOnj.get<String>("rawText"))
+        }
 
         "DialogWidget" -> DialogWidget(
-//            Dialog.readFromOnj(widgetOnj.get<OnjObject>("dialog"), screen),
             (widgetOnj.get<Double>("progressTime") * 1000).toInt(),
             widgetOnj.get<String>("advanceArrowDrawable"),
             widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
@@ -427,6 +429,7 @@ class ScreenBuilder(val file: FileHandle) {
             fontOrError(widgetOnj.get<String>("optionsFont"), screen),
             widgetOnj.get<Color>("optionsFontColor"),
             widgetOnj.get<Double>("optionsFontScale").toFloat(),
+            widgetOnj.get<OnjObject>("defaults"), // TODO: this is broken currently
             screen
         )
 
@@ -586,6 +589,10 @@ class ScreenBuilder(val file: FileHandle) {
         widgetOnj.ifHas<String>("touchable") { touchable = Touchable.valueOf(it) }
 
         widgetOnj.ifHas<Double>("width") { width = it.toFloat() }
+
+        if (widgetOnj.getOr("setFillParent", false)) {
+            if (this is Layout) setFillParent(true)
+        }
 
         onClick { fire(ButtonClickEvent()) }
     }
