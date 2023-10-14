@@ -11,6 +11,7 @@ enemies: [
         actionProbability: 0.8,
         texture: "enemy_texture",
         coverIcon: "shield_icon",
+        hiddenActionIcon: "normal_bullet",
         coverIconScale: 0.3,
         scaleX: 0.25,
         scaleY: 0.25,
@@ -39,6 +40,7 @@ enemies: [
         actionProbability: 0.8,
         texture: "enemy_texture",
         coverIcon: "shield_icon",
+        hiddenActionIcon: "normal_bullet",
         coverIconScale: 0.3,
         scaleX: 0.25,
         scaleY: 0.25,
@@ -50,16 +52,19 @@ enemies: [
                 showProbability: 1.0,
                 weight: 10,
                 scaleFactor: 0.5,
+                icon: "normal_bullet"
             },
             $TakeCover {
                 cover: [ 5, 10 ],
                 weight: 10,
                 showProbability: 1.0,
+                icon: "shield_icon"
             },
             $GivePlayerStatusEffect {
                 statusEffect: burning(5, 0.5),
                 weight: 10,
                 showProbability: 0.5,
+                icon: "burning_icon"
             },
             $GiveSelfStatusEffect {
                 statusEffect: fireResistance(5),
