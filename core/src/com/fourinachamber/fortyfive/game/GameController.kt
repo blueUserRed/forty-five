@@ -587,39 +587,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     "cardToShoot = $cardToShoot"
         )
 
-        var enemyDamageTimeline: Timeline? = null
-        var effectTimeline: Timeline? = null
-
-        if (cardToShoot != null) {
-
-            enemyDamageTimeline = Timeline.timeline {
-                action {
-                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
-                }
-                include(enemy.damage(cardToShoot.curDamage))
-                action { cardToShoot.afterShot() }
-            }
-
-            effectTimeline = checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
-        }
-
         val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
-
             includeLater(
                 { damagePlayerTimeline },
                 { cardToShoot == null }
             )
-
+            cardToShoot?.let {
+                action {
+                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
+                    cardToShoot.afterShot()
+                }
+                include(enemy.damage(cardToShoot.curDamage))
+            }
             include(rotateRevolver(rotationDirection))
-
-            enemyDamageTimeline?.let { include(it) }
-
-            includeLater(
-                { effectTimeline!! },
-                { effectTimeline != null }
-            )
+            cardToShoot?.let {
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot))
+            }
         }
 
         appendMainTimeline(Timeline.timeline {
@@ -639,8 +624,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
         val newRotation = modify(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
-        include(revolver.rotate(newRotation))
+//        include(revolver.rotate(newRotation))
         action {
+            dispatchAnimTimeline(revolver.rotate(newRotation))
             revolverRotationCounter += newRotation.amount
             checkCardModifierValidity()
             revolver
