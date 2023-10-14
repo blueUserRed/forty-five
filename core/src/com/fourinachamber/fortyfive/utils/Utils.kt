@@ -182,6 +182,17 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
     return Timeline(actions)
 }
 
+inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
+    val chunks = mutableListOf<MutableList<T>>(mutableListOf())
+    forEach { element ->
+        if (predicate(element)) chunks.add(mutableListOf())
+        chunks.last().add(element)
+    }
+    return chunks.filter { it.isNotEmpty() }
+}
+
+inline fun <T, U> Iterable<T>.zip(creator: (T) -> U): List<Pair<T, U>> = map { it to creator(it) }
+
 fun IntRange.midPoint(): Int = first + ((last - first) * 0.5).toInt()
 
 fun IntRange.scale(factor: Double): IntRange = IntRange(

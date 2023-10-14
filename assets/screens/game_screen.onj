@@ -38,7 +38,8 @@ assets: {
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
         ...(sharedComponents.navBarUsedAssets),
-        ...(sharedComponents.warningLabelUsedAssets)
+        ...(sharedComponents.warningLabelUsedAssets),
+        ...(sharedComponents.hoverDetailUsedAssets)
     ]
 },
 
@@ -98,6 +99,7 @@ options: {
 
 templates: [
     ...(sharedComponents.warningLabelTemplates),
+    sharedComponents.hoverDetail
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
