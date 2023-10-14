@@ -9,8 +9,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Cell
-import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
@@ -27,7 +25,11 @@ import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
+import io.github.orioncraftmc.meditate.YogaNode
+import ktx.actors.onEnter
+import ktx.actors.onExit
 import kotlin.system.measureTimeMillis
 
 
@@ -127,7 +129,8 @@ open class OnjScreen @MainThreadOnly constructor(
     var keySelectionHierarchy: KeySelectionHierarchyNode? = null
         private set
 
-    private var currentPopup: Pair<String, Widget>? = null
+    private var currentHoverDetail: Actor? = null
+    private var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
 
     init {
         useAssets.forEach {
@@ -227,6 +230,36 @@ open class OnjScreen @MainThreadOnly constructor(
         additionalEarlyRenderTasks.remove(task)
     }
 
+    fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
+        actor.onEnter {
+            showHoverDetail(actor, actor, actor.actorTemplate)
+        }
+        actor.onExit {
+            hideHoverDetail()
+        }
+    }
+
+    private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
+        if (currentHoverDetail != null) hideHoverDetail()
+        val detail = screenBuilder.generateFromTemplate(
+            detailTemplate,
+            displayDetailActor.getHoverDetailData(),
+            null,
+            this
+        )!!
+        displayDetailActor.detailActor = detail
+        displayDetailActor.setBoundsOfHoverDetailActor(actor)
+        currentHoverDetail = detail
+        currentDisplayDetailActor = displayDetailActor
+        displayDetailActor.onDetailDisplayStarted()
+    }
+
+    private fun hideHoverDetail() {
+        currentHoverDetail = null
+        currentDisplayDetailActor?.detailActor = null
+        currentDisplayDetailActor?.onDetailDisplayEnded()
+    }
+
     @AllThreadsAllowed
     fun namedActorOrError(name: String): Actor = namedActors[name] ?: throw RuntimeException(
         "no actor named $name"
@@ -279,21 +312,21 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
-        for (styleTarget in styleManagers) styleTarget.update()
+        styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()
         lastRenderTime = measureTimeMillis {
             stage.act(Gdx.graphics.deltaTime)
-//            if (postProcessor == null) {
-                ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-                if (stage.batch.isDrawing) stage.batch.end()
-                doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
-                stage.draw()
-                doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-//            } else {
-//                renderWithPostProcessing()
-//            }
+            ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
+            if (stage.batch.isDrawing) stage.batch.end()
+            doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
+            stage.draw()
+            doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
+            stage.batch.begin()
+            currentHoverDetail?.act(delta)
+            currentHoverDetail?.draw(stage.batch, 1f)
+            stage.batch.end()
         }
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)

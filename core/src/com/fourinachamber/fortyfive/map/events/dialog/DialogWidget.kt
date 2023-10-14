@@ -14,6 +14,7 @@ import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onClick
+import onj.value.OnjObject
 
 class DialogWidget(
     private val progressTime: Int,
@@ -23,8 +24,9 @@ class DialogWidget(
     private val optionsFont: BitmapFont,
     private val optionsFontColor: Color,
     private val optionsFontScale: Float,
+    defaults: OnjObject,
     screen: OnjScreen
-) : AdvancedTextWidget(AdvancedText.EMPTY, screen) {
+) : AdvancedTextWidget(defaults, screen) {
 
     private var isAnimFinished: Boolean = false
 
