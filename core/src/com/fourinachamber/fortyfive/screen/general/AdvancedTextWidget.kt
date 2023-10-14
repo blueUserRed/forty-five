@@ -27,7 +27,7 @@ open class AdvancedTextWidget(
     val screen: OnjScreen,
 ) : WidgetGroup(), ZIndexActor, HoverStateActor, StyledActor {
 
-    override var fixedZIndex: Int = -1
+    override var fixedZIndex: Int = 0
 
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
