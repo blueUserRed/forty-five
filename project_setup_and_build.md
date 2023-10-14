@@ -5,11 +5,7 @@
 - Open the repository as a project in IntelliJ
 - IntelliJ will set up Gradle, create Indices, etc. which will take a while
 - open a terminal, cd into the onj directory, and clone the following repository: https://github.com/blueUserRed/Onj.git
-- create the following directory: assets/textures/packed
 - execute the texturePacker gradle task
-- navigate to FortyFive.kt file, in the create function, uncomment the three lines 
-    regarding the CardGenerator. After the game was started successfully once, these lines
-    can be commented out again.
 - start the game
 
 ## Project Build (to .jar)
@@ -24,8 +20,11 @@
 - _keep in mind that these files are generated again when the game
     is started_
 - modify the logging/log_config.onj file
-  - change the logTarget to the logging/forty-five.log file
   - change the version tag
+  - for development versions, the version tag is usually "b" followed by the timestamp
+    in the format "yymmdd"
+  - for release version (i.e. versions that are meant to be played by non-team-members) use
+    semantic versioning
 - the .jar file contains the contents of the assets directory as well, but they can
     be removed because they are not needed and take up a lot of space
   - open the .jar file with a program like 7zip
@@ -34,5 +33,6 @@
 - remove unnecessary assets
   - for example assets that are packed into atlases (e.g. textures/game_screen, 
     textures/title_screen)
-  - assets used by the CardGenerator (textures/cards)
-- zip the temporary directory and upload
+- zip the temporary directory
+- rename it to "forty-five-" followed by the version tag
+- upload
