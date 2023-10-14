@@ -8,7 +8,8 @@ var enemyActionSharedKeys = {
     weight: int,
     showProbability: float,
     scaleFactor?: float,
-    predicates?: $GamePredicate[]
+    predicates?: $GamePredicate[],
+    hasUnlikelyPredicates?: boolean
 };
 
 $EnemyAction {
