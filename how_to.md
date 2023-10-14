@@ -1,6 +1,11 @@
 
 # How to...
 
+### work in progress
+
+**This file is meant to contain a series of step-by-step guides for common tasks,
+however, at the moment it only contains a few entries**
+
 ### add a new card
 
 - Add an entry into the cards.onj file for the card
