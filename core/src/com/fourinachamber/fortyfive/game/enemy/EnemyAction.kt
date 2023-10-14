@@ -12,7 +12,7 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import kotlin.random.Random
 
-sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy) {
+sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy, val hasUnlikelyPredicates: Boolean) {
 
     var scaleFactor: Float = 1f
 
@@ -32,7 +32,8 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
         val damage: IntRange,
         showProbability: Float,
         enemy: Enemy,
-    ) : EnemyAction(showProbability, enemy) {
+        hasUnlikelyPredicates: Boolean,
+    ) : EnemyAction(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             include(controller.enemyAttackTimeline(damage.scale(scale * scaleFactor).random()))
@@ -44,7 +45,8 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
         val maxCards: Int,
         showProbability: Float,
         enemy: Enemy,
-    ) : EnemyAction(showProbability, enemy) {
+        hasUnlikelyPredicates: Boolean,
+    ) : EnemyAction(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun applicable(controller: GameController): Boolean =
             checkPredicates(controller) && controller.cardHand.cards.isNotEmpty()
@@ -78,7 +80,8 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
         val maxTurnAmount: Int,
         showProbability: Float,
         enemy: Enemy,
-    ) : EnemyAction(showProbability, enemy) {
+        hasUnlikelyPredicates: Boolean,
+    ) : EnemyAction(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             val amount = (1..maxTurnAmount).random()
@@ -104,7 +107,11 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
 
     }
 
-    class ReturnCardToHand(showProbability: Float, enemy: Enemy) : EnemyAction(showProbability, enemy) {
+    class ReturnCardToHand(
+        showProbability: Float,
+        enemy: Enemy,
+        hasUnlikelyPredicates: Boolean
+    ) : EnemyAction(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             include(controller.confirmationPopupTimeline(
@@ -131,7 +138,8 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
         val cover: IntRange,
         showProbability: Float,
         enemy: Enemy,
-    ) : EnemyAction(showProbability, enemy) {
+        hasUnlikelyPredicates: Boolean,
+    ) : EnemyAction(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             action {
@@ -145,7 +153,8 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
         val statusEffect: StatusEffect,
         showProbability: Float,
         enemy: Enemy,
-    ) : EnemyAction(showProbability, enemy) {
+        hasUnlikelyPredicates: Boolean,
+    ) : EnemyAction(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             action {
@@ -161,7 +170,8 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
         val statusEffect: StatusEffect,
         showProbability: Float,
         enemy: Enemy,
-    ) : EnemyAction(showProbability, enemy) {
+        hasUnlikelyPredicates: Boolean,
+    ) : EnemyAction(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
             action {
@@ -178,36 +188,43 @@ sealed class EnemyAction(val showProbability: Float, protected val enemy: Enemy)
             "DestroyCardsInHand" -> DestroyCardsInHand(
                 obj.get<Long>("maxCards").toInt(),
                 obj.get<Double>("showProbability").toFloat(),
-                forEnemy
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false)
             )
             "RevolverRotation" -> RevolverRotation(
                 obj.get<Long>("maxTurns").toInt(),
                 obj.get<Double>("showProbability").toFloat(),
-                forEnemy
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false)
             )
             "TakeCover" -> TakeCover(
                 obj.get<OnjArray>("cover").toIntRange(),
                 obj.get<Double>("showProbability").toFloat(),
-                forEnemy
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false)
             )
             "GivePlayerStatusEffect" -> GivePlayerStatusEffect(
                 obj.get<StatusEffect>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
-                forEnemy
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false)
             )
             "ReturnCardToHand" -> ReturnCardToHand(
                 obj.get<Double>("showProbability").toFloat(),
-                forEnemy
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false)
             )
             "DamagePlayer" -> DamagePlayer(
                 obj.get<OnjArray>("damage").toIntRange(),
                 obj.get<Double>("showProbability").toFloat(),
-                forEnemy
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false)
             )
             "GiveSelfStatusEffect" -> GiveSelfStatusEffect(
                 obj.get<StatusEffect>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
-                forEnemy
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false)
             )
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")

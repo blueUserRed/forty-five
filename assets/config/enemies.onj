@@ -63,8 +63,9 @@ enemies: [
             },
             $GiveSelfStatusEffect {
                 statusEffect: fireResistance(5),
-                weight: 40,
+                weight: 60,
                 showProbability: 0.0,
+                hasUnlikelyPredicates: true,
                 predicates: [
                     $AnyEnemyHasStatusEffect {
                         value: burning(0, 0.5)
@@ -76,8 +77,9 @@ enemies: [
             },
             $GivePlayerStatusEffect {
                 statusEffect: burning(null, 0.5),
-                weight: 40,
+                weight: 500,
                 showProbability: 0.0,
+                hasUnlikelyPredicates: true,
                 predicates: [
                     $EnemyHealthLowerThanPercent {
                         value: 25.0

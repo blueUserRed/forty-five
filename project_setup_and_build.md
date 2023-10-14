@@ -16,6 +16,7 @@
 - copy the desktop.jar file to the temporary directory
 - copy the contents of the assets directory to the temporary directory
 - delete the saves/savefile.onj file
+- delete the saves/perma_savefile.onj file
 - delete the logging/forty-five.log file
 - _keep in mind that these files are generated again when the game
     is started_
