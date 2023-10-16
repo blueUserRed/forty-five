@@ -33,6 +33,7 @@ var widgetSharedKeys = {
     touchable?: string,
     styles?: { ...* }[],
     dragAndDrop?: $DragAndDropBehaviour,
+    setFillParent?: boolean,
 };
 
 //var detailTextSharedKeys = {
@@ -217,7 +218,8 @@ $Widget {
 
     $AdvancedText {
         font: string,
-        parts: $AdvancedTextPart[],
+        rawText: string,
+//        parts: $AdvancedTextPart[],
         defaults: {
             font: string,
             fontScale: float,
