@@ -2,10 +2,8 @@ package com.fourinachamber.fortyfive.game.enemy
 
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GamePredicate
-import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.scale
 import com.fourinachamber.fortyfive.utils.toIntRange
@@ -223,6 +221,7 @@ sealed class EnemyActionPrototype(
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val statusEffect = statusEffect.copy()
+            statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             return EnemyAction(statusEffect.getDisplayText(), iconHandle, this) {
                 action {
                     controller.applyStatusEffectToPlayer(statusEffect.copy())
@@ -250,6 +249,7 @@ sealed class EnemyActionPrototype(
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val statusEffect = statusEffect.copy()
+            statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             return EnemyAction(statusEffect.getDisplayText(), iconHandle, this) {
                 action {
                     enemy.applyEffect(statusEffect)
@@ -257,12 +257,24 @@ sealed class EnemyActionPrototype(
             }
         }
 
-//        override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
-//            action {
-//                enemy.applyEffect(statusEffect)
-//            }
-//        }
+    }
 
+    class GivePlayerCard(
+        val card: String,
+        showProbability: Float,
+        enemy: Enemy,
+        hasUnlikelyPredicates: Boolean,
+        private val iconHandle: ResourceHandle?,
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+
+        override fun create(controller: GameController, scale: Double): EnemyAction {
+            return EnemyAction(null, iconHandle, this) {
+                include(controller.tryToPutCardsInHandTimeline(card))
+            }
+        }
+
+        override fun applicable(controller: GameController): Boolean =
+            checkPredicates(controller) && controller.cardHand.cards.size < controller.hardMaxCards
     }
 
     companion object {
@@ -312,6 +324,13 @@ sealed class EnemyActionPrototype(
             )
             "GiveSelfStatusEffect" -> GiveSelfStatusEffect(
                 obj.get<StatusEffect>("statusEffect"),
+                obj.get<Double>("showProbability").toFloat(),
+                forEnemy,
+                obj.getOr("hasUnlikelyPredicates", false),
+                obj.getOr<String?>("icon", null)
+            )
+            "GivePlayerCard" -> GivePlayerCard(
+                obj.get<String>("card"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),

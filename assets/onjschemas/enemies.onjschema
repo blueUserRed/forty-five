@@ -49,6 +49,11 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
+    $GivePlayerCard {
+        card: string,
+        ...enemyActionSharedKeys
+    }
+
 }
 
 var enemy = {

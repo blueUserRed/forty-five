@@ -5,34 +5,34 @@ use Cards; // include Card namespace for status effects
 
 enemies: [
 
-    {
-        name: "Test Enemy",
-        baseHealth: 100,
-        actionProbability: 0.8,
-        texture: "enemy_texture",
-        coverIcon: "shield_icon",
-        hiddenActionIcon: "normal_bullet",
-        coverIconScale: 0.3,
-        scaleX: 0.25,
-        scaleY: 0.25,
-        detailFont: "red_wing",
-        detailFontScale: 0.6,
-        actions: [
-            $DamagePlayer {
-                damage: [ 5, 10 ],
-                showProbability: 1.0,
-                weight: 10,
-                scaleFactor: 0.5,
-            },
-            $TakeCover {
-                cover: [ 5, 10 ],
-                weight: 10,
-                showProbability: 1.0,
-            },
-
-        ],
-        detailFontColor: color.black
-    },
+//    {
+//        name: "Test Enemy",
+//        baseHealth: 100,
+//        actionProbability: 0.8,
+//        texture: "enemy_texture",
+//        coverIcon: "shield_icon",
+//        hiddenActionIcon: "normal_bullet",
+//        coverIconScale: 0.3,
+//        scaleX: 0.25,
+//        scaleY: 0.25,
+//        detailFont: "red_wing",
+//        detailFontScale: 0.6,
+//        actions: [
+//            $DamagePlayer {
+//                damage: [ 5, 10 ],
+//                showProbability: 1.0,
+//                weight: 10,
+//                scaleFactor: 0.5,
+//            },
+//            $TakeCover {
+//                cover: [ 5, 10 ],
+//                weight: 10,
+//                showProbability: 1.0,
+//            },
+//
+//        ],
+//        detailFontColor: color.black
+//    },
 
     {
         name: "Pyro",
@@ -93,6 +93,11 @@ enemies: [
                         value: [2, 10]
                     }
                 ]
+            },
+            $GivePlayerCard {
+                card: "scorchingBullet",
+                weight: 10,
+                showProbability: 0.0,
             }
         ],
         detailFontColor: color.black
