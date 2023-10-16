@@ -40,13 +40,13 @@ cards: [
         name: "workerBullet",
         title: "Worker Bullet",
         flavourText: "backup on the way",
-        description: "As long as this bullet is in the revolver, when a new turn starts: gain 1 reserve",
+        description: "As long as this bullet is in the revolver, when a new round starts: gain 1 reserve",
         baseDamage: 5,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ reserveGain("turn start", 1) ],
+        effects: [ reserveGain("round start", 1) ],
         forceLoadCards: [],
         cost: 1,
         tags: ["common", "startDeck"],
@@ -389,14 +389,14 @@ cards: [
         name: "bossBullet",
         title: "Boss Bullet",
         flavourText: "boss Bullet",
-        description: "As long as this bullet is in the revolver, when a new turn starts: create 1 card of type ‘worker Bullet’ in your hand",
+        description: "As long as this bullet is in the revolver, when a new round starts: create 1 card of type ‘worker Bullet’ in your hand",
         baseDamage: 10,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            putCardInHand("turn start", "workerBullet", 1)
+            putCardInHand("round start", "workerBullet", 1)
         ],
         forceLoadCards: [ "workerBullet" ],
         cost: 2,
@@ -527,7 +527,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damageDirect("turn start", 4)
+            damageDirect("round start", 4)
         ],
         forceLoadCards: [],
         cost: 1,
@@ -535,11 +535,32 @@ cards: [
         tags: ["rare"],
         price: 50,
     },
+    {
+        name: "scorchingBullet",
+        title: "scorching Bullet",
+        flavourText: "scorching Bullet",
+        description: "todo",
+        baseDamage: 0,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            damagePlayer("round end", 10)#canTriggerInHand
+        ],
+        forceLoadCards: [],
+        cost: 3,
+        type: $Bullet { },
+        tags: ["weight"],
+        price: 0,
+    },
 
 ],
 
 defaultBullet: "bullet",
 
 alwaysLoadCards: [
-    "bullet"
+    "bullet",
+    "scorchingBullet" // scorching bullet only needs to be loaded when the enemy is the pyro, but there is currently no
+                      // way to do that
 ]

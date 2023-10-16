@@ -517,17 +517,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * creates a new instance of the card named [name] and puts it in the hand of the player
      */
     @AllThreadsAllowed
-    fun tryToPutCardsInHand(name: String, amount: Int = 1): Timeline = Timeline.timeline {
+    fun tryToPutCardsInHandTimeline(name: String, amount: Int = 1): Timeline = Timeline.timeline {
         var cardsToDraw = 0
         action {
             val maxCards = hardMaxCards - cardHand.cards.size
             cardsToDraw = min(maxCards, amount)
         }
-        includeLater(
-            { maxCardsPopupTimeline() },
-            { cardsToDraw == 0 }
-        )
         action {
+            println("draw $cardsToDraw cards; card: $name")
             if (cardsToDraw == 0) return@action
             val cardProto = cardPrototypes
                 .firstOrNull { it.name == name }
@@ -661,6 +658,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             return
         }
         appendMainTimeline(Timeline.timeline {
+            include(checkEffectsActiveCards(Trigger.ON_ROUND_END))
             includeLater(
                 { putCardsUnderDeckTimeline() },
                 { cardHand.cards.size >= softMaxCards }
@@ -673,7 +671,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             include(drawCardPopupTimeline(cardsToDraw))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
-            includeLater({ checkEffectsActiveCards(Trigger.ON_TURN_START) }, { true })
+            includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
     }
 
@@ -744,7 +742,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        return card.checkEffects(trigger, triggerInformation) ?: Timeline(mutableListOf())
+        return card.checkEffects(trigger, triggerInformation, this)
     }
 
     @MainThreadOnly
@@ -754,8 +752,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         return createdCards
-            .filter { it.inGame }
-            .mapNotNull { it.checkEffects(trigger, triggerInformation) }
+            .filter { it.inGame || it.inHand(this) }
+            .map { it.checkEffects(trigger, triggerInformation, this) }
             .collectTimeline()
     }
 

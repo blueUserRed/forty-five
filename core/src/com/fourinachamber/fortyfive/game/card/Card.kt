@@ -253,23 +253,19 @@ class Card(
         if (isRotten) updateRottenModifier(rottenModifier.damage - 1)
     }
 
+    fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
+
     /**
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
     @MainThreadOnly
-    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation): Timeline? {
-        var wasEffectWithTimelineTriggered = false
-        val timeline = Timeline.timeline {
-            for (effect in effects) {
-                val effectTimeline = effect.checkTrigger(trigger, triggerInformation)
-                if (effectTimeline != null) {
-                    include(effectTimeline)
-                    wasEffectWithTimelineTriggered = true
-                }
-            }
-        }
-        return if (wasEffectWithTimelineTriggered) timeline else null
+    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation, controller: GameController): Timeline {
+        val inHand = inHand(controller)
+        return effects
+            .filter { inGame || (inHand && it.triggerInHand) }
+            .mapNotNull { it.checkTrigger(trigger, triggerInformation) }
+            .collectTimeline()
     }
 
     fun updateText() {
