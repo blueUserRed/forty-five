@@ -768,5 +768,47 @@ warningLabelTemplates: [
 ],
 
 warningLabelUsedAssets: [
-    "forty_white_texture", "warning_label_background_red", "title_screen_background"
+    "forty_white_texture", "warning_label_background_red", "title_screen_background", "red_wing"
 ],
+
+hoverDetail: $Box {
+    template_name: "card_hover_detail",
+    template_keys: {
+        "children.0.children.0.rawText": "text"
+    },
+    width: 300.0,
+} children [
+
+    $Box {
+        styles: [
+            {
+                background: "transparent_black_texture",
+                height: 100#percent,
+                width: 300#points,
+            }
+        ],
+        width: 300.0,
+    } children [
+
+        $AdvancedText {
+            styles: [
+                {
+                    width: 300#points
+                }
+            ],
+            width: 300.0,
+            font: "red_wing",
+            rawText: "",
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.5,
+                color: color.forty_white
+            },
+        }
+
+    ]
+],
+
+hoverDetailUsedAssets: [
+    "red_wing", "transparent_black_texture"
+]

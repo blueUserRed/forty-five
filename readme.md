@@ -1,4 +1,4 @@
-![logo](./website/assets/logo_black.png)
+![logo](./assets/textures/logo.png)
 
 ## Revenge runs in the family
 

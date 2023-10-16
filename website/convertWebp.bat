@@ -1,0 +1,1 @@
+ls ./assets/* | Foreach-Object { cwebp -q 50 $_.FullName -o "./assets2/$($_.BaseName).webp" }

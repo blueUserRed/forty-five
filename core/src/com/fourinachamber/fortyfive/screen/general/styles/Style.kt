@@ -173,6 +173,18 @@ open class StyleInstruction<DataType>(
 
 }
 
+@Suppress("UNCHECKED_CAST") // data is never actually used
+class ObservingStyleInstruction<DataType>(
+    priority: Int,
+    condition: StyleCondition,
+    dataTypeClass: KClass<*>,
+    private val observer: () -> DataType
+) : StyleInstruction<DataType>(null as DataType, priority, condition, dataTypeClass) {
+
+    override val value: DataType
+        get() = observer()
+}
+
 class AnimatedStyleInstruction<DataType>(
     data: DataType,
     priority: Int,
