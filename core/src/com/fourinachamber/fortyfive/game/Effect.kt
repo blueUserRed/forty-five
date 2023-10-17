@@ -239,8 +239,8 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = GiveStatus(trigger, statusEffect.copy(), triggerInHand)
 
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline = Timeline.timeline {
-            val game = FortyFive.currentGame!!
-            include(game.tryApplyStatusEffectToEnemy(statusEffect))
+            val controller = FortyFive.currentGame!!
+            include(controller.tryApplyStatusEffectToEnemy(statusEffect, controller.enemyArea.getTargetedEnemy()))
         }
 
         override fun blocks(controller: GameController) = false

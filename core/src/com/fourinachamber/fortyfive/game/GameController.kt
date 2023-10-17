@@ -391,6 +391,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.onEnter()
             checkCardMaximums()
         }
+        encounterModifier
+            .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
+            .collectTimeline()
+            .let { include(it) }
         includeLater(
             { checkEffectsSingleCard(Trigger.ON_ENTER, card) },
             { true }
@@ -524,7 +528,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardsToDraw = min(maxCards, amount)
         }
         action {
-            println("draw $cardsToDraw cards; card: $name")
             if (cardsToDraw == 0) return@action
             val cardProto = cardPrototypes
                 .firstOrNull { it.name == name }
@@ -612,16 +615,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
-    fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect): Timeline = Timeline.timeline {
-        if (encounterModifier.any { !it.shouldApplyStatusEffects() }) return Timeline(mutableListOf())
+    fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
+        if (encounterModifier.any { !it.shouldApplyStatusEffects() }) return Timeline()
         action {
-            enemyArea.getTargetedEnemy().applyEffect(statusEffect)
+            enemy.applyEffect(statusEffect)
         }
     }
 
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
         val newRotation = modify(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
-//        include(revolver.rotate(newRotation))
         action {
             dispatchAnimTimeline(revolver.rotate(newRotation))
             revolverRotationCounter += newRotation.amount

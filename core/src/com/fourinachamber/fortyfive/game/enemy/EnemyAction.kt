@@ -252,7 +252,7 @@ sealed class EnemyActionPrototype(
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             return EnemyAction(statusEffect.getDisplayText(), iconHandle, this) {
                 action {
-                    enemy.applyEffect(statusEffect)
+                    controller.tryApplyStatusEffectToEnemy(statusEffect, enemy)
                 }
             }
         }
