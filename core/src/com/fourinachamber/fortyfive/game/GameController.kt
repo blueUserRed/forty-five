@@ -165,7 +165,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
         FortyFive.useRenderPipeline(gameRenderPipeline)
-
+        encounterModifier.add(EncounterModifier.Moist())
         FortyFiveLogger.title("game starting")
 
         warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent
@@ -605,6 +605,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardToShoot?.let {
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot))
             }
+            encounterModifier
+                .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }
+                .collectTimeline()
+                .let { include(it) }
         }
 
         appendMainTimeline(Timeline.timeline {
@@ -631,8 +635,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             revolver
                 .slots
                 .mapNotNull { it.card }
-                .forEach(Card::onRevolverTurn)
+                .forEach { it.onRevolverRotation(rotation) }
         }
+        encounterModifier
+            .mapNotNull { it.executeAfterRevolverRotated(newRotation, this@GameController) }
+            .collectTimeline()
+            .let { include(it) }
         if (newRotation.amount != 0) {
             val info = TriggerInformation(multiplier = newRotation.amount)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
