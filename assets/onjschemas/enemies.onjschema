@@ -66,6 +66,7 @@ var enemy = {
     scaleY: float,
     actionProbability: float,
     coverIconScale: float,
+    indicatorIconScale: float,
     detailFont: string,
     detailFontScale: float,
     actions: $EnemyAction[],

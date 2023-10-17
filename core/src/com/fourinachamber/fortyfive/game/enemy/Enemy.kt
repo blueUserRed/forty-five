@@ -44,6 +44,7 @@ class Enemy(
     val scaleX: Float,
     val scaleY: Float,
     val coverIconScale: Float,
+    val indicatorIconScale: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
@@ -252,6 +253,7 @@ class Enemy(
                 onj.get<Double>("scaleX").toFloat(),
                 onj.get<Double>("scaleY").toFloat(),
                 onj.get<Double>("coverIconScale").toFloat(),
+                onj.get<Double>("indicatorIconScale").toFloat(),
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
@@ -315,7 +317,7 @@ class EnemyActor(
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
         coverIcon.setScale(enemy.coverIconScale)
-        attackIcon.setScale(enemy.coverIconScale) // TODO: fix
+        attackIcon.setScale(enemy.indicatorIconScale) // TODO: fix
         coverIcon.reportDimensionsWithScaling = true
         coverIcon.ignoreScalingWhenDrawing = true
         attackIcon.reportDimensionsWithScaling = true
