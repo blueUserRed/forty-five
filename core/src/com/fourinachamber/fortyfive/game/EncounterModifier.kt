@@ -77,7 +77,6 @@ sealed class EncounterModifier {
         }
 
         private fun updateModifierOfCard(card: Card, rotation: RevolverRotation) {
-            // TODO: oldModifier == null for some reason
             val oldModifier = cardModifiers.firstOrNull { it in card.modifiers }
             val damage = (oldModifier?.damage ?: 0) - rotation.amount
             val newModifier = Card.CardModifier(
@@ -85,9 +84,12 @@ sealed class EncounterModifier {
                 TemplateString("Bullet lost $damage damage due to the Moist Encounter Modifier"),
                 validityChecker = { true }
             )
-            println("update modifier: $card, rotation: $rotation, damage: $damage")
-            oldModifier?.let { card.removeModifier(it) }
+            oldModifier?.let {
+                card.removeModifier(it)
+                cardModifiers.remove(it)
+            }
             card.addModifier(newModifier)
+            cardModifiers.add(newModifier)
         }
 
     }
