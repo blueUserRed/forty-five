@@ -389,7 +389,39 @@ textures: [
     {
         name: "chooseCard_add_to_deck",
         file: "textures/chooseCard/to_deck.png"
-    }
+    },
+    {
+        name: "enemy_action_burning",
+        file: "textures/enemies/action_symbols/burning.png"
+    },
+    {
+        name: "enemy_action_cover",
+        file: "textures/enemies/action_symbols/cover.png"
+    },
+    {
+        name: "enemy_action_damage",
+        file: "textures/enemies/action_symbols/damage.png"
+    },
+    {
+        name: "enemy_action_fire_resistance",
+        file: "textures/enemies/action_symbols/fire_resistance.png"
+    },
+    {
+        name: "enemy_action_hot_potato",
+        file: "textures/enemies/action_symbols/hot_potato.png"
+    },
+    {
+        name: "enemy_action_inferno",
+        file: "textures/enemies/action_symbols/inferno.png"
+    },
+    {
+        name: "enemy_action_unknown",
+        file: "textures/enemies/action_symbols/unknown.png"
+    },
+    {
+        name: "enemy_pyro",
+        file: "textures/enemies/pyro/pyro.png"
+    },
 ],
 
 cursors: [
