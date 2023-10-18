@@ -293,6 +293,7 @@ class EnemyActor(
         enemy.detailFontScale
     )
 
+
     val healthLabel: CustomLabel = CustomLabel(
         screen,
         "",

@@ -277,6 +277,17 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $TextEffectEmitter {
+        font: string,
+        fontColor: Color,
+        fontScale: float,
+        speed: float[2],
+        spawnVarianceX: float,
+        spawnVarianceY: float,
+        animationDuration: int[2],
+        ...widgetSharedKeys
+    }
+
 }
 
 var advancedTextPartSharedKeys = {

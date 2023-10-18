@@ -493,6 +493,17 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("fontScale").toFloat()
         )
 
+        "TextEffectEmitter" -> TextEffectEmitter(
+            fontOrError(widgetOnj.get<String>("font"), screen),
+            widgetOnj.get<Color>("color"),
+            widgetOnj.get<Double>("fontScale").toFloat(),
+            widgetOnj.get<OnjArray>("speed").toFloatRange(),
+            widgetOnj.get<Double>("spawnVarianceX").toFloat(),
+            widgetOnj.get<Double>("spawnVarianceY").toFloat(),
+            widgetOnj.get<OnjArray>("animationDuration").toIntRange(),
+            screen
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
