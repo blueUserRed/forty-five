@@ -1,21 +1,6 @@
 import "config/game_config.onj" as gameConfig;
 
-ownedCards: [
-    "bullet", "bullet", "bullet", "bullet",
-    "incendiaryBullet",
-    "workerBullet",
-//    "bigBullet",
-//    "rottenBullet",
-//    "bewitchedBullet",
-//    "explosiveBullet",
-//    "leadersBullet",
-//    "silverBullet",
-//    "arrow",
-//    "obsidianBullet",
-//    "rustedBullet",
-//    "invisibleBullet",
-//    "poisonBullet"
-],
+ownedCards: null,
 decks: [
     {
         index: 1,
