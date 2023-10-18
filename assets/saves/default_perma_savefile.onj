@@ -1,3 +1,11 @@
 
 lastRandom: null,
-collection: []
+collection: [
+    "bullet",
+    "bullet",
+    "incendiaryBullet",
+    "workerBullet"
+],
+visitedAreas: [
+    "test_area" // the start area
+],

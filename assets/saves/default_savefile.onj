@@ -4,25 +4,8 @@ ownedCards: null,
 decks: [
     {
         index: 1,
-        cards: [
-            {
-                cardName: "bullet",
-                positionId: 0
-            },
-            {
-                cardName: "bullet",
-                positionId: 1
-            },
-            {
-                cardName: "bullet",
-                positionId: 3
-            },
-            {
-                cardName: "incendiaryBullet",
-                positionId: 4
-            },
-        ]
-    },
+        cards: []
+    }
 ],
 playerLives: gameConfig.playerConfig.lives,
 playerMoney: 110,
