@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
-import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.builder.buildOnjObject
@@ -31,10 +30,10 @@ object SaveState {
      */
     const val defaultSavefilePath: String = "saves/default_savefile.onj"
 
-    private var _ownedCards: MutableList<String> = mutableListOf()
+    private var _cards: MutableList<String> = mutableListOf()
 
     val cards: List<String>
-        get() = _ownedCards
+        get() = _cards
 
     private var _decks: MutableSet<Deck> = mutableSetOf()
 
@@ -160,8 +159,12 @@ object SaveState {
 
         obj as OnjObject
 
-        _ownedCards = obj.get<OnjArray>("ownedCards").value.map { it.value as String }.toMutableList()
-        FortyFiveLogger.debug(logTag, "cards: $_ownedCards")
+        _cards = obj.get<OnjArray?>("ownedCards")
+            ?.value
+            ?.map { it.value as String }
+            ?.toMutableList()
+            ?: PermaSaveState.collection.toMutableList()
+        FortyFiveLogger.debug(logTag, "cards: $_cards")
 
         obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck.getFromOnj(it as OnjObject)) }
         curDeckNbr = obj.get<Long>("curDeck").toInt()
@@ -206,8 +209,12 @@ object SaveState {
     }
 
     fun buyCard(card: String) {
-        _ownedCards.add(card)
+        _cards.add(card)
         savefileDirty = true
+    }
+
+    fun extract() {
+        PermaSaveState.collection = _cards.toMutableList()
     }
 
     private fun copyLastRunStats() {
@@ -227,7 +234,7 @@ object SaveState {
         if (!savefileDirty) return
         FortyFiveLogger.debug(logTag, "writing SaveState")
         val obj = buildOnjObject {
-            "ownedCards" with _ownedCards
+            "ownedCards" with _cards
             "playerLives" with playerLives
             "playerMoney" with playerMoney
             "currentDifficulty" with currentDifficulty

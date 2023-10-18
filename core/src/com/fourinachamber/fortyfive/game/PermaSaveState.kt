@@ -7,6 +7,7 @@ import onj.parser.OnjParser
 import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
+import onj.value.OnjArray
 import onj.value.OnjObject
 import kotlin.random.Random
 
@@ -23,6 +24,12 @@ object PermaSaveState {
     private var saveFileDirty: Boolean = false
 
     private var currentRandom: Long = 0
+
+    var collection: List<String> = mutableListOf()
+        set(value) {
+            field = value
+            saveFileDirty = true
+        }
 
     fun read() {
         FortyFiveLogger.debug(logTag, "reading SaveState")
@@ -49,6 +56,7 @@ object PermaSaveState {
         obj as OnjObject
 
         currentRandom = obj.get<Long?>("lastRandom") ?: Random.nextLong()
+        collection = obj.get<OnjArray>("collection").value.map { it.value as String }
 
         saveFileDirty = false
     }
@@ -57,6 +65,7 @@ object PermaSaveState {
         if (!saveFileDirty) return
         val obj = buildOnjObject {
             "lastRandom" with currentRandom
+            "collection" with collection
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
         saveFileDirty = false
