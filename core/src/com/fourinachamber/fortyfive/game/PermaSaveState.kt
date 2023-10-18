@@ -31,6 +31,11 @@ object PermaSaveState {
             saveFileDirty = true
         }
 
+    private var _visitedAreas: MutableSet<String> = mutableSetOf()
+
+    val visitedAreas: Set<String>
+        get() = _visitedAreas
+
     fun read() {
         FortyFiveLogger.debug(logTag, "reading SaveState")
 
@@ -57,8 +62,15 @@ object PermaSaveState {
 
         currentRandom = obj.get<Long?>("lastRandom") ?: Random.nextLong()
         collection = obj.get<OnjArray>("collection").value.map { it.value as String }
+        _visitedAreas = obj.get<OnjArray>("visitedAreas").value.map { it.value as String }.toMutableSet()
 
         saveFileDirty = false
+    }
+
+    fun hasVisitedArea(area: String) = area in visitedAreas
+
+    fun visitedNewArea(area: String) {
+        _visitedAreas.add(area)
     }
 
     fun write() {
@@ -66,6 +78,7 @@ object PermaSaveState {
         val obj = buildOnjObject {
             "lastRandom" with currentRandom
             "collection" with collection
+            "visitedAreas" with _visitedAreas
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
         saveFileDirty = false

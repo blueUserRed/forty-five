@@ -1,3 +1,4 @@
 
 lastRandom: int?,
-collection: string[]
+collection: string[],
+visitedAreas: string[],
