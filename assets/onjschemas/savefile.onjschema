@@ -1,5 +1,5 @@
 
-ownedCards: string[]?,
+cards: string[]?,
 
 stats: {
     usedReserves: int,
