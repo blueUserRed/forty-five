@@ -10,7 +10,6 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-import kotlin.math.abs
 
 class GameDirector(private val controller: GameController) {
 
@@ -37,19 +36,29 @@ class GameDirector(private val controller: GameController) {
     }
 
     fun onNewTurn() {
-        if (!Utils.coinFlip(enemy.actionProbability) || enemy.actions.isEmpty()) {
+        enemy.actor.setupForAction(NextAction.None) // make sure current action is cleared
+        if (!Utils.coinFlip(enemy.actionProbability) || enemy.actionPrototypes.isEmpty()) {
             nextAction = NextAction.None
             return
         }
-        val chosenAction = enemy
-            .actions
-            .weightedRandom()
+        // TODO: this algorithm for choosing enemy actions is not ideal, because it doesn't respect the weights
+        // correctly in certain scenarios
+        val possibleActions = enemy
+            .actionPrototypes
+            .filter { (_, action) -> action.showProbability <= 0f || action.applicable(controller) }
+            .filter { (_, action) -> action.showProbability > 0f || !action.hasUnlikelyPredicates }
+        if (possibleActions.isEmpty()) {
+            FortyFiveLogger.debug(logTag, "Wanted to execute enemy action but none was applicable")
+            return
+        }
+        val chosenAction = possibleActions.weightedRandom()
         val isShown = Utils.coinFlip(chosenAction.showProbability)
         nextAction = if (isShown) {
-            NextAction.ShownEnemyAction(chosenAction)
+            NextAction.ShownEnemyAction(chosenAction.create(controller, difficulty))
         } else {
-            NextAction.HiddenEnemyAction(chosenAction)
+            NextAction.HiddenEnemyAction
         }
+        enemy.actor.setupForAction(nextAction)
         FortyFiveLogger.debug(logTag,
             "executing enemy action next turn; isShown = $isShown; chosenAction = $chosenAction")
     }
@@ -59,35 +68,39 @@ class GameDirector(private val controller: GameController) {
         is NextAction.None -> Timeline()
 
         is NextAction.ShownEnemyAction -> {
-            if (!nextAction.action.applicable(controller)) {
+            if (!nextAction.action.prototype.applicable(controller)) {
                 FortyFiveLogger.warn(logTag, "Enemy action ${nextAction.action} was chosen to be shown " +
                         "but when the applicable() function was checked it returned false; bailing out")
                 Timeline()
             } else {
-                nextAction.action.getTimeline(controller, difficulty)
+                nextAction.action.getTimeline()
             }
         }
 
         is NextAction.HiddenEnemyAction -> {
-            if (nextAction.preferredAction.applicable(controller)) {
-                nextAction.preferredAction.getTimeline(controller, difficulty)
+            val possibleActions = enemy
+                .actionPrototypes
+                .filter { (_, action) -> action.showProbability <= 0f }
+                .filter { (_, action) -> action.applicable(controller) }
+            if (possibleActions.isEmpty()) {
+                FortyFiveLogger.warn(logTag, "encountered issue when executing HiddenEnemyAction: " +
+                        "preferred action was not applicable and no replacement action could be found; returning " +
+                        "empty timeline")
+                Timeline()
             } else {
-                // preferred action is not applicable, try to find another one instead
-                val possibleActions = enemy
-                    .actions
-                    .filter { (_, action) -> action.showProbability >= 1f }
-                    .filter { (_, action) -> action.applicable(controller) }
-                if (possibleActions.isNotEmpty()) {
-                    possibleActions.weightedRandom().getTimeline(controller, difficulty)
-                } else {
-                    FortyFiveLogger.warn(logTag, "encountered issue when executing HiddenEnemyAction: " +
-                            "preferred action was not applicable and no replacement action could be found; returning " +
-                            "empty timeline")
-                    Timeline()
-                }
+                possibleActions
+                    .weightedRandom()
+                    .create(controller, difficulty)
+                    .getTimeline()
             }
         }
 
+    }.apply {
+        appendAction(Timeline.timeline {
+            action {
+                enemy.actor.setupForAction(NextAction.None)
+            }
+        }.asAction())
     }
 
     fun end() {
@@ -144,7 +157,7 @@ class GameDirector(private val controller: GameController) {
 
         class ShownEnemyAction(val action: EnemyAction) : NextAction()
 
-        class HiddenEnemyAction(val preferredAction: EnemyAction) : NextAction()
+        object HiddenEnemyAction : NextAction()
 
     }
 
