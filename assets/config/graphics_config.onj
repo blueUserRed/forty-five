@@ -37,7 +37,11 @@ icons: {
     fireResistance: {
         icon: "buning_icon",
         scale: 0.25
-    }
+    },
+    bewitched: {
+        icon: "buning_icon",
+        scale: 0.25
+    },
 },
 
 damageOverlay: {

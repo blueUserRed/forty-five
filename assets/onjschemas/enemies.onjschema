@@ -25,8 +25,9 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
-    $RevolverRotation {
+    $RotateRevolver {
         maxTurns: int,
+        forceDirection?: string,
         ...enemyActionSharedKeys
     }
 

@@ -18,9 +18,9 @@ abstract class StatusEffect(
 
     protected lateinit var controller: GameController
 
-    abstract val damageType: StatusEffectDamageType
+    abstract val damageType: StatusEffectType
 
-    open val blocksStatusEffects: List<StatusEffectDamageType> = listOf()
+    open val blocksStatusEffects: List<StatusEffectType> = listOf()
 
     fun initIcon(gameController: GameController) {
         icon = CustomImageActor(iconHandle, gameController.curScreen)
@@ -153,7 +153,7 @@ class Burning(
         if (continueForever) continueForever()
     }
 
-    override val damageType: StatusEffectDamageType = StatusEffectDamageType.FIRE
+    override val damageType: StatusEffectType = StatusEffectType.FIRE
 
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
         if (target.isBlocked(this@Burning, controller)) return Timeline()
@@ -182,7 +182,7 @@ class Poison(
     turns
 ) {
 
-    override val damageType: StatusEffectDamageType = StatusEffectDamageType.POISON
+    override val damageType: StatusEffectType = StatusEffectType.POISON
 
     override fun executeOnNewTurn(target: StatusEffectTarget): Timeline {
         if (target.isBlocked(this, controller)) return Timeline()
@@ -213,8 +213,8 @@ class FireResistance(
     turns
 ) {
 
-    override val damageType: StatusEffectDamageType = StatusEffectDamageType.BLOCKING
-    override val blocksStatusEffects: List<StatusEffectDamageType> = listOf(StatusEffectDamageType.FIRE)
+    override val damageType: StatusEffectType = StatusEffectType.BLOCKING
+    override val blocksStatusEffects: List<StatusEffectType> = listOf(StatusEffectType.FIRE)
 
     override fun canStackWith(other: StatusEffect): Boolean = other is FireResistance
 
@@ -229,7 +229,49 @@ class FireResistance(
 
 }
 
-enum class StatusEffectDamageType {
+class Bewitched(
+    private val turns: Int,
+    private val rotations: Int
+) : StatusEffect(
+    GraphicsConfig.iconName("bewitched"),
+    GraphicsConfig.iconScale("bewitched")
+) {
+
+    override val damageType: StatusEffectType = StatusEffectType.OTHER
+
+    private var turnOnEffectStart: Int = -1
+    private var rotationOnEffectStart: Int = -1
+
+    private var turnsDuration: Int = turns
+    private var rotationDuration: Int = rotations
+
+    override fun start(controller: GameController) {
+        super.start(controller)
+        turnOnEffectStart = controller.turnCounter
+        rotationOnEffectStart = controller.revolverRotationCounter
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Bewitched
+
+    override fun stack(other: StatusEffect) {
+        other as Bewitched
+        turnsDuration += other.turns
+        rotationDuration += other.rotations
+    }
+
+    override fun isStillValid(): Boolean =
+        controller.turnCounter < turnOnEffectStart + turnsDuration ||
+        controller.revolverRotationCounter < rotationOnEffectStart + rotationDuration
+
+    override fun getDisplayText(): String = "$rotationDuration rotations or $turnsDuration turns"
+
+    override fun copy(): StatusEffect = Bewitched(turns, rotations)
+
+    override fun equals(other: Any?): Boolean = other is Bewitched
+
+}
+
+enum class StatusEffectType {
     FIRE, POISON, OTHER, BLOCKING
 }
 

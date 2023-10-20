@@ -168,6 +168,14 @@ object CardsNamespace {
         return OnjStatusEffect(FireResistance(turns.value.toInt()))
     }
 
+    @RegisterOnjFunction(schema = "params: [int, int]")
+    fun bewitched(turns: OnjInt, rotations: OnjInt): OnjStatusEffect {
+        return OnjStatusEffect(Bewitched(
+            turns.value.toInt(),
+            rotations.value.toInt(),
+        ))
+    }
+
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER
         "shot" -> Trigger.ON_SHOT
