@@ -4,6 +4,7 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.GamePredicate
 import com.fourinachamber.fortyfive.game.StatusEffect
+import com.fourinachamber.fortyfive.game.StatusEffectCreator
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.scale
@@ -222,7 +223,7 @@ sealed class EnemyActionPrototype(
     }
 
     class GivePlayerStatusEffect(
-        val statusEffect: StatusEffect,
+        val statusEffectCreator: StatusEffectCreator,
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
@@ -230,27 +231,23 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            val statusEffect = statusEffect.copy()
+            val statusEffect = statusEffectCreator()
+            // TODO: fix this
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             return EnemyAction(statusEffect.getDisplayText(), iconHandle, this) {
                 action {
-                    controller.applyStatusEffectToPlayer(statusEffect.copy())
+                    controller.applyStatusEffectToPlayer(statusEffect)
                 }
             }
         }
 
-        //        override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
-//            action {
-//                controller.applyStatusEffectToPlayer(statusEffect.copy())
-//            }
-//        }
 
         override fun applicable(controller: GameController): Boolean =
-            checkPredicates(controller) && controller.isStatusEffectApplicable(statusEffect)
+            checkPredicates(controller) && controller.isStatusEffectApplicable(statusEffectCreator())
     }
 
     class GiveSelfStatusEffect(
-        val statusEffect: StatusEffect,
+        val statusEffectCreator: StatusEffectCreator,
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
@@ -258,7 +255,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            val statusEffect = statusEffect.copy()
+            val statusEffect = statusEffectCreator()
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             return EnemyAction(statusEffect.getDisplayText(), iconHandle, this) {
                 action {
@@ -318,7 +315,7 @@ sealed class EnemyActionPrototype(
                 obj.getOr<String?>("icon", null)
             )
             "GivePlayerStatusEffect" -> GivePlayerStatusEffect(
-                obj.get<StatusEffect>("statusEffect"),
+                obj.get<StatusEffectCreator>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
@@ -338,7 +335,7 @@ sealed class EnemyActionPrototype(
                 obj.getOr<String?>("icon", null)
             )
             "GiveSelfStatusEffect" -> GiveSelfStatusEffect(
-                obj.get<StatusEffect>("statusEffect"),
+                obj.get<StatusEffectCreator>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),

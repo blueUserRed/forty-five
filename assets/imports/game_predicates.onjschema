@@ -23,4 +23,12 @@ $GamePredicate {
         value: StatusEffect
     }
 
+    $PlayerHasStatusEffect {
+        value: StatusEffect
+    }
+
+    $NegatePredicate {
+        value: $GamePredicate
+    }
+
 }

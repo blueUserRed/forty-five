@@ -48,8 +48,6 @@ abstract class StatusEffect(
 
     abstract fun getDisplayText(): String
 
-    abstract fun copy(): StatusEffect
-
     abstract override fun equals(other: Any?): Boolean
 }
 abstract class RotationBasedStatusEffect(
@@ -168,8 +166,6 @@ class Burning(
         stackRotationEffect(other)
     }
 
-    override fun copy(): StatusEffect = Burning(duration, percent, continueForever)
-
     override fun equals(other: Any?): Boolean = other is Burning
 }
 
@@ -200,8 +196,6 @@ class Poison(
     override fun getDisplayText(): String =
         "$damage damage / ${if (continueForever) "∞" else "${turnOnEffectStart + duration - controller.turnCounter} turns"}"
 
-    override fun copy(): StatusEffect = Poison(duration, damage)
-
     override fun equals(other: Any?): Boolean = other is Poison
 }
 
@@ -222,8 +216,6 @@ class FireResistance(
         other as FireResistance
         stackTurnEffect(other)
     }
-
-    override fun copy(): StatusEffect = FireResistance(duration)
 
     override fun equals(other: Any?): Boolean = other is FireResistance
 
@@ -265,11 +257,11 @@ class Bewitched(
 
     override fun getDisplayText(): String = "$rotationDuration rotations or $turnsDuration turns"
 
-    override fun copy(): StatusEffect = Bewitched(turns, rotations)
-
     override fun equals(other: Any?): Boolean = other is Bewitched
 
 }
+
+typealias StatusEffectCreator = () -> StatusEffect
 
 enum class StatusEffectType {
     FIRE, POISON, OTHER, BLOCKING

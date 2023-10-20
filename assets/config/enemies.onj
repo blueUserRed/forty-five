@@ -155,6 +155,18 @@ enemies: [
                 weight: 10,
                 showProbability: 0.5,
                 icon: "enemy_action_cover"
+            },
+            $GivePlayerStatusEffect {
+                statusEffect: burning(null, 0.5),
+                weight: 10,
+                showProbability: 0.0,
+                hasUnlikelyPredicates: true,
+                icon: "enemy_action_inferno",
+                predicates: [
+                    negatePredicate($PlayerHasStatusEffect {
+                        value: bewitched(0, 0)
+                    })
+                ]
             }
         ],
         detailFontColor: color.black

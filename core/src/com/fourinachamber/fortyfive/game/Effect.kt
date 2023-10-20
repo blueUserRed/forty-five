@@ -232,21 +232,23 @@ abstract class Effect(val trigger: Trigger) {
      */
     class GiveStatus(
         trigger: Trigger,
-        val statusEffect: StatusEffect,
+        val statusEffectCreator: StatusEffectCreator,
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
 
-        override fun copy(): Effect = GiveStatus(trigger, statusEffect.copy(), triggerInHand)
+        override fun copy(): Effect = GiveStatus(trigger, statusEffectCreator, triggerInHand)
 
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline = Timeline.timeline {
             val controller = FortyFive.currentGame!!
-            include(controller.tryApplyStatusEffectToEnemy(statusEffect, controller.enemyArea.getTargetedEnemy()))
+            include(
+                controller.tryApplyStatusEffectToEnemy(statusEffectCreator(), controller.enemyArea.getTargetedEnemy())
+            )
         }
 
         override fun blocks(controller: GameController) = false
 
         override fun toString(): String {
-            return "GiveStatus(trigger=$trigger, status=$statusEffect)"
+            return "GiveStatus(trigger=$trigger)"
         }
 
     }
