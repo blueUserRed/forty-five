@@ -1,6 +1,6 @@
 import "config/game_config.onj" as gameConfig;
 
-ownedCards: null,
+cards: null,
 decks: [
     {
         index: 1,

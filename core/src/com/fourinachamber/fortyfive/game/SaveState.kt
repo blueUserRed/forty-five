@@ -159,7 +159,7 @@ object SaveState {
 
         obj as OnjObject
 
-        _cards = obj.get<OnjArray?>("ownedCards")
+        _cards = obj.get<OnjArray?>("cards")
             ?.value
             ?.map { it.value as String }
             ?.toMutableList()
@@ -234,7 +234,7 @@ object SaveState {
         if (!savefileDirty) return
         FortyFiveLogger.debug(logTag, "writing SaveState")
         val obj = buildOnjObject {
-            "ownedCards" with _cards
+            "cards" with _cards
             "playerLives" with playerLives
             "playerMoney" with playerMoney
             "currentDifficulty" with currentDifficulty
