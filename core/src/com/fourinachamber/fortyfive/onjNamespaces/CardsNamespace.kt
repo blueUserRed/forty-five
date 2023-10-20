@@ -4,6 +4,7 @@ import com.fourinachamber.fortyfive.game.*
 import onj.customization.Namespace.OnjNamespaceDatatypes
 import onj.customization.Namespace.OnjNamespace
 import onj.customization.OnjFunction.RegisterOnjFunction
+import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.*
 import kotlin.reflect.KClass
 
@@ -20,47 +21,72 @@ object CardsNamespace {
 
     @RegisterOnjFunction(schema = "params: [string, int]")
     fun reserveGain(trigger: OnjString, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.ReserveGain(triggerOrError(trigger.value), amount.value.toInt()))
+        return OnjEffect(Effect.ReserveGain(triggerOrError(trigger.value), amount.value.toInt(), false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int]")
     fun buffDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.BuffDamage(triggerOrError(trigger.value), amount.value.toInt(), bulletSelector.value))
+        return OnjEffect(Effect.BuffDamage(
+            triggerOrError(trigger.value),
+            amount.value.toInt(),
+            bulletSelector.value,
+            false
+        ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int]")
     fun giftDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.GiftDamage(triggerOrError(trigger.value), amount.value.toInt(), bulletSelector.value))
+        return OnjEffect(Effect.GiftDamage(
+            triggerOrError(trigger.value),
+            amount.value.toInt(),
+            bulletSelector.value,
+            false
+        ))
     }
 
     @RegisterOnjFunction(schema = "params: [string, int]")
     fun draw(trigger: OnjString, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.Draw(triggerOrError(trigger.value), amount.value.toInt()))
+        return OnjEffect(Effect.Draw(triggerOrError(trigger.value), amount.value.toInt(), false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
     fun giveStatus(trigger: OnjString, effect: OnjStatusEffect): OnjEffect {
-        return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value))
+        return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value, false))
     }
 
     @RegisterOnjFunction(schema = "params: [string, string, int]")
     fun putCardInHand(trigger: OnjString, name: OnjString, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.PutCardInHand(triggerOrError(trigger.value), name.value, amount.value.toInt()))
+        return OnjEffect(Effect.PutCardInHand(
+            triggerOrError(trigger.value),
+            name.value,
+            amount.value.toInt(),
+            false
+        ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
     fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
-        return OnjEffect(Effect.Protect(triggerOrError(trigger.value), bulletSelector.value))
+        return OnjEffect(Effect.Protect(triggerOrError(trigger.value), bulletSelector.value, false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
     fun destroy(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
-        return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value))
+        return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value, false))
     }
 
     @RegisterOnjFunction(schema = "params: [string, int]")
     fun damageDirect(trigger: OnjString, damage: OnjInt): OnjEffect {
-        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value.toInt()))
+        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value.toInt(), false))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string, int]")
+    fun damagePlayer(trigger: OnjString, damage: OnjInt): OnjEffect {
+        return OnjEffect(Effect.DamagePlayer(triggerOrError(trigger.value), damage.value.toInt(), false))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
+    fun canTriggerInHand(effect: OnjEffect): OnjEffect {
+        return OnjEffect(effect.value.copy().apply { triggerInHand = true })
     }
 
     @RegisterOnjFunction(schema = "params: [*[]]")
@@ -146,7 +172,8 @@ object CardsNamespace {
         "enter" -> Trigger.ON_ENTER
         "shot" -> Trigger.ON_SHOT
         "destroy" -> Trigger.ON_DESTROY
-        "turn start" -> Trigger.ON_TURN_START
+        "round start" -> Trigger.ON_ROUND_START
+        "round end" -> Trigger.ON_ROUND_END
         "rotation" -> Trigger.ON_REVOLVER_ROTATION
         "card drawn" -> Trigger.ON_CARDS_DRAWN
         else -> throw RuntimeException("unknown trigger: $trigger")
