@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.screen.gameComponents
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -39,12 +40,12 @@ class TextEffectEmitter(
         val iterator = runningAnimations.iterator()
         while (iterator.hasNext()) {
             val anim = iterator.next()
-            if (anim.startTime + anim.duration >= now) {
+            if (anim.startTime + anim.duration <= now) {
                 screen.removeActorFromRoot(anim.label)
                 iterator.remove()
                 continue
             }
-            anim.label.y += anim.speed
+            anim.label.y += anim.speed * Gdx.graphics.deltaTime
         }
     }
 

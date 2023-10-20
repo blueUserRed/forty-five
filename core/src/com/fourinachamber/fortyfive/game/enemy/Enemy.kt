@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Vector2
@@ -9,6 +10,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
+import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
@@ -47,6 +49,7 @@ class Enemy(
     val detailFontScale: Float,
     val detailFontColor: Color,
     val actionProbability: Float,
+    textEmitterConfig: OnjObject,
     private val screen: OnjScreen
 ) {
 
@@ -94,7 +97,7 @@ class Enemy(
         get() = _statusEffects
 
     init {
-        actor = EnemyActor(this, screen)
+        actor = EnemyActor(this, textEmitterConfig, screen)
     }
 
     fun addEnemyAction(weight: Int, action: EnemyAction) {
@@ -181,18 +184,18 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-                val anim = GraphicsConfig.numberChangeAnimation(
-                    actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
-                    "-${min(damage, currentCover)}",
-                    false,
-                    false,
-                    gameController.curScreen
-                )
+//                val anim = GraphicsConfig.numberChangeAnimation(
+//                    actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
+//                    "-${min(damage, currentCover)}",
+//                    false,
+//                    false,
+//                    gameController.curScreen
+//                )
                 action {
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
                     actor.updateText()
-                    gameController.dispatchAnimTimeline(anim.wrap())
+//                    gameController.dispatchAnimTimeline(anim.wrap())
                 }
             } },
             { currentCover != 0 }
@@ -200,17 +203,10 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-                val anim = GraphicsConfig.numberChangeAnimation(
-                    actor.healthLabel.localToStageCoordinates(Vector2(0f, 0f)),
-                    "-$remaining",
-                    false,
-                    false,
-                    gameController.curScreen
-                )
                 action {
                     currentHealth -= remaining
                     actor.updateText()
-                    gameController.dispatchAnimTimeline(anim.wrap())
+                    actor.startDamageAnimation(remaining)
                 }
             } },
             { remaining != 0 }
@@ -254,6 +250,7 @@ class Enemy(
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
                 onj.get<Double>("actionProbability").toFloat(),
+                onj.get<OnjObject>("textEmitterConfig"),
                 curScreen
             )
             onj
@@ -274,6 +271,7 @@ class Enemy(
  */
 class EnemyActor(
     val enemy: Enemy,
+    textEmitterConfig: OnjObject,
     private val screen: OnjScreen
 ) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
 
@@ -286,6 +284,7 @@ class EnemyActor(
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = CustomImageActor("normal_bullet", screen, false) // TODO: fix
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
+    private val textEmitter: TextEffectEmitter
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
@@ -305,6 +304,16 @@ class EnemyActor(
     }
 
     init {
+        textEmitter = TextEffectEmitter(
+            enemy.detailFont,
+            textEmitterConfig.get<Color>("color"),
+            textEmitterConfig.get<Double>("fontScale").toFloat(),
+            textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
+            textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
+            textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
+            textEmitterConfig.get<OnjArray>("duration").toIntRange(),
+            screen
+        )
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
         attackLabel.setFontScale(enemy.detailFontScale)
@@ -333,8 +342,18 @@ class EnemyActor(
         addActor(attackIndicator)
         addActor(enemyBox)
         addActor(healthLabel)
+        addActor(textEmitter)
         addActor(statusEffectDisplay)
         updateText()
+    }
+
+    override fun layout() {
+        super.layout()
+        textEmitter.setBounds(healthLabel.x, healthLabel.y, healthLabel.width, healthLabel.height)
+    }
+
+    fun startDamageAnimation(damage: Int) {
+        textEmitter.playAnimation("-$damage")
     }
 
     fun displayAttackIndicator(damage: Int) {

@@ -3,6 +3,15 @@ import "imports/colors.onj" as color;
 
 use Cards; // include Card namespace for status effects
 
+var textEmitterConfig = {
+    color: color.red,
+    fontScale: 0.9,
+    speed: [-80.0, -60.0],
+    spawnVarianceX: 30.0,
+    spawnVarianceY: 30.0,
+    duration: [1_000, 1_500]
+};
+
 enemies: [
 
     {
@@ -16,6 +25,7 @@ enemies: [
         scaleY: 0.25,
         detailFont: "red_wing",
         detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
         actions: [
             $DamagePlayer {
                 damage: [ 5, 10 ],
@@ -44,6 +54,7 @@ enemies: [
         scaleY: 0.25,
         detailFont: "red_wing",
         detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
         actions: [
             $DamagePlayer {
                 damage: [ 5, 10 ],
