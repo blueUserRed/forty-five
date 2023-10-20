@@ -28,9 +28,9 @@
    instead. This prevents accidental memory leaks.
 
 ## Git
- - when tackling a feature, create a branch with the prefix 'f_' and develop there
- - for small bugfixes, you can use your personal brach with the 'dev_' prefix
- - branch names should use snake_case
+ - when working on a user story, the branch name should be "ff-xxx-name-of-user-story"
+   where xxx is the number of the user story
+ - merge request related to a user story should start with "[ff-xxx]"
  - commit messages should be meaningful, contain the number of the bug fixed when
    appropriate, and be written in english
  - you should commit when:
