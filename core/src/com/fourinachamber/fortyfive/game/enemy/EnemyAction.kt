@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.GamePredicate
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -107,8 +108,9 @@ sealed class EnemyActionPrototype(
 //        }
     }
 
-    class RevolverRotation(
+    class RotateRevolver(
         val maxTurnAmount: Int,
+        val forceDirection: RevolverRotation?,
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
@@ -117,10 +119,18 @@ sealed class EnemyActionPrototype(
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val amount = (1..maxTurnAmount).random()
-            val rotation = if (Random.nextBoolean()) {
-                GameController.RevolverRotation.Right(amount)
+            val rotation = if (forceDirection == null) {
+                if (Random.nextBoolean()) {
+                    RevolverRotation.Right(amount)
+                } else {
+                    RevolverRotation.Left(amount)
+                }
             } else {
-                GameController.RevolverRotation.Left(amount)
+                when (forceDirection) {
+                    is RevolverRotation.Right -> RevolverRotation.Right(amount)
+                    is RevolverRotation.Left -> RevolverRotation.Left(amount)
+                    else -> RevolverRotation.Right(amount)
+                }
             }
             return EnemyAction(amount.toString(), iconHandle, this) {
                 include(controller.rotateRevolver(rotation))
@@ -288,8 +298,13 @@ sealed class EnemyActionPrototype(
                 obj.getOr("hasUnlikelyPredicates", false),
                 obj.getOr<String?>("icon", null)
             )
-            "RevolverRotation" -> RevolverRotation(
+            "RotateRevolver" -> RotateRevolver(
                 obj.get<Long>("maxTurns").toInt(),
+                when (obj.getOr<String?>("forceDirection", null)) {
+                    "left" -> RevolverRotation.Left(0)
+                    "right" -> RevolverRotation.Right(0)
+                    else -> null
+                },
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),

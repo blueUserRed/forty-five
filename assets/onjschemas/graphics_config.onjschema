@@ -44,7 +44,8 @@ var iconConfig = {
 icons: {
     burning: iconConfig,
     poison: iconConfig,
-    fireResistance: iconConfig
+    fireResistance: iconConfig,
+    bewitched: iconConfig
 },
 
 stringTemplates:  {
