@@ -60,6 +60,14 @@ var enemy = {
     coverIconScale: float,
     detailFont: string,
     detailFontScale: float,
+    textEmitterConfig: {
+        color: Color,
+        fontScale: float,
+        speed: float[2],
+        spawnVarianceX: float,
+        spawnVarianceY: float,
+        duration: int[2]
+    },
     actions: $EnemyAction[],
     detailFontColor: Color,
 };
