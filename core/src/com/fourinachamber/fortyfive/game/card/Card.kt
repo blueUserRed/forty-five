@@ -22,7 +22,6 @@ import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -113,7 +112,7 @@ class Card(
         get() {
             if (!isDamageDirty) return field
             var cur = baseDamage
-            for (modifier in modifiers) cur += modifier.damage
+            for (modifier in _modifiers) cur += modifier.damage
             field = cur
             isDamageDirty = false
             return cur
@@ -129,11 +128,14 @@ class Card(
         private set
 
     val shouldRemoveAfterShot: Boolean
-        get() = !(isEverlasting || modifiers.any { it.everlasting })
+        get() = !(isEverlasting || _modifiers.any { it.everlasting })
 
     private lateinit var rottenModifier: CardModifier
 
-    private val modifiers: MutableList<CardModifier> = mutableListOf()
+    private val _modifiers: MutableList<CardModifier> = mutableListOf()
+
+    val modifiers: List<CardModifier>
+        get() = _modifiers
 
     private var isDamageDirty: Boolean = true
 
@@ -155,12 +157,12 @@ class Card(
 
     private fun initRottenModifier() {
         rottenModifier = CardModifier(0, null) { true }
-        modifiers.add(rottenModifier)
+        _modifiers.add(rottenModifier)
         updateText()
     }
 
     private fun updateRottenModifier(newDamage: Int) {
-        modifiers.remove(rottenModifier)
+        _modifiers.remove(rottenModifier)
         rottenModifier = CardModifier(
             newDamage,
             TemplateString(
@@ -168,7 +170,7 @@ class Card(
                 mapOf("damageLost" to newDamage)
             )
         ) { true }
-        modifiers.add(rottenModifier)
+        _modifiers.add(rottenModifier)
         isDamageDirty = true
         updateText()
         updateTexture()
@@ -178,7 +180,7 @@ class Card(
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
     fun checkModifierValidity() {
-        val iterator = modifiers.iterator()
+        val iterator = _modifiers.iterator()
         var textureDirty = false
         while (iterator.hasNext()) {
             val modifier = iterator.next()
@@ -206,7 +208,7 @@ class Card(
 
     fun leaveGame() {
         inGame = false
-        modifiers.clear()
+        _modifiers.clear()
         isDamageDirty = true
         updateText()
         updateTexture()
@@ -233,7 +235,14 @@ class Card(
      */
     fun addModifier(modifier: CardModifier) {
         FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
-        modifiers.add(modifier)
+        _modifiers.add(modifier)
+        isDamageDirty = true
+        updateText()
+        if (modifier.damage != 0) updateTexture()
+    }
+
+    fun removeModifier(modifier: CardModifier) {
+        _modifiers.remove(modifier)
         isDamageDirty = true
         updateText()
         if (modifier.damage != 0) updateTexture()
@@ -249,27 +258,23 @@ class Card(
     /**
      * called when the revolver rotates (but not when this card was shot)
      */
-    fun onRevolverTurn() {
-        if (isRotten) updateRottenModifier(rottenModifier.damage - 1)
+    fun onRevolverRotation(rotation: RevolverRotation) {
+        if (isRotten) updateRottenModifier(rottenModifier.damage - rotation.amount)
     }
+
+    fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
 
     /**
      * checks if the effects of this card respond to [trigger] and returns a timeline containing the actions for the
      * effects; null if no effect was triggered
      */
     @MainThreadOnly
-    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation): Timeline? {
-        var wasEffectWithTimelineTriggered = false
-        val timeline = Timeline.timeline {
-            for (effect in effects) {
-                val effectTimeline = effect.checkTrigger(trigger, triggerInformation)
-                if (effectTimeline != null) {
-                    include(effectTimeline)
-                    wasEffectWithTimelineTriggered = true
-                }
-            }
-        }
-        return if (wasEffectWithTimelineTriggered) timeline else null
+    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation, controller: GameController): Timeline {
+        val inHand = inHand(controller)
+        return effects
+            .filter { inGame || (inHand && it.triggerInHand) }
+            .mapNotNull { it.checkTrigger(trigger, triggerInformation) }
+            .collectTimeline()
     }
 
     fun updateText() {
@@ -281,7 +286,7 @@ class Card(
             .append("\n")
             .append(if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "")
 
-        modifiers
+        _modifiers
             .mapNotNull { it.description }
             .forEach { text.append(it.string).append("\n") }
 

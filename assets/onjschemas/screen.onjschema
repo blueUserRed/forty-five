@@ -421,6 +421,9 @@ $ScreenController {
         addToDeckWidgetName: string,
         addToBackpackWidgetName: string,
     }
+
+    $MapScreenController {
+    }
 }
 
 $KeyAction {

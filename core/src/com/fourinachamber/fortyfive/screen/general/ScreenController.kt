@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenController
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
@@ -20,6 +21,7 @@ object ScreenControllerFactory {
         "DialogScreenController" to { onj -> DialogScreenController(onj) },
         "ShopScreenController" to { onj -> ShopScreenController(onj) },
         "ChooseCardScreenController" to { onj -> ChooseCardScreenController(onj) },
+        "MapScreenController" to { MapScreenController() },
     )
 
     /**

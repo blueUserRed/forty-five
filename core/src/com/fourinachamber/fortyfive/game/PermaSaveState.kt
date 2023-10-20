@@ -7,6 +7,7 @@ import onj.parser.OnjParser
 import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
+import onj.value.OnjArray
 import onj.value.OnjObject
 import kotlin.random.Random
 
@@ -23,6 +24,17 @@ object PermaSaveState {
     private var saveFileDirty: Boolean = false
 
     private var currentRandom: Long = 0
+
+    var collection: List<String> = mutableListOf()
+        set(value) {
+            field = value
+            saveFileDirty = true
+        }
+
+    private var _visitedAreas: MutableSet<String> = mutableSetOf()
+
+    val visitedAreas: Set<String>
+        get() = _visitedAreas
 
     fun read() {
         FortyFiveLogger.debug(logTag, "reading SaveState")
@@ -49,14 +61,24 @@ object PermaSaveState {
         obj as OnjObject
 
         currentRandom = obj.get<Long?>("lastRandom") ?: Random.nextLong()
+        collection = obj.get<OnjArray>("collection").value.map { it.value as String }
+        _visitedAreas = obj.get<OnjArray>("visitedAreas").value.map { it.value as String }.toMutableSet()
 
         saveFileDirty = false
+    }
+
+    fun hasVisitedArea(area: String) = area in visitedAreas
+
+    fun visitedNewArea(area: String) {
+        _visitedAreas.add(area)
     }
 
     fun write() {
         if (!saveFileDirty) return
         val obj = buildOnjObject {
             "lastRandom" with currentRandom
+            "collection" with collection
+            "visitedAreas" with _visitedAreas
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
         saveFileDirty = false

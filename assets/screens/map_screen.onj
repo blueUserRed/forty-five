@@ -17,7 +17,7 @@ assets: {
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
-        "map_background_wasteland_tileable", "location_sign_salem",
+        "map_background_wasteland_tileable", "location_sign_salem", "transparent_black_texture",
         "map_decoration_cactus", "map_decoration_grass", "map_path", "dialog_continue_arrow",
         "map_player", "location_sign_aqua_dulche", "location_sign_salem",
         "map_node_default",
@@ -39,6 +39,7 @@ viewport: $FitViewport {
 options: {
     transitionAwayTime: 1.0,
     background: "title_screen_background",
+    screenController: $MapScreenController {},
     inputMap: [
         ...(inputMaps.defaultInputMap),
         ...(inputMaps.detailMapInputMap),
@@ -238,6 +239,49 @@ root: $Box {
         zIndex: 2,
     } children [
         worldView,
+    ],
+
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                background: "transparent_black_texture",
+                alignItems: align.center,
+                justifyContent: justify.center,
+                detached: true,
+                width: 100.0#percent,
+                height: 100.0#percent,
+            },
+            {
+                style_priority: 2,
+                detached: false,
+                style_condition: state("show_extraction_popup")
+            }
+        ],
+        touchable: "enabled",
+        zIndex: 3,
+    } children [
+
+        $Label {
+            font: "red_wing",
+            text: "Cards extracted!",
+            fontScale: 0.9,
+            color: color.white,
+        },
+
+        $Label {
+            font: "red_wing",
+            text: "Ok",
+            fontScale: 0.9,
+            color: color.white,
+            behaviours: [
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "PopupConfirmationEvent"
+                }
+            ]
+        },
     ],
 
     $Box {

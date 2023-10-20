@@ -41,10 +41,12 @@ class Enemy(
     val name: String,
     val drawableHandle: ResourceHandle,
     val coverIconHandle: ResourceHandle,
+    val hiddenActionIconHandle: ResourceHandle,
     val health: Int,
     val scaleX: Float,
     val scaleY: Float,
     val coverIconScale: Float,
+    val indicatorIconScale: Float,
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
@@ -64,9 +66,9 @@ class Enemy(
 
     private val gameController = FortyFive.currentGame!!
 
-    private val _actions: MutableList<Pair<Int, EnemyAction>> = mutableListOf()
+    private val _actions: MutableList<Pair<Int, EnemyActionPrototype>> = mutableListOf()
 
-    val actions: List<Pair<Int, EnemyAction>>
+    val actionPrototypes: List<Pair<Int, EnemyActionPrototype>>
         get() = _actions
 
     /**
@@ -97,10 +99,10 @@ class Enemy(
         get() = _statusEffects
 
     init {
-        actor = EnemyActor(this, textEmitterConfig, screen)
+        actor = EnemyActor(this, textEmitterConfig, hiddenActionIconHandle, screen)
     }
 
-    fun addEnemyAction(weight: Int, action: EnemyAction) {
+    fun addEnemyAction(weight: Int, action: EnemyActionPrototype) {
         _actions.add(weight to action)
     }
 
@@ -242,10 +244,12 @@ class Enemy(
                 onj.get<String>("name"),
                 drawableHandle,
                 coverIconHandle,
+                onj.get<String>("hiddenActionIcon"),
                 health,
                 onj.get<Double>("scaleX").toFloat(),
                 onj.get<Double>("scaleY").toFloat(),
                 onj.get<Double>("coverIconScale").toFloat(),
+                onj.get<Double>("indicatorIconScale").toFloat(),
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
@@ -257,7 +261,7 @@ class Enemy(
                 .get<OnjArray>("actions")
                 .value
                 .map { it as OnjNamedObject }
-                .map { it.get<Long>("weight").toInt() to EnemyAction.fromOnj(it, enemy) }
+                .map { it.get<Long>("weight").toInt() to EnemyActionPrototype.fromOnj(it, enemy) }
                 .forEach { (weight, action) -> enemy.addEnemyAction(weight, action) }
             return enemy
         }
@@ -272,6 +276,7 @@ class Enemy(
 class EnemyActor(
     val enemy: Enemy,
     textEmitterConfig: OnjObject,
+    private val hiddenActionIconHandle: ResourceHandle,
     private val screen: OnjScreen
 ) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
 
@@ -282,7 +287,7 @@ class EnemyActor(
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
     private var enemyBox = CustomHorizontalGroup(screen)
     private val attackIndicator = CustomHorizontalGroup(screen)
-    private val attackIcon = CustomImageActor("normal_bullet", screen, false) // TODO: fix
+    private val attackIcon = CustomImageActor(null, screen, false)
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
     private val textEmitter: TextEffectEmitter
     private val statusEffectDisplay = StatusEffectDisplay(
@@ -291,7 +296,6 @@ class EnemyActor(
         enemy.detailFontColor,
         enemy.detailFontScale
     )
-
 
     val healthLabel: CustomLabel = CustomLabel(
         screen,
@@ -322,7 +326,7 @@ class EnemyActor(
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true
         coverIcon.setScale(enemy.coverIconScale)
-        attackIcon.setScale(enemy.coverIconScale) // TODO: fix
+        attackIcon.setScale(enemy.indicatorIconScale) // TODO: fix
         coverIcon.reportDimensionsWithScaling = true
         coverIcon.ignoreScalingWhenDrawing = true
         attackIcon.reportDimensionsWithScaling = true
@@ -342,7 +346,6 @@ class EnemyActor(
         addActor(attackIndicator)
         addActor(enemyBox)
         addActor(healthLabel)
-        addActor(textEmitter)
         addActor(statusEffectDisplay)
         updateText()
     }
@@ -356,13 +359,24 @@ class EnemyActor(
         textEmitter.playAnimation("-$damage")
     }
 
-    fun displayAttackIndicator(damage: Int) {
-        attackLabel.setText(damage.toString())
-        attackIndicator.isVisible = true
-    }
+    fun setupForAction(action: GameDirector.NextAction) = when (action) {
 
-    fun hideAttackIndicator() {
-        attackIndicator.isVisible = false
+        is GameDirector.NextAction.None -> {
+            attackIndicator.isVisible = false
+        }
+
+        is GameDirector.NextAction.ShownEnemyAction -> {
+            attackIcon.backgroundHandle = action.action.iconHandle
+                ?: throw RuntimeException("action ${action.action.prototype} can be shown but defines no icon")
+            attackLabel.setText(action.action.indicatorText)
+            attackIndicator.isVisible = true
+        }
+
+        is GameDirector.NextAction.HiddenEnemyAction -> {
+            attackIcon.backgroundHandle = hiddenActionIconHandle
+            attackIndicator.isVisible = true
+        }
+
     }
 
     fun fireAnim(): Timeline = Timeline.timeline {

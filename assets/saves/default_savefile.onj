@@ -1,43 +1,11 @@
 import "config/game_config.onj" as gameConfig;
 
-ownedCards: [
-    "bullet", "bullet", "bullet", "bullet",
-    "incendiaryBullet",
-    "workerBullet",
-//    "bigBullet",
-//    "rottenBullet",
-//    "bewitchedBullet",
-//    "explosiveBullet",
-//    "leadersBullet",
-//    "silverBullet",
-//    "arrow",
-//    "obsidianBullet",
-//    "rustedBullet",
-//    "invisibleBullet",
-//    "poisonBullet"
-],
+cards: null,
 decks: [
     {
         index: 1,
-        cards: [
-            {
-                cardName: "bullet",
-                positionId: 0
-            },
-            {
-                cardName: "bullet",
-                positionId: 1
-            },
-            {
-                cardName: "bullet",
-                positionId: 3
-            },
-            {
-                cardName: "incendiaryBullet",
-                positionId: 4
-            },
-        ]
-    },
+        cards: []
+    }
 ],
 playerLives: gameConfig.playerConfig.lives,
 playerMoney: 110,

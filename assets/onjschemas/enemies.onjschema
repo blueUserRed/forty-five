@@ -7,8 +7,10 @@ use Cards; // include Card namespace for status effects
 var enemyActionSharedKeys = {
     weight: int,
     showProbability: float,
+    icon?: string,
     scaleFactor?: float,
-    predicates?: $GamePredicate[]
+    predicates?: $GamePredicate[],
+    hasUnlikelyPredicates?: boolean
 };
 
 $EnemyAction {
@@ -47,6 +49,11 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
+    $GivePlayerCard {
+        card: string,
+        ...enemyActionSharedKeys
+    }
+
 }
 
 var enemy = {
@@ -54,10 +61,12 @@ var enemy = {
     baseHealth: int,
     texture: string,
     coverIcon: string,
+    hiddenActionIcon: string,
     scaleX: float,
     scaleY: float,
     actionProbability: float,
     coverIconScale: float,
+    indicatorIconScale: float,
     detailFont: string,
     detailFontScale: float,
     textEmitterConfig: {

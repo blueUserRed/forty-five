@@ -15,30 +15,33 @@ var textEmitterConfig = {
 enemies: [
 
     {
-        name: "Test Enemy",
+        name: "Outlaw",
         baseHealth: 100,
         actionProbability: 0.8,
         texture: "enemy_texture",
         coverIcon: "shield_icon",
-        coverIconScale: 0.3,
-        scaleX: 0.25,
-        scaleY: 0.25,
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.35,
+        scaleY: 0.35,
         detailFont: "red_wing",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         actions: [
             $DamagePlayer {
-                damage: [ 5, 10 ],
+                damage: [ 8, 15 ],
                 showProbability: 1.0,
                 weight: 10,
                 scaleFactor: 0.5,
+                icon: "enemy_action_damage"
             },
             $TakeCover {
-                cover: [ 5, 10 ],
-                weight: 10,
+                cover: [ 10, 20 ],
+                weight: 2,
                 showProbability: 1.0,
+                icon: "enemy_action_cover"
             },
-
         ],
         detailFontColor: color.black
     },
@@ -47,11 +50,13 @@ enemies: [
         name: "Pyro",
         baseHealth: 100,
         actionProbability: 0.8,
-        texture: "enemy_texture",
+        texture: "enemy_pyro",
         coverIcon: "shield_icon",
-        coverIconScale: 0.3,
-        scaleX: 0.25,
-        scaleY: 0.25,
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.35,
+        scaleY: 0.35,
         detailFont: "red_wing",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
@@ -61,21 +66,26 @@ enemies: [
                 showProbability: 1.0,
                 weight: 10,
                 scaleFactor: 0.5,
+                icon: "enemy_action_damage"
             },
             $TakeCover {
                 cover: [ 5, 10 ],
                 weight: 10,
                 showProbability: 1.0,
+                icon: "enemy_action_cover"
             },
             $GivePlayerStatusEffect {
                 statusEffect: burning(5, 0.5),
                 weight: 10,
                 showProbability: 0.5,
+                icon: "enemy_action_burning"
             },
             $GiveSelfStatusEffect {
                 statusEffect: fireResistance(5),
-                weight: 40,
+                weight: 60,
                 showProbability: 0.0,
+                hasUnlikelyPredicates: true,
+                icon: "enemy_action_fire_resistance",
                 predicates: [
                     $AnyEnemyHasStatusEffect {
                         value: burning(0, 0.5)
@@ -87,8 +97,10 @@ enemies: [
             },
             $GivePlayerStatusEffect {
                 statusEffect: burning(null, 0.5),
-                weight: 40,
+                weight: 500,
                 showProbability: 0.0,
+                hasUnlikelyPredicates: true,
+                icon: "enemy_action_inferno",
                 predicates: [
                     $EnemyHealthLowerThanPercent {
                         value: 25.0
@@ -97,6 +109,12 @@ enemies: [
                         value: [2, 10]
                     }
                 ]
+            },
+            $GivePlayerCard {
+                card: "scorchingBullet",
+                icon: "enemy_action_hot_potato",
+                weight: 2,
+                showProbability: 0.0,
             }
         ],
         detailFontColor: color.black

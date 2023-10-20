@@ -165,7 +165,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
         FortyFive.useRenderPipeline(gameRenderPipeline)
-
+        encounterModifier.add(EncounterModifier.Moist())
         FortyFiveLogger.title("game starting")
 
         warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent
@@ -391,6 +391,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.onEnter()
             checkCardMaximums()
         }
+        encounterModifier
+            .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
+            .collectTimeline()
+            .let { include(it) }
         includeLater(
             { checkEffectsSingleCard(Trigger.ON_ENTER, card) },
             { true }
@@ -517,16 +521,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * creates a new instance of the card named [name] and puts it in the hand of the player
      */
     @AllThreadsAllowed
-    fun tryToPutCardsInHand(name: String, amount: Int = 1): Timeline = Timeline.timeline {
+    fun tryToPutCardsInHandTimeline(name: String, amount: Int = 1): Timeline = Timeline.timeline {
         var cardsToDraw = 0
         action {
             val maxCards = hardMaxCards - cardHand.cards.size
             cardsToDraw = min(maxCards, amount)
         }
-        includeLater(
-            { maxCardsPopupTimeline() },
-            { cardsToDraw == 0 }
-        )
         action {
             if (cardsToDraw == 0) return@action
             val cardProto = cardPrototypes
@@ -587,39 +587,28 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     "cardToShoot = $cardToShoot"
         )
 
-        var enemyDamageTimeline: Timeline? = null
-        var effectTimeline: Timeline? = null
-
-        if (cardToShoot != null) {
-
-            enemyDamageTimeline = Timeline.timeline {
-                action {
-                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
-                }
-                include(enemy.damage(cardToShoot.curDamage))
-                action { cardToShoot.afterShot() }
-            }
-
-            effectTimeline = checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot)
-        }
-
         val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
-
             includeLater(
                 { damagePlayerTimeline },
                 { cardToShoot == null }
             )
-
+            cardToShoot?.let {
+                action {
+                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
+                    cardToShoot.afterShot()
+                }
+                include(enemy.damage(cardToShoot.curDamage))
+            }
             include(rotateRevolver(rotationDirection))
-
-            enemyDamageTimeline?.let { include(it) }
-
-            includeLater(
-                { effectTimeline!! },
-                { effectTimeline != null }
-            )
+            cardToShoot?.let {
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot))
+            }
+            encounterModifier
+                .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }
+                .collectTimeline()
+                .let { include(it) }
         }
 
         appendMainTimeline(Timeline.timeline {
@@ -630,24 +619,28 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
-    fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect): Timeline = Timeline.timeline {
-        if (encounterModifier.any { !it.shouldApplyStatusEffects() }) return Timeline(mutableListOf())
+    fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
+        if (encounterModifier.any { !it.shouldApplyStatusEffects() }) return Timeline()
         action {
-            enemyArea.getTargetedEnemy().applyEffect(statusEffect)
+            enemy.applyEffect(statusEffect)
         }
     }
 
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
         val newRotation = modify(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
-        include(revolver.rotate(newRotation))
         action {
+            dispatchAnimTimeline(revolver.rotate(newRotation))
             revolverRotationCounter += newRotation.amount
             checkCardModifierValidity()
             revolver
                 .slots
                 .mapNotNull { it.card }
-                .forEach(Card::onRevolverTurn)
+                .forEach { it.onRevolverRotation(rotation) }
         }
+        encounterModifier
+            .mapNotNull { it.executeAfterRevolverRotated(newRotation, this@GameController) }
+            .collectTimeline()
+            .let { include(it) }
         if (newRotation.amount != 0) {
             val info = TriggerInformation(multiplier = newRotation.amount)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
@@ -675,6 +668,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             return
         }
         appendMainTimeline(Timeline.timeline {
+            include(checkEffectsActiveCards(Trigger.ON_ROUND_END))
             includeLater(
                 { putCardsUnderDeckTimeline() },
                 { cardHand.cards.size >= softMaxCards }
@@ -687,7 +681,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             include(drawCardPopupTimeline(cardsToDraw))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
-            includeLater({ checkEffectsActiveCards(Trigger.ON_TURN_START) }, { true })
+            includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
     }
 
@@ -758,7 +752,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        return card.checkEffects(trigger, triggerInformation) ?: Timeline(mutableListOf())
+        return card.checkEffects(trigger, triggerInformation, this)
     }
 
     @MainThreadOnly
@@ -768,8 +762,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         return createdCards
-            .filter { it.inGame }
-            .mapNotNull { it.checkEffects(trigger, triggerInformation) }
+            .filter { it.inGame || it.inHand(this) }
+            .map { it.checkEffects(trigger, triggerInformation, this) }
             .collectTimeline()
     }
 
