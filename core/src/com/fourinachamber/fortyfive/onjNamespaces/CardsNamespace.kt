@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
+import onj.builder.buildOnjObject
 import onj.customization.Namespace.OnjNamespaceDatatypes
 import onj.customization.Namespace.OnjNamespace
 import onj.customization.OnjFunction.RegisterOnjFunction
@@ -10,7 +11,7 @@ import kotlin.reflect.KClass
 
 @Suppress("unused") // variables and functions are read via reflection
 @OnjNamespace
-object CardsNamespace {
+object CardsNamespace { // TODO: something like GameNamespace would be a more accurate name
 
     @OnjNamespaceDatatypes
     val datatypes: Map<String, KClass<*>> = mapOf(
@@ -147,33 +148,39 @@ object CardsNamespace {
     }
 
     @RegisterOnjFunction(schema = "params: [int, int]")
-    fun poison(turns: OnjInt, damage: OnjInt): OnjStatusEffect {
-        return OnjStatusEffect(Poison(
+    fun poison(turns: OnjInt, damage: OnjInt): OnjStatusEffect = OnjStatusEffect {
+        Poison(
             turns.value.toInt(),
             damage.value.toInt()
-        ))
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [int?, float]")
-    fun burning(rotations: OnjValue, percent: OnjFloat): OnjStatusEffect {
-        return OnjStatusEffect(Burning(
+    fun burning(rotations: OnjValue, percent: OnjFloat): OnjStatusEffect = OnjStatusEffect {
+        Burning(
             if (rotations.isInt()) (rotations.value as Long).toInt() else 0,
             percent.value.toFloat(),
             rotations.isNull()
-        ))
+        )
     }
 
     @RegisterOnjFunction(schema = "params: [int]")
-    fun fireResistance(turns: OnjInt): OnjStatusEffect {
-        return OnjStatusEffect(FireResistance(turns.value.toInt()))
+    fun fireResistance(turns: OnjInt): OnjStatusEffect = OnjStatusEffect {
+        FireResistance(turns.value.toInt())
     }
 
     @RegisterOnjFunction(schema = "params: [int, int]")
-    fun bewitched(turns: OnjInt, rotations: OnjInt): OnjStatusEffect {
-        return OnjStatusEffect(Bewitched(
+    fun bewitched(turns: OnjInt, rotations: OnjInt): OnjStatusEffect = OnjStatusEffect {
+        Bewitched(
             turns.value.toInt(),
             rotations.value.toInt(),
-        ))
+        )
+    }
+
+    @RegisterOnjFunction(schema = "params: [{...*}]")
+    fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
+        name("NegatePredicate")
+        "value" with predicate
     }
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
@@ -219,7 +226,7 @@ class OnjBulletSelector(
  * a status effect that was read from an onj file
  */
 class OnjStatusEffect(
-    override val value: StatusEffect
+    override val value: StatusEffectCreator
 ) : OnjValue() {
 
     override fun stringify(info: ToStringInformation) {
