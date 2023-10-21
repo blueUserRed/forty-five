@@ -300,8 +300,7 @@ root: $Box {
         $AdvancedText {
             name: "shopMessage",
             font: "red_wing",
-            parts: [
-            ],
+            rawText: "// TODO this element because of MARRRRRRRRRRRRRRRVIN",
             defaults: { //defaults actually defined in map/events/shops.onj
 
                 font: "red_wing",
@@ -310,10 +309,10 @@ root: $Box {
             },
             styles: [
                 {
-                    width: 100.0#percent,
-                    flexDirection: flexDirection.row,
-                    flexWrap: wrap.wrap,
-                    marginTop: 1.0#percent,
+//                    width: 100.0#percent,
+//                    flexDirection: flexDirection.row,
+//                    flexWrap: wrap.wrap,
+//                    marginTop: 1.0#percent,
                 }
             ],
         },
