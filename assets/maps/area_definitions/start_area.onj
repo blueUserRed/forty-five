@@ -1,0 +1,81 @@
+startNode: 0,
+endNode: 2,
+biome: "wasteland",
+nodes: [
+    {
+        x: 20.0,
+        y: 80.0,
+        isArea: false,
+        edgesTo: [
+            1,
+        ],
+        event: $NPCMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            npc: 'Friend of your Father',
+        }
+    },
+    {
+        x: 40.0,
+        y: 110.0,
+        isArea: false,
+        edgesTo: [
+            0,2
+        ],
+        nodeTexture: "map_node_shop_rect",
+        event: $ChooseCardMapEvent {
+            seed: null,
+            types: [
+                "defType"
+            ],
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+        }
+    },
+    {
+        x: 65.0,
+        y: 100.0,
+        isArea: false,
+        edgesTo: [
+            1
+        ],
+        image: "salem",
+        imagePos: "right",
+        nodeTexture: "map_node_exit_rect",
+        event: $EnterMapMapEvent {
+            targetMap: "roadToSalem",
+            placeAtEnd: false
+        }
+    },
+],
+
+decorations: [
+    {
+        texture: "map_decoration_cactus",
+        baseWidth: 50.0,
+        baseHeight: 80.0,
+        positions: [
+            [
+                70.0, 70.0, 1.5
+            ],
+            [
+                100.0, 100.0, 1.0
+            ],
+            [
+                20.0, 112.0, 1.5
+            ],
+            [
+                40.0, 90.0, 2.0
+            ],
+            [
+                -10.0, 75.0, 1.7
+            ],
+            [
+                20.0, 55.0, 1.7
+            ],
+        ]
+    }
+],
+isArea: true,

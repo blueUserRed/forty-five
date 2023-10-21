@@ -17,7 +17,7 @@ stats: {
 },
 
 position: {
-    map: "test_area",
+    map: "start_area",
     node: 0,
     lastNode: null
 },

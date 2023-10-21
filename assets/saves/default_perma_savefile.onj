@@ -7,5 +7,5 @@ collection: [
     "workerBullet"
 ],
 visitedAreas: [
-    "test_area" // the start area
+    "start_area" // the start area
 ],
