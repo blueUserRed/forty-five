@@ -333,6 +333,9 @@ class SeededMapGenerator(
             val line1 = uniqueLines[i]
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
+                if (i == 2 && j == 5) {
+                    println("hi")
+                }
                 if (!line1.sharesPointWith(line2)) {
                     val interceptPoint = line1.addOnEachEnd(restrictions.pathTotalWidth)
                         .intersection(line2.addOnEachEnd(restrictions.pathTotalWidth))
@@ -845,16 +848,18 @@ class Line(val start: Vector2, val end: Vector2) {
     fun addOnEachEnd(distance: Float): Line {
         val ang = ang()
         val result = Line(start.clone(), end.clone())
-        if (start.x < end.x) {
-            result.start.x -= (cos(ang) * distance)
-            result.start.y -= (sin(ang) * distance)
-            result.end.x += (cos(ang) * distance)
-            result.end.y += (sin(ang) * distance)
+        val xChange = cos(ang) * distance
+        val yChange = sin(ang) * distance
+        if ((start.x < end.x) == (xChange > 0)) {
+            result.start.x -= xChange
+            result.start.y -= yChange
+            result.end.x += xChange
+            result.end.y += yChange
         } else {
-            result.start.x += (cos(ang) * distance)
-            result.start.y += (sin(ang) * distance)
-            result.end.x -= (cos(ang) * distance)
-            result.end.y -= (sin(ang) * distance)
+            result.start.x += xChange
+            result.start.y += yChange
+            result.end.x -= xChange
+            result.end.y -= yChange
         }
         return result
     }
