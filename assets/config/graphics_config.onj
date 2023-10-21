@@ -35,11 +35,11 @@ icons: {
         scale: 0.25
     },
     fireResistance: {
-        icon: "buning_icon",
+        icon: "burning_icon",
         scale: 0.25
     },
     bewitched: {
-        icon: "buning_icon",
+        icon: "burning_icon",
         scale: 0.25
     },
 },

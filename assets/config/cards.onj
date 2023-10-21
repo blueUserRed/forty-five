@@ -28,7 +28,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", burning(3, burningPercent)),
+            giveStatus("shot", burning(3, burningPercent, false)),
         ],
         forceLoadCards: [],
         cost: 1,
@@ -132,7 +132,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", burning(2, burningPercent))
+            giveStatus("shot", burning(2, burningPercent, false))
         ],
         forceLoadCards: [],
         cost: 1,

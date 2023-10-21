@@ -75,7 +75,7 @@ enemies: [
 //                icon: "enemy_action_cover"
 //            },
 //            $GivePlayerStatusEffect {
-//                statusEffect: burning(5, 0.5),
+//                statusEffect: burning(5, 0.5, false),
 //                weight: 10,
 //                showProbability: 0.5,
 //                icon: "enemy_action_burning"
@@ -88,7 +88,7 @@ enemies: [
 //                icon: "enemy_action_fire_resistance",
 //                predicates: [
 //                    $AnyEnemyHasStatusEffect {
-//                        value: burning(0, 0.5)
+//                        value: burning(0, 0.5, false)
 //                    },
 //                    $EnemyDoesNotHaveStatusEffect {
 //                        value: fireResistance(0)
@@ -96,7 +96,7 @@ enemies: [
 //                ]
 //            },
 //            $GivePlayerStatusEffect {
-//                statusEffect: burning(null, 0.5),
+//                statusEffect: burning(0, 0.5, true),
 //                weight: 500,
 //                showProbability: 0.0,
 //                hasUnlikelyPredicates: true,
@@ -157,10 +157,11 @@ enemies: [
                 icon: "enemy_action_cover"
             },
             $GivePlayerStatusEffect {
-                statusEffect: burning(null, 0.5),
-                weight: 10,
+                statusEffect: bewitched([1, 3], [2, 4]),
+                weight: 10000000,
+//                weight: 10,
                 showProbability: 0.0,
-                hasUnlikelyPredicates: true,
+                hasUnlikelyPredicates: false,
                 icon: "enemy_action_inferno",
                 predicates: [
                     negatePredicate($PlayerHasStatusEffect {
