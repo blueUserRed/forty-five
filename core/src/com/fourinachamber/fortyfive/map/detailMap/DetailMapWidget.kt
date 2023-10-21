@@ -74,6 +74,7 @@ class DetailMapWidget(
     override var backgroundHandle: ResourceHandle? = null
         set(value) {
             field = value
+            if (background != null) return
             background = if (value == null) {
                 null
             } else {
@@ -83,7 +84,12 @@ class DetailMapWidget(
 
     private var background: Drawable? = null
 
-    var backgroundScale: Float = 1F
+    var backgroundScale: Float? = null
+        set(value) {
+            if (field == null) {
+                field = value
+            }
+        }
 
     private val edgeTexture: TextureRegion by lazy {
         ResourceManager.get(screen, edgeTextureHandle)
@@ -212,7 +218,7 @@ class DetailMapWidget(
         if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // make sure player does not get trapped
         if (!playerNode.isLinkedTo(node)) return false
         if (node == lastNode) return true
-        if (playerNode.event?.currentlyBlocks ?: false) return false
+        if (playerNode.event?.currentlyBlocks == true) return false
         return true
     }
 
@@ -263,8 +269,8 @@ class DetailMapWidget(
 
     private fun drawBackground(batch: Batch) {
         val background = background ?: return
-        val minWidth = background.minWidth * backgroundScale
-        val minHeight = background.minHeight * backgroundScale
+        val minWidth = background.minWidth * (backgroundScale ?: 1F)
+        val minHeight = background.minHeight * (backgroundScale ?: 1F)
         val amountX = ceil(width / minWidth).toInt() + 2
         val amountY = ceil(height / minHeight).toInt() + 2
         var curX = x - minWidth + (mapOffset.x % minWidth)
