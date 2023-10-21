@@ -146,8 +146,10 @@ generatorConfig: {
             biome: "wasteland",
             seed: runRandom(1),
             restrictions: {
-                maxNodes: 14,
-                minNodes: 8,
+//                maxNodes: 14, //TODO comment back in
+//                minNodes: 8,
+                maxNodes: 4,
+                minNodes: 4,
                 maxSplits: 5,
                 splitProbability: 0.35,
                 startArea: "start_area",
@@ -171,15 +173,15 @@ generatorConfig: {
                 avgNbrOfEncounters: 0,
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
-                    {
-                        weight: 100,
-                        nodeTexture: "map_node_fight_circle",
-                        event: $EncounterMapEvent {
-                            currentlyBlocks: true,
-                            canBeStarted: true,
-                            isCompleted: false
-                        }
-                    },
+//                    { //TODO comment back in
+//                        weight: 100,
+//                        nodeTexture: "map_node_fight_circle",
+//                        event: $EncounterMapEvent {
+//                            currentlyBlocks: true,
+//                            canBeStarted: true,
+//                            isCompleted: false
+//                        }
+//                    },
                     {
                         weight: 10,
                         nodeTexture: null,
@@ -187,14 +189,14 @@ generatorConfig: {
                         }
                     },
                 ],
-                finalEvent: {
-                    nodeTexture: "map_node_fight_circle",
-                    event: $EncounterMapEvent {
-                        currentlyBlocks: true,
-                        canBeStarted: true,
-                        isCompleted: false
-                    }
-                },
+//                finalEvent: { //TODO comment back in
+//                    nodeTexture: "map_node_fight_circle",
+//                    event: $EncounterMapEvent {
+//                        currentlyBlocks: true,
+//                        canBeStarted: true,
+//                        isCompleted: false
+//                    }
+//                },
                 decorations: [
                     $RandomDistributionFunction {
                         decoration: "map_decoration_grass",

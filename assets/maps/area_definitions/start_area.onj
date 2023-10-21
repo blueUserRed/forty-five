@@ -21,7 +21,7 @@ nodes: [
         y: 110.0,
         isArea: false,
         edgesTo: [
-            0,2
+            0, 2
         ],
         nodeTexture: "map_node_shop_rect",
         event: $ChooseCardMapEvent {
@@ -53,6 +53,16 @@ nodes: [
 
 decorations: [
     {
+        texture: "burning_icon",
+        baseWidth: 50.0,
+        baseHeight: 50.0,
+        positions: [
+            [
+                19.8, 65.0, 1.0
+            ]
+        ],
+    },
+    {
         texture: "map_decoration_cactus",
         baseWidth: 50.0,
         baseHeight: 80.0,
@@ -76,6 +86,16 @@ decorations: [
                 20.0, 55.0, 1.7
             ],
         ]
+    },
+    {
+        texture: "burning_icon",
+        baseWidth: 50.0,
+        baseHeight: 50.0,
+        positions: [
+            [
+                25.3, 55.0, 0.3
+            ]
+        ],
     }
 ],
 isArea: true,
