@@ -300,9 +300,8 @@ root: $Box {
         $AdvancedText {
             name: "shopMessage",
             font: "red_wing",
-            rawText: "// TODO this element because of MARRRRRRRRRRRRRRRVIN",
+            rawText: "// TODO this element because of MArrrrrrrrVIN",
             defaults: { //defaults actually defined in map/events/shops.onj
-
                 font: "red_wing",
                 fontScale: 0.8,
                 color: color.forty_white,
