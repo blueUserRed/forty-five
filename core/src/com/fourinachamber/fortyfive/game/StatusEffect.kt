@@ -252,10 +252,12 @@ class Bewitched(
     }
 
     override fun isStillValid(): Boolean =
-        controller.turnCounter < turnOnEffectStart + turnsDuration ||
+        controller.turnCounter < turnOnEffectStart + turnsDuration &&
         controller.revolverRotationCounter < rotationOnEffectStart + rotationDuration
 
-    override fun getDisplayText(): String = "$rotationDuration rotations or $turnsDuration turns"
+    override fun getDisplayText(): String =
+            "${rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter} rotations or " +
+            "${turnOnEffectStart + turnsDuration - controller.turnCounter} turns"
 
     override fun equals(other: Any?): Boolean = other is Bewitched
 

@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.OnjNamespaceDatatypes
 import onj.customization.Namespace.OnjNamespace
@@ -147,33 +148,33 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjBulletSelector(BulletSelector.ByLambda { self, other, _, _ -> self === other })
     }
 
-    @RegisterOnjFunction(schema = "params: [int, int]")
-    fun poison(turns: OnjInt, damage: OnjInt): OnjStatusEffect = OnjStatusEffect {
+    @RegisterOnjFunction(schema = "params: [*, *]")
+    fun poison(turns: OnjValue, damage: OnjValue): OnjStatusEffect = OnjStatusEffect {
         Poison(
-            turns.value.toInt(),
-            damage.value.toInt()
+            getIntParamFromOnj(turns),
+            getIntParamFromOnj(damage)
         )
     }
 
-    @RegisterOnjFunction(schema = "params: [int?, float]")
-    fun burning(rotations: OnjValue, percent: OnjFloat): OnjStatusEffect = OnjStatusEffect {
+    @RegisterOnjFunction(schema = "params: [*, float, boolean]")
+    fun burning(rotations: OnjValue, percent: OnjFloat, isInfinite: OnjBoolean): OnjStatusEffect = OnjStatusEffect {
         Burning(
-            if (rotations.isInt()) (rotations.value as Long).toInt() else 0,
+            getIntParamFromOnj(rotations),
             percent.value.toFloat(),
-            rotations.isNull()
+            isInfinite.value
         )
     }
 
-    @RegisterOnjFunction(schema = "params: [int]")
-    fun fireResistance(turns: OnjInt): OnjStatusEffect = OnjStatusEffect {
-        FireResistance(turns.value.toInt())
+    @RegisterOnjFunction(schema = "params: [*]")
+    fun fireResistance(turns: OnjValue): OnjStatusEffect = OnjStatusEffect {
+        FireResistance(getIntParamFromOnj(turns))
     }
 
-    @RegisterOnjFunction(schema = "params: [int, int]")
-    fun bewitched(turns: OnjInt, rotations: OnjInt): OnjStatusEffect = OnjStatusEffect {
+    @RegisterOnjFunction(schema = "params: [*, *]")
+    fun bewitched(turns: OnjValue, rotations: OnjValue): OnjStatusEffect = OnjStatusEffect {
         Bewitched(
-            turns.value.toInt(),
-            rotations.value.toInt(),
+            getIntParamFromOnj(turns),
+            getIntParamFromOnj(rotations),
         )
     }
 
@@ -181,6 +182,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
         name("NegatePredicate")
         "value" with predicate
+    }
+
+    private fun getIntParamFromOnj(value: OnjValue): Int = when (value) {
+        is OnjInt -> value.value.toInt()
+        is OnjArray -> value.toIntRange().random()
+        else -> throw RuntimeException("expected parameter to be either an int or an array of two ints")
     }
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {

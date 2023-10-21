@@ -260,15 +260,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         else -> { }
     }
 
-    fun nextTurn() {
-        turnCounter++
-        if (remainingTurns != -1) {
-            FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
-            remainingTurns--
-        }
-        gameDirector.onNewTurn()
-    }
-
     private var updateCount = 0 // TODO: this is stupid
 
     @MainThreadOnly
@@ -673,10 +664,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 { putCardsUnderDeckTimeline() },
                 { cardHand.cards.size >= softMaxCards }
             )
+            action {
+                turnCounter++
+            }
             include(gameDirector.checkActions())
             include(executePlayerStatusEffectsOnNewTurn())
             action {
-                nextTurn()
+                gameDirector.onNewTurn()
                 curReserves = baseReserves
             }
             include(drawCardPopupTimeline(cardsToDraw))
