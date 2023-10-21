@@ -24,7 +24,7 @@ var images = {
 
 mapImages: [
     {
-        name: "test_area",
+        name: "start_area",
         image: images.testArea.image,
         width: images.testArea.width,
         height: images.testArea.height,
@@ -38,7 +38,28 @@ mapImages: [
         type: "sign",
     },
     {
-        name: "test_area",
+        name: "aqua_dulche",
+        image: images.testArea.image,
+        width: images.testArea.width,
+        height: images.testArea.height,
+        type: "sign",
+    },
+    {
+        name: "end_area",
+        image: images.testArea.image,
+        width: images.testArea.width,
+        height: images.testArea.height,
+        type: "sign",
+    },
+    {
+        name: "witch_hideout",
+        image: images.testArea.image,
+        width: images.testArea.width,
+        height: images.testArea.height,
+        type: "sign",
+    },
+    {
+        name: "start_area",
         image: images.testAreaName.image,
         width: images.testAreaName.width,
         height: images.testAreaName.height,
@@ -49,6 +70,27 @@ mapImages: [
         image: images.salemName.image,
         width: images.salemName.width,
         height: images.salemName.height,
+        type: "name",
+    },
+    {
+        name: "aqua_dulche",
+        image: images.testAreaName.image,
+        width: images.testAreaName.width,
+        height: images.testAreaName.height,
+        type: "name",
+    },
+    {
+        name: "end_area",
+        image: images.testAreaName.image,
+        width: images.testAreaName.width,
+        height: images.testAreaName.height,
+        type: "name",
+    },
+    {
+        name: "witch_hideout",
+        image: images.testAreaName.image,
+        width: images.testAreaName.width,
+        height: images.testAreaName.height,
         type: "name",
     },
 ],
@@ -63,20 +105,36 @@ screens: {
 
 displayNames: [
     {
-        name: "test_area",
-        display: "Aqua Dulche"
+        name: "start_area",
+        display: "Start Area"
     },
     {
         name: "salem",
         display: "Salem"
     },
     {
+        name: "aqua_dulche",
+        display: "Aqua Dulche"
+    },
+    {
+        name: "end_area",
+        display: "End Area"
+    },
+    {
+        name: "witch_hideout", // extra area between aqua_dulche and end_area
+        display: "Witches City"
+    },
+    {
         name: "roadToSalem",
         display: "Road to Salem"
     },
     {
-        name: "endlessRoad",
-        display: "Endless Road"
+        name: "roadToAquaDulche",
+        display: "Road to Aqua Dulche"
+    },
+    {
+        name: "roadToEnd",
+        display: "The Final Challenge"
     },
 ],
 
@@ -85,17 +143,17 @@ generatorConfig: {
     maps: [
         {
             name: "roadToSalem",
-            biome: "dunkelwald",
+            biome: "wasteland",
             seed: runRandom(1),
             restrictions: {
                 maxNodes: 14,
                 minNodes: 8,
-                maxSplits: 4,
-                splitProbability: 0.6,
-                startArea: "test_area",
+                maxSplits: 5,
+                splitProbability: 0.35,
+                startArea: "start_area",
                 endArea: "salem",
-                scaleWidth: 2.5,
-                scaleLength: 2.5,
+                scaleWidth: 0.5,
+                scaleLength: 0.5,
                 otherAreas: [
                 ],
                 rotation: 1.25,
@@ -103,18 +161,18 @@ generatorConfig: {
                 ],
                 encounterModifiers: [
                     {
-                        name: "Rain",
+                        name: "lookalike",
                         weight: 10,
                     }, {
                         name: "Frost",
                         weight: 1,
                     }
                 ],
-                avgNbrOfEncounters: 1,
+                avgNbrOfEncounters: 0,
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
-                        weight: 10000,
+                        weight: 100,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -271,7 +329,7 @@ worldView: {
             y: 595,
         },
         {
-            name: "test_area",
+            name: "start_area",
             x: 283,
             y: 603,
             image: images.testArea.image,
