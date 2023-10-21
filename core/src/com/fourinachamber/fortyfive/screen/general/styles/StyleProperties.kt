@@ -357,7 +357,7 @@ class BackgroundScaleStyleProperty(
         target.backgroundScale = data
     }
 
-    override fun get(node: YogaNode): Float = target.backgroundScale
+    override fun get(node: YogaNode): Float = target.backgroundScale ?: 1F
 }
 
 fun DetailMapWidget.addMapStyles(screen: OnjScreen) {
