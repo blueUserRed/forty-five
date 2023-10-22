@@ -9,8 +9,7 @@ nodes: [
         edgesTo: [
             1,
         ],
-        image: "end_area",
-        imagePos: "left",
+        nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
             targetMap: "roadToEnd",
         }
@@ -22,7 +21,6 @@ nodes: [
         edgesTo: [
             0,
         ],
-        nodeTexture: "map_node_exit_rect",
         event: $NPCMapEvent {
             currentlyBlocks: false,
             canBeStarted: true,
