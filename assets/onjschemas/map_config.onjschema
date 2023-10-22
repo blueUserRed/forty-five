@@ -26,7 +26,6 @@ $MapEvent {
 
     $EnterMapMapEvent {
         targetMap: string,
-        placeAtEnd: boolean
     }
 
     $NPCMapEvent {
