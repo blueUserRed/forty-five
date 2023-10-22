@@ -242,7 +242,8 @@ class SeededMapGenerator(
      */
     private fun getLimitInRange(x: Float, nodes: MutableList<MapNodeBuilder>, direction: Direction): Float {
         val nodesInRange: List<Float> =
-            nodes.filter { abs(it.x - x) < restrictions.rangeToCheckBetweenNodes }.map { it.y }
+            nodes.filter { abs(it.x - x) < restrictions.rangeToCheckForArea }.map { it.y }
+        if (nodesInRange.isEmpty()) return nodes.minBy { abs(it.x - x) }.y
         return if (direction == Direction.UP) nodesInRange.max() else nodesInRange.min()
 
     }
@@ -335,9 +336,6 @@ class SeededMapGenerator(
             val line1 = uniqueLines[i]
             for (j in (i + 1) until uniqueLines.size) {
                 val line2 = uniqueLines[j]
-                if (i == 2 && j == 5) {
-                    println("hi")
-                }
                 if (!line1.sharesPointWith(line2)) {
                     val interceptPoint = line1.addOnEachEnd(restrictions.pathTotalWidth)
                         .intersection(line2.addOnEachEnd(restrictions.pathTotalWidth))
@@ -1412,6 +1410,11 @@ data class MapRestriction(
      * the range from where nodes are checked if there are any other from another line
      */
     val rangeToCheckBetweenNodes: Float = 0.6F,
+
+    /**
+     * the range from where nodes are checked around an area to determine its height/distance from the main lines
+     */
+    val rangeToCheckForArea: Float = 60F,
 
     val startArea: String,
     val endArea: String,
