@@ -1,0 +1,1 @@
+ls | Rename-Item -NewName {$_ -replace 'forty-five_asset_(.*?)(_?v\d+)?\.png$', '$1.png' }
