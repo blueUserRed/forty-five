@@ -297,7 +297,7 @@ generatorConfig: {
                 ],
                 optionalEvents: [
                     {
-                        weight: 15 - 15, //TODO change
+                        weight: 15,
 
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
@@ -307,8 +307,8 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 15,
-                        nodeTexture: "map_node_fight_circle",
+                        weight: 3,
+                        nodeTexture: "map_node_shop_circle",
                         event: $EmptyMapEvent {
                         }
                     },
@@ -417,7 +417,7 @@ generatorConfig: {
                     },
                     {
                         weight: 10,
-                        nodeTexture: "map_node_fight_circle",
+                        nodeTexture: "map_node_shop_circle",
                         event: $ChooseCardMapEvent {
                             types: [
                                 "defType"
