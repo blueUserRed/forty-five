@@ -195,6 +195,10 @@ textures: [
         file: "textures/map/backgrounds/wasteland.png",
     },
     {
+        name: "map_background_bewitchedForest_tileable",
+        file: "textures/map/backgrounds/bewitchedForest.png",
+    },
+    {
         name: "map_path",
         file: "textures/map/path.png"
     },

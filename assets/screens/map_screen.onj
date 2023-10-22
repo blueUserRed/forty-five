@@ -17,7 +17,8 @@ assets: {
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
-        "map_background_wasteland_tileable", "location_sign_salem", "transparent_black_texture",
+        "map_background_wasteland_tileable","map_background_bewitchedForest_tileable",
+        "location_sign_salem", "transparent_black_texture",
         "map_decoration_wasteland_cactus_1", "map_decoration_wasteland_cactus_2", "map_decoration_grass", "map_path", "dialog_continue_arrow",
         "map_player", "location_sign_aqua_dulche", "location_sign_salem",
         "map_node_default",
@@ -88,7 +89,7 @@ var mapBox = $Box {
                 positionRight: 0#points,
                 positionTop: 0#points,
                 positionBottom: 0#points,
-                backgroundScale: 2.5,
+                backgroundScale: 0.5,
                 background: "map_background_wasteland_tileable",
             },
             {
@@ -103,6 +104,12 @@ var mapBox = $Box {
                 style_condition: biome("dunkelwald"),
                 backgroundScale: 0.5,
                 background: "map_background_grass_tileable",
+            },
+            {
+                style_priority: 2,
+                style_condition: biome("bewitchedForest"),
+                backgroundScale: 0.5,
+                background: "map_background_bewitchedForest_tileable",
             }
         ],
         detailMapProvider: $CurrentMapProvider {
