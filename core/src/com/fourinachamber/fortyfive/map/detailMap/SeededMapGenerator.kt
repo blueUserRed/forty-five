@@ -273,8 +273,10 @@ class SeededMapGenerator(
         var curUp = mainLine
         for (i in 1 until restrictions.maxLines) {
             if (rnd.nextBoolean()) {
+                if (curDown.lineNodes.isEmpty()) continue
                 curDown = curDown.generateNextLine(true, maxLength)!!
             } else {
+                if (curUp.lineNodes.isEmpty()) continue
                 curUp = curUp.generateNextLine(false, maxLength)!!
             }
         }
