@@ -13,7 +13,8 @@ var distributionFunctionStandardConfig = {
     baseHeight: float,
     scaleMin: float,
     scaleMax: float,
-    onlyCollidesWithNodes: boolean
+    onlyCollidesWithNodes: boolean,
+    canOverlapWithOtherNodes: boolean
 };
 
 $MapEvent {

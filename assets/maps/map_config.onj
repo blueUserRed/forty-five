@@ -122,6 +122,7 @@ displayNames: [
     },
     {
         name: "witch_hideout", // extra area between aqua_dulche and end_area
+
         display: "Witches City"
     },
     {
@@ -213,7 +214,8 @@ generatorConfig: {
                         baseHeight: 3.0,
                         scaleMin: 0.6,
                         scaleMax: 1.2,
-                        onlyCollidesWithNodes: false
+                        onlyCollidesWithNodes: false,
+                        canOverlapWithOtherNodes: true,
                     },
                     //                    $RandomDistributionFunction {
 //                        decoration: "map_decoration_grass",
@@ -222,7 +224,8 @@ generatorConfig: {
 //                        baseHeight: 4.0,
 //                        scaleMin: 1.5,
 //                        scaleMax: 2.5,
-//                        onlyCollidesWithNodes: false
+//                        onlyCollidesWithNodes: false,
+//                        canOverlapWithOtherNodes: true,
 //                    },
                     $MultiClusterDistributionFunction {
                         decoration: "map_decoration_wasteland_cactus_1",
@@ -234,7 +237,8 @@ generatorConfig: {
                         blockSize: 20.0,
                         prob: 0.2,
                         additionalProbIfNeighbor: 0.1,
-                        onlyCollidesWithNodes: false
+                        onlyCollidesWithNodes: false,
+                        canOverlapWithOtherNodes: true,
                     },
                     $SingleClusterDistributionFunction {
                         decoration: "map_decoration_grass",
@@ -247,7 +251,8 @@ generatorConfig: {
                         outerRadius: 80.0,
                         nbrOfInnerPoints: 7,
                         nbrOfOuterPoints: 15,
-                        onlyCollidesWithNodes: false
+                        onlyCollidesWithNodes: false,
+                        canOverlapWithOtherNodes: true,
                     },
                 ],
                 decorationSeed: 230789230789407892342,
@@ -315,7 +320,8 @@ generatorConfig: {
                         baseHeight: 3.0,
                         scaleMin: 0.6,
                         scaleMax: 1.2,
-                        onlyCollidesWithNodes: false
+                        onlyCollidesWithNodes: false,
+                        canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
                         decoration: "map_decoration_wasteland_cactus_2",
@@ -324,7 +330,8 @@ generatorConfig: {
                         baseHeight: 4.0,
                         scaleMin: 1.5,
                         scaleMax: 2.5,
-                        onlyCollidesWithNodes: false
+                        onlyCollidesWithNodes: false,
+                        canOverlapWithOtherNodes: true,
                     }
                 ],
                 decorationSeed: 230789230789407892340,
@@ -336,23 +343,35 @@ generatorConfig: {
             biome: "bewitchedForest",
             seed: runRandom(2),
             restrictions: {
-                //                maxNodes: 25,
-//                minNodes: 20,
+                maxNodes: 15,
+                minNodes: 10,
+                //                maxNodes: 5,
+//                minNodes: 5,
 
-                maxNodes: 5,
-                minNodes: 5,
-                maxSplits: 6,
-                splitProbability: 0.4,
+                maxSplits: 7,
+                splitProbability: 0.7,
                 startArea: "aqua_dulche",
                 endArea: "end_area",
                 otherAreas: [
                     "witch_hideout"
                 ],
                 encounterModifiers: [
+                    {
+                        name: "moist",
+                        weight: 10,
+                    },
+                    {
+                        name: "bewitchedmist",
+                        weight: 50,
+                    },
+                    {
+                        name: "rain",
+                        weight: 10,
+                    },
                 ],
-                avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
+                avgNbrOfEncounters: 2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
 
-                rotation: 0.0,
+                rotation: 1.0,
                 exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
                     {
@@ -363,14 +382,14 @@ generatorConfig: {
                             boughtIndices: [
                             ],
                             type: "rare_shop",
-                            person: "rare_merchant",
+                            person: "rare_merchant", //TODO when decks are finished
+
                         }
                     }
                 ],
                 optionalEvents: [
                     {
-                        weight: 15 - 15, //TODO change
-
+                        weight: 80,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -379,31 +398,50 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 15,
+                        weight: 10,
                         nodeTexture: "map_node_fight_circle",
-                        event: $EmptyMapEvent {
+                        event: $ChooseCardMapEvent {
+                            types: [
+                                "defType"
+                            ],
+                            seed: null,
+                            currentlyBlocks: false,
+                            isCompleted: false,
+                            canBeStarted: true,
                         }
                     },
                 ],
                 decorations: [
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_grass",
-                        density: 0.2,
-                        baseWidth: 3.0,
-                        baseHeight: 3.0,
-                        scaleMin: 0.6,
-                        scaleMax: 1.2,
-                        onlyCollidesWithNodes: false
-                    },
-                    $RandomDistributionFunction {
-                        decoration: "map_decoration_wasteland_cactus_2",
+                        decoration: "map_decoration_bewitchedForest_sheep",
                         density: 0.01,
-                        baseWidth: 2.0,
-                        baseHeight: 4.0,
+                        baseWidth: 40.0,
+                        baseHeight: 20.0,
                         scaleMin: 1.5,
                         scaleMax: 2.5,
-                        onlyCollidesWithNodes: false
-                    }
+                        onlyCollidesWithNodes: false,
+                        canOverlapWithOtherNodes: true,
+                    },
+                    $RandomDistributionFunction {
+                        decoration: "map_decoration_bewitchedForest_tree1",
+                        density: 10.0,
+                        baseWidth: 5.0,
+                        baseHeight: 10.0,
+                        scaleMin: 1.0,
+                        scaleMax: 2.0,
+                        onlyCollidesWithNodes: false,
+                        canOverlapWithOtherNodes: true,
+                    },
+//                    $RandomDistributionFunction {
+//                        decoration: "map_decoration_bewitchedForest_tree1",
+//                        density: 0.2,
+//                        baseWidth: 3.0,
+//                        baseHeight: 3.0,
+//                        scaleMin: 0.6,
+//                        scaleMax: 1.2,
+//                        onlyCollidesWithNodes: true,
+//                        canOverlapWithOtherNodes: true,
+//                    },
                 ],
                 decorationSeed: 230789230789407892340,
                 decorationPadding: 40.0,

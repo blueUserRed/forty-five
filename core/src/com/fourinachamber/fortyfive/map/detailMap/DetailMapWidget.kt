@@ -360,7 +360,7 @@ class DetailMapWidget(
                 drawable.draw(
                     batch,
                     x + offX + instance.first.x * mapScale, y + offY + instance.first.y * mapScale,
-                    width * instance.second, height * instance.second
+                    width * instance.second * mapScale, height * instance.second * mapScale
                 )
             }
         }
