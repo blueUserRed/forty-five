@@ -30,7 +30,8 @@ assets: {
         "map_decoration_wasteland_dune_3", "map_decoration_wasteland_dune_4",
         "map_decoration_wasteland_skull_1", "map_decoration_wasteland_skull_2",
 
-        "map_decoration_bewitchedForest_sheep", "map_decoration_bewitchedForest_tree1",
+        "map_decoration_bewitchedForest_sheep1","map_decoration_bewitchedForest_sheep2",
+        "map_decoration_bewitchedForest_tree1",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),

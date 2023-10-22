@@ -72,8 +72,16 @@ class SeededMapGenerator(
             ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
         val yRange =
             ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
+        // first pos, second width and height
+        val notOverlappingNodes = mutableListOf<Pair<Vector2, Vector2>>()
         restrictions.decorations.forEach {
-            decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
+            val deco = it.getDecoration(nodes, restrictions, connections, xRange, yRange, notOverlappingNodes)
+            decos.add(deco)
+            if (it.canOverlapWithOtherNodes) {
+                deco.instances.forEach { d ->
+                    notOverlappingNodes.add(d.first to Vector2(deco.baseWidth * d.second, deco.baseHeight * d.second))
+                }
+            }
         }
         return decos
     }
@@ -975,7 +983,7 @@ sealed class DecorationDistributionFunction(
     private val scaleMin: Float,
     private val scaleMax: Float,
     private val collidesOnlyWithNodes: Boolean,
-    private val canOverlapWithOtherNodes: Boolean,
+    val canOverlapWithOtherNodes: Boolean,
 ) {
     private val rnd: kotlin.random.Random = Random(seed)
 
@@ -1233,7 +1241,8 @@ sealed class DecorationDistributionFunction(
         restrictions: MapRestriction,
         connections: MutableList<Line>,
         xRange: ClosedFloatingPointRange<Float>,
-        yRange: ClosedFloatingPointRange<Float>
+        yRange: ClosedFloatingPointRange<Float>,
+        notOverlappingNodes: MutableList<Pair<Vector2, Vector2>>
     ): DetailMap.MapDecoration {
         val possiblePositions: List<Pair<Vector2, Float>> =
             getPossiblePositions(xRange, yRange, restrictions, rnd)
@@ -1244,7 +1253,15 @@ sealed class DecorationDistributionFunction(
             baseWidth,
             baseHeight,
             possiblePositions
-                .filter { isPossibleToPlaceNode(it, nodes, connections, restrictions.pathTotalWidth) }
+                .filter {
+                    isPossibleToPlaceNode(
+                        it,
+                        nodes,
+                        connections,
+                        notOverlappingNodes,
+                        restrictions.pathTotalWidth
+                    )
+                }
                 .sortedBy { -it.first.y }
         )
     }
@@ -1253,7 +1270,8 @@ sealed class DecorationDistributionFunction(
         data: Pair<Vector2, Float>,
         nodes: List<MapNodeBuilder>,
         connections: MutableList<Line>,
-        pathTotalWidth: Float
+        notOverlappingNodes: MutableList<Pair<Vector2, Vector2>>,
+        pathTotalWidth: Float,
     ): Boolean {
 
         val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
@@ -1267,7 +1285,6 @@ sealed class DecorationDistributionFunction(
                 return false
             }
         }
-        //TODO HERE HIHIHIHHIHIHII
         if (!collidesOnlyWithNodes) {
             val size = Vector2(baseWidth * data.second, baseHeight * data.second)
             val rectAbs = arrayOf(
@@ -1279,6 +1296,15 @@ sealed class DecorationDistributionFunction(
             for (it in connections) {
                 val tempRect = it.getAsRect(pathTotalWidth, Vector2(2.5F, 2.5F))
                 if (isPolygonsIntersecting(rectAbs, tempRect)) return false
+            }
+        }
+        for (tempRect in notOverlappingNodes){
+            if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                (tempRect.first.x < rect.first.x + rect.second.x) &&
+                (tempRect.first.y < rect.first.y + rect.second.y)
+            ) {
+                return false
             }
         }
         return true
@@ -1457,7 +1483,7 @@ data class MapRestriction(
     /**
      * width of the path, needed for checking if textures are overlapping
      */
-    val pathTotalWidth: Float = 7.5F,
+    val pathTotalWidth: Float = 2.5F,
     val minDistanceBetweenNodes: Float = 15F,
     val exitNodeTexture: ResourceHandle,
     /**
