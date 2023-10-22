@@ -77,11 +77,6 @@ class SeededMapGenerator(
         restrictions.decorations.forEach {
             val deco = it.getDecoration(nodes, restrictions, connections, xRange, yRange, notOverlappingNodes)
             decos.add(deco)
-            if (it.canOverlapWithOtherNodes) {
-                deco.instances.forEach { d ->
-                    notOverlappingNodes.add(d.first to Vector2(deco.baseWidth * d.second, deco.baseHeight * d.second))
-                }
-            }
         }
         return decos
     }
@@ -1298,7 +1293,7 @@ sealed class DecorationDistributionFunction(
                 if (isPolygonsIntersecting(rectAbs, tempRect)) return false
             }
         }
-        for (tempRect in notOverlappingNodes){
+        for (tempRect in notOverlappingNodes) {
             if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
                 (rect.first.y < tempRect.first.y + tempRect.second.y) &&
                 (tempRect.first.x < rect.first.x + rect.second.x) &&
@@ -1306,6 +1301,9 @@ sealed class DecorationDistributionFunction(
             ) {
                 return false
             }
+        }
+        if (canOverlapWithOtherNodes) {
+            notOverlappingNodes.add(data.first to Vector2(baseWidth * data.second, baseHeight * data.second))
         }
         return true
     }

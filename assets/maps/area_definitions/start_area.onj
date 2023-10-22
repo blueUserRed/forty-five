@@ -44,7 +44,7 @@ nodes: [
         //Phillip doesn't want these images inside the area
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
-            targetMap: "roadToEnd",//"roadToSalem", TODO change back
+            targetMap: "roadToSalem", // "roadToEnd",//
         }
     },
 ],
