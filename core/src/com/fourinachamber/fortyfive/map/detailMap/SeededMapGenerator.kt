@@ -702,7 +702,7 @@ class SeededMapGenerator(
             val posDirs: MutableList<Int> =
                 getPossibleDirectionsToCreatePathsTo(node, curLine)
             while (numberOfMissingConnections > 0 && posDirs.isNotEmpty() && node.edgesTo.size < 4) {
-                val curDir: Direction = Direction.values()[posDirs.random(rnd)]
+                val curDir: Direction = getCurDir(posDirs)
                 posDirs.remove(curDir.ordinal)
                 val possiblePointsToConnectTo: List<MapNodeBuilder> =
                     getPossiblePointsToConnect(node, curLine, curDir, nodes)
@@ -723,6 +723,10 @@ class SeededMapGenerator(
                     }
             }
         }
+
+        private fun getCurDir(posDirs: MutableList<Int>): Direction =
+            Direction.values()[posDirs[RandomCardSelection.getRandomIndex(posDirs.map { Direction.values()[it].getPriorityToGoNext() }
+                .toMutableList(), rnd)]]
 
         /**
          * searches all possible points to connect to for generating a path
@@ -884,6 +888,8 @@ enum class Direction {
         }
 
         override fun getNextDirCounterClock(): Direction = LEFT
+
+        override fun getPriorityToGoNext(): Float = 0.35F
     },
     DOWN {
         override fun getOpposite(): Direction = UP
@@ -895,6 +901,8 @@ enum class Direction {
         }
 
         override fun getNextDirCounterClock(): Direction = RIGHT
+
+        override fun getPriorityToGoNext(): Float = 0.35F
     },
     LEFT {
         override fun getOpposite(): Direction = RIGHT
@@ -906,6 +914,8 @@ enum class Direction {
         }
 
         override fun getNextDirCounterClock(): Direction = DOWN
+
+        override fun getPriorityToGoNext(): Float = 0F
     },
     RIGHT {
         override fun getOpposite(): Direction = LEFT
@@ -918,6 +928,7 @@ enum class Direction {
 
         override fun getNextDirCounterClock(): Direction = UP
 
+        override fun getPriorityToGoNext(): Float = 1.15F
     };
 
     abstract fun getOpposite(): Direction
@@ -928,6 +939,7 @@ enum class Direction {
      */
     abstract fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine?
     abstract fun getNextDirCounterClock(): Direction
+    abstract fun getPriorityToGoNext(): Float
 }
 
 /*class BezierCurve(
@@ -978,7 +990,7 @@ sealed class DecorationDistributionFunction(
     private val scaleMin: Float,
     private val scaleMax: Float,
     private val collidesOnlyWithNodes: Boolean,
-    val canOverlapWithOtherNodes: Boolean,
+    private val canOverlapWithOtherNodes: Boolean,
 ) {
     private val rnd: kotlin.random.Random = Random(seed)
 
