@@ -9,8 +9,8 @@ nodes: [
         edgesTo: [
             1, 3
         ],
-        image: "start_area",
-        imagePos: "left",
+//        image: "start_area",
+//        imagePos: "left",
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
