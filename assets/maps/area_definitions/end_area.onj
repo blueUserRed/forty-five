@@ -13,7 +13,6 @@ nodes: [
         imagePos: "left",
         event: $EnterMapMapEvent {
             targetMap: "roadToEnd",
-            placeAtEnd: true
         }
     },
     {

@@ -14,7 +14,6 @@ nodes: [
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
-            placeAtEnd: true
         }
     },
     {
@@ -37,7 +36,6 @@ nodes: [
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
             targetMap: "roadToAquaDulche",
-            placeAtEnd: false
         }
     },
     {

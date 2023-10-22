@@ -7,14 +7,13 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [
-            1, 3
+            1
         ],
         image: "start_area",
         imagePos: "left",
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
-            targetMap: "roadToAquaDulche",
-            placeAtEnd: true
+            targetMap: "roadToEnd",
         }
     },
     {
@@ -28,24 +27,11 @@ nodes: [
         }
     },
     {
-        x: 100.0,
-        y: 90.0,
-        isArea: false,
-        edgesTo: [
-            1
-        ],
-        nodeTexture: "map_node_exit_rect",
-        event: $EnterMapMapEvent {
-            targetMap: "roadToEnd",
-            placeAtEnd: false
-        }
-    },
-    {
         x: 30.0,
         y: 40.0,
         isArea: false,
         edgesTo: [
-            0
+            1
         ],
         nodeTexture: "map_node_shop_rect",
         event: $ShopMapEvent {
@@ -59,7 +45,7 @@ nodes: [
 ],
 
 decorations: [
-//    {
+    //    {
 //        texture: "burning_icon",
 //        baseWidth: 8.0,
 //        baseHeight: 8.0,

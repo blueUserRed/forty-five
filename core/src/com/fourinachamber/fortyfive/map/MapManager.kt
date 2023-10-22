@@ -101,6 +101,7 @@ object MapManager {
     fun changeToShopScreen(event: MapEvent) {
         FortyFive.changeToScreen(screenPaths["shopScreen"]!!, event)
     }
+
     fun changeToChooseCardScreen(event: MapEvent) {
         FortyFive.changeToScreen(screenPaths["chooseCardScreen"]!!, event)
     }
@@ -117,13 +118,14 @@ object MapManager {
         internalName
     }
 
-    fun changeToMap(newMap: String, placeAtEnd: Boolean = false) {
+    fun changeToMap(newMap: String, fromArea: String = currentDetailMap.name) {
         write()
         val map = lookupMapFile(newMap)
         currentMapFile = map
         currentDetailMap = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
-        SaveState.currentNode = if (placeAtEnd) currentDetailMap.endNode.index else currentDetailMap.startNode.index
+        SaveState.currentNode = currentDetailMap.uniqueNodes.filter { it.event is EnterMapMapEvent }
+            .find { (it.event as EnterMapMapEvent).targetMap == fromArea }!!.index
         changeToMapScreen()
     }
 
