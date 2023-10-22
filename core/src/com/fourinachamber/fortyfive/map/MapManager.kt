@@ -125,7 +125,7 @@ object MapManager {
         currentDetailMap = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
         SaveState.currentNode = currentDetailMap.uniqueNodes.filter { it.event is EnterMapMapEvent }
-            .find { (it.event as EnterMapMapEvent).targetMap == fromArea }!!.index
+            .find { (it.event as EnterMapMapEvent).targetMap == fromArea }?.index ?: 0
         changeToMapScreen()
     }
 

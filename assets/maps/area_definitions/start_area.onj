@@ -44,7 +44,7 @@ nodes: [
         //Phillip doesn't want these images inside the area
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
-            targetMap: "roadToSalem",
+            targetMap: "roadToEnd",//"roadToSalem", TODO change back
         }
     },
 ],
@@ -52,8 +52,8 @@ nodes: [
 decorations: [
     {
         texture: "burning_icon",
-        baseWidth: 50.0,
-        baseHeight: 50.0,
+        baseWidth: 5.0,
+        baseHeight: 5.0,
         positions: [
             [
                 19.8, 65.0, 1.0
@@ -62,8 +62,8 @@ decorations: [
     },
     {
         texture: "map_decoration_wasteland_cactus_1",
-        baseWidth: 50.0,
-        baseHeight: 80.0,
+        baseWidth: 5.0,
+        baseHeight: 8.0,
         positions: [
             [
                 70.0, 70.0, 1.5
@@ -87,8 +87,8 @@ decorations: [
     },
     {
         texture: "burning_icon",
-        baseWidth: 50.0,
-        baseHeight: 50.0,
+        baseWidth: 5.0,
+        baseHeight: 5.0,
         positions: [
             [
                 25.3, 55.0, 0.3
@@ -97,8 +97,8 @@ decorations: [
     },
     {
         texture: "map_decoration_wasteland_skull_1",
-        baseWidth: 50.0,
-        baseHeight: 50.0,
+        baseWidth: 5.0,
+        baseHeight: 5.0,
         positions: [
             [
                 36.0, 116.0, 0.6
@@ -107,8 +107,8 @@ decorations: [
     },
     {
         texture: "map_decoration_wasteland_skull_2",
-        baseWidth: 50.0,
-        baseHeight: 50.0,
+        baseWidth: 5.0,
+        baseHeight: 5.0,
         positions: [
             [
                 56.0, 94.0, 1.0

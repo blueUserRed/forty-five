@@ -975,6 +975,7 @@ sealed class DecorationDistributionFunction(
     private val scaleMin: Float,
     private val scaleMax: Float,
     private val collidesOnlyWithNodes: Boolean,
+    private val canOverlapWithOtherNodes: Boolean,
 ) {
     private val rnd: kotlin.random.Random = Random(seed)
 
@@ -986,7 +987,8 @@ sealed class DecorationDistributionFunction(
         baseHeight: Float,
         scaleMin: Float,
         scaleMax: Float,
-        collidesOnlyWithNodes: Boolean
+        collidesOnlyWithNodes: Boolean,
+        canOverlapWithOtherNodes: Boolean
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -995,7 +997,7 @@ sealed class DecorationDistributionFunction(
         baseHeight,
         scaleMin,
         scaleMax,
-        collidesOnlyWithNodes
+        collidesOnlyWithNodes, canOverlapWithOtherNodes
     ) {
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
@@ -1032,6 +1034,7 @@ sealed class DecorationDistributionFunction(
         private val outerRadius: Float,
         private val nbrOfInnerPoints: Int,
         private val nbrOfOuterPoints: Int,
+        canOverlapWithOtherNodes: Boolean,
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -1040,7 +1043,7 @@ sealed class DecorationDistributionFunction(
         baseHeight,
         scaleMin,
         scaleMax,
-        collidesOnlyWithNodes
+        collidesOnlyWithNodes, canOverlapWithOtherNodes
     ) {
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
@@ -1126,7 +1129,7 @@ sealed class DecorationDistributionFunction(
         collidesOnlyWithNodes: Boolean,
         private val blockSize: Float,
         private val prob: Float,
-        private val additionalProbIfNeighbor: Float
+        private val additionalProbIfNeighbor: Float, canOverlapWithOtherNodes: Boolean
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -1135,7 +1138,8 @@ sealed class DecorationDistributionFunction(
         baseHeight,
         scaleMin,
         scaleMax,
-        collidesOnlyWithNodes
+        collidesOnlyWithNodes,
+        canOverlapWithOtherNodes
     ) {
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
@@ -1263,6 +1267,7 @@ sealed class DecorationDistributionFunction(
                 return false
             }
         }
+        //TODO HERE HIHIHIHHIHIHII
         if (!collidesOnlyWithNodes) {
             val size = Vector2(baseWidth * data.second, baseHeight * data.second)
             val rectAbs = arrayOf(
@@ -1320,6 +1325,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("scaleMin").toFloat(),
                 onj.get<Double>("scaleMax").toFloat(),
                 onj.get<Boolean>("onlyCollidesWithNodes"),
+                onj.get<Boolean?>("canOverlapWithOtherNodes") ?: true,
             )
         },
         "SingleClusterDistributionFunction" to { onj, seed ->
@@ -1340,6 +1346,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("outerRadius").toFloat(),
                 onj.get<Long>("nbrOfInnerPoints").toInt(),
                 onj.get<Long>("nbrOfOuterPoints").toInt(),
+                onj.get<Boolean?>("canOverlapWithOtherNodes") ?: true,
             )
         },
         "MultiClusterDistributionFunction" to { onj, seed ->
@@ -1355,6 +1362,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("blockSize").toFloat(),
                 onj.get<Double>("prob").toFloat(),
                 onj.get<Double>("additionalProbIfNeighbor").toFloat(),
+                onj.get<Boolean?>("canOverlapWithOtherNodes") ?: true,
             )
         },
     )
