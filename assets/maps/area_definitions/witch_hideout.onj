@@ -1,5 +1,5 @@
 startNode: 0,
-endNode: 2,
+endNode: 1,
 biome: "bewitchedForest",
 nodes: [
     {
@@ -21,17 +21,7 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [
-            0, 2,
-        ],
-        event: $EmptyMapEvent {
-        }
-    },
-    {
-        x: 30.0,
-        y: 40.0,
-        isArea: false,
-        edgesTo: [
-            1
+            0,
         ],
         nodeTexture: "map_node_shop_rect",
         event: $ShopMapEvent {
