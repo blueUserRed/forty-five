@@ -178,6 +178,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun wardOfTheWitch(amount: OnjInt): OnjStatusEffect = OnjStatusEffect {
+        WardOfTheWitch(amount.value.toInt())
+    }
+
     @RegisterOnjFunction(schema = "params: [{...*}]")
     fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {
         name("NegatePredicate")
