@@ -57,6 +57,15 @@ $EnemyAction {
 
 }
 
+$EnemyBrain {
+
+    $RandomEnemyBrain {
+        actions: $EnemyAction[],
+        actionProbability: float,
+    }
+
+}
+
 var enemy = {
     name: string,
     baseHealth: int,
@@ -65,7 +74,6 @@ var enemy = {
     hiddenActionIcon: string,
     scaleX: float,
     scaleY: float,
-    actionProbability: float,
     coverIconScale: float,
     indicatorIconScale: float,
     detailFont: string,
@@ -78,7 +86,7 @@ var enemy = {
         spawnVarianceY: float,
         duration: int[2]
     },
-    actions: $EnemyAction[],
+    brain: $EnemyBrain,
     detailFontColor: Color,
 };
 

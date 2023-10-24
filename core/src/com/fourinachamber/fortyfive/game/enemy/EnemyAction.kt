@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.game.enemy
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.GamePredicate
-import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.game.StatusEffectCreator
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -216,7 +215,7 @@ sealed class EnemyActionPrototype(
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val cover = cover.scale(scale * scaleFactor).random()
             return EnemyAction(cover.toString(), iconHandle, this) {
-                enemy.currentCover += cover
+                include(enemy.addCoverTimeline(cover))
             }
         }
 
@@ -361,5 +360,15 @@ sealed class EnemyActionPrototype(
         }
 
     }
+
+}
+
+sealed class NextEnemyAction {
+
+    object None : NextEnemyAction()
+
+    class ShownEnemyAction(val action: EnemyAction) : NextEnemyAction()
+
+    object HiddenEnemyAction : NextEnemyAction()
 
 }
