@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
@@ -34,11 +35,13 @@ abstract class StatusEffect(
         this.controller = controller
     }
 
-    open fun executeAfterRotation(rotation: GameController.RevolverRotation, target: StatusEffectTarget): Timeline? = null
+    open fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? = null
 
     open fun executeOnNewTurn(target: StatusEffectTarget): Timeline? = null
 
     open fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline? = null
+
+    open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
     abstract fun canStackWith(other: StatusEffect): Boolean
 
@@ -229,7 +232,7 @@ class Bewitched(
     GraphicsConfig.iconScale("bewitched")
 ) {
 
-    override val damageType: StatusEffectType = StatusEffectType.OTHER
+    override val damageType: StatusEffectType = StatusEffectType.WITCH
 
     private var turnOnEffectStart: Int = -1
     private var rotationOnEffectStart: Int = -1
@@ -259,14 +262,45 @@ class Bewitched(
             "${rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter} rotations or " +
             "${turnOnEffectStart + turnsDuration - controller.turnCounter} turns"
 
+    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.Left(1)
+
     override fun equals(other: Any?): Boolean = other is Bewitched
+
+}
+
+class WardOfTheWitch(
+    private val amount: Int
+) : StatusEffect(
+    GraphicsConfig.iconName("wardOfTheWitch"),
+    GraphicsConfig.iconScale("wardOfTheWitch")
+) {
+
+    override val damageType: StatusEffectType = StatusEffectType.WITCH
+
+    override fun canStackWith(other: StatusEffect): Boolean = false
+
+    override fun stack(other: StatusEffect) { }
+
+    override fun isStillValid(): Boolean = true
+
+    override fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? {
+        if (target !is StatusEffectTarget.EnemyTarget) {
+            throw RuntimeException("WardOfTheWitch can only be used on enemies")
+        }
+        if (rotation !is RevolverRotation.Left) return null
+        return target.enemy.addCoverTimeline(amount)
+    }
+
+    override fun getDisplayText(): String = ""
+
+    override fun equals(other: Any?): Boolean = other is WardOfTheWitch
 
 }
 
 typealias StatusEffectCreator = () -> StatusEffect
 
 enum class StatusEffectType {
-    FIRE, POISON, OTHER, BLOCKING
+    FIRE, POISON, OTHER, BLOCKING, WITCH
 }
 
 sealed class StatusEffectTarget {

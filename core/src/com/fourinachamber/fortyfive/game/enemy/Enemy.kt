@@ -87,7 +87,7 @@ class Enemy(
         get() = currentHealth <= 0
 
     var currentCover: Int = 0
-        set(value) {
+        private set(value) {
             field = value
             FortyFiveLogger.debug(logTag, "enemy cover updated: new cover = $field")
             actor.updateText()
@@ -170,6 +170,12 @@ class Enemy(
         return Timeline.timeline {
             include(gameController.damagePlayerTimeline(damage))
 //            parallelActions(shakeAction, textAnimation)
+        }
+    }
+
+    fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
+        action {
+            currentCover += amount
         }
     }
 

@@ -45,7 +45,8 @@ icons: {
     burning: iconConfig,
     poison: iconConfig,
     fireResistance: iconConfig,
-    bewitched: iconConfig
+    bewitched: iconConfig,
+    wardOfTheWitch: iconConfig,
 },
 
 stringTemplates:  {

@@ -618,7 +618,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
-        val newRotation = modify(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
+        var newRotation = modifiers(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
+        playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
         action {
             dispatchAnimTimeline(revolver.rotate(newRotation))
             revolverRotationCounter += newRotation.amount
@@ -640,7 +641,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         include(executePlayerStatusEffectsAfterRevolverRotation(newRotation))
     }
 
-    private fun <T> modify(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
+    private fun <T> modifiers(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
         var cur = initial
         encounterModifier.forEach { cur = transformer(it, cur) }
         return cur

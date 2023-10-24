@@ -42,6 +42,10 @@ icons: {
         icon: "burning_icon",
         scale: 0.25
     },
+    wardOfTheWitch: {
+        icon: "burning_icon",
+        scale: 0.25
+    }
 },
 
 damageOverlay: {
