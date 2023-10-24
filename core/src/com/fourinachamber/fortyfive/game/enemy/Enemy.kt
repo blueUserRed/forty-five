@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Vector2
@@ -17,7 +16,6 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
-import java.lang.Integer.min
 
 data class EnemyPrototype(
     val name: String,
@@ -50,12 +48,14 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val actionProbability: Float,
     textEmitterConfig: OnjObject,
     private val screen: OnjScreen
 ) {
 
     val logTag = "enemy-$name-${++instanceCounter}"
+
+    var brain: EnemyBrain = NoOpEnemyBrain
+        private set
 
     /**
      * the actor that represents this enemy on the screen
@@ -65,11 +65,6 @@ class Enemy(
     val actor: EnemyActor
 
     private val gameController = FortyFive.currentGame!!
-
-    private val _actions: MutableList<Pair<Int, EnemyActionPrototype>> = mutableListOf()
-
-    val actionPrototypes: List<Pair<Int, EnemyActionPrototype>>
-        get() = _actions
 
     /**
      * the current lives of this enemy
@@ -100,10 +95,6 @@ class Enemy(
 
     init {
         actor = EnemyActor(this, textEmitterConfig, hiddenActionIconHandle, screen)
-    }
-
-    fun addEnemyAction(weight: Int, action: EnemyActionPrototype) {
-        _actions.add(weight to action)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -177,6 +168,10 @@ class Enemy(
         action {
             currentCover += amount
         }
+    }
+
+    fun brainTransplant(newBrain: EnemyBrain) {
+        brain = newBrain
     }
 
 
@@ -259,16 +254,11 @@ class Enemy(
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
-                onj.get<Double>("actionProbability").toFloat(),
                 onj.get<OnjObject>("textEmitterConfig"),
                 curScreen
             )
-            onj
-                .get<OnjArray>("actions")
-                .value
-                .map { it as OnjNamedObject }
-                .map { it.get<Long>("weight").toInt() to EnemyActionPrototype.fromOnj(it, enemy) }
-                .forEach { (weight, action) -> enemy.addEnemyAction(weight, action) }
+            val brain = EnemyBrain.fromOnj(onj.get<OnjNamedObject>("brain"), enemy)
+            enemy.brainTransplant(brain)
             return enemy
         }
 
@@ -365,20 +355,20 @@ class EnemyActor(
         textEmitter.playAnimation("-$damage")
     }
 
-    fun setupForAction(action: GameDirector.NextAction) = when (action) {
+    fun setupForAction(action: NextEnemyAction) = when (action) {
 
-        is GameDirector.NextAction.None -> {
+        is NextEnemyAction.None -> {
             attackIndicator.isVisible = false
         }
 
-        is GameDirector.NextAction.ShownEnemyAction -> {
+        is NextEnemyAction.ShownEnemyAction -> {
             attackIcon.backgroundHandle = action.action.iconHandle
                 ?: throw RuntimeException("action ${action.action.prototype} can be shown but defines no icon")
             attackLabel.setText(action.action.indicatorText)
             attackIndicator.isVisible = true
         }
 
-        is GameDirector.NextAction.HiddenEnemyAction -> {
+        is NextEnemyAction.HiddenEnemyAction -> {
             attackIcon.backgroundHandle = hiddenActionIconHandle
             attackIndicator.isVisible = true
         }

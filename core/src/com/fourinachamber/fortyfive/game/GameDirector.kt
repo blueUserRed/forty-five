@@ -2,8 +2,8 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.enemy.Enemy
-import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
+import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -17,8 +17,6 @@ class GameDirector(private val controller: GameController) {
 
     private lateinit var enemy: Enemy
     private lateinit var enemyProto: EnemyPrototype
-
-    private var nextAction: NextAction = NextAction.None
 
     fun init() {
         val enemiesOnj = OnjParser.parseFile(Gdx.files.internal("config/enemies.onj").file())
@@ -36,71 +34,16 @@ class GameDirector(private val controller: GameController) {
     }
 
     fun onNewTurn() {
-        enemy.actor.setupForAction(NextAction.None) // make sure current action is cleared
-        if (!Utils.coinFlip(enemy.actionProbability) || enemy.actionPrototypes.isEmpty()) {
-            nextAction = NextAction.None
-            return
-        }
-        // TODO: this algorithm for choosing enemy actions is not ideal, because it doesn't respect the weights
-        // correctly in certain scenarios
-        val possibleActions = enemy
-            .actionPrototypes
-            .filter { (_, action) -> action.showProbability <= 0f || action.applicable(controller) }
-            .filter { (_, action) -> action.showProbability > 0f || !action.hasUnlikelyPredicates }
-        if (possibleActions.isEmpty()) {
-            FortyFiveLogger.debug(logTag, "Wanted to execute enemy action but none was applicable")
-            return
-        }
-        val chosenAction = possibleActions.weightedRandom()
-        val isShown = Utils.coinFlip(chosenAction.showProbability)
-        nextAction = if (isShown) {
-            NextAction.ShownEnemyAction(chosenAction.create(controller, difficulty))
-        } else {
-            NextAction.HiddenEnemyAction
-        }
+        val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty)
+        enemy.actor.setupForAction(NextEnemyAction.None) // make sure current action is cleared
         enemy.actor.setupForAction(nextAction)
-        FortyFiveLogger.debug(logTag,
-            "executing enemy action next turn; isShown = $isShown; chosenAction = $chosenAction")
     }
 
-    fun checkActions(): Timeline = when (val nextAction = nextAction) {
-
-        is NextAction.None -> Timeline()
-
-        is NextAction.ShownEnemyAction -> {
-            if (!nextAction.action.prototype.applicable(controller)) {
-                FortyFiveLogger.warn(logTag, "Enemy action ${nextAction.action} was chosen to be shown " +
-                        "but when the applicable() function was checked it returned false; bailing out")
-                Timeline()
-            } else {
-                nextAction.action.getTimeline()
-            }
+    fun checkActions(): Timeline = Timeline.timeline {
+        action {
+            enemy.actor.setupForAction(NextEnemyAction.None)
         }
-
-        is NextAction.HiddenEnemyAction -> {
-            val possibleActions = enemy
-                .actionPrototypes
-                .filter { (_, action) -> action.showProbability <= 0f }
-                .filter { (_, action) -> action.applicable(controller) }
-            if (possibleActions.isEmpty()) {
-                FortyFiveLogger.warn(logTag, "encountered issue when executing HiddenEnemyAction: " +
-                        "preferred action was not applicable and no replacement action could be found; returning " +
-                        "empty timeline")
-                Timeline()
-            } else {
-                possibleActions
-                    .weightedRandom()
-                    .create(controller, difficulty)
-                    .getTimeline()
-            }
-        }
-
-    }.apply {
-        appendAction(Timeline.timeline {
-            action {
-                enemy.actor.setupForAction(NextAction.None)
-            }
-        }.asAction())
+        enemy.brain.resolveEnemyAction(controller, enemy, difficulty)?.getTimeline()?.let { include(it) }
     }
 
     fun end() {
@@ -150,16 +93,6 @@ class GameDirector(private val controller: GameController) {
 
     private fun scaleEnemyHealthPerTurn(healthPerTurn: Int, difficulty: Double): Int =
         (healthPerTurn * difficulty).toInt()
-
-    sealed class NextAction {
-
-        object None : NextAction()
-
-        class ShownEnemyAction(val action: EnemyAction) : NextAction()
-
-        object HiddenEnemyAction : NextAction()
-
-    }
 
     companion object {
 
