@@ -86,6 +86,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.DamagePlayer(triggerOrError(trigger.value), damage.value.toInt(), false))
     }
 
+    @RegisterOnjFunction(schema = "params: [string]")
+    fun killPlayer(trigger: OnjString): OnjEffect {
+        return OnjEffect(Effect.KillPlayer(triggerOrError(trigger.value), false))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
     fun canTriggerInHand(effect: OnjEffect): OnjEffect {
         return OnjEffect(effect.value.copy().apply { triggerInHand = true })

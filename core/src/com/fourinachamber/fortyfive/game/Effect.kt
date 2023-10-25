@@ -359,6 +359,17 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = DamagePlayer(trigger, damage, triggerInHand)
     }
 
+    class KillPlayer(trigger: Trigger, override var triggerInHand: Boolean) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation): Timeline =
+            FortyFive.currentGame!!.playerDeathTimeline()
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = KillPlayer(trigger, triggerInHand)
+
+    }
+
 }
 
 /**

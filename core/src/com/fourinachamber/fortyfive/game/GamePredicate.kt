@@ -52,7 +52,7 @@ fun interface GamePredicate {
             "AliveEnemyCountIn" -> aliveEnemyCountIn(obj.get<OnjArray>("value").toIntRange())
             "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
             "EnemyDoesNotHaveStatusEffect" -> enemyDoesNotHaveStatusEffect(
-                obj.get<StatusEffect>("value"),
+                obj.get<StatusEffectCreator>("value")(),
                 inContextOfEnemy ?: throw RuntimeException("EnemyDoesNotHaveStatusEffect Predicate can only be created" +
                         " when an enemy is passed into the fromOnj function")
             )
