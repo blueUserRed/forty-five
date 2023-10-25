@@ -32,7 +32,7 @@ cards: [
         ],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool0"],
         price: 50,
         type: $Bullet { },
     },
@@ -49,7 +49,7 @@ cards: [
         effects: [ reserveGain("round start", 1) ],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool0"],
         price: 50,
         type: $Bullet { }
     },
@@ -66,7 +66,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 2,
-        tags: ["common", "startDeck"],
+        tags: ["pool0"],
         price: 50,
         type: $Bullet { }
     },
@@ -83,7 +83,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -100,7 +100,7 @@ cards: [
         effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ],
         forceLoadCards: [],
         cost: 3,
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 100,
         type: $Bullet { }
     },
@@ -117,7 +117,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -136,7 +136,7 @@ cards: [
         ],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -153,7 +153,7 @@ cards: [
         effects: [ buffDmg("enter", bSelects.allExceptSelf, 8) ],
         forceLoadCards: [],
         cost: 2,
-        tags: ["common", "startDeck"],
+        tags: ["pool0"],
         price: 50,
         type: $Bullet { }
     },
@@ -170,7 +170,7 @@ cards: [
         effects: [ draw("enter", 1), draw("shot", 1) ],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool0"],
         price: 50,
         type: $Bullet { }
     },
@@ -187,7 +187,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool0"],
         price: 50,
         type: $Bullet { }
     },
@@ -204,7 +204,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -221,7 +221,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 5,
-        tags: ["common"],
+        tags: ["pool1"],
         price: 90,
         type: $Bullet { }
     },
@@ -238,7 +238,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 2,
-        tags: ["common", "startDeck"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -255,7 +255,7 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 0,
-        tags: [ "common", "startDeck" ],
+        tags: [ "pool1" ],
         price: 50,
         type: $Bullet { }
     },
@@ -272,7 +272,7 @@ cards: [
         effects: [ ],
         forceLoadCards: [],
         cost: 0,
-        tags: ["common", "startDeck"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -291,7 +291,7 @@ cards: [
         ],
         forceLoadCards: [],
         cost: 2,
-        tags: ["common"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -308,7 +308,7 @@ cards: [
         effects: [ buffDmg("enter", bSelects.allBullets, 10) ],
         forceLoadCards: [],
         cost: 3,
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -325,7 +325,7 @@ cards: [
         effects: [ putCardInHand("enter", "bullet", 3) ],
         forceLoadCards: [ "bullet" ],
         cost: 2,
-        tags: ["common"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { },
     },
@@ -345,7 +345,7 @@ cards: [
         ],
         forceLoadCards: [],
         cost: 2,
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -364,7 +364,7 @@ cards: [
         ],
         forceLoadCards: [],
         cost: 1,
-        tags: ["common", "startDeck"],
+        tags: ["pool1"],
         price: 50,
         type: $Bullet { }
     },
@@ -382,7 +382,7 @@ cards: [
         forceLoadCards: [],
         cost: 2,
         type: $Bullet { },
-        tags: ["common"],
+        tags: ["pool2"],
         price: 50,
     },
     {
@@ -401,7 +401,7 @@ cards: [
         forceLoadCards: [ "workerBullet" ],
         cost: 2,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["not used"],
         price: 50,
     },
     {
@@ -420,7 +420,7 @@ cards: [
         forceLoadCards: [],
         cost: 3,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
     },
     {
@@ -439,7 +439,7 @@ cards: [
         forceLoadCards: [],
         cost: 1,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
     },
     {
@@ -458,7 +458,7 @@ cards: [
         forceLoadCards: [],
         cost: 0,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 25,
     },
     {
@@ -475,7 +475,7 @@ cards: [
         forceLoadCards: [],
         cost: 1,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
     },
     {
@@ -494,7 +494,7 @@ cards: [
         forceLoadCards: [],
         cost: 1,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
     },
     {
@@ -513,7 +513,7 @@ cards: [
         forceLoadCards: [],
         cost: 1,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
     },
     {
@@ -532,7 +532,7 @@ cards: [
         forceLoadCards: [],
         cost: 1,
         type: $Bullet { },
-        tags: ["rare"],
+        tags: ["pool1"],
         price: 50,
     },
     {
@@ -571,7 +571,7 @@ cards: [
         forceLoadCards: [],
         cost: 2,
         type: $Bullet { },
-        tags: [],
+        tags: ["pool1"],
         price: 0,
     },
 
