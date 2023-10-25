@@ -208,6 +208,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "round end" -> Trigger.ON_ROUND_END
         "rotation" -> Trigger.ON_REVOLVER_ROTATION
         "card drawn" -> Trigger.ON_CARDS_DRAWN
+        "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

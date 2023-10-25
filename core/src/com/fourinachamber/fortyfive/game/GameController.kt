@@ -439,7 +439,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun drawCardPopupTimeline(amount: Int): Timeline = Timeline.timeline {
+    fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true): Timeline = Timeline.timeline {
         var remainingCardsToDraw = amount
         action {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
@@ -471,6 +471,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(cardDrawActorScreenState)
             checkCardMaximums()
         }
+        val triggerInfo = TriggerInformation(multiplier = remainingCardsToDraw)
+        include(checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, triggerInfo))
+        if (isSpecial) include(checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, triggerInfo))
     }
 
     fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
@@ -674,7 +677,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 gameDirector.onNewTurn()
                 curReserves = baseReserves
             }
-            include(drawCardPopupTimeline(cardsToDraw))
+            include(drawCardPopupTimeline(cardsToDraw, false))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
