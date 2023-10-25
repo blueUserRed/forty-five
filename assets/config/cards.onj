@@ -46,7 +46,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ reserveGain("round start", 1) ],
+        effects: [ reserveGain("round start", 1#val) ],
         forceLoadCards: [],
         cost: 1,
         tags: ["pool0"],
@@ -97,7 +97,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ draw("enter", 2), draw("shot", 1), draw("destroy", 1) ],
+        effects: [ draw("enter", 2#val), draw("shot", 1#val), draw("destroy", 1#val) ],
         forceLoadCards: [],
         cost: 3,
         tags: ["pool1"],
@@ -150,7 +150,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ buffDmg("enter", bSelects.allExceptSelf, 8) ],
+        effects: [ buffDmg("enter", bSelects.allExceptSelf, 8#val) ],
         forceLoadCards: [],
         cost: 2,
         tags: ["pool0"],
@@ -167,7 +167,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "glow",
-        effects: [ draw("enter", 1), draw("shot", 1) ],
+        effects: [ draw("enter", 1#val), draw("shot", 1#val) ],
         forceLoadCards: [],
         cost: 1,
         tags: ["pool0"],
@@ -287,7 +287,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-           reserveGain("shot", 4),
+           reserveGain("shot", 4#val),
         ],
         forceLoadCards: [],
         cost: 2,
@@ -305,7 +305,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ buffDmg("enter", bSelects.allBullets, 10) ],
+        effects: [ buffDmg("enter", bSelects.allBullets, 10#val) ],
         forceLoadCards: [],
         cost: 3,
         tags: ["pool1"],
@@ -322,7 +322,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ putCardInHand("enter", "bullet", 3) ],
+        effects: [ putCardInHand("enter", "bullet", 3#val) ],
         forceLoadCards: [ "bullet" ],
         cost: 2,
         tags: ["pool1"],
@@ -340,8 +340,8 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-           giftDmg("shot", bSelects.fourButNotSelf, 5),
-           giftDmg("destroy", bSelects.fourButNotSelf, 5)
+           giftDmg("shot", bSelects.fourButNotSelf, 5#val),
+           giftDmg("destroy", bSelects.fourButNotSelf, 5#val)
         ],
         forceLoadCards: [],
         cost: 2,
@@ -396,7 +396,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            putCardInHand("round start", "workerBullet", 1)
+            putCardInHand("round start", "workerBullet", 1#val)
         ],
         forceLoadCards: [ "workerBullet" ],
         cost: 2,
@@ -489,7 +489,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damageDirect("enter", 10)
+            damageDirect("enter", 10#val)
         ],
         forceLoadCards: [],
         cost: 1,
@@ -508,7 +508,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damageDirect("rotation", 2)
+            damageDirect("rotation", 2#val)
         ],
         forceLoadCards: [],
         cost: 1,
@@ -527,7 +527,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damageDirect("round start", 4)
+            damageDirect("round start", 4#val)
         ],
         forceLoadCards: [],
         cost: 1,
@@ -546,7 +546,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damagePlayer("round end", 10)#canTriggerInHand
+            damagePlayer("round end", 10#val)#canTriggerInHand
         ],
         forceLoadCards: [],
         cost: 3,
@@ -565,8 +565,8 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("special card drawn", bSelects.self, 3),
-            reserveGain("special card drawn", 1)
+            buffDmg("special card drawn", bSelects.self, 3#val),
+            reserveGain("special card drawn", 1#val)
         ],
         forceLoadCards: [],
         cost: 2,
@@ -586,7 +586,7 @@ cards: [
         highlightType: "standard",
         effects: [
             killPlayer("shot"),
-            giftDmg("round start", bSelects.allExceptSelf, 7)
+            giftDmg("round start", bSelects.allExceptSelf, 7#val)
         ],
         forceLoadCards: [],
         cost: 1,
@@ -607,6 +607,25 @@ cards: [
         effects: [],
         forceLoadCards: [],
         cost: 0,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
+    {
+        name: "glassBullet",
+        title: "glass Bullet",
+        flavourText: "glass Bullet",
+        description: "todo",
+        baseDamage: 16,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            draw("shot", value.mostExpensiveBulletInRevolver)
+        ],
+        forceLoadCards: [],
+        cost: 2,
         type: $Bullet { },
         tags: ["pool2"],
         price: 0,

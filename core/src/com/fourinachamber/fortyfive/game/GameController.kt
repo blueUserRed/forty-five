@@ -5,6 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
+import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
@@ -472,8 +474,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             checkCardMaximums()
         }
         val triggerInfo = TriggerInformation(multiplier = remainingCardsToDraw)
-        include(checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, triggerInfo))
-        if (isSpecial) include(checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, triggerInfo))
+        includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, triggerInfo) }, { remainingCardsToDraw != 0 })
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, triggerInfo) },
+            { isSpecial && remainingCardsToDraw != 0 }
+        )
     }
 
     fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {

@@ -1,10 +1,14 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.game.card.BulletSelector
+import com.fourinachamber.fortyfive.game.card.Effect
+import com.fourinachamber.fortyfive.game.card.EffectValue
+import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
-import onj.customization.Namespace.OnjNamespaceDatatypes
-import onj.customization.Namespace.OnjNamespace
+import onj.customization.Namespace
+import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.*
@@ -18,37 +22,54 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     val datatypes: Map<String, KClass<*>> = mapOf(
         "BulletSelector" to OnjBulletSelector::class,
         "StatusEffect" to OnjStatusEffect::class,
-        "Effect" to OnjEffect::class
+        "Effect" to OnjEffect::class,
+        "EffectValue" to OnjEffectValue::class
     )
 
-    @RegisterOnjFunction(schema = "params: [string, int]")
-    fun reserveGain(trigger: OnjString, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.ReserveGain(triggerOrError(trigger.value), amount.value.toInt(), false))
+    @OnjNamespaceVariables
+    val variables: Map<String, OnjObject> = mapOf(
+        "value" to buildOnjObject {
+            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller ->
+                controller
+                    .revolver
+                    .slots
+                    .mapNotNull { it.card }
+                    .maxOfOrNull { it.cost }
+                    ?: 0
+            }
+        }
+    )
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun reserveGain(trigger: OnjString, amount: OnjEffectValue): OnjEffect {
+        return OnjEffect(Effect.ReserveGain(triggerOrError(trigger.value), amount.value, false))
     }
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int]")
-    fun buffDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.BuffDamage(
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, EffectValue]")
+    fun buffDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjEffectValue): OnjEffect {
+        return OnjEffect(
+            Effect.BuffDamage(
             triggerOrError(trigger.value),
-            amount.value.toInt(),
+            amount.value,
             bulletSelector.value,
             false
         ))
     }
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int]")
-    fun giftDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.GiftDamage(
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, EffectValue]")
+    fun giftDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjEffectValue): OnjEffect {
+        return OnjEffect(
+            Effect.GiftDamage(
             triggerOrError(trigger.value),
-            amount.value.toInt(),
+            amount.value,
             bulletSelector.value,
             false
         ))
     }
 
-    @RegisterOnjFunction(schema = "params: [string, int]")
-    fun draw(trigger: OnjString, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.Draw(triggerOrError(trigger.value), amount.value.toInt(), false))
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun draw(trigger: OnjString, amount: OnjEffectValue): OnjEffect {
+        return OnjEffect(Effect.Draw(triggerOrError(trigger.value), amount.value, false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
@@ -56,12 +77,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value, false))
     }
 
-    @RegisterOnjFunction(schema = "params: [string, string, int]")
-    fun putCardInHand(trigger: OnjString, name: OnjString, amount: OnjInt): OnjEffect {
-        return OnjEffect(Effect.PutCardInHand(
+    @RegisterOnjFunction(schema = "use Cards; params: [string, string, EffectValue]")
+    fun putCardInHand(trigger: OnjString, name: OnjString, amount: OnjEffectValue): OnjEffect {
+        return OnjEffect(
+            Effect.PutCardInHand(
             triggerOrError(trigger.value),
             name.value,
-            amount.value.toInt(),
+            amount.value,
             false
         ))
     }
@@ -76,14 +98,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value, false))
     }
 
-    @RegisterOnjFunction(schema = "params: [string, int]")
-    fun damageDirect(trigger: OnjString, damage: OnjInt): OnjEffect {
-        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value.toInt(), false))
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun damageDirect(trigger: OnjString, damage: OnjEffectValue): OnjEffect {
+        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value, false))
     }
 
-    @RegisterOnjFunction(schema = "params: [string, int]")
-    fun damagePlayer(trigger: OnjString, damage: OnjInt): OnjEffect {
-        return OnjEffect(Effect.DamagePlayer(triggerOrError(trigger.value), damage.value.toInt(), false))
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun damagePlayer(trigger: OnjString, damage: OnjEffectValue): OnjEffect {
+        return OnjEffect(Effect.DamagePlayer(triggerOrError(trigger.value), damage.value, false))
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
@@ -199,6 +221,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "value" with predicate
     }
 
+    @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
+    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { value.value.toInt() }
+
     private fun getIntParamFromOnj(value: OnjValue): Int = when (value) {
         is OnjInt -> value.value.toInt()
         is OnjArray -> value.toIntRange().random()
@@ -256,4 +281,13 @@ class OnjStatusEffect(
         info.builder.append("'--status-effect--'")
     }
 
+}
+
+class OnjEffectValue(
+    override val value: EffectValue
+) : OnjValue() {
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--effect-value--'")
+    }
 }
