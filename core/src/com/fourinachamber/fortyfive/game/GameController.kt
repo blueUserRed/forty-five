@@ -715,7 +715,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 logTag,
                 "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives"
             )
-            if (curPlayerLives <= 0) playerDied()
+            if (curPlayerLives <= 0) include(playerDeathTimeline())
         }
         if (!triggeredByStatusEffect) include(executePlayerStatusEffectsAfterDamage(damage))
     }
@@ -892,17 +892,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     @MainThreadOnly
-    fun playerDied() {
-        appendMainTimeline(Timeline.timeline {
-            action {
-                FortyFiveLogger.debug(logTag, "player lost")
-                playerLost = true
-            }
-            includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
-            action {
-                FortyFive.changeToScreen("screens/title_screen.onj")
-            }
-        })
+    fun playerDeathTimeline(): Timeline = Timeline.timeline {
+        action {
+            FortyFiveLogger.debug(logTag, "player lost")
+            playerLost = true
+        }
+        includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
+        action {
+            mainTimeline.stopTimeline()
+            animTimelines.forEach(Timeline::stopTimeline)
+            FortyFive.changeToScreen("screens/title_screen.onj")
+        }
     }
 
     sealed class RevolverRotation {

@@ -574,6 +574,26 @@ cards: [
         tags: ["pool1"],
         price: 0,
     },
+    {
+        name: "finalBullet",
+        title: "final Bullet",
+        flavourText: "final Bullet",
+        description: "todo",
+        baseDamage: 20,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            killPlayer("shot"),
+            giftDmg("round start", bSelects.allExceptSelf, 7)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
 
 ],
 
