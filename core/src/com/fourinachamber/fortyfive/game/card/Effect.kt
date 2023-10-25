@@ -1,7 +1,9 @@
-package com.fourinachamber.fortyfive.game
+package com.fourinachamber.fortyfive.game.card
 
 import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.StatusEffectCreator
 import com.fourinachamber.fortyfive.utils.*
 
 /**
@@ -77,7 +79,7 @@ abstract class Effect(val trigger: Trigger) {
      * The Player gains reserves
      * @param amount the amount of reserves gained
      */
-    class ReserveGain(trigger: Trigger, val amount: Int, override var triggerInHand: Boolean) : Effect(trigger) {
+    class ReserveGain(trigger: Trigger, val amount: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
 
         override fun copy(): Effect = ReserveGain(trigger, amount, triggerInHand)
 
@@ -93,7 +95,7 @@ abstract class Effect(val trigger: Trigger) {
 //                true,
 //                FortyFive.currentGame!!.curScreen
 //            )
-            val amount = amount * (triggerInformation.multiplier ?: 1)
+            val amount = amount(gameController) * (triggerInformation.multiplier ?: 1)
             return Timeline.timeline {
                 delay(GraphicsConfig.bufferTime)
                 includeActionLater(cardHighlight) { card.inGame }
@@ -117,7 +119,7 @@ abstract class Effect(val trigger: Trigger) {
      */
     class BuffDamage(
         trigger: Trigger,
-        val amount: Int,
+        val amount: EffectValue,
         private val bulletSelector: BulletSelector,
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
@@ -126,7 +128,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline {
             val gameController = FortyFive.currentGame!!
-            val amount = amount * (triggerInformation.multiplier ?: 1)
+            val amount = amount(gameController) * (triggerInformation.multiplier ?: 1)
             val modifier = Card.CardModifier(
                 amount,
                 TemplateString(
@@ -163,7 +165,7 @@ abstract class Effect(val trigger: Trigger) {
      */
     class GiftDamage(
         trigger: Trigger,
-        val amount: Int,
+        val amount: EffectValue,
         private val bulletSelector: BulletSelector,
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
@@ -172,7 +174,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline {
             val gameController = FortyFive.currentGame!!
-            val amount = amount * (triggerInformation.multiplier ?: 1)
+            val amount = amount(gameController) * (triggerInformation.multiplier ?: 1)
             val modifier = Card.CardModifier(
                 amount,
                 TemplateString(
@@ -206,7 +208,7 @@ abstract class Effect(val trigger: Trigger) {
      * lets the player draw cards
      * @param amount the amount of cards to draw
      */
-    class Draw(trigger: Trigger, val amount: Int, override var triggerInHand: Boolean) : Effect(trigger) {
+    class Draw(trigger: Trigger, val amount: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
 
         override fun copy(): Effect = Draw(trigger, amount, triggerInHand)
 
@@ -215,7 +217,7 @@ abstract class Effect(val trigger: Trigger) {
             val cardHighlight = GraphicsConfig.cardHighlightEffect(card)
             delay(GraphicsConfig.bufferTime)
             includeActionLater(cardHighlight) { card.inGame }
-            val amount = amount * (triggerInformation.multiplier ?: 1)
+            val amount = amount(gameController) * (triggerInformation.multiplier ?: 1)
             include(gameController.drawCardPopupTimeline(amount))
         }
 
@@ -259,7 +261,7 @@ abstract class Effect(val trigger: Trigger) {
     class PutCardInHand(
         trigger: Trigger,
         val cardName: String,
-        val amount: Int,
+        val amount: EffectValue,
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
 
@@ -268,7 +270,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline = Timeline.timeline {
             val gameController = FortyFive.currentGame!!
             includeAction(GraphicsConfig.cardHighlightEffect(card))
-            val amount = amount * (triggerInformation.multiplier ?: 1)
+            val amount = amount(gameController) * (triggerInformation.multiplier ?: 1)
             include(gameController.tryToPutCardsInHandTimeline(cardName, amount))
         }
 
@@ -334,11 +336,11 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = Destroy(trigger, bulletSelector, triggerInHand)
     }
 
-    class DamageDirectly(trigger: Trigger, val damage: Int, override var triggerInHand: Boolean) : Effect(trigger) {
+    class DamageDirectly(trigger: Trigger, val damage: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline = Timeline.timeline {
             val controller = FortyFive.currentGame!!
-            val damage = damage * (triggerInformation.multiplier ?: 1)
+            val damage = damage(controller) * (triggerInformation.multiplier ?: 1)
             include(controller.enemyArea.enemies[0].damage(damage))
         }
 
@@ -347,11 +349,11 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = DamageDirectly(trigger, damage, triggerInHand)
     }
 
-    class DamagePlayer(trigger: Trigger, val damage: Int, override var triggerInHand: Boolean) : Effect(trigger) {
+    class DamagePlayer(trigger: Trigger, val damage: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline = Timeline.timeline {
             val controller = FortyFive.currentGame!!
-            include(controller.damagePlayerTimeline(damage))
+            include(controller.damagePlayerTimeline(damage(controller)))
         }
 
         override fun blocks(controller: GameController): Boolean = false
@@ -402,6 +404,8 @@ sealed class BulletSelector {
     abstract fun blocks(controller: GameController, self: Card): Boolean
 
 }
+
+typealias EffectValue = (controller: GameController) -> Int
 
 /**
  * possible triggers for an effect
