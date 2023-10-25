@@ -422,6 +422,14 @@ textures: [
         name: "enemy_pyro",
         file: "textures/enemies/pyro/pyro.png"
     },
+    {
+        name: "enemy_witch",
+        file: "textures/enemies/witch/witch.png"
+    },
+    {
+        name: "enemy_outlaw",
+        file: "textures/enemies/outlaw/outlaw.png"
+    },
 ],
 
 cursors: [

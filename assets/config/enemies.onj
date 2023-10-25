@@ -17,7 +17,7 @@ enemies: [
     {
         name: "Outlaw",
         baseHealth: 100,
-        texture: "enemy_texture",
+        texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
         coverIconScale: 0.2,
@@ -47,132 +47,118 @@ enemies: [
         },
         detailFontColor: color.black
     },
-//
-//    {
-//        name: "Pyro",
-//        baseHealth: 100,
-//        actionProbability: 0.8,
-//        texture: "enemy_pyro",
-//        coverIcon: "shield_icon",
-//        hiddenActionIcon: "enemy_action_unknown",
-//        coverIconScale: 0.2,
-//        indicatorIconScale: 0.6,
-//        scaleX: 0.35,
-//        scaleY: 0.35,
-//        detailFont: "red_wing",
-//        detailFontScale: 0.6,
-//        textEmitterConfig: textEmitterConfig,
-//        actions: [
-//            $DamagePlayer {
-//                damage: [ 5, 10 ],
-//                showProbability: 1.0,
-//                weight: 10,
-//                scaleFactor: 0.5,
-//                icon: "enemy_action_damage"
-//            },
-//            $TakeCover {
-//                cover: [ 5, 10 ],
-//                weight: 10,
-//                showProbability: 1.0,
-//                icon: "enemy_action_cover"
-//            },
-//            $GivePlayerStatusEffect {
-//                statusEffect: burning(5, 0.5, false),
-//                weight: 10,
-//                showProbability: 0.5,
-//                icon: "enemy_action_burning"
-//            },
-//            $GiveSelfStatusEffect {
-//                statusEffect: fireResistance(5),
-//                weight: 60,
-//                showProbability: 0.0,
-//                hasUnlikelyPredicates: true,
-//                icon: "enemy_action_fire_resistance",
-//                predicates: [
-//                    $AnyEnemyHasStatusEffect {
-//                        value: burning(0, 0.5, false)
-//                    },
-//                    $EnemyDoesNotHaveStatusEffect {
-//                        value: fireResistance(0)
-//                    }
-//                ]
-//            },
-//            $GivePlayerStatusEffect {
-//                statusEffect: burning(0, 0.5, true),
-//                weight: 500,
-//                showProbability: 0.0,
-//                hasUnlikelyPredicates: true,
-//                icon: "enemy_action_inferno",
-//                predicates: [
-//                    $EnemyHealthLowerThanPercent {
-//                        value: 25.0
-//                    },
-//                    $AliveEnemyCountIn {
-//                        value: [2, 10]
-//                    }
-//                ]
-//            },
-//            $GivePlayerCard {
-//                card: "scorchingBullet",
-//                icon: "enemy_action_hot_potato",
-//                weight: 2,
-//                showProbability: 0.0,
-//            }
-//        ],
-//        detailFontColor: color.black
-//    },
+
+    {
+        name: "Pyro",
+        baseHealth: 100,
+        texture: "enemy_pyro",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.35,
+        scaleY: 0.35,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $RandomEnemyBrain {
+            actionProbability: 0.8,
+            actions: [
+                $DamagePlayer {
+                    damage: [ 5, 10 ],
+                    showProbability: 1.0,
+                    weight: 10,
+                    scaleFactor: 0.5,
+                    icon: "enemy_action_damage"
+                },
+                $TakeCover {
+                    cover: [ 5, 10 ],
+                    weight: 10,
+                    showProbability: 1.0,
+                    icon: "enemy_action_cover"
+                },
+                $GivePlayerStatusEffect {
+                    statusEffect: burning(5, 0.5, false),
+                    weight: 10,
+                    showProbability: 0.5,
+                    icon: "enemy_action_burning"
+                },
+                $GiveSelfStatusEffect {
+                    statusEffect: fireResistance(5),
+                    weight: 60,
+                    showProbability: 0.0,
+                    hasUnlikelyPredicates: true,
+                    icon: "enemy_action_fire_resistance",
+                    predicates: [
+                        $AnyEnemyHasStatusEffect {
+                            value: burning(0, 0.5, false)
+                        },
+                        $EnemyDoesNotHaveStatusEffect {
+                            value: fireResistance(0)
+                        }
+                    ]
+                },
+                $GivePlayerStatusEffect {
+                    statusEffect: burning(0, 0.5, true),
+                    weight: 500,
+                    showProbability: 0.0,
+                    hasUnlikelyPredicates: true,
+                    icon: "enemy_action_inferno",
+                    predicates: [
+                        $EnemyHealthLowerThanPercent {
+                            value: 25.0
+                        },
+                        $AliveEnemyCountIn {
+                            value: [2, 10]
+                        }
+                    ]
+                },
+                $GivePlayerCard {
+                    card: "scorchingBullet",
+                    icon: "enemy_action_hot_potato",
+                    weight: 2,
+                    showProbability: 0.0,
+                }
+            ],
+        },
+        detailFontColor: color.black
+    },
 
 
-//    {
-//        name: "Witch",
-//        baseHealth: 100,
-//        actionProbability: 0.8,
-//        texture: "enemy_texture",
-//        coverIcon: "shield_icon",
-//        hiddenActionIcon: "enemy_action_unknown",
-//        coverIconScale: 0.2,
-//        indicatorIconScale: 0.6,
-//        scaleX: 0.35,
-//        scaleY: 0.35,
-//        detailFont: "red_wing",
-//        detailFontScale: 0.6,
-//        textEmitterConfig: textEmitterConfig,
-//        actions: [
-//            $DamagePlayer {
-//                damage: [ 8, 15 ],
-//                showProbability: 1.0,
-//                weight: 10,
-//                scaleFactor: 0.5,
-//                icon: "enemy_action_damage"
-//            },
-//            $TakeCover {
-//                cover: [ 10, 15 ],
-//                weight: 5,
-//                showProbability: 1.0,
-//                icon: "enemy_action_cover"
-//            },
-//            $RotateRevolver {
-//                maxTurns: 1,
-//                forceDirection: "left",
-//                weight: 10,
-//                showProbability: 0.5,
-//                icon: "enemy_action_cover"
-//            },
-//            $GivePlayerStatusEffect {
-//                statusEffect: bewitched([1, 3], [2, 4]),
-//                weight: 10000000,
-////                weight: 10,
-//                showProbability: 0.0,
-//                hasUnlikelyPredicates: false,
-//                icon: "enemy_action_inferno",
-//                predicates: [
-//                    negatePredicate($PlayerHasStatusEffect {
-//                        value: bewitched(0, 0)
-//                    })
-//                ]
-//            }
-//        ],
-//        detailFontColor: color.black
-//    },
+    {
+        name: "Witch",
+        baseHealth: 100,
+        texture: "enemy_witch",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.35,
+        scaleY: 0.35,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        detailFontColor: color.black,
+        brain: $WitchBrain {
+            firstEffectPossibleTurns: [1, 3],
+            secondEffectOffset: [7, 11],
+            bewitchedTurns: [1, 3],
+            bewitchedRotations: [2, 5],
+            wrathOfTheWitchDamageRange: [7, 13],
+            wardOfTheWitchCoverRange: [7, 13],
+            bewitchedBufferTurns: 1,
+            bewitchedProbability: 0.3,
+            bewitchedShowProbability: 0.5,
+            rotateRevolverProbability: 0.3,
+            rotateRevolverShowProbability: 0.5,
+            damageProbability: 0.3,
+            shieldProbability: 0.3,
+            damage: [7, 13],
+            shield: [7, 13],
+            revolverRotationIconHandle: "",
+            damageIconHandle: "enemy_action_damage",
+            shieldIconHandle: "enemy_action_cover",
+        }
+    },
 
 ]
