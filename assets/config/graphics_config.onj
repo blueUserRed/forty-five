@@ -45,6 +45,10 @@ icons: {
     wardOfTheWitch: {
         icon: "burning_icon",
         scale: 0.25
+    },
+    wrathOfTheWitch: {
+        icon: "burning_icon",
+        scale: 0.25
     }
 },
 

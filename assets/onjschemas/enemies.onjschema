@@ -64,6 +64,27 @@ $EnemyBrain {
         actionProbability: float,
     }
 
+    $WitchBrain {
+        firstEffectPossibleTurns: int[2],
+        secondEffectOffset: int[2],
+        bewitchedTurns: int[2],
+        bewitchedRotations: int[2],
+        wrathOfTheWitchDamageRange: int[2],
+        wardOfTheWitchCoverRange: int[2],
+        bewitchedBufferTurns: int,
+        bewitchedProbability: float,
+        bewitchedShowProbability: float,
+        rotateRevolverProbability: float,
+        rotateRevolverShowProbability: float,
+        damageProbability: float,
+        shieldProbability: float,
+        damage: int[2],
+        shield: int[2],
+        revolverRotationIconHandle: string,
+        damageIconHandle: string,
+        shieldIconHandle: string,
+    }
+
 }
 
 var enemy = {

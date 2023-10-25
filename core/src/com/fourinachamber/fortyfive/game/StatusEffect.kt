@@ -19,7 +19,7 @@ abstract class StatusEffect(
 
     protected lateinit var controller: GameController
 
-    abstract val damageType: StatusEffectType
+    abstract val effectType: StatusEffectType
 
     open val blocksStatusEffects: List<StatusEffectType> = listOf()
 
@@ -154,7 +154,7 @@ class Burning(
         if (continueForever) continueForever()
     }
 
-    override val damageType: StatusEffectType = StatusEffectType.FIRE
+    override val effectType: StatusEffectType = StatusEffectType.FIRE
 
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
         if (target.isBlocked(this@Burning, controller)) return Timeline()
@@ -181,7 +181,7 @@ class Poison(
     turns
 ) {
 
-    override val damageType: StatusEffectType = StatusEffectType.POISON
+    override val effectType: StatusEffectType = StatusEffectType.POISON
 
     override fun executeOnNewTurn(target: StatusEffectTarget): Timeline {
         if (target.isBlocked(this, controller)) return Timeline()
@@ -210,7 +210,7 @@ class FireResistance(
     turns
 ) {
 
-    override val damageType: StatusEffectType = StatusEffectType.BLOCKING
+    override val effectType: StatusEffectType = StatusEffectType.BLOCKING
     override val blocksStatusEffects: List<StatusEffectType> = listOf(StatusEffectType.FIRE)
 
     override fun canStackWith(other: StatusEffect): Boolean = other is FireResistance
@@ -232,7 +232,7 @@ class Bewitched(
     GraphicsConfig.iconScale("bewitched")
 ) {
 
-    override val damageType: StatusEffectType = StatusEffectType.WITCH
+    override val effectType: StatusEffectType = StatusEffectType.WITCH
 
     private var turnOnEffectStart: Int = -1
     private var rotationOnEffectStart: Int = -1
@@ -275,7 +275,7 @@ class WardOfTheWitch(
     GraphicsConfig.iconScale("wardOfTheWitch")
 ) {
 
-    override val damageType: StatusEffectType = StatusEffectType.WITCH
+    override val effectType: StatusEffectType = StatusEffectType.WITCH
 
     override fun canStackWith(other: StatusEffect): Boolean = false
 
@@ -291,9 +291,42 @@ class WardOfTheWitch(
         return target.enemy.addCoverTimeline(amount)
     }
 
-    override fun getDisplayText(): String = ""
+    override fun getDisplayText(): String = "+$amount shield"
 
     override fun equals(other: Any?): Boolean = other is WardOfTheWitch
+
+}
+
+class WrathOfTheWitch(
+    private val damage: Int
+) : StatusEffect(
+    GraphicsConfig.iconName("wrathOfTheWitch"),
+    GraphicsConfig.iconScale("wrathOfTheWitch")
+) {
+
+    override val effectType: StatusEffectType = StatusEffectType.WITCH
+
+    override fun executeAfterRotation(
+        rotation: RevolverRotation,
+        target: StatusEffectTarget
+    ): Timeline? = if (rotation is RevolverRotation.Left) Timeline.timeline {
+        if (target !is StatusEffectTarget.PlayerTarget) {
+            throw RuntimeException("WrathOfTheWitch can only be used on the player")
+        }
+        include(controller.damagePlayerTimeline(damage, true))
+    } else {
+        null
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = false
+
+    override fun stack(other: StatusEffect) {}
+
+    override fun isStillValid(): Boolean = true
+
+    override fun getDisplayText(): String = "$damage dmg"
+
+    override fun equals(other: Any?): Boolean = other is WrathOfTheWitch
 
 }
 
@@ -311,7 +344,7 @@ sealed class StatusEffectTarget {
             enemy.damage(damage, triggeredByStatusEffect = true)
 
         override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean =
-            enemy.statusEffect.any { effect.damageType in it.blocksStatusEffects }
+            enemy.statusEffect.any { effect.effectType in it.blocksStatusEffects }
     }
 
     object PlayerTarget : StatusEffectTarget() {
@@ -321,7 +354,7 @@ sealed class StatusEffectTarget {
 
         override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean = controller
             .playerStatusEffects
-            .any { effect.damageType in it.blocksStatusEffects }
+            .any { effect.effectType in it.blocksStatusEffects }
 
     }
 

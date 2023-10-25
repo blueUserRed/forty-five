@@ -47,6 +47,7 @@ icons: {
     fireResistance: iconConfig,
     bewitched: iconConfig,
     wardOfTheWitch: iconConfig,
+    wrathOfTheWitch: iconConfig,
 },
 
 stringTemplates:  {
