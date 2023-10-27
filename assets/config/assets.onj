@@ -287,12 +287,12 @@ textures: [
         file: "textures/map/decorations/wasteland_cactus_2.png"
     },
     {
-        name: "map_decoration_bewitchedForest_sheep1",
-        file: "textures/map/decorations/bewitchedForest_sheep1.png"
+        name: "map_decoration_bewitchedForest_sheep_1",
+        file: "textures/map/decorations/bewitchedForest_sheep_1.png"
     },
     {
-        name: "map_decoration_bewitchedForest_sheep2",
-        file: "textures/map/decorations/bewitchedForest_sheep2.png"
+        name: "map_decoration_bewitchedForest_sheep_2",
+        file: "textures/map/decorations/bewitchedForest_sheep_2.png"
     },
     {
         name: "map_decoration_bewitchedForest_tree1",
