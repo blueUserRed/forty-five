@@ -339,6 +339,7 @@ class EnemyActor(
         enemyBox.addActor(coverInfoBox)
         enemyBox.addActor(image)
 
+        addActor(textEmitter)
         addActor(attackIndicator)
         addActor(enemyBox)
         addActor(healthLabel)
