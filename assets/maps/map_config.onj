@@ -315,7 +315,7 @@ generatorConfig: {
                 ],
                 decorations: [
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep1",
+                        decoration: "map_decoration_bewitchedForest_sheep_1",
                         density: 0.005,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
@@ -325,7 +325,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep2",
+                        decoration: "map_decoration_bewitchedForest_sheep_2",
                         density: 0.003,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
@@ -431,7 +431,7 @@ generatorConfig: {
                 ],
                 decorations: [
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep1",
+                        decoration: "map_decoration_bewitchedForest_sheep_1",
                         density: 0.005,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
@@ -441,7 +441,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep2",
+                        decoration: "map_decoration_bewitchedForest_sheep_2",
                         density: 0.003,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
