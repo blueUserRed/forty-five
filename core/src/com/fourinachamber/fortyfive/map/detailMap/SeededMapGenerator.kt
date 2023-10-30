@@ -205,6 +205,8 @@ class SeededMapGenerator(
         areaNodes.filter { it !in nodes }.forEach { nodes.add(it) }
     }
 
+    //TODO fix with this seed -2085001091902831052
+
     private fun setImagePosForBorderAreas(first: MapNodeBuilder, last: MapNodeBuilder) {
         when (restrictions.rotation) {
             in ((PI / 4).toFloat()..(PI * 3 / 4).toFloat()) -> {

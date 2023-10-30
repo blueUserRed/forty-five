@@ -9,8 +9,10 @@ import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.utils.StringBuilder
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -18,8 +20,10 @@ import com.fourinachamber.fortyfive.utils.splitAt
 import com.fourinachamber.fortyfive.utils.zip
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
+import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import onj.value.OnjString
 import kotlin.math.sin
 
 open class AdvancedTextWidget(
@@ -50,7 +54,13 @@ open class AdvancedTextWidget(
     }
 
     fun setRawText(text: String) {
-        advancedText = AdvancedTextParser(text, screen, defaults).parse()
+        // this has to happen here, otherwise the dialog breaks / gets even more ugly
+        val defaultsAsObject = Triple(
+            ResourceManager.get(screen, defaults.get<String>("font")) as BitmapFont,
+            defaults.get<Color>("color"),
+            defaults.get<Double>("fontScale").toFloat()
+        )
+        advancedText = AdvancedTextParser(text, screen, defaultsAsObject).parse()
     }
 
     override fun layout() {
@@ -152,6 +162,32 @@ data class AdvancedText(
 
     companion object {
         val EMPTY = AdvancedText(listOf())
+
+        fun readFromOnj(texts: OnjArray, screen: OnjScreen, defaults: OnjObject): AdvancedText {
+            //TODO ugly all of this prob. but it kinda works
+            val curText = StringBuilder("")
+            val defaultFont: BitmapFont = ResourceManager.get(screen, defaults.get<String>("font"))
+            val defaultColor: Color = defaults.get<Color>("color")
+            val defaultFontScale = defaults.get<Double>("fontScale").toFloat()
+            val parts: MutableList<AdvancedTextPart> = mutableListOf()
+            texts.value.map { it as OnjNamedObject }.forEach {
+                if (it.name.contentEquals("Text")) {
+                    var color = it.get<Color?>("color")
+                    var fontScale = it.get<Double?>("fontScale")?.toFloat()
+                    val fontName = it.get<String?>("font")
+                    if ((color == null)) color = defaultColor
+                    val font: BitmapFont = if (fontName == null) defaultFont
+                    else ResourceManager.get(screen, fontName) as BitmapFont
+                    if (fontScale == null) fontScale = defaultFontScale
+                    val curParts = AdvancedTextParser(it.get<String>("text"), screen, Triple(font, color, fontScale)).parse()
+                    println(curParts.parts.size)
+                    parts.addAll(curParts.parts)
+                } else {
+                    println("found icon")
+                }
+            }
+            return AdvancedText(parts)
+        }
     }
 
 }
@@ -178,7 +214,7 @@ interface AdvancedTextPart {
         return computed
     }
 
-    fun update() { }
+    fun update() {}
 
 }
 
