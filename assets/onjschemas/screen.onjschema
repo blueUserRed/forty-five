@@ -236,6 +236,11 @@ $Widget {
         optionsFont: string,
         optionsFontColor: Color,
         optionsFontScale: float,
+        defaults: {
+            font: string,
+            fontScale: float,
+            color: Color
+        },
         ...widgetSharedKeys
     }
 
