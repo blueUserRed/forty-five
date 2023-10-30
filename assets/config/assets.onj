@@ -195,6 +195,10 @@ textures: [
         file: "textures/map/backgrounds/wasteland.png",
     },
     {
+        name: "map_background_bewitched_forest_tileable",
+        file: "textures/map/backgrounds/bewitchedForest.png",
+    },
+    {
         name: "map_path",
         file: "textures/map/path.png"
     },
@@ -251,8 +255,48 @@ textures: [
         file: "textures/map/decorations/grass.png"
     },
     {
-        name: "map_decoration_cactus",
-        file: "textures/map/decorations/cactus.png"
+        name: "map_decoration_wasteland_skull_1",
+        file: "textures/map/decorations/wasteland_skull_1.png"
+    },
+    {
+        name: "map_decoration_wasteland_skull_2",
+        file: "textures/map/decorations/wasteland_skull_2.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_1",
+        file: "textures/map/decorations/wasteland_dune_1.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_2",
+        file: "textures/map/decorations/wasteland_dune_2.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_3",
+        file: "textures/map/decorations/wasteland_dune_3.png"
+    },
+    {
+        name: "map_decoration_wasteland_dune_4",
+        file: "textures/map/decorations/wasteland_dune_4.png"
+    },
+    {
+        name: "map_decoration_wasteland_cactus_1",
+        file: "textures/map/decorations/wasteland_cactus_1.png"
+    },
+    {
+        name: "map_decoration_wasteland_cactus_2",
+        file: "textures/map/decorations/wasteland_cactus_2.png"
+    },
+    {
+        name: "map_decoration_bewitched_forest_sheep_1",
+        file: "textures/map/decorations/bewitchedForest_sheep_1.png"
+    },
+    {
+        name: "map_decoration_bewitched_forest_sheep_2",
+        file: "textures/map/decorations/bewitchedForest_sheep_2.png"
+    },
+    {
+        name: "map_decoration_bewitched_forest_tree1",
+        file: "textures/map/decorations/bewitchedForest_tree1.png"
     },
     {
         name: "shop_dark_background",

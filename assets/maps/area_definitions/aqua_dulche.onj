@@ -1,6 +1,6 @@
 startNode: 0,
 endNode: 2,
-biome: "wasteland",
+biome: "bewitched_forest",
 nodes: [
     {
         x: 20.0,
@@ -13,7 +13,7 @@ nodes: [
 //        imagePos: "left",
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
-            targetMap: "roadToSalem",
+            targetMap: "roadToAquaDulche"
         }
     },
     {
@@ -35,7 +35,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
-            targetMap: "roadToAquaDulche",
+            targetMap: "roadToEnd"
         }
     },
     {
@@ -57,24 +57,24 @@ nodes: [
 ],
 
 decorations: [
-    {
-        texture: "burning_icon",
-        baseWidth: 8.0,
-        baseHeight: 8.0,
-        positions: [
-            [
-                30.0, 30.0, 1.5
-            ],
-            [
-                60.0, 20.0, 1.0
-            ],
-            [
-                10.0, 10.0, 0.5
-            ],
-            [
-                90.0, 30.0, 2.0
-            ],
-        ]
-    }
+//    {
+//        texture: "burning_icon",
+//        baseWidth: 8.0,
+//        baseHeight: 8.0,
+//        positions: [
+//            [
+//                30.0, 30.0, 1.5
+//            ],
+//            [
+//                60.0, 20.0, 1.0
+//            ],
+//            [
+//                10.0, 10.0, 0.5
+//            ],
+//            [
+//                90.0, 30.0, 2.0
+//            ],
+//        ]
+//    }
 ],
 isArea: true,

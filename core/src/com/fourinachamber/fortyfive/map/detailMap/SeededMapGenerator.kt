@@ -72,8 +72,11 @@ class SeededMapGenerator(
             ((nodes.minOf { it.x } - restrictions.decorationPadding)..(nodes.maxOf { it.x } + restrictions.decorationPadding))
         val yRange =
             ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
+        // first pos, second width and height
+        val notOverlappingNodes = mutableListOf<Pair<Vector2, Vector2>>()
         restrictions.decorations.forEach {
-            decos.add(it.getDecoration(nodes, restrictions, connections, xRange, yRange))
+            val deco = it.getDecoration(nodes, restrictions, connections, xRange, yRange, notOverlappingNodes)
+            decos.add(deco)
         }
         return decos
     }
@@ -167,8 +170,8 @@ class SeededMapGenerator(
         val areaNodes: MutableList<MapNodeBuilder> = mutableListOf()
         areaNodes.add(mainLine.lineNodes.first())
         areaNodes.add(mainLine.lineNodes.last())
-        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea, true)
-        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea, false)
+        mainLine.lineNodes.first().event = EnterMapMapEvent(restrictions.startArea)
+        mainLine.lineNodes.last().event = EnterMapMapEvent(restrictions.endArea)
         mainLine.lineNodes.first().nodeTexture = restrictions.exitNodeTexture
         mainLine.lineNodes.last().nodeTexture = restrictions.exitNodeTexture
         for (areaName in restrictions.otherAreas) {
@@ -193,7 +196,7 @@ class SeededMapGenerator(
                 newPos.y,
                 imagePos = MapNode.ImagePosition.valueOf(direction.name),
                 imageName = areaName,
-                event = EnterMapMapEvent(areaName, false),
+                event = EnterMapMapEvent(areaName),
             )
             borderNodes.random(rnd).connect(newArea, direction)
             connections.add(Line(newPos, newPos.sub(newArea.edgesTo.first().posAsVec())))
@@ -242,7 +245,8 @@ class SeededMapGenerator(
      */
     private fun getLimitInRange(x: Float, nodes: MutableList<MapNodeBuilder>, direction: Direction): Float {
         val nodesInRange: List<Float> =
-            nodes.filter { abs(it.x - x) < restrictions.rangeToCheckBetweenNodes }.map { it.y }
+            nodes.filter { abs(it.x - x) < restrictions.rangeToCheckForArea }.map { it.y }
+        if (nodesInRange.isEmpty()) return nodes.minBy { abs(it.x - x) }.y
         return if (direction == Direction.UP) nodesInRange.max() else nodesInRange.min()
 
     }
@@ -273,8 +277,10 @@ class SeededMapGenerator(
         var curUp = mainLine
         for (i in 1 until restrictions.maxLines) {
             if (rnd.nextBoolean()) {
+                if (curDown.lineNodes.isEmpty()) continue
                 curDown = curDown.generateNextLine(true, maxLength)!!
             } else {
+                if (curUp.lineNodes.isEmpty()) continue
                 curUp = curUp.generateNextLine(false, maxLength)!!
             }
         }
@@ -696,7 +702,7 @@ class SeededMapGenerator(
             val posDirs: MutableList<Int> =
                 getPossibleDirectionsToCreatePathsTo(node, curLine)
             while (numberOfMissingConnections > 0 && posDirs.isNotEmpty() && node.edgesTo.size < 4) {
-                val curDir: Direction = Direction.values()[posDirs.random(rnd)]
+                val curDir: Direction = getCurDir(posDirs)
                 posDirs.remove(curDir.ordinal)
                 val possiblePointsToConnectTo: List<MapNodeBuilder> =
                     getPossiblePointsToConnect(node, curLine, curDir, nodes)
@@ -717,6 +723,10 @@ class SeededMapGenerator(
                     }
             }
         }
+
+        private fun getCurDir(posDirs: MutableList<Int>): Direction =
+            Direction.values()[posDirs[RandomCardSelection.getRandomIndex(posDirs.map { Direction.values()[it].getPriorityToGoNext() }
+                .toMutableList(), rnd)]]
 
         /**
          * searches all possible points to connect to for generating a path
@@ -845,16 +855,18 @@ class Line(val start: Vector2, val end: Vector2) {
     fun addOnEachEnd(distance: Float): Line {
         val ang = ang()
         val result = Line(start.clone(), end.clone())
-        if (start.x < end.x) {
-            result.start.x -= (cos(ang) * distance)
-            result.start.y -= (sin(ang) * distance)
-            result.end.x += (cos(ang) * distance)
-            result.end.y += (sin(ang) * distance)
+        val xChange = cos(ang) * distance
+        val yChange = sin(ang) * distance
+        if ((start.x < end.x) == (xChange > 0)) {
+            result.start.x -= xChange
+            result.start.y -= yChange
+            result.end.x += xChange
+            result.end.y += yChange
         } else {
-            result.start.x += (cos(ang) * distance)
-            result.start.y += (sin(ang) * distance)
-            result.end.x -= (cos(ang) * distance)
-            result.end.y -= (sin(ang) * distance)
+            result.start.x += xChange
+            result.start.y += yChange
+            result.end.x -= xChange
+            result.end.y -= yChange
         }
         return result
     }
@@ -876,6 +888,8 @@ enum class Direction {
         }
 
         override fun getNextDirCounterClock(): Direction = LEFT
+
+        override fun getPriorityToGoNext(): Float = 0.35F
     },
     DOWN {
         override fun getOpposite(): Direction = UP
@@ -887,6 +901,8 @@ enum class Direction {
         }
 
         override fun getNextDirCounterClock(): Direction = RIGHT
+
+        override fun getPriorityToGoNext(): Float = 0.35F
     },
     LEFT {
         override fun getOpposite(): Direction = RIGHT
@@ -898,6 +914,8 @@ enum class Direction {
         }
 
         override fun getNextDirCounterClock(): Direction = DOWN
+
+        override fun getPriorityToGoNext(): Float = 0F
     },
     RIGHT {
         override fun getOpposite(): Direction = LEFT
@@ -910,6 +928,7 @@ enum class Direction {
 
         override fun getNextDirCounterClock(): Direction = UP
 
+        override fun getPriorityToGoNext(): Float = 1.15F
     };
 
     abstract fun getOpposite(): Direction
@@ -920,6 +939,7 @@ enum class Direction {
      */
     abstract fun getOtherLine(curLine: SeededMapGenerator.MapGeneratorLine): SeededMapGenerator.MapGeneratorLine?
     abstract fun getNextDirCounterClock(): Direction
+    abstract fun getPriorityToGoNext(): Float
 }
 
 /*class BezierCurve(
@@ -970,6 +990,7 @@ sealed class DecorationDistributionFunction(
     private val scaleMin: Float,
     private val scaleMax: Float,
     private val collidesOnlyWithNodes: Boolean,
+    private val canOverlapWithOtherNodes: Boolean,
 ) {
     private val rnd: kotlin.random.Random = Random(seed)
 
@@ -981,7 +1002,8 @@ sealed class DecorationDistributionFunction(
         baseHeight: Float,
         scaleMin: Float,
         scaleMax: Float,
-        collidesOnlyWithNodes: Boolean
+        collidesOnlyWithNodes: Boolean,
+        canOverlapWithOtherNodes: Boolean
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -990,7 +1012,7 @@ sealed class DecorationDistributionFunction(
         baseHeight,
         scaleMin,
         scaleMax,
-        collidesOnlyWithNodes
+        collidesOnlyWithNodes, canOverlapWithOtherNodes
     ) {
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
@@ -1027,6 +1049,7 @@ sealed class DecorationDistributionFunction(
         private val outerRadius: Float,
         private val nbrOfInnerPoints: Int,
         private val nbrOfOuterPoints: Int,
+        canOverlapWithOtherNodes: Boolean,
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -1035,7 +1058,7 @@ sealed class DecorationDistributionFunction(
         baseHeight,
         scaleMin,
         scaleMax,
-        collidesOnlyWithNodes
+        collidesOnlyWithNodes, canOverlapWithOtherNodes
     ) {
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
@@ -1121,7 +1144,7 @@ sealed class DecorationDistributionFunction(
         collidesOnlyWithNodes: Boolean,
         private val blockSize: Float,
         private val prob: Float,
-        private val additionalProbIfNeighbor: Float
+        private val additionalProbIfNeighbor: Float, canOverlapWithOtherNodes: Boolean
     ) : DecorationDistributionFunction(
         seed,
         type,
@@ -1130,7 +1153,8 @@ sealed class DecorationDistributionFunction(
         baseHeight,
         scaleMin,
         scaleMax,
-        collidesOnlyWithNodes
+        collidesOnlyWithNodes,
+        canOverlapWithOtherNodes
     ) {
         override fun getPossiblePositions(
             xRange: ClosedFloatingPointRange<Float>,
@@ -1224,7 +1248,8 @@ sealed class DecorationDistributionFunction(
         restrictions: MapRestriction,
         connections: MutableList<Line>,
         xRange: ClosedFloatingPointRange<Float>,
-        yRange: ClosedFloatingPointRange<Float>
+        yRange: ClosedFloatingPointRange<Float>,
+        notOverlappingNodes: MutableList<Pair<Vector2, Vector2>>
     ): DetailMap.MapDecoration {
         val possiblePositions: List<Pair<Vector2, Float>> =
             getPossiblePositions(xRange, yRange, restrictions, rnd)
@@ -1235,7 +1260,15 @@ sealed class DecorationDistributionFunction(
             baseWidth,
             baseHeight,
             possiblePositions
-                .filter { isPossibleToPlaceNode(it, nodes, connections, restrictions.pathTotalWidth) }
+                .filter {
+                    isPossibleToPlaceNode(
+                        it,
+                        nodes,
+                        connections,
+                        notOverlappingNodes,
+                        restrictions.pathTotalWidth
+                    )
+                }
                 .sortedBy { -it.first.y }
         )
     }
@@ -1244,7 +1277,8 @@ sealed class DecorationDistributionFunction(
         data: Pair<Vector2, Float>,
         nodes: List<MapNodeBuilder>,
         connections: MutableList<Line>,
-        pathTotalWidth: Float
+        notOverlappingNodes: MutableList<Pair<Vector2, Vector2>>,
+        pathTotalWidth: Float,
     ): Boolean {
 
         val rect = data.first to Vector2(baseWidth * data.second, baseHeight * data.second)
@@ -1270,6 +1304,18 @@ sealed class DecorationDistributionFunction(
                 val tempRect = it.getAsRect(pathTotalWidth, Vector2(2.5F, 2.5F))
                 if (isPolygonsIntersecting(rectAbs, tempRect)) return false
             }
+        }
+        for (tempRect in notOverlappingNodes) {
+            if ((rect.first.x < tempRect.first.x + tempRect.second.x) &&
+                (rect.first.y < tempRect.first.y + tempRect.second.y) &&
+                (tempRect.first.x < rect.first.x + rect.second.x) &&
+                (tempRect.first.y < rect.first.y + rect.second.y)
+            ) {
+                return false
+            }
+        }
+        if (canOverlapWithOtherNodes) {
+            notOverlappingNodes.add(data.first to Vector2(baseWidth * data.second, baseHeight * data.second))
         }
         return true
     }
@@ -1315,6 +1361,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("scaleMin").toFloat(),
                 onj.get<Double>("scaleMax").toFloat(),
                 onj.get<Boolean>("onlyCollidesWithNodes"),
+                onj.get<Boolean?>("canOverlapWithOtherNodes") ?: true,
             )
         },
         "SingleClusterDistributionFunction" to { onj, seed ->
@@ -1335,6 +1382,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("outerRadius").toFloat(),
                 onj.get<Long>("nbrOfInnerPoints").toInt(),
                 onj.get<Long>("nbrOfOuterPoints").toInt(),
+                onj.get<Boolean?>("canOverlapWithOtherNodes") ?: true,
             )
         },
         "MultiClusterDistributionFunction" to { onj, seed ->
@@ -1350,6 +1398,7 @@ object DecorationDistributionFunctionFactory {
                 onj.get<Double>("blockSize").toFloat(),
                 onj.get<Double>("prob").toFloat(),
                 onj.get<Double>("additionalProbIfNeighbor").toFloat(),
+                onj.get<Boolean?>("canOverlapWithOtherNodes") ?: true,
             )
         },
     )
@@ -1406,6 +1455,11 @@ data class MapRestriction(
      */
     val rangeToCheckBetweenNodes: Float = 0.6F,
 
+    /**
+     * the range from where nodes are checked around an area to determine its height/distance from the main lines
+     */
+    val rangeToCheckForArea: Float = 60F,
+
     val startArea: String,
     val endArea: String,
     val otherAreas: List<String>,
@@ -1439,7 +1493,7 @@ data class MapRestriction(
     /**
      * width of the path, needed for checking if textures are overlapping
      */
-    val pathTotalWidth: Float = 7.5F,
+    val pathTotalWidth: Float = 2.5F,
     val minDistanceBetweenNodes: Float = 15F,
     val exitNodeTexture: ResourceHandle,
     /**
