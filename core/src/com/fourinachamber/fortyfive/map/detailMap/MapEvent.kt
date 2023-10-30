@@ -14,7 +14,7 @@ object MapEventFactory {
     private var mapEventCreators: Map<String, (onj: OnjObject) -> MapEvent> = mapOf(
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
-        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap"), it.get<Boolean>("placeAtEnd")) },
+        "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap")) },
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
@@ -188,7 +188,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
  * @param targetMap the name of the map to be opened
  * @param placeAtEnd if true, the player is placed at last node of the map instead of the first
  */
-class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEvent() {
+class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -204,13 +204,12 @@ class EnterMapMapEvent(val targetMap: String, val placeAtEnd: Boolean) : MapEven
     }
 
     override fun start() {
-        MapManager.changeToMap(targetMap, placeAtEnd)
+        MapManager.changeToMap(targetMap)
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EnterMapMapEvent")
         "targetMap" with targetMap
-        "placeAtEnd" with placeAtEnd
     }
 
 }
