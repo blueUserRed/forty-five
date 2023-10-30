@@ -262,7 +262,7 @@ generatorConfig: {
         },
         {
             name: "roadToAquaDulche",
-            biome: "bewitchedForest",
+            biome: "bewitched_forest",
             seed: runRandom(2),
             restrictions: {
                 //                maxNodes: 25,
@@ -315,7 +315,7 @@ generatorConfig: {
                 ],
                 decorations: [
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep_1",
+                        decoration: "map_decoration_bewitched_forest_sheep_1",
                         density: 0.005,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
@@ -325,7 +325,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep_2",
+                        decoration: "map_decoration_bewitched_forest_sheep_2",
                         density: 0.003,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
@@ -335,7 +335,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_tree1",
+                        decoration: "map_decoration_bewitched_forest_tree1",
                         density: 3.5,
                         baseWidth: 5.0,
                         baseHeight: 10.0,
@@ -345,7 +345,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_tree1",
+                        decoration: "map_decoration_bewitched_forest_tree1",
                         density: 0.2,
                         baseWidth: 5.0,
                         baseHeight: 10.0,
@@ -361,7 +361,7 @@ generatorConfig: {
         },
         {
             name: "roadToEnd",
-            biome: "bewitchedForest",
+            biome: "bewitched_forest",
             seed: runRandom(2),
             restrictions: {
                 maxNodes: 15,
@@ -431,7 +431,7 @@ generatorConfig: {
                 ],
                 decorations: [
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep_1",
+                        decoration: "map_decoration_bewitched_forest_sheep_1",
                         density: 0.005,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
@@ -441,7 +441,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_sheep_2",
+                        decoration: "map_decoration_bewitched_forest_sheep_2",
                         density: 0.003,
                         baseWidth: 4.0,
                         baseHeight: 4.0,
@@ -451,7 +451,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_tree1",
+                        decoration: "map_decoration_bewitched_forest_tree1",
                         density: 3.5,
                         baseWidth: 5.0,
                         baseHeight: 10.0,
@@ -461,7 +461,7 @@ generatorConfig: {
                         canOverlapWithOtherNodes: true,
                     },
                     $RandomDistributionFunction {
-                        decoration: "map_decoration_bewitchedForest_tree1",
+                        decoration: "map_decoration_bewitched_forest_tree1",
                         density: 0.2,
                         baseWidth: 5.0,
                         baseHeight: 10.0,

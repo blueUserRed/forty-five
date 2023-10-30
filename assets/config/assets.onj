@@ -195,7 +195,7 @@ textures: [
         file: "textures/map/backgrounds/wasteland.png",
     },
     {
-        name: "map_background_bewitchedForest_tileable",
+        name: "map_background_bewitched_forest_tileable",
         file: "textures/map/backgrounds/bewitchedForest.png",
     },
     {
@@ -287,15 +287,15 @@ textures: [
         file: "textures/map/decorations/wasteland_cactus_2.png"
     },
     {
-        name: "map_decoration_bewitchedForest_sheep_1",
+        name: "map_decoration_bewitched_forest_sheep_1",
         file: "textures/map/decorations/bewitchedForest_sheep_1.png"
     },
     {
-        name: "map_decoration_bewitchedForest_sheep_2",
+        name: "map_decoration_bewitched_forest_sheep_2",
         file: "textures/map/decorations/bewitchedForest_sheep_2.png"
     },
     {
-        name: "map_decoration_bewitchedForest_tree1",
+        name: "map_decoration_bewitched_forest_tree1",
         file: "textures/map/decorations/bewitchedForest_tree1.png"
     },
     {

@@ -1,6 +1,6 @@
 startNode: 0,
 endNode: 1,
-biome: "bewitchedForest",
+biome: "bewitched_forest",
 nodes: [
     {
         x: 20.0,
