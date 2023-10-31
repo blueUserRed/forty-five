@@ -3,7 +3,7 @@ import "imports/colors.onj" as color;
 
 npcs: [
 
-    {
+/*    {
         name: "my_cool_npc",
         dialog: {
             parts: [
@@ -66,7 +66,7 @@ npcs: [
             //            offsetX: 20.0,
             scale: 2.48
         }
-    },
+    },*/
 
 
 
@@ -75,17 +75,12 @@ npcs: [
         dialog: {
             parts: [
                 {
-                    text: [
-                        $Text { text: "Hey there!" },
-                    ],
+                    rawText: "Hey there!",
                     next: $Continue { }
                 },
-                {
-                    text: [
-                        $Text { text: "Did ya hear about the " },
-                        $Text { text: "merchant on the endless road?" },
-                    ],
-                    next: $ChooseNextPart {
+               {
+                    rawText: "Did ya hear about the merchant on the endless road?",
+                    next: $Continue { }/*$ChooseNextPart {
                         choices: [
                             {
                                 name: "The endless road?",
@@ -100,9 +95,9 @@ npcs: [
                                 next: 5
                             }
                         ]
-                    }
+                    }*/
                 },
-                {
+               /*  {
                     text: [
                         $Text { text: "Yes. It's called that because it is a circle. " },
                         $Text { text: "You go the entire way through, you " },
@@ -158,11 +153,9 @@ npcs: [
                             }
                         ]
                     }
-                },
+                },*/
                 {
-                    text: [
-                        $Text { text: "bye!" },
-                    ],
+                    rawText: "Bye!",
                     next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
                 }
             ],
@@ -170,7 +163,7 @@ npcs: [
                 font: "red_wing",
                 fontScale: 0.1,
                 color: color.black
-            }
+            },
         },
         image: {
             textureName: "shop_npcs_default",

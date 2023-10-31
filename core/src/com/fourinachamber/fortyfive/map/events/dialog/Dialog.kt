@@ -23,7 +23,8 @@ data class Dialog(
 
         private fun readDialogPart(onj: OnjObject, defaults: OnjObject, screen: OnjScreen): DialogPart {
 //            TODO("dialoges are temporarily broken")
-            val text = AdvancedText.readFromOnj(onj.get<OnjArray>("text"), screen, defaults)
+            val text =
+                AdvancedText.readFromOnj(onj.get<String>("rawText"), onj.get<OnjArray?>("effects"), screen, defaults)
             val nextSelector = onj.get<OnjNamedObject>("next")
             val next = when (nextSelector.name) {
                 "Continue" -> NextDialogPartSelector.Continue
@@ -38,6 +39,7 @@ data class Dialog(
                             it.get<String>("name") to it.get<Long>("next").toInt()
                         }
                 )
+
                 else -> throw RuntimeException()
             }
             return DialogPart(text, next)

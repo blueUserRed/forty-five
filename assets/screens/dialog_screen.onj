@@ -35,7 +35,7 @@ options: {
 
 var dialogWidget = $DialogWidget {
     styles: [
-        {   //TODO marvin fragen, wie zur hölle wir colors machen sollen
+        {   //TODO wieder so machen, dass es passt...
 //            flexDirection: flexDirection.row,
 //            background: "hover_detail_background",
             width: 80.0#percent,
@@ -51,7 +51,7 @@ var dialogWidget = $DialogWidget {
 //            paddingBottom: (3.0*10)#points,
         }
     ],
-    progressTime: 0.01,
+    progressTime: 1.0,//0.01, // //TODO change back again
     advanceArrowDrawable: "heart_texture",
     advanceArrowOffset: 1.0,
     touchable: "enabled",

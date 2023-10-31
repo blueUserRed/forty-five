@@ -80,13 +80,12 @@ class DialogWidget(
     }
 
     private fun finished(): Timeline = when (val part = currentPart!!.nextDialogPartSelector) {
-
         is NextDialogPartSelector.Continue -> Timeline.timeline {
             action { readyToAdvance = true }
             delayUntil { !readyToAdvance }
             action { currentPart = getPart(dialog.parts.indexOf(currentPart!!) + 1) }
             delayUntil { isAnimFinished }
-            includeLater( { finished() }, { true } )
+            includeLater({ finished() }, { true })
         }
 
         is NextDialogPartSelector.Fixed -> Timeline.timeline {
@@ -94,7 +93,7 @@ class DialogWidget(
             delayUntil { !readyToAdvance }
             action { currentPart = getPart(part.next) }
             delayUntil { isAnimFinished }
-            includeLater( { finished() }, { true } )
+            includeLater({ finished() }, { true })
         }
 
         is NextDialogPartSelector.End -> Timeline.timeline {
@@ -115,7 +114,7 @@ class DialogWidget(
                 clearOptionsBox()
             }
             delayUntil { isAnimFinished }
-            includeLater( { finished() }, { true } )
+            includeLater({ finished() }, { true })
         }
 
     }
@@ -174,6 +173,9 @@ class DialogWidget(
         val curTime = TimeUtils.millis()
         if (curTime < lastProgressTime + progressTime) return
         isAnimFinished = advancedText.progress()
+        println(currentPart)
+        currentPart?.text?.update()
+        println(currentPart)
         lastProgressTime = curTime
     }
 
