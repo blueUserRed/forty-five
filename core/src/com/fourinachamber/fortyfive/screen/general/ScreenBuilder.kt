@@ -418,7 +418,14 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<OnjObject>("defaults"),
             screen
         ).apply {
-            setRawText(widgetOnj.get<String>("rawText"))
+            setRawText(
+                widgetOnj.get<String>("rawText"),
+                widgetOnj.get<OnjArray?>("effects")?.value?.map {
+                    AdvancedTextParser.AdvancedTextEffect.getFromOnj(
+                        screen,
+                        widgetOnj
+                    )
+                } ?: listOf())
         }
 
         "DialogWidget" -> DialogWidget(

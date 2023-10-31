@@ -5,10 +5,6 @@ var advancedTextPartSharedKeys = {
     actions?: $AdvancedTextPartAction[]
 };
 
-var dialogPart = {
-    text: $AdvancedTextPart[],
-    next: $NextDialogPartSelector
-};
 
 $NextDialogPartSelector {
 
@@ -30,20 +26,36 @@ $NextDialogPartSelector {
     }
 }
 
-$AdvancedTextPart {
 
-    $Text {
-        text: string,
-        font?: string,
-        color?: Color,
-        fontScale?: float,
-        ...advancedTextPartSharedKeys
+var advancedTextEffectSharedKeys = {
+    indicator: string,
+};
+
+$AdvancedTextEffect {
+
+    $Color {
+        color: Color,
+        ...advancedTextEffectSharedKeys
     }
 
-    $Icon {
-        icon: string,
-        ...advancedTextPartSharedKeys
+    $Font {
+        font: string,
+        ...advancedTextEffectSharedKeys
     }
+
+    $FontScale {
+        fontScale: float,
+        ...advancedTextEffectSharedKeys
+    }
+
+    $Action {
+        actions: $AdvancedTextPartAction[],
+        ...advancedTextEffectSharedKeys
+    }
+//    $Icon { //TODO icons, maybe like this, maybe part of the text
+//        icon: string,
+//        ...advancedTextPartSharedKeys
+//    }
 
 }
 
@@ -59,7 +71,8 @@ $AdvancedTextPartAction {
 
 var dialog = {
     parts: {
-        text: $AdvancedTextPart[],
+        rawText: string,
+        effects?: $AdvancedTextEffect[],
         next: $NextDialogPartSelector
     }[],
     defaults: {

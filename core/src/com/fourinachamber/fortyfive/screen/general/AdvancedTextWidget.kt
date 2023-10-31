@@ -9,10 +9,8 @@ import com.badlogic.gdx.math.Matrix4
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.badlogic.gdx.utils.StringBuilder
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -23,7 +21,6 @@ import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import onj.value.OnjString
 import kotlin.math.sin
 
 open class AdvancedTextWidget(
@@ -39,8 +36,9 @@ open class AdvancedTextWidget(
 
     open var advancedText: AdvancedText = AdvancedText.EMPTY
         set(value) {
+            if (field != AdvancedText.EMPTY) clearText() //to reset before, not after assigning
             field = value
-            clearText()
+//            clearText()
             initText(value)
         }
 
@@ -53,14 +51,8 @@ open class AdvancedTextWidget(
         initText(advancedText)
     }
 
-    fun setRawText(text: String) {
-        // this has to happen here, otherwise the dialog breaks / gets even more ugly
-        val defaultsAsObject = Triple(
-            ResourceManager.get(screen, defaults.get<String>("font")) as BitmapFont,
-            defaults.get<Color>("color"),
-            defaults.get<Double>("fontScale").toFloat()
-        )
-        advancedText = AdvancedTextParser(text, screen, defaultsAsObject).parse()
+    fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>) {
+        advancedText = AdvancedTextParser(text, screen, defaults, effects).parse()
     }
 
     override fun layout() {
@@ -163,30 +155,13 @@ data class AdvancedText(
     companion object {
         val EMPTY = AdvancedText(listOf())
 
-        fun readFromOnj(texts: OnjArray, screen: OnjScreen, defaults: OnjObject): AdvancedText {
-            //TODO ugly all of this prob. but it kinda works
-            val curText = StringBuilder("")
-            val defaultFont: BitmapFont = ResourceManager.get(screen, defaults.get<String>("font"))
-            val defaultColor: Color = defaults.get<Color>("color")
-            val defaultFontScale = defaults.get<Double>("fontScale").toFloat()
-            val parts: MutableList<AdvancedTextPart> = mutableListOf()
-            texts.value.map { it as OnjNamedObject }.forEach {
-                if (it.name.contentEquals("Text")) {
-                    var color = it.get<Color?>("color")
-                    var fontScale = it.get<Double?>("fontScale")?.toFloat()
-                    val fontName = it.get<String?>("font")
-                    if ((color == null)) color = defaultColor
-                    val font: BitmapFont = if (fontName == null) defaultFont
-                    else ResourceManager.get(screen, fontName) as BitmapFont
-                    if (fontScale == null) fontScale = defaultFontScale
-                    val curParts = AdvancedTextParser(it.get<String>("text"), screen, Triple(font, color, fontScale)).parse()
-                    println(curParts.parts.size)
-                    parts.addAll(curParts.parts)
-                } else {
-                    println("found icon")
-                }
-            }
-            return AdvancedText(parts)
+        fun readFromOnj(rawText: String, effects: OnjArray?, screen: OnjScreen, defaults: OnjObject): AdvancedText {
+            return AdvancedTextParser(
+                rawText,
+                screen,
+                defaults,
+                effects?.value?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(screen, it as OnjNamedObject) }
+                    ?: listOf()).parse()
         }
     }
 
@@ -252,8 +227,8 @@ class TextAdvancedTextPart(
         val text = templateString.string
         if (progress > text.length) return true
         setText(text.substring(0, progress))
-        if (progress >= text.length) return true
-        return false
+        println("$text   $progress  ${super.getText()}")
+        return progress >= text.length
     }
 
     override fun resetProgress() {
@@ -265,7 +240,6 @@ class TextAdvancedTextPart(
         val newText = templateString.string
         if (progress >= newText.length) setText(newText)
         actions.forEach { it(this) }
-
         if (batch == null) {
             super.draw(null, parentAlpha)
             return

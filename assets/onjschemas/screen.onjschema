@@ -219,7 +219,7 @@ $Widget {
     $AdvancedText {
         font: string,
         rawText: string,
-//        parts: $AdvancedTextPart[],
+        effects?: $AdvancedTextEffect[],
         defaults: {
             font: string,
             fontScale: float,
@@ -284,24 +284,36 @@ $Widget {
 
 }
 
-var advancedTextPartSharedKeys = {
-    actions?: $AdvancedTextPartAction[]
+var advancedTextEffectSharedKeys = {
+    indicator: string,
 };
 
-$AdvancedTextPart {
+$AdvancedTextEffect {
 
-    $Text {
-        text: string,
-        font?: string,
-        color?: Color,
-        fontScale?: float,
-        ...advancedTextPartSharedKeys
+    $Color {
+        color: Color,
+        ...advancedTextEffectSharedKeys
     }
 
-    $Icon {
-        icon: string,
-        ...advancedTextPartSharedKeys
+    $Font {
+        font: string,
+        ...advancedTextEffectSharedKeys
     }
+
+    $FontScale {
+        fontScale: float,
+        ...advancedTextEffectSharedKeys
+    }
+
+    $Action {
+        actions: $AdvancedTextPartAction[],
+        ...advancedTextEffectSharedKeys
+    }
+
+//    $Icon { //TODO icons, maybe like this, maybe part of the text
+//        icon: string,
+//        ...advancedTextPartSharedKeys
+//    }
 
 }
 
