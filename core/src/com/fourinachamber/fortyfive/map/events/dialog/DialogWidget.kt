@@ -173,9 +173,6 @@ class DialogWidget(
         val curTime = TimeUtils.millis()
         if (curTime < lastProgressTime + progressTime) return
         isAnimFinished = advancedText.progress()
-        println(currentPart)
-        currentPart?.text?.update()
-        println(currentPart)
         lastProgressTime = curTime
     }
 

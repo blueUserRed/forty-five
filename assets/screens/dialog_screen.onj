@@ -51,7 +51,7 @@ var dialogWidget = $DialogWidget {
 //            paddingBottom: (3.0*10)#points,
         }
     ],
-    progressTime: 1.0,//0.01, // //TODO change back again
+    progressTime: 0.01, // 1.0,//
     advanceArrowDrawable: "heart_texture",
     advanceArrowOffset: 1.0,
     touchable: "enabled",
