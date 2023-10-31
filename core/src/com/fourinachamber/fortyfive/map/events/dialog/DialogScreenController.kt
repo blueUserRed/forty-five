@@ -37,7 +37,6 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
             .map { it as OnjObject }
             .find { it.get<String>("name") == context.npc }
             ?: throw RuntimeException("unknown npc: ${context.npc}")
-        println(context.npc)
         val dialogOnj = npc.get<OnjObject>("dialog")
         val dialog = Dialog.readFromOnj(dialogOnj, screen)
         dialogWidget.start(dialog)

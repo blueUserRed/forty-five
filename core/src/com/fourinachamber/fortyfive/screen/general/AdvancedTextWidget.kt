@@ -216,6 +216,7 @@ class TextAdvancedTextPart(
 
     init {
         setFontScale(fontScale)
+        skipTextCheck = true
     }
 
     override fun addDialogAction(action: AdvancedTextPart.() -> Unit) {
@@ -227,7 +228,6 @@ class TextAdvancedTextPart(
         val text = templateString.string
         if (progress > text.length) return true
         setText(text.substring(0, progress))
-        println("$text   $progress  ${super.getText()}")
         return progress >= text.length
     }
 
