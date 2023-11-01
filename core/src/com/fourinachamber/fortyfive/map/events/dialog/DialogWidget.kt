@@ -68,7 +68,7 @@ class DialogWidget(
         this.dialog = dialog
         currentPart = dialog.parts.getOrNull(0) ?: return
         advancedText.resetProgress()
-        onButtonClick {
+        parent.onButtonClick {
             if (readyToAdvance) readyToAdvance = false
         }
         val line = Timeline.timeline {

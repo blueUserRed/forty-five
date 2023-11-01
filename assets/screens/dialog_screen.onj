@@ -6,8 +6,8 @@ use Common;
 use Screen;
 use Style;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
 
 assets: {
     useAssets: [
@@ -33,39 +33,49 @@ options: {
     }
 },
 
-var dialogWidget = $DialogWidget {
+var dialogWidget =
+$Box {
     styles: [
-        {   //TODO wieder so machen, dass es passt...
-//            flexDirection: flexDirection.row,
-//            background: "hover_detail_background",
+        {
+            positionType: positionType.absolute,
             width: 80.0#percent,
             height: 25.0#percent,
-//                minHeight: (5.0*10)#points,
-            positionBottom: (2.0*10)#points,
-//            alignItems: align.center,
-//            justifyContent: justify.center,
-//            flexWrap: wrap.wrap,
-//            paddingLeft: (13.0*10)#points,
-//            paddingRight: (13.0*10)#points,
-//            paddingTop: (3.0*10)#points,
-//            paddingBottom: (3.0*10)#points,
+            positionBottom: 20#points,
+            justifyContent: justify.center,
+            background: "hover_detail_background",
+            paddingLeft: 70#points,
+            paddingRight:70#points,
+            paddingTop: 30#points,
+            paddingBottom: 30#points,
+            touchable: touchable.enabled,
+
         }
     ],
-    progressTime: 0.01, // 1.0,//
-    advanceArrowDrawable: "heart_texture",
-    advanceArrowOffset: 1.0,
-    touchable: "enabled",
-    optionsBox: "options_box",
-    optionsFont: "red_wing",
-    optionsFontScale: 0.1,
-    optionsFontColor: color.black,
-    defaults: {
-        font: "red_wing",
-        fontScale: 0.5,
-        color: color.dark_brown
-    },
-    name: "dialog_widget"
-};
+} children [
+
+    $DialogWidget {
+        styles: [
+            {   //TODO wieder so machen, dass es passt...
+                width: 92.0#percent,
+                height: 100.0#percent,
+            }
+        ],
+        progressTime: 0.01,
+        advanceArrowDrawable: "heart_texture",
+        advanceArrowOffset: -90.0,
+        touchable: "enabled",
+        optionsBox: "options_box",
+        optionsFont: "red_wing",
+        optionsFontScale: 1.0,
+        optionsFontColor: color.black,
+        defaults: {
+            font: "red_wing",
+            fontScale: 50.0,
+            color: color.dark_brown
+        },
+        name: "dialog_widget"
+    }
+];
 
 root: $Box {
     styles: [
@@ -77,18 +87,19 @@ root: $Box {
 } children [
 
     $Box {
+        debug:true,
         styles: [
             {
                 style_priority: 1,
                 background: "hover_detail_background",
                 positionType: positionType.absolute,
-                positionTop: (35.0*10)#points,
-                positionRight: (10.0*10)#points,
+                positionTop: (350)#points,
+                positionRight: (100)#points,
                 justifyContent: justify.center,
                 flexDirection: flexDirection.column,
-                width: (28.0*10)#points,
-                height: (20.0*10)#points,
-                padding: (2*10)#points,
+                width: (280)#points,
+                height: (200)#points,
+                padding: (20)#points,
                 detached: true
             },
             {
@@ -104,8 +115,8 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: (0.0*10)#points,
-                positionRight: (0.0*10)#points,
+                positionTop: 0#points,
+                positionRight: 0#points,
                 width: 100.0#percent,
                 height: 100.0#percent,
                 flexDirection: flexDirection.row,
@@ -117,5 +128,4 @@ root: $Box {
     } children [
         dialogWidget
     ]
-
 ]
