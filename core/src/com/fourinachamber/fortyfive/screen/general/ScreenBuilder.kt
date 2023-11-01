@@ -433,10 +433,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("advanceArrowDrawable"),
             widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
             widgetOnj.get<String>("optionsBox"),
-            fontOrError(widgetOnj.get<String>("optionsFont"), screen),
-            widgetOnj.get<Color>("optionsFontColor"),
-            widgetOnj.get<Double>("optionsFontScale").toFloat(),
-            widgetOnj.get<OnjObject>("defaults"), // TODO: this is broken currently
+            widgetOnj.get<OnjObject>("defaults"),
             screen
         )
 

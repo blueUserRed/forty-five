@@ -12,10 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.styles.*
-import com.fourinachamber.fortyfive.utils.AdvancedTextParser
-import com.fourinachamber.fortyfive.utils.TemplateString
-import com.fourinachamber.fortyfive.utils.splitAt
-import com.fourinachamber.fortyfive.utils.zip
+import com.fourinachamber.fortyfive.utils.*
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
@@ -167,12 +164,9 @@ data class AdvancedText(
 
 }
 
-interface AdvancedTextPart {
+interface AdvancedTextPart : OffSettable {
 
     val actor: Actor
-
-    var xOffset: Float?
-    var yOffset: Float?
 
     val breakLine: Boolean
 
@@ -183,7 +177,7 @@ interface AdvancedTextPart {
     fun calcTransformationMatrixForOffsets(oldTransform: Matrix4): Matrix4 {
         val worldTransform = Affine2()
         worldTransform.set(oldTransform)
-        worldTransform.translate(xOffset ?: 0f, yOffset ?: 0f)
+        worldTransform.translate(offsetX ?: 0f, offsetY ?: 0f)
         val computed = Matrix4()
         computed.set(worldTransform)
         return computed
@@ -209,9 +203,6 @@ class TextAdvancedTextPart(
     var progress: Int = templateString.string.length
         private set
 
-    override var xOffset: Float? = null
-    override var yOffset: Float? = null
-
     private val actions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
 
     init {
@@ -222,6 +213,9 @@ class TextAdvancedTextPart(
     override fun addDialogAction(action: AdvancedTextPart.() -> Unit) {
         actions.add(action)
     }
+
+    override var offsetX: Float = 0F
+    override var offsetY: Float = 0F
 
     override fun progress(): Boolean {
         progress++
@@ -245,7 +239,7 @@ class TextAdvancedTextPart(
             return
         }
 
-        val shouldTransform = xOffset != null || yOffset != null
+        val shouldTransform = offsetX != null || offsetY != null
 
         val oldTransform = batch.transformMatrix.cpy()
         if (shouldTransform) {
@@ -271,9 +265,6 @@ class IconAdvancedTextPart(
 
     override val actor: Actor = this
 
-    override var xOffset: Float? = null
-
-    override var yOffset: Float? = null
     private var isShown: Boolean = true
 
     private var iconHeight: Float = 0f
@@ -352,8 +343,8 @@ object AdvancedTextPartActionFactory {
             val yMagnitude = onj.get<Double>("yMagnitude").toFloat()
             ;
             {
-                xOffset = sin(TimeUtils.millis().toDouble() * xSpeed).toFloat() * xMagnitude
-                yOffset = sin(TimeUtils.millis().toDouble() * ySpeed + Math.PI.toFloat()).toFloat() * yMagnitude
+                offsetX = sin(TimeUtils.millis().toDouble() * xSpeed).toFloat() * xMagnitude
+                offsetY = sin(TimeUtils.millis().toDouble() * ySpeed + Math.PI.toFloat()).toFloat() * yMagnitude
             }
         }
     )

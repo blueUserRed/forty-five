@@ -233,9 +233,6 @@ $Widget {
         advanceArrowDrawable: string,
         advanceArrowOffset: float,
         optionsBox: string,
-        optionsFont: string,
-        optionsFontColor: Color,
-        optionsFontScale: float,
         defaults: {
             font: string,
             fontScale: float,
@@ -306,7 +303,7 @@ $AdvancedTextEffect {
     }
 
     $Action {
-        actions: $AdvancedTextPartAction[],
+        action: $AdvancedTextPartAction,
         ...advancedTextEffectSharedKeys
     }
 

@@ -49,7 +49,7 @@ $AdvancedTextEffect {
     }
 
     $Action {
-        actions: $AdvancedTextPartAction[],
+        action: $AdvancedTextPartAction,
         ...advancedTextEffectSharedKeys
     }
 //    $Icon { //TODO icons, maybe like this, maybe part of the text
