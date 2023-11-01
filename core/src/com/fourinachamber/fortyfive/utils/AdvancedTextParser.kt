@@ -50,7 +50,7 @@ class AdvancedTextParser(
     private fun nextChar() {
         val c = consume()
         currentText.append(c)
-        //TODO icons are missing
+        //TODO icons and actions are missing
         checkEffects()
         if (c.isWhitespace()) finishText()
     }
@@ -58,12 +58,18 @@ class AdvancedTextParser(
     private fun checkEffects() {
         val curEffect = changes.find { currentText.endsWith(it.indicator) }
         if (curEffect != null) {
-            currentText.removeSuffix(curEffect.indicator)
+            val newText = currentText.removeSuffix(curEffect.indicator)
+            currentText.clear()
+            currentText.append(newText)
+            finishText()
             if (curEffect in activeTextEffects) {
                 curEffect.backToDefault(this)
                 activeTextEffects.remove(curEffect)
             } else {
                 curEffect.executeChange(this)
+                if (curEffect.overridesOthers) {
+                    activeTextEffects.removeIf { it::class == curEffect::class }
+                }
                 activeTextEffects.add(curEffect)
             }
         }
@@ -71,6 +77,7 @@ class AdvancedTextParser(
 
     private fun finishText() {
         var text = currentText.toString()
+        if (text.isEmpty()) return
         val breakLine = text.endsWith("\n") || text.endsWith("\r")
         if (breakLine) text = text.trimEnd('\n', '\r')
         parts.add(
@@ -106,7 +113,16 @@ class AdvancedTextParser(
     private fun peek(): Char = code[next]
 
     interface AdvancedTextEffect {
+
+        /**
+         * the indicator to replace when starting or ending
+         */
         val indicator: String
+
+        /**
+         * if it overrides others from the same type
+         */
+        val overridesOthers: Boolean
 
         fun executeChange(parser: AdvancedTextParser)
         fun backToDefault(parser: AdvancedTextParser)
@@ -123,6 +139,7 @@ class AdvancedTextParser(
 
             class AdvancedColorTextEffect(data: OnjObject) : AdvancedTextEffect {
                 override val indicator: String = data.get<String>("indicator")
+                override val overridesOthers: Boolean = true
                 private val color = data.get<Color>("color")
                 override fun executeChange(parser: AdvancedTextParser) {
                     parser.curColor = color
@@ -138,6 +155,8 @@ class AdvancedTextParser(
             AdvancedTextEffect {
             override val indicator: String = data.get<String>("indicator")
 
+            override val overridesOthers: Boolean = true
+
             override fun executeChange(parser: AdvancedTextParser) {
                 parser.curFont = ResourceManager.get(screen, data.get<String>("font")) as BitmapFont
             }
@@ -151,6 +170,8 @@ class AdvancedTextParser(
         class AdvancedFontScaleTextEffect(private val data: OnjNamedObject) :
             AdvancedTextEffect {
             override val indicator: String = data.get<String>("indicator")
+
+            override val overridesOthers: Boolean = true
 
             override fun executeChange(parser: AdvancedTextParser) {
                 parser.curFontScale = data.get<Double>("fontScale").toFloat()
