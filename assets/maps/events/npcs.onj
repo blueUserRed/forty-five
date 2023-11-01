@@ -91,82 +91,75 @@ npcs: [
                             color: color.grey
                         },
                     ],
-                    next: $Continue {
-                    }// $ChooseNextPart {
-//                        choices: [
-//                            {
-//                                name: "The endless road?",
-//                                next: 2
-//                            },
-//                            {
-//                                name: "The merchant?",
-//                                next: 2//3
-//                            },
-//                            {
-//                                name: "Goodbye",
-//                                next: 2//5
-//                            }
-//                        ]
-//                    }
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "The endless road?",
+                                next: 2
+                            },
+                            {
+                                name: "The merchant?",
+                                next: 3
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 5
+                            }
+                        ]
+                    }
 
                 },
-                //                {
-//                    text: [
-//                        $Text { text: "Yes. It's called that because it is a circle. " },
-//                        $Text { text: "You go the entire way through, you " },
-//                        $Text { text: "end back up in Salem. " },
-//                        $Text { text: "But be careful though, " },
-//                        $Text { text: "it's full of " },
-//                        $Text { text: "gang members ", color: color.red },
-//                        $Icon { icon: "enemy_texture" },
-//                        $Text { text: "." },
-//                        $Text { text: "And somewhere among them is the " },
-//                        $Text { text: "merchant." },
-//                    ],
-//                    next: $ChooseNextPart {
-//                        choices: [
-//                            {
-//                                name: "The merchant?",
-//                                next: 3
-//                            },
-//                            {
-//                                name: "Goodbye",
-//                                next: 5
-//                            }
-//                        ]
-//                    }
-//                },
-//                {
-//                    text: [
-//                        $Text { text: "Hes a travelling merchant, " },
-//                        $Text { text: "just like the one you found over there." },
-//                        $Text { text: "However, I heard he sells his items at " },
-//                        $Text { text: "a much cheaper price." },
-//                    ],
-//                    next: $Continue { }
-//                },
-//                {
-//                    text: [
-//                        $Text { text: "The catch is, he is somewhere on the " },
-//                        $Text { text: "endless road, impossible to find. A real " },
-//                        $Text { text: "needle ", color: color.grey },
-//                        $Text { text: "in a " },
-//                        $Text { text: "haystack", color: color.yellow },
-//                        $Text { text: "." },
-//                    ],
-//                    next: $ChooseNextPart {
-//                        choices: [
-//                            {
-//                                name: "The endless road?",
-//                                next: 2
-//                            },
-//                            {
-//                                name: "Goodbye",
-//                                next: 5
-//                            }
-//                        ]
-//                    }
-//                },
+                {
+                    rawText:"Yes. It's called that because it is a circle. You go the entire way through, you end back up in Salem. But be careful though, it's full of $1gang members$1 §enemy_texture§. And somewhere among them is the merchant.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "The merchant?",
+                                next: 3
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    rawText: "Hes a travelling merchant, just like the one you found over there. However, I heard he sells his items at a much cheaper price.",
+                    next: $Continue {
+                    }
+                },
+                {
+                    rawText: "The catch is, he is somewhere on the endless road, impossible to find. A real $1needle$1 in a $2haystack$2.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.grey
+                        },
+                        $Color {
+                            indicator: "$2",
+                            color: color.yellow
+                        },
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "The endless road?",
+                                next: 2
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 5
+                            }
+                        ]
+                    }
+                },
                 {
                     rawText: "Bye!",
                     next: $EndOfDialog {
@@ -176,7 +169,7 @@ npcs: [
             ],
             defaults: {
                 font: "red_wing",
-                fontScale: 0.1,
+                fontScale: 1.0,
                 color: color.black
             },
         },
