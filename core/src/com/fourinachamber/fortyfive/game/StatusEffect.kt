@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
@@ -18,9 +19,9 @@ abstract class StatusEffect(
 
     protected lateinit var controller: GameController
 
-    abstract val damageType: StatusEffectDamageType
+    abstract val effectType: StatusEffectType
 
-    open val blocksStatusEffects: List<StatusEffectDamageType> = listOf()
+    open val blocksStatusEffects: List<StatusEffectType> = listOf()
 
     fun initIcon(gameController: GameController) {
         icon = CustomImageActor(iconHandle, gameController.curScreen)
@@ -34,11 +35,13 @@ abstract class StatusEffect(
         this.controller = controller
     }
 
-    open fun executeAfterRotation(rotation: GameController.RevolverRotation, target: StatusEffectTarget): Timeline? = null
+    open fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? = null
 
     open fun executeOnNewTurn(target: StatusEffectTarget): Timeline? = null
 
     open fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline? = null
+
+    open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
     abstract fun canStackWith(other: StatusEffect): Boolean
 
@@ -47,8 +50,6 @@ abstract class StatusEffect(
     abstract fun isStillValid(): Boolean
 
     abstract fun getDisplayText(): String
-
-    abstract fun copy(): StatusEffect
 
     abstract override fun equals(other: Any?): Boolean
 }
@@ -153,7 +154,7 @@ class Burning(
         if (continueForever) continueForever()
     }
 
-    override val damageType: StatusEffectDamageType = StatusEffectDamageType.FIRE
+    override val effectType: StatusEffectType = StatusEffectType.FIRE
 
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
         if (target.isBlocked(this@Burning, controller)) return Timeline()
@@ -168,8 +169,6 @@ class Burning(
         stackRotationEffect(other)
     }
 
-    override fun copy(): StatusEffect = Burning(duration, percent, continueForever)
-
     override fun equals(other: Any?): Boolean = other is Burning
 }
 
@@ -182,7 +181,7 @@ class Poison(
     turns
 ) {
 
-    override val damageType: StatusEffectDamageType = StatusEffectDamageType.POISON
+    override val effectType: StatusEffectType = StatusEffectType.POISON
 
     override fun executeOnNewTurn(target: StatusEffectTarget): Timeline {
         if (target.isBlocked(this, controller)) return Timeline()
@@ -200,8 +199,6 @@ class Poison(
     override fun getDisplayText(): String =
         "$damage damage / ${if (continueForever) "∞" else "${turnOnEffectStart + duration - controller.turnCounter} turns"}"
 
-    override fun copy(): StatusEffect = Poison(duration, damage)
-
     override fun equals(other: Any?): Boolean = other is Poison
 }
 
@@ -213,8 +210,8 @@ class FireResistance(
     turns
 ) {
 
-    override val damageType: StatusEffectDamageType = StatusEffectDamageType.BLOCKING
-    override val blocksStatusEffects: List<StatusEffectDamageType> = listOf(StatusEffectDamageType.FIRE)
+    override val effectType: StatusEffectType = StatusEffectType.BLOCKING
+    override val blocksStatusEffects: List<StatusEffectType> = listOf(StatusEffectType.FIRE)
 
     override fun canStackWith(other: StatusEffect): Boolean = other is FireResistance
 
@@ -223,14 +220,120 @@ class FireResistance(
         stackTurnEffect(other)
     }
 
-    override fun copy(): StatusEffect = FireResistance(duration)
-
     override fun equals(other: Any?): Boolean = other is FireResistance
 
 }
 
-enum class StatusEffectDamageType {
-    FIRE, POISON, OTHER, BLOCKING
+class Bewitched(
+    private val turns: Int,
+    private val rotations: Int
+) : StatusEffect(
+    GraphicsConfig.iconName("bewitched"),
+    GraphicsConfig.iconScale("bewitched")
+) {
+
+    override val effectType: StatusEffectType = StatusEffectType.WITCH
+
+    private var turnOnEffectStart: Int = -1
+    private var rotationOnEffectStart: Int = -1
+
+    private var turnsDuration: Int = turns
+    private var rotationDuration: Int = rotations
+
+    override fun start(controller: GameController) {
+        super.start(controller)
+        turnOnEffectStart = controller.turnCounter
+        rotationOnEffectStart = controller.revolverRotationCounter
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Bewitched
+
+    override fun stack(other: StatusEffect) {
+        other as Bewitched
+        turnsDuration += other.turns
+        rotationDuration += other.rotations
+    }
+
+    override fun isStillValid(): Boolean =
+        controller.turnCounter < turnOnEffectStart + turnsDuration &&
+        controller.revolverRotationCounter < rotationOnEffectStart + rotationDuration
+
+    override fun getDisplayText(): String =
+            "${rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter} rotations or " +
+            "${turnOnEffectStart + turnsDuration - controller.turnCounter} turns"
+
+    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.Left(1)
+
+    override fun equals(other: Any?): Boolean = other is Bewitched
+
+}
+
+class WardOfTheWitch(
+    private val amount: Int
+) : StatusEffect(
+    GraphicsConfig.iconName("wardOfTheWitch"),
+    GraphicsConfig.iconScale("wardOfTheWitch")
+) {
+
+    override val effectType: StatusEffectType = StatusEffectType.WITCH
+
+    override fun canStackWith(other: StatusEffect): Boolean = false
+
+    override fun stack(other: StatusEffect) { }
+
+    override fun isStillValid(): Boolean = true
+
+    override fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? {
+        if (target !is StatusEffectTarget.EnemyTarget) {
+            throw RuntimeException("WardOfTheWitch can only be used on enemies")
+        }
+        if (rotation !is RevolverRotation.Left) return null
+        return target.enemy.addCoverTimeline(amount)
+    }
+
+    override fun getDisplayText(): String = "+$amount shield"
+
+    override fun equals(other: Any?): Boolean = other is WardOfTheWitch
+
+}
+
+class WrathOfTheWitch(
+    private val damage: Int
+) : StatusEffect(
+    GraphicsConfig.iconName("wrathOfTheWitch"),
+    GraphicsConfig.iconScale("wrathOfTheWitch")
+) {
+
+    override val effectType: StatusEffectType = StatusEffectType.WITCH
+
+    override fun executeAfterRotation(
+        rotation: RevolverRotation,
+        target: StatusEffectTarget
+    ): Timeline? = if (rotation is RevolverRotation.Left) Timeline.timeline {
+        if (target !is StatusEffectTarget.PlayerTarget) {
+            throw RuntimeException("WrathOfTheWitch can only be used on the player")
+        }
+        include(controller.damagePlayerTimeline(damage, true))
+    } else {
+        null
+    }
+
+    override fun canStackWith(other: StatusEffect): Boolean = false
+
+    override fun stack(other: StatusEffect) {}
+
+    override fun isStillValid(): Boolean = true
+
+    override fun getDisplayText(): String = "$damage dmg"
+
+    override fun equals(other: Any?): Boolean = other is WrathOfTheWitch
+
+}
+
+typealias StatusEffectCreator = () -> StatusEffect
+
+enum class StatusEffectType {
+    FIRE, POISON, OTHER, BLOCKING, WITCH
 }
 
 sealed class StatusEffectTarget {
@@ -241,7 +344,7 @@ sealed class StatusEffectTarget {
             enemy.damage(damage, triggeredByStatusEffect = true)
 
         override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean =
-            enemy.statusEffect.any { effect.damageType in it.blocksStatusEffects }
+            enemy.statusEffect.any { effect.effectType in it.blocksStatusEffects }
     }
 
     object PlayerTarget : StatusEffectTarget() {
@@ -251,7 +354,7 @@ sealed class StatusEffectTarget {
 
         override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean = controller
             .playerStatusEffects
-            .any { effect.damageType in it.blocksStatusEffects }
+            .any { effect.effectType in it.blocksStatusEffects }
 
     }
 

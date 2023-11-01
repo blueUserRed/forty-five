@@ -21,7 +21,7 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
      * true when the timeline has finished
      */
     val isFinished: Boolean
-        get() = _actions.isEmpty()
+        get() = _actions.isEmpty() || hasBeenStopped
 
     val actions: List<TimelineAction>
         get() = _actions
@@ -33,6 +33,8 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
 
     val storage: MutableMap<String, Any?> = mutableMapOf()
 
+    private var hasBeenStopped: Boolean = false
+
     /**
      * starts executing the tasks in the timeline
      */
@@ -43,12 +45,18 @@ class Timeline(private val _actions: MutableList<TimelineAction> = mutableListOf
         _actions.first().start(this)
     }
 
+    @AllThreadsAllowed
+    fun stopTimeline() {
+        hasBeenStopped = true
+        _actions.firstOrNull()?.end(this)
+    }
+
     /**
      * should be called every frame to keep the timeline updated
      */
     @AllThreadsAllowed
     fun updateTimeline() {
-        if (isFinished || !hasBeenStarted) return
+        if (isFinished || !hasBeenStarted || hasBeenStopped) return
         while (true) {
             val first = _actions.first()
             if (!first.hasBeenStarted) first.start(this)

@@ -32,8 +32,16 @@ fun interface GamePredicate {
             statusEffect in enemy.statusEffect
         } }
 
+        val playerHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
+            statusEffect in controller.playerStatusEffects
+        } }
 
-        fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null) = when (obj.name) {
+        val negatePredicate = { other: GamePredicate -> GamePredicate { controller ->
+            !other.check(controller)
+        } }
+
+
+        fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
             "PlayerHealthLowerThan" -> playerHealthLowerThan(obj.get<Long>("value").toInt())
             "EnemyHealthLowerThanPercent" -> enemyHealthLowerThanPercent(
@@ -42,12 +50,14 @@ fun interface GamePredicate {
                         " an enemy is passed into the fromOnj function")
             )
             "AliveEnemyCountIn" -> aliveEnemyCountIn(obj.get<OnjArray>("value").toIntRange())
-            "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffect>("value"))
+            "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
             "EnemyDoesNotHaveStatusEffect" -> enemyDoesNotHaveStatusEffect(
-                obj.get<StatusEffect>("value"),
+                obj.get<StatusEffectCreator>("value")(),
                 inContextOfEnemy ?: throw RuntimeException("EnemyDoesNotHaveStatusEffect Predicate can only be created" +
                         " when an enemy is passed into the fromOnj function")
             )
+            "PlayerHasStatusEffect" -> playerHasStatusEffect(obj.get<StatusEffectCreator>("value")())
+            "NegatePredicate" -> negatePredicate(fromOnj(obj.get<OnjNamedObject>("value"), inContextOfEnemy))
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

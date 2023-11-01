@@ -9,13 +9,13 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
+import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Integer.max
-import java.lang.Integer.min
 
 data class EnemyPrototype(
     val name: String,
@@ -48,11 +48,14 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    val actionProbability: Float,
+    textEmitterConfig: OnjObject,
     private val screen: OnjScreen
 ) {
 
     val logTag = "enemy-$name-${++instanceCounter}"
+
+    var brain: EnemyBrain = NoOpEnemyBrain
+        private set
 
     /**
      * the actor that represents this enemy on the screen
@@ -62,11 +65,6 @@ class Enemy(
     val actor: EnemyActor
 
     private val gameController = FortyFive.currentGame!!
-
-    private val _actions: MutableList<Pair<Int, EnemyActionPrototype>> = mutableListOf()
-
-    val actionPrototypes: List<Pair<Int, EnemyActionPrototype>>
-        get() = _actions
 
     /**
      * the current lives of this enemy
@@ -84,7 +82,7 @@ class Enemy(
         get() = currentHealth <= 0
 
     var currentCover: Int = 0
-        set(value) {
+        private set(value) {
             field = value
             FortyFiveLogger.debug(logTag, "enemy cover updated: new cover = $field")
             actor.updateText()
@@ -96,11 +94,7 @@ class Enemy(
         get() = _statusEffects
 
     init {
-        actor = EnemyActor(this, hiddenActionIconHandle, screen)
-    }
-
-    fun addEnemyAction(weight: Int, action: EnemyActionPrototype) {
-        _actions.add(weight to action)
+        actor = EnemyActor(this, textEmitterConfig, hiddenActionIconHandle, screen)
     }
 
     fun applyEffect(effect: StatusEffect) {
@@ -170,6 +164,16 @@ class Enemy(
         }
     }
 
+    fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
+        action {
+            currentCover += amount
+        }
+    }
+
+    fun brainTransplant(newBrain: EnemyBrain) {
+        brain = newBrain
+    }
+
 
     /**
      * reduces the enemies lives by [damage]
@@ -183,18 +187,18 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-                val anim = GraphicsConfig.numberChangeAnimation(
-                    actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
-                    "-${min(damage, currentCover)}",
-                    false,
-                    false,
-                    gameController.curScreen
-                )
+//                val anim = GraphicsConfig.numberChangeAnimation(
+//                    actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
+//                    "-${min(damage, currentCover)}",
+//                    false,
+//                    false,
+//                    gameController.curScreen
+//                )
                 action {
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
                     actor.updateText()
-                    gameController.dispatchAnimTimeline(anim.wrap())
+//                    gameController.dispatchAnimTimeline(anim.wrap())
                 }
             } },
             { currentCover != 0 }
@@ -202,17 +206,10 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-                val anim = GraphicsConfig.numberChangeAnimation(
-                    actor.healthLabel.localToStageCoordinates(Vector2(0f, 0f)),
-                    "-$remaining",
-                    false,
-                    false,
-                    gameController.curScreen
-                )
                 action {
                     currentHealth -= remaining
                     actor.updateText()
-                    gameController.dispatchAnimTimeline(anim.wrap())
+                    actor.startDamageAnimation(remaining)
                 }
             } },
             { remaining != 0 }
@@ -257,15 +254,11 @@ class Enemy(
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
-                onj.get<Double>("actionProbability").toFloat(),
+                onj.get<OnjObject>("textEmitterConfig"),
                 curScreen
             )
-            onj
-                .get<OnjArray>("actions")
-                .value
-                .map { it as OnjNamedObject }
-                .map { it.get<Long>("weight").toInt() to EnemyActionPrototype.fromOnj(it, enemy) }
-                .forEach { (weight, action) -> enemy.addEnemyAction(weight, action) }
+            val brain = EnemyBrain.fromOnj(onj.get<OnjNamedObject>("brain"), enemy)
+            enemy.brainTransplant(brain)
             return enemy
         }
 
@@ -278,6 +271,7 @@ class Enemy(
  */
 class EnemyActor(
     val enemy: Enemy,
+    textEmitterConfig: OnjObject,
     private val hiddenActionIconHandle: ResourceHandle,
     private val screen: OnjScreen
 ) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
@@ -291,6 +285,7 @@ class EnemyActor(
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = CustomImageActor(null, screen, false)
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
+    private val textEmitter: TextEffectEmitter
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
@@ -309,6 +304,16 @@ class EnemyActor(
     }
 
     init {
+        textEmitter = TextEffectEmitter(
+            enemy.detailFont,
+            textEmitterConfig.get<Color>("color"),
+            textEmitterConfig.get<Double>("fontScale").toFloat(),
+            textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
+            textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
+            textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
+            textEmitterConfig.get<OnjArray>("duration").toIntRange(),
+            screen
+        )
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
         attackLabel.setFontScale(enemy.detailFontScale)
@@ -334,6 +339,7 @@ class EnemyActor(
         enemyBox.addActor(coverInfoBox)
         enemyBox.addActor(image)
 
+        addActor(textEmitter)
         addActor(attackIndicator)
         addActor(enemyBox)
         addActor(healthLabel)
@@ -341,20 +347,29 @@ class EnemyActor(
         updateText()
     }
 
-    fun setupForAction(action: GameDirector.NextAction) = when (action) {
+    override fun layout() {
+        super.layout()
+        textEmitter.setBounds(healthLabel.x, healthLabel.y, healthLabel.width, healthLabel.height)
+    }
 
-        is GameDirector.NextAction.None -> {
+    fun startDamageAnimation(damage: Int) {
+        textEmitter.playAnimation("-$damage")
+    }
+
+    fun setupForAction(action: NextEnemyAction) = when (action) {
+
+        is NextEnemyAction.None -> {
             attackIndicator.isVisible = false
         }
 
-        is GameDirector.NextAction.ShownEnemyAction -> {
+        is NextEnemyAction.ShownEnemyAction -> {
             attackIcon.backgroundHandle = action.action.iconHandle
                 ?: throw RuntimeException("action ${action.action.prototype} can be shown but defines no icon")
             attackLabel.setText(action.action.indicatorText)
             attackIndicator.isVisible = true
         }
 
-        is GameDirector.NextAction.HiddenEnemyAction -> {
+        is NextEnemyAction.HiddenEnemyAction -> {
             attackIcon.backgroundHandle = hiddenActionIconHandle
             attackIndicator.isVisible = true
         }
