@@ -17,10 +17,13 @@ class AdvancedTextParser(
 ) {
     init {
         if (changes.map { it.indicator }.toSet().size != changes.size) {
-            throw IllegalArgumentException("2 Times the same Indicator for the Effects")
+            FortyFiveLogger.warn(logTag, "2 Times the same Indicator for the Effects")
         }
-        if (changes.any { ICON_INDICATOR in it.indicator }){
-            throw IllegalArgumentException("Cannot contain the $ICON_INDICATOR in an Indicator for the Effects")
+        if (changes.any { ICON_INDICATOR in it.indicator }) {
+            FortyFiveLogger.warn(
+                logTag,
+                "Cannot contain the ICON_INDICATOR '$ICON_INDICATOR' in an Indicator for the Effects"
+            )
         }
     }
 
@@ -40,6 +43,7 @@ class AdvancedTextParser(
     private var curFont: BitmapFont = defaultSettings.first
     private var curColor: Color = defaultSettings.second
     private var curFontScale = defaultSettings.third
+    private var currentActions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
 
     private var isReadingIcon = false
 
@@ -55,7 +59,7 @@ class AdvancedTextParser(
         val c = consume()
         currentText.append(c)
         checkIcons()
-        //TODO icons and actions are missing
+        //TODO actions are missing
         checkEffects()
         if (c.isWhitespace()) finishText()
     }
@@ -111,7 +115,8 @@ class AdvancedTextParser(
                 )
             )
         }
-//        parts.last().addDialogAction {  } //TODO this action adding
+        for (i in currentActions)
+            parts.last().addDialogAction(i)
         currentText.clear()
     }
 
@@ -135,6 +140,7 @@ class AdvancedTextParser(
 
     companion object {
         const val ICON_INDICATOR = "§§"
+        const val logTag = "TextParser"
     }
 
     interface AdvancedTextEffect {
@@ -158,6 +164,7 @@ class AdvancedTextParser(
                     "Color" -> AdvancedColorTextEffect(onj)
                     "Font" -> AdvancedFontTextEffect(screen, onj)
                     "FontScale" -> AdvancedFontScaleTextEffect(onj)
+                    "Action" -> AdvancedActionTextEffect(onj)
                     else -> throw Exception("Unknown Text Effect")
                 }
             }
@@ -204,6 +211,24 @@ class AdvancedTextParser(
 
             override fun backToDefault(parser: AdvancedTextParser) {
                 parser.curFontScale = parser.defaultSettings.third
+            }
+        }
+
+        class AdvancedActionTextEffect(data: OnjNamedObject) :
+            AdvancedTextEffect {
+            override val indicator: String = data.get<String>("indicator")
+
+            override val overridesOthers: Boolean = false
+
+            private val action: AdvancedTextPart.() -> Unit =
+                AdvancedTextPartActionFactory.getAction(data.get<OnjNamedObject>("action"))
+
+            override fun executeChange(parser: AdvancedTextParser) {
+                parser.currentActions.add(action)
+            }
+
+            override fun backToDefault(parser: AdvancedTextParser) {
+                parser.currentActions.remove(action)
             }
         }
     }

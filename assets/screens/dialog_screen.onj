@@ -12,7 +12,12 @@ var worldHeight = 900.0;
 assets: {
     useAssets: [
         "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "enemy_texture"
+        "enemy_texture",
+        "dialog_name_field",
+        "dialog_continue",
+        "dialog_background",
+        "dialog_answer_option",
+        "dialog_answer_option_hover",
     ]
 },
 
@@ -38,36 +43,35 @@ $Box {
     styles: [
         {
             positionType: positionType.absolute,
-            width: 80.0#percent,
+            width: 87.0#percent,
             height: 25.0#percent,
-            positionBottom: 20#points,
+            positionBottom: 0#points,
             justifyContent: justify.center,
-            background: "hover_detail_background",
-            paddingLeft: 70#points,
-            paddingRight:70#points,
+            background: "dialog_background",
+            paddingLeft: 190#points,
+            paddingRight: 70#points,
             paddingTop: 30#points,
             paddingBottom: 30#points,
             touchable: touchable.enabled,
-
+            alpha: 0.6,
         }
     ],
 } children [
 
     $DialogWidget {
         styles: [
-            {   //TODO wieder so machen, dass es passt...
-                width: 92.0#percent,
+            {
+                width: 87.0#percent, //TODO wieder so machen, dass es passt, nachdem bilder exportiert wurden
                 height: 100.0#percent,
+                alpha: 1/0.6,
+
             }
         ],
         progressTime: 0.01,
-        advanceArrowDrawable: "heart_texture",
-        advanceArrowOffset: -90.0,
+        advanceArrowDrawable: "dialog_continue",
+        advanceArrowOffset: -55.0, //TODO wieder so machen, dass es passt, nachdem bilder exportiert wurden
         touchable: "enabled",
         optionsBox: "options_box",
-        optionsFont: "red_wing",
-        optionsFontScale: 1.0,
-        optionsFontColor: color.black,
         defaults: {
             font: "red_wing",
             fontScale: 50.0,
@@ -85,21 +89,15 @@ root: $Box {
         }
     ]
 } children [
-
     $Box {
-        debug:true,
         styles: [
             {
                 style_priority: 1,
-                background: "hover_detail_background",
                 positionType: positionType.absolute,
-                positionTop: (350)#points,
+                positionBottom: (250)#points,
                 positionRight: (100)#points,
-                justifyContent: justify.center,
+                paddingRight: 20#points,
                 flexDirection: flexDirection.column,
-                width: (280)#points,
-                height: (200)#points,
-                padding: (20)#points,
                 detached: true
             },
             {
@@ -124,8 +122,37 @@ root: $Box {
                 justifyContent: justify.center
             }
         ],
-        debug: true,
     } children [
         dialogWidget
     ]
+],
+
+templates: [
+    $Label {
+        template_name: "optionsItem",
+        template_keys: {
+            "text": "text",
+        },
+        text: "",
+        font: "red_wing",
+        color: color.forty_white,
+        fontScale: 0.8,
+        align: "center",
+        partOfSelectionHierarchy: true,
+        styles: [
+            {
+                style_priority: 1,
+                width: 135#percent,
+                height: 60#points,
+                margin: 10#points,
+                alpha: 0.8,
+                background: "dialog_answer_option",
+            },
+            {
+                style_priority: 2,
+                background: "dialog_answer_option_hover",
+                style_condition: hover(),
+            }
+        ],
+    }
 ]

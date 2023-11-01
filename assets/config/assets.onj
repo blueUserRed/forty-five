@@ -435,6 +435,26 @@ textures: [
         file: "textures/chooseCard/to_deck.png"
     },
     {
+        name: "dialog_answer_option",
+        file: "textures/dialog/answer_option.png"
+    },
+    {
+        name: "dialog_answer_option_hover",
+        file: "textures/dialog/answer_option_hover.png"
+    },
+    {
+        name: "dialog_background",
+        file: "textures/dialog/background.png"
+    },
+    {
+        name: "dialog_continue", //TODO change back from temp, when markus exports
+        file: "textures/dialog/continue_temp.png"
+    },
+    {
+        name: "dialog_name_field",
+        file: "textures/dialog/name_field.png"
+    },
+    {
         name: "enemy_action_burning",
         file: "textures/enemies/action_symbols/burning.png"
     },

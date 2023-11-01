@@ -1,5 +1,11 @@
 import "imports/colors.onj" as color;
 
+var shake = $ShakeTextAction {
+    xSpeed: 0.2,
+    xMagnitude: 1.0,
+    ySpeed: 0.1,
+    yMagnitude: 1.0,
+};
 
 npcs: [
 
@@ -80,7 +86,7 @@ npcs: [
                     }
                 },
                 {
-                    rawText: "Did ya hear about $2the merchant$2 on the $1endless road$1?",
+                    rawText: "Did ya hear about $2the merchant$2 §§enemy_texture§§ on the $1endless road$1?",
                     effects: [
                         $Color {
                             indicator: "$1",
@@ -89,6 +95,10 @@ npcs: [
                         $Color {
                             indicator: "$2",
                             color: color.grey
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
                         },
                     ],
                     next: $ChooseNextPart {
@@ -107,14 +117,17 @@ npcs: [
                             }
                         ]
                     }
-
                 },
                 {
-                    rawText:"Yes. It's called that because it is a circle. You go the entire way through, you end back up in Salem. But be careful though, it's full of $1gang members$1 §§enemy_texture§§. And somewhere among them is the merchant.",
+                    rawText: "Yes. It's called that because it is a circle. You go the entire way through, you end back up in Salem. But be careful though, it's full of $2$1gang members$1 §§enemy_texture§§$2. And somewhere among them is the merchant.",
                     effects: [
                         $Color {
                             indicator: "$1",
                             color: color.red
+                        },
+                        $Action {
+                            indicator: "$2",
+                            action: shake,
                         },
                     ],
                     next: $ChooseNextPart {
