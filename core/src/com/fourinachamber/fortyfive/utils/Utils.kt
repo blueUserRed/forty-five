@@ -159,7 +159,14 @@ fun OnjArray.toIntRange(): IntRange {
     val first = this.get<Long>(0).toInt()
     val second = this.get<Long>(1).toInt()
     if (second <= first) throw RuntimeException("second value must be higher than first when creating an IntRange")
-    return IntRange(first, second)
+    return first..second
+}
+
+fun OnjArray.toFloatRange(): ClosedFloatingPointRange<Float> {
+    val first = this.get<Double>(0).toFloat()
+    val second = this.get<Double>(1).toFloat()
+    if (second <= first) throw RuntimeException("second value must be higher than first when creating a FloatRange")
+    return first..second
 }
 
 fun <T> Collection<Pair<Int, T>>.weightedRandom(): T {

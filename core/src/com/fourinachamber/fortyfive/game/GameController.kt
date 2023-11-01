@@ -5,6 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
+import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
@@ -260,15 +262,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         else -> { }
     }
 
-    fun nextTurn() {
-        turnCounter++
-        if (remainingTurns != -1) {
-            FortyFiveLogger.debug(logTag, "$remainingTurns turns remaining")
-            remainingTurns--
-        }
-        gameDirector.onNewTurn()
-    }
-
     private var updateCount = 0 // TODO: this is stupid
 
     @MainThreadOnly
@@ -448,7 +441,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun drawCardPopupTimeline(amount: Int): Timeline = Timeline.timeline {
+    fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true): Timeline = Timeline.timeline {
         var remainingCardsToDraw = amount
         action {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
@@ -480,6 +473,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(cardDrawActorScreenState)
             checkCardMaximums()
         }
+        val triggerInfo = TriggerInformation(multiplier = remainingCardsToDraw)
+        includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, triggerInfo) }, { remainingCardsToDraw != 0 })
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, triggerInfo) },
+            { isSpecial && remainingCardsToDraw != 0 }
+        )
     }
 
     fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
@@ -627,7 +626,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
-        val newRotation = modify(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
+        var newRotation = modifiers(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
+        playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
         action {
             dispatchAnimTimeline(revolver.rotate(newRotation))
             revolverRotationCounter += newRotation.amount
@@ -649,7 +649,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         include(executePlayerStatusEffectsAfterRevolverRotation(newRotation))
     }
 
-    private fun <T> modify(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
+    private fun <T> modifiers(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
         var cur = initial
         encounterModifier.forEach { cur = transformer(it, cur) }
         return cur
@@ -673,13 +673,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 { putCardsUnderDeckTimeline() },
                 { cardHand.cards.size >= softMaxCards }
             )
+            action {
+                turnCounter++
+            }
             include(gameDirector.checkActions())
             include(executePlayerStatusEffectsOnNewTurn())
             action {
-                nextTurn()
+                gameDirector.onNewTurn()
                 curReserves = baseReserves
             }
-            include(drawCardPopupTimeline(cardsToDraw))
+            include(drawCardPopupTimeline(cardsToDraw, false))
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
@@ -717,7 +720,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 logTag,
                 "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives"
             )
-            if (curPlayerLives <= 0) playerDied()
+            if (curPlayerLives <= 0) include(playerDeathTimeline())
         }
         if (!triggeredByStatusEffect) include(executePlayerStatusEffectsAfterDamage(damage))
     }
@@ -894,17 +897,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     @MainThreadOnly
-    fun playerDied() {
-        appendMainTimeline(Timeline.timeline {
-            action {
-                FortyFiveLogger.debug(logTag, "player lost")
-                playerLost = true
-            }
-            includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
-            action {
-                FortyFive.changeToScreen("screens/title_screen.onj")
-            }
-        })
+    fun playerDeathTimeline(): Timeline = Timeline.timeline {
+        action {
+            FortyFiveLogger.debug(logTag, "player lost")
+            playerLost = true
+        }
+        includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
+        action {
+            mainTimeline.stopTimeline()
+            animTimelines.forEach(Timeline::stopTimeline)
+            FortyFive.changeToScreen("screens/title_screen.onj")
+        }
     }
 
     sealed class RevolverRotation {
