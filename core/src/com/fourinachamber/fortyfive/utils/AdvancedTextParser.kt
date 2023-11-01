@@ -17,7 +17,10 @@ class AdvancedTextParser(
 ) {
     init {
         if (changes.map { it.indicator }.toSet().size != changes.size) {
-            throw IllegalArgumentException("2 Times the same Indicator for the Special Changes")
+            throw IllegalArgumentException("2 Times the same Indicator for the Effects")
+        }
+        if (changes.any { ICON_INDICATOR in it.indicator }){
+            throw IllegalArgumentException("Cannot contain the $ICON_INDICATOR in an Indicator for the Effects")
         }
     }
 
@@ -38,6 +41,7 @@ class AdvancedTextParser(
     private var curColor: Color = defaultSettings.second
     private var curFontScale = defaultSettings.third
 
+    private var isReadingIcon = false
 
     fun parse(): AdvancedText {
         while (!end()) {
@@ -50,9 +54,20 @@ class AdvancedTextParser(
     private fun nextChar() {
         val c = consume()
         currentText.append(c)
+        checkIcons()
         //TODO icons and actions are missing
         checkEffects()
         if (c.isWhitespace()) finishText()
+    }
+
+    private fun checkIcons() {
+        if (currentText.endsWith(ICON_INDICATOR)) {
+            val newText = currentText.removeSuffix(ICON_INDICATOR)
+            currentText.clear()
+            currentText.append(newText)
+            finishText()
+            isReadingIcon = !isReadingIcon
+        }
     }
 
     private fun checkEffects() {
@@ -78,18 +93,24 @@ class AdvancedTextParser(
     private fun finishText() {
         var text = currentText.toString()
         if (text.isEmpty()) return
+
         val breakLine = text.endsWith("\n") || text.endsWith("\r")
         if (breakLine) text = text.trimEnd('\n', '\r')
-        parts.add(
-            TextAdvancedTextPart(
-                text,
-                curFont,
-                curColor,
-                curFontScale,
-                screen,
-                breakLine
+
+        if (isReadingIcon) {
+            parts.add(IconAdvancedTextPart(text.trim(), curFont, screen, curFontScale, breakLine))
+        } else {
+            parts.add(
+                TextAdvancedTextPart(
+                    text,
+                    curFont,
+                    curColor,
+                    curFontScale,
+                    screen,
+                    breakLine
+                )
             )
-        )
+        }
 //        parts.last().addDialogAction {  } //TODO this action adding
         currentText.clear()
     }
@@ -111,6 +132,10 @@ class AdvancedTextParser(
     private fun last(): Char = code[next - 1]
 
     private fun peek(): Char = code[next]
+
+    companion object {
+        const val ICON_INDICATOR = "§§"
+    }
 
     interface AdvancedTextEffect {
 
