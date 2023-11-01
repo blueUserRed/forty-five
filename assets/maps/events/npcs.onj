@@ -110,7 +110,7 @@ npcs: [
 
                 },
                 {
-                    rawText:"Yes. It's called that because it is a circle. You go the entire way through, you end back up in Salem. But be careful though, it's full of $1gang members$1 §enemy_texture§. And somewhere among them is the merchant.",
+                    rawText:"Yes. It's called that because it is a circle. You go the entire way through, you end back up in Salem. But be careful though, it's full of $1gang members$1 §§enemy_texture§§. And somewhere among them is the merchant.",
                     effects: [
                         $Color {
                             indicator: "$1",
