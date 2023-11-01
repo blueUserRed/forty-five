@@ -30,11 +30,7 @@ class EnemyArea(
 
     private var _enemies: MutableList<Enemy> = mutableListOf()
 
-    var selectedEnemy: Enemy? = null
-        set(value) {
-            // refuse to set value if there is only one enemy
-            if (_enemies.size != 1) field = value
-        }
+    private var selectedEnemy: Enemy? = null
 
     private val enemySelectionDrawable: Drawable by lazy {
         ResourceManager.get(screen, enemySelectionDrawableHandle)
@@ -59,13 +55,17 @@ class EnemyArea(
         invalidate()
     }
 
+    fun selectEnemy(enemy: Enemy) {
+        selectedEnemy = enemy
+    }
+
     fun getTargetedEnemy(): Enemy {
-        return selectedEnemy ?: enemies.firstOrNull() ?: throw RuntimeException("No enemies in enemy area")
+        return selectedEnemy ?: _enemies.firstOrNull() ?: throw RuntimeException("No enemies in enemy area")
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        enemies.forEach(Enemy::update)
+        _enemies.forEach(Enemy::update)
         val enemy = selectedEnemy ?: return
         enemySelectionDrawable.draw(
             batch,
