@@ -8,72 +8,82 @@ var shake = $ShakeTextAction {
 };
 
 npcs: [
-
-    /*    {
-            name: "my_cool_npc",
-            dialog: {
-                parts: [
-                ],
-                defaults: {
-                    font: "red_wing",
-                    fontScale: 0.1,
-                    color: color.black
+    {
+        name: "traveling_merchant",
+        displayName: "Traveling Merchant",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Hi and bye!",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
                 }
-            },
-            image: {
-                textureName: "shop_npcs_default",
-    //            offsetX: 20.0,
-                scale: 2.48
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.1,
+                color: color.black
             }
         },
-
-
-
-        {
-            name: "Guy from Salem",
-            dialog: {
-                parts: [
-                    {
-                        text: [
-                            $Text { text: "Hello" },
-                        ],
-                        next: $Continue { }
-                    },
-                    {
-                        text: [
-                            $Text { text: "I just wanted to visit Aqua Dulche to buy some goods..." },
-                        ],
-                        next: $Continue { }
-                    },
-                    {
-                        text: [
-                            $Text { text: "when suddenly the  " },
-                            $Text { text: "gang ", color: color.red },
-                            $Icon { icon: "enemy_texture" },
-                            $Text { text: " took over the entire road" },
-                        ],
-                        next: $Continue { }
-                    },
-                    {
-                        text: [
-                            $Text { text: "Guess I'm kinda stuck here now..." }
-                        ],
-                        next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
+        image: {
+            textureName: "shop_npcs_default",
+            scale: 2.48
+        }
+    },
+    {
+        name: "traveling_merchan2t",
+        displayName: "Traveling Merchant2",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Hi and bye!",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
                     }
-                ],
-                defaults: {
-                    font: "red_wing",
-                    fontScale: 0.1,
-                    color: color.black
                 }
-            },
-            image: {
-                textureName: "shop_npcs_default",
-                //            offsetX: 20.0,
-                scale: 2.48
-            }
-        },*/
+            ],
+            //                [
+//                    {
+//                        text: [
+//                            $Text { text: "Hello" },
+//                        ],
+//                        next: $Continue { }
+//                    },
+//                    {
+//                        text: [
+//                            $Text { text: "I just wanted to visit Aqua Dulche to buy some goods..." },
+//                        ],
+//                        next: $Continue { }
+//                    },
+//                    {
+//                        text: [
+//                            $Text { text: "when suddenly the  " },
+//                            $Text { text: "gang ", color: color.red },
+//                            $Icon { icon: "enemy_texture" },
+//                            $Text { text: " took over the entire road" },
+//                        ],
+//                        next: $Continue { }
+//                    },
+//                    {
+//                        text: [
+//                            $Text { text: "Guess I'm kinda stuck here now..." }
+//                        ],
+//                        next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
+//                    }
+//                ],
 
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.1,
+                color: color.black
+            }
+        },
+        image: {
+            textureName: "shop_npcs_default",
+            scale: 2.48
+        }
+    },
 
 
     {
@@ -189,8 +199,6 @@ npcs: [
         },
         image: {
             textureName: "shop_npcs_default",
-            //            offsetX: 20.0,
-
             scale: 2.48
         }
     },

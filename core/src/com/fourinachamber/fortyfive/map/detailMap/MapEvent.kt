@@ -226,7 +226,7 @@ class NPCMapEvent(val npc: String) : MapEvent() {
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = "talk to $npc"
+    override val descriptionText: String = "talk with $npc"
     override val displayName: String = "I just want to talk"
 
     override fun start() {
