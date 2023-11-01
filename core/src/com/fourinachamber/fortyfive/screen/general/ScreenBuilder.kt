@@ -423,7 +423,7 @@ class ScreenBuilder(val file: FileHandle) {
                 widgetOnj.get<OnjArray?>("effects")?.value?.map {
                     AdvancedTextParser.AdvancedTextEffect.getFromOnj(
                         screen,
-                        widgetOnj
+                        it as OnjNamedObject
                     )
                 } ?: listOf())
         }

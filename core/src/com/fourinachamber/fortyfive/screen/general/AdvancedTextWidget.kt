@@ -48,8 +48,8 @@ open class AdvancedTextWidget(
         initText(advancedText)
     }
 
-    fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>) {
-        advancedText = AdvancedTextParser(text, screen, defaults, effects).parse()
+    fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
+        advancedText = AdvancedTextParser(text, screen, defaults, effects ?: listOf()).parse()
     }
 
     override fun layout() {

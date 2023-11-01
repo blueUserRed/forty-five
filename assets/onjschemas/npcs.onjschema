@@ -1,11 +1,6 @@
 
 use Common;
 
-var advancedTextPartSharedKeys = {
-    actions?: $AdvancedTextPartAction[]
-};
-
-
 $NextDialogPartSelector {
 
     $Continue { }
@@ -52,10 +47,6 @@ $AdvancedTextEffect {
         action: $AdvancedTextPartAction,
         ...advancedTextEffectSharedKeys
     }
-//    $Icon { //TODO icons, maybe like this, maybe part of the text
-//        icon: string,
-//        ...advancedTextPartSharedKeys
-//    }
 
 }
 
