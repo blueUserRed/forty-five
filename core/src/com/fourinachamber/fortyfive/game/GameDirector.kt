@@ -15,8 +15,7 @@ class GameDirector(private val controller: GameController) {
 
     private var difficulty = 0.0
 
-    private lateinit var enemy: Enemy
-    private lateinit var enemyProto: EnemyPrototype
+    private lateinit var enemies: List<Enemy>
 
     fun init() {
         val enemiesOnj = OnjParser.parseFile(Gdx.files.internal("config/enemies.onj").file())
@@ -26,24 +25,26 @@ class GameDirector(private val controller: GameController) {
         difficulty = SaveState.currentDifficulty
         FortyFiveLogger.debug(logTag, "difficulty = $difficulty")
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
-        enemyProto = chooseEnemy(enemyPrototypes)
-        FortyFiveLogger.debug(logTag, "chose enemy ${enemyProto.name}")
-        enemy = scaleAndCreateEnemy(enemyProto, difficulty)
-        FortyFiveLogger.debug(logTag, "enemy: health = ${enemy.health}")
-        controller.initEnemyArea(enemy)
+        val chosenProtos = chooseEnemies(enemyPrototypes)
+        enemies = chosenProtos.map { it.create(it.baseHealth) }
+        controller.initEnemyArea(enemies)
     }
 
     fun onNewTurn() {
-        val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty)
-        enemy.actor.setupForAction(NextEnemyAction.None) // make sure current action is cleared
-        enemy.actor.setupForAction(nextAction)
+        enemies.forEach { enemy ->
+            val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty)
+            enemy.actor.setupForAction(NextEnemyAction.None) // make sure current action is cleared
+            enemy.actor.setupForAction(nextAction)
+        }
     }
 
     fun checkActions(): Timeline = Timeline.timeline {
-        action {
-            enemy.actor.setupForAction(NextEnemyAction.None)
+        enemies.forEach { enemy ->
+            action {
+                enemy.actor.setupForAction(NextEnemyAction.None)
+            }
+            enemy.brain.resolveEnemyAction(controller, enemy, difficulty)?.getTimeline()?.let { include(it) }
         }
-        enemy.brain.resolveEnemyAction(controller, enemy, difficulty)?.getTimeline()?.let { include(it) }
     }
 
     fun end() {
@@ -82,8 +83,8 @@ class GameDirector(private val controller: GameController) {
 //        return (if (difficultyDiff < 0.0) difficulty - 0.2 else difficulty + 0.2).coerceAtLeast(0.5)
     }
 
-    private fun chooseEnemy(prototypes: List<EnemyPrototype>): EnemyPrototype {
-        return prototypes.random()
+    private fun chooseEnemies(prototypes: List<EnemyPrototype>): List<EnemyPrototype> {
+        return listOf(prototypes.random())
     }
 
     private fun scaleAndCreateEnemy(prototype: EnemyPrototype, difficulty: Double): Enemy {

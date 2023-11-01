@@ -347,17 +347,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         this.cardSelector = cardSelector
     }
 
-    fun initEnemyArea(enemy: Enemy) {
+    fun initEnemyArea(enemies: List<Enemy>) {
         val curScreen = curScreen
 
         val enemyAreaName = enemyAreaOnj.get<String>("actorName")
         val enemyArea = curScreen.namedActorOrError(enemyAreaName)
         if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
 
-        enemyArea.addEnemy(enemy)
+        enemies.forEach { enemyArea.addEnemy(it) }
 
-//        if (enemyArea.enemies.isEmpty()) throw RuntimeException("enemyArea must have at least one enemy")
-//        if (enemyArea.enemies.size != 1) enemyArea.selectedEnemy = enemyArea.enemies[0]
+        if (enemies.isEmpty()) throw RuntimeException("enemyArea must have at least one enemy")
 
         this.enemyArea = enemyArea
     }
@@ -883,7 +882,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     private fun completeWin() {
         appendMainTimeline(Timeline.timeline {
-            val money = -enemyArea.enemies[0].currentHealth
+            val money = -enemyArea.enemies.sumOf { it.currentHealth }
             if (money > 0) {
                 include(confirmationPopupTimeline("You won!\nYour overkill damage will be converted to $money$"))
             }

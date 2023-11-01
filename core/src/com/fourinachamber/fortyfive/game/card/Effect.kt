@@ -341,7 +341,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(triggerInformation: TriggerInformation): Timeline = Timeline.timeline {
             val controller = FortyFive.currentGame!!
             val damage = damage(controller) * (triggerInformation.multiplier ?: 1)
-            include(controller.enemyArea.enemies[0].damage(damage))
+            include(controller.enemyArea.getTargetedEnemy().damage(damage))
         }
 
         override fun blocks(controller: GameController): Boolean = false
