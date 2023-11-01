@@ -62,14 +62,16 @@ $Box {
         styles: [
             {
                 width: 87.0#percent, //TODO wieder so machen, dass es passt, nachdem bilder exportiert wurden
+
                 height: 100.0#percent,
-                alpha: 1/0.6,
+                alpha: 1 / 0.6,
 
             }
         ],
         progressTime: 0.01,
         advanceArrowDrawable: "dialog_continue",
         advanceArrowOffset: -55.0, //TODO wieder so machen, dass es passt, nachdem bilder exportiert wurden
+
         touchable: "enabled",
         optionsBox: "options_box",
         defaults: {
@@ -96,7 +98,7 @@ root: $Box {
                 positionType: positionType.absolute,
                 positionBottom: (250)#points,
                 positionRight: (100)#points,
-                paddingRight: 20#points,
+//                paddingRight: 20#points,
                 flexDirection: flexDirection.column,
                 detached: true
             },
@@ -124,6 +126,33 @@ root: $Box {
         ],
     } children [
         dialogWidget
+    ],
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                flexDirection: flexDirection.column,
+                positionBottom: (200)#points,
+                positionLeft: (260)#points,
+            },
+        ],
+        debug: true,
+    } children [
+        $TemplateLabel {
+            template: "{map.curEvent.person.displayName}",
+            font: "red_wing",
+            color: color.forty_white,
+            fontScale: 0.9,
+            align: "center",
+            styles: [
+                {
+                    width: 140#percent, //TODO fix bug with this
+                    height: 60#points,
+                    alpha: 0.8,
+                    background: "dialog_name_field",
+                },
+            ],
+        }
     ]
 ],
 
@@ -138,7 +167,6 @@ templates: [
         color: color.forty_white,
         fontScale: 0.8,
         align: "center",
-        partOfSelectionHierarchy: true,
         styles: [
             {
                 style_priority: 1,

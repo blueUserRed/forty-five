@@ -78,6 +78,7 @@ npcs: [
 
     {
         name: "mysterious guy",
+        displayName: "Ben Dover",
         dialog: {
             parts: [
                 {
