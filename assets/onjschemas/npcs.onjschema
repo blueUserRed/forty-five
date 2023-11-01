@@ -91,6 +91,7 @@ var image = {
 
 npcs: {
     name: string,
+    displayName: string,
     dialog: dialog,
     image: image,
 }[]

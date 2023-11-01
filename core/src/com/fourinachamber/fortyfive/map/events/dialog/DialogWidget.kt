@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onClick

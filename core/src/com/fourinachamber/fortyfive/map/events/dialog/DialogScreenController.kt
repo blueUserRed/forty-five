@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.map.detailMap.NPCMapEvent
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
+import com.fourinachamber.fortyfive.utils.TemplateString
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -38,6 +39,7 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
             .find { it.get<String>("name") == context.npc }
             ?: throw RuntimeException("unknown npc: ${context.npc}")
         val dialogOnj = npc.get<OnjObject>("dialog")
+        TemplateString.updateGlobalParam("map.curEvent.person.displayName", npc.get<String>("displayName"))
         val dialog = Dialog.readFromOnj(dialogOnj, screen)
         dialogWidget.start(dialog)
     }
