@@ -879,7 +879,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun enemyDefeated(enemy: Enemy) {
         SaveState.enemiesDefeated++
-        hasWon = true
+        if (enemyArea.enemies.all { it.isDefeated }) hasWon = true
         FortyFiveLogger.debug(logTag, "player won")
     }
 
