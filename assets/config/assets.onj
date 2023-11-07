@@ -583,7 +583,7 @@ ninepatches: [
         bottom: 3,
         left: 3,
         right: 3,
-        scale: 0.2
+        scale: 2.0
     },
     {
         name: "white_rounded",

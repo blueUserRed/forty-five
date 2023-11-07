@@ -30,11 +30,7 @@ class EnemyArea(
 
     private var _enemies: MutableList<Enemy> = mutableListOf()
 
-    var selectedEnemy: Enemy? = null
-        set(value) {
-            // refuse to set value if there is only one enemy
-            if (_enemies.size != 1) field = value
-        }
+    private var selectedEnemy: Enemy? = null
 
     private val enemySelectionDrawable: Drawable by lazy {
         ResourceManager.get(screen, enemySelectionDrawableHandle)
@@ -56,28 +52,41 @@ class EnemyArea(
     fun addEnemy(enemy: Enemy) {
         _enemies.add(enemy)
         addActor(enemy.actor)
+        if (_enemies.size == 2) selectEnemy(_enemies[0])
         invalidate()
     }
 
+    fun selectEnemy(enemy: Enemy) {
+        if (_enemies.size < 2) return
+        selectedEnemy = enemy
+    }
+
     fun getTargetedEnemy(): Enemy {
-        return selectedEnemy ?: enemies.firstOrNull() ?: throw RuntimeException("No enemies in enemy area")
+        return selectedEnemy ?: _enemies.firstOrNull() ?: throw RuntimeException("No enemies in enemy area")
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
-        enemies.forEach(Enemy::update)
+        _enemies.forEach(Enemy::update)
         val enemy = selectedEnemy ?: return
         enemySelectionDrawable.draw(
             batch,
-            x + enemy.actor.x, y + enemy.actor.y,
-            enemy.actor.prefWidth, enemy.actor.prefHeight
+            x + enemy.actor.x,
+            y + enemy.actor.y,
+            enemy.actor.width,
+            enemy.actor.height
         )
     }
 
     override fun layout() {
-        for (enemy in _enemies) {
-            enemy.actor.setPosition(width / 2f, height / 2f)
-        }
+        super.layout()
+        var curX = 0f
+        enemies
+            .map { it.actor }
+            .forEach { enemy ->
+                enemy.setBounds(curX, height / 2, enemy.prefWidth, enemy.prefHeight)
+                curX += enemy.width * 1.3f
+            }
     }
 
     override fun resortZIndices() {
