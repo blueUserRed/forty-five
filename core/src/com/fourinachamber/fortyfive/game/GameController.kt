@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.*
+import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -354,7 +355,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val enemyArea = curScreen.namedActorOrError(enemyAreaName)
         if (enemyArea !is EnemyArea) throw RuntimeException("actor named $enemyAreaName must be a EnemyArea")
 
-        enemies.forEach { enemyArea.addEnemy(it) }
+        enemies.forEach { enemy ->
+            enemyArea.addEnemy(enemy)
+            enemy.actor.onClick { enemyArea.selectEnemy(enemy) }
+        }
 
         if (enemies.isEmpty()) throw RuntimeException("enemyArea must have at least one enemy")
 

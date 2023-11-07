@@ -152,7 +152,7 @@ var cardHand = $CardHand {
 
 var enemyArea = $EnemyArea {
     name: "enemy_area",
-    enemySelectionDrawable: "key_select_frame"
+    enemySelectionDrawable: "key_select_frame",
 };
 
 var shootButton = $Image {
@@ -652,10 +652,10 @@ var gameScreen = $Box {
     $EnemyArea {
         styles: [
             {
-                width: 100#points,
+                width: 70#percent,
                 height: 100#points,
-                positionLeft: 500#points,
-                positionBottom: -100#points,
+                positionLeft: 600#points,
+                positionBottom: -300#points,
             }
         ],
         ...enemyArea

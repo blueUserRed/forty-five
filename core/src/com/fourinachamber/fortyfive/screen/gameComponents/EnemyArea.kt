@@ -52,10 +52,12 @@ class EnemyArea(
     fun addEnemy(enemy: Enemy) {
         _enemies.add(enemy)
         addActor(enemy.actor)
+        if (_enemies.size == 2) selectEnemy(_enemies[0])
         invalidate()
     }
 
     fun selectEnemy(enemy: Enemy) {
+        if (_enemies.size < 2) return
         selectedEnemy = enemy
     }
 
@@ -69,15 +71,22 @@ class EnemyArea(
         val enemy = selectedEnemy ?: return
         enemySelectionDrawable.draw(
             batch,
-            x + enemy.actor.x, y + enemy.actor.y,
-            enemy.actor.prefWidth, enemy.actor.prefHeight
+            x + enemy.actor.x,
+            y + enemy.actor.y,
+            enemy.actor.width,
+            enemy.actor.height
         )
     }
 
     override fun layout() {
-        for (enemy in _enemies) {
-            enemy.actor.setPosition(width / 2f, height / 2f)
-        }
+        super.layout()
+        var curX = 0f
+        enemies
+            .map { it.actor }
+            .forEach { enemy ->
+                enemy.setBounds(curX, height / 2, enemy.prefWidth, enemy.prefHeight)
+                curX += enemy.width * 1.3f
+            }
     }
 
     override fun resortZIndices() {
