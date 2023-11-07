@@ -1473,10 +1473,6 @@ data class MapRestriction(
     val pathTotalWidth: Float = 2.5F,
     val minDistanceBetweenNodes: Float = 15F,
     val exitNodeTexture: ResourceHandle,
-    /**
-     * has the encounter Probabilities for this map with the weight for each possibility
-     */
-    val encounterProps: List<Pair<String, Int>>,
     private val avgNbrOfEncounters: Int,
 ) {
     val nbrOfEncounters: List<Pair<Int, Int>>
@@ -1541,10 +1537,6 @@ data class MapRestriction(
                     )
                 },
             exitNodeTexture = onj.get<String>("exitNodeTexture"),
-            encounterProps = onj.get<OnjArray>("encounterModifiers").value.map { it as OnjObject }.map {
-                it.get<String>("name") to
-                        it.get<Long>("weight").toInt()
-            },
             avgNbrOfEncounters = onj.get<Long>("avgNbrOfEncounters").toInt(),
         )
     }

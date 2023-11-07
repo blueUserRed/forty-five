@@ -55,52 +55,43 @@ class GameDirector(private val controller: GameController) {
 
     private fun adjustDifficulty(): Double {
         return difficulty
-//        if (controller.playerLost) return difficulty // Too late to adjust difficulty of enemy lol
-//        val usedTurns = controller.turnCounter
-//        val enemyHealth = enemy.health
-//        val enemyHealthPerTurn = scaleEnemyHealthPerTurn(enemyProto.baseHealth, difficulty)
-//        val enemyBaseHealth = enemyProto.baseHealth
-//
-//        val overkillDamage = enemy.currentHealth
-//
-//        val damage = controller.playerLivesAtStart - controller.curPlayerLives
-//        val damageDiff = damageEstimate - damage
-//        val baseDamageDiff = damageDiff / turnEstimate
-//        val idealDifficultyBasedOnDamage = difficulty + baseDamageDiff
-//
-//        val idealDifficulty = (idealDifficultyBasedOnTurns / 2) + (idealDifficultyBasedOnDamage / 2)
-//        val difficultyDiff = idealDifficulty - difficulty
-//
-//        FortyFiveLogger.debug(logTag, "difficulty calculation: " +
-//                "idealDifficultyBasedOnTurns = $idealDifficultyBasedOnTurns, " +
-//                "idealDifficultyBasedOnDamage = $idealDifficultyBasedOnDamage, " +
-//                "idealDifficulty = $idealDifficulty")
-//
-//
-//        if (difficultyDiff in ((idealDifficulty - 0.2)..(idealDifficulty + 0.2))) {
-//            return idealDifficulty.coerceAtLeast(0.5)
-//        }
-//        return (if (difficultyDiff < 0.0) difficulty - 0.2 else difficulty + 0.2).coerceAtLeast(0.5)
     }
 
-    private fun chooseEnemies(prototypes: List<EnemyPrototype>): List<EnemyPrototype> {
-        return listOf(prototypes.random(), prototypes.random())
-    }
-
-    private fun scaleAndCreateEnemy(prototype: EnemyPrototype, difficulty: Double): Enemy {
-        val health = scaleEnemyHealthPerTurn(prototype.baseHealth, difficulty)
-        return prototype.create(health)
-    }
-
-    private fun scaleEnemyHealthPerTurn(healthPerTurn: Int, difficulty: Double): Int =
-        (healthPerTurn * difficulty).toInt()
+    private data class Encounter(
+        val enemies: List<String>,
+        val encounterModifier: Set<String>,
+        val biomes: Set<String>,
+        val progress: ClosedFloatingPointRange<Float>,
+    )
 
     companion object {
 
         const val logTag = "director"
 
+        private lateinit var encounters: List<Encounter>
+
         private val enemiesFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/enemies.onjschema").file())
+        }
+
+        private val encounterDefinitionsSchema: OnjSchema by lazy {
+            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/encounter_definitions.onjschema").file())
+        }
+
+        fun init() {
+            val onj = OnjParser.parseFile(Gdx.files.internal("config/encounter_definitions.onj").file())
+            encounterDefinitionsSchema.assertMatches(onj)
+            onj as OnjObject
+            encounters = onj
+                .get<OnjArray>("encounter")
+                .value
+                .map { it as OnjObject }
+                .map { obj -> Encounter(
+                    obj.get<OnjArray>("enemies").value.map { it.value as String },
+                    obj.get<OnjArray>("encounterModifier").value.map { it.value as String }.toSet(),
+                    obj.get<OnjArray>("biomes").value.map { it.value as String }.toSet(),
+                    obj.get<OnjArray>("progress").toFloatRange()
+                ) }
         }
 
     }
