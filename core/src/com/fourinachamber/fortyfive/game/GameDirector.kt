@@ -84,7 +84,7 @@ class GameDirector(private val controller: GameController) {
     }
 
     private fun chooseEnemies(prototypes: List<EnemyPrototype>): List<EnemyPrototype> {
-        return listOf(prototypes.random())
+        return listOf(prototypes.random(), prototypes.random())
     }
 
     private fun scaleAndCreateEnemy(prototype: EnemyPrototype, difficulty: Double): Enemy {
