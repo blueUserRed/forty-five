@@ -155,15 +155,9 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
-    val encounterModifier: List<EncounterModifier>
-        get() = encounterModifierNames.map { EncounterModifier.getFromName(it) }
-
-    var encounterModifierNames: Set<String>
-
     init {
         setStandardValuesFromConfig(obj)
 //        currentlyBlocks = false
-        encounterModifierNames = obj.get<OnjArray?>("encounterModifier")?.value?.map { ((it as OnjString).value)}?.toSet()?: setOf()
     }
 
     override fun start() {
@@ -179,7 +173,6 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EncounterMapEvent")
         includeStandardConfig()
-        "encounterModifier" with encounterModifierNames
     }
 }
 

@@ -1,0 +1,15 @@
+
+encounter: [
+    {
+        enemies: [ "Witch", "Pyro"  ],
+        encounterModifier: [ "Moist", "BewitchedMist" ],
+        biomes: [ "wasteland", "bewitched_forest" ],
+        progress: [20.0, 50.0]
+    },
+    {
+        enemies: [ "Outlaw"  ],
+        encounterModifier: [],
+        biomes: [ "wasteland" ],
+        progress: [0.0, 100.0]
+    }
+]
