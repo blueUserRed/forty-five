@@ -11,7 +11,6 @@ $MapEvent {
 
     $EncounterMapEvent {
         ...mapEventStandardConfig,
-        encounterModifier:String[],
     }
 
     $EnterMapMapEvent {
@@ -59,4 +58,5 @@ decorations: {
 
 }[],
 biome: string,
-isArea:boolean,
+isArea: boolean,
+progress: float[2]
