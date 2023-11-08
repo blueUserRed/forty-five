@@ -1,6 +1,7 @@
 startNode: 0,
 endNode: 2,
 biome: "bewitched_forest",
+progress: [0.0, 0.1],
 nodes: [
     {
         x: 20.0,

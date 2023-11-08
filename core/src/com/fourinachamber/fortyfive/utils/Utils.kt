@@ -132,6 +132,13 @@ fun ClosedFloatingPointRange<Float>.random(random: Random = Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
 }
 
+infix fun <T> ClosedFloatingPointRange<T>.intersects(
+    other: ClosedFloatingPointRange<T>
+): Boolean where T : Comparable<T> = this.start in other || other.start in this
+
+inline fun <reified T> ClosedFloatingPointRange<T>.asArray(
+): Array<T> where T : Comparable<T> = arrayOf(this.start, this.endInclusive)
+
 public fun <E> List<E>.subListTillMax(toIndex: Int): List<E> {
     return subList(0, min(size, toIndex))
 }

@@ -107,12 +107,12 @@ sealed class EncounterModifier {
     companion object {
 
         fun getFromName(name: String) = when (name.lowercase()) {
-            "Rain" -> Rain
-            "Frost" -> Frost
-            "BewitchedMist" -> BewitchedMist
-            "Lookalike" -> Lookalike
-            "Moist" -> Moist()
-            else -> throw Exception("Unknown Encounter Modifier: ${name.lowercase()}")
+            "rain" -> Rain
+            "frost" -> Frost
+            "bewitchedmist" -> BewitchedMist
+            "lookalike" -> Lookalike
+            "moist" -> Moist()
+            else -> throw Exception("Unknown Encounter Modifier: $name")
         }
     }
 }
