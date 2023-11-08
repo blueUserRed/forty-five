@@ -2,9 +2,11 @@
 lastRandom: null,
 collection: [
     "bullet",
-    "bullet",
+    "bigBullet",
+    "workerBullet",
+    "leadersBullet",
+    "silverBullet",
     "incendiaryBullet",
-    "workerBullet"
 ],
 visitedAreas: [
     "start_area" // the start area
