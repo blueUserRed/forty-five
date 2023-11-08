@@ -59,7 +59,8 @@ class SeededMapGenerator(
             lastNode.asNode!!,
             decos,
             false,
-            biome
+            biome,
+            restrictions.progress
         )
     }
 
@@ -1473,6 +1474,7 @@ data class MapRestriction(
     val pathTotalWidth: Float = 2.5F,
     val minDistanceBetweenNodes: Float = 15F,
     val exitNodeTexture: ResourceHandle,
+    val progress: ClosedFloatingPointRange<Float>,
     private val avgNbrOfEncounters: Int,
 ) {
     val nbrOfEncounters: List<Pair<Int, Int>>
@@ -1538,6 +1540,7 @@ data class MapRestriction(
                 },
             exitNodeTexture = onj.get<String>("exitNodeTexture"),
             avgNbrOfEncounters = onj.get<Long>("avgNbrOfEncounters").toInt(),
+            progress = onj.get<OnjArray>("progress").toFloatRange()
         )
     }
 }

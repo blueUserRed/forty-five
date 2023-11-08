@@ -8,6 +8,7 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
+import com.fourinachamber.fortyfive.utils.asArray
 import com.fourinachamber.fortyfive.utils.toFloatRange
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
@@ -75,6 +76,7 @@ data class DetailMap(
         "decorations" with decorations.map { it.asOnjObject() }
         "isArea" with isArea
         "biome" with biome
+        "progress" with progress.asArray()
     }
 
     private fun nodesAsOnjArray(): OnjArray {
