@@ -115,7 +115,8 @@ statusbarCenterDefaults: {
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 100#percent,
+                            height: 70#percent,
+                            aspectRatio: 1.0
                         }
                     ],
                 },
