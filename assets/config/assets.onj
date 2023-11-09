@@ -490,7 +490,9 @@ shaders: [
         name: "earthquake_shader",
         file: "shaders/earthquake.glsl",
         constantArgs: {
-            timeOffset: 2_000
+            timeOffset: 1_500,
+            speed: 14.0,
+            mag: 0.2,
         }
     },
     {
@@ -507,6 +509,12 @@ shaders: [
     {
         name: "film_shader",
         file: "shaders/film.glsl",
+        constantArgs: {
+        }
+    },
+    {
+        name: "map_edge_shader",
+        file: "shaders/map_edge.glsl",
         constantArgs: {
         }
     },

@@ -32,6 +32,9 @@ assets: {
 
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
+
+        "map_edge_shader",
+
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
@@ -118,7 +121,7 @@ var mapBox = $Box {
         detailMapProvider: $CurrentMapProvider {
         },
         nodeSize: 60.0,
-        lineWidth: 55.0,
+        lineWidth: 20.0,
         mapScale: 10.0,
         name: "map",
         defaultNodeTexture: "map_node_default",
