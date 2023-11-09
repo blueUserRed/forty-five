@@ -104,7 +104,7 @@ keySelectUsedAssets: [ "key_select_frame" ],
 
 shootPostProcessor: {
     name: "earthquake_shader",
-    duration: 0.7
+    duration: 0.9
 },
 
 gameUsedAssets: [

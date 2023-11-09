@@ -111,7 +111,7 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
 
     }.asAction()
 
-    fun fadeToBlackTimelineAction(): Timeline.TimelineAction {
+    private fun fadeToBlackTimelineAction(): Timeline.TimelineAction {
         val duration = 2000
         return object : Timeline.TimelineAction() {
 
