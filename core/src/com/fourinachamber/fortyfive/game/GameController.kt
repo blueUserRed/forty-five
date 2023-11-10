@@ -648,7 +648,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val info = TriggerInformation(multiplier = newRotation.amount)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
         }
-        include(enemyArea.getTargetedEnemy().executeStatusEffectsAfterRevolverRotation(newRotation))
+        enemyArea
+            .enemies
+            .map { it.executeStatusEffectsAfterRevolverRotation(newRotation) }
+            .collectTimeline()
+            .let { include(it) }
         include(executePlayerStatusEffectsAfterRevolverRotation(newRotation))
     }
 

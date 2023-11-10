@@ -57,7 +57,8 @@ class DetailMapWidget(
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
-    private var mapOffset: Vector2 = Vector2(50f, 50f)
+    var mapOffset: Vector2 = Vector2(50f, 50f)
+        private set
 
     private var playerNode: MapNode = MapManager.currentMapNode
     private var playerPos: Vector2 = scaledNodePos(playerNode)
