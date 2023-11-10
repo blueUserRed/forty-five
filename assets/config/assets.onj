@@ -513,6 +513,18 @@ shaders: [
         }
     },
     {
+        name: "bewitched_fog_static_noise_shader",
+        file: "shaders/bewitched_fog_static_noise.glsl",
+        constantArgs: {
+        }
+    },
+    {
+        name: "bewitched_fog_dynamic_noise_shader",
+        file: "shaders/bewitched_fog_dynamic_noise.glsl",
+        constantArgs: {
+        }
+    },
+    {
         name: "map_edge_shader",
         file: "shaders/map_edge.glsl",
         constantArgs: {

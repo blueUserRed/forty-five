@@ -33,7 +33,8 @@ assets: {
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
 
-        "map_edge_shader",
+        "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
+        "prerendered_noise_perlin_512x512",
 
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
