@@ -233,6 +233,7 @@ $Widget {
         advanceArrowDrawable: string,
         advanceArrowOffset: float,
         optionsBox: string,
+        speakingPersonLabel: string,
         defaults: {
             font: string,
             fontScale: float,

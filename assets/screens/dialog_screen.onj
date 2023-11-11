@@ -38,8 +38,7 @@ options: {
     }
 },
 
-var dialogWidget =
-$Box {
+var dialogWidget = $Box {
     styles: [
         {
             positionType: positionType.absolute,
@@ -74,6 +73,7 @@ $Box {
 
         touchable: "enabled",
         optionsBox: "options_box",
+        speakingPersonLabel: "person_label",
         defaults: {
             font: "red_wing",
             fontScale: 50.0,
@@ -139,6 +139,7 @@ root: $Box {
         debug: true,
     } children [
         $TemplateLabel {
+            name: "person_label",
             template: "{map.curEvent.person.displayName}",
             font: "red_wing",
             color: color.forty_white,

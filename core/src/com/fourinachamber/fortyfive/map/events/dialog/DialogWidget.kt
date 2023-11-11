@@ -24,6 +24,7 @@ class DialogWidget(
     private val advanceArrowDrawableHandle: ResourceHandle,
     private val advanceArrowOffset: Float,
     private val optionsBoxName: String,
+    private val speakingPersonLabel: String,
     defaults: OnjObject,
     screen: OnjScreen
 ) : AdvancedTextWidget(defaults, screen) {
@@ -55,6 +56,7 @@ class DialogWidget(
     }
 
     private var initialisedOptionsBox: Boolean = false
+    private var initialisedNameSize: Boolean = false
     private lateinit var optionsBox: CustomFlexBox
 
     private val optionBoxNodes: MutableList<YogaNode> = mutableListOf()
@@ -154,6 +156,15 @@ class DialogWidget(
             }
             this.optionsBox = optionsBox
             initialisedOptionsBox = true
+        }
+        if (!initialisedNameSize) {
+            val tempParent = screen.namedActorOrError(speakingPersonLabel).parent as CustomFlexBox
+            if (tempParent.width < 30) { //TODO ugly with fixed size parameter
+                println(tempParent.width)
+                tempParent.invalidate()
+            }else{ //Needs to be done more than once till the text is correctly drawn
+                initialisedNameSize = true
+            }
         }
         super.draw(batch, parentAlpha)
         timeline.updateTimeline()
