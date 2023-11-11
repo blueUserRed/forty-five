@@ -433,6 +433,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("advanceArrowDrawable"),
             widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
             widgetOnj.get<String>("optionsBox"),
+            widgetOnj.get<String>("speakingPersonLabel"),
             widgetOnj.get<OnjObject>("defaults"),
             screen
         )
