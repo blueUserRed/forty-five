@@ -43,7 +43,7 @@ var dialogWidget = $Box {
     styles: [
         {
             positionType: positionType.absolute,
-            width: 87.0#percent,
+            width: 75.0#percent,
             height: 25.0#percent,
             positionBottom: 0#points,
             justifyContent: justify.center,
@@ -61,24 +61,22 @@ var dialogWidget = $Box {
     $DialogWidget {
         styles: [
             {
-                width: 87.0#percent, //TODO wieder so machen, dass es passt, nachdem bilder exportiert wurden
+                width: 87.0#percent,
 
                 height: 100.0#percent,
                 alpha: 1 / 0.6,
-
             }
         ],
         progressTime: 0.01,
         advanceArrowDrawable: "dialog_continue",
-        advanceArrowOffset: -55.0, //TODO wieder so machen, dass es passt, nachdem bilder exportiert wurden
-
+        advanceArrowOffset: -75.0,
         touchable: "enabled",
         optionsBox: "options_box",
         speakingPersonLabel: "person_label",
         defaults: {
             font: "red_wing",
             fontScale: 50.0,
-            color: color.dark_brown
+            color: color.forty_white
         },
         name: "dialog_widget"
     }
@@ -98,7 +96,7 @@ root: $Box {
                 style_priority: 1,
                 positionType: positionType.absolute,
                 positionBottom: (250)#points,
-                positionRight: (100)#points,
+                positionRight: (300)#points,
                 //                paddingRight: 20#points,
 
                 flexDirection: flexDirection.column,
@@ -134,8 +132,8 @@ root: $Box {
             {
                 positionType: positionType.absolute,
                 flexDirection: flexDirection.column,
-                positionBottom: (200)#points,
-                positionLeft: (260)#points,
+                positionBottom: (180)#points,
+                positionLeft: (280)#points,
             },
         ],
     } children [
@@ -143,12 +141,12 @@ root: $Box {
             name: "person_label",
             template: "{map.curEvent.person.displayName}",
             font: "red_wing",
-            color: color.forty_white,
+            color: color.dark_brown,
             fontScale: 0.9,
             align: "center",
             styles: [
                 {
-                    width: 140#percent, //TODO fix bug with this
+                    width: 180#percent,
                     height: 60#points,
                     alpha: 0.8,
                     background: "dialog_name_field",
@@ -160,7 +158,7 @@ root: $Box {
 
 templates: [
     $Label {
-        template_name: "optionsItem",
+        template_name: "optionsItem", //TODO make only background transparent, not text itself
         template_keys: {
             "text": "text",
         },

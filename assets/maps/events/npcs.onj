@@ -23,7 +23,7 @@ npcs: [
             defaults: {
                 font: "red_wing",
                 fontScale: 0.1,
-                color: color.black
+                color: color.forty_white
             }
         },
         image: {
@@ -76,7 +76,7 @@ npcs: [
             defaults: {
                 font: "red_wing",
                 fontScale: 0.1,
-                color: color.black
+                color: color.forty_white
             }
         },
         image: {
@@ -194,7 +194,7 @@ npcs: [
             defaults: {
                 font: "red_wing",
                 fontScale: 1.0,
-                color: color.black
+                color: color.forty_white
             },
         },
         image: {
