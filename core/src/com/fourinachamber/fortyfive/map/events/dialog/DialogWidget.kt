@@ -160,7 +160,6 @@ class DialogWidget(
         if (!initialisedNameSize) {
             val tempParent = screen.namedActorOrError(speakingPersonLabel).parent as CustomFlexBox
             if (tempParent.width < 30) { //TODO ugly with fixed size parameter
-                println(tempParent.width)
                 tempParent.invalidate()
             }else{ //Needs to be done more than once till the text is correctly drawn
                 initialisedNameSize = true

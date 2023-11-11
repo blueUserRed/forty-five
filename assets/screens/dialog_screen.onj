@@ -18,6 +18,7 @@ assets: {
         "dialog_background",
         "dialog_answer_option",
         "dialog_answer_option_hover",
+        "shop_npcs_default",
     ]
 },
 
@@ -98,7 +99,8 @@ root: $Box {
                 positionType: positionType.absolute,
                 positionBottom: (250)#points,
                 positionRight: (100)#points,
-//                paddingRight: 20#points,
+                //                paddingRight: 20#points,
+
                 flexDirection: flexDirection.column,
                 detached: true
             },
@@ -136,7 +138,6 @@ root: $Box {
                 positionLeft: (260)#points,
             },
         ],
-        debug: true,
     } children [
         $TemplateLabel {
             name: "person_label",
@@ -183,5 +184,24 @@ templates: [
                 style_condition: hover(),
             }
         ],
-    }
+    },
+    $Image {
+        template_name: "personImageLeft",
+        template_keys: {
+            "textureName": "textureName",
+            "scaleX": "scale",
+            "scaleY": "scale",
+        },
+        textureName: "",
+        scaleX: 1.0,
+        scaleY: 1.0,
+        //reportDimensionsWithScaling?: boolean,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionBottom: (0)#points,
+                positionLeft: (30)#points,
+            }
+        ],
+    },
 ]
