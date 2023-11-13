@@ -1,0 +1,10 @@
+
+var encounter = {
+    enemies: string[],
+    encounterModifier: string[],
+    biomes: string[],
+    progress: float[2],
+    weight: int,
+};
+
+encounter: encounter[]

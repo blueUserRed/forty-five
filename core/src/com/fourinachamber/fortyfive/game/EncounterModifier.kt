@@ -112,7 +112,7 @@ sealed class EncounterModifier {
             "bewitchedmist" -> BewitchedMist
             "lookalike" -> Lookalike
             "moist" -> Moist()
-            else -> throw Exception("Unknown Encounter Modifier: ${name.lowercase()}")
+            else -> throw Exception("Unknown Encounter Modifier: $name")
         }
     }
 }
