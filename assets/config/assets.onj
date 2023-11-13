@@ -196,7 +196,7 @@ textures: [
     },
     {
         name: "map_background_bewitched_forest_tileable",
-        file: "textures/map/backgrounds/bewitchedForest.png",
+        file: "textures/map/backgrounds/bewitched_forest.png",
     },
     {
         name: "map_path",
@@ -288,15 +288,15 @@ textures: [
     },
     {
         name: "map_decoration_bewitched_forest_sheep_1",
-        file: "textures/map/decorations/bewitchedForest_sheep_1.png"
+        file: "textures/map/decorations/bewitched_forest_sheep_1.png"
     },
     {
         name: "map_decoration_bewitched_forest_sheep_2",
-        file: "textures/map/decorations/bewitchedForest_sheep_2.png"
+        file: "textures/map/decorations/bewitched_forest_sheep_2.png"
     },
     {
         name: "map_decoration_bewitched_forest_tree1",
-        file: "textures/map/decorations/bewitchedForest_tree1.png"
+        file: "textures/map/decorations/bewitched_forest_tree1.png"
     },
     {
         name: "shop_dark_background",
@@ -424,15 +424,15 @@ textures: [
     },
     {
         name: "chooseCard_cardsBackground",
-        file: "textures/chooseCard/cards_background.png"
+        file: "textures/choose_card/cards_background.png"
     },
     {
         name: "chooseCard_add_to_backpack",
-        file: "textures/chooseCard/to_backpack.png"
+        file: "textures/choose_card/to_backpack.png"
     },
     {
         name: "chooseCard_add_to_deck",
-        file: "textures/chooseCard/to_deck.png"
+        file: "textures/choose_card/to_deck.png"
     },
     {
         name: "dialog_answer_option",
