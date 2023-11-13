@@ -147,6 +147,7 @@ generatorConfig: {
             biome: "wasteland",
             seed: runRandom(1),
             restrictions: {
+                progress: [0.0, 20.0],
                 minNodes: 15,
                 maxNodes: 20,
                 maxSplits: 4,
@@ -170,15 +171,6 @@ generatorConfig: {
                             person: "traveling_merchant",
                         }
                     },
-                ],
-                encounterModifiers: [
-                    {
-                        name: "lookalike",
-                        weight: 10,
-                    }, {
-                        name: "Frost",
-                        weight: 1,
-                    }
                 ],
                 avgNbrOfEncounters: 0,
                 exitNodeTexture: "map_node_exit_circle",
@@ -267,7 +259,7 @@ generatorConfig: {
             restrictions: {
                 //                maxNodes: 25,
 //                minNodes: 20,
-
+                progress: [2.0, 40.0],
                 maxNodes: 2,
                 minNodes: 2,
                 maxSplits: 6,
@@ -275,8 +267,6 @@ generatorConfig: {
                 startArea: "salem",
                 endArea: "aqua_dulche",
                 otherAreas: [
-                ],
-                encounterModifiers: [
                 ],
                 avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
 
@@ -364,6 +354,7 @@ generatorConfig: {
             biome: "bewitched_forest",
             seed: runRandom(2),
             restrictions: {
+                progress: [40.0, 60.0],
                 maxNodes: 15,
                 minNodes: 10,
                 maxSplits: 7,
@@ -372,20 +363,6 @@ generatorConfig: {
                 endArea: "end_area",
                 otherAreas: [
                     "witch_hideout"
-                ],
-                encounterModifiers: [
-                    {
-                        name: "moist",
-                        weight: 10,
-                    },
-                    {
-                        name: "bewitchedmist",
-                        weight: 50,
-                    },
-                    {
-                        name: "rain",
-                        weight: 10,
-                    },
                 ],
                 avgNbrOfEncounters: 2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
 

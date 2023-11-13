@@ -101,6 +101,7 @@ object FortyFive : Game() {
         GraphicsConfig.init()
         ResourceManager.init()
         RandomCardSelection.init()
+        GameDirector.init()
     }
 
     override fun dispose() {
