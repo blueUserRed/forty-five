@@ -34,7 +34,7 @@ object GraphicsConfig {
 
     @MainThreadOnly
     fun damageOverlay(screen: OnjScreen): Timeline.TimelineAction {
-        val overlayActor = CustomImageActor( damageOverlayTexture, screen)
+        val overlayActor = CustomImageActor(damageOverlayTexture, screen)
         val viewport = screen.stage.viewport
         val anim = FadeInAndOutAnimation(
             0f, 0f,

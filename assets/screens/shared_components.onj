@@ -772,7 +772,7 @@ warningLabelUsedAssets: [
     "forty_white_texture", "warning_label_background_red", "title_screen_background", "red_wing"
 ],
 
-hoverDetail: $Box {
+cardHoverDetail: $Box {
     template_name: "card_hover_detail",
     template_keys: {
         "children.0.children.0.rawText": "text"
@@ -810,6 +810,6 @@ hoverDetail: $Box {
     ]
 ],
 
-hoverDetailUsedAssets: [
+cardHoverDetailUsedAssets: [
     "red_wing", "transparent_black_texture"
 ]
