@@ -442,7 +442,7 @@ class CardActor(
     private val screen: OnjScreen
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor {
 
-    override val actorTemplate: String = "card_hover_detail" // TODO: fix
+    override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
 
     override var fixedZIndex: Int = 0
@@ -606,21 +606,6 @@ class CardActor(
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
         "text" to OnjString(card.currentHoverText)
     )
-
-    override fun setBoundsOfHoverDetailActor(actor: Actor) {
-        val detailActor = detailActor
-        if (detailActor !is Layout) return
-        val prefHeight = detailActor.prefHeight
-        val prefWidth = detailActor.prefWidth
-        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
-        detailActor.setBounds(
-            x + actor.width / 2 - detailActor.width / 2,
-            y + actor.height,
-            if (prefWidth == 0f) detailActor.width else prefWidth,
-            prefHeight
-        )
-        detailActor.invalidateHierarchy()
-    }
 
     override fun onDetailDisplayStarted() = card.updateText()
 
