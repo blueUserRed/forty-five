@@ -641,6 +641,7 @@ open class CustomFlexBox(
         addFlexBoxStyles(screen)
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
+        addOffsetableStyles(screen)
     }
 
 

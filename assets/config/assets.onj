@@ -145,6 +145,10 @@ textureAtlases: [
                 regionName: "player_bar"
             },
             {
+                handle: "encounter_modifier_background",
+                regionName: "encounter_modifier_background"
+            },
+            {
                 handle: "under_deck_background",
                 regionName: "under_deck_background"
             },
@@ -473,6 +477,14 @@ textures: [
     {
         name: "enemy_outlaw",
         file: "textures/enemies/outlaw/outlaw.png"
+    },
+    {
+        name: "encounter_modifier_frost",
+        file: "textures/encounter_modifier/frost.png"
+    },
+    {
+        name: "encounter_modifier_rain",
+        file: "textures/encounter_modifier/rain.png"
     },
 ],
 

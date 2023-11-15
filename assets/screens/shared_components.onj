@@ -221,8 +221,7 @@ statusbarLeftDefaults: {
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 65#percent,
-                            width: 4.2#percent,
+                            height: 35#points,
                             aspectRatio: 1.0
                         }
                     ],
