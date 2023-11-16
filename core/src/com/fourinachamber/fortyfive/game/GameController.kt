@@ -42,6 +42,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val warningParentName = onj.get<String>("warningParentName")
     private val statusEffectDisplayName = onj.get<String>("statusEffectDisplayName")
     private val putCardsUnderDeckWidgetOnj = onj.get<OnjObject>("putCardsUnderDeckWidget")
+    private val encounterModifierDisplayTemplateName = onj.get<String>("encounterModifierDisplayTemplateName")
+    private val encounterModifierParentName = onj.get<String>("encounterModifierParentName")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
