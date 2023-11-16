@@ -11,56 +11,44 @@ people: [
         displayName: "Traveling Merchant",
         defaultShopParameter: "flameing",
         texts: [
-            [
-                $Text {
-                    text: "\"I sell the ",
-                },
-                $Text {
-                    text: "BEST  ",
-                    color: color.viridian,
-                },
-                $Text {
-                    text: "goods south from Dunkelwald. You'll find deals like this NO where else!\"",
-                },
-                $Text {
-                    text: "Source: Trust me pal",
-                },
-            ],
-            [
-                $Text {
-                    text: "You'll find prices like here ",
-                },
-                $Text {
-                    text: "NOWHERE  ",
-                    color: color.red,
-                },
-                $Text {
-                    text: "else! So by as much as you can!!!",
-                },
-            ],
+            {
+                rawText: "I sell the $1BEST$1 goods south from Dunkelwald. You'll find deals like this NO where else! Source: Trust me pal",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.viridian
+                    },
+                ],
+            },
+            {
+                rawText: "You'll find prices like here $1NOWHERE$1 else! So buy as much as you can!!!",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.red
+                    },
+                ],
+            },
         ],
-        npcImageName: "my_cool_npc",
+        npcImageName: "traveling_merchant",
     },
     {
         name: "rare_merchant",
         displayName: "Traveling Merchant",
         defaultShopParameter: "flameing",
         texts: [
-            [
-                $Text {
-                    text: "\"I only sell the ",
-                },
-                $Text {
-                    text: "rarest  ",
-                    color: color.viridian,
-                },
-                $Text {
-                    text: "bullets! And that for the cheapest price!\" ",
-                },
-            ],
+            {
+                rawText: "I only sell the $1rarest$1 bullets! And that for the cheapest price!",
+                effects: [
+                    $Color {
+                        indicator: "$1",
+                        color: color.viridian
+                    },
+                ],
+            },
 
         ],
-        npcImageName: "my_cool_npc",
+        npcImageName: "traveling_merchant",
     }
 ],
 

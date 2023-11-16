@@ -1,15 +1,6 @@
 
 use Common;
 
-var advancedTextPartSharedKeys = {
-    actions?: $AdvancedTextPartAction[]
-};
-
-var dialogPart = {
-    text: $AdvancedTextPart[],
-    next: $NextDialogPartSelector
-};
-
 $NextDialogPartSelector {
 
     $Continue { }
@@ -30,19 +21,31 @@ $NextDialogPartSelector {
     }
 }
 
-$AdvancedTextPart {
 
-    $Text {
-        text: string,
-        font?: string,
-        color?: Color,
-        fontScale?: float,
-        ...advancedTextPartSharedKeys
+var advancedTextEffectSharedKeys = {
+    indicator: string,
+};
+
+$AdvancedTextEffect {
+
+    $Color {
+        color: Color,
+        ...advancedTextEffectSharedKeys
     }
 
-    $Icon {
-        icon: string,
-        ...advancedTextPartSharedKeys
+    $Font {
+        font: string,
+        ...advancedTextEffectSharedKeys
+    }
+
+    $FontScale {
+        fontScale: float,
+        ...advancedTextEffectSharedKeys
+    }
+
+    $Action {
+        action: $AdvancedTextPartAction,
+        ...advancedTextEffectSharedKeys
     }
 
 }
@@ -59,7 +62,8 @@ $AdvancedTextPartAction {
 
 var dialog = {
     parts: {
-        text: $AdvancedTextPart[],
+        rawText: string,
+        effects?: $AdvancedTextEffect[],
         next: $NextDialogPartSelector
     }[],
     defaults: {
@@ -78,6 +82,7 @@ var image = {
 
 npcs: {
     name: string,
+    displayName: string,
     dialog: dialog,
     image: image,
 }[]

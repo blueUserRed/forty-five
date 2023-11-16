@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.general
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.ScreenAdapter
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -13,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
+import com.badlogic.gdx.utils.Null
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -20,6 +22,7 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -27,9 +30,11 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
 import ktx.actors.onExit
+import onj.value.*
 import kotlin.system.measureTimeMillis
 
 
@@ -230,6 +235,32 @@ open class OnjScreen @MainThreadOnly constructor(
         additionalEarlyRenderTasks.remove(task)
     }
 
+    @MainThreadOnly
+    fun generateFromTemplate(name: String, data: Map<String, Any?>, parent: FlexBox?, screen: OnjScreen): Actor? {
+        val onjData: MutableMap<String, OnjValue> = mutableMapOf()
+        data.forEach {
+            onjData[it.key] = getAsOnjValue(it.value)
+        }
+        return screenBuilder.generateFromTemplate(name, onjData, parent, screen)
+    }
+
+    private fun getAsOnjValue(value: Any?): OnjValue {
+        return when (value) {
+            is OnjValue -> value
+            is Float, Double -> OnjFloat((value as Number).toDouble())
+            is Long, Int -> OnjInt((value as Number).toLong())
+            is String -> OnjString(value)
+            is Color -> OnjColor(value)
+            is Array<*> -> OnjArray((value as List<*>).map { getAsOnjValue(it) })
+            is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value)}.toMap())
+            is Null -> OnjNull()
+            else -> {
+                throw java.lang.Exception("Unexpected Onj Type, not implemented: "+value!!::class)
+            }
+        }
+    }
+
+
     fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
         actor.onEnter {
             showHoverDetail(actor, actor, actor.actorTemplate)
@@ -302,7 +333,10 @@ open class OnjScreen @MainThreadOnly constructor(
         isVisible = false
     }
 
-    fun swapStyleManager(old: StyleManager, new: StyleManager) { // TODO: this whole swapping stylemanager thing is kinda ugly
+    fun swapStyleManager(
+        old: StyleManager,
+        new: StyleManager
+    ) { // TODO: this whole swapping stylemanager thing is kinda ugly
         styleManagers = styleManagers.map { if (it === old) new else it }.toMutableList()
     }
 
