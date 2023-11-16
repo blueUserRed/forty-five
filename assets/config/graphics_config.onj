@@ -52,6 +52,34 @@ icons: {
     }
 },
 
+encounterModifiers: {
+    rain: {
+        icon: "encounter_modifier_frost",
+        displayName: "Rain",
+        description: "Status effects don't work"
+    },
+    frost:  {
+        icon: "encounter_modifier_frost",
+        displayName: "Frost",
+        description: "Status effects don't work"
+    },
+    bewitchedMist: {
+        icon: "encounter_modifier_frost",
+        displayName: "Bewitched Mist",
+        description: "Status effects don't work"
+    },
+    lookalike: {
+        icon: "encounter_modifier_frost",
+        displayName: "Lookalike",
+        description: "Status effects don't work"
+    },
+    moist: {
+        icon: "encounter_modifier_frost",
+        displayName: "Moist",
+        description: "Status effects don't work"
+    },
+},
+
 damageOverlay: {
     duration: 1.5,
     fadeIn: 0.0,

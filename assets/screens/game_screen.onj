@@ -111,7 +111,7 @@ options: {
 },
 
 var encounterModifierDisplayTemplate = $Box {
-    template_name: "enounter_modifier_display",
+    template_name: "encounter_modifier_display",
     template_keys: {
         "children.0.styles.0.background": "symbol",
         "children.1.children.0.text": "modifierName",
@@ -120,7 +120,8 @@ var encounterModifierDisplayTemplate = $Box {
     styles: [
         {
             flexDirection: flexDirection.row,
-            width: 100#percent,
+            width: 400#points,
+            marginLeft: 20#points
         }
     ],
 } children [
@@ -714,14 +715,15 @@ var encounterModifierDisplay = $Box {
                 style_priority: 1,
                 positionType: positionType.absolute,
                 background: "encounter_modifier_background",
-                width: 400.0#points,
+                width: 420.0#points,
                 positionTop: 100#points,
                 paddingTop: 10#points,
-                paddingLeft: 10#points,
+                paddingBottom: 10#points,
+//                paddingLeft: 10#points,
             },
             {
                 style_priority: 1,
-                positionLeft: (worldWidth - 50.0)#points,
+                positionLeft: (worldWidth - 75.0)#points,
                 style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.linear
@@ -738,7 +740,7 @@ var encounterModifierDisplay = $Box {
             }
         ],
         touchable: "enabled",
-        debug: true
+//        debug: true
     } children [
 
     ],
