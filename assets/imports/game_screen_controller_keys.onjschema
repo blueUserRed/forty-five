@@ -23,6 +23,8 @@ cardSelector: {
 },
 warningParentName: string,
 statusEffectDisplayName: string,
+encounterModifierDisplayTemplateName: string,
+encounterModifierParentName: string,
 cardDragBehaviour: $DragAndDropBehaviour,
 cardDropBehaviour: $DragAndDropBehaviour,
 cardsToDrawInFirstRound: int,

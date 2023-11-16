@@ -97,6 +97,8 @@ var controller = $GameScreenController {
     playerLives: gameConfig.playerConfig.lives,
     reservesAtRoundBegin: gameConfig.reservesConfig.roundStart,
     shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
+    encounterModifierDisplayTemplateName: "encounter_modifier_display",
+    encounterModifierParentName: "encounter_modifier_parent",
 };
 
 options: {
@@ -108,9 +110,68 @@ options: {
     ]
 },
 
+var encounterModifierDisplayTemplate = $Box {
+    template_name: "enounter_modifier_display",
+    template_keys: {
+        "children.0.styles.0.background": "symbol",
+        "children.1.children.0.text": "modifierName",
+        "children.1.children.1.text": "modifierDescription",
+    },
+    styles: [
+        {
+            flexDirection: flexDirection.row,
+            width: 100#percent,
+        }
+    ],
+} children [
+    $Box {
+        styles: [
+            {
+                background: "encounter_modifier_frost",
+                aspectRatio: 1.0,
+                marginTop: 20#points,
+                width: 40#points,
+            }
+        ],
+    },
+
+    $Box {
+        styles: [
+            {
+                flexDirection: flexDirection.column,
+                alignItems: align.flexStart,
+                marginLeft: 20#points,
+            }
+        ]
+    } children [
+        $Label {
+            font: "red_wing",
+            text: "Frost",
+            fontScale: 0.6,
+            align: "left",
+            color: color.red
+        },
+        $Label {
+            styles: [
+                {
+                    width: 370#points
+                }
+            ],
+            font: "red_wing",
+            text: "Some long description text Lorem Ipsum Lorem Ipsum Lorem Ipsum",
+            wrap: true,
+            fontScale: 0.6,
+            align: "left",
+            color: color.black,
+        }
+    ]
+
+];
+
 templates: [
     ...(sharedComponents.warningLabelTemplates),
-    sharedComponents.cardHoverDetail
+    sharedComponents.cardHoverDetail,
+    encounterModifierDisplayTemplate
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -647,6 +708,7 @@ var encounterModifierDisplay = $Box {
 } children [
 
     $Box {
+        name: "encounter_modifier_parent",
         styles: [
             {
                 style_priority: 1,
@@ -660,7 +722,7 @@ var encounterModifierDisplay = $Box {
             {
                 style_priority: 1,
                 positionLeft: (worldWidth - 50.0)#points,
-                style_animtion: {
+                style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.linear
                 }
@@ -669,7 +731,7 @@ var encounterModifierDisplay = $Box {
                 style_priority: 2,
                 style_condition: hover(),
                 positionLeft: (worldWidth - 400)#points,
-                style_animtion: {
+                style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.linear
                 }
@@ -679,57 +741,6 @@ var encounterModifierDisplay = $Box {
         debug: true
     } children [
 
-        $Box {
-            styles: [
-                {
-                    flexDirection: flexDirection.row,
-                    width: 100#percent,
-                }
-            ],
-        } children [
-            $Box {
-                styles: [
-                    {
-                        background: "encounter_modifier_frost",
-                        aspectRatio: 1.0,
-                        marginTop: 20#points,
-                        width: 40#points,
-                    }
-                ],
-            },
-
-            $Box {
-                styles: [
-                    {
-                        flexDirection: flexDirection.column,
-                        alignItems: align.flexStart,
-                        marginLeft: 20#points,
-                    }
-                ]
-            } children [
-                $Label {
-                    font: "red_wing",
-                    text: "Frost",
-                    fontScale: 0.6,
-                    align: "left",
-                    color: color.red
-                },
-                $Label {
-                    styles: [
-                        {
-                            width: 370#points
-                        }
-                    ],
-                    font: "red_wing",
-                    text: "Some long description text Lorem Ipsum Lorem Ipsum Lorem Ipsum",
-                    wrap: true,
-                    fontScale: 0.6,
-                    align: "left",
-                    color: color.black,
-                }
-            ]
-
-        ]
     ],
 ];
 
