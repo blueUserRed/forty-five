@@ -8,6 +8,8 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
+import com.fourinachamber.fortyfive.utils.asArray
+import com.fourinachamber.fortyfive.utils.toFloatRange
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
 import onj.parser.OnjParser
@@ -28,7 +30,8 @@ data class DetailMap(
     val endNode: MapNode,
     val decorations: List<MapDecoration>,
     val isArea: Boolean,
-    val biome: String
+    val biome: String,
+    val progress: ClosedFloatingPointRange<Float>
 ) {
 
     /**
@@ -73,6 +76,7 @@ data class DetailMap(
         "decorations" with decorations.map { it.asOnjObject() }
         "isArea" with isArea
         "biome" with biome
+        "progress" with progress.asArray()
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -144,7 +148,6 @@ data class DetailMap(
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
             val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
-            val biomeName = onj.get<String?>("biome")
             return DetailMap(
                 file.nameWithoutExtension(),
                 nodes[startNodeIndex].build(),
@@ -152,7 +155,8 @@ data class DetailMap(
                 decorations,
                 onj.get<Boolean>("isArea"),
                 onj.get<String>("biome"),
-                )
+                onj.get<OnjArray>("progress").toFloatRange()
+            )
         }
 
         private val mapOnjSchema: OnjSchema by lazy {

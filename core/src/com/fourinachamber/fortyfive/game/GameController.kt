@@ -139,7 +139,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var gameRenderPipeline: GameRenderPipeline
     private lateinit var encounterMapEvent: EncounterMapEvent
 
-    private val encounterModifier: MutableList<EncounterModifier> = mutableListOf()
+    private val encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
 
     var reservesSpent: Int = 0
         private set
@@ -170,7 +170,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
         FortyFive.useRenderPipeline(gameRenderPipeline)
-        encounterModifier.add(EncounterModifier.Moist())
         FortyFiveLogger.title("game starting")
 
         warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent
@@ -367,6 +366,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         this.enemyArea = enemyArea
     }
 
+    fun addEncounterModifier(modifier: EncounterModifier) {
+        encounterModifiers.add(modifier)
+    }
+
     /**
      * puts [card] in [slot] of the revolver (checks if the card is a bullet)
      */
@@ -389,7 +392,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.onEnter()
             checkCardMaximums()
         }
-        encounterModifier
+        encounterModifiers
             .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
             .collectTimeline()
             .let { include(it) }
@@ -609,7 +612,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardToShoot?.let {
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot))
             }
-            encounterModifier
+            encounterModifiers
                 .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }
                 .collectTimeline()
                 .let { include(it) }
@@ -624,7 +627,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
-        if (encounterModifier.any { !it.shouldApplyStatusEffects() }) return Timeline()
+        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
         action {
             enemy.applyEffect(statusEffect)
         }
@@ -642,7 +645,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 .mapNotNull { it.card }
                 .forEach { it.onRevolverRotation(rotation) }
         }
-        encounterModifier
+        encounterModifiers
             .mapNotNull { it.executeAfterRevolverRotated(newRotation, this@GameController) }
             .collectTimeline()
             .let { include(it) }
@@ -660,7 +663,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun <T> modifiers(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
         var cur = initial
-        encounterModifier.forEach { cur = transformer(it, cur) }
+        encounterModifiers.forEach { cur = transformer(it, cur) }
         return cur
     }
 
@@ -885,7 +888,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun enemyDefeated(enemy: Enemy) {
         SaveState.enemiesDefeated++
-        hasWon = true
+        if (enemyArea.enemies.all { it.isDefeated }) hasWon = true
         FortyFiveLogger.debug(logTag, "player won")
     }
 
