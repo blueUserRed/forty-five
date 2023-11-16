@@ -14,7 +14,7 @@ nodes: [
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
-            npc: 'Friend of your Father',
+            npc: 'mysterious guy', //for testing only TODO change to something differet (idk what, not implemented)
         }
     },
     {

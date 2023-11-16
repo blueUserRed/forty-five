@@ -237,8 +237,8 @@ interface DisplayDetailsOnHoverActor {
 
     fun getHoverDetailData(): Map<String, OnjValue>
 
-    fun onDetailDisplayStarted() { }
-    fun onDetailDisplayEnded() { }
+    fun onDetailDisplayStarted() {}
+    fun onDetailDisplayEnded() {}
 
 }
 
@@ -338,10 +338,12 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
     partOfHierarchy: Boolean = false
 ) : CustomLabel(screen, templateString.string, labelStyle, partOfHierarchy), BackgroundActor {
 
+    var skipTextCheck = false
+
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         val newString = templateString.string
-        if (!textEquals(newString)) {
+        if (!textEquals(newString) && !skipTextCheck) {
             setText(newString)
         }
         super.draw(batch, parentAlpha)
