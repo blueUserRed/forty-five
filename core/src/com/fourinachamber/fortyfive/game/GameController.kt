@@ -370,7 +370,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun addEncounterModifier(modifier: EncounterModifier) {
         encounterModifiers.add(modifier)
-        println("adding: $modifier")
         val actor = curScreen.screenBuilder.generateFromTemplate(
             encounterModifierDisplayTemplateName,
             mapOf(
@@ -382,8 +381,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"),
             curScreen
         )!!
-        println(actor)
-        println(curScreen.namedActorOrError(encounterModifierParentName))
     }
 
     /**
