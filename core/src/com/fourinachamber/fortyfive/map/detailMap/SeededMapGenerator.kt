@@ -59,7 +59,8 @@ class SeededMapGenerator(
             lastNode.asNode!!,
             decos,
             false,
-            biome
+            biome,
+            restrictions.progress
         )
     }
 
@@ -96,7 +97,6 @@ class SeededMapGenerator(
             } else {
                 val curNode = nodesWithoutEvents.random(rnd)
                 curNode.event = event
-                if (event is EncounterMapEvent) event.encounterModifierNames = getModifier()
                 curNode.nodeTexture = nodeTexture
                 nodesWithoutEvents.remove(curNode)
             }
@@ -118,7 +118,6 @@ class SeededMapGenerator(
                 val (_, eventCreator, nodeTexture) = restrictions.optionalEvents[choice]
                 curNode.event = eventCreator()
                 val event = curNode.event
-                if (event is EncounterMapEvent) event.encounterModifierNames = getModifier()
                 curNode.nodeTexture = nodeTexture
             }
             nodesWithoutEvents.remove(curNode)
@@ -141,27 +140,6 @@ class SeededMapGenerator(
         nodes.add(newEndNode)
         return newEndNode
     }
-
-    private fun getModifier(): Set<String> {
-        val encounterProps = restrictions.encounterProps.toMutableList()
-        val res: MutableSet<String> = mutableSetOf()
-        val nbrOfEncounterIndex =
-            RandomCardSelection.getRandomIndex(restrictions.nbrOfEncounters.map { it.second.toFloat() }
-                .toMutableList(), rnd)
-        repeat(restrictions.nbrOfEncounters[max(nbrOfEncounterIndex, 0)].first) {
-            if (encounterProps.isEmpty()) return res
-            val encIndex = RandomCardSelection.getRandomIndex(encounterProps.map { it.second.toFloat() }
-                .toMutableList(), rnd)
-            try {
-                res.add((encounterProps[encIndex].first))
-            } catch (e: Exception) {
-                throw Exception("Unknown encounter Modifier: ${encounterProps[encIndex]}.", e)
-            }
-            encounterProps.removeAt(encIndex)
-        }
-        return res
-    }
-
 
     /**
      * adds the areas at the end, after all other nodes were placed
@@ -1496,10 +1474,7 @@ data class MapRestriction(
     val pathTotalWidth: Float = 2.5F,
     val minDistanceBetweenNodes: Float = 15F,
     val exitNodeTexture: ResourceHandle,
-    /**
-     * has the encounter Probabilities for this map with the weight for each possibility
-     */
-    val encounterProps: List<Pair<String, Int>>,
+    val progress: ClosedFloatingPointRange<Float>,
     private val avgNbrOfEncounters: Int,
 ) {
     val nbrOfEncounters: List<Pair<Int, Int>>
@@ -1564,11 +1539,8 @@ data class MapRestriction(
                     )
                 },
             exitNodeTexture = onj.get<String>("exitNodeTexture"),
-            encounterProps = onj.get<OnjArray>("encounterModifiers").value.map { it as OnjObject }.map {
-                it.get<String>("name") to
-                        it.get<Long>("weight").toInt()
-            },
             avgNbrOfEncounters = onj.get<Long>("avgNbrOfEncounters").toInt(),
+            progress = onj.get<OnjArray>("progress").toFloatRange()
         )
     }
 }
