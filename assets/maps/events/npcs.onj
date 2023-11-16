@@ -1,89 +1,116 @@
 import "imports/colors.onj" as color;
 
+var shake = $ShakeTextAction {
+    xSpeed: 0.2,
+    xMagnitude: 1.0,
+    ySpeed: 0.1,
+    yMagnitude: 1.0,
+};
 
 npcs: [
-
     {
-        name: "my_cool_npc",
-        dialog: {
-            parts: [
-            ],
-            defaults: {
-                font: "red_wing",
-                fontScale: 0.1,
-                color: color.black
-            }
-        },
-        image: {
-            textureName: "shop_npcs_default",
-//            offsetX: 20.0,
-            scale: 2.48
-        }
-    },
-
-
-
-    {
-        name: "Guy from Salem",
+        name: "traveling_merchant",
+        displayName: "Traveling Merchant",
         dialog: {
             parts: [
                 {
-                    text: [
-                        $Text { text: "Hello" },
-                    ],
-                    next: $Continue { }
-                },
-                {
-                    text: [
-                        $Text { text: "I just wanted to visit Aqua Dulche to buy some goods..." },
-                    ],
-                    next: $Continue { }
-                },
-                {
-                    text: [
-                        $Text { text: "when suddenly the  " },
-                        $Text { text: "gang ", color: color.red },
-                        $Icon { icon: "enemy_texture" },
-                        $Text { text: " took over the entire road" },
-                    ],
-                    next: $Continue { }
-                },
-                {
-                    text: [
-                        $Text { text: "Guess I'm kinda stuck here now..." }
-                    ],
-                    next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
+                    rawText: "Hi and bye!",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
                 }
             ],
             defaults: {
                 font: "red_wing",
                 fontScale: 0.1,
-                color: color.black
+                color: color.forty_white
             }
         },
         image: {
             textureName: "shop_npcs_default",
-            //            offsetX: 20.0,
             scale: 2.48
         }
     },
+    {
+        name: "traveling_merchan2t",
+        displayName: "Traveling Merchant2",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Hi and bye!",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                }
+            ],
+            //                [
+//                    {
+//                        text: [
+//                            $Text { text: "Hello" },
+//                        ],
+//                        next: $Continue { }
+//                    },
+//                    {
+//                        text: [
+//                            $Text { text: "I just wanted to visit Aqua Dulche to buy some goods..." },
+//                        ],
+//                        next: $Continue { }
+//                    },
+//                    {
+//                        text: [
+//                            $Text { text: "when suddenly the  " },
+//                            $Text { text: "gang ", color: color.red },
+//                            $Icon { icon: "enemy_texture" },
+//                            $Text { text: " took over the entire road" },
+//                        ],
+//                        next: $Continue { }
+//                    },
+//                    {
+//                        text: [
+//                            $Text { text: "Guess I'm kinda stuck here now..." }
+//                        ],
+//                        next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
+//                    }
+//                ],
 
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.1,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "shop_npcs_default",
+            scale: 2.48
+        }
+    },
 
 
     {
         name: "mysterious guy",
+        displayName: "Ben Dover",
         dialog: {
             parts: [
                 {
-                    text: [
-                        $Text { text: "Hey there!" },
-                    ],
-                    next: $Continue { }
+                    rawText: "Hey there!",
+                    next: $Continue {
+                    }
                 },
                 {
-                    text: [
-                        $Text { text: "Did ya hear about the " },
-                        $Text { text: "merchant on the endless road?" },
+                    rawText: "Did ya hear about $2the merchant$2 §§enemy_texture§§ on the $1endless road$1?",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Color {
+                            indicator: "$2",
+                            color: color.grey
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
                     ],
                     next: $ChooseNextPart {
                         choices: [
@@ -103,17 +130,16 @@ npcs: [
                     }
                 },
                 {
-                    text: [
-                        $Text { text: "Yes. It's called that because it is a circle. " },
-                        $Text { text: "You go the entire way through, you " },
-                        $Text { text: "end back up in Salem. " },
-                        $Text { text: "But be careful though, " },
-                        $Text { text: "it's full of " },
-                        $Text { text: "gang members ", color: color.red },
-                        $Icon { icon: "enemy_texture" },
-                        $Text { text: "." },
-                        $Text { text: "And somewhere among them is the " },
-                        $Text { text: "merchant." },
+                    rawText: "Yes. It's called that because it is a circle. You go the entire way through, you end back up in Salem. But be careful though, it's full of $2$1gang members$1 §§enemy_texture§§$2. And somewhere among them is the merchant.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$2",
+                            action: shake,
+                        },
                     ],
                     next: $ChooseNextPart {
                         choices: [
@@ -129,22 +155,21 @@ npcs: [
                     }
                 },
                 {
-                    text: [
-                        $Text { text: "Hes a travelling merchant, " },
-                        $Text { text: "just like the one you found over there." },
-                        $Text { text: "However, I heard he sells his items at " },
-                        $Text { text: "a much cheaper price." },
-                    ],
-                    next: $Continue { }
+                    rawText: "Hes a travelling merchant, just like the one you found over there. However, I heard he sells his items at a much cheaper price.",
+                    next: $Continue {
+                    }
                 },
                 {
-                    text: [
-                        $Text { text: "The catch is, he is somewhere on the " },
-                        $Text { text: "endless road, impossible to find. A real " },
-                        $Text { text: "needle ", color: color.grey },
-                        $Text { text: "in a " },
-                        $Text { text: "haystack", color: color.yellow },
-                        $Text { text: "." },
+                    rawText: "The catch is, he is somewhere on the endless road, impossible to find. A real $1needle$1 in a $2haystack$2.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.grey
+                        },
+                        $Color {
+                            indicator: "$2",
+                            color: color.yellow
+                        },
                     ],
                     next: $ChooseNextPart {
                         choices: [
@@ -160,21 +185,20 @@ npcs: [
                     }
                 },
                 {
-                    text: [
-                        $Text { text: "bye!" },
-                    ],
-                    next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
+                    rawText: "Bye!",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
                 }
             ],
             defaults: {
                 font: "red_wing",
-                fontScale: 0.1,
-                color: color.black
-            }
+                fontScale: 1.0,
+                color: color.forty_white
+            },
         },
         image: {
             textureName: "shop_npcs_default",
-            //            offsetX: 20.0,
             scale: 2.48
         }
     },
