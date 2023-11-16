@@ -6,13 +6,19 @@ use Common;
 use Screen;
 use Style;
 
-var worldWidth = 160.0;
-var worldHeight = 90.0;
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
 
 assets: {
     useAssets: [
         "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
-        "heart_texture", "enemy_texture"
+        "enemy_texture",
+        "dialog_name_field",
+        "dialog_continue",
+        "dialog_background",
+        "dialog_answer_option",
+        "dialog_answer_option_hover",
+        "shop_npcs_default",
     ]
 },
 
@@ -33,34 +39,48 @@ options: {
     }
 },
 
-var dialogWidget = $DialogWidget {
+var dialogWidget = $Box {
     styles: [
         {
-            flexDirection: flexDirection.row,
-            background: "hover_detail_background",
-            width: 80.0#percent,
+            positionType: positionType.absolute,
+            width: 75.0#percent,
             height: 25.0#percent,
-//                minHeight: (5.0*10)#points,
-            positionBottom: (2.0*10)#points,
-            alignItems: align.center,
+            positionBottom: 0#points,
             justifyContent: justify.center,
-            flexWrap: wrap.wrap,
-            paddingLeft: (13.0*10)#points,
-            paddingRight: (13.0*10)#points,
-            paddingTop: (3.0*10)#points,
-            paddingBottom: (3.0*10)#points,
+            background: "dialog_background",
+            paddingLeft: 190#points,
+            paddingRight: 70#points,
+            paddingTop: 30#points,
+            paddingBottom: 30#points,
+            touchable: touchable.enabled,
+            alpha: 0.6,
         }
     ],
-    progressTime: 0.01,
-    advanceArrowDrawable: "heart_texture",
-    advanceArrowOffset: 1.0,
-    touchable: "enabled",
-    optionsBox: "options_box",
-    optionsFont: "red_wing",
-    optionsFontScale: 0.1,
-    optionsFontColor: color.black,
-    name: "dialog_widget"
-};
+} children [
+
+    $DialogWidget {
+        styles: [
+            {
+                width: 87.0#percent,
+
+                height: 100.0#percent,
+                alpha: 1 / 0.6,
+            }
+        ],
+        progressTime: 0.01,
+        advanceArrowDrawable: "dialog_continue",
+        advanceArrowOffset: -75.0,
+        touchable: "enabled",
+        optionsBox: "options_box",
+        speakingPersonLabel: "person_label",
+        defaults: {
+            font: "red_wing",
+            fontScale: 50.0,
+            color: color.forty_white
+        },
+        name: "dialog_widget"
+    }
+];
 
 root: $Box {
     styles: [
@@ -70,20 +90,16 @@ root: $Box {
         }
     ]
 } children [
-
     $Box {
         styles: [
             {
                 style_priority: 1,
-                background: "hover_detail_background",
                 positionType: positionType.absolute,
-                positionTop: (35.0*10)#points,
-                positionRight: (10.0*10)#points,
-                justifyContent: justify.center,
+                positionBottom: (250)#points,
+                positionRight: (300)#points,
+                //                paddingRight: 20#points,
+
                 flexDirection: flexDirection.column,
-                width: (28.0*10)#points,
-                height: (20.0*10)#points,
-                padding: (2*10)#points,
                 detached: true
             },
             {
@@ -99,8 +115,8 @@ root: $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: (0.0*10)#points,
-                positionRight: (0.0*10)#points,
+                positionTop: 0#points,
+                positionRight: 0#points,
                 width: 100.0#percent,
                 height: 100.0#percent,
                 flexDirection: flexDirection.row,
@@ -108,9 +124,82 @@ root: $Box {
                 justifyContent: justify.center
             }
         ],
-        debug: true,
     } children [
         dialogWidget
+    ],
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                flexDirection: flexDirection.column,
+                positionBottom: (180)#points,
+                positionLeft: (280)#points,
+            },
+        ],
+    } children [
+        $TemplateLabel {
+            name: "person_label",
+            template: "{map.curEvent.person.displayName}",
+            font: "red_wing",
+            color: color.dark_brown,
+            fontScale: 0.9,
+            align: "center",
+            styles: [
+                {
+                    width: 180#percent,
+                    height: 60#points,
+                    alpha: 0.8,
+                    background: "dialog_name_field",
+                },
+            ],
+        }
     ]
+],
 
+templates: [
+    $Label {
+        template_name: "optionsItem", //TODO make only background transparent, not text itself
+        template_keys: {
+            "text": "text",
+        },
+        text: "",
+        font: "red_wing",
+        color: color.forty_white,
+        fontScale: 0.8,
+        align: "center",
+        styles: [
+            {
+                style_priority: 1,
+                width: 135#percent,
+                height: 60#points,
+                margin: 10#points,
+                alpha: 0.8,
+                background: "dialog_answer_option",
+            },
+            {
+                style_priority: 2,
+                background: "dialog_answer_option_hover",
+                style_condition: hover(),
+            }
+        ],
+    },
+    $Image {
+        template_name: "personImageLeft",
+        template_keys: {
+            "textureName": "textureName",
+            "scaleX": "scale",
+            "scaleY": "scale",
+        },
+        textureName: "",
+        scaleX: 1.0,
+        scaleY: 1.0,
+        //reportDimensionsWithScaling?: boolean,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionBottom: (0)#points,
+                positionLeft: (30)#points,
+            }
+        ],
+    },
 ]
