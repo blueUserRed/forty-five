@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -22,6 +23,7 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import onj.value.OnjString
 import java.lang.Integer.max
 import java.lang.Integer.min
 
@@ -368,6 +370,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun addEncounterModifier(modifier: EncounterModifier) {
         encounterModifiers.add(modifier)
+        println("adding: $modifier")
+        val actor = curScreen.screenBuilder.generateFromTemplate(
+            encounterModifierDisplayTemplateName,
+            mapOf(
+                "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+                "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+                "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+            ),
+            curScreen.namedActorOrError(encounterModifierParentName) as? FlexBox
+                ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"),
+            curScreen
+        )!!
+        println(actor)
+        println(curScreen.namedActorOrError(encounterModifierParentName))
     }
 
     /**
