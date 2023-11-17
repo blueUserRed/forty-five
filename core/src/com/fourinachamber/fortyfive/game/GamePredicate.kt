@@ -25,7 +25,7 @@ fun interface GamePredicate {
         } }
 
         val anyEnemyHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
-            controller.enemyArea.enemies.any { statusEffect in it.statusEffect }
+            controller.activeEnemies.any { statusEffect in it.statusEffect }
         } }
 
         val enemyDoesNotHaveStatusEffect = { statusEffect: StatusEffect, enemy: Enemy -> GamePredicate {

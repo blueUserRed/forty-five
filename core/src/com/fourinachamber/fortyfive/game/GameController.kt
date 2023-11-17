@@ -162,6 +162,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var permanentWarningId: Int? = null
     private var isPermanentWarningHard: Boolean = false
 
+    val activeEnemies: List<Enemy>
+        get() = enemyArea.enemies.filter { !it.isDefeated }
+
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is EncounterMapEvent) { // TODO: comment back in
@@ -903,6 +906,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun enemyDefeated(enemy: Enemy) {
+        enemy.onDefeat()
+        enemyArea.onEnemyDefeated()
         SaveState.enemiesDefeated++
         if (enemyArea.enemies.all { it.isDefeated }) hasWon = true
         FortyFiveLogger.debug(logTag, "player won")
