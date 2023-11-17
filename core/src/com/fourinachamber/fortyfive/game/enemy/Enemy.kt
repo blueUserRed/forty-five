@@ -72,10 +72,11 @@ class Enemy(
     var currentHealth: Int = health
         private set(value) {
             FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
-            if (field > 0 && value <= 0) {
+            val oldValue = field
+            field = value
+            if (oldValue > 0 && value <= 0) {
                 gameController.enemyDefeated(this)
             }
-            field = value
         }
 
     val isDefeated: Boolean
