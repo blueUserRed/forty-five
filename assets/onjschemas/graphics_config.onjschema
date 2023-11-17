@@ -50,6 +50,20 @@ icons: {
     wrathOfTheWitch: iconConfig,
 },
 
+var encounterModifierConfig = {
+    icon: string,
+    displayName: string,
+    description: string,
+};
+
+encounterModifiers: {
+    rain: encounterModifierConfig,
+    frost: encounterModifierConfig,
+    bewitchedMist: encounterModifierConfig,
+    lookalike: encounterModifierConfig,
+    moist: encounterModifierConfig,
+},
+
 stringTemplates:  {
     rottenDetailText: string,
     buffDetailText: string,

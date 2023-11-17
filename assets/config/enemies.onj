@@ -16,7 +16,7 @@ enemies: [
 
     {
         name: "Outlaw",
-        baseHealth: 100,
+        baseHealth: 1,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -50,7 +50,7 @@ enemies: [
 
     {
         name: "Pyro",
-        baseHealth: 100,
+        baseHealth: 1,
         texture: "enemy_pyro",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -127,7 +127,7 @@ enemies: [
 
     {
         name: "Witch",
-        baseHealth: 100,
+        baseHealth: 1,
         texture: "enemy_witch",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",

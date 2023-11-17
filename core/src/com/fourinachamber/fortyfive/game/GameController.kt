@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -22,6 +23,7 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import onj.value.OnjString
 import java.lang.Integer.max
 import java.lang.Integer.min
 
@@ -42,6 +44,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val warningParentName = onj.get<String>("warningParentName")
     private val statusEffectDisplayName = onj.get<String>("statusEffectDisplayName")
     private val putCardsUnderDeckWidgetOnj = onj.get<OnjObject>("putCardsUnderDeckWidget")
+    private val encounterModifierDisplayTemplateName = onj.get<String>("encounterModifierDisplayTemplateName")
+    private val encounterModifierParentName = onj.get<String>("encounterModifierParentName")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -366,6 +370,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun addEncounterModifier(modifier: EncounterModifier) {
         encounterModifiers.add(modifier)
+        val actor = curScreen.screenBuilder.generateFromTemplate(
+            encounterModifierDisplayTemplateName,
+            mapOf(
+                "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+                "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+                "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+            ),
+            curScreen.namedActorOrError(encounterModifierParentName) as? FlexBox
+                ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"),
+            curScreen
+        )!!
     }
 
     /**
@@ -651,7 +666,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val info = TriggerInformation(multiplier = newRotation.amount)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
         }
-        include(enemyArea.getTargetedEnemy().executeStatusEffectsAfterRevolverRotation(newRotation))
+        enemyArea
+            .enemies
+            .map { it.executeStatusEffectsAfterRevolverRotation(newRotation) }
+            .collectTimeline()
+            .let { include(it) }
         include(executePlayerStatusEffectsAfterRevolverRotation(newRotation))
     }
 

@@ -142,6 +142,7 @@ $Widget {
         scaleX: float,
         scaleY: float,
         reportDimensionsWithScaling?: boolean,
+        hoverDetailActor?: string,
         ...widgetSharedKeys
     }
 
@@ -427,6 +428,7 @@ $ScreenController {
         cardsParentName: string,
         addToDeckWidgetName: string,
         addToBackpackWidgetName: string,
+        hoverDetailActorTemplateName: string,
     }
 
     $ChooseCardScreenController {

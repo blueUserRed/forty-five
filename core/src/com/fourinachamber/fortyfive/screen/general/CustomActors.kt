@@ -212,7 +212,7 @@ interface OffSettable {
 
 interface DisplayDetailsOnHoverActor {
 
-    val actorTemplate: String
+    var actorTemplate: String
     var detailActor: Actor?
 
     fun <T> registerOnHoverDetailActor(
@@ -223,16 +223,16 @@ interface DisplayDetailsOnHoverActor {
     fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
-        detailActor.layout()
-        val prefWidth = detailActor.prefWidth
         val prefHeight = detailActor.prefHeight
+        val prefWidth = detailActor.prefWidth
         val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
         detailActor.setBounds(
-            x + actor.width / 2 - prefWidth / 2,
+            x + actor.width / 2 - detailActor.width / 2,
             y + actor.height,
-            prefWidth,
+            if (prefWidth == 0f) detailActor.width else prefWidth,
             prefHeight
         )
+        detailActor.invalidateHierarchy()
     }
 
     fun getHoverDetailData(): Map<String, OnjValue>
@@ -356,8 +356,11 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
 open class CustomImageActor @AllThreadsAllowed constructor(
     drawableHandle: ResourceHandle?,
     private val screen: OnjScreen,
-    override val partOfHierarchy: Boolean = false
-) : Image(), Maskable, ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor, OffSettable {
+    override val partOfHierarchy: Boolean = false,
+    override var actorTemplate: String = "",
+    var hoverDetailDataProvider: () -> Map<String, OnjValue> = { mapOf() }
+) : Image(), Maskable, ZIndexActor, DisableActor,
+    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailsOnHoverActor {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
@@ -408,9 +411,13 @@ open class CustomImageActor @AllThreadsAllowed constructor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
+    override var detailActor: Actor? = null
+
     init {
         bindHoverStateListeners(this)
     }
+
+    override fun getHoverDetailData(): Map<String, OnjValue> = hoverDetailDataProvider()
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -469,6 +476,21 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
         x -= offsetX
         y -= offsetY
+    }
+
+    override fun setBoundsOfHoverDetailActor(actor: Actor) {
+        val detailActor = detailActor
+        if (detailActor !is Layout) return
+        val prefHeight = detailActor.prefHeight
+        val prefWidth = detailActor.prefWidth
+        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+        detailActor.setBounds(
+            x + actor.width / 2 - detailActor.width / 2,
+            y + actor.height,
+            if (prefWidth == 0f) detailActor.width else prefWidth,
+            prefHeight
+        )
+        detailActor.invalidateHierarchy()
     }
 
     fun forceLoadDrawable() {
@@ -621,6 +643,7 @@ open class CustomFlexBox(
         addFlexBoxStyles(screen)
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
+        addOffsetableStyles(screen)
     }
 
 

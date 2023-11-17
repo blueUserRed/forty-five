@@ -34,7 +34,7 @@ object GraphicsConfig {
 
     @MainThreadOnly
     fun damageOverlay(screen: OnjScreen): Timeline.TimelineAction {
-        val overlayActor = CustomImageActor( damageOverlayTexture, screen)
+        val overlayActor = CustomImageActor(damageOverlayTexture, screen)
         val viewport = screen.stage.viewport
         val anim = FadeInAndOutAnimation(
             0f, 0f,
@@ -142,6 +142,27 @@ object GraphicsConfig {
         return GameAnimationTimelineAction(anim)
     }
 
+    fun encounterModifierDisplayName(modifier: EncounterModifier): String {
+        val name = (modifier::class.simpleName ?: "").lowerCaseFirstChar()
+        val config = encounterModifierConfig.getOr<OnjObject?>(name, null)
+            ?: throw RuntimeException("unknown encounter modifier: $name")
+        return config.get<String>("displayName")
+    }
+
+    fun encounterModifierIcon(modifier: EncounterModifier): String {
+        val name = (modifier::class.simpleName ?: "").lowerCaseFirstChar()
+        val config = encounterModifierConfig.getOr<OnjObject?>(name, null)
+            ?: throw RuntimeException("unknown encounter modifier: $name")
+        return config.get<String>("icon")
+    }
+
+    fun encounterModifierDescription(modifier: EncounterModifier): String {
+        val name = (modifier::class.simpleName ?: "").lowerCaseFirstChar()
+        val config = encounterModifierConfig.getOr<OnjObject?>(name, null)
+            ?: throw RuntimeException("unknown encounter modifier: $name")
+        return config.get<String>("description")
+    }
+
     @MainThreadOnly
     fun cardFont(screen: OnjScreen): PixmapFont = ResourceManager.get(screen, cardFont)
     fun cardFontScale(): Float = cardFontScale
@@ -234,6 +255,8 @@ object GraphicsConfig {
         val onShootPostProcessor = config.get<OnjObject>("shootPostProcessor")
         shootPostProcessor = onShootPostProcessor.get<String>("name")
         shootPostProcessorDuration = (onShootPostProcessor.get<Double>("duration") * 100).toInt()
+
+        encounterModifierConfig = config.get<OnjObject>("encounterModifiers")
     }
 
     private lateinit var shootPostProcessor: String
@@ -287,5 +310,7 @@ object GraphicsConfig {
     private var fadeDuration by Delegates.notNull<Int>()
     private var fadeIn by Delegates.notNull<Int>()
     private var fadeOut by Delegates.notNull<Int>()
+
+    private lateinit var encounterModifierConfig: OnjObject
 
 }

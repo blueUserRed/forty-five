@@ -592,6 +592,11 @@ class ScreenBuilder(val file: FileHandle) {
             }
         }
 
+        widgetOnj.ifHas<String>("hoverDetailActor") { name ->
+            actor as DisplayDetailsOnHoverActor
+            actor.actorTemplate = name
+        }
+
         widgetOnj.ifHas<Long>("zIndex") {
             if (this !is ZIndexActor) throw RuntimeException("can only apply z-index to ZIndexActors")
             fixedZIndex = it.toInt()

@@ -196,6 +196,8 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
     return Timeline(actions)
 }
 
+fun String.lowerCaseFirstChar(): String = this.replaceFirstChar { it.lowercaseChar() }
+
 inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
     val chunks = mutableListOf<MutableList<T>>(mutableListOf())
     forEach { element ->
