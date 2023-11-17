@@ -142,6 +142,7 @@ $Widget {
         scaleX: float,
         scaleY: float,
         reportDimensionsWithScaling?: boolean,
+        hoverDetailActor?: string,
         ...widgetSharedKeys
     }
 
@@ -219,7 +220,7 @@ $Widget {
     $AdvancedText {
         font: string,
         rawText: string,
-//        parts: $AdvancedTextPart[],
+        effects?: $AdvancedTextEffect[],
         defaults: {
             font: string,
             fontScale: float,
@@ -233,9 +234,12 @@ $Widget {
         advanceArrowDrawable: string,
         advanceArrowOffset: float,
         optionsBox: string,
-        optionsFont: string,
-        optionsFontColor: Color,
-        optionsFontScale: float,
+        speakingPersonLabel: string,
+        defaults: {
+            font: string,
+            fontScale: float,
+            color: Color
+        },
         ...widgetSharedKeys
     }
 
@@ -290,24 +294,36 @@ $Widget {
 
 }
 
-var advancedTextPartSharedKeys = {
-    actions?: $AdvancedTextPartAction[]
+var advancedTextEffectSharedKeys = {
+    indicator: string,
 };
 
-$AdvancedTextPart {
+$AdvancedTextEffect {
 
-    $Text {
-        text: string,
-        font?: string,
-        color?: Color,
-        fontScale?: float,
-        ...advancedTextPartSharedKeys
+    $Color {
+        color: Color,
+        ...advancedTextEffectSharedKeys
     }
 
-    $Icon {
-        icon: string,
-        ...advancedTextPartSharedKeys
+    $Font {
+        font: string,
+        ...advancedTextEffectSharedKeys
     }
+
+    $FontScale {
+        fontScale: float,
+        ...advancedTextEffectSharedKeys
+    }
+
+    $Action {
+        action: $AdvancedTextPartAction,
+        ...advancedTextEffectSharedKeys
+    }
+
+//    $Icon { //TODO icons, maybe like this, maybe part of the text
+//        icon: string,
+//        ...advancedTextPartSharedKeys
+//    }
 
 }
 
@@ -412,6 +428,7 @@ $ScreenController {
         cardsParentName: string,
         addToDeckWidgetName: string,
         addToBackpackWidgetName: string,
+        hoverDetailActorTemplateName: string,
     }
 
     $ChooseCardScreenController {

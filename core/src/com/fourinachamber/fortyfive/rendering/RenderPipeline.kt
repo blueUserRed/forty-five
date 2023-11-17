@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Timeline
 
@@ -111,7 +113,7 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
 
     }.asAction()
 
-    fun fadeToBlackTimelineAction(): Timeline.TimelineAction {
+    private fun fadeToBlackTimelineAction(): Timeline.TimelineAction {
         val duration = 2000
         return object : Timeline.TimelineAction() {
 
@@ -161,4 +163,53 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
         }
     }
 
+}
+
+class PostProcessedRenderPipeline(
+    private val screen: OnjScreen,
+    private val postProcessorHandle: ResourceHandle,
+    private val shaderPreparer: ((shader: BetterShader) -> Unit)? = null
+) : Renderable {
+
+    private val postProcessor: BetterShader by lazy {
+        ResourceManager.get(screen, postProcessorHandle)
+    }
+
+    override fun render(delta: Float) {
+        val fbo = try {
+            FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
+        } catch (e: java.lang.IllegalStateException) {
+            // construction of FrameBuffer sometimes fails when the window is minimized
+            return
+        }
+
+        ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
+        fbo.begin()
+        screen.stage.viewport.apply()
+        screen.render(delta)
+        if (!screen.isVisible) {
+            // this has to be checked here because isVisible is set to false inside the render function
+            // TODO: fix this
+            fbo.end()
+            fbo.dispose()
+            return
+        }
+        fbo.end()
+        val batch = SpriteBatch()
+        postProcessor.shader.bind()
+        postProcessor.prepare(screen)
+        batch.shader = postProcessor.shader
+        shaderPreparer?.let { it(postProcessor) }
+        batch.begin()
+        batch.enableBlending()
+        batch.draw(
+            fbo.colorBufferTexture,
+            0f, 0f,
+            Gdx.graphics.width.toFloat(),
+            Gdx.graphics.height.toFloat(),
+            0f, 0f, 1f, 1f // flips the y-axis
+        )
+        batch.end()
+        fbo.dispose()
+    }
 }

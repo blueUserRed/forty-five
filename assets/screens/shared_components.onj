@@ -115,7 +115,8 @@ statusbarCenterDefaults: {
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 100#percent,
+                            height: 70#percent,
+                            aspectRatio: 1.0
                         }
                     ],
                 },
@@ -220,8 +221,7 @@ statusbarLeftDefaults: {
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 65#percent,
-                            width: 4.2#percent,
+                            height: 35#points,
                             aspectRatio: 1.0
                         }
                     ],
@@ -771,7 +771,7 @@ warningLabelUsedAssets: [
     "forty_white_texture", "warning_label_background_red", "title_screen_background", "red_wing"
 ],
 
-hoverDetail: $Box {
+cardHoverDetail: $Box {
     template_name: "card_hover_detail",
     template_keys: {
         "children.0.children.0.rawText": "text"
@@ -809,6 +809,6 @@ hoverDetail: $Box {
     ]
 ],
 
-hoverDetailUsedAssets: [
+cardHoverDetailUsedAssets: [
     "red_wing", "transparent_black_texture"
 ]

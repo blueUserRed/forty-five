@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
@@ -56,7 +57,8 @@ class DetailMapWidget(
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
-    private var mapOffset: Vector2 = Vector2(50f, 50f)
+    var mapOffset: Vector2 = Vector2(50f, 50f)
+        private set
 
     private var playerNode: MapNode = MapManager.currentMapNode
     private var playerPos: Vector2 = scaledNodePos(playerNode)
@@ -441,8 +443,16 @@ class DetailMapWidget(
         }
     }
 
+    // TODO: remove
+    private val edgeTestShader: BetterShader by lazy {
+        ResourceManager.get(screen, "map_edge_shader")
+    }
+
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges
+        batch.flush()
+        edgeTestShader.prepare(screen)
+        batch.shader = edgeTestShader.shader
         for ((node1, node2) in uniqueEdges) {
             val node1Pos = scaledNodePos(node1)
             val node2Pos = scaledNodePos(node2)
@@ -451,6 +461,7 @@ class DetailMapWidget(
             val length = Vector2(dx, dy).len()
             var angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
             if (dx < 0) angle = 360 - angle
+            edgeTestShader.shader.setUniformf("u_lineLength", length)
             batch.draw(
                 edgeTexture,
                 x + node1Pos.x + mapOffset.x + nodeSize / 2 - lineWidth / 2,
@@ -461,7 +472,9 @@ class DetailMapWidget(
                 1.0f, 1.0f,
                 angle
             )
+            batch.flush()
         }
+        batch.shader = null
     }
 
     private fun scaledNodePos(node: MapNode): Vector2 = Vector2(node.x, node.y) * mapScale
