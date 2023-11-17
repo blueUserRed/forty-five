@@ -1,9 +1,11 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.scenes.scene2d.Event
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.rendering.PostProcessedRenderPipeline
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.PopupConfirmationEvent
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -18,6 +20,15 @@ class MapScreenController : ScreenController() {
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
+        // TODO: do this properly
+        val mapWidget = onjScreen.namedActorOrError("map")
+        mapWidget as DetailMapWidget
+//        val pipeline = PostProcessedRenderPipeline(
+//            onjScreen,
+//            "bewitched_fog_dynamic_noise_shader",
+//            shaderPreparer = { it.shader.setUniformf("u_mapOffset", mapWidget.mapOffset) }
+//        )
+//        FortyFive.useRenderPipeline(pipeline)
         timeline.startTimeline()
         val map = MapManager.currentDetailMap
         if (!map.isArea) return

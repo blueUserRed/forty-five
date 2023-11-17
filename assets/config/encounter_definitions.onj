@@ -1,15 +1,16 @@
 
 encounter: [
-    {
-        enemies: [ "Witch", "Pyro"  ],
-        encounterModifier: [ "Moist", "BewitchedMist" ],
-        biomes: [ "wasteland", "bewitched_forest" ],
-        progress: [20.0, 50.0],
-        weight: 10
-    },
+//    {
+//        enemies: [ "Witch", "Pyro"  ],
+//        encounterModifier: [ "Moist", "BewitchedMist" ],
+//        biomes: [ "wasteland", "bewitched_forest" ],
+//        progress: [20.0, 50.0],
+//        weight: 10
+//    },
     {
         enemies: [ "Outlaw"  ],
-        encounterModifier: [],
+        encounterModifier: [ ],
+//        encounterModifier: [ "Moist", "BewitchedMist", "Frost", "Lookalike" ],
         biomes: [ "wasteland" ],
         progress: [0.0, 100.0],
         weight: 10

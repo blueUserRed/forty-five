@@ -17,7 +17,8 @@ class ShopCardsHandler(
     dataFile: String,
     private val screen: OnjScreen,
     private val parent: CustomScrollableFlexBox,
-    private val boughtIndices: MutableSet<Int>
+    private val boughtIndices: MutableSet<Int>,
+    private val cardHoverDetailTemplateName: String
 ) {
     private val _allCards: MutableList<Card>
     private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
@@ -79,6 +80,8 @@ class ShopCardsHandler(
             curParent,
             screen
         ) as CustomImageActor
+        screen.addOnHoverDetailActor(img)
+        img.hoverDetailDataProvider = { card.actor.getHoverDetailData() }
         img.programmedDrawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
         val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap2["name"] = OnjString("CardLabel" + parent.children.size)

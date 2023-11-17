@@ -145,6 +145,10 @@ textureAtlases: [
                 regionName: "player_bar"
             },
             {
+                handle: "encounter_modifier_background",
+                regionName: "encounter_modifier_background"
+            },
+            {
                 handle: "under_deck_background",
                 regionName: "under_deck_background"
             },
@@ -494,6 +498,14 @@ textures: [
         name: "enemy_outlaw",
         file: "textures/enemies/outlaw/outlaw.png"
     },
+    {
+        name: "encounter_modifier_frost",
+        file: "textures/encounter_modifier/frost.png"
+    },
+    {
+        name: "encounter_modifier_rain",
+        file: "textures/encounter_modifier/rain.png"
+    },
 ],
 
 cursors: [
@@ -510,7 +522,9 @@ shaders: [
         name: "earthquake_shader",
         file: "shaders/earthquake.glsl",
         constantArgs: {
-            timeOffset: 2_000
+            timeOffset: 1_500,
+            speed: 14.0,
+            mag: 0.2,
         }
     },
     {
@@ -527,6 +541,24 @@ shaders: [
     {
         name: "film_shader",
         file: "shaders/film.glsl",
+        constantArgs: {
+        }
+    },
+    {
+        name: "bewitched_fog_static_noise_shader",
+        file: "shaders/bewitched_fog_static_noise.glsl",
+        constantArgs: {
+        }
+    },
+    {
+        name: "bewitched_fog_dynamic_noise_shader",
+        file: "shaders/bewitched_fog_dynamic_noise.glsl",
+        constantArgs: {
+        }
+    },
+    {
+        name: "map_edge_shader",
+        file: "shaders/map_edge.glsl",
         constantArgs: {
         }
     },

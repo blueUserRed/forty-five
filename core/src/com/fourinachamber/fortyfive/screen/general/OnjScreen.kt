@@ -72,7 +72,8 @@ open class OnjScreen @MainThreadOnly constructor(
     private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
     private val additionalEarlyRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
 
-    private var isVisible: Boolean = false
+    var isVisible: Boolean = false
+        private set
 
     var defaultCursor: Either<Cursor, Cursor.SystemCursor> = Cursor.SystemCursor.Arrow.eitherRight()
         @MainThreadOnly set(value) {
@@ -380,6 +381,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun dispose() {
+        hide()
         screenController?.end()
         stage.dispose()
 //        toDispose.forEach(Disposable::dispose)

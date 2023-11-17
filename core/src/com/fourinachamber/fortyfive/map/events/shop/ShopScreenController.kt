@@ -28,6 +28,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
+    private val cardHoverDetailTemplateName = onj.get<String>("hoverDetailActorTemplateName")
 
     private lateinit var person: CustomImageActor
 
@@ -71,7 +72,13 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val defaults = shopFile.get<OnjObject>("defaults")
 
         val rnd = Random(context.seed)
-        shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
+        shopCardsHandler = ShopCardsHandler(
+            cardsFilePath,
+            screen,
+            cardsParentWidget,
+            context.boughtIndices,
+            cardHoverDetailTemplateName
+        )
         shopCardsHandler.addItems(rnd, context.type, personData.get<String>("defaultShopParameter"))
 
         val textToShow = text[(rnd.nextDouble() * text.size).toInt()] as OnjObject
