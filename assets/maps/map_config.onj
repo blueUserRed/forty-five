@@ -488,8 +488,8 @@ generatorConfig: {
                 maxNodes: 6,
                 maxSplits: 6,
                 splitProbability: 0.4,
-                startArea: "salem",
-                endArea: "aqua_dulche",
+                startArea: "start_area_demo",
+                endArea: "start_area_demo",
                 otherAreas: [
                 ],
                 avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
