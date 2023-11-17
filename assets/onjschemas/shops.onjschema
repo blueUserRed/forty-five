@@ -1,23 +1,30 @@
 use Common;
 
-var advancedTextPartSharedKeys = {
-    actions?: $AdvancedTextPartAction[]
+
+var advancedTextEffectSharedKeys = {
+    indicator: string,
 };
 
+$AdvancedTextEffect {
 
-$AdvancedTextPart {
-
-    $Text {
-        text: string,
-        font?: string,
-        color?: Color,
-        fontScale?: float,
-        ...advancedTextPartSharedKeys
+    $Color {
+        color: Color,
+        ...advancedTextEffectSharedKeys
     }
 
-    $Icon {
-        icon: string,
-        ...advancedTextPartSharedKeys
+    $Font {
+        font: string,
+        ...advancedTextEffectSharedKeys
+    }
+
+    $FontScale {
+        fontScale: float,
+        ...advancedTextEffectSharedKeys
+    }
+
+    $Action {
+        action: $AdvancedTextPartAction,
+        ...advancedTextEffectSharedKeys
     }
 
 }
@@ -30,7 +37,6 @@ $AdvancedTextPartAction {
         yMagnitude: float,
         ySpeed: float,
     }
-
 }
 
 
@@ -38,7 +44,10 @@ people: {
     name: string,
     displayName: string,
     defaultShopParameter: string,
-    texts: $AdvancedTextPart[][],
+    texts: {
+        rawText: string,
+        effects?: $AdvancedTextEffect[],
+    }[],
     npcImageName: string,
 }[],
 

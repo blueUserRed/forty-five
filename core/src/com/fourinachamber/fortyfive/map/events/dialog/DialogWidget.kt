@@ -10,20 +10,21 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onClick
 import onj.value.OnjObject
+import onj.value.OnjString
 
 class DialogWidget(
     private val progressTime: Int,
     private val advanceArrowDrawableHandle: ResourceHandle,
     private val advanceArrowOffset: Float,
     private val optionsBoxName: String,
-    private val optionsFont: BitmapFont,
-    private val optionsFontColor: Color,
-    private val optionsFontScale: Float,
+    private val speakingPersonLabel: String,
     defaults: OnjObject,
     screen: OnjScreen
 ) : AdvancedTextWidget(defaults, screen) {
@@ -55,6 +56,7 @@ class DialogWidget(
     }
 
     private var initialisedOptionsBox: Boolean = false
+    private var initialisedNameSize: Boolean = false
     private lateinit var optionsBox: CustomFlexBox
 
     private val optionBoxNodes: MutableList<YogaNode> = mutableListOf()
@@ -68,7 +70,7 @@ class DialogWidget(
         this.dialog = dialog
         currentPart = dialog.parts.getOrNull(0) ?: return
         advancedText.resetProgress()
-        onButtonClick {
+        parent.onButtonClick {
             if (readyToAdvance) readyToAdvance = false
         }
         val line = Timeline.timeline {
@@ -80,13 +82,12 @@ class DialogWidget(
     }
 
     private fun finished(): Timeline = when (val part = currentPart!!.nextDialogPartSelector) {
-
         is NextDialogPartSelector.Continue -> Timeline.timeline {
             action { readyToAdvance = true }
             delayUntil { !readyToAdvance }
             action { currentPart = getPart(dialog.parts.indexOf(currentPart!!) + 1) }
             delayUntil { isAnimFinished }
-            includeLater( { finished() }, { true } )
+            includeLater({ finished() }, { true })
         }
 
         is NextDialogPartSelector.Fixed -> Timeline.timeline {
@@ -94,7 +95,7 @@ class DialogWidget(
             delayUntil { !readyToAdvance }
             action { currentPart = getPart(part.next) }
             delayUntil { isAnimFinished }
-            includeLater( { finished() }, { true } )
+            includeLater({ finished() }, { true })
         }
 
         is NextDialogPartSelector.End -> Timeline.timeline {
@@ -115,7 +116,7 @@ class DialogWidget(
                 clearOptionsBox()
             }
             delayUntil { isAnimFinished }
-            includeLater( { finished() }, { true } )
+            includeLater({ finished() }, { true })
         }
 
     }
@@ -129,11 +130,14 @@ class DialogWidget(
         optionBoxNodes.clear()
         screen.enterState(showOptionsBoxScreenState)
         currentOptions!!.forEach { (option, _) ->
-            val actor = CustomLabel(screen, option, Label.LabelStyle(optionsFont, optionsFontColor))
-            actor.setFontScale(optionsFontScale)
-            actor.onClick { chosenOption = option } // TODO: find some way to use onButtonClick there
-            val node = optionsBox.add(actor)
-            optionBoxNodes.add(node)
+            val actor = screen.generateFromTemplate(
+                "optionsItem",
+                mutableMapOf("text" to option),
+                optionsBox,
+                screen
+            ) as CustomLabel
+            actor.onButtonClick { chosenOption = option }
+            actor.styleManager?.let { optionBoxNodes.add(it.node) }
         }
     }
 
@@ -152,6 +156,14 @@ class DialogWidget(
             }
             this.optionsBox = optionsBox
             initialisedOptionsBox = true
+        }
+        if (!initialisedNameSize) {
+            val tempParent = screen.namedActorOrError(speakingPersonLabel).parent as CustomFlexBox
+            if (tempParent.width < 30) { //TODO ugly with fixed size parameter
+                tempParent.invalidate()
+            }else{ //Needs to be done more than once till the text is correctly drawn
+                initialisedNameSize = true
+            }
         }
         super.draw(batch, parentAlpha)
         timeline.updateTimeline()

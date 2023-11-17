@@ -766,3 +766,52 @@ class ScrollbarLengthStyleProperty(
 
     override fun get(node: YogaNode): YogaValue = target.scrollbarLength
 }
+
+class OffsetXStyleProperty<T>(
+    target: T,
+    screen: OnjScreen,
+) : StyleProperty<T, Float>(
+    "offsetX",
+    target,
+    0f,
+    Float::class,
+    true,
+    false,
+    screen
+) where T : StyledActor, T : OffSettable, T : Actor {
+
+    override fun set(data: Float, node: YogaNode) {
+        target.offsetX = data
+    }
+
+    override fun get(node: YogaNode): Float = target.offsetX
+}
+
+class OffsetYStyleProperty<T>(
+    target: T,
+    screen: OnjScreen,
+) : StyleProperty<T, Float>(
+    "offsetY",
+    target,
+    0f,
+    Float::class,
+    true,
+    false,
+    screen
+) where T : StyledActor, T : OffSettable, T : Actor {
+
+    override fun set(data: Float, node: YogaNode) {
+        target.offsetY = data
+    }
+
+    override fun get(node: YogaNode): Float = target.offsetY
+}
+
+fun <T> T.addOffsetableStyles(
+    screen: OnjScreen
+) where T : Actor, T : StyledActor, T : OffSettable {
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(OffsetXStyleProperty(this, screen))
+    styleManager.addStyleProperty(OffsetYStyleProperty(this, screen))
+}
+

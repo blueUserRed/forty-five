@@ -418,7 +418,14 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<OnjObject>("defaults"),
             screen
         ).apply {
-            setRawText(widgetOnj.get<String>("rawText"))
+            setRawText(
+                widgetOnj.get<String>("rawText"),
+                widgetOnj.get<OnjArray?>("effects")?.value?.map {
+                    AdvancedTextParser.AdvancedTextEffect.getFromOnj(
+                        screen,
+                        it as OnjNamedObject
+                    )
+                } ?: listOf())
         }
 
         "DialogWidget" -> DialogWidget(
@@ -426,10 +433,8 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("advanceArrowDrawable"),
             widgetOnj.get<Double>("advanceArrowOffset").toFloat(),
             widgetOnj.get<String>("optionsBox"),
-            fontOrError(widgetOnj.get<String>("optionsFont"), screen),
-            widgetOnj.get<Color>("optionsFontColor"),
-            widgetOnj.get<Double>("optionsFontScale").toFloat(),
-            widgetOnj.get<OnjObject>("defaults"), // TODO: this is broken currently
+            widgetOnj.get<String>("speakingPersonLabel"),
+            widgetOnj.get<OnjObject>("defaults"),
             screen
         )
 
@@ -585,6 +590,11 @@ class ScreenBuilder(val file: FileHandle) {
                 it as OnjNamedObject
                 behavioursToBind.add(BehaviourFactory.behaviorOrError(it.name, it, this))
             }
+        }
+
+        widgetOnj.ifHas<String>("hoverDetailActor") { name ->
+            actor as DisplayDetailsOnHoverActor
+            actor.actorTemplate = name
         }
 
         widgetOnj.ifHas<Long>("zIndex") {

@@ -20,6 +20,7 @@ assets: {
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
+        ...(sharedComponents.cardHoverDetailUsedAssets),
     ]
 },
 
@@ -42,6 +43,7 @@ options: {
         cardsParentName: "cardsWidget",
         addToBackpackWidgetName: "addToBackpackWidget",
         addToDeckWidgetName: "addToDeckWidget",
+        hoverDetailActorTemplateName: sharedComponents.cardHoverDetail.template_name
     }
 },
 
@@ -360,6 +362,7 @@ templates: [
 
         scaleX: 0.01,
         scaleY: 0.01,
+        hoverDetailActor: sharedComponents.cardHoverDetail.template_name,
         reportDimensionsWithScaling: true,
         dragAndDrop: $ShopDragSource {
             group: "card",
@@ -449,4 +452,5 @@ templates: [
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
+    sharedComponents.cardHoverDetail,
 ],

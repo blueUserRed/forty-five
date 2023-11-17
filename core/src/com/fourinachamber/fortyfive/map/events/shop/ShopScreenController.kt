@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.enums.YogaUnit
@@ -27,6 +28,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
+    private val cardHoverDetailTemplateName = onj.get<String>("hoverDetailActorTemplateName")
 
     private lateinit var person: CustomImageActor
 
@@ -70,9 +72,26 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val defaults = shopFile.get<OnjObject>("defaults")
 
         val rnd = Random(context.seed)
-        shopCardsHandler = ShopCardsHandler(cardsFilePath, screen, cardsParentWidget, context.boughtIndices)
+        shopCardsHandler = ShopCardsHandler(
+            cardsFilePath,
+            screen,
+            cardsParentWidget,
+            context.boughtIndices,
+            cardHoverDetailTemplateName
+        )
         shopCardsHandler.addItems(rnd, context.type, personData.get<String>("defaultShopParameter"))
-//        messageWidget.advancedText = AdvancedText.readFromOnj(text[(rnd.nextDouble() * text.size).toInt()] as OnjArray, onjScreen, defaults)
+
+        val textToShow = text[(rnd.nextDouble() * text.size).toInt()] as OnjObject
+
+        messageWidget.setRawText(
+            textToShow.get<String>("rawText"),
+            textToShow.get<OnjArray?>("effects")?.value?.map {
+                AdvancedTextParser.AdvancedTextEffect.getFromOnj(
+                    screen,
+                    it as OnjNamedObject
+                )
+            } ?: listOf()
+        )
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
