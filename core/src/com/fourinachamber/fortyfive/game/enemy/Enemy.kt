@@ -98,6 +98,11 @@ class Enemy(
         actor = EnemyActor(this, textEmitterConfig, hiddenActionIconHandle, screen)
     }
 
+    fun onDefeat() {
+        _statusEffects.forEach { actor.removeStatusEffect(it) }
+        _statusEffects.clear()
+    }
+
     fun applyEffect(effect: StatusEffect) {
         FortyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
         for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {

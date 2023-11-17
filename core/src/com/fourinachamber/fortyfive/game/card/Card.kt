@@ -535,12 +535,12 @@ class CardActor(
     }
 
     fun glowAnimation(): Timeline = Timeline.timeline {
-        action {
-            inGlowAnim = true
-            glowShader.resetReferenceTime()
-        }
-        delay(1000)
-        action { inGlowAnim = false }
+//        action {
+//            inGlowAnim = true
+//            glowShader.resetReferenceTime()
+//        }
+//        delay(1000)
+//        action { inGlowAnim = false }
     }
 
     fun destroyAnimation(): Timeline = Timeline.timeline {
@@ -553,54 +553,54 @@ class CardActor(
     }
 
     fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
-        // TODO: hardcoded values
-        var origScaleX = 0f
-        var origScaleY = 0f
-        val scaleAction = ScaleToAction()
-        val moveAction = MoveByAction()
-        val interpolation = Interpolation.fade
-        action {
-            origScaleX = scaleX
-            origScaleY = scaleY
-            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
-            moveAction.setAmount(
-                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
-                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
-            )
-            moveAction.duration = 0.1f
-            scaleAction.duration = 0.1f
-            scaleAction.interpolation = interpolation
-            moveAction.interpolation = interpolation
-            addAction(scaleAction)
-            addAction(moveAction)
-        }
-        delayUntil { scaleAction.isComplete || !card.inGame }
-        if (includeGlow) {
-            delay(GraphicsConfig.bufferTime)
-            include(glowAnimation())
-        }
-        delay(GraphicsConfig.bufferTime)
-        action {
-            removeAction(scaleAction)
-            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
-            removeAction(moveAction)
-            scaleAction.reset()
-            moveAction.reset()
-            scaleAction.setScale(origScaleX, origScaleY)
-            moveAction.setAmount(moveAmount.x, moveAmount.y)
-            scaleAction.duration = 0.2f
-            moveAction.duration = 0.2f
-            scaleAction.interpolation = interpolation
-            moveAction.interpolation = interpolation
-            addAction(scaleAction)
-            addAction(moveAction)
-        }
-        delayUntil { scaleAction.isComplete || !card.inGame }
-        action {
-            removeAction(scaleAction)
-            removeAction(moveAction)
-        }
-        delay(GraphicsConfig.bufferTime)
+//        // TODO: hardcoded values
+//        var origScaleX = 0f
+//        var origScaleY = 0f
+//        val scaleAction = ScaleToAction()
+//        val moveAction = MoveByAction()
+//        val interpolation = Interpolation.fade
+//        action {
+//            origScaleX = scaleX
+//            origScaleY = scaleY
+//            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
+//            moveAction.setAmount(
+//                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
+//                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
+//            )
+//            moveAction.duration = 0.1f
+//            scaleAction.duration = 0.1f
+//            scaleAction.interpolation = interpolation
+//            moveAction.interpolation = interpolation
+//            addAction(scaleAction)
+//            addAction(moveAction)
+//        }
+//        delayUntil { scaleAction.isComplete || !card.inGame }
+//        if (includeGlow) {
+//            delay(GraphicsConfig.bufferTime)
+//            include(glowAnimation())
+//        }
+//        delay(GraphicsConfig.bufferTime)
+//        action {
+//            removeAction(scaleAction)
+//            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
+//            removeAction(moveAction)
+//            scaleAction.reset()
+//            moveAction.reset()
+//            scaleAction.setScale(origScaleX, origScaleY)
+//            moveAction.setAmount(moveAmount.x, moveAmount.y)
+//            scaleAction.duration = 0.2f
+//            moveAction.duration = 0.2f
+//            scaleAction.interpolation = interpolation
+//            moveAction.interpolation = interpolation
+//            addAction(scaleAction)
+//            addAction(moveAction)
+//        }
+//        delayUntil { scaleAction.isComplete || !card.inGame }
+//        action {
+//            removeAction(scaleAction)
+//            removeAction(moveAction)
+//        }
+//        delay(GraphicsConfig.bufferTime)
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(

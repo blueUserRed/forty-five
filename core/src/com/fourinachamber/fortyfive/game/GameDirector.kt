@@ -40,7 +40,7 @@ class GameDirector(private val controller: GameController) {
     }
 
     fun onNewTurn() {
-        enemies.forEach { enemy ->
+        controller.activeEnemies.forEach { enemy ->
             val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty)
             enemy.actor.setupForAction(NextEnemyAction.None) // make sure current action is cleared
             enemy.actor.setupForAction(nextAction)
@@ -48,7 +48,7 @@ class GameDirector(private val controller: GameController) {
     }
 
     fun checkActions(): Timeline = Timeline.timeline {
-        enemies.forEach { enemy ->
+        controller.activeEnemies.forEach { enemy ->
             action {
                 enemy.actor.setupForAction(NextEnemyAction.None)
             }

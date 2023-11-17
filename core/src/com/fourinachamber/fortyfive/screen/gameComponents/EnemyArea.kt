@@ -42,6 +42,9 @@ class EnemyArea(
     val enemies: List<Enemy>
         get() = _enemies
 
+    private val canSelectEnemy: Boolean
+        get() = _enemies.filter { !it.isDefeated }.size >= 2
+
     init {
         bindHoverStateListeners(this)
     }
@@ -52,17 +55,28 @@ class EnemyArea(
     fun addEnemy(enemy: Enemy) {
         _enemies.add(enemy)
         addActor(enemy.actor)
-        if (_enemies.size == 2) selectEnemy(_enemies[0])
+        if (canSelectEnemy) selectEnemy(_enemies.first { !it.isDefeated })
         invalidate()
     }
 
     fun selectEnemy(enemy: Enemy) {
-        if (_enemies.size < 2) return
+        if (!canSelectEnemy || enemy.isDefeated) return
         selectedEnemy = enemy
     }
 
-    fun getTargetedEnemy(): Enemy {
-        return selectedEnemy ?: _enemies.firstOrNull() ?: throw RuntimeException("No enemies in enemy area")
+    fun getTargetedEnemy(): Enemy =
+        selectedEnemy ?:
+        _enemies.firstOrNull { !it.isDefeated } ?:
+        _enemies.firstOrNull() ?:
+        throw RuntimeException("No enemies in enemy area")
+
+
+    fun onEnemyDefeated() {
+        selectedEnemy = if (canSelectEnemy) {
+            _enemies.first { !it.isDefeated }
+        } else {
+            null
+        }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
