@@ -745,8 +745,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 logTag,
                 "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives"
             )
-            if (curPlayerLives <= 0) include(playerDeathTimeline())
         }
+        includeLater(
+            { playerDeathTimeline() },
+            { curPlayerLives <= 0 }
+        )
         if (!triggeredByStatusEffect) include(executePlayerStatusEffectsAfterDamage(damage))
     }
 
@@ -931,7 +934,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
-            FortyFive.changeToScreen("screens/title_screen.onj")
+            FortyFive.changeToScreen("screens/map_screen.onj")
         }
     }
 
