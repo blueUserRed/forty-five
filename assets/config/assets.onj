@@ -311,6 +311,42 @@ textures: [
         file: "textures/shop/biomeBackgrounds/wasteland.png"
     },
     {
+        name: "heal_or_max_accept",
+        file: "textures/events/heal_or_max/accept.png"
+    },
+    {
+        name: "heal_or_max_accept_hover",
+        file: "textures/events/heal_or_max/accept_hover.png"
+    },
+    {
+        name: "heal_or_max_accept_invalid",
+        file: "textures/events/heal_or_max/accept_invalid.png"
+    },
+    {
+        name: "heal_or_max_add_health",
+        file: "textures/events/heal_or_max/add_health.png"
+    },
+    {
+        name: "heal_or_max_add_max_health",
+        file: "textures/events/heal_or_max/add_max_health.png"
+    },
+    {
+        name: "heal_or_max_background",
+        file: "textures/events/heal_or_max/heal_or_max_background.png"
+    },
+    {
+        name: "heal_or_max_selector_background",
+        file: "textures/events/heal_or_max/heal_or_max_selector_background.png"
+    },
+    {
+        name: "heal_or_max_selector_background_selected",
+        file: "textures/events/heal_or_max/heal_or_max_selector_background_selected.png"
+    },
+    {
+        name: "max_health_background",
+        file: "textures/events/heal_or_max/max_health_background.png"
+    },
+    {
         name: "shop_back_button",
         file: "textures/shop/back_button.png"
     },
