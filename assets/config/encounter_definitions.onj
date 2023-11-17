@@ -1,18 +1,2038 @@
+//encounter: [
+////    {
+////        enemies: [ "Witch", "Pyro"  ],
+////        encounterModifier: [ "Moist", "BewitchedMist" ],
+////        biomes: [ "wasteland", "bewitched_forest" ],
+////        progress: [20.0, 50.0],
+////        weight: 10
+////    },
+//    {
+//        enemies: [ "Outlaw"  ],
+//        encounterModifier: [ ],
+////        encounterModifier: [ "Moist", "BewitchedMist", "Frost", "Lookalike" ],
+//        biomes: [ "wasteland" ],
+//        progress: [0.0, 100.0],
+//        weight: 10
+//    }
+//]
 
 encounter: [
-//    {
-//        enemies: [ "Witch", "Pyro"  ],
-//        encounterModifier: [ "Moist", "BewitchedMist" ],
-//        biomes: [ "wasteland", "bewitched_forest" ],
-//        progress: [20.0, 50.0],
-//        weight: 10
-//    },
+    //grundlegende encounter mit lvl 1
+
     {
-        enemies: [ "Outlaw"  ],
-        encounterModifier: [ ],
-//        encounterModifier: [ "Moist", "BewitchedMist", "Frost", "Lookalike" ],
-        biomes: [ "wasteland" ],
-        progress: [0.0, 100.0],
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            0.0, 5.0
+        ],
         weight: 10
-    }
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            18.0, 20.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            5.0, 10.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "TheBlackDeath"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            8.0, 10.0
+        ],
+        weight: 1
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Rattle"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            30.0, 45.0
+        ],
+        weight: 2
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "SorryNotSorry"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            6.0, 10.0
+        ],
+        weight: 5
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            5.0, 10.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 25.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "AnOfferYouCantRefuse"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            5.0, 25.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Sacrifice"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 25.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "TimedInflation"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            15.0, 25.0
+        ],
+        weight: 1
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 25.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Sacrifice"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            20.0, 30.0
+        ],
+        weight: 2
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 25.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "WarriorsSpirit"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            7.0, 20.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            25.0, 30.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 25.0
+        ],
+        weight: 2
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Pacifist"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 25.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Frost",
+//            "WarriorsSpirit"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            17.0, 25.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Frost"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            23.0, 30.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            25.0, 50.0
+        ],
+        weight: 1
+    },
+
+    //other encounter early on
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            8.0, 15.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "ThroughTheFireAndFlames"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 15.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "Sacrifice"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            15.0, 30.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "SorryNotSorry"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            20.0, 30.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 50.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "SpiritOfTheWasteland"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            25.0, 40.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "ThroughTheFireAndFlames"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            20.0, 35.0
+        ],
+        weight: 2
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "BurnItDownPieceByPiece"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            17.0, 35.0
+        ],
+        weight: 2
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+            "Frost"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            30.0, 40.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "TimedInflation"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            20.0, 30.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            10.0, 20.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "Rattle"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 50.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            20.0, 30.0
+        ],
+        weight: 5
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "Scarcity", "Spoils"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            20.0, 30.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            30.0, 45.0
+        ],
+        weight: 3
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "Fog"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            35.0, 45.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 65.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "BurnItDownPieceByPiece"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 65.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+            "Frost"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            50.0, 65.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+            "Rain",
+//            "Scarcity"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            50.0, 65.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "Sacrifice"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            45.0, 65.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "Rattle"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            65.0, 70.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "ThroughTheFireAndFlames"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 55.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "TimedInflation"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 70.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+        ],
+        encounterModifier: [
+//            "MoneyForNothing"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            45.0, 60.0
+        ],
+        weight: 3
+    },
+
+
+    //grundlegende Encounter mit level 2
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 45.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Scarcity"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 45.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 65.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "SteelNerves"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 70.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+            "Frost"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            50.0, 60.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            45.0, 60.0
+        ],
+        weight: 5
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Fog"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            55.0, 70.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "TimedInflation"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 70.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 70.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Sacrifice"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 75.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "WarriorsSpirit", "SpiritOfTheWasteland"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 75.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            55.0, 75.0
+        ],
+        weight: 5
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            70.0, 75.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 75.0
+        ],
+        weight: 3
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 60.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Scarcity", "TheBlackDeath"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 60.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Scarcity", "TimesOfWealth", "AnOfferYouCantRefuse"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            40.0, 60.0
+        ],
+        weight: 1
+    },
+
+    //witch grundencounter
+
+    {
+        enemies: [
+            "Witch"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            50.0, 55.0
+        ],
+        weight: 3
+    },
+
+
+    {
+        enemies: [
+            "Witch"
+        ],
+        encounterModifier: [
+//            "Scarcity", "Spoils"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            50.0, 60.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            55.0, 65.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Witch"
+        ],
+        encounterModifier: [
+//            "BewitchedMist", "Rattle"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 85.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch"
+        ],
+        encounterModifier: [
+            "Frost"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            75.0, 85.0
+        ],
+        weight: 1
+    },
+
+
+    {
+        enemies: [
+            "Witch"
+        ],
+        encounterModifier: [
+            "Bewitched"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            55.0, 85.0
+        ],
+        weight: 2
+    },
+    {
+        enemies: [
+            "Witch"
+        ],
+        encounterModifier: [
+            "Rain",
+//            "Scarcity"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            50.0, 75.0
+        ],
+        weight: 2
+    },
+
+
+    //combinations latedemogame
+{
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            60.0, 70.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Rain",
+//            "Rattle"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            75.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Fog"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 80.0
+        ],
+        weight: 1
+    },
+
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "SpiritOfSalem"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            60.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "BewitchedMist",
+//            "SpiritOfSalem"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            55.0, 80.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            75.0, 80.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "MoneyForNothing"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            57.0, 75.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            60.0, 75.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            80.0, 85.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 80.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Scarcity", "PassiveIncome"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 80.0
+        ],
+        weight: 1
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Spoils", "Scarcity"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "SpiritOfSalem", "Scarcity"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            65.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 85.0
+        ],
+        weight: 5
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            70.0, 85.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 80.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "WarriorsSpirit"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            55.0, 70.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            70.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "MoneyForNothing"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            70.0, 80.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "MoneyForNothing"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "AnOfferYouCantRefuse"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "TimesOfWealth"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            60.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "PassiveIncome"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            55.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro"
+        ],
+        encounterModifier: [
+//            "SteelNerves"
+        ],
+        biomes: [
+            "wasteland", "bewitched_forest"
+        ],
+        progress: [
+            75.0, 80.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            75.0, 85.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            80.0, 90.0
+        ],
+        weight: 5
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 95.0
+        ],
+        weight: 1
+    },
+
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Scarcity", "PassiveIncome"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 95.0
+        ],
+        weight: 1
+    },
+
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Sacrifice"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 90.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 90.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Scarcity", "Spoils", "AnOfferYouCantRefuse"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 90.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl1"
+        ],
+        encounterModifier: [
+//            "Sacrifice", "TheBlackDeath", "PassiveIncome"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 95.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "TimesOfWealth"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 90.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "TimedInflation"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 2
+    },
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Spoils"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            78.0, 90.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            97.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Witch", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 100.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Witch", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "MoneyForNothing"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 95.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "MoneyForNothing"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            80.0, 100.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Witch", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+            "Frost"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            95.0, 100.0
+        ],
+        weight: 1
+    },
+    {
+        enemies: [
+            "Outlaw_lvl2", "Witch", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "HighNoon"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            97.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Witch", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            85.0, 95.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Witch", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "SpiritOfSalem"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            78.0, 88.0
+        ],
+        weight: 2
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Fog"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+            "Rain",
+//            "SpiritOfSalem"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            95.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 3
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Pacifist", "PassiveIncome"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 4
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Fog"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 3
+    },
+
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Outlaw_lvl2", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+            "Rain"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "SorryNotSorry"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 95.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Sacrifice"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            90.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Witch", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "Pacifist"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            95.0, 100.0
+        ],
+        weight: 1
+    },
+
+    {
+        enemies: [
+            "Outlaw_lvl2", "Pyro", "Outlaw_lvl2"
+        ],
+        encounterModifier: [
+//            "SteelNerves"
+        ],
+        biomes: [
+            "bewitched_forest"
+        ],
+        progress: [
+            97.0, 100.0
+        ],
+        weight: 1
+    },
 ]
