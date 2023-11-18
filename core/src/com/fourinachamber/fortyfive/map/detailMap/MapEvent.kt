@@ -1,7 +1,7 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
-import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
 import onj.value.*
@@ -28,6 +28,13 @@ object MapEventFactory {
             ChooseCardMapEvent(
                 onjObject.get<OnjArray>("types").value.map { (it as OnjString).value },
                 onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+            )
+        },
+        "HealOrMaxHPEvent" to { onjObject ->
+            HealOrMaxHPEvent(
+                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
+                onjObject.get<OnjArray>("healRange").toIntRange(),
+                onjObject.get<OnjArray>("maxHPRange").toIntRange(),
             )
         },
     )
@@ -306,6 +313,42 @@ class ChooseCardMapEvent(
         name("ChooseCardMapEvent")
         includeStandardConfig()
         ("types" with types)
+        ("seed" with seed)
+    }
+}
+
+
+/**
+ * event that opens a shop where the player can buy up to 8 cards
+ * @param types which type the restrictions are
+ */
+class HealOrMaxHPEvent(
+    val seed: Long,
+    val healthRange: IntRange,
+    val maxHpRange: IntRange,
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "You can choose to either heal yourself or obtain a higher Max HP."
+    override val displayName: String = "Restoration Point"
+
+    override fun start() {
+        MapManager.changeToHealOrMaxHPScreen(this)
+    }
+
+    fun complete() {
+        isCompleted = true
+        canBeStarted = false
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("HealOrMaxHPEvent")
+        includeStandardConfig()
         ("seed" with seed)
     }
 }

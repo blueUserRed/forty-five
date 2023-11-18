@@ -9,6 +9,13 @@ $MapEvent {
 
     $EmptyMapEvent { }
 
+    $HealOrMaxHPEvent {
+        ...mapEventStandardConfig,
+        healRange: int[2],
+        maxHPRange: int[2],
+        seed: int?,
+    }
+
     $EncounterMapEvent {
         ...mapEventStandardConfig,
     }

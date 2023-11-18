@@ -34,6 +34,7 @@ backpackAssets: [
     "backpack_type_hover",
     "backpack_direction_hover",
     "backpack_direction_arrow",
+    "card_character",
 ],
 
 
@@ -121,7 +122,7 @@ statusbarCenterDefaults: {
                     ],
                 },
                 $TemplateLabel {
-                    template: "{stat.playerLives}/" + (gameConfig.playerConfig.lives#string), //TODO if max_lives change, this needs to be changed
+                    template: "{stat.playerLives}/{stat.maxPlayerLives}",
 
                     font: "red_wing_cm",
                     color: color.forty_white,
@@ -227,7 +228,7 @@ statusbarLeftDefaults: {
                     ],
                 },
                 $TemplateLabel {
-                    template: "{stat.playerLives}/" + (gameConfig.playerConfig.lives#string), //TODO if max_lives change, this needs to be changed
+                    template: "{stat.playerLives}/{stat.maxPlayerLives}",
 
                     font: "red_wing_cm",
                     color: color.forty_white,
