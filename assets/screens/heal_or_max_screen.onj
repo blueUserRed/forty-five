@@ -59,6 +59,7 @@ root: $Box { //TODO biomes
     $Image {
         scaleX: 1.0,
         scaleY: 1.0,
+        debug: true,
         textureName: "transparent_black_texture",
         styles: [
             {
@@ -67,37 +68,24 @@ root: $Box { //TODO biomes
             }
         ],
     },
-    $Image {
-        name: "temp_name",
-        textureName: "heal_or_max_background",
-        scaleX: 0.9,
-        scaleY: 0.9,
-        reportDimensionsWithScaling: true,
-        styles: [
-            {
-                positionType: positionType.absolute,
-                positionTop: 20#percent,
-                positionRight: 32#percent,
-                width: 27#percent,
-                height: 40#percent,
-            }
-        ],
-    },
     $Box {
+        name: "temp_name",
         zIndex: 150,
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 23.5#percent,
+                positionTop: 13.5#percent,
                 positionLeft: 32.0#percent,
                 width: 36#percent,
-                height: 40#percent,
+                height: 60#percent,
                 flexDirection: flexDirection.column,
+                background: "heal_or_max_background",
             }
         ],
+        debug:true,
     } children [
         $Label {
-            text: "Choose one Bullet",
+            text: "Choose your reward",
             font: "red_wing_cm",
             color: color.forty_white,
             fontScale: 0.9,
@@ -105,7 +93,7 @@ root: $Box { //TODO biomes
         },
         $Box {
             zIndex: 10000,
-            name: "cardsParent",
+            name: "optionsParent",
             styles: [
                 {
                     width: 100#percent,

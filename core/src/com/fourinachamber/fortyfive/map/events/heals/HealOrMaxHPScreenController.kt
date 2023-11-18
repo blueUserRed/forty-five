@@ -25,7 +25,7 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController() {
         if (context !is HealOrMaxHPEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         val rnd = Random(context.seed)
         this.context = context
-        amount = context.healthRange.random(rnd) to context.maxHpRange.random(rnd)
+        amount = context.healthRange.random(rnd) to context.maxHPRange.random(rnd)
         TemplateString.updateGlobalParam(
             "map.curEvent.heal.lives_new",
             min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
