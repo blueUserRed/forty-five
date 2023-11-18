@@ -325,7 +325,7 @@ class ChooseCardMapEvent(
 class HealOrMaxHPEvent(
     val seed: Long,
     val healthRange: IntRange,
-    val maxHpRange: IntRange,
+    val maxHPRange: IntRange,
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -350,5 +350,7 @@ class HealOrMaxHPEvent(
         name("HealOrMaxHPEvent")
         includeStandardConfig()
         ("seed" with seed)
+        "healRange" with arrayOf(healthRange.first,healthRange.last)
+        "maxHPRange" with arrayOf(maxHPRange.first,maxHPRange.last)
     }
 }
