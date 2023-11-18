@@ -431,6 +431,10 @@ $ScreenController {
         hoverDetailActorTemplateName: string,
     }
 
+    $HealOrMaxHPScreenController {
+        addLifeActorName: string,
+    }
+
     $ChooseCardScreenController {
         cardsFile: string,
         leaveButtonName: string,

@@ -21,6 +21,13 @@ $MapEvent {
 
     $EmptyMapEvent { }
 
+    $HealOrMaxHPEvent {
+        ...mapEventStandardConfig,
+        healRange: int[2],
+        maxHPRange: int[2],
+        seed: int?,
+    }
+
     $EncounterMapEvent {
         ...mapEventStandardConfig
     }
@@ -114,6 +121,7 @@ screens: {
     encounterScreen: string,
     shopScreen: string,
     chooseCardScreen: string,
+    changeToHealOrMaxHPScreen: string,
 },
 
 mapImages: {

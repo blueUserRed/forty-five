@@ -11,6 +11,8 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
+        "shop_background_wasteland",
+        "transparent_black_texture",
         "hover_detail_background", "red_wing_cm", "red_wing",
         "heal_or_max_accept",
         "heal_or_max_accept_hover",
@@ -20,7 +22,7 @@ assets: {
         "heal_or_max_background",
         "heal_or_max_selector_background",
         "heal_or_max_selector_background_selected",
-        "max_health_background",
+//        "max_health_background",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
@@ -38,10 +40,8 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenController: $MaxOrHealScreenController {
-        acceptButtonName: "acceptButton",
-        addLifeActorName: "addLifesWidget",
-        addMaxHPActorName: "addmaxHPWidget",
+    screenController: $HealOrMaxHPScreenController {
+        addLifeActorName: "temp_name",
     }
 },
 
@@ -68,95 +68,8 @@ root: $Box { //TODO biomes
         ],
     },
     $Image {
-        zIndex: 150,
-        name: "addToDeckWidget",
-        textureName: "chooseCard_add_to_deck",
-        scaleX: 0.81,
-        scaleY: 0.81,
-        reportDimensionsWithScaling: true,
-        dragAndDrop: $ChooseCardDropTarget {
-            group: "card",
-            isToDeck: true,
-        },
-        styles: [
-            {
-                style_priority: 1,
-                positionType: positionType.absolute,
-                positionLeft: 24#percent,
-                width: 18#percent,
-                height: 25.0#percent,
-                alpha: 1.0,
-            },
-            {
-                style_priority: 2,
-                style_condition: actorState("disabled"),
-                alpha: 0.3,
-            },
-            {
-                style_priority: 2,
-                positionBottom: -5#percent,
-                style_animation: {
-                    duration: 0.1,
-                    interpolation: interpolation.linear
-                },
-            },
-            {
-                style_priority: 3,
-                style_condition: actorState("draggedHover"),
-                positionBottom: 0#percent,
-                style_animation: {
-                    duration: 0.1,
-                    interpolation: interpolation.linear
-                },
-            },
-        ],
-    },
-    $Image {
-        zIndex: 150,
-        name: "addToBackpackWidget",
-        textureName: "chooseCard_add_to_backpack",
-        scaleX: 0.81,
-        scaleY: 0.81,
-        reportDimensionsWithScaling: true,
-        dragAndDrop: $ChooseCardDropTarget {
-            group: "card",
-            isToDeck: false,
-        },
-        styles: [
-            {
-                style_priority: 1,
-                positionType: positionType.absolute,
-                positionRight: 24#percent,
-                width: 18#percent,
-                height: 25.0#percent,
-                alpha: 1.0,
-            },
-            {
-                style_priority: 2,
-                style_condition: actorState("disabled"),
-                alpha: 0.3,
-            },
-            {
-                style_priority: 2,
-                positionBottom: -5#percent,
-                style_animation: {
-                    duration: 0.1,
-                    interpolation: interpolation.linear
-                },
-            },
-            {
-                style_priority: 3,
-                style_condition: actorState("draggedHover"),
-                positionBottom: 0#percent,
-                style_animation: {
-                    duration: 0.1,
-                    interpolation: interpolation.linear
-                },
-            },
-        ],
-    },
-    $Image {
-        textureName: "chooseCard_cardsBackground",
+        name: "temp_name",
+        textureName: "heal_or_max_background",
         scaleX: 0.9,
         scaleY: 0.9,
         reportDimensionsWithScaling: true,
@@ -250,35 +163,6 @@ root: $Box { //TODO biomes
 ],
 
 templates: [
-    $Image {
-        template_name: "cardTemplate",
-        template_keys: {
-            "styles.0.rotation": "rotation",
-            "styles.0.positionBottom": "bottom",
-            "textureName": "textureName",
-        },
-        textureName: "card%%bullet",
-        scaleX: 0.31,
-        scaleY: 0.31,
-        reportDimensionsWithScaling: true,
-        dragAndDrop: $ChooseCardDragSource {
-            group: "card",
-        },
-        styles: [
-            {
-                style_priority: 1,
-                width: 150.0#points,
-                height: 150.0#points,
-                rotation: 0.0,
-                positionBottom: 0#points,
-            },
-            {
-                style_priority: 2,
-                style_condition: actorState("dragged"),
-                rotation: 0.0,
-            }
-        ]
-    },
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),

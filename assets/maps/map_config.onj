@@ -114,6 +114,7 @@ screens: {
     encounterScreen: "screens/game_screen.onj",
     shopScreen: "screens/shop_screen.onj",
     chooseCardScreen: "screens/choose_card_screen.onj",
+    changeToHealOrMaxHPScreen: "screens/max_or_heal_screen.onj",
 },
 
 displayNames: [
