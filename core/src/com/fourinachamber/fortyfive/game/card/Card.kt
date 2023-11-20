@@ -126,6 +126,8 @@ class Card(
         private set
     var isReplaceable: Boolean = false
         private set
+    var isSpray: Boolean = false
+        private set
 
     val shouldRemoveAfterShot: Boolean
         get() = !(isEverlasting || _modifiers.any { it.everlasting })
@@ -391,6 +393,7 @@ class Card(
                 "everlasting" -> card.isEverlasting = true
                 "undead" -> card.isUndead = true
                 "replaceable" -> card.isReplaceable = true
+                "spray" -> card.isSpray = true
                 "rotten" -> {
                     card.isRotten = true
                     card.initRottenModifier()
