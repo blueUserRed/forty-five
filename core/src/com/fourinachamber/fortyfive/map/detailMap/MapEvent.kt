@@ -18,10 +18,10 @@ object MapEventFactory {
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
-                onjObject.get<String>("type"),
+                onjObject.get<OnjArray>("types").value.map { it.value as String }.toSet(),
                 onjObject.get<String>("person"),
                 onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-                onjObject.get<List<OnjInt>>("boughtIndices").map { it -> it.value.toInt() }.toMutableSet(),
+                onjObject.get<List<OnjInt>>("boughtIndices").map { it.value.toInt() }.toMutableSet(),
             )
         },
         "ChooseCardMapEvent" to { onjObject ->
@@ -243,7 +243,7 @@ class NPCMapEvent(val npc: String) : MapEvent() {
  * @param type which type the restrictions are
  */
 class ShopMapEvent(
-    val type: String,
+    val types: Set<String>,
     val person: String,
     val seed: Long,
     val boughtIndices: MutableSet<Int>
@@ -268,7 +268,7 @@ class ShopMapEvent(
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
-        ("type" with type)
+        ("types" with types)
         ("person" with person)
         ("seed" with seed)
         ("boughtIndices" with boughtIndices)

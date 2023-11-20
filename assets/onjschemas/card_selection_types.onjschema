@@ -10,7 +10,7 @@ $CardSelector{
 }
 
 $CardEffect{
-    $Blacklist{}
+    $Blacklist { }
 
     $ProbabilityAddition{
         weight: float

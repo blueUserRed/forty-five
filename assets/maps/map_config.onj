@@ -186,7 +186,7 @@ generatorConfig: {
                             seed: null,
                             boughtIndices: [
                             ],
-                            type: "defType",
+                            types: ["defType"],
                             person: "traveling_merchant",
                         }
                     },
@@ -211,7 +211,7 @@ generatorConfig: {
                             seed: null,
                             boughtIndices: [
                             ],
-                            type: "defType",
+                            types: ["defType"],
                             person: "traveling_merchant",
                         }
                     },
@@ -302,7 +302,7 @@ generatorConfig: {
                             seed: null,
                             boughtIndices: [
                             ],
-                            type: "rare_shop",
+                            types: ["rare_shop"],
                             person: "rare_merchant",
                         }
                     }
@@ -400,7 +400,7 @@ generatorConfig: {
                             seed: null,
                             boughtIndices: [
                             ],
-                            type: "rare_shop",
+                            types: ["rare_shop"],
                             person: "rare_merchant", //TODO when decks are finished
 
                         }
