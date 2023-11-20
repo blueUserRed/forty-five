@@ -603,14 +603,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun shoot() {
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
-        val enemy = enemyArea.getTargetedEnemy()
 
         FortyFiveLogger.debug(logTag,
             "revolver is shooting;" +
                     "cardToShoot = $cardToShoot"
         )
 
-        val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
+        val damagePlayerTimeline = enemyArea
+            .getTargetedEnemy()
+            .damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
             includeLater(
@@ -622,7 +623,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
                     cardToShoot.afterShot()
                 }
-                include(enemy.damage(cardToShoot.curDamage))
+                if (cardToShoot.isSpray) {
+                    enemyArea
+                        .enemies
+                        .map { it.damage(cardToShoot.curDamage) }
+                        .collectTimeline()
+                        .let { include(it) }
+                } else {
+                    include(enemyArea.getTargetedEnemy().damage(cardToShoot.curDamage))
+                }
             }
             include(rotateRevolver(rotationDirection))
             cardToShoot?.let {
