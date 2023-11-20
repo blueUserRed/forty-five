@@ -897,8 +897,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         gameDirector.end()
         FortyFiveLogger.title("game ends")
         FortyFive.currentGame = null
-        if (playerLost) FortyFive.newRun()
-        SaveState.write()
     }
 
     /**
@@ -939,7 +937,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
-            FortyFive.changeToScreen("screens/map_screen.onj")
+            FortyFive.newRun()
+            SaveState.write()
+            MapManager.changeToMapScreen()
         }
     }
 

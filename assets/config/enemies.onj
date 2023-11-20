@@ -16,6 +16,7 @@ enemies: [
 
     {
         name: "Outlaw_lvl1",
+//        baseHealth: 1,
         baseHealth: 80,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
@@ -63,6 +64,7 @@ enemies: [
     },
     {
         name: "Outlaw_lvl2",
+//        baseHealth: 1,
         baseHealth: 120,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
