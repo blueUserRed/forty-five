@@ -79,7 +79,8 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             context.boughtIndices,
             cardHoverDetailTemplateName
         )
-        shopCardsHandler.addItems(rnd, context.type, personData.get<String>("defaultShopParameter"))
+        // TODO: defaultShopParameter ????
+        shopCardsHandler.addItems(rnd, context.types, personData.get<String>("defaultShopParameter"))
 
         val textToShow = text[(rnd.nextDouble() * text.size).toInt()] as OnjObject
 

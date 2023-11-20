@@ -23,7 +23,7 @@ $MapEvent {
     }
 
     $ShopMapEvent {
-        type: string,
+        types: string[],
         person: string,
         seed: int?,
         boughtIndices: int[],

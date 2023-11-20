@@ -551,7 +551,7 @@ cards: [
         forceLoadCards: [],
         cost: 3,
         type: $Bullet { },
-        tags: ["weight"],
+        tags: ["weight", "unobtainable"],
         price: 0,
     },
     {
