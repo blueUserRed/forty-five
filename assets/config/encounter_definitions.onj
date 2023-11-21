@@ -201,6 +201,7 @@ encounter: [
             "Outlaw_lvl1", "Outlaw_lvl1"
         ],
         encounterModifier: [
+            "Moist"
         ],
         biomes: [
             "wasteland", "bewitched_forest"
@@ -208,8 +209,8 @@ encounter: [
         progress: [
             10.0, 25.0
         ],
-//        weight: 400000
-        weight: 4
+        weight: 400000
+//        weight: 4
     },
 
     {
