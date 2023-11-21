@@ -108,7 +108,7 @@ class Card(
      * the current damage with all modifiers applied
      */
     val curDamage: Int
-        get() = baseDamage + _modifiers.sumOf { it.damage }
+        get() = (baseDamage + _modifiers.sumOf { it.damage }).coerceAtLeast(0)
 
     var isEverlasting: Boolean = false
         private set
@@ -437,7 +437,7 @@ class Card(
         val damage: Int,
         val everlasting: Boolean = false,
         val source: String,
-        val validityChecker: () -> Boolean,
+        val validityChecker: () -> Boolean = { true },
         val transformers: Map<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()
     )
 

@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.StatusEffectCreator
@@ -16,6 +15,9 @@ abstract class Effect(val trigger: Trigger) {
     lateinit var card: Card
 
     abstract var triggerInHand: Boolean
+
+    protected val cardDescName: String
+        get() = "[${card.title}]"
 
     /**
      * called when the effect triggers
@@ -115,23 +117,17 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
-//            val modifier = Card.CardModifier(
-//                amount,
-//                TemplateString(
-//                    GraphicsConfig.rawTemplateString("buffDetailText"),
-//                    mapOf(
-//                        "text" to if (amount > 0) "buff" else "debuff",
-//                        "amount" to amount,
-//                        "source" to card.title
-//                    )
-//                ),
-//            ) { card.inGame }
+            val modifier = Card.CardModifier(
+                damage = amount,
+                source = cardDescName,
+                validityChecker = { card.inGame }
+            )
 
             return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, this@BuffDamage.card))
                 action {
                     get<List<Card>>("selectedCards")
-//                        .forEach { it.addModifier(modifier) }
+                        .forEach { it.addModifier(modifier) }
                 }
             }
         }
@@ -160,23 +156,15 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
-//            val modifier = Card.CardModifier(
-//                amount,
-//                TemplateString(
-//                    GraphicsConfig.rawTemplateString("giftDetailText"),
-//                    mapOf(
-//                        "text" to if (amount > 0) "buff" else "debuff",
-//                        "amount" to amount,
-//                        "source" to card.title
-//                    )
-//                ),
-//            ) { true }
-
+            val modifier = Card.CardModifier(
+                damage = amount,
+                source = cardDescName
+            )
             return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, this@GiftDamage.card))
                 action {
                     get<List<Card>>("selectedCards")
-//                        .forEach { it.addModifier(modifier) }
+                        .forEach { it.addModifier(modifier) }
                 }
             }
         }
