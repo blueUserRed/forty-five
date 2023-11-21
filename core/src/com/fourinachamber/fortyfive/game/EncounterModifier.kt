@@ -42,13 +42,13 @@ sealed class EncounterModifier {
             controller: GameController
         ): Timeline = Timeline.timeline {
             action {
-                val modifier = Card.CardModifier(
-                    0,
-                    null,
-                    validityChecker = { true }
-                )
-                card.addModifier(modifier)
-                cardModifiers.add(modifier)
+//                val modifier = Card.CardModifier(
+//                    0,
+//                    null,
+//                    validityChecker = { true }
+//                )
+//                card.addModifier(modifier)
+//                cardModifiers.add(modifier)
             }
         }
 
@@ -79,17 +79,17 @@ sealed class EncounterModifier {
         private fun updateModifierOfCard(card: Card, rotation: RevolverRotation) {
             val oldModifier = cardModifiers.firstOrNull { it in card.modifiers }
             val damage = (oldModifier?.damage ?: 0) - rotation.amount
-            val newModifier = Card.CardModifier(
-                damage,
-                TemplateString("Bullet lost $damage damage due to the Moist Encounter Modifier"),
-                validityChecker = { true }
-            )
-            oldModifier?.let {
-                card.removeModifier(it)
-                cardModifiers.remove(it)
-            }
-            card.addModifier(newModifier)
-            cardModifiers.add(newModifier)
+//            val newModifier = Card.CardModifier(
+//                damage,
+//                TemplateString("Bullet lost $damage damage due to the Moist Encounter Modifier"),
+//                validityChecker = { true }
+//            )
+//            oldModifier?.let {
+//                card.removeModifier(it)
+//                cardModifiers.remove(it)
+//            }
+//            card.addModifier(newModifier)
+//            cardModifiers.add(newModifier)
         }
 
     }
