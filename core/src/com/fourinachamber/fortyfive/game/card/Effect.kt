@@ -115,23 +115,23 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
-            val modifier = Card.CardModifier(
-                amount,
-                TemplateString(
-                    GraphicsConfig.rawTemplateString("buffDetailText"),
-                    mapOf(
-                        "text" to if (amount > 0) "buff" else "debuff",
-                        "amount" to amount,
-                        "source" to card.title
-                    )
-                ),
-            ) { card.inGame }
+//            val modifier = Card.CardModifier(
+//                amount,
+//                TemplateString(
+//                    GraphicsConfig.rawTemplateString("buffDetailText"),
+//                    mapOf(
+//                        "text" to if (amount > 0) "buff" else "debuff",
+//                        "amount" to amount,
+//                        "source" to card.title
+//                    )
+//                ),
+//            ) { card.inGame }
 
             return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, this@BuffDamage.card))
                 action {
                     get<List<Card>>("selectedCards")
-                        .forEach { it.addModifier(modifier) }
+//                        .forEach { it.addModifier(modifier) }
                 }
             }
         }
@@ -160,23 +160,23 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
-            val modifier = Card.CardModifier(
-                amount,
-                TemplateString(
-                    GraphicsConfig.rawTemplateString("giftDetailText"),
-                    mapOf(
-                        "text" to if (amount > 0) "buff" else "debuff",
-                        "amount" to amount,
-                        "source" to card.title
-                    )
-                ),
-            ) { true }
+//            val modifier = Card.CardModifier(
+//                amount,
+//                TemplateString(
+//                    GraphicsConfig.rawTemplateString("giftDetailText"),
+//                    mapOf(
+//                        "text" to if (amount > 0) "buff" else "debuff",
+//                        "amount" to amount,
+//                        "source" to card.title
+//                    )
+//                ),
+//            ) { true }
 
             return Timeline.timeline {
                 include(getSelectedBullets(bulletSelector, controller, this@GiftDamage.card))
                 action {
                     get<List<Card>>("selectedCards")
-                        .forEach { it.addModifier(modifier) }
+//                        .forEach { it.addModifier(modifier) }
                 }
             }
         }
@@ -270,19 +270,19 @@ abstract class Effect(val trigger: Trigger) {
     ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            val modifier = Card.CardModifier(
-                0,
-                TemplateString(
-                    GraphicsConfig.rawTemplateString("protectDetailText"),
-                    mapOf("source" to card.title)
-                ),
-                true
-            ) { card.inGame }
+//            val modifier = Card.CardModifier(
+//                0,
+//                TemplateString(
+//                    GraphicsConfig.rawTemplateString("protectDetailText"),
+//                    mapOf("source" to card.title)
+//                ),
+//                true
+//            ) { card.inGame }
 
-            include(getSelectedBullets(bulletSelector, controller, this@Protect.card))
+            include(getSelectedBullets(bulletSelector, controller, card))
             action {
                 get<List<Card>>("selectedCards")
-                    .forEach { it.addModifier(modifier) }
+//                    .forEach { it.addModifier(modifier) }
             }
         }
 

@@ -107,16 +107,8 @@ class Card(
     /**
      * the current damage with all modifiers applied
      */
-    var curDamage: Int = baseDamage
-        private set
-        get() {
-            if (!isDamageDirty) return field
-            var cur = baseDamage
-            for (modifier in _modifiers) cur += modifier.damage
-            field = cur
-            isDamageDirty = false
-            return cur
-        }
+    val curDamage: Int
+        get() = baseDamage + _modifiers.sumOf { it.damage }
 
     var isEverlasting: Boolean = false
         private set
@@ -134,12 +126,12 @@ class Card(
 
     private lateinit var rottenModifier: CardModifier
 
+    private var lastDamageValue: Int = baseDamage
+
     private val _modifiers: MutableList<CardModifier> = mutableListOf()
 
     val modifiers: List<CardModifier>
         get() = _modifiers
-
-    private var isDamageDirty: Boolean = true
 
     var currentHoverText: String = ""
         private set
@@ -153,29 +145,6 @@ class Card(
             fontScale,
             screen
         )
-        updateText()
-        updateTexture()
-    }
-
-    private fun initRottenModifier() {
-        rottenModifier = CardModifier(0, null) { true }
-        _modifiers.add(rottenModifier)
-        updateText()
-    }
-
-    private fun updateRottenModifier(newDamage: Int) {
-        _modifiers.remove(rottenModifier)
-        rottenModifier = CardModifier(
-            newDamage,
-            TemplateString(
-                GraphicsConfig.rawTemplateString("rottenDetailText"),
-                mapOf("damageLost" to newDamage)
-            )
-        ) { true }
-        _modifiers.add(rottenModifier)
-        isDamageDirty = true
-        updateText()
-        updateTexture()
     }
 
     /**
@@ -183,18 +152,14 @@ class Card(
      */
     fun checkModifierValidity() {
         val iterator = _modifiers.iterator()
-        var textureDirty = false
         while (iterator.hasNext()) {
             val modifier = iterator.next()
             if (!modifier.validityChecker()) {
                 FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
                 iterator.remove()
-                isDamageDirty = true
-                if (modifier.damage != 0) textureDirty = true
+                modifiersChanged()
             }
         }
-        if (isDamageDirty) updateText()
-        if (textureDirty) updateTexture()
     }
 
     /**
@@ -211,9 +176,7 @@ class Card(
     fun leaveGame() {
         inGame = false
         _modifiers.clear()
-        isDamageDirty = true
-        updateText()
-        updateTexture()
+        modifiersChanged()
     }
 
     /**
@@ -238,16 +201,30 @@ class Card(
     fun addModifier(modifier: CardModifier) {
         FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
         _modifiers.add(modifier)
-        isDamageDirty = true
-        updateText()
-        if (modifier.damage != 0) updateTexture()
+        modifiersChanged()
     }
 
     fun removeModifier(modifier: CardModifier) {
         _modifiers.remove(modifier)
-        isDamageDirty = true
-        updateText()
-        if (modifier.damage != 0) updateTexture()
+        modifiersChanged()
+    }
+
+    private fun addRottenModifier() {
+        val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation -> CardModifier(
+            damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
+            source = oldModifier.source,
+            validityChecker = oldModifier.validityChecker,
+            transformers = oldModifier.transformers
+        )}
+        val modifier = CardModifier(
+            damage = 0,
+            source = "rotten effect",
+            validityChecker = { inGame },
+            transformers = mapOf(
+                Trigger.ON_REVOLVER_ROTATION to rotationTransformer
+            )
+        )
+        addModifier(modifier)
     }
 
     /**
@@ -261,7 +238,6 @@ class Card(
      * called when the revolver rotates (but not when this card was shot)
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
-        if (isRotten) updateRottenModifier(rottenModifier.damage - rotation.amount)
     }
 
     fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
@@ -271,15 +247,42 @@ class Card(
      * effects; null if no effect was triggered
      */
     @MainThreadOnly
-    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation, controller: GameController): Timeline {
+    fun checkEffects(
+        trigger: Trigger,
+        triggerInformation: TriggerInformation,
+        controller: GameController
+    ): Timeline = Timeline.timeline {
+        action {
+            checkModifierTransformers(trigger, triggerInformation)
+        }
         val inHand = inHand(controller)
-        return effects
+        effects
             .filter { inGame || (inHand && it.triggerInHand) }
             .mapNotNull { it.checkTrigger(trigger, triggerInformation, controller) }
             .collectTimeline()
+            .let { include(it) }
     }
 
-    fun updateText() {
+    private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
+        var modifierChanged = false
+        _modifiers.replaceAll { modifier ->
+            val transformer = modifier.transformers[trigger] ?: return@replaceAll modifier
+            modifierChanged = true
+            transformer(modifier, triggerInformation)
+        }
+        if (modifierChanged) modifiersChanged()
+    }
+
+    private fun modifiersChanged() {
+        updateText()
+        val newDamage = curDamage
+        if (newDamage != lastDamageValue) {
+            updateTexture()
+            lastDamageValue = newDamage
+        }
+    }
+
+    private fun updateText() {
         val text = StringBuilder()
         text
             .append(shortDescription)
@@ -288,9 +291,15 @@ class Card(
             .append("\n")
             .append(if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "")
 
-        _modifiers
-            .mapNotNull { it.description }
-            .forEach { text.append(it.string).append("\n") }
+        val damageText = if (_modifiers.any { it.damage != 0 }) {
+            _modifiers
+                .filter { it.damage != 0 }
+                .joinToString(separator =  ",", prefix = "Damage was changed by: ", transform = { it.source })
+        } else {
+            null
+        }
+
+        damageText?.let { text.append("\n").append(it) }
 
         currentHoverText = text.toString()
     }
@@ -396,7 +405,7 @@ class Card(
                 "spray" -> card.isSpray = true
                 "rotten" -> {
                     card.isRotten = true
-                    card.initRottenModifier()
+                    card.addRottenModifier()
                 }
 
                 else -> throw RuntimeException("unknown trait effect $effect")
@@ -422,14 +431,14 @@ class Card(
     /**
      * temporarily modifies a card. For example used by the buff damage effect to change the damage of a card
      * @param damage changes the damage of the card. Can be negative
-     * @param description if not null this description will be displayed in the detail text of the modified card
      * @param validityChecker checks if the modifier is still valid or should be removed
      */
     data class CardModifier(
         val damage: Int,
-        val description: TemplateString?,
         val everlasting: Boolean = false,
-        val validityChecker: () -> Boolean
+        val source: String,
+        val validityChecker: () -> Boolean,
+        val transformers: Map<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()
     )
 
 }
@@ -485,6 +494,7 @@ class CardActor(
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
+        redrawPixmap()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -609,8 +619,6 @@ class CardActor(
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
         "text" to OnjString(card.currentHoverText)
     )
-
-    override fun onDetailDisplayStarted() = card.updateText()
 
     override fun positionChanged() {
         super.positionChanged()
