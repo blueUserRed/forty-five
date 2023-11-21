@@ -609,6 +609,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     "cardToShoot = $cardToShoot"
         )
 
+        val targetedEnemies = if (cardToShoot?.isSpray ?: false) {
+            enemyArea.enemies
+        } else {
+            listOf(enemyArea.getTargetedEnemy())
+        }
+
         val damagePlayerTimeline = enemyArea
             .getTargetedEnemy()
             .damagePlayerDirectly(shotEmptyDamage, this@GameController)
@@ -623,19 +629,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
                     cardToShoot.afterShot()
                 }
-                if (cardToShoot.isSpray) {
-                    enemyArea
-                        .enemies
-                        .map { it.damage(cardToShoot.curDamage) }
-                        .collectTimeline()
-                        .let { include(it) }
-                } else {
-                    include(enemyArea.getTargetedEnemy().damage(cardToShoot.curDamage))
-                }
+                targetedEnemies
+                    .map { it.damage(cardToShoot.curDamage) }
+                    .collectTimeline()
+                    .let { include(it) }
             }
             include(rotateRevolver(rotationDirection))
             cardToShoot?.let {
-                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot))
+                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
             }
             encounterModifiers
                 .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }

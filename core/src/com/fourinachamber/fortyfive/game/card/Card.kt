@@ -275,7 +275,7 @@ class Card(
         val inHand = inHand(controller)
         return effects
             .filter { inGame || (inHand && it.triggerInHand) }
-            .mapNotNull { it.checkTrigger(trigger, triggerInformation) }
+            .mapNotNull { it.checkTrigger(trigger, triggerInformation, controller) }
             .collectTimeline()
     }
 
