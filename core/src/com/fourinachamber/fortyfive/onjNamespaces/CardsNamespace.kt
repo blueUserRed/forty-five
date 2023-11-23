@@ -88,9 +88,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         ))
     }
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
-    fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
-        return OnjEffect(Effect.Protect(triggerOrError(trigger.value), bulletSelector.value, false))
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int]")
+    fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector, shots: OnjInt): OnjEffect {
+        return OnjEffect(Effect.Protect(
+            triggerOrError(trigger.value),
+            bulletSelector.value,
+            shots.value.toInt(),
+            false
+        ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")

@@ -101,6 +101,7 @@ class Enemy(
     fun onDefeat() {
         _statusEffects.forEach { actor.removeStatusEffect(it) }
         _statusEffects.clear()
+        actor.setupForAction(NextEnemyAction.None)
     }
 
     fun applyEffect(effect: StatusEffect) {

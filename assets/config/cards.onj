@@ -415,7 +415,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            protect("enter", bSelects.targetRequiredNotSelf)
+            protect("enter", bSelects.targetRequiredNotSelf, 3)
         ],
         forceLoadCards: [],
         cost: 3,

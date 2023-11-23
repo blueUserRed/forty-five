@@ -254,29 +254,25 @@ abstract class Effect(val trigger: Trigger) {
     class Protect(
         trigger: Trigger,
         val bulletSelector: BulletSelector,
+        val shots: Int,
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-//            val modifier = Card.CardModifier(
-//                0,
-//                TemplateString(
-//                    GraphicsConfig.rawTemplateString("protectDetailText"),
-//                    mapOf("source" to card.title)
-//                ),
-//                true
-//            ) { card.inGame }
-
             include(getSelectedBullets(bulletSelector, controller, card))
             action {
                 get<List<Card>>("selectedCards")
-//                    .forEach { it.addModifier(modifier) }
+                    .forEach { it.protect(
+                        cardDescName,
+                        shots,
+                        validityChecker = { card.inGame }
+                    )}
             }
         }
 
         override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
 
-        override fun copy(): Effect = Protect(trigger, bulletSelector, triggerInHand)
+        override fun copy(): Effect = Protect(trigger, bulletSelector, shots, triggerInHand)
 
         override fun toString(): String = "Protect(trigger=$trigger)"
     }
