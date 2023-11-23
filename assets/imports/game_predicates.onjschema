@@ -31,4 +31,8 @@ $GamePredicate {
         value: $GamePredicate
     }
 
+    $TargetedEnemyShieldIsAtLeast {
+        value: int
+    }
+
 }

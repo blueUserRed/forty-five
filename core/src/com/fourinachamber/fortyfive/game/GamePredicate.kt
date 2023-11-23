@@ -40,6 +40,10 @@ fun interface GamePredicate {
             !other.check(controller)
         } }
 
+        val targetedEnemyShieldIsAtLeast = { value: Int -> GamePredicate { controller ->
+            controller.enemyArea.getTargetedEnemy().currentCover >= value
+        } }
+
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
@@ -58,6 +62,7 @@ fun interface GamePredicate {
             )
             "PlayerHasStatusEffect" -> playerHasStatusEffect(obj.get<StatusEffectCreator>("value")())
             "NegatePredicate" -> negatePredicate(fromOnj(obj.get<OnjNamedObject>("value"), inContextOfEnemy))
+            "TargetedEnemyShieldIsAtLeast" -> targetedEnemyShieldIsAtLeast(obj.get<Long>("value").toInt())
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

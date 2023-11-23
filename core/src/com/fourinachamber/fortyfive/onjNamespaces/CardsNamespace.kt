@@ -23,7 +23,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "BulletSelector" to OnjBulletSelector::class,
         "StatusEffect" to OnjStatusEffect::class,
         "Effect" to OnjEffect::class,
-        "EffectValue" to OnjEffectValue::class
+        "EffectValue" to OnjEffectValue::class,
+        "ActiveChecker" to OnjActiveChecker::class,
     )
 
     @OnjNamespaceVariables
@@ -53,6 +54,22 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             amount.value,
             bulletSelector.value,
             false
+        ))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, EffectValue, ActiveChecker]")
+    fun buffDmg(
+        trigger: OnjString,
+        bulletSelector: OnjBulletSelector,
+        amount: OnjEffectValue,
+        activeChecker: OnjActiveChecker
+    ): OnjEffect {
+        return OnjEffect(Effect.BuffDamage(
+            triggerOrError(trigger.value),
+            amount.value,
+            bulletSelector.value,
+            false,
+            activeChecker.value,
         ))
     }
 
@@ -229,6 +246,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
     fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { value.value.toInt() }
 
+    @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
+    fun activeChecker(value: OnjNamedObject): OnjActiveChecker {
+        val predicate = GamePredicate.fromOnj(value)
+        return OnjActiveChecker { controller -> predicate.check(controller) }
+    }
+
     private fun getIntParamFromOnj(value: OnjValue): Int = when (value) {
         is OnjInt -> value.value.toInt()
         is OnjArray -> value.toIntRange().random()
@@ -294,5 +317,14 @@ class OnjEffectValue(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--effect-value--'")
+    }
+}
+
+class OnjActiveChecker(
+    override val value: (controller: GameController) -> Boolean
+) : OnjValue() {
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--active-checker--'")
     }
 }
