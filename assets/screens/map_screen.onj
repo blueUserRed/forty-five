@@ -25,6 +25,7 @@ assets: {
         "map_node_shop_rect", "map_node_shop_circle",
         "map_node_fight_rect", "map_node_fight_circle",
         "map_node_exit_rect", "map_node_exit_circle",
+        "map_node_heal_rect", "map_node_heal_circle",
         "card_character",
         "map_decoration_wasteland_dune_1", "map_decoration_wasteland_dune_2",
         "map_decoration_wasteland_dune_3", "map_decoration_wasteland_dune_4",

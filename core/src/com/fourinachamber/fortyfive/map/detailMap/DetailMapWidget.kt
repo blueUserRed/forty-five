@@ -443,16 +443,16 @@ class DetailMapWidget(
         }
     }
 
-    // TODO: remove
-    private val edgeTestShader: BetterShader by lazy {
-        ResourceManager.get(screen, "map_edge_shader")
-    }
+//    // TODO: remove (commented out by zwicki, because it threw errors)
+//    private val edgeTestShader: BetterShader by lazy {
+//        ResourceManager.get(screen, "map_edge_shader")
+//    }
 
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges
         batch.flush()
-        edgeTestShader.prepare(screen)
-        batch.shader = edgeTestShader.shader
+//        edgeTestShader.prepare(screen)
+//        batch.shader = edgeTestShader.shader
         for ((node1, node2) in uniqueEdges) {
             val node1Pos = scaledNodePos(node1)
             val node2Pos = scaledNodePos(node2)
@@ -461,7 +461,7 @@ class DetailMapWidget(
             val length = Vector2(dx, dy).len()
             var angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
             if (dx < 0) angle = 360 - angle
-            edgeTestShader.shader.setUniformf("u_lineLength", length)
+//            edgeTestShader.shader.setUniformf("u_lineLength", length)
             batch.draw(
                 edgeTexture,
                 x + node1Pos.x + mapOffset.x + nodeSize / 2 - lineWidth / 2,
