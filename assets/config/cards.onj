@@ -647,6 +647,25 @@ cards: [
         tags: ["pool1"],
         price: 0,
     },
+    {
+        name: "hollowpointBullet",
+        title: "Hollowpoint Bullet",
+        flavourText: "hollowpoint Bullet",
+        description: "If the enemy has SHIELD: this Bullet has +6 dmg",
+        baseDamage: 10,
+        coverValue: 0,
+        traitEffects: [ "spray" ],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyShieldIsAtLeast { value: 1 }#activeChecker)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
 
 ],
 

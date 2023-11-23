@@ -110,17 +110,19 @@ abstract class Effect(val trigger: Trigger) {
         trigger: Trigger,
         val amount: EffectValue,
         private val bulletSelector: BulletSelector,
-        override var triggerInHand: Boolean
+        override var triggerInHand: Boolean,
+        private val activeChecker: (controller: GameController) -> Boolean = { true }
     ) : Effect(trigger) {
 
-        override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector, triggerInHand)
+        override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector, triggerInHand, activeChecker)
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
             val modifier = Card.CardModifier(
                 damage = amount,
                 source = cardDescName,
-                validityChecker = { card.inGame }
+                validityChecker = { card.inGame },
+                activeChecker = activeChecker
             )
 
             return Timeline.timeline {

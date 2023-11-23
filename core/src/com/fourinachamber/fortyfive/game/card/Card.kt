@@ -100,12 +100,6 @@ class Card(
     var inGame: Boolean = false
         private set
 
-    /**
-     * the current damage with all modifiers applied
-     */
-    val curDamage: Int
-        get() = (baseDamage + _modifiers.sumOf { it.damage }).coerceAtLeast(0)
-
     var isEverlasting: Boolean = false
         private set
     var isUndead: Boolean = false
@@ -132,6 +126,8 @@ class Card(
 
     private var protectingModifiers: MutableList<Triple<String, Int, () -> Boolean>> = mutableListOf()
 
+    private var modifierValuesDirty = true
+
     init {
         screen.borrowResource(cardTexturePrefix + name)
         actor = CardActor(
@@ -146,7 +142,7 @@ class Card(
     /**
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
-    fun checkModifierValidity() {
+    private fun checkModifierValidity(controller: GameController) {
         val modifierIterator = _modifiers.iterator()
         var somethingChanged = false
         while (modifierIterator.hasNext()) {
@@ -156,6 +152,10 @@ class Card(
                 modifierIterator.remove()
                 somethingChanged = true
             }
+            val active = modifier.activeChecker(controller)
+            if (active == modifier.wasActive) continue
+            modifier.wasActive = active
+            somethingChanged = true
         }
         val protectingIterator = protectingModifiers.iterator()
         while (protectingIterator.hasNext()) {
@@ -168,6 +168,25 @@ class Card(
         }
         if (somethingChanged) modifiersChanged()
     }
+
+    fun update(controller: GameController) {
+        checkModifierValidity(controller)
+        if (modifierValuesDirty) {
+            updateText(controller)
+            val newDamage = curDamage(controller)
+            if (newDamage != lastDamageValue) {
+                updateTexture(controller)
+                lastDamageValue = newDamage
+            }
+            modifierValuesDirty = false
+        }
+    }
+
+    fun activeModifiers(controller: GameController): List<CardModifier> =
+        _modifiers.filter { it.activeChecker(controller) }
+
+    fun curDamage(controller: GameController): Int =
+        (baseDamage + activeModifiers(controller).sumOf { it.damage }).coerceAtLeast(0)
 
     /**
      * called by gameScreenController when the card was shot
@@ -299,25 +318,20 @@ class Card(
     }
 
     private fun modifiersChanged() {
-        updateText()
-        val newDamage = curDamage
-        if (newDamage != lastDamageValue) {
-            updateTexture()
-            lastDamageValue = newDamage
-        }
+        modifierValuesDirty = true
     }
 
-    private fun updateText() {
+    private fun updateText(controller: GameController) {
         val text = StringBuilder()
         text
             .append(shortDescription)
             .append("\n")
             .append(flavourText)
             .append("\n")
-            .append(if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "")
+            .append(if (type == Type.BULLET) "damage: ${curDamage(controller)}/$baseDamage" else "")
 
-        if (_modifiers.any { it.damage != 0 }) {
-            val damageText = _modifiers
+        if (activeModifiers(controller).any { it.damage != 0 }) {
+            val damageText = activeModifiers(controller)
                 .filter { it.damage != 0 }
                 .joinToString(separator =  ", ", prefix = "Damage was changed by: ", transform = { it.source })
             text.append("\n").append(damageText)
@@ -337,7 +351,7 @@ class Card(
         currentHoverText = text.toString()
     }
 
-    private fun updateTexture() = actor.redrawPixmap()
+    private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller))
 
     override fun dispose() = actor.disposeTexture()
 
@@ -470,6 +484,8 @@ class Card(
         val damage: Int,
         val source: String,
         val validityChecker: () -> Boolean = { true },
+        val activeChecker: (controller: GameController) -> Boolean = { true },
+        var wasActive: Boolean = true,
         val transformers: Map<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()
     )
 
@@ -526,7 +542,7 @@ class CardActor(
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
-        redrawPixmap()
+        redrawPixmap(card.baseDamage)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -564,9 +580,9 @@ class CardActor(
         pixmapTextureRegion = null
     }
 
-    fun redrawPixmap() {
+    fun redrawPixmap(damageValue: Int) {
         pixmap.drawPixmap(cardTexturePixmap, 0, 0)
-        font.write(pixmap, card.curDamage.toString(), 35, 480, fontScale, fontColor)
+        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, fontColor)
         font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
         pixmapTextureRegion?.texture?.dispose()
         val texture = Texture(pixmap, true)
