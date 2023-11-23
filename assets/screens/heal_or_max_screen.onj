@@ -23,6 +23,7 @@ assets: {
         "heal_or_max_selector_background",
         "heal_or_max_selector_background_selected",
         "taupe_gray_rounded",
+        "map_node_heal_circle",
         //        "max_health_background",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
@@ -42,7 +43,7 @@ options: {
         ...(inputMaps.defaultInputMap)
     ],
     screenController: $HealOrMaxHPScreenController {
-        addLifeActorName: "temp_name",
+        addLifeActorName: "add_lives_option",
     }
 },
 
@@ -68,7 +69,6 @@ root: $Box { //TODO biomes
         ],
     },
     $Box {
-        name: "temp_name",
         zIndex: 150,
         styles: [
             {
@@ -167,6 +167,20 @@ root: $Box { //TODO biomes
             ],
         },
     ],
+    $Image {
+        textureName: "map_node_heal_circle",
+        zIndex: 160,
+
+        scaleX: 1.0,
+        scaleY: 1.0,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 19#percent,
+                positionLeft: 47.15#percent,
+            }
+        ],
+    },
     $Statusbar {
         zIndex: 400,
         options: [
