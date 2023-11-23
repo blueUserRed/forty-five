@@ -654,11 +654,30 @@ cards: [
         description: "If the enemy has SHIELD: this Bullet has +6 dmg",
         baseDamage: 10,
         coverValue: 0,
-        traitEffects: [ "spray" ],
+        traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
             buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyShieldIsAtLeast { value: 1 }#activeChecker)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
+    {
+        name: "pppBullet",
+        title: "+P+ Bullet",
+        flavourText: "+P+ Bullet",
+        description: "If the Enemy has at least 1 status effect: this has +6 dmg",
+        baseDamage: 8,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyHasAnyStatusEffect {}#activeChecker)
         ],
         forceLoadCards: [],
         cost: 1,

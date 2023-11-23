@@ -35,4 +35,7 @@ $GamePredicate {
         value: int
     }
 
+    $TargetedEnemyHasAnyStatusEffect {
+    }
+
 }
