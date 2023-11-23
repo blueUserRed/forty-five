@@ -91,7 +91,7 @@ class Enemy(
 
     private val _statusEffects: MutableList<StatusEffect> = mutableListOf()
 
-    val statusEffect: List<StatusEffect>
+    val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
     init {
