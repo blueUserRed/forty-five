@@ -2,7 +2,7 @@ package com.fourinachamber.fortyfive.map.events.heals
 
 
 import com.fourinachamber.fortyfive.game.SaveState
-import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPEvent
+import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -13,7 +13,7 @@ import kotlin.math.min
 import kotlin.random.Random
 
 class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController() {
-    private var context: HealOrMaxHPEvent? = null
+    private var context: HealOrMaxHPMapEvent? = null
 
     private var tarekHealChosenGeorgWidgetName: String = onj.get<String>("addLifeActorName")
 
@@ -22,7 +22,7 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController() {
     private lateinit var screen: OnjScreen
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
-        if (context !is HealOrMaxHPEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
+        if (context !is HealOrMaxHPMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         val rnd = Random(context.seed)
         this.context = context
         amount = context.healthRange.random(rnd) to context.maxHPRange.random(rnd)
@@ -32,6 +32,9 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController() {
         )
         TemplateString.updateGlobalParam("map.curEvent.maxHP.lives_new", SaveState.playerLives + amount.second)
         TemplateString.updateGlobalParam("map.curEvent.maxHP.maxLives_new", SaveState.maxPlayerLives + amount.second)
+        TemplateString.updateGlobalParam("map.curEvent.maxHP.distanceToEnd", this.context?.distanceToEnd)
+        TemplateString.updateGlobalParam("map.curEvent.heal.amount", amount.first)
+        TemplateString.updateGlobalParam("map.curEvent.maxHP.amount", amount.second)
     }
 
     /**
