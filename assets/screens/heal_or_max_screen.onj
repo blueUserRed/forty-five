@@ -132,10 +132,10 @@ root: $Box { //TODO biomes
             ],
         },
         $TemplateLabel {
-            template: "next safe point in {map.curEvent.maxHP.distanceToEnd} events",
+            template: "{map.curEvent.maxHP.distanceToEnd}",
             font: "red_wing_cm",
             color: color.forty_white,
-            fontScale: 0.7,
+            fontScale: 0.6,
             align: "center",
         },
         $Box {
@@ -170,7 +170,6 @@ root: $Box { //TODO biomes
     $Image {
         textureName: "map_node_heal_circle",
         zIndex: 160,
-
         scaleX: 1.0,
         scaleY: 1.0,
         styles: [

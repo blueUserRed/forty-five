@@ -182,13 +182,19 @@ generatorConfig: {
                 fixedEvents: [
                     {
                         isDeadEnd: false,
-                        nodeTexture: "map_node_shop_circle",
-                        event: $ShopMapEvent {
+                        nodeTexture: "map_node_heal_circle",
+                        event: $HealOrMaxHPEvent {
                             seed: null,
-                            boughtIndices: [
+                            healRange: [
+                                25, 35
                             ],
-                            type: "defType",
-                            person: "traveling_merchant",
+                            maxHPRange: [
+                                5, 15
+                            ],
+                            currentlyBlocks: false,
+                            canBeStarted: true,
+                            isCompleted: false,
+                            distanceToEnd: -1,
                         }
                     },
                 ],
