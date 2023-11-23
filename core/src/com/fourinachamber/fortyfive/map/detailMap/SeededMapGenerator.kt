@@ -67,13 +67,15 @@ class SeededMapGenerator(
     private fun setDistanceFromEnd(lastNode: MapNodeBuilder) {
         var curSteps = 0
         var curNodes = listOf(lastNode)
+        val visitedNodes = mutableListOf<MapNodeBuilder>()
         while (true) {
             val newNodes = mutableListOf<MapNodeBuilder>()
-            curNodes.forEach {
-                val curEvent = it.event
-                if (curEvent !is ScaledByDistance) return
-                curEvent.distanceToEnd = curSteps
+            curNodes.filter { it !in visitedNodes }.forEach {
                 newNodes.addAll(it.edgesTo)
+                visitedNodes.add(it)
+                val curEvent = it.event
+                if (curEvent !is ScaledByDistance) return@forEach
+                curEvent.distanceToEnd = curSteps
             }
             curNodes = newNodes
             if (curNodes.isEmpty()) return

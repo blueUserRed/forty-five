@@ -43,8 +43,8 @@ interface ScaledByDistance {
         distanceToEnd = onj.get<Long?>("distanceToEnd")?.toInt() ?: -1
     }
 
-    fun OnjObjectBuilderDSL.includeDistanceFromEnd() {
-        "distanceToEnd" to distanceToEnd
+    fun OnjObjectBuilderDSL.includeDistanceFromEnd() { //TODO somehow this doesn't work
+        "distanceToEnd" with distanceToEnd
     }
 }
 
@@ -188,6 +188,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
         name("EncounterMapEvent")
         includeStandardConfig()
         includeDistanceFromEnd()
+
     }
 
 }
@@ -363,14 +364,15 @@ class HealOrMaxHPMapEvent(
     fun complete() {
         isCompleted = true
         canBeStarted = false
+        MapManager.changeToMapScreen()
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("HealOrMaxHPEvent")
         includeStandardConfig()
-        ("seed" with seed)
+        includeDistanceFromEnd()
+        "seed" with seed
         "healRange" with arrayOf(healthRange.first, healthRange.last)
         "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
-        includeDistanceFromEnd()
     }
 }
