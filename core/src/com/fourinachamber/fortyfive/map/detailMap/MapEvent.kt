@@ -26,7 +26,7 @@ object MapEventFactory {
             )
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
-        "HealOrMaxHPEvent" to { HealOrMaxHPEvent(it) },
+        "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -43,8 +43,8 @@ interface ScaledByDistance {
         distanceToEnd = onj.get<Long?>("distanceToEnd")?.toInt() ?: -1
     }
 
-    fun includeDistanceFromEnd(): Pair<String, Int> {
-        return "distanceToEnd" to max(distanceToEnd, 0)
+    fun OnjObjectBuilderDSL.includeDistanceFromEnd() {
+        "distanceToEnd" to distanceToEnd
     }
 }
 
@@ -333,7 +333,7 @@ class ChooseCardMapEvent(
  * event that opens a shop where the player can buy up to 8 cards
  * @param types which type the restrictions are
  */
-class HealOrMaxHPEvent(
+class HealOrMaxHPMapEvent(
     onj: OnjObject
 ) : MapEvent(), ScaledByDistance {
 
