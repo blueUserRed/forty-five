@@ -5,14 +5,10 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
-import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -122,9 +118,7 @@ class Card(
         private set
 
     val shouldRemoveAfterShot: Boolean
-        get() = !(isEverlasting || _modifiers.any { it.everlasting })
-
-    private lateinit var rottenModifier: CardModifier
+        get() = !(isEverlasting || protectingModifiers.isNotEmpty())
 
     private var lastDamageValue: Int = baseDamage
 
@@ -135,6 +129,8 @@ class Card(
 
     var currentHoverText: String = ""
         private set
+
+    private var protectingModifiers: MutableList<Triple<String, Int, () -> Boolean>> = mutableListOf()
 
     init {
         screen.borrowResource(cardTexturePrefix + name)
@@ -151,15 +147,26 @@ class Card(
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
     fun checkModifierValidity() {
-        val iterator = _modifiers.iterator()
-        while (iterator.hasNext()) {
-            val modifier = iterator.next()
+        val modifierIterator = _modifiers.iterator()
+        var somethingChanged = false
+        while (modifierIterator.hasNext()) {
+            val modifier = modifierIterator.next()
             if (!modifier.validityChecker()) {
                 FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
-                iterator.remove()
-                modifiersChanged()
+                modifierIterator.remove()
+                somethingChanged = true
             }
         }
+        val protectingIterator = protectingModifiers.iterator()
+        while (protectingIterator.hasNext()) {
+            val modifier = protectingIterator.next()
+            if (!modifier.third()) {
+                FortyFiveLogger.debug(logTag, "protecting modifier no longer valid: $modifier")
+                protectingIterator.remove()
+                somethingChanged = true
+            }
+        }
+        if (somethingChanged) modifiersChanged()
     }
 
     /**
@@ -173,9 +180,27 @@ class Card(
         if (shouldRemoveAfterShot) leaveGame()
     }
 
+    fun beforeShot() {
+        if (protectingModifiers.isEmpty()) return
+        val effect = protectingModifiers.first()
+        val newEffect = effect.copy(second = effect.second - 1)
+        if (newEffect.second == 0) {
+            protectingModifiers.removeFirst()
+        } else {
+            protectingModifiers[0] = newEffect
+        }
+        modifiersChanged()
+    }
+
     fun leaveGame() {
         inGame = false
         _modifiers.clear()
+        modifiersChanged()
+    }
+
+    fun protect(source: String, protectedFor: Int, validityChecker: () -> Boolean) {
+        FortyFiveLogger.debug(logTag, "$source protected $this for $protectedFor shots")
+        protectingModifiers.add(Triple(source, protectedFor, validityChecker))
         modifiersChanged()
     }
 
@@ -291,15 +316,23 @@ class Card(
             .append("\n")
             .append(if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "")
 
-        val damageText = if (_modifiers.any { it.damage != 0 }) {
-            _modifiers
+        if (_modifiers.any { it.damage != 0 }) {
+            val damageText = _modifiers
                 .filter { it.damage != 0 }
-                .joinToString(separator =  ",", prefix = "Damage was changed by: ", transform = { it.source })
-        } else {
-            null
+                .joinToString(separator =  ", ", prefix = "Damage was changed by: ", transform = { it.source })
+            text.append("\n").append(damageText)
         }
 
-        damageText?.let { text.append("\n").append(it) }
+        if (protectingModifiers.isNotEmpty()) {
+            val total = protectingModifiers.sumOf { it.second }
+            val protectingText = protectingModifiers
+                .joinToString(
+                    separator = ", ",
+                    prefix = "Card is protected for ${total.pluralS("shot")} by: ",
+                    transform = { it.first }
+                )
+            text.append("\n").append(protectingText)
+        }
 
         currentHoverText = text.toString()
     }
@@ -435,7 +468,6 @@ class Card(
      */
     data class CardModifier(
         val damage: Int,
-        val everlasting: Boolean = false,
         val source: String,
         val validityChecker: () -> Boolean = { true },
         val transformers: Map<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()

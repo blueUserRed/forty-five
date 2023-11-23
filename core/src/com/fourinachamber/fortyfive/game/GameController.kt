@@ -626,6 +626,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
             cardToShoot?.let {
                 action {
+                    cardToShoot.beforeShot()
                     if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
                     cardToShoot.afterShot()
                 }
