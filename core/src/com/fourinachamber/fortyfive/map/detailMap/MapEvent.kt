@@ -163,6 +163,8 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
 
     override val displayDescription: Boolean = true
 
+    var encounterIndex: Int
+
     override val icon: String = "normal_bullet"
     override val descriptionText: String = "Take on enemies and come out on top!"
     override val completedDescriptionText: String = "All enemies gone already!"
@@ -171,7 +173,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
     init {
         setStandardValuesFromConfig(obj)
         setDistanceFromConfig(obj)
-//        currentlyBlocks = false
+        encounterIndex = obj.get<Long>("encounterIndex").toInt()
     }
 
     override fun start() {
@@ -188,6 +190,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
         name("EncounterMapEvent")
         includeStandardConfig()
         includeDistanceFromEnd()
+        "encounterIndex" with encounterIndex
 
     }
 

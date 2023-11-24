@@ -23,17 +23,17 @@ class ServiceThread : Thread("ServiceThread") {
             when (message) {
 
                 is ServiceThreadMessage.PrepareResources -> prepareResources()
-                is ServiceThreadMessage.GenerateMaps -> generateMaps(message)
+//                is ServiceThreadMessage.GenerateMaps -> generateMaps(message)
 
                 else -> throw RuntimeException("unknown message: $message")
             }
         }
     }
 
-    private fun CoroutineScope.generateMaps(message: ServiceThreadMessage.GenerateMaps) = launch(Dispatchers.Default) {
-        MapManager.generateMaps(this)
-        message.completed.complete(Unit)
-    }
+//    private fun CoroutineScope.generateMaps(message: ServiceThreadMessage.GenerateMaps) = launch(Dispatchers.Default) {
+//        MapManager.generateMaps(this)
+//        message.completed.complete(Unit)
+//    }
 
     private fun CoroutineScope.prepareResources() {
         ResourceManager
@@ -61,7 +61,7 @@ sealed class ServiceThreadMessage {
 
     object PrepareResources : ServiceThreadMessage()
 
-    class GenerateMaps(val completed: CompletableDeferred<Unit> = CompletableDeferred()) : ServiceThreadMessage()
+//    class GenerateMaps(val completed: CompletableDeferred<Unit> = CompletableDeferred()) : ServiceThreadMessage()
 
     override fun toString(): String = this::class.simpleName ?: ""
 

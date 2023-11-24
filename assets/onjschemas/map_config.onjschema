@@ -32,6 +32,7 @@ $MapEvent {
     $EncounterMapEvent {
         ...mapEventStandardConfig,
         distanceToEnd?: int,
+        encounterIndex: int,
     }
 
     $EnterMapMapEvent {

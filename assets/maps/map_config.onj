@@ -208,6 +208,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },
@@ -230,6 +231,7 @@ generatorConfig: {
                         currentlyBlocks: true,
                         canBeStarted: true,
                         isCompleted: false,
+                        encounterIndex: 0,
                         distanceToEnd: -1,
                     }
                 },
@@ -325,6 +327,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },
@@ -424,6 +427,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },
@@ -517,6 +521,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },

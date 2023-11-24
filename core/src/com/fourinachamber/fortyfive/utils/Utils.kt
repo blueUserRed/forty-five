@@ -196,6 +196,8 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
     return Timeline(actions)
 }
 
+fun <T> Collection<T>.randomIndex(): Int = (0..this.size).random()
+
 fun String.lowerCaseFirstChar(): String = this.replaceFirstChar { it.lowercaseChar() }
 
 inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {

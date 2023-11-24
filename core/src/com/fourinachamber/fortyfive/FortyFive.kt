@@ -93,15 +93,15 @@ object FortyFive : Game() {
         }
         TemplateString.init()
         FortyFiveLogger.init()
-//        resetAll()
-//        newRun()
+        GameDirector.init()
+        resetAll()
+        newRun()
         PermaSaveState.read()
         SaveState.read()
         MapManager.init()
         GraphicsConfig.init()
         ResourceManager.init()
         RandomCardSelection.init()
-        GameDirector.init()
     }
 
     override fun dispose() {
