@@ -94,7 +94,6 @@ var controller = $GameScreenController {
     cardsToDraw: gameConfig.cardDrawConfig.roundStart,
     softMaxCards: gameConfig.cardDrawConfig.softMaxCards,
     hardMaxCards: gameConfig.cardDrawConfig.hardMaxCards,
-    playerLives: gameConfig.playerConfig.lives,
     reservesAtRoundBegin: gameConfig.reservesConfig.roundStart,
     shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
     encounterModifierDisplayTemplateName: "encounter_modifier_display",
