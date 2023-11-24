@@ -215,6 +215,14 @@ textures: [
         file: "textures/map/nodes/exit_circle.png"
     },
     {
+        name: "map_node_heal_rect",
+        file: "textures/map/nodes/heal_rect.png"
+    },
+    {
+        name: "map_node_heal_circle",
+        file: "textures/map/nodes/heal_circle.png"
+    },
+    {
         name: "map_node_exit_rect",
         file: "textures/map/nodes/exit_rect.png"
     },
@@ -313,6 +321,42 @@ textures: [
     {
         name: "shop_background_wasteland",
         file: "textures/shop/biomeBackgrounds/wasteland.png"
+    },
+    {
+        name: "heal_or_max_accept",
+        file: "textures/events/heal_or_maxhp/accept.png"
+    },
+    {
+        name: "heal_or_max_accept_hover",
+        file: "textures/events/heal_or_maxhp/accept_hover.png"
+    },
+    {
+        name: "heal_or_max_accept_invalid",
+        file: "textures/events/heal_or_maxhp/accept_invalid.png"
+    },
+    {
+        name: "heal_or_max_add_health",
+        file: "textures/events/heal_or_maxhp/add_health.png"
+    },
+    {
+        name: "heal_or_max_add_max_health",
+        file: "textures/events/heal_or_maxhp/add_max_health.png"
+    },
+    {
+        name: "heal_or_max_background",
+        file: "textures/events/heal_or_maxhp/heal_or_max_background.png"
+    },
+    {
+        name: "heal_or_max_selector_background",
+        file: "textures/events/heal_or_maxhp/heal_or_max_selector_background.png"
+    },
+    {
+        name: "heal_or_max_selector_background_selected",
+        file: "textures/events/heal_or_maxhp/heal_or_max_selector_background_selected.png"
+    },
+    {
+        name: "max_health_background",
+        file: "textures/events/heal_or_maxhp/max_health_background.png"
     },
     {
         name: "shop_back_button",
@@ -649,6 +693,15 @@ ninepatches: [
     {
         name: "forty_white_rounded",
         file: "textures/ninepatches/forty_white_rounded.png",
+        top: 24,
+        bottom: 24,
+        left: 24,
+        right: 24,
+        scale: 0.0025
+    },
+    {
+        name: "taupe_gray_rounded",
+        file: "textures/ninepatches/taupe_gray_rounded.png",
         top: 24,
         bottom: 24,
         left: 24,

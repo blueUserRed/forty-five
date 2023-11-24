@@ -1,10 +1,11 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
-import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
 import onj.value.*
+import kotlin.math.max
 
 /**
  * used for dynamically creating events
@@ -24,16 +25,27 @@ object MapEventFactory {
                 onjObject.get<List<OnjInt>>("boughtIndices").map { it -> it.value.toInt() }.toMutableSet(),
             )
         },
-        "ChooseCardMapEvent" to { onjObject ->
-            ChooseCardMapEvent(
-                onjObject.get<OnjArray>("types").value.map { (it as OnjString).value },
-                onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-            )
-        },
+        "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
+        "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
         mapEventCreators[onj.name]?.invoke(onj) ?: throw RuntimeException("unknown map event ${onj.name}")
+}
+
+/**
+ * for those events that need to know the distance till the end of the next road
+ */
+interface ScaledByDistance {
+    var distanceToEnd: Int
+
+    fun setDistanceFromConfig(onj: OnjObject) {
+        distanceToEnd = onj.get<Long?>("distanceToEnd")?.toInt() ?: -1
+    }
+
+    fun OnjObjectBuilderDSL.includeDistanceFromEnd() { //TODO somehow this doesn't work
+        "distanceToEnd" with distanceToEnd
+    }
 }
 
 /**
@@ -142,11 +154,12 @@ class EmptyMapEvent : MapEvent() {
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent() {
+class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
     override var isCompleted: Boolean = false
+    override var distanceToEnd: Int = -1
 
     override val displayDescription: Boolean = true
 
@@ -157,6 +170,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
 
     init {
         setStandardValuesFromConfig(obj)
+        setDistanceFromConfig(obj)
 //        currentlyBlocks = false
     }
 
@@ -173,7 +187,10 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent() {
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("EncounterMapEvent")
         includeStandardConfig()
+        includeDistanceFromEnd()
+
     }
+
 }
 
 /**
@@ -262,9 +279,6 @@ class ShopMapEvent(
         MapManager.changeToShopScreen(this)
     }
 
-    fun complete() {
-        canBeStarted = true
-    }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
@@ -280,8 +294,7 @@ class ShopMapEvent(
  * @param types which type the restrictions are
  */
 class ChooseCardMapEvent(
-    val types: List<String>,
-    val seed: Long,
+    onj: OnjObject
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -292,6 +305,12 @@ class ChooseCardMapEvent(
 
     override val descriptionText: String = "You can choose one of three cards."
     override val displayName: String = "Ominous person"
+    val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
+    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
+
+    init {
+        setStandardValuesFromConfig(onj)
+    }
 
     override fun start() {
         MapManager.changeToChooseCardScreen(this)
@@ -307,5 +326,53 @@ class ChooseCardMapEvent(
         includeStandardConfig()
         ("types" with types)
         ("seed" with seed)
+    }
+}
+
+
+/**
+ * event that opens a shop where the player can buy up to 8 cards
+ * @param types which type the restrictions are
+ */
+class HealOrMaxHPMapEvent(
+    onj: OnjObject
+) : MapEvent(), ScaledByDistance {
+
+    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
+    val healthRange: IntRange = onj.get<OnjArray>("healRange").toIntRange()
+    val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+    override var distanceToEnd = -1
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "You can choose to either heal yourself or obtain a higher Max HP."
+    override val displayName: String = "Restoration Point"
+
+    override fun start() {
+        MapManager.changeToHealOrMaxHPScreen(this)
+    }
+
+    init {
+        setDistanceFromConfig(onj)
+        setStandardValuesFromConfig(onj)
+    }
+
+    fun complete() {
+        isCompleted = true
+        canBeStarted = false
+        MapManager.changeToMapScreen()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("HealOrMaxHPEvent")
+        includeStandardConfig()
+        includeDistanceFromEnd()
+        "seed" with seed
+        "healRange" with arrayOf(healthRange.first, healthRange.last)
+        "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
     }
 }

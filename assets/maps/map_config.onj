@@ -114,6 +114,7 @@ screens: {
     encounterScreen: "screens/game_screen.onj",
     shopScreen: "screens/shop_screen.onj",
     chooseCardScreen: "screens/choose_card_screen.onj",
+    changeToHealOrMaxHPScreen: "screens/heal_or_max_screen.onj",
 },
 
 displayNames: [
@@ -181,13 +182,19 @@ generatorConfig: {
                 fixedEvents: [
                     {
                         isDeadEnd: false,
-                        nodeTexture: "map_node_shop_circle",
-                        event: $ShopMapEvent {
+                        nodeTexture: "map_node_heal_circle",
+                        event: $HealOrMaxHPEvent {
                             seed: null,
-                            boughtIndices: [
+                            healRange: [
+                                25, 35
                             ],
-                            type: "defType",
-                            person: "traveling_merchant",
+                            maxHPRange: [
+                                5, 15
+                            ],
+                            currentlyBlocks: false,
+                            canBeStarted: true,
+                            isCompleted: false,
+                            distanceToEnd: -1,
                         }
                     },
                 ],
@@ -200,7 +207,8 @@ generatorConfig: {
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
-                            isCompleted: false
+                            isCompleted: false,
+                            distanceToEnd: -1,
                         }
                     },
 
@@ -221,7 +229,8 @@ generatorConfig: {
                     event: $EncounterMapEvent {
                         currentlyBlocks: true,
                         canBeStarted: true,
-                        isCompleted: false
+                        isCompleted: false,
+                        distanceToEnd: -1,
                     }
                 },
 
@@ -315,7 +324,8 @@ generatorConfig: {
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
-                            isCompleted: false
+                            isCompleted: false,
+                            distanceToEnd: -1,
                         }
                     },
                     {
@@ -413,7 +423,8 @@ generatorConfig: {
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
-                            isCompleted: false
+                            isCompleted: false,
+                            distanceToEnd: -1,
                         }
                     },
                     {
@@ -488,8 +499,8 @@ generatorConfig: {
                 maxNodes: 6,
                 maxSplits: 6,
                 splitProbability: 0.4,
-                startArea: "salem",
-                endArea: "aqua_dulche",
+                startArea: "start_area_demo",
+                endArea: "start_area_demo",
                 otherAreas: [
                 ],
                 avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
@@ -505,7 +516,8 @@ generatorConfig: {
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
-                            isCompleted: false
+                            isCompleted: false,
+                            distanceToEnd: -1,
                         }
                     },
                     {

@@ -86,6 +86,12 @@ object SaveState {
     var playerLives: Int by templateParam("stat.playerLives", 0) {
         savefileDirty = true
     }
+    /**
+     * the current lives of the player
+     */
+    var maxPlayerLives: Int by templateParam("stat.maxPlayerLives", 0) {
+        savefileDirty = true
+    }
 
     /**
      * the current money of the player
@@ -179,6 +185,7 @@ object SaveState {
         lastNode = position.get<Long?>("lastNode")?.toInt()
 
         playerLives = obj.get<Long>("playerLives").toInt()
+        maxPlayerLives = obj.get<Long>("maxPlayerLives").toInt()
         playerMoney = obj.get<Long>("playerMoney").toInt()
         currentDifficulty = obj.get<Double>("currentDifficulty")
 
@@ -187,7 +194,8 @@ object SaveState {
                     "usedReserves = $usedReserves, " +
                     "enemiesDefeated = $enemiesDefeated, " +
                     "playerMoney = $playerMoney, " +
-                    "playerLives = $playerLives"
+                    "playerLives = $playerLives"+
+                    "maxPlayerLives = $maxPlayerLives"
         )
 
         FortyFiveLogger.debug(
@@ -236,6 +244,7 @@ object SaveState {
         val obj = buildOnjObject {
             "cards" with _cards
             "playerLives" with playerLives
+            "maxPlayerLives" with maxPlayerLives
             "playerMoney" with playerMoney
             "currentDifficulty" with currentDifficulty
             "stats" with buildOnjObject {
