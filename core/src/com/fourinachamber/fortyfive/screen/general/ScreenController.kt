@@ -5,6 +5,7 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenController
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
+import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.CardSelectionScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
@@ -21,6 +22,8 @@ object ScreenControllerFactory {
         "DialogScreenController" to { onj -> DialogScreenController(onj) },
         "ShopScreenController" to { onj -> ShopScreenController(onj) },
         "ChooseCardScreenController" to { onj -> ChooseCardScreenController(onj) },
+        "HealOrMaxHPScreenController" to { onj -> HealOrMaxHPScreenController(onj) },
+        "HealOrMaxHPScreenController" to {onj -> HealOrMaxHPScreenController(onj) },
         "MapScreenController" to { MapScreenController() },
     )
 

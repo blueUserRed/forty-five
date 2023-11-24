@@ -103,9 +103,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         get() = SaveState.playerLives
 
-    @Suppress("unused")
-    val playerLivesAtStart: Int by templateParam("game.basePlayerLives", SaveState.playerLives)
-
     private var popupText: String by templateParam("game.popupText", "")
     private var popupButtonText: String by templateParam("game.popupButtonText", "")
     private var popupEvent: Event? = null

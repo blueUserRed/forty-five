@@ -64,6 +64,25 @@ class SeededMapGenerator(
         )
     }
 
+    private fun setDistanceFromEnd(lastNode: MapNodeBuilder) {
+        var curSteps = 0
+        var curNodes = listOf(lastNode)
+        val visitedNodes = mutableListOf<MapNodeBuilder>()
+        while (true) {
+            val newNodes = mutableListOf<MapNodeBuilder>()
+            curNodes.filter { it !in visitedNodes }.forEach {
+                newNodes.addAll(it.edgesTo)
+                visitedNodes.add(it)
+                val curEvent = it.event
+                if (curEvent !is ScaledByDistance) return@forEach
+                curEvent.distanceToEnd = curSteps
+            }
+            curNodes = newNodes
+            if (curNodes.isEmpty()) return
+            curSteps++;
+        }
+    }
+
     private fun generateDecorations(
         nodes: List<MapNodeBuilder>,
     ): List<DetailMap.MapDecoration> {
@@ -124,7 +143,11 @@ class SeededMapGenerator(
         }
 
         val lastMainNode = mainLine.lineNodes.last()
-        val endEvent = restrictions.finalEvent.invoke() ?: return lastMainNode
+        val endEvent = restrictions.finalEvent.invoke()
+        if (endEvent == null) {
+            setDistanceFromEnd(lastMainNode)
+            return lastMainNode
+        }
 
         val lastPos = lastMainNode.posAsVec()
         val posVec: Vector2 = mainLine.generateRandomPoint()
@@ -138,6 +161,7 @@ class SeededMapGenerator(
         lastMainNode.event = endEvent.first
         lastMainNode.nodeTexture = endEvent.second
         nodes.add(newEndNode)
+        setDistanceFromEnd(newEndNode)
         return newEndNode
     }
 
