@@ -196,6 +196,8 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
     return Timeline(actions)
 }
 
+fun <T> Collection<T>.randomIndex(): Int = (0..this.size).random()
+
 fun String.lowerCaseFirstChar(): String = this.replaceFirstChar { it.lowercaseChar() }
 
 inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
@@ -223,6 +225,8 @@ fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
 fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
     return substring(max(start, 0), min(max(end, 0), length - 1))
 }
+
+fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"
 
 object Utils {
 

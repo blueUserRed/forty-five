@@ -33,30 +33,18 @@ class ShopCardsHandler(
         _allCards = cardPrototypes.map { it.create() }.toMutableList()
     }
 
-    fun addItems(rnd: Random, contextType: String, defaultType: String) {
+    fun addItems(rnd: Random, contextTypes: Set<String>, defaultType: String) {
         val nbrOfItems = (5..16).random(rnd)
         FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
-        val cardsToAdd = if (RandomCardSelection.hasType(contextType)){
-            RandomCardSelection.getRandomCards(
-                _allCards,
-                listOf(contextType),
-                true,
-                nbrOfItems,
-                rnd,
-                MapManager.currentDetailMap.biome,
-                "shop"
-            )
-        } else {
-            RandomCardSelection.getRandomCards(
-                _allCards,
-                listOf(defaultType),
-                true,
-                nbrOfItems,
-                rnd,
-                MapManager.currentDetailMap.biome,
-                "shop"
-            )
-        }
+        val cardsToAdd = RandomCardSelection.getRandomCards(
+            _allCards,
+            contextTypes.toList(),
+            true,
+            nbrOfItems,
+            rnd,
+            MapManager.currentDetailMap.biome,
+            "shop"
+        )
         cards.addAll(cardsToAdd)
         cards.shuffle(rnd)
         cards.forEach { addCard(it) }

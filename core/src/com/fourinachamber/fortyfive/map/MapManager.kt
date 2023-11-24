@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -167,22 +168,22 @@ object MapManager {
         return file?.let { FileHandle(file) }
     }
 
-    suspend fun generateMaps(coroutineScope: CoroutineScope) = with(coroutineScope) {
-        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
-        mapConfigSchema.assertMatches(onj)
-        onj as OnjObject
-        val generatorConfig = onj.get<OnjObject>("generatorConfig")
-        val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
-        val jobs = generatorConfig
-            .get<OnjArray>("maps")
-            .value
-            .map { map ->
-                launch {
-                    generateMap(map as OnjObject, outputDir)
-                }
-            }
-        jobs.joinAll()
-    }
+//    suspend fun generateMaps(coroutineScope: CoroutineScope) = with(coroutineScope) {
+//        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
+//        mapConfigSchema.assertMatches(onj)
+//        onj as OnjObject
+//        val generatorConfig = onj.get<OnjObject>("generatorConfig")
+//        val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
+//        val jobs = generatorConfig
+//            .get<OnjArray>("maps")
+//            .value
+//            .map { map ->
+//                launch {
+//                    generateMap(map as OnjObject, outputDir)
+//                }
+//            }
+//        jobs.joinAll()
+//    }
 
     fun generateMapsSync() {
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
@@ -204,6 +205,7 @@ object MapManager {
         val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
         val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
         val map = generator.generate(name, biome)
+        GameDirector.assignEncounters(map)
         val path = "${outputDir.toPath()}/$name.onj"
         val file = File(path)
         if (!File(file.parent).exists()) File(file.parent).mkdirs()

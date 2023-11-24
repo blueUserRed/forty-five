@@ -344,7 +344,7 @@ sealed class StatusEffectTarget {
             enemy.damage(damage, triggeredByStatusEffect = true)
 
         override fun isBlocked(effect: StatusEffect, controller: GameController): Boolean =
-            enemy.statusEffect.any { effect.effectType in it.blocksStatusEffects }
+            enemy.statusEffects.any { effect.effectType in it.blocksStatusEffects }
     }
 
     object PlayerTarget : StatusEffectTarget() {

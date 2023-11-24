@@ -208,6 +208,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },
@@ -219,7 +220,7 @@ generatorConfig: {
                             seed: null,
                             boughtIndices: [
                             ],
-                            type: "defType",
+                            types: ["defType"],
                             person: "traveling_merchant",
                         }
                     },
@@ -230,6 +231,7 @@ generatorConfig: {
                         currentlyBlocks: true,
                         canBeStarted: true,
                         isCompleted: false,
+                        encounterIndex: 0,
                         distanceToEnd: -1,
                     }
                 },
@@ -311,7 +313,7 @@ generatorConfig: {
                             seed: null,
                             boughtIndices: [
                             ],
-                            type: "rare_shop",
+                            types: ["rare_shop"],
                             person: "rare_merchant",
                         }
                     }
@@ -325,6 +327,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },
@@ -410,7 +413,7 @@ generatorConfig: {
                             seed: null,
                             boughtIndices: [
                             ],
-                            type: "rare_shop",
+                            types: ["rare_shop"],
                             person: "rare_merchant", //TODO when decks are finished
 
                         }
@@ -424,6 +427,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },
@@ -517,6 +521,7 @@ generatorConfig: {
                             currentlyBlocks: true,
                             canBeStarted: true,
                             isCompleted: false,
+                            encounterIndex: 0,
                             distanceToEnd: -1,
                         }
                     },

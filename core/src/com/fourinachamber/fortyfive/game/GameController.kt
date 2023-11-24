@@ -136,7 +136,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBullet: CardPrototype
 
     private lateinit var gameRenderPipeline: GameRenderPipeline
-    private lateinit var encounterMapEvent: EncounterMapEvent
+
+    lateinit var encounterMapEvent: EncounterMapEvent
+        private set
 
     private val encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
 
@@ -158,6 +160,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private var permanentWarningId: Int? = null
     private var isPermanentWarningHard: Boolean = false
+
+    val activeEnemies: List<Enemy>
+        get() = enemyArea.enemies.filter { !it.isDefeated }
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
@@ -285,6 +290,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             if (cur.isFinished) iterator.remove()
         }
 
+        createdCards.forEach { it.update(this) }
         updateStatusEffects()
         updateGameAnimations()
     }
@@ -509,7 +515,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         includeLater(
             { Timeline.timeline {
                 val parryCard = parryCard!!
-                val remainingDamage = damage - parryCard.curDamage
+                val remainingDamage = damage - parryCard.curDamage(this@GameController)
                 action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
@@ -597,14 +603,21 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun shoot() {
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
-        val enemy = enemyArea.getTargetedEnemy()
 
         FortyFiveLogger.debug(logTag,
             "revolver is shooting;" +
                     "cardToShoot = $cardToShoot"
         )
 
-        val damagePlayerTimeline = enemy.damagePlayerDirectly(shotEmptyDamage, this@GameController)
+        val targetedEnemies = if (cardToShoot?.isSpray ?: false) {
+            enemyArea.enemies
+        } else {
+            listOf(enemyArea.getTargetedEnemy())
+        }
+
+        val damagePlayerTimeline = enemyArea
+            .getTargetedEnemy()
+            .damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
             includeLater(
@@ -613,14 +626,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
             cardToShoot?.let {
                 action {
+                    cardToShoot.beforeShot()
                     if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
                     cardToShoot.afterShot()
                 }
-                include(enemy.damage(cardToShoot.curDamage))
+                targetedEnemies
+                    .map { it.damage(cardToShoot.curDamage(this@GameController)) }
+                    .collectTimeline()
+                    .let { include(it) }
             }
             include(rotateRevolver(rotationDirection))
             cardToShoot?.let {
-                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot))
+                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
             }
             encounterModifiers
                 .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }
@@ -649,7 +667,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             dispatchAnimTimeline(revolver.rotate(newRotation))
             revolverRotationCounter += newRotation.amount
-            checkCardModifierValidity()
             revolver
                 .slots
                 .mapNotNull { it.card }
@@ -675,12 +692,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         var cur = initial
         encounterModifiers.forEach { cur = transformer(it, cur) }
         return cur
-    }
-
-    @AllThreadsAllowed
-    fun checkCardModifierValidity() {
-        FortyFiveLogger.debug(logTag, "checking card modifiers")
-        for (card in createdCards) if (card.inGame) card.checkModifierValidity()
     }
 
     @MainThreadOnly
@@ -732,10 +743,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @AllThreadsAllowed
     fun damagePlayerTimeline(damage: Int, triggeredByStatusEffect: Boolean = false): Timeline = Timeline.timeline {
-//        if (!triggeredByStatusEffect) {
-//            val overlayAction = GraphicsConfig.damageOverlay(curScreen)
-//            includeAction(overlayAction)
-//        }
+        if (!triggeredByStatusEffect) {
+            val overlayAction = GraphicsConfig.damageOverlay(curScreen)
+            includeAction(overlayAction)
+        }
         action {
             curPlayerLives -= damage
             FortyFiveLogger.debug(
@@ -891,8 +902,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         gameDirector.end()
         FortyFiveLogger.title("game ends")
         FortyFive.currentGame = null
-        if (playerLost) FortyFive.newRun()
-        SaveState.write()
     }
 
     /**
@@ -900,6 +909,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun enemyDefeated(enemy: Enemy) {
+        enemy.onDefeat()
+        enemyArea.onEnemyDefeated()
         SaveState.enemiesDefeated++
         if (enemyArea.enemies.all { it.isDefeated }) hasWon = true
         FortyFiveLogger.debug(logTag, "player won")
@@ -931,7 +942,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
-            FortyFive.changeToScreen("screens/map_screen.onj")
+            FortyFive.newRun()
+            SaveState.write()
+            MapManager.changeToMapScreen()
         }
     }
 

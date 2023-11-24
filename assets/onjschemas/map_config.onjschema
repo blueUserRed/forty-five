@@ -32,6 +32,7 @@ $MapEvent {
     $EncounterMapEvent {
         ...mapEventStandardConfig,
         distanceToEnd?: int,
+        encounterIndex: int,
     }
 
     $EnterMapMapEvent {
@@ -44,7 +45,7 @@ $MapEvent {
     }
 
     $ShopMapEvent {
-        type: string,
+        types: string[],
         person: string,
         seed: int?,
         boughtIndices: int[],
