@@ -106,6 +106,10 @@ object MapManager {
         FortyFive.changeToScreen(screenPaths["chooseCardScreen"]!!, event)
     }
 
+    fun changeToHealOrMaxHPScreen(event: MapEvent) {
+        FortyFive.changeToScreen(screenPaths["changeToHealOrMaxHPScreen"]!!, event)
+    }
+
     /**
      * @see DetailMap.invalidateCachedAssets
      */

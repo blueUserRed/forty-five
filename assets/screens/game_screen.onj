@@ -252,7 +252,7 @@ var endTurnButton = $Image {
 var playerLivesLabel = $TemplateLabel {
     name: "player_lives_label",
     font: "vanilla_whale",
-    template: "{stat.playerLives}/{game.basePlayerLives}",
+    template: "{stat.playerLives}/{stat.maxPlayerLives}",
     fontScale: 0.9,
     color: color.white,
 };

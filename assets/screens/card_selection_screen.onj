@@ -58,7 +58,7 @@ children: [
 
         ]
     }
-]
+],
 
 assets: {
     textures: [
@@ -94,7 +94,7 @@ options: {
     defaultCursor: {
         useSystemCursor: true,
         cursorName: "arrow",
-    }
+    },
     postProcessor: null,
     controller: $CardSelectionScreenController {
         cardSelectionActorName: "cardSelectionActor",
@@ -112,7 +112,7 @@ options: {
             targetY: cardSize * 1.13,
             enterInterpolation: null,
             exitInterpolation: null
-        }
+        },
         detailFont: "red_wing",
         detailFontColor: color.white,
         detailBackgroundTexture: "card_detail_background",

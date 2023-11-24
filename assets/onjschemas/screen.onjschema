@@ -388,6 +388,16 @@ $Behaviour {
         blockCaughtEvent?: boolean
     }
 
+    $OnClickSelectHealOrMaxOptionBehaviour {
+        state: string,
+    }
+
+    $OnClickSelectHealOptionBehaviour{
+        enterState: string,
+        acceptButtonName: string,
+        newButtonState: string,
+        otherOptionName: string,
+    }
 }
 
 $ScreenController {
@@ -429,6 +439,10 @@ $ScreenController {
         addToDeckWidgetName: string,
         addToBackpackWidgetName: string,
         hoverDetailActorTemplateName: string,
+    }
+
+    $HealOrMaxHPScreenController {
+        addLifeActorName: string,
     }
 
     $ChooseCardScreenController {
