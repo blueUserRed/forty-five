@@ -79,7 +79,7 @@ class SeededMapGenerator(
             }
             curNodes = newNodes
             if (curNodes.isEmpty()) return
-            curSteps++;
+            curSteps++
         }
     }
 

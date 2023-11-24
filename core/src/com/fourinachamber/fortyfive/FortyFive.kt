@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.utils.TextureGenerator
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
@@ -114,5 +113,4 @@ object FortyFive : Game() {
         ResourceManager.end()
         super.dispose()
     }
-
 }
