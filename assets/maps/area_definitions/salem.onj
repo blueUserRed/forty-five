@@ -51,7 +51,7 @@ nodes: [
             seed: null,
             boughtIndices: [
             ],
-            type: "normal",
+            types: ["defType"],
             person: "traveling_merchant",
         }
     },

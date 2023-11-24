@@ -19,10 +19,10 @@ object MapEventFactory {
         "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
-                onjObject.get<String>("type"),
+                onjObject.get<OnjArray>("types").value.map { it.value as String }.toSet(),
                 onjObject.get<String>("person"),
                 onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
-                onjObject.get<List<OnjInt>>("boughtIndices").map { it -> it.value.toInt() }.toMutableSet(),
+                onjObject.get<List<OnjInt>>("boughtIndices").map { it.value.toInt() }.toMutableSet(),
             )
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
@@ -163,6 +163,8 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
 
     override val displayDescription: Boolean = true
 
+    var encounterIndex: Int
+
     override val icon: String = "normal_bullet"
     override val descriptionText: String = "Take on enemies and come out on top!"
     override val completedDescriptionText: String = "All enemies gone already!"
@@ -171,7 +173,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
     init {
         setStandardValuesFromConfig(obj)
         setDistanceFromConfig(obj)
-//        currentlyBlocks = false
+        encounterIndex = obj.get<Long>("encounterIndex").toInt()
     }
 
     override fun start() {
@@ -188,6 +190,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
         name("EncounterMapEvent")
         includeStandardConfig()
         includeDistanceFromEnd()
+        "encounterIndex" with encounterIndex
 
     }
 
@@ -260,7 +263,7 @@ class NPCMapEvent(val npc: String) : MapEvent() {
  * @param type which type the restrictions are
  */
 class ShopMapEvent(
-    val type: String,
+    val types: Set<String>,
     val person: String,
     val seed: Long,
     val boughtIndices: MutableSet<Int>
@@ -282,7 +285,7 @@ class ShopMapEvent(
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
-        ("type" with type)
+        ("types" with types)
         ("person" with person)
         ("seed" with seed)
         ("boughtIndices" with boughtIndices)

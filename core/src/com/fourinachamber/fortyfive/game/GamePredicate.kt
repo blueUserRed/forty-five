@@ -4,7 +4,6 @@ import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
-import kotlin.reflect.KClass
 
 fun interface GamePredicate {
 
@@ -25,11 +24,11 @@ fun interface GamePredicate {
         } }
 
         val anyEnemyHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
-            controller.enemyArea.enemies.any { statusEffect in it.statusEffect }
+            controller.activeEnemies.any { statusEffect in it.statusEffects }
         } }
 
         val enemyDoesNotHaveStatusEffect = { statusEffect: StatusEffect, enemy: Enemy -> GamePredicate {
-            statusEffect in enemy.statusEffect
+            statusEffect in enemy.statusEffects
         } }
 
         val playerHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
@@ -39,6 +38,14 @@ fun interface GamePredicate {
         val negatePredicate = { other: GamePredicate -> GamePredicate { controller ->
             !other.check(controller)
         } }
+
+        val targetedEnemyShieldIsAtLeast = { value: Int -> GamePredicate { controller ->
+            controller.enemyArea.getTargetedEnemy().currentCover >= value
+        } }
+
+        val targetedEnemyHasAnyStatusEffect = GamePredicate { controller ->
+            controller.enemyArea.getTargetedEnemy().statusEffects.isNotEmpty()
+        }
 
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
@@ -58,6 +65,8 @@ fun interface GamePredicate {
             )
             "PlayerHasStatusEffect" -> playerHasStatusEffect(obj.get<StatusEffectCreator>("value")())
             "NegatePredicate" -> negatePredicate(fromOnj(obj.get<OnjNamedObject>("value"), inContextOfEnemy))
+            "TargetedEnemyShieldIsAtLeast" -> targetedEnemyShieldIsAtLeast(obj.get<Long>("value").toInt())
+            "TargetedEnemyHasAnyStatusEffect" -> targetedEnemyHasAnyStatusEffect
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

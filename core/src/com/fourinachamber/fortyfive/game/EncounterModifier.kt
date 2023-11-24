@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.game
 
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import java.lang.Exception
@@ -33,64 +35,29 @@ sealed class EncounterModifier {
         ): Timeline = controller.tryToPutCardsInHandTimeline(card.name)
     }
 
-    class Moist : EncounterModifier() {
-
-        private val cardModifiers: MutableList<Card.CardModifier> = mutableListOf()
+    object Moist : EncounterModifier() {
 
         override fun executeAfterBulletWasPlacedInRevolver(
             card: Card,
             controller: GameController
         ): Timeline = Timeline.timeline {
-            action {
-                val modifier = Card.CardModifier(
-                    0,
-                    null,
-                    validityChecker = { true }
+            val rotationTransformer = { old: Card.CardModifier, triggerInformation: TriggerInformation -> Card.CardModifier(
+                damage = old.damage - (triggerInformation.multiplier ?: 1),
+                source = old.source,
+                validityChecker = old.validityChecker,
+                transformers = old.transformers
+            )}
+            val modifier = Card.CardModifier(
+                damage = 0,
+                source = "moist modifier",
+                validityChecker = { card.inGame },
+                transformers = mapOf(
+                    Trigger.ON_REVOLVER_ROTATION to rotationTransformer
                 )
-                card.addModifier(modifier)
-                cardModifiers.add(modifier)
-            }
-        }
-
-        override fun executeAfterRevolverWasShot(
-            card: Card?,
-            controller: GameController
-        ): Timeline = Timeline.timeline {
-            action {
-                card ?: return@action
-                val modifier = cardModifiers.firstOrNull { it in card.modifiers } ?: return@action
-                cardModifiers.remove(modifier)
-            }
-        }
-
-        override fun executeAfterRevolverRotated(
-            rotation: RevolverRotation,
-            controller: GameController
-        ): Timeline = Timeline.timeline {
-            action {
-                controller
-                    .revolver
-                    .slots
-                    .mapNotNull { it.card }
-                    .forEach { updateModifierOfCard(it, rotation) }
-            }
-        }
-
-        private fun updateModifierOfCard(card: Card, rotation: RevolverRotation) {
-            val oldModifier = cardModifiers.firstOrNull { it in card.modifiers }
-            val damage = (oldModifier?.damage ?: 0) - rotation.amount
-            val newModifier = Card.CardModifier(
-                damage,
-                TemplateString("Bullet lost $damage damage due to the Moist Encounter Modifier"),
-                validityChecker = { true }
             )
-            oldModifier?.let {
-                card.removeModifier(it)
-                cardModifiers.remove(it)
-            }
-            card.addModifier(newModifier)
-            cardModifiers.add(newModifier)
+            card.addModifier(modifier)
         }
+
 
     }
 
@@ -111,8 +78,8 @@ sealed class EncounterModifier {
             "frost" -> Frost
             "bewitchedmist" -> BewitchedMist
             "lookalike" -> Lookalike
-            "moist" -> Moist()
-            else -> throw Exception("Unknown Encounter Modifier: $name")
+            "moist" -> Moist
+            else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
     }
 }

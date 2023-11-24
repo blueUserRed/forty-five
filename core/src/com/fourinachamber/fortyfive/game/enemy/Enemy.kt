@@ -91,11 +91,17 @@ class Enemy(
 
     private val _statusEffects: MutableList<StatusEffect> = mutableListOf()
 
-    val statusEffect: List<StatusEffect>
+    val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
     init {
         actor = EnemyActor(this, textEmitterConfig, hiddenActionIconHandle, screen)
+    }
+
+    fun onDefeat() {
+        _statusEffects.forEach { actor.removeStatusEffect(it) }
+        _statusEffects.clear()
+        actor.setupForAction(NextEnemyAction.None)
     }
 
     fun applyEffect(effect: StatusEffect) {

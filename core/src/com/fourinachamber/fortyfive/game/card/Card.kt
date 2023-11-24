@@ -5,14 +5,10 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
-import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -104,20 +100,6 @@ class Card(
     var inGame: Boolean = false
         private set
 
-    /**
-     * the current damage with all modifiers applied
-     */
-    var curDamage: Int = baseDamage
-        private set
-        get() {
-            if (!isDamageDirty) return field
-            var cur = baseDamage
-            for (modifier in _modifiers) cur += modifier.damage
-            field = cur
-            isDamageDirty = false
-            return cur
-        }
-
     var isEverlasting: Boolean = false
         private set
     var isUndead: Boolean = false
@@ -126,21 +108,25 @@ class Card(
         private set
     var isReplaceable: Boolean = false
         private set
+    var isSpray: Boolean = false
+        private set
 
     val shouldRemoveAfterShot: Boolean
-        get() = !(isEverlasting || _modifiers.any { it.everlasting })
+        get() = !(isEverlasting || protectingModifiers.isNotEmpty())
 
-    private lateinit var rottenModifier: CardModifier
+    private var lastDamageValue: Int = baseDamage
 
     private val _modifiers: MutableList<CardModifier> = mutableListOf()
 
     val modifiers: List<CardModifier>
         get() = _modifiers
 
-    private var isDamageDirty: Boolean = true
-
     var currentHoverText: String = ""
         private set
+
+    private var protectingModifiers: MutableList<Triple<String, Int, () -> Boolean>> = mutableListOf()
+
+    private var modifierValuesDirty = true
 
     init {
         screen.borrowResource(cardTexturePrefix + name)
@@ -151,49 +137,56 @@ class Card(
             fontScale,
             screen
         )
-        updateText()
-        updateTexture()
-    }
-
-    private fun initRottenModifier() {
-        rottenModifier = CardModifier(0, null) { true }
-        _modifiers.add(rottenModifier)
-        updateText()
-    }
-
-    private fun updateRottenModifier(newDamage: Int) {
-        _modifiers.remove(rottenModifier)
-        rottenModifier = CardModifier(
-            newDamage,
-            TemplateString(
-                GraphicsConfig.rawTemplateString("rottenDetailText"),
-                mapOf("damageLost" to newDamage)
-            )
-        ) { true }
-        _modifiers.add(rottenModifier)
-        isDamageDirty = true
-        updateText()
-        updateTexture()
     }
 
     /**
      * checks if the modifiers of this card are still valid and removes them if they are not
      */
-    fun checkModifierValidity() {
-        val iterator = _modifiers.iterator()
-        var textureDirty = false
-        while (iterator.hasNext()) {
-            val modifier = iterator.next()
+    private fun checkModifierValidity(controller: GameController) {
+        val modifierIterator = _modifiers.iterator()
+        var somethingChanged = false
+        while (modifierIterator.hasNext()) {
+            val modifier = modifierIterator.next()
             if (!modifier.validityChecker()) {
                 FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
-                iterator.remove()
-                isDamageDirty = true
-                if (modifier.damage != 0) textureDirty = true
+                modifierIterator.remove()
+                somethingChanged = true
+            }
+            val active = modifier.activeChecker(controller)
+            if (active == modifier.wasActive) continue
+            modifier.wasActive = active
+            somethingChanged = true
+        }
+        val protectingIterator = protectingModifiers.iterator()
+        while (protectingIterator.hasNext()) {
+            val modifier = protectingIterator.next()
+            if (!modifier.third()) {
+                FortyFiveLogger.debug(logTag, "protecting modifier no longer valid: $modifier")
+                protectingIterator.remove()
+                somethingChanged = true
             }
         }
-        if (isDamageDirty) updateText()
-        if (textureDirty) updateTexture()
+        if (somethingChanged) modifiersChanged()
     }
+
+    fun update(controller: GameController) {
+        checkModifierValidity(controller)
+        if (modifierValuesDirty) {
+            updateText(controller)
+            val newDamage = curDamage(controller)
+            if (newDamage != lastDamageValue) {
+                updateTexture(controller)
+                lastDamageValue = newDamage
+            }
+            modifierValuesDirty = false
+        }
+    }
+
+    fun activeModifiers(controller: GameController): List<CardModifier> =
+        _modifiers.filter { it.activeChecker(controller) }
+
+    fun curDamage(controller: GameController): Int =
+        (baseDamage + activeModifiers(controller).sumOf { it.damage }).coerceAtLeast(0)
 
     /**
      * called by gameScreenController when the card was shot
@@ -206,12 +199,28 @@ class Card(
         if (shouldRemoveAfterShot) leaveGame()
     }
 
+    fun beforeShot() {
+        if (protectingModifiers.isEmpty()) return
+        val effect = protectingModifiers.first()
+        val newEffect = effect.copy(second = effect.second - 1)
+        if (newEffect.second == 0) {
+            protectingModifiers.removeFirst()
+        } else {
+            protectingModifiers[0] = newEffect
+        }
+        modifiersChanged()
+    }
+
     fun leaveGame() {
         inGame = false
         _modifiers.clear()
-        isDamageDirty = true
-        updateText()
-        updateTexture()
+        modifiersChanged()
+    }
+
+    fun protect(source: String, protectedFor: Int, validityChecker: () -> Boolean) {
+        FortyFiveLogger.debug(logTag, "$source protected $this for $protectedFor shots")
+        protectingModifiers.add(Triple(source, protectedFor, validityChecker))
+        modifiersChanged()
     }
 
     /**
@@ -236,16 +245,30 @@ class Card(
     fun addModifier(modifier: CardModifier) {
         FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
         _modifiers.add(modifier)
-        isDamageDirty = true
-        updateText()
-        if (modifier.damage != 0) updateTexture()
+        modifiersChanged()
     }
 
     fun removeModifier(modifier: CardModifier) {
         _modifiers.remove(modifier)
-        isDamageDirty = true
-        updateText()
-        if (modifier.damage != 0) updateTexture()
+        modifiersChanged()
+    }
+
+    private fun addRottenModifier() {
+        val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation -> CardModifier(
+            damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
+            source = oldModifier.source,
+            validityChecker = oldModifier.validityChecker,
+            transformers = oldModifier.transformers
+        )}
+        val modifier = CardModifier(
+            damage = 0,
+            source = "rotten effect",
+            validityChecker = { inGame },
+            transformers = mapOf(
+                Trigger.ON_REVOLVER_ROTATION to rotationTransformer
+            )
+        )
+        addModifier(modifier)
     }
 
     /**
@@ -259,7 +282,6 @@ class Card(
      * called when the revolver rotates (but not when this card was shot)
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
-        if (isRotten) updateRottenModifier(rottenModifier.damage - rotation.amount)
     }
 
     fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
@@ -269,31 +291,67 @@ class Card(
      * effects; null if no effect was triggered
      */
     @MainThreadOnly
-    fun checkEffects(trigger: Trigger, triggerInformation: TriggerInformation, controller: GameController): Timeline {
+    fun checkEffects(
+        trigger: Trigger,
+        triggerInformation: TriggerInformation,
+        controller: GameController
+    ): Timeline = Timeline.timeline {
+        action {
+            checkModifierTransformers(trigger, triggerInformation)
+        }
         val inHand = inHand(controller)
-        return effects
+        effects
             .filter { inGame || (inHand && it.triggerInHand) }
-            .mapNotNull { it.checkTrigger(trigger, triggerInformation) }
+            .mapNotNull { it.checkTrigger(trigger, triggerInformation, controller) }
             .collectTimeline()
+            .let { include(it) }
     }
 
-    fun updateText() {
+    private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
+        var modifierChanged = false
+        _modifiers.replaceAll { modifier ->
+            val transformer = modifier.transformers[trigger] ?: return@replaceAll modifier
+            modifierChanged = true
+            transformer(modifier, triggerInformation)
+        }
+        if (modifierChanged) modifiersChanged()
+    }
+
+    private fun modifiersChanged() {
+        modifierValuesDirty = true
+    }
+
+    private fun updateText(controller: GameController) {
         val text = StringBuilder()
         text
             .append(shortDescription)
             .append("\n")
             .append(flavourText)
             .append("\n")
-            .append(if (type == Type.BULLET) "damage: $curDamage/$baseDamage" else "")
+            .append(if (type == Type.BULLET) "damage: ${curDamage(controller)}/$baseDamage" else "")
 
-        _modifiers
-            .mapNotNull { it.description }
-            .forEach { text.append(it.string).append("\n") }
+        if (activeModifiers(controller).any { it.damage != 0 }) {
+            val damageText = activeModifiers(controller)
+                .filter { it.damage != 0 }
+                .joinToString(separator =  ", ", prefix = "Damage was changed by: ", transform = { it.source })
+            text.append("\n").append(damageText)
+        }
+
+        if (protectingModifiers.isNotEmpty()) {
+            val total = protectingModifiers.sumOf { it.second }
+            val protectingText = protectingModifiers
+                .joinToString(
+                    separator = ", ",
+                    prefix = "Card is protected for ${total.pluralS("shot")} by: ",
+                    transform = { it.first }
+                )
+            text.append("\n").append(protectingText)
+        }
 
         currentHoverText = text.toString()
     }
 
-    private fun updateTexture() = actor.redrawPixmap()
+    private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller))
 
     override fun dispose() = actor.disposeTexture()
 
@@ -391,9 +449,10 @@ class Card(
                 "everlasting" -> card.isEverlasting = true
                 "undead" -> card.isUndead = true
                 "replaceable" -> card.isReplaceable = true
+                "spray" -> card.isSpray = true
                 "rotten" -> {
                     card.isRotten = true
-                    card.initRottenModifier()
+                    card.addRottenModifier()
                 }
 
                 else -> throw RuntimeException("unknown trait effect $effect")
@@ -419,14 +478,15 @@ class Card(
     /**
      * temporarily modifies a card. For example used by the buff damage effect to change the damage of a card
      * @param damage changes the damage of the card. Can be negative
-     * @param description if not null this description will be displayed in the detail text of the modified card
      * @param validityChecker checks if the modifier is still valid or should be removed
      */
     data class CardModifier(
         val damage: Int,
-        val description: TemplateString?,
-        val everlasting: Boolean = false,
-        val validityChecker: () -> Boolean
+        val source: String,
+        val validityChecker: () -> Boolean = { true },
+        val activeChecker: (controller: GameController) -> Boolean = { true },
+        var wasActive: Boolean = true,
+        val transformers: Map<Trigger, (old: CardModifier, triggerInformation: TriggerInformation) -> CardModifier> = mapOf()
     )
 
 }
@@ -482,6 +542,7 @@ class CardActor(
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
+        redrawPixmap(card.baseDamage)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -519,9 +580,9 @@ class CardActor(
         pixmapTextureRegion = null
     }
 
-    fun redrawPixmap() {
+    fun redrawPixmap(damageValue: Int) {
         pixmap.drawPixmap(cardTexturePixmap, 0, 0)
-        font.write(pixmap, card.curDamage.toString(), 35, 480, fontScale, fontColor)
+        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, fontColor)
         font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
         pixmapTextureRegion?.texture?.dispose()
         val texture = Texture(pixmap, true)
@@ -535,12 +596,12 @@ class CardActor(
     }
 
     fun glowAnimation(): Timeline = Timeline.timeline {
-        action {
-            inGlowAnim = true
-            glowShader.resetReferenceTime()
-        }
-        delay(1000)
-        action { inGlowAnim = false }
+//        action {
+//            inGlowAnim = true
+//            glowShader.resetReferenceTime()
+//        }
+//        delay(1000)
+//        action { inGlowAnim = false }
     }
 
     fun destroyAnimation(): Timeline = Timeline.timeline {
@@ -553,61 +614,59 @@ class CardActor(
     }
 
     fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
-        // TODO: hardcoded values
-        var origScaleX = 0f
-        var origScaleY = 0f
-        val scaleAction = ScaleToAction()
-        val moveAction = MoveByAction()
-        val interpolation = Interpolation.fade
-        action {
-            origScaleX = scaleX
-            origScaleY = scaleY
-            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
-            moveAction.setAmount(
-                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
-                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
-            )
-            moveAction.duration = 0.1f
-            scaleAction.duration = 0.1f
-            scaleAction.interpolation = interpolation
-            moveAction.interpolation = interpolation
-            addAction(scaleAction)
-            addAction(moveAction)
-        }
-        delayUntil { scaleAction.isComplete || !card.inGame }
-        if (includeGlow) {
-            delay(GraphicsConfig.bufferTime)
-            include(glowAnimation())
-        }
-        delay(GraphicsConfig.bufferTime)
-        action {
-            removeAction(scaleAction)
-            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
-            removeAction(moveAction)
-            scaleAction.reset()
-            moveAction.reset()
-            scaleAction.setScale(origScaleX, origScaleY)
-            moveAction.setAmount(moveAmount.x, moveAmount.y)
-            scaleAction.duration = 0.2f
-            moveAction.duration = 0.2f
-            scaleAction.interpolation = interpolation
-            moveAction.interpolation = interpolation
-            addAction(scaleAction)
-            addAction(moveAction)
-        }
-        delayUntil { scaleAction.isComplete || !card.inGame }
-        action {
-            removeAction(scaleAction)
-            removeAction(moveAction)
-        }
-        delay(GraphicsConfig.bufferTime)
+//        // TODO: hardcoded values
+//        var origScaleX = 0f
+//        var origScaleY = 0f
+//        val scaleAction = ScaleToAction()
+//        val moveAction = MoveByAction()
+//        val interpolation = Interpolation.fade
+//        action {
+//            origScaleX = scaleX
+//            origScaleY = scaleY
+//            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
+//            moveAction.setAmount(
+//                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
+//                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
+//            )
+//            moveAction.duration = 0.1f
+//            scaleAction.duration = 0.1f
+//            scaleAction.interpolation = interpolation
+//            moveAction.interpolation = interpolation
+//            addAction(scaleAction)
+//            addAction(moveAction)
+//        }
+//        delayUntil { scaleAction.isComplete || !card.inGame }
+//        if (includeGlow) {
+//            delay(GraphicsConfig.bufferTime)
+//            include(glowAnimation())
+//        }
+//        delay(GraphicsConfig.bufferTime)
+//        action {
+//            removeAction(scaleAction)
+//            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
+//            removeAction(moveAction)
+//            scaleAction.reset()
+//            moveAction.reset()
+//            scaleAction.setScale(origScaleX, origScaleY)
+//            moveAction.setAmount(moveAmount.x, moveAmount.y)
+//            scaleAction.duration = 0.2f
+//            moveAction.duration = 0.2f
+//            scaleAction.interpolation = interpolation
+//            moveAction.interpolation = interpolation
+//            addAction(scaleAction)
+//            addAction(moveAction)
+//        }
+//        delayUntil { scaleAction.isComplete || !card.inGame }
+//        action {
+//            removeAction(scaleAction)
+//            removeAction(moveAction)
+//        }
+//        delay(GraphicsConfig.bufferTime)
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
         "text" to OnjString(card.currentHoverText)
     )
-
-    override fun onDetailDisplayStarted() = card.updateText()
 
     override fun positionChanged() {
         super.positionChanged()

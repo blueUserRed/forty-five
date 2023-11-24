@@ -201,6 +201,7 @@ encounter: [
             "Outlaw_lvl1", "Outlaw_lvl1"
         ],
         encounterModifier: [
+            "Moist"
         ],
         biomes: [
             "wasteland", "bewitched_forest"

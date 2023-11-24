@@ -129,9 +129,10 @@ object RandomCardSelection {
         occasion: String
     ): Pair<MutableList<T>, MutableList<Float>> {
         val tempCards = cards.toMutableList()
-        val tempChances = tempCards.map { 0F }.toMutableList()
+        val tempChances = MutableList(tempCards.size) { 0f }
         changeNames.forEach { name ->
-            types[name]!!.forEach {
+            val type = types[name] ?: throw RuntimeException("unknown card selection type $name")
+            type.forEach {
                 it.applyEffects(tempCards, tempChances)
             }
         }
