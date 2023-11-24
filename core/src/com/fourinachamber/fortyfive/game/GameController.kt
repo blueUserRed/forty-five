@@ -136,7 +136,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private lateinit var defaultBullet: CardPrototype
 
     private lateinit var gameRenderPipeline: GameRenderPipeline
-    private lateinit var encounterMapEvent: EncounterMapEvent
+
+    lateinit var encounterMapEvent: EncounterMapEvent
+        private set
 
     private val encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
 
