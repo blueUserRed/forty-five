@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -28,7 +30,9 @@ object BehaviourFactory {
         "OnClickAbandonRunBehaviour" to { onj, actor -> OnClickAbandonRunBehaviour(onj, actor) },
         "OnClickChangeScreenBehaviour" to { onj, actor -> OnClickChangeScreenBehaviour(onj, actor) },
         "OnClickResetSavefileBehaviour" to { onj, actor -> OnClickResetSavefileBehaviour(onj, actor) },
-        "CatchEventAndEmitBehaviour" to { onj, actor -> CatchEventAndEmitBehaviour(onj, actor)}
+        "CatchEventAndEmitBehaviour" to { onj, actor -> CatchEventAndEmitBehaviour(onj, actor) },
+        "OnClickSelectHealOrMaxOptionBehaviour" to { onj, actor -> OnClickSelectHealOrMaxOptionBehaviour(onj, actor) },
+        "OnClickSelectHealOptionBehaviour" to { onj, actor -> OnClickSelectHealOptionBehaviour(onj, actor) },
     )
 
     /**
@@ -145,7 +149,7 @@ class MouseHoverBehaviour(
         } else null
     }
 
-    override val onHoverEnter: BehaviourCallback = callback@ {
+    override val onHoverEnter: BehaviourCallback = callback@{
         if (disabledCursor != null && actor is DisableActor && actor.isDisabled) {
             Utils.setCursor(disabledCursor!!)
             return@callback
@@ -206,12 +210,41 @@ class CatchEventAndEmitBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(
     private val eventToEmit: String = onj.get<String>("emit")
     private val blockCaughtEvent: Boolean = onj.getOr("blockCaughtEvent", true)
 
-    override val onEventCapture: ((event: Event) -> Boolean) = lambda@ { event ->
+    override val onEventCapture: ((event: Event) -> Boolean) = lambda@{ event ->
         if (!eventToCatch.isInstance(event)) return@lambda false
         val eventToEmit = EventFactory.createEvent(eventToEmit)
         actor.fire(eventToEmit)
         return@lambda blockCaughtEvent
     }
+}
+
+class OnClickSelectHealOrMaxOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+    val state = onj.get<String>("state")
+    override val onCLick: BehaviourCallback = {
+        if (this is StyledActor && inActorState(state)) {
+            println("now finish controller or so")
+            (onjScreen.screenController as HealOrMaxHPScreenController).complete()
+        }
+    }
+
+}
+
+class OnClickSelectHealOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+    private val enterStateName = onj.get<String>("enterState")
+    private val acceptButtonName = onj.get<String>("acceptButtonName")
+    private val newButtonState = onj.get<String>("newButtonState")
+    private val otherOptionName = onj.get<String>("otherOptionName")
+    override val onCLick: BehaviourCallback = {
+
+        if (this is StyledActor) this.enterActorState(enterStateName)
+
+        val acceptButton = onjScreen.namedActorOrError(acceptButtonName)
+        if (acceptButton is StyledActor) acceptButton.enterActorState(newButtonState)
+
+        val otherOption = onjScreen.namedActorOrError(otherOptionName)
+        if (otherOption is StyledActor) otherOption.leaveActorState(enterStateName)
+    }
+
 }
 
 typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor) -> Behaviour
