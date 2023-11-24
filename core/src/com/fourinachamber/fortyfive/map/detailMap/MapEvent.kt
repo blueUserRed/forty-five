@@ -43,7 +43,7 @@ interface ScaledByDistance {
         distanceToEnd = onj.get<Long?>("distanceToEnd")?.toInt() ?: -1
     }
 
-    fun OnjObjectBuilderDSL.includeDistanceFromEnd() { //TODO somehow this doesn't work
+    fun OnjObjectBuilderDSL.includeDistanceFromEnd() {
         "distanceToEnd" with distanceToEnd
     }
 }
