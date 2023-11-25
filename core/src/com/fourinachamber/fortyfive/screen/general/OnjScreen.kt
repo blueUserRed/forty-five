@@ -353,6 +353,7 @@ open class OnjScreen @MainThreadOnly constructor(
         updateCallbacks()
         lastRenderTime = measureTimeMillis {
             stage.act(Gdx.graphics.deltaTime)
+//            Thread.sleep(800) //TODO remove
             ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             if (stage.batch.isDrawing) stage.batch.end()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)

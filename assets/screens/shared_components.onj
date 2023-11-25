@@ -679,15 +679,13 @@ backpackTemplates: [
 
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
-    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason // the reason is called integer overflow
-
+    zIndex: (2.0 pow 31.0)#int,
     styles: [
         {
             positionType: positionType.absolute,
             positionBottom: 70#percent,
             positionLeft: 0#percent,
             width: 25#percent,
-            height: 30#percent,
         }
     ]
 },
@@ -714,7 +712,8 @@ warningLabelTemplates: [
                 positionType: positionType.absolute,
                 padding: 10#points,
                 background: "",
-                positionLeft: -100#percent,
+                positionLeft: 0#percent,
+                positionTop:100#percent,
             }
         ],
     } children [
@@ -739,7 +738,6 @@ warningLabelTemplates: [
                 }
             ],
         } children [
-
             $Label {
                 text: "",
                 font: "red_wing",
@@ -768,19 +766,6 @@ warningLabelTemplates: [
                 wrap: true,
             },
         ],
-        //        $Label {
-//            styles: [
-//                {
-//                    marginRight: 10#points,
-//                }
-//            ],
-//            text: "  x",
-//            font: "red_wing",
-//            color: color.forty_white,
-//            fontScale: 1.0,
-//            align: "center",
-//            behaviours: [$OnClickRemoveWarningLabelBehaviour{},],
-//        },
         $Box {
             styles: [
                 {
@@ -790,7 +775,6 @@ warningLabelTemplates: [
                     touchable: touchable.enabled,
                 }
             ],
-            debug:true,
             behaviours: [
                 $OnClickRemoveWarningLabelBehaviour {
                 },

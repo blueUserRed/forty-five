@@ -245,23 +245,12 @@ class OnClickSelectHealOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Beha
         val otherOption = onjScreen.namedActorOrError(otherOptionName)
         if (otherOption is StyledActor) otherOption.leaveActorState(enterStateName)
     }
-
 }
 
 class OnClickRemoveWarningLabelBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
-        println("hi")
-//        CustomWarningParent.getWarning(onjScreen).removeWarningByClick(this)
-    }
-
-    override val onEventCapture: ((event: Event) -> Boolean) = {
-        println("event ig")
-        false
-    }
-
-    init {
-        println("this should hihi")
+        CustomWarningParent.getWarning(onjScreen).removeWarningByClick(this)
     }
 }
 

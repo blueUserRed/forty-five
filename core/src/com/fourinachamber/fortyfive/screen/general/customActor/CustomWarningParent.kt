@@ -3,16 +3,19 @@ package com.fourinachamber.fortyfive.screen.general.customActor
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.ParallelTimelineAction
+import com.fourinachamber.fortyfive.screen.general.styles.StyleCondition
+import com.fourinachamber.fortyfive.screen.general.styles.StyleInstruction
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjString
+import kotlin.math.min
 
 class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
 
@@ -31,6 +34,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
 
     private val permanentsShown: MutableMap<Int, CustomFlexBox> = mutableMapOf()
 
+    private var percentageOfNewestHeight: Float = 0F
     fun setLimit(title: String, limit: Long) {
         limits[title] = limit
     }
@@ -40,16 +44,25 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         deadTimeline.startTimeline()
     }
 
-    override fun layout() {
-        super.layout()
-        curShown.forEach { addMarginBottom(it) }
-    }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         timeline.updateTimeline()
         deadTimeline.updateTimeline()
         checkDead()
+        validate()
+        setHeightPositions()
         super.draw(batch, parentAlpha)
+    }
+
+    private fun setHeightPositions() {
+        if (curShown.isEmpty()) return
+        val startY = 0F
+        var curHeight = -curShown.last().height * (1 - percentageOfNewestHeight)
+        for (counter in 0 until curShown.size) {
+            val i = curShown.size - counter - 1
+            curShown[i].y = startY + curHeight
+            curHeight += curShown[i].height
+        }
     }
 
     private fun checkDead() {
@@ -66,12 +79,15 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         curDeadTimers.filter { it.value <= System.currentTimeMillis() }.forEach { addFading(it.key) }
     }
 
+    fun removeWarningByClick(actor: Actor) {
+        curDeadTimers[actor.parent as CustomFlexBox] = System.currentTimeMillis() - 10
+    }
+
     private fun addFading(target: CustomFlexBox) {
         //TODO fix bug with permanents staying where they are, even if temporaries are gone below
         curDeadTimers.remove(target)
         deadTimeline.appendAction(Timeline.timeline {
-            val action =
-                CustomMoveByAction(target, Interpolation.exp5In, relX = -target.offsetX, duration = 200F)
+            val action = CustomMoveByAction(target, Interpolation.exp5In, relX = -target.width, duration = 200F)
             action {
                 target.addAction(action)
             }
@@ -138,9 +154,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             "width" to width.value.toOnjYoga(width.unit),
             "color" to OnjColor(severity.getColor(screen)),
         )
-        val current =
-            screen.screenBuilder.generateFromTemplate("warning_label_template", data, this, screen) as CustomFlexBox
-        timeline.appendAction(getAddingTimeline(current, title, body, false).asAction())
+        timeline.appendAction(getAddingTimeline(data, title, body, false).asAction())
     }
 
     fun addPermanentWarning(
@@ -156,7 +170,6 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         if (curLimits[title] == null) curLimits[title] = mutableListOf()
         else curLimits[title]!!.removeIf { it <= System.currentTimeMillis() }
         curLimits[title]!!.add(System.currentTimeMillis() + TIME_BETWEEN_LIMIT)
-        println("adding perma")
 
         val data = mapOf(
             "symbol" to OnjString(severity.getSymbol()),
@@ -166,13 +179,12 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             "width" to width.value.toOnjYoga(width.unit),
             "color" to OnjColor(severity.getColor(screen)),
         )
-        val current =
-            screen.screenBuilder.generateFromTemplate("warning_label_template", data, this, screen) as CustomFlexBox
-        timeline.appendAction(getAddingTimeline(current, title, body, true).asAction())
 
-        val index = (if (permanentsShown.isEmpty()) 0 else permanentsShown.keys.max() + 1)
-        permanentsShown[index] = current
-        return index
+        timeline.appendAction(getAddingTimeline(data, title, body, true).asAction())
+
+//        val index = (if (permanentsShown.isEmpty()) 0 else permanentsShown.keys.max() + 1) //TODO fix perma warnings
+//        permanentsShown[index] = current
+        return -1 // index
     }
 
     fun removePermanentWarning(id: Int) {
@@ -182,57 +194,83 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
     }
 
     private fun getAddingTimeline(
-        current: CustomFlexBox,
+        data: Map<String, *>,
         title: String,
         body: String,
         isPermanent: Boolean,
     ) = Timeline.timeline {
-        val heights = arrayOf(0F)
-        delayUntil { //due to layout the height changes even after it is zero, that why this code waits
-            val old = heights[0]
-            heights[0] = current.height
-            current.height != 0F && old == current.height
+        var current: CustomFlexBox? = null
+        action {
+            current = screen.generateFromTemplate(
+                "warning_label_template",
+                data,
+                this@CustomWarningParent,
+                screen
+            ) as CustomFlexBox
+        }
+        val heights = FloatArray(3) //max nbr of frames till it works //TODO VERY ugly
+        delayUntil {
+            if (current?.height == 0F) return@delayUntil false
+            val old = heights.clone()
+            for (i in 1 until heights.size) heights[i] = old[i - 1]
+            heights[0] = current!!.height
+//            current?.invalidate()
+            heights.none { it != old[old.size - 1] }
         }
         action {
-            addMarginBottom(current)
-            curShown.add(current)
-            parallelActions(
-                getMoveRightTimeline(current, title.length * 2 + body.length, isPermanent).asAction(),
-                ParallelTimelineAction(curShown.map { moveUpTimeline(it, current.height).asAction() })
+            curShown.add(current!!)
+            includeAction(getInitialTimeline(current!!, title.length * 2 + body.length, isPermanent).asAction())
+        }
+    }
+
+    private fun moveUpTimeline(current: CustomFlexBox): Timeline {
+        return Timeline.timeline {
+            var startTime = 0L
+            val duration = 200F
+            action {
+                percentageOfNewestHeight = 0F
+                startTime = System.currentTimeMillis()
+            }
+            delayUntil {
+                percentageOfNewestHeight = min((System.currentTimeMillis() - startTime) / duration, 1F)
+                percentageOfNewestHeight == 1F
+            }
+        }
+    }
+
+    private fun getInitialTimeline(target: CustomFlexBox, textLength: Int, isPermanent: Boolean): Timeline {
+        return Timeline.timeline {
+            action {
+                target.offsetX = -target.width
+                //this might be the ugliest but best possible solution ever //TODO ugly
+                val label = ((target.children[1] as CustomFlexBox).children[2] as CustomLabel)
+                val lastRowHeight = label.glyphLayout.runs.first().glyphs[0].height * label.fontScaleX
+                val data = YogaValue(target.height + DIST_BETWEEN_BLOCKS + lastRowHeight, YogaUnit.POINT)
+                val dataClass = data::class
+                val instruction = StyleInstruction(data, 10, StyleCondition.Always, dataClass)
+                @Suppress("UNCHECKED_CAST")
+                instruction as StyleInstruction<Any>
+                target.styleManager?.addInstruction("height", instruction, dataClass)
+            }
+            val action = CustomMoveByAction(
+                target,
+                Interpolation.exp10Out,
+                relX = target.width,
+                duration = 200F
             )
-        }
-    }
-
-    private fun addMarginBottom(current: CustomFlexBox) { //TODO ugly
-        val label = ((current.children[1] as CustomFlexBox).children[2] as CustomLabel)
-        current.height += label.glyphLayout.runs.first().glyphs[0].height * label.fontScaleX
-    }
-
-    private fun moveUpTimeline(target: CustomFlexBox, height: Float): Timeline {
-        return Timeline.timeline {
-            val action =
-                CustomMoveByAction(target, Interpolation.linear, relY = height + DIST_BETWEEN_BLOCKS, duration = 200F)
-            action {
-                target.addAction(action)
-            }
-            delayUntil { action.isComplete || target !in curShown }
-        }
-    }
-
-    private fun getMoveRightTimeline(target: CustomFlexBox, textLength: Int, isPermanent: Boolean): Timeline {
-        return Timeline.timeline {
-            action {
-                target.offsetY = -height - DIST_BETWEEN_BLOCKS
-            }
-            val action = CustomMoveByAction(target, Interpolation.exp10Out, relX = target.width, duration = 200F)
-            action {
-                target.addAction(action)
-                if (!isPermanent) {
-                curDeadTimers[target] =
-                    System.currentTimeMillis() + INITIAL_DISPLAYED_TIME + ADDITIONAL_DISPLAYED_TIME_PER_CHAR * textLength
-                }
-            }
-            delayUntil { action.isComplete }
+            parallelActions(
+                moveUpTimeline(target).asAction(),
+                Timeline.timeline {
+                    action {
+                        target.addAction(action)
+                        if (!isPermanent) {
+                            curDeadTimers[target] =
+                                System.currentTimeMillis() + INITIAL_DISPLAYED_TIME + ADDITIONAL_DISPLAYED_TIME_PER_CHAR * textLength
+                        }
+                    }
+                    delayUntil { action.isComplete }
+                }.asAction()
+            )
         }
     }
 
