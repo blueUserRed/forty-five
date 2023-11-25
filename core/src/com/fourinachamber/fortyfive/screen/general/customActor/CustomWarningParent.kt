@@ -80,11 +80,10 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
     }
 
     fun removeWarningByClick(actor: Actor) {
-        curDeadTimers[actor.parent as CustomFlexBox] = System.currentTimeMillis() - 10
+        curDeadTimers[actor as CustomFlexBox] = System.currentTimeMillis() - 10
     }
 
     private fun addFading(target: CustomFlexBox) {
-        //TODO fix bug with permanents staying where they are, even if temporaries are gone below
         curDeadTimers.remove(target)
         deadTimeline.appendAction(Timeline.timeline {
             val action = CustomMoveByAction(target, Interpolation.exp5In, relX = -target.width, duration = 200F)
@@ -154,7 +153,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             "width" to width.value.toOnjYoga(width.unit),
             "color" to OnjColor(severity.getColor(screen)),
         )
-        timeline.appendAction(getAddingTimeline(data, title, body, false).asAction())
+        timeline.appendAction(getAddingTimeline(data, title, body, -1).asAction())
     }
 
     fun addPermanentWarning(
@@ -180,11 +179,12 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
             "color" to OnjColor(severity.getColor(screen)),
         )
 
-        timeline.appendAction(getAddingTimeline(data, title, body, true).asAction())
+        val index = (if (permanentsShown.isEmpty()) 0 else permanentsShown.keys.max() + 1)
+        //only temporary, this will be overwritten later
+        permanentsShown[index] = this
 
-//        val index = (if (permanentsShown.isEmpty()) 0 else permanentsShown.keys.max() + 1) //TODO fix perma warnings
-//        permanentsShown[index] = current
-        return -1 // index
+        timeline.appendAction(getAddingTimeline(data, title, body, index).asAction())
+        return index
     }
 
     fun removePermanentWarning(id: Int) {
@@ -197,7 +197,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         data: Map<String, *>,
         title: String,
         body: String,
-        isPermanent: Boolean,
+        permanentIndex: Int,
     ) = Timeline.timeline {
         var current: CustomFlexBox? = null
         action {
@@ -219,7 +219,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         }
         action {
             curShown.add(current!!)
-            includeAction(getInitialTimeline(current!!, title.length * 2 + body.length, isPermanent).asAction())
+            includeAction(getInitialTimeline(current!!, title.length * 2 + body.length, permanentIndex).asAction())
         }
     }
 
@@ -238,7 +238,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         }
     }
 
-    private fun getInitialTimeline(target: CustomFlexBox, textLength: Int, isPermanent: Boolean): Timeline {
+    private fun getInitialTimeline(target: CustomFlexBox, textLength: Int, permanentIndex: Int): Timeline {
         return Timeline.timeline {
             action {
                 target.offsetX = -target.width
@@ -263,9 +263,11 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
                 Timeline.timeline {
                     action {
                         target.addAction(action)
-                        if (!isPermanent) {
+                        if (permanentIndex == -1) {
                             curDeadTimers[target] =
                                 System.currentTimeMillis() + INITIAL_DISPLAYED_TIME + ADDITIONAL_DISPLAYED_TIME_PER_CHAR * textLength
+                        } else {
+                            permanentsShown[permanentIndex] = target
                         }
                     }
                     delayUntil { action.isComplete }
