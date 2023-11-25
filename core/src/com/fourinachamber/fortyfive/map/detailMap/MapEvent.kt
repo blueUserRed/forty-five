@@ -5,7 +5,6 @@ import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
 import onj.value.*
-import kotlin.math.max
 
 /**
  * used for dynamically creating events
@@ -27,6 +26,7 @@ object MapEventFactory {
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
         "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
+        "AddMaxHPMapEvent" to { AddMaxHPMapEvent(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -333,10 +333,6 @@ class ChooseCardMapEvent(
 }
 
 
-/**
- * event that opens a shop where the player can buy up to 8 cards
- * @param types which type the restrictions are
- */
 class HealOrMaxHPMapEvent(
     onj: OnjObject
 ) : MapEvent(), ScaledByDistance {
@@ -356,7 +352,7 @@ class HealOrMaxHPMapEvent(
     override val displayName: String = "Restoration Point"
 
     override fun start() {
-        MapManager.changeToHealOrMaxHPScreen(this)
+        MapManager.changeToAddMaxHPScreen(this)
     }
 
     init {
@@ -376,6 +372,44 @@ class HealOrMaxHPMapEvent(
         includeDistanceFromEnd()
         "seed" with seed
         "healRange" with arrayOf(healthRange.first, healthRange.last)
+        "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
+    }
+}
+
+class AddMaxHPMapEvent(
+    onj: OnjObject
+) : MapEvent() {
+
+    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
+    val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "You can choose to either heal yourself or obtain a higher Max HP."
+    override val displayName: String = "Restoration Point"
+
+    override fun start() {
+        MapManager.changeToAddMaxHPScreen(this)
+    }
+
+    init {
+        setStandardValuesFromConfig(onj)
+    }
+
+    fun complete() {
+        isCompleted = true
+        canBeStarted = false
+        MapManager.changeToMapScreen()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("AddMaxHPMapEvent")
+        includeStandardConfig()
+        "seed" with seed
         "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
     }
 }
