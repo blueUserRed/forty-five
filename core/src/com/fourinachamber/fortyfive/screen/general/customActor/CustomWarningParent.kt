@@ -129,7 +129,6 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         if (curLimits[title] == null) curLimits[title] = mutableListOf()
         else curLimits[title]!!.removeIf { it <= System.currentTimeMillis() }
         curLimits[title]!!.add(System.currentTimeMillis() + TIME_BETWEEN_LIMIT)
-        println("adding normal")
 
         val data = mapOf(
             "symbol" to OnjString(severity.getSymbol()),

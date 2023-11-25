@@ -471,6 +471,10 @@ textures: [
         file: "textures/warning_label/background_red.png"
     },
     {
+        name: "warning_label_close",
+        file: "textures/warning_label/close_btn.png"
+    },
+    {
         name: "chooseCard_cardsBackground",
         file: "textures/choose_card/cards_background.png"
     },
