@@ -80,6 +80,7 @@ screens: {
     shopScreen: string,
     chooseCardScreen: string,
     changeToHealOrMaxHPScreen: string,
+    changeToAddMaxHPScreen: string,
 },
 
 mapImages: {

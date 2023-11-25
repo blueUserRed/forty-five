@@ -244,9 +244,9 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
 
         private const val ADDITIONAL_DISPLAYED_TIME_PER_CHAR = 60 //TODO in settings change this option
 
-        private const val INITIAL_DISPLAYED_TIME = 1000
+        private const val INITIAL_DISPLAYED_TIME = 500
 
-        private const val DIST_BETWEEN_BLOCKS = 5
+        private const val DIST_BETWEEN_BLOCKS = 10
 
         private const val TIME_BETWEEN_LIMIT = 500
     }

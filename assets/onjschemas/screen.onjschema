@@ -34,7 +34,7 @@ var widgetSharedKeys = {
     styles?: { ...* }[],
     dragAndDrop?: $DragAndDropBehaviour,
     setFillParent?: boolean,
-    states?: string[],
+    actorStates?: string[], //default, on creation
 };
 
 //var detailTextSharedKeys = {
@@ -444,6 +444,9 @@ $ScreenController {
 
     $HealOrMaxHPScreenController {
         addLifeActorName: string,
+    }
+
+    $AddMaxHPScreenController {
     }
 
     $ChooseCardScreenController {
