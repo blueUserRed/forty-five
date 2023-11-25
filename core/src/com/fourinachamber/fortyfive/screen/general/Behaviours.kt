@@ -250,7 +250,7 @@ class OnClickSelectHealOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Beha
 class OnClickRemoveWarningLabelBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
     override val onCLick: BehaviourCallback = {
-        CustomWarningParent.getWarning(onjScreen).removeWarningByClick(this)
+        CustomWarningParent.getWarning(onjScreen).removeWarningByClick(this.parent)
     }
 }
 
