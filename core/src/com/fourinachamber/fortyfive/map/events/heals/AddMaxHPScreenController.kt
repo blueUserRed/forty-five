@@ -29,9 +29,9 @@ class AddMaxHPScreenController(onj: OnjObject) : ScreenController(), Completable
         this.context = context
         amount = context.maxHPRange.random(rnd)
 
-        TemplateString.updateGlobalParam("map.curEvent.maxHP.lives_new", SaveState.playerLives + amount)
-        TemplateString.updateGlobalParam("map.curEvent.maxHP.maxLives_new", SaveState.maxPlayerLives + amount)
-        TemplateString.updateGlobalParam("map.curEvent.maxHP.amount", amount)
+        TemplateString.updateGlobalParam("map.cur_event.max_hp.lives_new", SaveState.playerLives + amount)
+        TemplateString.updateGlobalParam("map.cur_event.max_hp.maxLives_new", SaveState.maxPlayerLives + amount)
+        TemplateString.updateGlobalParam("map.cur_event.max_hp.amount", amount)
     }
 
     /**

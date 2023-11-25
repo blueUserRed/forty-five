@@ -105,7 +105,7 @@ root: $Box { //TODO biomes
                     scaleY: 0.9,
                 },
                 $TemplateLabel {
-                    template: "+{map.curEvent.maxHP.amount} MAX HP",
+                    template: "+{map.cur_event.max_hp.amount} MAX HP",
                     font: "red_wing_cm",
                     color: color.dark_brown,
                     fontScale: 1.1,
@@ -123,7 +123,7 @@ root: $Box { //TODO biomes
                     scaleY: 5.0,
                 },
                 $TemplateLabel {
-                    template: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.curEvent.maxHP.lives_new}/{map.curEvent.maxHP.maxLives_new} HP",
+                    template: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.cur_event.max_hp.lives_new}/{map.cur_event.max_hp.maxLives_new} HP",
                     font: "red_wing_cm",
                     color: color.dark_brown,
                     fontScale: 0.5,
