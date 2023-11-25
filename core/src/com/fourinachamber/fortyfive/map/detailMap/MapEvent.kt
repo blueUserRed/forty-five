@@ -26,7 +26,7 @@ object MapEventFactory {
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
         "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
-        "AddMaxHPMapEvent" to { AddMaxHPMapEvent(it) },
+        "AddMaxHPEvent" to { AddMaxHPMapEvent(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -158,7 +158,7 @@ class EmptyMapEvent : MapEvent() {
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance,Completable {
+class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance, Completable {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
@@ -335,7 +335,7 @@ class ChooseCardMapEvent(
 
 class HealOrMaxHPMapEvent(
     onj: OnjObject
-) : MapEvent(), ScaledByDistance,Completable {
+) : MapEvent(), ScaledByDistance, Completable {
 
     val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     val healthRange: IntRange = onj.get<OnjArray>("healRange").toIntRange()
@@ -378,7 +378,7 @@ class HealOrMaxHPMapEvent(
 
 class AddMaxHPMapEvent(
     onj: OnjObject
-) : MapEvent(),Completable {
+) : MapEvent(), Completable {
 
     val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
@@ -389,7 +389,7 @@ class AddMaxHPMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = "You can choose to either heal yourself or obtain a higher Max HP."
+    override val descriptionText: String = "You obtain higher Max HP."
     override val displayName: String = "Restoration Point"
 
     override fun start() {
@@ -407,7 +407,7 @@ class AddMaxHPMapEvent(
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
-        name("AddMaxHPMapEvent")
+        name("AddMaxHPEvent")
         includeStandardConfig()
         "seed" with seed
         "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
