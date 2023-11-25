@@ -78,12 +78,12 @@ class StatusbarWidget(
             val option = optionWidgets.find { it.first == clickedBox }!!
             when (displayedOptionIndex) {
                 -1 -> {
-                    screen.enterState("inStatusbarOverlay")
+                    screen.enterState(StatusbarWidget.OVERLAY_NAME)
                     display(option)
                 }
                 optionWidgets.indexOf(option) -> {
                     hide(option)
-                    screen.leaveState("inStatusbarOverlay")
+                    screen.leaveState(StatusbarWidget.OVERLAY_NAME)
                 }
                 else -> {
                     hide(optionWidgets[displayedOptionIndex])
@@ -176,4 +176,9 @@ class StatusbarWidget(
 
     private fun getStatusbarOption(option: Pair<CustomFlexBox, String>) =
         screen.namedActorOrError(option.second) as InOutAnimationActor
+
+
+    companion object{
+        const val OVERLAY_NAME = "inStatusbarOverlay"
+    }
 }
