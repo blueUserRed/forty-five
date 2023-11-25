@@ -17,7 +17,7 @@ $MapEvent {
         distanceToEnd: int,
     }
 
-    $AddMaxHPMapEvent {
+    $AddMaxHPEvent {
         ...mapEventStandardConfig,
         maxHPRange: int[2],
         seed: int?,

@@ -169,8 +169,10 @@ generatorConfig: {
                 progress: [
                     0.0, 20.0
                 ],
-                minNodes: 15,
-                maxNodes: 20,
+                minNodes: 3,
+                maxNodes: 6,
+//                minNodes: 15,
+//                maxNodes: 20,
                 maxSplits: 4,
                 splitProbability: 0.4,
                 startArea: "start_area",
@@ -198,12 +200,25 @@ generatorConfig: {
                             distanceToEnd: -1,
                         }
                     },
+                    {
+                        isDeadEnd: true,
+                        nodeTexture: "map_node_heal_circle",
+                        event: $AddMaxHPEvent {
+                            seed: null,
+                            maxHPRange: [
+                                5, 15
+                            ],
+                            currentlyBlocks: false,
+                            canBeStarted: true,
+                            isCompleted: false,
+                        }
+                    },
                 ],
                 avgNbrOfEncounters: 0,
                 exitNodeTexture: "map_node_exit_circle",
                 optionalEvents: [
                     {
-                        weight: 00,
+                        weight: 10,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -213,16 +228,21 @@ generatorConfig: {
                             distanceToEnd: -1,
                         }
                     },
-
                     {
-                        weight: 10,
-                        nodeTexture: "map_node_shop_circle",
-                        event: $ShopMapEvent {
+                        weight: 8,
+                        nodeTexture: "map_node_heal_circle",
+                        event: $HealOrMaxHPEvent {
                             seed: null,
-                            boughtIndices: [
+                            healRange: [
+                                25, 35
                             ],
-                            types: ["defType"],
-                            person: "traveling_merchant",
+                            maxHPRange: [
+                                5, 15
+                            ],
+                            currentlyBlocks: false,
+                            canBeStarted: true,
+                            isCompleted: false,
+                            distanceToEnd: -1,
                         }
                     },
                 ],
@@ -288,9 +308,6 @@ generatorConfig: {
             biome: "bewitched_forest",
             seed: runRandom(2),
             restrictions: {
-                //                maxNodes: 25,
-//                minNodes: 20,
-
                 progress: [
                     2.0, 40.0
                 ],
