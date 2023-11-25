@@ -48,6 +48,10 @@ interface ScaledByDistance {
     }
 }
 
+interface Completable {
+    fun completed()
+}
+
 /**
  * an event that can be placed on a [MapNode]
  */
@@ -154,7 +158,7 @@ class EmptyMapEvent : MapEvent() {
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
+class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance,Completable {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
@@ -180,7 +184,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
         MapManager.changeToEncounterScreen(this)
     }
 
-    fun completed() {
+    override fun completed() {
         currentlyBlocks = false
         canBeStarted = false
         isCompleted = true
@@ -246,10 +250,6 @@ class NPCMapEvent(val npc: String) : MapEvent() {
         MapManager.changeToDialogScreen(this)
     }
 
-    fun complete() {
-        canBeStarted = false
-        isCompleted = true
-    }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("NPCMapEvent")
@@ -298,7 +298,7 @@ class ShopMapEvent(
  */
 class ChooseCardMapEvent(
     onj: OnjObject
-) : MapEvent() {
+) : MapEvent(), Completable {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -319,7 +319,7 @@ class ChooseCardMapEvent(
         MapManager.changeToChooseCardScreen(this)
     }
 
-    fun complete() {
+    override fun completed() {
         isCompleted = true
         canBeStarted = false
     }
@@ -335,7 +335,7 @@ class ChooseCardMapEvent(
 
 class HealOrMaxHPMapEvent(
     onj: OnjObject
-) : MapEvent(), ScaledByDistance {
+) : MapEvent(), ScaledByDistance,Completable {
 
     val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     val healthRange: IntRange = onj.get<OnjArray>("healRange").toIntRange()
@@ -352,7 +352,7 @@ class HealOrMaxHPMapEvent(
     override val displayName: String = "Restoration Point"
 
     override fun start() {
-        MapManager.changeToAddMaxHPScreen(this)
+        MapManager.changeToHealOrMaxHPScreen(this)
     }
 
     init {
@@ -360,7 +360,7 @@ class HealOrMaxHPMapEvent(
         setStandardValuesFromConfig(onj)
     }
 
-    fun complete() {
+    override fun completed() {
         isCompleted = true
         canBeStarted = false
         MapManager.changeToMapScreen()
@@ -378,7 +378,7 @@ class HealOrMaxHPMapEvent(
 
 class AddMaxHPMapEvent(
     onj: OnjObject
-) : MapEvent() {
+) : MapEvent(),Completable {
 
     val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
@@ -400,7 +400,7 @@ class AddMaxHPMapEvent(
         setStandardValuesFromConfig(onj)
     }
 
-    fun complete() {
+    override fun completed() {
         isCompleted = true
         canBeStarted = false
         MapManager.changeToMapScreen()

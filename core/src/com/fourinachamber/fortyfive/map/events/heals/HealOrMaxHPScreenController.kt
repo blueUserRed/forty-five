@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.events.heals
 
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -14,7 +15,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.random.Random
 
-class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController() {
+class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController(), Completable {
     private var context: HealOrMaxHPMapEvent? = null
 
     private var healChosenTarekGeorgWidgetName: String = onj.get<String>("addLifeActorName")
@@ -48,20 +49,20 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController() {
     /**
      * gets called from the accept button, only if he is in the correct state ("valid")
      */
-    fun complete() {
+    override fun completed() {
         if ((screen.namedActorOrError(healChosenTarekGeorgWidgetName) as CustomFlexBox).inActorState("selected")) {
             val newLives = min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
             FortyFiveLogger.debug(logTag, "Lives healed from ${SaveState.playerLives} to $newLives!")
             SaveState.playerLives = newLives
         } else {
-            SaveState.playerLives += amount.second
             FortyFiveLogger.debug(
                 logTag,
                 "Max lives increased from ${SaveState.maxPlayerLives} to ${SaveState.maxPlayerLives + amount.second}!"
             )
             SaveState.maxPlayerLives += amount.second
+            SaveState.playerLives += amount.second
         }
-        context?.complete()
+        context?.completed()
     }
 
     companion object {

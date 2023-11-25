@@ -19,6 +19,7 @@ assets: {
         "max_health_background",
         "heal_or_max_add_max_health",
         "map_node_heal_circle",
+        "taupe_gray_rounded",
         //        "max_health_background",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
@@ -36,11 +37,9 @@ options: {
     background: "hover_detail_background",
     inputMap: [
         ...(inputMaps.defaultInputMap),
-        ...(inputMaps.healOrMaxInputMap),
         ...(inputMaps.addMaxHPInputMap),
     ],
-    screenController: $HealOrMaxHPScreenController {
-        addLifeActorName: "add_lives_option",
+    screenController: $AddMaxHPScreenController {
     }
 },
 
@@ -70,19 +69,19 @@ root: $Box { //TODO biomes
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 13.5#percent,
-                positionLeft: 26.0#percent,
-                width: (48)#percent,
-                height: 80#percent,
+                positionTop: 20#percent,
+                positionLeft: 31.0#percent,
+                width: (38)#percent,
+                height: 60#percent,
                 flexDirection: flexDirection.column,
                 background: "max_health_background",
-                paddingTop: 18#percent,
+                paddingTop: 23#percent,
                 alignItems: align.center,
             }
         ],
     } children [
         $Label {
-            text: "Choose your reward",
+            text: "MAX HP Increased!",
             font: "red_wing_cm",
             color: color.dark_brown,
             fontScale: 1.0,
@@ -93,21 +92,42 @@ root: $Box { //TODO biomes
                 {
                     width: 70#percent,
                     height: 63#percent,
-                    flexDirection: flexDirection.row,
-                    justifyContent: justify.spaceBetween,
+                    flexDirection: flexDirection.column,
+                    justifyContent: justify.center,
                     alignItems: align.center,
                 },
             ],
             children: [
-                $FromTemplate {
-                    generateFrom: "healOptionTemplate",
-                    data: {
-                        name: "add_max_hp_option",
-                        templateMainText: "+{map.curEvent.maxHP.amount} MAX HP",
-                        templateSubText: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.curEvent.maxHP.lives_new}/{map.curEvent.maxHP.maxLives_new} HP",
-                        textureName: "heal_or_max_add_max_health",
-                        otherOptionName: "add_lives_option",
-                    }
+                $Image {
+                    reportDimensionsWithScaling: true,
+                    textureName: "heal_or_max_add_max_health",
+                    scaleX: 0.9,
+                    scaleY: 0.9,
+                },
+                $TemplateLabel {
+                    template: "+{map.curEvent.maxHP.amount} MAX HP",
+                    font: "red_wing_cm",
+                    color: color.dark_brown,
+                    fontScale: 1.1,
+                    align: "center",
+                    styles: [
+                        {
+                            marginTop: 5#percent,
+                        }
+                    ],
+                },
+                $Image {
+                    reportDimensionsWithScaling: true,
+                    textureName: "taupe_gray_rounded",
+                    scaleX: 300.0,
+                    scaleY: 5.0,
+                },
+                $TemplateLabel {
+                    template: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.curEvent.maxHP.lives_new}/{map.curEvent.maxHP.maxLives_new} HP",
+                    font: "red_wing_cm",
+                    color: color.dark_brown,
+                    fontScale: 0.5,
+                    align: "center",
                 },
             ],
         },
@@ -118,13 +138,13 @@ root: $Box { //TODO biomes
                     state: "valid"
                 }
             ],
-            states: [
+            actorStates: [
                 "valid"
             ],
             styles: [
                 {
                     style_priority: 1,
-                    marginTop: 13.0#percent,
+                    marginTop: 1.0#percent,
                     width: 23.0#percent,
                     height: 10.0#percent,
                     touchable: touchable.enabled,
@@ -146,7 +166,7 @@ root: $Box { //TODO biomes
         styles: [
             {
                 positionType: positionType.absolute,
-                positionTop: 19#percent,
+                positionTop: 24#percent,
                 positionLeft: 47.15#percent,
             }
         ],
@@ -177,76 +197,4 @@ templates: [
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
-    $Box { //TODO this template and do it good
-
-        template_name: "healOptionTemplate",
-        template_keys: {
-            "name": "name",
-            "children.1.template": "templateMainText",
-            "children.3.template": "templateSubText",
-            "children.0.textureName": "textureName",
-            "behaviours.0.otherOptionName": "otherOptionName",
-        },
-        name: "",
-
-        styles: [
-            {
-                width: 40#percent,
-                height: 83#percent,
-                flexDirection: flexDirection.column,
-                alignItems: align.center,
-                justifyContent: justify.center,
-                touchable: touchable.enabled,
-                background: "heal_or_max_selector_background",
-                marginRight: 0#percent,
-                positionRight: 0#percent,
-            },
-            {
-                style_priority: 2,
-                background: "heal_or_max_selector_background_selected",
-                width: 70#percent,
-                height: 125#percent,
-                style_condition: actorState("selected"),
-                marginRight: -30#percent,
-                positionRight: 22#percent,
-            },
-        ],
-        behaviours: [
-            $OnClickSelectHealOptionBehaviour {
-                enterState: "selected",
-                acceptButtonName: "acceptButton",
-                newButtonState: "valid",
-                otherOptionName: "buttn",
-            }
-        ],
-        children: [
-            $Image {
-                reportDimensionsWithScaling: true,
-                textureName: "heal_or_max_add_max_health",
-                scaleX: 0.8,
-                scaleY: 0.8,
-            },
-            $TemplateLabel {
-                template: "+5 Max HP",
-                font: "red_wing_cm",
-                color: color.dark_brown,
-                fontScale: 1.1,
-                align: "center",
-            },
-            $Image {
-                reportDimensionsWithScaling: true,
-                textureName: "taupe_gray_rounded",
-                scaleX: 300.0,
-                scaleY: 5.0,
-            },
-            $TemplateLabel {
-                template: "13/45 HP -> 43/45 HP",
-                font: "red_wing_cm",
-                color: color.taupe_gray,
-                fontScale: 0.5,
-                align: "center",
-            },
-        ],
-    }
-
 ],

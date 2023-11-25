@@ -97,7 +97,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     }
 
     private fun addListener(screen: OnjScreen) {
-        (screen.namedActorOrError(leaveButtonName) as CustomLabel).onButtonClick { context?.complete() }
+        (screen.namedActorOrError(leaveButtonName) as CustomLabel).onButtonClick { context?.completed() }
     }
 
     private fun updateDropTargets() {
@@ -112,7 +112,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "Chose card: $card")
         SaveState.buyCard(card)
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card)
-        context?.complete()
+        context?.completed()
         SaveState.write()
         MapManager.changeToMapScreen()
     }

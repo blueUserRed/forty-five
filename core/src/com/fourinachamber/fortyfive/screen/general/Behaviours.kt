@@ -7,6 +7,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.map.detailMap.Completable
+import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
+import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
@@ -222,7 +225,8 @@ class OnClickSelectHealOrMaxOptionBehaviour(onj: OnjNamedObject, actor: Actor) :
     val state = onj.get<String>("state")
     override val onCLick: BehaviourCallback = {
         if (this is StyledActor && inActorState(state)) {
-            (onjScreen.screenController as HealOrMaxHPScreenController).complete()
+            val scrCont = onjScreen.screenController
+            if (scrCont is Completable) scrCont.completed()
         }
     }
 
