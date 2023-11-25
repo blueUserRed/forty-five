@@ -30,20 +30,20 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController(), Completa
         this.context = context
         amount = context.healthRange.random(rnd) to context.maxHPRange.random(rnd)
         TemplateString.updateGlobalParam(
-            "map.curEvent.heal.lives_new",
+            "map.cur_event.heal.lives_new",
             min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
         )
-        TemplateString.updateGlobalParam("map.curEvent.maxHP.lives_new", SaveState.playerLives + amount.second)
-        TemplateString.updateGlobalParam("map.curEvent.maxHP.maxLives_new", SaveState.maxPlayerLives + amount.second)
-        TemplateString.updateGlobalParam("map.curEvent.maxHP.distanceToEnd",
+        TemplateString.updateGlobalParam("map.cur_event.max_hp.lives_new", SaveState.playerLives + amount.second)
+        TemplateString.updateGlobalParam("map.cur_event.max_hp.maxLives_new", SaveState.maxPlayerLives + amount.second)
+        TemplateString.updateGlobalParam("map.cur_event.max_hp.distanceToEnd",
             if (MapManager.currentDetailMap.isArea){
                 "You are in a safe Area"
             }else{
                 "next safe Point in: ${max(context.distanceToEnd, 0)} events"
             }
         )
-        TemplateString.updateGlobalParam("map.curEvent.heal.amount", amount.first)
-        TemplateString.updateGlobalParam("map.curEvent.maxHP.amount", amount.second)
+        TemplateString.updateGlobalParam("map.cur_event.heal.amount", amount.first)
+        TemplateString.updateGlobalParam("map.cur_event.max_hp.amount", amount.second)
     }
 
     /**

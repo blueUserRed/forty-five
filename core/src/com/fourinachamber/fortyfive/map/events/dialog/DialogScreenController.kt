@@ -40,7 +40,7 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
             .find { it.get<String>("name") == context.npc }
             ?: throw RuntimeException("unknown npc: ${context.npc}")
         val dialogOnj = npc.get<OnjObject>("dialog")
-        TemplateString.updateGlobalParam("map.curEvent.person.displayName", npc.get<String>("displayName"))
+        TemplateString.updateGlobalParam("map.cur_event.person.displayName", npc.get<String>("displayName"))
         val dialog = Dialog.readFromOnj(dialogOnj, screen)
         dialogWidget.start(dialog)
 

@@ -108,8 +108,8 @@ root: $Box { //TODO biomes
                     generateFrom: "healOptionTemplate",
                     data: {
                         name: "add_lives_option",
-                        templateMainText: "Heal {map.curEvent.heal.amount} HP",
-                        templateSubText: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.curEvent.heal.lives_new}/{stat.maxPlayerLives} HP",
+                        templateMainText: "Heal {map.cur_event.heal.amount} HP",
+                        templateSubText: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.cur_event.heal.lives_new}/{stat.maxPlayerLives} HP",
                         textureName: "heal_or_max_add_health",
                         otherOptionName: "add_max_hp_option",
                     }
@@ -125,8 +125,8 @@ root: $Box { //TODO biomes
                     generateFrom: "healOptionTemplate",
                     data: {
                         name: "add_max_hp_option",
-                        templateMainText: "+{map.curEvent.maxHP.amount} MAX HP",
-                        templateSubText: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.curEvent.maxHP.lives_new}/{map.curEvent.maxHP.maxLives_new} HP",
+                        templateMainText: "+{map.cur_event.max_hp.amount} MAX HP",
+                        templateSubText: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.cur_event.max_hp.lives_new}/{map.cur_event.max_hp.maxLives_new} HP",
                         textureName: "heal_or_max_add_max_health",
                         otherOptionName: "add_lives_option",
                     }
@@ -134,7 +134,7 @@ root: $Box { //TODO biomes
             ],
         },
         $TemplateLabel {
-            template: "{map.curEvent.maxHP.distanceToEnd}",
+            template: "{map.cur_event.max_hp.distanceToEnd}",
             font: "red_wing_cm",
             color: color.forty_white,
             fontScale: 0.6,
