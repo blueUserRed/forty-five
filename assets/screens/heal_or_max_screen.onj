@@ -40,7 +40,9 @@ options: {
     transitionAwayTime: 1.0,
     background: "hover_detail_background",
     inputMap: [
-        ...(inputMaps.defaultInputMap)
+        ...(inputMaps.defaultInputMap),
+        ...(inputMaps.healOrMaxInputMap),
+        ...(inputMaps.addMaxHPInputMap),
     ],
     screenController: $HealOrMaxHPScreenController {
         addLifeActorName: "add_lives_option",
