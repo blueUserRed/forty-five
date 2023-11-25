@@ -486,7 +486,9 @@ $KeyAction {
 
     $PreviousInHierarchyKeyAction { }
 
-    $FireClickEventKeyAction { }
+    $FireClickEventKeyAction {
+        actor?: string
+    }
 
     $ForwardKeyKeyAction { }
 
