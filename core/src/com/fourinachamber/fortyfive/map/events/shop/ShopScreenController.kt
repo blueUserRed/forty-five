@@ -39,7 +39,8 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
 
-    override fun init(onjScreen: OnjScreen, context: Any?) { //TODO change image for "to_deck.png"
+    override fun init(onjScreen: OnjScreen, context: Any?) {
+        //TODO fix bug with cards when being on the edge of other cards when drag and dropping
         screen = onjScreen
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor

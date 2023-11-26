@@ -63,6 +63,7 @@ var scrollBar = $Image {
 };
 
 var cardsWidget = $Box {
+    zIndex: 100,
     styles: [
         {
             background: "shop_items_background",
