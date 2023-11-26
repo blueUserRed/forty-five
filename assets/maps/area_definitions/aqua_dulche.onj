@@ -6,7 +6,6 @@ nodes: [
     {
         x: 20.0,
         y: 80.0,
-        isArea: false,
         edgesTo: [
             1, 3
         ],
@@ -20,7 +19,6 @@ nodes: [
     {
         x: 60.0,
         y: 80.0,
-        isArea: false,
         edgesTo: [
             0, 2,
         ],
@@ -30,7 +28,6 @@ nodes: [
     {
         x: 100.0,
         y: 90.0,
-        isArea: false,
         edgesTo: [
             1
         ],
@@ -42,7 +39,6 @@ nodes: [
     {
         x: 30.0,
         y: 40.0,
-        isArea: false,
         edgesTo: [
             0
         ],
