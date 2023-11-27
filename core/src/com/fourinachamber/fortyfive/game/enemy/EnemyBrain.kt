@@ -166,7 +166,6 @@ class WitchBrain(
             1f,
             enemy,
             false,
-            GraphicsConfig.iconName("bewitched")
         )
     }
 
@@ -179,7 +178,6 @@ class WitchBrain(
                     1f,
                     enemy,
                     false,
-                    GraphicsConfig.iconName("wrathOfTheWitch")
                 ).create(controller, difficulty)
             } else {
                 return EnemyActionPrototype.GivePlayerStatusEffect(
@@ -187,7 +185,6 @@ class WitchBrain(
                     1f,
                     enemy,
                     false,
-                    GraphicsConfig.iconName("wrathOfTheWitch")
                 ).create(controller, difficulty)
             }
         }
@@ -223,7 +220,6 @@ class WitchBrain(
                 1f,
                 enemy,
                 false,
-                revolverRotationIconHandle
             ).create(controller, difficulty)
             nextAction = action
             return@run if (Utils.coinFlip(rotateRevolverShowProbability)) {
@@ -238,7 +234,6 @@ class WitchBrain(
                 1f,
                 enemy,
                 false,
-                damageIconHandle
             ).create(controller, difficulty)
             nextAction = action
             return NextEnemyAction.ShownEnemyAction(action)
@@ -249,7 +244,6 @@ class WitchBrain(
                 1f,
                 enemy,
                 false,
-                shieldIconHandle
             ).create(controller, difficulty)
             nextAction = action
             return NextEnemyAction.ShownEnemyAction(action)
