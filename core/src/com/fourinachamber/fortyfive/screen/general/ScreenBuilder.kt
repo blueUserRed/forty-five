@@ -554,6 +554,14 @@ class ScreenBuilder(val file: FileHandle) {
                     }
             }
         }
+
+        widgetOnj.ifHas<OnjArray>("actorStates") {
+            it.value.forEach { onjStr ->
+                onjStr as OnjString
+                actor.enterActorState(onjStr.value)
+            }
+        }
+
         return actor
     }
 

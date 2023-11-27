@@ -1,0 +1,200 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "shop_background_wasteland",
+        "transparent_black_texture",
+        "hover_detail_background", "red_wing_cm", "red_wing",
+        "heal_or_max_accept",
+        "heal_or_max_accept_hover",
+        "max_health_background",
+        "heal_or_max_add_max_health",
+        "map_node_heal_circle",
+        "taupe_gray_rounded",
+        //        "max_health_background",
+        ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.navBarUsedAssets),
+        ...(sharedComponents.warningLabelUsedAssets),
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    transitionAwayTime: 1.0,
+    background: "hover_detail_background",
+    inputMap: [
+        ...(inputMaps.defaultInputMap),
+        ...(inputMaps.addMaxHPInputMap),
+    ],
+    screenController: $AddMaxHPScreenController {
+    }
+},
+
+root: $Box { //TODO biomes
+
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent,
+            background: "shop_background_wasteland",
+        }
+    ]
+} children [
+    $Image {
+        scaleX: 1.0,
+        scaleY: 1.0,
+        textureName: "transparent_black_texture",
+        styles: [
+            {
+                width: 100#percent,
+                height: 100#percent,
+            }
+        ],
+    },
+    $Box {
+        zIndex: 150,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 20#percent,
+                positionLeft: 31.0#percent,
+                width: (38)#percent,
+                height: 60#percent,
+                flexDirection: flexDirection.column,
+                background: "max_health_background",
+                paddingTop: 23#percent,
+                alignItems: align.center,
+            }
+        ],
+    } children [
+        $Label {
+            text: "MAX HP Increased!",
+            font: "red_wing_cm",
+            color: color.dark_brown,
+            fontScale: 1.0,
+            align: "center",
+        },
+        $Box {
+            styles: [
+                {
+                    width: 70#percent,
+                    height: 63#percent,
+                    flexDirection: flexDirection.column,
+                    justifyContent: justify.center,
+                    alignItems: align.center,
+                },
+            ],
+            children: [
+                $Image {
+                    reportDimensionsWithScaling: true,
+                    textureName: "heal_or_max_add_max_health",
+                    scaleX: 0.9,
+                    scaleY: 0.9,
+                },
+                $TemplateLabel {
+                    template: "+{map.cur_event.max_hp.amount} MAX HP",
+                    font: "red_wing_cm",
+                    color: color.dark_brown,
+                    fontScale: 1.1,
+                    align: "center",
+                    styles: [
+                        {
+                            marginTop: 5#percent,
+                        }
+                    ],
+                },
+                $Image {
+                    reportDimensionsWithScaling: true,
+                    textureName: "taupe_gray_rounded",
+                    scaleX: 300.0,
+                    scaleY: 5.0,
+                },
+                $TemplateLabel {
+                    template: "{stat.playerLives}/{stat.maxPlayerLives} HP -> {map.cur_event.max_hp.lives_new}/{map.cur_event.max_hp.maxLives_new} HP",
+                    font: "red_wing_cm",
+                    color: color.dark_brown,
+                    fontScale: 0.5,
+                    align: "center",
+                },
+            ],
+        },
+        $Box {
+            name: "acceptButton",
+            behaviours: [
+                $OnClickSelectHealOrMaxOptionBehaviour {
+                    state: "valid"
+                }
+            ],
+            actorStates: [
+                "valid"
+            ],
+            styles: [
+                {
+                    style_priority: 1,
+                    marginTop: 1.0#percent,
+                    width: 23.0#percent,
+                    height: 10.0#percent,
+                    touchable: touchable.enabled,
+                    background: "heal_or_max_accept"
+                },
+                {
+                    style_priority: 2,
+                    background: "heal_or_max_accept_hover",
+                    style_condition: hover(),
+                }
+            ],
+        },
+    ],
+    $Image {
+        textureName: "map_node_heal_circle",
+        zIndex: 160,
+        scaleX: 1.0,
+        scaleY: 1.0,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 24#percent,
+                positionLeft: 47.15#percent,
+            }
+        ],
+    },
+    $Statusbar {
+        zIndex: 400,
+        options: [
+            {
+                actorName: "backpackActor",
+                displayName: "Notebook",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Backpack",
+            },
+            {
+                actorName: "backpackActor",
+                displayName: "Settings",
+            },
+        ],
+        ...(sharedComponents.statusbarCenterDefaults)
+    },
+    sharedComponents.backpack,
+    sharedComponents.warningParent,
+],
+
+templates: [
+    ...(sharedComponents.statusBarTemplates),
+    ...(sharedComponents.backpackTemplates),
+    ...(sharedComponents.warningLabelTemplates),
+],

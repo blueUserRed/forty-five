@@ -34,6 +34,7 @@ var widgetSharedKeys = {
     styles?: { ...* }[],
     dragAndDrop?: $DragAndDropBehaviour,
     setFillParent?: boolean,
+    actorStates?: string[], //default, on creation
 };
 
 //var detailTextSharedKeys = {
@@ -445,6 +446,9 @@ $ScreenController {
         addLifeActorName: string,
     }
 
+    $AddMaxHPScreenController {
+    }
+
     $ChooseCardScreenController {
         cardsFile: string,
         leaveButtonName: string,
@@ -486,7 +490,9 @@ $KeyAction {
 
     $PreviousInHierarchyKeyAction { }
 
-    $FireClickEventKeyAction { }
+    $FireClickEventKeyAction {
+        actor?: string
+    }
 
     $ForwardKeyKeyAction { }
 
