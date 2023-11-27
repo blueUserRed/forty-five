@@ -542,6 +542,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         addDisableStyles(screen)
     }
 
+    override fun toString(): String {
+        return "CustomImageActor($backgroundHandle)"
+    }
+
     companion object {
 
         val maskingShader: ShaderProgram by lazy {
