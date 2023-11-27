@@ -37,6 +37,10 @@ assets: {
 
         "enemy_pyro", "enemy_action_burning", "enemy_action_inferno",
         "enemy_action_hot_potato", "enemy_action_unknown",
+        "enemy_pyro_action_comic_common_panel_1", "enemy_pyro_action_comic_common_panel_2",
+        "enemy_pyro_action_comic_common_panel_3", "enemy_pyro_action_comic_panel_burning",
+        "enemy_pyro_action_comic_panel_fire_resistance", "enemy_pyro_action_comic_panel_hot_potato",
+        "enemy_pyro_action_comic_panel_inferno",
 
         "enemy_witch",
 
@@ -694,7 +698,6 @@ var playerBar = $Box {
 var encounterModifierDisplay = $Box {
     styles: [
         {
-            style_priority: 1,
             positionType: positionType.absolute,
             width: worldWidth#points,
             height: worldHeight#points,
@@ -743,6 +746,136 @@ var encounterModifierDisplay = $Box {
     } children [
 
     ],
+];
+
+var enemyActionAnimContainer = $Box {
+    styles: [
+        {
+            positionType: positionType.absolute,
+            width: worldWidth#points,
+            height: worldHeight#points,
+        }
+    ]
+} children [
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                width: 800#points,
+                height: 500#points,
+                positionTop: (worldHeight / 2.0 - 500.0 / 2.0 - 100)#points,
+                positionLeft: (worldWidth - 800)#points,
+                flexDirection: flexDirection.column,
+                alignItems: align.flexEnd
+            }
+        ],
+        debug: true
+    } children [
+
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.row,
+                    alignItems: align.flexEnd,
+                    height: 200#points,
+                    marginBottom: -20#points
+                }
+            ],
+            debug: true
+        } children [
+
+            $Image {
+                textureName: "enemy_pyro_action_comic_common_panel_3",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.8,
+                scaleY: 0.8,
+            },
+            $Image {
+                textureName: "enemy_pyro_action_comic_common_panel_2",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.8,
+                scaleY: 0.8,
+            },
+            $Image {
+                textureName: "enemy_pyro_action_comic_common_panel_1",
+                reportDimensionsWithScaling: true,
+                scaleX: 0.8,
+                scaleY: 0.8,
+            },
+
+        ],
+
+        $Image {
+            textureName: "enemy_pyro_action_comic_panel_burning",
+            reportDimensionsWithScaling: true,
+            scaleX: 0.8,
+            scaleY: 0.8,
+        },
+
+        $Box {
+            styles: [
+                {
+                    background: "transparent_black_texture",
+                    width: 500#points,
+                    alignSelf: align.center,
+                    flexDirection: flexDirection.row,
+                    paddingTop: 3#points,
+                    paddingLeft: 3#points,
+                }
+            ]
+        } children [
+
+            $Box {
+                styles: [
+                    {
+                        flexDirection: flexDirection.column,
+                        width: 430#points,
+                        alignItems: align.center
+                    }
+                ]
+            } children [
+                $Label {
+                    font: "red_wing",
+                    text: "Burning",
+                    fontScale: 1.1,
+                    align: "left",
+                    color: color.white
+                },
+                $Box {
+                    styles: [
+                        {
+                            background: "white_texture",
+                            height: 2#points,
+                            width: 430#points
+                        }
+                    ]
+                },
+                $Label {
+                    styles: [
+                        {
+                            width: 430#points
+                        }
+                    ],
+                    font: "red_wing",
+                    text: "The Player gets the burning for 5 Revolver rotations",
+                    fontScale: 0.6,
+                    align: "left",
+                    wrap: true,
+                    color: color.white
+                },
+            ],
+            $Box {
+                styles: [
+                    {
+                        background: "enemy_action_burning",
+                        width: 70#points,
+                        aspectRatio: 1.0
+                    }
+                ]
+            }
+        ]
+    ]
 ];
 
 var gameScreen = $Box {
@@ -848,7 +981,6 @@ root: $Box {
             font: "red_wing",
             fontColor: color.black,
             fontScale: 0.6,
-            debug: true
         },
 
     ],
@@ -856,6 +988,7 @@ root: $Box {
     sharedComponents.warningParent,
     encounterModifierDisplay,
     gameScreen,
+    enemyActionAnimContainer,
     drawCardActor,
     popupActor,
     attackPopup,

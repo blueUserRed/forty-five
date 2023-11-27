@@ -531,6 +531,34 @@ textures: [
         file: "textures/enemies/action_symbols/unknown.png"
     },
     {
+        name: "enemy_pyro_action_comic_common_panel_1",
+        file: "textures/enemies/pyro/action_comic_common_panel_1.png"
+    },
+    {
+        name: "enemy_pyro_action_comic_common_panel_2",
+        file: "textures/enemies/pyro/action_comic_common_panel_2.png"
+    },
+    {
+        name: "enemy_pyro_action_comic_common_panel_3",
+        file: "textures/enemies/pyro/action_comic_common_panel_3.png"
+    },
+    {
+        name: "enemy_pyro_action_comic_panel_burning",
+        file: "textures/enemies/pyro/action_comic_panel_burning.png"
+    },
+    {
+        name: "enemy_pyro_action_comic_panel_fire_resistance",
+        file: "textures/enemies/pyro/action_comic_panel_fire_resistance.png"
+    },
+    {
+        name: "enemy_pyro_action_comic_panel_hot_potato",
+        file: "textures/enemies/pyro/action_comic_panel_hot_potato.png"
+    },
+    {
+        name: "enemy_pyro_action_comic_panel_inferno",
+        file: "textures/enemies/pyro/action_comic_panel_inferno.png"
+    },
+    {
         name: "enemy_pyro",
         file: "textures/enemies/pyro/pyro.png"
     },
