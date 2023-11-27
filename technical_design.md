@@ -583,8 +583,8 @@ Example form DetailMapWidget.kt:
 ```kotlin
 private fun setupMapEvent(event: MapEvent?) {
     event ?: return
-    TemplateString.updateGlobalParam("map.curEvent.displayName", event.displayName)
-    TemplateString.updateGlobalParam("map.curEvent.description", event.descriptionText)
+    TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
+    TemplateString.updateGlobalParam("map.cur_event.description", event.descriptionText)
 }
 ```
 

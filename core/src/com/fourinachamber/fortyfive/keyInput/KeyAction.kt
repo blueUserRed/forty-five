@@ -9,7 +9,9 @@ import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.ButtonClickEvent
+import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.onButtonClick
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -138,10 +140,16 @@ object KeyActionFactory {
 
         "FireClickEvent" to {
             lambda@{ screen, _ ->
-                val selected = screen.selectedActor ?: return@lambda false
-                selected as Actor
-                selected.fire(ButtonClickEvent())
-                true
+                val actor = it.get<String?>("actor")
+                if (actor == null){
+                    val selected = screen.selectedActor ?: return@lambda false
+                    selected as Actor
+                    selected.fire(ButtonClickEvent())
+                    true
+                }else{
+                    (screen.namedActorOrError(it.get<String>("actor"))).fire(ButtonClickEvent())
+                    true
+                }
             }
         },
 
@@ -164,7 +172,7 @@ object KeyActionFactory {
                 (screen.namedActorOrError(it.get<String>("mapActor")) as DetailMapWidget).onStartButtonClicked()
                 true
             }
-        }
+        },
     )
 
     /**
