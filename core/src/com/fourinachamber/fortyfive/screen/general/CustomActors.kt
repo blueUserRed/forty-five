@@ -540,6 +540,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         addActorStyles(screen)
         addBackgroundStyles(screen)
         addDisableStyles(screen)
+        addOffsetableStyles(screen)
     }
 
     override fun toString(): String {
