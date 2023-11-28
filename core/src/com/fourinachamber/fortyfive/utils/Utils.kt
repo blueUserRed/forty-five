@@ -203,6 +203,10 @@ fun String.lowerCaseFirstChar(): String = this.replaceFirstChar { it.lowercaseCh
 
 fun String.onjString(): OnjString = OnjString(this)
 
+fun Timeline.TimelineBuilderDSL.awaitConfirmationInput(screen: OnjScreen, maxTime: Long? = null) {
+    includeAction(screen.confirmationClickTimelineAction(maxTime))
+}
+
 inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
     val chunks = mutableListOf<MutableList<T>>(mutableListOf())
     forEach { element ->

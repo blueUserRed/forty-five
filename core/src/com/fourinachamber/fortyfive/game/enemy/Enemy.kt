@@ -389,7 +389,7 @@ class EnemyActor(
             ) as? CustomFlexBox
                 ?: throw RuntimeException("template named $enemyActionAnimationTemplateName must be a FlexBox")
         }
-        delay(10000)
+        awaitConfirmationInput(screen, maxTime = 10_000)
         action {
             parent.remove(animActor!!.styleManager!!.node)
         }
