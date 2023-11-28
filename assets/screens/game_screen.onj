@@ -194,7 +194,6 @@ var enemyActionAnimationTemplate = $Box {
             alignItems: align.flexEnd
         }
     ],
-    debug: true
 } children [
 
     $Box {
@@ -206,13 +205,23 @@ var enemyActionAnimationTemplate = $Box {
                 marginBottom: -20#points
             }
         ],
-        debug: true
     } children [
 
         $Image {
             styles: [
                 {
+                    style_priority: 1,
+                    offsetX: 400.0,
                     width: 50#points
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("enemy_action_anim"),
+                    offsetX: 0.0,
+                    style_animation: {
+                        duration: 0.2,
+                        interpolation: interpolation.elastic_out
+                    }
                 }
             ],
             textureName: "enemy_pyro_action_comic_common_panel_3",
@@ -221,12 +230,44 @@ var enemyActionAnimationTemplate = $Box {
             scaleY: 0.8,
         },
         $Image {
+            styles: [
+                {
+                    style_priority: 1,
+                    offsetX: 400.0
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("enemy_action_anim"),
+                    offsetX: 0.0,
+                    style_animation: {
+                        duration: 0.2,
+                        delay: 0.2,
+                        interpolation: interpolation.elastic_out
+                    }
+                }
+            ],
             textureName: "enemy_pyro_action_comic_common_panel_2",
             reportDimensionsWithScaling: true,
             scaleX: 0.8,
             scaleY: 0.8,
         },
         $Image {
+            styles: [
+                {
+                    style_priority: 1,
+                    offsetX: 400.0
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("enemy_action_anim"),
+                    offsetX: 0.0,
+                    style_animation: {
+                        duration: 0.2,
+                        delay: 0.4,
+                        interpolation: interpolation.elastic_out
+                    }
+                }
+            ],
             textureName: "enemy_pyro_action_comic_common_panel_1",
             reportDimensionsWithScaling: true,
             scaleX: 0.8,
@@ -236,6 +277,22 @@ var enemyActionAnimationTemplate = $Box {
     ],
 
     $Image {
+        styles: [
+            {
+                style_priority: 1,
+                offsetX: 700.0
+            },
+            {
+                style_priority: 2,
+                style_condition: state("enemy_action_anim"),
+                offsetX: 0.0,
+                style_animation: {
+                    duration: 0.2,
+                    delay: 0.6,
+                    interpolation: interpolation.elastic_out
+                }
+            }
+        ],
         textureName: "enemy_pyro_action_comic_panel_burning",
         reportDimensionsWithScaling: true,
         scaleX: 0.8,
@@ -251,6 +308,17 @@ var enemyActionAnimationTemplate = $Box {
                 flexDirection: flexDirection.row,
                 paddingTop: 3#points,
                 paddingLeft: 3#points,
+                offsetX: 700.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("enemy_action_anim"),
+                offsetX: 0.0,
+                style_animation: {
+                    duration: 0.2,
+                    delay: 0.8,
+                    interpolation: interpolation.elastic_out
+                }
             }
         ]
     } children [
@@ -738,7 +806,6 @@ var putCardsUnderDeckActor = $Box {
                     }
                 ],
                 name: "putCardsUnderDeckWidget",
-                debug: true,
                 cardSize: cardHeight,
                 cardSpacing: 10.0
             }
@@ -877,7 +944,6 @@ var encounterModifierDisplay = $Box {
             }
         ],
         touchable: "enabled",
-//        debug: true
     } children [
 
     ],
