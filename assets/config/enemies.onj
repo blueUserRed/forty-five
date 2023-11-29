@@ -14,46 +14,35 @@ var textEmitterConfig = {
 
 var outlawDamageSharedKeys = {
     icon: "enemy_action_damage",
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_burning",
+    hasSpecialAnimation: false,
     title: "Damage",
     descriptionTemplate: "This attack does {damage} damage",
 };
 
 var outlawCoverSharedKeys = {
     icon: "enemy_action_cover",
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_burning",
+    hasSpecialAnimation: false,
     title: "Cover",
     descriptionTemplate: "The enemy adds {cover} shield",
 };
 
 var pyroDamageSharedKeys = {
     icon: "enemy_action_damage",
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_burning",
+    hasSpecialAnimation: false,
     title: "Damage",
     descriptionTemplate: "This attack does {damage} damage",
 };
 
 var pyroCoverSharedKeys = {
     icon: "enemy_action_cover",
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_burning",
+    hasSpecialAnimation: false,
     title: "Cover",
     descriptionTemplate: "The enemy adds {cover} shield",
 };
 
 var pyroBurningSharedKeys = {
     icon: "enemy_action_burning",
+    hasSpecialAnimation: true,
     commonPanel1: "enemy_pyro_action_comic_common_panel_1",
     commonPanel2: "enemy_pyro_action_comic_common_panel_2",
     commonPanel3: "enemy_pyro_action_comic_common_panel_3",
@@ -64,6 +53,7 @@ var pyroBurningSharedKeys = {
 
 var pyroFireResistanceSharedKeys = {
     icon: "enemy_action_fire_resistance",
+    hasSpecialAnimation: true,
     commonPanel1: "enemy_pyro_action_comic_common_panel_1",
     commonPanel2: "enemy_pyro_action_comic_common_panel_2",
     commonPanel3: "enemy_pyro_action_comic_common_panel_3",
@@ -74,6 +64,7 @@ var pyroFireResistanceSharedKeys = {
 
 var pyroInfernoSharedKeys = {
     icon: "enemy_action_inferno",
+    hasSpecialAnimation: true,
     commonPanel1: "enemy_pyro_action_comic_common_panel_1",
     commonPanel2: "enemy_pyro_action_comic_common_panel_2",
     commonPanel3: "enemy_pyro_action_comic_common_panel_3",
@@ -84,6 +75,7 @@ var pyroInfernoSharedKeys = {
 
 var pyroHotPotatoSharedKeys = {
     icon: "enemy_action_hot_potato",
+    hasSpecialAnimation: true,
     commonPanel1: "enemy_pyro_action_comic_common_panel_1",
     commonPanel2: "enemy_pyro_action_comic_common_panel_2",
     commonPanel3: "enemy_pyro_action_comic_common_panel_3",

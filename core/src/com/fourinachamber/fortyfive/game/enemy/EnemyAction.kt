@@ -27,22 +27,16 @@ sealed class EnemyActionPrototype(
     val showProbability: Float,
     protected val enemy: Enemy,
     val hasUnlikelyPredicates: Boolean,
+    val hasSpecialAnimation: Boolean
 ) {
 
     lateinit var iconHandle: ResourceHandle
-        private set
     lateinit var commonPanel1: ResourceHandle
-        private set
     lateinit var commonPanel2: ResourceHandle
-        private set
     lateinit var commonPanel3: ResourceHandle
-        private set
     lateinit var specialPanel: ResourceHandle
-        private set
     lateinit var title: String
-        private set
     lateinit var descriptionTemplate: String
-        private set
 
     var scaleFactor: Float = 1f
 
@@ -63,7 +57,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val damage = damage.scale(scale * scaleFactor).random()
@@ -78,7 +73,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun applicable(controller: GameController): Boolean =
             checkPredicates(controller) && controller.cardHand.cards.isNotEmpty()
@@ -104,7 +100,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val amount = (1..maxTurnAmount).random()
@@ -136,7 +133,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(
             controller: GameController,
@@ -164,7 +162,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val cover = cover.scale(scale * scaleFactor).random()
@@ -180,7 +179,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val statusEffect = statusEffectCreator()
@@ -204,7 +204,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val statusEffect = statusEffectCreator()
@@ -224,7 +225,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val cardTitle = controller.titleOfCard(card)
@@ -246,6 +248,7 @@ sealed class EnemyActionPrototype(
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "RotateRevolver" -> RotateRevolver(
                 obj.get<Long>("maxTurns").toInt(),
@@ -257,41 +260,48 @@ sealed class EnemyActionPrototype(
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "TakeCover" -> TakeCover(
                 obj.get<OnjArray>("cover").toIntRange(),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "GivePlayerStatusEffect" -> GivePlayerStatusEffect(
                 obj.get<StatusEffectCreator>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "ReturnCardToHand" -> ReturnCardToHand(
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "DamagePlayer" -> DamagePlayer(
                 obj.get<OnjArray>("damage").toIntRange(),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "GiveSelfStatusEffect" -> GiveSelfStatusEffect(
                 obj.get<StatusEffectCreator>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "GivePlayerCard" -> GivePlayerCard(
                 obj.get<String>("card"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
+                obj.get<Boolean>("hasSpecialAnimation")
             )
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")
@@ -299,17 +309,18 @@ sealed class EnemyActionPrototype(
         }.apply {
             scaleFactor = obj.getOr("scaleFactor", 1f)
             iconHandle = obj.get<String>("icon")
+            title = obj.get<String>("title")
+            descriptionTemplate = obj.get<String>("descriptionTemplate")
+            val predicates = obj.getOr<OnjArray?>("predicates", null)
+            predicates
+                ?.value
+                ?.map { GamePredicate.fromOnj(it as OnjNamedObject, forEnemy) }
+                ?.forEach { addPredicate(it) }
+            if (!hasSpecialAnimation) return@apply
             commonPanel1 = obj.get<String>("commonPanel1")
             commonPanel2 = obj.get<String>("commonPanel2")
             commonPanel3 = obj.get<String>("commonPanel3")
             specialPanel = obj.get<String>("specialPanel")
-            title = obj.get<String>("title")
-            descriptionTemplate = obj.get<String>("descriptionTemplate")
-            val predicates = obj.getOr<OnjArray?>("predicates", null) ?: return@apply
-            predicates
-                .value
-                .map { GamePredicate.fromOnj(it as OnjNamedObject, forEnemy) }
-                .forEach { addPredicate(it) }
         }
 
     }

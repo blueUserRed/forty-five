@@ -42,7 +42,11 @@ assets: {
         "enemy_pyro_action_comic_panel_fire_resistance", "enemy_pyro_action_comic_panel_hot_potato",
         "enemy_pyro_action_comic_panel_inferno",
 
-        "enemy_witch",
+        "enemy_witch", "enemy_action_bewitched", "enemy_action_left_turn",
+        "enemy_witch_action_comic_common_panel_1", "enemy_witch_action_comic_common_panel_2",
+        "enemy_witch_action_comic_common_panel_3", "enemy_witch_action_comic_panel_left_turn",
+        "enemy_witch_action_comic_panel_bewitched", "enemy_witch_action_comic_panel_wrath_of_the_witch",
+        "enemy_witch_action_comic_panel_ward_of_the_witch",
 
         "enemy_outlaw",
 
