@@ -527,6 +527,14 @@ textures: [
         file: "textures/enemies/action_symbols/inferno.png"
     },
     {
+        name: "enemy_action_bewitched",
+        file: "textures/enemies/action_symbols/bewitched.png"
+    },
+    {
+        name: "enemy_action_left_turn",
+        file: "textures/enemies/action_symbols/left_turn.png"
+    },
+    {
         name: "enemy_action_unknown",
         file: "textures/enemies/action_symbols/unknown.png"
     },
@@ -565,6 +573,34 @@ textures: [
     {
         name: "enemy_witch",
         file: "textures/enemies/witch/witch.png"
+    },
+    {
+        name: "enemy_witch_action_comic_common_panel_1",
+        file: "textures/enemies/witch/action_comic_common_panel_1.png"
+    },
+    {
+        name: "enemy_witch_action_comic_common_panel_2",
+        file: "textures/enemies/witch/action_comic_common_panel_2.png"
+    },
+    {
+        name: "enemy_witch_action_comic_common_panel_3",
+        file: "textures/enemies/witch/action_comic_common_panel_3.png"
+    },
+    {
+        name: "enemy_witch_action_comic_panel_bewitched",
+        file: "textures/enemies/witch/action_comic_panel_bewitched.png"
+    },
+    {
+        name: "enemy_witch_action_comic_panel_left_turn",
+        file: "textures/enemies/witch/action_comic_panel_left_turn.png"
+    },
+    {
+        name: "enemy_witch_action_comic_panel_ward_of_the_witch",
+        file: "textures/enemies/witch/action_comic_panel_ward_of_the_witch.png"
+    },
+    {
+        name: "enemy_witch_action_comic_panel_wrath_of_the_witch",
+        file: "textures/enemies/witch/action_comic_panel_wrath_of_the_witch.png"
     },
     {
         name: "enemy_outlaw",

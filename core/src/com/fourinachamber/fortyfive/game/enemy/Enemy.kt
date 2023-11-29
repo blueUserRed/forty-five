@@ -365,7 +365,13 @@ class EnemyActor(
         textEmitter.setBounds(healthLabel.x, healthLabel.y, healthLabel.width, healthLabel.height)
     }
 
-    fun enemyActionAnimationTimeline(action: EnemyAction): Timeline = Timeline.timeline {
+    fun enemyActionAnimationTimeline(action: EnemyAction): Timeline = if (action.prototype.hasSpecialAnimation) {
+        specialEnemyActionAnimationTimeline(action)
+    } else {
+        Timeline()
+    }
+
+    private fun specialEnemyActionAnimationTimeline(action: EnemyAction): Timeline = Timeline.timeline {
         val actionDescription =
             TemplateString(action.prototype.descriptionTemplate, action.descriptionParams).string.onjString()
         val data = mapOf<String, OnjValue>(
