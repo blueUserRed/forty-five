@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
+import com.fourinachamber.fortyfive.screen.general.customActor.DisableActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter

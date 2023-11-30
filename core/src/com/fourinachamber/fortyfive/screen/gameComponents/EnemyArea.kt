@@ -8,8 +8,8 @@ import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.ZIndexGroup
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
