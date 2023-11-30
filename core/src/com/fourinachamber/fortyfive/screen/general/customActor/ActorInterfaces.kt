@@ -220,3 +220,29 @@ interface DisplayDetailsOnHoverActor {
     fun onDetailDisplayEnded() {}
 
 }
+
+interface AnimationSpawner {
+
+    val actor: Actor
+}
+
+interface ActorWithAnimationSpawners {
+
+    val actor: Actor
+
+    val animationSpawners: List<AnimationSpawner>
+
+    fun addAnimationSpawner(spawner: AnimationSpawner)
+
+    fun layoutSpawners(xPos: Float, yPos: Float, width: Float, height: Float) {
+        val (x, y) = actor.localToStageCoordinates(Vector2(xPos, yPos))
+        animationSpawners
+            .map { it.actor }
+            .forEach {
+                it.setBounds(x, y, width, height)
+            }
+    }
+
+}
+
+inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? = animationSpawners.find { it is T } as? T

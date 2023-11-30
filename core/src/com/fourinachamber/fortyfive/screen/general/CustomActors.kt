@@ -36,17 +36,20 @@ import onj.value.*
 import kotlin.math.abs
 import kotlin.math.max
 
-/**
- * Label that uses a custom shader to render distance-field fonts correctly
- * @param background If not set to null, it is drawn behind the text using the default-shader. Will be scaled to fit the
- *  label
- */
 open class CustomLabel @AllThreadsAllowed constructor(
     val screen: OnjScreen,
     text: String,
     labelStyle: LabelStyle,
     override val partOfHierarchy: Boolean = false
-) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor, StyledActor, BackgroundActor {
+) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor,
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners {
+
+    override val actor: Actor = this
+
+    private val _animationSpawners: MutableList<AnimationSpawner> = mutableListOf()
+
+    override val animationSpawners: List<AnimationSpawner>
+        get() = _animationSpawners
 
     override var fixedZIndex: Int = 0
 
@@ -84,6 +87,11 @@ open class CustomLabel @AllThreadsAllowed constructor(
         return Rectangle(x, y, width, height)
     }
 
+    override fun addAnimationSpawner(spawner: AnimationSpawner) {
+        _animationSpawners.add(spawner)
+        screen.addActorToRoot(spawner.actor)
+    }
+
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) {
@@ -95,6 +103,12 @@ open class CustomLabel @AllThreadsAllowed constructor(
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
         batch.shader = prevShader
+    }
+
+    override fun layout() {
+        // Dont ask me why the -width is necessary
+        layoutSpawners(x - width, y, width, height)
+        super.layout()
     }
 
     protected fun drawBackground(batch: Batch) {
