@@ -5,11 +5,13 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.AnimationSpawner
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
@@ -26,8 +28,9 @@ class TextEffectEmitter(
     private val spawnVarianceY: Float,
     private val animationDuration: IntRange,
     private val screen: OnjScreen
-) : Widget(), StyledActor {
+) : Widget(), StyledActor, AnimationSpawner {
 
+    override val actor: Actor = this
     override var styleManager: StyleManager? = null
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
