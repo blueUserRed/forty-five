@@ -11,6 +11,8 @@ import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.AnimationActor
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -281,9 +283,8 @@ class EnemyActor(
     textEmitterConfig: OnjObject,
     private val hiddenActionIconHandle: ResourceHandle,
     private val screen: OnjScreen
-) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
+) : CustomVerticalGroup(screen), ZIndexActor {
 
-    override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
     private val image: CustomImageActor = CustomImageActor(enemy.drawableHandle, screen)
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
@@ -292,7 +293,7 @@ class EnemyActor(
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = CustomImageActor(null, screen, false)
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
-    private val textEmitter: TextEffectEmitter
+//    private val textEmitter: TextEffectEmitter
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
@@ -311,16 +312,16 @@ class EnemyActor(
     }
 
     init {
-        textEmitter = TextEffectEmitter(
-            enemy.detailFont,
-            textEmitterConfig.get<Color>("color"),
-            textEmitterConfig.get<Double>("fontScale").toFloat(),
-            textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
-            textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
-            textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
-            textEmitterConfig.get<OnjArray>("duration").toIntRange(),
-            screen
-        )
+//        textEmitter = TextEffectEmitter(
+//            enemy.detailFont,
+//            textEmitterConfig.get<Color>("color"),
+//            textEmitterConfig.get<Double>("fontScale").toFloat(),
+//            textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
+//            textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
+//            textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
+//            textEmitterConfig.get<OnjArray>("duration").toIntRange(),
+//            screen
+//        )
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
         attackLabel.setFontScale(enemy.detailFontScale)
@@ -346,7 +347,7 @@ class EnemyActor(
         enemyBox.addActor(coverInfoBox)
         enemyBox.addActor(image)
 
-        addActor(textEmitter)
+//        addActor(textEmitter)
         addActor(attackIndicator)
         addActor(enemyBox)
         addActor(healthLabel)
@@ -356,11 +357,11 @@ class EnemyActor(
 
     override fun layout() {
         super.layout()
-        textEmitter.setBounds(healthLabel.x, healthLabel.y, healthLabel.width, healthLabel.height)
+//        textEmitter.setBounds(healthLabel.x, healthLabel.y, healthLabel.width, healthLabel.height)
     }
 
     fun startDamageAnimation(damage: Int) {
-        textEmitter.playAnimation("-$damage")
+//        textEmitter.playAnimation("-$damage")
     }
 
     fun setupForAction(action: NextEnemyAction) = when (action) {
