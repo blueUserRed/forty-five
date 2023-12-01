@@ -21,7 +21,8 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Witch"
+//            "Outlaw_lvl1"
         ],
         encounterModifier: [
         ],
@@ -29,9 +30,10 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            0.0, 5.0
+            0.0, 20.0
+//            0.0, 5.0
         ],
-        weight: 10
+        weight: 1000000
     },
 
 

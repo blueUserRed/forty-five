@@ -7,10 +7,17 @@ use Cards; // include Card namespace for status effects
 var enemyActionSharedKeys = {
     weight: int,
     showProbability: float,
-    icon?: string,
+    icon: string,
     scaleFactor?: float,
     predicates?: $GamePredicate[],
-    hasUnlikelyPredicates?: boolean
+    hasSpecialAnimation: boolean,
+    hasUnlikelyPredicates?: boolean,
+    commonPanel1?: string,
+    commonPanel2?: string,
+    commonPanel3?: string,
+    specialPanel?: string,
+    title: string,
+    descriptionTemplate: string,
 };
 
 $EnemyAction {

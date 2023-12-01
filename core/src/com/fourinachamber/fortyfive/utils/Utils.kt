@@ -15,6 +15,7 @@ import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjObject
+import onj.value.OnjString
 import onj.value.OnjValue
 import java.lang.Math.round
 import java.util.concurrent.atomic.AtomicInteger
@@ -199,6 +200,12 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
 fun <T> Collection<T>.randomIndex(): Int = (0..this.size).random()
 
 fun String.lowerCaseFirstChar(): String = this.replaceFirstChar { it.lowercaseChar() }
+
+fun String.onjString(): OnjString = OnjString(this)
+
+fun Timeline.TimelineBuilderDSL.awaitConfirmationInput(screen: OnjScreen, maxTime: Long? = null) {
+    includeAction(screen.confirmationClickTimelineAction(maxTime))
+}
 
 inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
     val chunks = mutableListOf<MutableList<T>>(mutableListOf())

@@ -32,6 +32,7 @@ import onj.value.*
  */
 class CardPrototype(
     val name: String,
+    val title: String,
     val type: Card.Type,
     val tags: List<String>,
     private val creator: () -> Card
@@ -387,6 +388,7 @@ class Card(
                     onj as OnjObject
                     val prototype = CardPrototype(
                         onj.get<String>("name"),
+                        onj.get<String>("title"),
                         cardTypeOrError(onj),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                     ) { getCardFrom(onj, onjScreen, initializer) }
