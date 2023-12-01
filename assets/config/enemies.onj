@@ -54,7 +54,8 @@ enemies: [
                 },
                 $TakeCover {
                     cover: [ 12, 22 ],
-                    weight: 10,
+                    weight: 10000,
+//                    weight: 10,
                     showProbability: 1.0,
                     icon: "enemy_action_cover"
                 },
