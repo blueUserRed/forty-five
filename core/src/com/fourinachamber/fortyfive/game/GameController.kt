@@ -307,6 +307,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
+    fun titleOfCard(cardName: String): String = cardPrototypes.find { it.name == cardName }?.title
+        ?: throw RuntimeException("no card with name $cardName")
+
     /**
      * plays a gameAnimation
      */
@@ -952,17 +955,25 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         abstract val amount: Int
 
+        abstract val directionString: String
+
         class Right(override val amount: Int) : RevolverRotation() {
+
+            override val directionString: String = "right"
 
             override fun toString(): String = "Right($amount)"
         }
         class Left(override val amount: Int) : RevolverRotation() {
+
+            override val directionString: String = "left"
 
             override fun toString(): String = "Left($amount)"
         }
         object None : RevolverRotation() {
 
             override val amount: Int = 0
+
+            override val directionString: String = "none"
 
             override fun toString(): String = "None"
         }

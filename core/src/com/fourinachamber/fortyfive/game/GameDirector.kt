@@ -55,7 +55,11 @@ class GameDirector(private val controller: GameController) {
             action {
                 enemy.actor.setupForAction(NextEnemyAction.None)
             }
-            enemy.brain.resolveEnemyAction(controller, enemy, difficulty)?.getTimeline()?.let { include(it) }
+            val action = enemy.brain.resolveEnemyAction(controller, enemy, difficulty)
+            action?.let {
+                include(enemy.actor.enemyActionAnimationTimeline(it))
+                include(it.getTimeline())
+            }
         }
     }
 

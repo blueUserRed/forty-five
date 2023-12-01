@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -12,9 +13,11 @@ import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import onj.value.OnjValue
 import java.lang.Integer.max
 
 data class EnemyPrototype(
@@ -306,6 +309,9 @@ class EnemyActor(
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
+    private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
+    private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
+
     private val fireParticles: ParticleEffect by lazy {
         ResourceManager.get(screen, "fire_particle") // TODO: fix
     }
@@ -359,6 +365,48 @@ class EnemyActor(
         textEmitter.setBounds(healthLabel.x, healthLabel.y, healthLabel.width, healthLabel.height)
     }
 
+    fun enemyActionAnimationTimeline(action: EnemyAction): Timeline = if (action.prototype.hasSpecialAnimation) {
+        specialEnemyActionAnimationTimeline(action)
+    } else {
+        Timeline()
+    }
+
+    private fun specialEnemyActionAnimationTimeline(action: EnemyAction): Timeline = Timeline.timeline {
+        val actionDescription =
+            TemplateString(action.prototype.descriptionTemplate, action.descriptionParams).string.onjString()
+        val data = mapOf<String, OnjValue>(
+            "commonPanel1" to action.prototype.commonPanel1.onjString(),
+            "commonPanel2" to action.prototype.commonPanel2.onjString(),
+            "commonPanel3" to action.prototype.commonPanel3.onjString(),
+            "actionPanel" to action.prototype.specialPanel.onjString(),
+            "actionName" to action.prototype.title.onjString(),
+            "actionDescription" to actionDescription,
+            "actionIcon" to action.prototype.iconHandle.onjString(),
+        )
+        val parent = screen.namedActorOrError(enemyActionAnimationParentName) as? FlexBox
+            ?: throw RuntimeException("actor named $enemyActionAnimationParentName must be a FlexBox")
+        var animActor: CustomFlexBox? = null
+        action {
+            animActor = screen.screenBuilder.generateFromTemplate(
+                enemyActionAnimationTemplateName,
+                data,
+                parent,
+                screen
+            ) as? CustomFlexBox
+                ?: throw RuntimeException("template named $enemyActionAnimationTemplateName must be a FlexBox")
+        }
+        delay(10)
+        action {
+            screen.enterState("enemy_action_anim")
+        }
+        awaitConfirmationInput(screen, maxTime = 10_000)
+//        awaitConfirmationInput(screen, maxTime = 5_000)
+        action {
+            screen.leaveState("enemy_action_anim")
+            parent.remove(animActor!!.styleManager!!.node)
+        }
+    }
+
     fun startDamageAnimation(damage: Int) {
         textEmitter.playAnimation("-$damage")
     }
@@ -370,8 +418,7 @@ class EnemyActor(
         }
 
         is NextEnemyAction.ShownEnemyAction -> {
-            attackIcon.backgroundHandle = action.action.iconHandle
-                ?: throw RuntimeException("action ${action.action.prototype} can be shown but defines no icon")
+            attackIcon.backgroundHandle = action.action.prototype.iconHandle
             attackLabel.setText(action.action.indicatorText)
             attackIndicator.isVisible = true
         }
