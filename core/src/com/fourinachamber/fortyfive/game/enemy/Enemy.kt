@@ -11,7 +11,6 @@ import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.AnimationActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.findAnimationSpawner
 import com.fourinachamber.fortyfive.utils.*
@@ -197,18 +196,11 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-//                val anim = GraphicsConfig.numberChangeAnimation(
-//                    actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
-//                    "-${min(damage, currentCover)}",
-//                    false,
-//                    false,
-//                    gameController.curScreen
-//                )
                 action {
+                    actor.startDamageToCoverAnimation(damage.coerceAtMost(currentCover))
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
                     actor.updateText()
-//                    gameController.dispatchAnimTimeline(anim.wrap())
                 }
             } },
             { currentCover != 0 }
@@ -219,7 +211,7 @@ class Enemy(
                 action {
                     currentHealth -= remaining
                     actor.updateText()
-                    actor.startDamageAnimation(remaining)
+                    actor.startDamageToHealthAnimation(remaining)
                 }
             } },
             { remaining != 0 }
@@ -312,18 +304,10 @@ class EnemyActor(
     }
 
     init {
-        val textEmitter = TextEffectEmitter(
-            enemy.detailFont,
-            textEmitterConfig.get<Color>("color"),
-            textEmitterConfig.get<Double>("fontScale").toFloat(),
-            textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
-            textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
-            textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
-            textEmitterConfig.get<OnjArray>("duration").toIntRange(),
-            screen
-        )
-        textEmitter.debug = true
-        healthLabel.addAnimationSpawner(textEmitter)
+        val healthTextEmitter = createTextEffectEmitter(textEmitterConfig)
+        val coverTextEmitter = createTextEffectEmitter(textEmitterConfig)
+        healthLabel.addAnimationSpawner(healthTextEmitter)
+        coverText.addAnimationSpawner(coverTextEmitter)
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
         attackLabel.setFontScale(enemy.detailFontScale)
@@ -356,8 +340,26 @@ class EnemyActor(
         updateText()
     }
 
-    fun startDamageAnimation(damage: Int) {
+    private fun createTextEffectEmitter(textEmitterConfig: OnjObject) = TextEffectEmitter(
+        // TODO: handle this via function in TextEffectEmitter
+        enemy.detailFont,
+        textEmitterConfig.get<Color>("color"),
+        textEmitterConfig.get<Double>("fontScale").toFloat(),
+        textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
+        textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
+        textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
+        textEmitterConfig.get<OnjArray>("duration").toIntRange(),
+        screen
+    )
+
+    fun startDamageToHealthAnimation(damage: Int) {
        val emitter = healthLabel.findAnimationSpawner<TextEffectEmitter>() ?: return
+        emitter.playAnimation("-$damage")
+    }
+
+    // TODO: function for adding to Cover
+    fun startDamageToCoverAnimation(damage: Int) {
+       val emitter = coverText.findAnimationSpawner<TextEffectEmitter>() ?: return
         emitter.playAnimation("-$damage")
     }
 
