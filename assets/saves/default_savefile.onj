@@ -18,7 +18,7 @@ stats: {
 },
 
 position: {
-    map: "start_area",
+    map: "tutorial_road",
     node: 0,
     lastNode: null
 },

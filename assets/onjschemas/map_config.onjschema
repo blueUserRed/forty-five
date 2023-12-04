@@ -83,6 +83,14 @@ screens: {
     changeToAddMaxHPScreen: string,
 },
 
+paths: {
+    roads: string,
+    areas: string,
+    areaDefinitions: string,
+    staticRoadDefinitions: string,
+    mapScreen: string,
+},
+
 mapImages: {
     name: string,
     image: string,

@@ -1,0 +1,40 @@
+startNode: 0,
+endNode: 2,
+biome: "wasteland",
+progress: [0.0, 0.1],
+nodes: [
+    {
+        x: 20.0,
+        y: 80.0,
+        isArea: false,
+        edgesTo: [
+            1
+        ],
+        event: $EnterMapMapEvent {
+            targetMap: "aqua_dulche"
+        }
+    },
+    {
+        x: 60.0,
+        y: 80.0,
+        isArea: false,
+        edgesTo: [
+            0, 2,
+        ],
+        event: $EmptyMapEvent {
+        }
+    },
+    {
+        x: 100.0,
+        y: 90.0,
+        isArea: false,
+        edgesTo: [
+            1
+        ],
+        event: $EnterMapMapEvent {
+            targetMap: "aqua_dulche"
+        }
+    },
+],
+decorations: [],
+isArea: false,
