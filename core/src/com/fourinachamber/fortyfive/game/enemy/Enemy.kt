@@ -50,7 +50,7 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    textEmitterConfig: OnjObject,
+    textEmitterConfig: OnjArray,
     private val screen: OnjScreen
 ) {
 
@@ -155,27 +155,14 @@ class Enemy(
     private fun getPlayerDamagedTimeline(
         damage: Int,
         gameController: GameController,
-    ): Timeline {
-
-//        val shakeAction = GraphicsConfig.shakeActorAnimation(livesLabel, false)
-
-//        val textAnimation = GraphicsConfig.numberChangeAnimation(
-//            livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
-//            "-$damage",
-//            false,
-//            false,
-//            gameController.curScreen
-//        )
-
-        return Timeline.timeline {
-            include(gameController.damagePlayerTimeline(damage))
-//            parallelActions(shakeAction, textAnimation)
-        }
+    ): Timeline = Timeline.timeline {
+        include(gameController.damagePlayerTimeline(damage))
     }
 
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
         action {
             currentCover += amount
+            actor.startCoverChangeAnimation(amount)
         }
     }
 
@@ -197,7 +184,7 @@ class Enemy(
         includeLater(
             { Timeline.timeline {
                 action {
-                    actor.startDamageToCoverAnimation(damage.coerceAtMost(currentCover))
+                    actor.startCoverChangeAnimation(-damage.coerceAtMost(currentCover))
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
                     actor.updateText()
@@ -211,7 +198,7 @@ class Enemy(
                 action {
                     currentHealth -= remaining
                     actor.updateText()
-                    actor.startDamageToHealthAnimation(remaining)
+                    actor.startHealthChangeAnimation(-remaining)
                 }
             } },
             { remaining != 0 }
@@ -256,7 +243,7 @@ class Enemy(
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
-                onj.get<OnjObject>("textEmitterConfig"),
+                onj.get<OnjArray>("textEmitterConfig"),
                 curScreen
             )
             val brain = EnemyBrain.fromOnj(onj.get<OnjNamedObject>("brain"), enemy)
@@ -273,7 +260,7 @@ class Enemy(
  */
 class EnemyActor(
     val enemy: Enemy,
-    textEmitterConfig: OnjObject,
+    textEmitterConfig: OnjArray,
     private val hiddenActionIconHandle: ResourceHandle,
     private val screen: OnjScreen
 ) : CustomVerticalGroup(screen), ZIndexActor {
@@ -304,8 +291,9 @@ class EnemyActor(
     }
 
     init {
-        val healthTextEmitter = createTextEffectEmitter(textEmitterConfig)
-        val coverTextEmitter = createTextEffectEmitter(textEmitterConfig)
+        val emitterConfig = TextEffectEmitter.configsFromOnj(textEmitterConfig, screen)
+        val healthTextEmitter = TextEffectEmitter(emitterConfig, screen)
+        val coverTextEmitter = TextEffectEmitter(emitterConfig, screen)
         healthLabel.addAnimationSpawner(healthTextEmitter)
         coverText.addAnimationSpawner(coverTextEmitter)
         healthLabel.setFontScale(enemy.detailFontScale)
@@ -340,27 +328,15 @@ class EnemyActor(
         updateText()
     }
 
-    private fun createTextEffectEmitter(textEmitterConfig: OnjObject) = TextEffectEmitter(
-        // TODO: handle this via function in TextEffectEmitter
-        enemy.detailFont,
-        textEmitterConfig.get<Color>("color"),
-        textEmitterConfig.get<Double>("fontScale").toFloat(),
-        textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
-        textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
-        textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
-        textEmitterConfig.get<OnjArray>("duration").toIntRange(),
-        screen
-    )
-
-    fun startDamageToHealthAnimation(damage: Int) {
+    fun startHealthChangeAnimation(change: Int) {
        val emitter = healthLabel.findAnimationSpawner<TextEffectEmitter>() ?: return
-        emitter.playAnimation("-$damage")
+        emitter.playNumberChangeAnimation(change)
     }
 
     // TODO: function for adding to Cover
-    fun startDamageToCoverAnimation(damage: Int) {
+    fun startCoverChangeAnimation(change: Int) {
        val emitter = coverText.findAnimationSpawner<TextEffectEmitter>() ?: return
-        emitter.playAnimation("-$damage")
+        emitter.playNumberChangeAnimation(change)
     }
 
     fun setupForAction(action: NextEnemyAction) = when (action) {
