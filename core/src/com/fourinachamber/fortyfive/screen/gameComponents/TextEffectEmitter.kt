@@ -9,24 +9,19 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimationSpawner
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
-import com.fourinachamber.fortyfive.utils.random
-import com.fourinachamber.fortyfive.utils.component1
-import com.fourinachamber.fortyfive.utils.component2
+import com.fourinachamber.fortyfive.utils.*
+import onj.value.OnjArray
+import onj.value.OnjObject
 
 class TextEffectEmitter(
-    private val font: BitmapFont,
-    private val fontColor: Color,
-    private val fontScale: Float,
-    private val speed: ClosedFloatingPointRange<Float>,
-    private val spawnVarianceX: Float,
-    private val spawnVarianceY: Float,
-    private val animationDuration: IntRange,
+    private val animationConfigs: Map<String, TextAnimationConfig>,
     private val screen: OnjScreen
 ) : Widget(), StyledActor, AnimationSpawner {
 
@@ -52,23 +47,40 @@ class TextEffectEmitter(
         }
     }
 
-    fun playAnimation(text: String) {
-        val label = CustomLabel(screen, text, Label.LabelStyle(font, fontColor))
-        label.setFontScale(fontScale)
+    fun playAnimation(text: String, configName: String? = null) {
+        val config = findConfig(configName)
+        val label = CustomLabel(screen, text, Label.LabelStyle(config.font, config.fontColor))
+        label.setFontScale(config.fontScale)
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         label.setPosition(
-            x + (-spawnVarianceX..spawnVarianceX).random(),
-            y + (-spawnVarianceY..spawnVarianceY).random()
+            x + (-config.spawnVarianceX..config.spawnVarianceX).random(),
+            y + (-config.spawnVarianceY..config.spawnVarianceY).random()
         )
         val animation = TextAnimation(
             text,
             label,
             TimeUtils.millis(),
-            animationDuration.random(),
-            speed.random()
+            config.animationDuration.random(),
+            config.speed.random()
         )
         screen.addActorToRoot(label)
         runningAnimations.add(animation)
+    }
+
+    fun playNumberChangeAnimation(num: Int, overrideConfig: String? = null) {
+        val config = overrideConfig ?: when {
+            num < 0 -> "number_negative"
+            num > 0 -> "number_positive"
+            else -> "number"
+        }
+        playAnimation(num.toString(), config)
+    }
+
+    private fun findConfig(name: String?): TextAnimationConfig {
+        if (animationConfigs.isEmpty()) {
+            throw RuntimeException("attempted to play animation on TextEffectEmitter with no config defined")
+        }
+        return name?.let { animationConfigs[it] } ?: animationConfigs["default"] ?: animationConfigs.values.first()
     }
 
     override fun initStyles(screen: OnjScreen) {
@@ -82,5 +94,34 @@ class TextEffectEmitter(
         val duration: Int,
         val speed: Float
     )
+
+    data class TextAnimationConfig(
+        val font: BitmapFont,
+        val fontColor: Color,
+        val fontScale: Float,
+        val speed: ClosedFloatingPointRange<Float>,
+        val spawnVarianceX: Float,
+        val spawnVarianceY: Float,
+        val animationDuration: IntRange,
+    )
+
+    companion object {
+
+        fun configsFromOnj(onj: OnjArray, screen: OnjScreen): Map<String, TextAnimationConfig> = onj
+            .value
+            .map { it as OnjObject }
+            .associate { it.get<String>("name") to configFromOnj(it, screen) }
+
+        fun configFromOnj(onj: OnjObject, screen: OnjScreen): TextAnimationConfig = TextAnimationConfig(
+            ResourceManager.get(screen, onj.get<String>("font")),
+            onj.get<Color>("color"),
+            onj.get<Double>("fontScale").toFloat(),
+            onj.get<OnjArray>("speed").toFloatRange(),
+            onj.get<Double>("spawnVarianceX").toFloat(),
+            onj.get<Double>("spawnVarianceY").toFloat(),
+            onj.get<OnjArray>("duration").toIntRange(),
+        )
+
+    }
 
 }
