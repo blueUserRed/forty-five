@@ -508,6 +508,7 @@ class ScreenBuilder(val file: FileHandle) {
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
+        // TODO: split this into multiple functions
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
 
@@ -531,10 +532,12 @@ class ScreenBuilder(val file: FileHandle) {
                 val condition = obj.getOr<StyleCondition>("style_condition", StyleCondition.Always)
                 var duration: Int? = null
                 var interpolation: Interpolation? = null
+                var delay: Int? = null
                 obj.ifHas<OnjObject>("style_animation") {
                     val result = readStyleAnimation(it)
                     duration = result.first
                     interpolation = result.second
+                    delay = result.third
                 }
                 obj.value
                     .filter { !it.key.startsWith("style_") }
@@ -544,7 +547,7 @@ class ScreenBuilder(val file: FileHandle) {
                         val instruction = if (duration == null) {
                             StyleInstruction(data, priority, condition, dataClass)
                         } else {
-                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!)
+                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!, delay!!)
                         }
                         styleManager.addInstruction(key, instruction, dataClass)
                     }
@@ -561,10 +564,11 @@ class ScreenBuilder(val file: FileHandle) {
         return actor
     }
 
-
-    private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {
-        return (animation.get<Double>("duration") * 1000).toInt() to animation.get<Interpolation>("interpolation")
-    }
+    private fun readStyleAnimation(animation: OnjObject): Triple<Int, Interpolation, Int> = Triple(
+        (animation.get<Double>("duration") * 1000).toInt(),
+        animation.get<Interpolation>("interpolation"),
+        (animation.getOr<Double>("delay", 0.0) * 1000).toInt()
+    )
 
     private fun getDataForStyle(onjValue: OnjValue, keyName: String): Any {
         var data = onjValue.value ?: throw RuntimeException("style instruction $keyName cannot be null")
