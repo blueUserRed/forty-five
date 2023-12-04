@@ -191,40 +191,66 @@ class AnimatedStyleInstruction<DataType>(
     condition: StyleCondition,
     dataTypeClass: KClass<*>,
     val duration: Int,
-    val interpolation: Interpolation
+    val interpolation: Interpolation,
+    val delay: Int,
 ) : StyleInstruction<DataType>(data, priority, condition, dataTypeClass) {
 
     private var startValue: DataType? = null
+    private var controlGainedTime: Long = 0L
     private var startTime: Long = 0L
 
     override val value: DataType
         get() {
-            if (startValue == null) return data
-            if (TimeUtils.millis() >= startTime + duration) {
-                startValue = null
-                return data
+            val startValue = startValue ?: return data
+            if (controlGainedTime == 0L) return data
+            if (startTime == 0L) {
+                startTime = controlGainedTime + delay
             }
-            val percent = ((TimeUtils.millis().toDouble() - startTime.toDouble()) / duration.toDouble()).toFloat()
+            val now = TimeUtils.millis()
+            if (now > startTime + duration) return data
+            if (now < startTime) return startValue
+            val percent = (now.toDouble() - startTime.toDouble()) / duration.toDouble()
             return StyleManager.lerpStyleData(
                 dataTypeClass,
-                startValue!!,
+                startValue,
                 data,
-                percent
+                percent.toFloat()
             ) ?: run {
-                startValue = null
+                this.startValue = null
+                controlGainedTime = 0L
                 startTime = 0L
                 data
             }
         }
+//        get() {
+//            val startValue = startValue ?: return data
+//            val now = TimeUtils.millis()
+//            if (now in (controlGainedTime..(controlGainedTime + delay))) return startValue
+//            if (now >= controlGainedTime + delay + duration) {
+//                this.startValue = null
+//                return data
+//            }
+//            val percent = ((now.toDouble() - controlGainedTime.toDouble()) / duration.toDouble()).toFloat()
+//            return StyleManager.lerpStyleData(
+//                dataTypeClass,
+//                startValue,
+//                data,
+//                percent
+//            ) ?: run {
+//                this.startValue = null
+//                controlGainedTime = 0L
+//                data
+//            }
+//        }
 
     override fun onControlGained(valueBefore: DataType) {
         startValue = valueBefore
-        startTime = TimeUtils.millis()
+        controlGainedTime = TimeUtils.millis()
     }
 
     override fun onControlLost() {
         startValue = null
-        startTime = 0
+        controlGainedTime = 0
     }
 }
 

@@ -519,7 +519,7 @@ cards: [
     {
         name: "unpleasantGradientBullet",
         title: "Unpleasant Gradient Bullet",
-        flavourText: "”This is definetly more than unpleasent. This is a hate crime”",
+        flavourText: "This is definetly more than unpleasent. This is a hate crime",
         description: "As long as this Bullet is in the revolver: at the beginning of your turn, deal the enemy 4 dmg",
         baseDamage: 5,
         coverValue: 0,
