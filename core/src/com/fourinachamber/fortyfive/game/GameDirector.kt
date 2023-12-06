@@ -2,14 +2,10 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.enemy.Enemy
-import com.fourinachamber.fortyfive.game.enemy.EnemyPrototype
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
-import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMap
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
-import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -17,7 +13,6 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
-import kotlin.math.log
 
 class GameDirector(private val controller: GameController) {
 
@@ -84,10 +79,10 @@ class GameDirector(private val controller: GameController) {
         val weight: Int,
         val forceCards: List<String>?,
         val special: Boolean,
-        val tutorialTextParts: List<TutorialTextPart>
+        val tutorialTextParts: List<GameTutorialTextPart>
     )
 
-    data class TutorialTextPart(
+    data class GameTutorialTextPart(
         val text: String,
         val confirmationText: String,
         val focusActorName: String?,
@@ -96,7 +91,7 @@ class GameDirector(private val controller: GameController) {
 
         companion object {
 
-            fun fromOnj(onj: OnjObject): TutorialTextPart = TutorialTextPart(
+            fun fromOnj(onj: OnjObject): GameTutorialTextPart = GameTutorialTextPart(
                 onj.get<String>("text"),
                 onj.get<String>("confirmationText"),
                 onj.getOr<String?>("focusActor", null),
@@ -137,7 +132,7 @@ class GameDirector(private val controller: GameController) {
                     obj.getOr("special", false),
                     obj.getOr<OnjArray?>("tutorialText", null)
                         ?.value
-                        ?.map { TutorialTextPart.fromOnj(it as OnjObject) }
+                        ?.map { GameTutorialTextPart.fromOnj(it as OnjObject) }
                         ?: listOf()
                 ) }
         }

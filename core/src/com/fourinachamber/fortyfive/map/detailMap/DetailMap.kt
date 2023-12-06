@@ -31,7 +31,8 @@ data class DetailMap(
     val decorations: List<MapDecoration>,
     val isArea: Boolean,
     val biome: String,
-    val progress: ClosedFloatingPointRange<Float>
+    val progress: ClosedFloatingPointRange<Float>,
+    val tutorialText: MutableList<MapScreenController.MapTutorialTextPart>
 ) {
 
     /**
@@ -77,6 +78,7 @@ data class DetailMap(
         "isArea" with isArea
         "biome" with biome
         "progress" with progress.asArray()
+        "tutorialText" with tutorialText.map { it.asOnjObject() }
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -155,7 +157,12 @@ data class DetailMap(
                 decorations,
                 onj.get<Boolean>("isArea"),
                 onj.get<String>("biome"),
-                onj.get<OnjArray>("progress").toFloatRange()
+                onj.get<OnjArray>("progress").toFloatRange(),
+                onj.getOr<OnjArray?>("tutorialText", null)
+                    ?.value
+                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
+                    ?.toMutableList()
+                    ?: mutableListOf()
             )
         }
 

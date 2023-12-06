@@ -30,7 +30,6 @@ assets: {
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
-        "tutorial_info_actor_background",
 
         "enemy_action_damage", "enemy_action_cover",
 
@@ -41,7 +40,7 @@ assets: {
         "enemy_pyro_action_comic_common_panel_1", "enemy_pyro_action_comic_common_panel_2",
         "enemy_pyro_action_comic_common_panel_3", "enemy_pyro_action_comic_panel_burning",
         "enemy_pyro_action_comic_panel_fire_resistance", "enemy_pyro_action_comic_panel_hot_potato",
-        "enemy_pyro_action_comic_panel_inferno", "common_button_default", "common_button_hover",
+        "enemy_pyro_action_comic_panel_inferno",
 
         "enemy_witch", "enemy_action_bewitched", "enemy_action_left_turn",
         "enemy_witch_action_comic_common_panel_1", "enemy_witch_action_comic_common_panel_2",
@@ -61,7 +60,8 @@ assets: {
         ...(graphicsConfig.gameUsedAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
-        ...(sharedComponents.cardHoverDetailUsedAssets)
+        ...(sharedComponents.cardHoverDetailUsedAssets),
+        ...(sharedComponents.tutorialInfoActorUsedAssets),
     ]
 },
 
@@ -1035,64 +1035,7 @@ root: $Box {
     ]
 } children [
 
-    $TutorialInfoActor {
-        name: "tutorialInfoActor",
-        styles: [
-            {
-                style_priority: 1,
-                positionType: positionType.absolute,
-                width: worldWidth#points,
-                height: worldHeight#points,
-                positionLeft: 0#points,
-                positionTop: 0#points,
-                flexDirection: flexDirection.column,
-                alignItems: align.center,
-//                justifyContent: justify.center,
-                visible: false,
-            },
-            {
-                style_priority: 2,
-                style_condition: state("showTutorial"),
-                visible: true,
-            }
-        ],
-        circleRadiusMultiplier: 2.0,
-        circleRadiusExtension: 200.0,
-        zIndex: 100_000,
-        touchable: "enabled",
-        background: "tutorial_info_actor_background"
-    } children [
-
-        $TemplateLabel {
-            styles: [
-                {
-                    marginTop: 50#points,
-                    width: (worldWidth * 0.4)#points
-                }
-            ],
-            font: "red_wing",
-            align: "center",
-            template: "{game.tutorial.text}",
-            fontScale: 0.9,
-            wrap: true,
-            color: color.white,
-        },
-
-        $TemplateLabel {
-            font: "red_wing",
-            template: "{game.tutorial.confirmButtonText}",
-            fontScale: 0.9,
-            align: "center",
-            color: color.white,
-            behaviours: [
-                $CatchEventAndEmitBehaviour {
-                    catch: "ButtonClickEvent",
-                    emit: "TutorialConfirmedEvent"
-                }
-            ]
-        },
-
-    ],
+    sharedComponents.tutorialInfoActor,
 
     $Box {
         styles: [
