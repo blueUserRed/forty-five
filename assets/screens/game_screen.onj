@@ -30,6 +30,7 @@ assets: {
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
+        "tutorial_info_actor_background",
 
         "enemy_action_damage", "enemy_action_cover",
 
@@ -1040,19 +1041,19 @@ root: $Box {
     ]
 } children [
 
-//    $TutorialInfoActor {
-//        styles: [
-//            {
-//                positionType: positionType.absolute,
-//                width: worldWidth#points,
-//                height: worldHeight#points,
-//                positionLeft: 0#points,
-//                positionTop: 0#points
-//            }
-//        ],
-//        zIndex: 100_000,
-//        background: "transparent_black_texture"
-//    },
+    $TutorialInfoActor {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                width: worldWidth#points,
+                height: worldHeight#points,
+                positionLeft: 0#points,
+                positionTop: 0#points
+            }
+        ],
+        zIndex: 100_000,
+        background: "tutorial_info_actor_background"
+    },
 
     $Box {
         styles: [

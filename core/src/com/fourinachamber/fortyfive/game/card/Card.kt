@@ -596,7 +596,7 @@ class CardActor(
         pixmapTextureRegion = TextureRegion(texture)
     }
 
-    override fun getHighlightArea(): Rectangle {
+    override fun getBounds(): Rectangle {
         val (x, y) = localToScreenCoordinates(Vector2(0f, 0f))
         return Rectangle(x, y, width, height)
     }

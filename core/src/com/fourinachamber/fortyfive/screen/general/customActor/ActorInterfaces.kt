@@ -110,10 +110,30 @@ interface AnimationActor {
     var inAnimation: Boolean
 }
 
+interface BoundedActor {
+
+    /**
+     * returns the area of the actor on the screen in worldSpace coordinates
+     */
+    fun getBounds(): Rectangle
+
+    /**
+     * returns the area of the actor on the screen in screenSpace coordinates
+     */
+    fun getScreenSpaceBounds(screen: OnjScreen): Rectangle {
+        val worldSpaceBounds = getBounds()
+        val worldSpaceCoords = Vector2(worldSpaceBounds.x, worldSpaceBounds.y)
+        val screenSpaceCoords = screen.viewport.project(worldSpaceCoords)
+        val screenSpaceWidth = (screen.viewport.screenWidth / screen.viewport.worldWidth) * worldSpaceBounds.width
+        val screenSpaceHeight = (screen.viewport.screenHeight / screen.viewport.worldHeight) * worldSpaceBounds.height
+        return Rectangle(screenSpaceCoords.x, screenSpaceCoords.y, screenSpaceWidth, screenSpaceHeight)
+    }
+}
+
 /**
  * an actor that can be selected using the keyboard
  */
-interface KeySelectableActor {
+interface KeySelectableActor : BoundedActor {
 
     /**
      * true when the actor is currently selected
@@ -126,10 +146,6 @@ interface KeySelectableActor {
      */
     val partOfHierarchy: Boolean
 
-    /**
-     * returns the area of the actor on the screen, which will be highlighted when the actor is selected
-     */
-    fun getHighlightArea(): Rectangle
 }
 
 /**

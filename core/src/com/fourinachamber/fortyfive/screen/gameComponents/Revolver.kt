@@ -387,7 +387,7 @@ class RevolverSlot(
         return "revolverSlot: $num with card $card"
     }
 
-    override fun getHighlightArea(): Rectangle {
+    override fun getBounds(): Rectangle {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         return if (reportDimensionsWithScaling) {
             Rectangle(x, y, width, height)

@@ -34,10 +34,8 @@ import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnH
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.*
@@ -175,7 +173,7 @@ open class OnjScreen @MainThreadOnly constructor(
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
         addLateRenderTask {
-            val highlight = selectedActor?.getHighlightArea() ?: return@addLateRenderTask
+            val highlight = selectedActor?.getBounds() ?: return@addLateRenderTask
             keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
         }
         inputMultiplexer.addProcessor(screenInputProcessor)
@@ -384,7 +382,6 @@ open class OnjScreen @MainThreadOnly constructor(
             stage.act(Gdx.graphics.deltaTime)
             ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             if (stage.batch.isDrawing) stage.batch.end()
-            stage.batch.color = Color(0f, 0f, 0f, 0.0f)
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)

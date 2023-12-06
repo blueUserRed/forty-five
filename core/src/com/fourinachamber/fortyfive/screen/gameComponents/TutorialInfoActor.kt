@@ -8,6 +8,9 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.customActor.BoundedActor
+import com.fourinachamber.fortyfive.utils.Vector2
+import java.lang.Float.max
 
 class TutorialInfoActor(
     private val maskedBackgroundTextureName: ResourceHandle,
@@ -23,11 +26,12 @@ class TutorialInfoActor(
         batch.flush()
         batch.shader = shader.shader
         shader.prepare(screen)
-        val button = screen.namedActorOrError("shoot_button")
-//        shader.shader.setUniformf("u_x", 0.1f)
-//        shader.shader.setUniformf("u_y", 0f)
-//        shader.shader.setUniformf("u_width", 0.4f)
-//        shader.shader.setUniformf("u_height", 0.4f)
+        val button = screen.namedActorOrError("shoot_button") as BoundedActor
+        val bounds = button.getScreenSpaceBounds(screen)
+        val center = Vector2(0, 0)
+        bounds.getCenter(center)
+        shader.shader.setUniformf("u_center", center)
+        shader.shader.setUniformf("u_radius", max(bounds.width, bounds.height) / 1.0f)
         loadedBackground.draw(batch, x, y, width, height)
         batch.flush()
         batch.shader = null
