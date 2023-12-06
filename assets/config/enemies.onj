@@ -88,6 +88,7 @@ enemies: [
 
     {
         name: "Outlaw_lvl1",
+        title: "Outlaw",
 //        baseHealth: 1,
         baseHealth: 80,
         texture: "enemy_outlaw",
@@ -136,7 +137,7 @@ enemies: [
     },
     {
         name: "Outlaw_lvl2",
-//        baseHealth: 1,
+        title: "Outlaw",
         baseHealth: 120,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
@@ -185,6 +186,7 @@ enemies: [
 
     {
         name: "Pyro",
+        title: "Pyro",
         baseHealth: 1,
         texture: "enemy_pyro",
         coverIcon: "shield_icon",
@@ -262,6 +264,7 @@ enemies: [
 
     {
         name: "Witch",
+        title: "Witch",
         baseHealth: 1,
         texture: "enemy_witch",
         coverIcon: "shield_icon",
@@ -294,6 +297,26 @@ enemies: [
             damageIconHandle: "enemy_action_damage",
             shieldIconHandle: "enemy_action_cover",
         }
+    },
+    {
+        name: "tutorial_enemy_1",
+        title: "Scarecrow",
+        baseHealth: 30,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.25,
+        scaleY: 0.25,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $RandomEnemyBrain {
+            actionProbability: 0.0,
+            actions: [],
+        },
+        detailFontColor: color.black
     },
 
 ]

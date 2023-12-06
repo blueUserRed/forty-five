@@ -21,7 +21,12 @@ nodes: [
         edgesTo: [
             0, 2,
         ],
-        event: $EmptyMapEvent {
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 0,
+            distanceToEnd: -1,
         }
     },
     {

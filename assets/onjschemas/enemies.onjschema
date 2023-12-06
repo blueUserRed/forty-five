@@ -96,6 +96,7 @@ $EnemyBrain {
 
 var enemy = {
     name: string,
+    title: string,
     baseHealth: int,
     texture: string,
     coverIcon: string,

@@ -293,6 +293,11 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $TutorialInfoActor {
+        background: string,
+       ...widgetSharedKeys
+    }
+
 }
 
 var advancedTextEffectSharedKeys = {

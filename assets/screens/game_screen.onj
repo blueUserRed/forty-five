@@ -48,6 +48,8 @@ assets: {
         "enemy_witch_action_comic_panel_bewitched", "enemy_witch_action_comic_panel_wrath_of_the_witch",
         "enemy_witch_action_comic_panel_ward_of_the_witch",
 
+        "maskable_background_actor_shader",
+
         "enemy_outlaw",
 
         "revolver_cursor",
@@ -430,7 +432,7 @@ var enemyArea = $EnemyArea {
 };
 
 var shootButton = $Image {
-    name: "shoot_button_texture",
+    name: "shoot_button",
     textureName: "shoot_button_texture",
     reportDimensionsWithScaling: true,
     scaleX: 0.25,
@@ -1038,6 +1040,20 @@ root: $Box {
     ]
 } children [
 
+//    $TutorialInfoActor {
+//        styles: [
+//            {
+//                positionType: positionType.absolute,
+//                width: worldWidth#points,
+//                height: worldHeight#points,
+//                positionLeft: 0#points,
+//                positionTop: 0#points
+//            }
+//        ],
+//        zIndex: 100_000,
+//        background: "transparent_black_texture"
+//    },
+
     $Box {
         styles: [
             {
@@ -1046,8 +1062,6 @@ root: $Box {
                 height: worldHeight#points,
                 positionLeft: 0#points,
                 positionTop: 0#points
-//                flexDirection: flexDirection.row,
-//                positionTop: 10#points
             }
         ]
     } children [
