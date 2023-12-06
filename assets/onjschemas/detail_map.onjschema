@@ -1,5 +1,13 @@
 import "imports/map_events.onjschema" as _;
 
+var tutorialText = {
+    text: string,
+    confirmationText: string,
+    focusActor?: string,
+    triggerOnNodes: int[],
+};
+
+tutorialText?: tutorialText[],
 startNode: int,
 endNode: int,
 nodes: {

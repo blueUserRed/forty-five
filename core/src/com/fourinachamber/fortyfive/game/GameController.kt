@@ -164,7 +164,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var permanentWarningId: Int? = null
     private var isPermanentWarningHard: Boolean = false
 
-    private val tutorialTextParts: MutableList<GameDirector.TutorialTextPart> = mutableListOf()
+    private val tutorialTextParts: MutableList<GameDirector.GameTutorialTextPart> = mutableListOf()
     private var currentlyShowingTutorialText: Boolean = false
 
     val activeEnemies: List<Enemy>
@@ -249,7 +249,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     }
 
-    fun addTutorialText(textParts: List<GameDirector.TutorialTextPart>) {
+    fun addTutorialText(textParts: List<GameDirector.GameTutorialTextPart>) {
         tutorialTextParts.addAll(textParts)
     }
 
@@ -324,7 +324,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    private fun showTutorialPopupActor(tutorialTextPart: GameDirector.TutorialTextPart) {
+    private fun showTutorialPopupActor(tutorialTextPart: GameDirector.GameTutorialTextPart) {
         currentlyShowingTutorialText = true
         curScreen.enterState(showTutorialActorScreenState)
         TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)

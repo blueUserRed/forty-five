@@ -1,5 +1,27 @@
+tutorialText: [
+    {
+        text: "The player icon shows where on the map you are.",
+        confirmationText: "Next",
+        triggerOnNodes: [1],
+    },
+    {
+        text: "To move, move the mouse in the approximate direction of the node you want to move to. When the arrow next to the player icon is pointing in the direction you want to go, left-click to move.",
+        confirmationText: "Ok",
+        triggerOnNodes: [],
+    },
+    {
+        text: "The symbol on the node shows the event on that node . In the pop-up on the right, you will see more information about the event you are currently standing on.",
+        confirmationText: "Next",
+        triggerOnNodes: [2, 3],
+    },
+    {
+        text: "To activate the event on the node you are standing on, press the action button at the bottom of the popup.",
+        confirmationText: "Ok",
+        triggerOnNodes: [],
+    },
+],
 startNode: 0,
-endNode: 2,
+endNode: 4,
 biome: "wasteland",
 progress: [0.0, 0.1],
 nodes: [
@@ -19,7 +41,7 @@ nodes: [
         y: 80.0,
         isArea: false,
         edgesTo: [
-            0, 2,
+            0, 2, 3,
         ],
         event: $EncounterMapEvent {
             currentlyBlocks: true,
@@ -31,10 +53,30 @@ nodes: [
     },
     {
         x: 100.0,
+        y: 110.0,
+        isArea: false,
+        edgesTo: [
+            1, 4
+        ],
+        event: $EmptyMapEvent {
+        }
+    },
+    {
+        x: 100.0,
+        y: 70.0,
+        isArea: false,
+        edgesTo: [
+            1, 4
+        ],
+        event: $EmptyMapEvent {
+        }
+    },
+    {
+        x: 140.0,
         y: 90.0,
         isArea: false,
         edgesTo: [
-            1
+            2, 3
         ],
         event: $EnterMapMapEvent {
             targetMap: "aqua_dulche"
