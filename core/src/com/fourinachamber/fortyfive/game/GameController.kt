@@ -202,6 +202,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         curReserves = baseReserves
         appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
+        gameDirector.chooseEnemyActions()
     }
 
     private fun initCards() {
@@ -763,7 +764,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             include(gameDirector.checkActions())
             include(executePlayerStatusEffectsOnNewTurn())
             action {
-                gameDirector.onNewTurn()
+                gameDirector.chooseEnemyActions()
                 curReserves = baseReserves
             }
             include(drawCardPopupTimeline(cardsToDraw, false))
