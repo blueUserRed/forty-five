@@ -402,6 +402,9 @@ $Behaviour {
         newButtonState: string,
         otherOptionName: string,
     }
+
+
+    $OnClickRemoveWarningLabelBehaviour{ }
 }
 
 $ScreenController {

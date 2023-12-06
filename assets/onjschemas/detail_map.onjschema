@@ -13,7 +13,6 @@ endNode: int,
 nodes: {
     x: float,
     y: float,
-    isArea: boolean,
     edgesTo: int[],
     image?: string,
     imagePos?: string,

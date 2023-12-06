@@ -8,9 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.Completable
-import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
-import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
-import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
+import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.screen.general.customActor.DisableActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
@@ -37,6 +35,7 @@ object BehaviourFactory {
         "CatchEventAndEmitBehaviour" to { onj, actor -> CatchEventAndEmitBehaviour(onj, actor) },
         "OnClickSelectHealOrMaxOptionBehaviour" to { onj, actor -> OnClickSelectHealOrMaxOptionBehaviour(onj, actor) },
         "OnClickSelectHealOptionBehaviour" to { onj, actor -> OnClickSelectHealOptionBehaviour(onj, actor) },
+        "OnClickRemoveWarningLabelBehaviour" to { onj, actor -> OnClickRemoveWarningLabelBehaviour(onj, actor) },
     )
 
     /**
@@ -248,7 +247,13 @@ class OnClickSelectHealOptionBehaviour(onj: OnjNamedObject, actor: Actor) : Beha
         val otherOption = onjScreen.namedActorOrError(otherOptionName)
         if (otherOption is StyledActor) otherOption.leaveActorState(enterStateName)
     }
+}
 
+class OnClickRemoveWarningLabelBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    override val onCLick: BehaviourCallback = {
+        CustomWarningParent.getWarning(onjScreen).removeWarningByClick(this.parent)
+    }
 }
 
 typealias BehaviourCreator = (onj: OnjNamedObject, actor: Actor) -> Behaviour
