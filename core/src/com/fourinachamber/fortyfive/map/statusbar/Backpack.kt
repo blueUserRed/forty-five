@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
+import com.fourinachamber.fortyfive.screen.general.customActor.InOutAnimationActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -33,9 +34,7 @@ class Backpack(
     private val backpackEditIndicationWidgetName: String,
     private val sortWidgetName: String,
     private val sortReverseWidgetName: String,
-) :
-    CustomFlexBox(screen),
-    InOutAnimationActor {
+) : CustomFlexBox(screen), InOutAnimationActor {
 
     private val cardPrototypes: List<CardPrototype>
     private val _allCards: MutableList<Card>

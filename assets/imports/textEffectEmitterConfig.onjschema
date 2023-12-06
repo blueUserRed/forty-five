@@ -1,0 +1,11 @@
+
+use Common;
+
+name: string,
+font: string,
+color: Color,
+fontScale: float,
+speed: float[2],
+spawnVarianceX: float,
+spawnVarianceY: float,
+duration: int[2]

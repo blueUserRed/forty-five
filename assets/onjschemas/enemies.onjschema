@@ -1,5 +1,6 @@
 
 import "imports/game_predicates.onjschema" as _;
+import "imports/textEffectEmitterConfig.onjschema" as textEmitterConfig;
 
 use Common;
 use Cards; // include Card namespace for status effects
@@ -106,14 +107,7 @@ var enemy = {
     indicatorIconScale: float,
     detailFont: string,
     detailFontScale: float,
-    textEmitterConfig: {
-        color: Color,
-        fontScale: float,
-        speed: float[2],
-        spawnVarianceX: float,
-        spawnVarianceY: float,
-        duration: int[2]
-    },
+    textEmitterConfig: textEmitterConfig[],
     brain: $EnemyBrain,
     detailFontColor: Color,
 };

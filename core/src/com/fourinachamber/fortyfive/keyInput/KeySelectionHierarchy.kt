@@ -2,7 +2,7 @@ package com.fourinachamber.fortyfive.keyInput
 
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
-import com.fourinachamber.fortyfive.screen.general.KeySelectableActor
+import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 
 /**
  * A tree representing the structure of the screen. Only includes actors that can be selected using the keyboard.
