@@ -41,4 +41,7 @@ $GamePredicate {
     $GameInFreePhase {
     }
 
+    $PlayerHasRunOutOfReserves {
+    }
+
 }

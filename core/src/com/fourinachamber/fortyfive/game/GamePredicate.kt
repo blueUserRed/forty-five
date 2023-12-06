@@ -49,6 +49,8 @@ fun interface GamePredicate {
 
         val gameInFreePhase = GamePredicate { controller -> controller.inFreePhase }
 
+        val playerHasRunOutOfReserves = GamePredicate { controller -> controller.curReserves == 0 }
+
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
@@ -70,6 +72,7 @@ fun interface GamePredicate {
             "TargetedEnemyShieldIsAtLeast" -> targetedEnemyShieldIsAtLeast(obj.get<Long>("value").toInt())
             "TargetedEnemyHasAnyStatusEffect" -> targetedEnemyHasAnyStatusEffect
             "GameInFreePhase" -> gameInFreePhase
+            "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

@@ -8,6 +8,11 @@ var tutorialEncounters = [
         weight: 0,
         forceCards: [ "bullet", "bullet", "bullet", "bigBullet" ],
         tutorialText: [
+
+            //////////////////////////
+            // Card and Revolver Basics
+            //////////////////////////
+
             {
                 text: "These are your reserves. They are used to pay for cards. The cost of the Card is displayed in the top right corner.",
                 confirmationText: "Next",
@@ -15,7 +20,37 @@ var tutorialEncounters = [
                 predicate:  $GameInFreePhase { }
             },
             {
-                text: "The Number in the bottom left corner is the Damage (dmg) value of the card. If it is shot at the enemy, he will lose that much health Points (hp)",
+                text: "The number in the bottom left corner of the Card is the Damage (dmg) value of the card. When the card is shot, the enemy will lose that much health points (hp)",
+                confirmationText: "Next",
+            },
+            {
+                text: "To play a card, drag it into the slot you want to play it into. The reserves are paid automatically.",
+                focusActor: "revolverSlot-4",
+                confirmationText: "Next",
+            },
+            {
+                text: "Slot 5 (the one in the front) is the slot in which bullets are shot. If you load your bullet into this slot and press ‘shoot’, the bullet will leave the revolver, deal damage and the revolver rotates to the right.",
+                focusActor: "revolverSlot-4",
+                confirmationText: "Next",
+            },
+            {
+                text: "If you shoot and slot 5 is empty, you will take damage, so be careful.",
+                focusActor: "revolverSlot-4",
+                confirmationText: "Ok",
+            },
+
+            //////////////////////////
+            // Card and Revolver Basics (after Reserves)
+            //////////////////////////
+
+            {
+                text: "When you are out of reserves, you can end your turn. As soon as it is your turn again, they will be filled up and you are allowed to draw 2 cards.",
+                focusActor: "end_turn_button",
+                confirmationText: "Next",
+                predicate: $PlayerHasRunOutOfReserves { }
+            },
+            {
+                text: "If the enemy has 0 or less than 0 hp left and you click ‘end turn’, the fight will end and you will get money equivalent to the negative hp of the enemy.",
                 confirmationText: "Ok",
             },
         ]

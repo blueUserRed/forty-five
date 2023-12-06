@@ -324,7 +324,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun showTutorialPopupActor(tutorialTextPart: GameDirector.TutorialTextPart) {
+    private fun showTutorialPopupActor(tutorialTextPart: GameDirector.TutorialTextPart) {
         currentlyShowingTutorialText = true
         curScreen.enterState(showTutorialActorScreenState)
         TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)
@@ -336,10 +336,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun hideTutorialPopupActor() {
+    private fun hideTutorialPopupActor() {
         currentlyShowingTutorialText = false
         curScreen.leaveState(showTutorialActorScreenState)
         tutorialTextParts.removeFirst()
+        updateTutorialText() // prevents the tutorial popup from flickering for one frame
     }
 
     private fun updateGameAnimations() {

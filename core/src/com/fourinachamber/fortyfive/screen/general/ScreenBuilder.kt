@@ -507,6 +507,8 @@ class ScreenBuilder(val file: FileHandle) {
 
         "TutorialInfoActor" -> TutorialInfoActor(
             widgetOnj.get<String>("background"),
+            widgetOnj.get<Double>("circleRadiusMultiplier").toFloat(),
+            widgetOnj.get<Double>("circleRadiusExtension").toFloat(),
             screen
         ).apply {
             initFlexBox(this, widgetOnj, screen)

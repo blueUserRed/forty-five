@@ -55,7 +55,7 @@ open class OnjScreen @MainThreadOnly constructor(
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
-    private val namedActors: Map<String, Actor>,
+    private val namedActors: MutableMap<String, Actor>,
     private val printFrameRate: Boolean,
     val transitionAwayTime: Int?,
     val screenBuilder: ScreenBuilder,
@@ -272,6 +272,10 @@ open class OnjScreen @MainThreadOnly constructor(
         return screenBuilder.generateFromTemplate(name, onjData, parent, screen)
     }
 
+    fun addNamedActor(name: String, actor: Actor) {
+        namedActors[name] = actor
+    }
+
     private fun getAsOnjValue(value: Any?): OnjValue {
         return when (value) {
             is OnjValue -> value
@@ -281,9 +285,9 @@ open class OnjScreen @MainThreadOnly constructor(
             is Color -> OnjColor(value)
             is Array<*> -> OnjArray((value as List<*>).map { getAsOnjValue(it) })
             is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value)}.toMap())
-            is Null -> OnjNull()
+            null -> OnjNull()
             else -> {
-                throw java.lang.Exception("Unexpected Onj Type, not implemented: "+value!!::class)
+                throw java.lang.Exception("Unexpected Onj Type, not implemented: "+value::class)
             }
         }
     }

@@ -1047,7 +1047,7 @@ root: $Box {
                 positionTop: 0#points,
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
-                justifyContent: justify.center,
+//                justifyContent: justify.center,
                 visible: false,
             },
             {
@@ -1056,6 +1056,8 @@ root: $Box {
                 visible: true,
             }
         ],
+        circleRadiusMultiplier: 2.0,
+        circleRadiusExtension: 200.0,
         zIndex: 100_000,
         touchable: "enabled",
         background: "tutorial_info_actor_background"
@@ -1064,10 +1066,12 @@ root: $Box {
         $TemplateLabel {
             styles: [
                 {
-                    width: (worldWidth * 0.3)#points
+                    marginTop: 50#points,
+                    width: (worldWidth * 0.4)#points
                 }
             ],
             font: "red_wing",
+            align: "center",
             template: "{game.tutorial.text}",
             fontScale: 0.9,
             wrap: true,
@@ -1078,6 +1082,7 @@ root: $Box {
             font: "red_wing",
             template: "{game.tutorial.confirmButtonText}",
             fontScale: 0.9,
+            align: "center",
             color: color.white,
             behaviours: [
                 $CatchEventAndEmitBehaviour {

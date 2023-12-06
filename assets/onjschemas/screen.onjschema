@@ -291,6 +291,8 @@ $Widget {
     $TutorialInfoActor {
         background: string,
         children?: $Widget[],
+        circleRadiusMultiplier: float,
+        circleRadiusExtension: float,
        ...widgetSharedKeys
     }
 
