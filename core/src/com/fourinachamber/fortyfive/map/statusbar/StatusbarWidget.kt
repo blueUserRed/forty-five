@@ -78,13 +78,15 @@ class StatusbarWidget(
             val option = optionWidgets.find { it.first == clickedBox }!!
             when (displayedOptionIndex) {
                 -1 -> {
-                    screen.enterState("inStatusbarOverlay")
+                    screen.enterState(StatusbarWidget.OVERLAY_NAME)
                     display(option)
                 }
+
                 optionWidgets.indexOf(option) -> {
                     hide(option)
-                    screen.leaveState("inStatusbarOverlay")
+                    screen.leaveState(StatusbarWidget.OVERLAY_NAME)
                 }
+
                 else -> {
                     hide(optionWidgets[displayedOptionIndex])
                     display(option)
@@ -97,7 +99,14 @@ class StatusbarWidget(
         if (mapIndicatorWidgetName == null) return
         val mapIndicator = screen.namedActorOrError(mapIndicatorWidgetName) as CustomFlexBox
         val curImage = getImageData(MapManager.currentDetailMap.name)
-        if (curImage == null || !MapManager.currentDetailMap.isArea) {
+        if (curImage != null && MapManager.currentDetailMap.isArea) {
+            screen.screenBuilder.generateFromTemplate(
+                "statusbar_sign",
+                mapOf("textureName" to OnjString(curImage.resourceHandle)),
+                mapIndicator,
+                screen
+            )
+        }else if (MapManager.currentDetailMap.startNode.event is EnterMapMapEvent && MapManager.currentDetailMap.endNode.event is EnterMapMapEvent) {
             screen.screenBuilder.generateFromTemplate(
                 "statusbar_text",
                 mapOf("text" to OnjString("Road between ")),
@@ -138,8 +147,8 @@ class StatusbarWidget(
             )
         } else {
             screen.screenBuilder.generateFromTemplate(
-                "statusbar_sign",
-                mapOf("textureName" to OnjString(curImage.resourceHandle)),
+                "statusbar_text",
+                mapOf("text" to OnjString("You are on a Road")), //this text is not by phiLLiPP, just a temp solution
                 mapIndicator,
                 screen
             )
@@ -176,4 +185,9 @@ class StatusbarWidget(
 
     private fun getStatusbarOption(option: Pair<CustomFlexBox, String>) =
         screen.namedActorOrError(option.second) as InOutAnimationActor
+
+
+    companion object {
+        const val OVERLAY_NAME = "inStatusbarOverlay"
+    }
 }

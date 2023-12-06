@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -118,6 +119,7 @@ class DetailMapWidget(
         private var mapOffsetOnDragStart: Vector2? = null
 
         override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             super.dragStart(event, x, y, pointer)
             dragStartPosition = Vector2(x, y)
             mapOffsetOnDragStart = mapOffset
@@ -125,6 +127,7 @@ class DetailMapWidget(
         }
 
         override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             super.drag(event, x, y, pointer)
             val dragStartPosition = dragStartPosition ?: return
             val mapOffsetOnDragStart = mapOffsetOnDragStart ?: return
@@ -134,6 +137,7 @@ class DetailMapWidget(
         }
 
         override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
+            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             super.dragStop(event, x, y, pointer)
             dragStartPosition = null
             mapOffsetOnDragStart = null
@@ -147,17 +151,20 @@ class DetailMapWidget(
         private var lastTouchDownTime: Long = 0
 
         override fun mouseMoved(event: InputEvent?, x: Float, y: Float): Boolean {
+            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return false
             updateDirectionIndicator(Vector2(x, y))
             lastPointerPosition = Vector2(x, y)
             return super.mouseMoved(event, x, y)
         }
 
         override fun touchDown(event: InputEvent?, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return false
             lastTouchDownTime = TimeUtils.millis()
             return super.touchDown(event, x, y, pointer, button)
         }
 
         override fun clicked(event: InputEvent?, x: Float, y: Float) {
+            if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
             val screenDragged = screenDragged
             this@DetailMapWidget.screenDragged = false
             if (screenDragged || TimeUtils.millis() > lastTouchDownTime + maxClickTime) return
@@ -193,6 +200,8 @@ class DetailMapWidget(
     fun onStartButtonClicked(startButton: Actor? = null) {
         val btn = startButton ?: screen.namedActorOrError(startButtonName)
         if (btn is DisableActor && btn.isDisabled) return
+        if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
+
         playerNode.event?.start()
     }
 

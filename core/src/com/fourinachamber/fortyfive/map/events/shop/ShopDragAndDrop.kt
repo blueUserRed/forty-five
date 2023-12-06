@@ -67,6 +67,8 @@ class ShopDragSource(
     override fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
         val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
         controller.closeBuyPopups()
+        val tempParent = actor.parent.parent
+        if (tempParent is CustomScrollableFlexBox) tempParent.currentlyDraggedChild = null
     }
 }
 

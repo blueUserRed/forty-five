@@ -305,6 +305,7 @@ statusBarTemplates: [
             $Label {
                 name: "statusbar_text",
                 text: "", //template
+
                 font: "red_wing_cm",
                 color: color.forty_white,
                 fontScale: 0.7,
@@ -678,15 +679,13 @@ backpackTemplates: [
 
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
-    zIndex: (2.0 pow 31.0)#int, //if it is higher, it isn't shown for some reason // the reason is called integer overflow
-
+    zIndex: (2.0 pow 31.0)#int,
     styles: [
         {
             positionType: positionType.absolute,
             positionBottom: 70#percent,
             positionLeft: 0#percent,
             width: 25#percent,
-            height: 30#percent,
         }
     ]
 },
@@ -701,6 +700,7 @@ warningLabelTemplates: [
             "children.1.children.0.color": "color",
             "children.1.children.2.text": "body",
             "children.1.children.2.color": "color",
+            "children.2.color": "color",
             "styles.0.background": "background",
             "styles.0.width": "width",
         },
@@ -712,7 +712,8 @@ warningLabelTemplates: [
                 positionType: positionType.absolute,
                 padding: 10#points,
                 background: "",
-                positionLeft: -100#percent,
+                positionLeft: 0#percent,
+                positionTop:100#percent,
             }
         ],
     } children [
@@ -737,13 +738,13 @@ warningLabelTemplates: [
                 }
             ],
         } children [
-
             $Label {
                 text: "",
                 font: "red_wing",
                 color: color.forty_white,
                 fontScale: 0.7,
                 align: "left",
+                wrap: true,
             },
 
             $Box {
@@ -764,12 +765,26 @@ warningLabelTemplates: [
                 align: "left",
                 wrap: true,
             },
-        ]
+        ],
+        $Box {
+            styles: [
+                {
+                    width: 15.0#points,
+                    height: 15.0#points,
+                    background: "warning_label_close",
+                    touchable: touchable.enabled,
+                }
+            ],
+            behaviours: [
+                $OnClickRemoveWarningLabelBehaviour {
+                },
+            ],
+        }
     ]
 ],
 
 warningLabelUsedAssets: [
-    "forty_white_texture", "warning_label_background_red", "title_screen_background", "red_wing"
+    "forty_white_texture", "warning_label_background_red", "title_screen_background", "red_wing", "warning_label_close",
 ],
 
 cardHoverDetail: $Box {
