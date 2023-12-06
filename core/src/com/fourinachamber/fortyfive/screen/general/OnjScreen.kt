@@ -381,6 +381,7 @@ open class OnjScreen @MainThreadOnly constructor(
             stage.act(Gdx.graphics.deltaTime)
             ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             if (stage.batch.isDrawing) stage.batch.end()
+            stage.batch.color = Color(0f, 0f, 0f, 0.0f)
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)

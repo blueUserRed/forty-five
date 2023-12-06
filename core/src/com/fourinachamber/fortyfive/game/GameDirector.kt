@@ -78,7 +78,9 @@ class GameDirector(private val controller: GameController) {
         val encounterModifier: Set<String>,
         val biomes: Set<String>,
         val progress: ClosedFloatingPointRange<Float>,
-        val weight: Int
+        val weight: Int,
+        val forceCards: List<String>?,
+        val special: Boolean,
     )
 
     companion object {
@@ -108,7 +110,9 @@ class GameDirector(private val controller: GameController) {
                     obj.get<OnjArray>("encounterModifier").value.map { it.value as String }.toSet(),
                     obj.get<OnjArray>("biomes").value.map { it.value as String }.toSet(),
                     obj.get<OnjArray>("progress").toFloatRange(),
-                    obj.get<Long>("weight").toInt()
+                    obj.get<Long>("weight").toInt(),
+                    obj.getOr<OnjArray?>("forceCards", null)?.value?.map { it.value as String },
+                    obj.getOr("special", false),
                 ) }
         }
 
@@ -134,6 +138,7 @@ class GameDirector(private val controller: GameController) {
 
         private fun chooseEncounter(map: DetailMap, progress: ClosedFloatingPointRange<Float>): Int {
             val biome = map.biome
+            val encounters = encounters.filter { !it.special }
             if (encounters.isEmpty()) throw RuntimeException("no encounters are defined")
             val encountersInBiome = encounters.filter { biome in it.biomes }
             if (encountersInBiome.isEmpty()) {

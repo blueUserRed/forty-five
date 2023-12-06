@@ -5,6 +5,8 @@ var encounter = {
     biomes: string[],
     progress: float[2],
     weight: int,
+    forceCards?: string[],
+    special?: boolean
 };
 
 encounter: encounter[]

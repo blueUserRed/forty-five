@@ -509,6 +509,11 @@ class ScreenBuilder(val file: FileHandle) {
             screen
         )
 
+        "TutorialInfoActor" -> TutorialInfoActor(
+            widgetOnj.get<String>("background"),
+            screen
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->

@@ -693,6 +693,11 @@ shaders: [
             borderColor: color.black,
             noiseTexScale: 0.5
         }
+    },
+    {
+        name: "maskable_background_actor_shader",
+        file: "shaders/maskable_background_actor_shader.glsl",
+        constantArgs: { }
     }
 ],
 
