@@ -14,6 +14,8 @@ import java.lang.Float.max
 
 class TutorialInfoActor(
     private val maskedBackgroundTextureName: ResourceHandle,
+    private val circleRadiusMultiplier: Float,
+    private val circleRadiusExtension: Float,
     screen: OnjScreen
 ) : CustomFlexBox(screen) {
 
@@ -37,8 +39,9 @@ class TutorialInfoActor(
         val bounds = focusActor.getScreenSpaceBounds(screen)
         val center = Vector2(0, 0)
         bounds.getCenter(center)
+        val radius = max(bounds.width, bounds.height) * 0.5f * circleRadiusMultiplier + circleRadiusExtension
         shader.shader.setUniformf("u_center", center)
-        shader.shader.setUniformf("u_radius", max(bounds.width, bounds.height) / 1.0f)
+        shader.shader.setUniformf("u_radius", radius)
         loadedBackground.draw(batch, x, y, width, height)
         batch.flush()
         batch.shader = null
