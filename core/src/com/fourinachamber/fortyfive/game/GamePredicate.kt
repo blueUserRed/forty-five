@@ -47,6 +47,8 @@ fun interface GamePredicate {
             controller.enemyArea.getTargetedEnemy().statusEffects.isNotEmpty()
         }
 
+        val gameInFreePhase = GamePredicate { controller -> controller.inFreePhase }
+
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
@@ -67,6 +69,7 @@ fun interface GamePredicate {
             "NegatePredicate" -> negatePredicate(fromOnj(obj.get<OnjNamedObject>("value"), inContextOfEnemy))
             "TargetedEnemyShieldIsAtLeast" -> targetedEnemyShieldIsAtLeast(obj.get<Long>("value").toInt())
             "TargetedEnemyHasAnyStatusEffect" -> targetedEnemyHasAnyStatusEffect
+            "GameInFreePhase" -> gameInFreePhase
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

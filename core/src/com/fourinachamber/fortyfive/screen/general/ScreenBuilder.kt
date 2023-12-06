@@ -508,7 +508,9 @@ class ScreenBuilder(val file: FileHandle) {
         "TutorialInfoActor" -> TutorialInfoActor(
             widgetOnj.get<String>("background"),
             screen
-        )
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 

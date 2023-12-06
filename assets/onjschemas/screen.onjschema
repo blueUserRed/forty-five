@@ -290,6 +290,7 @@ $Widget {
 
     $TutorialInfoActor {
         background: string,
+        children?: $Widget[],
        ...widgetSharedKeys
     }
 

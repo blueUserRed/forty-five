@@ -9,11 +9,13 @@ import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.DetailMap
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
+import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import kotlin.math.log
 
@@ -39,6 +41,7 @@ class GameDirector(private val controller: GameController) {
         encounter
             .encounterModifier
             .forEach { controller.addEncounterModifier(EncounterModifier.getFromName(it)) }
+        controller.addTutorialText(encounter.tutorialTextParts)
         controller.initEnemyArea(enemies)
     }
 
@@ -73,7 +76,7 @@ class GameDirector(private val controller: GameController) {
         return difficulty
     }
 
-    private data class Encounter(
+    data class Encounter(
         val enemies: List<String>,
         val encounterModifier: Set<String>,
         val biomes: Set<String>,
@@ -81,7 +84,26 @@ class GameDirector(private val controller: GameController) {
         val weight: Int,
         val forceCards: List<String>?,
         val special: Boolean,
+        val tutorialTextParts: List<TutorialTextPart>
     )
+
+    data class TutorialTextPart(
+        val text: String,
+        val confirmationText: String,
+        val focusActorName: String?,
+        val predicate: GamePredicate?
+    ) {
+
+        companion object {
+
+            fun fromOnj(onj: OnjObject): TutorialTextPart = TutorialTextPart(
+                onj.get<String>("text"),
+                onj.get<String>("confirmationText"),
+                onj.getOr<String?>("focusActor", null),
+                onj.getOr<OnjNamedObject?>("predicate", null)?.let { GamePredicate.fromOnj(it) }
+            )
+        }
+    }
 
     companion object {
 
@@ -113,6 +135,10 @@ class GameDirector(private val controller: GameController) {
                     obj.get<Long>("weight").toInt(),
                     obj.getOr<OnjArray?>("forceCards", null)?.value?.map { it.value as String },
                     obj.getOr("special", false),
+                    obj.getOr<OnjArray?>("tutorialText", null)
+                        ?.value
+                        ?.map { TutorialTextPart.fromOnj(it as OnjObject) }
+                        ?: listOf()
                 ) }
         }
 

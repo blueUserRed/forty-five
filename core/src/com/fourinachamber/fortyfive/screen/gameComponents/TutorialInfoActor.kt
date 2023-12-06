@@ -21,13 +21,20 @@ class TutorialInfoActor(
         ResourceManager.get(screen, maskedBackgroundTextureName)
     }
 
+    var focusActor: BoundedActor? = null
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
+        val focusActor = focusActor
+        if (focusActor == null) {
+            loadedBackground.draw(batch, x, y, width, height)
+            super.draw(batch, parentAlpha)
+            return
+        }
         batch.flush()
         batch.shader = shader.shader
         shader.prepare(screen)
-        val button = screen.namedActorOrError("shoot_button") as BoundedActor
-        val bounds = button.getScreenSpaceBounds(screen)
+        val bounds = focusActor.getScreenSpaceBounds(screen)
         val center = Vector2(0, 0)
         bounds.getCenter(center)
         shader.shader.setUniformf("u_center", center)
@@ -38,9 +45,17 @@ class TutorialInfoActor(
         super.draw(batch, parentAlpha)
     }
 
+    fun focusActor(name: String) {
+        val actor = screen.namedActorOrError(name)
+        if (actor !is BoundedActor) {
+            throw RuntimeException("Actor '$name' must implement BoundedActor to be focused by TutorialInfoActor")
+        }
+        focusActor = actor
+    }
+
     companion object {
 
-        private const val shaderPath: String = "shaders/maskable_background_actor_shader.glsl"
+        private const val shaderPath: String = "shaders/tutorial_actor_shader.glsl"
 
         private val shader: BetterShader by lazy {
             BetterShader.load(shaderPath)

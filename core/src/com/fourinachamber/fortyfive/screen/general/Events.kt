@@ -15,6 +15,7 @@ object EventFactory {
         "DrawCardEvent" to { DrawCardEvent() },
         "PopupConfirmationEvent" to { PopupConfirmationEvent() },
         "ParryEvent" to { ParryEvent() },
+        "TutorialConfirmedEvent" to { TutorialConfirmedEvent() },
     )
 
     private val eventClasses: Map<String, KClass<out Event>> = mapOf(
@@ -24,6 +25,7 @@ object EventFactory {
         "DrawCardEvent" to DrawCardEvent::class,
         "PopupConfirmationEvent" to PopupConfirmationEvent::class,
         "ParryEvent" to ParryEvent::class,
+        "TutorialConfirmedEvent" to TutorialConfirmedEvent::class,
     )
 
     fun createEvent(name: String): Event = eventCreators[name]?.invoke()
@@ -63,6 +65,8 @@ class DrawCardEvent : Event()
 class PopupConfirmationEvent : Event()
 
 class ParryEvent : Event()
+
+class TutorialConfirmedEvent : Event()
 
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed

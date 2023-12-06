@@ -38,4 +38,7 @@ $GamePredicate {
     $TargetedEnemyHasAnyStatusEffect {
     }
 
+    $GameInFreePhase {
+    }
+
 }

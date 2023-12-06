@@ -6,7 +6,19 @@ var tutorialEncounters = [
         biomes: ["Wasteland"],
         progress: [1000.0, 1000.1],
         weight: 0,
-        forceCards: [ "bullet", "bullet", "bullet", "bigBullet" ]
+        forceCards: [ "bullet", "bullet", "bullet", "bigBullet" ],
+        tutorialText: [
+            {
+                text: "These are your reserves. They are used to pay for cards. The cost of the Card is displayed in the top right corner.",
+                confirmationText: "Next",
+                focusActor: "reserves_icon",
+                predicate:  $GameInFreePhase { }
+            },
+            {
+                text: "The Number in the bottom left corner is the Damage (dmg) value of the card. If it is shot at the enemy, he will lose that much health Points (hp)",
+                confirmationText: "Ok",
+            },
+        ]
     },
 ];
 
