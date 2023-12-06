@@ -614,6 +614,18 @@ textures: [
         name: "encounter_modifier_rain",
         file: "textures/encounter_modifier/rain.png"
     },
+    {
+        name: "common_button_default",
+        file: "textures/common/button/default.png"
+    },
+    {
+        name: "common_button_hover",
+        file: "textures/common/button/hover.png"
+    },
+    {
+        name: "common_button_disabled",
+        file: "textures/common/button/disabled.png"
+    },
 ],
 
 cursors: [
@@ -695,8 +707,8 @@ shaders: [
         }
     },
     {
-        name: "maskable_background_actor_shader",
-        file: "shaders/maskable_background_actor_shader.glsl",
+        name: "tutorial_actor_shader",
+        file: "shaders/tutorial_actor_shader.glsl",
         constantArgs: { }
     }
 ],

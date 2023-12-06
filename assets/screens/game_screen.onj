@@ -41,7 +41,7 @@ assets: {
         "enemy_pyro_action_comic_common_panel_1", "enemy_pyro_action_comic_common_panel_2",
         "enemy_pyro_action_comic_common_panel_3", "enemy_pyro_action_comic_panel_burning",
         "enemy_pyro_action_comic_panel_fire_resistance", "enemy_pyro_action_comic_panel_hot_potato",
-        "enemy_pyro_action_comic_panel_inferno",
+        "enemy_pyro_action_comic_panel_inferno", "common_button_default", "common_button_hover",
 
         "enemy_witch", "enemy_action_bewitched", "enemy_action_left_turn",
         "enemy_witch_action_comic_common_panel_1", "enemy_witch_action_comic_common_panel_2",
@@ -49,7 +49,7 @@ assets: {
         "enemy_witch_action_comic_panel_bewitched", "enemy_witch_action_comic_panel_wrath_of_the_witch",
         "enemy_witch_action_comic_panel_ward_of_the_witch",
 
-        "maskable_background_actor_shader",
+        "tutorial_actor_shader",
 
         "enemy_outlaw",
 
@@ -109,6 +109,7 @@ var controller = $GameScreenController {
     shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
     encounterModifierDisplayTemplateName: "encounter_modifier_display",
     encounterModifierParentName: "encounter_modifier_parent",
+    tutorialInfoActorName: "tutorialInfoActor"
 };
 
 options: {
@@ -460,14 +461,6 @@ var endTurnButton = $Image {
             emit: "EndTurnEvent"
         }
     ]
-};
-
-var playerLivesLabel = $TemplateLabel {
-    name: "player_lives_label",
-    font: "vanilla_whale",
-    template: "{stat.playerLives}/{stat.maxPlayerLives}",
-    fontScale: 0.9,
-    color: color.white,
 };
 
 var reservesLabel = $TemplateLabel {
@@ -850,6 +843,7 @@ var playerBar = $Box {
         enableTransform: true,
     } children [
         $Image {
+            name: "reserves_icon",
             styles: [
                 {
                     aspectRatio: 1.0,
@@ -1042,18 +1036,58 @@ root: $Box {
 } children [
 
     $TutorialInfoActor {
+        name: "tutorialInfoActor",
         styles: [
             {
+                style_priority: 1,
                 positionType: positionType.absolute,
                 width: worldWidth#points,
                 height: worldHeight#points,
                 positionLeft: 0#points,
-                positionTop: 0#points
+                positionTop: 0#points,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                visible: false,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showTutorial"),
+                visible: true,
             }
         ],
         zIndex: 100_000,
+        touchable: "enabled",
         background: "tutorial_info_actor_background"
-    },
+    } children [
+
+        $TemplateLabel {
+            styles: [
+                {
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+            font: "red_wing",
+            template: "{game.tutorial.text}",
+            fontScale: 0.9,
+            wrap: true,
+            color: color.white,
+        },
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{game.tutorial.confirmButtonText}",
+            fontScale: 0.9,
+            color: color.white,
+            behaviours: [
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "TutorialConfirmedEvent"
+                }
+            ]
+        },
+
+    ],
 
     $Box {
         styles: [

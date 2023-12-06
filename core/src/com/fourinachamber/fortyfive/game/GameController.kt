@@ -46,6 +46,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val putCardsUnderDeckWidgetOnj = onj.get<OnjObject>("putCardsUnderDeckWidget")
     private val encounterModifierDisplayTemplateName = onj.get<String>("encounterModifierDisplayTemplateName")
     private val encounterModifierParentName = onj.get<String>("encounterModifierParentName")
+    private val tutorialInfoActorName = onj.get<String>("tutorialInfoActorName")
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -78,6 +79,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var putCardsUnderDeckWidget: PutCardsUnderDeckWidget
         private set
     lateinit var statusEffectDisplay: StatusEffectDisplay
+        private set
+    lateinit var tutorialInfoActor: TutorialInfoActor
         private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
@@ -161,8 +164,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private var permanentWarningId: Int? = null
     private var isPermanentWarningHard: Boolean = false
 
+    private val tutorialTextParts: MutableList<GameDirector.TutorialTextPart> = mutableListOf()
+    private var currentlyShowingTutorialText: Boolean = false
+
     val activeEnemies: List<Enemy>
         get() = enemyArea.enemies.filter { !it.isDefeated }
+
+    val inFreePhase: Boolean
+        get() = !isUIFrozen
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
@@ -180,6 +189,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             ?: throw RuntimeException("actor named $warningParentName must be of type CustomWarningParent")
         statusEffectDisplay = onjScreen.namedActorOrError(statusEffectDisplayName) as? StatusEffectDisplay
             ?: throw RuntimeException("actor named $statusEffectDisplayName must be of type StatusEffectDisplay")
+        tutorialInfoActor = onjScreen.namedActorOrError(tutorialInfoActorName) as? TutorialInfoActor
+            ?: throw RuntimeException("actor named $tutorialInfoActorName must be of type TutorialInfoActor")
+
         initCards()
         initCardHand()
         initRevolver()
@@ -237,6 +249,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     }
 
+    fun addTutorialText(textParts: List<GameDirector.TutorialTextPart>) {
+        tutorialTextParts.addAll(textParts)
+    }
+
     private fun initCard(card: Card) {
         val dragBehaviour = DragAndDropBehaviourFactory.dragBehaviourOrError(
             cardDragBehaviour.name,
@@ -261,6 +277,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         is EndTurnEvent -> {
             endTurn()
+        }
+        is TutorialConfirmedEvent -> {
+            hideTutorialPopupActor()
         }
         is PopupConfirmationEvent, is PopupSelectionEvent, is DrawCardEvent, is ParryEvent -> {
             popupEvent = event
@@ -293,6 +312,34 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         createdCards.forEach { it.update(this) }
         updateStatusEffects()
         updateGameAnimations()
+        updateTutorialText()
+    }
+
+    private fun updateTutorialText() {
+        if (currentlyShowingTutorialText) return
+        if (tutorialTextParts.isEmpty()) return
+        val nextPart = tutorialTextParts.first()
+        if (nextPart.predicate == null || nextPart.predicate.check(this)) {
+            showTutorialPopupActor(nextPart)
+        }
+    }
+
+    fun showTutorialPopupActor(tutorialTextPart: GameDirector.TutorialTextPart) {
+        currentlyShowingTutorialText = true
+        curScreen.enterState(showTutorialActorScreenState)
+        TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)
+        TemplateString.updateGlobalParam("game.tutorial.confirmButtonText", tutorialTextPart.confirmationText)
+        if (tutorialTextPart.focusActorName == null) {
+            tutorialInfoActor.focusActor = null
+        } else {
+            tutorialInfoActor.focusActor(tutorialTextPart.focusActorName)
+        }
+    }
+
+    fun hideTutorialPopupActor() {
+        currentlyShowingTutorialText = false
+        curScreen.leaveState(showTutorialActorScreenState)
+        tutorialTextParts.removeFirst()
     }
 
     private fun updateGameAnimations() {
@@ -1003,6 +1050,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val showPopupCardSelectorScreenState = "showPopupCardSelector"
         const val showEnemyAttackPopupScreenState = "showAttackPopup"
         const val showPutCardsUnderDeckActorScreenState = "showPutCardsUnderDeckActor"
+        const val showTutorialActorScreenState = "showTutorial"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
