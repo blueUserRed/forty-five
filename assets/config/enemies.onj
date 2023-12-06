@@ -3,14 +3,34 @@ import "imports/colors.onj" as color;
 
 use Cards; // include Card namespace for status effects
 
-var textEmitterConfig = {
-    color: color.red,
+var textEmitterSharedConfig = {
+    font: "red_wing",
     fontScale: 0.9,
-    speed: [-80.0, -60.0],
     spawnVarianceX: 30.0,
     spawnVarianceY: 30.0,
     duration: [1_000, 1_500]
 };
+
+var textEmitterConfig = [
+    {
+        name: "number_positive",
+        color: color.green,
+        speed: [60.0, 80.0],
+        ...textEmitterSharedConfig
+    },
+    {
+        name: "number_negative",
+        color: color.red,
+        speed: [-80.0, -60.0],
+        ...textEmitterSharedConfig
+    },
+    {
+        name: "number",
+        color: color.black,
+        speed: [-80.0, -60.0],
+        ...textEmitterSharedConfig
+    },
+];
 
 var outlawDamageSharedKeys = {
     icon: "enemy_action_damage",

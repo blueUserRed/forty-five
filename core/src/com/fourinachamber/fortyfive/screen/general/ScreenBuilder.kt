@@ -28,6 +28,8 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
+import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -499,13 +501,7 @@ class ScreenBuilder(val file: FileHandle) {
         )
 
         "TextEffectEmitter" -> TextEffectEmitter(
-            fontOrError(widgetOnj.get<String>("font"), screen),
-            widgetOnj.get<Color>("color"),
-            widgetOnj.get<Double>("fontScale").toFloat(),
-            widgetOnj.get<OnjArray>("speed").toFloatRange(),
-            widgetOnj.get<Double>("spawnVarianceX").toFloat(),
-            widgetOnj.get<Double>("spawnVarianceY").toFloat(),
-            widgetOnj.get<OnjArray>("animationDuration").toIntRange(),
+            TextEffectEmitter.configsFromOnj(widgetOnj.get<OnjArray>("config"), screen),
             screen
         )
 

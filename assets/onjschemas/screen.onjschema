@@ -1,6 +1,7 @@
 import "imports/font_group.onjschema" as _;
 // this also imports DragAndDropBehaviours
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
+import "imports/textEffectEmitterConfig.onjschema" as textEmitterConfig;
 
 use Common;
 use Style;
@@ -283,13 +284,7 @@ $Widget {
     }
 
     $TextEffectEmitter {
-        font: string,
-        fontColor: Color,
-        fontScale: float,
-        speed: float[2],
-        spawnVarianceX: float,
-        spawnVarianceY: float,
-        animationDuration: int[2],
+        config: textEmitterConfig[],
         ...widgetSharedKeys
     }
 
