@@ -5,7 +5,6 @@ import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
 import onj.value.*
-import kotlin.math.max
 
 /**
  * used for dynamically creating events
@@ -27,6 +26,7 @@ object MapEventFactory {
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
         "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
+        "AddMaxHPEvent" to { AddMaxHPMapEvent(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -46,6 +46,10 @@ interface ScaledByDistance {
     fun OnjObjectBuilderDSL.includeDistanceFromEnd() {
         "distanceToEnd" with distanceToEnd
     }
+}
+
+interface Completable {
+    fun completed()
 }
 
 /**
@@ -154,7 +158,7 @@ class EmptyMapEvent : MapEvent() {
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
+class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance, Completable {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
@@ -180,7 +184,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance {
         MapManager.changeToEncounterScreen(this)
     }
 
-    fun completed() {
+    override fun completed() {
         currentlyBlocks = false
         canBeStarted = false
         isCompleted = true
@@ -246,10 +250,6 @@ class NPCMapEvent(val npc: String) : MapEvent() {
         MapManager.changeToDialogScreen(this)
     }
 
-    fun complete() {
-        canBeStarted = false
-        isCompleted = true
-    }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("NPCMapEvent")
@@ -298,7 +298,7 @@ class ShopMapEvent(
  */
 class ChooseCardMapEvent(
     onj: OnjObject
-) : MapEvent() {
+) : MapEvent(), Completable {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -319,7 +319,7 @@ class ChooseCardMapEvent(
         MapManager.changeToChooseCardScreen(this)
     }
 
-    fun complete() {
+    override fun completed() {
         isCompleted = true
         canBeStarted = false
     }
@@ -333,13 +333,9 @@ class ChooseCardMapEvent(
 }
 
 
-/**
- * event that opens a shop where the player can buy up to 8 cards
- * @param types which type the restrictions are
- */
 class HealOrMaxHPMapEvent(
     onj: OnjObject
-) : MapEvent(), ScaledByDistance {
+) : MapEvent(), ScaledByDistance, Completable {
 
     val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     val healthRange: IntRange = onj.get<OnjArray>("healRange").toIntRange()
@@ -364,7 +360,7 @@ class HealOrMaxHPMapEvent(
         setStandardValuesFromConfig(onj)
     }
 
-    fun complete() {
+    override fun completed() {
         isCompleted = true
         canBeStarted = false
         MapManager.changeToMapScreen()
@@ -376,6 +372,44 @@ class HealOrMaxHPMapEvent(
         includeDistanceFromEnd()
         "seed" with seed
         "healRange" with arrayOf(healthRange.first, healthRange.last)
+        "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
+    }
+}
+
+class AddMaxHPMapEvent(
+    onj: OnjObject
+) : MapEvent(), Completable {
+
+    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
+    val maxHPRange: IntRange = onj.get<OnjArray>("maxHPRange").toIntRange()
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+
+    override val displayDescription: Boolean = true
+
+    override val descriptionText: String = "You obtain higher Max HP."
+    override val displayName: String = "Restoration Point"
+
+    override fun start() {
+        MapManager.changeToAddMaxHPScreen(this)
+    }
+
+    init {
+        setStandardValuesFromConfig(onj)
+    }
+
+    override fun completed() {
+        isCompleted = true
+        canBeStarted = false
+        MapManager.changeToMapScreen()
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("AddMaxHPEvent")
+        includeStandardConfig()
+        "seed" with seed
         "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
     }
 }

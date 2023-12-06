@@ -139,7 +139,7 @@ root: $Box {
     } children [
         $TemplateLabel {
             name: "person_label",
-            template: "{map.curEvent.person.displayName}",
+            template: "{map.cur_event.person.displayName}",
             font: "red_wing",
             color: color.dark_brown,
             fontScale: 0.9,

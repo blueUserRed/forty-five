@@ -1,7 +1,10 @@
 package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input.Keys
+import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.InputMultiplexer
+import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
@@ -27,6 +30,9 @@ import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
+import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
@@ -113,10 +119,32 @@ open class OnjScreen @MainThreadOnly constructor(
             field = value
         }
 
+    private var awaitingConfirmationClick: Boolean = false
+
+    private var screenInputProcessor: InputProcessor = object : InputAdapter() {
+
+        override fun keyDown(keycode: Int): Boolean {
+            if (!awaitingConfirmationClick) return false
+            if (keycode in arrayOf(Keys.ENTER, Keys.NUMPAD_ENTER)) {
+                awaitingConfirmationClick = false
+                return true
+            }
+            return false
+        }
+
+        override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+            if (!awaitingConfirmationClick) return false
+            awaitingConfirmationClick = false
+            return true
+        }
+
+    }
+
     var inputMap: KeyInputMap? = null
         @AllThreadsAllowed set(value) {
             field = value
             inputMultiplexer.clear()
+            inputMultiplexer.addProcessor(screenInputProcessor)
             value?.let { inputMultiplexer.addProcessor(it) }
             inputMultiplexer.addProcessor(stage)
         }
@@ -150,6 +178,7 @@ open class OnjScreen @MainThreadOnly constructor(
             val highlight = selectedActor?.getHighlightArea() ?: return@addLateRenderTask
             keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
         }
+        inputMultiplexer.addProcessor(screenInputProcessor)
         inputMultiplexer.addProcessor(stage)
     }
 
@@ -378,6 +407,31 @@ open class OnjScreen @MainThreadOnly constructor(
     @MainThreadOnly
     override fun resize(width: Int, height: Int) {
         stage.viewport.update(width, height, true)
+    }
+
+    fun confirmationClickTimelineAction(maxTime: Long? = null): Timeline.TimelineAction = object : Timeline.TimelineAction() {
+
+        private var finishAt: Long? = null
+
+        override fun start(timeline: Timeline) {
+            super.start(timeline)
+            maxTime?.let {
+                finishAt = TimeUtils.millis() + it
+            }
+            awaitingConfirmationClick = true
+        }
+
+        override fun isFinished(timeline: Timeline): Boolean {
+            if (!awaitingConfirmationClick) return true
+            finishAt?.let {
+                if (TimeUtils.millis() >= it) return true
+            }
+            return false
+        }
+
+        override fun end(timeline: Timeline) {
+            awaitingConfirmationClick = false
+        }
     }
 
     @MainThreadOnly

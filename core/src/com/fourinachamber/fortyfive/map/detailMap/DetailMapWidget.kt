@@ -19,6 +19,9 @@ import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
+import com.fourinachamber.fortyfive.screen.general.customActor.DisableActor
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
@@ -427,9 +430,9 @@ class DetailMapWidget(
         } else {
             screen.leaveState(eventCanBeStartedScreenState)
         }
-        TemplateString.updateGlobalParam("map.curEvent.displayName", event.displayName)
+        TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
         TemplateString.updateGlobalParam(
-            "map.curEvent.description",
+            "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText
         )
     }

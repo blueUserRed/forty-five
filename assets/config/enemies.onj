@@ -3,13 +3,105 @@ import "imports/colors.onj" as color;
 
 use Cards; // include Card namespace for status effects
 
-var textEmitterConfig = {
-    color: color.red,
+var textEmitterSharedConfig = {
+    font: "red_wing",
     fontScale: 0.9,
-    speed: [-80.0, -60.0],
     spawnVarianceX: 30.0,
     spawnVarianceY: 30.0,
     duration: [1_000, 1_500]
+};
+
+var textEmitterConfig = [
+    {
+        name: "number_positive",
+        color: color.green,
+        speed: [60.0, 80.0],
+        ...textEmitterSharedConfig
+    },
+    {
+        name: "number_negative",
+        color: color.red,
+        speed: [-80.0, -60.0],
+        ...textEmitterSharedConfig
+    },
+    {
+        name: "number",
+        color: color.black,
+        speed: [-80.0, -60.0],
+        ...textEmitterSharedConfig
+    },
+];
+
+var outlawDamageSharedKeys = {
+    icon: "enemy_action_damage",
+    hasSpecialAnimation: false,
+    title: "Damage",
+    descriptionTemplate: "This attack does {damage} damage",
+};
+
+var outlawCoverSharedKeys = {
+    icon: "enemy_action_cover",
+    hasSpecialAnimation: false,
+    title: "Cover",
+    descriptionTemplate: "The enemy adds {cover} shield",
+};
+
+var pyroDamageSharedKeys = {
+    icon: "enemy_action_damage",
+    hasSpecialAnimation: false,
+    title: "Damage",
+    descriptionTemplate: "This attack does {damage} damage",
+};
+
+var pyroCoverSharedKeys = {
+    icon: "enemy_action_cover",
+    hasSpecialAnimation: false,
+    title: "Cover",
+    descriptionTemplate: "The enemy adds {cover} shield",
+};
+
+var pyroBurningSharedKeys = {
+    icon: "enemy_action_burning",
+    hasSpecialAnimation: true,
+    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+    specialPanel: "enemy_pyro_action_comic_panel_burning",
+    title: "Burning",
+    descriptionTemplate: "You get Burning!",
+};
+
+var pyroFireResistanceSharedKeys = {
+    icon: "enemy_action_fire_resistance",
+    hasSpecialAnimation: true,
+    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+    specialPanel: "enemy_pyro_action_comic_panel_fire_resistance",
+    title: "Fire resistance",
+    descriptionTemplate: "The enemy gives itself fire resistance!",
+};
+
+var pyroInfernoSharedKeys = {
+    icon: "enemy_action_inferno",
+    hasSpecialAnimation: true,
+    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+    specialPanel: "enemy_pyro_action_comic_panel_inferno",
+    title: "Inferno",
+    descriptionTemplate: "You get burning for the rest of the fight!",
+};
+
+var pyroHotPotatoSharedKeys = {
+    icon: "enemy_action_hot_potato",
+    hasSpecialAnimation: true,
+    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
+    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
+    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
+    specialPanel: "enemy_pyro_action_comic_panel_hot_potato",
+    title: "Hot Potato",
+    descriptionTemplate: "A [scorching Bullet] is being put in your hand!",
 };
 
 enemies: [
@@ -36,27 +128,27 @@ enemies: [
                     showProbability: 1.0,
                     weight: 5,
                     scaleFactor: 0.5,
-                    icon: "enemy_action_damage"
+                    ...outlawDamageSharedKeys
                 },
                 $DamagePlayer {
                     damage: [ 8, 12 ],
                     showProbability: 1.0,
                     weight: 10,
                     scaleFactor: 0.5,
-                    icon: "enemy_action_damage"
+                    ...outlawDamageSharedKeys
                 },
                 $DamagePlayer {
                     damage: [ 12, 18 ],
                     showProbability: 1.0,
                     weight: 10,
                     scaleFactor: 0.5,
-                    icon: "enemy_action_damage"
+                    ...outlawDamageSharedKeys
                 },
                 $TakeCover {
                     cover: [ 12, 22 ],
                     weight: 10,
                     showProbability: 1.0,
-                    icon: "enemy_action_cover"
+                    ...outlawCoverSharedKeys
                 },
             ],
         },
@@ -84,27 +176,27 @@ enemies: [
                     showProbability: 1.0,
                     weight: 5,
                     scaleFactor: 0.5,
-                    icon: "enemy_action_damage"
+                    ...outlawDamageSharedKeys
                 },
                 $DamagePlayer {
                     damage: [ 14, 17 ],
                     showProbability: 1.0,
                     weight: 10,
                     scaleFactor: 0.5,
-                    icon: "enemy_action_damage"
+                    ...outlawDamageSharedKeys
                 },
                 $DamagePlayer {
                     damage: [ 18, 24 ],
                     showProbability: 1.0,
                     weight: 10,
                     scaleFactor: 0.5,
-                    icon: "enemy_action_damage"
+                    ...outlawDamageSharedKeys
                 },
                 $TakeCover {
                     cover: [ 16, 24 ],
                     weight: 10,
                     showProbability: 1.0,
-                    icon: "enemy_action_cover"
+                    ...outlawCoverSharedKeys
                 },
             ],
         },
@@ -132,26 +224,25 @@ enemies: [
                     showProbability: 1.0,
                     weight: 10,
                     scaleFactor: 0.5,
-                    icon: "enemy_action_damage"
+                    ...pyroDamageSharedKeys
                 },
                 $TakeCover {
                     cover: [ 5, 10 ],
                     weight: 10,
                     showProbability: 1.0,
-                    icon: "enemy_action_cover"
+                    ...pyroCoverSharedKeys
                 },
                 $GivePlayerStatusEffect {
                     statusEffect: burning(5, 0.5, false),
                     weight: 10,
                     showProbability: 0.5,
-                    icon: "enemy_action_burning"
+                    ...pyroBurningSharedKeys
                 },
                 $GiveSelfStatusEffect {
                     statusEffect: fireResistance(5),
                     weight: 60,
                     showProbability: 0.0,
                     hasUnlikelyPredicates: true,
-                    icon: "enemy_action_fire_resistance",
                     predicates: [
                         $AnyEnemyHasStatusEffect {
                             value: burning(0, 0.5, false)
@@ -159,14 +250,15 @@ enemies: [
                         $EnemyDoesNotHaveStatusEffect {
                             value: fireResistance(0)
                         }
-                    ]
+                    ],
+                    ...pyroFireResistanceSharedKeys
                 },
                 $GivePlayerStatusEffect {
                     statusEffect: burning(0, 0.5, true),
                     weight: 500,
                     showProbability: 0.0,
                     hasUnlikelyPredicates: true,
-                    icon: "enemy_action_inferno",
+                    ...pyroInfernoSharedKeys,
                     predicates: [
                         $EnemyHealthLowerThanPercent {
                             value: 25.0
@@ -178,9 +270,9 @@ enemies: [
                 },
                 $GivePlayerCard {
                     card: "scorchingBullet",
-                    icon: "enemy_action_hot_potato",
                     weight: 2,
                     showProbability: 0.0,
+                    ...pyroHotPotatoSharedKeys
                 }
             ],
         },

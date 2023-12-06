@@ -67,7 +67,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             ?: throw RuntimeException("unknown shop: ${context.person}")).get<OnjObject>("image")
         initWidgets(onjScreen, imgData)
 
-        TemplateString.updateGlobalParam("map.curEvent.personDisplayName", personData.get<String>("displayName"))
+        TemplateString.updateGlobalParam("map.cur_event.personDisplayName", personData.get<String>("displayName"))
         val messageWidget = onjScreen.namedActorOrError(messageWidgetName) as AdvancedTextWidget
         val text = personData.get<OnjArray>("texts").value
         val defaults = shopFile.get<OnjObject>("defaults")

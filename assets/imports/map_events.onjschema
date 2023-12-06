@@ -1,0 +1,53 @@
+
+var mapEventStandardConfig = {
+    currentlyBlocks: boolean,
+    canBeStarted: boolean,
+    isCompleted: boolean
+};
+
+$MapEvent {
+
+    $EmptyMapEvent { }
+
+    $HealOrMaxHPEvent {
+        ...mapEventStandardConfig,
+        healRange: int[2],
+        maxHPRange: int[2],
+        seed: int?,
+        distanceToEnd: int,
+    }
+
+    $AddMaxHPEvent {
+        ...mapEventStandardConfig,
+        maxHPRange: int[2],
+        seed: int?,
+    }
+
+    $EncounterMapEvent {
+        ...mapEventStandardConfig,
+        distanceToEnd: int,
+        encounterIndex: int,
+    }
+
+    $EnterMapMapEvent {
+        targetMap: string,
+    }
+
+    $NPCMapEvent {
+        npc: string,
+        ...mapEventStandardConfig
+    }
+
+    $ShopMapEvent {
+        types: string[],
+        person: string,
+        seed: int?,
+        boughtIndices: int[],
+    }
+
+    $ChooseCardMapEvent {
+        types: string[],
+        seed: int?,
+        ...mapEventStandardConfig
+    }
+}
