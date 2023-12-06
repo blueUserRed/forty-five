@@ -109,7 +109,6 @@ class ShopCardsHandler(
                 labels[i].enterActorState("poor")
             }
         }
-        //TODO move cards to back after bought, so that they are at the end
     }
 
     companion object {

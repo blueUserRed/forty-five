@@ -86,7 +86,6 @@ data class DetailMap(
                 buildOnjObject {
                     "x" with node.x
                     "y" with node.y
-                    "isArea" with node.isArea
                     "edgesTo" with node.edgesTo.map { uniqueNodes.indexOf(it) }
                     "event" with node.event?.asOnjObject()
                     node.nodeTexture?.let { "nodeTexture" with node.nodeTexture }
@@ -121,7 +120,6 @@ data class DetailMap(
                             nodeOnj.get<Double>("x").toFloat(),
                             nodeOnj.get<Double>("y").toFloat(),
                             mutableListOf(),
-                            nodeOnj.get<Boolean>("isArea"),
                             nodeOnj.getOr<String?>("image", null),
                             MapNode.ImagePosition.valueOf(nodeOnj.getOr("imagePos", "up").uppercase()),
                             nodeOnj.getOr<String?>("nodeTexture", null),
