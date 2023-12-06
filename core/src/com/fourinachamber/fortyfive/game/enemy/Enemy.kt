@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -11,10 +12,14 @@ import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.findAnimationSpawner
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
+import onj.value.OnjValue
 import java.lang.Integer.max
 
 data class EnemyPrototype(
@@ -48,7 +53,7 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
-    textEmitterConfig: OnjObject,
+    textEmitterConfig: OnjArray,
     private val screen: OnjScreen
 ) {
 
@@ -153,27 +158,14 @@ class Enemy(
     private fun getPlayerDamagedTimeline(
         damage: Int,
         gameController: GameController,
-    ): Timeline {
-
-//        val shakeAction = GraphicsConfig.shakeActorAnimation(livesLabel, false)
-
-//        val textAnimation = GraphicsConfig.numberChangeAnimation(
-//            livesLabel.localToStageCoordinates(Vector2(0f, 0f)),
-//            "-$damage",
-//            false,
-//            false,
-//            gameController.curScreen
-//        )
-
-        return Timeline.timeline {
-            include(gameController.damagePlayerTimeline(damage))
-//            parallelActions(shakeAction, textAnimation)
-        }
+    ): Timeline = Timeline.timeline {
+        include(gameController.damagePlayerTimeline(damage))
     }
 
     fun addCoverTimeline(amount: Int): Timeline = Timeline.timeline {
         action {
             currentCover += amount
+            actor.startCoverChangeAnimation(amount)
         }
     }
 
@@ -194,18 +186,11 @@ class Enemy(
 
         includeLater(
             { Timeline.timeline {
-//                val anim = GraphicsConfig.numberChangeAnimation(
-//                    actor.coverText.localToStageCoordinates(Vector2(0f, 0f)),
-//                    "-${min(damage, currentCover)}",
-//                    false,
-//                    false,
-//                    gameController.curScreen
-//                )
                 action {
+                    actor.startCoverChangeAnimation(-damage.coerceAtMost(currentCover))
                     currentCover -= damage
                     if (currentCover < 0) currentCover = 0
                     actor.updateText()
-//                    gameController.dispatchAnimTimeline(anim.wrap())
                 }
             } },
             { currentCover != 0 }
@@ -216,7 +201,7 @@ class Enemy(
                 action {
                     currentHealth -= remaining
                     actor.updateText()
-                    actor.startDamageAnimation(remaining)
+                    actor.startHealthChangeAnimation(-remaining)
                 }
             } },
             { remaining != 0 }
@@ -261,7 +246,7 @@ class Enemy(
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
-                onj.get<OnjObject>("textEmitterConfig"),
+                onj.get<OnjArray>("textEmitterConfig"),
                 curScreen
             )
             val brain = EnemyBrain.fromOnj(onj.get<OnjNamedObject>("brain"), enemy)
@@ -278,12 +263,11 @@ class Enemy(
  */
 class EnemyActor(
     val enemy: Enemy,
-    textEmitterConfig: OnjObject,
+    textEmitterConfig: OnjArray,
     private val hiddenActionIconHandle: ResourceHandle,
     private val screen: OnjScreen
-) : CustomVerticalGroup(screen), ZIndexActor, AnimationActor {
+) : CustomVerticalGroup(screen), ZIndexActor {
 
-    override var inAnimation: Boolean = false
     override var fixedZIndex: Int = 0
     private val image: CustomImageActor = CustomImageActor(enemy.drawableHandle, screen)
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
@@ -292,7 +276,6 @@ class EnemyActor(
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = CustomImageActor(null, screen, false)
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
-    private val textEmitter: TextEffectEmitter
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
@@ -306,21 +289,19 @@ class EnemyActor(
         Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
     )
 
+    private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
+    private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
+
     private val fireParticles: ParticleEffect by lazy {
         ResourceManager.get(screen, "fire_particle") // TODO: fix
     }
 
     init {
-        textEmitter = TextEffectEmitter(
-            enemy.detailFont,
-            textEmitterConfig.get<Color>("color"),
-            textEmitterConfig.get<Double>("fontScale").toFloat(),
-            textEmitterConfig.get<OnjArray>("speed").toFloatRange(),
-            textEmitterConfig.get<Double>("spawnVarianceX").toFloat(),
-            textEmitterConfig.get<Double>("spawnVarianceY").toFloat(),
-            textEmitterConfig.get<OnjArray>("duration").toIntRange(),
-            screen
-        )
+        val emitterConfig = TextEffectEmitter.configsFromOnj(textEmitterConfig, screen)
+        val healthTextEmitter = TextEffectEmitter(emitterConfig, screen)
+        val coverTextEmitter = TextEffectEmitter(emitterConfig, screen)
+        healthLabel.addAnimationSpawner(healthTextEmitter)
+        coverText.addAnimationSpawner(coverTextEmitter)
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
         attackLabel.setFontScale(enemy.detailFontScale)
@@ -346,7 +327,6 @@ class EnemyActor(
         enemyBox.addActor(coverInfoBox)
         enemyBox.addActor(image)
 
-        addActor(textEmitter)
         addActor(attackIndicator)
         addActor(enemyBox)
         addActor(healthLabel)
@@ -354,13 +334,57 @@ class EnemyActor(
         updateText()
     }
 
-    override fun layout() {
-        super.layout()
-        textEmitter.setBounds(healthLabel.x, healthLabel.y, healthLabel.width, healthLabel.height)
+    fun startHealthChangeAnimation(change: Int) {
+       val emitter = healthLabel.findAnimationSpawner<TextEffectEmitter>() ?: return
+        emitter.playNumberChangeAnimation(change)
     }
 
-    fun startDamageAnimation(damage: Int) {
-        textEmitter.playAnimation("-$damage")
+    // TODO: function for adding to Cover
+    fun startCoverChangeAnimation(change: Int) {
+        val emitter = coverText.findAnimationSpawner<TextEffectEmitter>() ?: return
+        emitter.playNumberChangeAnimation(change)
+    }
+
+    fun enemyActionAnimationTimeline(action: EnemyAction): Timeline = if (action.prototype.hasSpecialAnimation) {
+        specialEnemyActionAnimationTimeline(action)
+    } else {
+        Timeline()
+    }
+
+    private fun specialEnemyActionAnimationTimeline(action: EnemyAction): Timeline = Timeline.timeline {
+        val actionDescription =
+            TemplateString(action.prototype.descriptionTemplate, action.descriptionParams).string.onjString()
+        val data = mapOf<String, OnjValue>(
+            "commonPanel1" to action.prototype.commonPanel1.onjString(),
+            "commonPanel2" to action.prototype.commonPanel2.onjString(),
+            "commonPanel3" to action.prototype.commonPanel3.onjString(),
+            "actionPanel" to action.prototype.specialPanel.onjString(),
+            "actionName" to action.prototype.title.onjString(),
+            "actionDescription" to actionDescription,
+            "actionIcon" to action.prototype.iconHandle.onjString(),
+        )
+        val parent = screen.namedActorOrError(enemyActionAnimationParentName) as? FlexBox
+            ?: throw RuntimeException("actor named $enemyActionAnimationParentName must be a FlexBox")
+        var animActor: CustomFlexBox? = null
+        action {
+            animActor = screen.screenBuilder.generateFromTemplate(
+                enemyActionAnimationTemplateName,
+                data,
+                parent,
+                screen
+            ) as? CustomFlexBox
+                ?: throw RuntimeException("template named $enemyActionAnimationTemplateName must be a FlexBox")
+        }
+        delay(10)
+        action {
+            screen.enterState("enemy_action_anim")
+        }
+        awaitConfirmationInput(screen, maxTime = 10_000)
+//        awaitConfirmationInput(screen, maxTime = 5_000)
+        action {
+            screen.leaveState("enemy_action_anim")
+            parent.remove(animActor!!.styleManager!!.node)
+        }
     }
 
     fun setupForAction(action: NextEnemyAction) = when (action) {
@@ -370,8 +394,7 @@ class EnemyActor(
         }
 
         is NextEnemyAction.ShownEnemyAction -> {
-            attackIcon.backgroundHandle = action.action.iconHandle
-                ?: throw RuntimeException("action ${action.action.prototype} can be shown but defines no icon")
+            attackIcon.backgroundHandle = action.action.prototype.iconHandle
             attackLabel.setText(action.action.indicatorText)
             attackIndicator.isVisible = true
         }

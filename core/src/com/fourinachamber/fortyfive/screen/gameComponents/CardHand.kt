@@ -6,8 +6,8 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.ZIndexGroup
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles

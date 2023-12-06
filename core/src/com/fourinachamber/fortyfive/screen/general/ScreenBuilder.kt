@@ -28,6 +28,8 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
+import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -499,19 +501,14 @@ class ScreenBuilder(val file: FileHandle) {
         )
 
         "TextEffectEmitter" -> TextEffectEmitter(
-            fontOrError(widgetOnj.get<String>("font"), screen),
-            widgetOnj.get<Color>("color"),
-            widgetOnj.get<Double>("fontScale").toFloat(),
-            widgetOnj.get<OnjArray>("speed").toFloatRange(),
-            widgetOnj.get<Double>("spawnVarianceX").toFloat(),
-            widgetOnj.get<Double>("spawnVarianceY").toFloat(),
-            widgetOnj.get<OnjArray>("animationDuration").toIntRange(),
+            TextEffectEmitter.configsFromOnj(widgetOnj.get<OnjArray>("config"), screen),
             screen
         )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor ->
+        // TODO: split this into multiple functions
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
 
@@ -535,10 +532,12 @@ class ScreenBuilder(val file: FileHandle) {
                 val condition = obj.getOr<StyleCondition>("style_condition", StyleCondition.Always)
                 var duration: Int? = null
                 var interpolation: Interpolation? = null
+                var delay: Int? = null
                 obj.ifHas<OnjObject>("style_animation") {
                     val result = readStyleAnimation(it)
                     duration = result.first
                     interpolation = result.second
+                    delay = result.third
                 }
                 obj.value
                     .filter { !it.key.startsWith("style_") }
@@ -548,19 +547,28 @@ class ScreenBuilder(val file: FileHandle) {
                         val instruction = if (duration == null) {
                             StyleInstruction(data, priority, condition, dataClass)
                         } else {
-                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!)
+                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!, delay!!)
                         }
                         styleManager.addInstruction(key, instruction, dataClass)
                     }
             }
         }
+
+        widgetOnj.ifHas<OnjArray>("actorStates") {
+            it.value.forEach { onjStr ->
+                onjStr as OnjString
+                actor.enterActorState(onjStr.value)
+            }
+        }
+
         return actor
     }
 
-
-    private fun readStyleAnimation(animation: OnjObject): Pair<Int, Interpolation> {
-        return (animation.get<Double>("duration") * 1000).toInt() to animation.get<Interpolation>("interpolation")
-    }
+    private fun readStyleAnimation(animation: OnjObject): Triple<Int, Interpolation, Int> = Triple(
+        (animation.get<Double>("duration") * 1000).toInt(),
+        animation.get<Interpolation>("interpolation"),
+        (animation.getOr<Double>("delay", 0.0) * 1000).toInt()
+    )
 
     private fun getDataForStyle(onjValue: OnjValue, keyName: String): Any {
         var data = onjValue.value ?: throw RuntimeException("style instruction $keyName cannot be null")

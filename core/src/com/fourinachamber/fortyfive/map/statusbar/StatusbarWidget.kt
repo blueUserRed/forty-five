@@ -6,8 +6,8 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.InOutAnimationActor
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
+import com.fourinachamber.fortyfive.screen.general.customActor.InOutAnimationActor
 import com.fourinachamber.fortyfive.screen.general.onButtonClick
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.toOnjYoga

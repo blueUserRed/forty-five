@@ -427,3 +427,43 @@ detailMapInputMap: [
         ],
     },
 ],
+
+healOrMaxInputMap: [
+    {
+        condition: not(screenState("inStatusbarOverlay")),
+        triggers: [
+            {
+                keycode: keys.A,
+                modifiers: [
+                ],
+                action: $FireClickEventKeyAction {
+                    actor: "add_lives_option"
+                }
+            },
+            {
+                keycode: keys.D,
+                modifiers: [
+                ],
+                action: $FireClickEventKeyAction {
+                    actor: "add_max_hp_option"
+                }
+            },
+        ],
+    },
+],
+
+addMaxHPInputMap: [
+    {
+        condition: not(screenState("inStatusbarOverlay")),
+        triggers: [
+            {
+                keycode: keys.Space,
+                modifiers: [
+                ],
+                action: $FireClickEventKeyAction {
+                    actor: "acceptButton"
+                }
+            }
+        ],
+    },
+],

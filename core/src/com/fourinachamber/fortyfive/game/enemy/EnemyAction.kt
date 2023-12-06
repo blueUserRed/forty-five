@@ -14,7 +14,7 @@ import kotlin.random.Random
 
 class EnemyAction(
     val indicatorText: String?,
-    val iconHandle: ResourceHandle?,
+    val descriptionParams: Map<String, Any>,
     val prototype: EnemyActionPrototype,
     private val timelineCreator: Timeline.TimelineBuilderDSL.() -> Unit
 ) {
@@ -27,7 +27,16 @@ sealed class EnemyActionPrototype(
     val showProbability: Float,
     protected val enemy: Enemy,
     val hasUnlikelyPredicates: Boolean,
+    val hasSpecialAnimation: Boolean
 ) {
+
+    lateinit var iconHandle: ResourceHandle
+    lateinit var commonPanel1: ResourceHandle
+    lateinit var commonPanel2: ResourceHandle
+    lateinit var commonPanel3: ResourceHandle
+    lateinit var specialPanel: ResourceHandle
+    lateinit var title: String
+    lateinit var descriptionTemplate: String
 
     var scaleFactor: Float = 1f
 
@@ -48,12 +57,12 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val damage = damage.scale(scale * scaleFactor).random()
-            return EnemyAction(damage.toString(), iconHandle, this) {
+            return EnemyAction(damage.toString(), mapOf("damage" to damage), this) {
                 include(controller.enemyAttackTimeline(damage))
             }
         }
@@ -64,8 +73,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun applicable(controller: GameController): Boolean =
             checkPredicates(controller) && controller.cardHand.cards.isNotEmpty()
@@ -73,7 +82,7 @@ sealed class EnemyActionPrototype(
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val cardAmount = controller.cardHand.cards.size
             val amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
-            return EnemyAction(amountToDestroy.toString(), iconHandle, this) {
+            return EnemyAction(amountToDestroy.toString(), mapOf("amount" to amountToDestroy),this) {
                 repeat(amountToDestroy) {
                     // might cause mismatches when this action is shown instead of hidden
                     if (controller.cardHand.cards.isEmpty()) return@repeat
@@ -83,29 +92,6 @@ sealed class EnemyActionPrototype(
             }
         }
 
-        //        override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
-//            var text = ""
-//            var amountToDestroy = 0
-//            val cardHand = controller.cardHand
-//            action {
-//                val cardAmount = cardHand.cards.size
-//                amountToDestroy = (1..maxCards).random().coerceAtMost(cardAmount - 1)
-//                text = TemplateString(
-//                    GraphicsConfig.rawTemplateString("destroyCardsInHand"),
-//                    mapOf("amount" to amountToDestroy, "s" to if (amountToDestroy == 1) "s" else "")
-//                ).string
-//            }
-//            includeLater(
-//                { controller.confirmationPopupTimeline(text) },
-//                { true }
-//            )
-//            action {
-//                repeat(amountToDestroy) {
-//                    val card = cardHand.cards[(0 until cardHand.cards.size).random()]
-//                    controller.destroyCardInHand(card)
-//                }
-//            }
-//        }
     }
 
     class RotateRevolver(
@@ -114,8 +100,8 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val amount = (1..maxTurnAmount).random()
@@ -132,29 +118,11 @@ sealed class EnemyActionPrototype(
                     else -> RevolverRotation.Right(amount)
                 }
             }
-            return EnemyAction(amount.toString(), iconHandle, this) {
+            val descriptionParams = mapOf("amount" to amount, "direction" to rotation.directionString)
+            return EnemyAction(amount.toString(), descriptionParams, this) {
                 include(controller.rotateRevolver(rotation))
             }
         }
-
-        //        override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
-//            val amount = (1..maxTurnAmount).random()
-//            val rotation = if (Random.nextBoolean()) {
-//                GameController.RevolverRotation.Right(amount)
-//            } else {
-//                GameController.RevolverRotation.Left(amount)
-//            }
-//            val text = TemplateString(
-//                if (amount == 1) {
-//                    GraphicsConfig.rawTemplateString("revolverRotation1Rot")
-//                } else {
-//                    GraphicsConfig.rawTemplateString("revolverRotationMoreRot")
-//                },
-//                mapOf("direction" to rotation::class.simpleName!!.lowercase(), "amount" to amount)
-//            ).string
-//            include(controller.confirmationPopupTimeline(text))
-//            include(controller.rotateRevolver(rotation))
-//        }
 
         override fun applicable(controller: GameController): Boolean =
             checkPredicates(controller) && controller.revolver.slots.any { it.card != null }
@@ -165,13 +133,13 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(
             controller: GameController,
             scale: Double
-        ): EnemyAction = EnemyAction(null, iconHandle, this) {
+        ): EnemyAction = EnemyAction(null, mapOf(),this) {
             action {
                 val card = controller
                     .revolver
@@ -182,21 +150,6 @@ sealed class EnemyActionPrototype(
                 controller.putCardFromRevolverBackInHand(card)
             }
         }
-
-        //        override fun getTimeline(controller: GameController, scale: Double): Timeline = Timeline.timeline {
-//            include(controller.confirmationPopupTimeline(
-//                GraphicsConfig.rawTemplateString("returnCardToHand")
-//            ))
-//            action {
-//                val card = controller
-//                    .revolver
-//                    .slots
-//                    .filter { it.card != null }
-//                    .random()
-//                    .card!!
-//                controller.putCardFromRevolverBackInHand(card)
-//            }
-//        }
 
         override fun applicable(controller: GameController): Boolean =
             checkPredicates(controller) &&
@@ -209,12 +162,12 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val cover = cover.scale(scale * scaleFactor).random()
-            return EnemyAction(cover.toString(), iconHandle, this) {
+            return EnemyAction(cover.toString(), mapOf("cover" to cover),this) {
                 include(enemy.addCoverTimeline(cover))
             }
         }
@@ -226,14 +179,15 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val statusEffect = statusEffectCreator()
             // TODO: fix this
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
-            return EnemyAction(statusEffect.getDisplayText(), iconHandle, this) {
+            val displayText = statusEffect.getDisplayText()
+            return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {
                 action {
                     controller.applyStatusEffectToPlayer(statusEffect)
                 }
@@ -250,13 +204,14 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val statusEffect = statusEffectCreator()
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
-            return EnemyAction(statusEffect.getDisplayText(), iconHandle, this) {
+            val displayText = statusEffect.getDisplayText()
+            return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {
                 action {
                     controller.tryApplyStatusEffectToEnemy(statusEffect, enemy)
                 }
@@ -270,11 +225,12 @@ sealed class EnemyActionPrototype(
         showProbability: Float,
         enemy: Enemy,
         hasUnlikelyPredicates: Boolean,
-        private val iconHandle: ResourceHandle?,
-    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates) {
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            return EnemyAction(null, iconHandle, this) {
+            val cardTitle = controller.titleOfCard(card)
+            return EnemyAction(null, mapOf("card" to cardTitle), this) {
                 include(controller.tryToPutCardsInHandTimeline(card))
             }
         }
@@ -292,7 +248,7 @@ sealed class EnemyActionPrototype(
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "RotateRevolver" -> RotateRevolver(
                 obj.get<Long>("maxTurns").toInt(),
@@ -304,59 +260,67 @@ sealed class EnemyActionPrototype(
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "TakeCover" -> TakeCover(
                 obj.get<OnjArray>("cover").toIntRange(),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "GivePlayerStatusEffect" -> GivePlayerStatusEffect(
                 obj.get<StatusEffectCreator>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "ReturnCardToHand" -> ReturnCardToHand(
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "DamagePlayer" -> DamagePlayer(
                 obj.get<OnjArray>("damage").toIntRange(),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "GiveSelfStatusEffect" -> GiveSelfStatusEffect(
                 obj.get<StatusEffectCreator>("statusEffect"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
             "GivePlayerCard" -> GivePlayerCard(
                 obj.get<String>("card"),
                 obj.get<Double>("showProbability").toFloat(),
                 forEnemy,
                 obj.getOr("hasUnlikelyPredicates", false),
-                obj.getOr<String?>("icon", null)
+                obj.get<Boolean>("hasSpecialAnimation")
             )
 
             else -> throw RuntimeException("unknown enemy action: ${obj.name}")
 
         }.apply {
             scaleFactor = obj.getOr("scaleFactor", 1f)
-            val predicates = obj.getOr<OnjArray?>("predicates", null) ?: return@apply
+            iconHandle = obj.get<String>("icon")
+            title = obj.get<String>("title")
+            descriptionTemplate = obj.get<String>("descriptionTemplate")
+            val predicates = obj.getOr<OnjArray?>("predicates", null)
             predicates
-                .value
-                .map { GamePredicate.fromOnj(it as OnjNamedObject, forEnemy) }
-                .forEach { addPredicate(it) }
+                ?.value
+                ?.map { GamePredicate.fromOnj(it as OnjNamedObject, forEnemy) }
+                ?.forEach { addPredicate(it) }
+            if (!hasSpecialAnimation) return@apply
+            commonPanel1 = obj.get<String>("commonPanel1")
+            commonPanel2 = obj.get<String>("commonPanel2")
+            commonPanel3 = obj.get<String>("commonPanel3")
+            specialPanel = obj.get<String>("specialPanel")
         }
 
     }

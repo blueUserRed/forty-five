@@ -1,5 +1,6 @@
 
 import "imports/game_predicates.onjschema" as _;
+import "imports/textEffectEmitterConfig.onjschema" as textEmitterConfig;
 
 use Common;
 use Cards; // include Card namespace for status effects
@@ -7,10 +8,17 @@ use Cards; // include Card namespace for status effects
 var enemyActionSharedKeys = {
     weight: int,
     showProbability: float,
-    icon?: string,
+    icon: string,
     scaleFactor?: float,
     predicates?: $GamePredicate[],
-    hasUnlikelyPredicates?: boolean
+    hasSpecialAnimation: boolean,
+    hasUnlikelyPredicates?: boolean,
+    commonPanel1?: string,
+    commonPanel2?: string,
+    commonPanel3?: string,
+    specialPanel?: string,
+    title: string,
+    descriptionTemplate: string,
 };
 
 $EnemyAction {
@@ -99,14 +107,7 @@ var enemy = {
     indicatorIconScale: float,
     detailFont: string,
     detailFontScale: float,
-    textEmitterConfig: {
-        color: Color,
-        fontScale: float,
-        speed: float[2],
-        spawnVarianceX: float,
-        spawnVarianceY: float,
-        duration: int[2]
-    },
+    textEmitterConfig: textEmitterConfig[],
     brain: $EnemyBrain,
     detailFontColor: Color,
 };

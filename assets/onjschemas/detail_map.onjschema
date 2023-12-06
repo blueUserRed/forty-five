@@ -1,50 +1,4 @@
-
-var mapEventStandardConfig = {
-    currentlyBlocks: boolean,
-    canBeStarted: boolean,
-    isCompleted: boolean
-};
-
-$MapEvent {
-
-    $EmptyMapEvent { }
-
-    $HealOrMaxHPEvent {
-        ...mapEventStandardConfig,
-        healRange: int[2],
-        maxHPRange: int[2],
-        seed: int?,
-        distanceToEnd: int,
-    }
-
-    $EncounterMapEvent {
-        ...mapEventStandardConfig,
-        distanceToEnd: int,
-        encounterIndex: int,
-    }
-
-    $EnterMapMapEvent {
-        targetMap: string,
-    }
-
-    $NPCMapEvent {
-        npc: string,
-        ...mapEventStandardConfig
-    }
-
-    $ShopMapEvent {
-        types: string[],
-        person: string,
-        seed: int?,
-        boughtIndices: int[],
-    }
-
-    $ChooseCardMapEvent {
-        types: string[],
-        seed: int?,
-        ...mapEventStandardConfig
-    }
-}
+import "imports/map_events.onjschema" as _;
 
 startNode: int,
 endNode: int,
@@ -59,7 +13,6 @@ nodes: {
 }[],
 
 decorations: {
-
     texture: string,
     baseWidth: float,
     baseHeight: float,

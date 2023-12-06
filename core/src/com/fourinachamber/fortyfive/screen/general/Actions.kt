@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.general
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.MoveByAction
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
+import com.fourinachamber.fortyfive.screen.general.customActor.AnimationActor
 import kotlin.math.cos
 import kotlin.math.sin
 

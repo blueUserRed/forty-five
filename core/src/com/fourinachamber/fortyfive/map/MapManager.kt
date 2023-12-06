@@ -8,7 +8,6 @@ import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import kotlinx.coroutines.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -109,6 +108,10 @@ object MapManager {
 
     fun changeToHealOrMaxHPScreen(event: MapEvent) {
         FortyFive.changeToScreen(screenPaths["changeToHealOrMaxHPScreen"]!!, event)
+    }
+
+    fun changeToAddMaxHPScreen(event: MapEvent) {
+        FortyFive.changeToScreen(screenPaths["changeToAddMaxHPScreen"]!!, event)
     }
 
     /**
