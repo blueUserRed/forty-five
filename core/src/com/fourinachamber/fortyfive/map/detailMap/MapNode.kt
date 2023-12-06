@@ -13,7 +13,6 @@ import kotlin.math.*
 data class MapNode(
     val index: Int,
     val edgesTo: List<MapNode>,
-    val isArea: Boolean,
     val x: Float,
     val y: Float,
     val imageName: String?,
@@ -164,12 +163,11 @@ data class MapNode(
     }
 
     override fun toString(): String {
-        return "MapNode(x = $x, y = $y, isArea = $isArea, edgesTo = ${edgesTo.map { it.toStringRec() }})"
+        return "MapNode(x = $x, y = $y, edgesTo = ${edgesTo.map { it.toStringRec() }})"
     }
 
     override fun hashCode(): Int {
-        var result = isArea.hashCode()
-        result = 31 * result + x.hashCode()
+        var result = x.hashCode()
         result = 31 * result + y.hashCode()
         return result
     }
@@ -213,7 +211,6 @@ data class MapNodeBuilder(
     var x: Float,
     var y: Float,
     val edgesTo: MutableList<MapNodeBuilder> = mutableListOf(),
-    var isArea: Boolean = false,
     var imageName: String? = null,
     var imagePos: MapNode.ImagePosition = MapNode.ImagePosition.UP,
     var nodeTexture: ResourceHandle? = null,
@@ -251,7 +248,6 @@ data class MapNodeBuilder(
         asNode = MapNode(
             index,
             buildEdges,
-            isArea,
             x, y,
             imageName,
             imagePos,
