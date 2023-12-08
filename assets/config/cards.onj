@@ -21,7 +21,7 @@ cards: [
         name: "incendiaryBullet",
         title: "Incendiary Bullet",
         flavourText: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime"',
-        description: 'When this bullet is shot: the enemy gets the status burning for 4 revolver rotations',
+        description: '$trigger$On Shot$trigger$\nThe enemy gets $status$BURNING$status$ (t={turns} ) \n\n\n\n\n\n\n\n$flaveLineSize$§§card_hover_flavor_seperation§§\n$flavorText$"I\'m pretty sure this is a Warcrime"$flavorText$',
         baseDamage: 7,
         coverValue: 0,
         traitEffects: [],

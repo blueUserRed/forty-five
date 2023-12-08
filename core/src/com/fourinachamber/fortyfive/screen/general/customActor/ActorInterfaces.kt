@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.TextureData.Factory
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -199,12 +200,13 @@ interface DisplayDetailsOnHoverActor {
         screen: OnjScreen
     ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
 
-    fun setBoundsOfHoverDetailActor(actor: Actor) {
+    fun setBoundsOfHoverDetailActor(actor: Actor, tempVal: Boolean = false) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
         val prefHeight = detailActor.prefHeight
         val prefWidth = detailActor.prefWidth
         val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+        if (tempVal) println("updating bounds ${detailActor.width}")
         detailActor.setBounds(
             x + actor.width / 2 - detailActor.width / 2,
             y + actor.height,
@@ -245,4 +247,5 @@ interface ActorWithAnimationSpawners {
 
 }
 
-inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? = animationSpawners.find { it is T } as? T
+inline fun <reified T : AnimationSpawner> ActorWithAnimationSpawners.findAnimationSpawner(): T? =
+    animationSpawners.find { it is T } as? T

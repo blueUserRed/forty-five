@@ -34,10 +34,8 @@ import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnH
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.YogaNode
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.*
@@ -309,7 +307,7 @@ open class OnjScreen @MainThreadOnly constructor(
             this
         )!!
         displayDetailActor.detailActor = detail
-        displayDetailActor.setBoundsOfHoverDetailActor(actor)
+        displayDetailActor.setBoundsOfHoverDetailActor(actor,true)
         currentHoverDetail = detail
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()
