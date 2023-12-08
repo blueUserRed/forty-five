@@ -75,22 +75,25 @@ class AdvancedTextParser(
     }
 
     private fun checkEffects() {
-        val curEffect = changes.find { currentText.endsWith(it.indicator) }
-        if (curEffect != null) {
-            val newText = currentText.removeSuffix(curEffect.indicator)
+        val curEffects = changes.filter { currentText.endsWith(it.indicator) }
+        if (curEffects.isNotEmpty()) {
+            val newText = currentText.removeSuffix(curEffects.first().indicator)
             currentText.clear()
             currentText.append(newText)
             finishText()
-            if (curEffect in activeTextEffects) {
-                curEffect.backToDefault(this)
-                activeTextEffects.remove(curEffect)
-            } else {
-                curEffect.executeChange(this)
-                if (curEffect.overridesOthers) {
-                    activeTextEffects.removeIf { it::class == curEffect::class }
+            for (curEffect in curEffects) {
+                if (curEffect in activeTextEffects) {
+                    curEffect.backToDefault(this)
+                    activeTextEffects.remove(curEffect)
+                } else {
+                    curEffect.executeChange(this)
+                    if (curEffect.overridesOthers) {
+                        activeTextEffects.removeIf { it::class == curEffect::class }
+                    }
+                    activeTextEffects.add(curEffect)
                 }
-                activeTextEffects.add(curEffect)
             }
+
         }
     }
 

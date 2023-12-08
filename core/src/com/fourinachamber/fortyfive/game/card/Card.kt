@@ -78,7 +78,7 @@ class Card(
     fontColor: Color,
     fontScale: Float,
     screen: OnjScreen
-): Disposable {
+) : Disposable {
 
     /**
      * used for logging
@@ -259,12 +259,14 @@ class Card(
     }
 
     private fun addRottenModifier() {
-        val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation -> CardModifier(
-            damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
-            source = oldModifier.source,
-            validityChecker = oldModifier.validityChecker,
-            transformers = oldModifier.transformers
-        )}
+        val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation ->
+            CardModifier(
+                damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
+                source = oldModifier.source,
+                validityChecker = oldModifier.validityChecker,
+                transformers = oldModifier.transformers
+            )
+        }
         val modifier = CardModifier(
             damage = 0,
             source = "rotten effect",
@@ -328,31 +330,27 @@ class Card(
 
     private fun updateText(controller: GameController) {
         val text = StringBuilder()
-        text
-            .append(shortDescription)
-            .append("\n")
-            .append(flavourText)
-            .append("\n")
-            .append(if (type == Type.BULLET) "damage: ${curDamage(controller)}/$baseDamage" else "")
+        text.append(shortDescription)
 
-        if (activeModifiers(controller).any { it.damage != 0 }) {
-            val damageText = activeModifiers(controller)
-                .filter { it.damage != 0 }
-                .joinToString(separator =  ", ", prefix = "Damage was changed by: ", transform = { it.source })
-            text.append("\n").append(damageText)
-        }
+        TemplateString.updateGlobalParam("turns","3")
+//        if (activeModifiers(controller).any { it.damage != 0 }) {
+//            val damageText = activeModifiers(controller)
+//                .filter { it.damage != 0 }
+//                .joinToString(separator = ", ", prefix = "Damage was changed by: ", transform = { it.source })
+//            text.append("\n").append(damageText)
+//        } //TODO modifiers
 
-        if (protectingModifiers.isNotEmpty()) {
-            val total = protectingModifiers.sumOf { it.second }
-            val protectingText = protectingModifiers
-                .joinToString(
-                    separator = ", ",
-                    prefix = "Card is protected for ${total.pluralS("shot")} by: ",
-                    transform = { it.first }
-                )
-            text.append("\n").append(protectingText)
-        }
-
+//        if (protectingModifiers.isNotEmpty()) {
+//            val total = protectingModifiers.sumOf { it.second }
+//            val protectingText = protectingModifiers
+//                .joinToString(
+//                    separator = ", ",
+//                    prefix = "Card is protected for ${total.pluralS("shot")} by: ",
+//                    transform = { it.first }
+//                )
+//            text.append("\n").append(protectingText)
+//        }
+//
         currentHoverText = text.toString()
     }
 
@@ -517,7 +515,7 @@ class CardActor(
 
     override var isSelected: Boolean = false
     override var partOfHierarchy: Boolean = true
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     /**
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fortyfive.game.card.CardDragSource]

@@ -322,6 +322,7 @@ var scrollBarBackgroundDeck = $Image {
     scaleY: 1.0,
     reportDimensionsWithScaling: true,
 };
+
 var scrollBarDeck = $Image {
     name: "deck_scrollbar_handle",
     textureName: "backpack_scrollbar",
@@ -336,6 +337,7 @@ var scrollBarBackgroundBackpack = $Image {
     scaleY: 1.0,
     reportDimensionsWithScaling: true,
 };
+
 var scrollBarBackpack = $Image {
     name: "backpack_scrollbar_handle",
     textureName: "backpack_scrollbar",
@@ -713,7 +715,7 @@ warningLabelTemplates: [
                 padding: 10#points,
                 background: "",
                 positionLeft: 0#percent,
-                positionTop:100#percent,
+                positionTop: 100#percent,
             }
         ],
     } children [
@@ -790,7 +792,8 @@ warningLabelUsedAssets: [
 cardHoverDetail: $Box {
     template_name: "card_hover_detail",
     template_keys: {
-        "children.0.children.0.rawText": "text"
+        "children.0.children.0.rawText": "text",
+        "children.0.children.0.effects": "effects",
     },
     width: 300.0,
 } children [
@@ -798,9 +801,10 @@ cardHoverDetail: $Box {
     $Box {
         styles: [
             {
-                background: "transparent_black_texture",
-                height: 100#percent,
-                width: 300#points,
+                background: "hoverdetail_big_background",
+                height: (250/1.2)#points,
+                width: 250#points,
+                padding: 15#points,
             }
         ],
         width: 300.0,
@@ -809,7 +813,7 @@ cardHoverDetail: $Box {
         $AdvancedText {
             styles: [
                 {
-                    width: 300#points
+                    width: 270#points,
                 }
             ],
             width: 300.0,
@@ -820,11 +824,36 @@ cardHoverDetail: $Box {
                 fontScale: 0.5,
                 color: color.forty_white
             },
-        }
+            effects: [ //kinda ugly that they are predefined here
+                $Color {
+                    indicator: "$trigger$",
+                    color: color.red
+                },
+                $FontScale {
+                    indicator: "$trigger$",
+                    fontScale: 0.8
+                },
+                $Color {
+                    indicator: "$status$",
+                    color: color.orange
+                },
+                $FontScale {
+                    indicator: "$flavorText$",
+                    fontScale: 0.4
+                },
 
+                $FontScale {
+                    indicator: "$flaveLineSize$",
+                    fontScale: 0.063
+                },
+            ],
+        }
     ]
 ],
 
 cardHoverDetailUsedAssets: [
-    "red_wing", "transparent_black_texture"
+    "red_wing",
+    "hoverdetail_big_background",
+    "hoverdetail_small_background",
+    "card_hover_flavor_seperation",
 ]
