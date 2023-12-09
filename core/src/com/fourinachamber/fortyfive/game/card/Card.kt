@@ -674,8 +674,8 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-        "description" to OnjString(card.shortDescription),
-        "flavotText" to OnjString(card.flavourText)
+//        "description" to OnjString(card.shortDescription), //TODO comment back in
+//        "flavotText" to OnjString(card.flavourText)  //TODO comment back in
     )
 
     override fun positionChanged() {
@@ -693,16 +693,16 @@ class CardActor(
         val detailActor = detailActor
         if (detailActor !is Layout) return
 
-        if (card.flavourText.isNotBlank()) { //add the flavor Text
-            val curActor = (((detailActor as Group).children[0] as Group).children[1])
-            if (curActor is StyledActor) curActor.enterActorState("hasFlavorText")
-        }
+//        if (card.flavourText.isNotBlank()) { //add the flavor Text  //TODO comment back in when finished with testing
+//            val curActor = (((detailActor as Group).children[0] as Group).children[1])
+//            if (curActor is StyledActor) curActor.enterActorState("hasFlavorText")
+//        }
         val prefHeight = detailActor.prefHeight
         val prefWidth = detailActor.prefWidth
         val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
         detailActor.setBounds(
             x + actor.width / 2 - detailActor.width / 2,
-            y + actor.height*0.8F,
+            y + actor.height,
             if (prefWidth == 0f) detailActor.width else prefWidth,
             prefHeight
         )

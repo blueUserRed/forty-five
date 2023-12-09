@@ -48,6 +48,7 @@ $MapEvent {
     $ChooseCardMapEvent {
         types: string[],
         seed: int?,
+        nbrOfCards: int,
         ...mapEventStandardConfig
     }
 }
