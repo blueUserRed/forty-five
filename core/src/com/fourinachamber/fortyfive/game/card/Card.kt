@@ -39,6 +39,7 @@ class CardPrototype(
     val title: String,
     val type: Card.Type,
     val tags: List<String>,
+    val forceLoadCards: List<String>,
     private val creator: () -> Card
 ) {
 
@@ -395,6 +396,7 @@ class Card(
                         onj.get<String>("title"),
                         cardTypeOrError(onj),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
+                        onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     ) { getCardFrom(onj, onjScreen, initializer) }
                     prototypes.add(prototype)
                 }

@@ -338,5 +338,39 @@ enemies: [
         },
         detailFontColor: color.black
     },
+    {
+        name: "tutorial_enemy_2",
+        title: "Outlaw",
+        baseHealth: 18,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.25,
+        scaleY: 0.25,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $ScriptedEnemyBrain {
+            actions: [
+                {
+                    turn: 1,
+                    show: true,
+                    action: $DamagePlayer {
+                        damage: [ 11, 11 ],
+                        showProbability: 1.0,
+                        weight: 0,
+                        scaleFactor: 1.0,
+                        icon: "enemy_action_damage",
+                        hasSpecialAnimation: false,
+                        title: "Damage",
+                        descriptionTemplate: "This attack does {damage} damage",
+                    }
+                }
+            ],
+        },
+        detailFontColor: color.black
+    },
 
 ]

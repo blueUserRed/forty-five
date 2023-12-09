@@ -145,6 +145,8 @@ class Revolver(
     fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
         slots = Array(5) {
             val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)
+            slot.reportDimensionsWithScaling = true
+            slot.ignoreScalingWhenDrawing = true
             addActor(slot)
             screen.addNamedActor("revolverSlot-$it", slot)
             val (dragAndDrop, dropOnj) = config
