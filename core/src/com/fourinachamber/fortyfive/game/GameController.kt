@@ -192,13 +192,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         tutorialInfoActor = onjScreen.namedActorOrError(tutorialInfoActorName) as? TutorialInfoActor
             ?: throw RuntimeException("actor named $tutorialInfoActorName must be of type TutorialInfoActor")
 
+        gameDirector.init()
+
         initCards()
         initCardHand()
         initRevolver()
         initCardSelector()
         initPutCardsUnderDeckWidget()
         // enemy area is initialised by the GameDirector
-        gameDirector.init()
+
         curReserves = baseReserves
         appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
         onjScreen.invalidateEverything()
@@ -210,25 +212,27 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
+        val cards = gameDirector.getPlayerCards()
+
         val cardsArray = onj.get<OnjArray>("cards")
-        cardsArray.value.forEach { card ->
-            card as OnjObject
-            curScreen.borrowResource("${Card.cardTexturePrefix}${card.get<String>("name")}")
+
+        cardPrototypes = Card
+            .getFrom(cardsArray, curScreen, ::initCard)
+            .toMutableList()
+
+        cards.forEach { cardName ->
+            val card = cardPrototypes.find { it.name == cardName } ?: throw  RuntimeException("unknown card $cardName")
+            curScreen.borrowResource("${Card.cardTexturePrefix}$cardName")
             card
-                .get<OnjArray>("forceLoadCards")
-                .value
-                .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}${it.value as String}") }
+                .forceLoadCards
+                .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}$it") }
         }
         onj
             .get<OnjArray>("alwaysLoadCards")
             .value
             .forEach { curScreen.borrowResource("${Card.cardTexturePrefix}${it.value as String}") }
 
-        cardPrototypes = Card
-            .getFrom(cardsArray, curScreen, ::initCard)
-            .toMutableList()
-
-        SaveState.cards.forEach { cardName ->
+        cards.forEach { cardName ->
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 

@@ -6,6 +6,7 @@ var tutorialEncounters = [
         biomes: ["Wasteland"],
         progress: [1000.0, 1000.1],
         weight: 0,
+        special: true,
         forceCards: [ "bullet", "bullet", "bullet", "bigBullet" ],
         tutorialText: [
 
@@ -55,6 +56,15 @@ var tutorialEncounters = [
             },
         ]
     },
+    {
+        enemies: ["tutorial_enemy_2"],
+        encounterModifier: [],
+        biomes: ["Wasteland"],
+        progress: [1000.0, 1000.1],
+        weight: 0,
+        special: true,
+        forceCards: [ "bullet", "bullet", "bullet", "bigBullet" ],
+    }
 ];
 
 encounter: [

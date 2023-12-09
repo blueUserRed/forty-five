@@ -21,27 +21,15 @@ tutorialText: [
     },
 ],
 startNode: 0,
-endNode: 4,
+endNode: 3,
 biome: "wasteland",
 progress: [0.0, 0.1],
 nodes: [
     {
-        x: 20.0,
-        y: 80.0,
-        isArea: false,
-        edgesTo: [
-            1
-        ],
-        event: $EnterMapMapEvent {
-            targetMap: "aqua_dulche"
-        }
-    },
-    {
         x: 60.0,
         y: 80.0,
-        isArea: false,
         edgesTo: [
-            0, 2, 3,
+            1, 2,
         ],
         event: $EncounterMapEvent {
             currentlyBlocks: true,
@@ -54,9 +42,8 @@ nodes: [
     {
         x: 100.0,
         y: 110.0,
-        isArea: false,
         edgesTo: [
-            1, 4
+            0, 3
         ],
         event: $EmptyMapEvent {
         }
@@ -64,9 +51,8 @@ nodes: [
     {
         x: 100.0,
         y: 70.0,
-        isArea: false,
         edgesTo: [
-            1, 4
+            0, 3
         ],
         event: $EmptyMapEvent {
         }
@@ -74,12 +60,15 @@ nodes: [
     {
         x: 140.0,
         y: 90.0,
-        isArea: false,
         edgesTo: [
-            2, 3
+            1, 2
         ],
-        event: $EnterMapMapEvent {
-            targetMap: "aqua_dulche"
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 1,
+            distanceToEnd: -1,
         }
     },
 ],

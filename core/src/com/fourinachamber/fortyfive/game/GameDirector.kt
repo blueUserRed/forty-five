@@ -20,6 +20,8 @@ class GameDirector(private val controller: GameController) {
 
     private lateinit var enemies: List<Enemy>
 
+    lateinit var encounter: Encounter
+
     fun init() {
         val enemiesOnj = OnjParser.parseFile(Gdx.files.internal("config/enemies.onj").file()) // TODO: read in companion
         enemiesFileSchema.assertMatches(enemiesOnj)
@@ -36,9 +38,12 @@ class GameDirector(private val controller: GameController) {
         encounter
             .encounterModifier
             .forEach { controller.addEncounterModifier(EncounterModifier.getFromName(it)) }
+        this.encounter = encounter
         controller.addTutorialText(encounter.tutorialTextParts)
         controller.initEnemyArea(enemies)
     }
+
+    fun getPlayerCards(): List<String> = encounter.forceCards ?: SaveState.cards
 
     fun chooseEnemyActions() {
         controller.activeEnemies.forEach { enemy ->
@@ -143,7 +148,7 @@ class GameDirector(private val controller: GameController) {
             val allNodes = map.uniqueNodes
             val progress = map.progress
             val roadDirection = Vector2(endNode.x, endNode.y) - Vector2(startNode.x, startNode.y)
-            val difficultyVariance = (progress.endInclusive - progress.start) * 0.3f
+            val difficultyVariance = (progress.endInclusive - progress.start) * 0.1f
             allNodes.forEach { node ->
                 if (node === startNode || node === endNode) return@forEach
                 if (node.event !is EncounterMapEvent) return@forEach
