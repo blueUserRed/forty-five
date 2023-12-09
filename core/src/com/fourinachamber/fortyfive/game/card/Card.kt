@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -22,6 +24,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnH
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -332,7 +335,9 @@ class Card(
         val text = StringBuilder()
         text.append(shortDescription)
 
-        TemplateString.updateGlobalParam("turns","3")
+        TemplateString.updateGlobalParam("turns", "3") //temp parameter for modifiers
+
+
 //        if (activeModifiers(controller).any { it.damage != 0 }) {
 //            val damageText = activeModifiers(controller)
 //                .filter { it.damage != 0 }
@@ -669,7 +674,8 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-        "text" to OnjString(card.currentHoverText)
+        "description" to OnjString(card.shortDescription),
+        "flavotText" to OnjString(card.flavourText)
     )
 
     override fun positionChanged() {
@@ -681,4 +687,26 @@ class CardActor(
         super.sizeChanged()
         setBoundsOfHoverDetailActor(this)
     }
+
+
+    override fun setBoundsOfHoverDetailActor(actor: Actor) {
+        val detailActor = detailActor
+        if (detailActor !is Layout) return
+
+        if (card.flavourText.isNotBlank()) { //add the flavor Text
+            val curActor = (((detailActor as Group).children[0] as Group).children[1])
+            if (curActor is StyledActor) curActor.enterActorState("hasFlavorText")
+        }
+        val prefHeight = detailActor.prefHeight
+        val prefWidth = detailActor.prefWidth
+        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+        detailActor.setBounds(
+            x + actor.width / 2 - detailActor.width / 2,
+            y + actor.height*0.8F,
+            if (prefWidth == 0f) detailActor.width else prefWidth,
+            prefHeight
+        )
+        detailActor.invalidateHierarchy()
+    }
+
 }

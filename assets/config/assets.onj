@@ -626,10 +626,6 @@ textures: [
         name: "hoverdetail_small_background",
         file: "textures/cards/hoverDetail/hoverdetail_effect_background.png"
     },
-    {
-        name: "card_hover_flavor_seperation", // TODO: VERY VERY UGLY; but way easier than everything possibibly could be
-        file: "textures/cards/hoverDetail/flavor_seperation.png"
-    },
 ],
 
 cursors: [

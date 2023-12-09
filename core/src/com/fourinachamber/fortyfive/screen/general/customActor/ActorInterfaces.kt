@@ -200,13 +200,12 @@ interface DisplayDetailsOnHoverActor {
         screen: OnjScreen
     ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
 
-    fun setBoundsOfHoverDetailActor(actor: Actor, tempVal: Boolean = false) {
+    fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
         val prefHeight = detailActor.prefHeight
         val prefWidth = detailActor.prefWidth
         val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-        if (tempVal) println("updating bounds ${detailActor.width}")
         detailActor.setBounds(
             x + actor.width / 2 - detailActor.width / 2,
             y + actor.height,
