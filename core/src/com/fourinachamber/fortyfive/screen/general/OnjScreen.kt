@@ -34,6 +34,8 @@ import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnH
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fortyfive.screen.general.styles.VisibleStyleProperty
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import ktx.actors.onEnter
@@ -280,10 +282,10 @@ open class OnjScreen @MainThreadOnly constructor(
             is String -> OnjString(value)
             is Color -> OnjColor(value)
             is Array<*> -> OnjArray((value as List<*>).map { getAsOnjValue(it) })
-            is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value)}.toMap())
+            is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value) }.toMap())
             is Null -> OnjNull()
             else -> {
-                throw java.lang.Exception("Unexpected Onj Type, not implemented: "+value!!::class)
+                throw java.lang.Exception("Unexpected Onj Type, not implemented: " + value!!::class)
             }
         }
     }
@@ -374,21 +376,25 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
+//        Thread.sleep(800) //TODO remove
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()
         lastRenderTime = measureTimeMillis {
             stage.act(Gdx.graphics.deltaTime)
-//            Thread.sleep(800) //TODO remove
             ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             if (stage.batch.isDrawing) stage.batch.end()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
             stage.batch.begin()
-            currentHoverDetail?.act(delta)
-            currentHoverDetail?.draw(stage.batch, 1f)
+            currentHoverDetail?.let { actor ->
+                val child = (actor as CustomFlexBox).children[0] as CustomFlexBox
+                child.styleManager!!.update() //this maybe more often or so, try //TODO try this
+                actor.act(delta)
+                actor.draw(stage.batch, 1f)
+            }
             stage.batch.end()
         }
     } catch (e: Exception) {
@@ -407,30 +413,31 @@ open class OnjScreen @MainThreadOnly constructor(
         stage.viewport.update(width, height, true)
     }
 
-    fun confirmationClickTimelineAction(maxTime: Long? = null): Timeline.TimelineAction = object : Timeline.TimelineAction() {
+    fun confirmationClickTimelineAction(maxTime: Long? = null): Timeline.TimelineAction =
+        object : Timeline.TimelineAction() {
 
-        private var finishAt: Long? = null
+            private var finishAt: Long? = null
 
-        override fun start(timeline: Timeline) {
-            super.start(timeline)
-            maxTime?.let {
-                finishAt = TimeUtils.millis() + it
+            override fun start(timeline: Timeline) {
+                super.start(timeline)
+                maxTime?.let {
+                    finishAt = TimeUtils.millis() + it
+                }
+                awaitingConfirmationClick = true
             }
-            awaitingConfirmationClick = true
-        }
 
-        override fun isFinished(timeline: Timeline): Boolean {
-            if (!awaitingConfirmationClick) return true
-            finishAt?.let {
-                if (TimeUtils.millis() >= it) return true
+            override fun isFinished(timeline: Timeline): Boolean {
+                if (!awaitingConfirmationClick) return true
+                finishAt?.let {
+                    if (TimeUtils.millis() >= it) return true
+                }
+                return false
             }
-            return false
-        }
 
-        override fun end(timeline: Timeline) {
-            awaitingConfirmationClick = false
+            override fun end(timeline: Timeline) {
+                awaitingConfirmationClick = false
+            }
         }
-    }
 
     @MainThreadOnly
     override fun dispose() {

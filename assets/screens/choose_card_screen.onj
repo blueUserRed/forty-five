@@ -208,7 +208,7 @@ root: $Box { //TODO bioms
                     width: 100#percent,
                     height: 63#percent,
                     flexDirection: flexDirection.row,
-                    justifyContent: justify.spaceBetween,
+                    justifyContent: justify.spaceAround,
                     alignItems: align.center,
                 },
             ],

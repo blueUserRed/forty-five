@@ -456,6 +456,7 @@ generatorConfig: {
                             types: [
                                 "defType"
                             ],
+                            nbrOfCards:3,
                             seed: null,
                             currentlyBlocks: false,
                             isCompleted: false,

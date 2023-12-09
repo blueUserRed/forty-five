@@ -16,9 +16,6 @@ class AdvancedTextParser(
     private val changes: List<AdvancedTextEffect>
 ) {
     init {
-        if (changes.map { it.indicator }.toSet().size != changes.size) {
-            FortyFiveLogger.warn(logTag, "2 Times the same Indicator for the Effects")
-        }
         if (changes.any { ICON_INDICATOR in it.indicator }) {
             FortyFiveLogger.warn(
                 logTag,
