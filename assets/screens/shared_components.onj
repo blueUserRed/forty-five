@@ -792,31 +792,36 @@ warningLabelUsedAssets: [
 cardHoverDetail: $Box {
     template_name: "card_hover_detail",
     template_keys: {
-        "children.0.children.0.rawText": "text",
-        "children.0.children.0.effects": "effects",
+        "children.0.children.0.rawText": "description",
+        "children.0.children.1.children.1.rawText": "flavotText",
+//        "children.0.children.0.effects": "effects",
     },
     width: 300.0,
+    zIndex:-10,
 } children [
-
     $Box {
         styles: [
             {
                 background: "hoverdetail_big_background",
-                height: (250/1.2)#points,
-                width: 250#points,
+                height: (250 / 1.2)#points,
+                width: 270#points,
                 padding: 15#points,
+                flexDirection: flexDirection.column,
+                justifyContent: justify.spaceBetween,
             }
         ],
-        width: 300.0,
+        width: 270.0,
+        zIndex:-10,
+
     } children [
 
         $AdvancedText {
             styles: [
                 {
-                    width: 270#points,
+                    width: 250#points,
                 }
             ],
-            width: 300.0,
+            width: 250.0,
             font: "red_wing",
             rawText: "",
             defaults: {
@@ -825,6 +830,7 @@ cardHoverDetail: $Box {
                 color: color.forty_white
             },
             effects: [ //kinda ugly that they are predefined here
+
                 $Color {
                     indicator: "$trigger$",
                     color: color.red
@@ -847,7 +853,52 @@ cardHoverDetail: $Box {
                     fontScale: 0.063
                 },
             ],
-        }
+        },
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    flexDirection: flexDirection.column,
+                    paddingRight: 15#points,
+                    visible: false,
+                },
+                {
+                    style_priority: 2,
+                    visible: true,
+                    style_condition: actorState("hasFlavorText")
+                }
+            ],
+            width: 250.0,
+        } children [
+            $Image{
+                textureName: "forty_white_texture",
+                scaleX: 200.0,
+                scaleY: 0.08,
+                reportDimensionsWithScaling: true,
+                styles: [
+                    {
+                        height: 02#points,
+                        alpha: 0.32,
+                    }
+                ],
+            },
+            $AdvancedText {
+                styles: [
+                    {
+                        width: 270#points,
+                    }
+                ],
+                width: 270.0,
+                font: "red_wing",
+                rawText: "",
+                defaults: {
+                    font: "red_wing",
+                    fontScale: 0.4,
+                    color: color.forty_white
+                },
+            }
+        ]
     ]
 ],
 
@@ -855,5 +906,5 @@ cardHoverDetailUsedAssets: [
     "red_wing",
     "hoverdetail_big_background",
     "hoverdetail_small_background",
-    "card_hover_flavor_seperation",
+    "forty_white_texture",
 ]

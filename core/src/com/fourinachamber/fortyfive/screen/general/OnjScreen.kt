@@ -307,7 +307,7 @@ open class OnjScreen @MainThreadOnly constructor(
             this
         )!!
         displayDetailActor.detailActor = detail
-        displayDetailActor.setBoundsOfHoverDetailActor(actor,true)
+        displayDetailActor.setBoundsOfHoverDetailActor(actor)
         currentHoverDetail = detail
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()

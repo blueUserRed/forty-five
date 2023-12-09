@@ -286,7 +286,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         y -= offsetY
     }
 
-    override fun setBoundsOfHoverDetailActor(actor: Actor, tempVal: Boolean) {
+    override fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
         val prefHeight = detailActor.prefHeight
