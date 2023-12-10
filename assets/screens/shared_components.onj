@@ -794,45 +794,59 @@ var cardHoverDetailMainWidth = 300.0;
 var cardHoverDetailTotalWidth = cardHoverDetailMainWidth + 2 * cardHoverDetailExtrasWidth;
 
 cardHoverDetailExtra: $Box {
-    template_name: "card_hover_detail_extra",
+    template_name: "card_hover_detail_extra_description",
     template_keys: {
-        //        "children.0.rawText": "text", //TODO comment back in
+        "children.0.children.0.rawText": "description",
+        "children.0.children.0.effects": "effects",
 
     },
     width: cardHoverDetailExtrasWidth,
     styles: [
         {
-            background: "hover_detail_small_background",
+//            background: "hover_detail_small_background",
             //            height: 50#points,
-
-            paddingLeft: 10#points,
-            paddingRight: 10#points,
+//            padding: 10#points,
             width: cardHoverDetailExtrasWidth#points,
             flexDirection: flexDirection.column,
             justifyContent: justify.spaceBetween,
+            alignItems: align.center,
+            margin: 10#points,
         }
     ],
     children: [
-        $AdvancedText {
+        $Box{
             styles: [
                 {
-                    width: (cardHoverDetailExtrasWidth - 20)#points,
-                    marginBottom: 10#points,
-                    marginTop: 10#points,
-                    height: 110#percent,
+                    background: "hover_detail_small_background",
+                    height:110#percent,
+                    width:100#percent,
+                    padding: 10#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.column,
+
                 }
             ],
-            width: (cardHoverDetailExtrasWidth - 20),
-            font: "red_wing",
-            rawText: "On Shot\nThe enemy gets BURNING(t={turns} ) h h h h hh h h hh hh h h h h hh h h h h h h h h h h h h h hh h ah ah ah h wah wahwh w aw wa", //Text for testing
-
-            defaults: {
-                font: "red_wing",
-                fontScale: 0.5,
-                color: color.forty_white
-            } //TODO effects still missing
-
-        },
+            children:[
+                $AdvancedText {
+                    styles: [
+                        {
+                            width: (cardHoverDetailExtrasWidth - 20)#points,
+//                            positionBottom: 5#points,
+                            positionTop: -5#points,
+//                            marginLeft:10#points,
+                        }
+                    ],
+                    width: (cardHoverDetailExtrasWidth - 20),
+                    font: "red_wing",
+                    rawText: "",
+                    defaults: {
+                        font: "red_wing",
+                        fontScale: 0.45,
+                        color: color.forty_white
+                    },
+                    effects:[],
+                },]
+        }
     ],
 },
 var mainCardHoverDetailBox = $Box {
@@ -850,7 +864,6 @@ var mainCardHoverDetailBox = $Box {
     width: (cardHoverDetailMainWidth),
 
 } children [
-
     $AdvancedText {
         styles: [
             {
@@ -859,43 +872,23 @@ var mainCardHoverDetailBox = $Box {
         ],
         width: (cardHoverDetailMainWidth - 30),
         font: "red_wing",
-        rawText: "$trigger$On Shot$trigger$\nThe enemy gets $status$BURNING$status$ (t={turns} )", //Text for testing
-
+        rawText: "",
         defaults: {
             font: "red_wing",
             fontScale: 0.5,
             color: color.forty_white
         },
         effects: [
-        ], //kinda ugly that they are predefined here
 
-        //            $Color {
-//                indicator: "$trigger$",
-//                color: color.red
-//            },
-//            $FontScale {
-//                indicator: "$trigger$",
-//                fontScale: 0.8
-//            },
-//            $Color {
-//                indicator: "$status$",
-//                color: color.orange
-//            },
-//            $FontScale {
-//                indicator: "$flavorText$",
-//                fontScale: 0.4
-//            },
-            // handgeschriebens + (keyword search)
+        ],
 
+        //DA Buch einteilung grob first draft
         // Marvin: Stylesystem, Timelines, Onj, (Kampfablauf),
                 // Zwicki: Kotlin, Screens + Screen Beispiel (+Widgets) Heal_or_max_HP, KeyInputSystem,
                     // MapGenerator, aber nicht zu technisch
 
         //offen: Steam release prep. (eher Zwicki)
-//            $FontScale {
-//                indicator: "$flaveLineSize$",
-//                fontScale: 0.063
-//            },
+
 
     },
     $Box {
@@ -951,6 +944,7 @@ var mainCardHoverDetailBox = $Box {
                     width: (cardHoverDetailMainWidth - 30),
                     font: "red_wing",
                     rawText: "\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"", //Text for testing
+
                     defaults: {
                         font: "red_wing",
                         fontScale: 0.4,
@@ -959,7 +953,8 @@ var mainCardHoverDetailBox = $Box {
                 },
                 $Image {
                     textureName: "hover_detail_more_info",
-                    scaleX: 0.1,  //TODO needs to be changed when image is replaced with better resolution
+                    scaleX: 0.1, //TODO needs to be changed when image is replaced with better resolution
+
                     scaleY: 0.1,
                     reportDimensionsWithScaling: true,
                     styles: [
@@ -967,7 +962,8 @@ var mainCardHoverDetailBox = $Box {
                             style_priority: 1,
                             height: 50#points,
                             width: 50#points,
-//                            positionRight: (50)#points,
+                            //                            positionRight: (50)#points,
+
                             visible: true,
                         },
                         {
@@ -984,6 +980,7 @@ var mainCardHoverDetailBox = $Box {
     $Image {
         textureName: "hover_detail_more_info",
         scaleX: 0.1, //TODO needs to be changed when image is replaced with better resolution
+
         scaleY: 0.1,
         reportDimensionsWithScaling: true,
         styles: [
@@ -1007,9 +1004,9 @@ var mainCardHoverDetailBox = $Box {
 cardHoverDetail: $Box {
     template_name: "card_hover_detail",
     template_keys: {
-        //        "children.0.children.0.rawText": "description", //TODO comment back in
-//        "children.0.children.1.children.1.rawText": "flavotText", //TODO comment back in
-
+        "children.1.children.1.children.0.rawText": "description",
+        "children.1.children.1.children.0.effects": "effects",
+        "children.1.children.1.children.1.children.1.children.0.rawText": "flavorText",
     },
     width: cardHoverDetailTotalWidth,
 } children [
@@ -1058,10 +1055,11 @@ cardHoverDetail: $Box {
                     flexDirection: flexDirection.column,
                 }
             ],
-        } children [
-            //            tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
+            //            children: [
+//                tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
+//            ],
 
-        ],
+        },
         mainCardHoverDetailBox,
         $Box {
             name: "cardHoverDetailExtraParentRight",
@@ -1072,10 +1070,11 @@ cardHoverDetail: $Box {
                     flexDirection: flexDirection.column,
                 }
             ],
-        } children [
-            //            tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
+            //            children: [
+//                tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
+//            ],
 
-        ],
+        },
     ]
 ],
 

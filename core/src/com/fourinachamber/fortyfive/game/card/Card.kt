@@ -21,6 +21,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -362,6 +363,13 @@ class Card(
         return "card: $name"
     }
 
+    fun getKeyWordsForDescriptions(): List<String> {
+        val res = mutableListOf<String>()
+        res.addAll(DetailDescriptionHandler.getKeyWordsFromDescription(shortDescription))
+        //TODO all temporary buffs are missing here
+        return res
+    }
+
     companion object {
 
         /**
@@ -545,12 +553,27 @@ class CardActor(
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
             if (button == 1) {
                 detailActor?.let {
-                    val directionsToUse = getParentsForExtras(it)
-
+                    val descriptionParent = getParentsForExtras(it).first
+                    showExtraDescriptions(descriptionParent)
                     return true
                 }
             }
             return false
+        }
+    }
+
+    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
+        val allKeys = card.getKeyWordsForDescriptions()
+        DetailDescriptionHandler.descriptions.filter { it.key in allKeys }.forEach {
+            screen.generateFromTemplate(
+                "card_hover_detail_extra_description",
+                mapOf(
+                    "description" to it.value.second,
+                    "effects" to DetailDescriptionHandler.allTextEffects
+                ),
+                descriptionParent,
+                screen
+            )
         }
     }
 
@@ -683,9 +706,9 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-//        "description" to OnjString(card.shortDescription), //TODO comment back in
-//        "flavotText" to OnjString(card.flavourText)  //TODO comment back in
-//        "effects" to OnjString(card.flavourText)  //TODO comment back in
+        "description" to OnjString(card.shortDescription), //TODO comment back in
+        "flavorText" to OnjString(card.flavourText),  //TODO comment back in
+        "effects" to DetailDescriptionHandler.allTextEffects
     )
 
     override fun positionChanged() {
@@ -732,10 +755,10 @@ class CardActor(
     /**
      * the first actor is for the explanations, the second one is for the temporary changes
      */
-    private fun getParentsForExtras(it: Actor): Pair<Actor, Actor> {
-        val left = screen.namedActorOrError("cardHoverDetailExtraParentLeft")
-        val right = screen.namedActorOrError("cardHoverDetailExtraParentRight")
-        val top = screen.namedActorOrError("cardHoverDetailExtraParentTop")
+    private fun getParentsForExtras(it: Actor): Pair<CustomFlexBox, CustomFlexBox> {
+        val left = screen.namedActorOrError("cardHoverDetailExtraParentLeft") as CustomFlexBox
+        val right = screen.namedActorOrError("cardHoverDetailExtraParentRight") as CustomFlexBox
+        val top = screen.namedActorOrError("cardHoverDetailExtraParentTop") as CustomFlexBox
         val directionsToUse =
             if (it.localToStageCoordinates(Vector2(it.width, 0F)).x >= stage.viewport.worldWidth) {
                 left to top
@@ -754,6 +777,8 @@ class CardActor(
         } else {
             screen.enterState("hoverDetailHasFlavorText")
         }
-//        screen.enterState("hoverDetailHasMoreInfo")
+        if (card.getKeyWordsForDescriptions().isEmpty())
+            screen.leaveState("hoverDetailHasMoreInfo")
+        else screen.enterState("hoverDetailHasMoreInfo")
     }
 }

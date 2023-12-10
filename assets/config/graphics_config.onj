@@ -51,36 +51,6 @@ icons: {
     }
 },
 
-//hoverInfoDetails: [ //TODO here
-//    {
-//        keyword: "burning",
-//        groupName: "status",
-//        description: "Enemies with burning get 50% more damage for the next t turns.",
-//    },
-//    {
-//        keyword: "poison",
-//        groupName: "status",
-//        description: "Enemies with Poison take d dmg for t turns. d and t both stack.",
-//    },
-//],
-//// farben nur auf 3 mögliche unterteilen
-//// beim oberen, damage wird geblockt angezeigt
-//
-//
-//hoverInfoDetailGroups: [
-//    {
-//        name: "status",
-//        color: color.orange,
-//    },
-//    {
-//        name: "trait",
-//        color: color.blue,
-//    },
-//    {
-//        name: "keyword",
-//        color: color.orange,
-//    },
-//],
 
 encounterModifiers: {
     rain: {
