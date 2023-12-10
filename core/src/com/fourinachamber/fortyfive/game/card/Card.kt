@@ -7,8 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
+import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
@@ -20,15 +19,13 @@ import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
-import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
-import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -334,10 +331,9 @@ class Card(
     private fun updateText(controller: GameController) {
         val text = StringBuilder()
         text.append(shortDescription)
+        actor.updateDetailStates()
 
-        TemplateString.updateGlobalParam("turns", "3") //temp parameter for modifiers
-
-
+//        controller.curScreen.enterState("hoverDetailHasFlavorText")
 //        if (activeModifiers(controller).any { it.damage != 0 }) {
 //            val damageText = activeModifiers(controller)
 //                .filter { it.damage != 0 }
@@ -355,7 +351,6 @@ class Card(
 //                )
 //            text.append("\n").append(protectingText)
 //        }
-//
         currentHoverText = text.toString()
     }
 
@@ -546,12 +541,26 @@ class CardActor(
 
     private val cardTexturePixmap: Pixmap
 
+    private val onRightClickShowAdditionalInformationListener = object : InputListener() {
+        override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+            if (button == 1) {
+                detailActor?.let {
+                    val directionsToUse = getParentsForExtras(it)
+
+                    return true
+                }
+            }
+            return false
+        }
+    }
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
         redrawPixmap(card.baseDamage)
+        addListener(onRightClickShowAdditionalInformationListener)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -676,6 +685,7 @@ class CardActor(
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
 //        "description" to OnjString(card.shortDescription), //TODO comment back in
 //        "flavotText" to OnjString(card.flavourText)  //TODO comment back in
+//        "effects" to OnjString(card.flavourText)  //TODO comment back in
     )
 
     override fun positionChanged() {
@@ -692,16 +702,19 @@ class CardActor(
     override fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
-
-//        if (card.flavourText.isNotBlank()) { //add the flavor Text  //TODO comment back in when finished with testing
-//            val curActor = (((detailActor as Group).children[0] as Group).children[1])
-//            if (curActor is StyledActor) curActor.enterActorState("hasFlavorText")
-//        }
+        stage ?: return
         val prefHeight = detailActor.prefHeight
         val prefWidth = detailActor.prefWidth
         val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+
+        val mainField = screen.namedActorOrError("cardHoverDetailMain")
+        val mainFieldStartX = mainField.localToParentCoordinates(Vector2(0F, 0F)).x
+        val mainFieldEndX = mainField.localToParentCoordinates(Vector2(mainField.width, 0F)).x
         detailActor.setBounds(
-            x + actor.width / 2 - detailActor.width / 2,
+            min( //this min max only so that it is always inside the screen
+                max(x + actor.width / 2 - detailActor.width / 2, -mainFieldStartX),
+                stage.viewport.worldWidth - mainFieldEndX
+            ),
             y + actor.height,
             if (prefWidth == 0f) detailActor.width else prefWidth,
             prefHeight
@@ -709,4 +722,38 @@ class CardActor(
         detailActor.invalidateHierarchy()
     }
 
+    override fun onDetailDisplayStarted() {
+        detailActor?.let {
+            updateDetailStates()
+            val tempInfoParent = getParentsForExtras(it).second
+        }
+    }
+
+    /**
+     * the first actor is for the explanations, the second one is for the temporary changes
+     */
+    private fun getParentsForExtras(it: Actor): Pair<Actor, Actor> {
+        val left = screen.namedActorOrError("cardHoverDetailExtraParentLeft")
+        val right = screen.namedActorOrError("cardHoverDetailExtraParentRight")
+        val top = screen.namedActorOrError("cardHoverDetailExtraParentTop")
+        val directionsToUse =
+            if (it.localToStageCoordinates(Vector2(it.width, 0F)).x >= stage.viewport.worldWidth) {
+                left to top
+                //            } else if (it.localToStageCoordinates(Vector2(0F, 0F)).x <= 0) {
+                //                right to top  //maybe this changes, that's why it's still here
+            } else {
+                right to top
+            }
+        return directionsToUse
+    }
+
+    fun updateDetailStates() {
+        TemplateString.updateGlobalParam("turns", "3") //temp parameter for modifiers
+        if (card.flavourText.isBlank()) {
+            screen.leaveState("hoverDetailHasFlavorText")
+        } else {
+            screen.enterState("hoverDetailHasFlavorText")
+        }
+//        screen.enterState("hoverDetailHasMoreInfo")
+    }
 }

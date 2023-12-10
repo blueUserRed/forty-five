@@ -31,11 +31,10 @@ import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
+import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
-import com.fourinachamber.fortyfive.screen.general.styles.VisibleStyleProperty
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import ktx.actors.onEnter
@@ -163,8 +162,11 @@ open class OnjScreen @MainThreadOnly constructor(
     var keySelectionHierarchy: KeySelectionHierarchyNode? = null
         private set
 
-    private var currentHoverDetail: Actor? = null
-    private var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
+    var currentHoverDetail: Actor? = null
+        private set
+
+    var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
+        private set
 
     init {
         useAssets.forEach {
@@ -292,12 +294,22 @@ open class OnjScreen @MainThreadOnly constructor(
 
 
     fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
-        actor.onEnter {
-            showHoverDetail(actor, actor, actor.actorTemplate)
+        if (actor is HoverStateActor){
+            actor.onHoverEnter {
+                showHoverDetail(actor, actor, actor.actorTemplate)
+            }
+            actor.onHoverLeave {
+                hideHoverDetail()
+            }
+        }else{
+            actor.onEnter {
+                showHoverDetail(actor, actor, actor.actorTemplate)
+            }
+            actor.onExit {
+                hideHoverDetail()
+            }
         }
-        actor.onExit {
-            hideHoverDetail()
-        }
+
     }
 
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
@@ -382,7 +394,10 @@ open class OnjScreen @MainThreadOnly constructor(
         screenController?.update()
         updateCallbacks()
         lastRenderTime = measureTimeMillis {
+            val oldStyleManagers = styleManagers.toList()
             stage.act(Gdx.graphics.deltaTime)
+            styleManagers.filter { it !in oldStyleManagers }
+                .forEach(StyleManager::update) //all added items get updated too
             ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             if (stage.batch.isDrawing) stage.batch.end()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
@@ -390,8 +405,6 @@ open class OnjScreen @MainThreadOnly constructor(
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
             stage.batch.begin()
             currentHoverDetail?.let { actor ->
-                val child = (actor as CustomFlexBox).children[0] as CustomFlexBox
-                child.styleManager!!.update() //this maybe more often or so, try //TODO try this
                 actor.act(delta)
                 actor.draw(stage.batch, 1f)
             }
