@@ -554,7 +554,8 @@ class CardActor(
             if (button == 1) {
                 detailActor?.let {
                     val descriptionParent = getParentsForExtras(it).first
-                    showExtraDescriptions(descriptionParent)
+                    if (descriptionParent.children.isEmpty)
+                        showExtraDescriptions(descriptionParent)
                     return true
                 }
             }
