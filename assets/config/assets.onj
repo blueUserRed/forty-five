@@ -619,12 +619,16 @@ textures: [
         file: "textures/encounter_modifier/rain.png"
     },
     {
-        name: "hoverdetail_big_background",
-        file: "textures/cards/hoverDetail/hoverdetail_background.png"
+        name: "hover_detail_big_background",
+        file: "textures/cards/hover_detail/hover_detail_background.png"
     },
     {
-        name: "hoverdetail_small_background",
-        file: "textures/cards/hoverDetail/hoverdetail_effect_background.png"
+        name: "hover_detail_small_background",
+        file: "textures/cards/hover_detail/hover_detail_effect_background.png"
+    },
+    {
+        name: "hover_detail_more_info",
+        file: "textures/cards/hover_detail/hover_detail_more_info.png"
     },
 ],
 

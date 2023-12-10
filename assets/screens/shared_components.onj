@@ -790,43 +790,74 @@ warningLabelUsedAssets: [
 ],
 
 var cardHoverDetailExtrasWidth = 200.0;
+var cardHoverDetailMainWidth = 300.0;
+var cardHoverDetailTotalWidth = cardHoverDetailMainWidth + 2 * cardHoverDetailExtrasWidth;
 
-var tempCardHoverDetailExtraChild = $Box {
+cardHoverDetailExtra: $Box {
+    template_name: "card_hover_detail_extra",
+    template_keys: {
+        //        "children.0.rawText": "text", //TODO comment back in
+
+    },
     width: cardHoverDetailExtrasWidth,
     styles: [
         {
-            background: "hoverdetail_small_background",
-            height: 50#points,
-            padding: 15#points,
+            background: "hover_detail_small_background",
+            //            height: 50#points,
+
+            paddingLeft: 10#points,
+            paddingRight: 10#points,
             width: cardHoverDetailExtrasWidth#points,
             flexDirection: flexDirection.column,
             justifyContent: justify.spaceBetween,
         }
     ],
-};
+    children: [
+        $AdvancedText {
+            styles: [
+                {
+                    width: (cardHoverDetailExtrasWidth - 20)#points,
+                    marginBottom: 10#points,
+                    marginTop: 10#points,
+                    height: 110#percent,
+                }
+            ],
+            width: (cardHoverDetailExtrasWidth - 20),
+            font: "red_wing",
+            rawText: "On Shot\nThe enemy gets BURNING(t={turns} ) h h h h hh h h hh hh h h h h hh h h h h h h h h h h h h h hh h ah ah ah h wah wahwh w aw wa", //Text for testing
+
+            defaults: {
+                font: "red_wing",
+                fontScale: 0.5,
+                color: color.forty_white
+            } //TODO effects still missing
+
+        },
+    ],
+},
 var mainCardHoverDetailBox = $Box {
     styles: [
         {
-            background: "hoverdetail_big_background",
-            height: (250 / 1.2)#points,
-            width: 270#points,
+            background: "hover_detail_big_background",
+            height: (cardHoverDetailMainWidth / 1.2)#points,
+            width: cardHoverDetailMainWidth#points,
             padding: 15#points,
             flexDirection: flexDirection.column,
             justifyContent: justify.spaceBetween,
-            visible: false,
         }
     ],
-    width: 270.0,
+    name: "cardHoverDetailMain",
+    width: (cardHoverDetailMainWidth),
 
 } children [
 
     $AdvancedText {
         styles: [
             {
-                width: 250#points,
+                width: (cardHoverDetailMainWidth - 30)#points,
             }
         ],
-        width: 250.0,
+        width: (cardHoverDetailMainWidth - 30),
         font: "red_wing",
         rawText: "$trigger$On Shot$trigger$\nThe enemy gets $status$BURNING$status$ (t={turns} )", //Text for testing
 
@@ -835,49 +866,54 @@ var mainCardHoverDetailBox = $Box {
             fontScale: 0.5,
             color: color.forty_white
         },
-        effects: [ //kinda ugly that they are predefined here
+        effects: [
+        ], //kinda ugly that they are predefined here
 
-            $Color {
-                indicator: "$trigger$",
-                color: color.red
-            },
-            $FontScale {
-                indicator: "$trigger$",
-                fontScale: 0.8
-            },
-            $Color {
-                indicator: "$status$",
-                color: color.orange
-            },
-            $FontScale {
-                indicator: "$flavorText$",
-                fontScale: 0.4
-            },
+        //            $Color {
+//                indicator: "$trigger$",
+//                color: color.red
+//            },
+//            $FontScale {
+//                indicator: "$trigger$",
+//                fontScale: 0.8
+//            },
+//            $Color {
+//                indicator: "$status$",
+//                color: color.orange
+//            },
+//            $FontScale {
+//                indicator: "$flavorText$",
+//                fontScale: 0.4
+//            },
+            // handgeschriebens + (keyword search)
 
-            $FontScale {
-                indicator: "$flaveLineSize$",
-                fontScale: 0.063
-            },
-        ],
+        // Marvin: Stylesystem, Timelines, Onj, (Kampfablauf),
+                // Zwicki: Kotlin, Screens + Screen Beispiel (+Widgets) Heal_or_max_HP, KeyInputSystem,
+                    // MapGenerator, aber nicht zu technisch
+
+        //offen: Steam release prep. (eher Zwicki)
+//            $FontScale {
+//                indicator: "$flaveLineSize$",
+//                fontScale: 0.063
+//            },
+
     },
     $Box {
         styles: [
             {
                 style_priority: 1,
-                width: 250#points,
+                width: (cardHoverDetailMainWidth - 30)#points,
                 flexDirection: flexDirection.column,
                 paddingRight: 15#points,
-                //                visible: false, // TODO change back to true when finished with testing
-
-                visible: true,
+                visible: false,
             },
             {
                 style_priority: 2,
                 visible: true,
-                style_condition: actorState("hasFlavorText")
+                style_condition: state("hoverDetailHasFlavorText")
             }
         ],
-        width: 250.0,
+        width: (cardHoverDetailMainWidth - 30),
     } children [
         $Image {
             textureName: "forty_white_texture",
@@ -891,23 +927,82 @@ var mainCardHoverDetailBox = $Box {
                 }
             ],
         },
-        $AdvancedText {
+        $Box {
             styles: [
                 {
-                    width: 270#points,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+
                 }
             ],
-            width: 270.0,
-            font: "red_wing",
-            rawText: "I\'m pretty sure this is a Warcrime", //Text for testing
-
-            defaults: {
-                font: "red_wing",
-                fontScale: 0.4,
-                color: color.forty_white
-            },
+            children: [
+                $AdvancedText {
+                    styles: [
+                        {
+                            style_priority: 1,
+                            width: (cardHoverDetailMainWidth - 30)#points,
+                        },
+                        {
+                            style_priority: 2,
+                            width: (cardHoverDetailMainWidth - 30 - 50)#points,
+                            style_condition: state("hoverDetailHasMoreInfo")
+                        }
+                    ],
+                    width: (cardHoverDetailMainWidth - 30),
+                    font: "red_wing",
+                    rawText: "\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"", //Text for testing
+                    defaults: {
+                        font: "red_wing",
+                        fontScale: 0.4,
+                        color: color.forty_white
+                    },
+                },
+                $Image {
+                    textureName: "hover_detail_more_info",
+                    scaleX: 0.1,  //TODO needs to be changed when image is replaced with better resolution
+                    scaleY: 0.1,
+                    reportDimensionsWithScaling: true,
+                    styles: [
+                        {
+                            style_priority: 1,
+                            height: 50#points,
+                            width: 50#points,
+//                            positionRight: (50)#points,
+                            visible: true,
+                        },
+                        {
+                            style_priority: 2,
+                            visible: false,
+                            style_condition: not(state("hoverDetailHasMoreInfo"))
+                        }
+                    ],
+                },
+            ]
         }
-    ]
+    ],
+
+    $Image {
+        textureName: "hover_detail_more_info",
+        scaleX: 0.1, //TODO needs to be changed when image is replaced with better resolution
+        scaleY: 0.1,
+        reportDimensionsWithScaling: true,
+        styles: [
+            {
+                style_priority: 1,
+                height: 50#points,
+                width: 50#points,
+                positionType: positionType.absolute,
+                positionRight: 15#points,
+                positionBottom: 10#points,
+                visible: true,
+            },
+            {
+                style_priority: 2,
+                visible: false,
+                style_condition: state("hoverDetailHasFlavorText") or not(state("hoverDetailHasMoreInfo"))
+            }
+        ],
+    },
 ];
 cardHoverDetail: $Box {
     template_name: "card_hover_detail",
@@ -916,51 +1011,78 @@ cardHoverDetail: $Box {
 //        "children.0.children.1.children.1.rawText": "flavotText", //TODO comment back in
 
     },
-    width: 300.0 + 2 * cardHoverDetailExtrasWidth,
+    width: cardHoverDetailTotalWidth,
 } children [
-//    $Box {
-//        styles: [
-//            {
-//                flexDirection: flexDirection.row,
-//            }
-//        ],
-//    } children [
-//        $Box {
-//            name: "cardHoverDetailExtraLeft",
-//            width: cardHoverDetailExtrasWidth,
-//            styles: [
-//                {
-////                    background: "hoverdetail_big_background",
-//                    width: cardHoverDetailExtrasWidth#points,
-//                    flexDirection: flexDirection.column,
-//                }
-//            ],
-//        } children [
-//            tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
+    $Box {
+        styles: [
+            {
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                width: (cardHoverDetailTotalWidth)#points,
+            }
+        ],
+        width: cardHoverDetailTotalWidth,
+    } children [
+        $Box {
+            name: "cardHoverDetailExtraParentTop",
+            width: cardHoverDetailExtrasWidth,
+            styles: [
+                {
+                    width: cardHoverDetailExtrasWidth#points,
+                    flexDirection: flexDirection.column,
+                }
+            ],
+        } children [
+            //TODO fix bug with height if there are too many
 //            tempCardHoverDetailExtraChild,
 //            tempCardHoverDetailExtraChild,
-//        ],
+//            tempCardHoverDetailExtraChild,
+
+        ],
+    ],
+    $Box {
+        styles: [
+            {
+                flexDirection: flexDirection.row,
+                width: (cardHoverDetailTotalWidth)#points,
+            }
+        ],
+        width: cardHoverDetailTotalWidth,
+    } children [
+        $Box {
+            name: "cardHoverDetailExtraParentLeft",
+            width: cardHoverDetailExtrasWidth,
+            styles: [
+                {
+                    width: cardHoverDetailExtrasWidth#points,
+                    flexDirection: flexDirection.column,
+                }
+            ],
+        } children [
+            //            tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
+
+        ],
         mainCardHoverDetailBox,
-//        $Box {
-//            name: "cardHoverDetailExtraRight",
-//            width: cardHoverDetailExtrasWidth,
-//            styles: [
-//                {
-//                    width: cardHoverDetailExtrasWidth#points,
-//                    flexDirection: flexDirection.column,
-//                }
-//            ],
-//        } children [
-//            tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
-//            tempCardHoverDetailExtraChild,
-//            tempCardHoverDetailExtraChild,
-//        ],
-//    ]
+        $Box {
+            name: "cardHoverDetailExtraParentRight",
+            width: cardHoverDetailExtrasWidth,
+            styles: [
+                {
+                    width: cardHoverDetailExtrasWidth#points,
+                    flexDirection: flexDirection.column,
+                }
+            ],
+        } children [
+            //            tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
+
+        ],
+    ]
 ],
 
 cardHoverDetailUsedAssets: [
     "red_wing",
-    "hoverdetail_big_background",
-    "hoverdetail_small_background",
+    "hover_detail_big_background",
+    "hover_detail_small_background",
     "forty_white_texture",
+    "hover_detail_more_info",
 ]

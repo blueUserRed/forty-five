@@ -5,15 +5,17 @@ import com.badlogic.gdx.graphics.TextureData.Factory
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
-import ktx.actors.onClick
-import ktx.actors.onEnter
-import ktx.actors.onExit
+import com.kotcrab.vis.ui.widget.Draggable
+import ktx.actors.*
 import onj.value.OnjValue
 
 /**
@@ -152,14 +154,22 @@ interface HoverStateActor {
      * binds listeners to [actor] that automatically assign [isHoveredOver]
      */
     fun bindHoverStateListeners(actor: Actor) {
-        actor.onEnter { isHoveredOver = true }
-        actor.onClick { isClicked = true }
+        actor.onEnter {
+            if (!isHoveredOver) actor.fire(HoverEnterEvent())
+            isHoveredOver = true
+        }
+
+        actor.onTouchEvent { event, x, y, pointer, button ->
+            if (event.type == InputEvent.Type.touchUp) isClicked = true
+        } //onTouch needed, since onClick doesn't trigger rightClicks
         actor.onExit {
-            if (!isClicked) isHoveredOver = false
+            if (!isClicked) {
+                if (isHoveredOver) actor.fire(HoverLeaveEvent())
+                isHoveredOver = false
+            }
             isClicked = false
         }
     }
-
 }
 
 /**
