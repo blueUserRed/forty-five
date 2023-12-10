@@ -738,7 +738,7 @@ class CardActor(
                 max(x + actor.width / 2 - detailActor.width / 2, -mainFieldStartX),
                 stage.viewport.worldWidth - mainFieldEndX
             ),
-            y + actor.height,
+            y + actor.height - prefHeight + mainField.height,
             if (prefWidth == 0f) detailActor.width else prefWidth,
             prefHeight
         )

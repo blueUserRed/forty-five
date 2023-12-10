@@ -803,14 +803,11 @@ cardHoverDetailExtra: $Box {
     width: cardHoverDetailExtrasWidth,
     styles: [
         {
-//            background: "hover_detail_small_background",
-            //            height: 50#points,
-//            padding: 10#points,
             width: cardHoverDetailExtrasWidth#points,
             flexDirection: flexDirection.column,
             justifyContent: justify.spaceBetween,
             alignItems: align.center,
-            margin: 10#points,
+            marginBottom: 10#points,
         }
     ],
     children: [
@@ -823,7 +820,6 @@ cardHoverDetailExtra: $Box {
                     padding: 10#points,
                     alignItems: align.center,
                     flexDirection: flexDirection.column,
-
                 }
             ],
             children:[
@@ -831,9 +827,7 @@ cardHoverDetailExtra: $Box {
                     styles: [
                         {
                             width: (cardHoverDetailExtrasWidth - 20)#points,
-//                            positionBottom: 5#points,
                             positionTop: -5#points,
-//                            marginLeft:10#points,
                         }
                     ],
                     width: (cardHoverDetailExtrasWidth - 20),
