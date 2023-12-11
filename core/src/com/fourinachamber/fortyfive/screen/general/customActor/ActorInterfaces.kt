@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
 import ktx.actors.onClick
@@ -124,8 +125,8 @@ interface BoundedActor {
         val worldSpaceBounds = getBounds()
         val worldSpaceCoords = Vector2(worldSpaceBounds.x, worldSpaceBounds.y)
         val screenSpaceCoords = screen.viewport.project(worldSpaceCoords)
-        val screenSpaceWidth = (screen.viewport.screenWidth / screen.viewport.worldWidth) * worldSpaceBounds.width
-        val screenSpaceHeight = (screen.viewport.screenHeight / screen.viewport.worldHeight) * worldSpaceBounds.height
+        val (screenSpaceWidth, screenSpaceHeight) =
+            Utils.worldSpaceToScreenSpaceDimensions(worldSpaceBounds.width, worldSpaceBounds.height, screen.viewport)
         return Rectangle(screenSpaceCoords.x, screenSpaceCoords.y, screenSpaceWidth, screenSpaceHeight)
     }
 }

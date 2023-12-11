@@ -92,10 +92,11 @@ abstract class Behaviour(val actor: Actor) {
     fun bindCallbacks(onjScreen: OnjScreen) {
         this.onjScreen = onjScreen
         actor.addListener { event ->
-            return@addListener if (actor is DisableActor && !actor.isDisabled) {
-                onEventCapture?.invoke(event) ?: false
+            return@addListener if (actor is DisableActor) {
+                if (actor.isDisabled) onEventCapture?.invoke(event) ?: false
+                else onDisabledEventCapture?.invoke(event) ?: false
             } else {
-                onDisabledEventCapture?.invoke(event) ?: false
+                onEventCapture?.invoke(event) ?: false
             }
         }
         onHoverEnter?.let { actor.onEnter(it) }

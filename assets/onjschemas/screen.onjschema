@@ -464,7 +464,8 @@ $ScreenController {
     }
 
     $MapScreenController {
-        tutorialInfoActor: string
+        tutorialInfoActor: string,
+        mapWidgetName: string
     }
 }
 
