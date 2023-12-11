@@ -363,6 +363,10 @@ class DetailMapWidget(
         }
     }
 
+    fun screenSpacePlayerBounds(): Rectangle {
+        val playerPos = scaledNodePos(playerNode) + mapOffset
+        return Rectangle(playerPos.x, playerPos.y, playerHeight, playerWidth)
+    }
 
     private fun drawDecorations(batch: Batch) {
         val (offX, offY) = mapOffset

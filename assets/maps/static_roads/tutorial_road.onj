@@ -2,6 +2,7 @@ tutorialText: [
     {
         text: "The player icon shows where on the map you are.",
         confirmationText: "Next",
+        highlightObject: "player",
         triggerOnNodes: [0],
     },
     {

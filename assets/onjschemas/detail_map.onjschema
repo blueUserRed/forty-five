@@ -5,6 +5,7 @@ var tutorialText = {
     confirmationText: string,
     focusActor?: string,
     triggerOnNodes: int[],
+    highlightObject?: string,
 };
 
 tutorialText?: tutorialText[],

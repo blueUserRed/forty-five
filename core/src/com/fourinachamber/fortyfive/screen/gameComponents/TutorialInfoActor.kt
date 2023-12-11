@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.screen.gameComponents
 
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.Circle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -9,7 +11,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.BoundedActor
-import com.fourinachamber.fortyfive.utils.Vector2
 import java.lang.Float.max
 
 class TutorialInfoActor(
@@ -23,12 +24,14 @@ class TutorialInfoActor(
         ResourceManager.get(screen, maskedBackgroundTextureName)
     }
 
-    var focusActor: BoundedActor? = null
+//    var focusActor: BoundedActor? = null
+
+    private var positionProvider: (() -> Circle)? = null
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         batch ?: return
-        val focusActor = focusActor
-        if (focusActor == null) {
+        val focus = positionProvider?.let { it() }
+        if (focus == null) {
             loadedBackground.draw(batch, x, y, width, height)
             super.draw(batch, parentAlpha)
             return
@@ -36,10 +39,12 @@ class TutorialInfoActor(
         batch.flush()
         batch.shader = shader.shader
         shader.prepare(screen)
-        val bounds = focusActor.getScreenSpaceBounds(screen)
-        val center = Vector2(0, 0)
-        bounds.getCenter(center)
-        val radius = max(bounds.width, bounds.height) * 0.5f * circleRadiusMultiplier + circleRadiusExtension
+//        val bounds = focusActor.getScreenSpaceBounds(screen)
+//        val center = Vector2(0, 0)
+//        bounds.getCenter(center)
+//        val radius = max(bounds.width, bounds.height) * 0.5f * circleRadiusMultiplier + circleRadiusExtension
+        val center = Vector2(focus.x, focus.y)
+        val radius = focus.radius
         shader.shader.setUniformf("u_center", center)
         shader.shader.setUniformf("u_radius", radius)
         loadedBackground.draw(batch, x, y, width, height)
@@ -53,7 +58,21 @@ class TutorialInfoActor(
         if (actor !is BoundedActor) {
             throw RuntimeException("Actor '$name' must implement BoundedActor to be focused by TutorialInfoActor")
         }
-        focusActor = actor
+        positionProvider = {
+            val bounds = actor.getScreenSpaceBounds(screen)
+            val center = Vector2(0f, 0f)
+            bounds.getCenter(center)
+            val radius = max(bounds.width, bounds.height) * 0.5f * circleRadiusMultiplier + circleRadiusExtension
+            Circle(center, radius)
+        }
+    }
+
+    fun focusByLambda(positionProvider: () -> Circle) {
+        this.positionProvider = positionProvider
+    }
+
+    fun removeFocus() {
+        positionProvider = null
     }
 
     companion object {

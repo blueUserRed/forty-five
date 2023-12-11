@@ -256,6 +256,12 @@ object Utils {
         return viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
     }
 
+    fun worldSpaceToScreenSpaceDimensions(width: Float, height: Float, viewport: Viewport): Pair<Float, Float> {
+        val screenSpaceWidth = (viewport.screenWidth / viewport.worldWidth) * width
+        val screenSpaceHeight = (viewport.screenHeight / viewport.worldHeight) * height
+        return screenSpaceHeight to screenSpaceWidth
+    }
+
     /**
      * loads either a custom cursor or a system cursor
      * @throws RuntimeException when [cursorName] is not known

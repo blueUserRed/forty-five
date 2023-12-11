@@ -55,7 +55,8 @@ options: {
     transitionAwayTime: 1.0,
     background: "title_screen_background",
     screenController: $MapScreenController {
-        tutorialInfoActor: "tutorialInfoActor"
+        tutorialInfoActor: "tutorialInfoActor",
+        mapWidgetName: "map"
     },
     inputMap: [
         ...(inputMaps.defaultInputMap),

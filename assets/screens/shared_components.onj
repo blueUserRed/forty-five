@@ -890,7 +890,13 @@ tutorialInfoActor: $TutorialInfoActor {
                 background: "common_button_hover",
             }
         ],
-        touchable: "enabled"
+        touchable: "enabled",
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "TutorialConfirmedEvent"
+            }
+        ],
     } children [
         $TemplateLabel {
             font: "red_wing",
@@ -898,12 +904,6 @@ tutorialInfoActor: $TutorialInfoActor {
             fontScale: 0.9,
             align: "center",
             color: color.white,
-            behaviours: [
-                $CatchEventAndEmitBehaviour {
-                    catch: "ButtonClickEvent",
-                    emit: "TutorialConfirmedEvent"
-                }
-            ],
         },
     ],
 ],

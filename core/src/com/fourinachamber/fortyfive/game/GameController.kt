@@ -335,7 +335,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)
         TemplateString.updateGlobalParam("game.tutorial.confirmButtonText", tutorialTextPart.confirmationText)
         if (tutorialTextPart.focusActorName == null) {
-            tutorialInfoActor.focusActor = null
+            tutorialInfoActor.removeFocus()
         } else {
             tutorialInfoActor.focusActor(tutorialTextPart.focusActorName)
         }
