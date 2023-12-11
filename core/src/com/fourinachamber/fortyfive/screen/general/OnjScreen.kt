@@ -276,6 +276,10 @@ open class OnjScreen @MainThreadOnly constructor(
         namedActors[name] = actor
     }
 
+    fun removeNamedActor(name: String) {
+        namedActors.remove(name)
+    }
+
     private fun getAsOnjValue(value: Any?): OnjValue {
         return when (value) {
             is OnjValue -> value

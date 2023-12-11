@@ -599,7 +599,7 @@ class CardActor(
     }
 
     override fun getBounds(): Rectangle {
-        val (x, y) = localToScreenCoordinates(Vector2(0f, 0f))
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         return Rectangle(x, y, width, height)
     }
 

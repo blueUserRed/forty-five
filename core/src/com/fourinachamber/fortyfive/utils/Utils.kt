@@ -166,7 +166,7 @@ val AtomicInteger.get: Int
 fun OnjArray.toIntRange(): IntRange {
     val first = this.get<Long>(0).toInt()
     val second = this.get<Long>(1).toInt()
-    if (second <= first) throw RuntimeException("second value must be higher than first when creating an IntRange")
+    if (second < first) throw RuntimeException("second value must be higher than first when creating an IntRange")
     return first..second
 }
 

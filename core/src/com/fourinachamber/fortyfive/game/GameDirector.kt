@@ -43,8 +43,6 @@ class GameDirector(private val controller: GameController) {
         controller.initEnemyArea(enemies)
     }
 
-    fun getPlayerCards(): List<String> = encounter.forceCards ?: SaveState.cards
-
     fun chooseEnemyActions() {
         controller.activeEnemies.forEach { enemy ->
             val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty)
@@ -83,6 +81,7 @@ class GameDirector(private val controller: GameController) {
         val progress: ClosedFloatingPointRange<Float>,
         val weight: Int,
         val forceCards: List<String>?,
+        val shuffleCards: Boolean,
         val special: Boolean,
         val tutorialTextParts: List<GameTutorialTextPart>
     )
@@ -134,6 +133,7 @@ class GameDirector(private val controller: GameController) {
                     obj.get<OnjArray>("progress").toFloatRange(),
                     obj.get<Long>("weight").toInt(),
                     obj.getOr<OnjArray?>("forceCards", null)?.value?.map { it.value as String },
+                    obj.getOr("shuffleCards", true),
                     obj.getOr("special", false),
                     obj.getOr<OnjArray?>("tutorialText", null)
                         ?.value

@@ -348,7 +348,7 @@ class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBra
         .map { it as OnjObject }
         .map {
             Triple(
-                it.get<Long>("turn").toInt(),
+                it.get<Long>("turn").toInt() - 1, // controller counts from 0
                 EnemyActionPrototype.fromOnj(it.get<OnjNamedObject>("action"), enemy),
                 it.get<Boolean>("show")
             )
@@ -357,7 +357,10 @@ class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBra
     private var createdAction: EnemyAction? = null
 
     override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
-        createdAction?.let { return it }
+        createdAction?.let {
+            createdAction = null
+            return it
+        }
         val (_, actionProto, _) = actions
             .find { (turn, _, _) -> turn == controller.turnCounter }
             ?: return null

@@ -16,6 +16,7 @@ var encounter = {
     weight: int,
     forceCards?: string[],
     special?: boolean,
+    shuffleCards?: boolean,
     tutorialText?: tutorialText[],
 };
 
