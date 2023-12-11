@@ -44,4 +44,7 @@ $GamePredicate {
     $PlayerHasRunOutOfReserves {
     }
 
+    $PlayerHasPlayedSilverBulletAndDrawnCards {
+    }
+
 }

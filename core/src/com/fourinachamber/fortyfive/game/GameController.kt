@@ -212,7 +212,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
-        val cards = gameDirector.getPlayerCards()
+        val cards = gameDirector.encounter.forceCards ?: SaveState.cards
 
         val cardsArray = onj.get<OnjArray>("cards")
 
@@ -239,7 +239,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardStack.add(card.create())
         }
 
-        cardStack.shuffle()
+        if (gameDirector.encounter.shuffleCards) cardStack.shuffle()
 
         _remainingCards = cardStack.size
 

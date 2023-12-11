@@ -341,7 +341,7 @@ enemies: [
     {
         name: "tutorial_enemy_2",
         title: "Outlaw",
-        baseHealth: 18,
+        baseHealth: 25,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -358,7 +358,7 @@ enemies: [
                     turn: 1,
                     show: true,
                     action: $DamagePlayer {
-                        damage: [ 11, 11 ],
+                        damage: [ 6, 6 ],
                         showProbability: 1.0,
                         weight: 0,
                         scaleFactor: 1.0,
@@ -368,6 +368,170 @@ enemies: [
                         descriptionTemplate: "This attack does {damage} damage",
                     }
                 }
+            ],
+        },
+        detailFontColor: color.black
+    },
+    {
+        name: "tutorial_enemy_3",
+        title: "Outlaw",
+        baseHealth: 45,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.25,
+        scaleY: 0.25,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $ScriptedEnemyBrain {
+            actions: [
+                {
+                    turn: 3,
+                    show: true,
+                    action: $DamagePlayer {
+                        damage: [ 25, 25 ],
+                        showProbability: 1.0,
+                        weight: 0,
+                        scaleFactor: 1.0,
+                        icon: "enemy_action_damage",
+                        hasSpecialAnimation: false,
+                        title: "Damage",
+                        descriptionTemplate: "This attack does {damage} damage",
+                    }
+                }
+            ],
+        },
+        detailFontColor: color.black
+    },
+    {
+        name: "tutorial_enemy_4",
+        title: "Outlaw",
+        baseHealth: 42,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.25,
+        scaleY: 0.25,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $ScriptedEnemyBrain {
+            actions: [
+                {
+                    turn: 2,
+                    show: true,
+                    action: $DamagePlayer {
+                        damage: [ 25, 25 ],
+                        showProbability: 1.0,
+                        weight: 0,
+                        scaleFactor: 1.0,
+                        icon: "enemy_action_damage",
+                        hasSpecialAnimation: false,
+                        title: "Damage",
+                        descriptionTemplate: "This attack does {damage} damage",
+                    }
+                }
+            ],
+        },
+        detailFontColor: color.black
+    },
+    {
+        name: "tutorial_enemy_5",
+        title: "Outlaw",
+        baseHealth: 55,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.25,
+        scaleY: 0.25,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $ScriptedEnemyBrain {
+            actions: [
+                {
+                    turn: 2,
+                    show: true,
+                    action: $DamagePlayer {
+                        damage: [ 25, 25 ],
+                        showProbability: 1.0,
+                        weight: 0,
+                        scaleFactor: 1.0,
+                        icon: "enemy_action_damage",
+                        hasSpecialAnimation: false,
+                        title: "Damage",
+                        descriptionTemplate: "This attack does {damage} damage",
+                    }
+                }
+            ],
+        },
+        detailFontColor: color.black
+    },
+    {
+        name: "tutorial_enemy_6",
+        title: "Outlaw",
+        baseHealth: 75,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.2,
+        indicatorIconScale: 0.6,
+        scaleX: 0.25,
+        scaleY: 0.25,
+        detailFont: "red_wing",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $ScriptedEnemyBrain {
+            actions: [
+                {
+                    turn: 2,
+                    show: true,
+                    action: $DamagePlayer {
+                        damage: [ 7, 7 ],
+                        showProbability: 1.0,
+                        weight: 0,
+                        scaleFactor: 1.0,
+                        icon: "enemy_action_damage",
+                        hasSpecialAnimation: false,
+                        title: "Damage",
+                        descriptionTemplate: "This attack does {damage} damage",
+                    }
+                },
+                {
+                    turn: 3,
+                    show: true,
+                    action: $DamagePlayer {
+                        damage: [ 5, 5 ],
+                        showProbability: 1.0,
+                        weight: 0,
+                        scaleFactor: 1.0,
+                        icon: "enemy_action_damage",
+                        hasSpecialAnimation: false,
+                        title: "Damage",
+                        descriptionTemplate: "This attack does {damage} damage",
+                    }
+                },
+                {
+                    turn: 4,
+                    show: true,
+                    action: $DamagePlayer {
+                        damage: [ 16, 16 ],
+                        showProbability: 1.0,
+                        weight: 0,
+                        scaleFactor: 1.0,
+                        icon: "enemy_action_damage",
+                        hasSpecialAnimation: false,
+                        title: "Damage",
+                        descriptionTemplate: "This attack does {damage} damage",
+                    }
+                },
             ],
         },
         detailFontColor: color.black

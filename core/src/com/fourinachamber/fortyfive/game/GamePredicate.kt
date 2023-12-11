@@ -51,6 +51,11 @@ fun interface GamePredicate {
 
         val playerHasRunOutOfReserves = GamePredicate { controller -> controller.curReserves == 0 }
 
+        // I know this is oddly specific, but I need it for the tutorial text
+        val playerHasPlayedSilverBulletAndDrawnCards = GamePredicate { controller ->
+            controller.revolver.slots.mapNotNull { it.card?.name }.contains("silverBullet") && controller.inFreePhase
+        }
+
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
@@ -73,6 +78,7 @@ fun interface GamePredicate {
             "TargetedEnemyHasAnyStatusEffect" -> targetedEnemyHasAnyStatusEffect
             "GameInFreePhase" -> gameInFreePhase
             "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
+            "PlayerHasPlayedSilverBulletAndDrawnCards" -> playerHasPlayedSilverBulletAndDrawnCards
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

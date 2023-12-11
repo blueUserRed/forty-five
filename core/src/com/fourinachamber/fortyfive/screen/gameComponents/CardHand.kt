@@ -89,6 +89,9 @@ class CardHand(
     fun addCard(card: Card) {
         _cards.add((_cards.size / 2), card)
         if (card.actor !in this) addActor(card.actor)
+        // This breaks when multiple cards with the same name are added, but because this is only used in the tutorial
+        // it shouldn't matter
+        screen.addNamedActor("card-${card.name}", card.actor)
         invalidateHierarchy()
     }
 
@@ -98,6 +101,7 @@ class CardHand(
     fun removeCard(card: Card) {
         _cards.remove(card)
         removeActor(card.actor)
+        screen.removeNamedActor("card-${card.name}")
         invalidateHierarchy()
     }
 

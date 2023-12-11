@@ -21,7 +21,7 @@ tutorialText: [
     },
 ],
 startNode: 0,
-endNode: 3,
+endNode: 11,
 biome: "wasteland",
 progress: [0.0, 0.1],
 nodes: [
@@ -61,13 +61,105 @@ nodes: [
         x: 140.0,
         y: 90.0,
         edgesTo: [
-            1, 2
+            1, 2, 4
         ],
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
+            currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
             encounterIndex: 1,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 180.0,
+        y: 90.0,
+        edgesTo: [
+            3, 5
+        ],
+        event: $EmptyMapEvent { // draw silver bullet
+        },
+    },
+    {
+        x: 220.0,
+        y: 90.0,
+        edgesTo: [
+            4, 6
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 2,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 260.0,
+        y: 90.0,
+        edgesTo: [
+            5, 7,
+        ],
+        event: $EmptyMapEvent { // draw workerBullet
+        },
+    },
+    {
+        x: 300.0,
+        y: 90.0,
+        edgesTo: [
+            6, 8
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 3,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 340.0,
+        y: 90.0,
+        edgesTo: [
+            7, 9,
+        ],
+        event: $EmptyMapEvent { // draw incendiaryBullet
+        },
+    },
+    {
+        x: 380.0,
+        y: 90.0,
+        edgesTo: [
+            8, 10
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 4,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 420.0,
+        y: 90.0,
+        edgesTo: [
+            9, 11,
+        ],
+        event: $EmptyMapEvent { // draw leadersBullet
+        },
+    },
+    {
+        x: 460.0,
+        y: 90.0,
+        edgesTo: [
+            10
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 5,
             distanceToEnd: -1,
         }
     },

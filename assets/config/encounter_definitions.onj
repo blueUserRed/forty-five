@@ -63,8 +63,127 @@ var tutorialEncounters = [
         progress: [1000.0, 1000.1],
         weight: 0,
         special: true,
-        forceCards: [ "bullet", "bullet", "bullet", "bigBullet" ],
-    }
+        shuffleCards: false,
+        forceCards: [ "bullet", "bigBullet", "bullet", "bullet" ],
+        tutorialText: [
+            {
+                text: "The symbol over the enemy's head indicates the action that the enemy will take on their next turn (after you press ‘end turn’). In this case, it is dealing 6 damage.",
+                confirmationText: "Next",
+                focusActor: "attackIndicator",
+                predicate:  $GameInFreePhase { }
+            },
+            {
+                text: "You can parry using a bullet in your revolver. If you have a bullet in slot 5 when the enemy's turn starts, you can either parry or choose not to.",
+                confirmationText: "Next",
+                focusActor: "revolverSlot-4",
+            },
+            {
+                text: "If you parry, the bullet in slot 5 is gone. When parrying with a bullet, the damage value of the bullet is subtracted from the damage value of the enemy.",
+                confirmationText: "Next",
+                focusActor: "revolverSlot-4",
+            },
+            {
+                text: "If you take too much damage, you die. When you die before you make it to the end of the road, all the cards you collected before reaching the next Area (Aqua Dulche) will be lost. If cards are saved once by reaching an Area, you can't lose them anymore.",
+                confirmationText: "Ok",
+                focusActor: "player_health_icon",
+            },
+        ]
+    },
+    {
+        // TODO: encounter is beatable without using silver bullet
+        enemies: ["tutorial_enemy_3"],
+        encounterModifier: [],
+        biomes: ["Wasteland"],
+        progress: [1000.0, 1000.1],
+        weight: 0,
+        special: true,
+        forceCards: [ "bullet", "bullet", "bullet", "bigBullet", "silverBullet" ],
+        tutorialText: [
+            {
+                text: "You have drawn your newly obtained card. You can hover over it to see its effect.",
+                confirmationText: "Next",
+                focusActor: "card-silverBullet",
+                predicate:  $GameInFreePhase { }
+            },
+            {
+                text: "Each bullet can have a unique effect. There are different ways a bullet's effect can be activated, called triggers.",
+                confirmationText: "Next",
+                focusActor: "card-silverBullet",
+            },
+            {
+                text: "The two most important triggers are found on this bullet. Let's look at one of them: On-Placedown effects are activated when it is placed in the revolver.",
+                confirmationText: "Next",
+                focusActor: "card-silverBullet",
+            },
+            {
+                text: "Silver Bullet lets you draw additional cards. When your deck is empty, you will only draw normal bullets.",
+                confirmationText: "Ok",
+                focusActor: "card-silverBullet",
+            },
+            {
+                text: "The second important trigger is On-Shot: On-Shot effects are activated when the bullet is shot at an enemy.",
+                confirmationText: "Ok",
+                predicate: $PlayerHasPlayedSilverBulletAndDrawnCards { },
+            },
+        ]
+    },
+    {
+        enemies: ["tutorial_enemy_4"],
+        encounterModifier: [],
+        biomes: ["Wasteland"],
+        progress: [1000.0, 1000.1],
+        weight: 0,
+        special: true,
+        shuffleCards: false,
+        forceCards: [
+            "bigBullet", "silverBullet", "workerBullet", "bullet", "bullet", "bullet",
+        ],
+        tutorialText: [
+            {
+                text: "You have drawn your newly obtained card. You can hover over it to see its effect.",
+                confirmationText: "Next",
+                focusActor: "card-workerBullet",
+                predicate:  $GameInFreePhase { }
+            },
+            {
+                text: "Workers Bullet has the trigger: \"While in revolver; at the beginning of your turn:\" This trigger activates as always when you start your turn, under the condition that workers bullet is in the revolver.",
+                confirmationText: "Ok",
+                focusActor: "card-workerBullet",
+            },
+        ]
+    },
+    {
+        enemies: ["tutorial_enemy_5"],
+        encounterModifier: [],
+        biomes: ["Wasteland"],
+        progress: [1000.0, 1000.1],
+        weight: 0,
+        special: true,
+        shuffleCards: false,
+        forceCards: [
+            "bullet", "bullet", "bigBullet", "incendiaryBullet", "workerBullet", "bullet", "silverBullet",
+        ],
+        tutorialText: [
+            {
+                text: "Incendiary Bullet's effect gives the enemy a so-called status effect. Both the enemies and the players can have status effects. Most status effects only last a limited amount of time. That time can be given either as the number of times the revolver rotates or the amount of turns played.",
+                confirmationText: "ok",
+                focusActor: "card-incendiaryBullet",
+                predicate:  $GameInFreePhase { }
+            },
+        ]
+    },
+    {
+        enemies: ["tutorial_enemy_6"],
+        encounterModifier: [],
+        biomes: ["Wasteland"],
+        progress: [1000.0, 1000.1],
+        weight: 0,
+        special: true,
+        shuffleCards: false,
+        forceCards: [
+            "bullet", "leadersBullet", "bigBullet", "incendiaryBullet", "workerBullet", "bullet", "bullet", "silverBullet",
+        ],
+    },
 ];
 
 encounter: [
