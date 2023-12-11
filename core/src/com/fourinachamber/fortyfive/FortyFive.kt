@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
@@ -83,6 +84,7 @@ object FortyFive : Game() {
     }
 
     private fun init() {
+        ShaderProgram.pedantic = false
         with(OnjConfig) {
             registerNameSpace("Common", CommonNamespace)
             registerNameSpace("Cards", CardsNamespace)
@@ -95,7 +97,7 @@ object FortyFive : Game() {
         GameDirector.init()
         MapManager.init()
 //        resetAll()
-        newRun()
+//        newRun()
         PermaSaveState.read()
         SaveState.read()
         MapManager.read()
