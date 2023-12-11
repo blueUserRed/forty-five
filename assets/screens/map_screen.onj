@@ -128,7 +128,7 @@ var mapBox = $Box {
         detailMapProvider: $CurrentMapProvider {
         },
         nodeSize: 60.0,
-        lineWidth: 20.0,
+        lineWidth: 10.0,
         mapScale: 10.0,
         name: "map",
         defaultNodeTexture: "map_node_default",

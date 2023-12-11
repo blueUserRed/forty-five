@@ -19,10 +19,9 @@ uniform sampler2D u_texture;
 uniform float u_lineLength;
 
 void main() {
-    u_lineLength;
-    float patternLength = 4.0;
+    float patternLength = 3.0;
     float patternBlack = 0.6;
-    vec4 color = v_color * texture2D(u_texture, v_texCoords);
+    // vec4 color = v_color * texture2D(u_texture, v_texCoords);
     float dist = v_texCoords.y * u_lineLength * 0.05;
     float alpha = mod(dist, patternLength) < patternLength * patternBlack ? 1.0 : 0.0;
     gl_FragColor = vec4(0.0, 0.0, 0.0, alpha);
