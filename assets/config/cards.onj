@@ -9,6 +9,7 @@ var bSelects = {
     fourButNotSelf: bNum([4]),
     threeButNotSelf: bNum([3]),
     targetRequiredNotSelf: bSelectTarget(false, false),
+    targetOptionalNotSelf: bSelectTarget(false, true),
     neighbors: bSelectNeighbors(),
     self: bSelectSelf()
 };
@@ -778,6 +779,26 @@ cards: [
         ],
         forceLoadCards: [],
         cost: 2,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
+    {
+        name: "sacrificialBullet",
+        title: "sacrificial Bullet",
+        flavourText: "sacrificial Bullet",
+        description: "When this Bullet is destroyed: Target Bullet gets +5 dmg, then, return Sacrificfial Bullet to your hand.",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("destroy", bSelects.targetOptionalNotSelf, 5#val),
+            putCardInHand("destroy", "sacrificialBullet", 1#val)
+        ],
+        forceLoadCards: [],
+        cost: 1,
         type: $Bullet { },
         tags: ["pool2"],
         price: 0,
