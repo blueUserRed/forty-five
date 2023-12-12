@@ -56,6 +56,10 @@ fun interface GamePredicate {
             controller.revolver.slots.mapNotNull { it.card?.name }.contains("silverBullet") && controller.inFreePhase
         }
 
+        val targetedEnemyHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
+            statusEffect in controller.enemyArea.getTargetedEnemy().statusEffects
+        } }
+
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
@@ -79,6 +83,7 @@ fun interface GamePredicate {
             "GameInFreePhase" -> gameInFreePhase
             "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
             "PlayerHasPlayedSilverBulletAndDrawnCards" -> playerHasPlayedSilverBulletAndDrawnCards
+            "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

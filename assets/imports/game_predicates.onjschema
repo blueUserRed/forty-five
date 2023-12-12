@@ -47,4 +47,8 @@ $GamePredicate {
     $PlayerHasPlayedSilverBulletAndDrawnCards {
     }
 
+    $TargetedEnemyHasStatusEffect {
+        value: StatusEffect
+    }
+
 }

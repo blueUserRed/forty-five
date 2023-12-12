@@ -13,6 +13,9 @@ import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
+import onj.parser.OnjParser
+import onj.value.OnjArray
+import onj.value.OnjObject
 
 /**
  * main game object
@@ -104,6 +107,8 @@ object FortyFive : Game() {
         GraphicsConfig.init()
         ResourceManager.init()
         RandomCardSelection.init()
+//        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
+//        println(cards.get<OnjArray>("cards").value.size)
     }
 
     override fun dispose() {

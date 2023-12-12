@@ -706,6 +706,26 @@ cards: [
         tags: ["pool1"],
         price: 0,
     },
+    {
+        name: "toxicBullet",
+        title: "Toxic Bullet",
+        flavourText: "Toxic Bullet",
+        description: "As long as the enemy is poisoned: this Bullet gets +14 dmg",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0, 0) }#activeChecker)
+        ],
+        forbiddenSlots: [3],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
 
 ],
 
