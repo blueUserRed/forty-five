@@ -94,6 +94,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value, false))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
+    fun givePlayerStatus(trigger: OnjString, effect: OnjStatusEffect): OnjEffect {
+        return OnjEffect(Effect.GivePlayerStatus(triggerOrError(trigger.value), effect.value, false))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, EffectValue]")
     fun putCardInHand(trigger: OnjString, name: OnjString, amount: OnjEffectValue): OnjEffect {
         return OnjEffect(

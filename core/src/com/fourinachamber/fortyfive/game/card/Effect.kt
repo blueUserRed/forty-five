@@ -363,6 +363,23 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = BounceBullet(trigger, bulletSelector, triggerInHand)
     }
 
+    class GivePlayerStatus(
+        trigger: Trigger,
+        val statusEffectCreator: StatusEffectCreator,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            action {
+                controller.applyStatusEffectToPlayer(statusEffectCreator())
+            }
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = GivePlayerStatus(trigger, statusEffectCreator, triggerInHand)
+    }
+
 }
 
 /**

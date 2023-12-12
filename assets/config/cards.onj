@@ -699,7 +699,6 @@ cards: [
         effects: [
             bounce("enter", bSelects.threeButNotSelf)
         ],
-        forbiddenSlots: [3],
         forceLoadCards: [],
         cost: 1,
         type: $Bullet { },
@@ -719,7 +718,26 @@ cards: [
         effects: [
             buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0, 0) }#activeChecker)
         ],
-        forbiddenSlots: [3],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
+    {
+        name: "fullLeadBullet",
+        title: "Full Lead Bullet",
+        flavourText: "Full Lead Bullet",
+        description: "While in Revolver: you get POISON (DMG d: 8 TURNS t: 1) on shot: the enemy gets POISON (DMG d: 8 TURNS t: 5)",
+        baseDamage: 8,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giveStatus("shot", poison(5, 8)),
+            givePlayerStatus("round start", poison(1, 8)),
+        ],
         forceLoadCards: [],
         cost: 1,
         type: $Bullet { },
