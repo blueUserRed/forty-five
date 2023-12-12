@@ -447,7 +447,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) = appendMainTimeline(Timeline.timeline {
-        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this@GameController)) return
+        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this@GameController, slot)) return
         val cardInSlot = revolver.getCardInSlot(slot)
         if (!(cardInSlot?.isReplaceable ?: true)) return
         if (!cost(card.cost)) return
@@ -838,6 +838,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "destroyed card: $card")
         }
         include(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
+    }
+
+    fun bounceBullet(card: Card): Timeline = Timeline.timeline {
+        action {
+            if (card !in revolver.slots.mapNotNull { it.card }) {
+                throw RuntimeException("cant bounce card $card because it isn't in the revolver")
+            }
+            revolver.removeCard(card)
+            card.leaveGame()
+        }
+        include(tryToPutCardsInHandTimeline(card.name))
     }
 
     @MainThreadOnly

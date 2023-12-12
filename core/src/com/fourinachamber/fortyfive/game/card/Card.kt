@@ -75,6 +75,7 @@ class Card(
     val rotationDirection: RevolverRotation,
     val highlightType: HighlightType,
     val tags: List<String>,
+    val forbiddenSlots: List<Int>,
     font: PixmapFont,
     fontColor: Color,
     fontScale: Float,
@@ -232,7 +233,8 @@ class Card(
     /**
      * checks whether this card can currently enter the game
      */
-    fun allowsEnteringGame(controller: GameController): Boolean = !effects.any { it.blocks(controller) }
+    fun allowsEnteringGame(controller: GameController, slot: Int): Boolean =
+        slot !in forbiddenSlots && effects.none { it.blocks(controller) }
 
     /**
      * called when this card was destroyed by the destroy effect
@@ -426,6 +428,12 @@ class Card(
                 rotationDirection = RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
                 highlightType = HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
                 tags = onj.get<OnjArray>("tags").value.map { it.value as String },
+                forbiddenSlots = onj
+                    .getOr<OnjArray?>("forbiddenSlots", null)
+                    ?.value
+                    ?.map { (it.value as Long).toInt() }
+                    ?.map { Utils.externalToInternalSlotRepresentation(it) }
+                    ?: listOf(),
                 //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(onjScreen),
                 fontColor = GraphicsConfig.cardFontColor(),
