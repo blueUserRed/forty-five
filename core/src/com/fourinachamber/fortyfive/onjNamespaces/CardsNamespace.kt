@@ -145,6 +145,20 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.BounceBullet(triggerOrError(trigger.value), bulletSelector.value, false))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, string, int]")
+    fun turnRevolver(trigger: OnjString, rotationDirection: OnjString, amount: OnjInt): OnjEffect {
+        return OnjEffect(Effect.TurnRevolver(
+            triggerOrError(trigger.value),
+            when (rotationDirection.value) {
+                "left" -> GameController.RevolverRotation.Left(amount.value.toInt())
+                "right" -> GameController.RevolverRotation.Right(amount.value.toInt())
+                "none" -> GameController.RevolverRotation.None
+                else -> throw RuntimeException("unknown rotation direction: ${rotationDirection.value}")
+            },
+            false
+        ))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
     fun canTriggerInHand(effect: OnjEffect): OnjEffect {
         return OnjEffect(effect.value.copy().apply { triggerInHand = true })
@@ -274,6 +288,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "rotation" -> Trigger.ON_REVOLVER_ROTATION
         "card drawn" -> Trigger.ON_CARDS_DRAWN
         "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
+        "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 
