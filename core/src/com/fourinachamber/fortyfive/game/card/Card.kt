@@ -21,7 +21,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
-import dev.lyze.flexbox.FlexBox
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -127,7 +126,10 @@ class Card(
     val modifiers: List<CardModifier>
         get() = _modifiers
 
-    var currentHoverText: String = ""
+    /**
+     * first ist the keyword, second is the actual text
+     */
+    var currentHoverTexts: List<Pair<String, String>> = listOf()
         private set
 
     private var protectingModifiers: MutableList<Triple<String, Int, () -> Boolean>> = mutableListOf()
@@ -330,29 +332,26 @@ class Card(
     }
 
     private fun updateText(controller: GameController) {
-        val text = StringBuilder()
-        text.append(shortDescription)
+        val currentEffects = mutableListOf<Pair<String, String>>()
+        if (activeModifiers(controller).any { it.damage != 0 }) {
+            val allDamageEffects = activeModifiers(controller).filter { it.damage != 0 }
+            val damageChange = allDamageEffects.sumOf { it.damage }
+            val damageText = allDamageEffects
+                .joinToString(
+                    separator = ", ",
+                    prefix = "${if (damageChange > 0) "+" else ""}$damageChange by ",
+                    transform = { it.source })
+            currentEffects.add("dmgBuff" to "\$dmgBuff\$$damageText\$dmgBuff\$")
+            //this is the only special keyword, since it doesn't need a description
+        }
+
+        if (protectingModifiers.isNotEmpty()) {
+            val total = protectingModifiers.sumOf { it.second }
+            currentEffects.add("protected" to "\$trait\$+ PROTECTED $total\$trait\$")
+        }
+
+        currentHoverTexts = currentEffects
         actor.updateDetailStates()
-
-//        controller.curScreen.enterState("hoverDetailHasFlavorText")
-//        if (activeModifiers(controller).any { it.damage != 0 }) {
-//            val damageText = activeModifiers(controller)
-//                .filter { it.damage != 0 }
-//                .joinToString(separator = ", ", prefix = "Damage was changed by: ", transform = { it.source })
-//            text.append("\n").append(damageText)
-//        } //TODO modifiers
-
-//        if (protectingModifiers.isNotEmpty()) {
-//            val total = protectingModifiers.sumOf { it.second }
-//            val protectingText = protectingModifiers
-//                .joinToString(
-//                    separator = ", ",
-//                    prefix = "Card is protected for ${total.pluralS("shot")} by: ",
-//                    transform = { it.first }
-//                )
-//            text.append("\n").append(protectingText)
-//        }
-        currentHoverText = text.toString()
     }
 
     private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller))
@@ -366,7 +365,7 @@ class Card(
     fun getKeyWordsForDescriptions(): List<String> {
         val res = mutableListOf<String>()
         res.addAll(DetailDescriptionHandler.getKeyWordsFromDescription(shortDescription))
-        //TODO all temporary buffs are missing here
+        res.addAll(currentHoverTexts.map { it.first })
         return res
     }
 
@@ -566,15 +565,7 @@ class CardActor(
     private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
         val allKeys = card.getKeyWordsForDescriptions()
         DetailDescriptionHandler.descriptions.filter { it.key in allKeys }.forEach {
-            screen.generateFromTemplate(
-                "card_hover_detail_extra_description",
-                mapOf(
-                    "description" to it.value.second,
-                    "effects" to DetailDescriptionHandler.allTextEffects
-                ),
-                descriptionParent,
-                screen
-            )
+            addHoverItemToParent(it.value.second, descriptionParent)
         }
     }
 
@@ -707,8 +698,8 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-        "description" to OnjString(card.shortDescription), //TODO comment back in
-        "flavorText" to OnjString(card.flavourText),  //TODO comment back in
+        "description" to OnjString(card.shortDescription),
+        "flavorText" to OnjString(card.flavourText),
         "effects" to DetailDescriptionHandler.allTextEffects
     )
 
@@ -739,7 +730,7 @@ class CardActor(
                 max(x + actor.width / 2 - detailActor.width / 2, -mainFieldStartX),
                 stage.viewport.worldWidth - mainFieldEndX
             ),
-            y + actor.height - prefHeight + mainField.height,
+            y + actor.height  + mainField.height - mainField.parent.height,
             if (prefWidth == 0f) detailActor.width else prefWidth,
             prefHeight
         )
@@ -750,13 +741,29 @@ class CardActor(
         detailActor?.let {
             updateDetailStates()
             val tempInfoParent = getParentsForExtras(it).second
+            card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
         }
+    }
+
+    private fun addHoverItemToParent(
+        desc: String,
+        tempInfoParent: CustomFlexBox
+    ) {
+        screen.generateFromTemplate( //TODO hardcoded value as name
+            "card_hover_detail_extra_description",
+            mapOf(
+                "description" to desc,
+                "effects" to DetailDescriptionHandler.allTextEffects
+            ),
+            tempInfoParent,
+            screen
+        )
     }
 
     /**
      * the first actor is for the explanations, the second one is for the temporary changes
      */
-    private fun getParentsForExtras(it: Actor): Pair<CustomFlexBox, CustomFlexBox> {
+    private fun getParentsForExtras(it: Actor): Pair<CustomFlexBox, CustomFlexBox> { //TODO hardcoded value as name
         val left = screen.namedActorOrError("cardHoverDetailExtraParentLeft") as CustomFlexBox
         val right = screen.namedActorOrError("cardHoverDetailExtraParentRight") as CustomFlexBox
         val top = screen.namedActorOrError("cardHoverDetailExtraParentTop") as CustomFlexBox
@@ -772,14 +779,10 @@ class CardActor(
     }
 
     fun updateDetailStates() {
-        TemplateString.updateGlobalParam("turns", "3") //temp parameter for modifiers
-        if (card.flavourText.isBlank()) {
-            screen.leaveState("hoverDetailHasFlavorText")
-        } else {
-            screen.enterState("hoverDetailHasFlavorText")
-        }
-        if (card.getKeyWordsForDescriptions().isEmpty())
-            screen.leaveState("hoverDetailHasMoreInfo")
+        if (card.flavourText.isBlank()) screen.leaveState("hoverDetailHasFlavorText")
+        else screen.enterState("hoverDetailHasFlavorText")
+
+        if (card.getKeyWordsForDescriptions().isEmpty()) screen.leaveState("hoverDetailHasMoreInfo")
         else screen.enterState("hoverDetailHasMoreInfo")
     }
 }
