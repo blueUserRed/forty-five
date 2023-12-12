@@ -349,7 +349,7 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 3,
+                        weight: 3000,
                         nodeTexture: "map_node_shop_circle",
                         event: $EmptyMapEvent {
                         }
@@ -409,8 +409,8 @@ generatorConfig: {
                 progress: [
                     40.0, 60.0
                 ],
-                maxNodes: 15,
                 minNodes: 10,
+                maxNodes: 15,
                 maxSplits: 7,
                 splitProbability: 0.7,
                 startArea: "aqua_dulche",
@@ -431,7 +431,7 @@ generatorConfig: {
                             boughtIndices: [
                             ],
                             types: [],
-                            person: "rare_merchant", //TODO when decks are finished
+                            person: "rare_merchant",
                         }
                     }
                 ],
