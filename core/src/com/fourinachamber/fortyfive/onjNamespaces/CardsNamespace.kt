@@ -5,9 +5,9 @@ import com.fourinachamber.fortyfive.game.card.BulletSelector
 import com.fourinachamber.fortyfive.game.card.Effect
 import com.fourinachamber.fortyfive.game.card.EffectValue
 import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
-import onj.customization.Namespace
 import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
@@ -135,6 +135,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.KillPlayer(triggerOrError(trigger.value), false))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
+    fun bounce(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
+        return OnjEffect(Effect.BounceBullet(triggerOrError(trigger.value), bulletSelector.value, false))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
     fun canTriggerInHand(effect: OnjEffect): OnjEffect {
         return OnjEffect(effect.value.copy().apply { triggerInHand = true })
@@ -148,9 +153,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         for (value in onjArr.value) when (value) {
             is OnjInt -> {
                 var num = value.value.toInt()
-                // convert slot from external representation (1 comes after 5)
-                // to internal representation (4 comes after 5)
-                num = if (num == 5) 5 else 5 - num
+                num = Utils.externalToInternalSlotRepresentation(num)
                 nums.add(num - 1)
             }
             is OnjString -> {
@@ -161,7 +164,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             }
             else -> throw RuntimeException("bNum only allows ints or strings!")
         }
-
 
         return OnjBulletSelector(BulletSelector.ByLambda { self, other, slot, _ ->
             // when self === other allowSelf must be true, even if the slot is correct

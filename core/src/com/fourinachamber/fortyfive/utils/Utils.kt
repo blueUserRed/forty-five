@@ -263,6 +263,12 @@ object Utils {
     }
 
     /**
+     * convert slot from external representation (1 comes after 5)
+     * to internal representation (4 comes after 5)
+     */
+    fun externalToInternalSlotRepresentation(slot: Int): Int = if (slot == 5) 5 else 5 - slot
+
+    /**
      * loads either a custom cursor or a system cursor
      * @throws RuntimeException when [cursorName] is not known
      */

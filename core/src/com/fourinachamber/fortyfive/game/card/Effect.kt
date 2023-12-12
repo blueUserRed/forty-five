@@ -340,6 +340,29 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    class BounceBullet(
+        trigger: Trigger,
+        val bulletSelector: BulletSelector,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, this@BounceBullet.card))
+            includeLater(
+                {
+                    get<List<Card>>("selectedCards")
+                        .map { controller.bounceBullet(it) }
+                        .collectTimeline()
+                },
+                { true }
+            )
+        }
+
+        override fun blocks(controller: GameController): Boolean = bulletSelector.blocks(controller, card)
+
+        override fun copy(): Effect = BounceBullet(trigger, bulletSelector, triggerInHand)
+    }
+
 }
 
 /**

@@ -93,7 +93,7 @@ abstract class Behaviour(val actor: Actor) {
         this.onjScreen = onjScreen
         actor.addListener { event ->
             return@addListener if (actor is DisableActor) {
-                if (actor.isDisabled) onEventCapture?.invoke(event) ?: false
+                if (!actor.isDisabled) onEventCapture?.invoke(event) ?: false
                 else onDisabledEventCapture?.invoke(event) ?: false
             } else {
                 onEventCapture?.invoke(event) ?: false
