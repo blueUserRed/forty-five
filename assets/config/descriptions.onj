@@ -29,7 +29,7 @@ hoverDetailDescriptionGroups: [
     },
     {
         name: "trait",
-        color: color.blue,
+        color: color.seljuk_blue,
     },
     {
         name: "keyword",
@@ -40,7 +40,7 @@ hoverDetailDescriptionGroups: [
 defaultTextEffects:[
     $Color{
         indicator:"$trigger$",
-        color: color.red,
+        color: color.hemoglobin_red,
     },
 
     $FontScale{
