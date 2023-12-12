@@ -15,6 +15,11 @@ hoverDetailDescriptions: [
         description: "$status$POISON (d,t)$status$\nEnemies with Poison take d dmg for t turns. d and t both stack.",
 //        description: "$status$POISON (d§§description_icon_dmg_status§§,t§§description_icon_turns_status§§)$status$\nEnemies with Poison take d dmg for t turns. d and t both stack.",
     },
+    {
+        keyword: "protected",
+        groupName: "trait",
+        description: "$trait$PROTECTED (s)$trait$\nBullets with this effect don't dissaper for s shots.", //TODO change this to the actual one
+    },
 ],
 
 hoverDetailDescriptionGroups: [
@@ -41,5 +46,10 @@ defaultTextEffects:[
     $FontScale{
         indicator:"$trigger$",
         fontScale: 0.8,
+    },
+
+    $Color{
+        indicator:"$dmgBuff$",
+        color: color.green,
     },
 ]
