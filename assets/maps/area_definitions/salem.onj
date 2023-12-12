@@ -54,24 +54,24 @@ nodes: [
 ],
 
 decorations: [
-    {
-        texture: "burning_icon",
-        baseWidth: 8.0,
-        baseHeight: 8.0,
-        positions: [
-            [
-                30.0, 30.0, 1.5
-            ],
-            [
-                60.0, 20.0, 1.0
-            ],
-            [
-                10.0, 10.0, 0.5
-            ],
-            [
-                90.0, 30.0, 2.0
-            ],
-        ]
-    }
+//    {
+//        texture: "burning_icon",
+//        baseWidth: 8.0,
+//        baseHeight: 8.0,
+//        positions: [
+//            [
+//                30.0, 30.0, 1.5
+//            ],
+//            [
+//                60.0, 20.0, 1.0
+//            ],
+//            [
+//                10.0, 10.0, 0.5
+//            ],
+//            [
+//                90.0, 30.0, 2.0
+//            ],
+//        ]
+//    }
 ],
 isArea: true,
