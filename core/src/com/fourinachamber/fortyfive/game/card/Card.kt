@@ -347,7 +347,7 @@ class Card(
 
         if (protectingModifiers.isNotEmpty()) {
             val total = protectingModifiers.sumOf { it.second }
-            currentEffects.add("protected" to "\$trait\$+ PROTECTED $total\$trait\$")
+            currentEffects.add("protected" to "\$trait\$+ PROTECTED ($total)\$trait\$")
         }
 
         currentHoverTexts = currentEffects

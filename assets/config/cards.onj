@@ -21,7 +21,7 @@ cards: [
         name: "incendiaryBullet",
         title: "Incendiary Bullet",
         flavourText: '"I\'m pretty sure this is a Warcrime"',
-        description: '$trigger$On Shot$trigger$\nThe enemy gets $status$BURNING$status$ (t={turns} )',
+        description: '$trigger$On Shot$trigger$\nThe enemy gets $status$BURNING$status$ (3)',
         baseDamage: 7,
         coverValue: 0,
         traitEffects: [],
