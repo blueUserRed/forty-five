@@ -123,10 +123,11 @@ class Card(
 
     private var lastDamageValue: Int = baseDamage
 
-    private val _modifiers: MutableList<CardModifier> = mutableListOf()
+    private var modifierCounter: Int = 0
+    private val _modifiers: MutableList<Pair<Int, CardModifier>> = mutableListOf()
 
     val modifiers: List<CardModifier>
-        get() = _modifiers
+        get() = _modifiers.map { it.second }
 
     var currentHoverText: String = ""
         private set
@@ -153,7 +154,7 @@ class Card(
         val modifierIterator = _modifiers.iterator()
         var somethingChanged = false
         while (modifierIterator.hasNext()) {
-            val modifier = modifierIterator.next()
+            val (_, modifier) = modifierIterator.next()
             if (!modifier.validityChecker()) {
                 FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
                 modifierIterator.remove()
@@ -190,10 +191,13 @@ class Card(
     }
 
     fun activeModifiers(controller: GameController): List<CardModifier> =
-        _modifiers.filter { it.activeChecker(controller) }
+        modifiers.filter { it.activeChecker(controller) }
 
-    fun curDamage(controller: GameController): Int =
-        (baseDamage + activeModifiers(controller).sumOf { it.damage }).coerceAtLeast(0)
+    fun curDamage(controller: GameController): Int = _modifiers
+        .filter { (_, modifier) -> modifier.activeChecker(controller) }
+        .sortedBy { it.first }
+        .fold(baseDamage) { acc, (_, modifier) -> ((acc + modifier.damage) * modifier.damageMultiplier).toInt() }
+        .coerceAtLeast(0)
 
     /**
      * called by gameScreenController when the card was shot
@@ -252,12 +256,12 @@ class Card(
      */
     fun addModifier(modifier: CardModifier) {
         FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
-        _modifiers.add(modifier)
+        _modifiers.add(++modifierCounter to modifier)
         modifiersChanged()
     }
 
     fun removeModifier(modifier: CardModifier) {
-        _modifiers.remove(modifier)
+        _modifiers.removeIf { (_, m) -> m === modifier }
         modifiersChanged()
     }
 
@@ -317,10 +321,10 @@ class Card(
 
     private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
         var modifierChanged = false
-        _modifiers.replaceAll { modifier ->
-            val transformer = modifier.transformers[trigger] ?: return@replaceAll modifier
+        _modifiers.replaceAll { (counter, modifier) ->
+            val transformer = modifier.transformers[trigger] ?: return@replaceAll counter to modifier
             modifierChanged = true
-            transformer(modifier, triggerInformation)
+            counter to transformer(modifier, triggerInformation)
         }
         if (modifierChanged) modifiersChanged()
     }
@@ -497,7 +501,8 @@ class Card(
      * @param validityChecker checks if the modifier is still valid or should be removed
      */
     data class CardModifier(
-        val damage: Int,
+        val damage: Int = 0,
+        val damageMultiplier: Float = 1f,
         val source: String,
         val validityChecker: () -> Boolean = { true },
         val activeChecker: (controller: GameController) -> Boolean = { true },

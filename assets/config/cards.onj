@@ -803,6 +803,26 @@ cards: [
         tags: ["pool2"],
         price: 0,
     },
+    {
+        name: "gravediggersBullet",
+        title: "Gravediggers Bullet",
+        flavourText: "Gravediggers Bullet",
+        description: "While in Revolver: whenever a Bullet is destroyed: draw a card and double Gravediggers Bullets dmg.",
+        baseDamage: 1,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            draw("any card destroyed", 1#val),
+            buffDmgMultiplier("any card destroyed", bSelects.self, 2.0),
+        ],
+        forceLoadCards: [],
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
 
 ],
 
