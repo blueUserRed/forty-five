@@ -2,7 +2,6 @@
 use Cards;
 
 var burningPercent = 0.5;
-var poisonDamage = 3;
 
 var bSelects = {
     allExceptSelf: bNum([1, 2, 3, 4, 5]),
@@ -361,7 +360,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", poison(3, poisonDamage))
+            giveStatus("shot", poison(3, 3))
         ],
         forceLoadCards: [],
         cost: 1,
@@ -739,7 +738,27 @@ cards: [
             givePlayerStatus("round start", poison(1, 8)),
         ],
         forceLoadCards: [],
-        cost: 1,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
+    {
+        name: "gasBullet",
+        title: "Gas Bullet",
+        flavourText: "gas Bullet",
+        description: "If this Bullet leaves the revolver: the enemy gets poison for 3 turns for 6 dmg",
+        baseDamage: 1,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giveStatus("shot", poison(3, 6)),
+            giveStatus("destroy", poison(3, 6))
+        ],
+        forceLoadCards: [],
+        cost: 2,
         type: $Bullet { },
         tags: ["pool2"],
         price: 0,
