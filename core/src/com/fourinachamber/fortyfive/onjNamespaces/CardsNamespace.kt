@@ -73,6 +73,16 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         ))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, float]")
+    fun buffDmgMultiplier(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjFloat): OnjEffect {
+        return OnjEffect(Effect.BuffDamageMultiplier(
+            triggerOrError(trigger.value),
+            amount.value.toFloat(),
+            bulletSelector.value,
+            false
+        ))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, EffectValue]")
     fun giftDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjEffectValue): OnjEffect {
         return OnjEffect(

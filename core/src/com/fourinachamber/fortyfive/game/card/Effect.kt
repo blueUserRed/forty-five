@@ -142,6 +142,39 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    class BuffDamageMultiplier(
+        trigger: Trigger,
+        val multiplier: Float,
+        private val bulletSelector: BulletSelector,
+        override var triggerInHand: Boolean,
+        private val activeChecker: (controller: GameController) -> Boolean = { true }
+    ) : Effect(trigger) {
+
+        override fun copy(): Effect =
+            BuffDamageMultiplier(trigger, multiplier, bulletSelector, triggerInHand, activeChecker)
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
+            val multiplier = multiplier * (triggerInformation.multiplier ?: 1)
+            val modifier = Card.CardModifier(
+                damageMultiplier = multiplier,
+                source = cardDescName,
+                validityChecker = { card.inGame },
+                activeChecker = activeChecker
+            )
+
+            return Timeline.timeline {
+                include(getSelectedBullets(bulletSelector, controller, this@BuffDamageMultiplier.card))
+                action {
+                    get<List<Card>>("selectedCards")
+                        .forEach { it.addModifier(modifier) }
+                }
+            }
+        }
+
+        override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
+
+    }
+
     /**
      * gifts a card a buff (or debuff) of its damage (stays valid even after the card left the game)
      * @param amount the amount by which the damage is changed
