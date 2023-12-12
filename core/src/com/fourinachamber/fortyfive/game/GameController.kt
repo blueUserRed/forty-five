@@ -838,6 +838,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "destroyed card: $card")
         }
         include(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
+        include(checkEffectsActiveCards(Trigger.ON_ANY_CARD_DESTROY))
     }
 
     fun bounceBullet(card: Card): Timeline = Timeline.timeline {

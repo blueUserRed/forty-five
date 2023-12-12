@@ -380,6 +380,21 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = GivePlayerStatus(trigger, statusEffectCreator, triggerInHand)
     }
 
+    class TurnRevolver(
+        trigger: Trigger,
+        val rotation: GameController.RevolverRotation,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(controller.rotateRevolver(rotation))
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = TurnRevolver(trigger, rotation, triggerInHand)
+    }
+
 }
 
 /**
@@ -421,7 +436,7 @@ typealias EffectValue = (controller: GameController) -> Int
 enum class Trigger {
 
     ON_ENTER, ON_SHOT, ON_ROUND_START, ON_ROUND_END, ON_DESTROY, ON_CARDS_DRAWN, ON_SPECIAL_CARDS_DRAWN,
-    ON_REVOLVER_ROTATION
+    ON_REVOLVER_ROTATION, ON_ANY_CARD_DESTROY
 
 }
 

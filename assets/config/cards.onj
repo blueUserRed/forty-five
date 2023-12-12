@@ -763,6 +763,25 @@ cards: [
         tags: ["pool2"],
         price: 0,
     },
+    {
+        name: "survivorsBullet",
+        title: "Survivors Bullet",
+        flavourText: "Survivors Bullet",
+        description: "Whenever a Bullet is destroyed, turn the revolver 1 to the left.",
+        baseDamage: 8,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            turnRevolver("any card destroyed", "left", 1)
+        ],
+        forceLoadCards: [],
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
 
 ],
 
