@@ -1,15 +1,73 @@
 use Common;
 
+var default=[
+    {
+        select: $ByTag {
+            name: "not used",
+        },
+        effect: $Blacklist {
+        }
+    },
+    {
+        select: $ByTag {
+            name: "pool0",
+        },
+        effect: $ProbabilityAddition {
+            weight: 1.0
+        }
+    },
+];
+
+var wasteland = [ //for demo only the biome says which cards, this makes it easier
+    ...default,
+    {
+        select: $ByTag {
+            name: "pool2",
+        },
+        effect: $Blacklist {
+        }
+    },
+    {
+        select: $ByTag {
+            name: "pool1",
+        },
+        effect: $ProbabilityAddition {
+            weight: 2.0
+        }
+    }
+];
+
+var bewitched_forest = [
+    ...default,
+    {
+        select: $ByTag {
+            name: "pool1",
+        },
+        effect: $ProbabilityAddition {
+            weight: 2.0
+        }
+    },
+    {
+        select: $ByTag {
+            name: "pool2",
+        },
+        effect: $ProbabilityAddition {
+            weight: 3.0
+        }
+    }
+];
+
 types: [
     {
         name: "defType",
         cardChanges: [
             {
                 select: $ByTag {
-                    name: "unobtainable",
+                    name: "not used",
                 },
-                effect: $Blacklist { }
-            },
+                effect: $Blacklist {
+                }
+            }
         ],
     }
 ],
@@ -18,8 +76,34 @@ biomes: [
     {
         name: "wasteland",
         shop: [
+            ...wasteland
         ],
         chooseCard: [
-       ]
+            ...wasteland,
+            {
+                select: $ByTag {
+                    name: "pool1",
+                },
+                effect: $ProbabilityAddition {
+                    weight: 10.0
+                }
+            }
+        ]
+    },{
+        name: "bewitched_forest",
+        shop: [
+            ...bewitched_forest
+        ],
+        chooseCard: [
+            ...bewitched_forest,
+            {
+                select: $ByTag {
+                    name: "pool2",
+                },
+                effect: $ProbabilityAddition {
+                    weight: 10.0
+                }
+            }
+        ]
     },
 ]
