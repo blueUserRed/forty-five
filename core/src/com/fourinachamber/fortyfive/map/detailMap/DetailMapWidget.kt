@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -51,7 +52,6 @@ class DetailMapWidget(
     private var screenSpeed: Float,
 //    private var backgroundScale: Float,
     private val disabledDirectionIndicatorAlpha: Float,
-    private val leftScreenSideDeadSection: Float,
     private val mapScale: Float
 ) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
 
@@ -225,6 +225,10 @@ class DetailMapWidget(
         if (!canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
+        val nodePos = scaledNodePos(node)
+        val idealPos = -nodePos + Vector2(width, height) / 2f
+        if (idealPos.compare(mapOffset, epsilon = 200f)) return
+        moveScreenToPoint = idealPos
     }
 
     private fun canGoTo(node: MapNode): Boolean {
@@ -393,15 +397,6 @@ class DetailMapWidget(
         val movementPath = scaledNodePos(movePlayerTo) - scaledNodePos(playerNode)
         val playerOffset = movementPath * (1f - percent)
         playerPos = scaledNodePos(playerNode) + playerOffset
-        val screenWidth = width
-        val screenHeight = height
-        val screenRectangle = Rectangle(
-            -mapOffset.x - leftScreenSideDeadSection, -mapOffset.y,
-            screenWidth - leftScreenSideDeadSection, screenHeight
-        )
-        if (!screenRectangle.contains(playerPos)) {
-            moveScreenToPoint = -playerPos + Vector2(screenWidth, screenHeight) / 2f
-        }
     }
 
     private fun finishMovement() {
