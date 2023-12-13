@@ -310,6 +310,7 @@ class ChooseCardMapEvent(
     override val displayName: String = "Ominous person"
     val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
     val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
+    val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
 
     init {
         setStandardValuesFromConfig(onj)
@@ -329,6 +330,7 @@ class ChooseCardMapEvent(
         includeStandardConfig()
         ("types" with types)
         ("seed" with seed)
+        ("nbrOfCards" with nbrOfCards)
     }
 }
 
