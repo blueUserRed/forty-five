@@ -458,7 +458,6 @@ sealed class BulletSelector {
     }
 
     abstract fun blocks(controller: GameController, self: Card): Boolean
-
 }
 
 typealias EffectValue = (controller: GameController) -> Int
@@ -467,7 +466,6 @@ typealias EffectValue = (controller: GameController) -> Int
  * possible triggers for an effect
  */
 enum class Trigger {
-
     ON_ENTER, ON_SHOT, ON_ROUND_START, ON_ROUND_END, ON_DESTROY, ON_CARDS_DRAWN, ON_SPECIAL_CARDS_DRAWN,
     ON_REVOLVER_ROTATION, ON_ANY_CARD_DESTROY
 

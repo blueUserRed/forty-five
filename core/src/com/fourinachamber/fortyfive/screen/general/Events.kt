@@ -16,6 +16,8 @@ object EventFactory {
         "PopupConfirmationEvent" to { PopupConfirmationEvent() },
         "ParryEvent" to { ParryEvent() },
         "TutorialConfirmedEvent" to { TutorialConfirmedEvent() },
+        "HoverEnterEvent" to { HoverEnterEvent() },
+        "HoverLeaveEvent" to { HoverLeaveEvent() },
     )
 
     private val eventClasses: Map<String, KClass<out Event>> = mapOf(
@@ -26,6 +28,8 @@ object EventFactory {
         "PopupConfirmationEvent" to PopupConfirmationEvent::class,
         "ParryEvent" to ParryEvent::class,
         "TutorialConfirmedEvent" to TutorialConfirmedEvent::class,
+        "HoverEnterEvent" to HoverEnterEvent::class,
+        "HoverLeaveEvent" to HoverLeaveEvent::class,
     )
 
     fun createEvent(name: String): Event = eventCreators[name]?.invoke()
@@ -40,6 +44,10 @@ object EventFactory {
  * This event gets fired when an actor was clicked using the mouse or using the keyboard
  */
 class ButtonClickEvent : Event()
+
+class HoverEnterEvent : Event()
+
+class HoverLeaveEvent : Event()
 
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when to shoot
@@ -80,6 +88,28 @@ class PopupSelectionEvent(val cardNum: Int) : Event()
 inline fun Actor.onButtonClick(crossinline block: @MainThreadOnly () -> Unit) {
     this.addListener { event ->
         if (event !is ButtonClickEvent) return@addListener false
+        block()
+        true
+    }
+}
+
+/**
+ * binds a listener for the [ButtonClickEvent] to this actor
+ */
+inline fun Actor.onHoverEnter(crossinline block: @MainThreadOnly () -> Unit) {
+    this.addListener { event ->
+        if (event !is HoverEnterEvent) return@addListener false
+        block()
+        true
+    }
+}
+
+/**
+ * binds a listener for the [ButtonClickEvent] to this actor
+ */
+inline fun Actor.onHoverLeave(crossinline block: @MainThreadOnly () -> Unit) {
+    this.addListener { event ->
+        if (event !is HoverLeaveEvent) return@addListener false
         block()
         true
     }

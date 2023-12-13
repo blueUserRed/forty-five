@@ -14,7 +14,7 @@ $MapEvent {
         healRange: int[2],
         maxHPRange: int[2],
         seed: int?,
-        distanceToEnd: int,
+        distanceToEnd?: int,
     }
 
     $AddMaxHPEvent {
@@ -48,6 +48,7 @@ $MapEvent {
     $ChooseCardMapEvent {
         types: string[],
         seed: int?,
+        nbrOfCards: int,
         ...mapEventStandardConfig
     }
 }
