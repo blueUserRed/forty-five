@@ -1143,6 +1143,7 @@ tutorialInfoActor: $TutorialInfoActor {
             }
         ],
         touchable: "enabled",
+        name: "confirmbutton",
         behaviours: [
             $CatchEventAndEmitBehaviour {
                 catch: "ButtonClickEvent",
@@ -1155,6 +1156,7 @@ tutorialInfoActor: $TutorialInfoActor {
             template: "{game.tutorial.confirmButtonText}",
             fontScale: 0.9,
             align: "center",
+            touchable: "disabled",
             color: color.white,
         },
     ],
