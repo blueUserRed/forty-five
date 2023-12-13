@@ -1,9 +1,16 @@
 use Common;
 
-var default=[
+var default = [
     {
         select: $ByTag {
             name: "not used",
+        },
+        effect: $Blacklist {
+        }
+    },
+    {
+        select: $ByTag {
+            name: "unobtainable",
         },
         effect: $Blacklist {
         }
@@ -37,7 +44,7 @@ var wasteland = [ //for demo only the biome says which cards, this makes it easi
     }
 ];
 
-var bewitched_forest = [
+var bewitchedForest = [
     ...default,
     {
         select: $ByTag {
@@ -69,7 +76,55 @@ types: [
                 }
             }
         ],
-    }
+    },
+    {
+        name: "tutorial_only_silver_bullet",
+        cardChanges: [
+            {
+                select: $ByName {
+                    name: "silverBullet",
+                    negate: true
+                },
+                effect: $Blacklist {}
+            }
+        ]
+    },
+    {
+        name: "tutorial_only_worker_bullet",
+        cardChanges: [
+            {
+                select: $ByName {
+                    name: "workerBullet",
+                    negate: true
+                },
+                effect: $Blacklist {}
+            }
+        ]
+    },
+    {
+        name: "tutorial_only_incendiary_bullet",
+        cardChanges: [
+            {
+                select: $ByName {
+                    name: "incendiaryBullet",
+                    negate: true
+                },
+                effect: $Blacklist {}
+            }
+        ]
+    },
+    {
+        name: "tutorial_only_leaders_bullet",
+        cardChanges: [
+            {
+                select: $ByName {
+                    name: "leadersBullet",
+                    negate: true
+                },
+                effect: $Blacklist {}
+            }
+        ]
+    },
 ],
 
 biomes: [
@@ -89,13 +144,14 @@ biomes: [
                 }
             }
         ]
-    },{
+    },
+    {
         name: "bewitched_forest",
         shop: [
-            ...bewitched_forest
+            ...bewitchedForest
         ],
         chooseCard: [
-            ...bewitched_forest,
+            ...bewitchedForest,
             {
                 select: $ByTag {
                     name: "pool2",
