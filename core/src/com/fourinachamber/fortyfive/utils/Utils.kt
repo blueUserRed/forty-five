@@ -14,10 +14,7 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
-import onj.value.OnjObject
 import onj.value.OnjString
-import onj.value.OnjValue
-import java.lang.Math.round
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.math.max

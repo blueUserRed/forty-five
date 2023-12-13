@@ -28,8 +28,9 @@ nodes: [
         event: $ChooseCardMapEvent {
             seed: null,
             types: [
-                "defType"
+
             ],
+            nbrOfCards:3,
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
@@ -57,7 +58,7 @@ nodes: [
             seed: null,
             boughtIndices: [
             ],
-            types: ["defType"],
+            types: [],
             person: "traveling_merchant",
         }
     },

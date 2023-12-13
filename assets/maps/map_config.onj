@@ -167,10 +167,10 @@ generatorConfig: {
             seed: runRandom(1),
             restrictions: {
                 progress: [
-                    0.0, 20.0
+                    0.0, 30.0
                 ],
-                minNodes: 3,
-                maxNodes: 6,
+                minNodes: 8,
+                maxNodes: 10,
 //                minNodes: 15,
 //                maxNodes: 20,
                 maxSplits: 4,
@@ -182,40 +182,21 @@ generatorConfig: {
                 otherAreas: [
                 ],
                 rotation: 1.25,
-                fixedEvents: [
-                    {
-                        isDeadEnd: false,
-                        nodeTexture: "map_node_heal_circle",
-                        event: $HealOrMaxHPEvent {
-                            seed: null,
-                            healRange: [
-                                25, 35
-                            ],
-                            maxHPRange: [
-                                5, 15
-                            ],
-                            currentlyBlocks: false,
-                            canBeStarted: true,
-                            isCompleted: false,
-                            distanceToEnd: -1,
-                        }
-                    },
-                    {
-                        isDeadEnd: true,
-                        nodeTexture: "map_node_heal_circle",
-                        event: $AddMaxHPEvent {
-                            seed: null,
-                            maxHPRange: [
-                                5, 15
-                            ],
-                            currentlyBlocks: false,
-                            canBeStarted: true,
-                            isCompleted: false,
-                        }
-                    },
-                ],
                 avgNbrOfEncounters: 0,
                 exitNodeTexture: "map_node_exit_circle",
+                fixedEvents: [
+                    {
+                        isDeadEnd: true,
+                        nodeTexture: "map_node_shop_circle",
+                        event: $ShopMapEvent {
+                            seed: null,
+                            boughtIndices: [
+                            ],
+                            types: [],
+                            person: "traveling_merchant",
+                        }
+                    }
+                ],
                 optionalEvents: [
                     {
                         weight: 10,
@@ -229,20 +210,19 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 8,
+                        weight: 3,
                         nodeTexture: "map_node_heal_circle",
                         event: $HealOrMaxHPEvent {
                             seed: null,
                             healRange: [
-                                25, 35
+                                35, 45
                             ],
                             maxHPRange: [
-                                5, 15
+                                10, 25
                             ],
                             currentlyBlocks: false,
                             canBeStarted: true,
                             isCompleted: false,
-                            distanceToEnd: -1,
                         }
                     },
                 ],
@@ -309,12 +289,12 @@ generatorConfig: {
             seed: runRandom(2),
             restrictions: {
                 progress: [
-                    2.0, 40.0
+                    30.0, 60.0
                 ],
-                maxNodes: 2,
-                minNodes: 2,
+                maxNodes: 12,
+                minNodes: 8,
                 maxSplits: 6,
-                splitProbability: 0.4,
+                splitProbability: 0.8,
                 startArea: "salem",
                 endArea: "aqua_dulche",
                 otherAreas: [
@@ -325,21 +305,29 @@ generatorConfig: {
                 exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
                     {
+                        isDeadEnd: true,
+                        nodeTexture: "map_node_shop_circle",
+                        event: $ShopMapEvent {
+                            seed: null,
+                            boughtIndices: [ ],
+                            types: [],
+                            person: "traveling_merchant",
+                        }
+                    },
+                    {
                         isDeadEnd: false,
                         nodeTexture: "map_node_shop_circle",
                         event: $ShopMapEvent {
                             seed: null,
-                            boughtIndices: [
-                            ],
-                            types: ["rare_shop"],
+                            boughtIndices: [ ],
+                            types: [],
                             person: "rare_merchant",
                         }
-                    }
+                    },
                 ],
                 optionalEvents: [
                     {
-                        weight: 15,
-
+                        weight: 10,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -351,8 +339,18 @@ generatorConfig: {
                     },
                     {
                         weight: 3,
-                        nodeTexture: "map_node_shop_circle",
-                        event: $EmptyMapEvent {
+                        nodeTexture: "map_node_heal_circle",
+                        event: $HealOrMaxHPEvent {
+                            seed: null,
+                            healRange: [
+                                45, 50
+                            ],
+                            maxHPRange: [
+                                10, 25
+                            ],
+                            currentlyBlocks: false,
+                            canBeStarted: true,
+                            isCompleted: false,
                         }
                     },
                 ],
@@ -408,10 +406,10 @@ generatorConfig: {
             seed: runRandom(2),
             restrictions: {
                 progress: [
-                    40.0, 60.0
+                    60.0, 100.0
                 ],
-                maxNodes: 15,
                 minNodes: 10,
+                maxNodes: 15,
                 maxSplits: 7,
                 splitProbability: 0.7,
                 startArea: "aqua_dulche",
@@ -425,21 +423,20 @@ generatorConfig: {
                 exitNodeTexture: "map_node_exit_circle",
                 fixedEvents: [
                     {
-                        isDeadEnd: false,
+                        isDeadEnd: true,
                         nodeTexture: "map_node_shop_circle",
                         event: $ShopMapEvent {
                             seed: null,
                             boughtIndices: [
                             ],
-                            types: ["rare_shop"],
-                            person: "rare_merchant", //TODO when decks are finished
-
+                            types: [],
+                            person: "rare_merchant",
                         }
                     }
                 ],
                 optionalEvents: [
                     {
-                        weight: 80,
+                        weight: 10,
                         nodeTexture: "map_node_fight_circle",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
@@ -450,16 +447,19 @@ generatorConfig: {
                         }
                     },
                     {
-                        weight: 10,
-                        nodeTexture: "map_node_shop_circle",
-                        event: $ChooseCardMapEvent {
-                            types: [
-                                "defType"
-                            ],
+                        weight: 3,
+                        nodeTexture: "map_node_heal_circle",
+                        event: $HealOrMaxHPEvent {
                             seed: null,
+                            healRange: [
+                                50, 65
+                            ],
+                            maxHPRange: [
+                                15, 30
+                            ],
                             currentlyBlocks: false,
-                            isCompleted: false,
                             canBeStarted: true,
+                            isCompleted: false,
                         }
                     },
                 ],
@@ -515,7 +515,7 @@ generatorConfig: {
             seed: runRandom(2),
             restrictions: {
                 progress: [
-                    0.0, 20.0
+                    75.0, 100.0
                 ],
                 minNodes: 4,
                 maxNodes: 6,

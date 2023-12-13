@@ -9,7 +9,7 @@ people: [
     {
         name: "traveling_merchant",
         displayName: "Traveling Merchant",
-        defaultShopParameter: "flameing",
+        defaultShopParameter: "defType",
         texts: [
             {
                 rawText: "I sell the $1BEST$1 goods south from Dunkelwald. You'll find deals like this NO where else! Source: Trust me pal",
@@ -35,7 +35,7 @@ people: [
     {
         name: "rare_merchant",
         displayName: "Traveling Merchant",
-        defaultShopParameter: "flameing",
+        defaultShopParameter: "defType",
         texts: [
             {
                 rawText: "I only sell the $1rarest$1 bullets! And that for the cheapest price!",

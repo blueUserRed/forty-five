@@ -7,8 +7,9 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -18,14 +19,13 @@ import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
-import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
-import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -78,7 +78,7 @@ class Card(
     fontColor: Color,
     fontScale: Float,
     screen: OnjScreen
-): Disposable {
+) : Disposable {
 
     /**
      * used for logging
@@ -126,7 +126,10 @@ class Card(
     val modifiers: List<CardModifier>
         get() = _modifiers
 
-    var currentHoverText: String = ""
+    /**
+     * first ist the keyword, second is the actual text
+     */
+    var currentHoverTexts: List<Pair<String, String>> = listOf()
         private set
 
     private var protectingModifiers: MutableList<Triple<String, Int, () -> Boolean>> = mutableListOf()
@@ -259,12 +262,14 @@ class Card(
     }
 
     private fun addRottenModifier() {
-        val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation -> CardModifier(
-            damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
-            source = oldModifier.source,
-            validityChecker = oldModifier.validityChecker,
-            transformers = oldModifier.transformers
-        )}
+        val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation ->
+            CardModifier(
+                damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
+                source = oldModifier.source,
+                validityChecker = oldModifier.validityChecker,
+                transformers = oldModifier.transformers
+            )
+        }
         val modifier = CardModifier(
             damage = 0,
             source = "rotten effect",
@@ -327,33 +332,26 @@ class Card(
     }
 
     private fun updateText(controller: GameController) {
-        val text = StringBuilder()
-        text
-            .append(shortDescription)
-            .append("\n")
-            .append(flavourText)
-            .append("\n")
-            .append(if (type == Type.BULLET) "damage: ${curDamage(controller)}/$baseDamage" else "")
-
+        val currentEffects = mutableListOf<Pair<String, String>>()
         if (activeModifiers(controller).any { it.damage != 0 }) {
-            val damageText = activeModifiers(controller)
-                .filter { it.damage != 0 }
-                .joinToString(separator =  ", ", prefix = "Damage was changed by: ", transform = { it.source })
-            text.append("\n").append(damageText)
+            val allDamageEffects = activeModifiers(controller).filter { it.damage != 0 }
+            val damageChange = allDamageEffects.sumOf { it.damage }
+            val damageText = allDamageEffects
+                .joinToString(
+                    separator = ", ",
+                    prefix = "${if (damageChange > 0) "+" else ""}$damageChange by ",
+                    transform = { it.source })
+            currentEffects.add("dmgBuff" to "\$dmgBuff\$$damageText\$dmgBuff\$")
+            //this is the only special keyword, since it doesn't need a description
         }
 
         if (protectingModifiers.isNotEmpty()) {
             val total = protectingModifiers.sumOf { it.second }
-            val protectingText = protectingModifiers
-                .joinToString(
-                    separator = ", ",
-                    prefix = "Card is protected for ${total.pluralS("shot")} by: ",
-                    transform = { it.first }
-                )
-            text.append("\n").append(protectingText)
+            currentEffects.add("protected" to "\$trait\$+ PROTECTED ($total)\$trait\$")
         }
 
-        currentHoverText = text.toString()
+        currentHoverTexts = currentEffects
+        actor.updateDetailStates()
     }
 
     private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller))
@@ -362,6 +360,13 @@ class Card(
 
     override fun toString(): String {
         return "card: $name"
+    }
+
+    fun getKeyWordsForDescriptions(): List<String> {
+        val res = mutableListOf<String>()
+        res.addAll(DetailDescriptionHandler.getKeyWordsFromDescription(shortDescription))
+        res.addAll(currentHoverTexts.map { it.first })
+        return res
     }
 
     companion object {
@@ -517,7 +522,7 @@ class CardActor(
 
     override var isSelected: Boolean = false
     override var partOfHierarchy: Boolean = true
-    override var isClicked: Boolean=false
+    override var isClicked: Boolean = false
 
     /**
      * true when the card is dragged; set by [CardDragSource][com.fourinachamber.fortyfive.game.card.CardDragSource]
@@ -543,12 +548,34 @@ class CardActor(
 
     private val cardTexturePixmap: Pixmap
 
+    private val onRightClickShowAdditionalInformationListener = object : InputListener() {
+        override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+            if (button == 1) {
+                detailActor?.let {
+                    val descriptionParent = getParentsForExtras(it).first
+                    if (descriptionParent.children.isEmpty)
+                        showExtraDescriptions(descriptionParent)
+                    return true
+                }
+            }
+            return false
+        }
+    }
+
+    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
+        val allKeys = card.getKeyWordsForDescriptions()
+        DetailDescriptionHandler.descriptions.filter { it.key in allKeys }.forEach {
+            addHoverItemToParent(it.value.second, descriptionParent)
+        }
+    }
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
         redrawPixmap(card.baseDamage)
+        addListener(onRightClickShowAdditionalInformationListener)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -671,7 +698,9 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-        "text" to OnjString(card.currentHoverText)
+        "description" to OnjString(card.shortDescription),
+        "flavorText" to OnjString(card.flavourText),
+        "effects" to DetailDescriptionHandler.allTextEffects
     )
 
     override fun positionChanged() {
@@ -682,5 +711,78 @@ class CardActor(
     override fun sizeChanged() {
         super.sizeChanged()
         setBoundsOfHoverDetailActor(this)
+    }
+
+
+    override fun setBoundsOfHoverDetailActor(actor: Actor) {
+        val detailActor = detailActor
+        if (detailActor !is Layout) return
+        stage ?: return
+        val prefHeight = detailActor.prefHeight
+        val prefWidth = detailActor.prefWidth
+        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+
+        val mainField = screen.namedActorOrError("cardHoverDetailMain")
+        val mainFieldStartX = mainField.localToParentCoordinates(Vector2(0F, 0F)).x
+        val mainFieldEndX = mainField.localToParentCoordinates(Vector2(mainField.width, 0F)).x
+        detailActor.setBounds(
+            min( //this min max only so that it is always inside the screen
+                max(x + actor.width / 2 - detailActor.width / 2, -mainFieldStartX),
+                stage.viewport.worldWidth - mainFieldEndX
+            ),
+            y + actor.height  + mainField.height - mainField.parent.height,
+            if (prefWidth == 0f) detailActor.width else prefWidth,
+            prefHeight
+        )
+        detailActor.invalidateHierarchy()
+    }
+
+    override fun onDetailDisplayStarted() {
+        detailActor?.let {
+            updateDetailStates()
+            val tempInfoParent = getParentsForExtras(it).second
+            card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
+        }
+    }
+
+    private fun addHoverItemToParent(
+        desc: String,
+        tempInfoParent: CustomFlexBox
+    ) {
+        screen.generateFromTemplate( //TODO hardcoded value as name
+            "card_hover_detail_extra_description",
+            mapOf(
+                "description" to desc,
+                "effects" to DetailDescriptionHandler.allTextEffects
+            ),
+            tempInfoParent,
+            screen
+        )
+    }
+
+    /**
+     * the first actor is for the explanations, the second one is for the temporary changes
+     */
+    private fun getParentsForExtras(it: Actor): Pair<CustomFlexBox, CustomFlexBox> { //TODO hardcoded value as name
+        val left = screen.namedActorOrError("cardHoverDetailExtraParentLeft") as CustomFlexBox
+        val right = screen.namedActorOrError("cardHoverDetailExtraParentRight") as CustomFlexBox
+        val top = screen.namedActorOrError("cardHoverDetailExtraParentTop") as CustomFlexBox
+        val directionsToUse =
+            if (it.localToStageCoordinates(Vector2(it.width, 0F)).x >= stage.viewport.worldWidth) {
+                left to top
+                //            } else if (it.localToStageCoordinates(Vector2(0F, 0F)).x <= 0) {
+                //                right to top  //maybe this changes, that's why it's still here
+            } else {
+                right to top
+            }
+        return directionsToUse
+    }
+
+    fun updateDetailStates() {
+        if (card.flavourText.isBlank()) screen.leaveState("hoverDetailHasFlavorText")
+        else screen.enterState("hoverDetailHasFlavorText")
+
+        if (card.getKeyWordsForDescriptions().isEmpty()) screen.leaveState("hoverDetailHasMoreInfo")
+        else screen.enterState("hoverDetailHasMoreInfo")
     }
 }

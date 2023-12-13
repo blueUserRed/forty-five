@@ -16,6 +16,7 @@ import onj.value.OnjArray
 import onj.value.OnjFloat
 import onj.value.OnjObject
 import onj.value.OnjString
+import kotlin.math.abs
 import kotlin.random.Random
 
 //TODO BIOME
@@ -35,10 +36,10 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is ChooseCardMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         this.context = context
-        init(onjScreen, context.seed, context.types.toMutableList())
+        init(onjScreen, context.seed, context.types.toMutableList(), context.nbrOfCards)
     }
 
-    private fun init(screen: OnjScreen, seed: Long, types: MutableList<String>) {
+    private fun init(screen: OnjScreen, seed: Long, types: MutableList<String>, nbrOfCards: Int) {
         val rnd = Random(seed)
         val onj = OnjParser.parseFile(cardsFilePath)
         Card.cardsFileSchema.assertMatches(onj)
@@ -48,7 +49,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
             cardPrototypes,
             types,
             true,
-            3,
+            nbrOfCards,
             rnd,
             MapManager.currentDetailMap.biome,
             "chooseCard"
@@ -72,11 +73,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
 
     private fun initCards(screen: OnjScreen, cardPrototypes: List<CardPrototype>) {
         val parent = screen.namedActorOrError(cardsParentName) as CustomFlexBox
-        val data = arrayOf(
-            7 to -2,
-            0 to 0,
-            -7 to -2
-        )
+        val data: List<Pair<Double, Float>> = getDataForCards(cardPrototypes.size)
         for (i in cardPrototypes.indices) {
             val curData = data[i]
             val curCard = cardPrototypes[i].create()
@@ -84,8 +81,8 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
             val curActor = screen.screenBuilder.generateFromTemplate(
                 "cardTemplate",
                 mapOf(
-                    "rotation" to OnjFloat(curData.first.toDouble()),
-                    "bottom" to curData.second.toFloat().toOnjYoga(YogaUnit.PERCENT),
+                    "rotation" to OnjFloat(curData.first),
+                    "bottom" to curData.second.toOnjYoga(YogaUnit.PERCENT),
                     "textureName" to OnjString(Card.cardTexturePrefix + "bullet")
                 ),
                 parent,
@@ -94,6 +91,32 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
             curActor.name = curCard.name
             curActor.programmedDrawable = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
         }
+    }
+
+    private fun getDataForCards(size: Int): List<Pair<Double, Float>> {
+        val pos = getXPositionsBasedOnSize(size)
+        val res = mutableListOf<Pair<Double, Float>>()
+        for (i in pos) res.add(-7 * i to -abs(2 * i.toFloat()))
+        return res
+    }
+
+    private fun getXPositionsBasedOnSize(size: Int): DoubleArray {
+        if (size <= 0) return DoubleArray(0)
+        val points = DoubleArray(size)
+        val mid = size / 2
+        val gap = 2.0 / size
+
+        for (i in 0 until mid) {
+            points[i] = -1 + i * gap
+            points[size - 1 - i] = 1 - i * gap
+        }
+        if (size % 2 == 1) {
+            points[mid] = 0.0
+        } else {
+            points[mid] = 0.0
+            points[mid - 1] = points[mid]
+        }
+        return points
     }
 
     private fun addListener(screen: OnjScreen) {

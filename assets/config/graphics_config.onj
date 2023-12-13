@@ -1,4 +1,3 @@
-
 import "imports/colors.onj" as color;
 
 bufferTime: 0.5,
@@ -52,13 +51,14 @@ icons: {
     }
 },
 
+
 encounterModifiers: {
     rain: {
         icon: "encounter_modifier_frost",
         displayName: "Rain",
         description: "Status effects don't work"
     },
-    frost:  {
+    frost: {
         icon: "encounter_modifier_frost",
         displayName: "Frost",
         description: "Status effects don't work"
@@ -87,7 +87,7 @@ damageOverlay: {
     overlay: "hit_overlay"
 },
 
-stringTemplates:  {
+stringTemplates: {
     rottenDetailText: "Bullet lost {damageLost} damage due to the rotten effect!",
     buffDetailText: "{source} applied a {text} of {amount}!",
     giftDetailText: "{source} gifted a {text} of {amount}!",
@@ -128,7 +128,9 @@ keySelect: {
     drawable: "key_select_frame"
 },
 
-keySelectUsedAssets: [ "key_select_frame" ],
+keySelectUsedAssets: [
+    "key_select_frame"
+],
 
 shootPostProcessor: {
     name: "earthquake_shader",

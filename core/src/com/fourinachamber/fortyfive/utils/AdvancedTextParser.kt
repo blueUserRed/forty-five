@@ -2,8 +2,11 @@ package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.scenes.scene2d.Action
+import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
+import onj.builder.buildOnjObject
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Exception
@@ -16,9 +19,6 @@ class AdvancedTextParser(
     private val changes: List<AdvancedTextEffect>
 ) {
     init {
-        if (changes.map { it.indicator }.toSet().size != changes.size) {
-            FortyFiveLogger.warn(logTag, "2 Times the same Indicator for the Effects")
-        }
         if (changes.any { ICON_INDICATOR in it.indicator }) {
             FortyFiveLogger.warn(
                 logTag,
@@ -75,22 +75,25 @@ class AdvancedTextParser(
     }
 
     private fun checkEffects() {
-        val curEffect = changes.find { currentText.endsWith(it.indicator) }
-        if (curEffect != null) {
-            val newText = currentText.removeSuffix(curEffect.indicator)
+        val curEffects = changes.filter { currentText.endsWith(it.indicator) }
+        if (curEffects.isNotEmpty()) {
+            val newText = currentText.removeSuffix(curEffects.first().indicator)
             currentText.clear()
             currentText.append(newText)
             finishText()
-            if (curEffect in activeTextEffects) {
-                curEffect.backToDefault(this)
-                activeTextEffects.remove(curEffect)
-            } else {
-                curEffect.executeChange(this)
-                if (curEffect.overridesOthers) {
-                    activeTextEffects.removeIf { it::class == curEffect::class }
+            for (curEffect in curEffects) {
+                if (curEffect in activeTextEffects) {
+                    curEffect.backToDefault(this)
+                    activeTextEffects.remove(curEffect)
+                } else {
+                    curEffect.executeChange(this)
+                    if (curEffect.overridesOthers) {
+                        activeTextEffects.removeIf { it::class == curEffect::class }
+                    }
+                    activeTextEffects.add(curEffect)
                 }
-                activeTextEffects.add(curEffect)
             }
+
         }
     }
 
@@ -158,6 +161,8 @@ class AdvancedTextParser(
         fun executeChange(parser: AdvancedTextParser)
         fun backToDefault(parser: AdvancedTextParser)
 
+        fun asOnjObject(): OnjObject
+
         companion object {
             fun getFromOnj(screen: OnjScreen, onj: OnjNamedObject): AdvancedTextEffect {
                 return when (onj.name) {
@@ -165,63 +170,105 @@ class AdvancedTextParser(
                     "Font" -> AdvancedFontTextEffect(screen, onj)
                     "FontScale" -> AdvancedFontScaleTextEffect(onj)
                     "Action" -> AdvancedActionTextEffect(onj)
-                    else -> throw Exception("Unknown Text Effect")
-                }
-            }
-
-            class AdvancedColorTextEffect(data: OnjObject) : AdvancedTextEffect {
-                override val indicator: String = data.get<String>("indicator")
-                override val overridesOthers: Boolean = true
-                private val color = data.get<Color>("color")
-                override fun executeChange(parser: AdvancedTextParser) {
-                    parser.curColor = color
-                }
-
-                override fun backToDefault(parser: AdvancedTextParser) {
-                    parser.curColor = parser.defaultSettings.second
+                    else -> throw Exception("Unknown Text Effect: ${onj.name}")
                 }
             }
         }
 
-        class AdvancedFontTextEffect(private val screen: OnjScreen, private val data: OnjNamedObject) :
-            AdvancedTextEffect {
-            override val indicator: String = data.get<String>("indicator")
+        class AdvancedColorTextEffect(
+            override val indicator: String,
+            private val color: Color,
+        ) : AdvancedTextEffect {
 
             override val overridesOthers: Boolean = true
 
+            constructor(data: OnjObject) : this(data.get<String>("indicator"), data.get<Color>("color"))
+
             override fun executeChange(parser: AdvancedTextParser) {
-                parser.curFont = ResourceManager.get(screen, data.get<String>("font")) as BitmapFont
+                parser.curColor = color
+            }
+
+            override fun backToDefault(parser: AdvancedTextParser) {
+                parser.curColor = parser.defaultSettings.second
+            }
+
+            override fun asOnjObject(): OnjObject = buildOnjObject {
+                name("Color")
+                "indicator" with indicator
+                "color" with OnjColor(color)
+            }
+        }
+
+        class AdvancedFontTextEffect(
+            private val screen: OnjScreen,
+            override val indicator: String,
+            private val fontName: String
+        ) :
+            AdvancedTextEffect {
+
+            override val overridesOthers: Boolean = true
+
+            constructor(screen: OnjScreen, data: OnjObject) : this(
+                screen,
+                data.get<String>("indicator"),
+                data.get<String>("font")
+            )
+
+            override fun executeChange(parser: AdvancedTextParser) {
+                parser.curFont = ResourceManager.get(screen, fontName) as BitmapFont
             }
 
             override fun backToDefault(parser: AdvancedTextParser) {
                 parser.curFont = parser.defaultSettings.first
             }
+
+            override fun asOnjObject(): OnjObject = buildOnjObject {
+                name("Font")
+                "indicator" with indicator
+                "font" with fontName
+            }
         }
 
 
-        class AdvancedFontScaleTextEffect(private val data: OnjNamedObject) :
-            AdvancedTextEffect {
-            override val indicator: String = data.get<String>("indicator")
+        class AdvancedFontScaleTextEffect(
+            override val indicator: String,
+            private val fontScale: Float,
+        ) : AdvancedTextEffect {
 
             override val overridesOthers: Boolean = true
 
+            constructor(data: OnjObject) : this(
+                data.get<String>("indicator"),
+                data.get<Double>("fontScale").toFloat()
+            )
+
             override fun executeChange(parser: AdvancedTextParser) {
-                parser.curFontScale = data.get<Double>("fontScale").toFloat()
+                parser.curFontScale = fontScale
             }
 
             override fun backToDefault(parser: AdvancedTextParser) {
                 parser.curFontScale = parser.defaultSettings.third
             }
+
+
+            override fun asOnjObject(): OnjObject = buildOnjObject {
+                name("FontScale")
+                "indicator" with indicator
+                "fontScale" with fontScale
+            }
         }
 
-        class AdvancedActionTextEffect(data: OnjNamedObject) :
-            AdvancedTextEffect {
-            override val indicator: String = data.get<String>("indicator")
+        class AdvancedActionTextEffect(
+            override val indicator: String,
+            private val action: AdvancedTextPart.() -> Unit,
+        ) : AdvancedTextEffect {
 
             override val overridesOthers: Boolean = false
 
-            private val action: AdvancedTextPart.() -> Unit =
+            constructor(data: OnjObject) : this(
+                data.get<String>("indicator"),
                 AdvancedTextPartActionFactory.getAction(data.get<OnjNamedObject>("action"))
+            )
 
             override fun executeChange(parser: AdvancedTextParser) {
                 parser.currentActions.add(action)
@@ -229,6 +276,12 @@ class AdvancedTextParser(
 
             override fun backToDefault(parser: AdvancedTextParser) {
                 parser.currentActions.remove(action)
+            }
+
+            override fun asOnjObject(): OnjObject = buildOnjObject {
+                name("Action")
+                "indicator" with indicator
+                "action" with action //TODO this breaks probably, however i don't think this is ever needed
             }
         }
     }

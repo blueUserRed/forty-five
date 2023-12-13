@@ -2,6 +2,8 @@ import "imports/font_group.onjschema" as _;
 // this also imports DragAndDropBehaviours
 import "imports/game_screen_controller_keys.onjschema" as gameScreenControllerKeys;
 import "imports/textEffectEmitterConfig.onjschema" as textEmitterConfig;
+import "imports/advanced_text_effect.onjschema" as _;
+
 
 use Common;
 use Style;
@@ -290,49 +292,6 @@ $Widget {
 
 }
 
-var advancedTextEffectSharedKeys = {
-    indicator: string,
-};
-
-$AdvancedTextEffect {
-
-    $Color {
-        color: Color,
-        ...advancedTextEffectSharedKeys
-    }
-
-    $Font {
-        font: string,
-        ...advancedTextEffectSharedKeys
-    }
-
-    $FontScale {
-        fontScale: float,
-        ...advancedTextEffectSharedKeys
-    }
-
-    $Action {
-        action: $AdvancedTextPartAction,
-        ...advancedTextEffectSharedKeys
-    }
-
-//    $Icon { //TODO icons, maybe like this, maybe part of the text
-//        icon: string,
-//        ...advancedTextPartSharedKeys
-//    }
-
-}
-
-$AdvancedTextPartAction {
-
-    $ShakeTextAction {
-        xMagnitude: float,
-        xSpeed: float,
-        yMagnitude: float,
-        ySpeed: float,
-    }
-
-}
 
 $DetailMapProvider {
 

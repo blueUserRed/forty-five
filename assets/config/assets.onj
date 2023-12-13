@@ -312,15 +312,15 @@ textures: [
     },
     {
         name: "shop_dark_background",
-        file: "textures/shop/dark_background.png"
+        file: "textures/events/shop/dark_background.png"
     },
     {
         name: "shop_items_background",
-        file: "textures/shop/items_background.png"
+        file: "textures/events/shop/items_background.png"
     },
     {
         name: "shop_background_wasteland",
-        file: "textures/shop/biomeBackgrounds/wasteland.png"
+        file: "textures/events/shop/biomeBackgrounds/wasteland.png"
     },
     {
         name: "heal_or_max_accept",
@@ -360,19 +360,19 @@ textures: [
     },
     {
         name: "shop_back_button",
-        file: "textures/shop/back_button.png"
+        file: "textures/events/shop/back_button.png"
     },
     {
         name: "shop_add_to_backpack",
-        file: "textures/shop/to_backpack.png"
+        file: "textures/events/shop/to_backpack.png"
     },
     {
         name: "shop_add_to_deck",
-        file: "textures/shop/to_deck.png"
+        file: "textures/events/shop/to_deck.png"
     },
     {
         name: "shop_npcs_default",
-        file: "textures/shop/npcs/default.png",
+        file: "textures/events/shop/npcs/default.png",
     },
     {
         name: "prerendered_noise_perlin_512x512",
@@ -476,35 +476,35 @@ textures: [
     },
     {
         name: "chooseCard_cardsBackground",
-        file: "textures/choose_card/cards_background.png"
+        file: "textures/events/choose_card/cards_background.png"
     },
     {
         name: "chooseCard_add_to_backpack",
-        file: "textures/choose_card/to_backpack.png"
+        file: "textures/events/choose_card/to_backpack.png"
     },
     {
         name: "chooseCard_add_to_deck",
-        file: "textures/choose_card/to_deck.png"
+        file: "textures/events/choose_card/to_deck.png"
     },
     {
         name: "dialog_answer_option",
-        file: "textures/dialog/answer_option.png"
+        file: "textures/events/dialog/answer_option.png"
     },
     {
         name: "dialog_answer_option_hover",
-        file: "textures/dialog/answer_option_hover.png"
+        file: "textures/events/dialog/answer_option_hover.png"
     },
     {
         name: "dialog_background",
-        file: "textures/dialog/background.png"
+        file: "textures/events/dialog/background.png"
     },
     {
         name: "dialog_continue",
-        file: "textures/dialog/continue.png"
+        file: "textures/events/dialog/continue.png"
     },
     {
         name: "dialog_name_field",
-        file: "textures/dialog/name_field.png"
+        file: "textures/events/dialog/name_field.png"
     },
     {
         name: "enemy_action_burning",
@@ -617,6 +617,18 @@ textures: [
     {
         name: "encounter_modifier_rain",
         file: "textures/encounter_modifier/rain.png"
+    },
+    {
+        name: "hover_detail_big_background",
+        file: "textures/cards/hover_detail/hover_detail_background.png"
+    },
+    {
+        name: "hover_detail_small_background",
+        file: "textures/cards/hover_detail/hover_detail_effect_background.png"
+    },
+    {
+        name: "hover_detail_more_info",
+        file: "textures/cards/hover_detail/hover_detail_more_info.png"
     },
 ],
 
