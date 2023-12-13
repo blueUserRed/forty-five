@@ -160,6 +160,7 @@ object MapManager {
             Gdx.files.internal(roadMapsPath).file(),
             true
         )
+        read()
     }
 
     fun resetAllSync() {
@@ -168,6 +169,7 @@ object MapManager {
             Gdx.files.internal(areaMapsPath).file(),
             true
         )
+        read()
     }
 
     fun changeToMapScreen() {
