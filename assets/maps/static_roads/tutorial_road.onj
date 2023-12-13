@@ -22,7 +22,7 @@ tutorialText: [
     },
 ],
 startNode: 0,
-endNode: 11,
+endNode: 13,
 biome: "wasteland",
 progress: [0.0, 0.1],
 nodes: [
@@ -79,7 +79,13 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-        event: $EmptyMapEvent { // draw silver bullet
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_silver_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
         },
     },
     {
@@ -103,7 +109,13 @@ nodes: [
         edgesTo: [
             5, 7,
         ],
-        event: $EmptyMapEvent { // draw workerBullet
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_worker_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
         },
     },
     {
@@ -127,7 +139,13 @@ nodes: [
         edgesTo: [
             7, 9,
         ],
-        event: $EmptyMapEvent { // draw incendiaryBullet
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_incendiary_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
         },
     },
     {
@@ -151,14 +169,20 @@ nodes: [
         edgesTo: [
             9, 11,
         ],
-        event: $EmptyMapEvent { // draw leadersBullet
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_leaders_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
         },
     },
     {
         x: 460.0,
         y: 90.0,
         edgesTo: [
-            10
+            10, 12
         ],
         event: $EncounterMapEvent {
             currentlyBlocks: true,
@@ -167,6 +191,31 @@ nodes: [
             isCompleted: false,
             encounterIndex: 5,
             distanceToEnd: -1,
+        }
+    },
+    {
+        x: 500.0,
+        y: 90.0,
+        edgesTo: [
+            11, 13
+        ],
+        event: $HealOrMaxHPEvent {
+            healRange: [100, 100],
+            maxHPRange: [0, 0],
+            seed: 0,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        }
+    },
+    {
+        x: 540.0,
+        y: 90.0,
+        edgesTo: [
+            12
+        ],
+        event: $EnterMapMapEvent {
+            targetMap: "start_area",
         }
     },
 ],
