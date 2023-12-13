@@ -61,8 +61,26 @@ class DetailMapWidget(
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
+    private val mapBounds: Rectangle by lazy {
+        val nodes = map.uniqueNodes.map { scaledNodePos(it) }
+        val lowX = nodes.minOf { it.x }
+        val lowY = nodes.minOf { it.y }
+        val highX = nodes.maxOf { it.x }
+        val highY = nodes.maxOf { it.y }
+        Rectangle(lowX, lowY, highX - lowX, highY - lowY)
+    }
+
     var mapOffset: Vector2 = Vector2(50f, 50f)
-        private set
+        private set(value) {
+            val bounds = mapBounds
+            var center = Vector2()
+            bounds.getCenter(center)
+            center -= Vector2(0f, height * 1.5f)
+            field = value.clampIndividual(
+                center.x - bounds.width / 2, center.x + bounds.width / 2,
+                center.y - bounds.height / 2, center.y + bounds.height / 2
+            )
+        }
 
     private var playerNode: MapNode = MapManager.currentMapNode
     private var playerPos: Vector2 = scaledNodePos(playerNode)
@@ -189,12 +207,22 @@ class DetailMapWidget(
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
+
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
-        mapOffset = Vector2(
+        val bounds = mapBounds
+        var center = Vector2()
+        bounds.getCenter(center)
+        center -= Vector2(0f, screen.viewport.worldHeight * 1.5f)
+        val playerPos = Vector2(
             -playerPos.x + screen.viewport.worldWidth * 0.5f,
             -playerPos.y + screen.viewport.worldHeight * 0.5f
         )
+        val offset = playerPos.clampIndividual(
+            center.x - bounds.width / 2, center.x + bounds.width / 2,
+            center.y - bounds.height / 2, center.y + bounds.height / 2
+        )
+        mapOffset.set(offset)
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
