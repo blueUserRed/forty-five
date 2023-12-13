@@ -1,0 +1,55 @@
+import "imports/colors.onj" as color;
+use Common;
+
+
+hoverDetailDescriptions: [
+    {
+    keyword: "burning",
+    groupName: "status",
+    description: "$status$BURNING (t)$status$\nEnemies with burning get 50% more damage for the next t turns.",
+//    description: "$status$BURNING (t§§description_icon_turns_status§§)$status$\nEnemies with burning get 50% more damage for the next t turns.",
+    },
+    {
+        keyword: "poison",
+        groupName: "status",
+        description: "$status$POISON (d,t)$status$\nEnemies with Poison take d dmg for t turns. d and t both stack.",
+//        description: "$status$POISON (d§§description_icon_dmg_status§§,t§§description_icon_turns_status§§)$status$\nEnemies with Poison take d dmg for t turns. d and t both stack.",
+    },
+    {
+        keyword: "protected",
+        groupName: "trait",
+        description: "$trait$PROTECTED (s)$trait$\nBullets with this effect don't dissaper for s shots.", //TODO change this to the actual one
+    },
+],
+
+hoverDetailDescriptionGroups: [
+    {
+        name: "status",
+        color: color.orange,
+    },
+    {
+        name: "trait",
+        color: color.seljuk_blue,
+    },
+    {
+        name: "keyword",
+        color: color.orange,
+    }
+],
+
+defaultTextEffects:[
+    $Color{
+        indicator:"$trigger$",
+        color: color.hemoglobin_red,
+    },
+
+    $FontScale{
+        indicator:"$trigger$",
+        fontScale: 0.8,
+    },
+
+    $Color{
+        indicator:"$dmgBuff$",
+        color: color.green,
+    },
+]

@@ -20,8 +20,8 @@ cards: [
     {
         name: "incendiaryBullet",
         title: "Incendiary Bullet",
-        flavourText: 'from the catalog: "the perfect Bullet for every pyromaniac and totally not a warcrime"',
-        description: 'When this bullet is shot: the enemy gets the status burning for 4 revolver rotations',
+        flavourText: '"I\'m pretty sure this is a Warcrime"',
+        description: '$trigger$On Shot$trigger$\nThe enemy gets $status$BURNING$status$ (3)',
         baseDamage: 7,
         coverValue: 0,
         traitEffects: [],
@@ -56,8 +56,8 @@ cards: [
     {
         name: "bigBullet",
         title: "Big Bullet",
-        flavourText: "bullet but like... idk bigger",
-        description: "",
+        flavourText: "",
+        description: "bullet but like... idk bigger",
         baseDamage: 16,
         coverValue: 0,
         traitEffects: [],
@@ -177,8 +177,8 @@ cards: [
     {
         name: "bullet",
         title: "Bullet",
-        flavourText: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright",
-        description: "",
+        flavourText: "", //cards that have no further description will have the flavor text as a description (decision by phillip)
+        description: "Daaamn are you a bullet cuz i wanna shoot you! ... No?... aalright",
         baseDamage: 6,
         coverValue: 0,
         traitEffects: [],

@@ -1,3 +1,4 @@
+import "imports/advanced_text_effect.onjschema" as _;
 
 use Common;
 
@@ -18,45 +19,6 @@ $NextDialogPartSelector {
 
     $EndOfDialog {
         changeToScreen: string
-    }
-}
-
-
-var advancedTextEffectSharedKeys = {
-    indicator: string,
-};
-
-$AdvancedTextEffect {
-
-    $Color {
-        color: Color,
-        ...advancedTextEffectSharedKeys
-    }
-
-    $Font {
-        font: string,
-        ...advancedTextEffectSharedKeys
-    }
-
-    $FontScale {
-        fontScale: float,
-        ...advancedTextEffectSharedKeys
-    }
-
-    $Action {
-        action: $AdvancedTextPartAction,
-        ...advancedTextEffectSharedKeys
-    }
-
-}
-
-$AdvancedTextPartAction {
-
-    $ShakeTextAction {
-        xMagnitude: float,
-        xSpeed: float,
-        yMagnitude: float,
-        ySpeed: float,
     }
 }
 

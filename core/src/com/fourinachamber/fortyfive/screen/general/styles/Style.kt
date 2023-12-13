@@ -170,6 +170,9 @@ open class StyleInstruction<DataType>(
     open fun onControlGained(valueBefore: DataType) {}
 
     open fun onControlLost() {}
+    override fun toString(): String {
+        return "${javaClass.simpleName}(priority:$priority, data:$data)"
+    }
 
 }
 

@@ -454,4 +454,5 @@ templates: [
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
     sharedComponents.cardHoverDetail,
+    sharedComponents.cardHoverDetailExtra,
 ],
