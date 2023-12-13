@@ -77,7 +77,6 @@ object FortyFive : Game() {
         PermaSaveState.newRun()
         SaveState.reset()
         MapManager.newRunSync()
-        MapManager.init() // re-read and reset things like the current map
     }
 
     fun resetAll() {
