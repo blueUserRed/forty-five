@@ -134,7 +134,6 @@ var mapBox = $Box {
         playerMovementTime: 0.3,
         directionIndicator: "dialog_continue_arrow",
         screenSpeed: 25.0,
-        leftScreenSideDeadSection: 100.0,
         disabledDirectionIndicatorAlpha: 0.5,
         startButtonName: "start_button"
     },
