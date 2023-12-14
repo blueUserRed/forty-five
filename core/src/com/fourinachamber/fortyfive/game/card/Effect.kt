@@ -274,7 +274,6 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = PutCardInHand(trigger, cardName, amount, triggerInHand)
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            includeAction(GraphicsConfig.cardHighlightEffect(card))
             val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
             include(controller.tryToPutCardsInHandTimeline(cardName, amount))
         }

@@ -33,6 +33,7 @@ var card = {
     highlightType: string,
     cost: int,
     price: int,
+    dark: boolean,
     type: $CardType,
     effects: Effect[],
     forceLoadCards: string[],
