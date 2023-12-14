@@ -285,7 +285,7 @@ enemies: [
     {
         name: "Witch",
         title: "Witch",
-        baseHealth: 1,
+        baseHealth: 130,
         texture: "enemy_witch",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
