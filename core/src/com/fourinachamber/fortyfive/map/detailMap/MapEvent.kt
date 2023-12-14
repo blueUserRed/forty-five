@@ -368,6 +368,7 @@ class HealOrMaxHPMapEvent(
     override fun completed() {
         isCompleted = true
         canBeStarted = false
+        currentlyBlocks = false
         MapManager.changeToMapScreen()
     }
 
