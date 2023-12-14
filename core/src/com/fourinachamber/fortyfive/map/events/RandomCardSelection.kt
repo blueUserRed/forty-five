@@ -218,14 +218,20 @@ interface Selector {
     fun <T> isPartOf(card: T): Boolean
 
     companion object {
-        fun getFromOnj(onj: OnjNamedObject): Selector {
-            return when (onj.name) {
-                "ByName" -> ByNameSelector(onj.get<String>("name"))
-                "ByTag" -> ByTagSelector(onj.get<String>("name"))
-                else -> throw Exception("Unknown card change: ${onj.name}")
 
-            }
+        fun getFromOnj(onj: OnjNamedObject): Selector = when (onj.name) {
+            "ByName" -> ByNameSelector(onj.get<String>("name"))
+            "ByTag" -> ByTagSelector(onj.get<String>("name"))
+            else -> throw Exception("Unknown card change: ${onj.name}")
+        }.let {
+            if (onj.getOr("negate", false)) InvertingSelector(it) else it
         }
+
+    }
+
+    class InvertingSelector(private val selector: Selector) : Selector {
+
+        override fun <T> isPartOf(card: T): Boolean = !selector.isPartOf(card)
     }
 
     class ByNameSelector(private val name: String) : Selector {

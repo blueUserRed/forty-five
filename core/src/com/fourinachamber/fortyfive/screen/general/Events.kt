@@ -15,6 +15,7 @@ object EventFactory {
         "DrawCardEvent" to { DrawCardEvent() },
         "PopupConfirmationEvent" to { PopupConfirmationEvent() },
         "ParryEvent" to { ParryEvent() },
+        "TutorialConfirmedEvent" to { TutorialConfirmedEvent() },
         "HoverEnterEvent" to { HoverEnterEvent() },
         "HoverLeaveEvent" to { HoverLeaveEvent() },
     )
@@ -26,6 +27,7 @@ object EventFactory {
         "DrawCardEvent" to DrawCardEvent::class,
         "PopupConfirmationEvent" to PopupConfirmationEvent::class,
         "ParryEvent" to ParryEvent::class,
+        "TutorialConfirmedEvent" to TutorialConfirmedEvent::class,
         "HoverEnterEvent" to HoverEnterEvent::class,
         "HoverLeaveEvent" to HoverLeaveEvent::class,
     )
@@ -71,6 +73,8 @@ class DrawCardEvent : Event()
 class PopupConfirmationEvent : Event()
 
 class ParryEvent : Event()
+
+class TutorialConfirmedEvent : Event()
 
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed

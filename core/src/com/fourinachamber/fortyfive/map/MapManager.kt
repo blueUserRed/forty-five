@@ -17,15 +17,19 @@ import java.io.File
 
 object MapManager {
 
-    // TODO: this is ugly
-    const val mapScreenPath: String = "screens/map_screen.onj"
-
-    const val mapConfigFilePath: String = "maps/map_config.onj"
-    const val roadMapsPath: String = "maps/roads"
-    const val areaMapsPath: String = "maps/areas"
-    const val areaDefinitionsMapsPath: String = "maps/area_definitions"
-
     const val logTag: String = "MapManager"
+    const val mapConfigFilePath: String = "maps/map_config.onj"
+
+    lateinit var roadMapsPath: String
+        private set
+    lateinit var areaMapsPath: String
+        private set
+    lateinit var areaDefinitionsMapsPath: String
+        private set
+    lateinit var staticRoadMapsPath: String
+        private set
+    lateinit var mapScreenPath: String
+        private set
 
     lateinit var currentDetailMap: DetailMap
         private set
@@ -76,6 +80,12 @@ object MapManager {
                     it.get<String>("type"),
                 )
             }
+        val paths = onj.get<OnjObject>("paths")
+        areaMapsPath = paths.get<String>("areas")
+        roadMapsPath = paths.get<String>("roads")
+        areaDefinitionsMapsPath = paths.get<String>("areaDefinitions")
+        mapScreenPath = paths.get<String>("mapScreen")
+        staticRoadMapsPath = paths.get<String>("staticRoadDefinitions")
         displayNames = onj
             .get<OnjArray>("displayNames")
             .value
@@ -85,6 +95,9 @@ object MapManager {
             .get<OnjObject>("screens")
             .value
             .mapValues { (_, value) -> value.value as String }
+    }
+
+    fun read() {
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
         currentDetailMap = DetailMap.readFromFile(map)
@@ -143,6 +156,11 @@ object MapManager {
 
     fun newRunSync() {
         generateMapsSync()
+        Gdx.files.internal(staticRoadMapsPath).file().copyRecursively(
+            Gdx.files.internal(roadMapsPath).file(),
+            true
+        )
+        read()
     }
 
     fun resetAllSync() {
@@ -151,6 +169,7 @@ object MapManager {
             Gdx.files.internal(areaMapsPath).file(),
             true
         )
+        read()
     }
 
     fun changeToMapScreen() {

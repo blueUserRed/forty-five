@@ -93,10 +93,19 @@ $EnemyBrain {
         shieldIconHandle: string,
     }
 
+    $ScriptedEnemyBrain {
+        actions: {
+            turn: int,
+            action: $EnemyAction,
+            show: boolean
+        }[]
+    }
+
 }
 
 var enemy = {
     name: string,
+    title: string,
     baseHealth: int,
     texture: string,
     coverIcon: string,
