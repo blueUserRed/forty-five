@@ -72,10 +72,9 @@ class Card(
     var price: Int,
     val effects: List<Effect>,
     val rotationDirection: RevolverRotation,
-    val highlightType: HighlightType,
     val tags: List<String>,
+    isDark: Boolean,
     font: PixmapFont,
-    fontColor: Color,
     fontScale: Float,
     screen: OnjScreen
 ) : Disposable {
@@ -141,8 +140,8 @@ class Card(
         actor = CardActor(
             this,
             font,
-            fontColor,
             fontScale,
+            isDark,
             screen
         )
     }
@@ -427,12 +426,11 @@ class Card(
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
                 rotationDirection = RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
-                highlightType = HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
                 tags = onj.get<OnjArray>("tags").value.map { it.value as String },
                 //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(onjScreen),
-                fontColor = GraphicsConfig.cardFontColor(),
                 fontScale = GraphicsConfig.cardFontScale(),
+                isDark = onj.get<Boolean>("dark"),
                 screen = onjScreen
             )
 
@@ -482,10 +480,6 @@ class Card(
         BULLET, ONE_SHOT
     }
 
-    enum class HighlightType {
-        STANDARD, GLOW
-    }
-
     /**
      * temporarily modifies a card. For example used by the buff damage effect to change the damage of a card
      * @param damage changes the damage of the card. Can be negative
@@ -508,8 +502,8 @@ class Card(
 class CardActor(
     val card: Card,
     val font: PixmapFont,
-    val fontColor: Color,
     val fontScale: Float,
+    val isDark: Boolean,
     private val screen: OnjScreen
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor {
 
@@ -529,12 +523,8 @@ class CardActor(
      */
     var isDragged: Boolean = false
 
-    private var inGlowAnim: Boolean = false
     private var inDestroyAnim: Boolean = false
 
-    private val glowShader: BetterShader by lazy {
-        ResourceManager.get(screen, "glow_shader") // TODO: fix
-    }
     private val destroyShader: BetterShader by lazy {
         ResourceManager.get(screen, "dissolve_shader") // TODO: fix
     }
@@ -582,9 +572,7 @@ class CardActor(
         setBoundsOfHoverDetailActor(this)
         batch ?: return
         val texture = pixmapTextureRegion ?: return
-        val shader = if (inGlowAnim) {
-            glowShader
-        } else if (inDestroyAnim) {
+        val shader = if (inDestroyAnim) {
             destroyShader
         } else {
             null
@@ -615,6 +603,12 @@ class CardActor(
 
     fun redrawPixmap(damageValue: Int) {
         pixmap.drawPixmap(cardTexturePixmap, 0, 0)
+        val situation = when {
+            damageValue > card.baseDamage -> "increase"
+            damageValue < card.baseDamage -> "decrease"
+            else -> "normal"
+        }
+        val fontColor = GraphicsConfig.cardFontColor(isDark, situation)
         font.write(pixmap, damageValue.toString(), 35, 480, fontScale, fontColor)
         font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
         pixmapTextureRegion?.texture?.dispose()
@@ -628,15 +622,7 @@ class CardActor(
         return Rectangle(x, y, width, height)
     }
 
-    fun glowAnimation(): Timeline = Timeline.timeline {
-//        action {
-//            inGlowAnim = true
-//            glowShader.resetReferenceTime()
-//        }
-//        delay(1000)
-//        action { inGlowAnim = false }
-    }
-
+    // TODO: came up with system for animations
     fun destroyAnimation(): Timeline = Timeline.timeline {
         action {
             inDestroyAnim = true
@@ -644,57 +630,6 @@ class CardActor(
         }
         delay(2000)
         action { inDestroyAnim = false }
-    }
-
-    fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
-//        // TODO: hardcoded values
-//        var origScaleX = 0f
-//        var origScaleY = 0f
-//        val scaleAction = ScaleToAction()
-//        val moveAction = MoveByAction()
-//        val interpolation = Interpolation.fade
-//        action {
-//            origScaleX = scaleX
-//            origScaleY = scaleY
-//            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
-//            moveAction.setAmount(
-//                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
-//                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
-//            )
-//            moveAction.duration = 0.1f
-//            scaleAction.duration = 0.1f
-//            scaleAction.interpolation = interpolation
-//            moveAction.interpolation = interpolation
-//            addAction(scaleAction)
-//            addAction(moveAction)
-//        }
-//        delayUntil { scaleAction.isComplete || !card.inGame }
-//        if (includeGlow) {
-//            delay(GraphicsConfig.bufferTime)
-//            include(glowAnimation())
-//        }
-//        delay(GraphicsConfig.bufferTime)
-//        action {
-//            removeAction(scaleAction)
-//            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
-//            removeAction(moveAction)
-//            scaleAction.reset()
-//            moveAction.reset()
-//            scaleAction.setScale(origScaleX, origScaleY)
-//            moveAction.setAmount(moveAmount.x, moveAmount.y)
-//            scaleAction.duration = 0.2f
-//            moveAction.duration = 0.2f
-//            scaleAction.interpolation = interpolation
-//            moveAction.interpolation = interpolation
-//            addAction(scaleAction)
-//            addAction(moveAction)
-//        }
-//        delayUntil { scaleAction.isComplete || !card.inGame }
-//        action {
-//            removeAction(scaleAction)
-//            removeAction(moveAction)
-//        }
-//        delay(GraphicsConfig.bufferTime)
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
@@ -712,7 +647,6 @@ class CardActor(
         super.sizeChanged()
         setBoundsOfHoverDetailActor(this)
     }
-
 
     override fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
