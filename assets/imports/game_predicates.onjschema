@@ -38,4 +38,17 @@ $GamePredicate {
     $TargetedEnemyHasAnyStatusEffect {
     }
 
+    $GameInFreePhase {
+    }
+
+    $PlayerHasRunOutOfReserves {
+    }
+
+    $PlayerHasPlayedSilverBulletAndDrawnCards {
+    }
+
+    $TargetedEnemyHasStatusEffect {
+        value: StatusEffect
+    }
+
 }

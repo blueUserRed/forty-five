@@ -289,6 +289,14 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $TutorialInfoActor {
+        background: string,
+        children?: $Widget[],
+        circleRadiusMultiplier: float,
+        circleRadiusExtension: float,
+       ...widgetSharedKeys
+    }
+
 }
 
 
@@ -414,6 +422,8 @@ $ScreenController {
     }
 
     $MapScreenController {
+        tutorialInfoActor: string,
+        mapWidgetName: string
     }
 }
 

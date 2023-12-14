@@ -47,6 +47,19 @@ fun interface GamePredicate {
             controller.enemyArea.getTargetedEnemy().statusEffects.isNotEmpty()
         }
 
+        val gameInFreePhase = GamePredicate { controller -> controller.inFreePhase }
+
+        val playerHasRunOutOfReserves = GamePredicate { controller -> controller.curReserves == 0 }
+
+        // I know this is oddly specific, but I need it for the tutorial text
+        val playerHasPlayedSilverBulletAndDrawnCards = GamePredicate { controller ->
+            controller.revolver.slots.mapNotNull { it.card?.name }.contains("silverBullet") && controller.inFreePhase
+        }
+
+        val targetedEnemyHasStatusEffect = { statusEffect: StatusEffect -> GamePredicate { controller ->
+            statusEffect in controller.enemyArea.getTargetedEnemy().statusEffects
+        } }
+
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
@@ -67,6 +80,10 @@ fun interface GamePredicate {
             "NegatePredicate" -> negatePredicate(fromOnj(obj.get<OnjNamedObject>("value"), inContextOfEnemy))
             "TargetedEnemyShieldIsAtLeast" -> targetedEnemyShieldIsAtLeast(obj.get<Long>("value").toInt())
             "TargetedEnemyHasAnyStatusEffect" -> targetedEnemyHasAnyStatusEffect
+            "GameInFreePhase" -> gameInFreePhase
+            "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
+            "PlayerHasPlayedSilverBulletAndDrawnCards" -> playerHasPlayedSilverBulletAndDrawnCards
+            "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

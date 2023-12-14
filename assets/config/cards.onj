@@ -2,13 +2,14 @@
 use Cards;
 
 var burningPercent = 0.5;
-var poisonDamage = 3;
 
 var bSelects = {
     allExceptSelf: bNum([1, 2, 3, 4, 5]),
     allBullets: bSelectByName("bullet"),
     fourButNotSelf: bNum([4]),
+    threeButNotSelf: bNum([3]),
     targetRequiredNotSelf: bSelectTarget(false, false),
+    targetOptionalNotSelf: bSelectTarget(false, true),
     neighbors: bSelectNeighbors(),
     self: bSelectSelf()
 };
@@ -360,7 +361,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", poison(3, poisonDamage))
+            giveStatus("shot", poison(3, 3))
         ],
         forceLoadCards: [],
         cost: 1,
@@ -681,6 +682,143 @@ cards: [
         ],
         forceLoadCards: [],
         cost: 1,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
+    {
+        name: "deputiesBullet",
+        title: "Deputies Bullet",
+        flavourText: "Deputies Bullet",
+        description: "This Bullet can't be placed in slot 3. On-Placedown: return the Bullet in Slot 3 to your hand.",
+        baseDamage: 6,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            bounce("enter", bSelects.threeButNotSelf)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
+    {
+        name: "toxicBullet",
+        title: "Toxic Bullet",
+        flavourText: "Toxic Bullet",
+        description: "As long as the enemy is poisoned: this Bullet gets +14 dmg",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0, 0) }#activeChecker)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
+    {
+        name: "fullLeadBullet",
+        title: "Full Lead Bullet",
+        flavourText: "Full Lead Bullet",
+        description: "While in Revolver: you get POISON (DMG d: 8 TURNS t: 1) on shot: the enemy gets POISON (DMG d: 8 TURNS t: 5)",
+        baseDamage: 8,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giveStatus("shot", poison(5, 8)),
+            givePlayerStatus("round start", poison(1, 8)),
+        ],
+        forceLoadCards: [],
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
+    {
+        name: "gasBullet",
+        title: "Gas Bullet",
+        flavourText: "gas Bullet",
+        description: "If this Bullet leaves the revolver: the enemy gets poison for 3 turns for 6 dmg",
+        baseDamage: 1,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giveStatus("shot", poison(3, 6)),
+            giveStatus("destroy", poison(3, 6))
+        ],
+        forceLoadCards: [],
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
+    {
+        name: "survivorsBullet",
+        title: "Survivors Bullet",
+        flavourText: "Survivors Bullet",
+        description: "Whenever a Bullet is destroyed, turn the revolver 1 to the left.",
+        baseDamage: 8,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            turnRevolver("any card destroyed", "left", 1)
+        ],
+        forceLoadCards: [],
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
+    {
+        name: "sacrificialBullet",
+        title: "sacrificial Bullet",
+        flavourText: "sacrificial Bullet",
+        description: "When this Bullet is destroyed: Target Bullet gets +5 dmg, then, return Sacrificfial Bullet to your hand.",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("destroy", bSelects.targetOptionalNotSelf, 5#val),
+            putCardInHand("destroy", "sacrificialBullet", 1#val)
+        ],
+        forceLoadCards: [],
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool2"],
+        price: 0,
+    },
+    {
+        name: "gravediggersBullet",
+        title: "Gravediggers Bullet",
+        flavourText: "Gravediggers Bullet",
+        description: "While in Revolver: whenever a Bullet is destroyed: draw a card and double Gravediggers Bullets dmg.",
+        baseDamage: 1,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            draw("any card destroyed", 1#val),
+            buffDmgMultiplier("any card destroyed", bSelects.self, 2.0),
+        ],
+        forceLoadCards: [],
+        cost: 2,
         type: $Bullet { },
         tags: ["pool1"],
         price: 0,

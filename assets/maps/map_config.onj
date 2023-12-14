@@ -22,6 +22,14 @@ var images = {
     }
 };
 
+paths: {
+    roads: "maps/roads",
+    areas: "maps/areas",
+    areaDefinitions: "maps/area_definitions",
+    staticRoadDefinitions: "maps/static_roads",
+    mapScreen: "screens/map_screen.onj",
+},
+
 mapImages: [
     {
         name: "start_area",

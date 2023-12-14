@@ -145,7 +145,10 @@ class Revolver(
     fun initDragAndDrop(config:  Pair<DragAndDrop, OnjNamedObject>) {
         slots = Array(5) {
             val slot = RevolverSlot(it + 1, this, slotDrawableHandle, slotScale!!, screen, animationDuration)
+            slot.reportDimensionsWithScaling = true
+            slot.ignoreScalingWhenDrawing = true
             addActor(slot)
+            screen.addNamedActor("revolverSlot-$it", slot)
             val (dragAndDrop, dropOnj) = config
             val dropBehaviour = DragAndDropBehaviourFactory.dropBehaviourOrError(
                 dropOnj.name,
@@ -163,25 +166,6 @@ class Revolver(
         validate()
         background.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
-
-        var isCardHoveredOver = false
-        for (slot in slots) if (slot.card?.actor?.isHoveredOver ?: false) {
-            isCardHoveredOver = true
-//            if (currentHoverDetailActor === slot.card?.actor?.hoverDetailActor) break
-//            currentHoverDetailActor?.isVisible = false
-//            removeActor(currentHoverDetailActor)
-//            currentHoverDetailActor = slot.card?.actor?.hoverDetailActor
-//            addActor(currentHoverDetailActor)
-//            currentHoverDetailActor!!.isVisible = true
-//            invalidate()
-            break
-        }
-        if (!isCardHoveredOver && currentHoverDetailActor != null) {
-//            currentHoverDetailActor?.isVisible = false
-//            removeActor(currentHoverDetailActor)
-//            currentHoverDetailActor = null
-            invalidate()
-        }
     }
 
     override fun layout() {
@@ -387,7 +371,7 @@ class RevolverSlot(
         return "revolverSlot: $num with card $card"
     }
 
-    override fun getHighlightArea(): Rectangle {
+    override fun getBounds(): Rectangle {
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         return if (reportDimensionsWithScaling) {
             Rectangle(x, y, width, height)

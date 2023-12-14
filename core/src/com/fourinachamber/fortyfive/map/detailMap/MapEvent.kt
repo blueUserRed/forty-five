@@ -306,11 +306,13 @@ class ChooseCardMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = "You can choose one of three cards."
-    override val displayName: String = "Ominous person"
     val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
     val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
+
+    override val descriptionText: String =
+        if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."
+    override val displayName: String = "Ominous person"
 
     init {
         setStandardValuesFromConfig(onj)
@@ -322,6 +324,7 @@ class ChooseCardMapEvent(
 
     override fun completed() {
         isCompleted = true
+        currentlyBlocks = false
         canBeStarted = false
     }
 
@@ -365,6 +368,7 @@ class HealOrMaxHPMapEvent(
     override fun completed() {
         isCompleted = true
         canBeStarted = false
+        currentlyBlocks = false
         MapManager.changeToMapScreen()
     }
 

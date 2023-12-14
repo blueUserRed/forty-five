@@ -168,7 +168,7 @@ val AtomicInteger.get: Int
 fun OnjArray.toIntRange(): IntRange {
     val first = this.get<Long>(0).toInt()
     val second = this.get<Long>(1).toInt()
-    if (second <= first) throw RuntimeException("second value must be higher than first when creating an IntRange")
+    if (second < first) throw RuntimeException("second value must be higher than first when creating an IntRange")
     return first..second
 }
 
@@ -257,6 +257,18 @@ object Utils {
     fun getCursorPos(viewport: Viewport): Vector2 {
         return viewport.camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)).xy
     }
+
+    fun worldSpaceToScreenSpaceDimensions(width: Float, height: Float, viewport: Viewport): Pair<Float, Float> {
+        val screenSpaceWidth = (viewport.screenWidth / viewport.worldWidth) * width
+        val screenSpaceHeight = (viewport.screenHeight / viewport.worldHeight) * height
+        return screenSpaceHeight to screenSpaceWidth
+    }
+
+    /**
+     * convert slot from external representation (1 comes after 5)
+     * to internal representation (4 comes after 5)
+     */
+    fun externalToInternalSlotRepresentation(slot: Int): Int = if (slot == 5) 5 else 5 - slot
 
     /**
      * loads either a custom cursor or a system cursor

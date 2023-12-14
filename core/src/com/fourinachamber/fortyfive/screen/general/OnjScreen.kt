@@ -56,7 +56,7 @@ open class OnjScreen @MainThreadOnly constructor(
     private val lateRenderTasks: List<OnjScreen.() -> Unit>,
     styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
-    private val namedActors: Map<String, Actor>,
+    private val namedActors: MutableMap<String, Actor>,
     private val printFrameRate: Boolean,
     val transitionAwayTime: Int?,
     val screenBuilder: ScreenBuilder,
@@ -177,7 +177,7 @@ open class OnjScreen @MainThreadOnly constructor(
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
         }
         addLateRenderTask {
-            val highlight = selectedActor?.getHighlightArea() ?: return@addLateRenderTask
+            val highlight = selectedActor?.getBounds() ?: return@addLateRenderTask
             keySelectDrawable.draw(it, highlight.x, highlight.y, highlight.width, highlight.height)
         }
         inputMultiplexer.addProcessor(screenInputProcessor)
@@ -276,6 +276,14 @@ open class OnjScreen @MainThreadOnly constructor(
         return screenBuilder.generateFromTemplate(name, onjData, parent, screen)
     }
 
+    fun addNamedActor(name: String, actor: Actor) {
+        namedActors[name] = actor
+    }
+
+    fun removeNamedActor(name: String) {
+        namedActors.remove(name)
+    }
+
     private fun getAsOnjValue(value: Any?): OnjValue {
         return when (value) {
             is OnjValue -> value
@@ -284,10 +292,10 @@ open class OnjScreen @MainThreadOnly constructor(
             is String -> OnjString(value)
             is Color -> OnjColor(value)
             is Array<*> -> OnjArray((value as List<*>).map { getAsOnjValue(it) })
-            is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value) }.toMap())
-            is Null -> OnjNull()
+            is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value)}.toMap())
+            null -> OnjNull()
             else -> {
-                throw java.lang.Exception("Unexpected Onj Type, not implemented: " + value!!::class)
+                throw java.lang.Exception("Unexpected Onj Type, not implemented: "+value::class)
             }
         }
     }
