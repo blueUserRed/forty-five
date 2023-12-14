@@ -16,6 +16,7 @@ import kotlin.math.min
 import kotlin.random.Random
 
 class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController(), Completable {
+
     private var context: HealOrMaxHPMapEvent? = null
 
     private var healChosenTarekGeorgWidgetName: String = onj.get<String>("addLifeActorName")
@@ -38,7 +39,7 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController(), Completa
         TemplateString.updateGlobalParam("map.cur_event.max_hp.distanceToEnd",
             if (MapManager.currentDetailMap.isArea){
                 "You are in a safe Area"
-            }else{
+            } else {
                 "next safe Point in: ${max(context.distanceToEnd, 0)} events"
             }
         )

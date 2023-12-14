@@ -412,7 +412,6 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("screenSpeed").toFloat(),
 //            widgetOnj.get<Double>("backgroundScale").toFloat(),
             widgetOnj.get<Double>("disabledDirectionIndicatorAlpha").toFloat(),
-            widgetOnj.get<Double>("leftScreenSideDeadSection").toFloat(),
             widgetOnj.get<Double>("mapScale").toFloat(),
         )
 
@@ -504,6 +503,15 @@ class ScreenBuilder(val file: FileHandle) {
             TextEffectEmitter.configsFromOnj(widgetOnj.get<OnjArray>("config"), screen),
             screen
         )
+
+        "TutorialInfoActor" -> TutorialInfoActor(
+            widgetOnj.get<String>("background"),
+            widgetOnj.get<Double>("circleRadiusMultiplier").toFloat(),
+            widgetOnj.get<Double>("circleRadiusExtension").toFloat(),
+            screen
+        ).apply {
+            initFlexBox(this, widgetOnj, screen)
+        }
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 

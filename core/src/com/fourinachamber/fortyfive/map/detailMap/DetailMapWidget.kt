@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -51,7 +52,6 @@ class DetailMapWidget(
     private var screenSpeed: Float,
 //    private var backgroundScale: Float,
     private val disabledDirectionIndicatorAlpha: Float,
-    private val leftScreenSideDeadSection: Float,
     private val mapScale: Float
 ) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
 
@@ -61,8 +61,26 @@ class DetailMapWidget(
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
+    private val mapBounds: Rectangle by lazy {
+        val nodes = map.uniqueNodes.map { scaledNodePos(it) }
+        val lowX = nodes.minOf { it.x }
+        val lowY = nodes.minOf { it.y }
+        val highX = nodes.maxOf { it.x }
+        val highY = nodes.maxOf { it.y }
+        Rectangle(lowX, lowY, highX - lowX, highY - lowY)
+    }
+
     var mapOffset: Vector2 = Vector2(50f, 50f)
-        private set
+        private set(value) {
+            val bounds = mapBounds
+            var center = Vector2()
+            bounds.getCenter(center)
+            center -= Vector2(0f, height * 1.5f)
+            field = value.clampIndividual(
+                center.x - bounds.width / 2, center.x + bounds.width / 2,
+                center.y - bounds.height / 2, center.y + bounds.height / 2
+            )
+        }
 
     private var playerNode: MapNode = MapManager.currentMapNode
     private var playerPos: Vector2 = scaledNodePos(playerNode)
@@ -189,12 +207,22 @@ class DetailMapWidget(
         addListener(dragListener)
         addListener(clickListener)
         invalidateHierarchy()
+
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
-        mapOffset = Vector2(
+        val bounds = mapBounds
+        var center = Vector2()
+        bounds.getCenter(center)
+        center -= Vector2(0f, screen.viewport.worldHeight * 1.5f)
+        val playerPos = Vector2(
             -playerPos.x + screen.viewport.worldWidth * 0.5f,
             -playerPos.y + screen.viewport.worldHeight * 0.5f
         )
+        val offset = playerPos.clampIndividual(
+            center.x - bounds.width / 2, center.x + bounds.width / 2,
+            center.y - bounds.height / 2, center.y + bounds.height / 2
+        )
+        mapOffset.set(offset)
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
@@ -225,6 +253,10 @@ class DetailMapWidget(
         if (!canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
+        val nodePos = scaledNodePos(node)
+        val idealPos = -nodePos + Vector2(width, height) / 2f
+        if (idealPos.compare(mapOffset, epsilon = 200f)) return
+        moveScreenToPoint = idealPos
     }
 
     private fun canGoTo(node: MapNode): Boolean {
@@ -363,6 +395,10 @@ class DetailMapWidget(
         }
     }
 
+    fun screenSpacePlayerBounds(): Rectangle {
+        val playerPos = scaledNodePos(playerNode) + mapOffset
+        return Rectangle(playerPos.x, playerPos.y, playerHeight, playerWidth)
+    }
 
     private fun drawDecorations(batch: Batch) {
         val (offX, offY) = mapOffset
@@ -393,15 +429,6 @@ class DetailMapWidget(
         val movementPath = scaledNodePos(movePlayerTo) - scaledNodePos(playerNode)
         val playerOffset = movementPath * (1f - percent)
         playerPos = scaledNodePos(playerNode) + playerOffset
-        val screenWidth = width
-        val screenHeight = height
-        val screenRectangle = Rectangle(
-            -mapOffset.x - leftScreenSideDeadSection, -mapOffset.y,
-            screenWidth - leftScreenSideDeadSection, screenHeight
-        )
-        if (!screenRectangle.contains(playerPos)) {
-            moveScreenToPoint = -playerPos + Vector2(screenWidth, screenHeight) / 2f
-        }
     }
 
     private fun finishMovement() {
@@ -455,16 +482,16 @@ class DetailMapWidget(
         }
     }
 
-//    // TODO: remove (commented out by zwicki, because it threw errors)
-//    private val edgeTestShader: BetterShader by lazy {
-//        ResourceManager.get(screen, "map_edge_shader")
-//    }
+    // TODO: remove
+    private val edgeTestShader: BetterShader by lazy {
+        ResourceManager.get(screen, "map_edge_shader")
+    }
 
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges
         batch.flush()
-//        edgeTestShader.prepare(screen)
-//        batch.shader = edgeTestShader.shader
+        edgeTestShader.prepare(screen)
+        batch.shader = edgeTestShader.shader
         for ((node1, node2) in uniqueEdges) {
             val node1Pos = scaledNodePos(node1)
             val node2Pos = scaledNodePos(node2)
@@ -473,7 +500,7 @@ class DetailMapWidget(
             val length = Vector2(dx, dy).len()
             var angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
             if (dx < 0) angle = 360 - angle
-//            edgeTestShader.shader.setUniformf("u_lineLength", length)
+            edgeTestShader.shader.setUniformf("u_lineLength", length)
             batch.draw(
                 edgeTexture,
                 x + node1Pos.x + mapOffset.x + nodeSize / 2 - lineWidth / 2,

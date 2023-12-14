@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -31,7 +32,8 @@ data class DetailMap(
     val decorations: List<MapDecoration>,
     val isArea: Boolean,
     val biome: String,
-    val progress: ClosedFloatingPointRange<Float>
+    val progress: ClosedFloatingPointRange<Float>,
+    val tutorialText: MutableList<MapScreenController.MapTutorialTextPart>
 ) {
 
     /**
@@ -77,6 +79,7 @@ data class DetailMap(
         "isArea" with isArea
         "biome" with biome
         "progress" with progress.asArray()
+        "tutorialText" with tutorialText.map { it.asOnjObject() }
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -153,7 +156,12 @@ data class DetailMap(
                 decorations,
                 onj.get<Boolean>("isArea"),
                 onj.get<String>("biome"),
-                onj.get<OnjArray>("progress").toFloatRange()
+                onj.get<OnjArray>("progress").toFloatRange(),
+                onj.getOr<OnjArray?>("tutorialText", null)
+                    ?.value
+                    ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
+                    ?.toMutableList()
+                    ?: mutableListOf()
             )
         }
 

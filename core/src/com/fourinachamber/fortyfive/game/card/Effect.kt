@@ -142,6 +142,39 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    class BuffDamageMultiplier(
+        trigger: Trigger,
+        val multiplier: Float,
+        private val bulletSelector: BulletSelector,
+        override var triggerInHand: Boolean,
+        private val activeChecker: (controller: GameController) -> Boolean = { true }
+    ) : Effect(trigger) {
+
+        override fun copy(): Effect =
+            BuffDamageMultiplier(trigger, multiplier, bulletSelector, triggerInHand, activeChecker)
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
+            val multiplier = multiplier * (triggerInformation.multiplier ?: 1)
+            val modifier = Card.CardModifier(
+                damageMultiplier = multiplier,
+                source = cardDescName,
+                validityChecker = { card.inGame },
+                activeChecker = activeChecker
+            )
+
+            return Timeline.timeline {
+                include(getSelectedBullets(bulletSelector, controller, this@BuffDamageMultiplier.card))
+                action {
+                    get<List<Card>>("selectedCards")
+                        .forEach { it.addModifier(modifier) }
+                }
+            }
+        }
+
+        override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
+
+    }
+
     /**
      * gifts a card a buff (or debuff) of its damage (stays valid even after the card left the game)
      * @param amount the amount by which the damage is changed
@@ -339,6 +372,61 @@ abstract class Effect(val trigger: Trigger) {
 
     }
 
+    class BounceBullet(
+        trigger: Trigger,
+        val bulletSelector: BulletSelector,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(getSelectedBullets(bulletSelector, controller, this@BounceBullet.card))
+            includeLater(
+                {
+                    get<List<Card>>("selectedCards")
+                        .map { controller.bounceBullet(it) }
+                        .collectTimeline()
+                },
+                { true }
+            )
+        }
+
+        override fun blocks(controller: GameController): Boolean = bulletSelector.blocks(controller, card)
+
+        override fun copy(): Effect = BounceBullet(trigger, bulletSelector, triggerInHand)
+    }
+
+    class GivePlayerStatus(
+        trigger: Trigger,
+        val statusEffectCreator: StatusEffectCreator,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            action {
+                controller.applyStatusEffectToPlayer(statusEffectCreator())
+            }
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = GivePlayerStatus(trigger, statusEffectCreator, triggerInHand)
+    }
+
+    class TurnRevolver(
+        trigger: Trigger,
+        val rotation: GameController.RevolverRotation,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            include(controller.rotateRevolver(rotation))
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = TurnRevolver(trigger, rotation, triggerInHand)
+    }
+
 }
 
 /**
@@ -378,7 +466,7 @@ typealias EffectValue = (controller: GameController) -> Int
  */
 enum class Trigger {
     ON_ENTER, ON_SHOT, ON_ROUND_START, ON_ROUND_END, ON_DESTROY, ON_CARDS_DRAWN, ON_SPECIAL_CARDS_DRAWN,
-    ON_REVOLVER_ROTATION
+    ON_REVOLVER_ROTATION, ON_ANY_CARD_DESTROY
 
 }
 

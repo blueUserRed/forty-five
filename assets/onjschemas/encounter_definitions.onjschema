@@ -1,10 +1,23 @@
 
+import "imports/game_predicates.onjschema" as _;
+
+var tutorialText = {
+    text: string,
+    confirmationText: string,
+    focusActor?: string,
+    predicate?: $GamePredicate,
+};
+
 var encounter = {
     enemies: string[],
     encounterModifier: string[],
     biomes: string[],
     progress: float[2],
     weight: int,
+    forceCards?: string[],
+    special?: boolean,
+    shuffleCards?: boolean,
+    tutorialText?: tutorialText[],
 };
 
 encounter: encounter[]

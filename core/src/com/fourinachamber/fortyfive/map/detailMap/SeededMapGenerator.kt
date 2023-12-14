@@ -60,7 +60,8 @@ class SeededMapGenerator(
             decos,
             false,
             biome,
-            restrictions.progress
+            restrictions.progress,
+            mutableListOf()
         )
     }
 

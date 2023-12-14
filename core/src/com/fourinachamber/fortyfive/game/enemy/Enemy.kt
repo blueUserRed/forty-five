@@ -306,6 +306,10 @@ class EnemyActor(
         coverText.setFontScale(enemy.detailFontScale)
         attackLabel.setFontScale(enemy.detailFontScale)
 
+        // When multiple enemies are in an encounter, the last attackIndicator will override the previous ones,
+        // but because the name is only used for the tutorial, this should not be an issue
+        screen.addNamedActor("attackIndicator", attackIcon)
+
         image.setScale(enemy.scaleX, enemy.scaleY)
         image.reportDimensionsWithScaling = true
         image.ignoreScalingWhenDrawing = true

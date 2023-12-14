@@ -1,12 +1,21 @@
 use Common;
 
+var cardSelectorSharedKeys = {
+    negate?: boolean,
+};
+
 $CardSelector{
-    $ByName{
-        name: string
+
+    $ByName {
+        name: string,
+        ...cardSelectorSharedKeys
     }
+
     $ByTag{
-        name: string
+        name: string,
+        ...cardSelectorSharedKeys
     }
+
 }
 
 $CardEffect{
@@ -20,7 +29,7 @@ $CardEffect{
         price: float
     }
 }
-var cardChange= {
+var cardChange = {
     select: $CardSelector,
     effect: $CardEffect
 };
