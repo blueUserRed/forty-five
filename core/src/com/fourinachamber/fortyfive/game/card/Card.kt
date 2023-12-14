@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -539,14 +538,14 @@ class CardActor(
     private val cardTexturePixmap: Pixmap
 
     private val onRightClickShowAdditionalInformationListener = object : InputListener() {
+
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
-            if (button == 1) {
-                detailActor?.let {
-                    val descriptionParent = getParentsForExtras(it).first
-                    if (descriptionParent.children.isEmpty)
-                        showExtraDescriptions(descriptionParent)
-                    return true
-                }
+            if (button != 1) return false
+
+            detailActor?.let {
+                val descriptionParent = getParentsForExtras(it).first
+                if (descriptionParent.children.isEmpty) showExtraDescriptions(descriptionParent)
+                return true
             }
             return false
         }
@@ -608,9 +607,10 @@ class CardActor(
             damageValue < card.baseDamage -> "decrease"
             else -> "normal"
         }
-        val fontColor = GraphicsConfig.cardFontColor(isDark, situation)
-        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, fontColor)
-        font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
+        val damageFontColor = GraphicsConfig.cardFontColor(isDark, situation)
+        val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
+        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
+        font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
         pixmapTextureRegion?.texture?.dispose()
         val texture = Texture(pixmap, true)
         texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)

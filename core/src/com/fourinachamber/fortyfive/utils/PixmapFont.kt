@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.utils.Disposable
+import kotlin.math.roundToInt
 
 /**
  * libgdx's BitmapFont can't draw on pixmaps and uses the Texture-class, which doesn't work on a non-openGL thread,
@@ -57,7 +58,13 @@ class PixmapFont @AllThreadsAllowed constructor(fntFile: FileHandle) : Disposabl
     fun write(on: Pixmap, text: String, x: Int, y: Int, scale: Float = 1f, color: Color = Color.BLACK) {
         var curX = x
         var curY = y
-        on.setColor(color)
+        var origColor = color.toIntBits()
+        var colorBits = 0
+        repeat(4) {
+            colorBits = colorBits shl 8
+            colorBits = colorBits or (origColor and 0xFF)
+            origColor = origColor ushr 8
+        }
         text.forEach { char ->
 
             if (char == '\n') {
@@ -68,14 +75,22 @@ class PixmapFont @AllThreadsAllowed constructor(fntFile: FileHandle) : Disposabl
 
             val letter = getLetter(char)
 
-            on.drawPixmap(
-                pixmap,
-                letter.x, letter.y,
-                letter.width, letter.height,
-                curX + (letter.xOffset * scale).toInt(),
-                curY + (letter.yOffset * scale).toInt(),
-                (letter.width * scale).toInt(), (letter.height * scale).toInt()
-            )
+            val dstXStart = curX + (letter.xOffset * scale).toInt()
+            val dstYStart = curY + (letter.yOffset * scale).toInt()
+            val dstWidth = (letter.width * scale).toInt()
+            val dstHeight = (letter.height * scale).toInt()
+            for (dstX in 0..dstWidth) {
+                val progressX = dstX.toDouble() / dstWidth.toDouble()
+                val srcX = (progressX * letter.width).roundToInt()
+                for (dstY in 0..dstHeight) {
+                    val progressY = dstY.toDouble() / dstHeight.toDouble()
+                    val srcY = (progressY * letter.height).roundToInt()
+                    val srcColor = pixmap.getPixel(letter.x + srcX, letter.y + srcY)
+                    val srcAlpha = srcColor and 0xFF
+                    val dstColor = (colorBits and (0xFF).inv()) or srcAlpha
+                    on.drawPixel(dstXStart + dstX, dstYStart + dstY, dstColor)
+                }
+            }
             curX += (letter.xAdvance * scale).toInt()
         }
     }
