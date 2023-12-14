@@ -78,6 +78,11 @@ fun Vector2.compare(other: Vector2, epsilon: Float = 0.01f): Boolean =
     other.x in (this.x - epsilon)..(this.x + epsilon) &&
             other.y in (this.y - epsilon)..(this.y + epsilon)
 
+fun Vector2.clampIndividual(minX: Float, maxX: Float, minY: Float, maxY: Float): Vector2 = Vector2(
+    this.x.coerceIn(minX, maxX),
+    this.y.coerceIn(minY, maxY),
+)
+
 operator fun Vector2.component1(): Float = this.x
 operator fun Vector2.component2(): Float = this.y
 

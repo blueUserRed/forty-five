@@ -208,7 +208,6 @@ $Widget {
         directionIndicator: string,
         startButtonName: string,
         screenSpeed: float,
-        leftScreenSideDeadSection: float,
         disabledDirectionIndicatorAlpha: float,
         mapScale: float,
         ...widgetSharedKeys

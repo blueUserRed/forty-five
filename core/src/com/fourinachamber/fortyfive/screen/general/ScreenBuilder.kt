@@ -412,7 +412,6 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("screenSpeed").toFloat(),
 //            widgetOnj.get<Double>("backgroundScale").toFloat(),
             widgetOnj.get<Double>("disabledDirectionIndicatorAlpha").toFloat(),
-            widgetOnj.get<Double>("leftScreenSideDeadSection").toFloat(),
             widgetOnj.get<Double>("mapScale").toFloat(),
         )
 
