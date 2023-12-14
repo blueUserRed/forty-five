@@ -3,37 +3,11 @@ use Common;
 
 bufferTime: float,
 
-shakeAnimation: {
-    xShake: float,
-    yShake: float,
-    xSpeed: float,
-    ySpeed: float,
-    duration: float,
-},
-
 enemyChargeAnimation: {
     xCharge: float,
     yCharge: float,
     duration: float,
     interpolation: string,
-},
-
-enemyQuickChargeAnimation: {
-    xCharge: float,
-    yCharge: float,
-    duration: float,
-    interpolation: string,
-},
-
-numberChangeAnimation: {
-    font: string,
-    negativeFontColor: Color,
-    positiveFontColor: Color,
-    fontScale: float,
-    duration: float,
-    startFadeoutAt: float,
-    raiseDistance: float,
-    sinkDistance: float,
 },
 
 var iconConfig = {
@@ -64,17 +38,6 @@ encounterModifiers: {
     moist: encounterModifierConfig,
 },
 
-stringTemplates:  {
-    rottenDetailText: string,
-    buffDetailText: string,
-    giftDetailText: string,
-    protectDetailText: string,
-    revolverRotation1Rot: string,
-    revolverRotationMoreRot: string,
-    returnCardToHand: string,
-    destroyCardsInHand: string,
-},
-
 damageOverlay: {
     duration: float,
     fadeIn: float,
@@ -82,19 +45,19 @@ damageOverlay: {
     overlay: string
 },
 
-insultFadeAnimation: {
-    fadeFontName: string,
-    fadeFontColor: Color,
-    fadeFontScale: float,
-    fadeDuration: float,
-    fadeIn: float,
-    fadeOut: float,
-},
-
 cardText: {
     font: string,
     fontScale: float,
-    fontColor: Color,
+    colorsForDarkCard: {
+        normal: Color,
+        increase: Color,
+        decrease: Color,
+    },
+    colorsForLightCard: {
+        normal: Color,
+        increase: Color,
+        decrease: Color,
+    }
 },
 
 keySelect: {
