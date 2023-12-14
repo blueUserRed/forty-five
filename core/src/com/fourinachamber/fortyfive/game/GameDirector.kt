@@ -180,7 +180,7 @@ class GameDirector(private val controller: GameController) {
                 .map { it.weight to it }
                 .weightedRandom()
 
-            return encounters.indexOf(chosen)
+            return this.encounters.indexOf(chosen)
         }
 
     }
