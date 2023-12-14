@@ -4,6 +4,7 @@ use Common;
 white: color("ffffff"),
 red: color("ff0000"),
 green: color("00ff00"),
+darkGreen: color("6a8759"),
 blue: color("0000ff"),
 yellow: color("aaaa00"),
 black: color("000000"),

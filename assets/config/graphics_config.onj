@@ -82,7 +82,7 @@ cardText: {
     },
     colorsForLightCard: {
         normal: color.black,
-        increase: color.green,
+        increase: color.darkGreen,
         decrease: color.red,
     }
 },
