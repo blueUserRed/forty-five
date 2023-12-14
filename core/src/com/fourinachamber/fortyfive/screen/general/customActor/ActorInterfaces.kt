@@ -12,6 +12,7 @@ import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
 import com.kotcrab.vis.ui.widget.Draggable
@@ -113,10 +114,30 @@ interface AnimationActor {
     var inAnimation: Boolean
 }
 
+interface BoundedActor {
+
+    /**
+     * returns the area of the actor on the screen in worldSpace coordinates
+     */
+    fun getBounds(): Rectangle
+
+    /**
+     * returns the area of the actor on the screen in screenSpace coordinates
+     */
+    fun getScreenSpaceBounds(screen: OnjScreen): Rectangle {
+        val worldSpaceBounds = getBounds()
+        val worldSpaceCoords = Vector2(worldSpaceBounds.x, worldSpaceBounds.y)
+        val screenSpaceCoords = screen.viewport.project(worldSpaceCoords)
+        val (screenSpaceWidth, screenSpaceHeight) =
+            Utils.worldSpaceToScreenSpaceDimensions(worldSpaceBounds.width, worldSpaceBounds.height, screen.viewport)
+        return Rectangle(screenSpaceCoords.x, screenSpaceCoords.y, screenSpaceWidth, screenSpaceHeight)
+    }
+}
+
 /**
  * an actor that can be selected using the keyboard
  */
-interface KeySelectableActor {
+interface KeySelectableActor : BoundedActor {
 
     /**
      * true when the actor is currently selected
@@ -129,10 +150,6 @@ interface KeySelectableActor {
      */
     val partOfHierarchy: Boolean
 
-    /**
-     * returns the area of the actor on the screen, which will be highlighted when the actor is selected
-     */
-    fun getHighlightArea(): Rectangle
 }
 
 /**

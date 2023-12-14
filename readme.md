@@ -1,5 +1,10 @@
 ![logo](./assets/textures/logo.png)
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/textures/logo_white.png">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/textures/logo.png">
+</picture>
+
 #### A perfect mix of card game, rogue-lite, and pure wild west mayhem. Explore an ever-changing map, collect interesting cards, and battle enemies.
 
 Check out our website:
@@ -23,7 +28,7 @@ them 6 feet deep! But watch out, he won't just stand there letting you shoot him
 ## Features
 
 - **It's completely free:** And thats a great price if you ask me. No ads or any kind of microtransactions, I promise.
-- **Over 100 unique cards,** some serious and some … a little bit … less serious.
+- **Over 50 unique cards,** some serious and some … a little bit … less serious.
 - **Innovative gameplay,** allowing the player to achieve creative combos with the revolvers rotation.
 - **100% handdrawn assets,** I might not be the next picasso, but hey, I'm trying okay …
 - **A procedurally generated map,** ever-changing, guaranteeing a new experience every run.

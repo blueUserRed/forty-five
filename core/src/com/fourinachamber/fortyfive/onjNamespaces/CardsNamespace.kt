@@ -5,9 +5,9 @@ import com.fourinachamber.fortyfive.game.card.BulletSelector
 import com.fourinachamber.fortyfive.game.card.Effect
 import com.fourinachamber.fortyfive.game.card.EffectValue
 import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
-import onj.customization.Namespace
 import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
@@ -73,6 +73,16 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         ))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, float]")
+    fun buffDmgMultiplier(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjFloat): OnjEffect {
+        return OnjEffect(Effect.BuffDamageMultiplier(
+            triggerOrError(trigger.value),
+            amount.value.toFloat(),
+            bulletSelector.value,
+            false
+        ))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, EffectValue]")
     fun giftDmg(trigger: OnjString, bulletSelector: OnjBulletSelector, amount: OnjEffectValue): OnjEffect {
         return OnjEffect(
@@ -92,6 +102,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
     fun giveStatus(trigger: OnjString, effect: OnjStatusEffect): OnjEffect {
         return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value, false))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
+    fun givePlayerStatus(trigger: OnjString, effect: OnjStatusEffect): OnjEffect {
+        return OnjEffect(Effect.GivePlayerStatus(triggerOrError(trigger.value), effect.value, false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, EffectValue]")
@@ -135,6 +150,25 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.KillPlayer(triggerOrError(trigger.value), false))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
+    fun bounce(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
+        return OnjEffect(Effect.BounceBullet(triggerOrError(trigger.value), bulletSelector.value, false))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, string, int]")
+    fun turnRevolver(trigger: OnjString, rotationDirection: OnjString, amount: OnjInt): OnjEffect {
+        return OnjEffect(Effect.TurnRevolver(
+            triggerOrError(trigger.value),
+            when (rotationDirection.value) {
+                "left" -> GameController.RevolverRotation.Left(amount.value.toInt())
+                "right" -> GameController.RevolverRotation.Right(amount.value.toInt())
+                "none" -> GameController.RevolverRotation.None
+                else -> throw RuntimeException("unknown rotation direction: ${rotationDirection.value}")
+            },
+            false
+        ))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
     fun canTriggerInHand(effect: OnjEffect): OnjEffect {
         return OnjEffect(effect.value.copy().apply { triggerInHand = true })
@@ -148,9 +182,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         for (value in onjArr.value) when (value) {
             is OnjInt -> {
                 var num = value.value.toInt()
-                // convert slot from external representation (1 comes after 5)
-                // to internal representation (4 comes after 5)
-                num = if (num == 5) 5 else 5 - num
+                num = Utils.externalToInternalSlotRepresentation(num)
                 nums.add(num - 1)
             }
             is OnjString -> {
@@ -161,7 +193,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             }
             else -> throw RuntimeException("bNum only allows ints or strings!")
         }
-
 
         return OnjBulletSelector(BulletSelector.ByLambda { self, other, slot, _ ->
             // when self === other allowSelf must be true, even if the slot is correct
@@ -267,6 +298,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "rotation" -> Trigger.ON_REVOLVER_ROTATION
         "card drawn" -> Trigger.ON_CARDS_DRAWN
         "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
+        "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

@@ -1,0 +1,223 @@
+tutorialText: [
+    {
+        text: "The player icon shows where on the map you are.",
+        confirmationText: "Next",
+        highlightObject: "player",
+        triggerOnNodes: [0],
+    },
+    {
+        text: "To move, move the mouse in the approximate direction of the node you want to move to. When the arrow next to the player icon is pointing in the direction you want to go, left-click to move.",
+        confirmationText: "Ok",
+        triggerOnNodes: [],
+    },
+    {
+        text: "The symbol on the node shows the event on that node. In the pop-up on the right, you will see more information about the event you are currently standing on.",
+        confirmationText: "Next",
+        triggerOnNodes: [1, 2],
+    },
+    {
+        text: "To activate the event on the node you are standing on, press the action button at the bottom of the popup.",
+        confirmationText: "Ok",
+        triggerOnNodes: [],
+    },
+],
+startNode: 0,
+endNode: 13,
+biome: "wasteland",
+progress: [0.0, 0.1],
+nodes: [
+    {
+        x: 60.0,
+        y: 80.0,
+        edgesTo: [
+            1, 2,
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 0,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 100.0,
+        y: 110.0,
+        edgesTo: [
+            0, 3
+        ],
+        event: $EmptyMapEvent {
+        }
+    },
+    {
+        x: 100.0,
+        y: 70.0,
+        edgesTo: [
+            0, 3
+        ],
+        event: $EmptyMapEvent {
+        }
+    },
+    {
+        x: 140.0,
+        y: 90.0,
+        edgesTo: [
+            1, 2, 4
+        ],
+        event: $EncounterMapEvent {
+//            currentlyBlocks: false,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 1,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 180.0,
+        y: 90.0,
+        edgesTo: [
+            3, 5
+        ],
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_silver_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        },
+    },
+    {
+        x: 220.0,
+        y: 90.0,
+        edgesTo: [
+            4, 6
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+//            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 2,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 260.0,
+        y: 90.0,
+        edgesTo: [
+            5, 7,
+        ],
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_worker_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        },
+    },
+    {
+        x: 300.0,
+        y: 90.0,
+        edgesTo: [
+            6, 8
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+//            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 3,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 340.0,
+        y: 90.0,
+        edgesTo: [
+            7, 9,
+        ],
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_incendiary_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        },
+    },
+    {
+        x: 380.0,
+        y: 90.0,
+        edgesTo: [
+            8, 10
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+//            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 4,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 420.0,
+        y: 90.0,
+        edgesTo: [
+            9, 11,
+        ],
+        event: $ChooseCardMapEvent {
+            types: ["tutorial_only_leaders_bullet"],
+            seed: 0,
+            nbrOfCards: 1,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        },
+    },
+    {
+        x: 460.0,
+        y: 90.0,
+        edgesTo: [
+            10, 12
+        ],
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+//            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 5,
+            distanceToEnd: -1,
+        }
+    },
+    {
+        x: 500.0,
+        y: 90.0,
+        edgesTo: [
+            11, 13
+        ],
+        event: $HealOrMaxHPEvent {
+            healRange: [100, 100],
+            maxHPRange: [0, 0],
+            seed: 0,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        }
+    },
+    {
+        x: 540.0,
+        y: 90.0,
+        edgesTo: [
+            12
+        ],
+        event: $EnterMapMapEvent {
+            targetMap: "start_area",
+        }
+    },
+],
+decorations: [],
+isArea: false,

@@ -8,6 +8,7 @@ import com.fourinachamber.fortyfive.utils.toIntRange
 import com.fourinachamber.fortyfive.utils.weightedRandom
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
+import onj.value.OnjObject
 
 abstract class EnemyBrain {
 
@@ -47,6 +48,11 @@ abstract class EnemyBrain {
                 onj.get<String>("revolverRotationIconHandle"),
                 onj.get<String>("damageIconHandle"),
                 onj.get<String>("shieldIconHandle"),
+            )
+
+            "ScriptedEnemyBrain" -> ScriptedEnemyBrain(
+                onj.get<OnjArray>("actions"),
+                enemy
             )
 
             else -> throw RuntimeException("unknown EnemyBrain ${onj.name}")
@@ -333,4 +339,45 @@ object NoOpEnemyBrain : EnemyBrain() {
     override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = null
 
     override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction = NextEnemyAction.None
+}
+
+class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBrain() {
+
+    private val actions: List<Triple<Int, EnemyActionPrototype, Boolean>> = actions
+        .value
+        .map { it as OnjObject }
+        .map {
+            Triple(
+                it.get<Long>("turn").toInt() - 1, // controller counts from 0
+                EnemyActionPrototype.fromOnj(it.get<OnjNamedObject>("action"), enemy),
+                it.get<Boolean>("show")
+            )
+        }
+
+    private var createdAction: EnemyAction? = null
+
+    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
+        createdAction?.let {
+            createdAction = null
+            return it
+        }
+        val (_, actionProto, _) = actions
+            .find { (turn, _, _) -> turn == controller.turnCounter }
+            ?: return null
+        return actionProto.create(controller, difficulty)
+    }
+
+    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+        val (_, actionProto, show) = actions
+            .find { (turn, _, _) -> turn == controller.turnCounter }
+            ?: return NextEnemyAction.None
+        return if (show) {
+            val action = actionProto.create(controller, difficulty)
+            createdAction = action
+            NextEnemyAction.ShownEnemyAction(action)
+        } else {
+            createdAction = null
+            NextEnemyAction.HiddenEnemyAction
+        }
+    }
 }

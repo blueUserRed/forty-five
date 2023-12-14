@@ -57,6 +57,7 @@ navBar: $Box {
             }
         ],
         textureName: "heart_texture",
+        name: "player_health_icon",
         scaleX: 0.1,
         scaleY: 0.1,
         reportDimensionsWithScaling: true,
@@ -111,6 +112,7 @@ statusbarCenterDefaults: {
             } children [
                 $Image {
                     textureName: "heart_texture",
+                    name: "player_health_icon",
                     scaleX: 0.1,
                     scaleY: 0.1,
                     reportDimensionsWithScaling: true,
@@ -217,6 +219,7 @@ statusbarLeftDefaults: {
             } children [
                 $Image {
                     textureName: "heart_texture",
+                    name: "player_health_icon",
                     scaleX: 0.08,
                     scaleY: 0.08,
                     reportDimensionsWithScaling: true,
@@ -1078,4 +1081,87 @@ cardHoverDetailUsedAssets: [
     "hover_detail_small_background",
     "forty_white_texture",
     "hover_detail_more_info",
+],
+
+
+tutorialInfoActor: $TutorialInfoActor {
+    name: "tutorialInfoActor",
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            positionLeft: 0#points,
+            positionTop: 0#points,
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            visible: false,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showTutorial"),
+            visible: true,
+        }
+    ],
+    circleRadiusMultiplier: 2.0,
+    circleRadiusExtension: 200.0,
+    zIndex: 100_000,
+    touchable: "enabled",
+    background: "tutorial_info_actor_background"
+} children [
+
+    $TemplateLabel {
+        styles: [
+            {
+                marginTop: 50#points,
+                width: (worldWidth * 0.4)#points
+            }
+        ],
+        font: "red_wing",
+        align: "center",
+        template: "{game.tutorial.text}",
+        fontScale: 0.9,
+        wrap: true,
+        color: color.white,
+    },
+
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                background: "common_button_default",
+                width: 80#points,
+                height: 40#points,
+                alignItems: align.center,
+                justifyContent: justify.center,
+            },
+            {
+                style_priority: 2,
+                style_condition: hover(),
+                background: "common_button_hover",
+            }
+        ],
+        touchable: "enabled",
+        name: "confirmbutton",
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "TutorialConfirmedEvent"
+            }
+        ],
+    } children [
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{game.tutorial.confirmButtonText}",
+            fontScale: 0.9,
+            align: "center",
+            touchable: "disabled",
+            color: color.white,
+        },
+    ],
+],
+
+tutorialInfoActorUsedAssets: [
+    "red_wing", "common_button_hover", "common_button_default", "tutorial_info_actor_background"
 ]

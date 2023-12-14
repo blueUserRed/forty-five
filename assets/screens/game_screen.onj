@@ -48,6 +48,8 @@ assets: {
         "enemy_witch_action_comic_panel_bewitched", "enemy_witch_action_comic_panel_wrath_of_the_witch",
         "enemy_witch_action_comic_panel_ward_of_the_witch",
 
+        "tutorial_actor_shader",
+
         "enemy_outlaw",
 
         "revolver_cursor",
@@ -58,7 +60,8 @@ assets: {
         ...(graphicsConfig.gameUsedAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
-        ...(sharedComponents.cardHoverDetailUsedAssets)
+        ...(sharedComponents.cardHoverDetailUsedAssets),
+        ...(sharedComponents.tutorialInfoActorUsedAssets),
     ]
 },
 
@@ -106,6 +109,7 @@ var controller = $GameScreenController {
     shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
     encounterModifierDisplayTemplateName: "encounter_modifier_display",
     encounterModifierParentName: "encounter_modifier_parent",
+    tutorialInfoActorName: "tutorialInfoActor"
 };
 
 options: {
@@ -431,7 +435,7 @@ var enemyArea = $EnemyArea {
 };
 
 var shootButton = $Image {
-    name: "shoot_button_texture",
+    name: "shoot_button",
     textureName: "shoot_button_texture",
     reportDimensionsWithScaling: true,
     scaleX: 0.25,
@@ -458,14 +462,6 @@ var endTurnButton = $Image {
             emit: "EndTurnEvent"
         }
     ]
-};
-
-var playerLivesLabel = $TemplateLabel {
-    name: "player_lives_label",
-    font: "vanilla_whale",
-    template: "{stat.playerLives}/{stat.maxPlayerLives}",
-    fontScale: 0.9,
-    color: color.white,
 };
 
 var reservesLabel = $TemplateLabel {
@@ -848,6 +844,7 @@ var playerBar = $Box {
         enableTransform: true,
     } children [
         $Image {
+            name: "reserves_icon",
             styles: [
                 {
                     aspectRatio: 1.0,
@@ -1039,6 +1036,8 @@ root: $Box {
     ]
 } children [
 
+    sharedComponents.tutorialInfoActor,
+
     $Box {
         styles: [
             {
@@ -1047,8 +1046,6 @@ root: $Box {
                 height: worldHeight#points,
                 positionLeft: 0#points,
                 positionTop: 0#points
-//                flexDirection: flexDirection.row,
-//                positionTop: 10#points
             }
         ]
     } children [

@@ -38,6 +38,7 @@ var card = {
     effects: Effect[],
     forceLoadCards: string[],
     tags: string[],
+    forbiddenSlots?: int[],
 };
 
 cards: card[],
