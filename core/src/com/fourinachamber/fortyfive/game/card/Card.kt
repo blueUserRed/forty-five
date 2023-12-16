@@ -1,6 +1,5 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -39,6 +38,7 @@ class CardPrototype(
     val title: String,
     val type: Card.Type,
     val tags: List<String>,
+    val forceLoadCards: List<String>,
     private val creator: () -> Card
 ) {
 
@@ -72,10 +72,10 @@ class Card(
     var price: Int,
     val effects: List<Effect>,
     val rotationDirection: RevolverRotation,
-    val highlightType: HighlightType,
     val tags: List<String>,
+    isDark: Boolean,
+    val forbiddenSlots: List<Int>,
     font: PixmapFont,
-    fontColor: Color,
     fontScale: Float,
     screen: OnjScreen
 ) : Disposable {
@@ -121,10 +121,11 @@ class Card(
 
     private var lastDamageValue: Int = baseDamage
 
-    private val _modifiers: MutableList<CardModifier> = mutableListOf()
+    private var modifierCounter: Int = 0
+    private val _modifiers: MutableList<Pair<Int, CardModifier>> = mutableListOf()
 
     val modifiers: List<CardModifier>
-        get() = _modifiers
+        get() = _modifiers.map { it.second }
 
     /**
      * first ist the keyword, second is the actual text
@@ -141,8 +142,8 @@ class Card(
         actor = CardActor(
             this,
             font,
-            fontColor,
             fontScale,
+            isDark,
             screen
         )
     }
@@ -154,7 +155,7 @@ class Card(
         val modifierIterator = _modifiers.iterator()
         var somethingChanged = false
         while (modifierIterator.hasNext()) {
-            val modifier = modifierIterator.next()
+            val (_, modifier) = modifierIterator.next()
             if (!modifier.validityChecker()) {
                 FortyFiveLogger.debug(logTag, "modifier no longer valid: $modifier")
                 modifierIterator.remove()
@@ -191,10 +192,13 @@ class Card(
     }
 
     fun activeModifiers(controller: GameController): List<CardModifier> =
-        _modifiers.filter { it.activeChecker(controller) }
+        modifiers.filter { it.activeChecker(controller) }
 
-    fun curDamage(controller: GameController): Int =
-        (baseDamage + activeModifiers(controller).sumOf { it.damage }).coerceAtLeast(0)
+    fun curDamage(controller: GameController): Int = _modifiers
+        .filter { (_, modifier) -> modifier.activeChecker(controller) }
+        .sortedBy { it.first }
+        .fold(baseDamage) { acc, (_, modifier) -> ((acc + modifier.damage) * modifier.damageMultiplier).toInt() }
+        .coerceAtLeast(0)
 
     /**
      * called by gameScreenController when the card was shot
@@ -234,7 +238,8 @@ class Card(
     /**
      * checks whether this card can currently enter the game
      */
-    fun allowsEnteringGame(controller: GameController): Boolean = !effects.any { it.blocks(controller) }
+    fun allowsEnteringGame(controller: GameController, slot: Int): Boolean =
+        slot !in forbiddenSlots && effects.none { it.blocks(controller) }
 
     /**
      * called when this card was destroyed by the destroy effect
@@ -252,12 +257,12 @@ class Card(
      */
     fun addModifier(modifier: CardModifier) {
         FortyFiveLogger.debug(logTag, "card got new modifier: $modifier")
-        _modifiers.add(modifier)
+        _modifiers.add(++modifierCounter to modifier)
         modifiersChanged()
     }
 
     fun removeModifier(modifier: CardModifier) {
-        _modifiers.remove(modifier)
+        _modifiers.removeIf { (_, m) -> m === modifier }
         modifiersChanged()
     }
 
@@ -319,10 +324,10 @@ class Card(
 
     private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
         var modifierChanged = false
-        _modifiers.replaceAll { modifier ->
-            val transformer = modifier.transformers[trigger] ?: return@replaceAll modifier
+        _modifiers.replaceAll { (counter, modifier) ->
+            val transformer = modifier.transformers[trigger] ?: return@replaceAll counter to modifier
             modifierChanged = true
-            transformer(modifier, triggerInformation)
+            counter to transformer(modifier, triggerInformation)
         }
         if (modifierChanged) modifiersChanged()
     }
@@ -400,6 +405,7 @@ class Card(
                         onj.get<String>("title"),
                         cardTypeOrError(onj),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
+                        onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     ) { getCardFrom(onj, onjScreen, initializer) }
                     prototypes.add(prototype)
                 }
@@ -427,12 +433,17 @@ class Card(
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
                 rotationDirection = RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
-                highlightType = HighlightType.valueOf(onj.get<String>("highlightType").uppercase()),
                 tags = onj.get<OnjArray>("tags").value.map { it.value as String },
+                forbiddenSlots = onj
+                    .getOr<OnjArray?>("forbiddenSlots", null)
+                    ?.value
+                    ?.map { (it.value as Long).toInt() }
+                    ?.map { Utils.externalToInternalSlotRepresentation(it) }
+                    ?: listOf(),
                 //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(onjScreen),
-                fontColor = GraphicsConfig.cardFontColor(),
                 fontScale = GraphicsConfig.cardFontScale(),
+                isDark = onj.get<Boolean>("dark"),
                 screen = onjScreen
             )
 
@@ -482,17 +493,14 @@ class Card(
         BULLET, ONE_SHOT
     }
 
-    enum class HighlightType {
-        STANDARD, GLOW
-    }
-
     /**
      * temporarily modifies a card. For example used by the buff damage effect to change the damage of a card
      * @param damage changes the damage of the card. Can be negative
      * @param validityChecker checks if the modifier is still valid or should be removed
      */
     data class CardModifier(
-        val damage: Int,
+        val damage: Int = 0,
+        val damageMultiplier: Float = 1f,
         val source: String,
         val validityChecker: () -> Boolean = { true },
         val activeChecker: (controller: GameController) -> Boolean = { true },
@@ -508,8 +516,8 @@ class Card(
 class CardActor(
     val card: Card,
     val font: PixmapFont,
-    val fontColor: Color,
     val fontScale: Float,
+    val isDark: Boolean,
     private val screen: OnjScreen
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor {
 
@@ -529,12 +537,8 @@ class CardActor(
      */
     var isDragged: Boolean = false
 
-    private var inGlowAnim: Boolean = false
     private var inDestroyAnim: Boolean = false
 
-    private val glowShader: BetterShader by lazy {
-        ResourceManager.get(screen, "glow_shader") // TODO: fix
-    }
     private val destroyShader: BetterShader by lazy {
         ResourceManager.get(screen, "dissolve_shader") // TODO: fix
     }
@@ -549,14 +553,14 @@ class CardActor(
     private val cardTexturePixmap: Pixmap
 
     private val onRightClickShowAdditionalInformationListener = object : InputListener() {
+
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
-            if (button == 1) {
-                detailActor?.let {
-                    val descriptionParent = getParentsForExtras(it).first
-                    if (descriptionParent.children.isEmpty)
-                        showExtraDescriptions(descriptionParent)
-                    return true
-                }
+            if (button != 1) return false
+
+            detailActor?.let {
+                val descriptionParent = getParentsForExtras(it).first
+                if (descriptionParent.children.isEmpty) showExtraDescriptions(descriptionParent)
+                return true
             }
             return false
         }
@@ -582,9 +586,7 @@ class CardActor(
         setBoundsOfHoverDetailActor(this)
         batch ?: return
         val texture = pixmapTextureRegion ?: return
-        val shader = if (inGlowAnim) {
-            glowShader
-        } else if (inDestroyAnim) {
+        val shader = if (inDestroyAnim) {
             destroyShader
         } else {
             null
@@ -615,28 +617,27 @@ class CardActor(
 
     fun redrawPixmap(damageValue: Int) {
         pixmap.drawPixmap(cardTexturePixmap, 0, 0)
-        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, fontColor)
-        font.write(pixmap, card.cost.toString(), 490, 28, fontScale, fontColor)
+        val situation = when {
+            damageValue > card.baseDamage -> "increase"
+            damageValue < card.baseDamage -> "decrease"
+            else -> "normal"
+        }
+        val damageFontColor = GraphicsConfig.cardFontColor(isDark, situation)
+        val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
+        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
+        font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
         pixmapTextureRegion?.texture?.dispose()
         val texture = Texture(pixmap, true)
         texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
         pixmapTextureRegion = TextureRegion(texture)
     }
 
-    override fun getHighlightArea(): Rectangle {
-        val (x, y) = localToScreenCoordinates(Vector2(0f, 0f))
+    override fun getBounds(): Rectangle {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         return Rectangle(x, y, width, height)
     }
 
-    fun glowAnimation(): Timeline = Timeline.timeline {
-//        action {
-//            inGlowAnim = true
-//            glowShader.resetReferenceTime()
-//        }
-//        delay(1000)
-//        action { inGlowAnim = false }
-    }
-
+    // TODO: came up with system for animations
     fun destroyAnimation(): Timeline = Timeline.timeline {
         action {
             inDestroyAnim = true
@@ -644,57 +645,6 @@ class CardActor(
         }
         delay(2000)
         action { inDestroyAnim = false }
-    }
-
-    fun growAnimation(includeGlow: Boolean): Timeline = Timeline.timeline {
-//        // TODO: hardcoded values
-//        var origScaleX = 0f
-//        var origScaleY = 0f
-//        val scaleAction = ScaleToAction()
-//        val moveAction = MoveByAction()
-//        val interpolation = Interpolation.fade
-//        action {
-//            origScaleX = scaleX
-//            origScaleY = scaleY
-//            scaleAction.setScale(origScaleX * 1.3f, origScaleY * 1.3f)
-//            moveAction.setAmount(
-//                -(width * origScaleX * 1.3f - width * origScaleX) / 2,
-//                -(height * origScaleY * 1.3f - height * origScaleY) / 2,
-//            )
-//            moveAction.duration = 0.1f
-//            scaleAction.duration = 0.1f
-//            scaleAction.interpolation = interpolation
-//            moveAction.interpolation = interpolation
-//            addAction(scaleAction)
-//            addAction(moveAction)
-//        }
-//        delayUntil { scaleAction.isComplete || !card.inGame }
-//        if (includeGlow) {
-//            delay(GraphicsConfig.bufferTime)
-//            include(glowAnimation())
-//        }
-//        delay(GraphicsConfig.bufferTime)
-//        action {
-//            removeAction(scaleAction)
-//            val moveAmount = -Vector2(moveAction.amountX, moveAction.amountY)
-//            removeAction(moveAction)
-//            scaleAction.reset()
-//            moveAction.reset()
-//            scaleAction.setScale(origScaleX, origScaleY)
-//            moveAction.setAmount(moveAmount.x, moveAmount.y)
-//            scaleAction.duration = 0.2f
-//            moveAction.duration = 0.2f
-//            scaleAction.interpolation = interpolation
-//            moveAction.interpolation = interpolation
-//            addAction(scaleAction)
-//            addAction(moveAction)
-//        }
-//        delayUntil { scaleAction.isComplete || !card.inGame }
-//        action {
-//            removeAction(scaleAction)
-//            removeAction(moveAction)
-//        }
-//        delay(GraphicsConfig.bufferTime)
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
@@ -712,7 +662,6 @@ class CardActor(
         super.sizeChanged()
         setBoundsOfHoverDetailActor(this)
     }
-
 
     override fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor

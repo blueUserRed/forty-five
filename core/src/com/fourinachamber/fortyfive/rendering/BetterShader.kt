@@ -3,12 +3,14 @@ package com.fourinachamber.fortyfive.rendering
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE0
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g3d.Shader
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.Either
 
 // TODO: come up with better name
 class BetterShader(
@@ -69,4 +71,16 @@ class BetterShader(
     override fun dispose() {
         shader.dispose()
     }
+
+    companion object {
+
+        fun load(file: String, constantArgs: Map<String, Any> = mapOf()): BetterShader {
+            val preProcessor = BetterShaderPreProcessor(Gdx.files.internal(file), constantArgs)
+            val code = preProcessor.preProcess()
+            if (code !is Either.Left) throw RuntimeException("shader $file is only meant for exporting")
+            return preProcessor.compile(code.value)
+        }
+
+    }
+
 }

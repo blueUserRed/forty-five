@@ -225,29 +225,10 @@ class AnimatedStyleInstruction<DataType>(
                 data
             }
         }
-//        get() {
-//            val startValue = startValue ?: return data
-//            val now = TimeUtils.millis()
-//            if (now in (controlGainedTime..(controlGainedTime + delay))) return startValue
-//            if (now >= controlGainedTime + delay + duration) {
-//                this.startValue = null
-//                return data
-//            }
-//            val percent = ((now.toDouble() - controlGainedTime.toDouble()) / duration.toDouble()).toFloat()
-//            return StyleManager.lerpStyleData(
-//                dataTypeClass,
-//                startValue,
-//                data,
-//                percent
-//            ) ?: run {
-//                this.startValue = null
-//                controlGainedTime = 0L
-//                data
-//            }
-//        }
 
     override fun onControlGained(valueBefore: DataType) {
         startValue = valueBefore
+        startTime = 0L
         controlGainedTime = TimeUtils.millis()
     }
 
