@@ -29,7 +29,7 @@ nodes: [
             seed: null,
             boughtIndices: [
             ],
-            type: "normal",
+            types: [],
             person: "traveling_merchant",
         }
     },

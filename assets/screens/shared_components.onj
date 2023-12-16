@@ -875,15 +875,6 @@ var mainCardHoverDetailBox = $Box {
         effects: [
 
         ],
-
-        //DA Buch einteilung grob first draft
-        // Marvin: Stylesystem, Timelines, Onj, (Kampfablauf),
-                // Zwicki: Kotlin, Screens + Screen Beispiel (+Widgets) Heal_or_max_HP, KeyInputSystem,
-                    // MapGenerator, aber nicht zu technisch
-
-        //offen: Steam release prep. (eher Zwicki)
-
-
     },
     $Box {
         styles: [
