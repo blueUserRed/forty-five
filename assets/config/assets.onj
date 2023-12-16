@@ -619,6 +619,18 @@ textures: [
         file: "textures/encounter_modifier/rain.png"
     },
     {
+        name: "common_button_default",
+        file: "textures/common/button/default.png"
+    },
+    {
+        name: "common_button_hover",
+        file: "textures/common/button/hover.png"
+    },
+    {
+        name: "common_button_disabled",
+        file: "textures/common/button/disabled.png"
+    },
+    {
         name: "hover_detail_big_background",
         file: "textures/cards/hover_detail/hover_detail_background.png"
     },
@@ -709,6 +721,11 @@ shaders: [
             borderColor: color.black,
             noiseTexScale: 0.5
         }
+    },
+    {
+        name: "tutorial_actor_shader",
+        file: "shaders/tutorial_actor_shader.glsl",
+        constantArgs: { }
     }
 ],
 
@@ -719,6 +736,10 @@ colorTextures: [
     {
         name: "transparent_black_texture",
         color: color.backgroundTransparent
+    },
+    {
+        name: "tutorial_info_actor_background",
+        color: color("040404BB")
     },
     {
         name: "black_texture",

@@ -77,70 +77,9 @@ object GraphicsConfig {
         }
     }
 
-    fun rawTemplateString(name: String): String = rawTemplateStrings[name]!!
-
     fun iconName(name: String): String = iconConfig[name]!!.first
 
     fun iconScale(name: String): Float = iconConfig[name]!!.second
-
-    // TODO: can probably be moved to Card
-    fun cardHighlightEffect(card: Card): Timeline.TimelineAction = when (card.highlightType) {
-
-        Card.HighlightType.STANDARD -> card.actor.growAnimation(false).asAction()
-        Card.HighlightType.GLOW -> card.actor.growAnimation(true).asAction()
-
-    }
-
-    fun shakeActorAnimation(actor: Actor, reduce: Boolean): ActorActionTimelineAction {
-        val action = ShakeActorAction(
-            if (reduce) xShake * 0.5f else xShake,
-            if (reduce) yShake * 0.5f else yShake,
-            xShakeSpeedMultiplier,
-            yShakeSpeedMultiplier
-        )
-        action.duration = shakeDuration
-        return ActorActionTimelineAction(action, actor)
-    }
-
-    @MainThreadOnly
-    fun insultFadeAnimation(pos: Vector2, insult: String, screen: OnjScreen): GameAnimationTimelineAction {
-        val anim = FadeInAndOutTextAnimation(
-            screen,
-            pos.x, pos.y,
-            insult,
-            fadeFontColor,
-            fadeFontScale,
-            ResourceManager.get(screen, fadeFontName),
-            screen,
-            fadeDuration,
-            fadeIn,
-            fadeOut
-        )
-        return GameAnimationTimelineAction(anim)
-    }
-
-    @MainThreadOnly
-    fun numberChangeAnimation(
-        pos: Vector2,
-        text: String,
-        raise: Boolean,
-        positive: Boolean,
-        screen: OnjScreen
-    ): GameAnimationTimelineAction {
-        val anim = TextAnimation(
-            screen,
-            pos.x, pos.y,
-            text,
-            if (positive) numChangePositiveFontColor else numChangeNegativeFontColor,
-            numChangeFontScale,
-            ResourceManager.get(screen, numChangeFontName),
-            if (raise) numChangeRaiseDistance else numChangeSinkDistance,
-            numChangeStartFadeoutAt,
-            screen,
-            numChangeDuration
-        )
-        return GameAnimationTimelineAction(anim)
-    }
 
     fun encounterModifierDisplayName(modifier: EncounterModifier): String {
         val name = (modifier::class.simpleName ?: "").lowerCaseFirstChar()
@@ -165,8 +104,15 @@ object GraphicsConfig {
 
     @MainThreadOnly
     fun cardFont(screen: OnjScreen): PixmapFont = ResourceManager.get(screen, cardFont)
+
     fun cardFontScale(): Float = cardFontScale
-    fun cardFontColor(): Color = cardFontColor
+
+    fun cardFontColor(isDark: Boolean, situation: String): Color {
+        if (situation !in arrayOf("normal", "increase", "decrease")) {
+            throw RuntimeException("unknown situation for card font color: $situation")
+        }
+        return if (isDark) cardFontColors["dark-$situation"]!! else cardFontColors["light-$situation"]!!
+    }
 
     @MainThreadOnly
     fun keySelectDrawable(screen: OnjScreen): Drawable = ResourceManager.get(screen, keySelectDrawable)
@@ -181,11 +127,6 @@ object GraphicsConfig {
 
     private fun readConstants(config: OnjObject) {
         bufferTime = (config.get<Double>("bufferTime") * 1000).toInt()
-
-        rawTemplateStrings = config
-            .get<OnjObject>("stringTemplates")
-            .value
-            .mapValues { it.value.value as String }
 
         iconConfig = config
             .get<OnjObject>("icons")
@@ -202,21 +143,6 @@ object GraphicsConfig {
         damageOverlayFadeIn = (damageOverlay.get<Double>("fadeIn") * 1000).toInt()
         damageOverlayFadeOut = (damageOverlay.get<Double>("fadeOut") * 1000).toInt()
 
-        val shakeOnj = config.get<OnjObject>("shakeAnimation")
-
-        xShake = shakeOnj.get<Double>("xShake").toFloat()
-        yShake = shakeOnj.get<Double>("yShake").toFloat()
-        xShakeSpeedMultiplier = shakeOnj.get<Double>("xSpeed").toFloat()
-        yShakeSpeedMultiplier = shakeOnj.get<Double>("ySpeed").toFloat()
-        shakeDuration = shakeOnj.get<Double>("duration").toFloat()
-
-        val quickChargeOnj = config.get<OnjObject>("enemyQuickChargeAnimation")
-
-        xQuickCharge = quickChargeOnj.get<Double>("xCharge").toFloat()
-        yQuickCharge = quickChargeOnj.get<Double>("yCharge").toFloat()
-        quickChargeDuration = quickChargeOnj.get<Double>("duration").toFloat() / 2f // divide by two because anim is played twice
-        quickChargeInterpolation = Utils.interpolationOrError(quickChargeOnj.get<String>("interpolation"))
-
         val chargeOnj = config.get<OnjObject>("enemyChargeAnimation")
 
         xCharge = chargeOnj.get<Double>("xCharge").toFloat()
@@ -224,30 +150,17 @@ object GraphicsConfig {
         chargeDuration = chargeOnj.get<Double>("duration").toFloat() / 2f // divide by two because anim is played twice
         chargeInterpolation = Utils.interpolationOrError(chargeOnj.get<String>("interpolation"))
 
-        val numChange = config.get<OnjObject>("numberChangeAnimation")
-
-        numChangeFontName = numChange.get<String>("font")
-        numChangeFontScale = numChange.get<Double>("fontScale").toFloat()
-        numChangeDuration = (numChange.get<Double>("duration") * 1000).toInt()
-        numChangeRaiseDistance = numChange.get<Double>("raiseDistance").toFloat()
-        numChangeSinkDistance = numChange.get<Double>("sinkDistance").toFloat()
-        numChangeStartFadeoutAt = (numChange.get<Double>("startFadeoutAt") * 1000).toInt()
-        numChangeNegativeFontColor = numChange.get<Color>("negativeFontColor")
-        numChangePositiveFontColor = numChange.get<Color>("positiveFontColor")
-
-        val fadeOnj = config.get<OnjObject>("insultFadeAnimation")
-
-        fadeFontColor = fadeOnj.get<Color>("fadeFontColor")
-        fadeFontName = fadeOnj.get<String>("fadeFontName")
-        fadeFontScale = fadeOnj.get<Double>("fadeFontScale"). toFloat()
-        fadeDuration = (fadeOnj.get<Double>("fadeDuration") * 1000).toInt()
-        fadeIn = (fadeOnj.get<Double>("fadeIn") * 1000).toInt()
-        fadeOut = (fadeOnj.get<Double>("fadeOut") * 1000).toInt()
-
         val cardOnj = config.get<OnjObject>("cardText")
         cardFont = cardOnj.get<String>("font")
         cardFontScale = cardOnj.get<Double>("fontScale").toFloat()
-        cardFontColor = cardOnj.get<Color>("fontColor")
+        val cardFontColors = mutableMapOf<String, Color>()
+        cardOnj.get<OnjObject>("colorsForDarkCard").value.forEach { (key, value) ->
+            cardFontColors["dark-$key"] = value.value as Color
+        }
+        cardOnj.get<OnjObject>("colorsForLightCard").value.forEach { (key, value) ->
+            cardFontColors["light-$key"] = value.value as Color
+        }
+        this.cardFontColors = cardFontColors
 
         val keySelect = config.get<OnjObject>("keySelect")
         keySelectDrawable = keySelect.get<OnjString>("drawable").value
@@ -266,9 +179,8 @@ object GraphicsConfig {
 
     private var cardFont by Delegates.notNull<String>()
     private var cardFontScale by Delegates.notNull<Float>()
-    private var cardFontColor by Delegates.notNull<Color>()
+    private lateinit var cardFontColors: Map<String, Color>
 
-    private lateinit var rawTemplateStrings: Map<String, String>
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
 
     var bufferTime by Delegates.notNull<Int>()
@@ -279,37 +191,10 @@ object GraphicsConfig {
     private var damageOverlayFadeIn by Delegates.notNull<Int>()
     private var damageOverlayFadeOut by Delegates.notNull<Int>()
 
-    private var xShake by Delegates.notNull<Float>()
-    private var yShake by Delegates.notNull<Float>()
-    private var xShakeSpeedMultiplier by Delegates.notNull<Float>()
-    private var yShakeSpeedMultiplier by Delegates.notNull<Float>()
-    private var shakeDuration by Delegates.notNull<Float>()
-
-    private var xQuickCharge by Delegates.notNull<Float>()
-    private var yQuickCharge by Delegates.notNull<Float>()
-    private var quickChargeDuration by Delegates.notNull<Float>()
-    private lateinit var quickChargeInterpolation: Interpolation
-
     private var xCharge by Delegates.notNull<Float>()
     private var yCharge by Delegates.notNull<Float>()
     private var chargeDuration by Delegates.notNull<Float>()
     private lateinit var chargeInterpolation: Interpolation
-
-    private lateinit var numChangeFontName: String
-    private lateinit var numChangeNegativeFontColor: Color
-    private lateinit var numChangePositiveFontColor: Color
-    private var numChangeFontScale by Delegates.notNull<Float>()
-    private var numChangeDuration by Delegates.notNull<Int>()
-    private var numChangeRaiseDistance by Delegates.notNull<Float>()
-    private var numChangeSinkDistance by Delegates.notNull<Float>()
-    private var numChangeStartFadeoutAt by Delegates.notNull<Int>()
-
-    private lateinit var fadeFontName: String
-    private lateinit var fadeFontColor: Color
-    private var fadeFontScale by Delegates.notNull<Float>()
-    private var fadeDuration by Delegates.notNull<Int>()
-    private var fadeIn by Delegates.notNull<Int>()
-    private var fadeOut by Delegates.notNull<Int>()
 
     private lateinit var encounterModifierConfig: OnjObject
 

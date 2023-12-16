@@ -7,7 +7,7 @@ decks: [
         cards: []
     }
 ],
-playerLives: gameConfig.playerConfig.lives,
+playerLives: 5,
 maxPlayerLives: gameConfig.playerConfig.lives,
 playerMoney: 110,
 currentDifficulty: 1.0,
@@ -18,7 +18,7 @@ stats: {
 },
 
 position: {
-    map: "start_area",
+    map: "tutorial_road",
     node: 0,
     lastNode: null
 },

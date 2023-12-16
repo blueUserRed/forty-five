@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
@@ -12,6 +13,9 @@ import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
+import onj.parser.OnjParser
+import onj.value.OnjArray
+import onj.value.OnjObject
 
 /**
  * main game object
@@ -73,7 +77,6 @@ object FortyFive : Game() {
         PermaSaveState.newRun()
         SaveState.reset()
         MapManager.newRunSync()
-        MapManager.init() // re-read and reset things like the current map
     }
 
     fun resetAll() {
@@ -83,6 +86,7 @@ object FortyFive : Game() {
     }
 
     private fun init() {
+        ShaderProgram.pedantic = false
         with(OnjConfig) {
             registerNameSpace("Common", CommonNamespace)
             registerNameSpace("Cards", CardsNamespace)
@@ -93,14 +97,17 @@ object FortyFive : Game() {
         TemplateString.init()
         FortyFiveLogger.init()
         GameDirector.init()
-        resetAll()
-        newRun()
+        MapManager.init()
+//        resetAll()
+//        newRun()
         PermaSaveState.read()
         SaveState.read()
-        MapManager.init()
+        MapManager.read()
         GraphicsConfig.init()
         ResourceManager.init()
         RandomCardSelection.init()
+//        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
+//        println(cards.get<OnjArray>("cards").value.size)
     }
 
     override fun dispose() {
