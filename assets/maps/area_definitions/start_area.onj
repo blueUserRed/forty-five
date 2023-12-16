@@ -57,21 +57,18 @@ nodes: [
 //    { //this node is used for testing events
 //        x: 40.0,
 //        y: 50.0,
-//        isArea: false,
 //        edgesTo: [
 //            0
 //        ],
 //        nodeTexture: "map_node_heal_circle",
-//        event: $AddMaxHPEvent {
+//        event: $ShopMapEvent {
 //            seed: null,
-//            maxHPRange: [
-//                15, 25
+//            boughtIndices: [
 //            ],
-//            currentlyBlocks: false,
-//            canBeStarted: true,
-//            isCompleted: false,
+//            types: [],
+//            person: "traveling_merchant",
 //        }
-//    }
+//    },
 ],
 
 decorations: [
