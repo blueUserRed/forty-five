@@ -46,6 +46,7 @@ class ShopDragSource(
         payload: DragAndDrop.Payload?,
         target: DragAndDrop.Target?
     ) {
+        println("now stopped")
         if (payload == null) return
         actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as ShopDragPayload
