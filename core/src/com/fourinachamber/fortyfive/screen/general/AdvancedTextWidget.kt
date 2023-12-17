@@ -260,7 +260,7 @@ class TextAdvancedTextPart(
 class IconAdvancedTextPart(
     private val resourceHandle: ResourceHandle,
     private val font: BitmapFont,
-    private val screen: OnjScreen,
+    override val screen: OnjScreen,
     private val dialogFontScale: Float,
     override val breakLine: Boolean
 ) : CustomImageActor(resourceHandle, screen, false), AdvancedTextPart {

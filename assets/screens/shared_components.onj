@@ -876,7 +876,6 @@ var mainCardHoverDetailBox = $Box {
             color: color.forty_white
         },
         effects: [
-
         ],
     },
     $Box {
