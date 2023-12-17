@@ -222,10 +222,7 @@ interface DisplayDetailsOnHoverActor {
     fun <T> registerOnHoverDetailActor(
         actor: T,
         screen: OnjScreen
-    ) where T : DisplayDetailsOnHoverActor, T : Actor {
-        println("hi" + actor)
-        screen.addOnHoverDetailActor(actor)
-    }
+    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
 
     fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
