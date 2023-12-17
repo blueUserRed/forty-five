@@ -1,21 +1,14 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.TextureData.Factory
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
-import com.fourinachamber.fortyfive.utils.Timeline
-import com.fourinachamber.fortyfive.utils.Utils
-import com.fourinachamber.fortyfive.utils.component1
-import com.fourinachamber.fortyfive.utils.component2
-import com.kotcrab.vis.ui.widget.Draggable
+import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.*
 import onj.value.OnjValue
 
@@ -198,7 +191,6 @@ interface BackgroundActor {
      * handle of the current background
      */
     var backgroundHandle: ResourceHandle?
-
 }
 
 /**
@@ -217,28 +209,57 @@ interface OffSettable {
     var offsetY: Float
 }
 
+interface HasOnjScreen {
+    val screen: OnjScreen
+}
+
 interface DisplayDetailsOnHoverActor {
 
     var actorTemplate: String
     var detailActor: Actor?
+    var mainHoverDetailActor: String?
 
     fun <T> registerOnHoverDetailActor(
         actor: T,
         screen: OnjScreen
-    ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
+    ) where T : DisplayDetailsOnHoverActor, T : Actor {
+        println("hi" + actor)
+        screen.addOnHoverDetailActor(actor)
+    }
 
     fun setBoundsOfHoverDetailActor(actor: Actor) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
         val prefHeight = detailActor.prefHeight
         val prefWidth = detailActor.prefWidth
-        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-        detailActor.setBounds(
-            x + actor.width / 2 - detailActor.width / 2,
-            y + actor.height,
-            if (prefWidth == 0f) detailActor.width else prefWidth,
-            prefHeight
-        )
+        if (mainHoverDetailActor == null || actor !is HasOnjScreen || actor.stage == null) {
+            val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+            detailActor.setBounds(
+                x + actor.width / 2 - detailActor.width / 2,
+                y + actor.height,
+                if (prefWidth == 0f) detailActor.width else prefWidth,
+                prefHeight
+            )
+        } else {
+            val mainActor = actor.screen.namedActorOrError(mainHoverDetailActor!!)
+            val distToRoot = mainActor.localToActorCoordinates(detailActor, Vector2(0F, 0F))
+            val actorPos = actor.localToStageCoordinates(Vector2(0, 0))
+            val yCoordinate =
+                if (actorPos.y + actor.height - distToRoot.y + mainActor.height > actor.stage.viewport.worldHeight) {
+                    actorPos.y - mainActor.height - distToRoot.y //if it would be too high up, it will be lower
+                } else {
+                    actorPos.y + actor.height - distToRoot.y
+                }
+            detailActor.setBounds(
+                (actorPos.x + actor.width / 2 - mainActor.width / 2 - distToRoot.x).between(
+                    -distToRoot.x,
+                    actor.stage.viewport.worldWidth - distToRoot.x - mainActor.width
+                ),
+                yCoordinate,
+                if (prefWidth == 0f) detailActor.width else prefWidth,
+                prefHeight
+            )
+        }
         detailActor.invalidateHierarchy()
     }
 
