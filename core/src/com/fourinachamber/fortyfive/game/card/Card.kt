@@ -522,7 +522,8 @@ class CardActor(
     val fontScale: Float,
     val isDark: Boolean,
     override val screen: OnjScreen
-) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor,HasOnjScreen, StyledActor {
+) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
+    OffSettable {
 
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
@@ -532,6 +533,8 @@ class CardActor(
     override var fixedZIndex: Int = 0
 
 
+    override var offsetX: Float = 0F
+    override var offsetY: Float = 0F
     override var styleManager: StyleManager? = null
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
@@ -615,7 +618,7 @@ class CardActor(
         batch.setColor(c.r, c.g, c.b, alpha)
         batch.draw(
             texture,
-            x, y,
+            x + offsetX, y + offsetY,
             width / 2, height / 2,
             width, height,
             scaleX, scaleY,
