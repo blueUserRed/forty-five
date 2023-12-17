@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.events.shop
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
@@ -20,7 +21,7 @@ class ShopCardsHandler(
     private val cardHoverDetailTemplateName: String
 ) {
     private val _allCards: MutableList<Card>
-    private val cardWidgets: MutableList<CustomImageActor> = mutableListOf()
+    private val cardWidgets: MutableList<CardActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
     private val labels: MutableList<CustomLabel> = mutableListOf()
 
@@ -60,16 +61,14 @@ class ShopCardsHandler(
 
         val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap["name"] = OnjString("Card_${curParent.children.size}")
-        tempMap["textureName"] = OnjString(Card.cardTexturePrefix + card.name)
-        val img = screen.screenBuilder.generateFromTemplate(
+        tempMap["textureName"] = OnjString(Card.cardTexturePrefix + card.name) //TODO remove this everywhere
+        screen.screenBuilder.addDataToWidgetFromTemplate(
             "cardsWidgetImage",
             tempMap,
             curParent,
-            screen
-        ) as CustomImageActor
-        screen.addOnHoverDetailActor(img)
-        img.hoverDetailDataProvider = { card.actor.getHoverDetailData() }
-        img.programmedDrawable = TextureRegionDrawable(card.actor.pixmapTextureRegion)
+            screen,
+            card.actor
+        )
         val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap2["name"] = OnjString("CardLabel" + parent.children.size)
         tempMap2["text"] = OnjString("" + card.price + "$")
@@ -79,12 +78,12 @@ class ShopCardsHandler(
             curParent,
             screen
         ) as CustomLabel
-        cardWidgets.add(img)
+        cardWidgets.add(card.actor)
         labels.add(label)
     }
 
     fun buyCard(
-        cardImg: CustomImageActor,
+        cardImg: CardActor,
         addToDeck: Boolean,
     ) {
         val i = cardWidgets.indexOf(cardImg)

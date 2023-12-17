@@ -44,7 +44,7 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
         val dialog = Dialog.readFromOnj(dialogOnj, screen)
         dialogWidget.start(dialog)
 
-       val personLeftImage= screen.generateFromTemplate("personImageLeft", npc.get<OnjObject>("image").value, screen.stage.root.children[0] as CustomFlexBox,screen)
+       val personLeftImage= screen.screenBuilder.generateFromTemplate("personImageLeft", npc.get<OnjObject>("image").value, screen.stage.root.children[0] as CustomFlexBox,screen)
         personLeftImage?.toBack()
     }
 
