@@ -77,8 +77,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         for (i in cardPrototypes.indices) {
             val curData = data[i]
             val curCard = cardPrototypes[i].create()
-
-            val curActor = screen.screenBuilder.generateFromTemplate(
+            screen.screenBuilder.addDataToWidgetFromTemplate(
                 "cardTemplate",
                 mapOf(
                     "rotation" to OnjFloat(curData.first),
@@ -86,10 +85,10 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
                     "textureName" to OnjString(Card.cardTexturePrefix + "bullet")
                 ),
                 parent,
-                screen
-            )!! as CustomImageActor
-            curActor.name = curCard.name
-            curActor.programmedDrawable = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
+                screen,
+                curCard.actor
+            )
+            curCard.actor.name = curCard.name
         }
     }
 

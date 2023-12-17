@@ -6,7 +6,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.general.*
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
 import kotlin.math.max
@@ -18,9 +20,7 @@ class ChooseCardDragSource(
     onj: OnjNamedObject,
 ) : CenteredDragSource(dragAndDrop, actor, onj, true) {
 
-    override fun getActor(): CustomImageActor {
-        return super.getActor() as CustomImageActor
-    }
+    override fun getActor(): CardActor = super.getActor() as CardActor
 
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload {
@@ -71,10 +71,10 @@ class ChooseCardDragPayload(val actor: Actor) : ExecutionPayload() {
      */
     fun onDrop(addToDeck: Boolean) = tasks.add {
         val scr = (FortyFive.screen as OnjScreen).screenController as ChooseCardScreenController
-        scr.getCard((actor as CustomImageActor).name!!, addToDeck)
+        scr.getCard((actor as CardActor).name!!, addToDeck)
     }
 
-    fun resetActorState(actor: CustomImageActor) = tasks.add { actor.leaveActorState("dragged") }
+    fun resetActorState(actor: CardActor) = tasks.add { actor.leaveActorState("dragged") }
 }
 
 class ChooseCardDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedObject) :

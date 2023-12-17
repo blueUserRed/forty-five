@@ -796,7 +796,7 @@ var cardHoverDetailExtrasWidth = 200.0;
 var cardHoverDetailMainWidth = 300.0;
 var cardHoverDetailTotalWidth = cardHoverDetailMainWidth + 2 * cardHoverDetailExtrasWidth;
 
-cardHoverDetailExtra: $Box {
+var cardHoverDetailExtra = $Box {
     template_name: "card_hover_detail_extra_description",
     template_keys: {
         "children.0.children.0.rawText": "description",
@@ -814,18 +814,18 @@ cardHoverDetailExtra: $Box {
         }
     ],
     children: [
-        $Box{
+        $Box {
             styles: [
                 {
                     background: "hover_detail_small_background",
-                    height:110#percent,
-                    width:100#percent,
+                    height: 110#percent,
+                    width: 100#percent,
                     padding: 10#points,
                     alignItems: align.center,
                     flexDirection: flexDirection.column,
                 }
             ],
-            children:[
+            children: [
                 $AdvancedText {
                     styles: [
                         {
@@ -841,11 +841,13 @@ cardHoverDetailExtra: $Box {
                         fontScale: 0.45,
                         color: color.forty_white
                     },
-                    effects:[],
-                },]
+                    effects: [
+                    ],
+                },
+            ]
         }
     ],
-},
+};
 var mainCardHoverDetailBox = $Box {
     styles: [
         {
@@ -988,12 +990,16 @@ var mainCardHoverDetailBox = $Box {
         ],
     },
 ];
-cardHoverDetail: $Box {
+var cardHoverDetail = $Box {
     template_name: "card_hover_detail",
     template_keys: {
         "children.1.children.1.children.0.rawText": "description",
         "children.1.children.1.children.0.effects": "effects",
         "children.1.children.1.children.1.children.1.children.0.rawText": "flavorText",
+//        "children.0.styles.rotation": "rotation",
+//        "children.1.children.1.children.0.styles.rotation": "rotation",
+//        "children.1.children.1.styles.rotation": "rotation",
+//        "children.1.styles.rotation": "rotation",
     },
     width: cardHoverDetailTotalWidth,
 } children [
@@ -1063,6 +1069,11 @@ cardHoverDetail: $Box {
 
         },
     ]
+];
+
+cardHoverDetailTemplates: [
+    cardHoverDetail,
+    cardHoverDetailExtra,
 ],
 
 cardHoverDetailUsedAssets: [

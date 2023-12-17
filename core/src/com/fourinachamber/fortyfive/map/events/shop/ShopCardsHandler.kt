@@ -61,7 +61,6 @@ class ShopCardsHandler(
 
         val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
         tempMap["name"] = OnjString("Card_${curParent.children.size}")
-        tempMap["textureName"] = OnjString(Card.cardTexturePrefix + card.name) //TODO remove this everywhere
         screen.screenBuilder.addDataToWidgetFromTemplate(
             "cardsWidgetImage",
             tempMap,

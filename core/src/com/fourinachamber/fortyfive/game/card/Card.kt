@@ -670,7 +670,8 @@ class CardActor(
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
         "description" to OnjString(card.shortDescription),
         "flavorText" to OnjString(card.flavourText),
-        "effects" to DetailDescriptionHandler.allTextEffects
+        "effects" to DetailDescriptionHandler.allTextEffects,
+//        "rotation" to OnjFloat(rotation.toDouble()),
     )
 
     override fun positionChanged() {
