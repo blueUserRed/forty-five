@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -19,7 +20,9 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
+import ktx.actors.alpha
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -519,7 +522,7 @@ class CardActor(
     val fontScale: Float,
     val isDark: Boolean,
     override val screen: OnjScreen
-) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor,HasOnjScreen {
+) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor,HasOnjScreen, StyledActor {
 
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
@@ -527,6 +530,15 @@ class CardActor(
     override var mainHoverDetailActor: String? = "cardHoverDetailMain"
 
     override var fixedZIndex: Int = 0
+
+
+    override var styleManager: StyleManager? = null
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+//        addBackgroundStyles(screen) //Maybe these are needed, probably not
+//        addDisableStyles(screen)
+//        addOffsetableStyles(screen)
+    }
 
     override var isHoveredOver: Boolean = false
 
@@ -599,6 +611,8 @@ class CardActor(
             it.prepare(screen)
             batch.shader = it.shader
         }
+        val c = batch.color.cpy()
+        batch.setColor(c.r, c.g, c.b, alpha)
         batch.draw(
             texture,
             x, y,
@@ -607,6 +621,7 @@ class CardActor(
             scaleX, scaleY,
             rotation
         )
+        batch.color = c
         batch.flush()
         shader?.let { batch.shader = null }
     }
@@ -677,7 +692,7 @@ class CardActor(
         desc: String,
         tempInfoParent: CustomFlexBox
     ) {
-        screen.generateFromTemplate( //TODO hardcoded value as name
+        screen.screenBuilder.generateFromTemplate( //TODO hardcoded value as name
             "card_hover_detail_extra_description",
             mapOf(
                 "description" to desc,
