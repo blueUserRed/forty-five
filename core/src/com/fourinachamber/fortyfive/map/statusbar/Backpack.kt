@@ -370,8 +370,6 @@ class Backpack(
     private fun checkCurCards() {
         val unplacedCards = SaveState.cards.toMutableList()
         val placedCards = _allCards.map { it.name }.toMutableList()
-        println(unplacedCards)
-        println(placedCards)
         var i = 0;
         while (i < unplacedCards.size) {
             val cur = unplacedCards[i]
