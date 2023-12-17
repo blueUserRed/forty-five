@@ -6,10 +6,15 @@ import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
+import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.general.CenteredDragSource
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
@@ -234,6 +239,22 @@ fun Float.toOnjYoga(unit: YogaUnit = YogaUnit.POINT): OnjYogaValue {
 fun String.substringTillEnd(start: Int = 0, end: Int = length - 1): String {
     return substring(max(start, 0), min(max(end, 0), length - 1))
 }
+
+@Suppress("UNCHECKED_CAST")
+fun DragAndDrop.removeAllListenersWithActor(actor: Actor) { //This feels highly illegal
+    val fieldSource = DragAndDrop::class.java.getDeclaredField("sourceListeners")
+    fieldSource.isAccessible = true
+    val sources = (fieldSource.get(this) as ObjectMap<DragAndDrop.Source, DragListener>).map { it.key }
+    sources.filter { it.actor == actor }.forEach {
+        removeSource(it)
+        if (it is CenteredDragSource) actor.removeListener(it.centerOnClick)
+    }
+    val fieldTarget = DragAndDrop::class.java.getDeclaredField("targets")
+    fieldTarget.isAccessible = true
+    val targets = (fieldTarget.get(this) as com.badlogic.gdx.utils.Array<DragAndDrop.Target>)
+    targets.filter { it.actor == actor }.forEach { removeTarget(it) }
+}
+
 
 fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"
 

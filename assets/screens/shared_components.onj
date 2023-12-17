@@ -12,6 +12,18 @@ navBarUsedAssets: [
     "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left", "heart_texture",
 ],
 
+var cardHoverDetailUsedAssetsDefinition = [
+    "red_wing",
+    "hover_detail_big_background",
+    "hover_detail_small_background",
+    "forty_white_texture",
+    "hover_detail_more_info",
+];
+
+cardHoverDetailUsedAssets: [
+    ...cardHoverDetailUsedAssetsDefinition,
+],
+
 backpackAssets: [
     "backpack_1",
     "backpack_2",
@@ -35,6 +47,7 @@ backpackAssets: [
     "backpack_direction_hover",
     "backpack_direction_arrow",
     "card_character",
+    ...cardHoverDetailUsedAssetsDefinition,
 ],
 
 
@@ -646,41 +659,6 @@ backpack: $Backpack {
 ],
 
 
-backpackTemplates: [
-    $Box {
-        template_name: "backpack_slot",
-        template_keys: {
-        },
-        dragAndDrop:
-        $DeckSlotDropTarget {
-            group: "backpack"
-        },
-        styles: [
-            {
-                marginTop: 2#percent,
-                marginLeft: 2#percent,
-                width: 22#percent,
-                height: 20.9#percent,
-                touchable: touchable.enabled,
-            }
-        ]
-    } children [
-        $Box {
-            dragAndDrop:
-            $BackpackDragSource {
-                group: "backpack"
-            },
-            styles: [
-                {
-                    positionType: positionType.absolute,
-                    width: 100#percent,
-                    height: 100#percent,
-                    touchable: touchable.enabled,
-                }
-            ]
-        }
-    ],
-],
 
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
@@ -996,10 +974,11 @@ var cardHoverDetail = $Box {
         "children.1.children.1.children.0.rawText": "description",
         "children.1.children.1.children.0.effects": "effects",
         "children.1.children.1.children.1.children.1.children.0.rawText": "flavorText",
-//        "children.0.styles.rotation": "rotation",
+        //        "children.0.styles.rotation": "rotation",
 //        "children.1.children.1.children.0.styles.rotation": "rotation",
 //        "children.1.children.1.styles.rotation": "rotation",
 //        "children.1.styles.rotation": "rotation",
+
     },
     width: cardHoverDetailTotalWidth,
 } children [
@@ -1071,17 +1050,50 @@ var cardHoverDetail = $Box {
     ]
 ];
 
-cardHoverDetailTemplates: [
+var cardHoverDetailTemplatesDefinition= [
     cardHoverDetail,
     cardHoverDetailExtra,
+];
+
+cardHoverDetailTemplates: [
+    ...cardHoverDetailTemplatesDefinition
 ],
 
-cardHoverDetailUsedAssets: [
-    "red_wing",
-    "hover_detail_big_background",
-    "hover_detail_small_background",
-    "forty_white_texture",
-    "hover_detail_more_info",
+backpackTemplates: [
+    $Box {
+        template_name: "backpack_slot_parent",
+        template_keys: {
+        },
+        dragAndDrop:
+        $DeckSlotDropTarget {
+            group: "backpack"
+        },
+        styles: [
+            {
+                marginTop: 2#percent,
+                marginLeft: 2#percent,
+                width: 22#percent,
+                height: 20.9#percent,
+                touchable: touchable.enabled,
+            }
+        ]
+    },
+    $Box {
+        template_name: "backpack_slot_card",
+        template_keys: {
+        },
+        dragAndDrop: $BackpackDragSource {
+            group: "backpack"
+        },
+        styles: [
+            {
+                positionType: positionType.absolute,
+                width: 100#percent,
+                height: 100#percent,
+            }
+        ]
+    },
+    ...cardHoverDetailTemplatesDefinition,
 ],
 
 

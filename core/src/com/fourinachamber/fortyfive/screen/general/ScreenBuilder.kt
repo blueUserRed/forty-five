@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -143,7 +144,8 @@ class ScreenBuilder(val file: FileHandle) {
         data: Map<String, Any?>,
         parent: FlexBox?,
         screen: OnjScreen,
-        actor: Actor
+        actor: Actor,
+        removeOldData: Boolean = true,
     ) {
         val onjData: MutableMap<String, OnjValue> = mutableMapOf()
         data.forEach { onjData[it.key] = getAsOnjValue(it.value) }
@@ -151,6 +153,15 @@ class ScreenBuilder(val file: FileHandle) {
         val combinedData = combineTemplateValues(template.get<OnjObject>("template_keys"), onjData)
         val widgetOnj = generateTemplateOnjValue(template, combinedData, "")
         widgetOnj as OnjNamedObject
+        if (removeOldData) {
+//            behavioursToBind.removeIf { it.actor == actor } //I don't know how to do that properly
+            val dragAndDrops = screen.dragAndDrop
+            addedActorsDragAndDrops.forEach {
+                if (it.value.remove(actor)){
+                    dragAndDrops[it.key]?.removeAllListenersWithActor(actor)
+                }
+            }
+        }
         val oldBehaviours = behavioursToBind.toList()
         applyWidgetKeysFromOnj(actor, widgetOnj, parent, screen)
         val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
