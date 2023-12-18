@@ -37,12 +37,12 @@ import kotlin.math.abs
 import kotlin.math.max
 
 open class CustomLabel @AllThreadsAllowed constructor(
-    val screen: OnjScreen,
+    override val screen: OnjScreen,
     text: String,
     labelStyle: LabelStyle,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners,HasOnjScreen {
 
     override val actor: Actor = this
 
@@ -163,16 +163,17 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
  */
 open class CustomImageActor @AllThreadsAllowed constructor(
     drawableHandle: ResourceHandle?,
-    private val screen: OnjScreen,
+    override val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
     override var actorTemplate: String = "",
     var hoverDetailDataProvider: () -> Map<String, OnjValue> = { mapOf() }
 ) : Image(), Maskable, ZIndexActor, DisableActor,
-    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailsOnHoverActor {
+    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailsOnHoverActor, HasOnjScreen {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
     override var isClicked: Boolean = false
+    override var mainHoverDetailActor: String? = null
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -371,8 +372,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 }
 
 open class CustomFlexBox(
-    val screen: OnjScreen
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable {
+    override val screen: OnjScreen
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable,HasOnjScreen {
 
     override var fixedZIndex: Int = 0
 
@@ -1008,8 +1009,8 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
  * custom h-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomHorizontalGroup(
-    private val screen: OnjScreen
-) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor {
+    override val screen: OnjScreen
+) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor,HasOnjScreen {
 
     override var fixedZIndex: Int = 0
 
@@ -1047,8 +1048,8 @@ open class CustomHorizontalGroup(
  * custom v-group, that implements [ZIndexActor] and [ZIndexGroup]
  */
 open class CustomVerticalGroup(
-    private val screen: OnjScreen
-) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor {
+    override val screen: OnjScreen
+) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor,HasOnjScreen {
 
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null
@@ -1093,6 +1094,5 @@ class CustomParticleActor(
     particle: ParticleEffect,
     resetOnStart: Boolean = true
 ) : ParticleEffectActor(particle, resetOnStart), ZIndexActor {
-
     override var fixedZIndex: Int = 0
 }

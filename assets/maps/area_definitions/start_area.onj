@@ -10,7 +10,7 @@ nodes: [
         y: 80.0,
         edgesTo: [
             1
-//            ,3
+            ,3
         ],
         event: $NPCMapEvent {
             currentlyBlocks: false,
@@ -54,24 +54,21 @@ nodes: [
 
         }
     },
-//    { //this node is used for testing events
-//        x: 40.0,
-//        y: 50.0,
-//        isArea: false,
-//        edgesTo: [
-//            0
-//        ],
-//        nodeTexture: "map_node_heal_circle",
-//        event: $AddMaxHPEvent {
-//            seed: null,
-//            maxHPRange: [
-//                15, 25
-//            ],
-//            currentlyBlocks: false,
-//            canBeStarted: true,
-//            isCompleted: false,
-//        }
-//    }
+    { //this node is used for testing events
+        x: 40.0,
+        y: 50.0,
+        edgesTo: [
+            0
+        ],
+        nodeTexture: "map_node_heal_circle",
+        event: $ShopMapEvent {
+            seed: null,
+            boughtIndices: [
+            ],
+            types: [],
+            person: "traveling_merchant",
+        }
+    },
 ],
 
 decorations: [

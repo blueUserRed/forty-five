@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -24,6 +25,7 @@ import com.fourinachamber.fortyfive.map.events.shop.PersonWidget
 import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
+import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
@@ -121,9 +123,11 @@ class ScreenBuilder(val file: FileHandle) {
         }
     }
 
-    fun generateFromTemplate(name: String, data: Map<String, OnjValue>, parent: FlexBox?, screen: OnjScreen): Actor? {
+    fun generateFromTemplate(name: String, data: Map<String, Any?>, parent: FlexBox?, screen: OnjScreen): Actor? {
+        val onjData: MutableMap<String, OnjValue> = mutableMapOf()
+        data.forEach { onjData[it.key] = getAsOnjValue(it.value) }
         val template = templateObjects[name] ?: return null
-        val combinedData = combineTemplateValues(template.get<OnjObject>("template_keys"), data)
+        val combinedData = combineTemplateValues(template.get<OnjObject>("template_keys"), onjData)
         val widgetOnj = generateTemplateOnjValue(template, combinedData, "")
         widgetOnj as OnjNamedObject
         val oldBehaviours = behavioursToBind.toList()
@@ -133,6 +137,53 @@ class ScreenBuilder(val file: FileHandle) {
         doDragAndDrop(screen)
         screen.invalidateEverything()
         return curActor
+    }
+
+    fun addDataToWidgetFromTemplate(
+        name: String,
+        data: Map<String, Any?>,
+        parent: FlexBox?,
+        screen: OnjScreen,
+        actor: Actor,
+        removeOldData: Boolean = true,
+    ) {
+        val onjData: MutableMap<String, OnjValue> = mutableMapOf()
+        data.forEach { onjData[it.key] = getAsOnjValue(it.value) }
+        val template = templateObjects[name] ?: return
+        val combinedData = combineTemplateValues(template.get<OnjObject>("template_keys"), onjData)
+        val widgetOnj = generateTemplateOnjValue(template, combinedData, "")
+        widgetOnj as OnjNamedObject
+        if (removeOldData) {
+//            behavioursToBind.removeIf { it.actor == actor } //I don't know how to do that properly
+            val dragAndDrops = screen.dragAndDrop
+            addedActorsDragAndDrops.forEach {
+                if (it.value.remove(actor)){
+                    dragAndDrops[it.key]?.removeAllListenersWithActor(actor)
+                }
+            }
+        }
+        val oldBehaviours = behavioursToBind.toList()
+        applyWidgetKeysFromOnj(actor, widgetOnj, parent, screen)
+        val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
+        for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
+        doDragAndDrop(screen)
+        screen.invalidateEverything()
+    }
+
+    fun getAsOnjValue(value: Any?): OnjValue {
+        return when (value) {
+            is OnjValue -> value
+            is Float, Double -> OnjFloat((value as Number).toDouble())
+            is Long, Int -> OnjInt((value as Number).toLong())
+            is String -> OnjString(value)
+            is Color -> OnjColor(value)
+            is Array<*> -> OnjArray((value as List<*>).map { getAsOnjValue(it) })
+            is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value) }.toMap())
+            null -> OnjNull()
+            else -> {
+                throw java.lang.Exception("Unexpected Onj Type, not implemented: " + value::class)
+            }
+        }
     }
 
     private fun generateTemplateOnjValue(
@@ -515,7 +566,14 @@ class ScreenBuilder(val file: FileHandle) {
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
-    }.let { actor ->
+    }.let { actor -> applyWidgetKeysFromOnj(actor, widgetOnj, parent, screen) }
+
+    private fun applyWidgetKeysFromOnj( //this is needed as a function to give styles to the cards,  // TODO ugly
+        actor: Actor,
+        widgetOnj: OnjNamedObject,
+        parent: FlexBox?,
+        screen: OnjScreen
+    ): Actor {
         // TODO: split this into multiple functions
         applySharedWidgetKeys(actor, widgetOnj)
         val node = parent?.add(actor)
@@ -555,7 +613,15 @@ class ScreenBuilder(val file: FileHandle) {
                         val instruction = if (duration == null) {
                             StyleInstruction(data, priority, condition, dataClass)
                         } else {
-                            AnimatedStyleInstruction(data, priority, condition, dataClass, duration!!, interpolation!!, delay!!)
+                            AnimatedStyleInstruction(
+                                data,
+                                priority,
+                                condition,
+                                dataClass,
+                                duration!!,
+                                interpolation!!,
+                                delay!!
+                            )
                         }
                         styleManager.addInstruction(key, instruction, dataClass)
                     }

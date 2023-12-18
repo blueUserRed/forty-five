@@ -5,8 +5,11 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
+import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
@@ -19,25 +22,27 @@ class BackpackDragSource(
     onj: OnjNamedObject,
 ) : CenteredDragSource(dragAndDrop, actor, onj, true) {
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
-        if ((actor !is CustomFlexBox)) return null
+        val actor = actor
+        if ((actor !is CardActor)) return null
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
         payload.dragActor = actor
         val curFlex = actor.parent.parent as CustomScrollableFlexBox
         curFlex.currentlyDraggedChild = actor
-
+        actor.toFront()
         actor.parent.parent.parent.toFront() //the side which say if its backpack or deck
+        actor.parent.parent.toFront() //the side which say if its backpack or deck
         val obj = BackpackDragPayload(actor)
         payload.obj = obj
         obj.resetTo(actor, Vector2(actor.x, actor.y))
-
         curFlex.fixedZIndex = 10
         (curFlex.parent as ZIndexGroup).resortZIndices()
-        obj.resetZIndex(curFlex)
+        obj.resetZIndex(curFlex, actor)
         startReal()
 
         return payload
     }
+
     override fun dragStop(
         event: InputEvent?,
         x: Float,
@@ -56,8 +61,12 @@ class BackpackDragSource(
     }
 
     override fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean {
-        if ((actor !is CustomFlexBox)) return false
-        val curFlex = actor.parent.parent as CustomScrollableFlexBox
+        if ((actor !is CardActor)) return false
+        val curFlex = if (actor.parent.parent is CustomScrollableFlexBox) {
+            actor.parent.parent as CustomScrollableFlexBox
+        } else {
+            actor.parent as CustomScrollableFlexBox
+        }
         curFlex.currentlyDraggedChild = actor
         actor.parent.parent.parent.toFront() //the side which say if its backpack or deck
         curFlex.fixedZIndex = 10
@@ -67,14 +76,16 @@ class BackpackDragSource(
 
     override fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
         actor.zIndex = max(actor.zIndex - 1, 0)
-        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
+        if (actor.parent.parent is CustomScrollableFlexBox)
+            (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
+        else (actor.parent as CustomScrollableFlexBox).currentlyDraggedChild = null
         actor.parent.parent.parent.zIndex = max(actor.parent.parent.parent.zIndex - 1, 0)
         (actor.parent.parent.parent.parent as ZIndexGroup).resortZIndices()
     }
 }
 
 class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
-    fun switchOrPlaceCard(card: CustomFlexBox, slot: CustomFlexBox) {
+    fun switchOrPlaceCard(card: CardActor, slot: CustomFlexBox) {
         val dataSource = card.name.split(Backpack.NAME_SEPARATOR_STRING)
         val sourceIndex = dataSource[2].toInt()
         val targetIndex = slot.parent.children.indexOf(slot)
@@ -83,13 +94,13 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
         else if (dataSource[1] == "backpack") curDeck.addToDeck(targetIndex, dataSource[0])
     }
 
-    fun backToBackpack(card: CustomFlexBox) {
+    fun backToBackpack(card: CardActor) {
         val fromDeck = card.name.split(Backpack.NAME_SEPARATOR_STRING)[1] == "deck"
         if (fromDeck) {
             if (SaveState.curDeck.canRemoveCards()) {
                 SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
             } else {
-               CustomWarningParent.getWarning(card.screen).addWarning(
+                CustomWarningParent.getWarning(card.screen).addWarning(
                     card.screen,
                     "Not enough cards",
                     "The minimum decksize is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
@@ -100,12 +111,13 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
     }
 
     fun invalidateParents(card: Actor) {
-        (card as CustomFlexBox).invalidateHierarchy()
+        (card as CardActor).invalidateHierarchy()
     }
 
-    fun resetZIndex(curFlex: CustomScrollableFlexBox) = tasks.add {
+    fun resetZIndex(curFlex: CustomScrollableFlexBox, actor: CardActor) = tasks.add {
         curFlex.fixedZIndex = 0
         (curFlex.parent as ZIndexGroup).resortZIndices()
+        actor.toBack()
     }
 }
 
@@ -124,7 +136,7 @@ class DeckSlotDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedOb
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null || source == null) return
         val obj = payload.obj as BackpackDragPayload
-        obj.switchOrPlaceCard(source.actor as CustomFlexBox, actor as CustomFlexBox)
+        obj.switchOrPlaceCard(source.actor as CardActor, actor as CustomFlexBox)
     }
 }
 
@@ -144,6 +156,6 @@ class BackpackDropTarget(dragAndDrop: DragAndDrop, actor: Actor, onj: OnjNamedOb
     override fun drop(source: DragAndDrop.Source?, payload: DragAndDrop.Payload?, x: Float, y: Float, pointer: Int) {
         if (payload == null || source == null) return
         val obj = payload.obj as BackpackDragPayload
-        obj.backToBackpack(source.actor as CustomFlexBox)
+        obj.backToBackpack(source.actor as CardActor)
     }
 }

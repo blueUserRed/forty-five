@@ -17,7 +17,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
  * used for displaying status effects
  */
 class StatusEffectDisplay(
-    private val screen: OnjScreen,
+    override val screen: OnjScreen,
     private val font: BitmapFont,
     private val fontColor: Color,
     private val fontScale: Float

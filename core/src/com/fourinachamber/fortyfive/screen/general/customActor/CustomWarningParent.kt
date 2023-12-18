@@ -201,7 +201,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
     ) = Timeline.timeline {
         var current: CustomFlexBox? = null
         action {
-            current = screen.generateFromTemplate(
+            current = screen.screenBuilder.generateFromTemplate(
                 "warning_label_template",
                 data,
                 this@CustomWarningParent,

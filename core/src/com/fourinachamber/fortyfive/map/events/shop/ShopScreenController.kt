@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.events.shop
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
@@ -126,7 +127,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
-        shopCardsHandler.buyCard(actor as CustomImageActor, addToDeck)
+        shopCardsHandler.buyCard(actor as CardActor, addToDeck)
     }
 
     fun displayBuyPopups() {

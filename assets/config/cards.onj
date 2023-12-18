@@ -737,6 +737,7 @@ cards: [
             bounce("enter", bSelects.threeButNotSelf)
         ],
         forceLoadCards: [],
+        dark: false,
         cost: 1,
         type: $Bullet { },
         tags: ["pool1"],
@@ -756,6 +757,7 @@ cards: [
             buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0, 0) }#activeChecker)
         ],
         forceLoadCards: [],
+        dark: false,
         cost: 1,
         type: $Bullet { },
         tags: ["pool2"],
@@ -776,6 +778,7 @@ cards: [
             givePlayerStatus("round start", poison(1, 8)),
         ],
         forceLoadCards: [],
+        dark: false,
         cost: 2,
         type: $Bullet { },
         tags: ["pool1"],
@@ -796,6 +799,7 @@ cards: [
             giveStatus("destroy", poison(3, 6))
         ],
         forceLoadCards: [],
+        dark: false,
         cost: 2,
         type: $Bullet { },
         tags: ["pool2"],
@@ -815,6 +819,7 @@ cards: [
             turnRevolver("any card destroyed", "left", 1)
         ],
         forceLoadCards: [],
+        dark: false,
         cost: 2,
         type: $Bullet { },
         tags: ["pool2"],
@@ -835,6 +840,7 @@ cards: [
             putCardInHand("destroy", "sacrificialBullet", 1#val)
         ],
         forceLoadCards: [],
+        dark: false,
         cost: 1,
         type: $Bullet { },
         tags: ["pool2"],
@@ -855,6 +861,7 @@ cards: [
             buffDmgMultiplier("any card destroyed", bSelects.self, 2.0),
         ],
         forceLoadCards: [],
+        dark: false,
         cost: 2,
         type: $Bullet { },
         tags: ["pool1"],

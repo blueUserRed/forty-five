@@ -142,7 +142,7 @@ abstract class CenteredDragSource(
     showClickHint: Boolean = false
 ) : DragBehaviour(dragAndDrop, actor, onj) {
 
-    private val centerOnClick = OnClickToCenter(this)
+    val centerOnClick = OnClickToCenter(this)
 
     init {
         if (actor is OffSettable && showClickHint) actor.addListener(centerOnClick)

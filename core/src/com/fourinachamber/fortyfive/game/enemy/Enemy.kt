@@ -265,7 +265,7 @@ class EnemyActor(
     val enemy: Enemy,
     textEmitterConfig: OnjArray,
     private val hiddenActionIconHandle: ResourceHandle,
-    private val screen: OnjScreen
+    override val screen: OnjScreen
 ) : CustomVerticalGroup(screen), ZIndexActor {
 
     override var fixedZIndex: Int = 0

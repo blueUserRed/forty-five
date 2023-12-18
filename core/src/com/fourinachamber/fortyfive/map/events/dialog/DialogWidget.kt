@@ -130,7 +130,7 @@ class DialogWidget(
         optionBoxNodes.clear()
         screen.enterState(showOptionsBoxScreenState)
         currentOptions!!.forEach { (option, _) ->
-            val actor = screen.generateFromTemplate(
+            val actor = screen.screenBuilder.generateFromTemplate(
                 "optionsItem",
                 mutableMapOf("text" to option),
                 optionsBox,
