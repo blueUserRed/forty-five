@@ -2,17 +2,19 @@ package com.fourinachamber.fortyfive.map.statusbar
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.screen.general.customActor.InOutAnimationActor
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
@@ -22,6 +24,8 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import java.lang.Exception
+import java.lang.IllegalStateException
 
 class Backpack(
     screen: OnjScreen,
@@ -49,11 +53,18 @@ class Backpack(
 
     private var sortingSystem: BackpackSorting = BackpackSorting.Damage()
 
+    /**
+     * it's true at the first time when called, since it needs to set the global variables in the templateString
+     */
+    private var sortingSystemDirty: Boolean = true
+
     private val quickAddRemoveListener = object : ClickListener() {
-        override fun clicked(event: InputEvent?, x: Float, y: Float) {
+        override fun clicked(event: InputEvent, x: Float, y: Float) {
             super.clicked(event, x, y)
-            if ((event!!.target as CustomFlexBox).name == null) return
-            val targetName = (event.target as CustomFlexBox).name.split(NAME_SEPARATOR_STRING)
+            val target = event.target
+            if (target !is CardActor) return
+            if (target.name == null) return
+            val targetName = target.name.split(NAME_SEPARATOR_STRING)
             if ((tapCount and 1) == 0) {
                 //if==true means that it is from backpack
                 if (targetName[1] == "backpack") quickAddToDeck(targetName, screen)
@@ -138,11 +149,13 @@ class Backpack(
 
     private fun initSortBy() {
         (screen.namedActorOrError(sortWidgetName) as CustomFlexBox).onClick {
+            sortingSystemDirty = true
             sortingSystem = sortingSystem.getNext()
             invalidateHierarchy()
         }
         val cur = screen.namedActorOrError(sortReverseWidgetName) as CustomFlexBox
         cur.onClick {
+            sortingSystemDirty = true
             sortingSystem.isReverse = !sortingSystem.isReverse
             invalidateHierarchy()
             this.children[0].rotateBy(180F)
@@ -157,7 +170,7 @@ class Backpack(
     private fun checkDeck() {
         //checks for the number of visible cards
         val deckSlots = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
-        val seenCards = deckSlots.map { it.children[0] }.filter { it.isVisible }
+        val seenCards = deckSlots.filter { it.children.size > 0 }.map { it.children[0] }
         if (seenCards.size != SaveState.curDeck.cards.size) {
             reloadDeck()
             return
@@ -165,8 +178,8 @@ class Backpack(
 
         //checks for all the cards that should be visible
         val nbrOfCorrectPlacedChildren =
-            SaveState.curDeck.cardPositions.map { deckSlots[it.key].children[0] to it.value }
-                .filter { it.first.isVisible }
+            SaveState.curDeck.cardPositions.filter { deckSlots[it.key].children.size > 0 }
+                .map { deckSlots[it.key].children[0] to it.value }
                 .filter { it.first.name != null }
                 .filter { it.second == it.first.name.split(NAME_SEPARATOR_STRING)[0] }
                 .size
@@ -175,17 +188,17 @@ class Backpack(
             return
         }
 
-        //maybe check before actually sorting if needed, but I think it doesn't matter
-        val unplacedCards = SaveState.cards.toMutableList()
-        seenCards.forEach { unplacedCards.remove(it.name.split(NAME_SEPARATOR_STRING)[0]) }
-        TemplateString.updateGlobalParam("overlay.backpack.sortByName", sortingSystem.getDisplayName())
-        sortBackpack(sortingSystem.sort(this, unplacedCards))
+        if (sortingSystemDirty) {
+            val unplacedCards = SaveState.cards.toMutableList()
+            seenCards.forEach { unplacedCards.remove(it.name.split(NAME_SEPARATOR_STRING)[0]) }
+            sortBackpack(sortingSystem.sort(this, unplacedCards))
+        }
     }
 
     private fun initDeckLayout() {
         for (i in 0 until SaveState.Deck.numberOfSlots) {
             val cur = (screen.screenBuilder.generateFromTemplate(
-                "backpack_slot",
+                "backpack_slot_parent",
                 mapOf(),
                 deckCardsWidget,
                 screen
@@ -222,61 +235,71 @@ class Backpack(
     private fun reloadDeck() {
         SaveState.curDeck.checkMinimum()
 
-        //"Reset" Deck
+        //"Reset" Deck and Backpack
         val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
-        children.forEach { (it.children[0] as CustomFlexBox).isVisible = false }
+
+        children.filter { it.children.size > 0 }.forEach { removeChildCompletely(it.children[0] as CardActor) }
+        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
 
         //Deck
         val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
         SaveState.curDeck.cardPositions.forEach {
             val currentSelection = unplacedCards.find { card -> it.value == card }!!
-            val cur = children[it.key].children[0] as CustomFlexBox
-            cur.isVisible = true
-            cur.background =
-                TextureRegionDrawable(getCard(it.value).actor.pixmapTextureRegion)
-            cur.name = "${it.value}${NAME_SEPARATOR_STRING}deck${NAME_SEPARATOR_STRING}${it.key}"
+            val cur = children[it.key]
+            val curChild = getCard(it.value, true).actor
+            screen.screenBuilder.addDataToWidgetFromTemplate("backpack_slot_card", mapOf(), cur, screen, curChild)
+            curChild.name = "${it.value}${NAME_SEPARATOR_STRING}deck${NAME_SEPARATOR_STRING}${it.key}"
             unplacedCards.remove(currentSelection)
         }
         deckCardsWidget.invalidate()
 
 
         //Reset Backpack
-        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
-            .forEach { removeChildCompletely(it) }
-        //Backpack
-        for (i in 0 until unplacedCards.size) {
-            val cur = screen.screenBuilder.generateFromTemplate(
-                "backpack_slot",
-                mapOf(),
-                backpackCardsWidget,
-                screen
-            ) as CustomFlexBox
-            cur.addListener(quickAddRemoveListener)
-        }
         sortBackpack(sortingSystem.sort(this, unplacedCards))
     }
 
-    private fun getCard(name: String): Card {
-        val card = _allCards.find { card -> card.name == name } ?: cardPrototypes.find { it.name == name }!!.create()
+    private fun getCard(name: String, checkParent: Boolean = false): Card {
+        val card = _allCards.find { card -> card.name == name && (!checkParent || card.actor.parent == null) }
+        card ?: throw IllegalStateException("You try to access a card that isn't loaded, this shouldn't be possible!")
         if (card !in _allCards) _allCards.add(card)
         return card
     }
 
-    private fun removeChildCompletely(child: CustomFlexBox) {
-        (child.parent as CustomFlexBox).remove(child.styleManager!!.node)
-        child.remove()
+    private fun removeChildCompletely(actor: Actor) {
+        if (actor !is StyledActor) throw Exception("This method should only be called with StyledActors")
+        if (actor is CustomFlexBox){
+            actor.children.forEach {removeChildCompletely(it)}
+        }
+        screen.styleManagers.remove(actor.styleManager!!)
+        (actor.parent as CustomFlexBox).remove(actor.styleManager!!.node)
+        actor.remove()
         //theoretically remove from screen with like behaviour and dragAndDrop, but idc
     }
 
     private fun sortBackpack(sortedCards: List<String>) {
-        val allPos = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
         for (i in sortedCards.indices) {
-            val curCard = getCard(sortedCards[i])
-            val curActor = allPos[i].children[0] as CustomFlexBox
-            curActor.background = TextureRegionDrawable(curCard.actor.pixmapTextureRegion)
-            curActor.name = "${curCard.name}${NAME_SEPARATOR_STRING}backpack${NAME_SEPARATOR_STRING}${i}"
+            val cardName=sortedCards[i]
+            val curActor = getCard(cardName, true).actor
+            val parent = screen.screenBuilder.generateFromTemplate(
+                "backpack_slot_parent",
+                mapOf(),
+                backpackCardsWidget,
+                screen,
+            ) as CustomFlexBox
+            screen.screenBuilder.addDataToWidgetFromTemplate(
+                "backpack_slot_card",
+                mapOf(),
+                parent,
+                screen,
+                curActor
+            )
+            curActor.name = "${cardName}${NAME_SEPARATOR_STRING}backpack${NAME_SEPARATOR_STRING}${i}"
+            curActor.addListener(quickAddRemoveListener)
         }
         backpackCardsWidget.invalidate()
+        TemplateString.updateGlobalParam("overlay.backpack.sortByName", sortingSystem.getDisplayName())
+        sortingSystemDirty = false
     }
 
     private fun initDeckName() {
@@ -334,6 +357,7 @@ class Backpack(
 
 
     override fun display(): Timeline {
+        checkCurCards()
         changeDeckTo(SaveState.curDeck.id, true)
         return Timeline.timeline {
             parallelActions(
@@ -341,6 +365,20 @@ class Backpack(
                 getInOutTimeLine(isGoingIn = true, true, backpackCardsWidget.parent as CustomFlexBox).asAction()
             )
         }
+    }
+
+    private fun checkCurCards() {
+        val unplacedCards = SaveState.cards.toMutableList()
+        val placedCards = _allCards.map { it.name }.toMutableList()
+        var i = 0;
+        while (i < unplacedCards.size) {
+            val cur = unplacedCards[i]
+            if (cur in placedCards) {
+                unplacedCards.remove(cur)
+                placedCards.remove(cur)
+            } else i++
+        }
+        unplacedCards.forEach { name -> _allCards.add(cardPrototypes.find { it.name == name }!!.create()) }
     }
 
     private fun getInOutTimeLine(isGoingIn: Boolean, goingRight: Boolean, target: CustomFlexBox) = Timeline.timeline {

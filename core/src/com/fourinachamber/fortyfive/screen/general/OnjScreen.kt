@@ -267,15 +267,6 @@ open class OnjScreen @MainThreadOnly constructor(
         additionalEarlyRenderTasks.remove(task)
     }
 
-    @MainThreadOnly
-    fun generateFromTemplate(name: String, data: Map<String, Any?>, parent: FlexBox?, screen: OnjScreen): Actor? {
-        val onjData: MutableMap<String, OnjValue> = mutableMapOf()
-        data.forEach {
-            onjData[it.key] = getAsOnjValue(it.value)
-        }
-        return screenBuilder.generateFromTemplate(name, onjData, parent, screen)
-    }
-
     fun addNamedActor(name: String, actor: Actor) {
         namedActors[name] = actor
     }
@@ -284,32 +275,17 @@ open class OnjScreen @MainThreadOnly constructor(
         namedActors.remove(name)
     }
 
-    private fun getAsOnjValue(value: Any?): OnjValue {
-        return when (value) {
-            is OnjValue -> value
-            is Float, Double -> OnjFloat((value as Number).toDouble())
-            is Long, Int -> OnjInt((value as Number).toLong())
-            is String -> OnjString(value)
-            is Color -> OnjColor(value)
-            is Array<*> -> OnjArray((value as List<*>).map { getAsOnjValue(it) })
-            is Map<*, *> -> OnjObject(value.map { it.key as String to getAsOnjValue(it.value)}.toMap())
-            null -> OnjNull()
-            else -> {
-                throw java.lang.Exception("Unexpected Onj Type, not implemented: "+value::class)
-            }
-        }
-    }
-
-
     fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
-        if (actor is HoverStateActor){
+        if (actor is HoverStateActor) {
             actor.onHoverEnter {
-                showHoverDetail(actor, actor, actor.actorTemplate)
+                if (dragAndDrop.none { it.value.isDragging }) { //TODO MARVIN has to add that this if works in a fight too
+                    showHoverDetail(actor, actor, actor.actorTemplate)
+                }
             }
             actor.onHoverLeave {
                 hideHoverDetail()
             }
-        }else{
+        } else {
             actor.onEnter {
                 showHoverDetail(actor, actor, actor.actorTemplate)
             }
@@ -396,7 +372,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
-//        Thread.sleep(800) //TODO remove
+//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         screenController?.update()
@@ -411,12 +387,15 @@ open class OnjScreen @MainThreadOnly constructor(
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-            stage.batch.begin()
-            currentHoverDetail?.let { actor ->
-                actor.act(delta)
-                actor.draw(stage.batch, 1f)
+
+            if (dragAndDrop.none { it.value.isDragging }) {
+                stage.batch.begin()
+                currentHoverDetail?.let { actor ->
+                    actor.act(delta)
+                    actor.draw(stage.batch, 1f)
+                }
+                stage.batch.end()
             }
-            stage.batch.end()
         }
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)

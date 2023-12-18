@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
@@ -19,7 +20,7 @@ class ShopDragSource(
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = this.actor
-        if ((actor !is CustomImageActor) || actor.inActorState("unbuyable")) return null
+        if ((actor !is CardActor) || actor.inActorState("unbuyable")) return null
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
 
@@ -45,6 +46,7 @@ class ShopDragSource(
         payload: DragAndDrop.Payload?,
         target: DragAndDrop.Target?
     ) {
+        println("now stopped")
         if (payload == null) return
         actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as ShopDragPayload
@@ -54,10 +56,10 @@ class ShopDragSource(
 
     override fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean {
         val actor = this.actor
-        if ((actor !is CustomImageActor) || actor.inActorState("unbuyable")) return false
+        if ((actor !is CardActor) || actor.inActorState("unbuyable")) return false
         dragAndDrop.setKeepWithinStage(false)
 
-        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = actor.parent
+        (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = actor
         actor.toFront()
         val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
         controller.displayBuyPopups()

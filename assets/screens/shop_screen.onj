@@ -43,7 +43,7 @@ options: {
         cardsParentName: "cardsWidget",
         addToBackpackWidgetName: "addToBackpackWidget",
         addToDeckWidgetName: "addToDeckWidget",
-        hoverDetailActorTemplateName: sharedComponents.cardHoverDetail.template_name
+        hoverDetailActorTemplateName: sharedComponents.cardHoverDetailTemplates.0.template_name
     }
 },
 
@@ -355,16 +355,11 @@ templates: [
     $Image {
         template_keys: {
             "name": "name",
-            "textureName": "textureName",
         },
         template_name: "cardsWidgetImage",
-        //        name: "",
-//        textureName: "shop_background_wasteland",
-
         scaleX: 0.01,
         scaleY: 0.01,
-        hoverDetailActor: sharedComponents.cardHoverDetail.template_name,
-        reportDimensionsWithScaling: true,
+        hoverDetailActor: sharedComponents.cardHoverDetailTemplates.0.template_name,
         dragAndDrop: $ShopDragSource {
             group: "card",
         },
@@ -453,6 +448,5 @@ templates: [
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
-    sharedComponents.cardHoverDetail,
-    sharedComponents.cardHoverDetailExtra,
+    ...(sharedComponents.cardHoverDetailTemplates),
 ],

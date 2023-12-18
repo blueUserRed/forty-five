@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -19,7 +20,9 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
+import ktx.actors.alpha
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -518,13 +521,27 @@ class CardActor(
     val font: PixmapFont,
     val fontScale: Float,
     val isDark: Boolean,
-    private val screen: OnjScreen
-) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor {
+    override val screen: OnjScreen
+) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
+    OffSettable {
 
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
 
+    override var mainHoverDetailActor: String? = "cardHoverDetailMain"
+
     override var fixedZIndex: Int = 0
+
+
+    override var offsetX: Float = 0F
+    override var offsetY: Float = 0F
+    override var styleManager: StyleManager? = null
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+//        addBackgroundStyles(screen) //Maybe these are needed, probably not
+//        addDisableStyles(screen)
+//        addOffsetableStyles(screen)
+    }
 
     override var isHoveredOver: Boolean = false
 
@@ -597,14 +614,17 @@ class CardActor(
             it.prepare(screen)
             batch.shader = it.shader
         }
+        val c = batch.color.cpy()
+        batch.setColor(c.r, c.g, c.b, alpha)
         batch.draw(
             texture,
-            x, y,
+            x + offsetX, y + offsetY,
             width / 2, height / 2,
             width, height,
             scaleX, scaleY,
             rotation
         )
+        batch.color = c
         batch.flush()
         shader?.let { batch.shader = null }
     }
@@ -650,7 +670,8 @@ class CardActor(
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
         "description" to OnjString(card.shortDescription),
         "flavorText" to OnjString(card.flavourText),
-        "effects" to DetailDescriptionHandler.allTextEffects
+        "effects" to DetailDescriptionHandler.allTextEffects,
+//        "rotation" to OnjFloat(rotation.toDouble()),
     )
 
     override fun positionChanged() {
@@ -661,29 +682,6 @@ class CardActor(
     override fun sizeChanged() {
         super.sizeChanged()
         setBoundsOfHoverDetailActor(this)
-    }
-
-    override fun setBoundsOfHoverDetailActor(actor: Actor) {
-        val detailActor = detailActor
-        if (detailActor !is Layout) return
-        stage ?: return
-        val prefHeight = detailActor.prefHeight
-        val prefWidth = detailActor.prefWidth
-        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-
-        val mainField = screen.namedActorOrError("cardHoverDetailMain")
-        val mainFieldStartX = mainField.localToParentCoordinates(Vector2(0F, 0F)).x
-        val mainFieldEndX = mainField.localToParentCoordinates(Vector2(mainField.width, 0F)).x
-        detailActor.setBounds(
-            min( //this min max only so that it is always inside the screen
-                max(x + actor.width / 2 - detailActor.width / 2, -mainFieldStartX),
-                stage.viewport.worldWidth - mainFieldEndX
-            ),
-            y + actor.height  + mainField.height - mainField.parent.height,
-            if (prefWidth == 0f) detailActor.width else prefWidth,
-            prefHeight
-        )
-        detailActor.invalidateHierarchy()
     }
 
     override fun onDetailDisplayStarted() {
@@ -698,7 +696,7 @@ class CardActor(
         desc: String,
         tempInfoParent: CustomFlexBox
     ) {
-        screen.generateFromTemplate( //TODO hardcoded value as name
+        screen.screenBuilder.generateFromTemplate( //TODO hardcoded value as name
             "card_hover_detail_extra_description",
             mapOf(
                 "description" to desc,

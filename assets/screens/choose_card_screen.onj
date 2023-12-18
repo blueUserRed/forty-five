@@ -19,6 +19,7 @@ assets: {
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
+        ...(sharedComponents.cardHoverDetailUsedAssets),
     ]
 },
 
@@ -268,9 +269,8 @@ templates: [
             "textureName": "textureName",
         },
         textureName: "card%%bullet",
-        scaleX: 0.31,
-        scaleY: 0.31,
-        reportDimensionsWithScaling: true,
+        scaleX: 0.01,
+        scaleY: 0.01,
         dragAndDrop: $ChooseCardDragSource {
             group: "card",
         },
@@ -292,4 +292,5 @@ templates: [
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
+    ...(sharedComponents.cardHoverDetailTemplates),
 ],
