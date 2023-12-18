@@ -46,22 +46,22 @@ encounterModifiers: {
     frost: {
         icon: "encounter_modifier_frost",
         displayName: "Frost",
-        description: "Status effects don't work"
+        description: "The revolver doesn't turn"
     },
     bewitchedMist: {
         icon: "encounter_modifier_frost",
         displayName: "Bewitched Mist",
-        description: "Status effects don't work"
+        description: "Revolver rotations are inverted"
     },
     lookalike: {
         icon: "encounter_modifier_frost",
         displayName: "Lookalike",
-        description: "Status effects don't work"
+        description: "Whenever you place a bullet in the revolver, you get a copy of it in your hand"
     },
     moist: {
         icon: "encounter_modifier_frost",
         displayName: "Moist",
-        description: "Status effects don't work"
+        description: "Every bullet in the revolver loses one damage every time it turns in the revolver"
     },
 },
 

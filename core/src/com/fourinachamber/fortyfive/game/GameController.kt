@@ -140,7 +140,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private lateinit var gameRenderPipeline: GameRenderPipeline
 
-    lateinit var encounterMapEvent: EncounterMapEvent
+    lateinit var encounterContext: EncounterContext
         private set
 
     private val encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
@@ -175,10 +175,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        if (context !is EncounterMapEvent) { // TODO: comment back in
+        if (context !is EncounterContext) {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
-        encounterMapEvent = context
+        encounterContext = context
         curScreen = onjScreen
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
@@ -993,7 +993,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             action {
                 SaveState.playerMoney += money
-                encounterMapEvent.completed()
+                encounterContext.completed()
                 SaveState.write()
                 MapManager.changeToMapScreen()
             }
@@ -1010,9 +1010,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
-            FortyFive.newRun()
-            SaveState.write()
-            MapManager.changeToMapScreen()
+            FortyFive.newRun(true)
         }
     }
 
@@ -1055,6 +1053,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         }
 
+    }
+
+    interface EncounterContext {
+
+        val encounterIndex: Int
+
+        fun completed()
     }
 
     companion object {

@@ -33,9 +33,9 @@ nodes: [
             1, 2,
         ],
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            canBeStarted: true,
-            isCompleted: false,
+            currentlyBlocks: false,
+            canBeStarted: false,
+            isCompleted: true,
             encounterIndex: 0,
             distanceToEnd: -1,
         }

@@ -1260,7 +1260,8 @@ encounter: [
             "Witch"
         ],
         encounterModifier: [
-//            "BewitchedMist", "Rattle"
+            "BewitchedMist",
+//          "Rattle"
         ],
         biomes: [
             "bewitched_forest"
