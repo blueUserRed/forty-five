@@ -40,6 +40,12 @@ object SaveState {
     val curDeck: Deck
         get() = _decks.find { it.id == curDeckNbr }!!
 
+    var playerCompletedFirstTutorialEncounter: Boolean = false
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
     /**
      * counts the amount of reserves used by the player over the whole run
      */
@@ -174,6 +180,8 @@ object SaveState {
 
         obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck.getFromOnj(it as OnjObject)) }
         curDeckNbr = obj.get<Long>("curDeck").toInt()
+
+        playerCompletedFirstTutorialEncounter = obj.get<Boolean>("playerCompletedFirstTutorialEncounter")
 
         val stats = obj.get<OnjObject>("stats")
         usedReserves = stats.get<Long>("usedReserves").toInt()
