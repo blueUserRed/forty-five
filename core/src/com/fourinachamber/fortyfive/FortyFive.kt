@@ -66,7 +66,7 @@ object FortyFive : Game() {
         serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
         fun onScreenChange() {
-            FortyFiveLogger.title("changing screen")
+            FortyFiveLogger.title("changing screen to $screenPath")
             currentScreen?.dispose()
             this.currentScreen = screen
             currentRenderable = screen
@@ -89,6 +89,7 @@ object FortyFive : Game() {
     }
 
     fun newRun(forwardToTutorialScreen: Boolean) {
+        FortyFiveLogger.title("newRun called; forwardToTutorialScreen = $forwardToTutorialScreen")
         PermaSaveState.newRun()
         SaveState.reset()
         MapManager.newRunSync()
