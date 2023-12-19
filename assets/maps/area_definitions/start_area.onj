@@ -31,9 +31,8 @@ nodes: [
         event: $ChooseCardMapEvent {
             seed: null,
             types: [
-
             ],
-            nbrOfCards: 3,
+            nbrOfCards: 1,
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
