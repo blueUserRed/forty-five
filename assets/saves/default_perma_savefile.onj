@@ -7,5 +7,4 @@ collection: [
     "bigBullet",
 ],
 visitedAreas: [
-    "start_area" // the start area
 ],
