@@ -156,14 +156,14 @@ object SaveState {
         var obj = try {
             OnjParser.parseFile(file)
         } catch (e: OnjParserException) {
-            FortyFiveLogger.debug(logTag, "Savefile invalid: ${e.message}")
+            FortyFiveLogger.warn(logTag, "Savefile invalid: ${e.message}")
             copyDefaultFile()
             OnjParser.parseFile(file)
         }
 
         val result = savefileSchema.check(obj)
         if (result != null) {
-            FortyFiveLogger.debug(logTag, "Savefile invalid: $result")
+            FortyFiveLogger.warn(logTag, "Savefile invalid: $result")
             copyDefaultFile()
             obj = OnjParser.parseFile(Gdx.files.local(saveFilePath).file())
             savefileSchema.assertMatches(obj)
@@ -255,6 +255,7 @@ object SaveState {
             "maxPlayerLives" with maxPlayerLives
             "playerMoney" with playerMoney
             "currentDifficulty" with currentDifficulty
+            "playerCompletedFirstTutorialEncounter" with playerCompletedFirstTutorialEncounter
             "stats" with buildOnjObject {
                 "usedReserves" with usedReserves
                 "enemiesDefeated" with enemiesDefeated
