@@ -8,9 +8,11 @@ assignees: ''
 ---
 
 **Describe the bug**
+
 A clear and concise description of what the bug is.
 
 **Steps to Reproduce**
+
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
@@ -18,8 +20,15 @@ Steps to reproduce the behavior:
 4. See error
 
 **Expected behavior**
+
 A clear and concise description of what you expected to happen.
 
 **Attachments**
+
 If applicable, add screenshots or videos of the bug.
 Please always include the log file!
+
+**Version**
+
+Please always include the version of the game the bug was discovered in.
+The Version number can be found in the log file or in the name of the build.
