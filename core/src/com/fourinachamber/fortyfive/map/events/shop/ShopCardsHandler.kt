@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
@@ -20,7 +21,7 @@ class ShopCardsHandler(
     private val boughtIndices: MutableSet<Int>,
     private val cardHoverDetailTemplateName: String
 ) {
-    private val _allCards: MutableList<Card>
+    private val allCardPrototypes: List<CardPrototype>
     private val cardWidgets: MutableList<CardActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
     private val labels: MutableList<CustomLabel> = mutableListOf()
@@ -29,15 +30,24 @@ class ShopCardsHandler(
         val onj = OnjParser.parseFile(dataFile)
         Card.cardsFileSchema.assertMatches(onj)
         onj as OnjObject
-        val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
-        _allCards = cardPrototypes.map { it.create() }.toMutableList()
+        allCardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
+//        _allCards = cardPrototypes.map { it.create() }.toMutableList()
+//        val cardsToAdd = RandomCardSelection.getRandomCards(
+//            cardPrototypes,
+//            contextTypes.toList(),
+//            true,
+//            nbrOfItems,
+//            rnd,
+//            MapManager.currentDetailMap.biome,
+//            "shop"
+//        )
     }
 
     fun addItems(rnd: Random, contextTypes: Set<String>, defaultType: String) {
         val nbrOfItems = (5..16).random(rnd)
         FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
         val cardsToAdd = RandomCardSelection.getRandomCards(
-            _allCards,
+            allCardPrototypes,
             contextTypes.toList(),
             true,
             nbrOfItems,
@@ -45,7 +55,7 @@ class ShopCardsHandler(
             MapManager.currentDetailMap.biome,
             "shop"
         )
-        cards.addAll(cardsToAdd)
+        cards.addAll(cardsToAdd.map { it.create() })
         cards.shuffle(rnd)
         cards.forEach { addCard(it) }
         updateCards()
