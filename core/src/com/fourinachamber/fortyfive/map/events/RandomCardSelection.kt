@@ -108,13 +108,13 @@ object RandomCardSelection {
      */
     fun getRandomCards(
         screen: OnjScreen,
-        cards: List<CardPrototype> = allCardPrototypes(screen),
         typeNames: List<String>,
-        unique: Boolean = false,
         nbrOfCards: Int,
         rnd: Random,
         biome: String,
         occasion: String, // TODO: could be an enum
+        unique: Boolean = false,
+        cards: List<CardPrototype> = allCardPrototypes(screen),
     ): List<CardPrototype> {
         val newCards = doCardRarities(cards)
         if (nbrOfCards >= newCards.size && unique) return newCards
@@ -133,7 +133,7 @@ object RandomCardSelection {
             }
             val ownedAmount = SaveState.cards.count { it == card.name }
             val maxAmount = (cardMaximums[tag]!! - ownedAmount).coerceAtLeast(0)
-            repeat(maxAmount) { newCards.add(card) }
+            repeat(maxAmount) { newCards.add(card.copy()) }
         }
         return newCards
     }

@@ -44,14 +44,14 @@ class CardPrototype(
     val forceLoadCards: List<String>,
 ) {
 
-    lateinit var creator: () -> Card
+    var creator: (() -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
 
     /**
      * creates an actual instance of this card
      */
-    fun create(): Card = creator()
+    fun create(): Card = creator!!()
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -61,6 +61,7 @@ class CardPrototype(
 
     fun copy(): CardPrototype = CardPrototype(name, title, type, tags, forceLoadCards).apply {
         this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
+        this.creator = this@CardPrototype.creator
     }
 
 }

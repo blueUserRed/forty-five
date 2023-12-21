@@ -15,45 +15,27 @@ import onj.value.*
 import kotlin.random.Random
 
 class ShopCardsHandler(
-    dataFile: String,
     private val screen: OnjScreen,
     private val parent: CustomScrollableFlexBox,
     private val boughtIndices: MutableSet<Int>,
     private val cardHoverDetailTemplateName: String
 ) {
-    private val allCardPrototypes: List<CardPrototype>
+
     private val cardWidgets: MutableList<CardActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
     private val labels: MutableList<CustomLabel> = mutableListOf()
-
-    init {
-        val onj = OnjParser.parseFile(dataFile)
-        Card.cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
-        allCardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
-//        _allCards = cardPrototypes.map { it.create() }.toMutableList()
-//        val cardsToAdd = RandomCardSelection.getRandomCards(
-//            cardPrototypes,
-//            contextTypes.toList(),
-//            true,
-//            nbrOfItems,
-//            rnd,
-//            MapManager.currentDetailMap.biome,
-//            "shop"
-//        )
-    }
 
     fun addItems(rnd: Random, contextTypes: Set<String>, defaultType: String) {
         val nbrOfItems = (5..16).random(rnd)
         FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
         val cardsToAdd = RandomCardSelection.getRandomCards(
-            allCardPrototypes,
+            screen,
             contextTypes.toList(),
-            true,
             nbrOfItems,
             rnd,
             MapManager.currentDetailMap.biome,
-            "shop"
+            "shop",
+            unique = true
         )
         cards.addAll(cardsToAdd.map { it.create() })
         cards.shuffle(rnd)
