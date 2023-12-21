@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Circle
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -475,23 +474,38 @@ class DetailMapWidget(
 
     private fun drawNodes(batch: Batch) {
         val uniqueNodes = map.uniqueNodes
-        for (node in uniqueNodes) {
+        val shader = visitedNodeShader
+        val nodeDrawer: (MapNode) -> Unit = { node ->
             val (nodeX, nodeY) = scaledNodePos(node) + mapOffset
             val drawable = node.getNodeTexture(screen) ?: nodeDrawable
             drawable.draw(batch, x + nodeX, y + nodeY, nodeSize, nodeSize)
         }
+        val (grayNodes, normalNodes) = uniqueNodes.splitInTwo { it.event?.canBeStarted?.not() ?: false }
+        batch.flush()
+        shader.shader.bind()
+        shader.prepare(screen)
+        batch.shader = shader.shader
+        grayNodes.forEach(nodeDrawer)
+        batch.flush()
+        batch.shader = null
+        normalNodes.forEach(nodeDrawer)
     }
 
     // TODO: remove
-    private val edgeTestShader: BetterShader by lazy {
+    private val visitedNodeShader: BetterShader by lazy {
+        ResourceManager.get(screen, "grayscale_shader")
+    }
+
+    // TODO: remove
+    private val edgeShader: BetterShader by lazy {
         ResourceManager.get(screen, "map_edge_shader")
     }
 
     private fun drawEdges(batch: Batch) {
         val uniqueEdges = map.uniqueEdges
         batch.flush()
-        edgeTestShader.prepare(screen)
-        batch.shader = edgeTestShader.shader
+        edgeShader.prepare(screen)
+        batch.shader = edgeShader.shader
         for ((node1, node2) in uniqueEdges) {
             val node1Pos = scaledNodePos(node1)
             val node2Pos = scaledNodePos(node2)
@@ -500,7 +514,7 @@ class DetailMapWidget(
             val length = Vector2(dx, dy).len()
             var angle = Math.toDegrees(asin((dy / length).toDouble())).toFloat() - 90f
             if (dx < 0) angle = 360 - angle
-            edgeTestShader.shader.setUniformf("u_lineLength", length)
+            edgeShader.shader.setUniformf("u_lineLength", length)
             batch.draw(
                 edgeTexture,
                 x + node1Pos.x + mapOffset.x + nodeSize / 2 - lineWidth / 2,

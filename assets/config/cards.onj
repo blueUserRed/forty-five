@@ -569,8 +569,7 @@ cards: [
         name: "scorchingBullet",
         title: "Scorching Bullet",
         flavourText: "scorching Bullet",
-        description: "$trigger$While in hand or revolver: On-Turn-Begin:$trigger$ Take 10 dmg", // TODO: desc
-        description: "In hand and revolver: At the beginning of your turn: Take 10 dmg.", // TODO: desc
+        description: "$trigger$While in hand or revolver: On-Turn-Begin:$trigger$ Take 10 dmg",
         baseDamage: 0,
         coverValue: 0,
         traitEffects: [],
