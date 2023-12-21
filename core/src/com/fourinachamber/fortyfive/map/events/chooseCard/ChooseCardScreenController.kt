@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.map.detailMap.ChooseCardMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.parser.OnjParser
@@ -24,7 +25,7 @@ import kotlin.random.Random
 // encounter modifier (wahrscheinlicher)
 
 class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
-    private val cardsFilePath = onj.get<String>("cardsFile")
+
     private val leaveButtonName = onj.get<String>("leaveButtonName")
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
@@ -33,26 +34,25 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
     private var screen: OnjScreen? = null
+
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        if (context !is ChooseCardMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
+        if (context !is ChooseCardMapEvent) {
+            throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
+        }
         this.context = context
         init(onjScreen, context.seed, context.types.toMutableList(), context.nbrOfCards)
     }
 
     private fun init(screen: OnjScreen, seed: Long, types: MutableList<String>, nbrOfCards: Int) {
         val rnd = Random(seed)
-        val onj = OnjParser.parseFile(cardsFilePath)
-        Card.cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
-        val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
         val cards = RandomCardSelection.getRandomCards(
-            cardPrototypes,
+            screen,
             types,
-            true,
             nbrOfCards,
             rnd,
             MapManager.currentDetailMap.biome,
-            "chooseCard"
+            "chooseCard",
+            unique = true
         )
         FortyFiveLogger.debug(
             logTag,
@@ -60,6 +60,11 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         )
 //        addListener(screen) //philip said for now not this feature bec he is indecisive
         initCards(screen, cards)
+        if (cards.size > 1) {
+            TemplateString.updateGlobalParam("screen.chooseCard.text", "Choose one Bullet")
+        } else {
+            TemplateString.updateGlobalParam("screen.chooseCard.text", "You get one Bullet")
+        }
         this.screen = screen
         this.addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         this.addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor

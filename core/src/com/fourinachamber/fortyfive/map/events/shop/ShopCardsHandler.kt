@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
@@ -14,38 +15,29 @@ import onj.value.*
 import kotlin.random.Random
 
 class ShopCardsHandler(
-    dataFile: String,
     private val screen: OnjScreen,
     private val parent: CustomScrollableFlexBox,
     private val boughtIndices: MutableSet<Int>,
     private val cardHoverDetailTemplateName: String
 ) {
-    private val _allCards: MutableList<Card>
+
     private val cardWidgets: MutableList<CardActor> = mutableListOf()
     private val cards: MutableList<Card> = mutableListOf()
     private val labels: MutableList<CustomLabel> = mutableListOf()
-
-    init {
-        val onj = OnjParser.parseFile(dataFile)
-        Card.cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
-        val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
-        _allCards = cardPrototypes.map { it.create() }.toMutableList()
-    }
 
     fun addItems(rnd: Random, contextTypes: Set<String>, defaultType: String) {
         val nbrOfItems = (5..16).random(rnd)
         FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
         val cardsToAdd = RandomCardSelection.getRandomCards(
-            _allCards,
+            screen,
             contextTypes.toList(),
-            true,
             nbrOfItems,
             rnd,
             MapManager.currentDetailMap.biome,
-            "shop"
+            "shop",
+            unique = true
         )
-        cards.addAll(cardsToAdd)
+        cards.addAll(cardsToAdd.map { it.create() })
         cards.shuffle(rnd)
         cards.forEach { addCard(it) }
         updateCards()

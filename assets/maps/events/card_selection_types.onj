@@ -23,6 +23,22 @@ var default = [
             weight: 1.0
         }
     },
+    {
+        select: $ByTag {
+            name: "rarity2"
+        },
+        effect: $ProbabilityAddition {
+            weight: 1.0
+        }
+    },
+    {
+        select: $ByTag {
+            name: "rarity3"
+        },
+        effect: $ProbabilityAddition {
+            weight: 2.0
+        }
+    }
 ];
 
 var wasteland = [ //for demo only the biome says which cards, this makes it easier
@@ -68,13 +84,7 @@ types: [
     {
         name: "defType",
         cardChanges: [
-            {
-                select: $ByTag {
-                    name: "not used",
-                },
-                effect: $Blacklist {
-                }
-            }
+            ...default
         ],
     },
     {
@@ -161,5 +171,20 @@ biomes: [
                 }
             }
         ]
+    },
+],
+
+rarities: [
+    {
+        tag: "rarity1",
+        maxAmount: 1
+    },
+    {
+        tag: "rarity2",
+        maxAmount: 2
+    },
+    {
+        tag: "rarity3",
+        maxAmount: 3
     },
 ]
