@@ -80,6 +80,11 @@ $Widget {
          ...widgetSharedKeys,
     }
 
+    $None {
+        ...widgetSharedKeys,
+        hoverDetailActor?: string,
+    }
+
     $Box {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,
