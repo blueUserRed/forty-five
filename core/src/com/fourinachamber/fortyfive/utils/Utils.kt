@@ -150,6 +150,15 @@ fun <T, U> Collection<T>.slot(keyMapper: (T) -> U): Map<U, List<T>> {
     return map
 }
 
+fun <T> Collection<T>.splitInTwo(predicate: (T) -> Boolean): Pair<List<T>, List<T>> {
+    val ifTrue = mutableListOf<T>()
+    val ifFalse = mutableListOf<T>()
+    forEach {
+        (if (predicate(it)) ifTrue else ifFalse).add(it)
+    }
+    return ifTrue to ifFalse
+}
+
 infix fun <T> ClosedFloatingPointRange<T>.intersects(
     other: ClosedFloatingPointRange<T>
 ): Boolean where T : Comparable<T> = this.start in other || other.start in this
