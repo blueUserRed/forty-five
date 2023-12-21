@@ -35,6 +35,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import ktx.actors.onEnter
@@ -309,6 +310,9 @@ open class OnjScreen @MainThreadOnly constructor(
         currentHoverDetail = detail
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()
+        // actor only appear on fade, same with dialog // bis morgen abend hoffentlich
+        // events eintragen für roads und so weiter (laut notion)
+        // Buch schreiben
     }
 
     private fun hideHoverDetail() {
