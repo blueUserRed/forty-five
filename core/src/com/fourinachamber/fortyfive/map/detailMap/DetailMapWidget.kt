@@ -75,11 +75,12 @@ class DetailMapWidget(
             val bounds = mapBounds
             var center = Vector2()
             bounds.getCenter(center)
-            center -= Vector2(0f, height * 1.5f)
-            field = value.clampIndividual(
-                center.x - bounds.width / 2, center.x + bounds.width / 2,
-                center.y - bounds.height / 2, center.y + bounds.height / 2
-            )
+            center -= Vector2(bounds.width, height * 1.5f)
+            field = value
+//            field = value.clampIndividual(
+//                center.x - bounds.width / 2, center.x + bounds.width / 2,
+//                center.y - bounds.height / 2, center.y + bounds.height / 2
+//            )
         }
 
     private var playerNode: MapNode = MapManager.currentMapNode
@@ -213,7 +214,7 @@ class DetailMapWidget(
         val bounds = mapBounds
         var center = Vector2()
         bounds.getCenter(center)
-        center -= Vector2(0f, screen.viewport.worldHeight * 1.5f)
+        center -= Vector2(bounds.width, screen.viewport.worldHeight * 1.5f)
         val playerPos = Vector2(
             -playerPos.x + screen.viewport.worldWidth * 0.5f,
             -playerPos.y + screen.viewport.worldHeight * 0.5f

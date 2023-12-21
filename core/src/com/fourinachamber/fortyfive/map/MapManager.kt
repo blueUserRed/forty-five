@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.*
@@ -103,8 +104,8 @@ object MapManager {
         currentDetailMap = DetailMap.readFromFile(map)
     }
 
-    fun changeToEncounterScreen(event: MapEvent) {
-        FortyFive.changeToScreen(screenPaths["encounterScreen"]!!, event)
+    fun changeToEncounterScreen(context: GameController.EncounterContext) {
+        FortyFive.changeToScreen(screenPaths["encounterScreen"]!!, context)
     }
 
     fun changeToDialogScreen(event: MapEvent) {
