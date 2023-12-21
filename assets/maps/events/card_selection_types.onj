@@ -27,7 +27,7 @@ var default = [
         select: $ByTag {
             name: "rarity2"
         },
-        effect: $ProbabilitAddition {
+        effect: $ProbabilityAddition {
             weight: 1.0
         }
     },
@@ -35,7 +35,7 @@ var default = [
         select: $ByTag {
             name: "rarity3"
         },
-        effect: $ProbabilitAddition {
+        effect: $ProbabilityAddition {
             weight: 2.0
         }
     }
