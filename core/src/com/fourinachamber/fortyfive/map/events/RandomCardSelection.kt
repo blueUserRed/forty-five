@@ -1,9 +1,11 @@
 package com.fourinachamber.fortyfive.map.events
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection.getRandomCards
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.random
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -30,12 +32,18 @@ object RandomCardSelection {
     /**
      * the path to the file from which the data is read from
      */
-    private const val TYPES_FILE_PATH: String = "maps/events/card_selection_types.onj"
-
+    const val TYPES_FILE_PATH: String = "maps/events/card_selection_types.onj"
+    const val cardConfigFile: String = "config/cards.onj"
 
     private val cardSelectionSchema: OnjSchema by lazy {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/card_selection_types.onjschema").file())
     }
+
+    private val cardsFileSchema: OnjSchema by lazy {
+        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/cards.onjschema").file())
+    }
+
+    private var cardMaximums: Map<String, Int> = mapOf()
 
     fun init() {
         val file = OnjParser.parseFile(Gdx.files.internal(TYPES_FILE_PATH).file())
@@ -53,7 +61,6 @@ object RandomCardSelection {
         }
         this.types = allTypes
 
-
         val allBiomes: MutableMap<String, Map<String, List<CardChange>>> = mutableMapOf()
         val allBiomesOnj = file.get<OnjArray>("biomes").value.map { it as OnjObject }
         allBiomesOnj.forEach { biome ->
@@ -67,33 +74,68 @@ object RandomCardSelection {
             }
             allBiomes[name] = tempMap
         }
+
+        cardMaximums = file
+            .get<OnjArray>("rarities")
+            .value
+            .map { it as OnjObject }
+            .associate { it.get<String>("tag") to it.get<Long>("maxAmount").toInt() }
+
         this.biomes = allBiomes
+    }
+
+    fun allCardPrototypes(screen: OnjScreen): List<CardPrototype> {
+        val onj = OnjParser.parseFile(cardConfigFile)
+        cardsFileSchema.assertMatches(onj)
+        onj as OnjObject
+        return Card
+            .getFrom(onj.get<OnjArray>("cards"), screen, initializer = {})
+            .toMutableList()
     }
 
     /**
      * It takes a set of cards or cardprototypes, the applies the "type"(definition found at [RandomCardSelection]) changes
      * to them and then return cards with these changes. It is possible to have the same card twice, which essentially says
-     * this card can exist twice AND has double the chance to appear. If [itemMaxOnce] is true, then it only has double the chance to appear,
+     * this card can exist twice AND has double the chance to appear. If [unique] is true, then it only has double the chance to appear,
      * but it can exist an infinite number of times
      *
-     * @param cards the cards to take as source (can have doubles)
+     * @param cards allows the caller to specify an already modified list of prototypes, if not specified all available card
+     * prototypes are used
      * @param typeNames the names of the types you want to apply to
-     * @param itemMaxOnce if true, then all chosen cards will be removed from the remaining selection and can therefore be there only once
+     * @param unique if true, then all chosen cards will be removed from the remaining selection and can therefore be there only once
      * @param nbrOfCards how many cards you want. However, there can be fewer cards remaining after applying the effects
      * @throws Exception if a type is not known
      */
     fun getRandomCards(
-        cards: List<CardPrototype>,
+        screen: OnjScreen,
+        cards: List<CardPrototype> = allCardPrototypes(screen),
         typeNames: List<String>,
-        itemMaxOnce: Boolean = false,
+        unique: Boolean = false,
         nbrOfCards: Int,
         rnd: Random,
         biome: String,
         occasion: String, // TODO: could be an enum
     ): List<CardPrototype> {
-        if (nbrOfCards >= cards.size && itemMaxOnce) return cards
-        val (tempCards, tempChances) = getCardsWithChances(cards.toMutableList(), typeNames, biome, occasion)
-        return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, itemMaxOnce)
+        val newCards = doCardRarities(cards)
+        if (nbrOfCards >= newCards.size && unique) return newCards
+        val (tempCards, tempChances) = getCardsWithChances(newCards.toMutableList(), typeNames, biome, occasion)
+        return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, unique)
+    }
+
+    private fun doCardRarities(cards: List<CardPrototype>): List<CardPrototype> {
+        val newCards = mutableListOf<CardPrototype>()
+        // .toSet() to eliminate duplicate cards
+        cards.toSet().forEach { card ->
+            val tag = card.tags.find { it in cardMaximums.keys }
+            if (tag == null) {
+                newCards.add(card)
+                return@forEach
+            }
+            val ownedAmount = SaveState.cards.count { it == card.name }
+            val maxAmount = (cardMaximums[tag]!! - ownedAmount).coerceAtLeast(0)
+            repeat(maxAmount) { newCards.add(card) }
+        }
+        return newCards
     }
 
     /**

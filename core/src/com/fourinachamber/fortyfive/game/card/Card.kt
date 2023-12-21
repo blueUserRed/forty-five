@@ -58,6 +58,11 @@ class CardPrototype(
     }
 
     fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
+
+    fun copy(): CardPrototype = CardPrototype(name, title, type, tags, forceLoadCards).apply {
+        this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
+    }
+
 }
 
 /**
