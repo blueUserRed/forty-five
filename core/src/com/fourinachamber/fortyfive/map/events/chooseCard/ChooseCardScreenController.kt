@@ -24,7 +24,7 @@ import kotlin.random.Random
 // encounter modifier (wahrscheinlicher)
 
 class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
-    private val cardsFilePath = onj.get<String>("cardsFile")
+
     private val leaveButtonName = onj.get<String>("leaveButtonName")
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
@@ -33,6 +33,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
     private var screen: OnjScreen? = null
+
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is ChooseCardMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
         this.context = context
@@ -41,18 +42,14 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
 
     private fun init(screen: OnjScreen, seed: Long, types: MutableList<String>, nbrOfCards: Int) {
         val rnd = Random(seed)
-        val onj = OnjParser.parseFile(cardsFilePath)
-        Card.cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
-        val cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), screen) {}
         val cards = RandomCardSelection.getRandomCards(
-            cardPrototypes,
+            screen,
             types,
-            true,
             nbrOfCards,
             rnd,
             MapManager.currentDetailMap.biome,
-            "chooseCard"
+            "chooseCard",
+            unique = true
         )
         FortyFiveLogger.debug(
             logTag,

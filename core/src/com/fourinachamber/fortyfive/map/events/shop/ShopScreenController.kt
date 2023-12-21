@@ -23,7 +23,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private val shopFilePath = onj.get<String>("shopsFile")
     private val npcsFilePath = onj.get<String>("npcsFile")
-    private val cardsFilePath = onj.get<String>("cardsFile")
 
     private val messageWidgetName = onj.get<String>("messageWidgetName")
     private val cardsParentName = onj.get<String>("cardsParentName")
@@ -75,7 +74,6 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
         val rnd = Random(context.seed)
         shopCardsHandler = ShopCardsHandler(
-            cardsFilePath,
             screen,
             cardsParentWidget,
             context.boughtIndices,
