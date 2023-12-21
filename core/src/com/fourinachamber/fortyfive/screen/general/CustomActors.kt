@@ -98,7 +98,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
             super.draw(null, parentAlpha)
             return
         }
-        drawBackground(batch)
+        drawBackground(batch, parentAlpha)
         val prevShader = batch.shader
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
@@ -111,9 +111,16 @@ open class CustomLabel @AllThreadsAllowed constructor(
         super.layout()
     }
 
-    protected fun drawBackground(batch: Batch) {
+    protected fun drawBackground(batch: Batch, parentAlpha: Float) {
         val background = getBackground()
-        background?.draw(batch, x, y, width, height)
+        background?.let {
+            batch.flush()
+            val old = batch.color.cpy()
+            batch.setColor(old.r, old.g, old.b, parentAlpha*alpha)
+            it.draw(batch, x, y, width, height)
+            batch.flush()
+            batch.setColor(old.r, old.g, old.b, old.a)
+        }
     }
 
     override fun initStyles(screen: OnjScreen) {
@@ -251,7 +258,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
         if (mask == null) {
             val c = batch.color.cpy()
-            batch.setColor(c.r, c.g, c.b, parentAlpha*alpha)
+            batch.setColor(c.r, c.g, c.b, parentAlpha * alpha)
             if (rotation != 0f) {
                 val drawable = drawable
                 if (drawable !is TransformDrawable) throw RuntimeException(
