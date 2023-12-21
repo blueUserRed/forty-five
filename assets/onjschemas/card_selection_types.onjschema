@@ -21,11 +21,11 @@ $CardSelector{
 $CardEffect{
     $Blacklist { }
 
-    $ProbabilityAddition{
+    $ProbabilityAddition {
         weight: float
     }
 
-    $PriceMultiplier{
+    $PriceMultiplier {
         price: float
     }
 }
@@ -44,3 +44,8 @@ biomes: {
     shop: cardChange[],
     chooseCard: cardChange[],
 }[],
+
+rarities: {
+    tag: string,
+    maxAmount: int
+}[]

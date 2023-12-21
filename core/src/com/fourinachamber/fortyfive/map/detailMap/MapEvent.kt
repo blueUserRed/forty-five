@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
+import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
@@ -158,7 +159,7 @@ class EmptyMapEvent : MapEvent() {
 /**
  * Map Event that represents an encounter with an enemy
  */
-class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance, Completable {
+class EncounterMapEvent(obj: OnjObject) : MapEvent(), GameController.EncounterContext, ScaledByDistance, Completable {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
@@ -167,7 +168,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance, Completa
 
     override val displayDescription: Boolean = true
 
-    var encounterIndex: Int
+    override var encounterIndex: Int = obj.get<Long>("encounterIndex").toInt()
 
     override val icon: String = "normal_bullet"
     override val descriptionText: String = "Take on enemies and come out on top!"
@@ -177,7 +178,6 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), ScaledByDistance, Completa
     init {
         setStandardValuesFromConfig(obj)
         setDistanceFromConfig(obj)
-        encounterIndex = obj.get<Long>("encounterIndex").toInt()
     }
 
     override fun start() {

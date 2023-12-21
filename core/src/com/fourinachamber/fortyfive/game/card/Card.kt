@@ -42,13 +42,28 @@ class CardPrototype(
     val type: Card.Type,
     val tags: List<String>,
     val forceLoadCards: List<String>,
-    private val creator: () -> Card
 ) {
+
+    var creator: (() -> Card)? = null
+
+    private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
 
     /**
      * creates an actual instance of this card
      */
-    fun create(): Card = creator()
+    fun create(): Card = creator!!()
+
+    fun modifyPrice(modifier: (Int) -> Int) {
+        priceModifiers.add(modifier)
+    }
+
+    fun getPriceWithModifications(basePrice: Int) = priceModifiers.fold(basePrice) { acc, mod -> mod(acc) }
+
+    fun copy(): CardPrototype = CardPrototype(name, title, type, tags, forceLoadCards).apply {
+        this.priceModifiers.addAll(this@CardPrototype.priceModifiers)
+        this.creator = this@CardPrototype.creator
+    }
+
 }
 
 /**
@@ -72,7 +87,7 @@ class Card(
     val type: Type,
     val baseDamage: Int,
     val cost: Int,
-    var price: Int,
+    val price: Int,
     val effects: List<Effect>,
     val rotationDirection: RevolverRotation,
     val tags: List<String>,
@@ -409,7 +424,8 @@ class Card(
                         cardTypeOrError(onj),
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                         onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
-                    ) { getCardFrom(onj, onjScreen, initializer) }
+                    )
+                    prototype.creator = { getCardFrom(onj, onjScreen, initializer, prototype) }
                     prototypes.add(prototype)
                 }
             return prototypes
@@ -419,7 +435,8 @@ class Card(
         private fun getCardFrom(
             onj: OnjObject,
             onjScreen: OnjScreen,
-            initializer: (Card) -> Unit
+            initializer: (Card) -> Unit,
+            prototype: CardPrototype
         ): Card {
             val name = onj.get<String>("name")
             val card = Card(
@@ -431,7 +448,7 @@ class Card(
                 type = cardTypeOrError(onj),
                 baseDamage = onj.get<Long>("baseDamage").toInt(),
                 cost = onj.get<Long>("cost").toInt(),
-                price = onj.get<Long>("price").toInt(),
+                price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
                 effects = onj.get<OnjArray>("effects")
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution

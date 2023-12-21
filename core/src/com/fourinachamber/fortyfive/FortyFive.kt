@@ -33,10 +33,25 @@ object FortyFive : Game() {
 
     var cleanExit: Boolean = true
 
+    private val tutorialEncounterContext = object : GameController.EncounterContext {
+
+        override val encounterIndex: Int = 0 // = first tutorial encounter
+
+        override fun completed() {
+            SaveState.playerCompletedFirstTutorialEncounter = true
+        }
+    }
+
     override fun create() {
         init()
         serviceThread.start()
-        changeToScreen("screens/map_screen.onj")
+//        resetAll()
+//        newRun(false)
+        if (SaveState.playerCompletedFirstTutorialEncounter) {
+            MapManager.changeToMapScreen()
+        } else {
+            MapManager.changeToEncounterScreen(tutorialEncounterContext)
+        }
     }
 
     override fun render() {
@@ -51,7 +66,7 @@ object FortyFive : Game() {
         serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
         fun onScreenChange() {
-            FortyFiveLogger.title("changing screen")
+            FortyFiveLogger.title("changing screen to $screenPath")
             currentScreen?.dispose()
             this.currentScreen = screen
             currentRenderable = screen
@@ -73,10 +88,12 @@ object FortyFive : Game() {
         renderable.init()
     }
 
-    fun newRun() {
+    fun newRun(forwardToTutorialScreen: Boolean) {
+        FortyFiveLogger.title("newRun called; forwardToTutorialScreen = $forwardToTutorialScreen")
         PermaSaveState.newRun()
         SaveState.reset()
         MapManager.newRunSync()
+        if (forwardToTutorialScreen) MapManager.changeToEncounterScreen(tutorialEncounterContext)
     }
 
     fun resetAll() {
@@ -98,7 +115,7 @@ object FortyFive : Game() {
         FortyFiveLogger.init()
         GameDirector.init()
         MapManager.init()
-        resetAll()
+//        resetAll()
 //        newRun()
         PermaSaveState.read()
         SaveState.read()
@@ -106,6 +123,8 @@ object FortyFive : Game() {
         GraphicsConfig.init()
         ResourceManager.init()
         RandomCardSelection.init()
+//        resetAll()
+//        newRun()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
 //        println(cards.get<OnjArray>("cards").value.size)
     }

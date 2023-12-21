@@ -29,7 +29,7 @@ class GameDirector(private val controller: GameController) {
 
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         difficulty = SaveState.currentDifficulty
-        val encounter = encounters[controller.encounterMapEvent.encounterIndex]
+        val encounter = encounters[controller.encounterContext.encounterIndex]
         FortyFiveLogger.debug(logTag, "chose encounter $encounter")
         enemies = encounter
             .enemies

@@ -194,8 +194,8 @@ root: $Box { //TODO bioms
             }
         ],
     } children [
-        $Label {
-            text: "Choose one Bullet",
+        $TemplateLabel {
+            template: "{screen.chooseCard.text}",
             font: "red_wing_cm",
             color: color.forty_white,
             fontScale: 0.9,
