@@ -37,7 +37,7 @@ assets: {
         "tutorial_info_actor_background",
 
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
-        "prerendered_noise_perlin_512x512",
+        "prerendered_noise_perlin_512x512", "grayscale_shader",
 
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
