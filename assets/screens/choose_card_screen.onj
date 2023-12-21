@@ -261,16 +261,13 @@ root: $Box { //TODO bioms
 ],
 
 templates: [
-    $Image {
+    $None {
         template_name: "cardTemplate",
         template_keys: {
             "styles.0.rotation": "rotation",
             "styles.0.positionBottom": "bottom",
             "textureName": "textureName",
         },
-        textureName: "card%%bullet",
-        scaleX: 0.01,
-        scaleY: 0.01,
         dragAndDrop: $ChooseCardDragSource {
             group: "card",
         },

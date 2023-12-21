@@ -310,6 +310,12 @@ open class OnjScreen @MainThreadOnly constructor(
         currentHoverDetail = detail
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()
+
+        leaveState("showHoverDetail")
+        afterMs(20) {
+            if (currentHoverDetail === detail)
+                enterState("showHoverDetail")
+        }
         // actor only appear on fade, same with dialog // bis morgen abend hoffentlich
         // events eintragen für roads und so weiter (laut notion)
         // Buch schreiben
