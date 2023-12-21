@@ -100,13 +100,13 @@ root: $Box {
                 //                paddingRight: 20#points,
 
                 flexDirection: flexDirection.column,
-                detached: true
+                detached: true,
             },
             {
                 style_priority: 2,
                 style_condition: state("displayOptionsBox"),
                 detached: false,
-            }
+            },
         ],
         name: "options_box"
     },
@@ -173,13 +173,23 @@ templates: [
                 width: 135#percent,
                 height: 60#points,
                 margin: 10#points,
-                alpha: 0.8,
+//                alpha: 0.8,
+                alpha: 0.0,
                 background: "dialog_answer_option",
             },
             {
                 style_priority: 2,
                 background: "dialog_answer_option_hover",
                 style_condition: hover(),
+            },
+            {
+                style_priority: 2,
+                style_condition: state("displayOptionsBox"),
+                alpha:1.0,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                }
             }
         ],
     },

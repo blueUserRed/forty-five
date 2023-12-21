@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -715,7 +714,7 @@ open class CustomInputField(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (batch == null) return
         validate()
-        drawBackground(batch)
+        drawBackground(batch, parentAlpha)
         val pos = localToStageCoordinates(Vector2())
         val ySize = glyphLayout.height * 1.2F
         val yPosCursor = pos.y + (height - ySize) / 2

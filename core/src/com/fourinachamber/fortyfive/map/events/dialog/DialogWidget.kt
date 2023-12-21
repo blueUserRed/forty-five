@@ -128,7 +128,9 @@ class DialogWidget(
 
     private fun setupOptionsBox() {
         optionBoxNodes.clear()
-        screen.enterState(showOptionsBoxScreenState)
+        screen.afterMs(20){
+            screen.enterState(showOptionsBoxScreenState)
+        }
         currentOptions!!.forEach { (option, _) ->
             val actor = screen.screenBuilder.generateFromTemplate(
                 "optionsItem",
