@@ -34,7 +34,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool0"],
+        tags: ["pool0", "rarity2"],
         price: 50,
         type: $Bullet { },
     },

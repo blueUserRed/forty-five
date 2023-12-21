@@ -140,6 +140,16 @@ fun ClosedFloatingPointRange<Float>.random(random: Random = Random): Float {
     return random.nextFloat() * (endInclusive - start) + start
 }
 
+fun <T, U> Collection<T>.slot(keyMapper: (T) -> U): Map<U, List<T>> {
+    val map = mutableMapOf<U, MutableList<T>>()
+    forEach {
+        val key = keyMapper(it)
+        if (map[key] == null) map[key] = mutableListOf()
+        map[key]!!.add(it)
+    }
+    return map
+}
+
 infix fun <T> ClosedFloatingPointRange<T>.intersects(
     other: ClosedFloatingPointRange<T>
 ): Boolean where T : Comparable<T> = this.start in other || other.start in this
