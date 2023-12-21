@@ -164,12 +164,12 @@ object MapManager {
     }
 
     fun resetAllSync() {
-        newRunSync()
         Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
             Gdx.files.internal(areaMapsPath).file(),
             true
         )
-        read()
+        newRunSync()
+//        read()
     }
 
     fun changeToMapScreen() {
