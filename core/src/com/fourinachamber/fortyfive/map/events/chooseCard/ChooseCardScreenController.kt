@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.map.detailMap.ChooseCardMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.parser.OnjParser
@@ -35,7 +36,9 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private var screen: OnjScreen? = null
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        if (context !is ChooseCardMapEvent) throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
+        if (context !is ChooseCardMapEvent) {
+            throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
+        }
         this.context = context
         init(onjScreen, context.seed, context.types.toMutableList(), context.nbrOfCards)
     }
@@ -57,6 +60,11 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         )
 //        addListener(screen) //philip said for now not this feature bec he is indecisive
         initCards(screen, cards)
+        if (cards.size > 1) {
+            TemplateString.updateGlobalParam("screen.chooseCard.text", "Choose one Bullet")
+        } else {
+            TemplateString.updateGlobalParam("screen.chooseCard.text", "You get one Bullet")
+        }
         this.screen = screen
         this.addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         this.addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor

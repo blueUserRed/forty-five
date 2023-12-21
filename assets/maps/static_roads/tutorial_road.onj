@@ -32,10 +32,11 @@ nodes: [
         edgesTo: [
             1, 2,
         ],
+        nodeTexture: "map_node_fight_circle",
         event: $EncounterMapEvent {
-            currentlyBlocks: true,
-            canBeStarted: true,
-            isCompleted: false,
+            currentlyBlocks: false,
+            canBeStarted: false,
+            isCompleted: true,
             encounterIndex: 0,
             distanceToEnd: -1,
         }
@@ -64,6 +65,7 @@ nodes: [
         edgesTo: [
             1, 2, 4
         ],
+        nodeTexture: "map_node_fight_circle",
         event: $EncounterMapEvent {
 //            currentlyBlocks: false,
             currentlyBlocks: true,
@@ -79,6 +81,7 @@ nodes: [
         edgesTo: [
             3, 5
         ],
+        nodeTexture: "map_node_shop_circle",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_silver_bullet"],
             seed: 0,
@@ -94,6 +97,7 @@ nodes: [
         edgesTo: [
             4, 6
         ],
+        nodeTexture: "map_node_fight_circle",
         event: $EncounterMapEvent {
             currentlyBlocks: true,
 //            currentlyBlocks: false,
@@ -109,6 +113,7 @@ nodes: [
         edgesTo: [
             5, 7,
         ],
+        nodeTexture: "map_node_shop_circle",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_worker_bullet"],
             seed: 0,
@@ -124,6 +129,7 @@ nodes: [
         edgesTo: [
             6, 8
         ],
+        nodeTexture: "map_node_fight_circle",
         event: $EncounterMapEvent {
             currentlyBlocks: true,
 //            currentlyBlocks: false,
@@ -139,6 +145,7 @@ nodes: [
         edgesTo: [
             7, 9,
         ],
+        nodeTexture: "map_node_shop_circle",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_incendiary_bullet"],
             seed: 0,
@@ -154,6 +161,7 @@ nodes: [
         edgesTo: [
             8, 10
         ],
+        nodeTexture: "map_node_fight_circle",
         event: $EncounterMapEvent {
             currentlyBlocks: true,
 //            currentlyBlocks: false,
@@ -169,6 +177,7 @@ nodes: [
         edgesTo: [
             9, 11,
         ],
+        nodeTexture: "map_node_shop_circle",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_leaders_bullet"],
             seed: 0,
@@ -184,6 +193,7 @@ nodes: [
         edgesTo: [
             10, 12
         ],
+        nodeTexture: "map_node_fight_circle",
         event: $EncounterMapEvent {
             currentlyBlocks: true,
 //            currentlyBlocks: false,
@@ -199,6 +209,7 @@ nodes: [
         edgesTo: [
             11, 13
         ],
+        nodeTexture: "map_node_heal_circle",
         event: $HealOrMaxHPEvent {
             healRange: [100, 100],
             maxHPRange: [0, 0],
@@ -214,6 +225,7 @@ nodes: [
         edgesTo: [
             12
         ],
+        nodeTexture: "map_node_exit_circle",
         event: $EnterMapMapEvent {
             targetMap: "start_area",
         }

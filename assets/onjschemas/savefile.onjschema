@@ -10,6 +10,7 @@ playerLives: int,
 maxPlayerLives: int,
 playerMoney: int,
 currentDifficulty: float,
+playerCompletedFirstTutorialEncounter: boolean,
 
 position: {
     map: string,

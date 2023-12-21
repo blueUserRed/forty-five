@@ -576,7 +576,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damagePlayer("round end", 10#val)#canTriggerInHand
+            damagePlayer("round start", 10#val)#canTriggerInHand
         ],
         forceLoadCards: [],
         dark: true,

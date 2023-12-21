@@ -140,7 +140,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private lateinit var gameRenderPipeline: GameRenderPipeline
 
-    lateinit var encounterMapEvent: EncounterMapEvent
+    lateinit var encounterContext: EncounterContext
         private set
 
     private val encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
@@ -175,10 +175,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        if (context !is EncounterMapEvent) { // TODO: comment back in
+        if (context !is EncounterContext) {
             throw RuntimeException("GameScreen needs a context of type encounterMapEvent")
         }
-        encounterMapEvent = context
+        encounterContext = context
         curScreen = onjScreen
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
@@ -330,6 +330,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun showTutorialPopupActor(tutorialTextPart: GameDirector.GameTutorialTextPart) {
+        FortyFiveLogger.debug(logTag, "showing tutorial popup: ${tutorialTextPart.text}")
         currentlyShowingTutorialText = true
         curScreen.enterState(showTutorialActorScreenState)
         TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)
@@ -342,6 +343,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun hideTutorialPopupActor() {
+        FortyFiveLogger.debug(logTag, "hiding tutorial popup")
         currentlyShowingTutorialText = false
         curScreen.leaveState(showTutorialActorScreenState)
         tutorialTextParts.removeFirst()
@@ -429,7 +431,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun addEncounterModifier(modifier: EncounterModifier) {
         encounterModifiers.add(modifier)
-        val actor = curScreen.screenBuilder.generateFromTemplate(
+        curScreen.screenBuilder.generateFromTemplate(
             encounterModifierDisplayTemplateName,
             mapOf(
                 "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
@@ -447,6 +449,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) = appendMainTimeline(Timeline.timeline {
+        FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
         if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this@GameController, slot)) return
         val cardInSlot = revolver.getCardInSlot(slot)
         if (!(cardInSlot?.isReplaceable ?: true)) return
@@ -475,6 +478,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     })
 
     fun putCardFromRevolverBackInHand(card: Card) {
+        FortyFiveLogger.debug(logTag, "returning card $card from the revolver to the hand")
         revolver.removeCard(card)
         card.leaveGame()
         cardHand.addCard(card)
@@ -482,6 +486,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun destroyCardInHand(card: Card) {
+        FortyFiveLogger.debug(logTag, "destroying card $card in the hand")
         cardHand.removeCard(card)
         checkCardMaximums()
     }
@@ -525,7 +530,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         var remainingCardsToDraw = amount
         action {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
-            FortyFiveLogger.debug(logTag, "drawing cards in initial draw: $remainingCardsToDraw")
+            FortyFiveLogger.debug(logTag, "drawing cards: remainingCards = $remainingCardsToDraw; isSpecial = $isSpecial")
             if (remainingCardsToDraw != 0) curScreen.enterState(cardDrawActorScreenState)
             TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount)
             TemplateString.updateGlobalParam(
@@ -566,6 +571,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             parryCard = revolver.slots[4].card
             curScreen.enterState(showEnemyAttackPopupScreenState)
+            FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
         }
         delayUntil { popupEvent != null || parryCard == null }
         includeLater(
@@ -577,7 +583,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     revolver.removeCard(parryCard)
                     parryCard.leaveGame()
-
+                    FortyFiveLogger.debug(logTag, "Player parried")
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
                 if (remainingDamage > 0) include(damagePlayerTimeline(remainingDamage))
@@ -589,6 +595,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
+                    FortyFiveLogger.debug(logTag, "Player didn't parry")
                 }
                 include(damagePlayerTimeline(damage))
             } },
@@ -614,7 +621,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             repeat(cardsToDraw) {
                 cardHand.addCard(cardProto.create())
             }
-            FortyFiveLogger.debug(logTag, "card $name entered hand")
+            FortyFiveLogger.debug(logTag, "card $name entered hand $amount times")
             checkCardMaximums()
         }
     }
@@ -993,7 +1000,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             action {
                 SaveState.playerMoney += money
-                encounterMapEvent.completed()
+                encounterContext.completed()
                 SaveState.write()
                 MapManager.changeToMapScreen()
             }
@@ -1010,9 +1017,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
-            FortyFive.newRun()
-            SaveState.write()
-            MapManager.changeToMapScreen()
+            FortyFive.newRun(true)
         }
     }
 
@@ -1055,6 +1060,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         }
 
+    }
+
+    interface EncounterContext {
+
+        val encounterIndex: Int
+
+        fun completed()
     }
 
     companion object {
