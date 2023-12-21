@@ -726,7 +726,12 @@ shaders: [
         name: "tutorial_actor_shader",
         file: "shaders/tutorial_actor_shader.glsl",
         constantArgs: { }
-    }
+    },
+    {
+        name: "grayscale_shader",
+        file: "shaders/grayscale.glsl",
+        constantArgs: { }
+    },
 ],
 
 animations: [
