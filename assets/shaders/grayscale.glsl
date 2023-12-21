@@ -1,8 +1,14 @@
+~~~section vertex
+
+%include shaders/includes/default_vertex.glsl
+
+~~~section fragment
+
 #ifdef GL_ES
 #define LOWP lowp
 precision mediump float;
 #else
-#define LOWP 
+#define LOWP
 #endif
 
 varying LOWP vec4 v_color;

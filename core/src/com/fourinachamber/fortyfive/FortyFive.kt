@@ -108,6 +108,7 @@ object FortyFive : Game() {
         RandomCardSelection.init()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
 //        println(cards.get<OnjArray>("cards").value.size)
+//        println(cards.get<OnjArray>("cards").value.map {it as OnjObject}.map { it.get<String>("name") }.joinToString(separator = ",\n", transform = { "'$it'" }))
     }
 
     override fun dispose() {
