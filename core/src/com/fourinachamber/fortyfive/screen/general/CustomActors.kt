@@ -42,7 +42,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
     labelStyle: LabelStyle,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners,HasOnjScreen {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen {
 
     override val actor: Actor = this
 
@@ -98,7 +98,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
             super.draw(null, parentAlpha)
             return
         }
-        drawBackground(batch)
+        drawBackground(batch, parentAlpha)
         val prevShader = batch.shader
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
@@ -111,9 +111,16 @@ open class CustomLabel @AllThreadsAllowed constructor(
         super.layout()
     }
 
-    protected fun drawBackground(batch: Batch) {
+    protected fun drawBackground(batch: Batch, parentAlpha: Float) {
         val background = getBackground()
-        background?.draw(batch, x, y, width, height)
+        background?.let {
+            batch.flush()
+            val old = batch.color.cpy()
+            batch.setColor(old.r, old.g, old.b, parentAlpha*alpha)
+            it.draw(batch, x, y, width, height)
+            batch.flush()
+            batch.setColor(old.r, old.g, old.b, old.a)
+        }
     }
 
     override fun initStyles(screen: OnjScreen) {
@@ -251,7 +258,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
         if (mask == null) {
             val c = batch.color.cpy()
-            batch.setColor(c.r, c.g, c.b, alpha)
+            batch.setColor(c.r, c.g, c.b, parentAlpha * alpha)
             if (rotation != 0f) {
                 val drawable = drawable
                 if (drawable !is TransformDrawable) throw RuntimeException(
@@ -373,7 +380,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 open class CustomFlexBox(
     override val screen: OnjScreen
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable,HasOnjScreen {
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable, HasOnjScreen {
 
     override var fixedZIndex: Int = 0
 
@@ -445,7 +452,14 @@ open class CustomFlexBox(
         x += offsetX
         y += offsetY
         if (batch != null && background != null) {
+            val old = batch.color.a
+            batch.flush()
+            batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha)
+
             background?.draw(batch, x, y, width, height)
+            batch.flush()
+
+            batch.setColor(batch.color.r, batch.color.g, batch.color.b, old)
         }
         super.draw(batch, parentAlpha)
         x -= offsetX
@@ -1010,7 +1024,7 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
  */
 open class CustomHorizontalGroup(
     override val screen: OnjScreen
-) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor,HasOnjScreen {
+) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen {
 
     override var fixedZIndex: Int = 0
 
@@ -1049,7 +1063,7 @@ open class CustomHorizontalGroup(
  */
 open class CustomVerticalGroup(
     override val screen: OnjScreen
-) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor,HasOnjScreen {
+) : VerticalGroup(), ZIndexGroup, ZIndexActor, StyledActor, BackgroundActor, HasOnjScreen {
 
     override var fixedZIndex: Int = 0
     override var styleManager: StyleManager? = null

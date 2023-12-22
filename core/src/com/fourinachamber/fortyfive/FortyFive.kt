@@ -116,6 +116,7 @@ object FortyFive : Game() {
         GameDirector.init()
         MapManager.init()
 //        resetAll()
+//        newRun()
         PermaSaveState.read()
         SaveState.read()
         MapManager.read()

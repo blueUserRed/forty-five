@@ -103,7 +103,7 @@ var mapBox = $Box {
                 positionRight: 0#points,
                 positionTop: 0#points,
                 positionBottom: 0#points,
-                backgroundScale: 0.5,
+                backgroundScale: 0.8,
                 background: "map_background_wasteland_tileable",
             },
             {
