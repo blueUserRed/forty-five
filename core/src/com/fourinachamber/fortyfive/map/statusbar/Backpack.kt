@@ -238,12 +238,24 @@ class Backpack(
         //"Reset" Deck and Backpack
         val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
 
-        children.filter { it.children.size > 0 }.forEach { removeChildCompletely(it.children[0] as CardActor) }
+        val positions = SaveState.curDeck.cardPositions.toMutableMap()
+        val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
+
+        children.forEachIndexed { i, it ->
+            if (it.children.size > 0) {
+                val curActor = it.children[0] as CardActor
+                if (positions[i] != curActor.card.name) {
+                    removeChildCompletely(curActor)
+                }else{
+                    unplacedCards.remove(curActor.card.name)
+                    positions.remove(i)
+                }
+            }
+        }
         backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
 
         //Deck
-        val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
-        SaveState.curDeck.cardPositions.forEach {
+        positions.forEach {
             val currentSelection = unplacedCards.find { card -> it.value == card }!!
             val cur = children[it.key]
             val curChild = getCard(it.value, true).actor
@@ -267,8 +279,8 @@ class Backpack(
 
     private fun removeChildCompletely(actor: Actor) {
         if (actor !is StyledActor) throw Exception("This method should only be called with StyledActors")
-        if (actor is CustomFlexBox){
-            actor.children.forEach {removeChildCompletely(it)}
+        if (actor is CustomFlexBox) {
+            actor.children.forEach { removeChildCompletely(it) }
         }
         screen.styleManagers.remove(actor.styleManager!!)
         (actor.parent as CustomFlexBox).remove(actor.styleManager!!.node)
@@ -279,7 +291,7 @@ class Backpack(
     private fun sortBackpack(sortedCards: List<String>) {
         backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
         for (i in sortedCards.indices) {
-            val cardName=sortedCards[i]
+            val cardName = sortedCards[i]
             val curActor = getCard(cardName, true).actor
             val parent = screen.screenBuilder.generateFromTemplate(
                 "backpack_slot_parent",
