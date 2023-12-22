@@ -659,7 +659,6 @@ backpack: $Backpack {
 ],
 
 
-
 warningParent: $WarningParent {
     name: "WARNING_PARENT",
     zIndex: (2.0 pow 31.0)#int,
@@ -974,20 +973,26 @@ var cardHoverDetail = $Box {
         "children.1.children.1.children.0.rawText": "description",
         "children.1.children.1.children.0.effects": "effects",
         "children.1.children.1.children.1.children.1.children.0.rawText": "flavorText",
-        //        "children.0.styles.rotation": "rotation",
-//        "children.1.children.1.children.0.styles.rotation": "rotation",
-//        "children.1.children.1.styles.rotation": "rotation",
-//        "children.1.styles.rotation": "rotation",
-
     },
     width: cardHoverDetailTotalWidth,
 } children [
     $Box {
         styles: [
             {
+                style_priority: 1,
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 width: (cardHoverDetailTotalWidth)#points,
+                alpha: 0.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showHoverDetail"),
+                alpha: 1.0,
+                style_animation: {
+                    duration: 0.1,
+                    interpolation: interpolation.linear
+                }
             }
         ],
         width: cardHoverDetailTotalWidth,
@@ -999,6 +1004,7 @@ var cardHoverDetail = $Box {
                 {
                     width: cardHoverDetailExtrasWidth#points,
                     flexDirection: flexDirection.column,
+
                 }
             ],
         } children [
@@ -1012,8 +1018,19 @@ var cardHoverDetail = $Box {
     $Box {
         styles: [
             {
+                style_priority: 1,
                 flexDirection: flexDirection.row,
                 width: (cardHoverDetailTotalWidth)#points,
+                alpha: 0.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showHoverDetail"),
+                alpha: 1.0,
+                style_animation: {
+                    duration: 0.1,
+                    interpolation: interpolation.linear
+                }
             }
         ],
         width: cardHoverDetailTotalWidth,
@@ -1050,7 +1067,7 @@ var cardHoverDetail = $Box {
     ]
 ];
 
-var cardHoverDetailTemplatesDefinition= [
+var cardHoverDetailTemplatesDefinition = [
     cardHoverDetail,
     cardHoverDetailExtra,
 ];
@@ -1078,7 +1095,7 @@ backpackTemplates: [
             }
         ]
     },
-    $Box {
+    $None {
         template_name: "backpack_slot_card",
         template_keys: {
         },

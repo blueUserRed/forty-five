@@ -352,13 +352,11 @@ root: $Box {
 ],
 
 templates: [
-    $Image {
+    $None {
         template_keys: {
             "name": "name",
         },
         template_name: "cardsWidgetImage",
-        scaleX: 0.01,
-        scaleY: 0.01,
         hoverDetailActor: sharedComponents.cardHoverDetailTemplates.0.template_name,
         dragAndDrop: $ShopDragSource {
             group: "card",
