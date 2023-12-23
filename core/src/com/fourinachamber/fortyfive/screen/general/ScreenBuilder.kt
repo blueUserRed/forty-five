@@ -460,6 +460,8 @@ class ScreenBuilder(val file: FileHandle) {
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
             widgetOnj.get<String>("directionIndicator"),
             widgetOnj.get<String>("startButtonName"),
+            widgetOnj.get<String>("encounterModifierParentName"),
+            widgetOnj.get<String>("encounterModifierDisplayTemplateName"),
             widgetOnj.get<Double>("screenSpeed").toFloat(),
 //            widgetOnj.get<Double>("backgroundScale").toFloat(),
             widgetOnj.get<Double>("disabledDirectionIndicatorAlpha").toFloat(),

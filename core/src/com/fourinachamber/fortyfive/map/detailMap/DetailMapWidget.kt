@@ -13,6 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.game.EncounterModifier
+import com.fourinachamber.fortyfive.game.GameDirector
+import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
@@ -27,6 +30,8 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addMapStyles
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
+import onj.value.OnjString
 import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -48,6 +53,8 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
+    private val encounterModifierParentName: String,
+    private val encounterModifierDisplayTemplateName: String,
     private var screenSpeed: Float,
 //    private var backgroundScale: Float,
     private val disabledDirectionIndicatorAlpha: Float,
@@ -130,6 +137,11 @@ class DetailMapWidget(
     private var pointToNode: MapNode? = null
     private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
+
+    private val encounterModifierParent: CustomFlexBox by lazy {
+        screen.namedActorOrError(encounterModifierParentName) as? CustomFlexBox
+            ?: throw RuntimeException("actor named $encounterModifierParentName must be a CustomFlexBox")
+    }
 
     private val dragListener = object : DragListener() {
 
@@ -264,7 +276,7 @@ class DetailMapWidget(
         if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // make sure player does not get trapped
         if (!playerNode.isLinkedTo(node)) return false
         if (node == lastNode) return true
-        if (playerNode.event?.currentlyBlocks == true) return false
+//        if (playerNode.event?.currentlyBlocks == true) return false // TODO: COMMENT BACK IN
         return true
     }
 
@@ -462,6 +474,25 @@ class DetailMapWidget(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText
         )
+        encounterModifierParent.clearChildren()
+        screen.enterState(noEncounterModifierScreenState)
+        if (event !is EncounterMapEvent) return
+        val encounter = GameDirector.encounters[event.encounterIndex]
+        val encounterModifiers = encounter.encounterModifiers
+        if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
+        encounterModifiers.forEach { modifierName ->
+            val modifier = EncounterModifier.getFromName(modifierName)
+            screen.screenBuilder.generateFromTemplate(
+                encounterModifierDisplayTemplateName,
+                mapOf(
+                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+                ),
+                encounterModifierParent,
+                screen
+            )!!
+        }
     }
 
     private fun updateScreenState(event: MapEvent?) {
@@ -541,6 +572,7 @@ class DetailMapWidget(
     companion object {
         const val displayEventDetailScreenState: String = "displayEventDetail"
         const val eventCanBeStartedScreenState: String = "canStartEvent"
+        const val noEncounterModifierScreenState: String = "noEncounterModifier"
     }
 
 }
