@@ -34,11 +34,14 @@ assets: {
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
 
+        "encounter_modifier_background",
+
         "tutorial_info_actor_background",
 
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
         "prerendered_noise_perlin_512x512", "grayscale_shader",
 
+        ...(graphicsConfig.encounterModifierAssets),
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
@@ -80,6 +83,181 @@ var worldView = $WorldView {
     ]
 };
 
+var encounterModifierDisplayTemplate = $Box {
+    template_name: "encounter_modifier_display",
+    template_keys: {
+        "children.0.styles.0.background": "symbol",
+        "children.1.children.0.text": "modifierName",
+        "children.1.children.1.text": "modifierDescription",
+    },
+    styles: [
+        {
+            flexDirection: flexDirection.row,
+//            width: 90#percent,
+            width: 230#points,
+            marginLeft: 20#points
+        }
+    ],
+} children [
+    $Box {
+        styles: [
+            {
+                background: "encounter_modifier_frost",
+                aspectRatio: 1.0,
+                marginTop: 20#points,
+                width: 30#points,
+            }
+        ],
+    },
+
+    $Box {
+        styles: [
+            {
+                flexDirection: flexDirection.column,
+                alignItems: align.flexStart,
+                marginLeft: 10#points,
+            }
+        ]
+    } children [
+        $Label {
+            font: "red_wing",
+            text: "Frost",
+            fontScale: 0.6,
+            align: "left",
+            color: color.red
+        },
+        $Label {
+            styles: [
+                {
+                    width: 230#points
+                }
+            ],
+            font: "red_wing",
+            text: "Some long description text Lorem Ipsum Lorem Ipsum Lorem Ipsum",
+            wrap: true,
+            fontScale: 0.6,
+            align: "left",
+            color: color.black,
+        }
+    ]
+
+];
+
+var infoPopup = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            alignItems: align.center,
+            justifyContent: justify.spaceBetween,
+            height: 90.0#percent,
+            width: 30.0#percent,
+            positionLeft: 100.0#percent,
+            paddingTop: 60#points,
+            paddingBottom: 60#points,
+            paddingLeft: 130.0#points,
+            background: "map_detail_background"
+        },
+        {
+            style_priority: 2,
+            style_animation: {
+                duration: 0.2,
+                interpolation: interpolation.linear
+            },
+            positionLeft: (25.0 * 10)#points,
+        },
+        {
+            style_priority: 3,
+            style_condition: state("displayEventDetail") and not(state("transition away")),
+            style_animation: {
+                duration: 0.2,
+                interpolation: interpolation.linear
+            },
+            positionLeft: (0.0 * 10)#points,
+        },
+    ],
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: 100#percent,
+                alignItems: align.center,
+            }
+        ]
+    } children [
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{map.cur_event.displayName}",
+            fontScale: 1.1,
+            color: color.white,
+        },
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{map.cur_event.description}",
+            fontScale: 0.7,
+            color: color.white,
+            wrap: true,
+            align: "center",
+            styles: [
+                {
+                    width: 90#percent,
+                }
+            ]
+        },
+
+        $Box {
+            name: "encounter_modifier_parent",
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "encounter_modifier_background",
+                    width: 90#percent,
+                    height: 300#points,
+                    flexDirection: flexDirection.column,
+                    justifyContent: justify.center,
+                    detached: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("noEncounterModifier"),
+                    detached: true,
+                }
+            ],
+        } children [
+
+        ],
+    ],
+
+
+    $Image {
+        styles: [
+            {
+                style_priority: 1,
+                background: "map_detail_fight_button",
+                disabled: false,
+                alpha: 1.0,
+            },
+            {
+                style_priority: 2,
+                background: "map_detail_fight_button_hover",
+                style_condition: hover() and state("canStartEvent")
+            },
+            {
+                style_priority: 3,
+                style_condition: not(state("canStartEvent")),
+                alpha: 0.5,
+                disabled: true
+            }
+        ],
+        name: "start_button",
+        reportDimensionsWithScaling: true,
+        scaleX: 0.6,
+        scaleY: 0.6,
+    }
+
+];
 
 var mapBox = $Box {
     styles: [
@@ -139,91 +317,14 @@ var mapBox = $Box {
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
         directionIndicator: "dialog_continue_arrow",
+        encounterModifierDisplayTemplateName: "encounter_modifier_display",
+        encounterModifierParentName: "encounter_modifier_parent",
         screenSpeed: 25.0,
         disabledDirectionIndicatorAlpha: 0.5,
         startButtonName: "start_button"
     },
 
-    $Box {
-        styles: [
-            {
-                style_priority: 1,
-                alignItems: align.center,
-                justifyContent: justify.spaceAround,
-                height: 90.0#percent,
-                width: 30.0#percent,
-                positionLeft: 100.0#percent,
-                paddingLeft: (13.0 * 10)#points,
-                background: "map_detail_background"
-            },
-            {
-                style_priority: 2,
-                style_animation: {
-                    duration: 0.2,
-                    interpolation: interpolation.linear
-                },
-                positionLeft: (25.0 * 10)#points,
-            },
-            {
-                style_priority: 3,
-                style_condition: state("displayEventDetail") and not(state("transition away")),
-                style_animation: {
-                    duration: 0.2,
-                    interpolation: interpolation.linear
-                },
-                positionLeft: (0.0 * 10)#points,
-            },
-        ],
-    } children [
-
-        $TemplateLabel {
-            font: "red_wing",
-            template: "{map.cur_event.displayName}",
-            fontScale: 1.1,
-            color: color.white,
-        },
-
-        $TemplateLabel {
-            font: "red_wing",
-            template: "{map.cur_event.description}",
-            fontScale: 0.7,
-            color: color.white,
-            wrap: true,
-
-            styles: [
-                {
-                    width: 90#percent,
-                }
-            ]
-        },
-
-        $Image {
-            styles: [
-                {
-                    style_priority: 1,
-                    background: "map_detail_fight_button",
-                    disabled: false,
-                    alpha: 1.0,
-                },
-                {
-                    style_priority: 2,
-                    background: "map_detail_fight_button_hover",
-                    style_condition: hover() and state("canStartEvent")
-                },
-                {
-                    style_priority: 3,
-                    style_condition: not(state("canStartEvent")),
-                    alpha: 0.5,
-                    disabled: true
-                }
-            ],
-            name: "start_button",
-            reportDimensionsWithScaling: true,
-            scaleX: 0.6,
-            scaleY: 0.6,
-        }
-
-    ]
+    infoPopup,
 
 ];
 
@@ -354,4 +455,5 @@ templates: [
     ...(sharedComponents.statusBarTemplates),
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
+    encounterModifierDisplayTemplate,
 ],

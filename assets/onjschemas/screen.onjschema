@@ -214,6 +214,8 @@ $Widget {
         startButtonName: string,
         screenSpeed: float,
         disabledDirectionIndicatorAlpha: float,
+        encounterModifierDisplayTemplateName: string,
+        encounterModifierParentName: string,
         mapScale: float,
         ...widgetSharedKeys
     }
