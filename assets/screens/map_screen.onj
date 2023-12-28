@@ -34,7 +34,7 @@ assets: {
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
 
-        "encounter_modifier_background",
+        "map_detail_encounter_modifier_background",
 
         "tutorial_info_actor_background",
 
@@ -135,7 +135,7 @@ var encounterModifierDisplayTemplate = $Box {
             font: "red_wing",
             text: "Some long description text Lorem Ipsum Lorem Ipsum Lorem Ipsum",
             wrap: true,
-            fontScale: 0.6,
+            fontScale: 0.5,
             align: "left",
             color: color.black,
         }
@@ -212,7 +212,7 @@ var infoPopup = $Box {
             styles: [
                 {
                     style_priority: 1,
-                    background: "encounter_modifier_background",
+                    background: "map_detail_encounter_modifier_background",
                     width: 90#percent,
                     height: 300#points,
                     flexDirection: flexDirection.column,
