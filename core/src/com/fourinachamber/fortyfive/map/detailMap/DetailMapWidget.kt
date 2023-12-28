@@ -56,7 +56,7 @@ class DetailMapWidget(
     private val encounterModifierParentName: String,
     private val encounterModifierDisplayTemplateName: String,
     private var screenSpeed: Float,
-//    private var backgroundScale: Float,
+    private val scrollMargin: Float,
     private val disabledDirectionIndicatorAlpha: Float,
     private val mapScale: Float
 ) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
@@ -79,14 +79,14 @@ class DetailMapWidget(
     var mapOffset: Vector2 = Vector2(50f, 50f)
         private set(value) {
             val bounds = mapBounds
-            var center = Vector2()
-            bounds.getCenter(center)
-            center -= Vector2(bounds.width, height * 1.5f)
-            field = value
-//            field = value.clampIndividual(
-//                center.x - bounds.width / 2, center.x + bounds.width / 2,
-//                center.y - bounds.height / 2, center.y + bounds.height / 2
-//            )
+            val lowX = bounds.x
+            val lowY = bounds.y
+            val highX = bounds.x + bounds.width
+            val highY = bounds.y + bounds.height
+            field = value.clampIndividual(
+                -highX + width / 2 - scrollMargin, -lowX + width / 2 + scrollMargin,
+                -highY + height / 2 - scrollMargin, -lowY + height / 2 + scrollMargin
+            )
         }
 
     private var playerNode: MapNode = MapManager.currentMapNode
@@ -222,19 +222,9 @@ class DetailMapWidget(
 
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
-        val bounds = mapBounds
-        var center = Vector2()
-        bounds.getCenter(center)
-        center -= Vector2(bounds.width, screen.viewport.worldHeight * 1.5f)
-        val playerPos = Vector2(
-            -playerPos.x + screen.viewport.worldWidth * 0.5f,
-            -playerPos.y + screen.viewport.worldHeight * 0.5f
-        )
-        val offset = playerPos.clampIndividual(
-            center.x - bounds.width / 2, center.x + bounds.width / 2,
-            center.y - bounds.height / 2, center.y + bounds.height / 2
-        )
-        mapOffset.set(offset)
+        val nodePos = scaledNodePos(playerNode)
+        val idealPos = -nodePos + Vector2(screen.viewport.worldWidth, screen.viewport.worldHeight) / 2f
+        mapOffset.set(idealPos)
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
