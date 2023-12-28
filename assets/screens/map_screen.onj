@@ -316,6 +316,7 @@ var mapBox = $Box {
         playerHeight: 3.0 * 3.0 * 10.0,
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
+        scrollMargin: 0.0,
         directionIndicator: "dialog_continue_arrow",
         encounterModifierDisplayTemplateName: "encounter_modifier_display",
         encounterModifierParentName: "encounter_modifier_parent",
