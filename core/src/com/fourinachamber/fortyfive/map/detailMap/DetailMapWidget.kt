@@ -266,7 +266,7 @@ class DetailMapWidget(
         if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // make sure player does not get trapped
         if (!playerNode.isLinkedTo(node)) return false
         if (node == lastNode) return true
-//        if (playerNode.event?.currentlyBlocks == true) return false // TODO: COMMENT BACK IN
+        if (playerNode.event?.currentlyBlocks == true) return false
         return true
     }
 
