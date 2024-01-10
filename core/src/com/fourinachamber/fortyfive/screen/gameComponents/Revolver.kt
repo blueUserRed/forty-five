@@ -7,8 +7,11 @@ import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.EncounterModifier
 import com.fourinachamber.fortyfive.game.GameController.*
 import com.fourinachamber.fortyfive.game.card.Card
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
@@ -83,6 +86,10 @@ class Revolver(
 
     private val background: Drawable by lazy {
         ResourceManager.get(screen, backgroundHandle)
+    }
+
+    private val iceShader: BetterShader by lazy {
+        ResourceManager.get(screen, "ice_shader")
     }
 
     init {
@@ -164,8 +171,18 @@ class Revolver(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
+        batch ?: return
         background.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
+        // This is really ugly but I won't bother with a better solution
+        if (EncounterModifier.Frost in FortyFive.currentGame!!.encounterModifiers) {
+            batch.flush()
+            batch.shader = iceShader.shader
+            iceShader.prepare(screen)
+            background.draw(batch, x, y, width, height)
+            batch.flush()
+            batch.shader = null
+        }
     }
 
     override fun layout() {

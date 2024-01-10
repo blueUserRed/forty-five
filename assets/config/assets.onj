@@ -97,10 +97,6 @@ textureAtlases: [
                 regionName: "player_turn_banner"
             },
             {
-                handle: "revolver_drum",
-                regionName: "revolver_drum"
-            },
-            {
                 handle: "heart_texture",
                 regionName: "heart"
             },
@@ -165,6 +161,10 @@ textures: [
     {
         name: "loose_screen_background",
         file: "textures/screens/loose_screen_background.png"
+    },
+    {
+        name: "revolver_drum",
+        file: "textures/game_screen/revolver_drum.png"
     },
     {
         name: "win_screen_background",
@@ -380,7 +380,11 @@ textures: [
     },
     {
         name: "prerendered_noise_perlin_512x512",
-        file: "textures/prerendered_noise/perlin_512x512.png"
+        file: "textures/shader_textures/prerendered_noise/perlin_512x512.png"
+    },
+    {
+        name: "ice_texture",
+        file: "textures/shader_textures/ice.jpg"
     },
     {
         name: "statusbar_background",
@@ -734,6 +738,11 @@ shaders: [
     {
         name: "grayscale_shader",
         file: "shaders/grayscale.glsl",
+        constantArgs: { }
+    },
+    {
+        name: "ice_shader",
+        file: "shaders/ice.glsl",
         constantArgs: { }
     },
 ],
