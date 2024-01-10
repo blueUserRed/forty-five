@@ -153,6 +153,9 @@ class Card(
 
     private var modifierValuesDirty = true
 
+    var rotationCounter: Int = 0
+        private set
+
     init {
         screen.borrowResource(cardTexturePrefix + name)
         actor = CardActor(
@@ -313,6 +316,7 @@ class Card(
      * called when the revolver rotates (but not when this card was shot)
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
+        rotationCounter += rotation.amount
     }
 
     fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
