@@ -30,7 +30,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @OnjNamespaceVariables
     val variables: Map<String, OnjObject> = mapOf(
         "value" to buildOnjObject {
-            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller ->
+            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller, _ ->
                 controller
                     .revolver
                     .slots
@@ -38,6 +38,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .maxOfOrNull { it.cost }
                     ?: 0
             }
+            "rotationAmount" with OnjEffectValue { _, card -> card.rotationCounter }
         }
     )
 
@@ -275,7 +276,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
-    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { value.value.toInt() }
+    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _ -> value.value.toInt() }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
     fun activeChecker(value: OnjNamedObject): OnjActiveChecker {

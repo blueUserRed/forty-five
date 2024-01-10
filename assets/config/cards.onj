@@ -646,7 +646,7 @@ cards: [
         price: 0,
     },
     {
-        name: "glassBullet", // TODO: texture says 'Glas'
+        name: "glassBullet",
         title: "Glass Bullet",
         flavourText: "",
         description: "$trigger$On-Shot:$trigger$\nDraw x cards, where x is the cost value of the card with the highest cost value in the revolver.",
@@ -859,6 +859,27 @@ cards: [
         effects: [
             draw("any card destroyed", 1#val),
             buffDmgMultiplier("any card destroyed", bSelects.self, 2.0),
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
+    {
+        name: "goldBullet",
+        title: "Gold Bullet",
+        flavourText: "Not everything that glitters is gold. This is tho",
+        description: "$trigger$On-Leave:$trigger$\nDraw x cards, x being the number of times this bullet has turned in the revolver.",
+        baseDamage: 9,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            draw("shot", value.rotationAmount),
+            draw("destroy", value.rotationAmount),
         ],
         forceLoadCards: [],
         dark: false,
