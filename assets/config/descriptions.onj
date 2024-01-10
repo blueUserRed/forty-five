@@ -40,6 +40,11 @@ hoverDetailDescriptions: [
         groupName: "trait",
         description: "$trait$UNDEAD$trait$\nA bullet with undead is returned to your hand On-Leave.",
     },
+    {
+        keyword: "REINFORCED",
+        groupName: "trait",
+        description: "$trait$REINFORCED$trait$\nWhen parrying with a bullet with reinforced, no dmg will come through, even if this Bullets dmg value is smaller than the attack that is being parried.",
+    },
 ],
 
 hoverDetailDescriptionGroups: [

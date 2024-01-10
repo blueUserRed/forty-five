@@ -577,7 +577,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         includeLater(
             { Timeline.timeline {
                 val parryCard = parryCard!!
-                val remainingDamage = damage - parryCard.curDamage(this@GameController)
+                val remainingDamage = if (parryCard.isReinforced) {
+                    0
+                } else {
+                    damage - parryCard.curDamage(this@GameController)
+                }
                 action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
