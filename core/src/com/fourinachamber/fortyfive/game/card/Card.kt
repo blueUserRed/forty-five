@@ -8,8 +8,6 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -26,8 +24,6 @@ import ktx.actors.alpha
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -132,6 +128,8 @@ class Card(
     var isReplaceable: Boolean = false
         private set
     var isSpray: Boolean = false
+        private set
+    var isReinforced: Boolean = false
         private set
 
     val shouldRemoveAfterShot: Boolean
@@ -492,6 +490,7 @@ class Card(
                 "undead" -> card.isUndead = true
                 "replaceable" -> card.isReplaceable = true
                 "spray" -> card.isSpray = true
+                "reinforced" -> card.isReinforced = true
                 "rotten" -> {
                     card.isRotten = true
                     card.addRottenModifier()
