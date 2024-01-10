@@ -61,10 +61,6 @@ textureAtlases: [
         file: "textures/packed/game_screen/game_screen.atlas",
         regions: [
             {
-                handle: "game_screen_background",
-                regionName: "background"
-            },
-            {
                 handle: "revolver_slot_texture",
                 regionName: "revolver_slot"
             },
@@ -152,12 +148,20 @@ textureAtlases: [
                 handle: "under_deck_background",
                 regionName: "under_deck_background"
             },
+            {
+                handle: "game_screen_player",
+                regionName: "player"
+            },
         ]
     }
 
 ],
 
 textures: [
+    {
+        name: "game_screen_background_wasteland",
+        file: "textures/game_screen_backgrounds/wasteland.png"
+    },
     {
         name: "loose_screen_background",
         file: "textures/screens/loose_screen_background.png"
