@@ -1,6 +1,9 @@
 package com.fourinachamber.fortyfive.utils
 
-import com.fourinachamber.fortyfive.map.MapManager
+import com.badlogic.gdx.graphics.Pixmap
+import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import kotlinx.coroutines.*
@@ -23,17 +26,11 @@ class ServiceThread : Thread("ServiceThread") {
             when (message) {
 
                 is ServiceThreadMessage.PrepareResources -> prepareResources()
-//                is ServiceThreadMessage.GenerateMaps -> generateMaps(message)
+                is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
 
-                else -> throw RuntimeException("unknown message: $message")
             }
         }
     }
-
-//    private fun CoroutineScope.generateMaps(message: ServiceThreadMessage.GenerateMaps) = launch(Dispatchers.Default) {
-//        MapManager.generateMaps(this)
-//        message.completed.complete(Unit)
-//    }
 
     private fun CoroutineScope.prepareResources() {
         ResourceManager
@@ -42,6 +39,30 @@ class ServiceThread : Thread("ServiceThread") {
             .forEach {
                 launch(Dispatchers.IO) { it.prepare() }
             }
+    }
+
+    private fun CoroutineScope.drawCardPixmap(message: ServiceThreadMessage.DrawCardPixmap) = launch {
+        synchronized(message.pixmap) {
+            val pixmap = message.pixmap
+            val cardTexturePixmap = message.cardTexturePixmap
+            val card = message.card
+            val damageValue = message.damageValue
+            val baseDamage = card.baseDamage
+            val font = card.actor.font
+            val isDark = card.actor.isDark
+            val fontScale = card.actor.fontScale
+            pixmap.drawPixmap(cardTexturePixmap, 0, 0)
+            val situation = when {
+                damageValue > baseDamage -> "increase"
+                damageValue < baseDamage -> "decrease"
+                else -> "normal"
+            }
+            val damageFontColor = GraphicsConfig.cardFontColor(isDark, situation)
+            val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
+            font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
+            font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
+            message.isFinished = true
+        }
     }
 
     fun sendMessage(message: ServiceThreadMessage): ChannelResult<Unit> = channel.trySendBlocking(message)
@@ -61,7 +82,13 @@ sealed class ServiceThreadMessage {
 
     object PrepareResources : ServiceThreadMessage()
 
-//    class GenerateMaps(val completed: CompletableDeferred<Unit> = CompletableDeferred()) : ServiceThreadMessage()
+    class DrawCardPixmap(
+        val pixmap: Pixmap,
+        val cardTexturePixmap: Pixmap,
+        val card: Card,
+        val damageValue: Int,
+        var isFinished: Boolean = false
+    ) : ServiceThreadMessage()
 
     override fun toString(): String = this::class.simpleName ?: ""
 
