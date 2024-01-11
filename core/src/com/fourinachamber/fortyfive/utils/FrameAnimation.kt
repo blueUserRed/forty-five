@@ -10,8 +10,16 @@ data class FrameAnimation(
     val frameTime: Int
 ) : Disposable {
 
+    val duration: Int
+        get() = frameTime * frames.size
+
     init {
         if (initialFrame !in frames.indices) throw RuntimeException("frameOffset must be a valid index into frames")
+    }
+
+    fun getFrame(progress: Long): Drawable {
+        val frame = (progress / frameTime).toInt().coerceAtLeast(0).coerceAtMost(frames.size)
+        return frames[frame]
     }
 
     override fun dispose() {
