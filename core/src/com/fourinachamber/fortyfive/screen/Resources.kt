@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
+import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
 import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.Either
@@ -466,4 +467,30 @@ class PixmapFontResource(
         variants = listOf(font!!)
         disposables = listOf(font!!)
     }
+}
+
+class DeferredFrameAnimationResource(
+    handle: ResourceHandle,
+    val previewHandle: ResourceHandle,
+    val atlasHandle: ResourceHandle,
+    val frameTime: Int
+) : Resource(handle) {
+
+    private var anim: DeferredFrameAnimation? = null
+
+    override fun loadDirectMainThread() {
+        val anim = DeferredFrameAnimation(previewHandle, atlasHandle, frameTime)
+        variants = listOf(anim)
+        disposables = listOf(anim)
+    }
+
+    override fun prepareLoadingAllThreads() {
+        anim = DeferredFrameAnimation(previewHandle, atlasHandle, frameTime)
+    }
+
+    override fun finishLoadingMainThread() {
+        variants = listOf(anim!!)
+        disposables = listOf(anim!!)
+    }
+
 }

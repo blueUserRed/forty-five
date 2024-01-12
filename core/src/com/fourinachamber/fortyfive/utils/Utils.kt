@@ -244,6 +244,9 @@ inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
 
 inline fun <T, U> Iterable<T>.zip(creator: (T) -> U): List<Pair<T, U>> = map { it to creator(it) }
 
+inline fun <T, U, V> Iterable<Pair<T, U>>.mapFirst(mapper: (T) -> V): List<Pair<V, U>> = map { (first, second) -> mapper(first) to second }
+inline fun <T, U, V> Iterable<Pair<T, U>>.mapSecond(mapper: (U) -> V): List<Pair<T, V>> = map { (first, second) -> first to mapper(second) }
+
 fun IntRange.midPoint(): Int = first + ((last - first) * 0.5).toInt()
 
 fun IntRange.scale(factor: Double): IntRange = IntRange(

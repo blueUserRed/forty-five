@@ -5,6 +5,8 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.Resource
+import com.fourinachamber.fortyfive.screen.ResourceBorrower
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -27,6 +29,7 @@ class ServiceThread : Thread("ServiceThread") {
 
                 is ServiceThreadMessage.PrepareResources -> prepareResources()
                 is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
+                is ServiceThreadMessage.LoadSingleResource -> loadSingleResource(message)
 
             }
         }
@@ -65,6 +68,18 @@ class ServiceThread : Thread("ServiceThread") {
         }
     }
 
+    private fun CoroutineScope.loadSingleResource(message: ServiceThreadMessage.LoadSingleResource) = launch {
+        val resource = ResourceManager
+            .resources
+            .find { it.handle == message.handle }
+            ?: throw RuntimeException("unknown resource: ${message.handle}")
+        launch { resource.prepare() }.join()
+        synchronized(message) {
+            message.finished = true
+            if (message.cancelled) resource.dispose()
+        }
+    }
+
     fun sendMessage(message: ServiceThreadMessage): ChannelResult<Unit> = channel.trySendBlocking(message)
 
     fun close() {
@@ -88,6 +103,12 @@ sealed class ServiceThreadMessage {
         val card: Card,
         val damageValue: Int,
         var isFinished: Boolean = false
+    ) : ServiceThreadMessage()
+
+    class LoadSingleResource(
+        val handle: ResourceHandle,
+        var finished: Boolean = false,
+        var cancelled: Boolean = false
     ) : ServiceThreadMessage()
 
     override fun toString(): String = this::class.simpleName ?: ""

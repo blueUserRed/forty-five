@@ -70,6 +70,12 @@ particles: {
     textureDir: string,
     scale: float,
 }[],
+frameAnimations: {
+    name: string,
+    preview: string,
+    atlas: string,
+    frameTime: int
+}
 cards: {
     directory: string
 }
