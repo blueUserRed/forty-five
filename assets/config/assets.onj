@@ -870,6 +870,9 @@ particles: [
     }
 ],
 
+frameAnimations: [
+],
+
 cards: {
     directory: "textures/cards",
 }

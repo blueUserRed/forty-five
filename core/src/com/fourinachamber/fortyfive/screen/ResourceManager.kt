@@ -167,6 +167,16 @@ object ResourceManager {
             ))
         }
 
+        assets.get<OnjArray>("frameAnimations").value.forEach {
+            it as OnjObject
+            resources.add(DeferredFrameAnimationResource(
+                it.get<String>("name"),
+                it.get<String>("preview"),
+                it.get<String>("atlas"),
+                it.get<Long>("frameTime").toInt()
+            ))
+        }
+
         val cardsFile = assets.access<String>(".cards.directory")
         Gdx.files.internal(cardsFile)
             .file()
