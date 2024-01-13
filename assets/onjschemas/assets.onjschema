@@ -75,7 +75,7 @@ frameAnimations: {
     preview: string,
     atlas: string,
     frameTime: int
-}
+}[],
 cards: {
     directory: string
 }
