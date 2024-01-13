@@ -6,14 +6,15 @@ import com.badlogic.gdx.utils.Disposable
 data class FrameAnimation(
     val frames: Array<out Drawable>,
     private val disposables: Iterable<Disposable>,
-    val frameTime: Int
+    val frameTime: Int,
+    var frameOffset: Int,
 ) : AnimationPart {
 
     override val duration: Int
         get() = frameTime * frames.size
 
     override fun getFrame(progress: Int): Drawable {
-        val frame = ((progress / frameTime) % frames.size).coerceAtLeast(0).coerceAtMost(frames.size)
+        val frame = ((progress / frameTime + frameOffset) % frames.size).coerceAtLeast(0).coerceAtMost(frames.size)
         return frames[frame]
     }
 

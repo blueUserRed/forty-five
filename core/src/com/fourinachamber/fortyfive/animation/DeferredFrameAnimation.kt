@@ -24,6 +24,16 @@ class DeferredFrameAnimation(
         ResourceManager.get(this, previewHandle)
     }
 
+    var frameOffset: Int = 0
+        get() = loadedFrameAnimation?.frameOffset ?: field
+        set(value) {
+            val anim = loadedFrameAnimation ?: run {
+                field = value
+                return
+            }
+            anim.frameOffset = value
+        }
+
     override val duration: Int
         get() = loadedFrameAnimation?.duration ?: Int.MAX_VALUE
 
@@ -48,7 +58,7 @@ class DeferredFrameAnimation(
             .sortedBy { it.second }
             .map { TextureRegionDrawable(it.first) }
             .toTypedArray()
-        loadedFrameAnimation = FrameAnimation(frames, listOf(), frameTime)
+        loadedFrameAnimation = FrameAnimation(frames, listOf(), frameTime, frameOffset)
     }
 
     override fun dispose() {

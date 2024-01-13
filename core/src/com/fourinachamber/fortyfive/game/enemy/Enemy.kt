@@ -10,6 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.animation.AnimationDrawable
+import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
+import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
@@ -296,8 +299,17 @@ class EnemyActor(
     private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
     private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
 
-    private val fireParticles: ParticleEffect by lazy {
-        ResourceManager.get(screen, "fire_particle") // TODO: fix
+    // animations are hardcoded, deal with it
+    private val animation: AnimationDrawable? = when {
+        enemy.name.startsWith("Outlaw") -> createAnimation(screen) {
+            val anim = deferredAnimation("outlaw_animation", (0..30).random())
+            order {
+                loop(anim)
+            }
+        }
+        else -> null
+    }?.apply {
+        screen.addDisposable(this)
     }
 
     init {
@@ -336,6 +348,7 @@ class EnemyActor(
         addActor(coverInfoBox)
         updateText()
         touchable = Touchable.enabled
+        animation?.start()
     }
 
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
@@ -350,7 +363,7 @@ class EnemyActor(
             0f, height / 2 - coverInfoBox.prefHeight / 2,
             coverInfoBox.prefWidth, coverInfoBox.prefHeight
         )
-        enemyDrawable.draw(
+        (animation ?: enemyDrawable).draw(
             batch,
             x + coverInfoBox.width, y + healthLabel.prefHeight,
             enemyDrawable.minWidth * enemy.scale, enemyDrawable.minHeight * enemy.scale

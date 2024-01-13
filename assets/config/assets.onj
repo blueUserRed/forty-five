@@ -47,6 +47,11 @@ textureAtlases: [
         ]
     },
     {
+        name: "outlaw_animation_atlas",
+        file: "large_assets/packed/outlaw_animation/outlaw_animation.atlas",
+        regions: []
+    },
+    {
         name: "world_view_background_atlas",
         file: "maps/world_view/generated/background.atlas",
         regions: [
@@ -871,6 +876,12 @@ particles: [
 ],
 
 frameAnimations: [
+    {
+        name: "outlaw_animation",
+        preview: "enemy_outlaw",
+        atlas: "outlaw_animation_atlas",
+        frameTime: (1000.0 / 30.0)#int
+    }
 ],
 
 cards: {
