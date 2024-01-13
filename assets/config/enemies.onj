@@ -111,6 +111,7 @@ enemies: [
         title: "Outlaw",
 //        baseHealth: 1,
         baseHealth: 80,
+//        texture: "outlaw_animation",
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
