@@ -29,7 +29,7 @@ abstract class Resource(
     val handle: String,
     var variants: List<Any> = listOf(),
     var disposables: List<Disposable> = listOf(),
-    val borrowedBy: MutableList<ResourceBorrower> = mutableListOf()
+    val borrowedBy: MutableSet<ResourceBorrower> = mutableSetOf()
 ) : Disposable {
 
     var state: ResourceState = ResourceState.NOT_LOADED

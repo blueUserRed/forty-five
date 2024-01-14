@@ -2,32 +2,29 @@ package com.fourinachamber.fortyfive.animation
 
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.utils.Either
+import com.fourinachamber.fortyfive.utils.eitherLeft
+import com.fourinachamber.fortyfive.utils.eitherRight
 
-class AnimationBuilderDSL(private val borrower: ResourceBorrower) {
+class AnimationBuilderDSL {
 
     private var sequenceBuilder: (suspend SequenceScope<Int>.() -> Unit)? = null
-    private val animations: MutableList<AnimationPart> = mutableListOf()
+    private val animations: MutableList<Either<String, AnimationPart>> = mutableListOf()
 
     lateinit var animationDrawable: AnimationDrawable
 
-    fun deferredAnimation(name: String, frameOffset: Int = 0): Int {
-        ResourceManager.borrow(borrower, name)
-        val anim = ResourceManager.get<DeferredFrameAnimation>(borrower, name)
-        anim.frameOffset = frameOffset
-        animations.add(anim)
+    fun deferredAnimation(name: String): Int {
+        animations.add(name.eitherLeft())
         return animations.size - 1
     }
 
     fun stillFrame(name: String, duration: Int): Int {
-        animations.add(StillFrameAnimationPart(name, duration))
+        animations.add(StillFrameAnimationPart(name, duration).eitherRight())
         return animations.size - 1
     }
 
-    suspend fun SequenceScope<Int>.loop(animation: Int, timeOffset: Int = 0) {
-        if (timeOffset != 0) {
-            yield(animation)
-            animationDrawable.skipInCurrentAnimation(timeOffset)
-        }
+    suspend fun SequenceScope<Int>.loop(animation: Int, frameOffset: Int = 0) {
+        animationDrawable.frameOffset = frameOffset
         while (true) yield(animation)
     }
 
@@ -38,8 +35,8 @@ class AnimationBuilderDSL(private val borrower: ResourceBorrower) {
     fun finish(): AnimationDrawable = AnimationDrawable(animations, sequence(sequenceBuilder!!))
 }
 
-fun createAnimation(borrower: ResourceBorrower, builder: AnimationBuilderDSL.() -> Unit): AnimationDrawable {
-    val builderDSL = AnimationBuilderDSL(borrower)
+fun createAnimation(builder: AnimationBuilderDSL.() -> Unit): AnimationDrawable {
+    val builderDSL = AnimationBuilderDSL()
     builder(builderDSL)
     val drawable = builderDSL.finish()
     builderDSL.animationDrawable = drawable

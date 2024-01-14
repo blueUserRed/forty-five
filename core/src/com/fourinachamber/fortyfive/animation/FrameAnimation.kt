@@ -7,13 +7,12 @@ data class FrameAnimation(
     val frames: Array<out Drawable>,
     private val disposables: Iterable<Disposable>,
     val frameTime: Int,
-    var frameOffset: Int,
 ) : AnimationPart {
 
     override val duration: Int
         get() = frameTime * frames.size
 
-    override fun getFrame(progress: Int): Drawable {
+    override fun getFrame(progress: Int, frameOffset: Int): Drawable {
         val frame = ((progress / frameTime + frameOffset) % frames.size).coerceAtLeast(0).coerceAtMost(frames.size)
         return frames[frame]
     }

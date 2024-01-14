@@ -34,16 +34,6 @@ class DeferredFrameAnimation(
 
     private var atlas: TextureAtlas? = null
 
-    var frameOffset: Int = 0
-        get() = loadedFrameAnimation?.frameOffset ?: field
-        set(value) {
-            val anim = loadedFrameAnimation ?: run {
-                field = value
-                return
-            }
-            anim.frameOffset = value
-        }
-
     override val duration: Int
         get() = loadedFrameAnimation?.duration ?: Int.MAX_VALUE
 
@@ -53,12 +43,12 @@ class DeferredFrameAnimation(
         FortyFive.serviceThread.sendMessage(serviceThreadMessage)
     }
 
-    override fun getFrame(progress: Int): Drawable {
+    override fun getFrame(progress: Int, frameOffset: Int): Drawable {
         loadingTimeline.updateTimeline()
         if (loadedFrameAnimation == null && serviceThreadMessage.finished && loadingTimeline.isFinished) {
             loadFrameAnimation()
         }
-        return loadedFrameAnimation?.getFrame(progress) ?: previewDrawable
+        return loadedFrameAnimation?.getFrame(progress, frameOffset) ?: previewDrawable
     }
 
     private fun loadFrameAnimation() {
@@ -83,7 +73,7 @@ class DeferredFrameAnimation(
                         frames[number] = TextureRegionDrawable(region)
                     }
                 @Suppress("UNCHECKED_CAST") // this cast is safe, because every element was replaced
-                loadedFrameAnimation = FrameAnimation(frames as Array<out Drawable>, listOf(), frameTime, frameOffset)
+                loadedFrameAnimation = FrameAnimation(frames as Array<out Drawable>, listOf(), frameTime)
             }
         }.asAction())
     }
@@ -93,7 +83,14 @@ class DeferredFrameAnimation(
         hasBeenDisposed = true
         synchronized(serviceThreadMessage) {
             if (loadedFrameAnimation == null) {
-                if (serviceThreadMessage.finished) loadFrameAnimation()
+                if (serviceThreadMessage.finished) {
+                    if (loadingTimeline.isFinished) {
+                        serviceThreadMessage.pages!!.values.forEach { it.dispose() }
+                        return@synchronized
+                    }
+                    // TODO: might cause long delays when the screen is closed while the animation is still loading
+                    while (!loadingTimeline.isFinished) loadingTimeline.updateTimeline()
+                }
                 else serviceThreadMessage.cancelled = true
             }
         }
@@ -104,6 +101,5 @@ class DeferredFrameAnimation(
         if (previewDrawableDelegate.isInitialized()) {
             ResourceManager.giveBack(this, previewHandle)
         }
-//        ResourceManager.giveBack(this, atlasHandle)
     }
 }
