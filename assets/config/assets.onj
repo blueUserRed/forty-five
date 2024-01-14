@@ -52,6 +52,11 @@ textureAtlases: [
         regions: []
     },
     {
+        name: "pyro_animation_atlas",
+        file: "large_assets/packed/pyro_animation/pyro_animation.atlas",
+        regions: []
+    },
+    {
         name: "world_view_background_atlas",
         file: "maps/world_view/generated/background.atlas",
         regions: [
@@ -881,7 +886,13 @@ frameAnimations: [
         preview: "enemy_outlaw",
         atlas: "outlaw_animation_atlas",
         frameTime: (1000.0 / 15.0)#int
-    }
+    },
+    {
+        name: "pyro_animation",
+        preview: "enemy_pyro",
+        atlas: "pyro_animation_atlas",
+        frameTime: (1000.0 / 15.0)#int
+    },
 ],
 
 cards: {
