@@ -123,5 +123,6 @@ def packAnimation(anim) {
 task packAnimations {
     doLast {
         packAnimation("outlaw_animation")
+        packAnimation("pyro_animation")
     }
 }
