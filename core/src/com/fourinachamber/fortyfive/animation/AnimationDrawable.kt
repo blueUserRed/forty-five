@@ -9,14 +9,15 @@ import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.utils.Either
 
 // TODO: It would be cleaner if this class would be responsible for borrowing the parts it needs
 // the current solution can cause problems if two drawables depend on the same animation and one is disposed when
 // the other is still used
 class AnimationDrawable(
-    val animations: List<AnimationPart>,
+    val animations: List<Either<String, AnimationPart>>,
     animationSequence: Sequence<Int>,
-): BaseDrawable(), Disposable {
+): BaseDrawable(), ResourceBorrower, Disposable {
 
     private var startTime: Long = -1
 
@@ -26,6 +27,17 @@ class AnimationDrawable(
 
     val isRunning: Boolean
         get() = startTime != -1L
+
+    var frameOffset: Int = 0
+
+    private val loadedAnimations: List<AnimationPart> = animations.map {
+        if (it is Either.Left) {
+            ResourceManager.borrow(this, it.value)
+            ResourceManager.get(this, it.value)
+        } else {
+            (it as Either.Right).value
+        }
+    }
 
     init {
         if (animations.isEmpty()) throw RuntimeException("AnimationDrawable needs at least one Animation")
@@ -50,17 +62,8 @@ class AnimationDrawable(
             currentAnimation = nextAnimation() ?: return
             progress = 0
         }
-        val frame = currentAnimation.getFrame(progress.toInt()) ?: return
+        val frame = currentAnimation.getFrame(progress.toInt(), frameOffset) ?: return
         frame.draw(batch, x, y, width, height)
-    }
-
-    /**
-     * skips forwards or backwards in the current animation part.
-     *
-     * Won't work correctly when trying to skip into another animation part
-     */
-    fun skipInCurrentAnimation(time: Int) {
-        startTime += time
     }
 
     private fun nextAnimation(): AnimationPart? {
@@ -75,13 +78,20 @@ class AnimationDrawable(
     }
 
     private fun getAnimation(num: Int): AnimationPart = if (num in animations.indices) {
-        animations[num]
+        loadedAnimations[num]
     } else {
         throw RuntimeException("animationSequence returned out of bounds index $num")
     }
 
     override fun dispose() {
-        animations.forEach(Disposable::dispose)
+        animations.forEach {
+            if (it is Either.Left) {
+                ResourceManager.giveBack(this, it.value)
+            } else {
+                it as Either.Right
+                it.value.dispose()
+            }
+        }
     }
 }
 
@@ -89,7 +99,7 @@ interface AnimationPart : Disposable {
 
     val duration: Int
 
-    fun getFrame(progress: Int): Drawable?
+    fun getFrame(progress: Int, frameOffset: Int = 0): Drawable?
 
 }
 
@@ -103,7 +113,7 @@ data class StillFrameAnimationPart(
         ResourceManager.get(this, frameHandle)
     }
 
-    override fun getFrame(progress: Int): Drawable = frame
+    override fun getFrame(progress: Int, frameOffset: Int): Drawable = frame
 
     override fun dispose() {
         ResourceManager.giveBack(this, frameHandle)

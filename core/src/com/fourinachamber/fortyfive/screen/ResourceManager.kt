@@ -52,12 +52,8 @@ object ResourceManager {
     fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toGiveBack = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
-        if (borrower !in toGiveBack.borrowedBy) {
-            throw RuntimeException("resource $handle not borrowed by $borrower")
-        }
         toGiveBack.giveBack(borrower)
     }
-
 
     private const val assetsFile: String = "config/assets.onj"
 
