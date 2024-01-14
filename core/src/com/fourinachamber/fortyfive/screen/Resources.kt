@@ -22,6 +22,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
+import kotlin.system.measureTimeMillis
 
 
 abstract class Resource(
@@ -188,7 +189,7 @@ class FontResource(
 
 class AtlasResource(
     handle: ResourceHandle,
-    private val file: String
+    val file: String
 ) : Resource(handle) {
 
     private var data: TextureAtlasData? = null

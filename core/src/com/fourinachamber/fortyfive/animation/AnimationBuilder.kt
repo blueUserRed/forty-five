@@ -8,6 +8,8 @@ class AnimationBuilderDSL(private val borrower: ResourceBorrower) {
     private var sequenceBuilder: (suspend SequenceScope<Int>.() -> Unit)? = null
     private val animations: MutableList<AnimationPart> = mutableListOf()
 
+    lateinit var animationDrawable: AnimationDrawable
+
     fun deferredAnimation(name: String, frameOffset: Int = 0): Int {
         ResourceManager.borrow(borrower, name)
         val anim = ResourceManager.get<DeferredFrameAnimation>(borrower, name)
@@ -21,7 +23,11 @@ class AnimationBuilderDSL(private val borrower: ResourceBorrower) {
         return animations.size - 1
     }
 
-    suspend fun SequenceScope<Int>.loop(animation: Int) {
+    suspend fun SequenceScope<Int>.loop(animation: Int, timeOffset: Int = 0) {
+        if (timeOffset != 0) {
+            yield(animation)
+            animationDrawable.skipInCurrentAnimation(timeOffset)
+        }
         while (true) yield(animation)
     }
 
@@ -35,5 +41,7 @@ class AnimationBuilderDSL(private val borrower: ResourceBorrower) {
 fun createAnimation(borrower: ResourceBorrower, builder: AnimationBuilderDSL.() -> Unit): AnimationDrawable {
     val builderDSL = AnimationBuilderDSL(borrower)
     builder(builderDSL)
-    return builderDSL.finish()
+    val drawable = builderDSL.finish()
+    builderDSL.animationDrawable = drawable
+    return drawable
 }

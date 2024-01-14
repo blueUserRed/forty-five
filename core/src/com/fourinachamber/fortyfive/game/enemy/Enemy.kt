@@ -302,9 +302,9 @@ class EnemyActor(
     // animations are hardcoded, deal with it
     private val animation: AnimationDrawable? = when {
         enemy.name.startsWith("Outlaw") -> createAnimation(screen) {
-            val anim = deferredAnimation("outlaw_animation", (0..30).random())
+            val anim = deferredAnimation("outlaw_animation")
             order {
-                loop(anim)
+                loop(anim, timeOffset = (0..1000).random())
             }
         }
         else -> null
