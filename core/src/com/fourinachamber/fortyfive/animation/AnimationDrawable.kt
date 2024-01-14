@@ -10,9 +10,12 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 
+// TODO: It would be cleaner if this class would be responsible for borrowing the parts it needs
+// the current solution can cause problems if two drawables depend on the same animation and one is disposed when
+// the other is still used
 class AnimationDrawable(
     val animations: List<AnimationPart>,
-    animationSequence: Sequence<Int>
+    animationSequence: Sequence<Int>,
 ): BaseDrawable(), Disposable {
 
     private var startTime: Long = -1
@@ -49,6 +52,15 @@ class AnimationDrawable(
         }
         val frame = currentAnimation.getFrame(progress.toInt()) ?: return
         frame.draw(batch, x, y, width, height)
+    }
+
+    /**
+     * skips forwards or backwards in the current animation part.
+     *
+     * Won't work correctly when trying to skip into another animation part
+     */
+    fun skipInCurrentAnimation(time: Int) {
+        startTime += time
     }
 
     private fun nextAnimation(): AnimationPart? {

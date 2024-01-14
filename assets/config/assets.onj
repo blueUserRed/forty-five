@@ -880,7 +880,7 @@ frameAnimations: [
         name: "outlaw_animation",
         preview: "enemy_outlaw",
         atlas: "outlaw_animation_atlas",
-        frameTime: (1000.0 / 30.0)#int
+        frameTime: (1000.0 / 15.0)#int
     }
 ],
 

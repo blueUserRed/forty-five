@@ -1,13 +1,12 @@
 package com.fourinachamber.fortyfive.utils
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Pixmap
-import com.fourinachamber.fortyfive.game.GameController
+import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.screen.Resource
-import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ChannelResult
@@ -16,6 +15,9 @@ import kotlinx.coroutines.channels.trySendBlocking
 class ServiceThread : Thread("ServiceThread") {
 
     private val channel: Channel<ServiceThreadMessage> = Channel(Channel.Factory.UNLIMITED)
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private val animationLoaderDispatcher = newSingleThreadContext("animation-loader")
 
     override fun run(): Unit = runBlocking {
         FortyFiveLogger.debug(logTag, "starting up")
@@ -29,7 +31,7 @@ class ServiceThread : Thread("ServiceThread") {
 
                 is ServiceThreadMessage.PrepareResources -> prepareResources()
                 is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
-                is ServiceThreadMessage.LoadSingleResource -> loadSingleResource(message)
+                is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
 
             }
         }
@@ -45,7 +47,7 @@ class ServiceThread : Thread("ServiceThread") {
     }
 
     private fun CoroutineScope.drawCardPixmap(message: ServiceThreadMessage.DrawCardPixmap) = launch {
-        synchronized(message.pixmap) {
+        synchronized(message.pixmap) { synchronized(message.card) {
             val pixmap = message.pixmap
             val cardTexturePixmap = message.cardTexturePixmap
             val card = message.card
@@ -65,15 +67,35 @@ class ServiceThread : Thread("ServiceThread") {
             font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
             font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
             message.isFinished = true
-        }
+        } }
     }
 
-    private fun CoroutineScope.loadSingleResource(message: ServiceThreadMessage.LoadSingleResource) = launch {
+
+    private fun CoroutineScope.loadAnimationResource(message: ServiceThreadMessage.LoadAnimationResource) = launch(animationLoaderDispatcher) {
+//        val resource = ResourceManager
+//            .resources
+//            .find { it.handle == message.handle }
+//            ?: throw RuntimeException("unknown resource: ${message.handle}")
+//        launch(animationLoaderDispatcher) { resource.prepare() }.join()
+
         val resource = ResourceManager
             .resources
             .find { it.handle == message.handle }
             ?: throw RuntimeException("unknown resource: ${message.handle}")
-        launch { resource.prepare() }.join()
+
+        resource as? AtlasResource ?: throw RuntimeException("resource loaded by LoadAnimationResourceMessage must" +
+                "be a AtlasRegionResource")
+
+
+        val fileHandle = Gdx.files.internal(resource.file)
+        val data = TextureAtlasData(fileHandle, fileHandle.parent(), false)
+        val pages = mutableMapOf<String, Pixmap>()
+        data.pages.forEach { page ->
+            pages[page.textureFile.path()] = Pixmap(page.textureFile)
+        }
+        message.data = data
+        message.pages = pages
+
         synchronized(message) {
             message.finished = true
             if (message.cancelled) resource.dispose()
@@ -105,8 +127,10 @@ sealed class ServiceThreadMessage {
         var isFinished: Boolean = false
     ) : ServiceThreadMessage()
 
-    class LoadSingleResource(
+    class LoadAnimationResource(
         val handle: ResourceHandle,
+        var data: TextureAtlasData? = null,
+        var pages: Map<String, Pixmap>? = null,
         var finished: Boolean = false,
         var cancelled: Boolean = false
     ) : ServiceThreadMessage()

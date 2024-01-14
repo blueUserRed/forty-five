@@ -157,13 +157,17 @@ class Card(
 
     init {
         screen.borrowResource(cardTexturePrefix + name)
-        actor = CardActor(
-            this,
-            font,
-            fontScale,
-            isDark,
-            screen
-        )
+        // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
+        // card texture while the constructor is running and actor is not yet assigned
+        synchronized(this) {
+            actor = CardActor(
+                this,
+                font,
+                fontScale,
+                isDark,
+                screen
+            )
+        }
     }
 
     /**
