@@ -30,6 +30,9 @@ class AnimationDrawable(
 
     var frameOffset: Int = 0
 
+    var flipX: Boolean = false
+    var flipY: Boolean = false
+
     private val loadedAnimations: List<AnimationPart> = animations.map {
         if (it is Either.Left) {
             ResourceManager.borrow(this, it.value)
@@ -63,7 +66,13 @@ class AnimationDrawable(
             progress = 0
         }
         val frame = currentAnimation.getFrame(progress.toInt(), frameOffset) ?: return
-        frame.draw(batch, x, y, width, height)
+        frame.draw(
+            batch,
+            if (flipX) x + width else x,
+            if (flipY) y + height else y,
+            if (flipX) -width else width,
+            if (flipY) -height else height
+        )
     }
 
     private fun nextAnimation(): AnimationPart? {
