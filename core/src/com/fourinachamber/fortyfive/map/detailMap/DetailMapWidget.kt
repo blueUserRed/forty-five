@@ -34,6 +34,7 @@ import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.random.Random
 
 /**
  * the widget used for displaying a [DetailMap]
@@ -219,7 +220,10 @@ class DetailMapWidget(
         invalidateHierarchy()
 
         animatedDecorations.forEach { (_, instances) ->
-            instances.forEach { (_, _, animation) -> animation.start() }
+            instances.forEach { (_, _, animation) ->
+                screen.addDisposable(animation)
+                animation.start()
+            }
         }
 
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
@@ -271,6 +275,24 @@ class DetailMapWidget(
             order {
                 if (Utils.coinFlip(0.5f)) flipX()
                 while (true) yield(if (Utils.coinFlip(0.1f)) anim else still)
+            }
+        }
+
+        "tree" -> createAnimation {
+            val anim = deferredAnimation("map_decoration_tree_animation")
+            val still = stillFrame("map_decoration_bewitched_forest_tree1", 100)
+            val cycleOffset = (0..30).random()
+            order {
+                while (true) {
+                    val now = System.currentTimeMillis()
+                    val curCycle = (now % 10_000).toInt()
+                    if (curCycle >= 9_000) {
+                        repeat(cycleOffset) { yield(still) }
+                        yield(anim)
+                    } else {
+                        yield(still)
+                    }
+                }
             }
         }
 

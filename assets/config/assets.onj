@@ -62,6 +62,11 @@ textureAtlases: [
         regions: []
     },
     {
+        name: "map_decoration_tree_animation_atlas",
+        file: "large_assets/packed/tree_animation/tree_animation.atlas",
+        regions: []
+    },
+    {
         name: "world_view_background_atlas",
         file: "maps/world_view/generated/background.atlas",
         regions: [
@@ -902,6 +907,12 @@ frameAnimations: [
         name: "map_decoration_sheep_animation",
         preview: "map_decoration_bewitched_forest_sheep_1",
         atlas: "map_decoration_sheep_animation_atlas",
+        frameTime: (1000.0 / 15.0)#int
+    },
+    {
+        name: "map_decoration_tree_animation",
+        preview: "map_decoration_bewitched_forest_tree1",
+        atlas: "map_decoration_tree_animation_atlas",
         frameTime: (1000.0 / 15.0)#int
     },
 ],
