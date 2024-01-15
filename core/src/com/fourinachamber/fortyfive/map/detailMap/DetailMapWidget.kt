@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -13,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.animation.AnimationDrawable
+import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
@@ -131,6 +134,13 @@ class DetailMapWidget(
     private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
 
+    // I hate this
+    private val animatedDecorations: List<Pair<DetailMap.MapDecoration, List<Triple<Vector2, Float, AnimationDrawable>>>> = map
+        .animatedDecorations
+        .zip { decoration ->
+            decoration.instances.map { Triple(it.first, it.second, createDecorationAnimation(decoration.drawableHandle)) }
+        }
+
     private val dragListener = object : DragListener() {
 
         private var dragStartPosition: Vector2? = null
@@ -208,6 +218,10 @@ class DetailMapWidget(
         addListener(clickListener)
         invalidateHierarchy()
 
+        animatedDecorations.forEach { (_, instances) ->
+            instances.forEach { (_, _, animation) -> animation.start() }
+        }
+
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
         val bounds = mapBounds
@@ -247,6 +261,20 @@ class DetailMapWidget(
             }
         }
         pointToNode = bestMatch
+    }
+
+    private fun createDecorationAnimation(name: String): AnimationDrawable = when (name) {
+
+        "sheep" -> createAnimation {
+            val anim = deferredAnimation("map_decoration_sheep_animation")
+            val still = stillFrame("map_decoration_bewitched_forest_sheep_1", 500)
+            order {
+                if (Utils.coinFlip(0.5f)) flipX()
+                while (true) yield(if (Utils.coinFlip(0.1f)) anim else still)
+            }
+        }
+
+        else -> throw RuntimeException("unknown animated decoration: $name")
     }
 
     private fun goToNode(node: MapNode) {
@@ -298,6 +326,7 @@ class DetailMapWidget(
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
         drawDecorations(batch)
+        drawAnimatedDecorations(batch)
         drawDirectionIndicator(batch)
         drawNodeImages(batch)
         super.draw(batch, parentAlpha)
@@ -411,6 +440,22 @@ class DetailMapWidget(
                     batch,
                     x + offX + instance.first.x * mapScale, y + offY + instance.first.y * mapScale,
                     width * instance.second * mapScale, height * instance.second * mapScale
+                )
+            }
+        }
+    }
+
+    private fun drawAnimatedDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        animatedDecorations.forEach { (decoration, instances) ->
+            val width = decoration.baseWidth
+            val height = decoration.baseHeight
+            instances.forEach { (position, scale, drawable) ->
+                drawable.draw(
+//                map.decorations[0].getDrawable(screen).draw(
+                    batch,
+                    x + offX + position.x * mapScale, y + offY + position.y * mapScale,
+                    width * scale * mapScale, height * scale * mapScale
                 )
             }
         }

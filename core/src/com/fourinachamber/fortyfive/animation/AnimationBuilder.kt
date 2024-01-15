@@ -1,7 +1,5 @@
 package com.fourinachamber.fortyfive.animation
 
-import com.fourinachamber.fortyfive.screen.ResourceBorrower
-import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.Either
 import com.fourinachamber.fortyfive.utils.eitherLeft
 import com.fourinachamber.fortyfive.utils.eitherRight
@@ -26,6 +24,16 @@ class AnimationBuilderDSL {
     suspend fun SequenceScope<Int>.loop(animation: Int, frameOffset: Int = 0) {
         animationDrawable.frameOffset = frameOffset
         while (true) yield(animation)
+    }
+
+    @Suppress("unused") // unused receiver is there to force the user to call this function in the order block
+    fun SequenceScope<Int>.flipX(flipX: Boolean = true) {
+        animationDrawable.flipX = flipX
+    }
+
+    @Suppress("unused") // unused receiver is there to force the user to call this function in the order block
+    fun SequenceScope<Int>.flipY(flipY: Boolean = true) {
+        animationDrawable.flipY = flipY
     }
 
     fun order(sequence: suspend SequenceScope<Int>.() -> Unit) {

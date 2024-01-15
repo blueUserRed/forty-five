@@ -232,4 +232,5 @@ nodes: [
     },
 ],
 decorations: [],
+animatedDecorations: [],
 isArea: false,

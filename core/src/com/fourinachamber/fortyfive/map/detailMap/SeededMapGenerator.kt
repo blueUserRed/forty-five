@@ -50,7 +50,8 @@ class SeededMapGenerator(
         setImagePosForBorderAreas(mainLine.lineNodes.first(), lastNode)
         nodes.forEach { it.scale(restrictions.scaleLength, restrictions.scaleWidth) }
         nodes.forEach { it.rotate(restrictions.rotation) }
-        val decos = generateDecorations(nodes)
+        val decos = generateDecorations(nodes, restrictions.decorations)
+        val animatedDecos = generateDecorations(nodes, restrictions.animatedDecorations)
         this.nodes = nodes
         build()
         return DetailMap(
@@ -58,6 +59,7 @@ class SeededMapGenerator(
             mainLine.lineNodes.first().asNode!!,
             lastNode.asNode!!,
             decos,
+            animatedDecos,
             false,
             biome,
             restrictions.progress,
@@ -86,6 +88,7 @@ class SeededMapGenerator(
 
     private fun generateDecorations(
         nodes: List<MapNodeBuilder>,
+        distFunctions: List<DecorationDistributionFunction>
     ): List<DetailMap.MapDecoration> {
         val connections = getUniqueLinesFromNodes(nodes)
         val decos: MutableList<DetailMap.MapDecoration> = mutableListOf()
@@ -95,7 +98,7 @@ class SeededMapGenerator(
             ((nodes.minOf { it.y } - restrictions.decorationPadding)..(nodes.maxOf { it.y } + restrictions.decorationPadding))
         // first pos, second width and height
         val notOverlappingNodes = mutableListOf<Pair<Vector2, Vector2>>()
-        restrictions.decorations.forEach {
+        distFunctions.forEach {
             val deco = it.getDecoration(nodes, restrictions, connections, xRange, yRange, notOverlappingNodes)
             decos.add(deco)
         }
@@ -1493,7 +1496,8 @@ data class MapRestriction(
     val optionalEvents: List<Triple<Int, () -> MapEvent, String?>>,
 
     val finalEvent: () -> Pair<MapEvent, String>?,
-    val decorations: List<DecorationDistributionFunction>,// = listOf(
+    val decorations: List<DecorationDistributionFunction>,
+    val animatedDecorations: List<DecorationDistributionFunction>,
     val decorationPadding: Float, //TODO 4 parameters instead of 1 (each direction)
     /**
      * width of the path, needed for checking if textures are overlapping
@@ -1563,6 +1567,16 @@ data class MapRestriction(
                     DecorationDistributionFunctionFactory.get(
                         decoration,
                         onj.get<Long>("decorationSeed") * 289708 * index
+                    )
+                },
+            animatedDecorations = onj
+                .get<OnjArray>("animatedDecorations")
+                .value
+                .mapIndexed { index, decoration ->
+                    decoration as OnjNamedObject
+                    DecorationDistributionFunctionFactory.get(
+                        decoration,
+                        onj.get<Long>("decorationSeed") * 127893 * index
                     )
                 },
             exitNodeTexture = onj.get<String>("exitNodeTexture"),
