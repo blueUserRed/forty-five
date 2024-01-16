@@ -233,7 +233,7 @@ class Backpack(
     }
 
     private fun reloadDeck() {
-        SaveState.curDeck.checkMinimum()
+        SaveState.curDeck.checkDeck()
 
         //"Reset" Deck and Backpack
         val children = deckCardsWidget.children.filterIsInstance<CustomFlexBox>()
