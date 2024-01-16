@@ -929,6 +929,26 @@ cards: [
         tags: ["pool1"],
         price: 0,
     },
+    {
+        name: "brickBullet",
+        title: "Brick Bullet",
+        flavourText: "During the civil war, the weapon industry of the old World created their own special bullets in order to combat those of the witches. Soft Point Bullet is one of them.",
+        description: "$trigger$On-Placedown:$trigger$\n You get $status$SHIELD$status$ (14)",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            givePlayerStatus("enter", shield(14)),
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1"],
+        price: 0,
+    },
 
 ],
 

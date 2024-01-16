@@ -89,7 +89,7 @@ fun interface GamePredicate {
             "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
             "PlayerHasPlayedSilverBulletAndDrawnCards" -> playerHasPlayedSilverBulletAndDrawnCards
             "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
-            "targetedEnemyHealthAbovePercent" -> targetedEnemyHealthAbovePercent(obj.get<Double>("value").toFloat())
+            "TargetedEnemyHealthAbovePercent" -> targetedEnemyHealthAbovePercent(obj.get<Double>("value").toFloat())
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

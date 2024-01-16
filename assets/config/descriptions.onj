@@ -4,16 +4,19 @@ use Common;
 
 hoverDetailDescriptions: [
     {
-    keyword: "burning",
-    groupName: "status",
-    description: "$status$BURNING (t)$status$\nEnemies with burning get 50% more damage for the next t turns.",
-//    description: "$status$BURNING (t§§description_icon_turns_status§§)$status$\nEnemies with burning get 50% more damage for the next t turns.",
+        keyword: "BURNING",
+        groupName: "status",
+        description: "$status$BURNING (t)$status$\nEnemies with burning get 50% more damage for the next t turns.",
     },
     {
-        keyword: "poison",
+        keyword: "POISON",
         groupName: "status",
         description: "$status$POISON (d,t)$status$\nEnemies with Poison take d dmg for t turns. d and t both stack.",
-//        description: "$status$POISON (d§§description_icon_dmg_status§§,t§§description_icon_turns_status§§)$status$\nEnemies with Poison take d dmg for t turns. d and t both stack.",
+    },
+    {
+        keyword: "SHIELD",
+        groupName: "status",
+        description: "$status$SHIELD (d)$status$\nShield protects from d dmg.",
     },
     {
         keyword: "PROTECTED",

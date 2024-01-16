@@ -810,22 +810,29 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @AllThreadsAllowed
     fun damagePlayerTimeline(damage: Int, triggeredByStatusEffect: Boolean = false): Timeline = Timeline.timeline {
-        if (!triggeredByStatusEffect) {
-            val overlayAction = GraphicsConfig.damageOverlay(curScreen)
-            includeAction(overlayAction)
-        }
+        var newDamage: Int? = null
         action {
-            curPlayerLives -= damage
+            newDamage = playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
+        }
+        includeLater(
+            { GraphicsConfig.damageOverlay(curScreen).wrap() },
+            { !triggeredByStatusEffect && newDamage!! > 0 }
+        )
+        action {
+            curPlayerLives -= newDamage!!
             FortyFiveLogger.debug(
                 logTag,
-                "player got damaged; damage = $damage; curPlayerLives = $curPlayerLives"
+                "player got damaged; damage = $newDamage; curPlayerLives = $curPlayerLives"
             )
         }
         includeLater(
             { playerDeathTimeline() },
             { curPlayerLives <= 0 }
         )
-        if (!triggeredByStatusEffect) include(executePlayerStatusEffectsAfterDamage(damage))
+        includeLater(
+            { executePlayerStatusEffectsAfterDamage(newDamage!!) },
+            { !triggeredByStatusEffect }
+        )
     }
 
     /**
