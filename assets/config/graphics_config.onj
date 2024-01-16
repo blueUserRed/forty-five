@@ -33,6 +33,10 @@ icons: {
     wrathOfTheWitch: {
         icon: "burning_icon",
         scale: 0.25
+    },
+    shield: {
+        icon: "shield_icon",
+        scale: 0.25
     }
 },
 

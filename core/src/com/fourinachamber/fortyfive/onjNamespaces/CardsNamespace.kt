@@ -237,6 +237,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "params: [*]")
+    fun shield(shield: OnjValue): OnjStatusEffect = OnjStatusEffect {
+        Shield(getIntParamFromOnj(shield))
+    }
+
     @RegisterOnjFunction(schema = "params: [*, float, boolean]")
     fun burning(rotations: OnjValue, percent: OnjFloat, isInfinite: OnjBoolean): OnjStatusEffect = OnjStatusEffect {
         Burning(
