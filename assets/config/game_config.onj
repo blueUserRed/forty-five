@@ -15,7 +15,7 @@ playerConfig: {
 },
 
 reservesConfig: {
-    roundStart: 3
+    roundStart: 4
 },
 
 damageConfig: {
