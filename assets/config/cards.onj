@@ -438,7 +438,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            protect("enter", bSelects.targetRequiredNotSelf, 3)
+            protect("enter", bSelects.targetRequiredNotSelf, 4)
         ],
         forceLoadCards: [],
         dark: false,
@@ -522,7 +522,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
@@ -610,7 +610,7 @@ cards: [
         name: "finalBullet",
         title: "Final Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\nYou lose the game;\n$trigger$While in revolver: On-Turn-Begin:$trigger$\nAll other bullets get +8 dmg",
+        description: "$trigger$On-Shot:$trigger$\nYou lose the game;\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +8 dmg",
         baseDamage: 20,
         coverValue: 0,
         traitEffects: [],
@@ -932,7 +932,7 @@ cards: [
     {
         name: "brickBullet",
         title: "Brick Bullet",
-        flavourText: "During the civil war, the weapon industry of the old World created their own special bullets in order to combat those of the witches. Soft Point Bullet is one of them.",
+        flavourText: "Short disclaimer: I’ve never thrown this at a homeless man! It slipped out of my hand!",
         description: "$trigger$On-Placedown:$trigger$\n You get $status$SHIELD$status$ (14)",
         baseDamage: 7,
         coverValue: 0,
