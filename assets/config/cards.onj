@@ -52,7 +52,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool0"],
+        tags: ["pool0", "rarity3"],
         price: 50,
         type: $Bullet { }
     },
@@ -70,7 +70,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 2,
-        tags: ["pool0"],
+        tags: ["pool0", "rarity3"],
         price: 50,
         type: $Bullet { }
     },
@@ -88,7 +88,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
         type: $Bullet { }
     },
@@ -106,7 +106,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 3,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 100,
         type: $Bullet { }
     },
@@ -124,7 +124,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity3"],
         price: 50,
         type: $Bullet { }
     },
@@ -144,7 +144,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 50,
         type: $Bullet { }
     },
@@ -162,7 +162,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 2,
-        tags: ["pool0"],
+        tags: ["pool0", "rarity3"],
         price: 50,
         type: $Bullet { }
     },
@@ -180,7 +180,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool0"],
+        tags: ["pool0", "rarity3"],
         price: 50,
         type: $Bullet { }
     },
@@ -216,7 +216,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 50,
         type: $Bullet { }
     },
@@ -234,7 +234,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 5,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 90,
         type: $Bullet { }
     },
@@ -252,7 +252,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 2,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
         type: $Bullet { }
     },
@@ -270,7 +270,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 0,
-        tags: [ "pool1" ],
+        tags: [ "pool1", "rarity2" ],
         price: 50,
         type: $Bullet { }
     },
@@ -288,7 +288,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 0,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 50,
         type: $Bullet { }
     },
@@ -308,7 +308,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 2,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
         type: $Bullet { }
     },
@@ -326,7 +326,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 3,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
         type: $Bullet { }
     },
@@ -341,7 +341,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [ putCardInHand("enter", "bullet", 3#val) ],
-        forceLoadCards: [ "bullet" ],
+        forceLoadCards: [ "bullet", "rarity3" ],
         dark: false,
         cost: 2,
         tags: ["pool1"],
@@ -365,7 +365,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 2,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 50,
         type: $Bullet { }
     },
@@ -385,7 +385,7 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
-        tags: ["pool1"],
+        tags: ["pool1", "rarity3"],
         price: 50,
         type: $Bullet { }
     },
@@ -404,7 +404,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity3"],
         price: 50,
     },
     {
@@ -444,7 +444,7 @@ cards: [
         dark: false,
         cost: 3,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
@@ -464,7 +464,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
@@ -484,7 +484,7 @@ cards: [
         dark: false,
         cost: 0,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 25,
     },
     {
@@ -502,7 +502,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
@@ -542,7 +542,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity3"],
         price: 50,
     },
     {
@@ -562,7 +562,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
     {
@@ -603,7 +603,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 0,
     },
     {
@@ -624,7 +624,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity1"],
         price: 0,
     },
     {
@@ -642,7 +642,7 @@ cards: [
         dark: false,
         cost: 0,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity2"],
         price: 0,
     },
     {
@@ -662,7 +662,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity2"],
         price: 0,
     },
     {
@@ -680,7 +680,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 0,
     },
     {
@@ -700,7 +700,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 0,
     },
     {
@@ -720,7 +720,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 0,
     },
     {
@@ -740,7 +740,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity3"],
         price: 0,
     },
     {
@@ -760,7 +760,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity2"],
         price: 0,
     },
     {
@@ -781,7 +781,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 0,
     },
     {
@@ -802,7 +802,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity2"],
         price: 0,
     },
     {
@@ -822,7 +822,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity1"],
         price: 0,
     },
     {
@@ -843,7 +843,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool2"],
+        tags: ["pool2", "rarity2"],
         price: 0,
     },
     {
@@ -864,7 +864,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 0,
     },
     {
@@ -885,7 +885,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity1"],
         price: 0,
     },
     {
@@ -906,7 +906,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 0,
     },
     {
@@ -926,7 +926,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity3"],
         price: 0,
     },
     {
@@ -946,7 +946,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1"],
+        tags: ["pool1", "rarity2"],
         price: 0,
     },
 
