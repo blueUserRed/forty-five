@@ -37,6 +37,9 @@ object FortyFive : Game() {
 
         override val encounterIndex: Int = 0 // = first tutorial encounter
 
+        override val forwardToScreen: String
+            get() = MapManager.mapScreenPath
+
         override fun completed() {
             SaveState.playerCompletedFirstTutorialEncounter = true
         }
