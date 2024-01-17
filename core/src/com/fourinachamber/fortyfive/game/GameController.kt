@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
@@ -10,6 +11,7 @@ import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
@@ -57,6 +59,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     val softMaxCards = onj.get<Long>("softMaxCards").toInt()
     val hardMaxCards = onj.get<Long>("hardMaxCards").toInt()
+
+    private val rewardChance = onj.get<Double>("rewardChance").toFloat()
 
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
@@ -1002,7 +1006,21 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 SaveState.playerMoney += money
                 encounterContext.completed()
                 SaveState.write()
-                MapManager.changeToMapScreen()
+
+                val chooseCardContext = object : ChooseCardScreenContext {
+                    override val forwardToScreen: String = encounterContext.forwardToScreen
+                    override val seed: Long = TimeUtils.millis()
+                    override val nbrOfCards: Int = 3
+                    override val types: List<String> = listOf()
+                    override fun completed() { }
+                }
+
+                if (Utils.coinFlip(rewardChance)) {
+                    MapManager.changeToChooseCardScreen(chooseCardContext)
+                } else {
+                    FortyFive.changeToScreen(encounterContext.forwardToScreen)
+                }
+
             }
         })
     }
@@ -1065,6 +1083,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     interface EncounterContext {
 
         val encounterIndex: Int
+
+        val forwardToScreen: String
 
         fun completed()
     }
