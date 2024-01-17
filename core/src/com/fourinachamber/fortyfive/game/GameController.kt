@@ -245,8 +245,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         if (gameDirector.encounter.shuffleCards) cardStack.shuffle()
 
-        _remainingCards = cardStack.size
-
         FortyFiveLogger.debug(logTag, "card stack: $cardStack")
 
         val defaultBulletName = onj.get<String>("defaultBullet")
@@ -305,6 +303,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
         if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
+
+        _remainingCards = cardStack.size
 
         mainTimeline.updateTimeline()
 
@@ -694,7 +694,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardToShoot?.let {
                 action {
                     cardToShoot.beforeShot()
-                    if (cardToShoot.shouldRemoveAfterShot) revolver.removeCard(cardToShoot)
+                    if (cardToShoot.shouldRemoveAfterShot) {
+                        revolver.removeCard(cardToShoot)
+                        cardStack.add(cardToShoot)
+                    }
                     cardToShoot.afterShot()
                 }
                 targetedEnemies
@@ -801,7 +804,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardHand.reattachToOriginalParent()
             val cards = putCardsUnderDeckWidget.complete()
             cards.forEach { cardStack.add(it) }
-            _remainingCards = cardStack.size
         }
     }
 
@@ -961,7 +963,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @AllThreadsAllowed
     fun drawCard() {
         val card = cardStack.removeFirstOrNull() ?: defaultBullet.create()
-        _remainingCards = cardStack.size
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++

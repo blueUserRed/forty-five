@@ -30,7 +30,7 @@ var tutorialEncounters = [
                 confirmationText: "Next",
             },
             {
-                text: "Slot 5 (the one in the front) is the slot in which bullets are shot. If you load your bullet into this slot and press ‘shoot’, the bullet will leave the revolver, deal damage and the revolver rotates to the right.",
+                text: "Slot 5 (the one in the front) is the slot in which bullets are shot. If you load your bullet into this slot and press ‘shoot’, the bullet will leave the revolver, deal damage and the revolver rotates to the right. After a bullet is shot, it is put at the bottom of your deck.",
                 focusActor: "revolverSlot-4",
                 confirmationText: "Next",
             },
