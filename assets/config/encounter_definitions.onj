@@ -857,7 +857,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
         ],
         encounterModifier: [
 //            "Sacrifice"
