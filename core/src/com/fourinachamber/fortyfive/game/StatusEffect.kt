@@ -35,6 +35,8 @@ abstract class StatusEffect(
         this.controller = controller
     }
 
+    open fun modifyDamage(damage: Int): Int = damage
+
     open fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? = null
 
     open fun executeOnNewTurn(target: StatusEffectTarget): Timeline? = null
@@ -327,6 +329,37 @@ class WrathOfTheWitch(
     override fun getDisplayText(): String = "$damage dmg"
 
     override fun equals(other: Any?): Boolean = other is WrathOfTheWitch
+
+}
+
+class Shield(
+    private var shield: Int
+) : StatusEffect(
+    GraphicsConfig.iconName("shield"),
+    GraphicsConfig.iconScale("shield")
+) {
+
+    override val effectType: StatusEffectType = StatusEffectType.OTHER
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is Shield
+
+    override fun stack(other: StatusEffect) {
+        other as Shield
+        shield += other.shield
+    }
+
+    override fun modifyDamage(damage: Int): Int {
+        val shield = shield - damage
+        this.shield = shield.coerceAtLeast(0)
+        if (shield < 0) return -shield
+        return 0
+    }
+
+    override fun isStillValid(): Boolean = shield > 0
+
+    override fun getDisplayText(): String = shield.toString()
+
+    override fun equals(other: Any?): Boolean = other is Shield
 
 }
 

@@ -87,7 +87,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = ReserveGain(trigger, amount, triggerInHand)
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card) * (triggerInformation.multiplier ?: 1)
             return Timeline.timeline {
                 action { controller.gainReserves(amount) }
             }
@@ -117,7 +117,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector, triggerInHand, activeChecker)
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card) * (triggerInformation.multiplier ?: 1)
             val modifier = Card.CardModifier(
                 damage = amount,
                 source = cardDescName,
@@ -190,7 +190,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = GiftDamage(trigger, amount, bulletSelector, triggerInHand)
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
-            val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card) * (triggerInformation.multiplier ?: 1)
             val modifier = Card.CardModifier(
                 damage = amount,
                 source = cardDescName
@@ -222,7 +222,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             delay(GraphicsConfig.bufferTime)
-            val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card) * (triggerInformation.multiplier ?: 1)
             include(controller.drawCardPopupTimeline(amount))
         }
 
@@ -274,7 +274,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = PutCardInHand(trigger, cardName, amount, triggerInHand)
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            val amount = amount(controller) * (triggerInformation.multiplier ?: 1)
+            val amount = amount(controller, card) * (triggerInformation.multiplier ?: 1)
             include(controller.tryToPutCardsInHandTimeline(cardName, amount))
         }
 
@@ -337,7 +337,7 @@ abstract class Effect(val trigger: Trigger) {
     class DamageDirectly(trigger: Trigger, val damage: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            val damage = damage(controller) * (triggerInformation.multiplier ?: 1)
+            val damage = damage(controller, card) * (triggerInformation.multiplier ?: 1)
             triggerInformation
                 .targetedEnemies
                 .map { it.damage(damage) }
@@ -353,7 +353,7 @@ abstract class Effect(val trigger: Trigger) {
     class DamagePlayer(trigger: Trigger, val damage: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(controller.damagePlayerTimeline(damage(controller)))
+            include(controller.damagePlayerTimeline(damage(controller, card)))
         }
 
         override fun blocks(controller: GameController): Boolean = false
@@ -459,15 +459,24 @@ sealed class BulletSelector {
     abstract fun blocks(controller: GameController, self: Card): Boolean
 }
 
-typealias EffectValue = (controller: GameController) -> Int
+typealias EffectValue = (controller: GameController, card: Card) -> Int
 
 /**
  * possible triggers for an effect
  */
-enum class Trigger {
-    ON_ENTER, ON_SHOT, ON_ROUND_START, ON_ROUND_END, ON_DESTROY, ON_CARDS_DRAWN, ON_SPECIAL_CARDS_DRAWN,
-    ON_REVOLVER_ROTATION, ON_ANY_CARD_DESTROY
-
+enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
+    ON_ENTER,
+    ON_LEAVE,
+    ON_SHOT(listOf(ON_LEAVE)),
+    ON_ROUND_START,
+    ON_ROUND_END,
+    ON_DESTROY(listOf(ON_LEAVE)),
+    ON_BOUNCE(listOf(ON_LEAVE)),
+    ON_CARDS_DRAWN,
+    ON_SPECIAL_CARDS_DRAWN,
+    ON_REVOLVER_ROTATION,
+    ON_ANY_CARD_DESTROY,
+    ON_RETURNED_HOME,
 }
 
 data class TriggerInformation(
