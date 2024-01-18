@@ -26,14 +26,13 @@ assets: {
 
         "vanilla_whale", "red_wing",
 
-        "title_screen_background", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
+        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
+        "game_screen_player",
 
         "enemy_action_damage", "enemy_action_cover",
-
-        "encounter_modifier_frost",
 
         "enemy_pyro", "enemy_action_burning", "enemy_action_inferno",
         "enemy_action_hot_potato", "enemy_action_unknown",
@@ -54,10 +53,11 @@ assets: {
 
         "revolver_cursor",
 
-        "dissolve_shader", "prerendered_noise_perlin_512x512",
+        "dissolve_shader", "prerendered_noise_perlin_512x512", "ice_shader", "ice_texture",
 
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
+        ...(graphicsConfig.encounterModifierAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
         ...(sharedComponents.cardHoverDetailUsedAssets),
@@ -114,7 +114,7 @@ var controller = $GameScreenController {
 };
 
 options: {
-    background: "title_screen_background",
+    background: "game_screen_background_wasteland",
     screenController: controller,
     inputMap: [
         ...(inputMaps.gameInputMap),
@@ -989,7 +989,7 @@ var gameScreen = $Box {
             {
                 width: 70#percent,
                 height: 100#points,
-                positionLeft: 600#points,
+                positionLeft: 800#points,
                 positionBottom: -300#points,
             }
         ],
@@ -1024,6 +1024,20 @@ var gameScreen = $Box {
     },
 
 ];
+
+var playerOverlay = $Box {
+    styles: [
+        {
+            positionType: positionType.absolute,
+            background: "game_screen_player",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            width: worldWidth#points,
+            height: worldHeight#points,
+        },
+    ],
+    zIndex: 0,
+};
 
 root: $Box {
     styles: [
@@ -1072,6 +1086,7 @@ root: $Box {
 
     sharedComponents.warningParent,
     encounterModifierDisplay,
+    playerOverlay,
     gameScreen,
     enemyActionAnimContainer,
     drawCardActor,

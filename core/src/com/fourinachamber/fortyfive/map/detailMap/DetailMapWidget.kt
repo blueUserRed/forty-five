@@ -13,6 +13,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.game.EncounterModifier
+import com.fourinachamber.fortyfive.game.GameDirector
+import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
@@ -27,6 +30,8 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addMapStyles
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
+import onj.value.OnjString
 import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -48,8 +53,10 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
+    private val encounterModifierParentName: String,
+    private val encounterModifierDisplayTemplateName: String,
     private var screenSpeed: Float,
-//    private var backgroundScale: Float,
+    private val scrollMargin: Float,
     private val disabledDirectionIndicatorAlpha: Float,
     private val mapScale: Float
 ) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
@@ -72,14 +79,14 @@ class DetailMapWidget(
     var mapOffset: Vector2 = Vector2(50f, 50f)
         private set(value) {
             val bounds = mapBounds
-            var center = Vector2()
-            bounds.getCenter(center)
-            center -= Vector2(bounds.width, height * 1.5f)
-            field = value
-//            field = value.clampIndividual(
-//                center.x - bounds.width / 2, center.x + bounds.width / 2,
-//                center.y - bounds.height / 2, center.y + bounds.height / 2
-//            )
+            val lowX = bounds.x
+            val lowY = bounds.y
+            val highX = bounds.x + bounds.width
+            val highY = bounds.y + bounds.height
+            field = value.clampIndividual(
+                -highX + width / 2 - scrollMargin, -lowX + width / 2 + scrollMargin,
+                -highY + height / 2 - scrollMargin, -lowY + height / 2 + scrollMargin
+            )
         }
 
     private var playerNode: MapNode = MapManager.currentMapNode
@@ -130,6 +137,11 @@ class DetailMapWidget(
     private var pointToNode: MapNode? = null
     private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
+
+    private val encounterModifierParent: CustomFlexBox by lazy {
+        screen.namedActorOrError(encounterModifierParentName) as? CustomFlexBox
+            ?: throw RuntimeException("actor named $encounterModifierParentName must be a CustomFlexBox")
+    }
 
     private val dragListener = object : DragListener() {
 
@@ -210,19 +222,9 @@ class DetailMapWidget(
 
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
-        val bounds = mapBounds
-        var center = Vector2()
-        bounds.getCenter(center)
-        center -= Vector2(bounds.width, screen.viewport.worldHeight * 1.5f)
-        val playerPos = Vector2(
-            -playerPos.x + screen.viewport.worldWidth * 0.5f,
-            -playerPos.y + screen.viewport.worldHeight * 0.5f
-        )
-        val offset = playerPos.clampIndividual(
-            center.x - bounds.width / 2, center.x + bounds.width / 2,
-            center.y - bounds.height / 2, center.y + bounds.height / 2
-        )
-        mapOffset.set(offset)
+        val nodePos = scaledNodePos(playerNode)
+        val idealPos = -nodePos + Vector2(screen.viewport.worldWidth, screen.viewport.worldHeight) / 2f
+        mapOffset.set(idealPos)
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
@@ -462,6 +464,25 @@ class DetailMapWidget(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText
         )
+        encounterModifierParent.clearChildren()
+        screen.enterState(noEncounterModifierScreenState)
+        if (event !is EncounterMapEvent) return
+        val encounter = GameDirector.encounters[event.encounterIndex]
+        val encounterModifiers = encounter.encounterModifiers
+        if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
+        encounterModifiers.forEach { modifierName ->
+            val modifier = EncounterModifier.getFromName(modifierName)
+            screen.screenBuilder.generateFromTemplate(
+                encounterModifierDisplayTemplateName,
+                mapOf(
+                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+                ),
+                encounterModifierParent,
+                screen
+            )!!
+        }
     }
 
     private fun updateScreenState(event: MapEvent?) {
@@ -541,6 +562,7 @@ class DetailMapWidget(
     companion object {
         const val displayEventDetailScreenState: String = "displayEventDetail"
         const val eventCanBeStartedScreenState: String = "canStartEvent"
+        const val noEncounterModifierScreenState: String = "noEncounterModifier"
     }
 
 }
