@@ -38,6 +38,8 @@ encounterModifiers: {
     moist: encounterModifierConfig,
 },
 
+encounterModifierAssets: string[],
+
 damageOverlay: {
     duration: float,
     fadeIn: float,

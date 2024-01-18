@@ -33,8 +33,6 @@ assets: {
 
         "enemy_action_damage", "enemy_action_cover",
 
-        "encounter_modifier_frost",
-
         "enemy_pyro", "enemy_action_burning", "enemy_action_inferno",
         "enemy_action_hot_potato", "enemy_action_unknown",
         "enemy_pyro_action_comic_common_panel_1", "enemy_pyro_action_comic_common_panel_2",
@@ -58,6 +56,7 @@ assets: {
 
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
+        ...(graphicsConfig.encounterModifierAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
         ...(sharedComponents.cardHoverDetailUsedAssets),

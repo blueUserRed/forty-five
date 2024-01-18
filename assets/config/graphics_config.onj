@@ -65,6 +65,10 @@ encounterModifiers: {
     },
 },
 
+encounterModifierAssets: [
+    "encounter_modifier_frost"
+],
+
 damageOverlay: {
     duration: 1.5,
     fadeIn: 0.0,
