@@ -126,5 +126,6 @@ task packAnimations {
         packAnimation("pyro_animation")
         packAnimation("sheep_animation")
         packAnimation("tree_animation")
+        packAnimation("grass_animation")
     }
 }
