@@ -965,6 +965,27 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 0,
     },
+    {
+        name: "birthdayBullet",
+        title: "Birthday Bullet",
+        flavourText: "Haaaaappy Birthdaaay!!",
+        description: "Whenever this rotates into the slot that it was originally placed into:\nGain 3 reserves, then: you loose 1 life",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            reserveGain("return home", 3#val),
+            damagePlayer("return home", 1#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1", "rarity1"],
+        price: 0,
+    },
 
 ],
 
