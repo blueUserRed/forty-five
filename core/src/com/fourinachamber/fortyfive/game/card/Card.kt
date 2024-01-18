@@ -608,6 +608,12 @@ class CardActor(
 
     private val cardTexturePixmap: Pixmap
 
+    override var isHoverDetailActive: Boolean
+        get() = card.shortDescription.isNotBlank() ||
+                card.flavourText.isNotBlank() ||
+                card.getAdditionalHoverDescriptions().isNotEmpty()
+        set(value) {}
+
     private val onRightClickShowAdditionalInformationListener = object : InputListener() {
 
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
@@ -713,8 +719,12 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-        "description" to OnjString(card.shortDescription),
-        "flavorText" to OnjString(card.flavourText),
+        "description" to OnjString(
+            card.shortDescription.ifBlank { card.flavourText }
+        ),
+        "flavorText" to OnjString(
+            if (card.shortDescription.isBlank()) "" else card.flavourText
+        ),
         "effects" to DetailDescriptionHandler.allTextEffects,
 //        "rotation" to OnjFloat(rotation.toDouble()),
     )
@@ -769,7 +779,7 @@ class CardActor(
     }
 
     fun <T> updateDetailStates(hoverActor: T) where T : Actor, T : StyledActor {
-        if (card.flavourText.isBlank()) {
+        if (card.flavourText.isBlank() || card.shortDescription.isBlank()) {
             screen.leaveState("hoverDetailHasFlavorText")
         } else {
             screen.enterState("hoverDetailHasFlavorText")
