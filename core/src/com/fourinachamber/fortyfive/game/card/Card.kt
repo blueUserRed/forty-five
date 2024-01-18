@@ -40,14 +40,14 @@ class CardPrototype(
     val forceLoadCards: List<String>,
 ) {
 
-    var creator: (() -> Card)? = null
+    var creator: ((screen: OnjScreen) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
 
     /**
      * creates an actual instance of this card
      */
-    fun create(): Card = creator!!()
+    fun create(screen: OnjScreen): Card = creator!!(screen)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -418,7 +418,6 @@ class Card(
          */
         fun getFrom(
             cards: OnjArray,
-            onjScreen: OnjScreen,
             initializer: (Card) -> Unit
         ): List<CardPrototype> {
 
@@ -435,7 +434,7 @@ class Card(
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                         onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     )
-                    prototype.creator = { getCardFrom(onj, onjScreen, initializer, prototype) }
+                    prototype.creator = { screen -> getCardFrom(onj, screen, initializer, prototype) }
                     prototypes.add(prototype)
                 }
             return prototypes
