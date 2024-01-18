@@ -107,6 +107,7 @@ var controller = $GameScreenController {
     hardMaxCards: gameConfig.cardDrawConfig.hardMaxCards,
     reservesAtRoundBegin: gameConfig.reservesConfig.roundStart,
     shotEmptyDamage: gameConfig.damageConfig.shotEmptyDamage,
+    rewardChance: gameConfig.cardDrawConfig.chooseCardRewardPercantage,
     encounterModifierDisplayTemplateName: "encounter_modifier_display",
     encounterModifierParentName: "encounter_modifier_parent",
     tutorialInfoActorName: "tutorialInfoActor"
