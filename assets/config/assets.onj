@@ -187,6 +187,10 @@ textures: [
         file: "textures/map/detail/background.png"
     },
     {
+        name: "map_detail_encounter_modifier_background",
+        file: "textures/map/detail/encounter_modifier_background.png"
+    },
+    {
         name: "map_background_grass_tileable",
         file: "textures/map/backgrounds/grass.png",
     },
