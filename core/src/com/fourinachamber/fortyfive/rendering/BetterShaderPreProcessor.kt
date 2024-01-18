@@ -149,6 +149,7 @@ class BetterShaderPreProcessor(
             "u_time" to "float",
             "u_resolution" to "vec2",
             "u_perlin512x512" to "sampler2D",
+            "u_iceTexture" to "sampler2D",
         )
 
     }

@@ -9,7 +9,6 @@ import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
@@ -143,7 +142,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var encounterContext: EncounterContext
         private set
 
-    private val encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
+    private val _encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
+    val encounterModifiers: List<EncounterModifier>
+        get() = _encounterModifiers
 
     var reservesSpent: Int = 0
         private set
@@ -212,7 +213,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
-        val cards = gameDirector.encounter.forceCards ?: SaveState.cards
+        val cards = gameDirector.encounter.forceCards ?: SaveState.curDeck.cards
 
         val cardsArray = onj.get<OnjArray>("cards")
 
@@ -430,7 +431,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun addEncounterModifier(modifier: EncounterModifier) {
-        encounterModifiers.add(modifier)
+        _encounterModifiers.add(modifier)
         curScreen.screenBuilder.generateFromTemplate(
             encounterModifierDisplayTemplateName,
             mapOf(
@@ -467,7 +468,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.onEnter()
             checkCardMaximums()
         }
-        encounterModifiers
+        _encounterModifiers
             .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
             .collectTimeline()
             .let { include(it) }
@@ -703,7 +704,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
             }
-            encounterModifiers
+            _encounterModifiers
                 .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }
                 .collectTimeline()
                 .let { include(it) }
@@ -718,7 +719,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
-        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
+        if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
         action {
             enemy.applyEffect(statusEffect)
         }
@@ -735,7 +736,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 .mapNotNull { it.card }
                 .forEach { it.onRevolverRotation(rotation) }
         }
-        encounterModifiers
+        _encounterModifiers
             .mapNotNull { it.executeAfterRevolverRotated(newRotation, this@GameController) }
             .collectTimeline()
             .let { include(it) }
@@ -753,7 +754,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun <T> modifiers(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
         var cur = initial
-        encounterModifiers.forEach { cur = transformer(it, cur) }
+        _encounterModifiers.forEach { cur = transformer(it, cur) }
         return cur
     }
 
