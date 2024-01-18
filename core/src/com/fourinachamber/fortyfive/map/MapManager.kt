@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.*
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
@@ -116,8 +117,8 @@ object MapManager {
         FortyFive.changeToScreen(screenPaths["shopScreen"]!!, event)
     }
 
-    fun changeToChooseCardScreen(event: MapEvent) {
-        FortyFive.changeToScreen(screenPaths["chooseCardScreen"]!!, event)
+    fun changeToChooseCardScreen(context: ChooseCardScreenContext) {
+        FortyFive.changeToScreen(screenPaths["chooseCardScreen"]!!, context)
     }
 
     fun changeToHealOrMaxHPScreen(event: MapEvent) {
