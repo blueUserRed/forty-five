@@ -867,6 +867,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             revolver.removeCard(card)
             card.leaveGame()
         }
+        include(checkEffectsSingleCard(Trigger.ON_BOUNCE, card))
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
@@ -877,7 +878,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
-        return card.checkEffects(trigger, triggerInformation, this)
+        return Timeline.timeline {
+            include(card.checkEffects(trigger, triggerInformation, this@GameController))
+            trigger
+                .cascadeTriggers
+                .map { checkEffectsSingleCard(it, card, triggerInformation) }
+                .collectTimeline()
+                .let { include(it) }
+        }
     }
 
     @MainThreadOnly
@@ -886,10 +894,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
-        return createdCards
-            .filter { it.inGame || it.inHand(this) }
-            .map { it.checkEffects(trigger, triggerInformation, this) }
-            .collectTimeline()
+        return Timeline.timeline {
+            createdCards
+                .filter { it.inGame || it.inHand(this@GameController) }
+                .map { it.checkEffects(trigger, triggerInformation, this@GameController) }
+                .collectTimeline()
+                .let { include(it) }
+            trigger
+                .cascadeTriggers
+                .map { checkEffectsActiveCards(trigger, triggerInformation) }
+                .collectTimeline()
+                .let { include(it) }
+        }
     }
 
     @MainThreadOnly
