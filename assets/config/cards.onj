@@ -528,14 +528,14 @@ cards: [
         name: "bull_et",
         title: "Bull et",
         flavourText: "",
-        description: "$trigger$On-Rotate:$trigger$\nDeal 3 dmg to all enemies",
+        description: "$trigger$On-Rotate:$trigger$\nDeal 5 dmg to all enemies",
         baseDamage: 7,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damageDirect("rotation", 2#val)
+            damageDirect("rotation", 5#val)
         ],
         forceLoadCards: [],
         dark: false,
