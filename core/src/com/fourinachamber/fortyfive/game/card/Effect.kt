@@ -464,10 +464,18 @@ typealias EffectValue = (controller: GameController, card: Card) -> Int
 /**
  * possible triggers for an effect
  */
-enum class Trigger {
-    ON_ENTER, ON_SHOT, ON_ROUND_START, ON_ROUND_END, ON_DESTROY, ON_CARDS_DRAWN, ON_SPECIAL_CARDS_DRAWN,
-    ON_REVOLVER_ROTATION, ON_ANY_CARD_DESTROY
-
+enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
+    ON_ENTER,
+    ON_LEAVE,
+    ON_SHOT(listOf(ON_LEAVE)),
+    ON_ROUND_START,
+    ON_ROUND_END,
+    ON_DESTROY(listOf(ON_LEAVE)),
+    ON_BOUNCE(listOf(ON_LEAVE)),
+    ON_CARDS_DRAWN,
+    ON_SPECIAL_CARDS_DRAWN,
+    ON_REVOLVER_ROTATION,
+    ON_ANY_CARD_DESTROY,
 }
 
 data class TriggerInformation(

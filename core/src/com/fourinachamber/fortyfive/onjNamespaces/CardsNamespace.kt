@@ -298,6 +298,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER
         "shot" -> Trigger.ON_SHOT
+        "bounce" -> Trigger.ON_BOUNCE
+        "leave" -> Trigger.ON_LEAVE
         "destroy" -> Trigger.ON_DESTROY
         "round start" -> Trigger.ON_ROUND_START
         "round end" -> Trigger.ON_ROUND_END
