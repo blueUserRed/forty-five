@@ -12,8 +12,6 @@ var distributionFunctionStandardConfig = {
     canOverlapWithOtherNodes: boolean
 };
 
-
-
 $DecorationDistributionFunction {
 
     $RandomDistributionFunction {
@@ -68,6 +66,7 @@ var mapRestrictions = {
     },
     decorationSeed: int,
     decorations: $DecorationDistributionFunction[],
+    animatedDecorations: $DecorationDistributionFunction[],
     exitNodeTexture: string,
     avgNbrOfEncounters: int,
     progress: float[2]

@@ -161,13 +161,17 @@ class Card(
 
     init {
         screen.borrowResource(cardTexturePrefix + name)
-        actor = CardActor(
-            this,
-            font,
-            fontScale,
-            isDark,
-            screen
-        )
+        // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
+        // card texture while the constructor is running and actor is not yet assigned
+        synchronized(this) {
+            actor = CardActor(
+                this,
+                font,
+                fontScale,
+                isDark,
+                screen
+            )
+        }
     }
 
     /**
@@ -593,6 +597,8 @@ class CardActor(
 
     private val cardTexturePixmap: Pixmap
 
+    private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
+
     private val onRightClickShowAdditionalInformationListener = object : InputListener() {
 
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
@@ -624,6 +630,9 @@ class CardActor(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (drawPixmapMessage?.isFinished ?: false) {
+            finishPixmapDrawing()
+        }
         setBoundsOfHoverDetailActor(this)
         batch ?: return
         val texture = pixmapTextureRegion ?: return
@@ -660,20 +669,22 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int) {
-        pixmap.drawPixmap(cardTexturePixmap, 0, 0)
-        val situation = when {
-            damageValue > card.baseDamage -> "increase"
-            damageValue < card.baseDamage -> "decrease"
-            else -> "normal"
-        }
-        val damageFontColor = GraphicsConfig.cardFontColor(isDark, situation)
-        val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
-        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
-        font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
+        val message = ServiceThreadMessage.DrawCardPixmap(
+            pixmap,
+            cardTexturePixmap,
+            card,
+            damageValue
+        )
+        FortyFive.serviceThread.sendMessage(message)
+        drawPixmapMessage = message
+    }
+
+    private fun finishPixmapDrawing() {
         pixmapTextureRegion?.texture?.dispose()
         val texture = Texture(pixmap, true)
         texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
         pixmapTextureRegion = TextureRegion(texture)
+        drawPixmapMessage = null
     }
 
     override fun getBounds(): Rectangle {

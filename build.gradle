@@ -107,3 +107,25 @@ task texturePacker {
         }
     }
 }
+
+def packAnimation(anim) {
+    def atlasDir = file("assets/large_assets/packed/$anim")
+    if (atlasDir.exists()) {
+        atlasDir.deleteDir()
+    }
+    TexturePacker.process(
+        "assets/large_assets/$anim",
+        "assets/large_assets/packed/$anim",
+        anim
+    )
+}
+
+task packAnimations {
+    doLast {
+        packAnimation("outlaw_animation")
+        packAnimation("pyro_animation")
+        packAnimation("sheep_animation")
+        packAnimation("tree_animation")
+        packAnimation("grass_animation")
+    }
+}

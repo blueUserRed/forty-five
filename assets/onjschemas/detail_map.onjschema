@@ -28,6 +28,12 @@ decorations: {
     positions: float[3][]
 
 }[],
+animatedDecorations: {
+    texture: string,
+    baseWidth: float,
+    baseHeight: float,
+    positions: float[3][]
+}[],
 biome: string,
 isArea: boolean,
 progress: float[2]

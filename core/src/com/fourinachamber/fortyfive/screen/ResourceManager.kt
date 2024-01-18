@@ -52,12 +52,8 @@ object ResourceManager {
     fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toGiveBack = resources.find { it.handle == handle }
             ?: throw RuntimeException("no resource with handle $handle")
-        if (borrower !in toGiveBack.borrowedBy) {
-            throw RuntimeException("resource $handle not borrowed by $borrower")
-        }
         toGiveBack.giveBack(borrower)
     }
-
 
     private const val assetsFile: String = "config/assets.onj"
 
@@ -164,6 +160,16 @@ object ResourceManager {
                 it.get<Long>("top").toInt(),
                 it.get<Long>("bottom").toInt(),
                 it.getOr("scale", 1.0).toFloat()
+            ))
+        }
+
+        assets.get<OnjArray>("frameAnimations").value.forEach {
+            it as OnjObject
+            resources.add(DeferredFrameAnimationResource(
+                it.get<String>("name"),
+                it.get<String>("preview"),
+                it.get<String>("atlas"),
+                it.get<Long>("frameTime").toInt()
             ))
         }
 
