@@ -235,7 +235,7 @@ npcs: [
             ],
             defaults: {
                 font: "red_wing",
-                fontScale: 0.1,
+                fontScale: 1.0,
                 color: color.forty_white
             }
         },

@@ -440,6 +440,9 @@ class FinishTutorialMapEvent(
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
 
+    override val displayName: String = "Exit"
+    override val descriptionText: String = "Start your Journey"
+
     private val goToMap: String = onj.get<String>("goToMap")
 
     override fun start() {
@@ -448,6 +451,7 @@ class FinishTutorialMapEvent(
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("FinishTutorialMapEvent")
         "goToMap" with goToMap
     }
 
