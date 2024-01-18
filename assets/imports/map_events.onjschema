@@ -51,4 +51,9 @@ $MapEvent {
         nbrOfCards: int,
         ...mapEventStandardConfig
     }
+
+    $FinishTutorialMapEvent {
+        goToMap: string
+    }
+
 }

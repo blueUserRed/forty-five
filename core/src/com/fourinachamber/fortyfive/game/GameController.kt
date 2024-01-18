@@ -223,7 +223,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val cardsArray = onj.get<OnjArray>("cards")
 
         cardPrototypes = Card
-            .getFrom(cardsArray, curScreen, ::initCard)
+            .getFrom(cardsArray, ::initCard)
             .toMutableList()
 
         cards.forEach { cardName ->
@@ -242,7 +242,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            cardStack.add(card.create())
+            cardStack.add(card.create(curScreen))
         }
 
         if (gameDirector.encounter.shuffleCards) cardStack.shuffle()
@@ -629,7 +629,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 .firstOrNull { it.name == name }
                 ?: throw RuntimeException("unknown card: $name")
             repeat(cardsToDraw) {
-                cardHand.addCard(cardProto.create())
+                cardHand.addCard(cardProto.create(curScreen))
             }
             FortyFiveLogger.debug(logTag, "card $name entered hand $amount times")
             checkCardMaximums()
@@ -1003,7 +1003,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @AllThreadsAllowed
     fun drawCard() {
-        val card = cardStack.removeFirstOrNull() ?: defaultBullet.create()
+        val card = cardStack.removeFirstOrNull() ?: defaultBullet.create(curScreen)
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++

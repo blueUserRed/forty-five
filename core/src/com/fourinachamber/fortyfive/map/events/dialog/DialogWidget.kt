@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
@@ -82,6 +84,7 @@ class DialogWidget(
     }
 
     private fun finished(): Timeline = when (val part = currentPart!!.nextDialogPartSelector) {
+
         is NextDialogPartSelector.Continue -> Timeline.timeline {
             action { readyToAdvance = true }
             delayUntil { !readyToAdvance }
@@ -102,6 +105,22 @@ class DialogWidget(
             action { readyToAdvance = true }
             delayUntil { !readyToAdvance }
             action { FortyFive.changeToScreen(part.nextScreen) }
+        }
+
+        is NextDialogPartSelector.GiftCardEnd -> Timeline.timeline {
+            action { readyToAdvance = true }
+            delayUntil { !readyToAdvance }
+            action {
+                val context = object : ChooseCardScreenContext {
+                    override val forwardToScreen: String = part.nextScreen
+                    override val seed: Long = -1
+                    override val nbrOfCards: Int = 1
+                    override val types: List<String> = listOf()
+                    override val forceCards: List<String> = listOf(part.card)
+                    override fun completed() {}
+                }
+                MapManager.changeToChooseCardScreen(context)
+            }
         }
 
         is NextDialogPartSelector.Choice -> Timeline.timeline {
