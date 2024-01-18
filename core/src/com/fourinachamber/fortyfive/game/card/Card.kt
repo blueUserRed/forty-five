@@ -8,8 +8,6 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -26,8 +24,6 @@ import ktx.actors.alpha
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -133,6 +129,8 @@ class Card(
         private set
     var isSpray: Boolean = false
         private set
+    var isReinforced: Boolean = false
+        private set
 
     val shouldRemoveAfterShot: Boolean
         get() = !(isEverlasting || protectingModifiers.isNotEmpty())
@@ -154,6 +152,12 @@ class Card(
     private var protectingModifiers: MutableList<Triple<String, Int, () -> Boolean>> = mutableListOf()
 
     private var modifierValuesDirty = true
+
+    var enteredInSlot: Int? = null
+        private set
+
+    var rotationCounter: Int = 0
+        private set
 
     init {
         screen.borrowResource(cardTexturePrefix + name)
@@ -311,14 +315,16 @@ class Card(
     /**
      * called when the card enters the game
      */
-    fun onEnter() {
+    fun onEnter(controller: GameController) {
         inGame = true
+        enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
     }
 
     /**
      * called when the revolver rotates (but not when this card was shot)
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
+        rotationCounter += rotation.amount
     }
 
     fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
@@ -496,6 +502,7 @@ class Card(
                 "undead" -> card.isUndead = true
                 "replaceable" -> card.isReplaceable = true
                 "spray" -> card.isSpray = true
+                "reinforced" -> card.isReinforced = true
                 "rotten" -> {
                     card.isRotten = true
                     card.addRottenModifier()

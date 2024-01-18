@@ -60,6 +60,11 @@ fun interface GamePredicate {
             statusEffect in controller.enemyArea.getTargetedEnemy().statusEffects
         } }
 
+        val targetedEnemyHealthAbovePercent = { percent: Float -> GamePredicate { controller ->
+            val enemy = controller.enemyArea.getTargetedEnemy()
+            (enemy.currentHealth.toFloat() / enemy.health.toFloat()) > percent
+        } }
+
 
         fun fromOnj(obj: OnjNamedObject, inContextOfEnemy: Enemy? = null): GamePredicate = when (obj.name) {
 
@@ -84,6 +89,7 @@ fun interface GamePredicate {
             "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
             "PlayerHasPlayedSilverBulletAndDrawnCards" -> playerHasPlayedSilverBulletAndDrawnCards
             "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
+            "TargetedEnemyHealthAbovePercent" -> targetedEnemyHealthAbovePercent(obj.get<Double>("value").toFloat())
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")
 

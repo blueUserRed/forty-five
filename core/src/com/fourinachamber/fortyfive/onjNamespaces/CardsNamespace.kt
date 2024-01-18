@@ -30,7 +30,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @OnjNamespaceVariables
     val variables: Map<String, OnjObject> = mapOf(
         "value" to buildOnjObject {
-            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller ->
+            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller, _ ->
                 controller
                     .revolver
                     .slots
@@ -38,6 +38,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .maxOfOrNull { it.cost }
                     ?: 0
             }
+            "rotationAmount" with OnjEffectValue { _, card -> card.rotationCounter }
         }
     )
 
@@ -236,6 +237,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "params: [*]")
+    fun shield(shield: OnjValue): OnjStatusEffect = OnjStatusEffect {
+        Shield(getIntParamFromOnj(shield))
+    }
+
     @RegisterOnjFunction(schema = "params: [*, float, boolean]")
     fun burning(rotations: OnjValue, percent: OnjFloat, isInfinite: OnjBoolean): OnjStatusEffect = OnjStatusEffect {
         Burning(
@@ -275,7 +281,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
-    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { value.value.toInt() }
+    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _ -> value.value.toInt() }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
     fun activeChecker(value: OnjNamedObject): OnjActiveChecker {
@@ -292,6 +298,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER
         "shot" -> Trigger.ON_SHOT
+        "bounce" -> Trigger.ON_BOUNCE
+        "leave" -> Trigger.ON_LEAVE
         "destroy" -> Trigger.ON_DESTROY
         "round start" -> Trigger.ON_ROUND_START
         "round end" -> Trigger.ON_ROUND_END
@@ -299,6 +307,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "card drawn" -> Trigger.ON_CARDS_DRAWN
         "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
         "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
+        "return home" -> Trigger.ON_RETURNED_HOME
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

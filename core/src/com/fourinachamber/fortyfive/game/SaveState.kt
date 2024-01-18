@@ -8,7 +8,8 @@ import onj.parser.OnjParser
 import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
-import onj.value.*
+import onj.value.OnjArray
+import onj.value.OnjObject
 
 /**
  * stores data about the current run and can read/write it to a file
@@ -92,6 +93,7 @@ object SaveState {
     var playerLives: Int by templateParam("stat.playerLives", 0) {
         savefileDirty = true
     }
+
     /**
      * the current lives of the player
      */
@@ -202,7 +204,7 @@ object SaveState {
                     "usedReserves = $usedReserves, " +
                     "enemiesDefeated = $enemiesDefeated, " +
                     "playerMoney = $playerMoney, " +
-                    "playerLives = $playerLives"+
+                    "playerLives = $playerLives" +
                     "maxPlayerLives = $maxPlayerLives"
         )
 
@@ -282,10 +284,10 @@ object SaveState {
 
 
         init {
-            checkMinimum()
+            checkDeck()
         }
 
-        fun checkMinimum() {
+        fun checkDeck() {
             if (cardPositions.size < minDeckSize && cardPositions.size < SaveState.cards.size) {
                 val onlyBackpackCards = mutableListOf<String>()
                 val curDeck = cards.toMutableList()
@@ -302,6 +304,17 @@ object SaveState {
                     onlyBackpackCards.removeAt(onlyBackpackCards.indexOf(cur))
                 }
                 savefileDirty = true
+            }
+            //TODO ugly, this code should never be necessary
+            val remainingCards = SaveState._cards.toMutableList()
+            val iterator = _cardPositions.iterator()
+            while (iterator.hasNext()) {
+                val it = iterator.next()
+                if (it.value in remainingCards) {
+                    remainingCards.remove(it.value)
+                } else {
+                    iterator.remove()
+                }
             }
         }
 
