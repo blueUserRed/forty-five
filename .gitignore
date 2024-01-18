@@ -7,6 +7,7 @@ assets/maps/world_view/generated/*
 assets/logging/forty-five.log
 assets/maps/roads/*
 assets/maps/areas/*
+assets/large_assets/*
 /onj/build
 assets/error_logs/*
 website/out/*

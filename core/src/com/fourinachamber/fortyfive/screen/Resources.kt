@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
+import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
 import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.Either
@@ -21,13 +22,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
+import kotlin.system.measureTimeMillis
 
 
 abstract class Resource(
     val handle: String,
     var variants: List<Any> = listOf(),
     var disposables: List<Disposable> = listOf(),
-    val borrowedBy: MutableList<ResourceBorrower> = mutableListOf()
+    val borrowedBy: MutableSet<ResourceBorrower> = mutableSetOf()
 ) : Disposable {
 
     var state: ResourceState = ResourceState.NOT_LOADED
@@ -187,7 +189,7 @@ class FontResource(
 
 class AtlasResource(
     handle: ResourceHandle,
-    private val file: String
+    val file: String
 ) : Resource(handle) {
 
     private var data: TextureAtlasData? = null
@@ -466,4 +468,30 @@ class PixmapFontResource(
         variants = listOf(font!!)
         disposables = listOf(font!!)
     }
+}
+
+class DeferredFrameAnimationResource(
+    handle: ResourceHandle,
+    val previewHandle: ResourceHandle,
+    val atlasHandle: ResourceHandle,
+    val frameTime: Int
+) : Resource(handle) {
+
+    private var anim: DeferredFrameAnimation? = null
+
+    override fun loadDirectMainThread() {
+        val anim = DeferredFrameAnimation(previewHandle, atlasHandle, frameTime)
+        variants = listOf(anim)
+        disposables = listOf(anim)
+    }
+
+    override fun prepareLoadingAllThreads() {
+        anim = DeferredFrameAnimation(previewHandle, atlasHandle, frameTime)
+    }
+
+    override fun finishLoadingMainThread() {
+        variants = listOf(anim!!)
+        disposables = listOf(anim!!)
+    }
+
 }
