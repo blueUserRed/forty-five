@@ -218,6 +218,7 @@ interface DisplayDetailsOnHoverActor {
     var actorTemplate: String
     var detailActor: Actor?
     var mainHoverDetailActor: String?
+    var isHoverDetailActive: Boolean
 
     fun <T> registerOnHoverDetailActor(
         actor: T,
