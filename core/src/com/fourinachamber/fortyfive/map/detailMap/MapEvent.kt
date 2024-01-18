@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -175,6 +176,8 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), GameController.EncounterCo
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
+    override val forwardToScreen: String = MapManager.mapScreenPath
+
     init {
         setStandardValuesFromConfig(obj)
         setDistanceFromConfig(obj)
@@ -298,7 +301,7 @@ class ShopMapEvent(
  */
 class ChooseCardMapEvent(
     onj: OnjObject
-) : MapEvent(), Completable {
+) : MapEvent(), ChooseCardScreenContext, Completable {
 
     override var currentlyBlocks: Boolean = false
     override var canBeStarted: Boolean = true
@@ -306,9 +309,11 @@ class ChooseCardMapEvent(
 
     override val displayDescription: Boolean = true
 
-    val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
-    val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
-    val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
+    override val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
+    override val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
+    override val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
+
+    override val forwardToScreen: String = MapManager.mapScreenPath
 
     override val descriptionText: String =
         if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."

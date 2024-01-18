@@ -37,6 +37,9 @@ object FortyFive : Game() {
 
         override val encounterIndex: Int = 0 // = first tutorial encounter
 
+        override val forwardToScreen: String
+            get() = MapManager.mapScreenPath
+
         override fun completed() {
             SaveState.playerCompletedFirstTutorialEncounter = true
         }
@@ -118,6 +121,9 @@ object FortyFive : Game() {
 //        resetAll()
 //        MapManager.generateMapsSync()
 //        newRun()
+        if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
+            resetAll()
+        }
         PermaSaveState.read()
         SaveState.read()
         MapManager.read()

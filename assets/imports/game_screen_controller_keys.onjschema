@@ -34,3 +34,4 @@ hardMaxCards: int,
 reservesAtRoundBegin: int,
 shotEmptyDamage: int,
 tutorialInfoActorName: string,
+rewardChance: float

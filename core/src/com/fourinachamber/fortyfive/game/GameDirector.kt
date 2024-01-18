@@ -36,7 +36,7 @@ class GameDirector(private val controller: GameController) {
             .map { enemy -> enemyPrototypes.find { it.name == enemy } ?: throw RuntimeException("unknown enemy $enemy") }
             .map { it.create(it.baseHealth) }
         encounter
-            .encounterModifier
+            .encounterModifiers
             .forEach { controller.addEncounterModifier(EncounterModifier.getFromName(it)) }
         this.encounter = encounter
         controller.addTutorialText(encounter.tutorialTextParts)
@@ -76,7 +76,7 @@ class GameDirector(private val controller: GameController) {
 
     data class Encounter(
         val enemies: List<String>,
-        val encounterModifier: Set<String>,
+        val encounterModifiers: Set<String>,
         val biomes: Set<String>,
         val progress: ClosedFloatingPointRange<Float>,
         val weight: Int,
@@ -108,7 +108,8 @@ class GameDirector(private val controller: GameController) {
 
         const val logTag = "director"
 
-        private lateinit var encounters: List<Encounter>
+        lateinit var encounters: List<Encounter>
+            private set
 
         private val enemiesFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/enemies.onjschema").file())
