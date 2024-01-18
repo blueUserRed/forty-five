@@ -725,7 +725,7 @@ cards: [
     {
         name: "deputiesBullet",
         title: "Deputies Bullet",
-        flavourText: "Deputies Bullet",
+        flavourText: "",
         description: "This Bullet can't be placed in slot 3.\n\n$trigger$On-Placedown:$trigger$\nReturn the bullet in slot 3 to your hand",
         baseDamage: 6,
         coverValue: 0,
@@ -739,6 +739,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
+        forbiddenSlots: [3],
         tags: ["pool1", "rarity3"],
         price: 0,
     },
