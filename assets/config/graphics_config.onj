@@ -33,6 +33,10 @@ icons: {
     wrathOfTheWitch: {
         icon: "burning_icon",
         scale: 0.25
+    },
+    shield: {
+        icon: "shield_icon",
+        scale: 0.25
     }
 },
 
@@ -64,6 +68,10 @@ encounterModifiers: {
         description: "Every bullet in the revolver loses one damage every time it turns in the revolver"
     },
 },
+
+encounterModifierAssets: [
+    "encounter_modifier_frost"
+],
 
 damageOverlay: {
     duration: 1.5,

@@ -51,4 +51,8 @@ $GamePredicate {
         value: StatusEffect
     }
 
+    $TargetedEnemyHealthAbovePercent {
+        value: float
+    }
+
 }
