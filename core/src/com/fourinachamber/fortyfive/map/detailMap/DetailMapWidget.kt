@@ -310,7 +310,7 @@ class DetailMapWidget(
     }
 
     private fun goToNode(node: MapNode) {
-//        if (!canGoTo(node)) return // TODO: COMMENT BACK IN!!!!!!!!!
+        if (!canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
         val nodePos = scaledNodePos(node)
