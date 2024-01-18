@@ -244,7 +244,18 @@ generatorConfig: {
                         distanceToEnd: -1,
                     }
                 },
-                animatedDecorations: [],
+                animatedDecorations: [
+//                    $RandomDistributionFunction {
+//                        decoration: "grass",
+//                        density: 0.04,
+//                        baseWidth: 1.0,
+//                        baseHeight: 1.0,
+//                        scaleMin: 1.8,
+//                        scaleMax: 2.5,
+//                        onlyCollidesWithNodes: false,
+//                        canOverlapWithOtherNodes: true,
+//                    },
+                ],
                 decorations: [
                     $RandomDistributionFunction {
                         decoration: "map_decoration_wasteland_skull_1",

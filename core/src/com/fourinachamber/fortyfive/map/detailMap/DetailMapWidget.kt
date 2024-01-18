@@ -296,6 +296,13 @@ class DetailMapWidget(
             }
         }
 
+        "grass" -> createAnimation {
+            val anim = deferredAnimation("map_decoration_grass_animation")
+            order {
+                loop(anim)
+            }
+        }
+
         else -> throw RuntimeException("unknown animated decoration: $name")
     }
 
