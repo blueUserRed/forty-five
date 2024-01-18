@@ -663,6 +663,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool2"],
+        additionalHoverInfos: ["mostExpensiveBullet"],
         price: 0,
     },
     {
