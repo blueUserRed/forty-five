@@ -1057,7 +1057,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     override fun completed() { }
                 }
 
-                if (Utils.coinFlip(rewardChance)) {
+                if (!gameDirector.encounter.special && Utils.coinFlip(rewardChance)) {
                     MapManager.changeToChooseCardScreen(chooseCardContext)
                 } else {
                     FortyFive.changeToScreen(encounterContext.forwardToScreen)
