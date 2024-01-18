@@ -153,6 +153,9 @@ class Card(
 
     private var modifierValuesDirty = true
 
+    var enteredInSlot: Int? = null
+        private set
+
     var rotationCounter: Int = 0
         private set
 
@@ -308,8 +311,9 @@ class Card(
     /**
      * called when the card enters the game
      */
-    fun onEnter() {
+    fun onEnter(controller: GameController) {
         inGame = true
+        enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
     }
 
     /**

@@ -307,6 +307,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "card drawn" -> Trigger.ON_CARDS_DRAWN
         "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
         "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
+        "return home" -> Trigger.ON_RETURNED_HOME
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

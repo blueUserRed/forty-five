@@ -464,7 +464,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             revolver.setCard(slot, card)
             FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
-            card.onEnter()
+            card.onEnter(this@GameController)
             checkCardMaximums()
         }
         encounterModifiers
@@ -731,8 +731,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
         var newRotation = modifiers(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
         playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
+        include(revolver.rotate(newRotation))
         action {
-            dispatchAnimTimeline(revolver.rotate(newRotation))
             revolverRotationCounter += newRotation.amount
             revolver
                 .slots
@@ -746,6 +746,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (newRotation.amount != 0) {
             val info = TriggerInformation(multiplier = newRotation.amount)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
+            includeLater(
+                {
+                    revolver
+                        .slots
+                        .asList()
+                        .zip { it.card }
+                        .filter { it.second != null }
+                        .filter { it.first.num == it.second?.enteredInSlot }
+                        .map { checkEffectsSingleCard(Trigger.ON_RETURNED_HOME, it.second!!) }
+                        .collectTimeline()
+                },
+                { true }
+            )
         }
         enemyArea
             .enemies
@@ -871,8 +884,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
-    @MainThreadOnly
-    private fun checkEffectsSingleCard(
+    fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
         triggerInformation: TriggerInformation = TriggerInformation()

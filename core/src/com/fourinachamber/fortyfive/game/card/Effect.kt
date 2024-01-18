@@ -476,6 +476,7 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
     ON_SPECIAL_CARDS_DRAWN,
     ON_REVOLVER_ROTATION,
     ON_ANY_CARD_DESTROY,
+    ON_RETURNED_HOME,
 }
 
 data class TriggerInformation(
