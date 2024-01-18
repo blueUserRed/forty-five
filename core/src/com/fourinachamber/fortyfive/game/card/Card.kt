@@ -8,8 +8,6 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
-import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -26,8 +24,6 @@ import ktx.actors.alpha
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -93,6 +89,7 @@ class Card(
     val tags: List<String>,
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
+    val additionalHoverInfos: List<String>,
     font: PixmapFont,
     fontScale: Float,
     screen: OnjScreen
@@ -374,7 +371,9 @@ class Card(
         }
 
         currentHoverTexts = currentEffects
-        actor.updateDetailStates()
+        val detailActor = actor.detailActor ?: return
+        detailActor as StyledActor
+        actor.updateDetailStates(detailActor)
     }
 
     private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller))
@@ -390,6 +389,25 @@ class Card(
         res.addAll(DetailDescriptionHandler.getKeyWordsFromDescription(shortDescription))
         res.addAll(currentHoverTexts.map { it.first })
         return res
+    }
+
+    fun getAdditionalHoverDescriptions(): List<String> {
+        return additionalHoverInfos.map { info ->
+            when (info) {
+                "home" -> TODO()
+                "rotations" -> TODO()
+                "mostExpensiveBullet" -> {
+                    val mostExpensive = (actor.screen.screenController as GameController)
+                        .revolver
+                        .slots
+                        .mapNotNull { it.card }
+                        .maxOfOrNull { it.cost }
+                        ?: 0
+                    "most expensive bullet costs $mostExpensive"
+                }
+                else -> throw RuntimeException("unknown additional hover info $info")
+            }
+        }
     }
 
     companion object {
@@ -464,6 +482,11 @@ class Card(
                 font = GraphicsConfig.cardFont(onjScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.get<Boolean>("dark"),
+                additionalHoverInfos = onj
+                    .getOr<OnjArray?>("additionalHoverInfos", null)
+                    ?.value
+                    ?.map { it.value as String }
+                    ?: listOf(),
                 screen = onjScreen
             )
 
@@ -549,7 +572,6 @@ class CardActor(
 
     override var fixedZIndex: Int = 0
 
-
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
     override var styleManager: StyleManager? = null
@@ -600,13 +622,6 @@ class CardActor(
         }
     }
 
-    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
-        val allKeys = card.getKeyWordsForDescriptions()
-        DetailDescriptionHandler.descriptions.filter { it.key in allKeys }.forEach {
-            addHoverItemToParent(it.value.second, descriptionParent)
-        }
-    }
-
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
@@ -614,6 +629,19 @@ class CardActor(
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
         redrawPixmap(card.baseDamage)
         addListener(onRightClickShowAdditionalInformationListener)
+    }
+
+    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
+        val allKeys = card.getKeyWordsForDescriptions()
+        DetailDescriptionHandler
+            .descriptions
+            .filter { it.key in allKeys }
+            .forEach {
+                addHoverItemToParent(it.value.second, descriptionParent)
+            }
+        card
+            .getAdditionalHoverDescriptions()
+            .forEach { addHoverItemToParent(it, descriptionParent) }
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -702,11 +730,11 @@ class CardActor(
     }
 
     override fun onDetailDisplayStarted() {
-        detailActor?.let {
-            updateDetailStates()
-            val tempInfoParent = getParentsForExtras(it).second
-            card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
-        }
+        val detailActor = detailActor ?: return
+        detailActor as StyledActor
+        updateDetailStates(detailActor)
+        val tempInfoParent = getParentsForExtras(detailActor).second
+        card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
     }
 
     private fun addHoverItemToParent(
@@ -734,19 +762,23 @@ class CardActor(
         val directionsToUse =
             if (it.localToStageCoordinates(Vector2(it.width, 0F)).x >= stage.viewport.worldWidth) {
                 left to top
-                //            } else if (it.localToStageCoordinates(Vector2(0F, 0F)).x <= 0) {
-                //                right to top  //maybe this changes, that's why it's still here
             } else {
                 right to top
             }
         return directionsToUse
     }
 
-    fun updateDetailStates() {
-        if (card.flavourText.isBlank()) screen.leaveState("hoverDetailHasFlavorText")
-        else screen.enterState("hoverDetailHasFlavorText")
+    fun <T> updateDetailStates(hoverActor: T) where T : Actor, T : StyledActor {
+        if (card.flavourText.isBlank()) {
+            screen.leaveState("hoverDetailHasFlavorText")
+        } else {
+            screen.enterState("hoverDetailHasFlavorText")
+        }
 
-        if (card.getKeyWordsForDescriptions().isEmpty()) screen.leaveState("hoverDetailHasMoreInfo")
-        else screen.enterState("hoverDetailHasMoreInfo")
+        if (card.getKeyWordsForDescriptions().isEmpty() && card.getAdditionalHoverDescriptions().isEmpty()) {
+            screen.leaveState("hoverDetailHasMoreInfo")
+        } else {
+            screen.enterState("hoverDetailHasMoreInfo")
+        }
     }
 }
