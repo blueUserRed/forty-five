@@ -22,6 +22,7 @@ icons: {
     bewitched: iconConfig,
     wardOfTheWitch: iconConfig,
     wrathOfTheWitch: iconConfig,
+    shield: iconConfig,
 },
 
 var encounterModifierConfig = {
