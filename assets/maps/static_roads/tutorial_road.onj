@@ -156,9 +156,24 @@ nodes: [
     },
     {
         x: 380.0,
+        y: 100.0,
+        edgesTo: [
+            8, 10
+        ],
+        nodeTexture: "map_node_heal_circle",
+        event: $NPCMapEvent {
+            npc: "mayor_of_cody",
+            canOnlyBeStartedOnce: true,
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false
+        }
+    },
+    {
+        x: 420.0,
         y: 120.0,
         edgesTo: [
-            8
+            9
         ],
         nodeTexture: "map_node_exit_circle",
         event: $FinishTutorialMapEvent {

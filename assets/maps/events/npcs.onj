@@ -245,4 +245,41 @@ npcs: [
         }
     },
 
+    {
+        name: "mayor_of_cody",
+        displayName: "Mayor of Cody",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Oh hello.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "I was just taking a walk around this beautiful town, when I found something in the sand.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "I don't know what it is, but maybe it could be useful for you.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "As they say, one man's trash is anothers treasure",
+                    next: $GiftCardEnd {
+                        card: "leadersBullet",
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.0,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "shop_npcs_default",
+            scale: 2.48
+        }
+    },
+
 ]
