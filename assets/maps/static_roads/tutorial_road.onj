@@ -148,6 +148,7 @@ nodes: [
         nodeTexture: "map_node_heal_circle",
         event: $NPCMapEvent {
             npc: "brother",
+            canOnlyBeStartedOnce: true,
             currentlyBlocks: true,
             canBeStarted: true,
             isCompleted: false

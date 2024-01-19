@@ -35,6 +35,7 @@ $MapEvent {
 
     $NPCMapEvent {
         npc: string,
+        canOnlyBeStartedOnce: boolean,
         ...mapEventStandardConfig
     }
 

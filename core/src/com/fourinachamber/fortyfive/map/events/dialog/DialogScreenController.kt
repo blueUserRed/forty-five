@@ -42,6 +42,7 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
         val dialogOnj = npc.get<OnjObject>("dialog")
         TemplateString.updateGlobalParam("map.cur_event.person.displayName", npc.get<String>("displayName"))
         val dialog = Dialog.readFromOnj(dialogOnj, screen)
+        dialogWidget.onFinish { context.completed() }
         dialogWidget.start(dialog)
 
        val personLeftImage= screen.screenBuilder.generateFromTemplate(
