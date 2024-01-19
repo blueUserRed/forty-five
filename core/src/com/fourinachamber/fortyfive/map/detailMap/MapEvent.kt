@@ -238,15 +238,16 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 
 /**
  * event that opens a dialog box and allows talking to an NPC
- * @param npc the name of the npc
  */
 class NPCMapEvent(onj: OnjObject) : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
+    override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
+
+    private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
 
     val npc: String = onj.get<String>("npc")
 
@@ -259,6 +260,12 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
 
     override fun start() {
         MapManager.changeToDialogScreen(this)
+    }
+
+    fun completed() {
+        currentlyBlocks = false
+        if (canOnlyBeStartedOnce) canBeStarted = false
+        isCompleted = true
     }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {

@@ -66,6 +66,8 @@ class DialogWidget(
     private var chosenOption: String? = null
     private var currentOptions: Map<String, Int>? = null
 
+    private val onFinishedCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     private lateinit var dialog: Dialog
 
     fun start(dialog: Dialog) {
@@ -104,7 +106,10 @@ class DialogWidget(
         is NextDialogPartSelector.End -> Timeline.timeline {
             action { readyToAdvance = true }
             delayUntil { !readyToAdvance }
-            action { FortyFive.changeToScreen(part.nextScreen) }
+            action {
+                end()
+                FortyFive.changeToScreen(part.nextScreen)
+            }
         }
 
         is NextDialogPartSelector.GiftCardEnd -> Timeline.timeline {
@@ -119,6 +124,7 @@ class DialogWidget(
                     override val forceCards: List<String> = listOf(part.card)
                     override fun completed() {}
                 }
+                end()
                 MapManager.changeToChooseCardScreen(context)
             }
         }
@@ -138,6 +144,14 @@ class DialogWidget(
             includeLater({ finished() }, { true })
         }
 
+    }
+
+    private fun end() {
+        onFinishedCallbacks.forEach { it() }
+    }
+
+    fun onFinish(callback: () -> Unit) {
+        onFinishedCallbacks.add(callback)
     }
 
     private fun getPart(next: Int): DialogPart? = dialog.parts.getOrNull(next) ?: run {
