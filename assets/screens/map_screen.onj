@@ -13,7 +13,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "key_select_frame", "white_texture", "black_texture", "enemy_texture", "red_wing",
+        "title_screen_background", "key_select_frame", "white_texture", "enemy_texture", "red_wing",
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
@@ -56,7 +56,7 @@ viewport: $FitViewport {
 
 options: {
     transitionAwayTime: 1.0,
-    background: "title_screen_background",
+    background: "black_texture",
     screenController: $MapScreenController {
         tutorialInfoActor: "tutorialInfoActor",
         mapWidgetName: "map"
