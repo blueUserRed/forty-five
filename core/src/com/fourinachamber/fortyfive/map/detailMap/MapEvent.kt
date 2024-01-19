@@ -272,6 +272,7 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
         name("NPCMapEvent")
         includeStandardConfig()
         "npc" with npc
+        "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
     }
 }
 
