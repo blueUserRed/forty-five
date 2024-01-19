@@ -12,6 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.game.GameAnimation
+import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.onjNamespaces.OnjYogaValue
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CenteredDragSource
@@ -277,6 +279,12 @@ fun DragAndDrop.removeAllListenersWithActor(actor: Actor) { //This feels highly 
     targets.filter { it.actor == actor }.forEach { removeTarget(it) }
 }
 
+fun GameAnimation.asTimeline(controller: GameController): Timeline = Timeline.timeline {
+    action {
+        controller.playGameAnimation(this@asTimeline)
+    }
+    delayUntil { this@asTimeline.isFinished() }
+}
 
 fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"
 
