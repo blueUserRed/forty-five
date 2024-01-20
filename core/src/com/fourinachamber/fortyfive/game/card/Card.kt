@@ -408,8 +408,8 @@ class Card(
     fun getAdditionalHoverDescriptions(): List<String> {
         return additionalHoverInfos.map { info ->
             when (info) {
-                "home" -> TODO()
-                "rotations" -> TODO()
+                "home" -> enteredInSlot.toString()
+                "rotations" -> rotationCounter.toString()
                 "mostExpensiveBullet" -> {
                     val mostExpensive = (actor.screen.screenController as GameController)
                         .revolver
