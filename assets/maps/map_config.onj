@@ -191,11 +191,11 @@ generatorConfig: {
                 ],
                 rotation: 1.25,
                 avgNbrOfEncounters: 0,
-                exitNodeTexture: "map_node_exit_circle",
+                exitNodeTexture: "map_node_exit",
                 fixedEvents: [
                     {
                         isDeadEnd: true,
-                        nodeTexture: "map_node_shop_circle",
+                        nodeTexture: "map_node_shop",
                         event: $ShopMapEvent {
                             seed: null,
                             boughtIndices: [
@@ -208,7 +208,7 @@ generatorConfig: {
                 optionalEvents: [
                     {
                         weight: 10,
-                        nodeTexture: "map_node_fight_circle",
+                        nodeTexture: "map_node_fight",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
@@ -219,7 +219,7 @@ generatorConfig: {
                     },
                     {
                         weight: 3,
-                        nodeTexture: "map_node_heal_circle",
+                        nodeTexture: "map_node_heal",
                         event: $HealOrMaxHPEvent {
                             seed: null,
                             healRange: [
@@ -235,7 +235,7 @@ generatorConfig: {
                     },
                 ],
                 finalEvent: {
-                    nodeTexture: "map_node_fight_circle",
+                    nodeTexture: "map_node_fight",
                     event: $EncounterMapEvent {
                         currentlyBlocks: true,
                         canBeStarted: true,
@@ -321,11 +321,11 @@ generatorConfig: {
                 avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
 
                 rotation: 0.0,
-                exitNodeTexture: "map_node_exit_circle",
+                exitNodeTexture: "map_node_exit",
                 fixedEvents: [
                     {
                         isDeadEnd: true,
-                        nodeTexture: "map_node_shop_circle",
+                        nodeTexture: "map_node_shop",
                         event: $ShopMapEvent {
                             seed: null,
                             boughtIndices: [ ],
@@ -335,7 +335,7 @@ generatorConfig: {
                     },
                     {
                         isDeadEnd: false,
-                        nodeTexture: "map_node_shop_circle",
+                        nodeTexture: "map_node_shop",
                         event: $ShopMapEvent {
                             seed: null,
                             boughtIndices: [ ],
@@ -347,7 +347,7 @@ generatorConfig: {
                 optionalEvents: [
                     {
                         weight: 10,
-                        nodeTexture: "map_node_fight_circle",
+                        nodeTexture: "map_node_fight",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
@@ -358,7 +358,7 @@ generatorConfig: {
                     },
                     {
                         weight: 3,
-                        nodeTexture: "map_node_heal_circle",
+                        nodeTexture: "map_node_heal",
                         event: $HealOrMaxHPEvent {
                             seed: null,
                             healRange: [
@@ -441,11 +441,11 @@ generatorConfig: {
                 avgNbrOfEncounters: 2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
 
                 rotation: 1.0,
-                exitNodeTexture: "map_node_exit_circle",
+                exitNodeTexture: "map_node_exit",
                 fixedEvents: [
                     {
                         isDeadEnd: true,
-                        nodeTexture: "map_node_shop_circle",
+                        nodeTexture: "map_node_shop",
                         event: $ShopMapEvent {
                             seed: null,
                             boughtIndices: [
@@ -458,7 +458,7 @@ generatorConfig: {
                 optionalEvents: [
                     {
                         weight: 10,
-                        nodeTexture: "map_node_fight_circle",
+                        nodeTexture: "map_node_fight",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,
@@ -469,7 +469,7 @@ generatorConfig: {
                     },
                     {
                         weight: 3,
-                        nodeTexture: "map_node_heal_circle",
+                        nodeTexture: "map_node_heal",
                         event: $HealOrMaxHPEvent {
                             seed: null,
                             healRange: [
@@ -550,13 +550,13 @@ generatorConfig: {
                 avgNbrOfEncounters: -2, //minus 2 and lower means always 0 (which doesn't matter rn because there are none)
 
                 rotation: 0.0,
-                exitNodeTexture: "map_node_exit_circle",
+                exitNodeTexture: "map_node_exit",
                 fixedEvents: [
                 ],
                 optionalEvents: [
                     {
                         weight: 15,
-                        nodeTexture: "map_node_fight_circle",
+                        nodeTexture: "map_node_fight",
                         event: $EncounterMapEvent {
                             currentlyBlocks: true,
                             canBeStarted: true,

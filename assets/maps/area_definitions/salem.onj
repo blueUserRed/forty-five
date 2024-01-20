@@ -11,7 +11,7 @@ nodes: [
         ],
 //        image: "start_area",
 //        imagePos: "left",
-        nodeTexture: "map_node_exit_rect",
+        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem",
         }
@@ -31,7 +31,7 @@ nodes: [
         edgesTo: [
             1
         ],
-        nodeTexture: "map_node_exit_rect",
+        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "roadToAquaDulche",
         }
@@ -42,7 +42,7 @@ nodes: [
         edgesTo: [
             0
         ],
-        nodeTexture: "map_node_shop_rect",
+        nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
             seed: null,
             boughtIndices: [
