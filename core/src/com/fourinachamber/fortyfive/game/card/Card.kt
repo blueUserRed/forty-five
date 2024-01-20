@@ -631,27 +631,12 @@ class CardActor(
 
     private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
 
-    private val onRightClickShowAdditionalInformationListener = object : InputListener() {
-
-        override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
-            if (button != 1) return false
-
-            detailActor?.let {
-                val descriptionParent = getParentsForExtras(it).first
-                if (descriptionParent.children.isEmpty) showExtraDescriptions(descriptionParent)
-                return true
-            }
-            return false
-        }
-    }
-
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
         redrawPixmap(card.baseDamage)
-        addListener(onRightClickShowAdditionalInformationListener)
     }
 
     private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
@@ -767,6 +752,7 @@ class CardActor(
         updateDetailStates(detailActor)
         val tempInfoParent = getParentsForExtras(detailActor).second
         card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
+        showExtraDescriptions(getParentsForExtras(detailActor).first)
     }
 
     private fun addHoverItemToParent(
