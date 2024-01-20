@@ -58,10 +58,17 @@ class BetterShader(
         }
 
         "u_perlin512x512" -> {
-            // TODO: slightly ugly
             val texture = ResourceManager.get<Texture>(screen, "prerendered_noise_perlin_512x512")
             texture.bind(1)
             shader.setUniformi("u_perlin512x512", 1)
+            Gdx.gl.glActiveTexture(GL_TEXTURE0)
+        }
+
+        "u_iceTexture" -> {
+            // TODO: This fails if both textures are included in a shader
+            val texture = ResourceManager.get<Texture>(screen, "ice_texture")
+            texture.bind(1)
+            shader.setUniformi("u_iceTexture", 1)
             Gdx.gl.glActiveTexture(GL_TEXTURE0)
         }
 
