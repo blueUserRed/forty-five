@@ -27,7 +27,7 @@ nodes: [
         edgesTo: [
             0, 2
         ],
-        nodeTexture: "map_node_shop_rect",
+        nodeTexture: "map_node_shop",
         event: $ChooseCardMapEvent {
             seed: null,
             types: [
@@ -47,7 +47,7 @@ nodes: [
         ],
         //Phillip doesn't want these images inside the area
 
-        nodeTexture: "map_node_exit_rect",
+        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "roadToSalem", // "roadToEnd",//
 
