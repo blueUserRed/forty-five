@@ -69,7 +69,7 @@ nodes: [
         }
     },
 ],
-
+animatedDecorations: [],
 decorations: [
     {
         texture: "burning_icon",

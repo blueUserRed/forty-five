@@ -30,14 +30,14 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val cardsParentName = onj.get<String>("cardsParentName")
     private val addToDeckWidgetName = onj.get<String>("addToDeckWidgetName")
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
-    private var context: ChooseCardMapEvent? = null
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
     private var screen: OnjScreen? = null
+    private lateinit var context: ChooseCardScreenContext
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        if (context !is ChooseCardMapEvent) {
-            throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardMapEvent")
+        if (context !is ChooseCardScreenContext) {
+            throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardScreenContext")
         }
         this.context = context
         init(onjScreen, context.seed, context.types.toMutableList(), context.nbrOfCards)
@@ -139,7 +139,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "Chose card: $card")
         SaveState.buyCard(card)
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), card)
-        context?.completed()
+        context.completed()
         SaveState.write()
         MapManager.changeToMapScreen()
     }
@@ -147,4 +147,13 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     companion object {
         var logTag: String = "ChooseCardScreenController"
     }
+}
+
+interface ChooseCardScreenContext {
+    val forwardToScreen: String
+    val seed: Long
+    val nbrOfCards: Int
+    val types: List<String>
+
+    fun completed()
 }

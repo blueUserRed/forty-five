@@ -47,6 +47,31 @@ textureAtlases: [
         ]
     },
     {
+        name: "outlaw_animation_atlas",
+        file: "large_assets/packed/outlaw_animation/outlaw_animation.atlas",
+        regions: []
+    },
+    {
+        name: "pyro_animation_atlas",
+        file: "large_assets/packed/pyro_animation/pyro_animation.atlas",
+        regions: []
+    },
+    {
+        name: "map_decoration_sheep_animation_atlas",
+        file: "large_assets/packed/sheep_animation/sheep_animation.atlas",
+        regions: []
+    },
+    {
+        name: "map_decoration_tree_animation_atlas",
+        file: "large_assets/packed/tree_animation/tree_animation.atlas",
+        regions: []
+    },
+    {
+        name: "map_decoration_grass_animation_atlas",
+        file: "large_assets/packed/grass_animation/grass_animation.atlas",
+        regions: []
+    },
+    {
         name: "world_view_background_atlas",
         file: "maps/world_view/generated/background.atlas",
         regions: [
@@ -60,10 +85,6 @@ textureAtlases: [
         name: "game_screen_atlas",
         file: "textures/packed/game_screen/game_screen.atlas",
         regions: [
-            {
-                handle: "game_screen_background",
-                regionName: "background"
-            },
             {
                 handle: "revolver_slot_texture",
                 regionName: "revolver_slot"
@@ -99,10 +120,6 @@ textureAtlases: [
             {
                 handle: "player_turn_banner",
                 regionName: "player_turn_banner"
-            },
-            {
-                handle: "revolver_drum",
-                regionName: "revolver_drum"
             },
             {
                 handle: "heart_texture",
@@ -152,6 +169,10 @@ textureAtlases: [
                 handle: "under_deck_background",
                 regionName: "under_deck_background"
             },
+            {
+                handle: "game_screen_player",
+                regionName: "player"
+            },
         ]
     }
 
@@ -159,8 +180,16 @@ textureAtlases: [
 
 textures: [
     {
+        name: "game_screen_background_wasteland",
+        file: "textures/game_screen_backgrounds/wasteland.png"
+    },
+    {
         name: "loose_screen_background",
         file: "textures/screens/loose_screen_background.png"
+    },
+    {
+        name: "revolver_drum",
+        file: "textures/game_screen/revolver_drum.png"
     },
     {
         name: "win_screen_background",
@@ -185,6 +214,10 @@ textures: [
     {
         name: "map_detail_background",
         file: "textures/map/detail/background.png"
+    },
+    {
+        name: "map_detail_encounter_modifier_background",
+        file: "textures/map/detail/encounter_modifier_background.png"
     },
     {
         name: "map_background_grass_tileable",
@@ -376,7 +409,11 @@ textures: [
     },
     {
         name: "prerendered_noise_perlin_512x512",
-        file: "textures/prerendered_noise/perlin_512x512.png"
+        file: "textures/shader_textures/prerendered_noise/perlin_512x512.png"
+    },
+    {
+        name: "ice_texture",
+        file: "textures/shader_textures/ice.jpg"
     },
     {
         name: "statusbar_background",
@@ -732,6 +769,11 @@ shaders: [
         file: "shaders/grayscale.glsl",
         constantArgs: { }
     },
+    {
+        name: "ice_shader",
+        file: "shaders/ice.glsl",
+        constantArgs: { }
+    },
 ],
 
 animations: [
@@ -868,6 +910,39 @@ particles: [
         textureDir: "textures/particles",
         scale: 0.07
     }
+],
+
+frameAnimations: [
+    {
+        name: "outlaw_animation",
+        preview: "enemy_outlaw",
+        atlas: "outlaw_animation_atlas",
+        frameTime: (1000.0 / 15.0)#int
+    },
+    {
+        name: "pyro_animation",
+        preview: "enemy_pyro",
+        atlas: "pyro_animation_atlas",
+        frameTime: (1000.0 / 15.0)#int
+    },
+    {
+        name: "map_decoration_sheep_animation",
+        preview: "map_decoration_bewitched_forest_sheep_1",
+        atlas: "map_decoration_sheep_animation_atlas",
+        frameTime: (1000.0 / 15.0)#int
+    },
+    {
+        name: "map_decoration_tree_animation",
+        preview: "map_decoration_bewitched_forest_tree1",
+        atlas: "map_decoration_tree_animation_atlas",
+        frameTime: (1000.0 / 15.0)#int
+    },
+    {
+        name: "map_decoration_grass_animation",
+        preview: "map_decoration_grass",
+        atlas: "map_decoration_grass_animation_atlas",
+        frameTime: (1000.0 / 15.0)#int
+    },
 ],
 
 cards: {

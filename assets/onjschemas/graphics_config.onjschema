@@ -22,6 +22,7 @@ icons: {
     bewitched: iconConfig,
     wardOfTheWitch: iconConfig,
     wrathOfTheWitch: iconConfig,
+    shield: iconConfig,
 },
 
 var encounterModifierConfig = {
@@ -37,6 +38,8 @@ encounterModifiers: {
     lookalike: encounterModifierConfig,
     moist: encounterModifierConfig,
 },
+
+encounterModifierAssets: string[],
 
 damageOverlay: {
     duration: float,

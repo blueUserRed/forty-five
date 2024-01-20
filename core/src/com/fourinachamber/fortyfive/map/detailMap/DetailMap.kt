@@ -30,6 +30,7 @@ data class DetailMap(
     val startNode: MapNode,
     val endNode: MapNode,
     val decorations: List<MapDecoration>,
+    val animatedDecorations: List<MapDecoration>,
     val isArea: Boolean,
     val biome: String,
     val progress: ClosedFloatingPointRange<Float>,
@@ -76,6 +77,7 @@ data class DetailMap(
         "startNode" with startNode.index
         "endNode" with endNode.index
         "decorations" with decorations.map { it.asOnjObject() }
+        "animatedDecorations" with animatedDecorations.map { it.asOnjObject() }
         "isArea" with isArea
         "biome" with biome
         "progress" with progress.asArray()
@@ -148,12 +150,20 @@ data class DetailMap(
                     }
                 }
             val startNodeIndex = onj.get<Long>("startNode").toInt()
-            val decorations = onj.get<OnjArray>("decorations").value.map { MapDecoration.fromOnj(it as OnjObject) }
+            val decorations = onj
+                .get<OnjArray>("decorations")
+                .value
+                .map { MapDecoration.fromOnj(it as OnjObject) }
+            val animatedDecorations = onj
+                .get<OnjArray>("animatedDecorations")
+                .value
+                .map { MapDecoration.fromOnj(it as OnjObject) }
             return DetailMap(
                 file.nameWithoutExtension(),
                 nodes[startNodeIndex].build(),
                 endNode.asNode!!,
                 decorations,
+                animatedDecorations,
                 onj.get<Boolean>("isArea"),
                 onj.get<String>("biome"),
                 onj.get<OnjArray>("progress").toFloatRange(),
@@ -173,7 +183,8 @@ data class DetailMap(
 
     /**
      * represents a type of decoration on the map
-     * @param drawableHandle the handle for the drawable used for drawing the decoration
+     * @param drawableHandle the handle for the drawable used for drawing the decoration, or the name of the decoration
+     * when it is animated
      * @param baseWidth the base width of the drawable, can be adjusted by scaling
      * @param baseHeight the base height of the drawable, can be adjusted by scaling
      * @param instances all instances of the decoration on the map. Contains both the position and the scale

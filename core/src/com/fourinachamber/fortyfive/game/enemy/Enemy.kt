@@ -1,12 +1,18 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.ParticleEffect
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
+import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.animation.AnimationDrawable
+import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
+import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
@@ -33,8 +39,6 @@ data class EnemyPrototype(
 /**
  * represents an enemy
  * @param name the name of the enemy
- * @param scaleX scales [actor]
- * @param scaleY scales [actor]
  * @param health the initial (and maximum) lives of this enemy
  * @param detailFont the font used for the description of the enemy
  * @param detailFontScale scales [detailFont]
@@ -46,8 +50,7 @@ class Enemy(
     val coverIconHandle: ResourceHandle,
     val hiddenActionIconHandle: ResourceHandle,
     val health: Int,
-    val scaleX: Float,
-    val scaleY: Float,
+    val scale: Float,
     val coverIconScale: Float,
     val indicatorIconScale: Float,
     val detailFont: BitmapFont,
@@ -239,8 +242,7 @@ class Enemy(
                 coverIconHandle,
                 onj.get<String>("hiddenActionIcon"),
                 health,
-                onj.get<Double>("scaleX").toFloat(),
-                onj.get<Double>("scaleY").toFloat(),
+                onj.get<Double>("scale").toFloat(),
                 onj.get<Double>("coverIconScale").toFloat(),
                 onj.get<Double>("indicatorIconScale").toFloat(),
                 detailFont,
@@ -265,23 +267,28 @@ class EnemyActor(
     val enemy: Enemy,
     textEmitterConfig: OnjArray,
     private val hiddenActionIconHandle: ResourceHandle,
-    override val screen: OnjScreen
-) : CustomVerticalGroup(screen), ZIndexActor {
+    val screen: OnjScreen
+) : WidgetGroup(), ZIndexActor {
 
     override var fixedZIndex: Int = 0
-    private val image: CustomImageActor = CustomImageActor(enemy.drawableHandle, screen)
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
-    private var enemyBox = CustomHorizontalGroup(screen)
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = CustomImageActor(null, screen, false)
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
+    private val coverInfoBox = CustomVerticalGroup(screen)
+    private val statsBox = CustomVerticalGroup(screen)
+
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
         enemy.detailFontColor,
         enemy.detailFontScale
     )
+
+    private val enemyDrawable: Drawable by lazy {
+        ResourceManager.get(screen, enemy.drawableHandle)
+    }
 
     val healthLabel: CustomLabel = CustomLabel(
         screen,
@@ -292,8 +299,27 @@ class EnemyActor(
     private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
     private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
 
-    private val fireParticles: ParticleEffect by lazy {
-        ResourceManager.get(screen, "fire_particle") // TODO: fix
+    // animations are hardcoded, deal with it
+    private val animation: AnimationDrawable? = when {
+
+        enemy.name.startsWith("Outlaw") -> createAnimation {
+            val anim = deferredAnimation("outlaw_animation")
+            order {
+                loop(anim, frameOffset = (0..50).random())
+            }
+        }
+
+        enemy.name.startsWith("Pyro") -> createAnimation {
+            val anim = deferredAnimation("pyro_animation")
+            order {
+                loop(anim, frameOffset = (0..50).random())
+            }
+        }
+
+        else -> null
+
+    }?.apply {
+        screen.addDisposable(this)
     }
 
     init {
@@ -310,9 +336,6 @@ class EnemyActor(
         // but because the name is only used for the tutorial, this should not be an issue
         screen.addNamedActor("attackIndicator", attackIcon)
 
-        image.setScale(enemy.scaleX, enemy.scaleY)
-        image.reportDimensionsWithScaling = true
-        image.ignoreScalingWhenDrawing = true
         coverIcon.setScale(enemy.coverIconScale)
         attackIcon.setScale(enemy.indicatorIconScale) // TODO: fix
         coverIcon.reportDimensionsWithScaling = true
@@ -324,18 +347,53 @@ class EnemyActor(
         attackIndicator.addActor(attackLabel)
         attackIndicator.isVisible = false
 
-        val coverInfoBox = CustomVerticalGroup(screen)
         coverInfoBox.addActor(coverIcon)
         coverInfoBox.addActor(coverText)
 
-        enemyBox.addActor(coverInfoBox)
-        enemyBox.addActor(image)
+        statsBox.addActor(healthLabel)
+        statsBox.addActor(statusEffectDisplay)
 
         addActor(attackIndicator)
-        addActor(enemyBox)
-        addActor(healthLabel)
-        addActor(statusEffectDisplay)
+        addActor(statsBox)
+        addActor(coverInfoBox)
         updateText()
+        touchable = Touchable.enabled
+        animation?.start()
+    }
+
+    override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
+        if (touchable && this.touchable != Touchable.enabled) return null
+        if (!isVisible) return null
+        return if (x >= 0 && x < width && y >= 0 && y < height) this else null
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
+        coverInfoBox.setBounds(
+            0f, height / 2 - coverInfoBox.prefHeight / 2,
+            coverInfoBox.prefWidth, coverInfoBox.prefHeight
+        )
+        (animation ?: enemyDrawable).draw(
+            batch,
+            x + coverInfoBox.width, y + healthLabel.prefHeight,
+            enemyDrawable.minWidth * enemy.scale, enemyDrawable.minHeight * enemy.scale
+        )
+        statsBox.width = statsBox.prefWidth
+        statsBox.height = statsBox.prefHeight
+        statsBox.setPosition(width / 2 - statsBox.width / 2,  -statsBox.height)
+        attackIndicator.setBounds(
+            width / 2 - attackIndicator.prefWidth / 2, enemyDrawable.minHeight * enemy.scale + 20f,
+            attackIndicator.prefWidth, attackIndicator.prefHeight
+        )
+        super.draw(batch, parentAlpha)
+    }
+
+    override fun getWidth(): Float {
+        return coverInfoBox.width + enemyDrawable.minWidth * enemy.scale
+    }
+
+    override fun getHeight(): Float {
+        return enemyDrawable.minHeight * enemy.scale + attackIndicator.prefHeight + statsBox.prefHeight
     }
 
     fun startHealthChangeAnimation(change: Int) {
@@ -343,7 +401,6 @@ class EnemyActor(
         emitter.playNumberChangeAnimation(change)
     }
 
-    // TODO: function for adding to Cover
     fun startCoverChangeAnimation(change: Int) {
         val emitter = coverText.findAnimationSpawner<TextEffectEmitter>() ?: return
         emitter.playNumberChangeAnimation(change)
@@ -408,14 +465,6 @@ class EnemyActor(
             attackIndicator.isVisible = true
         }
 
-    }
-
-    fun fireAnim(): Timeline = Timeline.timeline {
-        includeAction(ParticleTimelineAction(
-            fireParticles,
-            image.localToStageCoordinates(Vector2(0f, 0f)) + Vector2(image.width / 2, 0f),
-            screen
-        ))
     }
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)

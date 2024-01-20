@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -13,6 +14,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.animation.AnimationDrawable
+import com.fourinachamber.fortyfive.animation.createAnimation
+import com.fourinachamber.fortyfive.game.EncounterModifier
+import com.fourinachamber.fortyfive.game.GameDirector
+import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
@@ -27,10 +33,13 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addMapStyles
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
+import onj.value.OnjString
 import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.random.Random
 
 /**
  * the widget used for displaying a [DetailMap]
@@ -48,8 +57,10 @@ class DetailMapWidget(
     private val playerMoveTime: Int,
     private val directionIndicatorHandle: ResourceHandle,
     private val startButtonName: String,
+    private val encounterModifierParentName: String,
+    private val encounterModifierDisplayTemplateName: String,
     private var screenSpeed: Float,
-//    private var backgroundScale: Float,
+    private val scrollMargin: Float,
     private val disabledDirectionIndicatorAlpha: Float,
     private val mapScale: Float
 ) : Widget(), ZIndexActor, StyledActor, BackgroundActor {
@@ -72,14 +83,14 @@ class DetailMapWidget(
     var mapOffset: Vector2 = Vector2(50f, 50f)
         private set(value) {
             val bounds = mapBounds
-            var center = Vector2()
-            bounds.getCenter(center)
-            center -= Vector2(bounds.width, height * 1.5f)
-            field = value
-//            field = value.clampIndividual(
-//                center.x - bounds.width / 2, center.x + bounds.width / 2,
-//                center.y - bounds.height / 2, center.y + bounds.height / 2
-//            )
+            val lowX = bounds.x
+            val lowY = bounds.y
+            val highX = bounds.x + bounds.width
+            val highY = bounds.y + bounds.height
+            field = value.clampIndividual(
+                -highX + width / 2 - scrollMargin, -lowX + width / 2 + scrollMargin,
+                -highY + height / 2 - scrollMargin, -lowY + height / 2 + scrollMargin
+            )
         }
 
     private var playerNode: MapNode = MapManager.currentMapNode
@@ -130,6 +141,19 @@ class DetailMapWidget(
     private var pointToNode: MapNode? = null
     private var lastPointerPosition: Vector2 = Vector2(0f, 0f)
     private var screenDragged: Boolean = false
+
+    // I hate this
+    private val animatedDecorations: List<Pair<DetailMap.MapDecoration, List<Triple<Vector2, Float, AnimationDrawable>>>> = map
+        .animatedDecorations
+        .zip { decoration ->
+            decoration.instances.map { Triple(it.first, it.second, createDecorationAnimation(decoration.drawableHandle)) }
+        }
+
+    private val encounterModifierParent: CustomFlexBox by lazy {
+        screen.namedActorOrError(encounterModifierParentName) as? CustomFlexBox
+            ?: throw RuntimeException("actor named $encounterModifierParentName must be a CustomFlexBox")
+    }
+
 
     private val dragListener = object : DragListener() {
 
@@ -208,21 +232,18 @@ class DetailMapWidget(
         addListener(clickListener)
         invalidateHierarchy()
 
+        animatedDecorations.forEach { (_, instances) ->
+            instances.forEach { (_, _, animation) ->
+                screen.addDisposable(animation)
+                animation.start()
+            }
+        }
+
         // doesn't work when the map doesn't take up most of the screenspace, but width/height
         // are not initialised yet
-        val bounds = mapBounds
-        var center = Vector2()
-        bounds.getCenter(center)
-        center -= Vector2(bounds.width, screen.viewport.worldHeight * 1.5f)
-        val playerPos = Vector2(
-            -playerPos.x + screen.viewport.worldWidth * 0.5f,
-            -playerPos.y + screen.viewport.worldHeight * 0.5f
-        )
-        val offset = playerPos.clampIndividual(
-            center.x - bounds.width / 2, center.x + bounds.width / 2,
-            center.y - bounds.height / 2, center.y + bounds.height / 2
-        )
-        mapOffset.set(offset)
+        val nodePos = scaledNodePos(playerNode)
+        val idealPos = -nodePos + Vector2(screen.viewport.worldWidth, screen.viewport.worldHeight) / 2f
+        mapOffset.set(idealPos)
     }
 
     fun onStartButtonClicked(startButton: Actor? = null) {
@@ -247,6 +268,45 @@ class DetailMapWidget(
             }
         }
         pointToNode = bestMatch
+    }
+
+    private fun createDecorationAnimation(name: String): AnimationDrawable = when (name) {
+
+        "sheep" -> createAnimation {
+            val anim = deferredAnimation("map_decoration_sheep_animation")
+            val still = stillFrame("map_decoration_bewitched_forest_sheep_1", 500)
+            order {
+                if (Utils.coinFlip(0.5f)) flipX()
+                while (true) yield(if (Utils.coinFlip(0.1f)) anim else still)
+            }
+        }
+
+        "tree" -> createAnimation {
+            val anim = deferredAnimation("map_decoration_tree_animation")
+            val still = stillFrame("map_decoration_bewitched_forest_tree1", 100)
+            val cycleOffset = (0..30).random()
+            order {
+                while (true) {
+                    val now = System.currentTimeMillis()
+                    val curCycle = (now % 10_000).toInt()
+                    if (curCycle >= 9_000) {
+                        repeat(cycleOffset) { yield(still) }
+                        yield(anim)
+                    } else {
+                        yield(still)
+                    }
+                }
+            }
+        }
+
+        "grass" -> createAnimation {
+            val anim = deferredAnimation("map_decoration_grass_animation")
+            order {
+                loop(anim)
+            }
+        }
+
+        else -> throw RuntimeException("unknown animated decoration: $name")
     }
 
     private fun goToNode(node: MapNode) {
@@ -298,6 +358,7 @@ class DetailMapWidget(
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
         playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
         drawDecorations(batch)
+        drawAnimatedDecorations(batch)
         drawDirectionIndicator(batch)
         drawNodeImages(batch)
         super.draw(batch, parentAlpha)
@@ -416,6 +477,22 @@ class DetailMapWidget(
         }
     }
 
+    private fun drawAnimatedDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        animatedDecorations.forEach { (decoration, instances) ->
+            val width = decoration.baseWidth
+            val height = decoration.baseHeight
+            instances.forEach { (position, scale, drawable) ->
+                drawable.draw(
+//                map.decorations[0].getDrawable(screen).draw(
+                    batch,
+                    x + offX + position.x * mapScale, y + offY + position.y * mapScale,
+                    width * scale * mapScale, height * scale * mapScale
+                )
+            }
+        }
+    }
+
     private fun updatePlayerMovement() {
         val movePlayerTo = movePlayerTo ?: return
         val playerNode = playerNode
@@ -462,6 +539,25 @@ class DetailMapWidget(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText
         )
+        encounterModifierParent.clearChildren()
+        screen.enterState(noEncounterModifierScreenState)
+        if (event !is EncounterMapEvent) return
+        val encounter = GameDirector.encounters[event.encounterIndex]
+        val encounterModifiers = encounter.encounterModifiers
+        if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
+        encounterModifiers.forEach { modifierName ->
+            val modifier = EncounterModifier.getFromName(modifierName)
+            screen.screenBuilder.generateFromTemplate(
+                encounterModifierDisplayTemplateName,
+                mapOf(
+                    "symbol" to OnjString(GraphicsConfig.encounterModifierIcon(modifier)),
+                    "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
+                    "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
+                ),
+                encounterModifierParent,
+                screen
+            )!!
+        }
     }
 
     private fun updateScreenState(event: MapEvent?) {
@@ -541,6 +637,7 @@ class DetailMapWidget(
     companion object {
         const val displayEventDetailScreenState: String = "displayEventDetail"
         const val eventCanBeStartedScreenState: String = "canStartEvent"
+        const val noEncounterModifierScreenState: String = "noEncounterModifier"
     }
 
 }

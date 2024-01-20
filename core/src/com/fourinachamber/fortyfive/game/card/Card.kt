@@ -130,6 +130,8 @@ class Card(
         private set
     var isSpray: Boolean = false
         private set
+    var isReinforced: Boolean = false
+        private set
 
     val shouldRemoveAfterShot: Boolean
         get() = !(isEverlasting || protectingModifiers.isNotEmpty())
@@ -152,15 +154,25 @@ class Card(
 
     private var modifierValuesDirty = true
 
+    var enteredInSlot: Int? = null
+        private set
+
+    var rotationCounter: Int = 0
+        private set
+
     init {
         screen.borrowResource(cardTexturePrefix + name)
-        actor = CardActor(
-            this,
-            font,
-            fontScale,
-            isDark,
-            screen
-        )
+        // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
+        // card texture while the constructor is running and actor is not yet assigned
+        synchronized(this) {
+            actor = CardActor(
+                this,
+                font,
+                fontScale,
+                isDark,
+                screen
+            )
+        }
     }
 
     /**
@@ -304,14 +316,16 @@ class Card(
     /**
      * called when the card enters the game
      */
-    fun onEnter() {
+    fun onEnter(controller: GameController) {
         inGame = true
+        enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
     }
 
     /**
      * called when the revolver rotates (but not when this card was shot)
      */
     fun onRevolverRotation(rotation: RevolverRotation) {
+        rotationCounter += rotation.amount
     }
 
     fun inHand(controller: GameController): Boolean = this in controller.cardHand.cards
@@ -515,6 +529,7 @@ class Card(
                 "undead" -> card.isUndead = true
                 "replaceable" -> card.isReplaceable = true
                 "spray" -> card.isSpray = true
+                "reinforced" -> card.isReinforced = true
                 "rotten" -> {
                     card.isRotten = true
                     card.addRottenModifier()
@@ -614,6 +629,8 @@ class CardActor(
                 card.getAdditionalHoverDescriptions().isNotEmpty()
         set(value) {}
 
+    private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
+
     private val onRightClickShowAdditionalInformationListener = object : InputListener() {
 
         override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
@@ -651,6 +668,9 @@ class CardActor(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        if (drawPixmapMessage?.isFinished ?: false) {
+            finishPixmapDrawing()
+        }
         setBoundsOfHoverDetailActor(this)
         batch ?: return
         val texture = pixmapTextureRegion ?: return
@@ -687,20 +707,22 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int) {
-        pixmap.drawPixmap(cardTexturePixmap, 0, 0)
-        val situation = when {
-            damageValue > card.baseDamage -> "increase"
-            damageValue < card.baseDamage -> "decrease"
-            else -> "normal"
-        }
-        val damageFontColor = GraphicsConfig.cardFontColor(isDark, situation)
-        val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
-        font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
-        font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
+        val message = ServiceThreadMessage.DrawCardPixmap(
+            pixmap,
+            cardTexturePixmap,
+            card,
+            damageValue
+        )
+        FortyFive.serviceThread.sendMessage(message)
+        drawPixmapMessage = message
+    }
+
+    private fun finishPixmapDrawing() {
         pixmapTextureRegion?.texture?.dispose()
         val texture = Texture(pixmap, true)
         texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
         pixmapTextureRegion = TextureRegion(texture)
+        drawPixmapMessage = null
     }
 
     override fun getBounds(): Rectangle {
