@@ -73,6 +73,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     private val createTime: Long = TimeUtils.millis()
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
+    private val callbackAddBuffer: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val additionalDisposables: MutableList<Disposable> = mutableListOf()
 
     private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
@@ -187,7 +188,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @AllThreadsAllowed
     fun afterMs(ms: Int, callback: @MainThreadOnly () -> Unit) {
-        callbacks.add((TimeUtils.millis() + ms) to callback)
+        callbackAddBuffer.add((TimeUtils.millis() + ms) to callback)
     }
 
     @AllThreadsAllowed
@@ -334,6 +335,8 @@ open class OnjScreen @MainThreadOnly constructor(
 
     private fun updateCallbacks() {
         val curTime = TimeUtils.millis()
+        callbacks.addAll(callbackAddBuffer)
+        callbackAddBuffer.clear()
         val iterator = callbacks.iterator()
         while (iterator.hasNext()) {
             val (time, callback) = iterator.next()
