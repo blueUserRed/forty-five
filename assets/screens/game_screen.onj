@@ -435,6 +435,17 @@ var enemyArea = $EnemyArea {
 };
 
 var shootButton = $Image {
+    styles: [
+        {
+            style_priority: 1,
+            disabled: false
+        },
+        {
+            style_priority: 2,
+            style_condition: state("uiFrozen"),
+            disabled: true,
+        }
+    ],
     name: "shoot_button",
     textureName: "shoot_button_texture",
     reportDimensionsWithScaling: true,
@@ -450,6 +461,17 @@ var shootButton = $Image {
 };
 
 var endTurnButton = $Image {
+    styles: [
+        {
+            style_priority: 1,
+            disabled: false
+        },
+        {
+            style_priority: 2,
+            style_condition: state("uiFrozen"),
+            disabled: true,
+        }
+    ],
     name: "end_turn_button",
     textureName: "end_turn_button_texture",
     reportDimensionsWithScaling: true,
@@ -687,6 +709,7 @@ var drawCardActor = $Box {
             detached: false
         }
     ],
+    touchable: "enabled",
     zIndex: overlayZIndex,
 } children [
 

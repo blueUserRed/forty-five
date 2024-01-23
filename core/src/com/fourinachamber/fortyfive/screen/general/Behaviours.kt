@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.Cursor.SystemCursor
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.Completable
@@ -36,6 +37,7 @@ object BehaviourFactory {
         "OnClickSelectHealOrMaxOptionBehaviour" to { onj, actor -> OnClickSelectHealOrMaxOptionBehaviour(onj, actor) },
         "OnClickSelectHealOptionBehaviour" to { onj, actor -> OnClickSelectHealOptionBehaviour(onj, actor) },
         "OnClickRemoveWarningLabelBehaviour" to { onj, actor -> OnClickRemoveWarningLabelBehaviour(onj, actor) },
+        "SpamPreventionBehaviour" to { onj, actor -> SpamPreventionBehaviour(onj, actor) },
     )
 
     /**
@@ -254,6 +256,24 @@ class OnClickRemoveWarningLabelBehaviour(onj: OnjNamedObject, actor: Actor) : Be
 
     override val onCLick: BehaviourCallback = {
         CustomWarningParent.getWarning(onjScreen).removeWarningByClick(this.parent)
+    }
+}
+
+class SpamPreventionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val eventName = onj.get<String>("event")
+    private val eventClass = EventFactory.eventClass(eventName)
+    private val blockDuration: Int = onj.get<Long>("blockDuration").toInt()
+
+    private var lastEventTime: Long = -1
+
+    override val onEventCapture: (event: Event) -> Boolean = lambda@{ event ->
+        if (!eventClass.isInstance(event)) return@lambda false
+        val now = TimeUtils.millis()
+        val block = lastEventTime + blockDuration > now
+        lastEventTime = now
+        if (block) event.cancel()
+        block
     }
 }
 

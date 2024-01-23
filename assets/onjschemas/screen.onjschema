@@ -371,6 +371,11 @@ $Behaviour {
 
 
     $OnClickRemoveWarningLabelBehaviour{ }
+
+    $SpamPreventionBehaviour {
+        event: string,
+        blockDuration: int
+    }
 }
 
 $ScreenController {
