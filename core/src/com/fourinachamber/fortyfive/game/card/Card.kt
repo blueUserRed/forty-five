@@ -629,6 +629,20 @@ class CardActor(
         addListener(onRightClickShowAdditionalInformationListener)
     }
 
+    override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
+        // This is a fix for the ChooseCardScreen, where for some reason the CardDragAndDrop sets the position first,
+        // but is then overwritten by the layout code every frame (I guess something is calling invalidate each frame,
+        // but I dont know what)
+        // I also dont know why the LibGDX drag and drop system is implemented like this, because it inherently relies
+        // on the order in which the DragAndDrop/Layout/Draw code is executed, which breaks really easily
+        // This is a really bad fix, but a good fix would probably involve completely rewriting the DragAndDrop-System
+        // and this issue has been haunting me for too long
+
+        // block the layout code from setting the position when the actor is dragged (and hope that the DragAndDrop-Code doesnt use the setBounds function)
+        if (isDragged) return
+        super.setBounds(x, y, width, height)
+    }
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         if (drawPixmapMessage?.isFinished ?: false) {
             finishPixmapDrawing()
@@ -649,6 +663,7 @@ class CardActor(
         }
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha)
+        println("${card.name}: ----- drawing $x")
         batch.draw(
             texture,
             x + offsetX, y + offsetY,
