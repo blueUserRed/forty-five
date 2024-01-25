@@ -663,7 +663,6 @@ class CardActor(
         }
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha)
-        println("${card.name}: ----- drawing $x")
         batch.draw(
             texture,
             x + offsetX, y + offsetY,
