@@ -69,7 +69,7 @@ class CardSelectionScreenController(private val onj: OnjNamedObject) : ScreenCon
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
-        cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), onjScreen) { }
+        cardPrototypes = Card.getFrom(onj.get<OnjArray>("cards"), initializer = {})
     }
 
     private fun addCards(onjScreen: OnjScreen) {

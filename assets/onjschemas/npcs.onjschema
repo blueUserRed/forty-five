@@ -20,6 +20,12 @@ $NextDialogPartSelector {
     $EndOfDialog {
         changeToScreen: string
     }
+
+    $GiftCardEnd {
+        card: string,
+        changeToScreen: string
+    }
+
 }
 
 var dialog = {

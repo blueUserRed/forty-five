@@ -30,7 +30,7 @@ assets: {
         "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
-        "game_screen_player",
+        "game_screen_player", "player_turn_banner", "enemy_turn_banner",
 
         "enemy_action_damage", "enemy_action_cover",
 
