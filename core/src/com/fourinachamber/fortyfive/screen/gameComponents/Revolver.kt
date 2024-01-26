@@ -303,6 +303,8 @@ class RevolverSlot(
 
     override var inAnimation: Boolean = false
 
+    override var isHoverDetailActive: Boolean = true
+
     /**
      * if set to a card, the card will be moved along with the spin animation
      */
