@@ -408,8 +408,10 @@ class Card(
     fun getAdditionalHoverDescriptions(): List<String> {
         return additionalHoverInfos.map { info ->
             when (info) {
-                "home" -> enteredInSlot.toString()
-                "rotations" -> rotationCounter.toString()
+                "home" -> enteredInSlot?.let {
+                    "bullet entered in slot $it"
+                } ?: ""
+                "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
                     val mostExpensive = (actor.screen.screenController as GameController)
                         .revolver
@@ -648,6 +650,7 @@ class CardActor(
             }
         card
             .getAdditionalHoverDescriptions()
+            .filter { it.isNotBlank() }
             .forEach { addHoverItemToParent(it, descriptionParent) }
     }
 
