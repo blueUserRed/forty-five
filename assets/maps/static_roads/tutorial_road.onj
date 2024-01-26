@@ -22,7 +22,7 @@ tutorialText: [
     },
 ],
 startNode: 0,
-endNode: 13,
+endNode: 9,
 biome: "wasteland",
 progress: [0.0, 0.1],
 nodes: [
@@ -77,7 +77,7 @@ nodes: [
     },
     {
         x: 180.0,
-        y: 90.0,
+        y: 50.0,
         edgesTo: [
             3, 5
         ],
@@ -93,7 +93,7 @@ nodes: [
     },
     {
         x: 220.0,
-        y: 90.0,
+        y: 110.0,
         edgesTo: [
             4, 6
         ],
@@ -109,7 +109,7 @@ nodes: [
     },
     {
         x: 260.0,
-        y: 90.0,
+        y: 80.0,
         edgesTo: [
             5, 7,
         ],
@@ -125,7 +125,7 @@ nodes: [
     },
     {
         x: 300.0,
-        y: 90.0,
+        y: 100.0,
         edgesTo: [
             6, 8
         ],
@@ -141,93 +141,43 @@ nodes: [
     },
     {
         x: 340.0,
-        y: 90.0,
+        y: 95.0,
         edgesTo: [
-            7, 9,
+            7, 9
         ],
-        nodeTexture: "map_node_shop_circle",
-        event: $ChooseCardMapEvent {
-            types: ["tutorial_only_incendiary_bullet"],
-            seed: 0,
-            nbrOfCards: 1,
+        nodeTexture: "map_node_heal_circle",
+        event: $NPCMapEvent {
+            npc: "brother",
+            canOnlyBeStartedOnce: true,
             currentlyBlocks: true,
             canBeStarted: true,
             isCompleted: false
-        },
+        }
     },
     {
         x: 380.0,
-        y: 90.0,
+        y: 100.0,
         edgesTo: [
             8, 10
         ],
-        nodeTexture: "map_node_fight_circle",
-        event: $EncounterMapEvent {
+        nodeTexture: "map_node_heal_circle",
+        event: $NPCMapEvent {
+            npc: "mayor_of_cody",
+            canOnlyBeStartedOnce: true,
             currentlyBlocks: true,
-//            currentlyBlocks: false,
             canBeStarted: true,
-            isCompleted: false,
-            encounterIndex: 4,
-            distanceToEnd: -1,
+            isCompleted: false
         }
     },
     {
         x: 420.0,
-        y: 90.0,
+        y: 120.0,
         edgesTo: [
-            9, 11,
-        ],
-        nodeTexture: "map_node_shop_circle",
-        event: $ChooseCardMapEvent {
-            types: ["tutorial_only_leaders_bullet"],
-            seed: 0,
-            nbrOfCards: 1,
-            currentlyBlocks: true,
-            canBeStarted: true,
-            isCompleted: false
-        },
-    },
-    {
-        x: 460.0,
-        y: 90.0,
-        edgesTo: [
-            10, 12
-        ],
-        nodeTexture: "map_node_fight_circle",
-        event: $EncounterMapEvent {
-            currentlyBlocks: true,
-//            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-            encounterIndex: 5,
-            distanceToEnd: -1,
-        }
-    },
-    {
-        x: 500.0,
-        y: 90.0,
-        edgesTo: [
-            11, 13
-        ],
-        nodeTexture: "map_node_heal_circle",
-        event: $HealOrMaxHPEvent {
-            healRange: [100, 100],
-            maxHPRange: [0, 0],
-            seed: 0,
-            currentlyBlocks: true,
-            canBeStarted: true,
-            isCompleted: false
-        }
-    },
-    {
-        x: 540.0,
-        y: 90.0,
-        edgesTo: [
-            12
+            9
         ],
         nodeTexture: "map_node_exit_circle",
-        event: $EnterMapMapEvent {
-            targetMap: "start_area",
+        event: $FinishTutorialMapEvent {
+            goToMap: "start_area",
         }
     },
 ],

@@ -53,13 +53,13 @@ class GameDirector(private val controller: GameController) {
 
     fun checkActions(): Timeline = Timeline.timeline {
         controller.activeEnemies.forEach { enemy ->
-            action {
-                enemy.actor.setupForAction(NextEnemyAction.None)
-            }
             val action = enemy.brain.resolveEnemyAction(controller, enemy, difficulty)
             action?.let {
                 include(enemy.actor.enemyActionAnimationTimeline(it))
                 include(it.getTimeline())
+            }
+            action {
+                enemy.actor.setupForAction(NextEnemyAction.None)
             }
         }
     }
