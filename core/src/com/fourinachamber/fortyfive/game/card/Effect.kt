@@ -248,7 +248,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             triggerInformation
                 .targetedEnemies
-                .map { controller.tryApplyStatusEffectToEnemy(statusEffectCreator(), it) }
+                .map { controller.tryApplyStatusEffectToEnemy(statusEffectCreator(controller, card), it) }
                 .collectTimeline()
                 .let { include(it) }
         }
@@ -403,7 +403,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             action {
-                controller.applyStatusEffectToPlayer(statusEffectCreator())
+                controller.applyStatusEffectToPlayer(statusEffectCreator(controller, card))
             }
         }
 
@@ -459,7 +459,7 @@ sealed class BulletSelector {
     abstract fun blocks(controller: GameController, self: Card): Boolean
 }
 
-typealias EffectValue = (controller: GameController, card: Card) -> Int
+typealias EffectValue = (controller: GameController, card: Card?) -> Int
 
 /**
  * possible triggers for an effect

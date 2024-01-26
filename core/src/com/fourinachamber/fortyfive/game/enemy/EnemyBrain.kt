@@ -166,55 +166,55 @@ class WitchBrain(
     private var nextAction: EnemyAction? = null
     private var doBewitched: Boolean = false
 
-    private fun createBewitchedActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
-        { Bewitched(bewitchedTurns.random(), bewitchedRotations.random()) },
-        1f,
-        enemy,
-        false,
-        true
-    ).also {
-        setParameters(
-            it,
-            // im not passing all these values through the constructor, it is already long enough
-            // TODO: come up with a better solution
-            "enemy_action_bewitched",
-            "The player gets the bewitched status effect!",
-            "Bewitched",
-            "enemy_witch_action_comic_panel_bewitched"
-        )
-    }
+//    private fun createBewitchedActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
+//        { Bewitched(bewitchedTurns.random(), bewitchedRotations.random()) },
+//        1f,
+//        enemy,
+//        false,
+//        true
+//    ).also {
+//        setParameters(
+//            it,
+//            // im not passing all these values through the constructor, it is already long enough
+//            // TODO: come up with a better solution
+//            "enemy_action_bewitched",
+//            "The player gets the bewitched status effect!",
+//            "Bewitched",
+//            "enemy_witch_action_comic_panel_bewitched"
+//        )
+//    }
 
-    private fun createWrathOfTheWitchActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
-        { WrathOfTheWitch(wrathOfTheWitchDamage) },
-        1f,
-        enemy,
-        false,
-        true
-    ).also {
-        setParameters(
-            it,
-            "enemy_action_bewitched",
-            "The player gets the 'Wrath of the Witch' status effect!",
-            "Wrath of the Witch",
-            "enemy_witch_action_comic_panel_wrath_of_the_witch"
-        )
-    }
+//    private fun createWrathOfTheWitchActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
+//        { WrathOfTheWitch(wrathOfTheWitchDamage) },
+//        1f,
+//        enemy,
+//        false,
+//        true
+//    ).also {
+//        setParameters(
+//            it,
+//            "enemy_action_bewitched",
+//            "The player gets the 'Wrath of the Witch' status effect!",
+//            "Wrath of the Witch",
+//            "enemy_witch_action_comic_panel_wrath_of_the_witch"
+//        )
+//    }
 
-    private fun createWardOfTheWitchActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GiveSelfStatusEffect(
-        { WardOfTheWitch(wardOfTheWitchCover) },
-        1f,
-        enemy,
-        false,
-        true
-    ).also {
-        setParameters(
-            it,
-            "enemy_action_bewitched",
-            "The player gets the 'Ward of the Witch' status effect!",
-            "Ward of the Witch",
-            "enemy_witch_action_comic_panel_ward_of_the_witch"
-        )
-    }
+//    private fun createWardOfTheWitchActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GiveSelfStatusEffect(
+//        { WardOfTheWitch(wardOfTheWitchCover) },
+//        1f,
+//        enemy,
+//        false,
+//        true
+//    ).also {
+//        setParameters(
+//            it,
+//            "enemy_action_bewitched",
+//            "The player gets the 'Ward of the Witch' status effect!",
+//            "Ward of the Witch",
+//            "enemy_witch_action_comic_panel_ward_of_the_witch"
+//        )
+//    }
 
     private fun createLeftRotationActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.RotateRevolver(
         1,
@@ -252,18 +252,18 @@ class WitchBrain(
     override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
         val turn = controller.turnCounter
         if (turn == firstEffectTurn || turn == secondEffectTurn) {
-            return if (turn == firstEffectTurn && firstEffectIsWrathOfTheWitch) {
-                createWrathOfTheWitchActionPrototype(enemy).create(controller, difficulty)
-            } else {
-                createWardOfTheWitchActionPrototype(enemy).create(controller, difficulty)
-            }
+//            return if (turn == firstEffectTurn && firstEffectIsWrathOfTheWitch) {
+//                createWrathOfTheWitchActionPrototype(enemy).create(controller, difficulty)
+//            } else {
+//                createWardOfTheWitchActionPrototype(enemy).create(controller, difficulty)
+//            }
         }
         nextAction?.let {
             nextAction = null
             return it
         }
         if (doBewitched) {
-            return createBewitchedActionPrototype(enemy).create(controller, difficulty)
+//            return createBewitchedActionPrototype(enemy).create(controller, difficulty)
         }
         return null
     }
@@ -274,13 +274,13 @@ class WitchBrain(
         if (turn == firstEffectTurn || turn == secondEffectTurn) return@run NextEnemyAction.HiddenEnemyAction
         if (bewitchedActiveUntilTurn + bewitchedBufferTurns < turn && Utils.coinFlip(bewitchedProbability)) {
             doBewitched = true
-            val action = createBewitchedActionPrototype(enemy).create(controller, difficulty)
-            nextAction = action
-            return@run if (Utils.coinFlip(bewitchedShowProbability)) {
-                NextEnemyAction.HiddenEnemyAction
-            } else {
-                NextEnemyAction.ShownEnemyAction(action)
-            }
+//            val action = createBewitchedActionPrototype(enemy).create(controller, difficulty)
+//            nextAction = action
+//            return@run if (Utils.coinFlip(bewitchedShowProbability)) {
+//                NextEnemyAction.HiddenEnemyAction
+//            } else {
+//                NextEnemyAction.ShownEnemyAction(action)
+//            }
         }
 
         if (Utils.coinFlip(rotateRevolverProbability)) {

@@ -29,7 +29,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", burning(3, burningPercent, false)),
+            giveStatus("shot", burning(3#val, burningPercent, false)),
         ],
         forceLoadCards: [],
         dark: false,
@@ -139,7 +139,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", burning(2, burningPercent, false))
+            giveStatus("shot", burning(2#val, burningPercent, false))
         ],
         forceLoadCards: [],
         dark: false,
@@ -152,13 +152,13 @@ cards: [
         name: "leadersBullet",
         title: "Leaders Bullet",
         flavourText: "",
-        description: "$trigger$On-Placedown:$trigger$\nAll other bullets get +8 dmg as long as Leaders Bullet is in the revolver",
+        description: "$trigger$On-Placedown:$trigger$\nAll other bullets get +5 dmg as long as Leaders Bullet is in the revolver",
         baseDamage: 15,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [ buffDmg("enter", bSelects.allExceptSelf, 8#val) ],
+        effects: [ buffDmg("enter", bSelects.allExceptSelf, 5#val) ],
         forceLoadCards: [],
         dark: false,
         cost: 2,
@@ -352,14 +352,14 @@ cards: [
         name: "undeadBullet",
         title: "Undead Bullet",
         flavourText: "does that happen to all ma bullets? The witch didn't mention thaat.",
-        description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 4 gets +14 dmg",
+        description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 4 gets +10 dmg",
         baseDamage: 12,
         coverValue: 0,
         traitEffects: [ "undead" ],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giftDmg("leave", bSelects.fourButNotSelf, 14#val)
+            giftDmg("leave", bSelects.fourButNotSelf, 10#val)
         ],
         forceLoadCards: [],
         dark: false,
@@ -379,7 +379,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", poison(3, 3))
+            giveStatus("shot", poison(3#val, 3#val))
         ],
         forceLoadCards: [],
         dark: false,
@@ -754,7 +754,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0, 0) }#activeChecker)
+            buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)
         ],
         forceLoadCards: [],
         dark: false,
@@ -774,8 +774,8 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", poison(5, 8)),
-            givePlayerStatus("round start", poison(1, 8)),
+            giveStatus("shot", poison(5#val, 8#val)),
+            givePlayerStatus("round start", poison(1#val, 8#val)),
         ],
         forceLoadCards: [],
         dark: false,
@@ -795,7 +795,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("leave", poison(3, 6)),
+            giveStatus("leave", poison(3#val, 6#val)),
         ],
         forceLoadCards: [],
         dark: false,
@@ -937,7 +937,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            givePlayerStatus("enter", shield(14)),
+            givePlayerStatus("enter", shield(14#val)),
         ],
         forceLoadCards: [],
         dark: false,
@@ -957,7 +957,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            givePlayerStatus("round start", shield(5)),
+            givePlayerStatus("round start", shield(5#val)),
         ],
         forceLoadCards: [],
         dark: false,
@@ -970,7 +970,7 @@ cards: [
         name: "birthdayBullet",
         title: "Birthday Bullet",
         flavourText: "Haaaaappy Birthdaaay!!",
-        description: "Whenever this rotates into the slot that it was originally placed into:\nGain 3 reserves, then: you loose 1 life",
+        description: "Whenever this bullet rotates into the slot that it was originally placed into:\nGain 3 reserves, then: you loose 1 life",
         baseDamage: 5,
         coverValue: 0,
         traitEffects: [],
@@ -979,6 +979,26 @@ cards: [
         effects: [
             reserveGain("return home", 3#val),
             damagePlayer("return home", 1#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1", "rarity1"],
+        price: 0,
+    },
+    {
+        name: "turtleBullet",
+        title: "Turtle Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nYou get $status$SHIELD$status$ (x * 2), where x is the number of times this bullet has turned",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            givePlayerStatus("shot", shield(value.rotationAmount * 2.0)),
         ],
         forceLoadCards: [],
         dark: false,

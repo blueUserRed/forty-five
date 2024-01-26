@@ -233,28 +233,28 @@ enemies: [
                     ...pyroCoverSharedKeys
                 },
                 $GivePlayerStatusEffect {
-                    statusEffect: burning(5, 0.5, false),
+                    statusEffect: burning(5#val, 0.5, false),
                     weight: 10,
                     showProbability: 0.5,
                     ...pyroBurningSharedKeys
                 },
                 $GiveSelfStatusEffect {
-                    statusEffect: fireResistance(5),
+                    statusEffect: fireResistance(5#val),
                     weight: 60,
                     showProbability: 0.0,
                     hasUnlikelyPredicates: true,
                     predicates: [
                         $AnyEnemyHasStatusEffect {
-                            value: burning(0, 0.5, false)
+                            value: burning(0#val, 0.5, false)
                         },
                         $EnemyDoesNotHaveStatusEffect {
-                            value: fireResistance(0)
+                            value: fireResistance(0#val)
                         }
                     ],
                     ...pyroFireResistanceSharedKeys
                 },
                 $GivePlayerStatusEffect {
-                    statusEffect: burning(0, 0.5, true),
+                    statusEffect: burning(0#val, 0.5, true),
                     weight: 500,
                     showProbability: 0.0,
                     hasUnlikelyPredicates: true,
