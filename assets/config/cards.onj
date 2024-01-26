@@ -1031,6 +1031,28 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 0,
     },
+    {
+        name: "carouselBullet",
+        title: "Carousel Bullet",
+        flavourText: "If you think about it, a revolver is just a really deadly carusel for Bullets",
+        description: "Whenever this rotates into the slot that it was originally placed into:\nDraw two cards and all bullets in the revolver gain +5 dmg",
+        baseDamage: 6,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            draw("return home", 2#val),
+            giftDmg("return home", bSelects.allExceptSelf, 5#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        additionalHoverInfos: ["home"],
+        tags: ["pool1", "rarity1"],
+        price: 0,
+    },
 
 ],
 
