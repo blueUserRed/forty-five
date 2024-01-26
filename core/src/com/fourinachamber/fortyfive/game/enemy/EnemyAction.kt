@@ -183,7 +183,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            val statusEffect = statusEffectCreator()
+            val statusEffect = statusEffectCreator(controller, null)
             // TODO: fix this
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
@@ -196,7 +196,7 @@ sealed class EnemyActionPrototype(
 
 
         override fun applicable(controller: GameController): Boolean =
-            checkPredicates(controller) && controller.isStatusEffectApplicable(statusEffectCreator())
+            checkPredicates(controller) && controller.isStatusEffectApplicable(statusEffectCreator(controller, null))
     }
 
     class GiveSelfStatusEffect(
@@ -208,7 +208,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(showProbability, enemy, hasUnlikelyPredicates, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            val statusEffect = statusEffectCreator()
+            val statusEffect = statusEffectCreator(controller, null)
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
             return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {
