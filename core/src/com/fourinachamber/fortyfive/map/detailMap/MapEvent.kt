@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.utils.toIntRange
@@ -17,7 +18,7 @@ object MapEventFactory {
         "EmptyMapEvent" to { EmptyMapEvent() },
         "EncounterMapEvent" to { EncounterMapEvent(it) },
         "EnterMapMapEvent" to { EnterMapMapEvent(it.get<String>("targetMap")) },
-        "NPCMapEvent" to { NPCMapEvent(it.get<String>("npc")) },
+        "NPCMapEvent" to { NPCMapEvent(it) },
         "ShopMapEvent" to { onjObject ->
             ShopMapEvent(
                 onjObject.get<OnjArray>("types").value.map { it.value as String }.toSet(),
@@ -29,6 +30,7 @@ object MapEventFactory {
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
         "HealOrMaxHPEvent" to { HealOrMaxHPMapEvent(it) },
         "AddMaxHPEvent" to { AddMaxHPMapEvent(it) },
+        "FinishTutorialMapEvent" to { FinishTutorialMapEvent(it) },
     )
 
     fun getMapEvent(onj: OnjNamedObject): MapEvent =
@@ -236,28 +238,41 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
 
 /**
  * event that opens a dialog box and allows talking to an NPC
- * @param npc the name of the npc
  */
-class NPCMapEvent(val npc: String) : MapEvent() {
+class NPCMapEvent(onj: OnjObject) : MapEvent() {
 
-    override var currentlyBlocks: Boolean = false
+    override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
     override var isCompleted: Boolean = false
 
     override val displayDescription: Boolean = true
 
+    private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
+
+    val npc: String = onj.get<String>("npc")
+
     override val descriptionText: String = "talk with $npc"
     override val displayName: String = "I just want to talk"
+
+    init {
+        setStandardValuesFromConfig(onj)
+    }
 
     override fun start() {
         MapManager.changeToDialogScreen(this)
     }
 
+    fun completed() {
+        currentlyBlocks = false
+        if (canOnlyBeStartedOnce) canBeStarted = false
+        isCompleted = true
+    }
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("NPCMapEvent")
         includeStandardConfig()
         "npc" with npc
+        "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
     }
 }
 
@@ -284,7 +299,6 @@ class ShopMapEvent(
     override fun start() {
         MapManager.changeToShopScreen(this)
     }
-
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
@@ -423,4 +437,30 @@ class AddMaxHPMapEvent(
         "seed" with seed
         "maxHPRange" with arrayOf(maxHPRange.first, maxHPRange.last)
     }
+}
+
+class FinishTutorialMapEvent(
+    onj: OnjObject,
+) : MapEvent() {
+
+    override var currentlyBlocks: Boolean = false
+    override var canBeStarted: Boolean = true
+    override var isCompleted: Boolean = false
+    override val displayDescription: Boolean = true
+
+    override val displayName: String = "Exit"
+    override val descriptionText: String = "Start your Journey"
+
+    private val goToMap: String = onj.get<String>("goToMap")
+
+    override fun start() {
+        SaveState.playerLives = SaveState.maxPlayerLives
+        MapManager.changeToMap(goToMap)
+    }
+
+    override fun asOnjObject(): OnjObject = buildOnjObject {
+        name("FinishTutorialMapEvent")
+        "goToMap" with goToMap
+    }
+
 }
