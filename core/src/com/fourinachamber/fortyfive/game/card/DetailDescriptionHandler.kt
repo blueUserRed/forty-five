@@ -25,12 +25,19 @@ object DetailDescriptionHandler {
         val onj = OnjParser.parseFile(FILE_PATH)
 //        Card.cardsFileSchema.assertMatches(onj) //TODO this path
         onj as OnjObject
-        groups = onj.get<OnjArray>("hoverDetailDescriptionGroups").value.filterIsInstance<OnjObject>()
-            .map { it.get<String>("name") to it.get<Color>("color") }.toMap()
+        groups = onj
+            .get<OnjArray>("hoverDetailDescriptionGroups")
+            .value
+            .filterIsInstance<OnjObject>()
+            .associate { it.get<String>("name") to it.get<Color>("color") }
         allTextEffects = getAllTextEffects(onj.get<OnjArray>("defaultTextEffects"))
-        descriptions = onj.get<OnjArray>("hoverDetailDescriptions").value.filterIsInstance<OnjObject>().map {
-            it.get<String>("keyword").lowercase() to (it.get<String>("groupName") to it.get<String>("description"))
-        }.toMap()
+        descriptions = onj
+            .get<OnjArray>("hoverDetailDescriptions")
+            .value
+            .filterIsInstance<OnjObject>()
+            .associate {
+                it.get<String>("keyword").lowercase() to (it.get<String>("groupName") to it.get<String>("description"))
+            }
     }
 
     private fun getAllTextEffects(default: OnjArray): OnjArray {
