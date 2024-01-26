@@ -13,6 +13,7 @@ nodes: [
             ,3
         ],
         event: $NPCMapEvent {
+            canOnlyBeStartedOnce: false,
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,

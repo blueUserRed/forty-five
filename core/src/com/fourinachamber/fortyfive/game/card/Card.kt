@@ -40,14 +40,14 @@ class CardPrototype(
     val forceLoadCards: List<String>,
 ) {
 
-    var creator: (() -> Card)? = null
+    var creator: ((screen: OnjScreen) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
 
     /**
      * creates an actual instance of this card
      */
-    fun create(): Card = creator!!()
+    fun create(screen: OnjScreen): Card = creator!!(screen)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -89,6 +89,7 @@ class Card(
     val tags: List<String>,
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
+    val additionalHoverInfos: List<String>,
     font: PixmapFont,
     fontScale: Float,
     screen: OnjScreen
@@ -384,7 +385,9 @@ class Card(
         }
 
         currentHoverTexts = currentEffects
-        actor.updateDetailStates()
+        val detailActor = actor.detailActor ?: return
+        detailActor as StyledActor
+        actor.updateDetailStates(detailActor)
     }
 
     private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller))
@@ -400,6 +403,25 @@ class Card(
         res.addAll(DetailDescriptionHandler.getKeyWordsFromDescription(shortDescription))
         res.addAll(currentHoverTexts.map { it.first })
         return res
+    }
+
+    fun getAdditionalHoverDescriptions(): List<String> {
+        return additionalHoverInfos.map { info ->
+            when (info) {
+                "home" -> enteredInSlot.toString()
+                "rotations" -> rotationCounter.toString()
+                "mostExpensiveBullet" -> {
+                    val mostExpensive = (actor.screen.screenController as GameController)
+                        .revolver
+                        .slots
+                        .mapNotNull { it.card }
+                        .maxOfOrNull { it.cost }
+                        ?: 0
+                    "most expensive bullet costs $mostExpensive"
+                }
+                else -> throw RuntimeException("unknown additional hover info $info")
+            }
+        }
     }
 
     companion object {
@@ -418,7 +440,6 @@ class Card(
          */
         fun getFrom(
             cards: OnjArray,
-            onjScreen: OnjScreen,
             initializer: (Card) -> Unit
         ): List<CardPrototype> {
 
@@ -435,7 +456,7 @@ class Card(
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                         onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     )
-                    prototype.creator = { getCardFrom(onj, onjScreen, initializer, prototype) }
+                    prototype.creator = { screen -> getCardFrom(onj, screen, initializer, prototype) }
                     prototypes.add(prototype)
                 }
             return prototypes
@@ -474,6 +495,11 @@ class Card(
                 font = GraphicsConfig.cardFont(onjScreen),
                 fontScale = GraphicsConfig.cardFontScale(),
                 isDark = onj.get<Boolean>("dark"),
+                additionalHoverInfos = onj
+                    .getOr<OnjArray?>("additionalHoverInfos", null)
+                    ?.value
+                    ?.map { it.value as String }
+                    ?: listOf(),
                 screen = onjScreen
             )
 
@@ -560,7 +586,6 @@ class CardActor(
 
     override var fixedZIndex: Int = 0
 
-
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
     override var styleManager: StyleManager? = null
@@ -597,28 +622,13 @@ class CardActor(
 
     private val cardTexturePixmap: Pixmap
 
+    override var isHoverDetailActive: Boolean
+        get() = card.shortDescription.isNotBlank() ||
+                card.flavourText.isNotBlank() ||
+                card.getAdditionalHoverDescriptions().isNotEmpty()
+        set(value) {}
+
     private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
-
-    private val onRightClickShowAdditionalInformationListener = object : InputListener() {
-
-        override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
-            if (button != 1) return false
-
-            detailActor?.let {
-                val descriptionParent = getParentsForExtras(it).first
-                if (descriptionParent.children.isEmpty) showExtraDescriptions(descriptionParent)
-                return true
-            }
-            return false
-        }
-    }
-
-    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
-        val allKeys = card.getKeyWordsForDescriptions()
-        DetailDescriptionHandler.descriptions.filter { it.key in allKeys }.forEach {
-            addHoverItemToParent(it.value.second, descriptionParent)
-        }
-    }
 
     init {
         bindHoverStateListeners(this)
@@ -626,7 +636,19 @@ class CardActor(
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
         redrawPixmap(card.baseDamage)
-        addListener(onRightClickShowAdditionalInformationListener)
+    }
+
+    private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
+        val allKeys = card.getKeyWordsForDescriptions()
+        DetailDescriptionHandler
+            .descriptions
+            .filter { it.key in allKeys }
+            .forEach {
+                addHoverItemToParent(it.value.second, descriptionParent)
+            }
+        card
+            .getAdditionalHoverDescriptions()
+            .forEach { addHoverItemToParent(it, descriptionParent) }
     }
 
     override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
@@ -717,8 +739,12 @@ class CardActor(
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
-        "description" to OnjString(card.shortDescription),
-        "flavorText" to OnjString(card.flavourText),
+        "description" to OnjString(
+            card.shortDescription.ifBlank { card.flavourText }
+        ),
+        "flavorText" to OnjString(
+            if (card.shortDescription.isBlank()) "" else card.flavourText
+        ),
         "effects" to DetailDescriptionHandler.allTextEffects,
 //        "rotation" to OnjFloat(rotation.toDouble()),
     )
@@ -734,11 +760,12 @@ class CardActor(
     }
 
     override fun onDetailDisplayStarted() {
-        detailActor?.let {
-            updateDetailStates()
-            val tempInfoParent = getParentsForExtras(it).second
-            card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
-        }
+        val detailActor = detailActor ?: return
+        detailActor as StyledActor
+        updateDetailStates(detailActor)
+        val tempInfoParent = getParentsForExtras(detailActor).second
+        card.currentHoverTexts.forEach { addHoverItemToParent(it.second, tempInfoParent) }
+        showExtraDescriptions(getParentsForExtras(detailActor).first)
     }
 
     private fun addHoverItemToParent(
@@ -766,19 +793,23 @@ class CardActor(
         val directionsToUse =
             if (it.localToStageCoordinates(Vector2(it.width, 0F)).x >= stage.viewport.worldWidth) {
                 left to top
-                //            } else if (it.localToStageCoordinates(Vector2(0F, 0F)).x <= 0) {
-                //                right to top  //maybe this changes, that's why it's still here
             } else {
                 right to top
             }
         return directionsToUse
     }
 
-    fun updateDetailStates() {
-        if (card.flavourText.isBlank()) screen.leaveState("hoverDetailHasFlavorText")
-        else screen.enterState("hoverDetailHasFlavorText")
+    fun <T> updateDetailStates(hoverActor: T) where T : Actor, T : StyledActor {
+        if (card.flavourText.isBlank() || card.shortDescription.isBlank()) {
+            screen.leaveState("hoverDetailHasFlavorText")
+        } else {
+            screen.enterState("hoverDetailHasFlavorText")
+        }
 
-        if (card.getKeyWordsForDescriptions().isEmpty()) screen.leaveState("hoverDetailHasMoreInfo")
-        else screen.enterState("hoverDetailHasMoreInfo")
+        if (card.getKeyWordsForDescriptions().isEmpty() && card.getAdditionalHoverDescriptions().isEmpty()) {
+            screen.leaveState("hoverDetailHasMoreInfo")
+        } else {
+            screen.enterState("hoverDetailHasMoreInfo")
+        }
     }
 }

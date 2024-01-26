@@ -6,7 +6,6 @@ import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -17,7 +16,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.Null
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -25,7 +23,6 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
-import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -35,12 +32,9 @@ import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
-import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
-import dev.lyze.flexbox.FlexBox
 import ktx.actors.onEnter
 import ktx.actors.onExit
-import onj.value.*
 import kotlin.system.measureTimeMillis
 
 
@@ -299,6 +293,7 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
+        if (!displayDetailActor.isHoverDetailActive) return
         if (currentHoverDetail != null) hideHoverDetail()
         val detail = screenBuilder.generateFromTemplate(
             detailTemplate,

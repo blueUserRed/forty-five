@@ -917,55 +917,9 @@ var mainCardHoverDetailBox = $Box {
                         color: color.forty_white
                     },
                 },
-                $Image {
-                    textureName: "hover_detail_more_info",
-                    scaleX: 0.1, //TODO needs to be changed when image is replaced with better resolution
-
-                    scaleY: 0.1,
-                    reportDimensionsWithScaling: true,
-                    styles: [
-                        {
-                            style_priority: 1,
-                            height: 50#points,
-                            width: 50#points,
-                            //                            positionRight: (50)#points,
-
-                            visible: true,
-                        },
-                        {
-                            style_priority: 2,
-                            visible: false,
-                            style_condition: not(state("hoverDetailHasMoreInfo"))
-                        }
-                    ],
-                },
             ]
         }
     ],
-
-    $Image {
-        textureName: "hover_detail_more_info",
-        scaleX: 0.1, //TODO needs to be changed when image is replaced with better resolution
-
-        scaleY: 0.1,
-        reportDimensionsWithScaling: true,
-        styles: [
-            {
-                style_priority: 1,
-                height: 50#points,
-                width: 50#points,
-                positionType: positionType.absolute,
-                positionRight: 15#points,
-                positionBottom: 10#points,
-                visible: true,
-            },
-            {
-                style_priority: 2,
-                visible: false,
-                style_condition: state("hoverDetailHasFlavorText") or not(state("hoverDetailHasMoreInfo"))
-            }
-        ],
-    },
 ];
 var cardHoverDetail = $Box {
     template_name: "card_hover_detail",

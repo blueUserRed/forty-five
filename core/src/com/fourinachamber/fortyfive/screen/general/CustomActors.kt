@@ -227,6 +227,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
+    override var isHoverDetailActive: Boolean = true
     override var detailActor: Actor? = null
 
     init {

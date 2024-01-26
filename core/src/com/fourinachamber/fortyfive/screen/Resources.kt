@@ -22,7 +22,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
 import kotlin.reflect.cast
-import kotlin.system.measureTimeMillis
 
 
 abstract class Resource(
@@ -217,7 +216,9 @@ class AtlasResource(
         val pages = pages!!
         val atlas = TextureAtlas()
         data.pages.forEach { page ->
-            page.texture = Texture(pages[page.textureFile.path()], page.useMipMaps)
+            val pagePixmap = pages[page.textureFile.path()]!!
+            page.texture = Texture(pagePixmap, page.useMipMaps)
+            pagePixmap.dispose()
         }
         atlas.load(data)
         variants = listOf(atlas)
