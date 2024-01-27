@@ -593,7 +593,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
-                    revolver.removeCard(parryCard)
+                    if (parryCard.shouldRemoveAfterShot) {
+                        revolver.removeCard(parryCard)
+                        cardStack.add(parryCard)
+                    }
                     parryCard.leaveGame()
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
