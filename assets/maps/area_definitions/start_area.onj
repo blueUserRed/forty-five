@@ -60,7 +60,7 @@ nodes: [
         edgesTo: [
             0
         ],
-        nodeTexture: "map_node_heal_circle",
+        nodeTexture: "map_node_heal",
         event: $ShopMapEvent {
             seed: null,
             boughtIndices: [

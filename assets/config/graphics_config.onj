@@ -70,7 +70,7 @@ encounterModifiers: {
 },
 
 encounterModifierAssets: [
-    "encounter_modifier_frost"
+    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist"
 ],
 
 damageOverlay: {

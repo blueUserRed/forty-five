@@ -4,9 +4,12 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
@@ -111,11 +114,6 @@ class Card(
      * true when the card can be dragged
      */
     var isDraggable: Boolean = true
-
-    /**
-     * true when [actor] is in an animation
-     */
-    var inAnimation: Boolean = false
 
     var inGame: Boolean = false
         private set
@@ -352,11 +350,25 @@ class Card(
             checkModifierTransformers(trigger, triggerInformation)
         }
         val inHand = inHand(controller)
-        effects
+        val effects = effects
             .filter { inGame || (inHand && it.triggerInHand) }
             .mapNotNull { it.checkTrigger(trigger, triggerInformation, controller) }
-            .collectTimeline()
-            .let { include(it) }
+        if (effects.isEmpty()) return@timeline
+        action {
+            actor.inAnimation = true
+        }
+        includeLater(
+            { actor.animateToTriggerPosition(controller) },
+            { inGame }
+        )
+        include(effects.collectTimeline())
+        includeLater(
+            { actor.animateBack(controller) },
+            { inGame }
+        )
+        action {
+            actor.inAnimation = false
+        }
     }
 
     private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
@@ -588,10 +600,12 @@ class CardActor(
     val isDark: Boolean,
     override val screen: OnjScreen
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable {
+    OffSettable, AnimationActor {
 
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
+
+    override var inAnimation: Boolean = false
 
     override var mainHoverDetailActor: String? = "cardHoverDetailMain"
 
@@ -640,6 +654,8 @@ class CardActor(
         set(value) {}
 
     private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
+
+    private var prevPosition: Vector2? = null
 
     init {
         bindHoverStateListeners(this)
@@ -748,6 +764,50 @@ class CardActor(
         }
         delay(2000)
         action { inDestroyAnim = false }
+    }
+
+    fun animateToTriggerPosition(controller: GameController): Timeline = Timeline.timeline {
+        prevPosition = Vector2(x, y)
+        val (targetX, targetY) = controller.revolver.getCardTriggerPosition()
+        val moveAction = MoveToAction()
+        moveAction.setPosition(targetX, targetY)
+        moveAction.duration = 0.3f
+        moveAction.interpolation = Interpolation.pow2
+        val scaleAction = ScaleToAction()
+        scaleAction.setScale(1.3f)
+        scaleAction.duration = 0.3f
+        scaleAction.interpolation = Interpolation.pow2
+        action {
+            addAction(moveAction)
+            addAction(scaleAction)
+        }
+        delayUntil { moveAction.isComplete }
+        action {
+            removeAction(moveAction)
+            removeAction(scaleAction)
+        }
+        delay(100)
+    }
+
+    fun animateBack(controller: GameController): Timeline = Timeline.timeline {
+        val (targetX, targetY) = prevPosition ?: return@timeline
+        val moveAction = MoveToAction()
+        moveAction.setPosition(targetX, targetY)
+        moveAction.duration = 0.3f
+        moveAction.interpolation = Interpolation.pow2
+        val scaleAction = ScaleToAction()
+        scaleAction.setScale(1f)
+        scaleAction.duration = 0.3f
+        scaleAction.interpolation = Interpolation.pow2
+        action {
+            addAction(moveAction)
+            addAction(scaleAction)
+        }
+        delayUntil { moveAction.isComplete }
+        action {
+            removeAction(moveAction)
+            removeAction(scaleAction)
+        }
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
