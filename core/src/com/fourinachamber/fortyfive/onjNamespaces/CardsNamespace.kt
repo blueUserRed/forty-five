@@ -133,6 +133,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value, false))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
+    fun destroyTargetOrDestroySelf(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
+        return OnjEffect(Effect.DestroyTargetOrDestroySelf(
+            triggerOrError(trigger.value),
+            bulletSelector.value,
+            false
+        ))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun damageDirect(trigger: OnjString, damage: OnjEffectValue): OnjEffect {
         return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value, false))

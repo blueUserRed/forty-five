@@ -640,6 +640,10 @@ textures: [
         file: "textures/encounter_modifier/rain.png"
     },
     {
+        name: "encounter_modifier_moist",
+        file: "textures/encounter_modifier/moist.png"
+    },
+    {
         name: "common_button_default",
         file: "textures/common/button/default.png"
     },

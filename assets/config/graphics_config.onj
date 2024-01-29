@@ -43,7 +43,7 @@ icons: {
 
 encounterModifiers: {
     rain: {
-        icon: "encounter_modifier_frost",
+        icon: "encounter_modifier_rain",
         displayName: "Rain",
         description: "Status effects don't work"
     },
@@ -63,9 +63,9 @@ encounterModifiers: {
         description: "Whenever you place a bullet in the revolver, you get a copy of it in your hand"
     },
     moist: {
-        icon: "encounter_modifier_frost",
+        icon: "encounter_modifier_moist",
         displayName: "Moist",
-        description: "Every bullet in the revolver loses one damage every time it turns in the revolver"
+        description: "Every bullet in the revolver loses one damage every time it turns"
     },
 },
 
