@@ -1053,6 +1053,26 @@ cards: [
         tags: ["pool1", "rarity1"],
         price: 0,
     },
+    {
+        name: "bloodcravingBullet",
+        title: "Bloodcraving Bullet",
+        flavourText: "",
+        description: "Can't be shot in the same turn that it entered the revolver.\n$trigger$While in Revolver:$trigger$\n$trigger$At the beginning of turn:$trigger$\nYou must destroy target bullet. If you are unable to destroy another bullet, this bullet destroys itself.",
+        baseDamage: 22,
+        coverValue: 0,
+        traitEffects: ["shotProtected"],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            destroyTargetOrDestroySelf("round start", bSelects.targetOptionalNotSelf)
+        ],
+        forceLoadCards: [],
+        dark: true,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 0,
+    },
 
 ],
 

@@ -30,6 +30,7 @@ import onj.value.OnjObject
 import onj.value.OnjString
 import java.lang.Integer.max
 import java.lang.Integer.min
+import kotlin.math.log
 
 /**
  * the Controller for the main game screen
@@ -686,6 +687,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             "revolver is shooting;" +
                     "cardToShoot = $cardToShoot"
         )
+
+        if (cardToShoot?.canBeShot(this)?.not() ?: false) {
+            FortyFiveLogger.debug(logTag, "Card can't be shot because it blocks")
+            return
+        }
 
         val targetedEnemies = if (cardToShoot?.isSpray ?: false) {
             enemyArea.enemies

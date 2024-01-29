@@ -132,6 +132,8 @@ class Card(
         private set
     var isReinforced: Boolean = false
         private set
+    var isShotProtected: Boolean = false
+        private set
 
     val shouldRemoveAfterShot: Boolean
         get() = !(isEverlasting || protectingModifiers.isNotEmpty())
@@ -155,6 +157,9 @@ class Card(
     private var modifierValuesDirty = true
 
     var enteredInSlot: Int? = null
+        private set
+
+    var enteredOnTurn: Int? = null
         private set
 
     var rotationCounter: Int = 0
@@ -204,6 +209,8 @@ class Card(
         }
         if (somethingChanged) modifiersChanged()
     }
+
+    fun canBeShot(controller: GameController): Boolean = !(isShotProtected && controller.turnCounter == enteredOnTurn)
 
     fun update(controller: GameController) {
         checkModifierValidity(controller)
@@ -319,6 +326,7 @@ class Card(
     fun onEnter(controller: GameController) {
         inGame = true
         enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
+        enteredOnTurn = controller.turnCounter
     }
 
     /**
@@ -531,6 +539,7 @@ class Card(
                 "replaceable" -> card.isReplaceable = true
                 "spray" -> card.isSpray = true
                 "reinforced" -> card.isReinforced = true
+                "shotProtected" -> card.isShotProtected = true
                 "rotten" -> {
                     card.isRotten = true
                     card.addRottenModifier()

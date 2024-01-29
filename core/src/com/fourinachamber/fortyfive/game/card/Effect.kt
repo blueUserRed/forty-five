@@ -317,6 +317,10 @@ abstract class Effect(val trigger: Trigger) {
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
 
+        init {
+            println("hi2")
+        }
+
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             include(getSelectedBullets(bulletSelector, controller, this@Destroy.card))
             includeLater(
@@ -425,6 +429,50 @@ abstract class Effect(val trigger: Trigger) {
         override fun blocks(controller: GameController): Boolean = false
 
         override fun copy(): Effect = TurnRevolver(trigger, rotation, triggerInHand)
+    }
+
+    class DestroyTargetOrDestroySelf(
+        trigger: Trigger,
+        val bulletSelector: BulletSelector,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        init {
+            println("hi")
+        }
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            var destroySelf = false
+            val card = this@DestroyTargetOrDestroySelf.card
+            action {
+                destroySelf = controller
+                    .revolver
+                    .slots
+                    .mapNotNull { it.card }
+                    .size < 2
+                println(destroySelf)
+            }
+            includeLater(
+                { println("showing popup") ; getSelectedBullets(bulletSelector, controller, card) },
+                { !destroySelf }
+            )
+            includeLater(
+                {
+                    get<List<Card>>("selectedCards")
+                        .map { controller.destroyCardTimeline(it) }
+                        .collectTimeline()
+                },
+                { !destroySelf }
+            )
+            includeLater(
+                { controller.destroyCardTimeline(card) },
+                { destroySelf }
+            )
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = DestroyTargetOrDestroySelf(trigger, bulletSelector, triggerInHand)
     }
 
 }
