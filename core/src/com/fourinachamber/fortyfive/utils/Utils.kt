@@ -317,9 +317,9 @@ object Utils {
 
     /**
      * convert slot from external representation (1 comes after 5)
-     * to internal representation (4 comes after 5)
+     * to internal representation (4 comes after 5) and back
      */
-    fun externalToInternalSlotRepresentation(slot: Int): Int = if (slot == 5) 5 else 5 - slot
+    fun convertSlotRepresentation(slot: Int): Int = if (slot == 5) 5 else 5 - slot
 
     /**
      * loads either a custom cursor or a system cursor
