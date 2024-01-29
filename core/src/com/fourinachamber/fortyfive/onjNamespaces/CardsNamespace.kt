@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.onjNamespaces
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.utils.Utils
-import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
@@ -189,7 +188,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         for (value in onjArr.value) when (value) {
             is OnjInt -> {
                 var num = value.value.toInt()
-                num = Utils.externalToInternalSlotRepresentation(num)
+                num = Utils.convertSlotRepresentation(num)
                 nums.add(num - 1)
             }
             is OnjString -> {

@@ -429,7 +429,7 @@ class Card(
         return additionalHoverInfos.map { info ->
             when (info) {
                 "home" -> enteredInSlot?.let {
-                    "bullet entered in slot $it"
+                    "bullet entered in slot ${Utils.convertSlotRepresentation(it)}"
                 } ?: ""
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
@@ -511,7 +511,7 @@ class Card(
                     .getOr<OnjArray?>("forbiddenSlots", null)
                     ?.value
                     ?.map { (it.value as Long).toInt() }
-                    ?.map { Utils.externalToInternalSlotRepresentation(it) }
+                    ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
                 //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(onjScreen),
