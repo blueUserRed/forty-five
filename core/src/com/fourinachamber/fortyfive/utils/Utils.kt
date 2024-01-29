@@ -288,6 +288,8 @@ fun GameAnimation.asTimeline(controller: GameController): Timeline = Timeline.ti
 
 fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"
 
+fun Actor.setPosition(pos: Vector2) = setPosition(pos.x, pos.y)
+
 object Utils {
 
     fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability

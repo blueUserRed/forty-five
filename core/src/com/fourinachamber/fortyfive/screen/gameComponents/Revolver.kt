@@ -24,6 +24,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
+import com.fourinachamber.fortyfive.utils.setPosition
 import ktx.actors.contains
 import onj.value.OnjNamedObject
 import kotlin.math.cos
@@ -345,12 +346,17 @@ class RevolverSlot(
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
         if (card?.actor?.inAnimation ?: true) return
-        card?.actor?.let {
-            it.setPosition(
-                x + slotSize / 2 - (it.width * it.scaleX) / 2,
-                y + slotSize / 2 - (it.height * it.scaleY) / 2
-            )
-        }
+        card?.actor?.setPosition(cardPosition())
+    }
+
+    fun cardPosition(): Vector2 {
+        val slotSize = drawable.minWidth * scaleX
+        val width = card?.actor?.width ?: slotSize
+        val height = card?.actor?.height ?: slotSize
+        return Vector2(
+            x + slotSize / 2 - (width) / 2,
+            y + slotSize / 2 - (height) / 2,
+        )
     }
 
     /**
