@@ -778,6 +778,7 @@ class CardActor(
         scaleAction.duration = 0.3f
         scaleAction.interpolation = Interpolation.pow2
         action {
+            toFront()
             addAction(moveAction)
             addAction(scaleAction)
         }
@@ -790,7 +791,12 @@ class CardActor(
     }
 
     fun animateBack(controller: GameController): Timeline = Timeline.timeline {
-        val (targetX, targetY) = prevPosition ?: return@timeline
+        val (targetX, targetY) = controller
+            .revolver
+            .slots
+            .find { it.card === card }
+            ?.cardPosition()
+            ?: return@timeline
         val moveAction = MoveToAction()
         moveAction.setPosition(targetX, targetY)
         moveAction.duration = 0.3f
