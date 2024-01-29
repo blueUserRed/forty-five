@@ -111,7 +111,7 @@ class Revolver(
         }
         card?.actor?.fixedZIndex = cardZIndex
         if (card != null && card.actor !in this) addActor(card.actor)
-        invalidate()
+        slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
     }
 
     /**
@@ -184,6 +184,8 @@ class Revolver(
             batch.shader = null
         }
     }
+
+    fun getCardTriggerPosition() = Vector2(slots[0].x - slots[0].width / 2f, slots[4].y + slots[0].width / 2f)
 
     override fun layout() {
         super.layout()
@@ -324,7 +326,7 @@ class RevolverSlot(
         if (inAnimation && action?.isComplete ?: false) {
             removeAction(action)
             inAnimation = false
-            card?.inAnimation = false
+//            card?.inAnimation = false
             revolver.invalidate()
         }
     }
@@ -342,6 +344,7 @@ class RevolverSlot(
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
+        if (card?.actor?.inAnimation ?: true) return
         card?.actor?.let {
             it.setPosition(
                 x + slotSize / 2 - (it.width * it.scaleX) / 2,
@@ -363,7 +366,6 @@ class RevolverSlot(
         action.isReverse = true
         action.duration = animationDuration
         addAction(action)
-        card?.inAnimation = true
         inAnimation = true
         this.action = action
     }
@@ -381,7 +383,6 @@ class RevolverSlot(
         action.isReverse = false
         action.duration = animationDuration
         addAction(action)
-        card?.inAnimation = true
         inAnimation = true
         this.action = action
     }

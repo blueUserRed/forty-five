@@ -317,10 +317,6 @@ abstract class Effect(val trigger: Trigger) {
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
 
-        init {
-            println("hi2")
-        }
-
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             include(getSelectedBullets(bulletSelector, controller, this@Destroy.card))
             includeLater(
@@ -437,10 +433,6 @@ abstract class Effect(val trigger: Trigger) {
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
 
-        init {
-            println("hi")
-        }
-
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             var destroySelf = false
             val card = this@DestroyTargetOrDestroySelf.card
@@ -450,10 +442,9 @@ abstract class Effect(val trigger: Trigger) {
                     .slots
                     .mapNotNull { it.card }
                     .size < 2
-                println(destroySelf)
             }
             includeLater(
-                { println("showing popup") ; getSelectedBullets(bulletSelector, controller, card) },
+                { getSelectedBullets(bulletSelector, controller, card) },
                 { !destroySelf }
             )
             includeLater(
