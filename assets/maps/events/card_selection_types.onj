@@ -42,6 +42,7 @@ var default = [
 ];
 
 var wasteland = [ //for demo only the biome says which cards, this makes it easier
+
     ...default,
     {
         select: $ByTag {
@@ -95,7 +96,8 @@ types: [
                     name: "silverBullet",
                     negate: true
                 },
-                effect: $Blacklist {}
+                effect: $Blacklist {
+                }
             }
         ]
     },
@@ -107,7 +109,8 @@ types: [
                     name: "workerBullet",
                     negate: true
                 },
-                effect: $Blacklist {}
+                effect: $Blacklist {
+                }
             }
         ]
     },
@@ -119,7 +122,8 @@ types: [
                     name: "incendiaryBullet",
                     negate: true
                 },
-                effect: $Blacklist {}
+                effect: $Blacklist {
+                }
             }
         ]
     },
@@ -131,8 +135,39 @@ types: [
                     name: "leadersBullet",
                     negate: true
                 },
-                effect: $Blacklist {}
+                effect: $Blacklist {
+                }
             }
+        ]
+    },
+    {
+        name: "weight_cards_pool_1",
+        cardChanges: [
+            {
+                select: $ByTag {
+                    name: "rarity1"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 1.0
+                }
+            },
+            {
+                select: $ByTag {
+                    name: "rarity2"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 2.0
+                }
+            },
+            {
+                select: $ByTag {
+                    name: "rarity3"
+                },
+                effect: $ProbabilityAddition {
+
+                    weight: 2.0
+                }
+            },
         ]
     },
 ],
