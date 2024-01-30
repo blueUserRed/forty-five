@@ -673,6 +673,7 @@ class CardActor(
             .forEach {
                 addHoverItemToParent(it.value.second, descriptionParent)
             }
+        if (FortyFive.currentGame == null) return
         card
             .getAdditionalHoverDescriptions()
             .filter { it.isNotBlank() }
@@ -884,7 +885,7 @@ class CardActor(
             screen.enterState("hoverDetailHasFlavorText")
         }
 
-        if (card.getKeyWordsForDescriptions().isEmpty() && card.getAdditionalHoverDescriptions().isEmpty()) {
+        if (card.getKeyWordsForDescriptions().isEmpty() && (FortyFive.currentGame == null || card.getAdditionalHoverDescriptions().isEmpty())) {
             screen.leaveState("hoverDetailHasMoreInfo")
         } else {
             screen.enterState("hoverDetailHasMoreInfo")

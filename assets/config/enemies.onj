@@ -32,78 +32,6 @@ var textEmitterConfig = [
     },
 ];
 
-var outlawDamageSharedKeys = {
-    icon: "enemy_action_damage",
-    hasSpecialAnimation: false,
-    title: "Damage",
-    descriptionTemplate: "This attack does {damage} damage",
-};
-
-var outlawCoverSharedKeys = {
-    icon: "enemy_action_cover",
-    hasSpecialAnimation: false,
-    title: "Cover",
-    descriptionTemplate: "The enemy adds {cover} shield",
-};
-
-var pyroDamageSharedKeys = {
-    icon: "enemy_action_damage",
-    hasSpecialAnimation: false,
-    title: "Damage",
-    descriptionTemplate: "This attack does {damage} damage",
-};
-
-var pyroCoverSharedKeys = {
-    icon: "enemy_action_cover",
-    hasSpecialAnimation: false,
-    title: "Cover",
-    descriptionTemplate: "The enemy adds {cover} shield",
-};
-
-var pyroBurningSharedKeys = {
-    icon: "enemy_action_burning",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_burning",
-    title: "Burning",
-    descriptionTemplate: "You get Burning!",
-};
-
-var pyroFireResistanceSharedKeys = {
-    icon: "enemy_action_fire_resistance",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_fire_resistance",
-    title: "Fire resistance",
-    descriptionTemplate: "The enemy gives itself fire resistance!",
-};
-
-var pyroInfernoSharedKeys = {
-    icon: "enemy_action_inferno",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_inferno",
-    title: "Inferno",
-    descriptionTemplate: "You get burning for the rest of the fight!",
-};
-
-var pyroHotPotatoSharedKeys = {
-    icon: "enemy_action_hot_potato",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_hot_potato",
-    title: "Hot Potato",
-    descriptionTemplate: "A [scorching Bullet] is being put in your hand!",
-};
-
 enemies: [
 
     {
@@ -121,37 +49,17 @@ enemies: [
         detailFont: "red_wing",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
-        brain: $RandomEnemyBrain {
+        brain: $OutlawBrain {
+            phase1End: 3,
+            phase2End: 6,
+            damagePhase1: [2, 5],
+            damagePhase2: [5, 10],
+            damagePhase3: [13, 18],
+            coverPhase1: [2, 5],
+            coverPhase2: [5, 10],
+            coverPhase3: [13, 18],
             actionProbability: 0.8,
-            actions: [
-                $DamagePlayer {
-                    damage: [ 6, 7 ],
-                    showProbability: 1.0,
-                    weight: 5,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 8, 12 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 12, 18 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $TakeCover {
-                    cover: [ 12, 22 ],
-                    weight: 10,
-                    showProbability: 1.0,
-                    ...outlawCoverSharedKeys
-                },
-            ],
+            attackProbability: 0.5,
         },
         detailFontColor: color.black
     },
@@ -168,37 +76,17 @@ enemies: [
         detailFont: "red_wing",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
-        brain: $RandomEnemyBrain {
+        brain: $OutlawBrain {
+            phase1End: 3,
+            phase2End: 6,
+            damagePhase1: [2, 5],
+            damagePhase2: [5, 10],
+            damagePhase3: [13, 18],
+            coverPhase1: [2, 5],
+            coverPhase2: [5, 10],
+            coverPhase3: [13, 18],
             actionProbability: 0.8,
-            actions: [
-                $DamagePlayer {
-                    damage: [ 11, 13 ],
-                    showProbability: 1.0,
-                    weight: 5,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 14, 17 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 18, 24 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $TakeCover {
-                    cover: [ 16, 24 ],
-                    weight: 10,
-                    showProbability: 1.0,
-                    ...outlawCoverSharedKeys
-                },
-            ],
+            attackProbability: 0.5,
         },
         detailFontColor: color.black
     },
@@ -206,84 +94,35 @@ enemies: [
     {
         name: "Pyro",
         title: "Pyro",
-        baseHealth: 1,
+        baseHealth: 100,
         texture: "enemy_pyro",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
-        scale: 0.45,
+        scale: 0.22,
         detailFont: "red_wing",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
-        brain: $RandomEnemyBrain {
-            actionProbability: 0.8,
-            actions: [
-                $DamagePlayer {
-                    damage: [ 5, 10 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...pyroDamageSharedKeys
-                },
-                $TakeCover {
-                    cover: [ 5, 10 ],
-                    weight: 10,
-                    showProbability: 1.0,
-                    ...pyroCoverSharedKeys
-                },
-                $GivePlayerStatusEffect {
-                    statusEffect: burning(5#val, 0.5, false),
-                    weight: 10,
-                    showProbability: 0.5,
-                    ...pyroBurningSharedKeys
-                },
-                $GiveSelfStatusEffect {
-                    statusEffect: fireResistance(5#val),
-                    weight: 60,
-                    showProbability: 0.0,
-                    hasUnlikelyPredicates: true,
-                    predicates: [
-                        $AnyEnemyHasStatusEffect {
-                            value: burning(0#val, 0.5, false)
-                        },
-                        $EnemyDoesNotHaveStatusEffect {
-                            value: fireResistance(0#val)
-                        }
-                    ],
-                    ...pyroFireResistanceSharedKeys
-                },
-                $GivePlayerStatusEffect {
-                    statusEffect: burning(0#val, 0.5, true),
-                    weight: 500,
-                    showProbability: 0.0,
-                    hasUnlikelyPredicates: true,
-                    ...pyroInfernoSharedKeys,
-                    predicates: [
-                        $EnemyHealthLowerThanPercent {
-                            value: 25.0
-                        },
-                        $AliveEnemyCountIn {
-                            value: [2, 10]
-                        }
-                    ]
-                },
-                $GivePlayerCard {
-                    card: "scorchingBullet",
-                    weight: 2,
-                    showProbability: 0.0,
-                    ...pyroHotPotatoSharedKeys
-                }
-            ],
+        brain: $PyroBrain {
+            possibleBurningTurns: [1, 3],
+            burningRotations: [3, 5],
+            hideBurningProbability: 0.25,
+            hotPotatoProbability: 0.15,
+            hideHotPotatoProbability: 0.7,
+            infernoHealthPercentage: 0.15,
+            damage: [8, 10],
+            cover: [10, 13],
+            actionProbability: 0.4,
+            attackProbability: 0.4,
         },
         detailFontColor: color.black
     },
 
-
     {
         name: "Witch",
         title: "Witch",
-        baseHealth: 130,
+        baseHealth: 100,
         texture: "enemy_witch",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -295,24 +134,15 @@ enemies: [
         textEmitterConfig: textEmitterConfig,
         detailFontColor: color.black,
         brain: $WitchBrain {
-            firstEffectPossibleTurns: [1, 3],
-            secondEffectOffset: [7, 11],
-            bewitchedTurns: [1, 3],
-            bewitchedRotations: [2, 5],
-            wrathOfTheWitchDamageRange: [7, 13],
-            wardOfTheWitchCoverRange: [7, 13],
-            bewitchedBufferTurns: 1,
-            bewitchedProbability: 0.3,
-            bewitchedShowProbability: 0.5,
-            rotateRevolverProbability: 0.3,
-            rotateRevolverShowProbability: 0.5,
-            damageProbability: 0.3,
-            shieldProbability: 0.3,
-            damage: [7, 13],
-            shield: [7, 13],
-            revolverRotationIconHandle: "",
-            damageIconHandle: "enemy_action_damage",
-            shieldIconHandle: "enemy_action_cover",
+            bewitchedProbability: 0.2,
+            bewitchedTurns: [2, 3],
+            bewitchedRotations: [3, 5],
+            hideBewitchedProbability: 0.8,
+            leftTurnProbability: 0.3,
+            damage: [5, 10],
+            cover: [10, 20],
+            actionProbability: 0.6,
+            attackProbability: 0.6,
         }
     },
     {
