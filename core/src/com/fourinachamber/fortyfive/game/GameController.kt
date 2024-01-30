@@ -465,6 +465,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (!cost(card.cost)) return
         action {
             cardHand.removeCard(card)
+            if (cardInSlot != null) revolver.preAddCard(slot, card)
         }
         includeLater(
             { destroyCardTimeline(cardInSlot!!) },
@@ -722,11 +723,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     .collectTimeline()
                     .let { include(it) }
             }
-            include(rotateRevolver(rotationDirection))
             cardToShoot?.let {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
             }
+            include(rotateRevolver(rotationDirection))
             _encounterModifiers
                 .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }
                 .collectTimeline()

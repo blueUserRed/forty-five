@@ -109,10 +109,26 @@ class Revolver(
             it.width = slots[0].width * cardScale
             it.height = slots[0].width * cardScale
             it.rotation = 0f
+            it.fixedZIndex = cardZIndex
         }
-        card?.actor?.fixedZIndex = cardZIndex
         if (card != null && card.actor !in this) addActor(card.actor)
         slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
+    }
+
+    fun preAddCard(slot: Int, card: Card) {
+        if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
+        card.isDraggable = false
+        val revolverSlot = slots[slot - 1]
+        if (card.actor !in this) addActor(card.actor)
+        card.actor.let {
+            it.width = slots[0].width * cardScale
+            it.height = slots[0].width * cardScale
+            it.rotation = 0f
+            it.toBack()
+        }
+        slots.forEach { it.toBack() }
+        card.actor.setPosition(revolverSlot.cardPosition())
+
     }
 
     /**
