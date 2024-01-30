@@ -36,17 +36,13 @@ paths: {
 mapImages: [
     {
         name: "aqua_balle",
-        image: images.aquaDulche.image,
-        width: images.aquaDulche.width,
-        height: images.aquaDulche.height,
         type: "sign",
+        ...(images.aquaBalle),
     },
     {
         name: "tabu_letter_outpost",
-        image: images.aquaDulche.image,
-        width: images.aquaDulche.width,
-        height: images.aquaDulche.height,
         type: "sign",
+        ...(images.aquaBalle),
     },
     {
         name: "salem",
@@ -57,24 +53,18 @@ mapImages: [
     },
     {
         name: "spire_outpost",
-        image: images.aquaDulche.image,
-        width: images.aquaDulche.width,
-        height: images.aquaDulche.height,
         type: "sign",
+        ...(images.aquaBalle),
     },
     {
         name: "aqua_balle",
-        image: images.aquaDulcheName.image,
-        width: images.aquaDulcheName.width,
-        height: images.aquaDulcheName.height,
         type: "name",
+        ...(images.aquaBalleName),
     },
     {
         name: "tabu_letter_outpost",
-        image: images.aquaDulcheName.image,
-        width: images.aquaDulcheName.width,
-        height: images.aquaDulcheName.height,
         type: "name",
+        ...(images.aquaBalleName),
     },
     {
         name: "salem",
@@ -85,10 +75,8 @@ mapImages: [
     },
     {
         name: "spire_outpost",
-        image: images.aquaDulcheName.image,
-        width: images.aquaDulcheName.width,
-        height: images.aquaDulcheName.height,
         type: "name",
+        ...(images.aquaBalleName),
     }
 ],
 
@@ -166,8 +154,8 @@ var biomeDecorations = {
             },
         ],
         decorationPadding: 40.0,
-        //        animatedDecorations: [
-//            $RandomDistributionFunction {
+        animatedDecorations: [
+            //            $RandomDistributionFunction {
 //                decoration: "grass",
 //                density: 0.04,
 //                baseWidth: 1.0,
@@ -177,8 +165,35 @@ var biomeDecorations = {
 //                onlyCollidesWithNodes: false,
 //                canOverlapWithOtherNodes: true,
 //            },
-//        ],
+        ],
 
+    },
+    bewitchedForest: {
+        decorations: [
+        ],
+        decorationPadding: 40.0,
+        animatedDecorations: [
+            $RandomDistributionFunction {
+                decoration: "sheep",
+                density: 0.015,
+                baseWidth: 8.0,
+                baseHeight: 8.0,
+                scaleMin: 1.0,
+                scaleMax: 1.0,
+                onlyCollidesWithNodes: false,
+                canOverlapWithOtherNodes: true,
+            },
+            $RandomDistributionFunction {
+                decoration: "tree",
+                density: 3.5,
+                baseWidth: 5.0,
+                baseHeight: 10.0,
+                scaleMin: 1.0,
+                scaleMax: 2.0,
+                onlyCollidesWithNodes: false,
+                canOverlapWithOtherNodes: true,
+            },
+        ],
     }
 };
 
@@ -192,7 +207,7 @@ var uniqueEventsToUseOften = {
                 types: [
                     "weighted_cards_pool_1"
                 ],
-                nbrOfCards: 1,
+                nbrOfCards: 3,
                 currentlyBlocks: false,
                 canBeStarted: true,
                 isCompleted: false,
@@ -214,11 +229,75 @@ var uniqueEventsToUseOften = {
                 isCompleted: false,
             },
         }
-    }
+    },
+    roadBetweenTabuLetterAndSalem: {
+        chooseCard: {
+            isDeadEnd: false,
+            nodeTexture: "map_node_shop_circle",
+            event: $ChooseCardMapEvent {
+                seed: null,
+                types: [
+                    "weighted_cards_pool_2"
+                ],
+                nbrOfCards: 3,
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            }
+        },
+        healEvent: {
+            isDeadEnd: false,
+            nodeTexture: "map_node_shop_circle",
+            event: $HealOrMaxHPEvent {
+                seed: null,
+                healRange: [
+                    17, 22
+                ],
+                maxHPRange: [
+                    4, 6
+                ],
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            },
+        }
+    },
+    roadBetweenSalemAndSpireOutpost: {
+        chooseCard: {
+            isDeadEnd: false,
+            nodeTexture: "map_node_shop_circle",
+            event: $ChooseCardMapEvent {
+                seed: null,
+                types: [
+                    "weighted_cards_pool_3"
+                ],
+                nbrOfCards: 3,
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            }
+        },
+        healEvent: {
+            isDeadEnd: false,
+            nodeTexture: "map_node_shop_circle",
+            event: $HealOrMaxHPEvent {
+                seed: null,
+                healRange: [
+                    18, 23
+                ],
+                maxHPRange: [
+                    5, 8
+                ],
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            },
+        }
+    },
 };
 
-var aqua_balle = {
-    name: "road_between_aqua_balle_and_tabu_letter",
+var aquaBalleToTabuLetterOutpost = {
+    name: "road_between_aqua_balle_and_tabu_letter_outpost",
     biome: "wasteland",
     seed: runRandom(1),
     restrictions: {
@@ -235,7 +314,7 @@ var aqua_balle = {
         scaleLength: 0.5,
         otherAreas: [
         ],
-        rotation: 1.25,
+        rotation: 0.0,
         avgNbrOfEncounters: 0,
         exitNodeTexture: "map_node_exit_circle",
         fixedEvents: [
@@ -250,12 +329,104 @@ var aqua_balle = {
                     types: [
                     ],
                     person: "traveling_merchant",
-                }
+                },
+                isDeadEnd: false,
             }
         ],
         optionalEvents: [
             {
-                weight: 10,
+                weight: 25,
+                nodeTexture: "map_node_fight_circle",
+                event: $EncounterMapEvent {
+                    currentlyBlocks: true,
+                    canBeStarted: true,
+                    isCompleted: false,
+                    encounterIndex: 0,
+                    distanceToEnd: -1,
+                }
+            },
+            {
+                weight: 3,
+                nodeTexture: "map_node_shop_circle",
+                event: $ChooseCardMapEvent {
+                    seed: null,
+                    types: [
+                        "weighted_cards_pool_2"
+                    ],
+                    nbrOfCards: 3,
+                    currentlyBlocks: false,
+                    canBeStarted: true,
+                    isCompleted: false,
+                }
+            },
+            {
+                weight: 3,
+                nodeTexture: "map_node_shop_rect",
+                event: $ShopMapEvent {
+                    seed: null,
+                    boughtIndices: [
+                    ],
+                    types: [
+                    ],
+                    person: "traveling_merchant",
+                }
+            },
+        ],
+        finalEvent: {
+            nodeTexture: "map_node_fight_circle",
+            event: $EncounterMapEvent {
+                currentlyBlocks: true,
+                canBeStarted: true,
+                isCompleted: false,
+                encounterIndex: 0,
+                distanceToEnd: -1,
+            }
+        },
+        ...(biomeDecorations.wasteland),
+        decorationSeed: 258765657,
+    },
+};
+
+var tabuLetterOutpostToSalem = {
+    name: "road_between_tabu_letter_outpost_and_salem",
+    biome: "bewitched_forest",
+    seed: runRandom(2),
+    restrictions: {
+        progress: [
+            50.0, 75.0
+        ],
+        minNodes: 40,
+        maxNodes: 50,
+        maxSplits: 4,
+        splitProbability: 0.5,
+        startArea: "tabu_letter_outpost",
+        endArea: "salem",
+        scaleWidth: 1.1,
+        scaleLength: 0.5,
+        otherAreas: [
+        ],
+        rotation: 0.0,
+        avgNbrOfEncounters: 0,
+        exitNodeTexture: "map_node_exit_circle",
+        fixedEvents: [
+            ...repeat(8, uniqueEventsToUseOften.roadBetweenTabuLetterAndSalem.chooseCard),
+            ...repeat(3, uniqueEventsToUseOften.roadBetweenTabuLetterAndSalem.healEvent),
+            {
+                nodeTexture: "map_node_shop_rect",
+                event: $ShopMapEvent {
+                    seed: null,
+                    boughtIndices: [
+                    ],
+                    types: [
+                    ],
+                    person: "traveling_merchant",
+                },
+                isDeadEnd: false,
+            }
+        ],
+        optionalEvents: [
+            {
+                weight: 25,
                 nodeTexture: "map_node_fight_circle",
                 event: $EncounterMapEvent {
                     currentlyBlocks: true,
@@ -271,14 +442,26 @@ var aqua_balle = {
                 event: $HealOrMaxHPEvent {
                     seed: null,
                     healRange: [
-                        35, 45
+                        17, 22
                     ],
                     maxHPRange: [
-                        10, 25
+                        4, 6
                     ],
                     currentlyBlocks: false,
                     canBeStarted: true,
                     isCompleted: false,
+                }
+            },
+            {
+                weight: 3,
+                nodeTexture: "map_node_shop_rect",
+                event: $ShopMapEvent {
+                    seed: null,
+                    boughtIndices: [
+                    ],
+                    types: [
+                    ],
+                    person: "traveling_merchant",
                 }
             },
         ],
@@ -292,16 +475,110 @@ var aqua_balle = {
                 distanceToEnd: -1,
             }
         },
+        ...(biomeDecorations.bewitchedForest),
+        decorationSeed: 12345678,
+    },
+};
 
-        decorationSeed: 258765657,
+var salemToSpireOutpost = {
+    name: "road_between_salem_and_spire_outpost",
+    biome: "bewitched_forest",
+    seed: runRandom(2),
+    restrictions: {
+        progress: [
+            75.0, 100.0
+        ],
+        minNodes: 40,
+        maxNodes: 50,
+        maxSplits: 4,
+        splitProbability: 0.5,
+        startArea: "salem",
+        endArea: "spire_outpost",
+        scaleWidth: 1.1,
+        scaleLength: 0.5,
+        otherAreas: [
+        ],
+        rotation: 0.0,
+        avgNbrOfEncounters: 0,
+        exitNodeTexture: "map_node_exit_circle",
+        fixedEvents: [
+            ...repeat(8, uniqueEventsToUseOften.roadBetweenSalemAndSpireOutpost.chooseCard),
+            ...repeat(3, uniqueEventsToUseOften.roadBetweenSalemAndSpireOutpost.healEvent),
+            {
+                nodeTexture: "map_node_shop_rect",
+                event: $ShopMapEvent {
+                    seed: null,
+                    boughtIndices: [
+                    ],
+                    types: [
+                    ],
+                    person: "traveling_merchant",
+                },
+                isDeadEnd: false,
+            }
+        ],
+        optionalEvents: [
+            {
+                weight: 25,
+                nodeTexture: "map_node_fight_circle",
+                event: $EncounterMapEvent {
+                    currentlyBlocks: true,
+                    canBeStarted: true,
+                    isCompleted: false,
+                    encounterIndex: 0,
+                    distanceToEnd: -1,
+                }
+            },
+            {
+                weight: 3,
+                nodeTexture: "map_node_heal_circle",
+                event: $HealOrMaxHPEvent {
+                    seed: null,
+                    healRange: [
+                        17, 22
+                    ],
+                    maxHPRange: [
+                        4, 6
+                    ],
+                    currentlyBlocks: false,
+                    canBeStarted: true,
+                    isCompleted: false,
+                }
+            },
+            {
+                weight: 3,
+                nodeTexture: "map_node_shop_rect",
+                event: $ShopMapEvent {
+                    seed: null,
+                    boughtIndices: [
+                    ],
+                    types: [
+                    ],
+                    person: "traveling_merchant",
+                }
+            },
+        ],
+        finalEvent: {
+            nodeTexture: "map_node_fight_circle",
+            event: $EncounterMapEvent {
+                currentlyBlocks: true,
+                canBeStarted: true,
+                isCompleted: false,
+                encounterIndex: 0,
+                distanceToEnd: -1,
+            }
+        },
+        ...(biomeDecorations.bewitchedForest),
+        decorationSeed: 1234567890,
     },
 };
 
 generatorConfig: {
     outputDirectory: "maps/roads",
     maps: [
-        aqua_balle,
-
+        aquaBalleToTabuLetterOutpost,
+        tabuLetterOutpostToSalem,
+        salemToSpireOutpost,
     ]
 },
 
