@@ -141,7 +141,37 @@ types: [
         ]
     },
     {
-        name: "weight_cards_pool_1",
+        name: "weighted_cards_pool_1",
+        cardChanges: [
+            {
+                select: $ByTag {
+                    name: "rarity1"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 1.0
+                }
+            },
+            {
+                select: $ByTag {
+                    name: "rarity2"
+                },
+                effect: $ProbabilityAddition {
+                    weight: 2.0
+                }
+            },
+            {
+                select: $ByTag {
+                    name: "rarity3"
+                },
+                effect: $ProbabilityAddition {
+
+                    weight: 2.0
+                }
+            },
+        ]
+    },
+    {
+        name: "weighted_cards_pool_2",
         cardChanges: [
             {
                 select: $ByTag {
