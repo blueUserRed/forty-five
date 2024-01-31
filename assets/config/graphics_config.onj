@@ -76,10 +76,12 @@ encounterModifierAssets: [
 encounterBackgrounds: [
     {
         biome: "wasteland",
+        isDark: false,
         background: "game_screen_background_wasteland"
     },
     {
         biome: "bewitched_forest",
+        isDark: true,
         background: "game_screen_background_bewitched_forest"
     },
 ],

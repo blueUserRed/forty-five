@@ -131,6 +131,14 @@ object GraphicsConfig {
         ?.get<String>("background")
         ?: throw RuntimeException("no background for biome $biome")
 
+    fun isEncounterBackgroundDark(biome: String): Boolean = config
+        .get<OnjArray>("encounterBackgrounds")
+        .value
+        .map { it as OnjObject }
+        .find { it.get<String>("biome") == biome }
+        ?.get<Boolean>("isDark")
+        ?: throw RuntimeException("no background for biome $biome")
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
