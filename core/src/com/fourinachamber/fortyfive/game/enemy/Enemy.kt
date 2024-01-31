@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.game.enemy
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -11,9 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
-import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
 import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.*
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
@@ -56,6 +55,7 @@ class Enemy(
     val detailFont: BitmapFont,
     val detailFontScale: Float,
     val detailFontColor: Color,
+    val detailFontColorDark: Color,
     textEmitterConfig: OnjArray,
     private val screen: OnjScreen
 ) {
@@ -248,6 +248,7 @@ class Enemy(
                 detailFont,
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
+                onj.get<Color>("detailFontColorDark"),
                 onj.get<OnjArray>("textEmitterConfig"),
                 curScreen
             )
@@ -270,19 +271,25 @@ class EnemyActor(
     val screen: OnjScreen
 ) : WidgetGroup(), ZIndexActor {
 
+    private val fontColor = if (GraphicsConfig.isEncounterBackgroundDark(MapManager.currentDetailMap.biome)) {
+        enemy.detailFontColorDark
+    } else {
+        enemy.detailFontColor
+    }
+
     override var fixedZIndex: Int = 0
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
-    val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
+    val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor))
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = CustomImageActor(null, screen, false)
-    private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, enemy.detailFontColor))
+    private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor))
     private val coverInfoBox = CustomVerticalGroup(screen)
     private val statsBox = CustomVerticalGroup(screen)
 
     private val statusEffectDisplay = StatusEffectDisplay(
         screen,
         enemy.detailFont,
-        enemy.detailFontColor,
+        fontColor,
         enemy.detailFontScale
     )
 
@@ -293,7 +300,7 @@ class EnemyActor(
     val healthLabel: CustomLabel = CustomLabel(
         screen,
         "",
-        Label.LabelStyle(enemy.detailFont, enemy.detailFontColor)
+        Label.LabelStyle(enemy.detailFont, fontColor)
     )
 
     private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix

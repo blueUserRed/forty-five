@@ -61,7 +61,8 @@ enemies: [
             actionProbability: 0.8,
             attackProbability: 0.5,
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "Outlaw_lvl2",
@@ -88,7 +89,8 @@ enemies: [
             actionProbability: 0.8,
             attackProbability: 0.5,
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
 
     {
@@ -116,7 +118,8 @@ enemies: [
             actionProbability: 0.4,
             attackProbability: 0.4,
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
 
     {
@@ -133,6 +136,7 @@ enemies: [
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         detailFontColor: color.black,
+        detailFontColorDark: color.white,
         brain: $WitchBrain {
             bewitchedProbability: 0.2,
             bewitchedTurns: [2, 3],
@@ -162,7 +166,8 @@ enemies: [
             actionProbability: 0.0,
             actions: [],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_2",
@@ -195,7 +200,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_3",
@@ -228,7 +234,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_4",
@@ -261,7 +268,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_5",
@@ -294,7 +302,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_6",
@@ -355,7 +364,8 @@ enemies: [
                 },
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
 
 ]

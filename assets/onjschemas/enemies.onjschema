@@ -135,6 +135,7 @@ var enemy = {
     textEmitterConfig: textEmitterConfig[],
     brain: $EnemyBrain,
     detailFontColor: Color,
+    detailFontColorDark: Color,
 };
 
 enemies: enemy[]

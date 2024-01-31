@@ -43,6 +43,7 @@ encounterModifierAssets: string[],
 
 encounterBackgrounds: {
     biome: string,
+    isDark: boolean,
     background: string,
 }[],
 
