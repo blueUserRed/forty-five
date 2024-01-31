@@ -715,8 +715,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     cardToShoot.beforeShot()
                     if (cardToShoot.shouldRemoveAfterShot) {
                         revolver.removeCard(cardToShoot)
-                        cardStack.add(cardToShoot)
+                        if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
                     }
+                    if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
                     cardToShoot.afterShot()
                 }
                 targetedEnemies
