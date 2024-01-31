@@ -44,11 +44,14 @@ class DeferredFrameAnimation(
     }
 
     override fun getFrame(progress: Int, frameOffset: Int): Drawable {
-        loadingTimeline.updateTimeline()
         if (loadedFrameAnimation == null && serviceThreadMessage.finished && loadingTimeline.isFinished) {
             loadFrameAnimation()
         }
         return loadedFrameAnimation?.getFrame(progress, frameOffset) ?: previewDrawable
+    }
+
+    override fun update() {
+        loadingTimeline.updateTimeline()
     }
 
     private fun loadFrameAnimation() {

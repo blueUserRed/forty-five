@@ -75,6 +75,10 @@ class AnimationDrawable(
         )
     }
 
+    fun update() {
+        loadedAnimations.forEach { it.update() }
+    }
+
     private fun nextAnimation(): AnimationPart? {
         if (!animationIterator.hasNext()) {
             end()
@@ -109,6 +113,8 @@ interface AnimationPart : Disposable {
     val duration: Int
 
     fun getFrame(progress: Int, frameOffset: Int = 0): Drawable?
+
+    fun update() {}
 
 }
 
