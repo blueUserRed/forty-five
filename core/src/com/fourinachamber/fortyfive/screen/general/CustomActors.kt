@@ -381,11 +381,14 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 open class CustomFlexBox(
     override val screen: OnjScreen
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable, HasOnjScreen {
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
+    Detachable, OffSettable, HasOnjScreen, DisableActor {
 
     override var fixedZIndex: Int = 0
 
     var background: Drawable? = null
+
+    override var isDisabled: Boolean = false
 
     override var isHoveredOver: Boolean = false
 
@@ -473,6 +476,7 @@ open class CustomFlexBox(
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
         addOffsetableStyles(screen)
+        addDisableStyles(screen)
     }
 
 

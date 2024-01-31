@@ -73,6 +73,10 @@ object StyleNamespace {
     fun hover(): OnjStyleCondition = OnjStyleCondition(StyleCondition.IsHoveredOver)
 
     @RegisterOnjFunction(schema = "params: [string]")
+    fun hover(actorName: OnjString): OnjStyleCondition =
+        OnjStyleCondition(StyleCondition.IsActorHoveredOver(actorName.value))
+
+    @RegisterOnjFunction(schema = "params: [string]")
     fun state(state: OnjString): OnjStyleCondition = OnjStyleCondition(StyleCondition.ScreenState(state.value))
 
     @RegisterOnjFunction(schema = "params: [string]")

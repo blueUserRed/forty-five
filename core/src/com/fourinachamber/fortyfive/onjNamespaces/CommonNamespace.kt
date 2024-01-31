@@ -37,6 +37,7 @@ object CommonNamespace {
             "circle" with OnjInterpolation(Interpolation.circle)
             "circle_in" with OnjInterpolation(Interpolation.circleIn)
             "circle_out" with OnjInterpolation(Interpolation.circleOut)
+            "pow2" with OnjInterpolation(Interpolation.pow2)
         }
     )
 
