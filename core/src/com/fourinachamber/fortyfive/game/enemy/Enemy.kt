@@ -452,6 +452,7 @@ class EnemyActor(
 
         is NextEnemyAction.None -> {
             attackIndicator.isVisible = false
+            attackLabel.setText("")
         }
 
         is NextEnemyAction.ShownEnemyAction -> {
@@ -462,6 +463,7 @@ class EnemyActor(
 
         is NextEnemyAction.HiddenEnemyAction -> {
             attackIcon.backgroundHandle = hiddenActionIconHandle
+            attackLabel.setText("")
             attackIndicator.isVisible = true
         }
 

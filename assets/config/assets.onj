@@ -184,6 +184,10 @@ textures: [
         file: "textures/game_screen_backgrounds/wasteland.png"
     },
     {
+        name: "game_screen_background_bewitched_forest",
+        file: "textures/game_screen_backgrounds/bewitched_forest.png"
+    },
+    {
         name: "loose_screen_background",
         file: "textures/screens/loose_screen_background.png"
     },

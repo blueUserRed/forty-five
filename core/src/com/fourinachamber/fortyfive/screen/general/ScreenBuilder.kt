@@ -75,7 +75,6 @@ class ScreenBuilder(val file: FileHandle) {
             batch = SpriteBatch(),
             controllerContext = controllerContext,
             styleManagers = listOf(),
-            background = background,
             useAssets = borrowed.toMutableList(),
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
@@ -85,6 +84,7 @@ class ScreenBuilder(val file: FileHandle) {
             transitionAwayTime = transitionAwayTime,
             screenBuilder = this,
         )
+        screen.background = background
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)

@@ -192,6 +192,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFive.currentGame = this
         gameRenderPipeline = GameRenderPipeline(onjScreen)
         FortyFive.useRenderPipeline(gameRenderPipeline)
+        onjScreen.background = GraphicsConfig.encounterBackgroundFor(MapManager.currentDetailMap.biome)
         FortyFiveLogger.title("game starting")
 
         warningParent = onjScreen.namedActorOrError(warningParentName) as? CustomWarningParent

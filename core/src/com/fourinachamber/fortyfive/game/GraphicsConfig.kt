@@ -15,6 +15,7 @@ import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
+import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjString
 import kotlin.properties.Delegates
@@ -29,6 +30,7 @@ object GraphicsConfig {
         val schema = OnjSchemaParser.parseFile(Gdx.files.internal(graphicsConfigSchemaFile).file())
         schema.assertMatches(config)
         config as OnjObject
+        this.config = config
         readConstants(config)
     }
 
@@ -121,6 +123,14 @@ object GraphicsConfig {
     fun shootShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, shootPostProcessor)
     fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
 
+    fun encounterBackgroundFor(biome: String): ResourceHandle = config
+        .get<OnjArray>("encounterBackgrounds")
+        .value
+        .map { it as OnjObject }
+        .find { it.get<String>("biome") == biome }
+        ?.get<String>("background")
+        ?: throw RuntimeException("no background for biome $biome")
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,5 +207,7 @@ object GraphicsConfig {
     private lateinit var chargeInterpolation: Interpolation
 
     private lateinit var encounterModifierConfig: OnjObject
+
+    private lateinit var config: OnjObject
 
 }

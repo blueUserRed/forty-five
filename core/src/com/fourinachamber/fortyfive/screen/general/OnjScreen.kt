@@ -44,7 +44,6 @@ import kotlin.system.measureTimeMillis
 open class OnjScreen @MainThreadOnly constructor(
     val viewport: Viewport,
     batch: Batch,
-    private val background: String?,
     private val controllerContext: Any?,
     private val useAssets: MutableList<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
@@ -149,9 +148,19 @@ open class OnjScreen @MainThreadOnly constructor(
         GraphicsConfig.keySelectDrawable(this)
     }
 
-    private val backgroundDrawable: Drawable? by lazy {
-        background?.let { ResourceManager.get<Drawable>(this, it) }
-    }
+    var background: ResourceHandle? = null
+        set(value) {
+            field = value
+            backgroundDrawable = null
+        }
+
+    private var backgroundDrawable: Drawable? = null
+        get() {
+            if (field != null) return field
+            val background = background ?: return null
+            field = ResourceManager.get(this, background)
+            return field
+        }
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
