@@ -73,6 +73,17 @@ encounterModifierAssets: [
     "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist"
 ],
 
+encounterBackgrounds: [
+    {
+        biome: "wasteland",
+        background: "game_screen_background_wasteland"
+    },
+    {
+        biome: "bewitched_forest",
+        background: "game_screen_background_bewitched_forest"
+    },
+],
+
 damageOverlay: {
     duration: 1.5,
     fadeIn: 0.0,
@@ -112,5 +123,5 @@ gameUsedAssets: [
     "earthquake_shader", "glow_shader", "red_wing", "transparent_black_texture", "white_texture",
     "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon",
     "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
-    "fire_particle", "card_character"
+    "fire_particle", "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland"
 ]

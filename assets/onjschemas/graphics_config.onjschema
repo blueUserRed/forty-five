@@ -41,6 +41,11 @@ encounterModifiers: {
 
 encounterModifierAssets: string[],
 
+encounterBackgrounds: {
+    biome: string,
+    background: string,
+}[],
+
 damageOverlay: {
     duration: float,
     fadeIn: float,
