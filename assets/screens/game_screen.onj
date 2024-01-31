@@ -974,36 +974,37 @@ var playerBar = $Box {
 //        endTurnButton
 //    ]
 
-//    $Box {
-//        styles: [
-//            {
-//                flexDirection: flexDirection.row,
-//                alignItems: align.center,
-//                justifyContent: justify.center,
-//                height: 40#points,
-//                width: 90#points,
-//                rotation: 6.0,
-//                positionBottom: -6.0#points,
-//                positionLeft: 20.0#points
-//            }
-//        ],
-//        enableTransform: true,
-//    } children [
-//        $Image {
-//            name: "reserves_icon",
-//            styles: [
-//                {
-//                    aspectRatio: 1.0,
-//                    width: 40.0#points
-//                }
-//            ],
-//            reportDimensionsWithScaling: true,
-//            textureName: "reserves_texture",
-//            scaleX: 0.02,
-//            scaleY: 0.02
-//        },
-//        reservesLabel,
-//    ],
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                flexDirection: flexDirection.row,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                height: 40#points,
+                width: 90#points,
+                rotation: 6.0,
+                positionBottom: 60.0#points,
+                positionLeft: 20.0#points
+            }
+        ],
+        enableTransform: true,
+    } children [
+        $Image {
+            name: "reserves_icon",
+            styles: [
+                {
+                    aspectRatio: 1.0,
+                    width: 40.0#points
+                }
+            ],
+            reportDimensionsWithScaling: true,
+            textureName: "reserves_texture",
+            scaleX: 0.02,
+            scaleY: 0.02
+        },
+        reservesLabel,
+    ],
 
 ];
 

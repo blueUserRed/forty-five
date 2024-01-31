@@ -368,6 +368,11 @@ class EnemyActor(
         animation?.start()
     }
 
+    override fun act(delta: Float) {
+        super.act(delta)
+        animation?.update()
+    }
+
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (touchable && this.touchable != Touchable.enabled) return null
         if (!isVisible) return null
