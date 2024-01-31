@@ -26,8 +26,10 @@ assets: {
 
         "vanilla_whale", "red_wing",
 
-        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
-        "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
+        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture",
+        "end_turn_button_texture", // "end_turn_button_texture_hover",
+        "shoot_button_texture", // "shoot_button_texture_hover",
+        "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
         "game_screen_player", "player_turn_banner", "enemy_turn_banner",
@@ -434,58 +436,6 @@ var enemyArea = $EnemyArea {
     enemySelectionDrawable: "key_select_frame",
 };
 
-var shootButton = $Image {
-    styles: [
-        {
-            style_priority: 1,
-            disabled: false
-        },
-        {
-            style_priority: 2,
-            style_condition: state("uiFrozen"),
-            disabled: true,
-        }
-    ],
-    name: "shoot_button",
-    textureName: "shoot_button_texture",
-    reportDimensionsWithScaling: true,
-    scaleX: 0.25,
-    scaleY: 0.25,
-    behaviours: [
-        buttonHoverBehaviour,
-        $CatchEventAndEmitBehaviour {
-            catch: "ButtonClickEvent",
-            emit: "ShootRevolverEvent"
-        }
-    ]
-};
-
-var endTurnButton = $Image {
-    styles: [
-        {
-            style_priority: 1,
-            disabled: false
-        },
-        {
-            style_priority: 2,
-            style_condition: state("uiFrozen"),
-            disabled: true,
-        }
-    ],
-    name: "end_turn_button",
-    textureName: "end_turn_button_texture",
-    reportDimensionsWithScaling: true,
-    scaleX: 0.25,
-    scaleY: 0.25,
-    behaviours: [
-        buttonHoverBehaviour,
-        $CatchEventAndEmitBehaviour {
-            catch: "ButtonClickEvent",
-            emit: "EndTurnEvent"
-        }
-    ]
-};
-
 var reservesLabel = $TemplateLabel {
     name: "reserves_label",
     font: "vanilla_whale",
@@ -838,88 +788,223 @@ var putCardsUnderDeckActor = $Box {
 
 ];
 
-// TODO: fix pixelated looking textures
 var playerBar = $Box {
     styles: [
         {
             width: 100#percent,
             height: 220#points,
-            background: "player_bar",
+//            background: "player_bar",
             flexDirection: flexDirection.row,
             alignItems: align.center
         }
-    ]
+    ],
 } children [
 
     $Box {
         styles: [
             {
-                flexDirection: flexDirection.row,
-                alignItems: align.center,
-                justifyContent: justify.center,
-                height: 40#points,
-                width: 90#points,
-                rotation: 6.0,
-                positionBottom: -6.0#points,
-                positionLeft: 20.0#points
+                positionType: positionType.absolute,
+                background: "player_bar",
+                width: worldWidth#points,
+                positionBottom: 0#points,
+                aspectRatio: 1920.0 / 505.0,
             }
         ],
-        enableTransform: true,
-    } children [
-        $Image {
-            name: "reserves_icon",
-            styles: [
-                {
-                    aspectRatio: 1.0,
-                    width: 40.0#points
-                }
-            ],
-            reportDimensionsWithScaling: true,
-            textureName: "reserves_texture",
-            scaleX: 0.02,
-            scaleY: 0.02
-        },
-        reservesLabel,
-    ],
-
-    $Box {
-        styles: [
-            {
-                positionLeft: 320#points,
-                positionBottom: 30#points,
-                rotation: 4.0
-            }
-        ],
-        enableTransform: true
-    } children [
-        shootButton
-    ],
-
-    $Box {
-        styles: [
-            {
-                width: 150#points,
-                height: 80#points,
-                positionLeft: 800#points,
-                positionBottom: 30#points,
-                rotation: -4.0
-            }
-        ],
-        enableTransform: true,
     },
 
     $Box {
         styles: [
             {
-                positionLeft: 1070#points,
-                positionBottom: 20#points,
-                rotation: -6.0,
-            }
+                style_priority: 1,
+                height: 100#points,
+                width: 270#points,
+                positionLeft: 380#points,
+                positionBottom: 50#points,
+            },
         ],
-        enableTransform: true,
     } children [
-        endTurnButton
-    ]
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "shoot_button_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("shoot_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                }
+            ],
+        },
+        $Box {
+            name: "shoot_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 25#points,
+                    positionBottom: 50#points,
+                    rotation: -25.0,
+                    disabled: false
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("uiFrozen"),
+                    disabled: true,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "ShootRevolverEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                height: 100#points,
+                width: 270#points,
+                positionLeft: 700#points,
+                positionBottom: 60#points,
+            },
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "end_turn_button_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("end_turn_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                }
+            ],
+        },
+        $Box {
+            name: "end_turn_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 25#points,
+                    positionBottom: 50#points,
+                    rotation: -25.0,
+                    disabled: false
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("uiFrozen"),
+                    disabled: true,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "EndTurnEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+
+
+//
+//    $Box {
+//        styles: [
+//            {
+//                positionLeft: 1070#points,
+//                positionBottom: 20#points,
+////                rotation: -6.0,
+//            }
+//        ],
+//        enableTransform: true,
+//    } children [
+//        endTurnButton
+//    ]
+
+//    $Box {
+//        styles: [
+//            {
+//                flexDirection: flexDirection.row,
+//                alignItems: align.center,
+//                justifyContent: justify.center,
+//                height: 40#points,
+//                width: 90#points,
+//                rotation: 6.0,
+//                positionBottom: -6.0#points,
+//                positionLeft: 20.0#points
+//            }
+//        ],
+//        enableTransform: true,
+//    } children [
+//        $Image {
+//            name: "reserves_icon",
+//            styles: [
+//                {
+//                    aspectRatio: 1.0,
+//                    width: 40.0#points
+//                }
+//            ],
+//            reportDimensionsWithScaling: true,
+//            textureName: "reserves_texture",
+//            scaleX: 0.02,
+//            scaleY: 0.02
+//        },
+//        reservesLabel,
+//    ],
+
 ];
 
 var encounterModifierDisplay = $Box {
@@ -1022,7 +1107,7 @@ var gameScreen = $Box {
     $Revolver {
         styles: [
             {
-                positionBottom: -250#points
+                positionBottom: -260#points
             }
         ],
         zIndex: 100,
