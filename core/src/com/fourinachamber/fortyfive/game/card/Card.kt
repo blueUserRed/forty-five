@@ -236,10 +236,6 @@ class Card(
      * called by gameScreenController when the card was shot
      */
     fun afterShot() {
-        if (isUndead) {
-            FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
-            FortyFive.currentGame!!.cardHand.addCard(this)
-        }
         if (shouldRemoveAfterShot) leaveGame()
     }
 
