@@ -29,6 +29,8 @@ assets: {
         "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "wood_box", "deck_icon",
         "end_turn_button_texture", "end_turn_button_hover_texture",
         "shoot_button_texture", "shoot_button_hover_texture",
+        "pass_button_texture", "pass_button_hover_texture",
+        "parry_button_texture", "parry_button_hover_texture",
         "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
@@ -458,53 +460,53 @@ var disableStyles = [
     }
 ];
 
-var attackPopup = $Box {
-    styles: [
-        {
-            style_priority: 1,
-            positionType: positionType.absolute,
-            background: "transparent_black_texture",
-            flexDirection: flexDirection.column,
-            alignItems: align.center,
-            justifyContent: justify.center,
-            width: worldWidth#points,
-            height: worldHeight#points,
-            detached: true
-        },
-        {
-            style_priority: 2,
-            style_condition: state("showAttackPopup"),
-            detached: false
-        }
-    ]
-} children [
-
-    $Label {
-        font: "red_wing",
-        text: "Parry",
-        fontScale: 0.9,
-        color: color.white,
-        behaviours: [
-            $CatchEventAndEmitBehaviour {
-                catch: "ButtonClickEvent",
-                emit: "ParryEvent"
-            }
-        ]
-    },
-    $Label {
-        font: "red_wing",
-        text: "Dont Parry",
-        fontScale: 0.9,
-        color: color.white,
-        behaviours: [
-            $CatchEventAndEmitBehaviour {
-                catch: "ButtonClickEvent",
-                emit: "PopupConfirmationEvent"
-            }
-        ]
-    },
-
-];
+//var attackPopup = $Box {
+//    styles: [
+//        {
+//            style_priority: 1,
+//            positionType: positionType.absolute,
+//            background: "transparent_black_texture",
+//            flexDirection: flexDirection.column,
+//            alignItems: align.center,
+//            justifyContent: justify.center,
+//            width: worldWidth#points,
+//            height: worldHeight#points,
+//            detached: true
+//        },
+//        {
+//            style_priority: 2,
+//            style_condition: state("showAttackPopup"),
+//            detached: false
+//        }
+//    ]
+//} children [
+//
+//    $Label {
+//        font: "red_wing",
+//        text: "Parry",
+//        fontScale: 0.9,
+//        color: color.white,
+//        behaviours: [
+//            $CatchEventAndEmitBehaviour {
+//                catch: "ButtonClickEvent",
+//                emit: "ParryEvent"
+//            }
+//        ]
+//    },
+//    $Label {
+//        font: "red_wing",
+//        text: "Dont Parry",
+//        fontScale: 0.9,
+//        color: color.white,
+//        behaviours: [
+//            $CatchEventAndEmitBehaviour {
+//                catch: "ButtonClickEvent",
+//                emit: "PopupConfirmationEvent"
+//            }
+//        ]
+//    },
+//
+//];
 
 var enemyActionPopup = $Box {
     styles: [
@@ -853,14 +855,32 @@ var playerBar = $Box {
         reservesLabel,
     ],
 
+    // shoot button ---------------------------------------
     $Box {
         styles: [
             {
                 style_priority: 1,
+                positionType: positionType.absolute,
                 height: 100#points,
                 width: 270#points,
+                positionBottom: 110#points,
+            },
+            {
+                style_priority: 1,
                 positionLeft: 380#points,
-                positionBottom: 50#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: (380 + 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
             },
         ],
     } children [
@@ -897,7 +917,7 @@ var playerBar = $Box {
                         duration: 0.1,
                         interpolation: interpolation.pow2
                     }
-                }
+                },
             ],
         },
         $Box {
@@ -931,14 +951,128 @@ var playerBar = $Box {
         }
     ],
 
+    // pass button ---------------------------------------
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                style_priority: 1,
+                height: 100#points,
+                width: 270#points,
+                positionBottom: 110#points,
+            },
+            {
+                style_priority: 1,
+                positionLeft: (380 + 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: 380#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "pass_button_texture",
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("pass_button_hover_box"),
+                    background: "pass_button_hover_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("pass_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+            ],
+        },
+        $Box {
+            name: "pass_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 25#points,
+                    positionBottom: 50#points,
+                    rotation: -25.0,
+                    disabled: true
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showAttackPopup"),
+                    disabled: false,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "PopupConfirmationEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+    // holster button ---------------------------------------
     $Box {
         styles: [
             {
                 style_priority: 1,
+                positionType: positionType.absolute,
                 height: 100#points,
                 width: 270#points,
-                positionLeft: 700#points,
-                positionBottom: 60#points,
+                positionBottom: 119#points,
+            },
+            {
+                style_priority: 1,
+                positionLeft: 970#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: (970 - 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
             },
         ],
     } children [
@@ -987,7 +1121,7 @@ var playerBar = $Box {
                     width: 200#points,
                     height: 100#points,
                     positionLeft: 25#points,
-                    positionBottom: 50#points,
+                    positionBottom: 119#points,
                     rotation: -25.0,
                     disabled: false
                 },
@@ -1002,6 +1136,102 @@ var playerBar = $Box {
                 $CatchEventAndEmitBehaviour {
                     catch: "ButtonClickEvent",
                     emit: "EndTurnEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+    // parry button ---------------------------------------
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                height: 100#points,
+                width: 270#points,
+                positionBottom: 119#points,
+            },
+            {
+                style_priority: 1,
+                positionLeft: (970 - 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: 970#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "parry_button_texture",
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("parry_button_hover_box"),
+                    background: "parry_button_hover_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("parry_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                }
+            ],
+        },
+        $Box {
+            name: "parry_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 25#points,
+                    positionBottom: 50#points,
+                    rotation: -25.0,
+                    disabled: true
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showAttackPopup"),
+                    disabled: false,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "ParryEvent"
                 }
             ],
             enableTransform: true,
@@ -1243,7 +1473,6 @@ root: $Box {
     enemyActionAnimContainer,
     drawCardActor,
     popupActor,
-    attackPopup,
     putCardsUnderDeckActor,
     enemyActionPopup
 ]
