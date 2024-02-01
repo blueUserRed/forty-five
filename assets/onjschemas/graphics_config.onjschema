@@ -80,4 +80,9 @@ shootPostProcessor: {
     duration: float
 },
 
+enemyGravestone: {
+    texture: string,
+    scale: float,
+},
+
 gameUsedAssets: string[]

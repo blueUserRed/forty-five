@@ -139,6 +139,11 @@ object GraphicsConfig {
         ?.get<Boolean>("isDark")
         ?: throw RuntimeException("no background for biome $biome")
 
+    fun defeatedEnemyDrawable(screen: OnjScreen): Drawable =
+        ResourceManager.get(screen, config.access(".enemyGravestone.texture"))
+
+    fun defeatedEnemyDrawableScale(): Float = config.access<Double>(".enemyGravestone.scale").toFloat()
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
