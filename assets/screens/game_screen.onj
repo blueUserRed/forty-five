@@ -31,7 +31,7 @@ assets: {
         "shoot_button_texture", "shoot_button_hover_texture",
         "pass_button_texture", "pass_button_hover_texture",
         "parry_button_texture", "parry_button_hover_texture",
-        "revolver_drum",
+        "revolver_drum", "parry_popup_background",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
         "game_screen_player", "player_turn_banner", "enemy_turn_banner",
@@ -1277,6 +1277,72 @@ var playerBar = $Box {
             ]
         },
     ],
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                background: "parry_popup_background",
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                width: 700#points,
+                aspectRatio: 698.0 / 390.0,
+                positionBottom: 300#points,
+                positionLeft: (worldWidth / 2.0 - 700.0 / 2.0)#points,
+            },
+            {
+                style_priority: 1,
+                alpha: 0.0,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                alpha: 1.0,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                }
+            },
+        ]
+    } children [
+
+        $Label {
+            styles: [
+                {
+                    marginBottom: 30#points
+                }
+            ],
+            font: "red_wing",
+            text: "Parry Bullet?",
+            fontScale: 1.3,
+            color: color.brightYellow,
+        },
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "Parrying will let {game.remainingParryDamage} dmg through",
+            fontScale: 0.6,
+            color: color.forty_white,
+        },
+
+        $TemplateLabel {
+            styles: [
+                {
+                    marginTop: 10#points
+                }
+            ],
+            font: "red_wing",
+            template: "Passing will let {game.remainingPassDamage} dmg through",
+            fontScale: 0.6,
+            color: color.red,
+        },
+
+    ]
 
 ];
 

@@ -579,8 +579,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
         var parryCard: Card? = null
+        var remainingDamage: Int? = null
         action {
-            parryCard = revolver.slots[4].card
+            parryCard = revolver.slots[4].card ?: return@action
+            remainingDamage = if (parryCard!!.isReinforced) {
+                0
+            } else {
+                damage - parryCard!!.curDamage(this@GameController)
+            }
+            TemplateString.updateGlobalParam("game.remainingParryDamage", remainingDamage)
+            TemplateString.updateGlobalParam(
+                "game.remainingPassDamage",
+                max(parryCard!!.curDamage(this@GameController), 0)
+            )
             gameRenderPipeline.startParryEffect(curScreen)
             curScreen.enterState(showEnemyAttackPopupScreenState)
             FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
@@ -588,12 +599,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         delayUntil { popupEvent != null || parryCard == null }
         includeLater(
             { Timeline.timeline {
-                val parryCard = parryCard!!
-                val remainingDamage = if (parryCard.isReinforced) {
-                    0
-                } else {
-                    damage - parryCard.curDamage(this@GameController)
-                }
+                @Suppress("NAME_SHADOWING") val parryCard = parryCard!!
                 action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
@@ -606,7 +612,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
-                if (remainingDamage > 0) include(damagePlayerTimeline(remainingDamage))
+                if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))
             } },
             { popupEvent is ParryEvent && parryCard != null }
         )

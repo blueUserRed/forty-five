@@ -455,6 +455,7 @@ class FinishTutorialMapEvent(
 
     override fun start() {
         SaveState.playerLives = SaveState.maxPlayerLives
+        SaveState.write()
         MapManager.changeToMap(goToMap)
     }
 

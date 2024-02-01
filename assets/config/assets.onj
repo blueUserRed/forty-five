@@ -146,6 +146,10 @@ textureAtlases: [
                 regionName: "player_turn_banner"
             },
             {
+                handle: "parry_popup_background",
+                regionName: "parry_popup_background"
+            },
+            {
                 handle: "heart_texture",
                 regionName: "heart"
             },

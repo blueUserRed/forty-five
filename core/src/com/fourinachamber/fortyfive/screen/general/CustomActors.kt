@@ -457,11 +457,11 @@ open class CustomFlexBox(
         y += offsetY
         if (batch != null && background != null) {
             val old = batch.color.a
-            batch.flush()
-            batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha)
+            if (parentAlpha * alpha < 1f) batch.flush()
+            batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
 
             background?.draw(batch, x, y, width, height)
-            batch.flush()
+            if (parentAlpha * alpha < 1f) batch.flush()
 
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, old)
         }
