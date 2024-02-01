@@ -26,9 +26,9 @@ assets: {
 
         "vanilla_whale", "red_wing",
 
-        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture",
-        "end_turn_button_texture", // "end_turn_button_texture_hover",
-        "shoot_button_texture", // "shoot_button_texture_hover",
+        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "wood_box", "deck_icon",
+        "end_turn_button_texture", "end_turn_button_hover_texture",
+        "shoot_button_texture", "shoot_button_hover_texture",
         "revolver_drum",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
@@ -407,7 +407,7 @@ var revolver = $Revolver {
     font: "vanilla_whale",
     fontColor: color.white,
     fontScale: 2.5,
-    slotScale: 0.34,
+    slotScale: 0.22,
     cardScale: 0.9,
     animationDuration: 0.2,
     radius: 140.0,
@@ -438,10 +438,10 @@ var enemyArea = $EnemyArea {
 
 var reservesLabel = $TemplateLabel {
     name: "reserves_label",
-    font: "vanilla_whale",
+    font: "red_wing",
     template: "{game.curReserves}/{game.baseReserves}",
-    fontScale: 0.9,
-    color: color.white,
+    fontScale: 1.1,
+    color: color.forty_white,
 };
 
 var disableStyles = [
@@ -793,7 +793,6 @@ var playerBar = $Box {
         {
             width: 100#percent,
             height: 220#points,
-//            background: "player_bar",
             flexDirection: flexDirection.row,
             alignItems: align.center
         }
@@ -815,6 +814,48 @@ var playerBar = $Box {
     $Box {
         styles: [
             {
+                positionType: positionType.absolute,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                aspectRatio: 1.0,
+                width: 120#points,
+                positionBottom: 180#points,
+                positionLeft: 90#points,
+                rotation: 15.0
+            }
+        ],
+        enableTransform: true,
+    } children [
+
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 100#percent,
+                    height: 100#percent,
+                    background: "wood_box",
+                }
+            ]
+        },
+
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 60#points,
+                    height: 60#points,
+                    positionBottom: 90#points,
+                    positionLeft: 30#points,
+                    background: "reserves_texture",
+                }
+            ]
+        },
+        reservesLabel,
+    ],
+
+    $Box {
+        styles: [
+            {
                 style_priority: 1,
                 height: 100#points,
                 width: 270#points,
@@ -830,6 +871,11 @@ var playerBar = $Box {
                     positionType: positionType.absolute,
                     aspectRatio: 655.0 / 543.0,
                     background: "shoot_button_texture",
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("shoot_button_hover_box"),
+                    background: "shoot_button_hover_texture",
                 },
                 {
                     style_priority: 1,
@@ -905,6 +951,11 @@ var playerBar = $Box {
                     background: "end_turn_button_texture",
                 },
                 {
+                    style_priority: 2,
+                    style_condition: hover("end_turn_button_hover_box"),
+                    background: "end_turn_button_hover_texture",
+                },
+                {
                     style_priority: 1,
                     width: 250#points,
                     positionBottom: -60#points,
@@ -958,52 +1009,43 @@ var playerBar = $Box {
         }
     ],
 
-
-
-//
-//    $Box {
-//        styles: [
-//            {
-//                positionLeft: 1070#points,
-//                positionBottom: 20#points,
-////                rotation: -6.0,
-//            }
-//        ],
-//        enableTransform: true,
-//    } children [
-//        endTurnButton
-//    ]
-
     $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                flexDirection: flexDirection.row,
                 alignItems: align.center,
                 justifyContent: justify.center,
-                height: 40#points,
-                width: 90#points,
-                rotation: 6.0,
-                positionBottom: 60.0#points,
-                positionLeft: 20.0#points
+                aspectRatio: 1.0,
+                width: 120#points,
+                positionBottom: 200#points,
+                positionLeft: (worldWidth - 90 - 120)#points,
+                rotation: -15.0
             }
         ],
         enableTransform: true,
     } children [
-        $Image {
-            name: "reserves_icon",
+
+        $Box {
             styles: [
                 {
-                    aspectRatio: 1.0,
-                    width: 40.0#points
+                    positionType: positionType.absolute,
+                    width: 100#percent,
+                    height: 100#percent,
+                    background: "wood_box",
                 }
-            ],
-            reportDimensionsWithScaling: true,
-            textureName: "reserves_texture",
-            scaleX: 0.02,
-            scaleY: 0.02
+            ]
         },
-        reservesLabel,
+
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 60#points,
+                    height: 60#points,
+                    background: "deck_icon",
+                }
+            ]
+        },
     ],
 
 ];
@@ -1141,6 +1183,7 @@ var playerOverlay = $Box {
             background: "game_screen_player",
             flexDirection: flexDirection.column,
             alignItems: align.center,
+            positionLeft: 20#points,
             width: worldWidth#points,
             height: worldHeight#points,
         },
