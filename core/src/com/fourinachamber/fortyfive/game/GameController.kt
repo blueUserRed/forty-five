@@ -581,6 +581,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         var parryCard: Card? = null
         action {
             parryCard = revolver.slots[4].card
+            gameRenderPipeline.startParryEffect(curScreen)
             curScreen.enterState(showEnemyAttackPopupScreenState)
             FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
         }
@@ -596,6 +597,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
+                    gameRenderPipeline.stopParryEffect()
                     if (parryCard.shouldRemoveAfterShot) {
                         revolver.removeCard(parryCard)
                         cardStack.add(parryCard)
@@ -613,6 +615,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     popupEvent = null
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
+                    gameRenderPipeline.stopParryEffect()
                     FortyFiveLogger.debug(logTag, "Player didn't parry")
                 }
                 include(damagePlayerTimeline(damage))

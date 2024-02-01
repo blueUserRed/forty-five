@@ -718,13 +718,26 @@ shaders: [
     },
     {
         name: "vignette_shader", // TODO: fix
-
         file: "shaders/vignette.glsl",
         constantArgs: {
             color: color.red,
             speed: 0.0,
             movement: 1.0,
             minMovement: 0.3
+        }
+    },
+    {
+        name: "parry_shader",
+        file: "shaders/parry.glsl",
+        constantArgs: {
+            color: color.red,
+            speed: 10.0,
+            movement: 0.35,
+            baseStrength: -0.45,
+            fallOff: 6.0,
+            blackStrength: -0.22,
+            blackFallOff: 3.0,
+            center: [0.5, 0.24]
         }
     },
     {
