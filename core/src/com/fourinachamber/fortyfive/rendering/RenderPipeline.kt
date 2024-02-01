@@ -34,6 +34,8 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
 
     private var fadeToBlack: Float = 0.0f
 
+    private var parryShader: BetterShader? = null
+
     override fun init() {
     }
 
@@ -161,6 +163,16 @@ class GameRenderPipeline(private val screen: OnjScreen) : Renderable {
                 sizeDirty = true
             }
         }
+    }
+
+    fun startParryEffect(screen: OnjScreen) {
+        val parryShader = parryShader ?: ResourceManager.get(screen, "parry_shader")
+        this.parryShader = parryShader
+        currentPostProcessingShaders.add(parryShader)
+    }
+
+    fun stopParryEffect() {
+        currentPostProcessingShaders.remove(parryShader)
     }
 
 }

@@ -57,7 +57,7 @@ assets: {
 
         "revolver_cursor",
 
-        "dissolve_shader", "prerendered_noise_perlin_512x512", "ice_shader", "ice_texture",
+        "dissolve_shader", "prerendered_noise_perlin_512x512", "ice_shader", "ice_texture", "parry_shader",
 
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
