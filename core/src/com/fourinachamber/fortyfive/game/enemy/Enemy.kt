@@ -297,6 +297,10 @@ class EnemyActor(
         ResourceManager.get(screen, enemy.drawableHandle)
     }
 
+    private val defeatedDrawable: Drawable by lazy {
+        GraphicsConfig.defeatedEnemyDrawable(screen)
+    }
+
     val healthLabel: CustomLabel = CustomLabel(
         screen,
         "",
@@ -385,10 +389,20 @@ class EnemyActor(
             0f, height / 2 - coverInfoBox.prefHeight / 2,
             coverInfoBox.prefWidth, coverInfoBox.prefHeight
         )
-        (animation ?: enemyDrawable).draw(
+        val drawable = if (enemy.isDefeated) {
+            defeatedDrawable
+        } else {
+            animation ?: enemyDrawable
+        }
+        val scale = if (enemy.isDefeated) {
+            GraphicsConfig.defeatedEnemyDrawableScale()
+        } else {
+            enemy.scale
+        }
+        drawable.draw(
             batch,
             x + coverInfoBox.width, y + healthLabel.prefHeight,
-            enemyDrawable.minWidth * enemy.scale, enemyDrawable.minHeight * enemy.scale
+            drawable.minWidth * scale, drawable.minHeight * scale
         )
         statsBox.width = statsBox.prefWidth
         statsBox.height = statsBox.prefHeight

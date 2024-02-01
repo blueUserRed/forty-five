@@ -54,6 +54,10 @@ class DeferredFrameAnimation(
         loadingTimeline.updateTimeline()
     }
 
+    override fun width(): Float = previewDrawable.minWidth
+
+    override fun height(): Float = previewDrawable.minHeight
+
     private fun loadFrameAnimation() {
         val data = serviceThreadMessage.data!!
         val pages = serviceThreadMessage.pages!!

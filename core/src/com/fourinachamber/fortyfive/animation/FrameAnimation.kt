@@ -9,6 +9,10 @@ data class FrameAnimation(
     val frameTime: Int,
 ) : AnimationPart {
 
+    init {
+        if (frames.isEmpty()) throw RuntimeException("FrameAnimation must have at least one frame!")
+    }
+
     override val duration: Int
         get() = frameTime * frames.size
 
@@ -38,4 +42,6 @@ data class FrameAnimation(
         return result
     }
 
+    override fun width(): Float = frames[0].minWidth
+    override fun height(): Float = frames[1].minHeight
 }
