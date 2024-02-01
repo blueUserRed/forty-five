@@ -94,6 +94,14 @@ textureAtlases: [
                 regionName: "enemy"
             },
             {
+                handle: "wood_box",
+                regionName: "wood_box"
+            },
+            {
+                handle: "deck_icon",
+                regionName: "deck_icon"
+            },
+            {
                 handle: "normal_bullet",
                 regionName: "normal_bullet"
             },
@@ -104,6 +112,14 @@ textureAtlases: [
             {
                 handle: "shoot_button_texture",
                 regionName: "shoot"
+            },
+            {
+                handle: "end_turn_button_hover_texture",
+                regionName: "end_turn_hover"
+            },
+            {
+                handle: "shoot_button_hover_texture",
+                regionName: "shoot_hover"
             },
             {
                 handle: "enemy_turn_banner",
