@@ -110,16 +110,32 @@ textureAtlases: [
                 regionName: "end_turn"
             },
             {
-                handle: "shoot_button_texture",
-                regionName: "shoot"
-            },
-            {
                 handle: "end_turn_button_hover_texture",
                 regionName: "end_turn_hover"
             },
             {
+                handle: "shoot_button_texture",
+                regionName: "shoot"
+            },
+            {
                 handle: "shoot_button_hover_texture",
                 regionName: "shoot_hover"
+            },
+            {
+                handle: "parry_button_texture",
+                regionName: "parry"
+            },
+            {
+                handle: "parry_button_hover_texture",
+                regionName: "parry_hover"
+            },
+            {
+                handle: "pass_button_texture",
+                regionName: "pass"
+            },
+            {
+                handle: "pass_button_hover_texture",
+                regionName: "pass_hover"
             },
             {
                 handle: "enemy_turn_banner",
