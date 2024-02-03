@@ -385,15 +385,15 @@ class Card(
     private fun updateText(controller: GameController) {
         val currentEffects = mutableListOf<Pair<String, String>>()
         if (activeModifiers(controller).any { it.damage != 0 }) {
-            val allDamageEffects = activeModifiers(controller).filter { it.damage != 0 }
-            val damageChange = allDamageEffects.sumOf { it.damage }
+            val allDamageEffects = activeModifiers(controller).filter { it.damage != 0 || it.damageMultiplier != 1f }
+            val damageChange = curDamage(controller) - baseDamage
             val damageText = allDamageEffects
                 .joinToString(
                     separator = ", ",
                     prefix = "${if (damageChange > 0) "+" else ""}$damageChange by ",
                     transform = { it.source })
-            currentEffects.add("dmgBuff" to "\$dmgBuff\$$damageText\$dmgBuff\$")
-            //this is the only special keyword, since it doesn't need a description
+            val keyWord = if (damageChange > 0) "\$dmgBuff\$" else "\$dmgNerf\$"
+            currentEffects.add("dmgBuff" to "$keyWord$damageText$keyWord")
         }
 
         if (protectingModifiers.isNotEmpty()) {

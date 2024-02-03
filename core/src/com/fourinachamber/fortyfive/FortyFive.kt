@@ -47,7 +47,6 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-        serviceThread.start()
 //        resetAll()
 //        newRun(false)
         if (SaveState.playerCompletedFirstTutorialEncounter) {
@@ -129,6 +128,8 @@ object FortyFive : Game() {
         MapManager.read()
         GraphicsConfig.init()
         ResourceManager.init()
+        serviceThread.start()
+        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
 //        resetAll()
 //        newRun()
@@ -144,6 +145,7 @@ object FortyFive : Game() {
         SaveState.write()
         currentScreen?.dispose()
         serviceThread.close()
+        ResourceManager.trimPrepared()
         ResourceManager.end()
         super.dispose()
     }
