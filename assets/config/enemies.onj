@@ -4,7 +4,7 @@ import "imports/colors.onj" as color;
 use Cards; // include Card namespace for status effects
 
 var textEmitterSharedConfig = {
-    font: "red_wing",
+    font: "roadgeek",
     fontScale: 0.9,
     spawnVarianceX: 30.0,
     spawnVarianceY: 30.0,
@@ -46,7 +46,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $OutlawBrain {
@@ -74,7 +74,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $OutlawBrain {
@@ -103,7 +103,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.22,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $PyroBrain {
@@ -132,7 +132,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.35,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         detailFontColor: color.black,
@@ -159,7 +159,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -178,7 +178,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -212,7 +212,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -246,7 +246,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -280,7 +280,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -314,7 +314,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {

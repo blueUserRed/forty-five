@@ -16,6 +16,17 @@ fonts: [
         markupEnabled: true
     },
     {
+        name: "roadgeek",
+        fontFile: "fonts/roadgeek.fnt",
+        imageFile: "fonts/roadgeek.png"
+    },
+    {
+        name: "roadgeek_cm",
+        fontFile: "fonts/roadgeek.fnt",
+        imageFile: "fonts/roadgeek.png",
+        markupEnabled: true
+    },
+    {
         name: "vanilla_whale",
         fontFile: "fonts/vanilla_whale.fnt",
         imageFile: "fonts/vanilla_whale.png"
