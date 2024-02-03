@@ -48,6 +48,13 @@ object ResourceManager {
         return toGet.get(type) ?: throw RuntimeException("no variant of type ${type.simpleName} for handle $handle")
     }
 
+    fun trimPrepared() {
+        resources
+            .filter { it.state != Resource.ResourceState.NOT_LOADED }
+            .filter { it.borrowedBy.isEmpty() }
+            .forEach { it.dispose() }
+    }
+
     @MainThreadOnly
     fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toGiveBack = resources.find { it.handle == handle }
@@ -177,6 +184,7 @@ object ResourceManager {
         Gdx.files.internal(cardsFile)
             .file()
             .walk()
+            .filter { it.isFile }
             .forEach {
                 resources.add(TextureResource(
                     "${Card.cardTexturePrefix}${it.nameWithoutExtension}",
