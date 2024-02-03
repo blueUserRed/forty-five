@@ -305,7 +305,7 @@ class Card(
         }
         val modifier = CardModifier(
             damage = 0,
-            source = "rotten effect",
+            source = "disintegration effect",
             validityChecker = { inGame },
             transformers = mapOf(
                 Trigger.ON_REVOLVER_ROTATION to rotationTransformer
@@ -321,6 +321,7 @@ class Card(
         inGame = true
         enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
         enteredOnTurn = controller.turnCounter
+        if (isRotten) addRottenModifier()
     }
 
     /**
@@ -548,10 +549,7 @@ class Card(
                 "spray" -> card.isSpray = true
                 "reinforced" -> card.isReinforced = true
                 "shotProtected" -> card.isShotProtected = true
-                "rotten" -> {
-                    card.isRotten = true
-                    card.addRottenModifier()
-                }
+                "rotten" -> card.isRotten = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
