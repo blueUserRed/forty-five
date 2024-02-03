@@ -24,7 +24,7 @@ var overlayZIndex = 500;
 assets: {
     useAssets: [
 
-        "vanilla_whale", "red_wing",
+        "vanilla_whale", "red_wing", "roadgeek",
 
         "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "wood_box", "deck_icon",
         "end_turn_button_texture", "end_turn_button_hover_texture",
@@ -162,7 +162,7 @@ var encounterModifierDisplayTemplate = $Box {
         ]
     } children [
         $Label {
-            font: "red_wing",
+            font: "roadgeek",
             text: "Frost",
             fontScale: 0.6,
             align: "left",
@@ -174,7 +174,7 @@ var encounterModifierDisplayTemplate = $Box {
                     width: 370#points
                 }
             ],
-            font: "red_wing",
+            font: "roadgeek",
             text: "Some long description text Lorem Ipsum Lorem Ipsum Lorem Ipsum",
             wrap: true,
             fontScale: 0.6,
