@@ -31,7 +31,7 @@ assets: {
         "map_decoration_wasteland_dune_1", "map_decoration_wasteland_dune_2",
         "map_decoration_wasteland_dune_3", "map_decoration_wasteland_dune_4",
         "map_decoration_wasteland_skull_1", "map_decoration_wasteland_skull_2",
-
+        "common_button_default", "common_button_hover", "common_button_disabled",
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
 
@@ -231,32 +231,42 @@ var infoPopup = $Box {
         ],
     ],
 
-
-    $Image {
+    $Box {
+        name: "start_button",
         styles: [
             {
                 style_priority: 1,
-                background: "map_detail_fight_button",
                 disabled: false,
-                alpha: 1.0,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                height: 50#points,
+                width: 140#points,
+                background: "common_button_default"
             },
             {
                 style_priority: 2,
-                background: "map_detail_fight_button_hover",
-                style_condition: hover() and state("canStartEvent")
+                style_condition: hover() and state("canStartEvent"),
+                background: "common_button_hover"
             },
             {
                 style_priority: 3,
                 style_condition: not(state("canStartEvent")),
-                alpha: 0.5,
-                disabled: true
+                disabled: true,
+                background: "common_button_disabled"
             }
         ],
-        name: "start_button",
-        reportDimensionsWithScaling: true,
-        scaleX: 0.6,
-        scaleY: 0.6,
-    }
+        touchable: "enabled"
+    } children [
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{map.cur_event.buttonText}",
+            fontScale: 1.0,
+            color: color.black,
+            align: "center",
+        }
+
+    ]
 
 ];
 

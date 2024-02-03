@@ -542,6 +542,7 @@ class DetailMapWidget(
             screen.leaveState(eventCanBeStartedScreenState)
         }
         TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
+        TemplateString.updateGlobalParam("map.cur_event.buttonText", event.buttonText)
         TemplateString.updateGlobalParam(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText
