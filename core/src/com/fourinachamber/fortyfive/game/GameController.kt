@@ -1080,6 +1080,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (money > 0) curScreen.enterState(showCashItem)
                 TemplateString.updateGlobalParam("game.overkillCash", money)
                 if (playerGetsCard) curScreen.enterState(showCardItem)
+                println(curScreen.screenState)
             }
             delayUntil { popupEvent != null }
             action {
