@@ -588,10 +588,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 damage - parryCard!!.curDamage(this@GameController)
             }
             TemplateString.updateGlobalParam("game.remainingParryDamage", remainingDamage)
-            TemplateString.updateGlobalParam(
-                "game.remainingPassDamage",
-                max(parryCard!!.curDamage(this@GameController), 0)
-            )
+            TemplateString.updateGlobalParam("game.remainingPassDamage", max(damage, 0))
             gameRenderPipeline.startParryEffect(curScreen)
             curScreen.enterState(showEnemyAttackPopupScreenState)
             FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
@@ -1075,12 +1072,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     private fun completeWin() {
+        val money = -enemyArea.enemies.sumOf { it.currentHealth }
+        val playerGetsCard = !gameDirector.encounter.special && Utils.coinFlip(rewardChance)
         appendMainTimeline(Timeline.timeline {
-            val money = -enemyArea.enemies.sumOf { it.currentHealth }
-            if (money > 0) {
-                include(confirmationPopupTimeline("You won!\nYour overkill damage will be converted to $money$"))
-            }
             action {
+                curScreen.enterState(showWinScreen)
+                if (money > 0) curScreen.enterState(showCashItem)
+                TemplateString.updateGlobalParam("game.overkillCash", money)
+                if (playerGetsCard) curScreen.enterState(showCardItem)
+            }
+            delayUntil { popupEvent != null }
+            action {
+                popupEvent = null
                 SaveState.playerMoney += money
                 encounterContext.completed()
                 SaveState.write()
@@ -1093,7 +1096,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     override fun completed() { }
                 }
 
-                if (!gameDirector.encounter.special && Utils.coinFlip(rewardChance)) {
+                if (playerGetsCard) {
                     MapManager.changeToChooseCardScreen(chooseCardContext)
                 } else {
                     FortyFive.changeToScreen(encounterContext.forwardToScreen)
@@ -1179,6 +1182,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val showEnemyAttackPopupScreenState = "showAttackPopup"
         const val showPutCardsUnderDeckActorScreenState = "showPutCardsUnderDeckActor"
         const val showTutorialActorScreenState = "showTutorial"
+        const val showWinScreen = "showWinScreen"
+        const val showCashItem = "showCashItem"
+        const val showCardItem = "showCardItem"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
