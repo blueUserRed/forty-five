@@ -1529,7 +1529,7 @@ var winScreen = $Box {
                     },
                     {
                         style_priority: 2,
-                        style_conition: state("showCashItem"),
+                        style_condition: state("showCashItem"),
                         detached: false
                     }
                 ]
@@ -1571,7 +1571,7 @@ var winScreen = $Box {
                     },
                     {
                         style_priority: 2,
-                        style_conition: state("showCardItem"),
+                        style_condition: state("showCardItem"),
                         detached: false
                     }
                 ]
