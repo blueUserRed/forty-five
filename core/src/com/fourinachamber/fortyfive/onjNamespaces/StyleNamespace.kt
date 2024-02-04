@@ -8,10 +8,7 @@ import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
 import onj.customization.OnjFunction.*
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
-import onj.value.OnjFloat
-import onj.value.OnjInt
-import onj.value.OnjString
-import onj.value.OnjValue
+import onj.value.*
 import kotlin.reflect.KClass
 
 @OnjNamespace
@@ -107,6 +104,17 @@ object StyleNamespace {
 
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
     fun points(value: OnjInt): OnjYogaValue = OnjYogaValue(YogaValue(value.value.toFloat(), YogaUnit.POINT))
+
+    @RegisterOnjFunction(schema = "params: [{styles: {...*}[], ...*}, {...*}[]]", type = OnjFunctionType.INFIX)
+    fun addStyles(obj: OnjObject, additionalStyles: OnjArray): OnjObject {
+        val pairs = obj.value.toMutableMap()
+        val styles = (pairs["styles"] as OnjArray).value.toTypedArray()
+        pairs["styles"] = OnjArray(listOf(*additionalStyles.value.toTypedArray(), *styles))
+        return when (obj) {
+            is OnjNamedObject -> OnjNamedObject(obj.name, pairs)
+            else -> OnjObject(pairs)
+        }
+    }
 
 }
 

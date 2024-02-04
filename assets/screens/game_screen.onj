@@ -1445,7 +1445,6 @@ var playerOverlay = $Box {
     zIndex: 0,
 };
 
-
 var winScreen = $Box {
     styles: [
         {
@@ -1458,7 +1457,7 @@ var winScreen = $Box {
             width: worldWidth#points,
             height: worldHeight#points,
             touchable: touchable.enabled,
-//            detached: true
+            detached: true
         },
         {
             style_priority: 2,
@@ -1520,11 +1519,18 @@ var winScreen = $Box {
             $Box {
                 styles: [
                     {
+                        style_priority: 1,
                         background: "win_screen_item_cash",
                         width: 100#percent,
                         height: 60#points,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
+                        detached: true,
+                    },
+                    {
+                        style_priority: 2,
+                        style_conition: state("showCashItem"),
+                        detached: false
                     }
                 ]
             } children [
@@ -1554,12 +1560,19 @@ var winScreen = $Box {
             $Box {
                 styles: [
                     {
+                        style_priority: 1,
                         marginTop: 10#points,
                         background: "win_screen_item_card",
                         width: 100#percent,
                         height: 60#points,
                         flexDirection: flexDirection.row,
                         alignItems: align.center,
+                        detached: true,
+                    },
+                    {
+                        style_priority: 2,
+                        style_conition: state("showCardItem"),
+                        detached: false
                     }
                 ]
             } children [
@@ -1585,9 +1598,7 @@ var winScreen = $Box {
                     color: color.black,
                 }
             ],
-
         ]
-
     ],
 
     $Box {
@@ -1609,6 +1620,10 @@ var winScreen = $Box {
             }
         ],
         behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "PopupConfirmationEvent"
+            },
             buttonHoverBehaviour
         ]
     } children [
@@ -1654,11 +1669,21 @@ root: $Box {
 
         winScreen,
 
-//        $Statusbar {
-//            options: [
-//            ],
-//            ...(sharedComponents.statusbarLeftDefaults)
-//        },
+        $Statusbar {
+            options: [
+            ],
+            ...(sharedComponents.statusbarLeftDefaults)
+        } addStyles [
+            {
+                style_priority: 1,
+                detached: false,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showWinScreen"),
+                detached: true,
+            }
+        ],
 
         $Statusbar {
             options: [
@@ -1677,7 +1702,17 @@ root: $Box {
             ],
             zIndex: 100000,
             ...(sharedComponents.statusbarCenterDefaults),
-        },
+        } addStyles [
+            {
+                style_priority: 1,
+                detached: true,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showWinScreen"),
+                detached: false,
+            }
+        ],
 
         $StatusEffectDisplay {
             styles: [
