@@ -180,6 +180,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(effect.value.copy().apply { triggerInHand = true })
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
+    fun hide(effect: OnjEffect): OnjEffect {
+        return OnjEffect(effect.value.copy().apply { isHidden = true })
+    }
+
     @RegisterOnjFunction(schema = "params: [*[]]")
     fun bNum(onjArr: OnjArray): OnjBulletSelector {
         val nums = mutableSetOf<Int>()
@@ -268,16 +273,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             getStatusEffectValue(rotations, controller, card, 1),
         )
     }
-
-//    @RegisterOnjFunction(schema = "params: [int]")
-//    fun wardOfTheWitch(amount: OnjInt): OnjStatusEffect = OnjStatusEffect {
-//        WardOfTheWitch(amount.value.toInt())
-//    }
-//
-//    @RegisterOnjFunction(schema = "params: [int]")
-//    fun wrathOfTheWitch(amount: OnjInt): OnjStatusEffect = OnjStatusEffect {
-//        WrathOfTheWitch(amount.value.toInt())
-//    }
 
     @RegisterOnjFunction(schema = "params: [{...*}]")
     fun negatePredicate(predicate: OnjObject): OnjObject = buildOnjObject {

@@ -349,19 +349,21 @@ class Card(
         val inHand = inHand(controller)
         val effects = effects
             .filter { inGame || (inHand && it.triggerInHand) }
-            .mapNotNull { it.checkTrigger(trigger, triggerInformation, controller) }
+            .zip { it.checkTrigger(trigger, triggerInformation, controller) }
+            .filter { it.second != null }
         if (effects.isEmpty()) return@timeline
+        val showAnimation = effects.any { !it.first.isHidden }
         action {
             actor.inAnimation = true
         }
         includeLater(
             { actor.animateToTriggerPosition(controller) },
-            { inGame }
+            { inGame && showAnimation }
         )
-        include(effects.collectTimeline())
+        include(effects.mapNotNull { it.second }.collectTimeline())
         includeLater(
             { actor.animateBack(controller) },
-            { inGame }
+            { inGame && showAnimation }
         )
         action {
             actor.inAnimation = false

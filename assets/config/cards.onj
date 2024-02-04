@@ -694,7 +694,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyShieldIsAtLeast { value: 1 }#activeChecker)
+            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyShieldIsAtLeast { value: 1 }#activeChecker)#hide
         ],
         forceLoadCards: [],
         dark: false,
@@ -714,7 +714,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyHasAnyStatusEffect {}#activeChecker)
+            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyHasAnyStatusEffect {}#activeChecker)#hide
         ],
         forceLoadCards: [],
         dark: false,
@@ -755,7 +755,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)
+            buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)#hide
         ],
         forceLoadCards: [],
         dark: false,
@@ -919,7 +919,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyHealthAbovePercent { value: 0.5 }#activeChecker)
+            buffDmg("enter", bSelects.self, 6#val, $TargetedEnemyHealthAbovePercent { value: 0.5 }#activeChecker)#hide
         ],
         forceLoadCards: [],
         dark: false,
