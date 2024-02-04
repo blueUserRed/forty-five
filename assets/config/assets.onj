@@ -216,6 +216,22 @@ textureAtlases: [
                 handle: "game_screen_player",
                 regionName: "player"
             },
+            {
+                handle: "win_screen_background",
+                regionName: "win_screen_background"
+            },
+            {
+                handle: "win_screen_spacer",
+                regionName: "win_screen_spacer"
+            },
+            {
+                handle: "win_screen_item_cash",
+                regionName: "win_screen_item_cash"
+            },
+            {
+                handle: "win_screen_item_card",
+                regionName: "win_screen_item_card"
+            },
         ]
     }
 
@@ -237,10 +253,6 @@ textures: [
     {
         name: "revolver_drum",
         file: "textures/game_screen/revolver_drum.png"
-    },
-    {
-        name: "win_screen_background",
-        file: "textures/screens/win_screen_background.png"
     },
     {
         name: "location_sign_aqua_dulche",
@@ -307,6 +319,10 @@ textures: [
         file: "textures/map/nodes/shop.png"
     },
     {
+        name: "map_node_get_card",
+        file: "textures/map/nodes/get_card.png"
+    },
+    {
         name: "map_player",
         file: "textures/map/player.png"
     },
@@ -325,6 +341,10 @@ textures: [
     {
         name: "nav_bar_background",
         file: "textures/statusbar/background_old.png"
+    },
+    {
+        name: "cash_symbol",
+        file: "textures/statusbar/cash_symbol.png"
     },
     {
         name: "map_decoration_grass",
