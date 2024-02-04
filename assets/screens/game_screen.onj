@@ -1078,9 +1078,9 @@ var playerBar = $Box {
                     positionType: positionType.absolute,
                     width: 200#points,
                     height: 100#points,
-                    positionLeft: 25#points,
-                    positionBottom: 119#points,
-                    rotation: -25.0,
+                    positionLeft: 35#points,
+                    positionBottom: -40#points,
+                    rotation: 25.0,
                     disabled: false
                 },
                 {
@@ -1174,9 +1174,9 @@ var playerBar = $Box {
                     positionType: positionType.absolute,
                     width: 200#points,
                     height: 100#points,
-                    positionLeft: 25#points,
-                    positionBottom: 50#points,
-                    rotation: -25.0,
+                    positionLeft: 35#points,
+                    positionBottom: -40#points,
+                    rotation: 25.0,
                     disabled: true
                 },
                 {
