@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
+import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fortyfive.rendering.Renderable
@@ -24,7 +25,7 @@ object FortyFive : Game() {
 
     const val logTag = "forty-five"
 
-    private var currentRenderable: Renderable? = null
+    private var currentRenderPipeline: RenderPipeline? = null
     private var currentScreen: OnjScreen? = null
 
     var currentGame: GameController? = null
@@ -57,7 +58,7 @@ object FortyFive : Game() {
     }
 
     override fun render() {
-        currentRenderable?.render(Gdx.graphics.deltaTime)
+        currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
     fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
@@ -71,7 +72,8 @@ object FortyFive : Game() {
             FortyFiveLogger.title("changing screen to $screenPath")
             currentScreen?.dispose()
             this.currentScreen = screen
-            currentRenderable = screen
+            currentRenderPipeline?.dispose()
+            currentRenderPipeline = RenderPipeline(screen, screen).apply { init() }
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
@@ -85,9 +87,10 @@ object FortyFive : Game() {
     }
 
     @AllThreadsAllowed
-    fun useRenderPipeline(renderable: Renderable) {
-        currentRenderable = renderable
-        renderable.init()
+    fun useRenderPipeline(renderPipeline: RenderPipeline) {
+        currentRenderPipeline?.dispose()
+        currentRenderPipeline = renderPipeline
+        renderPipeline.init()
     }
 
     fun newRun(forwardToTutorialScreen: Boolean) {
@@ -96,6 +99,11 @@ object FortyFive : Game() {
         SaveState.reset()
         MapManager.newRunSync()
         if (forwardToTutorialScreen) MapManager.changeToEncounterScreen(tutorialEncounterContext)
+    }
+
+    override fun resize(width: Int, height: Int) {
+        super.resize(width, height)
+        currentRenderPipeline?.sizeChanged()
     }
 
     fun resetAll() {

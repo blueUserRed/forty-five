@@ -589,7 +589,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             TemplateString.updateGlobalParam("game.remainingParryDamage", remainingDamage)
             TemplateString.updateGlobalParam("game.remainingPassDamage", max(damage, 0))
-            gameRenderPipeline.startParryEffect(curScreen)
+            gameRenderPipeline.startParryEffect()
             curScreen.enterState(showEnemyAttackPopupScreenState)
             FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
         }
@@ -745,7 +745,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         appendMainTimeline(Timeline.timeline {
             parallelActions(
                 timeline.asAction(),
-                gameRenderPipeline.getOnShotPostProcessingTimelineAction()
+                gameRenderPipeline.getOnShotPostProcessingTimeline().asAction()
             )
         })
     }
@@ -1113,7 +1113,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "player lost")
             playerLost = true
         }
-        includeAction(gameRenderPipeline.getOnDeathPostProcessingTimelineAction())
+        include(gameRenderPipeline.getOnDeathPostProcessingTimeline())
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)

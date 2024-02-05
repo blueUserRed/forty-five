@@ -399,7 +399,6 @@ open class OnjScreen @MainThreadOnly constructor(
             stage.act(Gdx.graphics.deltaTime)
             styleManagers.filter { it !in oldStyleManagers }
                 .forEach(StyleManager::update) //all added items get updated too
-            ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             if (stage.batch.isDrawing) stage.batch.end()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
