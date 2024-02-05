@@ -13,6 +13,7 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
+import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
@@ -805,6 +806,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     fun endTurn() {
+        gameRenderPipeline.addOrbAnimation(
+            RenderPipeline.OrbAnimation(
+                orbTexture = "cash_symbol",
+                width = 50f,
+                height = 50f,
+                duration = 5_000,
+                position = RenderPipeline.OrbAnimation.linear(
+                    com.badlogic.gdx.math.Vector2(0f, 0f),
+                    com.badlogic.gdx.math.Vector2(curScreen.viewport.worldWidth, curScreen.viewport.worldHeight)
+                )
+            )
+        )
         if (hasWon) {
             completeWin()
             return

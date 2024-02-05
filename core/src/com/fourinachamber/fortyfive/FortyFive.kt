@@ -73,7 +73,7 @@ object FortyFive : Game() {
             currentScreen?.dispose()
             this.currentScreen = screen
             currentRenderPipeline?.dispose()
-            currentRenderPipeline = RenderPipeline(screen, screen).apply { init() }
+            currentRenderPipeline = RenderPipeline(screen, screen)
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
@@ -90,7 +90,6 @@ object FortyFive : Game() {
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
         currentRenderPipeline?.dispose()
         currentRenderPipeline = renderPipeline
-        renderPipeline.init()
     }
 
     fun newRun(forwardToTutorialScreen: Boolean) {

@@ -842,6 +842,12 @@ shaders: [
         file: "shaders/ice.glsl",
         constantArgs: { }
     },
+    {
+        name: "alpha_reduction_shader",
+        file: "shaders/reduce_alpha.glsl",
+        constantArgs: {
+        }
+    },
 ],
 
 animations: [

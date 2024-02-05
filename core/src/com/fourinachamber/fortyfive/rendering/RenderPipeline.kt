@@ -8,10 +8,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
-import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -34,12 +35,24 @@ open class RenderPipeline(
         get() {
             if (_fbo != null) return _fbo
             _fbo = try {
-                println("creating new fbo")
                 FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
             } catch (e: java.lang.IllegalStateException) {
                 null
             }
             return _fbo
+        }
+
+    private var _orbFbo: FrameBuffer? = null
+
+    private val orbFbo: FrameBuffer?
+        get() {
+            if (_orbFbo != null) return _orbFbo
+            _orbFbo = try {
+                FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
+            } catch (e: java.lang.IllegalStateException) {
+                null
+            }
+            return _orbFbo
         }
 
     protected open val earlyTasks: MutableList<() -> Unit> = mutableListOf()
@@ -49,15 +62,84 @@ open class RenderPipeline(
 
     protected val batch: SpriteBatch = SpriteBatch()
 
-    open fun init() {
+    private val orbAnimations: MutableList<OrbAnimation> = mutableListOf()
+
+    private val alphaReductionShaderDelegate = lazy {
+        ResourceManager.get<BetterShader>(screen, "alpha_reduction_shader")
+    }
+    private val alphaReductionShader: BetterShader by alphaReductionShaderDelegate
+
+    private fun updateOrbFbo(delta: Float) {
+        val fbo = orbFbo ?: return
+
+        fbo.begin()
+        screen.viewport.apply()
+        batch.projectionMatrix = screen.viewport.camera.combined
+        batch.begin()
+
+        val shader = alphaReductionShader
+        batch.flush()
+        batch.shader = shader.shader
+        shader.shader.bind()
+        println(delta * 0.05f)
+//        shader.shader.setUniformf("u_alphaReduction", 0.0001f)
+//        Gdx.gl.glBlendFuncSeparate(GL20.GL_ONE, GL20.GL_ZERO, GL20.GL_ONE, GL20.GL_ZERO)
+        shader.shader.setUniformf("u_alphaReduction", delta * 2f)
+        shader.prepare(screen)
+        batch.enableBlending()
+        batch.setBlendFunctionSeparate(GL20.GL_ONE, GL20.GL_ZERO, GL20.GL_ONE, GL20.GL_ZERO)
+        batch.draw(
+            fbo.colorBufferTexture,
+            0f, 0f,
+            screen.viewport.worldWidth,
+            screen.viewport.worldHeight,
+            0f, 0f, 1f, 1f // flips the y-axis
+        )
+        batch.flush()
+        batch.shader = null
+        batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        val toRemove = mutableListOf<OrbAnimation>()
+        orbAnimations.forEach { anim ->
+            val time = TimeUtils.millis() - anim.startTime
+            val progress = time.toFloat() / anim.duration.toFloat()
+            if (progress >= 1f) {
+                toRemove.add(anim)
+                return@forEach
+            }
+            val drawable = ResourceManager.get<Drawable>(screen, anim.orbTexture)
+            val position = anim.position(progress)
+            drawable.draw(
+                batch,
+                position.x, position.y,
+                anim.width, anim.height
+            )
+        }
+        orbAnimations.removeAll(toRemove)
+
+        batch.end()
+        fbo.end()
+    }
+
+    private fun renderOrbFbo() {
+        val fbo = orbFbo ?: return
+        batch.draw(
+            fbo.colorBufferTexture,
+            0f, 0f,
+            screen.viewport.worldWidth,
+            screen.viewport.worldHeight,
+            0f, 0f, 1f, 1f // flips the y-axis
+        )
     }
 
     open fun render(delta: Float) {
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
+        updateOrbFbo(delta)
         if (postPreprocessingSteps.isEmpty()) {
+            baseRenderable.render(delta)
             batch.begin()
             earlyTasks.forEach { it() }
-            baseRenderable.render(delta)
+            renderOrbFbo()
             lateTasks.forEach { it() }
             batch.end()
         } else {
@@ -69,8 +151,11 @@ open class RenderPipeline(
         val fbo = fbo ?: return
         fbo.begin()
         baseRenderable.render(delta)
+        screen.viewport.apply()
+        batch.projectionMatrix = screen.viewport.camera.combined
         batch.begin()
         earlyTasks.forEach { it() }
+        renderOrbFbo()
         batch.end()
         fbo.end()
         batch.begin()
@@ -107,14 +192,43 @@ open class RenderPipeline(
         batch.shader = null
     }
 
+    fun addOrbAnimation(orbAnimation: OrbAnimation) {
+        orbAnimation.startTime = TimeUtils.millis()
+        orbAnimations.add(orbAnimation)
+    }
+
     open fun sizeChanged() {
         _fbo?.dispose()
         _fbo = null
+        _orbFbo?.dispose()
+        _orbFbo = null
     }
 
     override fun dispose() {
         _fbo?.dispose()
+        _orbFbo?.dispose()
         batch.dispose()
+    }
+
+    data class OrbAnimation(
+        var startTime: Long = 0L,
+        val orbTexture: ResourceHandle,
+        val width: Float,
+        val height: Float,
+        val duration: Int,
+        val position: (progress: Float) -> Vector2,
+    ) {
+
+        companion object {
+
+            fun linear(start: Vector2, end: Vector2): (progress: Float) -> Vector2 = { progress ->
+                Vector2(
+                    start.x + (end.x - start.x) * progress,
+                    start.y + (end.y - start.y) * progress,
+                )
+            }
+
+        }
     }
 }
 
