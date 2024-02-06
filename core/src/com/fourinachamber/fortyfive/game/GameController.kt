@@ -811,8 +811,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 orbTexture = "cash_symbol",
                 width = 50f,
                 height = 50f,
-                duration = 5_000,
-                position = RenderPipeline.OrbAnimation.linear(
+                duration = 10_000,
+                segments = 1,
+                position = RenderPipeline.OrbAnimation.curvedPath(
+//                position = RenderPipeline.OrbAnimation.linear(
                     com.badlogic.gdx.math.Vector2(0f, 0f),
                     com.badlogic.gdx.math.Vector2(curScreen.viewport.worldWidth, curScreen.viewport.worldHeight)
                 )
