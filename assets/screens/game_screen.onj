@@ -1536,6 +1536,7 @@ var winScreen = $Box {
                 ]
             } children [
                 $Box {
+                    name: "win_screen_cash_symbol",
                     styles: [
                         {
                             background: "cash_symbol",
