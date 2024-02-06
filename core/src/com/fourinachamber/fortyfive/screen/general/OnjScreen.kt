@@ -387,29 +387,29 @@ open class OnjScreen @MainThreadOnly constructor(
         styleManagers.add(manager)
     }
 
-    @MainThreadOnly
-    override fun render(delta: Float) = try {
-//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
+    fun update(delta: Float) {
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()
+        stage.act(Gdx.graphics.deltaTime)
+        currentHoverDetail?.act(delta)
+    }
+
+    @MainThreadOnly
+    override fun render(delta: Float) = try {
+//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
         lastRenderTime = measureTimeMillis {
-            val oldStyleManagers = styleManagers.toList()
-            stage.act(Gdx.graphics.deltaTime)
-            styleManagers.filter { it !in oldStyleManagers }
-                .forEach(StyleManager::update) //all added items get updated too
+//            val oldStyleManagers = styleManagers.toList()
+//            styleManagers.filter { it !in oldStyleManagers }
+//                .forEach(StyleManager::update) //all added items get updated too
             if (stage.batch.isDrawing) stage.batch.end()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-
             if (dragAndDrop.none { it.value.isDragging }) {
                 stage.batch.begin()
-                currentHoverDetail?.let { actor ->
-                    actor.act(delta)
-                    actor.draw(stage.batch, 1f)
-                }
+                currentHoverDetail?.draw(stage.batch, 1f)
                 stage.batch.end()
             }
         }

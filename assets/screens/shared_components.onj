@@ -177,6 +177,7 @@ statusbarCenterDefaults: {
                     align: "center",
                 },
                 $Box {
+                    name: "cash_symbol",
                     styles: [
                         {
                             background: "cash_symbol",

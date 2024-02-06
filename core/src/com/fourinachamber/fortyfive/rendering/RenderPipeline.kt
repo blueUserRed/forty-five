@@ -33,6 +33,9 @@ open class RenderPipeline(
     private val baseRenderable: Renderable
 ) : Disposable {
 
+    protected var hasBeenDisposed: Boolean = false
+        private set
+
     private var _fbo: FrameBuffer? = null
     protected val fbo: FrameBuffer?
         get() {
@@ -188,6 +191,7 @@ open class RenderPipeline(
     }
 
     open fun render(delta: Float) {
+        if (hasBeenDisposed) return
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
         if (isOrbAnimActive) updateOrbFbo(delta)
         if (postPreprocessingSteps.isEmpty()) {
@@ -262,6 +266,7 @@ open class RenderPipeline(
     }
 
     override fun dispose() {
+        hasBeenDisposed = true
         _fbo?.dispose()
         _orbFbo?.dispose()
         batch.dispose()

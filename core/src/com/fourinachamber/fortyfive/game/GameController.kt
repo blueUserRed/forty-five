@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.TimeUtils
@@ -806,20 +807,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     fun endTurn() {
-        gameRenderPipeline.addOrbAnimation(
-            RenderPipeline.OrbAnimation(
-                orbTexture = "cash_symbol",
-                width = 50f,
-                height = 50f,
-                duration = 10_000,
-                segments = 1,
-                position = RenderPipeline.OrbAnimation.curvedPath(
-//                position = RenderPipeline.OrbAnimation.linear(
-                    com.badlogic.gdx.math.Vector2(0f, 0f),
-                    com.badlogic.gdx.math.Vector2(curScreen.viewport.worldWidth, curScreen.viewport.worldHeight)
-                )
-            )
-        )
         if (hasWon) {
             completeWin()
             return
@@ -1095,9 +1082,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (money > 0) curScreen.enterState(showCashItem)
                 TemplateString.updateGlobalParam("game.overkillCash", money)
                 if (playerGetsCard) curScreen.enterState(showCardItem)
-                println(curScreen.screenState)
             }
             delayUntil { popupEvent != null }
+            action {
+                val start = curScreen.namedActorOrError("win_screen_cash_symbol").localToScreenCoordinates(Vector2())
+                val end = curScreen.namedActorOrError("cash_symbol").localToScreenCoordinates(Vector2()) multIndividual Vector2(1f, -1f)
+                gameRenderPipeline.addOrbAnimation(
+                    RenderPipeline.OrbAnimation(
+                        orbTexture = "cash_symbol",
+                        width = 30f,
+                        height = 30f,
+                        duration = 1_000,
+                        segments = 5,
+//                        position = RenderPipeline.OrbAnimation.linear(start, end)
+                        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
+                    )
+                )
+            }
+            delay(100)
             action {
                 popupEvent = null
                 SaveState.playerMoney += money

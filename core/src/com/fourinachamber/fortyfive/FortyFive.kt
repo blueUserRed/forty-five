@@ -49,7 +49,7 @@ object FortyFive : Game() {
     override fun create() {
         init()
 //        resetAll()
-//        newRun(false)
+        newRun(false)
         if (SaveState.playerCompletedFirstTutorialEncounter) {
             MapManager.changeToMapScreen()
         } else {
@@ -58,10 +58,11 @@ object FortyFive : Game() {
     }
 
     override fun render() {
+        currentScreen?.update(Gdx.graphics.deltaTime)
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
-    fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
+    fun changeToScreen(screenPath: String, controllerContext: Any? = null) = Gdx.app.postRunnable {
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
         val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
