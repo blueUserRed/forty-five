@@ -848,6 +848,12 @@ shaders: [
         constantArgs: {
         }
     },
+    {
+        name: "gaussian_blur_shader",
+        file: "shaders/gaussian_blur.glsl",
+        constantArgs: {
+        }
+    },
 ],
 
 animations: [

@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.rendering
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Pixmap
@@ -8,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
+import com.badlogic.gdx.math.CatmullRomSpline
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Disposable
@@ -17,7 +19,9 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.*
+import java.lang.Long.max
+import kotlin.math.absoluteValue
 
 interface Renderable {
 
@@ -30,7 +34,6 @@ open class RenderPipeline(
 ) : Disposable {
 
     private var _fbo: FrameBuffer? = null
-
     protected val fbo: FrameBuffer?
         get() {
             if (_fbo != null) return _fbo
@@ -43,7 +46,6 @@ open class RenderPipeline(
         }
 
     private var _orbFbo: FrameBuffer? = null
-
     private val orbFbo: FrameBuffer?
         get() {
             if (_orbFbo != null) return _orbFbo
@@ -69,6 +71,15 @@ open class RenderPipeline(
     }
     private val alphaReductionShader: BetterShader by alphaReductionShaderDelegate
 
+    private val gaussianBlurShaderDelegate = lazy {
+        ResourceManager.get<BetterShader>(screen, "gaussian_blur_shader")
+    }
+    private val gaussianBlurShader: BetterShader by gaussianBlurShaderDelegate
+
+    private var orbFinisesAt: Long = -1
+    private val isOrbAnimActive: Boolean
+        get() = TimeUtils.millis() <= orbFinisesAt
+
     private fun updateOrbFbo(delta: Float) {
         val fbo = orbFbo ?: return
 
@@ -81,10 +92,7 @@ open class RenderPipeline(
         batch.flush()
         batch.shader = shader.shader
         shader.shader.bind()
-        println(delta * 0.05f)
-//        shader.shader.setUniformf("u_alphaReduction", 0.0001f)
-//        Gdx.gl.glBlendFuncSeparate(GL20.GL_ONE, GL20.GL_ZERO, GL20.GL_ONE, GL20.GL_ZERO)
-        shader.shader.setUniformf("u_alphaReduction", delta * 2f)
+        shader.shader.setUniformf("u_alphaReduction", delta * 1.3f)
         shader.prepare(screen)
         batch.enableBlending()
         batch.setBlendFunctionSeparate(GL20.GL_ONE, GL20.GL_ZERO, GL20.GL_ONE, GL20.GL_ZERO)
@@ -103,17 +111,28 @@ open class RenderPipeline(
         orbAnimations.forEach { anim ->
             val time = TimeUtils.millis() - anim.startTime
             val progress = time.toFloat() / anim.duration.toFloat()
+            val lastProgress = anim.lastProgress
             if (progress >= 1f) {
                 toRemove.add(anim)
                 return@forEach
             }
+
             val drawable = ResourceManager.get<Drawable>(screen, anim.orbTexture)
-            val position = anim.position(progress)
-            drawable.draw(
-                batch,
-                position.x, position.y,
-                anim.width, anim.height
-            )
+
+            val segments = anim.segments + 1
+            var curProgress = lastProgress
+            repeat(segments) {
+                if (it == segments - 1) return@repeat
+                curProgress += (progress - lastProgress) / segments
+                val position = anim.position(curProgress)
+                drawable.draw(
+                    batch,
+                    position.x, position.y,
+                    anim.width, anim.height
+                )
+            }
+
+            anim.lastProgress = progress
         }
         orbAnimations.removeAll(toRemove)
 
@@ -122,7 +141,30 @@ open class RenderPipeline(
     }
 
     private fun renderOrbFbo() {
-        val fbo = orbFbo ?: return
+        val orbFbo = orbFbo ?: return
+        val fbo = fbo ?: return
+        val shader = gaussianBlurShader
+        batch.flush()
+        batch.enableBlending()
+        fbo.begin()
+        ScreenUtils.clear(0f, 0f, 0f, 0f)
+        shader.shader.bind()
+        shader.prepare(screen)
+        batch.shader = shader.shader
+        batch.enableBlending()
+        batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        shader.shader.setUniformf("u_dir", 1f, 0f)
+        shader.shader.setUniformf("u_radius", 5.0f)
+        batch.draw(
+            orbFbo.colorBufferTexture,
+            0f, 0f,
+            screen.viewport.worldWidth,
+            screen.viewport.worldHeight,
+            0f, 0f, 1f, 1f // flips the y-axis
+        )
+        batch.flush()
+        fbo.end()
+        shader.shader.setUniformf("u_dir", 0f, 1f)
         batch.draw(
             fbo.colorBufferTexture,
             0f, 0f,
@@ -130,16 +172,29 @@ open class RenderPipeline(
             screen.viewport.worldHeight,
             0f, 0f, 1f, 1f // flips the y-axis
         )
+        batch.flush()
+        batch.shader = null
+        orbAnimations.forEach { anim ->
+            val drawable = ResourceManager.get<Drawable>(screen, anim.orbTexture)
+            val time = TimeUtils.millis() - anim.startTime
+            val progress = time.toFloat() / anim.duration.toFloat()
+            val position = anim.position(progress)
+            drawable.draw(
+                batch,
+                position.x, position.y,
+                anim.width, anim.height
+            )
+        }
     }
 
     open fun render(delta: Float) {
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
-        updateOrbFbo(delta)
+        if (isOrbAnimActive) updateOrbFbo(delta)
         if (postPreprocessingSteps.isEmpty()) {
             baseRenderable.render(delta)
             batch.begin()
             earlyTasks.forEach { it() }
-            renderOrbFbo()
+            if (isOrbAnimActive) renderOrbFbo()
             lateTasks.forEach { it() }
             batch.end()
         } else {
@@ -155,7 +210,6 @@ open class RenderPipeline(
         batch.projectionMatrix = screen.viewport.camera.combined
         batch.begin()
         earlyTasks.forEach { it() }
-        renderOrbFbo()
         batch.end()
         fbo.end()
         batch.begin()
@@ -167,7 +221,9 @@ open class RenderPipeline(
             step()
             if (!last) fbo.end()
         }
-        batch.flush()
+        batch.end()
+        if (isOrbAnimActive) renderOrbFbo()
+        batch.begin()
         screen.viewport.apply()
         batch.projectionMatrix = screen.viewport.camera.combined
         lateTasks.forEach { it() }
@@ -195,6 +251,7 @@ open class RenderPipeline(
     fun addOrbAnimation(orbAnimation: OrbAnimation) {
         orbAnimation.startTime = TimeUtils.millis()
         orbAnimations.add(orbAnimation)
+        orbFinisesAt = max(orbFinisesAt, TimeUtils.millis() + orbAnimation.duration + 500L)
     }
 
     open fun sizeChanged() {
@@ -212,10 +269,12 @@ open class RenderPipeline(
 
     data class OrbAnimation(
         var startTime: Long = 0L,
+        var lastProgress: Float = 0f,
         val orbTexture: ResourceHandle,
         val width: Float,
         val height: Float,
         val duration: Int,
+        val segments: Int,
         val position: (progress: Float) -> Vector2,
     ) {
 
@@ -226,6 +285,24 @@ open class RenderPipeline(
                     start.x + (end.x - start.x) * progress,
                     start.y + (end.y - start.y) * progress,
                 )
+            }
+
+            fun curvedPath(start: Vector2, end: Vector2): (progress: Float) -> Vector2 {
+                val midpoint = start midPoint end
+                val length = (end - start).len().absoluteValue
+                val controlPoints = arrayOf(
+                    start,
+                    start,
+                    midpoint + midpoint.normal.withMag(length * 0.15f),
+                    end,
+                    end,
+                )
+                val spline = CatmullRomSpline(controlPoints, false)
+                return { progress ->
+                    val result = Vector2()
+                    spline.valueAt(result, progress)
+                    result
+                }
             }
 
         }
@@ -303,8 +380,6 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
     override fun dispose() {
         super.dispose()
         shapeRenderer.dispose()
-        if (shootShaderDelegate.isInitialized()) shootShader.dispose()
-        if (parryShaderDelegate.isInitialized()) parryShader.dispose()
     }
 
 }

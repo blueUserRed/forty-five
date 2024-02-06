@@ -73,6 +73,11 @@ val Vector2.unit: Vector2
         return this / len
     }
 
+val Vector2.normal: Vector2
+    get() {
+        return this.cpy().rotate90(0)
+    }
+
 operator fun Vector2.minus(other: Vector2) = Vector2(x - other.x, y - other.y)
 operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 operator fun Vector2.times(other: Float): Vector2 = Vector2(this.x * other, this.y * other)
@@ -89,6 +94,11 @@ fun Vector2.clampIndividual(minX: Float, maxX: Float, minY: Float, maxY: Float):
     this.x.coerceIn(minX, maxX),
     this.y.coerceIn(minY, maxY),
 )
+
+infix fun Vector2.midPoint(other: Vector2): Vector2 {
+    val off = this - other
+    return other + off * 0.5f
+}
 
 operator fun Vector2.component1(): Float = this.x
 operator fun Vector2.component2(): Float = this.y
