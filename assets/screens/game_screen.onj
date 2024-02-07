@@ -1260,7 +1260,7 @@ var playerBar = $Box {
             },
             {
                 style_priority: 2,
-                style_condition: state("showAttackPopup"),
+                style_condition: state("showAttackPopup") or state("showSelectionPopup"),
                 alpha: 1.0,
                 style_animation: {
                     duration: 0.2,
@@ -1270,19 +1270,30 @@ var playerBar = $Box {
         ]
     } children [
 
-        $Label {
+        $TemplateLabel {
             styles: [
                 {
                     marginBottom: 30#points
                 }
             ],
             font: "red_wing",
-            text: "Parry Bullet?",
+            template: "{game.revolverPopupText}",
             fontScale: 1.3,
             color: color.brightYellow,
         },
 
         $TemplateLabel {
+            styles: [
+                {
+                    style_priority: 1,
+                    visible: true
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showSelectionPopup"),
+                    visible: false,
+                }
+            ],
             font: "red_wing",
             template: "Parrying will let {game.remainingParryDamage} dmg through",
             fontScale: 0.6,
@@ -1292,7 +1303,14 @@ var playerBar = $Box {
         $TemplateLabel {
             styles: [
                 {
+                    style_priority: 1,
+                    visible: true,
                     marginTop: 10#points
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showSelectionPopup"),
+                    visible: false,
                 }
             ],
             font: "red_wing",
