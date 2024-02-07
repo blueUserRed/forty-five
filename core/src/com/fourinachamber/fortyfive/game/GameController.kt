@@ -1085,21 +1085,21 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             delayUntil { popupEvent != null }
             action {
-                val start = curScreen.namedActorOrError("win_screen_cash_symbol").localToScreenCoordinates(Vector2())
-                val end = curScreen.namedActorOrError("cash_symbol").localToScreenCoordinates(Vector2()) multIndividual Vector2(1f, -1f)
+                val start = curScreen.namedActorOrError("win_screen_cash_symbol").localToStageCoordinates(Vector2())
+                val end = curScreen.namedActorOrError("cash_symbol").localToStageCoordinates(Vector2())
                 gameRenderPipeline.addOrbAnimation(
                     RenderPipeline.OrbAnimation(
                         orbTexture = "cash_symbol",
                         width = 30f,
                         height = 30f,
                         duration = 1_000,
-                        segments = 5,
-//                        position = RenderPipeline.OrbAnimation.linear(start, end)
-                        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
+                        segments = 20,
+                        position = RenderPipeline.OrbAnimation.linear(start, end)
+//                        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
                     )
                 )
             }
-            delay(100)
+            delay(1_000)
             action {
                 popupEvent = null
                 SaveState.playerMoney += money

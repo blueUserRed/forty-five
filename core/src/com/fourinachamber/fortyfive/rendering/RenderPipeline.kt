@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
+import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -33,32 +34,10 @@ open class RenderPipeline(
     private val baseRenderable: Renderable
 ) : Disposable {
 
+    protected val frameBufferManager: FrameBufferManager = FrameBufferManager()
+
     protected var hasBeenDisposed: Boolean = false
         private set
-
-    private var _fbo: FrameBuffer? = null
-    protected val fbo: FrameBuffer?
-        get() {
-            if (_fbo != null) return _fbo
-            _fbo = try {
-                FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
-            } catch (e: java.lang.IllegalStateException) {
-                null
-            }
-            return _fbo
-        }
-
-    private var _orbFbo: FrameBuffer? = null
-    private val orbFbo: FrameBuffer?
-        get() {
-            if (_orbFbo != null) return _orbFbo
-            _orbFbo = try {
-                FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.width, Gdx.graphics.height, false)
-            } catch (e: java.lang.IllegalStateException) {
-                null
-            }
-            return _orbFbo
-        }
 
     protected open val earlyTasks: MutableList<() -> Unit> = mutableListOf()
     protected open val lateTasks: MutableList<() -> Unit> = mutableListOf()
@@ -83,12 +62,16 @@ open class RenderPipeline(
     private val isOrbAnimActive: Boolean
         get() = TimeUtils.millis() <= orbFinisesAt
 
-    private fun updateOrbFbo(delta: Float) {
-        val fbo = orbFbo ?: return
+    init {
+        frameBufferManager.addPingPongFrameBuffer("orb", 1f)
+        frameBufferManager.addPingPongFrameBuffer("pp", 1f)
+    }
 
-        fbo.begin()
-        screen.viewport.apply()
-        batch.projectionMatrix = screen.viewport.camera.combined
+    private fun updateOrbFbo(delta: Float) {
+        val (active, inactive) = frameBufferManager.getPingPongFrameBuffers("orb") ?: return
+
+        active.begin()
+        ScreenUtils.clear(0f, 0f, 0f, 0f)
         batch.begin()
 
         val shader = alphaReductionShader
@@ -100,7 +83,7 @@ open class RenderPipeline(
         batch.enableBlending()
         batch.setBlendFunctionSeparate(GL20.GL_ONE, GL20.GL_ZERO, GL20.GL_ONE, GL20.GL_ZERO)
         batch.draw(
-            fbo.colorBufferTexture,
+            inactive.colorBufferTexture,
             0f, 0f,
             screen.viewport.worldWidth,
             screen.viewport.worldHeight,
@@ -109,8 +92,9 @@ open class RenderPipeline(
         batch.flush()
         batch.shader = null
         batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-
         val toRemove = mutableListOf<OrbAnimation>()
+        screen.viewport.apply()
+        batch.projectionMatrix = screen.viewport.camera.combined
         orbAnimations.forEach { anim ->
             val time = TimeUtils.millis() - anim.startTime
             val progress = time.toFloat() / anim.duration.toFloat()
@@ -140,16 +124,16 @@ open class RenderPipeline(
         orbAnimations.removeAll(toRemove)
 
         batch.end()
-        fbo.end()
+        active.end()
+        frameBufferManager.swapPingPongFrameBuffers("orb")
     }
 
     private fun renderOrbFbo() {
-        val orbFbo = orbFbo ?: return
-        val fbo = fbo ?: return
+        val (active, inactive) = frameBufferManager.getPingPongFrameBuffers("orb") ?: return
         val shader = gaussianBlurShader
         batch.flush()
         batch.enableBlending()
-        fbo.begin()
+        active.begin()
         ScreenUtils.clear(0f, 0f, 0f, 0f)
         shader.shader.bind()
         shader.prepare(screen)
@@ -157,19 +141,21 @@ open class RenderPipeline(
         batch.enableBlending()
         batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         shader.shader.setUniformf("u_dir", 1f, 0f)
-        shader.shader.setUniformf("u_radius", 5.0f)
+        shader.shader.setUniformf("u_radius", 3.0f)
         batch.draw(
-            orbFbo.colorBufferTexture,
+            inactive.colorBufferTexture,
             0f, 0f,
             screen.viewport.worldWidth,
             screen.viewport.worldHeight,
             0f, 0f, 1f, 1f // flips the y-axis
         )
         batch.flush()
-        fbo.end()
+        active.end()
+        screen.viewport.apply()
+        batch.projectionMatrix = screen.viewport.camera.combined
         shader.shader.setUniformf("u_dir", 0f, 1f)
         batch.draw(
-            fbo.colorBufferTexture,
+            active.colorBufferTexture,
             0f, 0f,
             screen.viewport.worldWidth,
             screen.viewport.worldHeight,
@@ -193,6 +179,8 @@ open class RenderPipeline(
     open fun render(delta: Float) {
         if (hasBeenDisposed) return
         ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
+        screen.viewport.apply()
+        batch.projectionMatrix = screen.viewport.camera.combined
         if (isOrbAnimActive) updateOrbFbo(delta)
         if (postPreprocessingSteps.isEmpty()) {
             baseRenderable.render(delta)
@@ -207,26 +195,28 @@ open class RenderPipeline(
     }
 
     private fun renderWithPostProcessors(delta: Float) {
-        val fbo = fbo ?: return
-        fbo.begin()
+        val (active, _) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return
+        active.begin()
         baseRenderable.render(delta)
         screen.viewport.apply()
         batch.projectionMatrix = screen.viewport.camera.combined
         batch.begin()
         earlyTasks.forEach { it() }
         batch.end()
-        fbo.end()
+        active.end()
+        if (isOrbAnimActive) renderOrbFbo()
         batch.begin()
-        screen.viewport.apply()
-        batch.projectionMatrix = screen.viewport.camera.combined
+//        screen.viewport.apply()
+//        batch.projectionMatrix = screen.viewport.camera.combined
         postPreprocessingSteps.forEachIndexed { index, step ->
+            frameBufferManager.swapPingPongFrameBuffers("pp")
+            val (@Suppress("NAME_SHADOWING") active, _) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return
             val last = index == postPreprocessingSteps.size - 1
-            if (!last) fbo.begin()
+            if (!last) active.begin()
             step()
-            if (!last) fbo.end()
+            if (!last) active.end()
         }
         batch.end()
-        if (isOrbAnimActive) renderOrbFbo()
         batch.begin()
         screen.viewport.apply()
         batch.projectionMatrix = screen.viewport.camera.combined
@@ -235,14 +225,14 @@ open class RenderPipeline(
     }
 
     protected fun shaderPostProcessingStep(shader: BetterShader): () -> Unit = lambda@{
-        val fbo = fbo ?: return@lambda
+        val (_, inactive) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return@lambda
         batch.flush()
         batch.shader = shader.shader
         shader.shader.bind()
         shader.prepare(screen)
         batch.enableBlending()
         batch.draw(
-            fbo.colorBufferTexture,
+            inactive.colorBufferTexture,
             0f, 0f,
             screen.viewport.worldWidth,
             screen.viewport.worldHeight,
@@ -259,16 +249,12 @@ open class RenderPipeline(
     }
 
     open fun sizeChanged() {
-        _fbo?.dispose()
-        _fbo = null
-        _orbFbo?.dispose()
-        _orbFbo = null
+        frameBufferManager.sizeChanged()
     }
 
     override fun dispose() {
         hasBeenDisposed = true
-        _fbo?.dispose()
-        _orbFbo?.dispose()
+        frameBufferManager.dispose()
         batch.dispose()
     }
 
@@ -387,4 +373,77 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
         shapeRenderer.dispose()
     }
 
+}
+
+class FrameBufferManager : Disposable {
+
+    private val singleBuffers: MutableMap<String, Pair<Float, FrameBuffer?>> = mutableMapOf()
+    private val pingPongBuffers: MutableMap<String, Pair<Float, Pair<FrameBuffer, FrameBuffer>?>> = mutableMapOf()
+
+    fun addFrameBuffer(name: String, sizeMultiplier: Float) {
+        if (singleBuffers.containsKey(name)) throw RuntimeException("single FrameBuffer with name $name already exists")
+        singleBuffers[name] = sizeMultiplier to null
+    }
+
+    fun getFrameBuffer(name: String): FrameBuffer? {
+        val (sizeMultiplier, buffer) = singleBuffers[name] ?: throw RuntimeException("no single FrameBuffer with name $name")
+        if (buffer != null) return buffer
+        val newBuffer = tryCreateFrameBuffer(sizeMultiplier)
+        singleBuffers[name] = sizeMultiplier to newBuffer
+        return newBuffer
+    }
+
+    private fun tryCreateFrameBuffer(sizeMultiplier: Float): FrameBuffer? = try {
+        FrameBuffer(
+            Pixmap.Format.RGBA8888,
+            (Gdx.graphics.width * sizeMultiplier).toInt(),
+            (Gdx.graphics.height * sizeMultiplier).toInt(),
+            false
+        )
+    } catch (e: java.lang.IllegalStateException) {
+        null
+    }
+
+    fun addPingPongFrameBuffer(name: String, sizeMultiplier: Float) {
+        if (pingPongBuffers.containsKey(name)) throw RuntimeException("ping pong FrameBuffer with name $name already exists")
+        pingPongBuffers[name] = sizeMultiplier to null
+    }
+
+    fun getPingPongFrameBuffers(name: String): Pair<FrameBuffer, FrameBuffer>? {
+        val (sizeMultiplier, buffers) = pingPongBuffers[name] ?: throw RuntimeException("no ping pong FrameBuffer with name $name")
+        if (buffers != null) return buffers
+        val newBuffers = tryCreateFrameBuffer(sizeMultiplier)
+            ?.let { first -> tryCreateFrameBuffer(sizeMultiplier)?.let { first to it } }
+        pingPongBuffers[name] = sizeMultiplier to newBuffers
+        return newBuffers
+    }
+
+    fun swapPingPongFrameBuffers(name: String) {
+        val (sizeMultiplier, buffers) = pingPongBuffers[name] ?: throw RuntimeException("no ping pong FrameBuffer with name $name")
+        pingPongBuffers[name] = sizeMultiplier to (buffers?.let { it.second to it.first })
+    }
+
+    fun sizeChanged() {
+        singleBuffers.replaceAll { _, (sizeMultiplier, buffer) ->
+            buffer?.dispose()
+            sizeMultiplier to null
+        }
+        pingPongBuffers.replaceAll { _, (sizeMultiplier, buffers) ->
+            buffers?.let {
+                it.first.dispose()
+                it.second.dispose()
+            }
+            sizeMultiplier to null
+        }
+    }
+
+    override fun dispose() {
+        singleBuffers.values.forEach { (_, buffer) -> buffer?.dispose() }
+        pingPongBuffers.values.forEach { (_, buffers) ->
+            buffers?.let {
+                it.first.dispose()
+                it.second.dispose()
+            }
+        }
+    }
 }

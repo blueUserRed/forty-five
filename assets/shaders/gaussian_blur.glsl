@@ -24,8 +24,8 @@ uniform vec2 u_dir;
 vec2 gaussSample(vec2 at, float weight, vec4 middle) {
     vec4 result = texture2D(u_texture, at);
 //    return result;
-//    return result * weight;
-    return (result * result.a + middle * (1.0 - result.a)) * weight;
+    return result * weight;
+//    return (result * result.a + middle * (1.0 - result.a)) * weight;
 }
 
 void main() {
