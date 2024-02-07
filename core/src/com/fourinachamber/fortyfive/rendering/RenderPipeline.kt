@@ -93,8 +93,6 @@ open class RenderPipeline(
         batch.shader = null
         batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         val toRemove = mutableListOf<OrbAnimation>()
-        screen.viewport.apply()
-        batch.projectionMatrix = screen.viewport.camera.combined
         orbAnimations.forEach { anim ->
             val time = TimeUtils.millis() - anim.startTime
             val progress = time.toFloat() / anim.duration.toFloat()
@@ -141,7 +139,7 @@ open class RenderPipeline(
         batch.enableBlending()
         batch.setBlendFunctionSeparate(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         shader.shader.setUniformf("u_dir", 1f, 0f)
-        shader.shader.setUniformf("u_radius", 3.0f)
+        shader.shader.setUniformf("u_radius", 2.5f)
         batch.draw(
             inactive.colorBufferTexture,
             0f, 0f,
@@ -204,10 +202,8 @@ open class RenderPipeline(
         earlyTasks.forEach { it() }
         batch.end()
         active.end()
-        if (isOrbAnimActive) renderOrbFbo()
         batch.begin()
-//        screen.viewport.apply()
-//        batch.projectionMatrix = screen.viewport.camera.combined
+        if (isOrbAnimActive) renderOrbFbo()
         postPreprocessingSteps.forEachIndexed { index, step ->
             frameBufferManager.swapPingPongFrameBuffers("pp")
             val (@Suppress("NAME_SHADOWING") active, _) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return
@@ -278,13 +274,13 @@ open class RenderPipeline(
                 )
             }
 
-            fun curvedPath(start: Vector2, end: Vector2): (progress: Float) -> Vector2 {
+            fun curvedPath(start: Vector2, end: Vector2, curveOffsetMultiplier: Float = 1f): (progress: Float) -> Vector2 {
                 val midpoint = start midPoint end
                 val length = (end - start).len().absoluteValue
                 val controlPoints = arrayOf(
                     start,
                     start,
-                    midpoint + midpoint.normal.withMag(length * 0.15f),
+                    midpoint + midpoint.normal.withMag(length * 0.15f * curveOffsetMultiplier),
                     end,
                     end,
                 )

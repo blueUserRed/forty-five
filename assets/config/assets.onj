@@ -101,6 +101,10 @@ textureAtlases: [
                 regionName: "revolver_slot"
             },
             {
+                handle: "reserves_orb",
+                regionName: "reserves_orb"
+            },
+            {
                 handle: "enemy_texture",
                 regionName: "enemy"
             },

@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.TimeUtils
@@ -465,7 +466,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this@GameController, slot)) return
         val cardInSlot = revolver.getCardInSlot(slot)
         if (!(cardInSlot?.isReplaceable ?: true)) return
-        if (!cost(card.cost)) return
+        if (!cost(card.cost, card.actor)) return
         action {
             cardHand.removeCard(card)
             if (cardInSlot != null) revolver.preAddCard(slot, card)
@@ -1044,13 +1045,41 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsDrawn++
     }
 
-    private fun cost(cost: Int): Boolean {
+    private fun cost(cost: Int, animTarget: Actor? = null): Boolean {
         if (cost > curReserves) return false
         curReserves -= cost
         SaveState.usedReserves += cost
         reservesSpent += cost
         FortyFiveLogger.debug(logTag, "$cost reserves were spent, curReserves = $curReserves")
+        if (animTarget == null) return true
+        dispatchAnimTimeline(Timeline.timeline {
+            includeLater(
+                { reservesAnim(cost, animTarget) },
+                { true }
+            )
+        })
         return true
+    }
+
+    private fun reservesAnim(amount: Int, animTarget: Actor): Timeline = Timeline.timeline {
+        repeat(amount) {
+            action {
+                gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
+                    orbTexture = "reserves_orb",
+                    width = 10f,
+                    height = 10f,
+                    duration = 300,
+                    segments = 20,
+                    position = RenderPipeline.OrbAnimation.curvedPath(
+                        curScreen.stageCoordsOfActor("reserves_icon"),
+                        animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
+                                Vector2(animTarget.width / 2, animTarget.height / 2),
+                        curveOffsetMultiplier = (-1.5f..1.5f).random()
+                    )
+                ))
+            }
+            delay(50)
+        }
     }
 
     override fun end() {
@@ -1085,24 +1114,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             delayUntil { popupEvent != null }
             action {
-                val start = curScreen.namedActorOrError("win_screen_cash_symbol").localToStageCoordinates(Vector2())
-                val end = curScreen.namedActorOrError("cash_symbol").localToStageCoordinates(Vector2())
-                gameRenderPipeline.addOrbAnimation(
-                    RenderPipeline.OrbAnimation(
-                        orbTexture = "cash_symbol",
-                        width = 30f,
-                        height = 30f,
-                        duration = 1_000,
-                        segments = 20,
-                        position = RenderPipeline.OrbAnimation.linear(start, end)
-//                        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
-                    )
-                )
+                val start = curScreen.stageCoordsOfActor("win_screen_cash_symbol")
+                val end = curScreen.stageCoordsOfActor("cash_symbol")
+                gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
+                    orbTexture = "cash_symbol",
+                    width = 30f,
+                    height = 30f,
+                    duration = 600,
+                    segments = 20,
+                    position = RenderPipeline.OrbAnimation.curvedPath(start, end)
+                ))
             }
-            delay(1_000)
+            delay(600)
+            action {
+                SaveState.playerMoney += money
+            }
+            delay(300)
             action {
                 popupEvent = null
-                SaveState.playerMoney += money
                 encounterContext.completed()
                 SaveState.write()
 

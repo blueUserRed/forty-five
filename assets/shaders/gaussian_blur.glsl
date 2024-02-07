@@ -21,37 +21,51 @@ uniform sampler2D u_texture;
 uniform float u_radius;
 uniform vec2 u_dir;
 
-vec2 gaussSample(vec2 at, float weight, vec4 middle) {
-    vec4 result = texture2D(u_texture, at);
-//    return result;
-    return result * weight;
-//    return (result * result.a + middle * (1.0 - result.a)) * weight;
-}
-
 void main() {
-    vec4 sum = vec4(0.0);
-
     vec2 tc = v_texCoords;
-
     float resolution = u_resolution.x * u_dir.x + u_resolution.y * u_dir.y;
     float blur = u_radius / resolution;
-
     float hstep = u_dir.x;
     float vstep = u_dir.y;
 
-    vec4 middle = texture2D(u_texture, vec2(tc.x, tc.y));
+    const int numSamples = 9;
 
-    sum += gaussSample(vec2(tc.x - 4.0 * blur * hstep, tc.y - 4.0 * blur * vstep), 0.0162162162, middle);
-    sum += gaussSample(vec2(tc.x - 3.0 * blur * hstep, tc.y - 3.0 * blur * vstep), 0.0540540541, middle);
-    sum += gaussSample(vec2(tc.x - 2.0 * blur * hstep, tc.y - 2.0 * blur * vstep), 0.1216216216, middle);
-    sum += gaussSample(vec2(tc.x - 1.0 * blur * hstep, tc.y - 1.0 * blur * vstep), 0.1945945946, middle);
-    sum += gaussSample(vec2(tc.x, tc.y), 0.2270270270, middle);
-    sum += gaussSample(vec2(tc.x + 1.0 * blur * hstep, tc.y + 1.0 * blur * vstep), 0.1945945946, middle);
-    sum += gaussSample(vec2(tc.x + 2.0 * blur * hstep, tc.y + 2.0 * blur * vstep), 0.1216216216, middle);
-    sum += gaussSample(vec2(tc.x + 3.0 * blur * hstep, tc.y + 3.0 * blur * vstep), 0.0540540541, middle);
-    sum += gaussSample(vec2(tc.x + 4.0 * blur * hstep, tc.y + 4.0 * blur * vstep), 0.0162162162, middle);
+    vec2 samples[numSamples];
 
-//    gl_FragColor = v_color * vec4(sum.rgb, sum.a * 6.0);
-//    gl_FragColor = v_color * vec4(sum.rgb, sum.a * 6.0);
-    gl_FragColor = v_color * sum;
+    samples[0] = vec2(tc.x - 4.0 * blur * hstep, tc.y - 4.0 * blur * vstep);
+    samples[1] = vec2(tc.x - 3.0 * blur * hstep, tc.y - 3.0 * blur * vstep);
+    samples[2] = vec2(tc.x - 2.0 * blur * hstep, tc.y - 2.0 * blur * vstep);
+    samples[3] = vec2(tc.x - 1.0 * blur * hstep, tc.y - 1.0 * blur * vstep);
+    samples[4] = vec2(tc.x, tc.y);
+    samples[5] = vec2(tc.x + 1.0 * blur * hstep, tc.y + 1.0 * blur * vstep);
+    samples[6] = vec2(tc.x + 2.0 * blur * hstep, tc.y + 2.0 * blur * vstep);
+    samples[7] = vec2(tc.x + 3.0 * blur * hstep, tc.y + 3.0 * blur * vstep);
+    samples[8] = vec2(tc.x + 4.0 * blur * hstep, tc.y + 4.0 * blur * vstep);
+
+    float weights[numSamples] = float[numSamples](
+        0.0162162162,
+        0.0540540541,
+        0.1216216216,
+        0.1945945946,
+        0.2270270270,
+        0.1945945946,
+        0.1216216216,
+        0.0540540541,
+        0.0162162162
+    );
+
+    vec4 sum = vec4(0.0);
+    float weightAcc = 0.0;
+    for (int i = 0; i < numSamples; i++) {
+        vec4 result = texture2D(u_texture, samples[i]);
+        float weight = weights[i];
+        float weightWithAlpha = weight * result.a;
+        sum += vec4(result.rgb * weightWithAlpha, result.a * weight);
+        weightAcc += weightWithAlpha;
+    }
+
+    sum.rgb /= weightAcc;
+
+    vec4 result = v_color * sum;
+    gl_FragColor = result;
 }
