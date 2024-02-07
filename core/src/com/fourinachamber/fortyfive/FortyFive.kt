@@ -49,7 +49,7 @@ object FortyFive : Game() {
     override fun create() {
         init()
 //        resetAll()
-        newRun(false)
+//        newRun(false)
         if (SaveState.playerCompletedFirstTutorialEncounter) {
             MapManager.changeToMapScreen()
         } else {

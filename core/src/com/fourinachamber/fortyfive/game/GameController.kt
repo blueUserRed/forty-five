@@ -127,6 +127,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private var isUIFrozen: Boolean = false
 
+    private var selectedCard: Card? = null
+
     /**
      * counts up every turn; starts at 0, but gets immediately incremented to one
      */
@@ -525,19 +527,29 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun cardSelectionPopupTimeline(text: String, exclude: Card? = null): Timeline = Timeline.timeline {
         action {
-            cardSelector.setTo(revolver, exclude)
-            curScreen.enterState(showPopupScreenState)
-            curScreen.enterState(showPopupCardSelectorScreenState)
-            popupText = text
+            revolver
+                .slots
+                .mapNotNull { it.card }
+                .filter { it !== exclude }
+                .forEach { it.actor.enterSelectionMode() }
+            TemplateString.updateGlobalParam("game.revolverPopupText", text)
+            curScreen.enterState(showSelectionPopup)
+            selectedCard = null
         }
-        delayUntil { popupEvent != null }
+        delayUntil { selectedCard != null }
         action {
-            val event = popupEvent as PopupSelectionEvent
-            store("selectedCard", revolver.slots[event.cardNum].card!!)
-            popupEvent = null
-            curScreen.leaveState(showPopupScreenState)
-            curScreen.leaveState(showPopupCardSelectorScreenState)
+            revolver
+                .slots
+                .mapNotNull { it.card }
+                .forEach { it.actor.exitSelectionMode() }
+            store("selectedCard", selectedCard!!)
+            curScreen.leaveState(showSelectionPopup)
+            selectedCard = null
         }
+    }
+
+    fun selectCard(card: Card) {
+        selectedCard = card
     }
 
     fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true): Timeline = Timeline.timeline {
@@ -592,6 +604,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             TemplateString.updateGlobalParam("game.remainingParryDamage", remainingDamage)
             TemplateString.updateGlobalParam("game.remainingPassDamage", max(damage, 0))
+            TemplateString.updateGlobalParam("game.revolverPopupText", "Parry Bullet?")
             gameRenderPipeline.startParryEffect()
             curScreen.enterState(showEnemyAttackPopupScreenState)
             FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
@@ -1232,6 +1245,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val showWinScreen = "showWinScreen"
         const val showCashItem = "showCashItem"
         const val showCardItem = "showCardItem"
+        const val showSelectionPopup = "showSelectionPopup"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -24,6 +25,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
+import ktx.actors.onClick
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -610,12 +612,6 @@ class CardActor(
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
     override var styleManager: StyleManager? = null
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-//        addBackgroundStyles(screen) //Maybe these are needed, probably not
-//        addDisableStyles(screen)
-//        addOffsetableStyles(screen)
-    }
 
     override var isHoveredOver: Boolean = false
 
@@ -653,12 +649,19 @@ class CardActor(
 
     private var prevPosition: Vector2? = null
 
+    private var inSelectionMode: Boolean = false
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
         redrawPixmap(card.baseDamage)
+        onClick {
+            if (!inSelectionMode) return@onClick
+            // UGGGGGLLLLLLYYYYY
+            FortyFive.currentGame!!.selectCard(card)
+        }
     }
 
     private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
@@ -710,6 +713,21 @@ class CardActor(
         }
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha)
+        val width: Float
+        val height: Float
+        val x: Float
+        val y: Float
+        if (isHoveredOver && inSelectionMode) {
+            width = this.width * 1.2f
+            height = this.height * 1.2f
+            x = this.x - (width - this.width) / 2f
+            y = this.y - (height - this.height) / 2f
+        } else {
+            width = this.width
+            height = this.height
+            x = this.x
+            y = this.y
+        }
         batch.draw(
             texture,
             x + offsetX, y + offsetY,
@@ -813,6 +831,14 @@ class CardActor(
         }
     }
 
+    fun enterSelectionMode() {
+        inSelectionMode = true
+    }
+
+    fun exitSelectionMode() {
+        inSelectionMode = false
+    }
+
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
         "description" to OnjString(
             card.shortDescription.ifBlank { card.flavourText }
@@ -887,4 +913,12 @@ class CardActor(
             screen.enterState("hoverDetailHasMoreInfo")
         }
     }
+
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+//        addBackgroundStyles(screen) //Maybe these are needed, probably not
+//        addDisableStyles(screen)
+//        addOffsetableStyles(screen)
+    }
+
 }

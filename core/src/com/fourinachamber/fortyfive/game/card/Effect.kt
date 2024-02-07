@@ -64,7 +64,7 @@ abstract class Effect(val trigger: Trigger) {
 
             is BulletSelector.ByPopup -> {
                 include(controller.cardSelectionPopupTimeline(
-                    "Select target:",
+                    "Select Target Bullet",
                     if (bulletSelector.includeSelf) null else self
                 ))
                 action {
