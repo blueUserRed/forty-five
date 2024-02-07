@@ -8,6 +8,7 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.*
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -396,18 +397,20 @@ open class OnjScreen @MainThreadOnly constructor(
         currentHoverDetail?.act(delta)
     }
 
+    fun stageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).localToStageCoordinates(Vector2(0f, 0f))
+
     @MainThreadOnly
     override fun render(delta: Float) = try {
 //        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
         lastRenderTime = measureTimeMillis {
-//            val oldStyleManagers = styleManagers.toList()
-//            styleManagers.filter { it !in oldStyleManagers }
-//                .forEach(StyleManager::update) //all added items get updated too
+            val oldStyleManagers = styleManagers.toList()
             if (stage.batch.isDrawing) stage.batch.end()
             stage.viewport.apply()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
+            styleManagers.filter { it !in oldStyleManagers }
+                .forEach(StyleManager::update) //all added items get updated too
             if (dragAndDrop.none { it.value.isDragging }) {
                 stage.batch.begin()
                 currentHoverDetail?.draw(stage.batch, 1f)
