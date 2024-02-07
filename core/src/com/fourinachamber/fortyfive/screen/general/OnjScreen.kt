@@ -404,6 +404,7 @@ open class OnjScreen @MainThreadOnly constructor(
 //            styleManagers.filter { it !in oldStyleManagers }
 //                .forEach(StyleManager::update) //all added items get updated too
             if (stage.batch.isDrawing) stage.batch.end()
+            stage.viewport.apply()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
