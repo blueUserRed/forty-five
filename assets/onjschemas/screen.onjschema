@@ -130,6 +130,7 @@ $Widget {
         backgroundTexture?: string,
         align?: string,
         wrap?: boolean,
+        isDistanceField?: boolean,
         partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
@@ -142,6 +143,7 @@ $Widget {
         backgroundTexture?: string,
         align?: string,
         wrap?: boolean,
+        isDistanceField?: boolean,
         partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
@@ -232,6 +234,7 @@ $Widget {
         font: string,
         rawText: string,
         effects?: $AdvancedTextEffect[],
+        isDistanceField?: boolean,
         defaults: {
             font: string,
             fontScale: float,
@@ -344,7 +347,7 @@ $Behaviour {
     $OnClickExitBehaviour { }
 
     $OnClickChangeScreenBehaviour {
-        screenPath: string
+        screenPath: string,
     }
 
     $OnClickAbandonRunBehaviour { }

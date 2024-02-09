@@ -40,6 +40,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override val screen: OnjScreen,
     text: String,
     labelStyle: LabelStyle,
+    private val isDistanceField: Boolean,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor,
     StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen {
@@ -94,8 +95,8 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (batch == null) {
-            super.draw(null, parentAlpha)
+        if (batch == null || !isDistanceField) {
+            super.draw(batch, parentAlpha)
             return
         }
         drawBackground(batch, parentAlpha)
@@ -150,8 +151,9 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
     screen: OnjScreen,
     private val templateString: TemplateString,
     labelStyle: LabelStyle,
+    isDistanceField: Boolean,
     partOfHierarchy: Boolean = false
-) : CustomLabel(screen, templateString.string, labelStyle, partOfHierarchy), BackgroundActor {
+) : CustomLabel(screen, templateString.string, labelStyle, isDistanceField, partOfHierarchy), BackgroundActor {
 
     var skipTextCheck = false
 

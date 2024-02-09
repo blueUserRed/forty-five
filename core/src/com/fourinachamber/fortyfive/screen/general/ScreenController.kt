@@ -8,7 +8,6 @@ import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
-import com.fourinachamber.fortyfive.screen.gameComponents.CardSelectionScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
@@ -18,7 +17,6 @@ object ScreenControllerFactory {
 
     private val controllers: MutableMap<String, (OnjNamedObject) -> ScreenController> = mutableMapOf(
         "GameScreenController" to { onj -> GameController(onj) },
-        "CardSelectionScreenController" to { onj -> CardSelectionScreenController(onj) },
         "IntroScreenController" to { onj -> IntroScreenController(onj) },
         "DialogScreenController" to { onj -> DialogScreenController(onj) },
         "ShopScreenController" to { onj -> ShopScreenController(onj) },

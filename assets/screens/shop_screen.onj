@@ -30,7 +30,6 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 1.0,
     background: "hover_detail_background",
     inputMap: [
         ...(inputMaps.defaultInputMap)

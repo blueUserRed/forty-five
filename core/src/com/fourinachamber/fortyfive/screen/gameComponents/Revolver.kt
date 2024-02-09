@@ -83,8 +83,6 @@ class Revolver(
     lateinit var slots: Array<RevolverSlot>
         private set
 
-    private var currentHoverDetailActor: CardDetailActor? = null
-
     private val background: Drawable by lazy {
         ResourceManager.get(screen, backgroundHandle)
     }
@@ -206,13 +204,6 @@ class Revolver(
 
     override fun layout() {
         super.layout()
-        currentHoverDetailActor?.forcedWidth = width
-        currentHoverDetailActor?.setBounds(
-            width / 2 - currentHoverDetailActor!!.forcedWidth / 2,
-            height,
-            currentHoverDetailActor!!.prefWidth,
-            currentHoverDetailActor!!.prefHeight
-        )
         updateSlotsAndCards()
     }
 

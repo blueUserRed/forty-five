@@ -1,6 +1,6 @@
 info face="Redwing Medium" size=32 bold=0 italic=0 charset="" unicode=0 stretchH=100 smooth=1 aa=1 padding=3,3,3,3 spacing=-6,-6
 common lineHeight=40 base=32 scaleW=512 scaleH=512 pages=1 packed=0
-page id=0 file="red_wing.png"
+page id=0 file="red_wing_df.png"
 chars count=96
 char id=10      x=0    y=0    width=0    height=0    xoffset=-3   yoffset=0    xadvance=0    page=0    chnl=0 
 char id=32      x=0    y=0    width=0    height=0    xoffset=-3   yoffset=0    xadvance=6    page=0    chnl=0 
