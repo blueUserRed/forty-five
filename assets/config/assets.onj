@@ -738,6 +738,22 @@ textures: [
         name: "loose_screen_background",
         file: "textures/loose_screen/background.png"
     },
+    {
+        name: "stats_screen_background",
+        file: "textures/stats_screen/background.png"
+    },
+    {
+        name: "stats_screen_spacer",
+        file: "textures/stats_screen/spacer.png"
+    },
+    {
+        name: "stats_screen_stat_box",
+        file: "textures/stats_screen/stat_box.png"
+    },
+    {
+        name: "stats_screen_lost_cards_background",
+        file: "textures/stats_screen/lost_cards_background.png"
+    },
 ],
 
 cursors: [

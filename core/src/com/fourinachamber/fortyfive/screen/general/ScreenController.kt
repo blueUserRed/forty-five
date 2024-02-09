@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.StatsScreenController
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenController
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
@@ -24,6 +25,7 @@ object ScreenControllerFactory {
         "HealOrMaxHPScreenController" to { onj -> HealOrMaxHPScreenController(onj) },
         "AddMaxHPScreenController" to {onj -> AddMaxHPScreenController(onj) },
         "MapScreenController" to { onj -> MapScreenController(onj) },
+        "StatsScreenController" to { StatsScreenController() },
     )
 
     /**

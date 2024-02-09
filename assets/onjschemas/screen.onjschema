@@ -392,6 +392,9 @@ $ScreenController {
         nextScreen: string,
     }
 
+    $StatsScreenController {
+    }
+
     $CardSelectionScreenController {
         cardSelectionActorName: string,
         cardConfigFile: string,
