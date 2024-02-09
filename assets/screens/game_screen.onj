@@ -1036,6 +1036,7 @@ var playerBar = $Box {
         ],
     } children [
         $Box {
+            name: "end_turn_button",
             styles: [
                 {
                     style_priority: 1,

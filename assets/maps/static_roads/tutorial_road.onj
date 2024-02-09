@@ -176,8 +176,8 @@ nodes: [
             9
         ],
         nodeTexture: "map_node_exit",
-        event: $EnterMapMapEvent {
-            targetMap: "start_area",
+        event: $FinishTutorialMapEvent {
+            goToMap: "start_area",
         }
     },
 ],

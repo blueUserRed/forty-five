@@ -4,7 +4,7 @@ import "config/graphics_config.onj" as graphicsConfig;
 
 cardDrawConfig: {
     firstRound: 5,
-    roundStart: 2,
+    roundStart: 5,
     softMaxCards: 12,
     hardMaxCards: 20,
     chooseCardRewardPercantage: 1.0

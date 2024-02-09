@@ -696,6 +696,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
             this.permanentWarningId = id
             isPermanentWarningHard = false
+        } else if (permanentWarningId != null) {
+            warningParent.removePermanentWarning(permanentWarningId)
         }
     }
 
