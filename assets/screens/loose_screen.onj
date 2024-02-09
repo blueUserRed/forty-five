@@ -39,6 +39,7 @@ root: $Box {
             justifyContent: justify.center
         }
     ],
+    touchable: "enabled",
     behaviours: [
         $OnClickChangeScreenBehaviour {
             screenPath: "screens/stats_screen.onj",

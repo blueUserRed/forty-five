@@ -10,13 +10,9 @@ import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
-import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-import onj.parser.OnjParser
-import onj.value.OnjArray
-import onj.value.OnjObject
 
 /**
  * main game object
@@ -33,6 +29,8 @@ object FortyFive : Game() {
     val serviceThread: ServiceThread = ServiceThread()
 
     var cleanExit: Boolean = true
+
+    private var inScreenTransition: Boolean = false
 
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
@@ -64,6 +62,8 @@ object FortyFive : Game() {
     }
 
     fun changeToScreen(screenPath: String, controllerContext: Any? = null) = Gdx.app.postRunnable {
+        if (inScreenTransition) return@postRunnable
+        inScreenTransition = true
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
         val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
@@ -79,6 +79,7 @@ object FortyFive : Game() {
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
+            inScreenTransition = false
         }
 
         if (currentScreen == null) {

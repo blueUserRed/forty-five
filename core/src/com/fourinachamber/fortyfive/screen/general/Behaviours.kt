@@ -175,11 +175,12 @@ class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviou
 
     private val screenPath = onj.get<String>("screenPath")
 
-    override val onCLick: BehaviourCallback = {
-        val time = measureTimeMillis {
-            FortyFive.changeToScreen(screenPath)
-        }
-//        println(time)
+    private var changedScreen: Boolean = false
+
+    override val onCLick: BehaviourCallback = lambda@{
+        if (changedScreen) return@lambda
+        changedScreen = true
+        FortyFive.changeToScreen(screenPath)
     }
 }
 

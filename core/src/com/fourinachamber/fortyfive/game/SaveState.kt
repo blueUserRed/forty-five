@@ -129,18 +129,6 @@ object SaveState {
             savefileDirty = true
         }
 
-    /**
-     * temporarily stores the used reserves, so it can be shown on the death screen
-     */
-    var lastRunUsedReserves: Int by templateParam("stat.lastRun.usedReserves", 0)
-        private set
-
-    /**
-     * temporarily stores the defeated enemies, so it can be shown on the death screen
-     */
-    var lastRunEnemiesDefeated: Int by templateParam("stat.lastRun.enemiesDefeated", 0)
-        private set
-
     private val savefileSchema: OnjSchema by lazy {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/savefile.onjschema").file())
     }
@@ -221,7 +209,6 @@ object SaveState {
      * resets to the default save file
      */
     fun reset() {
-        copyLastRunStats()
         copyDefaultFile()
         read()
     }
@@ -233,11 +220,6 @@ object SaveState {
 
     fun extract() {
         PermaSaveState.collection = _cards.toMutableList()
-    }
-
-    private fun copyLastRunStats() {
-        lastRunEnemiesDefeated = enemiesDefeated
-        lastRunUsedReserves = usedReserves
     }
 
     private fun copyDefaultFile() {
