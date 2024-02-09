@@ -69,8 +69,6 @@ class CardHand(
 
     private var _cards: MutableList<Card> = mutableListOf()
 
-    private var currentHoverDetailActor: CardDetailActor? = null
-
     private lateinit var controller: GameController
 
     private var originalParent: CustomFlexBox? = null

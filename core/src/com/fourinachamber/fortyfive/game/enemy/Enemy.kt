@@ -279,10 +279,10 @@ class EnemyActor(
 
     override var fixedZIndex: Int = 0
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
-    val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor))
+    val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = CustomImageActor(null, screen, false)
-    private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor))
+    private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
     private val coverInfoBox = CustomVerticalGroup(screen)
     private val statsBox = CustomVerticalGroup(screen)
 
@@ -304,7 +304,8 @@ class EnemyActor(
     val healthLabel: CustomLabel = CustomLabel(
         screen,
         "",
-        Label.LabelStyle(enemy.detailFont, fontColor)
+        Label.LabelStyle(enemy.detailFont, fontColor),
+        true,
     )
 
     private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix

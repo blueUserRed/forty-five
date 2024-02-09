@@ -6,30 +6,30 @@ fonts: [
 
     {
         name: "red_wing",
-        fontFile: "fonts/red_wing.fnt",
-        imageFile: "fonts/red_wing.png"
+        fontFile: "fonts/red_wing_df.fnt",
+        imageFile: "fonts/red_wing_df.png"
     },
     {
         name: "red_wing_cm",
-        fontFile: "fonts/red_wing.fnt",
-        imageFile: "fonts/red_wing.png",
+        fontFile: "fonts/red_wing_df.fnt",
+        imageFile: "fonts/red_wing_df.png",
         markupEnabled: true
     },
     {
         name: "roadgeek",
-        fontFile: "fonts/roadgeek.fnt",
-        imageFile: "fonts/roadgeek.png"
+        fontFile: "fonts/roadgeek_df.fnt",
+        imageFile: "fonts/roadgeek_df.png"
     },
     {
         name: "roadgeek_cm",
-        fontFile: "fonts/roadgeek.fnt",
-        imageFile: "fonts/roadgeek.png",
+        fontFile: "fonts/roadgeek_df.fnt",
+        imageFile: "fonts/roadgeek_df.png",
         markupEnabled: true
     },
     {
-        name: "vanilla_whale",
-        fontFile: "fonts/vanilla_whale.fnt",
-        imageFile: "fonts/vanilla_whale.png"
+        name: "red_wing_bmp",
+        fontFile: "fonts/red_wing_bmp.fnt",
+        imageFile: "fonts/red_wing_bmp.png"
     }
 
 ],
@@ -249,10 +249,6 @@ textures: [
     {
         name: "game_screen_background_bewitched_forest",
         file: "textures/game_screen_backgrounds/bewitched_forest.png"
-    },
-    {
-        name: "loose_screen_background",
-        file: "textures/screens/loose_screen_background.png"
     },
     {
         name: "revolver_drum",
@@ -737,6 +733,10 @@ textures: [
     {
         name: "hover_detail_more_info",
         file: "textures/cards/hover_detail/hover_detail_more_info.png"
+    },
+    {
+        name: "loose_screen_background",
+        file: "textures/loose_screen/background.png"
     },
 ],
 

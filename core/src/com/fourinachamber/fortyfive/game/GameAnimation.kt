@@ -122,7 +122,7 @@ class TextAnimation(
     private var startTime = 0L
     private var runUntil = 0L
 
-    private val label = CustomLabel(screen, initialText, Label.LabelStyle(font, fontColor))
+    private val label = CustomLabel(screen, initialText, Label.LabelStyle(font, fontColor), true)
 
     var text: String = initialText
         set(value) {
@@ -249,7 +249,7 @@ class FadeInAndOutTextAnimation(
     fadeOut : Int
 ) : FadeInAndOutAnimation(
     x, y,
-    CustomLabel(screen, initialText, Label.LabelStyle(font, fontColor)),
+    CustomLabel(screen, initialText, Label.LabelStyle(font, fontColor), true),
     onjScreen,
     duration, fadeIn, fadeOut
 ) {
