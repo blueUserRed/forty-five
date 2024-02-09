@@ -873,7 +873,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
         ],
         encounterModifier: [
 //            "Rattle"
@@ -889,7 +889,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
         ],
         encounterModifier: [
 //            "ThroughTheFireAndFlames"
@@ -905,7 +905,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
         ],
         encounterModifier: [
 //            "TimedInflation"
@@ -921,7 +921,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Oulaw_lvl1", "Pyro"
+            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro"
         ],
         encounterModifier: [
 //            "MoneyForNothing"

@@ -382,7 +382,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 open class CustomFlexBox(
     override val screen: OnjScreen
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
-    Detachable, OffSettable, HasOnjScreen, DisableActor {
+    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor {
 
     override var fixedZIndex: Int = 0
 
@@ -479,6 +479,10 @@ open class CustomFlexBox(
         addDisableStyles(screen)
     }
 
+    override fun getBounds(): Rectangle {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        return Rectangle(x, y, width, height)
+    }
 
     protected fun getTotalOffset(): Vector2 {
         val res = Vector2()
