@@ -130,8 +130,8 @@ class Backpack(
         val cardsOnj = OnjParser.parseFile(cardsFile)
         cardsFileSchema.assertMatches(cardsOnj)
         cardsOnj as OnjObject
-        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), screen) {})
-        _allCards = cardPrototypes.filter { it.name in SaveState.cards }.map { it.create() }.toMutableList()
+        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = {}))
+        _allCards = cardPrototypes.filter { it.name in SaveState.cards }.map { it.create(screen) }.toMutableList()
     }
 
     fun initAfterChildrenExist() {
@@ -390,7 +390,7 @@ class Backpack(
                 placedCards.remove(cur)
             } else i++
         }
-        unplacedCards.forEach { name -> _allCards.add(cardPrototypes.find { it.name == name }!!.create()) }
+        unplacedCards.forEach { name -> _allCards.add(cardPrototypes.find { it.name == name }!!.create(screen)) }
     }
 
     private fun getInOutTimeLine(isGoingIn: Boolean, goingRight: Boolean, target: CustomFlexBox) = Timeline.timeline {

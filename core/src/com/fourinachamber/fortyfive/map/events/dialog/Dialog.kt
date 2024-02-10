@@ -22,14 +22,17 @@ data class Dialog(
         }
 
         private fun readDialogPart(onj: OnjObject, defaults: OnjObject, screen: OnjScreen): DialogPart {
-//            TODO("dialoges are temporarily broken")
             val text =
                 AdvancedText.readFromOnj(onj.get<String>("rawText"), onj.get<OnjArray?>("effects"), screen, defaults)
             val nextSelector = onj.get<OnjNamedObject>("next")
             val next = when (nextSelector.name) {
+
                 "Continue" -> NextDialogPartSelector.Continue
+
                 "EndOfDialog" -> NextDialogPartSelector.End(nextSelector.get<String>("changeToScreen"))
+
                 "FixedNextPart" -> NextDialogPartSelector.Fixed(nextSelector.get<Long>("next").toInt())
+
                 "ChooseNextPart" -> NextDialogPartSelector.Choice(
                     nextSelector
                         .get<OnjArray>("choices")
@@ -40,7 +43,12 @@ data class Dialog(
                         }
                 )
 
-                else -> throw RuntimeException()
+                "GiftCardEnd" -> NextDialogPartSelector.GiftCardEnd(
+                    nextSelector.get<String>("card"),
+                    nextSelector.get<String>("changeToScreen"),
+                )
+
+                else -> throw RuntimeException("unknown next dialog part selector: ${nextSelector.name}")
             }
             return DialogPart(text, next)
         }
@@ -65,5 +73,7 @@ sealed class NextDialogPartSelector {
     ) : NextDialogPartSelector()
 
     class End(val nextScreen: String) : NextDialogPartSelector()
+
+    class GiftCardEnd(val card: String, val nextScreen: String) : NextDialogPartSelector()
 
 }

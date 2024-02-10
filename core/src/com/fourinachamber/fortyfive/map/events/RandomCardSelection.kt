@@ -45,6 +45,14 @@ object RandomCardSelection {
 
     private var cardMaximums: Map<String, Int> = mapOf()
 
+    val allCardPrototypes: List<CardPrototype> by lazy {
+        val onj = OnjParser.parseFile(cardConfigFile)
+        cardsFileSchema.assertMatches(onj)
+        onj as OnjObject
+        Card
+            .getFrom(onj.get<OnjArray>("cards"), initializer = {})
+    }
+
     fun init() {
         val file = OnjParser.parseFile(Gdx.files.internal(TYPES_FILE_PATH).file())
         cardSelectionSchema.assertMatches(file)
@@ -84,15 +92,6 @@ object RandomCardSelection {
         this.biomes = allBiomes
     }
 
-    fun allCardPrototypes(screen: OnjScreen): List<CardPrototype> {
-        val onj = OnjParser.parseFile(cardConfigFile)
-        cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
-        return Card
-            .getFrom(onj.get<OnjArray>("cards"), screen, initializer = {})
-            .toMutableList()
-    }
-
     /**
      * It takes a set of cards or cardprototypes, the applies the "type"(definition found at [RandomCardSelection]) changes
      * to them and then return cards with these changes. It is possible to have the same card twice, which essentially says
@@ -114,7 +113,7 @@ object RandomCardSelection {
         biome: String,
         occasion: String, // TODO: could be an enum
         unique: Boolean = false,
-        cards: List<CardPrototype> = allCardPrototypes(screen),
+        cards: List<CardPrototype> = allCardPrototypes,
     ): List<CardPrototype> {
         val newCards = doCardRarities(cards)
         if (nbrOfCards >= newCards.size && unique) return newCards

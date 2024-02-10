@@ -270,6 +270,8 @@ class IconAdvancedTextPart(
 
     private var isShown: Boolean = true
 
+    override var isHoverDetailActive: Boolean = true
+
     private var iconHeight: Float = 0f
     private var iconWidth: Float = 0f
 

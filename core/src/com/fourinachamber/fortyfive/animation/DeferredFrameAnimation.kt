@@ -58,7 +58,9 @@ class DeferredFrameAnimation(
         loadingTimeline.appendAction(Timeline.timeline {
             data.pages.forEach { page ->
                 action {
-                    page.texture = Texture(pages[page.textureFile.path()], false)
+                    val pagePixmap = pages[page.textureFile.path()]!!
+                    page.texture = Texture(pagePixmap, false)
+                    pagePixmap.dispose()
                 }
                 delay(100)
             }

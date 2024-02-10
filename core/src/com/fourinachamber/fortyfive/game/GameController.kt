@@ -13,6 +13,8 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
+import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
@@ -223,7 +225,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val cardsArray = onj.get<OnjArray>("cards")
 
         cardPrototypes = Card
-            .getFrom(cardsArray, curScreen, ::initCard)
+            .getFrom(cardsArray, ::initCard)
             .toMutableList()
 
         cards.forEach { cardName ->
@@ -242,7 +244,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            cardStack.add(card.create())
+            cardStack.add(card.create(curScreen))
         }
 
         if (gameDirector.encounter.shuffleCards) cardStack.shuffle()
@@ -629,7 +631,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 .firstOrNull { it.name == name }
                 ?: throw RuntimeException("unknown card: $name")
             repeat(cardsToDraw) {
-                cardHand.addCard(cardProto.create())
+                cardHand.addCard(cardProto.create(curScreen))
             }
             FortyFiveLogger.debug(logTag, "card $name entered hand $amount times")
             checkCardMaximums()
@@ -798,10 +800,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             action {
                 turnCounter++
             }
+            include(bannerAnimationTimeline("enemy_turn_banner"))
             include(gameDirector.checkActions())
             include(executePlayerStatusEffectsOnNewTurn())
             action {
                 gameDirector.chooseEnemyActions()
+            }
+            include(bannerAnimationTimeline("player_turn_banner"))
+            action {
                 curReserves = baseReserves
             }
             include(drawCardPopupTimeline(cardsToDraw, false))
@@ -809,6 +815,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
     }
+
+    private fun bannerAnimationTimeline(drawableHandle: ResourceHandle): Timeline = BannerAnimation(
+        ResourceManager.get(curScreen, drawableHandle),
+        curScreen,
+        1_500,
+        500,
+        1.4f,
+        1.1f
+    ).asTimeline(this)
 
     private fun putCardsUnderDeckTimeline(): Timeline = Timeline.timeline {
         action {
@@ -1003,7 +1018,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @AllThreadsAllowed
     fun drawCard() {
-        val card = cardStack.removeFirstOrNull() ?: defaultBullet.create()
+        val card = cardStack.removeFirstOrNull() ?: defaultBullet.create(curScreen)
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++
@@ -1057,7 +1072,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     override fun completed() { }
                 }
 
-                if (Utils.coinFlip(rewardChance)) {
+                if (!gameDirector.encounter.special && Utils.coinFlip(rewardChance)) {
                     MapManager.changeToChooseCardScreen(chooseCardContext)
                 } else {
                     FortyFive.changeToScreen(encounterContext.forwardToScreen)
