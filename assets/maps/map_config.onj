@@ -111,6 +111,14 @@ displayNames: [
         name: "road_between_aqua_balle_and_tabu_letter_outpost",
         display: "Road between aqua balle and tabu letter outpost"
     },
+    {
+        name: "road_between_tabu_letter_outpost_and_salem",
+        display: "Road between tabu letter outpost and salem"
+    },
+    {
+        name: "road_between_salem_and_spire_outpost",
+        display: "Road between salem and spire outpost"
+    },
 ],
 
 var biomeDecorations = {
