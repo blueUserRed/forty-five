@@ -11,7 +11,7 @@ playerLives: 5,
 maxPlayerLives: gameConfig.playerConfig.lives,
 playerMoney: 110,
 currentDifficulty: 1.0,
-playerCompletedFirstTutorialEncounter: true, //TODO CHANGE BACK to "false"; PLEASE TELL ME THIS MARVIN
+playerCompletedFirstTutorialEncounter: false, //TODO CHANGE BACK to "false"; PLEASE TELL ME THIS MARVIN (TODO left intentionally, since this might be needed again)
 
 stats: {
     usedReserves: 0,
@@ -19,7 +19,7 @@ stats: {
 },
 
 position: {
-    map: "spire_outpost",  //TODO CHANGE BACK TO "tutorial_road"; PLEASE TELL ME THIS MARVIN
+    map: "tutorial_road",  //TODO CHANGE BACK TO "tutorial_road"; PLEASE TELL ME THIS MARVIN
     node: 0,
     lastNode: null
 },
