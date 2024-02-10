@@ -107,6 +107,10 @@ displayNames: [
         name: "spire_outpost",
         display: "Spire Outpost"
     },
+    {
+        name: "road_between_aqua_balle_and_tabu_letter_outpost",
+        display: "Road between aqua balle and tabu letter outpost"
+    },
 ],
 
 var biomeDecorations = {
