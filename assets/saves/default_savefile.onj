@@ -19,7 +19,7 @@ stats: {
 },
 
 position: {
-    map: "salem",  //TODO CHANGE BACK TO "tutorial_road"; PLEASE TELL ME THIS MARVIN
+    map: "spire_outpost",  //TODO CHANGE BACK TO "tutorial_road"; PLEASE TELL ME THIS MARVIN
     node: 0,
     lastNode: null
 },

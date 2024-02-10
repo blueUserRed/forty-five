@@ -16,6 +16,7 @@
 - update from notion
   - Dialogs (needed from Phillip)
 - Names for roads + "\n" in preview on map
+- change "fight" button to start any event
 
 # Zwicki
 
