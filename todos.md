@@ -20,6 +20,7 @@
   <br> https://github.com/blueUserRed/forty-five/issues/56
   <br> https://github.com/blueUserRed/forty-five/issues/70
   <br> https://github.com/blueUserRed/forty-five/issues/71
+  - Dialogs (needed from Phillip)
 
 ### Backpack
 - Hover information shown even if out of screen https://github.com/blueUserRed/forty-five/issues/67
