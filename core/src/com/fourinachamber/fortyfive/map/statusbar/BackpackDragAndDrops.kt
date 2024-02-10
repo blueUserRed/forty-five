@@ -5,11 +5,9 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.SaveState
-import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
@@ -24,6 +22,7 @@ class BackpackDragSource(
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = actor
         if ((actor !is CardActor)) return null
+        if (!canBeStarted(actor, x, y)) return null
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
         payload.dragActor = actor

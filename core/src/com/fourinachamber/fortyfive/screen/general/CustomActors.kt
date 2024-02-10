@@ -516,7 +516,8 @@ class CustomScrollableFlexBox(
         }
     }
 
-    private var needsScrollbar: Boolean = true
+    var needsScrollbar: Boolean = true
+        private set
 
     private val dragListener = object : InputListener() {
         var startPos = 0f
@@ -874,6 +875,22 @@ class CustomScrollableFlexBox(
         addScrollFlexBoxStyles(screen)
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
+    }
+
+
+    companion object{
+        fun isInsideScrollableParents(actor: Actor, x: Float, y: Float): Boolean {
+            var cur: Actor? = actor
+            while (cur != null) {
+                cur = cur.parent
+                if (cur is CustomScrollableFlexBox && cur.needsScrollbar) {
+                    val coordinates = actor.localToActorCoordinates(cur, Vector2(x, y))
+                    if (coordinates.x < 0 || coordinates.y < 0 || coordinates.x > cur.width || coordinates.y > cur.height)
+                        return false
+                }
+            }
+            return true
+        }
     }
 }
 
