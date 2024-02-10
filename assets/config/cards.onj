@@ -662,6 +662,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool2", "rarity2"],
+        additionalHoverInfos: ["mostExpensiveBullet"],
         price: 0,
     },
     {
@@ -883,6 +884,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
+        additionalHoverInfos: ["rotations"],
         tags: ["pool1", "rarity1"],
         price: 0,
     },
@@ -980,6 +982,7 @@ cards: [
             reserveGain("return home", 3#val),
             damagePlayer("return home", 1#val)
         ],
+        additionalHoverInfos: ["home"],
         forceLoadCards: [],
         dark: false,
         cost: 1,

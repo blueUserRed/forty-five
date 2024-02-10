@@ -32,28 +32,28 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
     private val addToBackpackWidgetName = onj.get<String>("addToBackpackWidgetName")
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
-    private var screen: OnjScreen? = null
+    private lateinit var screen: OnjScreen
     private lateinit var context: ChooseCardScreenContext
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         if (context !is ChooseCardScreenContext) {
             throw RuntimeException("context for ${this.javaClass.simpleName} must be a ChooseCardScreenContext")
         }
+        this.screen = onjScreen
         this.context = context
-        init(onjScreen, context.seed, context.types.toMutableList(), context.nbrOfCards)
+        init(onjScreen, context.seed, context.types.toMutableList(), context.nbrOfCards, context.forceCards)
     }
 
-    private fun init(screen: OnjScreen, seed: Long, types: MutableList<String>, nbrOfCards: Int) {
-        val rnd = Random(seed)
-        val cards = RandomCardSelection.getRandomCards(
-            screen,
-            types,
-            nbrOfCards,
-            rnd,
-            MapManager.currentDetailMap.biome,
-            "chooseCard",
-            unique = true
-        )
+    private fun init(
+        screen: OnjScreen,
+        seed: Long,
+        types: MutableList<String>,
+        nbrOfCards: Int,
+        forceCards: List<String>?
+    ) {
+
+        val cards = forceCards?.let { getFixedCards(it) } ?: getRandomCards(seed, types, nbrOfCards)
+
         FortyFiveLogger.debug(
             logTag,
             "Generated with seed $seed and the types $types the following cards: ${cards.map { it.name }}"
@@ -65,10 +65,28 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         } else {
             TemplateString.updateGlobalParam("screen.chooseCard.text", "You get one Bullet")
         }
-        this.screen = screen
         this.addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         this.addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         updateDropTargets()
+    }
+
+    private fun getRandomCards(seed: Long, types: MutableList<String>, nbrOfCards: Int): List<CardPrototype> {
+        val rnd = Random(seed)
+        return RandomCardSelection.getRandomCards(
+            screen,
+            types,
+            nbrOfCards,
+            rnd,
+            MapManager.currentDetailMap.biome,
+            "chooseCard",
+            unique = true
+        )
+    }
+
+    private fun getFixedCards(cards: List<String>): List<CardPrototype> {
+        val protos = RandomCardSelection.allCardPrototypes
+        return cards
+            .map { name -> protos.find { it.name == name } ?: throw RuntimeException("unknown card $name") }
     }
 
     override fun update() {
@@ -81,7 +99,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         val data: List<Pair<Double, Float>> = getDataForCards(cardPrototypes.size)
         for (i in cardPrototypes.indices) {
             val curData = data[i]
-            val curCard = cardPrototypes[i].create()
+            val curCard = cardPrototypes[i].create(screen)
             screen.screenBuilder.addDataToWidgetFromTemplate(
                 "cardTemplate",
                 mapOf(
@@ -150,10 +168,14 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
 }
 
 interface ChooseCardScreenContext {
+
     val forwardToScreen: String
     val seed: Long
     val nbrOfCards: Int
     val types: List<String>
+
+    val forceCards: List<String>?
+        get() = null
 
     fun completed()
 }

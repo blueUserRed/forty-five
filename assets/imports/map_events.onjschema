@@ -35,6 +35,7 @@ $MapEvent {
 
     $NPCMapEvent {
         npc: string,
+        canOnlyBeStartedOnce: boolean,
         ...mapEventStandardConfig
     }
 
@@ -51,4 +52,9 @@ $MapEvent {
         nbrOfCards: int,
         ...mapEventStandardConfig
     }
+
+    $FinishTutorialMapEvent {
+        goToMap: string
+    }
+
 }

@@ -37,7 +37,7 @@ class ShopCardsHandler(
             "shop",
             unique = true
         )
-        cards.addAll(cardsToAdd.map { it.create() })
+        cards.addAll(cardsToAdd.map { it.create(screen) })
         cards.shuffle(rnd)
         cards.forEach { addCard(it) }
         updateCards()
