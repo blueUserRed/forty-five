@@ -307,11 +307,11 @@ var aquaBalleToTabuLetterOutpost = {
         minNodes: 40,
         maxNodes: 50,
         maxSplits: 4,
-        splitProbability: 0.5,
+        splitProbability: 0.3,
         startArea: "aqua_balle",
         endArea: "tabu_letter_outpost",
         scaleWidth: 1.1,
-        scaleLength: 0.5,
+        scaleLength: 1.1,
         otherAreas: [
         ],
         rotation: 0.0,
