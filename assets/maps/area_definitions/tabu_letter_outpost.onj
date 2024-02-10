@@ -20,7 +20,7 @@ nodes: [
         x: 20.0,
         y: 80.0,
         edgesTo: [
-            2
+            0,2
         ],
         nodeTexture: "map_node_shop_rect",
         event: $ShopMapEvent {

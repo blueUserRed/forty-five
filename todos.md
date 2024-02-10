@@ -12,6 +12,11 @@
 - skippable   https://github.com/blueUserRed/forty-five/issues/110
 - even easier/less text https://github.com/blueUserRed/forty-five/issues/92
 
+### Maps
+- update from notion
+  - Dialogs (needed from Phillip)
+- Names for roads + "\n" in preview on map
+
 # Zwicki
 
 ### Maps
@@ -20,7 +25,6 @@
   <br> https://github.com/blueUserRed/forty-five/issues/56
   <br> https://github.com/blueUserRed/forty-five/issues/70
   <br> https://github.com/blueUserRed/forty-five/issues/71
-  - Dialogs (needed from Phillip)
 
 ### Backpack
 - Hover information shown even if out of screen https://github.com/blueUserRed/forty-five/issues/67
