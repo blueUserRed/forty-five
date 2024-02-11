@@ -736,6 +736,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
             cardToShoot?.let {
                 action {
+                    SaveState.bulletsShot++
                     cardToShoot.beforeShot()
                     if (cardToShoot.shouldRemoveAfterShot) {
                         revolver.removeCard(cardToShoot)
@@ -1122,6 +1123,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val playerGetsCard = !gameDirector.encounter.special && Utils.coinFlip(rewardChance)
         appendMainTimeline(Timeline.timeline {
             action {
+                SaveState.encountersWon++
                 curScreen.enterState(showWinScreen)
                 if (money > 0) curScreen.enterState(showCashItem)
                 TemplateString.updateGlobalParam("game.overkillCash", money)
@@ -1142,7 +1144,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             delay(600)
             action {
-                SaveState.playerMoney += money
+                SaveState.earnMoney(money)
             }
             delay(300)
             action {
