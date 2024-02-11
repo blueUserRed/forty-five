@@ -11,7 +11,7 @@ nodes: [
         edgesTo: [
             1
         ],
-        nodeTexture: "map_node_exit_rect",
+        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "road_between_aqua_balle_and_tabu_letter_outpost",
         }
@@ -22,7 +22,7 @@ nodes: [
         edgesTo: [
             0,2
         ],
-        nodeTexture: "map_node_shop_rect",
+        nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
             seed: null,
             boughtIndices: [

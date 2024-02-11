@@ -177,7 +177,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit",
         event: $FinishTutorialMapEvent {
-            goToMap: "start_area",
+            goToMap: "aqua_balle",
         }
     },
 ],

@@ -11,7 +11,7 @@ nodes: [
         edgesTo: [
             1
         ],
-        nodeTexture: "map_node_shop_rect",
+        nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
             seed: null,
             boughtIndices: [
