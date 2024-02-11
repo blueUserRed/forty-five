@@ -10,30 +10,29 @@ nodes: [
         y: 80.0,
         edgesTo: [
             1
-            ,3
         ],
-        event: $NPCMapEvent {
-            canOnlyBeStartedOnce: false,
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-            npc: 'mysterious guy', //for testing only TODO change to something differet (idk what, not implemented)
-
+        nodeTexture: "map_node_shop_rect",
+        event: $ShopMapEvent {
+            seed: null,
+            boughtIndices: [
+            ],
+            types: [
+            ],
+            person: "traveling_merchant",
         }
     },
     {
         x: 40.0,
         y: 110.0,
-
         edgesTo: [
             0, 2
         ],
-        nodeTexture: "map_node_shop_rect",
-        event: $ChooseCardMapEvent {
-            seed: null,
-            types: [
+        nodeTexture: "map_node_heal_rect",
+        event: $AddMaxHPEvent {
+            maxHPRange: [
+                10, 15
             ],
-            nbrOfCards: 1,
+            seed: null,
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
@@ -42,46 +41,28 @@ nodes: [
     {
         x: 65.0,
         y: 100.0,
-
         edgesTo: [
             1
         ],
-        //Phillip doesn't want these images inside the area
-
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
-            targetMap: "roadToSalem", // "roadToEnd",//
-
-        }
-    },
-    { //this node is used for testing events
-        x: 40.0,
-        y: 50.0,
-        edgesTo: [
-            0
-        ],
-        nodeTexture: "map_node_heal_circle",
-        event: $ShopMapEvent {
-            seed: null,
-            boughtIndices: [
-            ],
-            types: [],
-            person: "traveling_merchant",
+            targetMap: "road_between_aqua_balle_and_tabu_letter_outpost",
         }
     },
 ],
-animatedDecorations: [],
+animatedDecorations: [
+],
 decorations: [
-    {
-        texture: "burning_icon",
-        baseWidth: 5.0,
-        baseHeight: 5.0,
-        positions: [
-            [
-                19.8, 65.0, 1.0
-            ]
-        ],
-    },
+//    { // i don't think phillip likes this
+//        texture: "burning_icon",
+//        baseWidth: 5.0,
+//        baseHeight: 5.0,
+//        positions: [
+//            [
+//                19.8, 65.0, 1.0
+//            ]
+//        ],
+//    },
     {
         texture: "map_decoration_wasteland_cactus_1",
         baseWidth: 5.0,

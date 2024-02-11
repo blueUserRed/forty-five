@@ -21,6 +21,7 @@ class ShopDragSource(
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = this.actor
         if ((actor !is CardActor) || actor.inActorState("unbuyable")) return null
+        if (!canBeStarted(actor, x, y)) return null
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
 
