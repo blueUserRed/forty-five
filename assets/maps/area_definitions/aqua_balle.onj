@@ -9,13 +9,16 @@ nodes: [
         x: 20.0,
         y: 80.0,
         edgesTo: [
-            1, 3,4
+            1
         ],
-        event: $NPCMapEvent {
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-            npc: 'mysterious guy', //for testing only TODO change to something differet (idk what, not implemented)
+        nodeTexture: "map_node_shop_rect",
+        event: $ShopMapEvent {
+            seed: null,
+            boughtIndices: [
+            ],
+            types: [
+            ],
+            person: "traveling_merchant",
         }
     },
     {
@@ -24,13 +27,12 @@ nodes: [
         edgesTo: [
             0, 2
         ],
-        nodeTexture: "map_node_shop",
-        event: $ChooseCardMapEvent {
-            seed: null,
-            types: [
-
+        nodeTexture: "map_node_heal",
+        event: $AddMaxHPEvent {
+            maxHPRange: [
+                10, 15
             ],
-            nbrOfCards:3,
+            seed: null,
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
@@ -40,61 +42,27 @@ nodes: [
         x: 65.0,
         y: 100.0,
         edgesTo: [
-            1, 3
+            1
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
-            targetMap: "roadToDemo",
+            targetMap: "road_between_aqua_balle_and_tabu_letter_outpost",
         }
     },
-    {
-        x: 60.0,
-        y: 80.0,
-        edgesTo: [
-            0, 2
-        ],
-        nodeTexture: "map_node_shop",
-        event: $ShopMapEvent {
-            seed: null,
-            boughtIndices: [
-            ],
-            types: [],
-            person: "traveling_merchant",
-        }
-    },
-    {
-        x: 30.0,
-        y: 50.0,
-        edgesTo: [
-            0
-        ],
-//        nodeTexture: null,
-        event: $HealOrMaxHPEvent {
-            seed: null,
-            healRange: [
-                25, 35
-            ],
-            maxHPRange: [
-                5, 15
-            ],
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-        }
-    }
 ],
-animatedDecorations: [],
+animatedDecorations: [
+],
 decorations: [
-    {
-        texture: "burning_icon",
-        baseWidth: 5.0,
-        baseHeight: 5.0,
-        positions: [
-            [
-                19.8, 65.0, 1.0
-            ]
-        ],
-    },
+//    { // i don't think phillip likes this
+//        texture: "burning_icon",
+//        baseWidth: 5.0,
+//        baseHeight: 5.0,
+//        positions: [
+//            [
+//                19.8, 65.0, 1.0
+//            ]
+//        ],
+//    },
     {
         texture: "map_decoration_wasteland_cactus_1",
         baseWidth: 5.0,

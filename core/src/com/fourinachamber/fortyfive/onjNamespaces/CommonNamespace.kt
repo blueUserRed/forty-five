@@ -6,9 +6,7 @@ import com.fourinachamber.fortyfive.utils.Utils
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
-import onj.value.OnjArray
-import onj.value.OnjString
-import onj.value.OnjValue
+import onj.value.*
 import kotlin.reflect.KClass
 
 @Suppress("unused") // values and functions are read via reflection
@@ -53,8 +51,11 @@ object CommonNamespace {
         return OnjArray(listOf())
     }
 
-    @RegisterOnjFunction("params: [string,string]",RegisterOnjFunction.OnjFunctionType.OPERATOR)
-    fun plus(s:OnjString, s2: OnjString): OnjString = OnjString(s.value + s2.value)
+    @RegisterOnjFunction("params: [string,string]", RegisterOnjFunction.OnjFunctionType.OPERATOR)
+    fun plus(s: OnjString, s2: OnjString): OnjString = OnjString(s.value + s2.value)
+
+    @RegisterOnjFunction("params: [int,*]")
+    fun repeat(amount: OnjInt, value: OnjValue): OnjArray = OnjArray(List(amount.value.toInt()) { value })
 
 }
 

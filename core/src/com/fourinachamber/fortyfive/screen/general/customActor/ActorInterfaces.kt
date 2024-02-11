@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
@@ -164,7 +165,8 @@ interface HoverStateActor {
      * binds listeners to [actor] that automatically assign [isHoveredOver]
      */
     fun bindHoverStateListeners(actor: Actor) {
-        actor.onEnter {
+        actor.onEnterEvent { event, x, y ->
+            if (!CustomScrollableFlexBox.isInsideScrollableParents(actor, x, y)) return@onEnterEvent
             if (!isHoveredOver) actor.fire(HoverEnterEvent())
             isHoveredOver = true
         }
