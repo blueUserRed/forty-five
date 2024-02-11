@@ -49,8 +49,8 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun(false)
         if (SaveState.playerCompletedFirstTutorialEncounter) {
-//            MapManager.changeToMapScreen()
-            changeToScreen("screens/loose_screen.onj")
+            MapManager.changeToMapScreen()
+//            changeToScreen("screens/loose_screen.onj")
         } else {
             MapManager.changeToEncounterScreen(tutorialEncounterContext)
         }
@@ -95,12 +95,13 @@ object FortyFive : Game() {
         currentRenderPipeline = renderPipeline
     }
 
-    fun newRun(forwardToTutorialScreen: Boolean) {
-        FortyFiveLogger.title("newRun called; forwardToTutorialScreen = $forwardToTutorialScreen")
+    fun newRun(forwardToLooseScreen: Boolean) {
+        FortyFiveLogger.title("newRun called; forwardToTutorialScreen = $forwardToLooseScreen")
         PermaSaveState.newRun()
+        if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
         MapManager.newRunSync()
-        if (forwardToTutorialScreen) MapManager.changeToEncounterScreen(tutorialEncounterContext)
+        if (forwardToLooseScreen) changeToScreen("screens/loose_screen.onj")
     }
 
     override fun resize(width: Int, height: Int) {

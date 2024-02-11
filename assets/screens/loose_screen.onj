@@ -48,7 +48,7 @@ root: $Box {
 } children [
 
     $AdvancedText {
-        font: "red_wing",
+        font: "red_wing_bmp",
         rawText: "A $TERRIBLE$ FAITH...",
         isDistanceField: false,
         defaults: {

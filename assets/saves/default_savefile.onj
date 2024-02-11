@@ -15,7 +15,10 @@ playerCompletedFirstTutorialEncounter: false,
 
 stats: {
     usedReserves: 0,
-    enemiesDefeated: 0
+    enemiesDefeated: 0,
+    totalMoneyEarned: 0,
+    encountersWon: 0,
+    bulletsShot: 0
 },
 
 position: {

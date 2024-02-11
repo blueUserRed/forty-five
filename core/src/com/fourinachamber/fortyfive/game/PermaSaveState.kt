@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.templateParam
 import onj.builder.buildOnjObject
 import onj.parser.OnjParser
 import onj.parser.OnjParserException
@@ -35,6 +36,10 @@ object PermaSaveState {
 
     val visitedAreas: Set<String>
         get() = _visitedAreas
+
+    var statTotalMoneyEarned: Int by templateParam("stat.totalCashCollected", 0)
+    var statEncountersWon: Int by templateParam("stat.encountersWon", 0)
+    var statBulletsShot: Int by templateParam("stat.bulletsShot", 0)
 
     fun read() {
         FortyFiveLogger.debug(logTag, "reading SaveState")
