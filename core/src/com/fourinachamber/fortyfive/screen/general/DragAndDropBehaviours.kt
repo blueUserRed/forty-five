@@ -148,6 +148,10 @@ abstract class CenteredDragSource(
         if (actor is OffSettable && showClickHint) actor.addListener(centerOnClick)
     }
 
+    fun canBeStarted(actor: Actor, x: Float, y: Float): Boolean {
+        return CustomScrollableFlexBox.isInsideScrollableParents(actor, x, y)
+    }
+
     open fun fakeStart(event: InputEvent?, x: Float, y: Float, pointer: Int): Boolean = true
 
     open fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {}
@@ -211,6 +215,7 @@ class OnClickToCenter(private val src: CenteredDragSource) : ClickListener() {
     var realStart = false
     private var startOffset: Vector2? = Vector2()
     override fun touchDown(event: InputEvent, x: Float, y: Float, pointer: Int, button: Int): Boolean {
+        if (!src.canBeStarted(src.actor, x, y)) return false
         if (button != 0 || !src.fakeStart(event, x, y, pointer)) return super.touchDown(event, x, y, pointer, button)
 
         realStart = false
