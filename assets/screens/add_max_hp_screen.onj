@@ -18,7 +18,7 @@ assets: {
         "heal_or_max_accept_hover",
         "max_health_background",
         "heal_or_max_add_max_health",
-        "map_node_heal_circle",
+        "map_node_heal",
         "taupe_gray_rounded",
         //        "max_health_background",
         ...(sharedComponents.backpackAssets),
@@ -158,7 +158,7 @@ root: $Box { //TODO biomes
         },
     ],
     $Image {
-        textureName: "map_node_heal_circle",
+        textureName: "map_node_heal",
         zIndex: 160,
         scaleX: 1.0,
         scaleY: 1.0,

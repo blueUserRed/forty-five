@@ -11,7 +11,7 @@ nodes: [
         edgesTo: [
             1
         ],
-        nodeTexture: "map_node_exit_rect",
+        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "road_between_tabu_letter_outpost_and_salem",
         }
@@ -22,7 +22,7 @@ nodes: [
         edgesTo: [
             0, 2
         ],
-        nodeTexture: "map_node_fight_rect",
+        nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
             distanceToEnd: 1,
             encounterIndex: 0,
