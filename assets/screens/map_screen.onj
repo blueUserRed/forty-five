@@ -188,9 +188,16 @@ var infoPopup = $Box {
     } children [
 
         $TemplateLabel {
+            styles: [
+                {
+                    width: 95#percent
+                }
+            ],
             font: "red_wing",
             template: "{map.cur_event.displayName}",
             fontScale: 1.1,
+            wrap: true,
+            align: "center",
             color: color.white,
         },
 
