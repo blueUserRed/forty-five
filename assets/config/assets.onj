@@ -797,11 +797,11 @@ shaders: [
         constantArgs: {
             color: color.red,
             speed: 10.0,
-            movement: 0.35,
-            baseStrength: -0.45,
-            fallOff: 6.0,
-            blackStrength: -0.22,
-            blackFallOff: 3.0,
+            movement: 0.10,
+            baseStrength: -0.38,
+            fallOff: 5.0,
+            blackStrength: -0.38,
+            blackFallOff: 5.0,
             center: [0.5, 0.24]
         }
     },
