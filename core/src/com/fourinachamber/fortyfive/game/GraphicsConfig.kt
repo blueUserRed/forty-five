@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
@@ -57,6 +58,19 @@ object GraphicsConfig {
             override fun isFinished(timeline: Timeline): Boolean = anim.isFinished()
         }
     }
+
+    fun orbAnimation(source: Vector2, target: Vector2): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
+        orbTexture = "reserves_orb",
+        width = 10f,
+        height = 10f,
+        duration = 300,
+        segments = 20,
+        position = RenderPipeline.OrbAnimation.curvedPath(
+            source,
+            target,
+            curveOffsetMultiplier = (-1.5f..1.5f).random()
+        )
+    )
 
     fun chargeTimeline(actor: Actor): Timeline {
         val moveByAction = CustomMoveByAction()

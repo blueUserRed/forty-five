@@ -12,7 +12,6 @@ import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
@@ -33,7 +32,6 @@ import onj.value.OnjObject
 import onj.value.OnjString
 import java.lang.Integer.max
 import java.lang.Integer.min
-import kotlin.math.log
 
 /**
  * the Controller for the main game screen
@@ -912,8 +910,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * adds reserves (plays no animations)
      */
     @AllThreadsAllowed
-    fun gainReserves(amount: Int) {
+    fun gainReserves(amount: Int, source: Actor? = null) {
         curReserves += amount
+        source?.let {
+            dispatchAnimTimeline(reservesGainedAnim(amount, it))
+        }
         FortyFiveLogger.debug(logTag, "player gained reserves; amount = $amount; curReserves = $curReserves")
     }
 
@@ -1070,33 +1071,40 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (animTarget == null) return true
         dispatchAnimTimeline(Timeline.timeline {
             includeLater(
-                { reservesAnim(cost, animTarget) },
+                { reservesPaidAnim(cost, animTarget) },
                 { true }
             )
         })
         return true
     }
 
-    private fun reservesAnim(amount: Int, animTarget: Actor): Timeline = Timeline.timeline {
+    private fun reservesPaidAnim(amount: Int, animTarget: Actor): Timeline = Timeline.timeline {
         repeat(amount) {
             action {
-                gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
-                    orbTexture = "reserves_orb",
-                    width = 10f,
-                    height = 10f,
-                    duration = 300,
-                    segments = 20,
-                    position = RenderPipeline.OrbAnimation.curvedPath(
-                        curScreen.stageCoordsOfActor("reserves_icon"),
-                        animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
-                                Vector2(animTarget.width / 2, animTarget.height / 2),
-                        curveOffsetMultiplier = (-1.5f..1.5f).random()
-                    )
+                gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
+                    stageCoordsOfReservesIcon(),
+                    animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
+                            Vector2(animTarget.width / 2, animTarget.height / 2)
                 ))
             }
             delay(50)
         }
     }
+
+    private fun reservesGainedAnim(amount: Int, animSource: Actor): Timeline = Timeline.timeline {
+        repeat(amount) {
+            action {
+                gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
+                    animSource.localToStageCoordinates(Vector2(0f, 0f)) +
+                            Vector2(animSource.width / 2, animSource.height / 2),
+                    stageCoordsOfReservesIcon()
+                ))
+            }
+            delay(50)
+        }
+    }
+
+    private fun stageCoordsOfReservesIcon(): Vector2 = curScreen.stageCoordsOfActor("reserves_icon")
 
     override fun end() {
         createdCards.forEach { it.dispose() }
@@ -1133,7 +1141,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             action {
                 val start = curScreen.stageCoordsOfActor("win_screen_cash_symbol")
                 val end = curScreen.stageCoordsOfActor("cash_symbol")
-                gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
+                if (money > 0) gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
                     orbTexture = "cash_symbol",
                     width = 30f,
                     height = 30f,
@@ -1142,7 +1150,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     position = RenderPipeline.OrbAnimation.curvedPath(start, end)
                 ))
             }
-            delay(600)
+            delay(if (money > 0) 600 else 0)
             action {
                 SaveState.earnMoney(money)
             }
