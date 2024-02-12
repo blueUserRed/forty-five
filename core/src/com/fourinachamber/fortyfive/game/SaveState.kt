@@ -243,6 +243,8 @@ object SaveState {
         PermaSaveState.statTotalMoneyEarned = totalMoneyEarned
         PermaSaveState.statEncountersWon = encountersWon
         PermaSaveState.statBulletsShot = bulletsShot
+        PermaSaveState.statUsedReserves = usedReserves
+        PermaSaveState.statEnemiesDefeated = enemiesDefeated
     }
 
     /**

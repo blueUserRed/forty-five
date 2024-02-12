@@ -42,6 +42,7 @@ nodes: [
             npc: "to_be_continued_npc",
             currentlyBlocks: false,
             canBeStarted: true,
+            canOnlyBeStartedOnce: false,
             isCompleted: false,
         }
     },
