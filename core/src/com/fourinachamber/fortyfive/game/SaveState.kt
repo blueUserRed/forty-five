@@ -417,7 +417,7 @@ object SaveState {
                 return Deck(name, id, cardPositions)
             }
 
-            const val minDeckSize = 12
+            const val minDeckSize = 15
             const val numberOfSlots = 35
         }
     }

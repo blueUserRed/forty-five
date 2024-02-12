@@ -93,7 +93,7 @@ abstract class Effect(val trigger: Trigger) {
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller, card) * (triggerInformation.multiplier ?: 1)
             return Timeline.timeline {
-                action { controller.gainReserves(amount) }
+                action { controller.gainReserves(amount, card.actor) }
             }
         }
 
