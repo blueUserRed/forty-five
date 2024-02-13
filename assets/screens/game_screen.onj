@@ -24,7 +24,7 @@ var overlayZIndex = 500;
 assets: {
     useAssets: [
 
-        "red_wing", "roadgeek",
+        "red_wing", "roadgeek", "red_wing_bmp",
 
         "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "wood_box", "deck_icon",
         "end_turn_button_texture", "end_turn_button_hover_texture",

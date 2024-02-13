@@ -21,7 +21,9 @@ object FortyFive : Game() {
 
     const val logTag = "forty-five"
 
-    private var currentRenderPipeline: RenderPipeline? = null
+    var currentRenderPipeline: RenderPipeline? = null
+        private set
+
     private var currentScreen: OnjScreen? = null
 
     var currentGame: GameController? = null

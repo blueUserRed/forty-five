@@ -52,7 +52,7 @@ open class OnjScreen @MainThreadOnly constructor(
     styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: MutableMap<String, Actor>,
-    private val printFrameRate: Boolean,
+    val printFrameRate: Boolean,
     val transitionAwayTime: Int?,
     val screenBuilder: ScreenBuilder,
 ) : ScreenAdapter(), Renderable, ResourceBorrower {

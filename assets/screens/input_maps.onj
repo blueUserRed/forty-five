@@ -15,6 +15,18 @@ defaultInputMap: [
             },
         ],
     },
+    {
+        priority: (2.0 pow 30.0)#int,
+        triggers: [
+            {
+                keycode: keys.T,
+                modifiers: [
+                ],
+                action: $ToggleFpsKeyAction {
+                }
+            },
+        ],
+    },
     { // block everything else, if you are in an inputfield (has no action, but a high priority)
         priority: (2.0 pow 30.0)#int -1,
         condition: screenState("inInputField"),
