@@ -13,7 +13,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "roadgeek",
+        "roadgeek", "red_wing_bmp",
         "title_screen_background", "key_select_frame", "white_texture", "enemy_texture", "red_wing",
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",

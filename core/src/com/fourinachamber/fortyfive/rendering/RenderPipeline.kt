@@ -5,6 +5,8 @@ import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Pixmap
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.FrameBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -33,6 +35,8 @@ open class RenderPipeline(
     protected val screen: OnjScreen,
     private val baseRenderable: Renderable
 ) : Disposable {
+
+    var showFps: Boolean = false
 
     protected val frameBufferManager: FrameBufferManager = FrameBufferManager()
 
@@ -190,6 +194,18 @@ open class RenderPipeline(
         } else {
             renderWithPostProcessors(delta)
         }
+        if (!showFps) return
+        val font = ResourceManager.get<BitmapFont>(screen, "red_wing_bmp")
+        font.data.setScale(0.3f)
+        val fps = Gdx.graphics.framesPerSecond
+        val layout = GlyphLayout(font, "fps: $fps", Color.WHITE, 200f, 0, false)
+        val viewport = ExtendViewport(1600f, 900f)
+        viewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
+        batch.begin()
+        viewport.apply()
+        batch.projectionMatrix = viewport.camera.combined
+        font.draw(batch, layout, viewport.worldWidth - 200f, 880f)
+        batch.end()
     }
 
     private fun renderWithPostProcessors(delta: Float) {
@@ -390,12 +406,16 @@ class FrameBufferManager : Disposable {
     }
 
     private fun tryCreateFrameBuffer(sizeMultiplier: Float): FrameBuffer? = try {
-        FrameBuffer(
+        val fbo = FrameBuffer(
             Pixmap.Format.RGBA8888,
             (Gdx.graphics.width * sizeMultiplier).toInt(),
             (Gdx.graphics.height * sizeMultiplier).toInt(),
             false
         )
+        fbo.begin()
+        ScreenUtils.clear(0f, 0f, 0f, 0f)
+        fbo.end()
+        fbo
     } catch (e: java.lang.IllegalStateException) {
         null
     }
