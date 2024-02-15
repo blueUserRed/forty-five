@@ -26,7 +26,7 @@ class ShopCardsHandler(
     private val labels: MutableList<CustomLabel> = mutableListOf()
 
     fun addItems(rnd: Random, contextTypes: Set<String>, defaultType: String) {
-        val nbrOfItems = (5..10).random(rnd)
+        val nbrOfItems = (9..11).random(rnd)
         FortyFiveLogger.debug(logTag, "Creating $nbrOfItems items")
         val cardsToAdd = RandomCardSelection.getRandomCards(
             screen,
