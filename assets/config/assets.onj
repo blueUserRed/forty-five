@@ -340,6 +340,10 @@ textures: [
         file: "textures/map/decorations/wasteland_cactus_2.png"
     },
     {
+        name: "map_decoration_wasteland_snake_2",
+        file: "textures/map/decorations/wasteland_Snake_2.png"
+    },
+    {
         name: "map_decoration_bewitched_forest_sheep_1",
         file: "textures/map/decorations/bewitched_forest_sheep_1.png"
     },
