@@ -212,8 +212,8 @@ var biomeDecorations = {
 var uniqueEventsToUseOften = {
     roadBetweenAquaBalleAndTabuLetter: {
         chooseCard: {
-            isDeadEnd: false,
-            nodeTexture: "map_node_shop_circle",
+            isDeadEnd: true,
+            nodeTexture: "map_node_choose_card_circle",
             event: $ChooseCardMapEvent {
                 seed: null,
                 types: [
@@ -227,7 +227,7 @@ var uniqueEventsToUseOften = {
         },
         healEvent: {
             isDeadEnd: false,
-            nodeTexture: "map_node_shop_circle",
+            nodeTexture: "map_node_heal_circle",
             event: $HealOrMaxHPEvent {
                 seed: null,
                 healRange: [
@@ -316,22 +316,22 @@ var aquaBalleToTabuLetterOutpost = {
         progress: [
             0.0, 50.0
         ],
-        minNodes: 40,
-        maxNodes: 50,
-        maxSplits: 4,
-        splitProbability: 0.3,
+        minNodes: 9,
+        maxNodes: 11,
+        maxSplits: 3,
+        splitProbability: 0.6,
         startArea: "aqua_balle",
         endArea: "tabu_letter_outpost",
-        scaleWidth: 1.1,
-        scaleLength: 1.1,
+        scaleWidth: 0.6,
+        scaleLength: 0.6,
         otherAreas: [
         ],
-        rotation: 0.0,
+        rotation: 1.507,
         avgNbrOfEncounters: 0,
         exitNodeTexture: "map_node_exit_circle",
         fixedEvents: [
-            ...repeat(8, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.chooseCard),
-            ...repeat(4, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.healEvent),
+            ...repeat(3, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.chooseCard),
+            ...repeat(2, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.healEvent),
             {
                 nodeTexture: "map_node_shop_rect",
                 event: $ShopMapEvent {
@@ -358,8 +358,8 @@ var aquaBalleToTabuLetterOutpost = {
                 }
             },
             {
-                weight: 3,
-                nodeTexture: "map_node_shop_circle",
+                weight: 1,
+                nodeTexture: "map_node_choose_card_circle",
                 event: $ChooseCardMapEvent {
                     seed: null,
                     types: [
@@ -372,7 +372,7 @@ var aquaBalleToTabuLetterOutpost = {
                 }
             },
             {
-                weight: 3,
+                weight: 1,
                 nodeTexture: "map_node_shop_rect",
                 event: $ShopMapEvent {
                     seed: null,
