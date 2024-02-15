@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
@@ -464,6 +465,8 @@ class FinishTutorialMapEvent(
     override fun start() {
         SaveState.playerLives = SaveState.maxPlayerLives
         SaveState.write()
+        PermaSaveState.playerHasCompletedTutorial = true
+        PermaSaveState.write()
         MapManager.changeToMap(goToMap)
     }
 

@@ -13,7 +13,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "shop_background_wasteland", "red_wing_cm", "red_wing", "roadgeek", "hover_detail_background", "reserves_texture",
+        "shop_background_wasteland", "red_wing_cm", "red_wing", "red_wing_bmp", "roadgeek", "hover_detail_background", "reserves_texture",
         "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         "shop_add_to_backpack", "shop_add_to_deck",

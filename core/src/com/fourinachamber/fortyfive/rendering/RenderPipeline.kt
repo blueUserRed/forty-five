@@ -67,7 +67,7 @@ open class RenderPipeline(
         get() = TimeUtils.millis() <= orbFinisesAt
 
     init {
-        frameBufferManager.addPingPongFrameBuffer("orb", 1f)
+        frameBufferManager.addPingPongFrameBuffer("orb", 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", 1f)
     }
 

@@ -50,11 +50,14 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
-        if (SaveState.playerCompletedFirstTutorialEncounter) {
-            MapManager.changeToMapScreen()
-//            changeToScreen("screens/loose_screen.onj")
+        if (!PermaSaveState.playerHasCompletedTutorial) {
+            if (SaveState.playerCompletedFirstTutorialEncounter) {
+                MapManager.changeToMap("tutorial_road")
+            } else {
+                MapManager.changeToEncounterScreen(tutorialEncounterContext)
+            }
         } else {
-            MapManager.changeToEncounterScreen(tutorialEncounterContext)
+            MapManager.changeToMapScreen()
         }
     }
 
