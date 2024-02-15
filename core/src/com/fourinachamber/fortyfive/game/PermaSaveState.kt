@@ -32,6 +32,12 @@ object PermaSaveState {
             saveFileDirty = true
         }
 
+    var playerHasCompletedTutorial: Boolean = false
+        set(value) {
+            field = value
+            saveFileDirty = true
+        }
+
     private var _visitedAreas: MutableSet<String> = mutableSetOf()
 
     val visitedAreas: Set<String>
@@ -68,6 +74,7 @@ object PermaSaveState {
         obj as OnjObject
 
         currentRandom = obj.get<Long?>("lastRandom") ?: Random.nextLong()
+        playerHasCompletedTutorial = obj.get<Boolean>("playerHasCompletedTutorial")
         collection = obj.get<OnjArray>("collection").value.map { it.value as String }
         _visitedAreas = obj.get<OnjArray>("visitedAreas").value.map { it.value as String }.toMutableSet()
 
@@ -85,6 +92,7 @@ object PermaSaveState {
         val obj = buildOnjObject {
             "lastRandom" with currentRandom
             "collection" with collection
+            "playerHasCompletedTutorial" with playerHasCompletedTutorial
             "visitedAreas" with _visitedAreas
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())

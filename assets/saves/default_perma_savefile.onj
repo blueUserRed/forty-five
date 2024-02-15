@@ -8,3 +8,4 @@ collection: [
 ],
 visitedAreas: [
 ],
+playerHasCompletedTutorial: false,

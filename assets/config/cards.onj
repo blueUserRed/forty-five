@@ -595,7 +595,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("special card drawn", bSelects.self, 3#val),
+            buffDmg("special card drawn", bSelects.self, 5#val),
             reserveGain("special card drawn", 1#val)
         ],
         forceLoadCards: [],
@@ -1005,7 +1005,7 @@ cards: [
         ],
         forceLoadCards: [],
         dark: false,
-        cost: 1,
+        cost: 2,
         type: $Bullet { },
         additionalHoverInfos: ["rotations"],
         tags: ["pool2", "rarity2"],

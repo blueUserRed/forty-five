@@ -11,7 +11,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "chooseCard_add_to_backpack",
+        "hover_detail_background", "red_wing_cm", "red_wing", "red_wing_bmp", "card_character", "chooseCard_add_to_backpack",
         "chooseCard_add_to_deck",
         "shop_background_wasteland", /*temp -> */ "card%%bullet",
         "chooseCard_cardsBackground",

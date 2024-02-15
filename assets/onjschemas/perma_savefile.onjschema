@@ -2,3 +2,4 @@
 lastRandom: int?,
 collection: string[],
 visitedAreas: string[],
+playerHasCompletedTutorial: boolean,
