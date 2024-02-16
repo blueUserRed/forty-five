@@ -13,7 +13,7 @@ nodes: [
         ],
         nodeTexture: "map_node_exit_rect",
         event: $EnterMapMapEvent {
-            targetMap: "road_between_tabu_letter_outpost_and_salem",
+            targetMap: "road_between_salem_and_spire_outpost",
         }
     },
     {
@@ -43,7 +43,8 @@ nodes: [
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
-        }
+            canOnlyBeStartedOnce: false,
+    }
     },
 ],
 animatedDecorations: [
