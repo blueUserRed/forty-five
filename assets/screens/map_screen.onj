@@ -27,7 +27,10 @@ assets: {
         "map_node_fight",
         "map_node_exit",
         "map_node_heal",
+        "map_node_choose_card",
+        "map_node_dialog",
         "card_character",
+        "map_decoration_wasteland_snake_2", // there is no snake 1, because of Nils and/or Fillipo
         "map_decoration_wasteland_dune_1", "map_decoration_wasteland_dune_2",
         "map_decoration_wasteland_dune_3", "map_decoration_wasteland_dune_4",
         "map_decoration_wasteland_skull_1", "map_decoration_wasteland_skull_2",

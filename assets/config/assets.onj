@@ -329,6 +329,14 @@ textures: [
         file: "textures/map/nodes/get_card.png"
     },
     {
+        name: "map_node_choose_card_circle",
+        file: "textures/map/nodes/choose_card_circle.png"
+    },
+    {
+        name: "map_node_dialog_circle",
+        file: "textures/map/nodes/dialog_circle.png"
+    },
+    {
         name: "map_player",
         file: "textures/map/player.png"
     },
@@ -387,6 +395,10 @@ textures: [
     {
         name: "map_decoration_wasteland_cactus_2",
         file: "textures/map/decorations/wasteland_cactus_2.png"
+    },
+    {
+        name: "map_decoration_wasteland_snake_2",
+        file: "textures/map/decorations/wasteland_Snake_2.png"
     },
     {
         name: "map_decoration_bewitched_forest_sheep_1",

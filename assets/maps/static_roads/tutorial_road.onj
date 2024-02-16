@@ -145,7 +145,7 @@ nodes: [
         edgesTo: [
             7, 9
         ],
-        nodeTexture: "map_node_heal",
+        nodeTexture: "map_node_dialog",
         event: $NPCMapEvent {
             npc: "brother",
             canOnlyBeStartedOnce: true,
@@ -160,7 +160,7 @@ nodes: [
         edgesTo: [
             8, 10
         ],
-        nodeTexture: "map_node_heal",
+        nodeTexture: "map_node_dialog",
         event: $NPCMapEvent {
             npc: "mayor_of_cody",
             canOnlyBeStartedOnce: true,
