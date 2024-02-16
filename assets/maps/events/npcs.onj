@@ -213,7 +213,7 @@ npcs: [
                     }
                 },
                 {
-                    rawText: "We - $1the developer$1 - want to thank you for playing! We are $3definitly$3 going to contine developing this game, just wait a little. Till then, bye!",
+                    rawText: "We - $1the developers$1 - want to thank you for playing! We are $3definitly$3 going to contine developing this game, just wait a little. Till then, bye!",
                     effects: [
                         $Color {
                             indicator: "$1",
