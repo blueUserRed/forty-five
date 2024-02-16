@@ -2,13 +2,13 @@ package com.fourinachamber.fortyfive.screen.general
 
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.StatsScreenController
 import com.fourinachamber.fortyfive.map.detailMap.MapScreenController
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenController
 import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
-import com.fourinachamber.fortyfive.screen.gameComponents.CardSelectionScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
@@ -18,7 +18,6 @@ object ScreenControllerFactory {
 
     private val controllers: MutableMap<String, (OnjNamedObject) -> ScreenController> = mutableMapOf(
         "GameScreenController" to { onj -> GameController(onj) },
-        "CardSelectionScreenController" to { onj -> CardSelectionScreenController(onj) },
         "IntroScreenController" to { onj -> IntroScreenController(onj) },
         "DialogScreenController" to { onj -> DialogScreenController(onj) },
         "ShopScreenController" to { onj -> ShopScreenController(onj) },
@@ -26,6 +25,7 @@ object ScreenControllerFactory {
         "HealOrMaxHPScreenController" to { onj -> HealOrMaxHPScreenController(onj) },
         "AddMaxHPScreenController" to {onj -> AddMaxHPScreenController(onj) },
         "MapScreenController" to { onj -> MapScreenController(onj) },
+        "StatsScreenController" to { StatsScreenController() },
     )
 
     /**

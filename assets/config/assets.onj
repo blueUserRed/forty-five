@@ -6,20 +6,37 @@ fonts: [
 
     {
         name: "red_wing",
-        fontFile: "fonts/red_wing.fnt",
-        imageFile: "fonts/red_wing.png"
+        fontFile: "fonts/red_wing_df.fnt",
+        imageFile: "fonts/red_wing_df.png"
     },
     {
         name: "red_wing_cm",
-        fontFile: "fonts/red_wing.fnt",
-        imageFile: "fonts/red_wing.png",
+        fontFile: "fonts/red_wing_df.fnt",
+        imageFile: "fonts/red_wing_df.png",
         markupEnabled: true
     },
     {
-        name: "vanilla_whale",
-        fontFile: "fonts/vanilla_whale.fnt",
-        imageFile: "fonts/vanilla_whale.png"
-    }
+        name: "red_wing_bmp",
+        fontFile: "fonts/red_wing_bmp.fnt",
+        imageFile: "fonts/red_wing_bmp.png"
+    },
+    {
+        name: "red_wing_bmp_cm",
+        fontFile: "fonts/red_wing_bmp.fnt",
+        imageFile: "fonts/red_wing_bmp.png",
+        markupEnabled: true
+    },
+    {
+        name: "roadgeek",
+        fontFile: "fonts/roadgeek_df.fnt",
+        imageFile: "fonts/roadgeek_df.png"
+    },
+    {
+        name: "roadgeek_cm",
+        fontFile: "fonts/roadgeek_df.fnt",
+        imageFile: "fonts/roadgeek_df.png",
+        markupEnabled: true
+    },
 
 ],
 
@@ -90,8 +107,20 @@ textureAtlases: [
                 regionName: "revolver_slot"
             },
             {
+                handle: "reserves_orb",
+                regionName: "reserves_orb"
+            },
+            {
                 handle: "enemy_texture",
                 regionName: "enemy"
+            },
+            {
+                handle: "wood_box",
+                regionName: "wood_box"
+            },
+            {
+                handle: "deck_icon",
+                regionName: "deck_icon"
             },
             {
                 handle: "normal_bullet",
@@ -102,7 +131,7 @@ textureAtlases: [
                 regionName: "end_turn"
             },
             {
-                handle: "end_turn_button_texture_hover",
+                handle: "end_turn_button_hover_texture",
                 regionName: "end_turn_hover"
             },
             {
@@ -110,8 +139,24 @@ textureAtlases: [
                 regionName: "shoot"
             },
             {
-                handle: "shoot_button_texture_hover",
+                handle: "shoot_button_hover_texture",
                 regionName: "shoot_hover"
+            },
+            {
+                handle: "parry_button_texture",
+                regionName: "parry"
+            },
+            {
+                handle: "parry_button_hover_texture",
+                regionName: "parry_hover"
+            },
+            {
+                handle: "pass_button_texture",
+                regionName: "pass"
+            },
+            {
+                handle: "pass_button_hover_texture",
+                regionName: "pass_hover"
             },
             {
                 handle: "enemy_turn_banner",
@@ -120,6 +165,14 @@ textureAtlases: [
             {
                 handle: "player_turn_banner",
                 regionName: "player_turn_banner"
+            },
+            {
+                handle: "enemy_gravestone",
+                regionName: "enemy_gravestone"
+            },
+            {
+                handle: "parry_popup_background",
+                regionName: "parry_popup_background"
             },
             {
                 handle: "heart_texture",
@@ -173,6 +226,22 @@ textureAtlases: [
                 handle: "game_screen_player",
                 regionName: "player"
             },
+            {
+                handle: "win_screen_background",
+                regionName: "win_screen_background"
+            },
+            {
+                handle: "win_screen_spacer",
+                regionName: "win_screen_spacer"
+            },
+            {
+                handle: "win_screen_item_cash",
+                regionName: "win_screen_item_cash"
+            },
+            {
+                handle: "win_screen_item_card",
+                regionName: "win_screen_item_card"
+            },
         ]
     }
 
@@ -184,16 +253,12 @@ textures: [
         file: "textures/game_screen_backgrounds/wasteland.png"
     },
     {
-        name: "loose_screen_background",
-        file: "textures/screens/loose_screen_background.png"
+        name: "game_screen_background_bewitched_forest",
+        file: "textures/game_screen_backgrounds/bewitched_forest.png"
     },
     {
         name: "revolver_drum",
         file: "textures/game_screen/revolver_drum.png"
-    },
-    {
-        name: "win_screen_background",
-        file: "textures/screens/win_screen_background.png"
     },
     {
         name: "location_sign_aqua_dulche",
@@ -244,44 +309,32 @@ textures: [
         file: "textures/map/nodes/default_node.png"
     },
     {
-        name: "map_node_exit_circle",
-        file: "textures/map/nodes/exit_circle.png"
+        name: "map_node_heal",
+        file: "textures/map/nodes/heal.png"
     },
     {
-        name: "map_node_heal_rect",
-        file: "textures/map/nodes/heal_rect.png"
+        name: "map_node_exit",
+        file: "textures/map/nodes/exit.png"
     },
     {
-        name: "map_node_heal_circle",
-        file: "textures/map/nodes/heal_circle.png"
+        name: "map_node_fight",
+        file: "textures/map/nodes/fight.png"
     },
     {
-        name: "map_node_exit_rect",
-        file: "textures/map/nodes/exit_rect.png"
+        name: "map_node_shop",
+        file: "textures/map/nodes/shop.png"
     },
     {
-        name: "map_node_fight_circle",
-        file: "textures/map/nodes/fight_circle.png"
+        name: "map_node_get_card",
+        file: "textures/map/nodes/get_card.png"
     },
     {
-        name: "map_node_fight_rect",
-        file: "textures/map/nodes/fight_rect.png"
+        name: "map_node_choose_card",
+        file: "textures/map/nodes/choose_card.png"
     },
     {
-        name: "map_node_shop_circle",
-        file: "textures/map/nodes/shop_circle.png"
-    },
-    {
-        name: "map_node_shop_rect",
-        file: "textures/map/nodes/shop_rect.png"
-    },
-    {
-        name: "map_node_choose_card_circle",
-        file: "textures/map/nodes/choose_card_circle.png"
-    },
-    {
-        name: "map_node_dialog_circle",
-        file: "textures/map/nodes/dialog_circle.png"
+        name: "map_node_dialog",
+        file: "textures/map/nodes/dialog.png"
     },
     {
         name: "map_player",
@@ -302,6 +355,10 @@ textures: [
     {
         name: "nav_bar_background",
         file: "textures/statusbar/background_old.png"
+    },
+    {
+        name: "cash_symbol",
+        file: "textures/statusbar/cash_symbol.png"
     },
     {
         name: "map_decoration_grass",
@@ -668,6 +725,10 @@ textures: [
         file: "textures/encounter_modifier/rain.png"
     },
     {
+        name: "encounter_modifier_moist",
+        file: "textures/encounter_modifier/moist.png"
+    },
+    {
         name: "common_button_default",
         file: "textures/common/button/default.png"
     },
@@ -690,6 +751,26 @@ textures: [
     {
         name: "hover_detail_more_info",
         file: "textures/cards/hover_detail/hover_detail_more_info.png"
+    },
+    {
+        name: "loose_screen_background",
+        file: "textures/loose_screen/background.png"
+    },
+    {
+        name: "stats_screen_background",
+        file: "textures/stats_screen/background.png"
+    },
+    {
+        name: "stats_screen_spacer",
+        file: "textures/stats_screen/spacer.png"
+    },
+    {
+        name: "stats_screen_stat_box",
+        file: "textures/stats_screen/stat_box.png"
+    },
+    {
+        name: "stats_screen_lost_cards_background",
+        file: "textures/stats_screen/lost_cards_background.png"
     },
 ],
 
@@ -714,13 +795,26 @@ shaders: [
     },
     {
         name: "vignette_shader", // TODO: fix
-
         file: "shaders/vignette.glsl",
         constantArgs: {
             color: color.red,
             speed: 0.0,
             movement: 1.0,
             minMovement: 0.3
+        }
+    },
+    {
+        name: "parry_shader",
+        file: "shaders/parry.glsl",
+        constantArgs: {
+            color: color.red,
+            speed: 10.0,
+            movement: 0.10,
+            baseStrength: -0.38,
+            fallOff: 5.0,
+            blackStrength: -0.38,
+            blackFallOff: 5.0,
+            center: [0.5, 0.24]
         }
     },
     {
@@ -785,6 +879,18 @@ shaders: [
         name: "ice_shader",
         file: "shaders/ice.glsl",
         constantArgs: { }
+    },
+    {
+        name: "alpha_reduction_shader",
+        file: "shaders/reduce_alpha.glsl",
+        constantArgs: {
+        }
+    },
+    {
+        name: "gaussian_blur_shader",
+        file: "shaders/gaussian_blur.glsl",
+        constantArgs: {
+        }
     },
 ],
 

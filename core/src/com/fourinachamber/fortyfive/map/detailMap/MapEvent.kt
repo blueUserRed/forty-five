@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
 import com.fourinachamber.fortyfive.game.GameController
+import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
@@ -83,6 +84,8 @@ abstract class MapEvent {
      * when this is true, the sidebar with the description is displayed
      */
     abstract val displayDescription: Boolean
+
+    open val buttonText: String = "Start"
 
     /**
      * currently unused
@@ -180,6 +183,8 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), GameController.EncounterCo
 
     override val forwardToScreen: String = MapManager.mapScreenPath
 
+    override val buttonText: String = "Fight!"
+
     init {
         setStandardValuesFromConfig(obj)
         setDistanceFromConfig(obj)
@@ -217,6 +222,8 @@ class EnterMapMapEvent(val targetMap: String) : MapEvent() {
     override var isCompleted: Boolean = false
     override val displayDescription: Boolean = true
 
+    override val buttonText: String = "Enter"
+
     // lazy so it doesn't crash when the event is instanced
     override val displayName: String by lazy {
         "Enter ${MapManager.displayName(targetMap)}"
@@ -251,8 +258,9 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
 
     val npc: String = onj.get<String>("npc")
 
-    override val descriptionText: String = "talk with $npc"
-    override val displayName: String = "I just want to talk"
+    override val descriptionText: String = ""
+    override val displayName: String = "Talk with $npc"
+    override val buttonText: String = "Talk"
 
     init {
         setStandardValuesFromConfig(onj)
@@ -293,8 +301,9 @@ class ShopMapEvent(
 
     override val displayDescription: Boolean = true
 
-    override val descriptionText: String = "Enter shop"
-    override val displayName: String = "BUY STUFF NOW"
+    override val descriptionText: String = ""
+    override val displayName: String = "Shop"
+    override val buttonText: String = "Enter"
 
     override fun start() {
         MapManager.changeToShopScreen(this)
@@ -455,6 +464,9 @@ class FinishTutorialMapEvent(
 
     override fun start() {
         SaveState.playerLives = SaveState.maxPlayerLives
+        SaveState.write()
+        PermaSaveState.playerHasCompletedTutorial = true
+        PermaSaveState.write()
         MapManager.changeToMap(goToMap)
     }
 

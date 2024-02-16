@@ -15,11 +15,14 @@ playerCompletedFirstTutorialEncounter: false, //TODO CHANGE BACK to "false"; PLE
 
 stats: {
     usedReserves: 0,
-    enemiesDefeated: 0
+    enemiesDefeated: 0,
+    totalMoneyEarned: 0,
+    encountersWon: 0,
+    bulletsShot: 0
 },
 
 position: {
-    map: "tutorial_road",  //TODO CHANGE BACK TO "tutorial_road"; PLEASE TELL ME THIS MARVIN  map: "aqua_balle",
+    map: "aqua_balle",  //TODO CHANGE BACK TO "aqua_balle"; PLEASE TELL ME THIS MARVIN
     node: 0,
     lastNode: null
 },

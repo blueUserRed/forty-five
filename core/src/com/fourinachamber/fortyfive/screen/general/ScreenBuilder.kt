@@ -75,7 +75,6 @@ class ScreenBuilder(val file: FileHandle) {
             batch = SpriteBatch(),
             controllerContext = controllerContext,
             styleManagers = listOf(),
-            background = background,
             useAssets = borrowed.toMutableList(),
             earlyRenderTasks = earlyRenderTasks,
             lateRenderTasks = lateRenderTasks,
@@ -85,6 +84,7 @@ class ScreenBuilder(val file: FileHandle) {
             transitionAwayTime = transitionAwayTime,
             screenBuilder = this,
         )
+        screen.background = background
 
         onj.get<OnjObject>("options").ifHas<OnjArray>("inputMap") {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
@@ -370,6 +370,7 @@ class ScreenBuilder(val file: FileHandle) {
                     fontColor = widgetOnj.get<Color>("color")
                 }
             },
+            isDistanceField = widgetOnj.getOr("isDistanceFiled", true),
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
             screen = screen
         ).apply {
@@ -439,6 +440,7 @@ class ScreenBuilder(val file: FileHandle) {
                 fontOrError(widgetOnj.get<String>("font"), screen),
                 widgetOnj.get<Color>("color")
             ),
+            isDistanceField = widgetOnj.getOr("isDistanceField", true),
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
@@ -470,7 +472,8 @@ class ScreenBuilder(val file: FileHandle) {
 
         "AdvancedText" -> AdvancedTextWidget(
             widgetOnj.get<OnjObject>("defaults"),
-            screen
+            screen,
+            widgetOnj.getOr("isDistanceField", true),
         ).apply {
             setRawText(
                 widgetOnj.get<String>("rawText"),

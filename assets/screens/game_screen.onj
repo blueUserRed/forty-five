@@ -24,15 +24,22 @@ var overlayZIndex = 500;
 assets: {
     useAssets: [
 
-        "vanilla_whale", "red_wing",
+        "red_wing", "roadgeek", "red_wing_bmp",
 
-        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "end_turn_button_texture",
-        "end_turn_button_texture_hover", "shoot_button_texture", "shoot_button_texture_hover", "revolver_drum",
+        "game_screen_background_wasteland", "revolver_slot_texture", "enemy_texture", "wood_box", "deck_icon",
+        "end_turn_button_texture", "end_turn_button_hover_texture",
+        "shoot_button_texture", "shoot_button_hover_texture",
+        "pass_button_texture", "pass_button_hover_texture",
+        "parry_button_texture", "parry_button_hover_texture",
+        "revolver_drum", "parry_popup_background",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
-        "game_screen_player", "player_turn_banner", "enemy_turn_banner",
+        "game_screen_player", "player_turn_banner", "enemy_turn_banner", "reserves_orb",
 
         "enemy_action_damage", "enemy_action_cover",
+
+        "win_screen_background", "win_screen_spacer", "win_screen_item_cash", "cash_symbol", "win_screen_item_card",
+        "map_node_get_card", "common_button_default", "common_button_hover",
 
         "enemy_pyro", "enemy_action_burning", "enemy_action_inferno",
         "enemy_action_hot_potato", "enemy_action_unknown",
@@ -54,6 +61,7 @@ assets: {
         "revolver_cursor",
 
         "dissolve_shader", "prerendered_noise_perlin_512x512", "ice_shader", "ice_texture",
+        "parry_shader", "alpha_reduction_shader", "gaussian_blur_shader",
 
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
@@ -62,6 +70,7 @@ assets: {
         ...(sharedComponents.warningLabelUsedAssets),
         ...(sharedComponents.cardHoverDetailUsedAssets),
         ...(sharedComponents.tutorialInfoActorUsedAssets),
+        ...(sharedComponents.backpackAssets),
     ]
 },
 
@@ -158,7 +167,7 @@ var encounterModifierDisplayTemplate = $Box {
         ]
     } children [
         $Label {
-            font: "red_wing",
+            font: "roadgeek",
             text: "Frost",
             fontScale: 0.6,
             align: "left",
@@ -170,7 +179,7 @@ var encounterModifierDisplayTemplate = $Box {
                     width: 370#points
                 }
             ],
-            font: "red_wing",
+            font: "roadgeek",
             text: "Some long description text Lorem Ipsum Lorem Ipsum Lorem Ipsum",
             wrap: true,
             fontScale: 0.6,
@@ -386,8 +395,10 @@ var enemyActionAnimationTemplate = $Box {
 templates: [
     ...(sharedComponents.warningLabelTemplates),
     ...(sharedComponents.cardHoverDetailTemplates),
+    ...(sharedComponents.statusBarTemplates),
+    ...(sharedComponents.backpackTemplates),
     encounterModifierDisplayTemplate,
-    enemyActionAnimationTemplate
+    enemyActionAnimationTemplate,
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -402,10 +413,10 @@ var buttonHoverBehaviour = $MouseHoverBehaviour {
 var revolver = $Revolver {
     name: "revolver",
     slotTexture: "revolver_slot_texture",
-    font: "vanilla_whale",
+    font: "red_wing",
     fontColor: color.white,
     fontScale: 2.5,
-    slotScale: 0.34,
+    slotScale: 0.22,
     cardScale: 0.9,
     animationDuration: 0.2,
     radius: 140.0,
@@ -434,42 +445,12 @@ var enemyArea = $EnemyArea {
     enemySelectionDrawable: "key_select_frame",
 };
 
-var shootButton = $Image {
-    name: "shoot_button",
-    textureName: "shoot_button_texture",
-    reportDimensionsWithScaling: true,
-    scaleX: 0.25,
-    scaleY: 0.25,
-    behaviours: [
-        buttonHoverBehaviour,
-        $CatchEventAndEmitBehaviour {
-            catch: "ButtonClickEvent",
-            emit: "ShootRevolverEvent"
-        }
-    ]
-};
-
-var endTurnButton = $Image {
-    name: "end_turn_button",
-    textureName: "end_turn_button_texture",
-    reportDimensionsWithScaling: true,
-    scaleX: 0.25,
-    scaleY: 0.25,
-    behaviours: [
-        buttonHoverBehaviour,
-        $CatchEventAndEmitBehaviour {
-            catch: "ButtonClickEvent",
-            emit: "EndTurnEvent"
-        }
-    ]
-};
-
 var reservesLabel = $TemplateLabel {
-    name: "reserves_label",
-    font: "vanilla_whale",
+    name: "reserves_icon",
+    font: "red_wing",
     template: "{game.curReserves}/{game.baseReserves}",
-    fontScale: 0.9,
-    color: color.white,
+    fontScale: 1.1,
+    color: color.forty_white,
 };
 
 var disableStyles = [
@@ -484,54 +465,6 @@ var disableStyles = [
         alpha: 0.5,
         disabled: true
     }
-];
-
-var attackPopup = $Box {
-    styles: [
-        {
-            style_priority: 1,
-            positionType: positionType.absolute,
-            background: "transparent_black_texture",
-            flexDirection: flexDirection.column,
-            alignItems: align.center,
-            justifyContent: justify.center,
-            width: worldWidth#points,
-            height: worldHeight#points,
-            detached: true
-        },
-        {
-            style_priority: 2,
-            style_condition: state("showAttackPopup"),
-            detached: false
-        }
-    ]
-} children [
-
-    $Label {
-        font: "red_wing",
-        text: "Parry",
-        fontScale: 0.9,
-        color: color.white,
-        behaviours: [
-            $CatchEventAndEmitBehaviour {
-                catch: "ButtonClickEvent",
-                emit: "ParryEvent"
-            }
-        ]
-    },
-    $Label {
-        font: "red_wing",
-        text: "Dont Parry",
-        fontScale: 0.9,
-        color: color.white,
-        behaviours: [
-            $CatchEventAndEmitBehaviour {
-                catch: "ButtonClickEvent",
-                emit: "PopupConfirmationEvent"
-            }
-        ]
-    },
-
 ];
 
 var enemyActionPopup = $Box {
@@ -687,6 +620,7 @@ var drawCardActor = $Box {
             detached: false
         }
     ],
+    touchable: "enabled",
     zIndex: overlayZIndex,
 } children [
 
@@ -815,88 +749,579 @@ var putCardsUnderDeckActor = $Box {
 
 ];
 
-// TODO: fix pixelated looking textures
 var playerBar = $Box {
     styles: [
         {
             width: 100#percent,
             height: 220#points,
-            background: "player_bar",
             flexDirection: flexDirection.row,
             alignItems: align.center
         }
-    ]
+    ],
 } children [
 
     $Box {
         styles: [
             {
-                flexDirection: flexDirection.row,
-                alignItems: align.center,
-                justifyContent: justify.center,
-                height: 40#points,
-                width: 90#points,
-                rotation: 6.0,
-                positionBottom: -6.0#points,
-                positionLeft: 20.0#points
+                positionType: positionType.absolute,
+                background: "player_bar",
+                width: worldWidth#points,
+                positionBottom: 0#points,
+                aspectRatio: 1920.0 / 505.0,
             }
         ],
-        enableTransform: true,
-    } children [
-        $Image {
-            name: "reserves_icon",
-            styles: [
-                {
-                    aspectRatio: 1.0,
-                    width: 40.0#points
-                }
-            ],
-            reportDimensionsWithScaling: true,
-            textureName: "reserves_texture",
-            scaleX: 0.02,
-            scaleY: 0.02
-        },
-        reservesLabel,
-    ],
-
-    $Box {
-        styles: [
-            {
-                positionLeft: 320#points,
-                positionBottom: 30#points,
-                rotation: 4.0
-            }
-        ],
-        enableTransform: true
-    } children [
-        shootButton
-    ],
-
-    $Box {
-        styles: [
-            {
-                width: 150#points,
-                height: 80#points,
-                positionLeft: 800#points,
-                positionBottom: 30#points,
-                rotation: -4.0
-            }
-        ],
-        enableTransform: true,
     },
 
     $Box {
         styles: [
             {
-                positionLeft: 1070#points,
-                positionBottom: 20#points,
-                rotation: -6.0,
+                positionType: positionType.absolute,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                aspectRatio: 1.0,
+                width: 120#points,
+                positionBottom: 180#points,
+                positionLeft: 90#points,
+                rotation: 15.0
             }
         ],
         enableTransform: true,
     } children [
-        endTurnButton
+
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 100#percent,
+                    height: 100#percent,
+                    background: "wood_box",
+                }
+            ]
+        },
+
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 60#points,
+                    height: 60#points,
+                    positionBottom: 90#points,
+                    positionLeft: 30#points,
+                    background: "reserves_texture",
+                }
+            ]
+        },
+        reservesLabel,
+    ],
+
+    // shoot button ---------------------------------------
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                height: 100#points,
+                width: 270#points,
+                positionBottom: 110#points,
+            },
+            {
+                style_priority: 1,
+                positionLeft: 380#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: (380 + 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "shoot_button_texture",
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("shoot_button_hover_box"),
+                    background: "shoot_button_hover_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("shoot_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+            ],
+        },
+        $Box {
+            name: "shoot_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 25#points,
+                    positionBottom: 50#points,
+                    rotation: -25.0,
+                    disabled: false
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("uiFrozen"),
+                    disabled: true,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "ShootRevolverEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+    // pass button ---------------------------------------
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                style_priority: 1,
+                height: 100#points,
+                width: 270#points,
+                positionBottom: 110#points,
+            },
+            {
+                style_priority: 1,
+                positionLeft: (380 + 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: 380#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "pass_button_texture",
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("pass_button_hover_box"),
+                    background: "pass_button_hover_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("pass_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+            ],
+        },
+        $Box {
+            name: "pass_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 25#points,
+                    positionBottom: 50#points,
+                    rotation: -25.0,
+                    disabled: true
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showAttackPopup"),
+                    disabled: false,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "PopupConfirmationEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+    // holster button ---------------------------------------
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                height: 100#points,
+                width: 270#points,
+                positionBottom: 119#points,
+            },
+            {
+                style_priority: 1,
+                positionLeft: 970#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: (970 - 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+        ],
+    } children [
+        $Box {
+            name: "end_turn_button",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "end_turn_button_texture",
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("end_turn_button_hover_box"),
+                    background: "end_turn_button_hover_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("end_turn_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                }
+            ],
+        },
+        $Box {
+            name: "end_turn_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 35#points,
+                    positionBottom: -40#points,
+                    rotation: 25.0,
+                    disabled: false
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("uiFrozen"),
+                    disabled: true,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "EndTurnEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+    // parry button ---------------------------------------
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                height: 100#points,
+                width: 270#points,
+                positionBottom: 119#points,
+            },
+            {
+                style_priority: 1,
+                positionLeft: (970 - 270)#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup"),
+                positionLeft: 970#points,
+                style_animation: {
+                    duration: 0.3,
+                    interpolation: interpolation.pow2
+                }
+            },
+        ],
+    } children [
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    aspectRatio: 655.0 / 543.0,
+                    background: "parry_button_texture",
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("parry_button_hover_box"),
+                    background: "parry_button_hover_texture",
+                },
+                {
+                    style_priority: 1,
+                    width: 250#points,
+                    positionBottom: -60#points,
+                    positionLeft: 0#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover("parry_button_hover_box"),
+                    width: 270#points,
+                    positionBottom: -70#points,
+                    positionLeft: -10#points,
+                    style_animation: {
+                        duration: 0.1,
+                        interpolation: interpolation.pow2
+                    }
+                }
+            ],
+        },
+        $Box {
+            name: "parry_button_hover_box",
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    width: 200#points,
+                    height: 100#points,
+                    positionLeft: 35#points,
+                    positionBottom: -40#points,
+                    rotation: 25.0,
+                    disabled: true
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showAttackPopup"),
+                    disabled: false,
+                }
+            ],
+            behaviours: [
+                buttonHoverBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "ParryEvent"
+                }
+            ],
+            enableTransform: true,
+            touchable: "enabled",
+        }
+    ],
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                aspectRatio: 1.0,
+                width: 120#points,
+                positionBottom: 200#points,
+                positionLeft: (worldWidth - 90 - 120)#points,
+                rotation: -15.0
+            }
+        ],
+        enableTransform: true,
+    } children [
+
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 100#percent,
+                    height: 100#percent,
+                    background: "wood_box",
+                }
+            ]
+        },
+
+        $Box {
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    width: 60#points,
+                    height: 60#points,
+                    background: "deck_icon",
+                }
+            ]
+        },
+    ],
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                background: "parry_popup_background",
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                width: 700#points,
+                aspectRatio: 698.0 / 390.0,
+                positionBottom: 300#points,
+                positionLeft: (worldWidth / 2.0 - 700.0 / 2.0)#points,
+            },
+            {
+                style_priority: 1,
+                alpha: 0.0,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showAttackPopup") or state("showSelectionPopup"),
+                alpha: 1.0,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                }
+            },
+        ]
+    } children [
+
+        $TemplateLabel {
+            styles: [
+                {
+                    marginBottom: 30#points
+                }
+            ],
+            font: "red_wing",
+            template: "{game.revolverPopupText}",
+            fontScale: 1.3,
+            color: color.brightYellow,
+        },
+
+        $TemplateLabel {
+            styles: [
+                {
+                    style_priority: 1,
+                    visible: true
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showSelectionPopup"),
+                    visible: false,
+                }
+            ],
+            font: "red_wing",
+            template: "Parrying will let {game.remainingParryDamage} dmg through",
+            fontScale: 0.6,
+            color: color.forty_white,
+        },
+
+        $TemplateLabel {
+            styles: [
+                {
+                    style_priority: 1,
+                    visible: true,
+                    marginTop: 10#points
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("showSelectionPopup"),
+                    visible: false,
+                }
+            ],
+            font: "red_wing",
+            template: "Passing will let {game.remainingPassDamage} dmg through",
+            fontScale: 0.6,
+            color: color.red,
+        },
+
     ]
+
 ];
 
 var encounterModifierDisplay = $Box {
@@ -999,7 +1424,7 @@ var gameScreen = $Box {
     $Revolver {
         styles: [
             {
-                positionBottom: -250#points
+                positionBottom: -260#points
             }
         ],
         zIndex: 100,
@@ -1032,12 +1457,208 @@ var playerOverlay = $Box {
             background: "game_screen_player",
             flexDirection: flexDirection.column,
             alignItems: align.center,
+            positionLeft: 20#points,
             width: worldWidth#points,
             height: worldHeight#points,
         },
     ],
     zIndex: 0,
 };
+
+var winScreen = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            positionType: positionType.absolute,
+            background: "transparent_black_texture",
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            touchable: touchable.enabled,
+            detached: true
+        },
+        {
+            style_priority: 2,
+            style_condition: state("showWinScreen"),
+            detached: false
+        }
+    ],
+    zIndex: overlayZIndex - 1,
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: (worldWidth * 0.4)#points,
+                height: (worldHeight * 0.9)#points,
+                background: "win_screen_background",
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.flexStart,
+            }
+        ]
+    } children [
+
+        $Label {
+            styles: [
+                {
+                    marginTop: 130#points,
+                }
+            ],
+            font: "red_wing",
+            text: "You survived",
+            fontScale: 1.3,
+            color: color.forty_white,
+        },
+
+        $Box {
+            styles: [
+                {
+                    marginTop: 30#points,
+                    background: "win_screen_spacer",
+                    aspectRatio: 373.0 / 3.0,
+                    width: 60#percent,
+                }
+            ]
+        },
+
+        $Box {
+            styles: [
+                {
+                    marginTop: 30#points,
+                    width: 60#percent,
+                    flexDirection: flexDirection.column,
+                    alignItems: align.center,
+                    justifyContent: justify.flexStart
+                }
+            ]
+        } children [
+
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        background: "win_screen_item_cash",
+                        width: 100#percent,
+                        height: 60#points,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        detached: true,
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: state("showCashItem"),
+                        detached: false
+                    }
+                ]
+            } children [
+                $Box {
+                    name: "win_screen_cash_symbol",
+                    styles: [
+                        {
+                            background: "cash_symbol",
+                            width: 25#points,
+                            aspectRatio: 1.0,
+                            marginLeft: 10#points,
+                        }
+                    ]
+                },
+                $TemplateLabel {
+                    styles: [
+                        {
+                            marginLeft: 10#points,
+                        }
+                    ],
+                    font: "red_wing",
+                    template: "Overkill cash: {game.overkillCash}",
+                    fontScale: 0.8,
+                    color: color.black,
+                }
+            ],
+
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        marginTop: 10#points,
+                        background: "win_screen_item_card",
+                        width: 100#percent,
+                        height: 60#points,
+                        flexDirection: flexDirection.row,
+                        alignItems: align.center,
+                        detached: true,
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: state("showCardItem"),
+                        detached: false
+                    }
+                ]
+            } children [
+                $Box {
+                    styles: [
+                        {
+                            background: "map_node_get_card",
+                            width: 35#points,
+                            aspectRatio: 1.0,
+                            marginLeft: 10#points,
+                        }
+                    ]
+                },
+                $Label {
+                    styles: [
+                        {
+                            marginLeft: 10#points,
+                        }
+                    ],
+                    font: "red_wing",
+                    text: "New Card",
+                    fontScale: 0.8,
+                    color: color.black,
+                }
+            ],
+        ]
+    ],
+
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionTop: (worldHeight * 0.9 - 90.0)#points,
+                width: 190#points,
+                height: 50#points,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                background: "common_button_default",
+            },
+            {
+                style_priority: 2,
+                style_condition: hover(),
+                background: "common_button_hover"
+            }
+        ],
+        behaviours: [
+            $CatchEventAndEmitBehaviour {
+                catch: "ButtonClickEvent",
+                emit: "PopupConfirmationEvent"
+            },
+            buttonHoverBehaviour
+        ]
+    } children [
+
+        $Label {
+            font: "red_wing",
+            text: "Claim & Continue",
+            fontScale: 0.8,
+            color: color.black,
+        }
+
+    ]
+
+];
 
 root: $Box {
     styles: [
@@ -1064,11 +1685,55 @@ root: $Box {
         ]
     } children [
 
+        playerOverlay,
+        gameScreen,
+
+        winScreen,
+
         $Statusbar {
             options: [
             ],
             ...(sharedComponents.statusbarLeftDefaults)
-        },
+        } addStyles [
+            {
+                style_priority: 1,
+                detached: false,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showWinScreen"),
+                detached: true,
+            }
+        ],
+
+        $Statusbar {
+            options: [
+                {
+                    actorName: "backpackActor",
+                    displayName: "Notebook",
+                },
+                {
+                    actorName: "backpackActor",
+                    displayName: "Backpack",
+                },
+                {
+                    actorName: "backpackActor",
+                    displayName: "Settings",
+                },
+            ],
+            zIndex: 100000,
+            ...(sharedComponents.statusbarCenterDefaults),
+        } addStyles [
+            {
+                style_priority: 1,
+                detached: true,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showWinScreen"),
+                detached: false,
+            }
+        ],
 
         $StatusEffectDisplay {
             styles: [
@@ -1084,14 +1749,12 @@ root: $Box {
 
     ],
 
+    sharedComponents.backpack,
     sharedComponents.warningParent,
     encounterModifierDisplay,
-    playerOverlay,
-    gameScreen,
     enemyActionAnimContainer,
     drawCardActor,
     popupActor,
-    attackPopup,
     putCardsUnderDeckActor,
     enemyActionPopup
 ]

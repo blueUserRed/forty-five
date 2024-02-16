@@ -73,13 +73,18 @@ val Vector2.unit: Vector2
         return this / len
     }
 
+val Vector2.normal: Vector2
+    get() {
+        return this.cpy().rotate90(0)
+    }
+
 operator fun Vector2.minus(other: Vector2) = Vector2(x - other.x, y - other.y)
 operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 operator fun Vector2.times(other: Float): Vector2 = Vector2(this.x * other, this.y * other)
 operator fun Vector2.div(other: Float): Vector2 = Vector2(this.x / other, this.y / other)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
 operator fun Vector2.unaryMinus(): Vector2 = Vector2(-this.x, -this.y)
-fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
+infix fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
 fun Vector2.withMag(mag: Float): Vector2 = this.unit * mag
 fun Vector2.compare(other: Vector2, epsilon: Float = 0.01f): Boolean =
     other.x in (this.x - epsilon)..(this.x + epsilon) &&
@@ -89,6 +94,11 @@ fun Vector2.clampIndividual(minX: Float, maxX: Float, minY: Float, maxY: Float):
     this.x.coerceIn(minX, maxX),
     this.y.coerceIn(minY, maxY),
 )
+
+infix fun Vector2.midPoint(other: Vector2): Vector2 {
+    val off = this - other
+    return other + off * 0.5f
+}
 
 operator fun Vector2.component1(): Float = this.x
 operator fun Vector2.component2(): Float = this.y
@@ -288,6 +298,8 @@ fun GameAnimation.asTimeline(controller: GameController): Timeline = Timeline.ti
 
 fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"
 
+fun Actor.setPosition(pos: Vector2) = setPosition(pos.x, pos.y)
+
 object Utils {
 
     fun coinFlip(probability: Float): Boolean = (0f..1f).random() < probability
@@ -317,9 +329,9 @@ object Utils {
 
     /**
      * convert slot from external representation (1 comes after 5)
-     * to internal representation (4 comes after 5)
+     * to internal representation (4 comes after 5) and back
      */
-    fun externalToInternalSlotRepresentation(slot: Int): Int = if (slot == 5) 5 else 5 - slot
+    fun convertSlotRepresentation(slot: Int): Int = if (slot == 5) 5 else 5 - slot
 
     /**
      * loads either a custom cursor or a system cursor

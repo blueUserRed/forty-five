@@ -104,7 +104,7 @@ abstract class Resource(
 
 class TextureResource(
     handle: String,
-    private val file: String,
+    val file: String,
     val tileable: Boolean,
     val tileScale: Float
 ) : Resource(handle) {

@@ -249,6 +249,15 @@ sealed class StyleCondition {
             actor.isHoveredOver
     }
 
+    class IsActorHoveredOver(val actorName: String) : StyleCondition() {
+
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
+            (
+                (screen.namedActorOrError(actorName) as? HoverStateActor)
+                ?: throw RuntimeException("actor $actorName must be a HoverStateActor")
+            ).isHoveredOver
+    }
+
     class ScreenState(val state: String) : StyleCondition() {
         override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
             state in screen.screenState
