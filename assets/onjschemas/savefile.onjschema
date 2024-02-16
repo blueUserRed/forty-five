@@ -3,7 +3,10 @@ cards: string[]?,
 
 stats: {
     usedReserves: int,
-    enemiesDefeated: int
+    enemiesDefeated: int,
+    totalMoneyEarned: int,
+    encountersWon: int,
+    bulletsShot: int,
 },
 
 playerLives: int,

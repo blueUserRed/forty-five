@@ -232,7 +232,7 @@ var uniqueEventsToUseOften = {
     roadBetweenAquaBalleAndTabuLetter: {
         chooseCard: {
             isDeadEnd: true,
-            nodeTexture: "map_node_choose_card_circle",
+            nodeTexture: "map_node_shop",
             event: $ChooseCardMapEvent {
                 seed: null,
                 types: [
@@ -246,7 +246,7 @@ var uniqueEventsToUseOften = {
         },
         healEvent: {
             isDeadEnd: false,
-            nodeTexture: "map_node_heal_circle",
+            nodeTexture: "map_node_heal",
             event: $HealOrMaxHPEvent {
                 seed: null,
                 healRange: [
@@ -264,7 +264,7 @@ var uniqueEventsToUseOften = {
     roadBetweenTabuLetterAndSalem: {
         chooseCard: {
             isDeadEnd: true,
-            nodeTexture: "map_node_choose_card_circle",
+            nodeTexture: "map_node_choose_card",
             event: $ChooseCardMapEvent {
                 seed: null,
                 types: [
@@ -278,7 +278,7 @@ var uniqueEventsToUseOften = {
         },
         healEvent: {
             isDeadEnd: false,
-            nodeTexture: "map_node_heal_circle",
+            nodeTexture: "map_node_heal",
             event: $HealOrMaxHPEvent {
                 seed: null,
                 healRange: [
@@ -296,7 +296,7 @@ var uniqueEventsToUseOften = {
     roadBetweenSalemAndSpireOutpost: {
         chooseCard: {
             isDeadEnd: false,
-            nodeTexture: "map_node_choose_card_circle",
+            nodeTexture: "map_node_choose_card",
             event: $ChooseCardMapEvent {
                 seed: null,
                 types: [
@@ -310,7 +310,7 @@ var uniqueEventsToUseOften = {
         },
         healEvent: {
             isDeadEnd: false,
-            nodeTexture: "map_node_heal_circle",
+            nodeTexture: "map_node_heal",
             event: $HealOrMaxHPEvent {
                 seed: null,
                 healRange: [
@@ -347,12 +347,12 @@ var aquaBalleToTabuLetterOutpost = {
         ],
         rotation: 1.507,
         avgNbrOfEncounters: 0,
-        exitNodeTexture: "map_node_exit_circle",
+        exitNodeTexture: "map_node_exit",
         fixedEvents: [
             ...repeat(3, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.chooseCard),
             ...repeat(2, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.healEvent),
             {
-                nodeTexture: "map_node_shop_rect",
+                nodeTexture: "map_node_shop",
                 event: $ShopMapEvent {
                     seed: null,
                     boughtIndices: [
@@ -367,7 +367,7 @@ var aquaBalleToTabuLetterOutpost = {
         optionalEvents: [
             {
                 weight: 25,
-                nodeTexture: "map_node_fight_circle",
+                nodeTexture: "map_node_fight",
                 event: $EncounterMapEvent {
                     currentlyBlocks: true,
                     canBeStarted: true,
@@ -378,7 +378,7 @@ var aquaBalleToTabuLetterOutpost = {
             },
             {
                 weight: 1,
-                nodeTexture: "map_node_choose_card_circle",
+                nodeTexture: "map_node_choose_card",
                 event: $ChooseCardMapEvent {
                     seed: null,
                     types: [
@@ -392,7 +392,7 @@ var aquaBalleToTabuLetterOutpost = {
             },
             {
                 weight: 1,
-                nodeTexture: "map_node_shop_rect",
+                nodeTexture: "map_node_shop",
                 event: $ShopMapEvent {
                     seed: null,
                     boughtIndices: [
@@ -404,7 +404,7 @@ var aquaBalleToTabuLetterOutpost = {
             },
         ],
         finalEvent: {
-            nodeTexture: "map_node_fight_circle",
+            nodeTexture: "map_node_fight",
             event: $EncounterMapEvent {
                 currentlyBlocks: true,
                 canBeStarted: true,
@@ -438,12 +438,12 @@ var tabuLetterOutpostToSalem = {
         ],
         rotation: 3.14/4,
         avgNbrOfEncounters: 0,
-        exitNodeTexture: "map_node_exit_circle",
+        exitNodeTexture: "map_node_exit",
         fixedEvents: [
             ...repeat(4, uniqueEventsToUseOften.roadBetweenTabuLetterAndSalem.chooseCard),
             ...repeat(3, uniqueEventsToUseOften.roadBetweenTabuLetterAndSalem.healEvent),
             {
-                nodeTexture: "map_node_shop_rect",
+                nodeTexture: "map_node_shop",
                 event: $ShopMapEvent {
                     seed: null,
                     boughtIndices: [
@@ -458,7 +458,7 @@ var tabuLetterOutpostToSalem = {
         optionalEvents: [
             {
                 weight: 25,
-                nodeTexture: "map_node_fight_circle",
+                nodeTexture: "map_node_fight",
                 event: $EncounterMapEvent {
                     currentlyBlocks: true,
                     canBeStarted: true,
@@ -469,7 +469,7 @@ var tabuLetterOutpostToSalem = {
             },
             {
                 weight: 1,
-                nodeTexture: "map_node_heal_circle",
+                nodeTexture: "map_node_heal",
                 event: $HealOrMaxHPEvent {
                     seed: null,
                     healRange: [
@@ -485,7 +485,7 @@ var tabuLetterOutpostToSalem = {
             },
             {
                 weight: 1,
-                nodeTexture: "map_node_shop_rect",
+                nodeTexture: "map_node_shop",
                 event: $ShopMapEvent {
                     seed: null,
                     boughtIndices: [
@@ -511,7 +511,7 @@ var tabuLetterOutpostToSalem = {
             },
         ],
         finalEvent: {
-            nodeTexture: "map_node_fight_circle",
+            nodeTexture: "map_node_fight",
             event: $EncounterMapEvent {
                 currentlyBlocks: true,
                 canBeStarted: true,
@@ -545,12 +545,12 @@ var salemToSpireOutpost = {
         ],
         rotation: 0.0,
         avgNbrOfEncounters: 0,
-        exitNodeTexture: "map_node_exit_circle",
+        exitNodeTexture: "map_node_exit",
         fixedEvents: [
             ...repeat(4, uniqueEventsToUseOften.roadBetweenSalemAndSpireOutpost.chooseCard),
             ...repeat(3, uniqueEventsToUseOften.roadBetweenSalemAndSpireOutpost.healEvent),
             {
-                nodeTexture: "map_node_shop_circle",
+                nodeTexture: "map_node_shop",
                 event: $ShopMapEvent {
                     seed: null,
                     boughtIndices: [
@@ -565,7 +565,7 @@ var salemToSpireOutpost = {
         optionalEvents: [
             {
                 weight: 25,
-                nodeTexture: "map_node_fight_circle",
+                nodeTexture: "map_node_fight",
                 event: $EncounterMapEvent {
                     currentlyBlocks: true,
                     canBeStarted: true,
@@ -576,7 +576,7 @@ var salemToSpireOutpost = {
             },
             {
                 weight: 1,
-                nodeTexture: "map_node_heal_circle",
+                nodeTexture: "map_node_heal",
                 event: $HealOrMaxHPEvent {
                     seed: null,
                     healRange: [
@@ -592,7 +592,7 @@ var salemToSpireOutpost = {
             },
             {
                 weight: 1,
-                nodeTexture: "map_node_shop_circle",
+                nodeTexture: "map_node_shop",
                 event: $ShopMapEvent {
                     seed: null,
                     boughtIndices: [
@@ -618,7 +618,7 @@ var salemToSpireOutpost = {
             }
         ],
         finalEvent: {
-            nodeTexture: "map_node_fight_circle",
+            nodeTexture: "map_node_fight",
             event: $EncounterMapEvent {
                 currentlyBlocks: true,
                 canBeStarted: true,

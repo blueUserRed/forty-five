@@ -43,7 +43,7 @@ class StatusEffectDisplay(
      * adds a new status effect that will be displayed
      */
     fun displayEffect(effect: StatusEffect) {
-        val remainingLabel = CustomLabel(screen, effect.getDisplayText(), Label.LabelStyle(font, fontColor))
+        val remainingLabel = CustomLabel(screen, effect.getDisplayText(), Label.LabelStyle(font, fontColor), true)
         remainingLabel.setFontScale(fontScale)
         addActor(effect.icon)
         addActor(remainingLabel)

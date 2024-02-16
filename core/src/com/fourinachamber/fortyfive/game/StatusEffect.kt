@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game
 
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
@@ -270,68 +271,6 @@ class Bewitched(
 
 }
 
-class WardOfTheWitch(
-    private val amount: Int
-) : StatusEffect(
-    GraphicsConfig.iconName("wardOfTheWitch"),
-    GraphicsConfig.iconScale("wardOfTheWitch")
-) {
-
-    override val effectType: StatusEffectType = StatusEffectType.WITCH
-
-    override fun canStackWith(other: StatusEffect): Boolean = false
-
-    override fun stack(other: StatusEffect) { }
-
-    override fun isStillValid(): Boolean = true
-
-    override fun executeAfterRotation(rotation: RevolverRotation, target: StatusEffectTarget): Timeline? {
-        if (target !is StatusEffectTarget.EnemyTarget) {
-            throw RuntimeException("WardOfTheWitch can only be used on enemies")
-        }
-        if (rotation !is RevolverRotation.Left) return null
-        return target.enemy.addCoverTimeline(amount)
-    }
-
-    override fun getDisplayText(): String = "+$amount shield"
-
-    override fun equals(other: Any?): Boolean = other is WardOfTheWitch
-
-}
-
-class WrathOfTheWitch(
-    private val damage: Int
-) : StatusEffect(
-    GraphicsConfig.iconName("wrathOfTheWitch"),
-    GraphicsConfig.iconScale("wrathOfTheWitch")
-) {
-
-    override val effectType: StatusEffectType = StatusEffectType.WITCH
-
-    override fun executeAfterRotation(
-        rotation: RevolverRotation,
-        target: StatusEffectTarget
-    ): Timeline? = if (rotation is RevolverRotation.Left) Timeline.timeline {
-        if (target !is StatusEffectTarget.PlayerTarget) {
-            throw RuntimeException("WrathOfTheWitch can only be used on the player")
-        }
-        include(controller.damagePlayerTimeline(damage, true))
-    } else {
-        null
-    }
-
-    override fun canStackWith(other: StatusEffect): Boolean = false
-
-    override fun stack(other: StatusEffect) {}
-
-    override fun isStillValid(): Boolean = true
-
-    override fun getDisplayText(): String = "$damage dmg"
-
-    override fun equals(other: Any?): Boolean = other is WrathOfTheWitch
-
-}
-
 class Shield(
     private var shield: Int
 ) : StatusEffect(
@@ -363,7 +302,7 @@ class Shield(
 
 }
 
-typealias StatusEffectCreator = () -> StatusEffect
+typealias StatusEffectCreator = (GameController?, Card?) -> StatusEffect
 
 enum class StatusEffectType {
     FIRE, POISON, OTHER, BLOCKING, WITCH

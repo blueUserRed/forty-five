@@ -11,7 +11,7 @@ nodes: [
         edgesTo: [
             1
         ],
-        nodeTexture: "map_node_exit_rect",
+        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "road_between_tabu_letter_outpost_and_salem",
         }
@@ -22,7 +22,7 @@ nodes: [
         edgesTo: [
             0,2
         ],
-        nodeTexture: "map_node_shop_rect",
+        nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
             seed: null,
             boughtIndices: [
@@ -38,7 +38,7 @@ nodes: [
         edgesTo: [
             1, 3
         ],
-        nodeTexture: "map_node_heal_rect",
+        nodeTexture: "map_node_heal",
         event: $AddMaxHPEvent {
             maxHPRange: [
                 10, 15
@@ -55,7 +55,7 @@ nodes: [
         edgesTo: [
             2
         ],
-        nodeTexture: "map_node_exit_rect",
+        nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "road_between_salem_and_spire_outpost",
         }

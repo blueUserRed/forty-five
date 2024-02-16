@@ -98,15 +98,20 @@ class StatusbarWidget(
     private fun initMapIndicator() {
         if (mapIndicatorWidgetName == null) return
         val mapIndicator = screen.namedActorOrError(mapIndicatorWidgetName) as CustomFlexBox
-        val curImage = getImageData(MapManager.currentDetailMap.name)
-        if (curImage != null && MapManager.currentDetailMap.isArea) {
+        val currentMap = MapManager.currentDetailMap
+        val curImage = if (currentMap.isArea) {
+            getImageData(currentMap.name)
+        } else {
+            null
+        }
+        if (curImage != null) {
             screen.screenBuilder.generateFromTemplate(
                 "statusbar_sign",
                 mapOf("textureName" to OnjString(curImage.resourceHandle)),
                 mapIndicator,
                 screen
             )
-        }else if (MapManager.currentDetailMap.startNode.event is EnterMapMapEvent && MapManager.currentDetailMap.endNode.event is EnterMapMapEvent) {
+        } else if (currentMap.startNode.event is EnterMapMapEvent && currentMap.endNode.event is EnterMapMapEvent) {
             screen.screenBuilder.generateFromTemplate(
                 "statusbar_text",
                 mapOf("text" to OnjString("Road between ")),
@@ -119,8 +124,8 @@ class StatusbarWidget(
                     "textureName" to
                             OnjString(
                                 getImageData(
-                                    (MapManager.currentDetailMap.startNode.event as EnterMapMapEvent).targetMap
-                                )!!.resourceHandle
+                                    (currentMap.startNode.event as EnterMapMapEvent).targetMap
+                                ).resourceHandle
                             )
                 ),
                 mapIndicator,
@@ -138,8 +143,8 @@ class StatusbarWidget(
                     "textureName" to
                             OnjString(
                                 getImageData(
-                                    (MapManager.currentDetailMap.endNode.event as EnterMapMapEvent).targetMap
-                                )!!.resourceHandle
+                                    (currentMap.endNode.event as EnterMapMapEvent).targetMap
+                                ).resourceHandle
                             )
                 ),
                 mapIndicator,
@@ -156,6 +161,7 @@ class StatusbarWidget(
     }
 
     private fun getImageData(name: String) = MapManager.mapImages.find { it.name == name && it.type == "name" }
+        ?: throw RuntimeException("no image for map $name")
 
     private fun getOptionTimeline(target: CustomFlexBox, goUp: Boolean) =
         Timeline.timeline {

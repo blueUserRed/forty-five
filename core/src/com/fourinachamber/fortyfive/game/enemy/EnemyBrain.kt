@@ -1,11 +1,8 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
-import com.fourinachamber.fortyfive.utils.weightedRandom
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -20,325 +17,35 @@ abstract class EnemyBrain {
 
         fun fromOnj(onj: OnjNamedObject, enemy: Enemy): EnemyBrain = when (onj.name) {
 
-            "RandomEnemyBrain" -> RandomEnemyBrain(
-                onj
-                    .get<OnjArray>("actions")
-                    .value
-                    .map { it as OnjNamedObject }
-                    .map { it.get<Long>("weight").toInt() to EnemyActionPrototype.fromOnj(it, enemy) },
-                onj.get<Double>("actionProbability").toFloat()
-            )
-
-            "WitchBrain" -> WitchBrain(
-                onj.get<OnjArray>("firstEffectPossibleTurns").toIntRange(),
-                onj.get<OnjArray>("secondEffectOffset").toIntRange(),
-                onj.get<OnjArray>("bewitchedTurns").toIntRange(),
-                onj.get<OnjArray>("bewitchedRotations").toIntRange(),
-                onj.get<OnjArray>("wrathOfTheWitchDamageRange").toIntRange(),
-                onj.get<OnjArray>("wardOfTheWitchCoverRange").toIntRange(),
-                onj.get<Long>("bewitchedBufferTurns").toInt(),
-                onj.get<Double>("bewitchedProbability").toFloat(),
-                onj.get<Double>("bewitchedShowProbability").toFloat(),
-                onj.get<Double>("rotateRevolverProbability").toFloat(),
-                onj.get<Double>("rotateRevolverShowProbability").toFloat(),
-                onj.get<Double>("damageProbability").toFloat(),
-                onj.get<OnjArray>("damage").toIntRange(),
-                onj.get<Double>("shieldProbability").toFloat(),
-                onj.get<OnjArray>("shield").toIntRange(),
-                onj.get<String>("revolverRotationIconHandle"),
-                onj.get<String>("damageIconHandle"),
-                onj.get<String>("shieldIconHandle"),
-            )
-
             "ScriptedEnemyBrain" -> ScriptedEnemyBrain(
                 onj.get<OnjArray>("actions"),
                 enemy
             )
 
+            "OutlawBrain" -> OutlawEnemyBrain(onj)
+            "PyroBrain" -> PyroEnemyBrain(onj)
+            "WitchBrain" -> WitchEnemyBrain(onj)
+
             else -> throw RuntimeException("unknown EnemyBrain ${onj.name}")
         }
-
     }
 
-}
-
-class RandomEnemyBrain(
-    private val actionPrototypes: List<Pair<Int, EnemyActionPrototype>>,
-    private val actionProbability: Float
-) : EnemyBrain() {
-
-    private var nextEnemyAction: NextEnemyAction = NextEnemyAction.None
-
-    override fun resolveEnemyAction(
-        controller: GameController,
-        enemy: Enemy,
-        difficulty: Double
-    ): EnemyAction? = when (val nextAction = nextEnemyAction) {
-
-        is NextEnemyAction.None -> null
-
-        is NextEnemyAction.ShownEnemyAction -> {
-            if (!nextAction.action.prototype.applicable(controller)) {
-                FortyFiveLogger.warn(
-                    GameDirector.logTag, "Enemy action ${nextAction.action} was chosen to be shown " +
-                            "but when the applicable() function was checked it returned false; bailing out"
-                )
-                null
-            } else {
-                nextAction.action
-            }
-        }
-
-        is NextEnemyAction.HiddenEnemyAction -> {
-            val possibleActions = actionPrototypes
-                .filter { (_, action) -> action.showProbability <= 0f }
-                .filter { (_, action) -> action.applicable(controller) }
-            if (possibleActions.isEmpty()) {
-                FortyFiveLogger.warn(
-                    GameDirector.logTag, "encountered issue when executing HiddenEnemyAction: " +
-                            "preferred action was not applicable and no replacement action could be found; returning " +
-                            "empty timeline"
-                )
-                null
-            } else {
-                possibleActions
-                    .weightedRandom()
-                    .create(controller, difficulty)
-            }
-        }
+    protected fun damagePlayer(range: IntRange, enemy: Enemy) = EnemyActionPrototype.DamagePlayer(
+        range, enemy, false
+    ).apply {
+        iconHandle = "enemy_action_damage"
+        title = "Damage"
+        descriptionTemplate = "This attack deals {damage} damage"
     }
 
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction = run {
-        if (!Utils.coinFlip(actionProbability) || actionPrototypes.isEmpty()) {
-            return@run NextEnemyAction.None
-        }
-        // TODO: this algorithm for choosing enemy actions is not ideal, because it doesn't respect the weights
-        // correctly in certain scenarios
-        val possibleActions = actionPrototypes
-            .filter { (_, action) -> action.showProbability <= 0f || action.applicable(controller) }
-            .filter { (_, action) -> action.showProbability > 0f || !action.hasUnlikelyPredicates }
-        if (possibleActions.isEmpty()) {
-            FortyFiveLogger.debug(GameDirector.logTag, "Wanted to execute enemy action but none was applicable")
-            return@run NextEnemyAction.None
-        }
-        val chosenAction = possibleActions.weightedRandom()
-        val isShown = Utils.coinFlip(chosenAction.showProbability)
-        return@run if (isShown) {
-            NextEnemyAction.ShownEnemyAction(chosenAction.create(controller, difficulty))
-        } else {
-            NextEnemyAction.HiddenEnemyAction
-        }
-    }.also {
-        nextEnemyAction = it
-    }
-}
-
-class WitchBrain(
-    firstEffectPossibleTurns: IntRange,
-    secondEffectOffset: IntRange,
-    private val bewitchedTurns: IntRange,
-    private val bewitchedRotations: IntRange,
-    wrathOfTheWitchDamageRange: IntRange,
-    wardOfTheWitchCoverRange: IntRange,
-    private val bewitchedBufferTurns: Int,
-    private val bewitchedProbability: Float,
-    private val bewitchedShowProbability: Float,
-    private val rotateRevolverProbability: Float,
-    private val rotateRevolverShowProbability: Float,
-    private val damageProbability: Float,
-    private val damage: IntRange,
-    private val shieldProbability: Float,
-    private val shield: IntRange,
-    private val revolverRotationIconHandle: ResourceHandle,
-    private val damageIconHandle: ResourceHandle,
-    private val shieldIconHandle: ResourceHandle,
-) : EnemyBrain() {
-
-    private val firstEffectTurn = firstEffectPossibleTurns.random()
-    private val secondEffectTurn = firstEffectTurn + secondEffectOffset.random()
-    private val firstEffectIsWrathOfTheWitch: Boolean = Utils.coinFlip(0.5f)
-
-    private val wrathOfTheWitchDamage = wrathOfTheWitchDamageRange.random()
-    private val wardOfTheWitchCover = wardOfTheWitchCoverRange.random()
-
-    private val bewitchedActiveUntilTurn: Int = 0
-
-    private var nextAction: EnemyAction? = null
-    private var doBewitched: Boolean = false
-
-    private fun createBewitchedActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
-        { Bewitched(bewitchedTurns.random(), bewitchedRotations.random()) },
-        1f,
-        enemy,
-        false,
-        true
-    ).also {
-        setParameters(
-            it,
-            // im not passing all these values through the constructor, it is already long enough
-            // TODO: come up with a better solution
-            "enemy_action_bewitched",
-            "The player gets the bewitched status effect!",
-            "Bewitched",
-            "enemy_witch_action_comic_panel_bewitched"
-        )
+    protected fun takeCover(range: IntRange, enemy: Enemy) = EnemyActionPrototype.TakeCover(
+        range, enemy, false
+    ).apply {
+        iconHandle = "enemy_action_cover"
+        title = "Cover"
+        descriptionTemplate = "The enemy adds {cover} shield"
     }
 
-    private fun createWrathOfTheWitchActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
-        { WrathOfTheWitch(wrathOfTheWitchDamage) },
-        1f,
-        enemy,
-        false,
-        true
-    ).also {
-        setParameters(
-            it,
-            "enemy_action_bewitched",
-            "The player gets the 'Wrath of the Witch' status effect!",
-            "Wrath of the Witch",
-            "enemy_witch_action_comic_panel_wrath_of_the_witch"
-        )
-    }
-
-    private fun createWardOfTheWitchActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GiveSelfStatusEffect(
-        { WardOfTheWitch(wardOfTheWitchCover) },
-        1f,
-        enemy,
-        false,
-        true
-    ).also {
-        setParameters(
-            it,
-            "enemy_action_bewitched",
-            "The player gets the 'Ward of the Witch' status effect!",
-            "Ward of the Witch",
-            "enemy_witch_action_comic_panel_ward_of_the_witch"
-        )
-    }
-
-    private fun createLeftRotationActionPrototype(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.RotateRevolver(
-        1,
-        GameController.RevolverRotation.Left(1),
-        1f,
-        enemy,
-        false,
-        true
-    ).also {
-        setParameters(
-            it,
-            "enemy_action_left_turn",
-            "The revolver rotates {amount} to the left",
-            "Left Rotation",
-            "enemy_witch_action_comic_panel_left_turn"
-        )
-    }
-
-    private fun setParameters(
-        of: EnemyActionPrototype,
-        icon: String,
-        descriptionTemplate: String,
-        title: String,
-        specialPanel: String? = null
-    ) {
-        of.commonPanel1 = "enemy_witch_action_comic_common_panel_1"
-        of.commonPanel2 = "enemy_witch_action_comic_common_panel_2"
-        of.commonPanel3 = "enemy_witch_action_comic_common_panel_3"
-        specialPanel?.let { of.specialPanel = it }
-        of.iconHandle = icon
-        of.descriptionTemplate = descriptionTemplate
-        of.title = title
-    }
-
-    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
-        val turn = controller.turnCounter
-        if (turn == firstEffectTurn || turn == secondEffectTurn) {
-            return if (turn == firstEffectTurn && firstEffectIsWrathOfTheWitch) {
-                createWrathOfTheWitchActionPrototype(enemy).create(controller, difficulty)
-            } else {
-                createWardOfTheWitchActionPrototype(enemy).create(controller, difficulty)
-            }
-        }
-        nextAction?.let {
-            nextAction = null
-            return it
-        }
-        if (doBewitched) {
-            return createBewitchedActionPrototype(enemy).create(controller, difficulty)
-        }
-        return null
-    }
-
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction = run {
-        val turn = controller.turnCounter
-        doBewitched = false
-        if (turn == firstEffectTurn || turn == secondEffectTurn) return@run NextEnemyAction.HiddenEnemyAction
-        if (bewitchedActiveUntilTurn + bewitchedBufferTurns < turn && Utils.coinFlip(bewitchedProbability)) {
-            doBewitched = true
-            val action = createBewitchedActionPrototype(enemy).create(controller, difficulty)
-            nextAction = action
-            return@run if (Utils.coinFlip(bewitchedShowProbability)) {
-                NextEnemyAction.HiddenEnemyAction
-            } else {
-                NextEnemyAction.ShownEnemyAction(action)
-            }
-        }
-
-        if (Utils.coinFlip(rotateRevolverProbability)) {
-            val action = createLeftRotationActionPrototype(enemy).create(controller, difficulty)
-            nextAction = action
-            return@run if (Utils.coinFlip(rotateRevolverShowProbability)) {
-                NextEnemyAction.ShownEnemyAction(action)
-            } else {
-                NextEnemyAction.HiddenEnemyAction
-            }
-        }
-        if (Utils.coinFlip(damageProbability)) {
-            val action = EnemyActionPrototype.DamagePlayer(
-                damage,
-                1f,
-                enemy,
-                false,
-                false
-            ).also {
-                setParameters(
-                    it,
-                    "enemy_action_damage",
-                    "This attack does {damage} damage",
-                    "Damage"
-                )
-            }.create(controller, difficulty)
-            nextAction = action
-            return NextEnemyAction.ShownEnemyAction(action)
-        }
-        if (Utils.coinFlip(shieldProbability)) {
-            val action = EnemyActionPrototype.TakeCover(
-                shield,
-                1f,
-                enemy,
-                false,
-                false
-            ).also {
-                setParameters(
-                    it,
-                    "enemy_action_cover",
-                    "The enemy adds {cover} shield",
-                    "Cover"
-                )
-            }.create(controller, difficulty)
-            nextAction = action
-            return NextEnemyAction.ShownEnemyAction(action)
-        }
-
-        return@run NextEnemyAction.None
-    }
-
-}
-
-object NoOpEnemyBrain : EnemyBrain() {
-
-    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = null
-
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction = NextEnemyAction.None
 }
 
 class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBrain() {
@@ -381,3 +88,251 @@ class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBra
         }
     }
 }
+
+class OutlawEnemyBrain(onj: OnjObject) : EnemyBrain() {
+
+    private val phase1End = onj.get<Long>("phase1End").toInt()
+    private val phase2End = onj.get<Long>("phase2End").toInt()
+
+    private val damageValues: Array<IntRange> = arrayOf(
+        onj.get<OnjArray>("damagePhase1").toIntRange(),
+        onj.get<OnjArray>("damagePhase2").toIntRange(),
+        onj.get<OnjArray>("damagePhase3").toIntRange(),
+    )
+
+    private val coverValues: Array<IntRange> = arrayOf(
+        onj.get<OnjArray>("coverPhase1").toIntRange(),
+        onj.get<OnjArray>("coverPhase2").toIntRange(),
+        onj.get<OnjArray>("coverPhase3").toIntRange(),
+    )
+
+    private val actionProb = onj.get<Double>("actionProbability").toFloat()
+    private val attackProb = onj.get<Double>("attackProbability").toFloat()
+
+    private var chosenAction: EnemyAction? = null
+    private var didSomethingLastTurn: Boolean = false
+
+    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = chosenAction
+
+    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+        if (didSomethingLastTurn || !Utils.coinFlip(actionProb)) {
+            didSomethingLastTurn = false
+            chosenAction = null
+            return NextEnemyAction.None
+        }
+        val phase = when {
+            controller.turnCounter + 1 > phase2End -> 2
+            controller.turnCounter + 1 > phase1End -> 1
+            else -> 0
+        }
+        val action = if (Utils.coinFlip(attackProb)) {
+            damagePlayer(damageValues[phase], enemy)
+        } else {
+            takeCover(coverValues[phase], enemy)
+        }.create(controller, difficulty)
+        chosenAction = action
+        didSomethingLastTurn = true
+        return NextEnemyAction.ShownEnemyAction(action)
+    }
+}
+
+class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
+
+    private var chosenAction: EnemyAction? = null
+
+    private val burningTurns: IntRange = onj.get<OnjArray>("possibleBurningTurns").toIntRange()
+    private val burningTurn: Int = burningTurns.random()
+    private val burningRotations: IntRange = onj.get<OnjArray>("burningRotations").toIntRange()
+    private val hideBurningProb: Float = onj.get<Double>("hideBurningProbability").toFloat()
+
+    private val hotPotatoProb: Float = onj.get<Double>("hotPotatoProbability").toFloat()
+    private val hideHotPotatoProb: Float = onj.get<Double>("hideHotPotatoProbability").toFloat()
+
+    private val infernoHealthPercentage: Float = onj.get<Double>("infernoHealthPercentage").toFloat()
+
+    private val damage: IntRange = onj.get<OnjArray>("damage").toIntRange()
+    private val cover: IntRange = onj.get<OnjArray>("cover").toIntRange()
+
+    private val actionProb = onj.get<Double>("actionProbability").toFloat()
+    private val attackProb = onj.get<Double>("attackProbability").toFloat()
+
+    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = chosenAction
+
+    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+        if (controller.turnCounter + 1 == burningTurn) {
+            val action = burning(burningRotations.random(), enemy).create(controller, difficulty)
+            chosenAction = action
+            return if (Utils.coinFlip(hideBurningProb)) {
+                NextEnemyAction.HiddenEnemyAction
+            } else {
+                NextEnemyAction.ShownEnemyAction(action)
+            }
+        }
+        if (controller.turnCounter + 1 > burningTurns.last && Utils.coinFlip(hotPotatoProb)) {
+            val action = hotPotato(enemy).create(controller, difficulty)
+            chosenAction = action
+            return if (Utils.coinFlip(hideHotPotatoProb)) {
+                NextEnemyAction.HiddenEnemyAction
+            } else {
+                NextEnemyAction.ShownEnemyAction(action)
+            }
+        }
+        if ((enemy.currentHealth.toFloat() / enemy.health.toFloat()) < infernoHealthPercentage) {
+            val action = inferno(enemy).create(controller, difficulty)
+            chosenAction = action
+            return NextEnemyAction.ShownEnemyAction(action)
+        }
+        if (!Utils.coinFlip(actionProb)) {
+            chosenAction = null
+            return NextEnemyAction.None
+        }
+        val action = if (Utils.coinFlip(attackProb)) {
+            damagePlayer(damage, enemy)
+        } else {
+            takeCover(cover, enemy)
+        }.create(controller, difficulty)
+        chosenAction = action
+        return NextEnemyAction.ShownEnemyAction(action)
+    }
+
+    private fun hotPotato(enemy: Enemy) = EnemyActionPrototype.GivePlayerCard(
+        "scorchingBullet",
+        enemy,
+        true
+    ).apply {
+        iconHandle = "enemy_action_hot_potato"
+        title = "Hot Potato"
+        descriptionTemplate = "A [Scorching Bullet] is being put in your hand!"
+        commonPanel1 = "enemy_pyro_action_comic_common_panel_1"
+        commonPanel2 = "enemy_pyro_action_comic_common_panel_2"
+        commonPanel3 = "enemy_pyro_action_comic_common_panel_3"
+        specialPanel = "enemy_pyro_action_comic_panel_hot_potato"
+    }
+
+    private fun burning(rotations: Int, enemy: Enemy) = EnemyActionPrototype.GiveSelfStatusEffect(
+        { _, _ -> Burning(rotations, 0.5f, false) },
+        enemy,
+        true
+    ).apply {
+        iconHandle = "enemy_action_burning"
+        title = "Burning"
+        descriptionTemplate = "You get Burning!"
+        commonPanel1 = "enemy_pyro_action_comic_common_panel_1"
+        commonPanel2 = "enemy_pyro_action_comic_common_panel_2"
+        commonPanel3 = "enemy_pyro_action_comic_common_panel_3"
+        specialPanel = "enemy_pyro_action_comic_panel_burning"
+    }
+
+    private fun inferno(enemy: Enemy) = EnemyActionPrototype.GiveSelfStatusEffect(
+        { _, _ -> Burning(0, 0.5f, true) },
+        enemy,
+        true
+    ).apply {
+        iconHandle = "enemy_action_inferno"
+        title = "Inferno"
+        descriptionTemplate = "You get Burning for the rest of the fight!"
+        commonPanel1 = "enemy_pyro_action_comic_common_panel_1"
+        commonPanel2 = "enemy_pyro_action_comic_common_panel_2"
+        commonPanel3 = "enemy_pyro_action_comic_common_panel_3"
+        specialPanel = "enemy_pyro_action_comic_panel_inferno"
+    }
+}
+
+class WitchEnemyBrain(onj: OnjObject) : EnemyBrain() {
+
+    private var doLeftTurn: Boolean = false
+    private var chosenAction: EnemyAction? = null
+
+    private val bewitchedProb = onj.get<Double>("bewitchedProbability").toFloat()
+    private val bewitchedTurns: IntRange = onj.get<OnjArray>("bewitchedTurns").toIntRange()
+    private val bewitchedRotations: IntRange = onj.get<OnjArray>("bewitchedRotations").toIntRange()
+    private val hideBewitchedProb = onj.get<Double>("hideBewitchedProbability").toFloat()
+
+    private val leftTurnProb = onj.get<Double>("leftTurnProbability").toFloat()
+
+    private val damage: IntRange = onj.get<OnjArray>("damage").toIntRange()
+    private val cover: IntRange = onj.get<OnjArray>("cover").toIntRange()
+
+    private val actionProb = onj.get<Double>("actionProbability").toFloat()
+    private val attackProb = onj.get<Double>("attackProbability").toFloat()
+
+    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
+        if (doLeftTurn) {
+            doLeftTurn = false
+            return if (controller.revolver.slots.any { it.card != null }) {
+                leftTurn(enemy).create(controller, difficulty)
+            } else {
+                bewitched(bewitchedTurns.random(), bewitchedRotations.random(), enemy)
+                    .create(controller, difficulty)
+            }
+        }
+        return chosenAction
+    }
+
+    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+        if (Utils.coinFlip(leftTurnProb)) {
+            doLeftTurn = true
+            chosenAction = null
+            return NextEnemyAction.HiddenEnemyAction
+        }
+        if (Utils.coinFlip(bewitchedProb)) {
+            val action = bewitched(bewitchedTurns.random(), bewitchedRotations.random(), enemy)
+                .create(controller, difficulty)
+            chosenAction = action
+            return if (Utils.coinFlip(hideBewitchedProb)) {
+                NextEnemyAction.HiddenEnemyAction
+            } else {
+                NextEnemyAction.ShownEnemyAction(action)
+            }
+        }
+        if (!Utils.coinFlip(actionProb)) {
+            chosenAction = null
+            return NextEnemyAction.None
+        }
+        val action = if (Utils.coinFlip(attackProb)) {
+            damagePlayer(damage, enemy)
+        } else {
+            takeCover(cover, enemy)
+        }.create(controller, difficulty)
+        chosenAction = action
+        return NextEnemyAction.ShownEnemyAction(action)
+    }
+
+    private fun bewitched(turns: Int, rotations: Int, enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
+        { _, _ -> Bewitched(turns, rotations) },
+        enemy,
+        true
+    ).apply {
+        iconHandle = "enemy_action_bewitched"
+        title = "Bewitched"
+        descriptionTemplate = "The player gets the Bewitched status effect!"
+        commonPanel1 = "enemy_witch_action_comic_common_panel_1"
+        commonPanel2 = "enemy_witch_action_comic_common_panel_2"
+        commonPanel3 = "enemy_witch_action_comic_common_panel_3"
+        specialPanel = "enemy_witch_action_comic_panel_bewitched"
+    }
+
+    private fun leftTurn(enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.RotateRevolver(
+        1,
+        GameController.RevolverRotation.Left(1),
+        enemy,
+        true
+    ).apply {
+        iconHandle = "enemy_action_bewitched"
+        title = "Bewitched"
+        descriptionTemplate = "The revolver rotates to the left!"
+        commonPanel1 = "enemy_witch_action_comic_common_panel_1"
+        commonPanel2 = "enemy_witch_action_comic_common_panel_2"
+        commonPanel3 = "enemy_witch_action_comic_common_panel_3"
+        specialPanel = "enemy_witch_action_comic_panel_left_turn"
+    }
+
+}
+
+object NoOpEnemyBrain : EnemyBrain() {
+
+    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = null
+
+    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction = NextEnemyAction.None
+}
+

@@ -41,6 +41,12 @@ encounterModifiers: {
 
 encounterModifierAssets: string[],
 
+encounterBackgrounds: {
+    biome: string,
+    isDark: boolean,
+    background: string,
+}[],
+
 damageOverlay: {
     duration: float,
     fadeIn: float,
@@ -72,6 +78,11 @@ keySelectUsedAssets: string[],
 shootPostProcessor: {
     name: string,
     duration: float
+},
+
+enemyGravestone: {
+    texture: string,
+    scale: float,
 },
 
 gameUsedAssets: string[]

@@ -24,6 +24,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.component1
 import com.fourinachamber.fortyfive.utils.component2
+import com.fourinachamber.fortyfive.utils.setPosition
 import ktx.actors.contains
 import onj.value.OnjNamedObject
 import kotlin.math.cos
@@ -82,8 +83,6 @@ class Revolver(
     lateinit var slots: Array<RevolverSlot>
         private set
 
-    private var currentHoverDetailActor: CardDetailActor? = null
-
     private val background: Drawable by lazy {
         ResourceManager.get(screen, backgroundHandle)
     }
@@ -108,10 +107,26 @@ class Revolver(
             it.width = slots[0].width * cardScale
             it.height = slots[0].width * cardScale
             it.rotation = 0f
+            it.fixedZIndex = cardZIndex
         }
-        card?.actor?.fixedZIndex = cardZIndex
         if (card != null && card.actor !in this) addActor(card.actor)
-        invalidate()
+        slots[slot - 1].position(Vector2(width / 2, height / 2), radius, angleForIndex(slot - 1))
+    }
+
+    fun preAddCard(slot: Int, card: Card) {
+        if (slot !in 1..5) throw RuntimeException("slot must be between between 1 and 5")
+        card.isDraggable = false
+        val revolverSlot = slots[slot - 1]
+        if (card.actor !in this) addActor(card.actor)
+        card.actor.let {
+            it.width = slots[0].width * cardScale
+            it.height = slots[0].width * cardScale
+            it.rotation = 0f
+            it.toBack()
+        }
+        slots.forEach { it.toBack() }
+        card.actor.setPosition(revolverSlot.cardPosition())
+
     }
 
     /**
@@ -185,15 +200,10 @@ class Revolver(
         }
     }
 
+    fun getCardTriggerPosition() = Vector2(slots[0].x - slots[0].width / 2f, slots[4].y + slots[0].width / 2f)
+
     override fun layout() {
         super.layout()
-        currentHoverDetailActor?.forcedWidth = width
-        currentHoverDetailActor?.setBounds(
-            width / 2 - currentHoverDetailActor!!.forcedWidth / 2,
-            height,
-            currentHoverDetailActor!!.prefWidth,
-            currentHoverDetailActor!!.prefHeight
-        )
         updateSlotsAndCards()
     }
 
@@ -324,7 +334,7 @@ class RevolverSlot(
         if (inAnimation && action?.isComplete ?: false) {
             removeAction(action)
             inAnimation = false
-            card?.inAnimation = false
+//            card?.inAnimation = false
             revolver.invalidate()
         }
     }
@@ -342,12 +352,18 @@ class RevolverSlot(
         val dy = sin(angle) * r
         setPosition(base.x + dx.toFloat() - slotSize / 2, base.y + dy.toFloat() - slotSize / 2)
         curAngle = angle
-        card?.actor?.let {
-            it.setPosition(
-                x + slotSize / 2 - (it.width * it.scaleX) / 2,
-                y + slotSize / 2 - (it.height * it.scaleY) / 2
-            )
-        }
+        if (card?.actor?.inAnimation ?: true) return
+        card?.actor?.setPosition(cardPosition())
+    }
+
+    fun cardPosition(): Vector2 {
+        val slotSize = drawable.minWidth * scaleX
+        val width = card?.actor?.width ?: slotSize
+        val height = card?.actor?.height ?: slotSize
+        return Vector2(
+            x + slotSize / 2 - (width) / 2,
+            y + slotSize / 2 - (height) / 2,
+        )
     }
 
     /**
@@ -363,7 +379,6 @@ class RevolverSlot(
         action.isReverse = true
         action.duration = animationDuration
         addAction(action)
-        card?.inAnimation = true
         inAnimation = true
         this.action = action
     }
@@ -381,7 +396,6 @@ class RevolverSlot(
         action.isReverse = false
         action.duration = animationDuration
         addAction(action)
-        card?.inAnimation = true
         inAnimation = true
         this.action = action
     }

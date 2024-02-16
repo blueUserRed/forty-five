@@ -77,9 +77,23 @@ object SaveState {
     /**
      * how many enemies the player has defeated this run
      */
-    var enemiesDefeated: Int by templateParam("stat.enemiesDefeated", 0) {
-        savefileDirty = true
-    }
+    var enemiesDefeated: Int = 0
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
+    var encountersWon: Int = 0
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
+
+    var bulletsShot: Int = 0
+        set(value) {
+            field = value
+            savefileDirty = true
+        }
 
     /**
      * true if value has changed since the savefile was last written; will not write if this is false
@@ -104,9 +118,15 @@ object SaveState {
     /**
      * the current money of the player
      */
-    var playerMoney: Int by templateParam("stat.playerMoney", 0) {
+    val playerMoney: Int
+        get() = _playerMoney
+
+    private var _playerMoney: Int by templateParam("stat.playerMoney", 0) {
         savefileDirty = true
     }
+
+    var totalMoneyEarned: Int = 0
+        private set
 
     var curDeckNbr = 1
         set(value) {
@@ -128,18 +148,6 @@ object SaveState {
             }
             savefileDirty = true
         }
-
-    /**
-     * temporarily stores the used reserves, so it can be shown on the death screen
-     */
-    var lastRunUsedReserves: Int by templateParam("stat.lastRun.usedReserves", 0)
-        private set
-
-    /**
-     * temporarily stores the defeated enemies, so it can be shown on the death screen
-     */
-    var lastRunEnemiesDefeated: Int by templateParam("stat.lastRun.enemiesDefeated", 0)
-        private set
 
     private val savefileSchema: OnjSchema by lazy {
         OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/savefile.onjschema").file())
@@ -188,6 +196,9 @@ object SaveState {
         val stats = obj.get<OnjObject>("stats")
         usedReserves = stats.get<Long>("usedReserves").toInt()
         enemiesDefeated = stats.get<Long>("enemiesDefeated").toInt()
+        totalMoneyEarned = stats.get<Long>("totalMoneyEarned").toInt()
+        encountersWon = stats.get<Long>("encountersWon").toInt()
+        bulletsShot = stats.get<Long>("bulletsShot").toInt()
 
         val position = obj.get<OnjObject>("position")
         currentMap = position.get<String>("map")
@@ -196,14 +207,14 @@ object SaveState {
 
         playerLives = obj.get<Long>("playerLives").toInt()
         maxPlayerLives = obj.get<Long>("maxPlayerLives").toInt()
-        playerMoney = obj.get<Long>("playerMoney").toInt()
+        _playerMoney = obj.get<Long>("playerMoney").toInt()
         currentDifficulty = obj.get<Double>("currentDifficulty")
 
         FortyFiveLogger.debug(
             logTag, "stats: " +
                     "usedReserves = $usedReserves, " +
                     "enemiesDefeated = $enemiesDefeated, " +
-                    "playerMoney = $playerMoney, " +
+                    "playerMoney = $_playerMoney, " +
                     "playerLives = $playerLives" +
                     "maxPlayerLives = $maxPlayerLives"
         )
@@ -217,11 +228,29 @@ object SaveState {
         savefileDirty = false
     }
 
+    fun earnMoney(amount: Int) {
+        _playerMoney += amount
+        totalMoneyEarned += amount
+        savefileDirty = true
+    }
+
+    fun payMoney(amount: Int) {
+        _playerMoney -= amount
+        savefileDirty = true
+    }
+
+    fun copyStats() {
+        PermaSaveState.statTotalMoneyEarned = totalMoneyEarned
+        PermaSaveState.statEncountersWon = encountersWon
+        PermaSaveState.statBulletsShot = bulletsShot
+        PermaSaveState.statUsedReserves = usedReserves
+        PermaSaveState.statEnemiesDefeated = enemiesDefeated
+    }
+
     /**
      * resets to the default save file
      */
     fun reset() {
-        copyLastRunStats()
         copyDefaultFile()
         read()
     }
@@ -233,11 +262,6 @@ object SaveState {
 
     fun extract() {
         PermaSaveState.collection = _cards.toMutableList()
-    }
-
-    private fun copyLastRunStats() {
-        lastRunEnemiesDefeated = enemiesDefeated
-        lastRunUsedReserves = usedReserves
     }
 
     private fun copyDefaultFile() {
@@ -261,6 +285,9 @@ object SaveState {
             "stats" with buildOnjObject {
                 "usedReserves" with usedReserves
                 "enemiesDefeated" with enemiesDefeated
+                "totalMoneyEarned" with totalMoneyEarned
+                "encountersWon" with encountersWon
+                "bulletsShot" with bulletsShot
             }
             "position" with buildOnjObject {
                 "map" with currentMap
@@ -390,7 +417,7 @@ object SaveState {
                 return Deck(name, id, cardPositions)
             }
 
-            const val minDeckSize = 12
+            const val minDeckSize = 15
             const val numberOfSlots = 35
         }
     }

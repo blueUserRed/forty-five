@@ -66,18 +66,23 @@ hoverDetailDescriptionGroups: [
 ],
 
 defaultTextEffects:[
-    $Color{
+    $Color {
         indicator:"$trigger$",
         color: color.hemoglobin_red,
     },
 
-    $FontScale{
+    $FontScale {
         indicator:"$trigger$",
         fontScale: 0.8,
     },
 
-    $Color{
+    $Color {
         indicator:"$dmgBuff$",
         color: color.green,
+    },
+
+    $Color {
+        indicator:"$dmgNerf$",
+        color: color.red,
     },
 ]

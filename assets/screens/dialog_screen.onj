@@ -11,7 +11,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
+        "title_screen_background", "red_wing_cm", "red_wing", "red_wing_bmp", "hover_detail_background", "reserves_texture",
         "enemy_texture",
         "dialog_name_field",
         "dialog_continue",
@@ -28,7 +28,6 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 1.0,
     background: "title_screen_background",
     inputMap: [
         ...(inputMaps.defaultInputMap)
@@ -53,7 +52,6 @@ var dialogWidget = $Box {
             paddingTop: 30#points,
             paddingBottom: 30#points,
             touchable: touchable.enabled,
-            alpha: 0.6,
         }
     ],
 } children [

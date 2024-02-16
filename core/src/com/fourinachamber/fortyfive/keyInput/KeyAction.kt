@@ -29,13 +29,22 @@ object KeyActionFactory {
             val width = obj.get<Long>("width").toInt()
             val height = obj.get<Long>("height").toInt()
             ; { _, _ ->
-            if (!Gdx.graphics.isFullscreen) {
-                Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-            } else {
-                Gdx.graphics.setWindowedMode(width, height)
+                if (!Gdx.graphics.isFullscreen) {
+                    Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
+                } else {
+                    Gdx.graphics.setWindowedMode(width, height)
+                }
+                true
             }
-            true
-        }
+        },
+
+        "ToggleFps" to {
+            { _, _ ->
+                FortyFive.currentRenderPipeline?.let {
+                    it.showFps = !it.showFps
+                }
+                true
+            }
         },
 
         "SelectCardInHand" to { obj ->

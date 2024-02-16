@@ -4,10 +4,14 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
+import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
+import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -21,6 +25,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
+import ktx.actors.onClick
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -112,11 +117,6 @@ class Card(
      */
     var isDraggable: Boolean = true
 
-    /**
-     * true when [actor] is in an animation
-     */
-    var inAnimation: Boolean = false
-
     var inGame: Boolean = false
         private set
 
@@ -131,6 +131,8 @@ class Card(
     var isSpray: Boolean = false
         private set
     var isReinforced: Boolean = false
+        private set
+    var isShotProtected: Boolean = false
         private set
 
     val shouldRemoveAfterShot: Boolean
@@ -155,6 +157,9 @@ class Card(
     private var modifierValuesDirty = true
 
     var enteredInSlot: Int? = null
+        private set
+
+    var enteredOnTurn: Int? = null
         private set
 
     var rotationCounter: Int = 0
@@ -205,6 +210,8 @@ class Card(
         if (somethingChanged) modifiersChanged()
     }
 
+    fun canBeShot(controller: GameController): Boolean = !(isShotProtected && controller.turnCounter == enteredOnTurn)
+
     fun update(controller: GameController) {
         checkModifierValidity(controller)
         if (modifierValuesDirty) {
@@ -231,10 +238,6 @@ class Card(
      * called by gameScreenController when the card was shot
      */
     fun afterShot() {
-        if (isUndead) {
-            FortyFiveLogger.debug(logTag, "undead card is respawning in hand after being shot")
-            FortyFive.currentGame!!.cardHand.addCard(this)
-        }
         if (shouldRemoveAfterShot) leaveGame()
     }
 
@@ -304,7 +307,7 @@ class Card(
         }
         val modifier = CardModifier(
             damage = 0,
-            source = "rotten effect",
+            source = "disintegration effect",
             validityChecker = { inGame },
             transformers = mapOf(
                 Trigger.ON_REVOLVER_ROTATION to rotationTransformer
@@ -319,6 +322,8 @@ class Card(
     fun onEnter(controller: GameController) {
         inGame = true
         enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
+        enteredOnTurn = controller.turnCounter
+        if (isRotten) addRottenModifier()
     }
 
     /**
@@ -344,11 +349,27 @@ class Card(
             checkModifierTransformers(trigger, triggerInformation)
         }
         val inHand = inHand(controller)
-        effects
+        val effects = effects
             .filter { inGame || (inHand && it.triggerInHand) }
-            .mapNotNull { it.checkTrigger(trigger, triggerInformation, controller) }
-            .collectTimeline()
-            .let { include(it) }
+            .zip { it.checkTrigger(trigger, triggerInformation, controller) }
+            .filter { it.second != null }
+        if (effects.isEmpty()) return@timeline
+        val showAnimation = effects.any { !it.first.isHidden }
+        action {
+            actor.inAnimation = true
+        }
+        includeLater(
+            { actor.animateToTriggerPosition(controller) },
+            { inGame && showAnimation }
+        )
+        include(effects.mapNotNull { it.second }.collectTimeline())
+        includeLater(
+            { actor.animateBack(controller) },
+            { inGame && showAnimation }
+        )
+        action {
+            actor.inAnimation = false
+        }
     }
 
     private fun checkModifierTransformers(trigger: Trigger, triggerInformation: TriggerInformation) {
@@ -368,15 +389,15 @@ class Card(
     private fun updateText(controller: GameController) {
         val currentEffects = mutableListOf<Pair<String, String>>()
         if (activeModifiers(controller).any { it.damage != 0 }) {
-            val allDamageEffects = activeModifiers(controller).filter { it.damage != 0 }
-            val damageChange = allDamageEffects.sumOf { it.damage }
+            val allDamageEffects = activeModifiers(controller).filter { it.damage != 0 || it.damageMultiplier != 1f }
+            val damageChange = curDamage(controller) - baseDamage
             val damageText = allDamageEffects
                 .joinToString(
                     separator = ", ",
                     prefix = "${if (damageChange > 0) "+" else ""}$damageChange by ",
                     transform = { it.source })
-            currentEffects.add("dmgBuff" to "\$dmgBuff\$$damageText\$dmgBuff\$")
-            //this is the only special keyword, since it doesn't need a description
+            val keyWord = if (damageChange > 0) "\$dmgBuff\$" else "\$dmgNerf\$"
+            currentEffects.add("dmgBuff" to "$keyWord$damageText$keyWord")
         }
 
         if (protectingModifiers.isNotEmpty()) {
@@ -408,8 +429,10 @@ class Card(
     fun getAdditionalHoverDescriptions(): List<String> {
         return additionalHoverInfos.map { info ->
             when (info) {
-                "home" -> enteredInSlot.toString()
-                "rotations" -> rotationCounter.toString()
+                "home" -> enteredInSlot?.let {
+                    "bullet entered in slot ${Utils.convertSlotRepresentation(it)}"
+                } ?: ""
+                "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
                     val mostExpensive = (actor.screen.screenController as GameController)
                         .revolver
@@ -489,7 +512,7 @@ class Card(
                     .getOr<OnjArray?>("forbiddenSlots", null)
                     ?.value
                     ?.map { (it.value as Long).toInt() }
-                    ?.map { Utils.externalToInternalSlotRepresentation(it) }
+                    ?.map { Utils.convertSlotRepresentation(it) }
                     ?: listOf(),
                 //TODO: CardDetailActor could call these functions itself
                 font = GraphicsConfig.cardFont(onjScreen),
@@ -529,10 +552,8 @@ class Card(
                 "replaceable" -> card.isReplaceable = true
                 "spray" -> card.isSpray = true
                 "reinforced" -> card.isReinforced = true
-                "rotten" -> {
-                    card.isRotten = true
-                    card.addRottenModifier()
-                }
+                "shotProtected" -> card.isShotProtected = true
+                "rotten" -> card.isRotten = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
@@ -577,10 +598,12 @@ class CardActor(
     val isDark: Boolean,
     override val screen: OnjScreen
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
-    OffSettable {
+    OffSettable, AnimationActor {
 
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
+
+    override var inAnimation: Boolean = false
 
     override var mainHoverDetailActor: String? = "cardHoverDetailMain"
 
@@ -589,12 +612,6 @@ class CardActor(
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
     override var styleManager: StyleManager? = null
-    override fun initStyles(screen: OnjScreen) {
-        addActorStyles(screen)
-//        addBackgroundStyles(screen) //Maybe these are needed, probably not
-//        addDisableStyles(screen)
-//        addOffsetableStyles(screen)
-    }
 
     override var isHoveredOver: Boolean = false
 
@@ -630,12 +647,21 @@ class CardActor(
 
     private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
 
+    private var prevPosition: Vector2? = null
+
+    private var inSelectionMode: Boolean = false
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
         redrawPixmap(card.baseDamage)
+        onClick {
+            if (!inSelectionMode) return@onClick
+            // UGGGGGLLLLLLYYYYY
+            FortyFive.currentGame!!.selectCard(card)
+        }
     }
 
     private fun showExtraDescriptions(descriptionParent: CustomFlexBox) {
@@ -646,9 +672,25 @@ class CardActor(
             .forEach {
                 addHoverItemToParent(it.value.second, descriptionParent)
             }
+        if (FortyFive.currentGame == null) return
         card
             .getAdditionalHoverDescriptions()
+            .filter { it.isNotBlank() }
             .forEach { addHoverItemToParent(it, descriptionParent) }
+    }
+
+    override fun setBounds(x: Float, y: Float, width: Float, height: Float) {
+        // This is a fix for the ChooseCardScreen, where for some reason the CardDragAndDrop sets the position first,
+        // but is then overwritten by the layout code every frame (I guess something is calling invalidate each frame,
+        // but I dont know what)
+        // I also dont know why the LibGDX drag and drop system is implemented like this, because it inherently relies
+        // on the order in which the DragAndDrop/Layout/Draw code is executed, which breaks really easily
+        // This is a really bad fix, but a good fix would probably involve completely rewriting the DragAndDrop-System
+        // and this issue has been haunting me for too long
+
+        // block the layout code from setting the position when the actor is dragged (and hope that the DragAndDrop-Code doesnt use the setBounds function)
+        if (isDragged) return
+        super.setBounds(x, y, width, height)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -671,6 +713,21 @@ class CardActor(
         }
         val c = batch.color.cpy()
         batch.setColor(c.r, c.g, c.b, alpha)
+        val width: Float
+        val height: Float
+        val x: Float
+        val y: Float
+        if (isHoveredOver && inSelectionMode) {
+            width = this.width * 1.2f
+            height = this.height * 1.2f
+            x = this.x - (width - this.width) / 2f
+            y = this.y - (height - this.height) / 2f
+        } else {
+            width = this.width
+            height = this.height
+            x = this.x
+            y = this.y
+        }
         batch.draw(
             texture,
             x + offsetX, y + offsetY,
@@ -722,6 +779,64 @@ class CardActor(
         }
         delay(2000)
         action { inDestroyAnim = false }
+    }
+
+    fun animateToTriggerPosition(controller: GameController): Timeline = Timeline.timeline {
+        prevPosition = Vector2(x, y)
+        val (targetX, targetY) = controller.revolver.getCardTriggerPosition()
+        val moveAction = MoveToAction()
+        moveAction.setPosition(targetX, targetY)
+        moveAction.duration = 0.3f
+        moveAction.interpolation = Interpolation.pow2
+        val scaleAction = ScaleToAction()
+        scaleAction.setScale(1.3f)
+        scaleAction.duration = 0.3f
+        scaleAction.interpolation = Interpolation.pow2
+        action {
+            toFront()
+            addAction(moveAction)
+            addAction(scaleAction)
+        }
+        delayUntil { moveAction.isComplete }
+        action {
+            removeAction(moveAction)
+            removeAction(scaleAction)
+        }
+        delay(100)
+    }
+
+    fun animateBack(controller: GameController): Timeline = Timeline.timeline {
+        val (targetX, targetY) = controller
+            .revolver
+            .slots
+            .find { it.card === card }
+            ?.cardPosition()
+            ?: return@timeline
+        val moveAction = MoveToAction()
+        moveAction.setPosition(targetX, targetY)
+        moveAction.duration = 0.3f
+        moveAction.interpolation = Interpolation.pow2
+        val scaleAction = ScaleToAction()
+        scaleAction.setScale(1f)
+        scaleAction.duration = 0.3f
+        scaleAction.interpolation = Interpolation.pow2
+        action {
+            addAction(moveAction)
+            addAction(scaleAction)
+        }
+        delayUntil { moveAction.isComplete }
+        action {
+            removeAction(moveAction)
+            removeAction(scaleAction)
+        }
+    }
+
+    fun enterSelectionMode() {
+        inSelectionMode = true
+    }
+
+    fun exitSelectionMode() {
+        inSelectionMode = false
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
@@ -792,10 +907,18 @@ class CardActor(
             screen.enterState("hoverDetailHasFlavorText")
         }
 
-        if (card.getKeyWordsForDescriptions().isEmpty() && card.getAdditionalHoverDescriptions().isEmpty()) {
+        if (card.getKeyWordsForDescriptions().isEmpty() && (FortyFive.currentGame == null || card.getAdditionalHoverDescriptions().isEmpty())) {
             screen.leaveState("hoverDetailHasMoreInfo")
         } else {
             screen.enterState("hoverDetailHasMoreInfo")
         }
     }
+
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+//        addBackgroundStyles(screen) //Maybe these are needed, probably not
+//        addDisableStyles(screen)
+//        addOffsetableStyles(screen)
+    }
+
 }

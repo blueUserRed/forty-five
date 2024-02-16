@@ -25,6 +25,7 @@ class ChooseCardDragSource(
 
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload {
         val actor = this.actor
+        actor.isDragged = true
         val payload = DragAndDrop.Payload()
         dragAndDrop.setKeepWithinStage(false)
         payload.dragActor = actor
@@ -47,6 +48,7 @@ class ChooseCardDragSource(
         target: DragAndDrop.Target?,
     ) {
         if (payload == null) return
+        actor.isDragged = false
         actor.zIndex = max(actor.zIndex - 1, 0)
         val obj = payload.obj as ChooseCardDragPayload
         obj.onDragStop()

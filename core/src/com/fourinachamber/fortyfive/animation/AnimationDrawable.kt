@@ -75,6 +75,10 @@ class AnimationDrawable(
         )
     }
 
+    fun update() {
+        loadedAnimations.forEach { it.update() }
+    }
+
     private fun nextAnimation(): AnimationPart? {
         if (!animationIterator.hasNext()) {
             end()
@@ -85,6 +89,10 @@ class AnimationDrawable(
         startTime = TimeUtils.millis()
         return anim
     }
+
+    override fun getMinWidth(): Float = currentAnimation?.width() ?: 0f
+
+    override fun getMinHeight(): Float = currentAnimation?.height() ?: 0f
 
     private fun getAnimation(num: Int): AnimationPart = if (num in animations.indices) {
         loadedAnimations[num]
@@ -110,6 +118,11 @@ interface AnimationPart : Disposable {
 
     fun getFrame(progress: Int, frameOffset: Int = 0): Drawable?
 
+    fun update() {}
+
+    fun width(): Float
+    fun height(): Float
+
 }
 
 data class StillFrameAnimationPart(
@@ -127,4 +140,7 @@ data class StillFrameAnimationPart(
     override fun dispose() {
         ResourceManager.giveBack(this, frameHandle)
     }
+
+    override fun width(): Float = frame.minWidth
+    override fun height(): Float = frame.minHeight
 }

@@ -246,6 +246,13 @@ class DetailMapWidget(
         mapOffset.set(idealPos)
     }
 
+    override fun act(delta: Float) {
+        super.act(delta)
+        animatedDecorations.forEach { (_, drawables) ->
+            drawables.forEach { (_, _, drawable) -> drawable.update() }
+        }
+    }
+
     fun onStartButtonClicked(startButton: Actor? = null) {
         val btn = startButton ?: screen.namedActorOrError(startButtonName)
         if (btn is DisableActor && btn.isDisabled) return
@@ -535,6 +542,7 @@ class DetailMapWidget(
             screen.leaveState(eventCanBeStartedScreenState)
         }
         TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
+        TemplateString.updateGlobalParam("map.cur_event.buttonText", event.buttonText)
         TemplateString.updateGlobalParam(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText

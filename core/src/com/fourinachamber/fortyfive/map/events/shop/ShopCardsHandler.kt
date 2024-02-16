@@ -80,7 +80,7 @@ class ShopCardsHandler(
         val i = cardWidgets.indexOf(cardImg)
         if (i !in boughtIndices) boughtIndices.add(i)
         val card = cards[i]
-        SaveState.playerMoney -= card.price
+        SaveState.payMoney(card.price)
         updateCards()
         FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
         SaveState.buyCard(card.name)

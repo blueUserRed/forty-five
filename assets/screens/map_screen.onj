@@ -13,6 +13,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
+        "roadgeek", "red_wing_bmp",
         "title_screen_background", "key_select_frame", "white_texture", "enemy_texture", "red_wing",
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
@@ -22,17 +23,18 @@ assets: {
         "map_decoration_wasteland_cactus_1", "map_decoration_wasteland_cactus_2", "map_decoration_grass", "map_path", "dialog_continue_arrow",
         "map_player", "location_sign_aqua_dulche", "location_sign_salem",
         "map_node_default",
-        "map_node_shop_rect", "map_node_shop_circle",
-        "map_node_fight_rect", "map_node_fight_circle",
-        "map_node_exit_rect", "map_node_exit_circle",
-        "map_node_heal_rect", "map_node_heal_circle",
-        "map_node_choose_card_circle", "map_node_dialog_circle",
+        "map_node_shop",
+        "map_node_fight",
+        "map_node_exit",
+        "map_node_heal",
+        "map_node_choose_card",
+        "map_node_dialog",
         "card_character",
         "map_decoration_wasteland_snake_2", // there is no snake 1, because of Nils and/or Fillipo
         "map_decoration_wasteland_dune_1", "map_decoration_wasteland_dune_2",
         "map_decoration_wasteland_dune_3", "map_decoration_wasteland_dune_4",
         "map_decoration_wasteland_skull_1", "map_decoration_wasteland_skull_2",
-
+        "common_button_default", "common_button_hover", "common_button_disabled",
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
 
@@ -41,7 +43,7 @@ assets: {
         "tutorial_info_actor_background",
 
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
-        "prerendered_noise_perlin_512x512", "grayscale_shader",
+        "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader",
 
         ...(graphicsConfig.encounterModifierAssets),
         ...(sharedComponents.backpackAssets),
@@ -134,7 +136,7 @@ var encounterModifierDisplayTemplate = $Box {
                     width: 230#points
                 }
             ],
-            font: "red_wing",
+            font: "roadgeek",
             text: "Some long description text Lorem Ipsum Lorem Ipsum Lorem Ipsum",
             wrap: true,
             fontScale: 0.5,
@@ -189,14 +191,21 @@ var infoPopup = $Box {
     } children [
 
         $TemplateLabel {
+            styles: [
+                {
+                    width: 95#percent
+                }
+            ],
             font: "red_wing",
             template: "{map.cur_event.displayName}",
             fontScale: 1.1,
+            wrap: true,
+            align: "center",
             color: color.white,
         },
 
         $TemplateLabel {
-            font: "red_wing",
+            font: "roadgeek",
             template: "{map.cur_event.description}",
             fontScale: 0.7,
             color: color.white,
@@ -232,32 +241,42 @@ var infoPopup = $Box {
         ],
     ],
 
-
-    $Image {
+    $Box {
+        name: "start_button",
         styles: [
             {
                 style_priority: 1,
-                background: "map_detail_fight_button",
                 disabled: false,
-                alpha: 1.0,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                height: 50#points,
+                width: 140#points,
+                background: "common_button_default"
             },
             {
                 style_priority: 2,
-                background: "map_detail_fight_button_hover",
-                style_condition: hover() and state("canStartEvent")
+                style_condition: hover() and state("canStartEvent"),
+                background: "common_button_hover"
             },
             {
                 style_priority: 3,
                 style_condition: not(state("canStartEvent")),
-                alpha: 0.5,
-                disabled: true
+                disabled: true,
+                background: "common_button_disabled"
             }
         ],
-        name: "start_button",
-        reportDimensionsWithScaling: true,
-        scaleX: 0.6,
-        scaleY: 0.6,
-    }
+        touchable: "enabled"
+    } children [
+
+        $TemplateLabel {
+            font: "red_wing",
+            template: "{map.cur_event.buttonText}",
+            fontScale: 1.0,
+            color: color.black,
+            align: "center",
+        }
+
+    ]
 
 ];
 

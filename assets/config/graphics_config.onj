@@ -43,7 +43,7 @@ icons: {
 
 encounterModifiers: {
     rain: {
-        icon: "encounter_modifier_frost",
+        icon: "encounter_modifier_rain",
         displayName: "Rain",
         description: "Status effects don't work"
     },
@@ -63,14 +63,27 @@ encounterModifiers: {
         description: "Whenever you place a bullet in the revolver, you get a copy of it in your hand"
     },
     moist: {
-        icon: "encounter_modifier_frost",
+        icon: "encounter_modifier_moist",
         displayName: "Moist",
-        description: "Every bullet in the revolver loses one damage every time it turns in the revolver"
+        description: "Every bullet in the revolver loses one damage every time it turns"
     },
 },
 
 encounterModifierAssets: [
-    "encounter_modifier_frost"
+    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist"
+],
+
+encounterBackgrounds: [
+    {
+        biome: "wasteland",
+        isDark: false,
+        background: "game_screen_background_wasteland"
+    },
+    {
+        biome: "bewitched_forest",
+        isDark: true,
+        background: "game_screen_background_bewitched_forest"
+    },
 ],
 
 damageOverlay: {
@@ -108,9 +121,14 @@ shootPostProcessor: {
     duration: 0.9
 },
 
+enemyGravestone: {
+    texture: "enemy_gravestone",
+    scale: 0.3,
+},
+
 gameUsedAssets: [
     "earthquake_shader", "glow_shader", "red_wing", "transparent_black_texture", "white_texture",
-    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon",
+    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon", "enemy_gravestone",
     "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
-    "fire_particle", "card_character"
+    "fire_particle", "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland"
 ]
