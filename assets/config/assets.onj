@@ -43,7 +43,7 @@ fonts: [
 pixmapFonts: [
     {
         name: "card_character",
-        fontFile: "fonts/card_character.fnt"
+        fontFile: "fonts/card_character_bmp.fnt"
     }
 ],
 

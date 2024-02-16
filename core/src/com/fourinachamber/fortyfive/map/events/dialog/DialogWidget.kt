@@ -29,7 +29,7 @@ class DialogWidget(
     private val speakingPersonLabel: String,
     defaults: OnjObject,
     screen: OnjScreen
-) : AdvancedTextWidget(defaults, screen, false) {
+) : AdvancedTextWidget(defaults, screen, true) {
 
     private var isAnimFinished: Boolean = false
 
