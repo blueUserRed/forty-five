@@ -329,12 +329,12 @@ textures: [
         file: "textures/map/nodes/get_card.png"
     },
     {
-        name: "map_node_choose_card_circle",
-        file: "textures/map/nodes/choose_card_circle.png"
+        name: "map_node_choose_card",
+        file: "textures/map/nodes/choose_card.png"
     },
     {
-        name: "map_node_dialog_circle",
-        file: "textures/map/nodes/dialog_circle.png"
+        name: "map_node_dialog",
+        file: "textures/map/nodes/dialog.png"
     },
     {
         name: "map_player",
