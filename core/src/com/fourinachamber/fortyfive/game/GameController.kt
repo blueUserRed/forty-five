@@ -464,10 +464,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) = appendMainTimeline(Timeline.timeline {
         FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
-        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this@GameController, slot)) return
         val cardInSlot = revolver.getCardInSlot(slot)
-        if (!(cardInSlot?.isReplaceable ?: true)) return
-        if (!cost(card.cost, card.actor)) return
+
+        if (
+            card.type != Card.Type.BULLET ||
+            !card.allowsEnteringGame(this@GameController, slot) ||
+            !(cardInSlot?.isReplaceable ?: true) ||
+            !cost(card.cost, card.actor)
+        ) {
+            SoundPlayer.situation("not_allowed", curScreen)
+            return
+        }
         action {
             cardHand.removeCard(card)
             if (cardInSlot != null) revolver.preAddCard(slot, card)

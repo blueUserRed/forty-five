@@ -1088,6 +1088,10 @@ sounds: [
         name: "not_allowed_sound",
         file: "large_assets/sounds/not_allowed.wav"
     },
+    {
+        name: "button_2_sound",
+        file: "large_assets/sounds/button_2.wav"
+    },
 ],
 
 cards: {

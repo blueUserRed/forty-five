@@ -7,6 +7,19 @@ import "config/game_config.onj" as gameConfig;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
+buttonSoundBehaviour: $OnClickSoundSituationBehaviour {
+    situation: "general_button_click",
+},
+
+buttonCursorBehaviour: $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
+    disabled: {
+        useSystemCursor: true,
+        cursorName: "not allowed"
+    }
+},
+
 navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
     "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left", "heart_texture",
@@ -50,6 +63,7 @@ backpackAssets: [
     "backpack_direction_hover",
     "backpack_direction_arrow",
     "card_character",
+    "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
     ...cardHoverDetailUsedAssetsDefinition,
 ],
 
