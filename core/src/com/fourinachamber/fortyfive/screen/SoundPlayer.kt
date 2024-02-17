@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -16,6 +17,9 @@ object SoundPlayer {
     const val soundsSchemaFile: String = "onjschemas/sounds.onjschema"
 
     private lateinit var situations: List<Situation>
+
+    private var currentMusicHandle: ResourceHandle? = null
+    private var currentMusic: Music? = null
 
     fun init() {
         val onj = OnjParser.parseFile(Gdx.files.internal(soundsFile).file())
@@ -37,6 +41,21 @@ object SoundPlayer {
                     it.getOr("volume", 1.0).toFloat()
                 )
             }
+    }
+
+    fun currentMusic(musicHandle: ResourceHandle?, screen: OnjScreen) {
+        if (currentMusicHandle == musicHandle) return
+        currentMusic?.stop()
+        if (musicHandle == null) {
+            currentMusic = null
+            currentMusicHandle = null
+            return
+        }
+        val music = ResourceManager.get<Music>(screen, musicHandle)
+        currentMusic = music
+        currentMusicHandle = musicHandle
+        music.isLooping = true
+        music.play()
     }
 
     fun situation(name: String, screen: OnjScreen) {

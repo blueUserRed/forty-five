@@ -55,6 +55,7 @@ open class OnjScreen @MainThreadOnly constructor(
     val printFrameRate: Boolean,
     val transitionAwayTime: Int?,
     val screenBuilder: ScreenBuilder,
+    val music: ResourceHandle?
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
 
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()

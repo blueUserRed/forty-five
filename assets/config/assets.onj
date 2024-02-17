@@ -1106,6 +1106,17 @@ sounds: [
     },
 ],
 
+music: [
+    {
+        name: "main_theme",
+        file: "large_assets/music/main_theme.wav"
+    },
+    {
+        name: "map_theme",
+        file: "large_assets/music/map_theme.wav"
+    },
+],
+
 cards: {
     directory: "textures/cards",
 }

@@ -47,6 +47,8 @@ assets: {
 
         "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound", "button_2_sound",
 
+        "map_theme",
+
         ...(graphicsConfig.encounterModifierAssets),
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
@@ -63,6 +65,7 @@ viewport: $FitViewport {
 options: {
     transitionAwayTime: 1.0,
     background: "black_texture",
+    music: "map_theme",
     screenController: $MapScreenController {
         tutorialInfoActor: "tutorialInfoActor",
         mapWidgetName: "map"

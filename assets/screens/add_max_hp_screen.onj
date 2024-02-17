@@ -22,6 +22,7 @@ assets: {
         "taupe_gray_rounded",
         "button_2_sound",
         "heal_sound",
+        "map_theme",
         //        "max_health_background",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
@@ -37,6 +38,7 @@ viewport: $FitViewport {
 options: {
     background: "hover_detail_background",
     transitionAwayTime: 1.5,
+    music: "map_theme",
     inputMap: [
         ...(inputMaps.defaultInputMap),
         ...(inputMaps.addMaxHPInputMap),
