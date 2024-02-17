@@ -81,7 +81,7 @@ nodes: [
         edgesTo: [
             3, 5
         ],
-        nodeTexture: "map_node_shop",
+        nodeTexture: "map_node_choose_card",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_silver_bullet"],
             seed: 0,
@@ -113,7 +113,7 @@ nodes: [
         edgesTo: [
             5, 7,
         ],
-        nodeTexture: "map_node_shop",
+        nodeTexture: "map_node_choose_card",
         event: $ChooseCardMapEvent {
             types: ["tutorial_only_worker_bullet"],
             seed: 0,

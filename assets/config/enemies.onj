@@ -92,7 +92,7 @@ enemies: [
     },
 
     {
-        name: "Pyro",
+        name: "Pyro_lvl1",
         title: "Pyro",
         baseHealth: 105,
         texture: "enemy_pyro",
@@ -121,7 +121,7 @@ enemies: [
     },
 
     {
-        name: "Witch",
+        name: "Witch_lvl1",
         title: "Witch",
         baseHealth: 130,
         texture: "enemy_witch",

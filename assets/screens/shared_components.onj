@@ -1146,6 +1146,10 @@ tutorialInfoActor: $TutorialInfoActor {
             $CatchEventAndEmitBehaviour {
                 catch: "ButtonClickEvent",
                 emit: "TutorialConfirmedEvent"
+            },
+            $SpamPreventionBehaviour {
+                event: "TutorialConfirmedEvent",
+                blockDuration: 400
             }
         ],
     } children [
