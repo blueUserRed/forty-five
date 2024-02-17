@@ -232,7 +232,7 @@ var uniqueEventsToUseOften = {
     roadBetweenAquaBalleAndTabuLetter: {
         chooseCard: {
             isDeadEnd: true,
-            nodeTexture: "map_node_shop",
+            nodeTexture: "map_node_choose_card",
             event: $ChooseCardMapEvent {
                 seed: null,
                 types: [
@@ -333,7 +333,7 @@ var aquaBalleToTabuLetterOutpost = {
     seed: runRandom(1),
     restrictions: {
         progress: [
-            0.0, 50.0
+            0.0, 10.0
         ],
         minNodes: 9,
         maxNodes: 11,
@@ -424,7 +424,7 @@ var tabuLetterOutpostToSalem = {
     seed: runRandom(2),
     restrictions: {
         progress: [
-            50.0, 75.0
+            10.0, 20.0
         ],
         minNodes: 9,
         maxNodes: 11,
@@ -531,7 +531,7 @@ var salemToSpireOutpost = {
     seed: runRandom(3),
     restrictions: {
         progress: [
-            75.0, 100.0
+            20.0, 30.0
         ],
         minNodes: 9,
         maxNodes: 11,

@@ -1457,9 +1457,9 @@ var playerOverlay = $Box {
             background: "game_screen_player",
             flexDirection: flexDirection.column,
             alignItems: align.center,
-            positionLeft: 20#points,
-            width: worldWidth#points,
+            positionLeft: 30#points,
             height: worldHeight#points,
+            aspectRatio: 1305.0 / 1512.0
         },
     ],
     zIndex: 0,

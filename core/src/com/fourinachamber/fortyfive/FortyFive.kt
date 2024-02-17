@@ -142,7 +142,9 @@ object FortyFive : Game() {
 //        MapManager.generateMapsSync()
 //        newRun()
 
-        val permaSaveFileExists = Gdx.files.internal("saves/perma_savefile.onj").file().exists()
+        if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
+            resetAll()
+        }
         PermaSaveState.read()
         SaveState.read()
         MapManager.read()
@@ -151,9 +153,7 @@ object FortyFive : Game() {
         serviceThread.start()
         serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
-        if (!permaSaveFileExists) {
-            resetAll()
-        }
+
 //        resetAll()
 //        newRun()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
