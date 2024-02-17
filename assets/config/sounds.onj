@@ -12,8 +12,8 @@ situations: [
     },
     {
         name: "card_hover",
-        sound: null,
-//        sound: "card_hover_sound",
+//        sound: null,
+        sound: "card_hover_sound",
     },
     {
         name: "card_drag_finished",
