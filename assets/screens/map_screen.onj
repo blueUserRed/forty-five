@@ -78,21 +78,21 @@ options: {
     ]
 },
 
-var worldView = $WorldView {
-    styles: [
-        {
-            style_priority: 1,
-            width: 100.0#percent,
-            height: 100.0#percent,
-        },
-    ],
-    behaviours: [
-        $OnClickChangeScreenStateBehaviour {
-            state: "show_world_view",
-            enter: false
-        }
-    ]
-};
+//var worldView = $WorldView {
+//    styles: [
+//        {
+//            style_priority: 1,
+//            width: 100.0#percent,
+//            height: 100.0#percent,
+//        },
+//    ],
+//    behaviours: [
+//        $OnClickChangeScreenStateBehaviour {
+//            state: "show_world_view",
+//            enter: false
+//        }
+//    ]
+//};
 
 var encounterModifierDisplayTemplate = $Box {
     template_name: "encounter_modifier_display",
@@ -397,7 +397,7 @@ root: $Box {
         ],
         zIndex: 2,
     } children [
-        worldView,
+//        worldView,
     ],
 
     $Box {

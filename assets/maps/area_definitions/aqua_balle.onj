@@ -27,16 +27,7 @@ nodes: [
         edgesTo: [
             0, 2
         ],
-        nodeTexture: "map_node_heal",
-        event: $AddMaxHPEvent {
-            maxHPRange: [
-                10, 15
-            ],
-            seed: null,
-            currentlyBlocks: false,
-            canBeStarted: true,
-            isCompleted: false,
-        }
+        event: $EmptyMapEvent { }
     },
     {
         x: 65.0,

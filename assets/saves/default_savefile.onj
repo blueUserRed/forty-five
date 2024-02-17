@@ -9,7 +9,7 @@ decks: [
 ],
 playerLives: 5,
 maxPlayerLives: gameConfig.playerConfig.lives,
-playerMoney: 110,
+playerMoney: 0,
 currentDifficulty: 1.0,
 playerCompletedFirstTutorialEncounter: false, //TODO CHANGE BACK to "false"; PLEASE TELL ME THIS MARVIN (TODO left intentionally, since this might be needed again)
 
