@@ -50,12 +50,12 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
-        if (!PermaSaveState.playerHasCompletedTutorial) {
-            if (SaveState.playerCompletedFirstTutorialEncounter) {
-                MapManager.changeToMap("tutorial_road")
-            } else {
-                MapManager.changeToEncounterScreen(tutorialEncounterContext)
-            }
+        changeToInitialScreen()
+    }
+
+    fun changeToInitialScreen() {
+        if (!SaveState.playerCompletedFirstTutorialEncounter) {
+            MapManager.changeToEncounterScreen(tutorialEncounterContext)
         } else {
             MapManager.changeToMapScreen()
         }
@@ -66,8 +66,8 @@ object FortyFive : Game() {
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
-    fun changeToScreen(screenPath: String, controllerContext: Any? = null) = Gdx.app.postRunnable {
-        if (inScreenTransition) return@postRunnable
+    fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
+        if (inScreenTransition) return
         inScreenTransition = true
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
@@ -105,7 +105,7 @@ object FortyFive : Game() {
     }
 
     fun newRun(forwardToLooseScreen: Boolean) {
-        FortyFiveLogger.title("newRun called; forwardToTutorialScreen = $forwardToLooseScreen")
+        FortyFiveLogger.title("newRun called; forwardToLooseScreen = $forwardToLooseScreen")
         PermaSaveState.newRun()
         if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
@@ -122,6 +122,7 @@ object FortyFive : Game() {
         PermaSaveState.reset()
         SaveState.reset()
         MapManager.resetAllSync()
+        newRun(false)
     }
 
     private fun init() {
@@ -141,9 +142,7 @@ object FortyFive : Game() {
 //        MapManager.generateMapsSync()
 //        newRun()
 
-        if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
-            resetAll()
-        }
+        val permaSaveFileExists = Gdx.files.internal("saves/perma_savefile.onj").file().exists()
         PermaSaveState.read()
         SaveState.read()
         MapManager.read()
@@ -152,6 +151,9 @@ object FortyFive : Game() {
         serviceThread.start()
         serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
+        if (!permaSaveFileExists) {
+            resetAll()
+        }
 //        resetAll()
 //        newRun()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject

@@ -201,7 +201,11 @@ object SaveState {
         bulletsShot = stats.get<Long>("bulletsShot").toInt()
 
         val position = obj.get<OnjObject>("position")
-        currentMap = position.get<String>("map")
+        currentMap = if (PermaSaveState.playerHasCompletedTutorial) { // TODO: slightly ugly
+            position.get<String>("map")
+        } else {
+            "tutorial_road"
+        }
         currentNode = position.get<Long>("node").toInt()
         lastNode = position.get<Long?>("lastNode")?.toInt()
 
@@ -417,7 +421,7 @@ object SaveState {
                 return Deck(name, id, cardPositions)
             }
 
-            const val minDeckSize = 15
+            const val minDeckSize = 14
             const val numberOfSlots = 35
         }
     }
