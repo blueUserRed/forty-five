@@ -19,6 +19,7 @@ assets: {
         "dialog_answer_option",
         "dialog_answer_option_hover",
         "shop_npcs_default",
+        "map_theme",
     ]
 },
 
@@ -29,6 +30,7 @@ viewport: $FitViewport {
 
 options: {
     background: "title_screen_background",
+    music: "map_theme",
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

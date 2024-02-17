@@ -506,6 +506,7 @@ assets: {
 options: {
     background?: string,
     screenController?: $ScreenController,
+    music?: string,
     inputMap?: {
         priority?: int,
         condition?: KeyInputCondition,

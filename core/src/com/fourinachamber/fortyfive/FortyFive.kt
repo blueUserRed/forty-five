@@ -78,6 +78,7 @@ object FortyFive : Game() {
 
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to $screenPath")
+            SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
             this.currentScreen = screen
             currentRenderPipeline?.dispose()

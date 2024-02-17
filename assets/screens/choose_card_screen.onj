@@ -18,6 +18,7 @@ assets: {
         "transparent_black_texture",
 
         "card_pickup_sound", "card_laydown_sound",
+        "map_theme",
 
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
@@ -34,6 +35,7 @@ viewport: $FitViewport {
 options: {
     transitionAwayTime: 0.0,
     background: "hover_detail_background",
+    music: "map_theme",
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

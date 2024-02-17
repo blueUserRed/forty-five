@@ -66,6 +66,8 @@ assets: {
         "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
         "holster_sound",
 
+        "map_theme",
+
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
         ...(graphicsConfig.encounterModifierAssets),
@@ -128,6 +130,7 @@ var controller = $GameScreenController {
 options: {
     background: "game_screen_background_wasteland",
     screenController: controller,
+    music: "map_theme",
     inputMap: [
         ...(inputMaps.gameInputMap),
         ...(inputMaps.defaultInputMap)
