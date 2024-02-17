@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.obj
 import onj.value.OnjNamedObject
@@ -36,6 +37,7 @@ class ShopDragSource(
         controller.displayBuyPopups()
         obj.closePopups(controller)
         startReal()
+        SoundPlayer.situation("card_drag_started", actor.screen)
         return payload
     }
 
@@ -81,6 +83,7 @@ class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
     fun onBuy(addToDeck: Boolean) = tasks.add {
         val scr = (FortyFive.screen as OnjScreen).screenController as ShopScreenController
         scr.buyCard(actor, addToDeck)
+        SoundPlayer.situation("card_drag_finished", (actor as CardActor).screen)
     }
 
     fun closePopups(controller: ShopScreenController) = tasks.add {

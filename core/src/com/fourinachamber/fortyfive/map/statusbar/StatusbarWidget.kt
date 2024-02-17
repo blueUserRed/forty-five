@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Interpolation
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.EnterMapMapEvent
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
@@ -69,7 +70,10 @@ class StatusbarWidget(
             ) as CustomFlexBox
             val actorName = i.get<String>("actorName")
             optionWidgets.add(curBox to actorName)
-            curBox.onButtonClick { buttonClicked(curBox) }
+            curBox.onButtonClick {
+                buttonClicked(curBox)
+                SoundPlayer.situation("statusbar_button_clicked", screen)
+            }
         }
     }
 

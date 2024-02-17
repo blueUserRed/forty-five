@@ -180,6 +180,14 @@ object ResourceManager {
             ))
         }
 
+        assets.get<OnjArray>("sounds").value.forEach {
+            it as OnjObject
+            resources.add(SoundResource(
+                it.get<String>("name"),
+                it.get<String>("file")
+            ))
+        }
+
         val cardsFile = assets.access<String>(".cards.directory")
         Gdx.files.internal(cardsFile)
             .file()

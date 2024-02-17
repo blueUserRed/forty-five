@@ -16,6 +16,9 @@ assets: {
         "shop_background_wasteland", /*temp -> */ "card%%bullet",
         "chooseCard_cardsBackground",
         "transparent_black_texture",
+
+        "card_pickup_sound", "card_laydown_sound",
+
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
