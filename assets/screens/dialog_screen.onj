@@ -1,5 +1,6 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
 import "dialog/dialog.onj" as dialogs;
 
 use Common;

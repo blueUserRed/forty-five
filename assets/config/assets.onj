@@ -729,6 +729,10 @@ textures: [
         file: "textures/encounter_modifier/moist.png"
     },
     {
+        name: "encounter_modifier_steel_nerves",
+        file: "textures/encounter_modifier/steel_nerves.png"
+    },
+    {
         name: "common_button_default",
         file: "textures/common/button/default.png"
     },
@@ -1123,6 +1127,10 @@ sounds: [
     {
         name: "owl_sound",
         file: "large_assets/sounds/owl.wav"
+    },
+    {
+        name: "swoosh_sound",
+        file: "large_assets/sounds/swoosh.wav"
     },
 ],
 

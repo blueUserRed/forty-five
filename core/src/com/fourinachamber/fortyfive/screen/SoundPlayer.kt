@@ -25,6 +25,10 @@ object SoundPlayer {
     private var currentMusicHandle: ResourceHandle? = null
     private var currentMusic: Music? = null
 
+    var musicVolume: Float = 0f
+//    var musicVolume: Float = 1f
+    var soundEffectVolume: Float = 1.0f
+
     fun init() {
         val onj = OnjParser.parseFile(Gdx.files.internal(soundsFile).file())
         val schema = OnjSchemaParser.parseFile(Gdx.files.internal(soundsSchemaFile).file())
@@ -81,6 +85,7 @@ object SoundPlayer {
         currentMusicHandle = musicHandle
         music.isLooping = true
         music.play()
+        music.volume = musicVolume
     }
 
     fun situation(name: String, screen: OnjScreen) {
@@ -89,12 +94,12 @@ object SoundPlayer {
             return
         }
         val sound = ResourceManager.get<Sound>(screen, situation.sound ?: return)
-        sound.play(situation.volume)
+        sound.play(situation.volume * soundEffectVolume)
     }
 
     fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
         val sound = ResourceManager.get<Sound>(screen, soundHandle)
-        sound.play(1f)
+        sound.play(soundEffectVolume)
     }
 
     fun updateAmbientSounds(screen: OnjScreen) {
@@ -108,7 +113,7 @@ object SoundPlayer {
             if (nextPlayTime > now) return@forEach
             val sound = ResourceManager.get<Sound>(screen, ambient.sound)
             val id = sound.play()
-            sound.setPan(id, (-1f..1f).random(), ambient.volume)
+            sound.setPan(id, (-1f..1f).random(), ambient.volume * soundEffectVolume)
             ambientSounds[ambient] = now + ambient.delay.random()
         }
     }

@@ -7,18 +7,22 @@ import "config/game_config.onj" as gameConfig;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
-buttonSoundBehaviour: $OnClickSoundSituationBehaviour {
+var buttonSoundBehaviour = $OnClickSoundSituationBehaviour {
     situation: "general_button_click",
-},
+};
 
-buttonCursorBehaviour: $MouseHoverBehaviour {
+buttonSoundBehaviour: buttonSoundBehaviour,
+
+var buttonCursorBehaviour = $MouseHoverBehaviour {
     useSystemCursor: true,
     cursorName: "hand",
     disabled: {
         useSystemCursor: true,
         cursorName: "not allowed"
     }
-},
+};
+
+buttonCursorBehaviour: buttonCursorBehaviour,
 
 ambientSoundsUsedAssets: [
     "snake_sound", "owl_sound"
@@ -1169,7 +1173,9 @@ tutorialInfoActor: $TutorialInfoActor {
             $SpamPreventionBehaviour {
                 event: "TutorialConfirmedEvent",
                 blockDuration: 400
-            }
+            },
+            buttonCursorBehaviour,
+            buttonSoundBehaviour
         ],
     } children [
         $TemplateLabel {
