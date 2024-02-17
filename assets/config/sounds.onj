@@ -64,6 +64,10 @@ situations: [
         name: "card_drawn",
         sound: "card_laydown_sound",
     },
+    {
+        name: "orb_anim_playing",
+        sound: "swoosh_sound",
+    },
 ],
 
 ambientSounds: [

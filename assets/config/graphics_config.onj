@@ -67,10 +67,15 @@ encounterModifiers: {
         displayName: "Moist",
         description: "Every bullet in the revolver loses one damage every time it turns"
     },
+    steelNerves: {
+        icon: "encounter_modifier_steel_nerves",
+        displayName: "Steel Nerves",
+        description: "The revolver shoots automatically every ten seconds"
+    }
 },
 
 encounterModifierAssets: [
-    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist"
+    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist", "encounter_modifier_steel_nerves"
 ],
 
 encounterBackgrounds: [

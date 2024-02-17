@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.Trigger
@@ -7,6 +8,8 @@ import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import java.lang.Exception
+import java.sql.Time
+import kotlin.math.roundToInt
 
 sealed class EncounterModifier {
 
@@ -61,6 +64,56 @@ sealed class EncounterModifier {
 
     }
 
+    class SteelNerves : EncounterModifier() {
+
+        private var baseTime: Long = -1
+
+        override fun onStart(controller: GameController) {
+            controller.curScreen.enterState("steel_nerves")
+        }
+
+        override fun update(controller: GameController) {
+            if (baseTime == -1L) return
+            if (controller.playerLost || GameController.showWinScreen in controller.curScreen.screenState) {
+                controller.curScreen.leaveState("steel_nerves")
+                baseTime = -1
+                return
+            }
+            val now = TimeUtils.millis()
+            val diff = 10 - ((now - baseTime).toDouble() / 1000.0).roundToInt()
+            TemplateString.updateGlobalParam("game.steelNerves.remainingTime", diff)
+            if (now - baseTime < 10_000) return
+            baseTime = -1
+            controller.shoot()
+        }
+
+        override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
+            action {
+                baseTime = TimeUtils.millis()
+            }
+        }
+
+        override fun executeOnEndTurn(): Timeline = Timeline.timeline {
+            action {
+                baseTime = -1
+            }
+        }
+
+        override fun executeOnPlayerTurnStart(): Timeline = Timeline.timeline {
+            action {
+                baseTime = TimeUtils.millis()
+            }
+        }
+    }
+
+    open fun update(controller: GameController) {}
+
+    open fun onStart(controller: GameController) {}
+
+    open fun executeOnEndTurn(): Timeline? = null
+
+    open fun executeOnPlayerTurnStart(): Timeline? = null
+
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
     open fun shouldApplyStatusEffects(): Boolean = true
@@ -77,6 +130,7 @@ sealed class EncounterModifier {
             "rain" -> Rain
             "frost" -> Frost
             "bewitchedmist" -> throw RuntimeException("encounter modifier bewitchedMist is not available")
+            "steelnerves" -> SteelNerves()
 //            "bewitchedmist" -> BewitchedMist
             "lookalike" -> throw RuntimeException("encounter modifier lookalike is not available")
 //            "lookalike" -> Lookalike

@@ -37,6 +37,7 @@ encounterModifiers: {
     bewitchedMist: encounterModifierConfig,
     lookalike: encounterModifierConfig,
     moist: encounterModifierConfig,
+    steelNerves: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],

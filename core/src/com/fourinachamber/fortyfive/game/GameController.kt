@@ -164,7 +164,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var cardsDrawn: Int = 0
         private set
 
-    private var hasWon: Boolean = false
+    var hasWon: Boolean = false
+        private set
 
     var playerLost: Boolean = false
         private set
@@ -216,7 +217,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         // enemy area is initialised by the GameDirector
 
         curReserves = baseReserves
-        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
+
+        addEncounterModifier(EncounterModifier.SteelNerves())
+
+        encounterModifiers.forEach { it.onStart(this) }
+        appendMainTimeline(Timeline.timeline {
+            include(drawCardPopupTimeline(cardsToDrawInFirstRound))
+            encounterModifiers
+                    .mapNotNull { it.executeOnPlayerTurnStart() }
+                    .collectTimeline()
+                    .let { include(it) }
+        })
         onjScreen.invalidateEverything()
         gameDirector.chooseEnemyActions()
     }
@@ -310,6 +321,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     override fun update() {
         if (updateCount < 6) curScreen.invalidateEverything() // TODO: this is stupid
         updateCount++
+
+        encounterModifiers.forEach { it.update(this) }
 
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
         if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
@@ -843,6 +856,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             action {
                 SoundPlayer.situation("holster", curScreen)
             }
+            encounterModifiers
+                    .mapNotNull { it.executeOnEndTurn() }
+                    .collectTimeline()
+                    .let { include(it) }
             include(checkEffectsActiveCards(Trigger.ON_ROUND_END))
             includeLater(
                 { putCardsUnderDeckTimeline() },
@@ -862,6 +879,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 curReserves = baseReserves
             }
             include(drawCardPopupTimeline(cardsToDraw, false))
+            encounterModifiers
+                    .mapNotNull { it.executeOnPlayerTurnStart() }
+                    .collectTimeline()
+                    .let { include(it) }
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
@@ -1097,6 +1118,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun reservesPaidAnim(amount: Int, animTarget: Actor): Timeline = Timeline.timeline {
         repeat(amount) {
             action {
+                SoundPlayer.situation("orb_anim_playing", curScreen)
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     stageCoordsOfReservesIcon(),
                     animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
@@ -1110,6 +1132,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun reservesGainedAnim(amount: Int, animSource: Actor): Timeline = Timeline.timeline {
         repeat(amount) {
             action {
+                SoundPlayer.situation("orb_anim_playing", curScreen)
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     animSource.localToStageCoordinates(Vector2(0f, 0f)) +
                             Vector2(animSource.width / 2, animSource.height / 2),
@@ -1158,6 +1181,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 val start = curScreen.stageCoordsOfActor("win_screen_cash_symbol")
                 val end = curScreen.stageCoordsOfActor("cash_symbol")
                 if (money > 0) {
+                    SoundPlayer.situation("orb_anim_playing", curScreen)
                     gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
                         orbTexture = "cash_symbol",
                         width = 30f,

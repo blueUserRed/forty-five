@@ -34,7 +34,7 @@ assets: {
         "revolver_drum", "parry_popup_background",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
-        "game_screen_player", "player_turn_banner", "enemy_turn_banner", "reserves_orb",
+        "game_screen_player", "player_turn_banner", "enemy_turn_banner", "reserves_orb", "black_texture",
 
         "enemy_action_damage", "enemy_action_cover",
 
@@ -64,7 +64,7 @@ assets: {
         "parry_shader", "alpha_reduction_shader", "gaussian_blur_shader",
 
         "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
-        "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound",
+        "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound", "swoosh_sound", "button_2_sound",
 
         "map_theme",
 
@@ -1668,6 +1668,62 @@ var winScreen = $Box {
 
 ];
 
+var steelNervesOverlay = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            flexDirection: flexDirection.column,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            detached: true,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("steel_nerves"),
+            detached: false,
+        }
+    ],
+} children [
+
+    $Box {
+        styles: [
+            {
+                positionTop: -100#points,
+                positionLeft: 100#points,
+                rotation: 45.0
+            }
+        ],
+        enableTransform: true
+    } children [
+        $Box {
+            styles: [
+                {
+                    width: 200#points,
+                    aspectRatio: 1.0,
+                    background: "black_texture",
+                }
+            ]
+        }
+    ],
+
+    $TemplateLabel {
+        styles: [
+            {
+                positionTop: -320#points,
+                width: 200#points
+            }
+        ],
+        font: "red_wing_bmp",
+        template: "{game.steelNerves.remainingTime}",
+        fontScale: 1.0,
+        align: "center",
+        color: color.red
+    }
+
+];
+
 root: $Box {
     styles: [
         {
@@ -1694,6 +1750,7 @@ root: $Box {
     } children [
 
         playerOverlay,
+        steelNervesOverlay,
         gameScreen,
 
         winScreen,
