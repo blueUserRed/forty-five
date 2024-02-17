@@ -43,5 +43,51 @@ situations: [
         name: "heal",
         sound: "heal_sound",
     },
+    {
+        name: "card_bought",
+        sound: "money_sound",
+    },
+    {
+        name: "money_earned",
+        sound: "money_sound",
+    },
+    {
+        name: "revolver_rotation",
+        sound: "revolver_drum_sound",
+    },
+    {
+        name: "walk",
+        sound: "walk_sound",
+        volume: 0.7,
+    },
+    {
+        name: "card_drawn",
+        sound: "card_laydown_sound",
+    },
+],
 
-]
+ambientSounds: [
+    {
+        name: "snake",
+        sound: "snake_sound",
+        delay: [8_000, 10_000],
+        volume: 1.5
+    },
+    {
+        name: "owl",
+        sound: "owl_sound",
+        delay: [15_000, 20_000],
+        volume: 1.5
+    },
+],
+
+biomeAmbience: [
+    {
+        biomeName: "wasteland",
+        sounds: ["snake"]
+    },
+    {
+        biomeName: "bewitched_forest",
+        sounds: ["owl"]
+    },
+],

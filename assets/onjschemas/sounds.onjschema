@@ -3,4 +3,16 @@ situations: {
     name: string,
     sound: string?,
     volume?: float,
+}[],
+
+ambientSounds: {
+    name: string,
+    sound: string,
+    volume?: float,
+    delay: int[2]
+}[],
+
+biomeAmbience: {
+    biomeName: string,
+    sounds: string[]
 }[]

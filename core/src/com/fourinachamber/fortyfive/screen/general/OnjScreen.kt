@@ -28,6 +28,7 @@ import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
@@ -55,7 +56,8 @@ open class OnjScreen @MainThreadOnly constructor(
     val printFrameRate: Boolean,
     val transitionAwayTime: Int?,
     val screenBuilder: ScreenBuilder,
-    val music: ResourceHandle?
+    val music: ResourceHandle?,
+    val playAmbientSounds: Boolean
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
 
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
@@ -390,6 +392,9 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun update(delta: Float) {
+        if (playAmbientSounds) {
+            SoundPlayer.updateAmbientSounds(this)
+        }
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         screenController?.update()

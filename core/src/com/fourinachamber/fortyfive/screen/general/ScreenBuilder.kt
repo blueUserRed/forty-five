@@ -59,6 +59,7 @@ class ScreenBuilder(val file: FileHandle) {
     private var screenController: ScreenController? = null
     private var background: String? = null
     private var music: ResourceHandle? = null
+    private var playAmbientSounds: Boolean = false
     private var transitionAwayTime: Int? = null
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
@@ -85,7 +86,8 @@ class ScreenBuilder(val file: FileHandle) {
             namedCells = mapOf(),
             transitionAwayTime = transitionAwayTime,
             screenBuilder = this,
-            music = music
+            music = music,
+            playAmbientSounds = playAmbientSounds
         )
         screen.background = background
 
@@ -240,6 +242,7 @@ class ScreenBuilder(val file: FileHandle) {
         options.ifHas<String>("music") {
             music = it
         }
+        playAmbientSounds = options.get<Boolean>("playAmbientSounds")
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
         }

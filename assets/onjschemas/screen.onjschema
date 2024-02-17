@@ -507,6 +507,7 @@ options: {
     background?: string,
     screenController?: $ScreenController,
     music?: string,
+    playAmbientSounds: boolean,
     inputMap?: {
         priority?: int,
         condition?: KeyInputCondition,

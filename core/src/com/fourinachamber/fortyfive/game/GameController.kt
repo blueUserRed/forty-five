@@ -575,6 +575,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             repeat(remainingCardsToDraw) { cur ->
                 delayUntil { popupEvent != null }
                 action {
+                    SoundPlayer.situation("card_drawn", curScreen)
                     popupEvent = null
                     drawCard()
                     TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount - cur - 1)
@@ -1156,14 +1157,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             action {
                 val start = curScreen.stageCoordsOfActor("win_screen_cash_symbol")
                 val end = curScreen.stageCoordsOfActor("cash_symbol")
-                if (money > 0) gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
-                    orbTexture = "cash_symbol",
-                    width = 30f,
-                    height = 30f,
-                    duration = 600,
-                    segments = 20,
-                    position = RenderPipeline.OrbAnimation.curvedPath(start, end)
-                ))
+                if (money > 0) {
+                    gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
+                        orbTexture = "cash_symbol",
+                        width = 30f,
+                        height = 30f,
+                        duration = 600,
+                        segments = 20,
+                        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
+                    ))
+                    SoundPlayer.situation("money_earned", curScreen)
+                }
             }
             delay(if (money > 0) 600 else 0)
             action {

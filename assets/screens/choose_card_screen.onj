@@ -21,6 +21,7 @@ assets: {
         "map_theme",
 
         ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.ambientSoundsUsedAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
         ...(sharedComponents.cardHoverDetailUsedAssets),
@@ -36,6 +37,7 @@ options: {
     transitionAwayTime: 0.0,
     background: "hover_detail_background",
     music: "map_theme",
+    playAmbientSounds: true,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

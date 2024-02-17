@@ -1104,6 +1104,26 @@ sounds: [
         name: "heal_sound",
         file: "large_assets/sounds/heal.wav"
     },
+    {
+        name: "money_sound",
+        file: "large_assets/sounds/money.wav"
+    },
+    {
+        name: "revolver_drum_sound",
+        file: "large_assets/sounds/revolver_drum.wav"
+    },
+    {
+        name: "walk_sound",
+        file: "large_assets/sounds/walk.wav"
+    },
+    {
+        name: "snake_sound",
+        file: "large_assets/sounds/snake.wav"
+    },
+    {
+        name: "owl_sound",
+        file: "large_assets/sounds/owl.wav"
+    },
 ],
 
 music: [

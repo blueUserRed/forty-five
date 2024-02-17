@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import dev.lyze.flexbox.FlexBox
@@ -81,6 +82,7 @@ class ShopCardsHandler(
         if (i !in boughtIndices) boughtIndices.add(i)
         val card = cards[i]
         SaveState.payMoney(card.price)
+        SoundPlayer.situation("card_bought", screen)
         updateCards()
         FortyFiveLogger.debug(logTag, "Bought ${card.name} for a price of ${card.price}")
         SaveState.buyCard(card.name)

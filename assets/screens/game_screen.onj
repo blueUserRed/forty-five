@@ -64,10 +64,11 @@ assets: {
         "parry_shader", "alpha_reduction_shader", "gaussian_blur_shader",
 
         "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
-        "holster_sound",
+        "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound",
 
         "map_theme",
 
+        ...(sharedComponents.ambientSoundsUsedAssets),
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
         ...(graphicsConfig.encounterModifierAssets),
@@ -130,6 +131,7 @@ var controller = $GameScreenController {
 options: {
     background: "game_screen_background_wasteland",
     screenController: controller,
+    playAmbientSounds: true,
     music: "map_theme",
     inputMap: [
         ...(inputMaps.gameInputMap),
