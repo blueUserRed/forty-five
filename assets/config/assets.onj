@@ -1063,6 +1063,33 @@ frameAnimations: [
     },
 ],
 
+sounds: [
+    {
+        name: "revolver_shot_sound",
+        file: "large_assets/sounds/revolver_shot.wav"
+    },
+    {
+        name: "button_1_sound",
+        file: "large_assets/sounds/button_1.wav"
+    },
+    {
+        name: "card_hover_sound",
+        file: "large_assets/sounds/card_hover.wav"
+    },
+    {
+        name: "card_laydown_sound",
+        file: "large_assets/sounds/card_laydown.wav"
+    },
+    {
+        name: "card_pickup_sound",
+        file: "large_assets/sounds/card_pickup.wav"
+    },
+    {
+        name: "not_allowed_sound",
+        file: "large_assets/sounds/not_allowed.wav"
+    },
+],
+
 cards: {
     directory: "textures/cards",
 }

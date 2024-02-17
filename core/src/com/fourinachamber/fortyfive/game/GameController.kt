@@ -17,6 +17,7 @@ import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
@@ -728,6 +729,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
+            action {
+                SoundPlayer.situation("revolver_shot", curScreen)
+            }
             includeLater(
                 { damagePlayerTimeline },
                 { cardToShoot == null }

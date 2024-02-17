@@ -20,6 +20,7 @@ import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
@@ -651,6 +652,8 @@ class CardActor(
 
     private var inSelectionMode: Boolean = false
 
+    var playSoundsOnHover: Boolean = false
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
@@ -661,6 +664,10 @@ class CardActor(
             if (!inSelectionMode) return@onClick
             // UGGGGGLLLLLLYYYYY
             FortyFive.currentGame!!.selectCard(card)
+        }
+        onHoverEnter {
+            if (!playSoundsOnHover) return@onHoverEnter
+            SoundPlayer.situation("card_hover", screen)
         }
     }
 
@@ -833,10 +840,12 @@ class CardActor(
 
     fun enterSelectionMode() {
         inSelectionMode = true
+        playSoundsOnHover = true
     }
 
     fun exitSelectionMode() {
         inSelectionMode = false
+        playSoundsOnHover = false
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(

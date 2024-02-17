@@ -11,6 +11,7 @@ import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
 
@@ -87,6 +88,7 @@ object FortyFive : Game() {
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
             inScreenTransition = false
+            ResourceManager.trimPrepared()
         }
 
         if (currentScreen == null) {
@@ -135,6 +137,7 @@ object FortyFive : Game() {
         }
         TemplateString.init()
         FortyFiveLogger.init()
+        SoundPlayer.init()
         GameDirector.init()
         MapManager.init()
 //        resetAll()

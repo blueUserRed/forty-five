@@ -63,6 +63,8 @@ assets: {
         "dissolve_shader", "prerendered_noise_perlin_512x512", "ice_shader", "ice_texture",
         "parry_shader", "alpha_reduction_shader", "gaussian_blur_shader",
 
+        "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
+
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
         ...(graphicsConfig.encounterModifierAssets),

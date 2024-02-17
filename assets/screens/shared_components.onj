@@ -11,6 +11,7 @@ navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
     "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left", "heart_texture",
     "cash_symbol",
+    "button_1_sound",
 ],
 
 var cardHoverDetailUsedAssetsDefinition = [

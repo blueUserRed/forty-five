@@ -76,6 +76,10 @@ frameAnimations: {
     atlas: string,
     frameTime: int
 }[],
+sounds: {
+    name: string,
+    file: string,
+}[],
 cards: {
     directory: string
 }

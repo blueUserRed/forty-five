@@ -1,0 +1,30 @@
+
+situations: [
+
+    {
+        name: "revolver_shot",
+        sound: "revolver_shot_sound"
+    },
+    {
+        name: "statusbar_button_clicked",
+        sound: "button_1_sound",
+        volume: 0.5
+    },
+    {
+        name: "card_hover",
+        sound: "card_hover_sound",
+    },
+    {
+        name: "card_drag_finished",
+        sound: "card_laydown_sound",
+    },
+    {
+        name: "card_drag_started",
+        sound: "card_pickup_sound",
+    },
+    {
+        name: "not_allowed",
+        sound: "not_allowed_sound",
+    },
+
+]
