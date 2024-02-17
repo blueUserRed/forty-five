@@ -20,6 +20,7 @@ assets: {
         "heal_or_max_add_max_health",
         "map_node_heal",
         "taupe_gray_rounded",
+        "button_2_sound",
         //        "max_health_background",
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
@@ -135,7 +136,9 @@ root: $Box { //TODO biomes
             behaviours: [
                 $OnClickSelectHealOrMaxOptionBehaviour {
                     state: "valid"
-                }
+                },
+                sharedComponents.buttonSoundBehaviour,
+                sharedComponents.buttonCursorBehaviour,
             ],
             actorStates: [
                 "valid"
