@@ -1092,6 +1092,18 @@ sounds: [
         name: "button_2_sound",
         file: "large_assets/sounds/button_2.wav"
     },
+    {
+        name: "holster_sound",
+        file: "large_assets/sounds/holster.wav"
+    },
+    {
+        name: "parry_sound",
+        file: "large_assets/sounds/parry.wav"
+    },
+    {
+        name: "heal_sound",
+        file: "large_assets/sounds/heal.wav"
+    },
 ],
 
 cards: {

@@ -31,5 +31,17 @@ situations: [
         name: "general_button_click",
         sound: "button_2_sound",
     },
+    {
+        name: "holster",
+        sound: "holster_sound",
+    },
+    {
+        name: "enter_parry",
+        sound: "parry_sound",
+    },
+    {
+        name: "heal",
+        sound: "heal_sound",
+    },
 
 ]

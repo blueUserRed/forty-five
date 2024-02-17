@@ -64,6 +64,7 @@ assets: {
         "parry_shader", "alpha_reduction_shader", "gaussian_blur_shader",
 
         "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
+        "holster_sound",
 
         ...(graphicsConfig.keySelectUsedAssets),
         ...(graphicsConfig.gameUsedAssets),
