@@ -3,8 +3,10 @@ package com.fourinachamber.fortyfive.screen
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
+import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
+import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.value.OnjArray
@@ -17,6 +19,8 @@ object SoundPlayer {
     const val soundsSchemaFile: String = "onjschemas/sounds.onjschema"
 
     private lateinit var situations: List<Situation>
+    private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
+    private lateinit var biomeAmbience: Map<String, List<String>>
 
     private var currentMusicHandle: ResourceHandle? = null
     private var currentMusic: Music? = null
@@ -41,6 +45,27 @@ object SoundPlayer {
                     it.getOr("volume", 1.0).toFloat()
                 )
             }
+        ambientSounds = onj
+            .get<OnjArray>("ambientSounds")
+            .value
+            .map {
+                it as OnjObject
+                AmbientSound(
+                    it.get<String>("name"),
+                    it.get<String>("sound"),
+                    it.getOr("volume", 1.0).toFloat(),
+                    it.get<OnjArray>("delay").toIntRange()
+                )
+            }
+            .associateWith { 0L }
+            .toMutableMap()
+        biomeAmbience = onj
+            .get<OnjArray>("biomeAmbience")
+            .value
+            .map { it as OnjObject }
+            .zip { it.get<String>("biomeName") }
+            .mapFirst { it.get<OnjArray>("sounds").value.map { it.value as String } }
+            .associate { it.second to it.first }
     }
 
     fun currentMusic(musicHandle: ResourceHandle?, screen: OnjScreen) {
@@ -71,6 +96,29 @@ object SoundPlayer {
         val sound = ResourceManager.get<Sound>(screen, soundHandle)
         sound.play(1f)
     }
+
+    fun updateAmbientSounds(screen: OnjScreen) {
+        val now = TimeUtils.millis()
+        val biome = MapManager.currentDetailMap.biome
+        val sounds = biomeAmbience[biome] ?: run {
+            FortyFiveLogger.warn(logTag, "No ambience defined for biome $biome")
+            return
+        }
+        ambientSounds.filter { it.key.name in sounds }.forEach { (ambient, nextPlayTime) ->
+            if (nextPlayTime > now) return@forEach
+            val sound = ResourceManager.get<Sound>(screen, ambient.sound)
+            val id = sound.play()
+            sound.setPan(id, (-1f..1f).random(), ambient.volume)
+            ambientSounds[ambient] = now + ambient.delay.random()
+        }
+    }
+
+    private data class AmbientSound(
+        val name: String,
+        val sound: ResourceHandle,
+        val volume: Float,
+        val delay: IntRange
+    )
 
     private data class Situation(
         val name: String,

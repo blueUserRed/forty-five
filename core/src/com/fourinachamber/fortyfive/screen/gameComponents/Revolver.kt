@@ -14,6 +14,7 @@ import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.AnimationActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
@@ -229,13 +230,19 @@ class Revolver(
         when (rotation) {
 
             is RevolverRotation.Right -> repeat(rotation.amount) {
-                action { rotateRight() }
+                action {
+                    SoundPlayer.situation("revolver_rotation", screen)
+                    rotateRight()
+                }
                 delayUntil { animFinished() }
                 delay(10)
             }
 
             is RevolverRotation.Left -> repeat(rotation.amount) {
-                action { rotateLeft() }
+                action {
+                    SoundPlayer.situation("revolver_rotation", screen)
+                    rotateLeft()
+                }
                 delayUntil { animFinished() }
                 delay(10)
             }

@@ -45,10 +45,11 @@ assets: {
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
         "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader",
 
-        "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound", "button_2_sound",
+        "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound", "button_2_sound", "walk_sound",
 
         "map_theme",
 
+        ...(sharedComponents.ambientSoundsUsedAssets),
         ...(graphicsConfig.encounterModifierAssets),
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
@@ -66,6 +67,7 @@ options: {
     transitionAwayTime: 1.0,
     background: "black_texture",
     music: "map_theme",
+    playAmbientSounds: true,
     screenController: $MapScreenController {
         tutorialInfoActor: "tutorialInfoActor",
         mapWidgetName: "map"
