@@ -614,6 +614,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             gameRenderPipeline.startParryEffect()
             curScreen.enterState(showEnemyAttackPopupScreenState)
             FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
+            SoundPlayer.situation("enter_parry", curScreen)
         }
         delayUntil { popupEvent != null || parryCard == null }
         includeLater(
@@ -838,6 +839,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             return
         }
         appendMainTimeline(Timeline.timeline {
+            action {
+                SoundPlayer.situation("holster", curScreen)
+            }
             include(checkEffectsActiveCards(Trigger.ON_ROUND_END))
             includeLater(
                 { putCardsUnderDeckTimeline() },
