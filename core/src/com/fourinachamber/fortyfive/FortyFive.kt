@@ -54,6 +54,8 @@ object FortyFive : Game() {
     }
 
     fun changeToInitialScreen() {
+        changeToScreen("screens/intro_screen.onj")
+        return
         if (!SaveState.playerCompletedFirstTutorialEncounter) {
             MapManager.changeToEncounterScreen(tutorialEncounterContext)
         } else {

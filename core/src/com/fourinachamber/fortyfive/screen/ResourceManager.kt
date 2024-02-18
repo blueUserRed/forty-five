@@ -82,6 +82,7 @@ object ResourceManager {
                 it.get<String>("file"),
                 it.getOr("tileable", false),
                 it.getOr("tileScale", 1.0).toFloat(),
+                it.getOr("useMipMaps", false)
             ))
         }
 
@@ -190,7 +191,8 @@ object ResourceManager {
                     "${Card.cardTexturePrefix}${it.nameWithoutExtension}",
                     it.path,
                     false,
-                    1f
+                    1f,
+                    false
                 ))
             }
 
