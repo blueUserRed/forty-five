@@ -46,14 +46,14 @@ class CardPrototype(
     val forceLoadCards: List<String>,
 ) {
 
-    var creator: ((screen: OnjScreen) -> Card)? = null
+    var creator: ((screen: OnjScreen, isSaved: Boolean?) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
 
     /**
      * creates an actual instance of this card
      */
-    fun create(screen: OnjScreen): Card = creator!!(screen)
+    fun create(screen: OnjScreen, isSaved: Boolean? = null): Card = creator!!(screen, isSaved)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -98,7 +98,8 @@ class Card(
     val additionalHoverInfos: List<String>,
     font: PixmapFont,
     fontScale: Float,
-    screen: OnjScreen
+    screen: OnjScreen,
+    val isSaved: Boolean?
 ) : Disposable {
 
     /**
@@ -257,6 +258,7 @@ class Card(
     fun leaveGame() {
         inGame = false
         _modifiers.clear()
+        rotationCounter = 0
         modifiersChanged()
     }
 
@@ -480,7 +482,7 @@ class Card(
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                         onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     )
-                    prototype.creator = { screen -> getCardFrom(onj, screen, initializer, prototype) }
+                    prototype.creator = { screen, isSaved -> getCardFrom(onj, screen, initializer, prototype, isSaved) }
                     prototypes.add(prototype)
                 }
             return prototypes
@@ -491,7 +493,8 @@ class Card(
             onj: OnjObject,
             onjScreen: OnjScreen,
             initializer: (Card) -> Unit,
-            prototype: CardPrototype
+            prototype: CardPrototype,
+            isSaved: Boolean?,
         ): Card {
             val name = onj.get<String>("name")
             val card = Card(
@@ -524,7 +527,8 @@ class Card(
                     ?.value
                     ?.map { it.value as String }
                     ?: listOf(),
-                screen = onjScreen
+                screen = onjScreen,
+                isSaved = isSaved
             )
 
             for (effect in card.effects) effect.card = card
@@ -755,11 +759,22 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int) {
+        val savedPixmap = when (card.isSaved) {
+            null -> null
+            true -> GraphicsConfig.cardSavedSymbol(screen)
+            false -> GraphicsConfig.cardNotSavedSymbol(screen)
+        }
+            ?.textureData
+            ?.let {
+                if (!it.isPrepared) it.prepare()
+                it.consumePixmap()
+            }
         val message = ServiceThreadMessage.DrawCardPixmap(
             pixmap,
             cardTexturePixmap,
             card,
-            damageValue
+            damageValue,
+            savedPixmap
         )
         FortyFive.serviceThread.sendMessage(message)
         drawPixmapMessage = message

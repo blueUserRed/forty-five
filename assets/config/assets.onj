@@ -776,6 +776,14 @@ textures: [
         name: "stats_screen_lost_cards_background",
         file: "textures/stats_screen/lost_cards_background.png"
     },
+    {
+        name: "card_symbol_saved",
+        file: "textures/cards/symbols/saved.png"
+    },
+    {
+        name: "card_symbol_not_saved",
+        file: "textures/cards/symbols/not_saved.png"
+    },
 ],
 
 cursors: [

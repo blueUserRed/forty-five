@@ -218,8 +218,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         curReserves = baseReserves
 
-        addEncounterModifier(EncounterModifier.SteelNerves())
-
         encounterModifiers.forEach { it.onStart(this) }
         appendMainTimeline(Timeline.timeline {
             include(drawCardPopupTimeline(cardsToDrawInFirstRound))
@@ -458,6 +456,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun addEncounterModifier(modifier: EncounterModifier) {
         _encounterModifiers.add(modifier)
+        val parent = (curScreen.namedActorOrError(encounterModifierParentName) as? FlexBox
+                ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"))
         curScreen.screenBuilder.generateFromTemplate(
             encounterModifierDisplayTemplateName,
             mapOf(
@@ -465,10 +465,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
                 "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
             ),
-            curScreen.namedActorOrError(encounterModifierParentName) as? FlexBox
-                ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"),
+            parent,
             curScreen
         )!!
+        parent.invalidateHierarchy()
     }
 
     /**

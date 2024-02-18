@@ -110,7 +110,9 @@ cardText: {
         normal: color.black,
         increase: color.darkGreen,
         decrease: color.red,
-    }
+    },
+    savedSymbol: "card_symbol_saved",
+    notSavedSymbol: "card_symbol_not_saved",
 },
 
 keySelect: {
