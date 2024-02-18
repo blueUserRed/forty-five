@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.Completable
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.screen.general.customActor.DisableActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
@@ -16,6 +17,7 @@ import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjNamedObject
+import onj.value.OnjNull
 import onj.value.OnjObject
 import kotlin.reflect.KClass
 import kotlin.system.measureTimeMillis
@@ -38,6 +40,7 @@ object BehaviourFactory {
         "OnClickSelectHealOptionBehaviour" to { onj, actor -> OnClickSelectHealOptionBehaviour(onj, actor) },
         "OnClickRemoveWarningLabelBehaviour" to { onj, actor -> OnClickRemoveWarningLabelBehaviour(onj, actor) },
         "SpamPreventionBehaviour" to { onj, actor -> SpamPreventionBehaviour(onj, actor) },
+        "OnClickSoundSituationBehaviour" to { onj, actor -> OnClickSoundSituationBehaviour(onj, actor) },
     )
 
     /**
@@ -275,6 +278,15 @@ class SpamPreventionBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(act
         lastEventTime = now
         if (block) event.cancel()
         block
+    }
+}
+
+class OnClickSoundSituationBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    private val situation: String = onj.get<String>("situation")
+
+    override val onCLick: BehaviourCallback = {
+        SoundPlayer.situation(situation, onjScreen)
     }
 }
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexGroup
@@ -19,6 +20,7 @@ class BackpackDragSource(
     actor: Actor,
     onj: OnjNamedObject,
 ) : CenteredDragSource(dragAndDrop, actor, onj, true) {
+
     override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int): DragAndDrop.Payload? {
         val actor = actor
         if ((actor !is CardActor)) return null
@@ -38,6 +40,7 @@ class BackpackDragSource(
         (curFlex.parent as ZIndexGroup).resortZIndices()
         obj.resetZIndex(curFlex, actor)
         startReal()
+        SoundPlayer.situation("card_drag_started", actor.screen)
 
         return payload
     }
@@ -84,6 +87,7 @@ class BackpackDragSource(
 }
 
 class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
+
     fun switchOrPlaceCard(card: CardActor, slot: CustomFlexBox) {
         val dataSource = card.name.split(Backpack.NAME_SEPARATOR_STRING)
         val sourceIndex = dataSource[2].toInt()
@@ -91,6 +95,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
         val curDeck = SaveState.curDeck
         if (dataSource[1] == "deck") curDeck.swapCards(sourceIndex, targetIndex)
         else if (dataSource[1] == "backpack") curDeck.addToDeck(targetIndex, dataSource[0])
+        SoundPlayer.situation("card_drag_finished", card.screen)
     }
 
     fun backToBackpack(card: CardActor) {
@@ -98,6 +103,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
         if (fromDeck) {
             if (SaveState.curDeck.canRemoveCards()) {
                 SaveState.curDeck.removeFromDeck(card.parent.parent.children.indexOf(card.parent))
+                SoundPlayer.situation("card_drag_finished", card.screen)
             } else {
                 CustomWarningParent.getWarning(card.screen).addWarning(
                     card.screen,
@@ -105,6 +111,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
                     "The minimum decksize is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
                     CustomWarningParent.Severity.MIDDLE
                 )
+                SoundPlayer.situation("not_allowed", card.screen)
             }
         }
     }

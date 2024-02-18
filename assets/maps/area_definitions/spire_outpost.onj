@@ -44,7 +44,6 @@ nodes: [
             canBeStarted: true,
             canOnlyBeStartedOnce: false,
             isCompleted: false,
-            canOnlyBeStartedOnce: false,
     }
     },
 ],

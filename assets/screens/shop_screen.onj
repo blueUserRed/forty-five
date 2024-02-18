@@ -17,6 +17,12 @@ assets: {
         "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         "shop_add_to_backpack", "shop_add_to_deck",
+
+        "card_pickup_sound", "card_laydown_sound", "money_sound",
+
+        "map_theme",
+
+        ...(sharedComponents.ambientSoundsUsedAssets),
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
@@ -31,6 +37,8 @@ viewport: $FitViewport {
 
 options: {
     background: "hover_detail_background",
+    music: "map_theme",
+    playAmbientSounds: true,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

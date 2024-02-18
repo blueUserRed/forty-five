@@ -24,7 +24,11 @@ assets: {
         "heal_or_max_selector_background_selected",
         "taupe_gray_rounded",
         "map_node_heal",
+        "button_2_sound",
+        "heal_sound",
+        "map_theme",
         //        "max_health_background",
+        ...(sharedComponents.ambientSoundsUsedAssets),
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
@@ -38,6 +42,9 @@ viewport: $FitViewport {
 
 options: {
     background: "hover_detail_background",
+    transitionAwayTime: 1.5,
+    music: "map_theme",
+    playAmbientSounds: true,
     inputMap: [
         ...(inputMaps.defaultInputMap),
         ...(inputMaps.healOrMaxInputMap),
@@ -144,7 +151,9 @@ root: $Box { //TODO biomes
             behaviours: [
                 $OnClickSelectHealOrMaxOptionBehaviour {
                     state: "valid"
-                }
+                },
+                sharedComponents.buttonSoundBehaviour,
+                sharedComponents.buttonCursorBehaviour,
             ],
             styles: [
                 {
