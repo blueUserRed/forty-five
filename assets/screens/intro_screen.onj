@@ -1,0 +1,54 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+//        "red_wing", "red_wing_bmp", "roadgeek",
+        "microwave_studios_brown_texture", "microwave_studios_logo",
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    transitionAwayTime: 4.0,
+    background: "microwave_studios_brown_texture",
+    //playAmbientSounds: false,
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+},
+
+root: $Box {
+    styles: [
+        {
+            width: worldWidth#points,
+            flexDirection: flexDirection.column,
+            height: worldHeight#points,
+            alignItems: align.center,
+            justifyContent: justify.center
+        }
+    ],
+} children [
+
+    $Box {
+        styles: [
+            {
+                background: "microwave_studios_logo",
+                width: (worldWidth * 0.6)#points,
+                aspectRatio: 2030.0 / 528.0,
+            }
+        ]
+    }
+
+]

@@ -772,6 +772,11 @@ textures: [
         name: "stats_screen_lost_cards_background",
         file: "textures/stats_screen/lost_cards_background.png"
     },
+    {
+        name: "microwave_studios_logo",
+        file: "textures/microwave_studios.png",
+        useMipMaps: true
+    },
 ],
 
 cursors: [
@@ -925,6 +930,10 @@ colorTextures: [
     {
         name: "forty_white_texture",
         color: color.forty_white
+    },
+    {
+        name: "microwave_studios_brown_texture",
+        color: color.microwaveStudiosBrown
     }
 ],
 

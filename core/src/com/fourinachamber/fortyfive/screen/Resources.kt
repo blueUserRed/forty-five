@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.Texture.TextureFilter
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.graphics.g2d.BitmapFont.BitmapFontData
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData
@@ -106,13 +107,15 @@ class TextureResource(
     handle: String,
     val file: String,
     val tileable: Boolean,
-    val tileScale: Float
+    val tileScale: Float,
+    val useMipMaps: Boolean,
 ) : Resource(handle) {
 
     private var pixmap: Pixmap? = null
 
     override fun loadDirectMainThread() {
-        val texture = Texture(Gdx.files.internal(file))
+        val texture = Texture(Gdx.files.internal(file), useMipMaps)
+        if (useMipMaps) texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.Linear)
         val region = TextureRegion(texture)
         val drawable =
             if (tileable) TiledDrawable(region).apply { scale = tileScale } else TextureRegionDrawable(region)
@@ -125,7 +128,8 @@ class TextureResource(
     }
 
     override fun finishLoadingMainThread() {
-        val texture = Texture(pixmap)
+        val texture = Texture(pixmap, useMipMaps)
+        if (useMipMaps) texture.setFilter(TextureFilter.MipMapLinearLinear, TextureFilter.Linear)
         val region = TextureRegion(texture)
         val drawable =
             if (tileable) TiledDrawable(region).apply { scale = tileScale } else TextureRegionDrawable(region)
@@ -154,7 +158,7 @@ class FontResource(
     override fun loadDirectMainThread() {
         val texture = Texture(Gdx.files.internal(imageFile), true)
         val font = BitmapFont(Gdx.files.internal(fontFile), TextureRegion(texture), false)
-        texture.setFilter(Texture.TextureFilter.MipMapLinearNearest, Texture.TextureFilter.Linear)
+        texture.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.Linear)
         font.setUseIntegerPositions(false)
         font.color = Color.WHITE
         font.data.markupEnabled = markupEnabled
@@ -170,7 +174,7 @@ class FontResource(
     override fun finishLoadingMainThread() {
         val texture = Texture(pixmap, true)
         val font = BitmapFont(fontData!!, TextureRegion(texture), false)
-        texture.setFilter(Texture.TextureFilter.MipMapLinearNearest, Texture.TextureFilter.Linear)
+        texture.setFilter(TextureFilter.MipMapLinearNearest, TextureFilter.Linear)
         font.setUseIntegerPositions(false)
         font.color = Color.WHITE
         font.data.markupEnabled = markupEnabled
