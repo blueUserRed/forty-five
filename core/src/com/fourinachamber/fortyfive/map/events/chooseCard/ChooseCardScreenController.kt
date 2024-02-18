@@ -100,6 +100,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         for (i in cardPrototypes.indices) {
             val curData = data[i]
             val curCard = cardPrototypes[i].create(screen)
+            screen.addDisposable(curCard)
             screen.screenBuilder.addDataToWidgetFromTemplate(
                 "cardTemplate",
                 mapOf(
