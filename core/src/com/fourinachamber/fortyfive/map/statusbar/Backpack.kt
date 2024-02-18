@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
@@ -24,8 +25,8 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-import java.lang.Exception
-import java.lang.IllegalStateException
+import java.lang.Integer.max
+import kotlin.math.min
 
 class Backpack(
     screen: OnjScreen,
@@ -134,7 +135,7 @@ class Backpack(
         _allCards = cardPrototypes
             .filter { it.name in SaveState.cards }
             // TODO: figure out if the card is saved or not
-            .map { it.create(screen, false) }
+            .map { it.create(screen, it.name in PermaSaveState.collection) }
             .toMutableList()
     }
 
@@ -244,28 +245,41 @@ class Backpack(
 
         val positions = SaveState.curDeck.cardPositions.toMutableMap()
         val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
-
+        val removedCardInDeck = mutableListOf<String>()
         children.forEachIndexed { i, it ->
             if (it.children.size > 0) {
                 val curActor = it.children[0] as CardActor
                 if (positions[i] != curActor.card.name) {
                     removeChildCompletely(curActor)
-                }else{
+                    removedCardInDeck.add(curActor.card.name)
+                } else {
                     unplacedCards.remove(curActor.card.name)
                     positions.remove(i)
                 }
             }
         }
-        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
+
+
+        val cardsNeededToRemoveInBackpack = mutableListOf<String>()
+        positions.forEach {
+            if (!removedCardInDeck.remove(it.value)) cardsNeededToRemoveInBackpack.add(it.value)
+        }
+
+        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach {
+            if (it.children.size > 0 && it.children[0] is CardActor) {
+                if (cardsNeededToRemoveInBackpack.remove((it.children[0] as CardActor).card.name)) {
+                    removeChildCompletely(it)
+                }
+            }
+        }
 
         //Deck
         positions.forEach {
-            val currentSelection = unplacedCards.find { card -> it.value == card }!!
             val cur = children[it.key]
             val curChild = getCard(it.value, true).actor
             screen.screenBuilder.addDataToWidgetFromTemplate("backpack_slot_card", mapOf(), cur, screen, curChild)
             curChild.name = "${it.value}${NAME_SEPARATOR_STRING}deck${NAME_SEPARATOR_STRING}${it.key}"
-            unplacedCards.remove(currentSelection)
+            unplacedCards.remove(it.value)
         }
         deckCardsWidget.invalidate()
 
@@ -276,9 +290,8 @@ class Backpack(
 
     private fun getCard(name: String, checkParent: Boolean = false): Card {
         val card = _allCards.find { card -> card.name == name && (!checkParent || card.actor.parent == null) }
-        card ?: throw IllegalStateException("You try to access a card that isn't loaded, this shouldn't be possible!")
-        if (card !in _allCards) _allCards.add(card)
         return card
+            ?: throw IllegalStateException("You try to access a card that isn't loaded, this shouldn't be possible!")
     }
 
     private fun removeChildCompletely(actor: Actor) {
@@ -293,20 +306,46 @@ class Backpack(
     }
 
     private fun sortBackpack(sortedCards: List<String>) {
-        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
+        var parents = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+//        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
+
+        //if a card got added or removed to/from the backpack
+        if (sortedCards.size != parents.size) {
+            val min = min(sortedCards.size, parents.size)
+            if (sortedCards.size > min) {
+                for (i in min until sortedCards.size) {
+                    screen.screenBuilder.generateFromTemplate(
+                        "backpack_slot_parent",
+                        mapOf(),
+                        backpackCardsWidget,
+                        screen,
+                    ) as CustomFlexBox
+                }
+            } else if (parents.size > min)
+                for (i in min until parents.size) {
+                    removeChildCompletely(parents[i])
+                }
+        }
+        parents = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+
+        //leave cards that are at the right position
+        for (i in sortedCards.indices) {
+            val children = parents[i].children
+            if (children.size >= 1 && children[0] is CardActor) {
+                val c = children[0] as CardActor
+                if (c.card.name != sortedCards[i]) removeChildCompletely(c)
+            }
+        }
+
+        // add the cards that are at the right position
         for (i in sortedCards.indices) {
             val cardName = sortedCards[i]
+            if (parents[i].children.size!=0) continue
             val curActor = getCard(cardName, true).actor
-            val parent = screen.screenBuilder.generateFromTemplate(
-                "backpack_slot_parent",
-                mapOf(),
-                backpackCardsWidget,
-                screen,
-            ) as CustomFlexBox
             screen.screenBuilder.addDataToWidgetFromTemplate(
                 "backpack_slot_card",
                 mapOf(),
-                parent,
+                parents[i],
                 screen,
                 curActor
             )
@@ -384,6 +423,7 @@ class Backpack(
     }
 
     private fun checkCurCards() {
+        val savedCardsLeft = PermaSaveState.collection.toMutableList()
         val unplacedCards = SaveState.cards.toMutableList()
         val placedCards = _allCards.map { it.name }.toMutableList()
         var i = 0;
@@ -392,9 +432,12 @@ class Backpack(
             if (cur in placedCards) {
                 unplacedCards.remove(cur)
                 placedCards.remove(cur)
+                if (cur in savedCardsLeft) savedCardsLeft.remove(cur)
             } else i++
         }
-        unplacedCards.forEach { name -> _allCards.add(cardPrototypes.find { it.name == name }!!.create(screen)) }
+        unplacedCards.forEach { name ->
+            _allCards.add(cardPrototypes.find { it.name == name }!!.create(screen, savedCardsLeft.remove(name)))
+        }
     }
 
     private fun getInOutTimeLine(isGoingIn: Boolean, goingRight: Boolean, target: CustomFlexBox) = Timeline.timeline {
