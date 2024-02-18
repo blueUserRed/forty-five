@@ -796,6 +796,7 @@ class CardActor(
     // TODO: came up with system for animations
     fun destroyAnimation(): Timeline = Timeline.timeline {
         action {
+            SoundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
             destroyShader.resetReferenceTime()
         }
@@ -815,6 +816,7 @@ class CardActor(
         scaleAction.duration = 0.3f
         scaleAction.interpolation = Interpolation.pow2
         action {
+            SoundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
             addAction(moveAction)
             addAction(scaleAction)
@@ -843,6 +845,7 @@ class CardActor(
         scaleAction.duration = 0.3f
         scaleAction.interpolation = Interpolation.pow2
         action {
+            SoundPlayer.situation("card_trigger_anim_out", screen)
             addAction(moveAction)
             addAction(scaleAction)
         }

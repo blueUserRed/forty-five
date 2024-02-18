@@ -65,6 +65,7 @@ assets: {
 
         "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
         "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound", "swoosh_sound", "button_2_sound",
+        "card_destroy_sound",
 
         "map_theme",
 
@@ -382,9 +383,21 @@ var enemyActionAnimationTemplate = $Box {
                 ],
                 font: "red_wing",
                 text: "The Player gets the burning for 5 Revolver rotations",
-                fontScale: 0.6,
-                align: "left",
+                fontScale: 0.8,
+                align: "center",
                 wrap: true,
+                color: color.white
+            },
+            $Label {
+                styles: [
+                    {
+                        width: 430#points
+                    }
+                ],
+                font: "red_wing",
+                text: "Click to Continue",
+                fontScale: 0.6,
+                align: "center",
                 color: color.white
             },
         ],
