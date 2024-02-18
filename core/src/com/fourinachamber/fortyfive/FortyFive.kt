@@ -51,12 +51,11 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
-        changeToInitialScreen()
+//        changeToInitialScreen()
+        changeToScreen("screens/intro_screen.onj")
     }
 
     fun changeToInitialScreen() {
-        changeToScreen("screens/intro_screen.onj")
-        return
         if (!SaveState.playerCompletedFirstTutorialEncounter) {
             MapManager.changeToEncounterScreen(tutorialEncounterContext)
         } else {
@@ -69,8 +68,8 @@ object FortyFive : Game() {
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
-    fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
-        if (inScreenTransition) return
+    fun changeToScreen(screenPath: String, controllerContext: Any? = null) = Gdx.app.postRunnable {
+        if (inScreenTransition) return@postRunnable
         inScreenTransition = true
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()

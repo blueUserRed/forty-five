@@ -12,6 +12,7 @@ assets: {
     useAssets: [
 //        "red_wing", "red_wing_bmp", "roadgeek",
         "microwave_studios_brown_texture", "microwave_studios_logo",
+        "microwave_theme",
     ]
 },
 
@@ -21,9 +22,10 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 4.0,
+    transitionAwayTime: 5.0,
     background: "microwave_studios_brown_texture",
-    //playAmbientSounds: false,
+    playAmbientSounds: false,
+    screenController: $IntroScreenController {},
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

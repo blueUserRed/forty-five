@@ -391,10 +391,7 @@ $ScreenController {
         ...gameScreenControllerKeys
     }
 
-    $IntroScreenController {
-        appearActor: string,
-        nextScreen: string,
-    }
+    $IntroScreenController {}
 
     $StatsScreenController {
     }
