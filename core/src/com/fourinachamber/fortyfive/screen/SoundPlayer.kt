@@ -26,8 +26,9 @@ object SoundPlayer {
     private var currentMusic: Music? = null
 
 //    var musicVolume: Float = 0f
-    var musicVolume: Float = 1f
-    var soundEffectVolume: Float = 1.0f
+        var musicVolume: Float = 1f
+//    var soundEffectVolume: Float = 0f
+    var soundEffectVolume: Float = 1f
 
     fun init() {
         val onj = OnjParser.parseFile(Gdx.files.internal(soundsFile).file())
