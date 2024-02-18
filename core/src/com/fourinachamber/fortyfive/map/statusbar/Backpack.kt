@@ -337,7 +337,7 @@ class Backpack(
             }
         }
 
-        // add the cards that are at the wrong position
+        // add the cards that are at the right position
         for (i in sortedCards.indices) {
             val cardName = sortedCards[i]
             if (parents[i].children.size!=0) continue
