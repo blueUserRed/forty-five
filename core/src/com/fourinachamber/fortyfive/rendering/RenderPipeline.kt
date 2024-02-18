@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.rendering
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Pixmap
@@ -14,11 +13,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
 import com.badlogic.gdx.math.CatmullRomSpline
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -195,16 +196,59 @@ open class RenderPipeline(
             renderWithPostProcessors(delta)
         }
         if (!showFps) return
+        showPerformanceInfo()
+    }
+
+    private fun showPerformanceInfo() {
         val font = ResourceManager.get<BitmapFont>(screen, "red_wing_bmp")
-        font.data.setScale(0.3f)
+        font.data.setScale(0.2f)
         val fps = Gdx.graphics.framesPerSecond
-        val layout = GlyphLayout(font, "fps: $fps", Color.WHITE, 200f, 0, false)
+        val loadedAssets = ResourceManager
+            .resources
+            .filter { it.state == Resource.ResourceState.LOADED || it.state == Resource.ResourceState.PREPARED }
+            .size
+        val javaHeap = String.format("%.3f", Gdx.app.javaHeap.toDouble() / (1000 * 1000))
+        val nativeHeap = String.format("%.3f", Gdx.app.nativeHeap.toDouble() / (1000 * 1000))
+        var text = """
+            press 't' to toggle this display
+            fps: $fps
+            15s render lagSpike: ${screen.largestRenderTimeInLast15Sec()}ms
+            active style managers: ${screen.styleManagerCount()}
+            loaded assets: $loadedAssets/${ResourceManager.resources.size}
+            version: ${FortyFiveLogger.versionTag}
+        """.trimIndent()
+//        text += """
+//
+//            javaHeap: $javaHeap
+//            nativeHeap: $nativeHeap
+//        """.trimIndent()
+        val layout = GlyphLayout(
+            font,
+            text,
+            Color.WHITE,
+            200f,
+            Align.topLeft,
+            false
+        )
         val viewport = ExtendViewport(1600f, 900f)
         viewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
+        val shapeRenderer = ShapeRenderer()
+        shapeRenderer.begin(ShapeType.Filled)
+        viewport.apply()
+        shapeRenderer.projectionMatrix = viewport.camera.combined
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        shapeRenderer.setColor(0f, 0f, 0f, 0.6f)
+        shapeRenderer.rect(
+            viewport.worldWidth - 50f - layout.width,
+            880f - layout.height - 50f,
+            500f,
+            500f
+        )
+        shapeRenderer.end()
         batch.begin()
         viewport.apply()
         batch.projectionMatrix = viewport.camera.combined
-        font.draw(batch, layout, viewport.worldWidth - 200f, 880f)
+        font.draw(batch, layout, viewport.worldWidth - 300f, 880f)
         batch.end()
     }
 

@@ -17,7 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
@@ -177,6 +176,8 @@ open class OnjScreen @MainThreadOnly constructor(
 
     var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
         private set
+
+    private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
     init {
         useAssets.forEach {
@@ -438,9 +439,18 @@ open class OnjScreen @MainThreadOnly constructor(
                 stage.batch.end()
             }
         }
+        lastRenderTimes.add(lastRenderTime)
+        if (lastRenderTimes.size > 60 * 15) {
+            lastRenderTimes.removeAt(0)
+        }
+        Unit
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)
     }
+
+    fun largestRenderTimeInLast15Sec(): Long =  lastRenderTimes.max()
+
+    fun styleManagerCount(): Int = styleManagers.size
 
     private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
         stage.batch.begin()
