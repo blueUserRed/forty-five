@@ -568,14 +568,14 @@ cards: [
         name: "scorchingBullet",
         title: "Scorching Bullet",
         flavourText: "scorching Bullet",
-        description: "$trigger$While in hand or revolver: On-Turn-Begin:$trigger$ Take 10 dmg",
+        description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 10 dmg",
         baseDamage: 0,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damagePlayer("round start", 10#val)#canTriggerInHand
+            damagePlayer("round end", 10#val)#canTriggerInHand
         ],
         forceLoadCards: [],
         dark: true,
