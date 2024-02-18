@@ -37,6 +37,7 @@ encounterModifiers: {
     bewitchedMist: encounterModifierConfig,
     lookalike: encounterModifierConfig,
     moist: encounterModifierConfig,
+    steelNerves: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],
@@ -66,7 +67,9 @@ cardText: {
         normal: Color,
         increase: Color,
         decrease: Color,
-    }
+    },
+    savedSymbol: string,
+    notSavedSymbol: string,
 },
 
 keySelect: {

@@ -7,10 +7,32 @@ import "config/game_config.onj" as gameConfig;
 var worldWidth = 1600.0;
 var worldHeight = 900.0;
 
+var buttonSoundBehaviour = $OnClickSoundSituationBehaviour {
+    situation: "general_button_click",
+};
+
+buttonSoundBehaviour: buttonSoundBehaviour,
+
+var buttonCursorBehaviour = $MouseHoverBehaviour {
+    useSystemCursor: true,
+    cursorName: "hand",
+    disabled: {
+        useSystemCursor: true,
+        cursorName: "not allowed"
+    }
+};
+
+buttonCursorBehaviour: buttonCursorBehaviour,
+
+ambientSoundsUsedAssets: [
+    "snake_sound", "owl_sound"
+],
+
 navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
     "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left", "heart_texture",
     "cash_symbol",
+    "button_1_sound",
 ],
 
 var cardHoverDetailUsedAssetsDefinition = [
@@ -49,6 +71,8 @@ backpackAssets: [
     "backpack_direction_hover",
     "backpack_direction_arrow",
     "card_character",
+    "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
+    "card_symbol_saved", "card_symbol_not_saved",
     ...cardHoverDetailUsedAssetsDefinition,
 ],
 
@@ -1150,7 +1174,9 @@ tutorialInfoActor: $TutorialInfoActor {
             $SpamPreventionBehaviour {
                 event: "TutorialConfirmedEvent",
                 blockDuration: 400
-            }
+            },
+            buttonCursorBehaviour,
+            buttonSoundBehaviour
         ],
     } children [
         $TemplateLabel {

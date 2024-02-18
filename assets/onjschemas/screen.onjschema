@@ -379,6 +379,10 @@ $Behaviour {
         event: string,
         blockDuration: int
     }
+
+    $OnClickSoundSituationBehaviour {
+        situation: string,
+    }
 }
 
 $ScreenController {
@@ -502,6 +506,8 @@ assets: {
 options: {
     background?: string,
     screenController?: $ScreenController,
+    music?: string,
+    playAmbientSounds: boolean,
     inputMap?: {
         priority?: int,
         condition?: KeyInputCondition,

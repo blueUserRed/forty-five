@@ -17,6 +17,7 @@ import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
@@ -163,7 +164,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     var cardsDrawn: Int = 0
         private set
 
-    private var hasWon: Boolean = false
+    var hasWon: Boolean = false
+        private set
 
     var playerLost: Boolean = false
         private set
@@ -215,7 +217,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         // enemy area is initialised by the GameDirector
 
         curReserves = baseReserves
-        appendMainTimeline(drawCardPopupTimeline(cardsToDrawInFirstRound))
+
+        encounterModifiers.forEach { it.onStart(this) }
+        appendMainTimeline(Timeline.timeline {
+            include(drawCardPopupTimeline(cardsToDrawInFirstRound))
+            encounterModifiers
+                    .mapNotNull { it.executeOnPlayerTurnStart() }
+                    .collectTimeline()
+                    .let { include(it) }
+        })
         onjScreen.invalidateEverything()
         gameDirector.chooseEnemyActions()
     }
@@ -309,6 +319,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     override fun update() {
         if (updateCount < 6) curScreen.invalidateEverything() // TODO: this is stupid
         updateCount++
+
+        encounterModifiers.forEach { it.update(this) }
 
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
         if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
@@ -444,6 +456,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun addEncounterModifier(modifier: EncounterModifier) {
         _encounterModifiers.add(modifier)
+        val parent = (curScreen.namedActorOrError(encounterModifierParentName) as? FlexBox
+                ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"))
         curScreen.screenBuilder.generateFromTemplate(
             encounterModifierDisplayTemplateName,
             mapOf(
@@ -451,10 +465,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 "modifierName" to OnjString(GraphicsConfig.encounterModifierDisplayName(modifier)),
                 "modifierDescription" to OnjString(GraphicsConfig.encounterModifierDescription(modifier)),
             ),
-            curScreen.namedActorOrError(encounterModifierParentName) as? FlexBox
-                ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"),
+            parent,
             curScreen
         )!!
+        parent.invalidateHierarchy()
     }
 
     /**
@@ -463,10 +477,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) = appendMainTimeline(Timeline.timeline {
         FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
-        if (card.type != Card.Type.BULLET || !card.allowsEnteringGame(this@GameController, slot)) return
         val cardInSlot = revolver.getCardInSlot(slot)
-        if (!(cardInSlot?.isReplaceable ?: true)) return
-        if (!cost(card.cost, card.actor)) return
+
+        if (
+            card.type != Card.Type.BULLET ||
+            !card.allowsEnteringGame(this@GameController, slot) ||
+            !(cardInSlot?.isReplaceable ?: true) ||
+            !cost(card.cost, card.actor)
+        ) {
+            SoundPlayer.situation("not_allowed", curScreen)
+            return
+        }
         action {
             cardHand.removeCard(card)
             if (cardInSlot != null) revolver.preAddCard(slot, card)
@@ -567,6 +588,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             repeat(remainingCardsToDraw) { cur ->
                 delayUntil { popupEvent != null }
                 action {
+                    SoundPlayer.situation("card_drawn", curScreen)
                     popupEvent = null
                     drawCard()
                     TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount - cur - 1)
@@ -606,6 +628,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             gameRenderPipeline.startParryEffect()
             curScreen.enterState(showEnemyAttackPopupScreenState)
             FortyFiveLogger.debug(logTag, "enemy attacking: damage = $damage; parryCard = $parryCard")
+            SoundPlayer.situation("enter_parry", curScreen)
         }
         delayUntil { popupEvent != null || parryCard == null }
         includeLater(
@@ -728,6 +751,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .damagePlayerDirectly(shotEmptyDamage, this@GameController)
 
         val timeline = Timeline.timeline {
+            action {
+                SoundPlayer.situation("revolver_shot", curScreen)
+            }
             includeLater(
                 { damagePlayerTimeline },
                 { cardToShoot == null }
@@ -827,6 +853,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             return
         }
         appendMainTimeline(Timeline.timeline {
+            action {
+                SoundPlayer.situation("holster", curScreen)
+            }
+            encounterModifiers
+                    .mapNotNull { it.executeOnEndTurn() }
+                    .collectTimeline()
+                    .let { include(it) }
             include(checkEffectsActiveCards(Trigger.ON_ROUND_END))
             includeLater(
                 { putCardsUnderDeckTimeline() },
@@ -846,6 +879,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 curReserves = baseReserves
             }
             include(drawCardPopupTimeline(cardsToDraw, false))
+            encounterModifiers
+                    .mapNotNull { it.executeOnPlayerTurnStart() }
+                    .collectTimeline()
+                    .let { include(it) }
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
             includeLater({ checkEffectsActiveCards(Trigger.ON_ROUND_START) }, { true })
         })
@@ -1081,6 +1118,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun reservesPaidAnim(amount: Int, animTarget: Actor): Timeline = Timeline.timeline {
         repeat(amount) {
             action {
+                SoundPlayer.situation("orb_anim_playing", curScreen)
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     stageCoordsOfReservesIcon(),
                     animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
@@ -1094,6 +1132,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun reservesGainedAnim(amount: Int, animSource: Actor): Timeline = Timeline.timeline {
         repeat(amount) {
             action {
+                SoundPlayer.situation("orb_anim_playing", curScreen)
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     animSource.localToStageCoordinates(Vector2(0f, 0f)) +
                             Vector2(animSource.width / 2, animSource.height / 2),
@@ -1141,14 +1180,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             action {
                 val start = curScreen.stageCoordsOfActor("win_screen_cash_symbol")
                 val end = curScreen.stageCoordsOfActor("cash_symbol")
-                if (money > 0) gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
-                    orbTexture = "cash_symbol",
-                    width = 30f,
-                    height = 30f,
-                    duration = 600,
-                    segments = 20,
-                    position = RenderPipeline.OrbAnimation.curvedPath(start, end)
-                ))
+                if (money > 0) {
+                    SoundPlayer.situation("orb_anim_playing", curScreen)
+                    gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
+                        orbTexture = "cash_symbol",
+                        width = 30f,
+                        height = 30f,
+                        duration = 600,
+                        segments = 20,
+                        position = RenderPipeline.OrbAnimation.curvedPath(start, end)
+                    ))
+                    SoundPlayer.situation("money_earned", curScreen)
+                }
             }
             delay(if (money > 0) 600 else 0)
             action {

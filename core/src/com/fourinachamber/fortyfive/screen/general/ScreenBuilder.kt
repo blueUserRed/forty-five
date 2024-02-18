@@ -26,6 +26,7 @@ import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
@@ -57,6 +58,8 @@ class ScreenBuilder(val file: FileHandle) {
 
     private var screenController: ScreenController? = null
     private var background: String? = null
+    private var music: ResourceHandle? = null
+    private var playAmbientSounds: Boolean = false
     private var transitionAwayTime: Int? = null
     private val templateObjects: MutableMap<String, OnjNamedObject> = mutableMapOf()
 
@@ -83,6 +86,8 @@ class ScreenBuilder(val file: FileHandle) {
             namedCells = mapOf(),
             transitionAwayTime = transitionAwayTime,
             screenBuilder = this,
+            music = music,
+            playAmbientSounds = playAmbientSounds
         )
         screen.background = background
 
@@ -234,6 +239,10 @@ class ScreenBuilder(val file: FileHandle) {
         options.ifHas<String>("background") {
             background = it
         }
+        options.ifHas<String>("music") {
+            music = it
+        }
+        playAmbientSounds = options.get<Boolean>("playAmbientSounds")
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
         }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop.Payload
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.gameComponents.PutCardsUnderDeckWidget
 import com.fourinachamber.fortyfive.screen.gameComponents.RevolverSlot
 import com.fourinachamber.fortyfive.screen.general.*
@@ -46,6 +47,9 @@ open class CardDragSource(
         val obj = CardDragAndDropPayload(card)
         payload.obj = obj
         obj.resetTo(card.actor, Vector2(actor.x, actor.y))
+
+        SoundPlayer.situation("card_drag_started", card.actor.screen)
+
         return payload
     }
 
@@ -182,9 +186,11 @@ class CardDragAndDropPayload(val card: Card) : ExecutionPayload() {
      */
     fun loadIntoRevolver(slot: Int) = tasks.add {
         FortyFive.currentGame!!.loadBulletInRevolver(card, slot)  //TODO ugly
+        SoundPlayer.situation("card_drag_finished", card.actor.screen)
     }
 
     fun putCardUnderDeck(widget: PutCardsUnderDeckWidget) = tasks.add {
         widget.addCard(card)
+        SoundPlayer.situation("card_drag_finished", card.actor.screen)
     }
 }

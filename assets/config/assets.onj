@@ -729,6 +729,10 @@ textures: [
         file: "textures/encounter_modifier/moist.png"
     },
     {
+        name: "encounter_modifier_steel_nerves",
+        file: "textures/encounter_modifier/steel_nerves.png"
+    },
+    {
         name: "common_button_default",
         file: "textures/common/button/default.png"
     },
@@ -771,6 +775,14 @@ textures: [
     {
         name: "stats_screen_lost_cards_background",
         file: "textures/stats_screen/lost_cards_background.png"
+    },
+    {
+        name: "card_symbol_saved",
+        file: "textures/cards/symbols/saved.png"
+    },
+    {
+        name: "card_symbol_not_saved",
+        file: "textures/cards/symbols/not_saved.png"
     },
 ],
 
@@ -1060,6 +1072,84 @@ frameAnimations: [
         preview: "map_decoration_grass",
         atlas: "map_decoration_grass_animation_atlas",
         frameTime: (1000.0 / 15.0)#int
+    },
+],
+
+sounds: [
+    {
+        name: "revolver_shot_sound",
+        file: "large_assets/sounds/revolver_shot.wav"
+    },
+    {
+        name: "button_1_sound",
+        file: "large_assets/sounds/button_1.wav"
+    },
+    {
+        name: "card_hover_sound",
+        file: "large_assets/sounds/card_hover.wav"
+    },
+    {
+        name: "card_laydown_sound",
+        file: "large_assets/sounds/card_laydown.wav"
+    },
+    {
+        name: "card_pickup_sound",
+        file: "large_assets/sounds/card_pickup.wav"
+    },
+    {
+        name: "not_allowed_sound",
+        file: "large_assets/sounds/not_allowed.wav"
+    },
+    {
+        name: "button_2_sound",
+        file: "large_assets/sounds/button_2.wav"
+    },
+    {
+        name: "holster_sound",
+        file: "large_assets/sounds/holster.wav"
+    },
+    {
+        name: "parry_sound",
+        file: "large_assets/sounds/parry.wav"
+    },
+    {
+        name: "heal_sound",
+        file: "large_assets/sounds/heal.wav"
+    },
+    {
+        name: "money_sound",
+        file: "large_assets/sounds/money.wav"
+    },
+    {
+        name: "revolver_drum_sound",
+        file: "large_assets/sounds/revolver_drum.wav"
+    },
+    {
+        name: "walk_sound",
+        file: "large_assets/sounds/walk.wav"
+    },
+    {
+        name: "snake_sound",
+        file: "large_assets/sounds/snake.wav"
+    },
+    {
+        name: "owl_sound",
+        file: "large_assets/sounds/owl.wav"
+    },
+    {
+        name: "swoosh_sound",
+        file: "large_assets/sounds/swoosh.wav"
+    },
+],
+
+music: [
+    {
+        name: "main_theme",
+        file: "large_assets/music/main_theme.wav"
+    },
+    {
+        name: "map_theme",
+        file: "large_assets/music/map_theme.wav"
     },
 ],
 
