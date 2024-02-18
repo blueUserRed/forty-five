@@ -1,12 +1,8 @@
 package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.game.card.BulletSelector
-import com.fourinachamber.fortyfive.game.card.Effect
-import com.fourinachamber.fortyfive.game.card.EffectValue
-import com.fourinachamber.fortyfive.game.card.Trigger
+import com.fourinachamber.fortyfive.game.card.*
 import com.fourinachamber.fortyfive.utils.Utils
-import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
@@ -38,7 +34,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .maxOfOrNull { it.cost }
                     ?: 0
             }
-            "rotationAmount" with OnjEffectValue { _, card -> card.rotationCounter }
+            "rotationAmount" with OnjEffectValue { _, card -> card!!.rotationCounter }
         }
     )
 
@@ -136,6 +132,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value, false))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
+    fun destroyTargetOrDestroySelf(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
+        return OnjEffect(Effect.DestroyTargetOrDestroySelf(
+            triggerOrError(trigger.value),
+            bulletSelector.value,
+            false
+        ))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun damageDirect(trigger: OnjString, damage: OnjEffectValue): OnjEffect {
         return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value, false))
@@ -175,6 +180,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(effect.value.copy().apply { triggerInHand = true })
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
+    fun hide(effect: OnjEffect): OnjEffect {
+        return OnjEffect(effect.value.copy().apply { isHidden = true })
+    }
+
     @RegisterOnjFunction(schema = "params: [*[]]")
     fun bNum(onjArr: OnjArray): OnjBulletSelector {
         val nums = mutableSetOf<Int>()
@@ -183,7 +193,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         for (value in onjArr.value) when (value) {
             is OnjInt -> {
                 var num = value.value.toInt()
-                num = Utils.externalToInternalSlotRepresentation(num)
+                num = Utils.convertSlotRepresentation(num)
                 nums.add(num - 1)
             }
             is OnjString -> {
@@ -229,49 +239,39 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjBulletSelector(BulletSelector.ByLambda { self, other, _, _ -> self === other })
     }
 
-    @RegisterOnjFunction(schema = "params: [*, *]")
-    fun poison(turns: OnjValue, damage: OnjValue): OnjStatusEffect = OnjStatusEffect {
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
+    fun poison(turns: OnjEffectValue, damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
         Poison(
-            getIntParamFromOnj(turns),
-            getIntParamFromOnj(damage)
+            getStatusEffectValue(turns, controller, card, 1),
+            getStatusEffectValue(damage, controller, card, 1)
         )
     }
 
-    @RegisterOnjFunction(schema = "params: [*]")
-    fun shield(shield: OnjValue): OnjStatusEffect = OnjStatusEffect {
-        Shield(getIntParamFromOnj(shield))
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
+    fun shield(shield: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+        Shield(getStatusEffectValue(shield, controller, card, 1))
     }
 
-    @RegisterOnjFunction(schema = "params: [*, float, boolean]")
-    fun burning(rotations: OnjValue, percent: OnjFloat, isInfinite: OnjBoolean): OnjStatusEffect = OnjStatusEffect {
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float, boolean]")
+    fun burning(rotations: OnjEffectValue, percent: OnjFloat, isInfinite: OnjBoolean): OnjStatusEffect = OnjStatusEffect { controller, card ->
         Burning(
-            getIntParamFromOnj(rotations),
+            getStatusEffectValue(rotations, controller, card, 1),
             percent.value.toFloat(),
             isInfinite.value
         )
     }
 
-    @RegisterOnjFunction(schema = "params: [*]")
-    fun fireResistance(turns: OnjValue): OnjStatusEffect = OnjStatusEffect {
-        FireResistance(getIntParamFromOnj(turns))
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
+    fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+        FireResistance(getStatusEffectValue(turns, controller, card, 1))
     }
 
-    @RegisterOnjFunction(schema = "params: [*, *]")
-    fun bewitched(turns: OnjValue, rotations: OnjValue): OnjStatusEffect = OnjStatusEffect {
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
+    fun bewitched(turns: OnjEffectValue, rotations: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
         Bewitched(
-            getIntParamFromOnj(turns),
-            getIntParamFromOnj(rotations),
+            getStatusEffectValue(turns, controller, card, 1),
+            getStatusEffectValue(rotations, controller, card, 1),
         )
-    }
-
-    @RegisterOnjFunction(schema = "params: [int]")
-    fun wardOfTheWitch(amount: OnjInt): OnjStatusEffect = OnjStatusEffect {
-        WardOfTheWitch(amount.value.toInt())
-    }
-
-    @RegisterOnjFunction(schema = "params: [int]")
-    fun wrathOfTheWitch(amount: OnjInt): OnjStatusEffect = OnjStatusEffect {
-        WrathOfTheWitch(amount.value.toInt())
     }
 
     @RegisterOnjFunction(schema = "params: [{...*}]")
@@ -283,17 +283,28 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
     fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _ -> value.value.toInt() }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float]", type = OnjFunctionType.OPERATOR)
+    fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card ->
+        (value.value(controller, card) * multiplier.value).toInt()
+    }
+
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
     fun activeChecker(value: OnjNamedObject): OnjActiveChecker {
         val predicate = GamePredicate.fromOnj(value)
         return OnjActiveChecker { controller -> predicate.check(controller) }
     }
 
-    private fun getIntParamFromOnj(value: OnjValue): Int = when (value) {
-        is OnjInt -> value.value.toInt()
-        is OnjArray -> value.toIntRange().random()
-        else -> throw RuntimeException("expected parameter to be either an int or an array of two ints")
-    }
+   @Suppress("NAME_SHADOWING")
+   private fun getStatusEffectValue(
+       effectValue: OnjEffectValue,
+       controller: GameController?,
+       card: Card?,
+       default: Int
+   ) = controller?.let { controller ->
+       card?.let { card ->
+           effectValue.value(controller, card)
+       }
+   } ?: default
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER

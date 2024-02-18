@@ -26,6 +26,7 @@ import kotlin.math.sin
 open class AdvancedTextWidget(
     private val defaults: OnjObject,
     val screen: OnjScreen,
+    private val isDistanceField: Boolean,
 ) : WidgetGroup(), ZIndexActor, HoverStateActor, StyledActor {
 
     override var fixedZIndex: Int = 0
@@ -52,7 +53,7 @@ open class AdvancedTextWidget(
     }
 
     fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
-        advancedText = AdvancedTextParser(text, screen, defaults, effects ?: listOf()).parse()
+        advancedText = AdvancedTextParser(text, screen, defaults, isDistanceField, effects ?: listOf()).parse()
     }
 
     override fun layout() {
@@ -155,12 +156,15 @@ data class AdvancedText(
     companion object {
         val EMPTY = AdvancedText(listOf())
 
-        fun readFromOnj(rawText: String, effects: OnjArray?, screen: OnjScreen, defaults: OnjObject): AdvancedText {
+        fun readFromOnj(rawText: String, isDistanceField: Boolean, effects: OnjArray?, screen: OnjScreen, defaults: OnjObject): AdvancedText {
             return AdvancedTextParser(
                 rawText,
                 screen,
                 defaults,
-                effects?.value?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(screen, it as OnjNamedObject) }
+                isDistanceField,
+                effects
+                ?.value
+                ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(screen, it as OnjNamedObject) }
                     ?: listOf()).parse()
         }
     }
@@ -196,8 +200,9 @@ class TextAdvancedTextPart(
     fontColor: Color,
     fontScale: Float,
     screen: OnjScreen,
+    isDistanceFiled: Boolean,
     override val breakLine: Boolean
-) : TemplateStringLabel(screen, TemplateString(rawText), LabelStyle(font, fontColor)), AdvancedTextPart {
+) : TemplateStringLabel(screen, TemplateString(rawText), LabelStyle(font, fontColor), isDistanceFiled), AdvancedTextPart {
 
     override val actor: Actor = this
 

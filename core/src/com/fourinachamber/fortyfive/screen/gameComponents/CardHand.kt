@@ -69,8 +69,6 @@ class CardHand(
 
     private var _cards: MutableList<Card> = mutableListOf()
 
-    private var currentHoverDetailActor: CardDetailActor? = null
-
     private lateinit var controller: GameController
 
     private var originalParent: CustomFlexBox? = null
@@ -92,6 +90,7 @@ class CardHand(
         // This breaks when multiple cards with the same name are added, but because this is only used in the tutorial
         // it shouldn't matter
         screen.addNamedActor("card-${card.name}", card.actor)
+        card.actor.playSoundsOnHover = true
         invalidateHierarchy()
     }
 
@@ -102,6 +101,7 @@ class CardHand(
         _cards.remove(card)
         removeActor(card.actor)
         screen.removeNamedActor("card-${card.name}")
+        card.actor.playSoundsOnHover = false
         invalidateHierarchy()
     }
 

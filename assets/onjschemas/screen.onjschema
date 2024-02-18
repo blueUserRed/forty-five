@@ -130,6 +130,7 @@ $Widget {
         backgroundTexture?: string,
         align?: string,
         wrap?: boolean,
+        isDistanceField?: boolean,
         partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
@@ -142,6 +143,7 @@ $Widget {
         backgroundTexture?: string,
         align?: string,
         wrap?: boolean,
+        isDistanceField?: boolean,
         partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
@@ -232,6 +234,7 @@ $Widget {
         font: string,
         rawText: string,
         effects?: $AdvancedTextEffect[],
+        isDistanceField?: boolean,
         defaults: {
             font: string,
             fontScale: float,
@@ -344,7 +347,7 @@ $Behaviour {
     $OnClickExitBehaviour { }
 
     $OnClickChangeScreenBehaviour {
-        screenPath: string
+        screenPath: string,
     }
 
     $OnClickAbandonRunBehaviour { }
@@ -371,6 +374,15 @@ $Behaviour {
 
 
     $OnClickRemoveWarningLabelBehaviour{ }
+
+    $SpamPreventionBehaviour {
+        event: string,
+        blockDuration: int
+    }
+
+    $OnClickSoundSituationBehaviour {
+        situation: string,
+    }
 }
 
 $ScreenController {
@@ -382,6 +394,9 @@ $ScreenController {
     $IntroScreenController {
         appearActor: string,
         nextScreen: string,
+    }
+
+    $StatsScreenController {
     }
 
     $CardSelectionScreenController {
@@ -460,6 +475,8 @@ $KeyAction {
 
     $DeselectAllKeyAction { }
 
+    $ToggleFpsKeyAction { }
+
     $NextInHierarchyKeyAction { }
 
     $PreviousInHierarchyKeyAction { }
@@ -489,6 +506,8 @@ assets: {
 options: {
     background?: string,
     screenController?: $ScreenController,
+    music?: string,
+    playAmbientSounds: boolean,
     inputMap?: {
         priority?: int,
         condition?: KeyInputCondition,

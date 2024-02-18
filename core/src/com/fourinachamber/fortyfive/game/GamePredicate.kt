@@ -75,20 +75,20 @@ fun interface GamePredicate {
                         " an enemy is passed into the fromOnj function")
             )
             "AliveEnemyCountIn" -> aliveEnemyCountIn(obj.get<OnjArray>("value").toIntRange())
-            "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
+            "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null))
             "EnemyDoesNotHaveStatusEffect" -> enemyDoesNotHaveStatusEffect(
-                obj.get<StatusEffectCreator>("value")(),
+                obj.get<StatusEffectCreator>("value")(null, null),
                 inContextOfEnemy ?: throw RuntimeException("EnemyDoesNotHaveStatusEffect Predicate can only be created" +
                         " when an enemy is passed into the fromOnj function")
             )
-            "PlayerHasStatusEffect" -> playerHasStatusEffect(obj.get<StatusEffectCreator>("value")())
+            "PlayerHasStatusEffect" -> playerHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null))
             "NegatePredicate" -> negatePredicate(fromOnj(obj.get<OnjNamedObject>("value"), inContextOfEnemy))
             "TargetedEnemyShieldIsAtLeast" -> targetedEnemyShieldIsAtLeast(obj.get<Long>("value").toInt())
             "TargetedEnemyHasAnyStatusEffect" -> targetedEnemyHasAnyStatusEffect
             "GameInFreePhase" -> gameInFreePhase
             "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
             "PlayerHasPlayedSilverBulletAndDrawnCards" -> playerHasPlayedSilverBulletAndDrawnCards
-            "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")())
+            "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null))
             "TargetedEnemyHealthAbovePercent" -> targetedEnemyHealthAbovePercent(obj.get<Double>("value").toFloat())
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")

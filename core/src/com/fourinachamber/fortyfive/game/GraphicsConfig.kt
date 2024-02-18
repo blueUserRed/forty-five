@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -9,12 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
+import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.*
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
+import onj.value.OnjArray
 import onj.value.OnjObject
 import onj.value.OnjString
 import kotlin.properties.Delegates
@@ -29,6 +32,7 @@ object GraphicsConfig {
         val schema = OnjSchemaParser.parseFile(Gdx.files.internal(graphicsConfigSchemaFile).file())
         schema.assertMatches(config)
         config as OnjObject
+        this.config = config
         readConstants(config)
     }
 
@@ -55,6 +59,19 @@ object GraphicsConfig {
             override fun isFinished(timeline: Timeline): Boolean = anim.isFinished()
         }
     }
+
+    fun orbAnimation(source: Vector2, target: Vector2): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
+        orbTexture = "reserves_orb",
+        width = 10f,
+        height = 10f,
+        duration = 300,
+        segments = 20,
+        position = RenderPipeline.OrbAnimation.curvedPath(
+            source,
+            target,
+            curveOffsetMultiplier = (-1.5f..1.5f).random()
+        )
+    )
 
     fun chargeTimeline(actor: Actor): Timeline {
         val moveByAction = CustomMoveByAction()
@@ -107,6 +124,10 @@ object GraphicsConfig {
 
     fun cardFontScale(): Float = cardFontScale
 
+    fun cardSavedSymbol(screen: OnjScreen): Texture = ResourceManager.get(screen, cardSavedSymbol)
+
+    fun cardNotSavedSymbol(screen: OnjScreen): Texture = ResourceManager.get(screen, cardNotSavedSymbol)
+
     fun cardFontColor(isDark: Boolean, situation: String): Color {
         if (situation !in arrayOf("normal", "increase", "decrease")) {
             throw RuntimeException("unknown situation for card font color: $situation")
@@ -120,6 +141,27 @@ object GraphicsConfig {
     @MainThreadOnly
     fun shootShader(screen: OnjScreen): BetterShader = ResourceManager.get(screen, shootPostProcessor)
     fun shootPostProcessingDuration(): Int = shootPostProcessorDuration
+
+    fun encounterBackgroundFor(biome: String): ResourceHandle = config
+        .get<OnjArray>("encounterBackgrounds")
+        .value
+        .map { it as OnjObject }
+        .find { it.get<String>("biome") == biome }
+        ?.get<String>("background")
+        ?: throw RuntimeException("no background for biome $biome")
+
+    fun isEncounterBackgroundDark(biome: String): Boolean = config
+        .get<OnjArray>("encounterBackgrounds")
+        .value
+        .map { it as OnjObject }
+        .find { it.get<String>("biome") == biome }
+        ?.get<Boolean>("isDark")
+        ?: throw RuntimeException("no background for biome $biome")
+
+    fun defeatedEnemyDrawable(screen: OnjScreen): Drawable =
+        ResourceManager.get(screen, config.access(".enemyGravestone.texture"))
+
+    fun defeatedEnemyDrawableScale(): Float = config.access<Double>(".enemyGravestone.scale").toFloat()
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Beware of ugly code below
@@ -153,6 +195,8 @@ object GraphicsConfig {
         val cardOnj = config.get<OnjObject>("cardText")
         cardFont = cardOnj.get<String>("font")
         cardFontScale = cardOnj.get<Double>("fontScale").toFloat()
+        cardSavedSymbol = cardOnj.get<String>("savedSymbol")
+        cardNotSavedSymbol = cardOnj.get<String>("notSavedSymbol")
         val cardFontColors = mutableMapOf<String, Color>()
         cardOnj.get<OnjObject>("colorsForDarkCard").value.forEach { (key, value) ->
             cardFontColors["dark-$key"] = value.value as Color
@@ -180,6 +224,8 @@ object GraphicsConfig {
     private var cardFont by Delegates.notNull<String>()
     private var cardFontScale by Delegates.notNull<Float>()
     private lateinit var cardFontColors: Map<String, Color>
+    private lateinit var cardSavedSymbol: String
+    private lateinit var cardNotSavedSymbol: String
 
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
 
@@ -197,5 +243,7 @@ object GraphicsConfig {
     private lateinit var chargeInterpolation: Interpolation
 
     private lateinit var encounterModifierConfig: OnjObject
+
+    private lateinit var config: OnjObject
 
 }

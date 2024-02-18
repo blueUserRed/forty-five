@@ -40,6 +40,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override val screen: OnjScreen,
     text: String,
     labelStyle: LabelStyle,
+    private val isDistanceField: Boolean,
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor,
     StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen {
@@ -94,8 +95,8 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (batch == null) {
-            super.draw(null, parentAlpha)
+        if (batch == null || !isDistanceField) {
+            super.draw(batch, parentAlpha)
             return
         }
         drawBackground(batch, parentAlpha)
@@ -150,8 +151,9 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
     screen: OnjScreen,
     private val templateString: TemplateString,
     labelStyle: LabelStyle,
+    isDistanceField: Boolean,
     partOfHierarchy: Boolean = false
-) : CustomLabel(screen, templateString.string, labelStyle, partOfHierarchy), BackgroundActor {
+) : CustomLabel(screen, templateString.string, labelStyle, isDistanceField, partOfHierarchy), BackgroundActor {
 
     var skipTextCheck = false
 
@@ -381,11 +383,14 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 open class CustomFlexBox(
     override val screen: OnjScreen
-) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor, Detachable, OffSettable, HasOnjScreen {
+) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
+    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor {
 
     override var fixedZIndex: Int = 0
 
     var background: Drawable? = null
+
+    override var isDisabled: Boolean = false
 
     override var isHoveredOver: Boolean = false
 
@@ -454,11 +459,11 @@ open class CustomFlexBox(
         y += offsetY
         if (batch != null && background != null) {
             val old = batch.color.a
-            batch.flush()
-            batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha)
+            if (parentAlpha * alpha < 1f) batch.flush()
+            batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
 
             background?.draw(batch, x, y, width, height)
-            batch.flush()
+            if (parentAlpha * alpha < 1f) batch.flush()
 
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, old)
         }
@@ -473,8 +478,13 @@ open class CustomFlexBox(
         addBackgroundStyles(screen)
         addDetachableStyles(screen)
         addOffsetableStyles(screen)
+        addDisableStyles(screen)
     }
 
+    override fun getBounds(): Rectangle {
+        val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+        return Rectangle(x, y, width, height)
+    }
 
     protected fun getTotalOffset(): Vector2 {
         val res = Vector2()

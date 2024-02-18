@@ -3,7 +3,6 @@ package com.fourinachamber.fortyfive.map.detailMap
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -24,6 +23,7 @@ import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BackgroundActor
 import com.fourinachamber.fortyfive.screen.general.customActor.DisableActor
@@ -33,13 +33,11 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 import com.fourinachamber.fortyfive.screen.general.styles.addMapStyles
 import com.fourinachamber.fortyfive.utils.*
-import dev.lyze.flexbox.FlexBox
 import onj.value.OnjString
 import kotlin.math.asin
 import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.random.Random
 
 /**
  * the widget used for displaying a [DetailMap]
@@ -246,6 +244,13 @@ class DetailMapWidget(
         mapOffset.set(idealPos)
     }
 
+    override fun act(delta: Float) {
+        super.act(delta)
+        animatedDecorations.forEach { (_, drawables) ->
+            drawables.forEach { (_, _, drawable) -> drawable.update() }
+        }
+    }
+
     fun onStartButtonClicked(startButton: Actor? = null) {
         val btn = startButton ?: screen.namedActorOrError(startButtonName)
         if (btn is DisableActor && btn.isDisabled) return
@@ -315,6 +320,7 @@ class DetailMapWidget(
         playerMovementStartTime = TimeUtils.millis()
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
+        SoundPlayer.situation("walk", screen)
         if (idealPos.compare(mapOffset, epsilon = 200f)) return
         moveScreenToPoint = idealPos
     }
@@ -535,6 +541,7 @@ class DetailMapWidget(
             screen.leaveState(eventCanBeStartedScreenState)
         }
         TemplateString.updateGlobalParam("map.cur_event.displayName", event.displayName)
+        TemplateString.updateGlobalParam("map.cur_event.buttonText", event.buttonText)
         TemplateString.updateGlobalParam(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText

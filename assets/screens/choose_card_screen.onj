@@ -11,12 +11,17 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "hover_detail_background", "red_wing_cm", "red_wing", "card_character", "chooseCard_add_to_backpack",
+        "hover_detail_background", "red_wing_cm", "red_wing", "red_wing_bmp", "card_character", "chooseCard_add_to_backpack",
         "chooseCard_add_to_deck",
         "shop_background_wasteland", /*temp -> */ "card%%bullet",
         "chooseCard_cardsBackground",
         "transparent_black_texture",
+
+        "card_pickup_sound", "card_laydown_sound",
+        "map_theme",
+
         ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.ambientSoundsUsedAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
         ...(sharedComponents.cardHoverDetailUsedAssets),
@@ -29,8 +34,10 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 1.0,
+    transitionAwayTime: 0.0,
     background: "hover_detail_background",
+    music: "map_theme",
+    playAmbientSounds: true,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
