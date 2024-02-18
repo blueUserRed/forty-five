@@ -245,28 +245,41 @@ class Backpack(
 
         val positions = SaveState.curDeck.cardPositions.toMutableMap()
         val unplacedCards: MutableList<String> = SaveState.cards.toMutableList()
-
+        val removedCardInDeck = mutableListOf<String>()
         children.forEachIndexed { i, it ->
             if (it.children.size > 0) {
                 val curActor = it.children[0] as CardActor
                 if (positions[i] != curActor.card.name) {
                     removeChildCompletely(curActor)
+                    removedCardInDeck.add(curActor.card.name)
                 } else {
                     unplacedCards.remove(curActor.card.name)
                     positions.remove(i)
                 }
             }
         }
-        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
+
+
+        val cardsNeededToRemoveInBackpack = mutableListOf<String>()
+        positions.forEach {
+            if (!removedCardInDeck.remove(it.value)) cardsNeededToRemoveInBackpack.add(it.value)
+        }
+
+        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach {
+            if (it.children.size > 0 && it.children[0] is CardActor) {
+                if (cardsNeededToRemoveInBackpack.remove((it.children[0] as CardActor).card.name)) {
+                    removeChildCompletely(it)
+                }
+            }
+        }
 
         //Deck
         positions.forEach {
-            val currentSelection = unplacedCards.find { card -> it.value == card }!!
             val cur = children[it.key]
             val curChild = getCard(it.value, true).actor
             screen.screenBuilder.addDataToWidgetFromTemplate("backpack_slot_card", mapOf(), cur, screen, curChild)
             curChild.name = "${it.value}${NAME_SEPARATOR_STRING}deck${NAME_SEPARATOR_STRING}${it.key}"
-            unplacedCards.remove(currentSelection)
+            unplacedCards.remove(it.value)
         }
         deckCardsWidget.invalidate()
 
@@ -296,37 +309,38 @@ class Backpack(
         var parents = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
 //        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
 
-        //TODO ugly, this for can be way more effitient, but it shouldn't matter
-        for (i in min(sortedCards.size, parents.size) until max(sortedCards.size, parents.size)) {
-            if (i >= sortedCards.size) {
-                removeChildCompletely(parents[i])
-                continue
-            }
-
-            if (i >= parents.size) {
-                screen.screenBuilder.generateFromTemplate(
-                    "backpack_slot_parent",
-                    mapOf(),
-                    backpackCardsWidget,
-                    screen,
-                ) as CustomFlexBox
-
-                continue;
-            }
-
-            val cardName = sortedCards[i]
-
-            val children = parents[i].children
-            println(children)
-            if (children.size >= 1 && children[0] is CardActor) {
-                val c = children[0] as CardActor
-                println(c.card.name + " should be:  " + cardName)
-            }
+        //if a card got added or removed to/from the backpack
+        if (sortedCards.size != parents.size) {
+            val min = min(sortedCards.size, parents.size)
+            if (sortedCards.size > min) {
+                for (i in min until sortedCards.size) {
+                    screen.screenBuilder.generateFromTemplate(
+                        "backpack_slot_parent",
+                        mapOf(),
+                        backpackCardsWidget,
+                        screen,
+                    ) as CustomFlexBox
+                }
+            } else if (parents.size > min)
+                for (i in min until parents.size) {
+                    removeChildCompletely(parents[i])
+                }
         }
         parents = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
 
+        //leave cards that are at the right position
+        for (i in sortedCards.indices) {
+            val children = parents[i].children
+            if (children.size >= 1 && children[0] is CardActor) {
+                val c = children[0] as CardActor
+                if (c.card.name != sortedCards[i]) removeChildCompletely(c)
+            }
+        }
+
+        // add the cards that are at the wrong position
         for (i in sortedCards.indices) {
             val cardName = sortedCards[i]
+            if (parents[i].children.size!=0) continue
             val curActor = getCard(cardName, true).actor
             screen.screenBuilder.addDataToWidgetFromTemplate(
                 "backpack_slot_card",
