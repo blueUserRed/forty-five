@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
@@ -134,7 +135,7 @@ class Backpack(
         _allCards = cardPrototypes
             .filter { it.name in SaveState.cards }
             // TODO: figure out if the card is saved or not
-            .map { it.create(screen, false) }
+            .map { it.create(screen, it.name in PermaSaveState.collection) }
             .toMutableList()
     }
 
@@ -250,7 +251,7 @@ class Backpack(
                 val curActor = it.children[0] as CardActor
                 if (positions[i] != curActor.card.name) {
                     removeChildCompletely(curActor)
-                }else{
+                } else {
                     unplacedCards.remove(curActor.card.name)
                     positions.remove(i)
                 }
@@ -276,9 +277,8 @@ class Backpack(
 
     private fun getCard(name: String, checkParent: Boolean = false): Card {
         val card = _allCards.find { card -> card.name == name && (!checkParent || card.actor.parent == null) }
-        card ?: throw IllegalStateException("You try to access a card that isn't loaded, this shouldn't be possible!")
-        if (card !in _allCards) _allCards.add(card)
         return card
+            ?: throw IllegalStateException("You try to access a card that isn't loaded, this shouldn't be possible!")
     }
 
     private fun removeChildCompletely(actor: Actor) {
@@ -384,6 +384,7 @@ class Backpack(
     }
 
     private fun checkCurCards() {
+        val savedCardsLeft = PermaSaveState.collection.toMutableList()
         val unplacedCards = SaveState.cards.toMutableList()
         val placedCards = _allCards.map { it.name }.toMutableList()
         var i = 0;
@@ -392,9 +393,13 @@ class Backpack(
             if (cur in placedCards) {
                 unplacedCards.remove(cur)
                 placedCards.remove(cur)
+                if (cur in savedCardsLeft) savedCardsLeft.remove(cur)
             } else i++
         }
-        unplacedCards.forEach { name -> _allCards.add(cardPrototypes.find { it.name == name }!!.create(screen)) }
+        println(savedCardsLeft)
+        unplacedCards.forEach { name ->
+            _allCards.add(cardPrototypes.find { it.name == name }!!.create(screen, savedCardsLeft.remove(name)))
+        }
     }
 
     private fun getInOutTimeLine(isGoingIn: Boolean, goingRight: Boolean, target: CustomFlexBox) = Timeline.timeline {
