@@ -38,6 +38,8 @@ assets: {
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
 
+        "card_symbol_saved", "card_symbol_not_saved",
+
         "map_detail_encounter_modifier_background",
 
         "tutorial_info_actor_background",

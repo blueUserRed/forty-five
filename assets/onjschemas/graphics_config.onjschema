@@ -67,7 +67,9 @@ cardText: {
         normal: Color,
         increase: Color,
         decrease: Color,
-    }
+    },
+    savedSymbol: string,
+    notSavedSymbol: string,
 },
 
 keySelect: {

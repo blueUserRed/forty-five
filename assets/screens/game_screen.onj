@@ -159,7 +159,7 @@ var encounterModifierDisplayTemplate = $Box {
             {
                 background: "encounter_modifier_frost",
                 aspectRatio: 1.0,
-                marginTop: 20#points,
+//                marginTop: 10#points,
                 width: 40#points,
             }
         ],
@@ -1349,6 +1349,7 @@ var encounterModifierDisplay = $Box {
 
     $Box {
         name: "encounter_modifier_parent",
+        debug: true,
         styles: [
             {
                 style_priority: 1,
@@ -1371,7 +1372,7 @@ var encounterModifierDisplay = $Box {
             {
                 style_priority: 2,
                 style_condition: hover(),
-                positionLeft: (worldWidth - 400)#points,
+                positionLeft: (worldWidth - 410)#points,
                 style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.linear

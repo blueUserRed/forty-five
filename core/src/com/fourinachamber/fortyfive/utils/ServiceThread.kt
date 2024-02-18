@@ -73,6 +73,7 @@ class ServiceThread : Thread("ServiceThread") {
             val font = card.actor.font
             val isDark = card.actor.isDark
             val fontScale = card.actor.fontScale
+            val savedSymbol = message.savedPixmap
             pixmap.drawPixmap(cardTexturePixmap, 0, 0)
             val situation = when {
                 damageValue > baseDamage -> "increase"
@@ -83,6 +84,15 @@ class ServiceThread : Thread("ServiceThread") {
             val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
             font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
             font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
+            if (savedSymbol != null) {
+                pixmap.drawPixmap(
+                    savedSymbol,
+                    0, 0,
+                    savedSymbol.width, savedSymbol.height,
+                    450, 440,
+                    100, 100
+                )
+            }
             message.isFinished = true
         } }
     }
@@ -135,6 +145,7 @@ sealed class ServiceThreadMessage {
         val cardTexturePixmap: Pixmap,
         val card: Card,
         val damageValue: Int,
+        val savedPixmap: Pixmap?,
         var isFinished: Boolean = false
     ) : ServiceThreadMessage()
 

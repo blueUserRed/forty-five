@@ -7,8 +7,6 @@ import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
-import java.lang.Exception
-import java.sql.Time
 import kotlin.math.roundToInt
 
 sealed class EncounterModifier {
@@ -130,8 +128,8 @@ sealed class EncounterModifier {
             "rain" -> Rain
             "frost" -> Frost
             "bewitchedmist" -> throw RuntimeException("encounter modifier bewitchedMist is not available")
-            "steelnerves" -> SteelNerves()
 //            "bewitchedmist" -> BewitchedMist
+            "steelnerves" -> SteelNerves()
             "lookalike" -> throw RuntimeException("encounter modifier lookalike is not available")
 //            "lookalike" -> Lookalike
             "moist" -> Moist

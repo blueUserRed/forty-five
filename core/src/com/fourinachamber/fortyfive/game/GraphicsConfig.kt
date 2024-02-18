@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -123,6 +124,10 @@ object GraphicsConfig {
 
     fun cardFontScale(): Float = cardFontScale
 
+    fun cardSavedSymbol(screen: OnjScreen): Texture = ResourceManager.get(screen, cardSavedSymbol)
+
+    fun cardNotSavedSymbol(screen: OnjScreen): Texture = ResourceManager.get(screen, cardNotSavedSymbol)
+
     fun cardFontColor(isDark: Boolean, situation: String): Color {
         if (situation !in arrayOf("normal", "increase", "decrease")) {
             throw RuntimeException("unknown situation for card font color: $situation")
@@ -190,6 +195,8 @@ object GraphicsConfig {
         val cardOnj = config.get<OnjObject>("cardText")
         cardFont = cardOnj.get<String>("font")
         cardFontScale = cardOnj.get<Double>("fontScale").toFloat()
+        cardSavedSymbol = cardOnj.get<String>("savedSymbol")
+        cardNotSavedSymbol = cardOnj.get<String>("notSavedSymbol")
         val cardFontColors = mutableMapOf<String, Color>()
         cardOnj.get<OnjObject>("colorsForDarkCard").value.forEach { (key, value) ->
             cardFontColors["dark-$key"] = value.value as Color
@@ -217,6 +224,8 @@ object GraphicsConfig {
     private var cardFont by Delegates.notNull<String>()
     private var cardFontScale by Delegates.notNull<Float>()
     private lateinit var cardFontColors: Map<String, Color>
+    private lateinit var cardSavedSymbol: String
+    private lateinit var cardNotSavedSymbol: String
 
     private lateinit var iconConfig: Map<String, Pair<String, Float>>
 
