@@ -31,7 +31,7 @@ assets: {
         "shoot_button_texture", "shoot_button_hover_texture",
         "pass_button_texture", "pass_button_hover_texture",
         "parry_button_texture", "parry_button_hover_texture",
-        "revolver_drum", "parry_popup_background",
+        "revolver_drum", "parry_popup_background", "card_orb",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
         "game_screen_player", "player_turn_banner", "enemy_turn_banner", "reserves_orb", "black_texture",
@@ -1248,6 +1248,7 @@ var playerBar = $Box {
         },
 
         $Box {
+            name: "deck_icon",
             styles: [
                 {
                     positionType: positionType.absolute,

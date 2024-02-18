@@ -149,7 +149,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private lateinit var defaultBullet: CardPrototype
 
-    private lateinit var gameRenderPipeline: GameRenderPipeline
+    lateinit var gameRenderPipeline: GameRenderPipeline
+        private set
 
     lateinit var encounterContext: EncounterContext
         private set
@@ -762,12 +763,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     SaveState.bulletsShot++
                     cardToShoot.beforeShot()
-                    if (cardToShoot.shouldRemoveAfterShot) {
-                        revolver.removeCard(cardToShoot)
-                        if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
-                    }
-                    if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
-                    cardToShoot.afterShot()
                 }
                 targetedEnemies
                     .map { it.damage(cardToShoot.curDamage(this@GameController)) }
@@ -776,7 +771,16 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             cardToShoot?.let {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
-                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, true, triggerInformation))
+                action {
+                    if (cardToShoot.shouldRemoveAfterShot) {
+                        if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
+                        gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
+                        revolver.removeCard(cardToShoot)
+                    }
+                    if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
+                    cardToShoot.afterShot()
+                }
             }
             include(rotateRevolver(rotationDirection))
             _encounterModifiers
@@ -792,6 +796,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
         })
     }
+
+    private fun cardOrbAnim(actor: Actor) = GraphicsConfig.orbAnimation(
+        actor.localToStageCoordinates(Vector2(0f, 0f)) +
+                Vector2(actor.width / 2, actor.height / 2),
+        curScreen.stageCoordsOfActor("deck_icon"),
+        false
+    )
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
         if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
@@ -985,14 +996,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
+        isOnShot: Boolean = false,
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
-            include(card.checkEffects(trigger, triggerInformation, this@GameController))
+            include(card.checkEffects(trigger, triggerInformation, this@GameController, isOnShot))
             trigger
                 .cascadeTriggers
-                .map { checkEffectsSingleCard(it, card, triggerInformation) }
+                .map { checkEffectsSingleCard(it, card, isOnShot, triggerInformation) }
                 .collectTimeline()
                 .let { include(it) }
         }
@@ -1007,7 +1019,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         return Timeline.timeline {
             createdCards
                 .filter { it.inGame || it.inHand(this@GameController) }
-                .map { it.checkEffects(trigger, triggerInformation, this@GameController) }
+                .map { it.checkEffects(trigger, triggerInformation, this@GameController, false) }
                 .collectTimeline()
                 .let { include(it) }
             trigger
@@ -1122,7 +1134,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     stageCoordsOfReservesIcon(),
                     animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
-                            Vector2(animTarget.width / 2, animTarget.height / 2)
+                            Vector2(animTarget.width / 2, animTarget.height / 2),
+                    true
                 ))
             }
             delay(50)
@@ -1136,7 +1149,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     animSource.localToStageCoordinates(Vector2(0f, 0f)) +
                             Vector2(animSource.width / 2, animSource.height / 2),
-                    stageCoordsOfReservesIcon()
+                    stageCoordsOfReservesIcon(),
+                    true
                 ))
             }
             delay(50)

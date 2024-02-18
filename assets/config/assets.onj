@@ -111,6 +111,10 @@ textureAtlases: [
                 regionName: "reserves_orb"
             },
             {
+                handle: "card_orb",
+                regionName: "card_orb"
+            },
+            {
                 handle: "enemy_texture",
                 regionName: "enemy"
             },
