@@ -1,6 +1,8 @@
 package com.fourinachamber.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.audio.Music
+import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -499,4 +501,60 @@ class DeferredFrameAnimationResource(
         disposables = listOf(anim!!)
     }
 
+}
+
+class SoundResource(
+    handle: ResourceHandle,
+    private val file: String,
+) : Resource(handle) {
+
+    private var sound: Sound? = null
+
+    override fun loadDirectMainThread() {
+        val sound = Gdx.audio.newSound(Gdx.files.internal(file))
+        variants = listOf(sound)
+        disposables = listOf(sound)
+    }
+
+    override fun prepareLoadingAllThreads() {
+        sound = Gdx.audio.newSound(Gdx.files.internal(file))
+    }
+
+    override fun finishLoadingMainThread() {
+        variants = listOf(sound!!)
+        disposables = listOf(sound!!)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        sound?.dispose()
+    }
+}
+
+class MusicResource(
+    handle: ResourceHandle,
+    private val file: String,
+) : Resource(handle) {
+
+    private var music: Music? = null
+
+    override fun loadDirectMainThread() {
+        val music = Gdx.audio.newMusic(Gdx.files.internal(file))
+        variants = listOf(music)
+        disposables = listOf(music)
+    }
+
+    override fun prepareLoadingAllThreads() {
+        music = Gdx.audio.newMusic(Gdx.files.internal(file))
+    }
+
+    override fun finishLoadingMainThread() {
+        variants = listOf(music!!)
+        disposables = listOf(music!!)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        music?.dispose()
+    }
 }

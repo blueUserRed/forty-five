@@ -42,17 +42,17 @@ void main() {
     samples[7] = vec2(tc.x + 3.0 * blur * hstep, tc.y + 3.0 * blur * vstep);
     samples[8] = vec2(tc.x + 4.0 * blur * hstep, tc.y + 4.0 * blur * vstep);
 
-    float weights[numSamples] = float[numSamples](
-        0.0162162162,
-        0.0540540541,
-        0.1216216216,
-        0.1945945946,
-        0.2270270270,
-        0.1945945946,
-        0.1216216216,
-        0.0540540541,
-        0.0162162162
-    );
+    float weights[numSamples];
+
+    weights[0] = 0.0162162162;
+    weights[1] = 0.0540540541;
+    weights[2] = 0.1216216216;
+    weights[3] = 0.1945945946;
+    weights[4] = 0.2270270270;
+    weights[5] = 0.1945945946;
+    weights[6] = 0.1216216216;
+    weights[7] = 0.0540540541;
+    weights[8] = 0.0162162162;
 
     vec4 sum = vec4(0.0);
     float weightAcc = 0.0;

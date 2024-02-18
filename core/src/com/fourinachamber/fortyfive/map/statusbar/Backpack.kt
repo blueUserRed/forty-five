@@ -131,7 +131,11 @@ class Backpack(
         cardsFileSchema.assertMatches(cardsOnj)
         cardsOnj as OnjObject
         cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = {}))
-        _allCards = cardPrototypes.filter { it.name in SaveState.cards }.map { it.create(screen) }.toMutableList()
+        _allCards = cardPrototypes
+            .filter { it.name in SaveState.cards }
+            // TODO: figure out if the card is saved or not
+            .map { it.create(screen, false) }
+            .toMutableList()
     }
 
     fun initAfterChildrenExist() {

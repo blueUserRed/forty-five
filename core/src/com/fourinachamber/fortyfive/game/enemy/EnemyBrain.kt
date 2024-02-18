@@ -11,7 +11,12 @@ abstract class EnemyBrain {
 
     abstract fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction?
 
-    abstract fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction
+    abstract fun chooseNewAction(
+        controller: GameController,
+        enemy: Enemy,
+        difficulty: Double,
+        otherChosenActions: List<NextEnemyAction>
+    ): NextEnemyAction
 
     companion object {
 
@@ -46,6 +51,9 @@ abstract class EnemyBrain {
         descriptionTemplate = "The enemy adds {cover} shield"
     }
 
+    protected fun List<NextEnemyAction>.containsAttack(): Boolean =
+        any { it is NextEnemyAction.ShownEnemyAction && it.action.prototype is EnemyActionPrototype.DamagePlayer }
+
 }
 
 class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBrain() {
@@ -74,7 +82,12 @@ class ScriptedEnemyBrain(actions: OnjArray, private val enemy: Enemy) : EnemyBra
         return actionProto.create(controller, difficulty)
     }
 
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+    override fun chooseNewAction(
+        controller: GameController,
+        enemy: Enemy,
+        difficulty: Double,
+        otherChosenActions: List<NextEnemyAction>
+    ): NextEnemyAction {
         val (_, actionProto, show) = actions
             .find { (turn, _, _) -> turn == controller.turnCounter }
             ?: return NextEnemyAction.None
@@ -114,7 +127,12 @@ class OutlawEnemyBrain(onj: OnjObject) : EnemyBrain() {
 
     override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = chosenAction
 
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+    override fun chooseNewAction(
+        controller: GameController,
+        enemy: Enemy,
+        difficulty: Double,
+        otherChosenActions: List<NextEnemyAction>
+    ): NextEnemyAction {
         if (didSomethingLastTurn || !Utils.coinFlip(actionProb)) {
             didSomethingLastTurn = false
             chosenAction = null
@@ -126,7 +144,11 @@ class OutlawEnemyBrain(onj: OnjObject) : EnemyBrain() {
             else -> 0
         }
         val action = if (Utils.coinFlip(attackProb)) {
-            damagePlayer(damageValues[phase], enemy)
+            var damage = damageValues[phase]
+            if (otherChosenActions.containsAttack()) {
+                damage = damage.first..(damage.last / 2.0 + 0.5).toInt()
+            }
+            damagePlayer(damage, enemy)
         } else {
             takeCover(coverValues[phase], enemy)
         }.create(controller, difficulty)
@@ -158,7 +180,12 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
 
     override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = chosenAction
 
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+    override fun chooseNewAction(
+        controller: GameController,
+        enemy: Enemy,
+        difficulty: Double,
+        otherChosenActions: List<NextEnemyAction>
+    ): NextEnemyAction {
         if (controller.turnCounter + 1 == burningTurn) {
             val action = burning(burningRotations.random(), enemy).create(controller, difficulty)
             chosenAction = action
@@ -187,6 +214,10 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
             return NextEnemyAction.None
         }
         val action = if (Utils.coinFlip(attackProb)) {
+            var damage = damage
+            if (otherChosenActions.containsAttack()) {
+                damage = damage.first..(damage.last / 2.0 + 0.5).toInt()
+            }
             damagePlayer(damage, enemy)
         } else {
             takeCover(cover, enemy)
@@ -269,7 +300,12 @@ class WitchEnemyBrain(onj: OnjObject) : EnemyBrain() {
         return chosenAction
     }
 
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction {
+    override fun chooseNewAction(
+        controller: GameController,
+        enemy: Enemy,
+        difficulty: Double,
+        otherChosenActions: List<NextEnemyAction>
+    ): NextEnemyAction {
         if (Utils.coinFlip(leftTurnProb)) {
             doLeftTurn = true
             chosenAction = null
@@ -290,6 +326,10 @@ class WitchEnemyBrain(onj: OnjObject) : EnemyBrain() {
             return NextEnemyAction.None
         }
         val action = if (Utils.coinFlip(attackProb)) {
+            var damage = damage
+            if (otherChosenActions.containsAttack()) {
+                damage = damage.first..(damage.last / 2.0 + 0.5).toInt()
+            }
             damagePlayer(damage, enemy)
         } else {
             takeCover(cover, enemy)
@@ -318,7 +358,7 @@ class WitchEnemyBrain(onj: OnjObject) : EnemyBrain() {
         enemy,
         true
     ).apply {
-        iconHandle = "enemy_action_bewitched"
+        iconHandle = "enemy_action_left_turn"
         title = "Bewitched"
         descriptionTemplate = "The revolver rotates to the left!"
         commonPanel1 = "enemy_witch_action_comic_common_panel_1"
@@ -333,6 +373,11 @@ object NoOpEnemyBrain : EnemyBrain() {
 
     override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? = null
 
-    override fun chooseNewAction(controller: GameController, enemy: Enemy, difficulty: Double): NextEnemyAction = NextEnemyAction.None
+    override fun chooseNewAction(
+        controller: GameController,
+        enemy: Enemy,
+        difficulty: Double,
+        otherChosenActions: List<NextEnemyAction>
+    ): NextEnemyAction = NextEnemyAction.None
 }
 

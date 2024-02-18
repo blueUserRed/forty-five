@@ -24,6 +24,7 @@ viewport: $FitViewport {
 
 options: {
     background: "loose_screen_background",
+    playAmbientSounds: false,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

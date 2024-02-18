@@ -191,7 +191,13 @@ object SaveState {
         obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck.getFromOnj(it as OnjObject)) }
         curDeckNbr = obj.get<Long>("curDeck").toInt()
 
-        playerCompletedFirstTutorialEncounter = obj.get<Boolean>("playerCompletedFirstTutorialEncounter")
+        // TODO: fix workaround with 'if (PermaSaveState.playerHasCompletedTutorial)'
+
+        playerCompletedFirstTutorialEncounter = if (PermaSaveState.playerHasCompletedTutorial) {
+            true
+        } else {
+            obj.get<Boolean>("playerCompletedFirstTutorialEncounter")
+        }
 
         val stats = obj.get<OnjObject>("stats")
         usedReserves = stats.get<Long>("usedReserves").toInt()
@@ -201,7 +207,7 @@ object SaveState {
         bulletsShot = stats.get<Long>("bulletsShot").toInt()
 
         val position = obj.get<OnjObject>("position")
-        currentMap = if (PermaSaveState.playerHasCompletedTutorial) { // TODO: slightly ugly
+        currentMap = if (PermaSaveState.playerHasCompletedTutorial) {
             position.get<String>("map")
         } else {
             "tutorial_road"
@@ -209,7 +215,11 @@ object SaveState {
         currentNode = position.get<Long>("node").toInt()
         lastNode = position.get<Long?>("lastNode")?.toInt()
 
-        playerLives = obj.get<Long>("playerLives").toInt()
+        playerLives = if (PermaSaveState.playerHasCompletedTutorial) {
+            obj.get<Long>("playerLives").toInt()
+        } else {
+            5
+        }
         maxPlayerLives = obj.get<Long>("maxPlayerLives").toInt()
         _playerMoney = obj.get<Long>("playerMoney").toInt()
         currentDifficulty = obj.get<Double>("currentDifficulty")

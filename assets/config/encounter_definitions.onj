@@ -405,7 +405,7 @@ encounter: [
             "Pyro_lvl1"
         ],
         encounterModifier: [
-//            "SteelNerves"
+            "SteelNerves"
         ],
         biomes: [
             "wasteland", "bewitched_forest"
@@ -488,7 +488,8 @@ encounter: [
             "Outlaw_lvl1", "Pyro_lvl1"
         ],
         encounterModifier: [
-//            "SteelNerves", "MoneyForNothing"
+            "SteelNerves",
+//            "MoneyForNothing"
         ],
         biomes: [
             "wasteland", "bewitched_forest"
@@ -692,7 +693,7 @@ encounter: [
             "Outlaw_lvl2", "Pyro_lvl1"
         ],
         encounterModifier: [
-//            "SteelNerves"
+            "SteelNerves"
         ],
         biomes: [
             "bewitched_forest"
@@ -776,7 +777,7 @@ encounter: [
             "Outlaw_lvl2", "Witch_lvl1"
         ],
         encounterModifier: [
-//            "SteelNerves"
+            "SteelNerves"
         ],
         biomes: [
             "bewitched_forest"
@@ -962,7 +963,7 @@ encounter: [
             "Outlaw_lvl1", "Outlaw_lvl1", "Pyro_lvl1"
         ],
         encounterModifier: [
-//            "SteelNerves"
+            "SteelNerves"
         ],
         biomes: [
             "bewitched_forest"
@@ -980,7 +981,6 @@ encounter: [
             "Outlaw_lvl2", "Outlaw_lvl1", "Outlaw_lvl1"
         ],
         encounterModifier: [
-            ""
         ],
         biomes: [
             "bewitched_forest"
@@ -1016,7 +1016,7 @@ encounter: [
         ],
         encounterModifier: [
             "BewitchedMist",
-//            "SteelNerves"
+            "SteelNerves"
         ],
         biomes: [
             "bewitched_forest"

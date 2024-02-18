@@ -7,7 +7,7 @@ decks: [
         cards: []
     }
 ],
-playerLives: 5,
+playerLives: gameConfig.playerConfig.lives,
 maxPlayerLives: gameConfig.playerConfig.lives,
 playerMoney: 0,
 currentDifficulty: 1.0,

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.obj
@@ -36,6 +37,7 @@ class ChooseCardDragSource(
         actor.enterActorState("dragged")
         obj.resetActorState(actor)
         startReal()
+        SoundPlayer.situation("card_drag_started", getActor().screen)
         return payload
     }
 
@@ -73,7 +75,9 @@ class ChooseCardDragPayload(val actor: Actor) : ExecutionPayload() {
      */
     fun onDrop(addToDeck: Boolean) = tasks.add {
         val scr = (FortyFive.screen as OnjScreen).screenController as ChooseCardScreenController
-        scr.getCard((actor as CardActor).name!!, addToDeck)
+        val cardActor = actor as CardActor
+        scr.getCard(cardActor.name!!, addToDeck)
+        SoundPlayer.situation("card_drag_finished", cardActor.screen)
     }
 
     fun resetActorState(actor: CardActor) = tasks.add { actor.leaveActorState("dragged") }
