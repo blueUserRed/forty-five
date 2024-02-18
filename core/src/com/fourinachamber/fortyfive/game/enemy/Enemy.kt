@@ -480,6 +480,7 @@ class EnemyActor(
         action {
             screen.leaveState("enemy_action_anim")
             parent.remove(animActor!!.styleManager!!.node)
+            screen.removeAllStyleManagers(animActor!!)
         }
     }
 

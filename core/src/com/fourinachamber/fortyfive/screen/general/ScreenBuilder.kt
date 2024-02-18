@@ -140,7 +140,7 @@ class ScreenBuilder(val file: FileHandle) {
         val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
         for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
         doDragAndDrop(screen)
-        screen.invalidateEverything()
+//        screen.invalidateEverything()
         return curActor
     }
 
@@ -172,7 +172,7 @@ class ScreenBuilder(val file: FileHandle) {
         val newBehaviours = behavioursToBind.filter { it !in oldBehaviours }
         for (behaviour in newBehaviours) behaviour.bindCallbacks(screen)
         doDragAndDrop(screen)
-        screen.invalidateEverything()
+//        screen.invalidateEverything()
     }
 
     fun getAsOnjValue(value: Any?): OnjValue {

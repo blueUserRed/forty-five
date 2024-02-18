@@ -34,6 +34,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
@@ -330,8 +331,22 @@ open class OnjScreen @MainThreadOnly constructor(
         // Buch schreiben
     }
 
+    fun removeAllStyleManagers(actor: StyledActor) {
+        styleManagers.remove(actor.styleManager)
+        if (actor is Group) {
+            actor.children
+                .filterIsInstance<StyledActor>()
+                .forEach { removeAllStyleManagers(it) }
+        }
+    }
+
     private fun hideHoverDetail() {
-        currentHoverDetail = null
+
+        val currentHoverDetail = currentHoverDetail
+        if (currentHoverDetail is StyledActor) {
+            removeAllStyleManagers(currentHoverDetail)
+        }
+        this.currentHoverDetail = null
         currentDisplayDetailActor?.detailActor = null
         currentDisplayDetailActor?.onDetailDisplayEnded()
     }

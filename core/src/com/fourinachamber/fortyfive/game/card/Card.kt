@@ -705,6 +705,7 @@ class CardActor(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
         if (drawPixmapMessage?.isFinished ?: false) {
             finishPixmapDrawing()
         }
