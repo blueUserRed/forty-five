@@ -45,7 +45,7 @@ class GameDirector(private val controller: GameController) {
 
     fun chooseEnemyActions() {
         controller.activeEnemies.forEach { enemy ->
-            val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty)
+            val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty, listOf())
             enemy.actor.setupForAction(NextEnemyAction.None) // make sure current action is cleared
             enemy.actor.setupForAction(nextAction)
         }

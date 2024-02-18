@@ -49,7 +49,7 @@ class TextEffectEmitter(
 
     fun playAnimation(text: String, configName: String? = null) {
         val config = findConfig(configName)
-        val label = CustomLabel(screen, text, Label.LabelStyle(config.font, config.fontColor))
+        val label = CustomLabel(screen, text, Label.LabelStyle(config.font, config.fontColor), true)
         label.setFontScale(config.fontScale)
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         label.setPosition(

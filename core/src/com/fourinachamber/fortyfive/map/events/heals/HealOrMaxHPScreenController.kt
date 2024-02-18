@@ -5,6 +5,7 @@ import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -51,6 +52,7 @@ class HealOrMaxHPScreenController(onj: OnjObject) : ScreenController(), Completa
      * gets called from the accept button, only if he is in the correct state ("valid")
      */
     override fun completed() {
+        SoundPlayer.situation("heal", screen)
         if ((screen.namedActorOrError(healChosenTarekGeorgWidgetName) as CustomFlexBox).inActorState("selected")) {
             val newLives = min(SaveState.playerLives + amount.first, SaveState.maxPlayerLives)
             FortyFiveLogger.debug(logTag, "Lives healed from ${SaveState.playerLives} to $newLives!")

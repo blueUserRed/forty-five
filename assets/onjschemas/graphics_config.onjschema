@@ -37,9 +37,16 @@ encounterModifiers: {
     bewitchedMist: encounterModifierConfig,
     lookalike: encounterModifierConfig,
     moist: encounterModifierConfig,
+    steelNerves: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],
+
+encounterBackgrounds: {
+    biome: string,
+    isDark: boolean,
+    background: string,
+}[],
 
 damageOverlay: {
     duration: float,
@@ -60,7 +67,9 @@ cardText: {
         normal: Color,
         increase: Color,
         decrease: Color,
-    }
+    },
+    savedSymbol: string,
+    notSavedSymbol: string,
 },
 
 keySelect: {
@@ -72,6 +81,11 @@ keySelectUsedAssets: string[],
 shootPostProcessor: {
     name: string,
     duration: float
+},
+
+enemyGravestone: {
+    texture: string,
+    scale: float,
 },
 
 gameUsedAssets: string[]

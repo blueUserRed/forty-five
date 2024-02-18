@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.screen.*
 import kotlinx.coroutines.*
@@ -32,8 +33,24 @@ class ServiceThread : Thread("ServiceThread") {
                 is ServiceThreadMessage.PrepareResources -> prepareResources()
                 is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
                 is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
+                is ServiceThreadMessage.PrepareCards -> prepareCards(message)
 
             }
+        }
+    }
+
+    private fun CoroutineScope.prepareCards(message: ServiceThreadMessage.PrepareCards) {
+        var cards = ResourceManager
+            .resources
+            .filter { it.state == Resource.ResourceState.NOT_LOADED }
+            .filter { it.handle.startsWith(Card.cardTexturePrefix) }
+
+        if (!message.all) {
+            cards = cards.filter { it.handle.removePrefix(Card.cardTexturePrefix) in SaveState.curDeck.cards }
+        }
+
+        cards.forEach {
+            launch(Dispatchers.IO) { it.prepare() }
         }
     }
 
@@ -56,6 +73,7 @@ class ServiceThread : Thread("ServiceThread") {
             val font = card.actor.font
             val isDark = card.actor.isDark
             val fontScale = card.actor.fontScale
+            val savedSymbol = message.savedPixmap
             pixmap.drawPixmap(cardTexturePixmap, 0, 0)
             val situation = when {
                 damageValue > baseDamage -> "increase"
@@ -66,18 +84,21 @@ class ServiceThread : Thread("ServiceThread") {
             val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
             font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
             font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
+            if (savedSymbol != null) {
+                pixmap.drawPixmap(
+                    savedSymbol,
+                    0, 0,
+                    savedSymbol.width, savedSymbol.height,
+                    450, 440,
+                    100, 100
+                )
+            }
             message.isFinished = true
         } }
     }
 
 
     private fun CoroutineScope.loadAnimationResource(message: ServiceThreadMessage.LoadAnimationResource) = launch(animationLoaderDispatcher) {
-//        val resource = ResourceManager
-//            .resources
-//            .find { it.handle == message.handle }
-//            ?: throw RuntimeException("unknown resource: ${message.handle}")
-//        launch(animationLoaderDispatcher) { resource.prepare() }.join()
-
         val resource = ResourceManager
             .resources
             .find { it.handle == message.handle }
@@ -124,6 +145,7 @@ sealed class ServiceThreadMessage {
         val cardTexturePixmap: Pixmap,
         val card: Card,
         val damageValue: Int,
+        val savedPixmap: Pixmap?,
         var isFinished: Boolean = false
     ) : ServiceThreadMessage()
 
@@ -134,6 +156,8 @@ sealed class ServiceThreadMessage {
         var finished: Boolean = false,
         var cancelled: Boolean = false
     ) : ServiceThreadMessage()
+
+    class PrepareCards(val all: Boolean) : ServiceThreadMessage()
 
     override fun toString(): String = this::class.simpleName ?: ""
 

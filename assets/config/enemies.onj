@@ -4,7 +4,7 @@ import "imports/colors.onj" as color;
 use Cards; // include Card namespace for status effects
 
 var textEmitterSharedConfig = {
-    font: "red_wing",
+    font: "roadgeek",
     fontScale: 0.9,
     spawnVarianceX: 30.0,
     spawnVarianceY: 30.0,
@@ -32,256 +32,96 @@ var textEmitterConfig = [
     },
 ];
 
-var outlawDamageSharedKeys = {
-    icon: "enemy_action_damage",
-    hasSpecialAnimation: false,
-    title: "Damage",
-    descriptionTemplate: "This attack does {damage} damage",
-};
-
-var outlawCoverSharedKeys = {
-    icon: "enemy_action_cover",
-    hasSpecialAnimation: false,
-    title: "Cover",
-    descriptionTemplate: "The enemy adds {cover} shield",
-};
-
-var pyroDamageSharedKeys = {
-    icon: "enemy_action_damage",
-    hasSpecialAnimation: false,
-    title: "Damage",
-    descriptionTemplate: "This attack does {damage} damage",
-};
-
-var pyroCoverSharedKeys = {
-    icon: "enemy_action_cover",
-    hasSpecialAnimation: false,
-    title: "Cover",
-    descriptionTemplate: "The enemy adds {cover} shield",
-};
-
-var pyroBurningSharedKeys = {
-    icon: "enemy_action_burning",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_burning",
-    title: "Burning",
-    descriptionTemplate: "You get Burning!",
-};
-
-var pyroFireResistanceSharedKeys = {
-    icon: "enemy_action_fire_resistance",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_fire_resistance",
-    title: "Fire resistance",
-    descriptionTemplate: "The enemy gives itself fire resistance!",
-};
-
-var pyroInfernoSharedKeys = {
-    icon: "enemy_action_inferno",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_inferno",
-    title: "Inferno",
-    descriptionTemplate: "You get burning for the rest of the fight!",
-};
-
-var pyroHotPotatoSharedKeys = {
-    icon: "enemy_action_hot_potato",
-    hasSpecialAnimation: true,
-    commonPanel1: "enemy_pyro_action_comic_common_panel_1",
-    commonPanel2: "enemy_pyro_action_comic_common_panel_2",
-    commonPanel3: "enemy_pyro_action_comic_common_panel_3",
-    specialPanel: "enemy_pyro_action_comic_panel_hot_potato",
-    title: "Hot Potato",
-    descriptionTemplate: "A [scorching Bullet] is being put in your hand!",
-};
-
 enemies: [
 
     {
         name: "Outlaw_lvl1",
         title: "Outlaw",
-//        baseHealth: 1,
-        baseHealth: 80,
-//        texture: "outlaw_animation",
+        baseHealth: 110,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
-        brain: $RandomEnemyBrain {
-            actionProbability: 0.8,
-            actions: [
-                $DamagePlayer {
-                    damage: [ 6, 7 ],
-                    showProbability: 1.0,
-                    weight: 5,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 8, 12 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 12, 18 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $TakeCover {
-                    cover: [ 12, 22 ],
-                    weight: 10,
-                    showProbability: 1.0,
-                    ...outlawCoverSharedKeys
-                },
-            ],
+        brain: $OutlawBrain {
+            phase1End: 2,
+            phase2End: 4,
+            damagePhase1: [7, 9],
+            damagePhase2: [9, 13],
+            damagePhase3: [13, 20],
+            coverPhase1: [5, 10],
+            coverPhase2: [7, 10],
+            coverPhase3: [10, 15],
+            actionProbability: 0.95,
+            attackProbability: 0.8,
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "Outlaw_lvl2",
         title: "Outlaw",
-        baseHealth: 120,
+        baseHealth: 140,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
-        brain: $RandomEnemyBrain {
-            actionProbability: 0.8,
-            actions: [
-                $DamagePlayer {
-                    damage: [ 11, 13 ],
-                    showProbability: 1.0,
-                    weight: 5,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 14, 17 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $DamagePlayer {
-                    damage: [ 18, 24 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...outlawDamageSharedKeys
-                },
-                $TakeCover {
-                    cover: [ 16, 24 ],
-                    weight: 10,
-                    showProbability: 1.0,
-                    ...outlawCoverSharedKeys
-                },
-            ],
+        brain: $OutlawBrain {
+            phase1End: 1,
+            phase2End: 3,
+            damagePhase1: [7, 10],
+            damagePhase2: [8, 15],
+            damagePhase3: [15, 28],
+            coverPhase1: [10, 15],
+            coverPhase2: [15, 25],
+            coverPhase3: [25, 30],
+            actionProbability: 0.95,
+            attackProbability: 0.8,
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
 
     {
-        name: "Pyro",
+        name: "Pyro_lvl1",
         title: "Pyro",
-        baseHealth: 1,
+        baseHealth: 105,
         texture: "enemy_pyro",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
-        scale: 0.45,
-        detailFont: "red_wing",
+        scale: 0.22,
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
-        brain: $RandomEnemyBrain {
-            actionProbability: 0.8,
-            actions: [
-                $DamagePlayer {
-                    damage: [ 5, 10 ],
-                    showProbability: 1.0,
-                    weight: 10,
-                    scaleFactor: 0.5,
-                    ...pyroDamageSharedKeys
-                },
-                $TakeCover {
-                    cover: [ 5, 10 ],
-                    weight: 10,
-                    showProbability: 1.0,
-                    ...pyroCoverSharedKeys
-                },
-                $GivePlayerStatusEffect {
-                    statusEffect: burning(5, 0.5, false),
-                    weight: 10,
-                    showProbability: 0.5,
-                    ...pyroBurningSharedKeys
-                },
-                $GiveSelfStatusEffect {
-                    statusEffect: fireResistance(5),
-                    weight: 60,
-                    showProbability: 0.0,
-                    hasUnlikelyPredicates: true,
-                    predicates: [
-                        $AnyEnemyHasStatusEffect {
-                            value: burning(0, 0.5, false)
-                        },
-                        $EnemyDoesNotHaveStatusEffect {
-                            value: fireResistance(0)
-                        }
-                    ],
-                    ...pyroFireResistanceSharedKeys
-                },
-                $GivePlayerStatusEffect {
-                    statusEffect: burning(0, 0.5, true),
-                    weight: 500,
-                    showProbability: 0.0,
-                    hasUnlikelyPredicates: true,
-                    ...pyroInfernoSharedKeys,
-                    predicates: [
-                        $EnemyHealthLowerThanPercent {
-                            value: 25.0
-                        },
-                        $AliveEnemyCountIn {
-                            value: [2, 10]
-                        }
-                    ]
-                },
-                $GivePlayerCard {
-                    card: "scorchingBullet",
-                    weight: 2,
-                    showProbability: 0.0,
-                    ...pyroHotPotatoSharedKeys
-                }
-            ],
+        brain: $PyroBrain {
+            possibleBurningTurns: [1, 3],
+            burningRotations: [3, 6],
+            hideBurningProbability: 0.45,
+            hotPotatoProbability: 0.2,
+            hideHotPotatoProbability: 0.7,
+            infernoHealthPercentage: 0.15,
+            damage: [8, 12],
+            cover: [10, 13],
+            actionProbability: 0.95,
+            attackProbability: 0.30,
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
 
-
     {
-        name: "Witch",
+        name: "Witch_lvl1",
         title: "Witch",
         baseHealth: 130,
         texture: "enemy_witch",
@@ -290,29 +130,21 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.35,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         detailFontColor: color.black,
+        detailFontColorDark: color.white,
         brain: $WitchBrain {
-            firstEffectPossibleTurns: [1, 3],
-            secondEffectOffset: [7, 11],
-            bewitchedTurns: [1, 3],
-            bewitchedRotations: [2, 5],
-            wrathOfTheWitchDamageRange: [7, 13],
-            wardOfTheWitchCoverRange: [7, 13],
-            bewitchedBufferTurns: 1,
-            bewitchedProbability: 0.3,
-            bewitchedShowProbability: 0.5,
-            rotateRevolverProbability: 0.3,
-            rotateRevolverShowProbability: 0.5,
-            damageProbability: 0.3,
-            shieldProbability: 0.3,
-            damage: [7, 13],
-            shield: [7, 13],
-            revolverRotationIconHandle: "",
-            damageIconHandle: "enemy_action_damage",
-            shieldIconHandle: "enemy_action_cover",
+            bewitchedProbability: 0.2,
+            bewitchedTurns: [2, 3],
+            bewitchedRotations: [3, 5],
+            hideBewitchedProbability: 0.8,
+            leftTurnProbability: 0.4,
+            damage: [10, 18],
+            cover: [10, 20],
+            actionProbability: 0.95,
+            attackProbability: 0.4,
         }
     },
     {
@@ -325,14 +157,14 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
-        brain: $RandomEnemyBrain {
-            actionProbability: 0.0,
+        brain: $ScriptedEnemyBrain {
             actions: [],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_2",
@@ -344,7 +176,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -365,7 +197,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_3",
@@ -377,7 +210,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -398,7 +231,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_4",
@@ -410,7 +244,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -431,7 +265,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_5",
@@ -443,7 +278,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -464,7 +299,8 @@ enemies: [
                 }
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
     {
         name: "tutorial_enemy_6",
@@ -476,7 +312,7 @@ enemies: [
         coverIconScale: 0.2,
         indicatorIconScale: 0.6,
         scale: 0.25,
-        detailFont: "red_wing",
+        detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $ScriptedEnemyBrain {
@@ -525,7 +361,8 @@ enemies: [
                 },
             ],
         },
-        detailFontColor: color.black
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
     },
 
 ]

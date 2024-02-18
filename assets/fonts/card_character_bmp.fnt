@@ -1,6 +1,6 @@
 info face="Card Characters" size=32 bold=0 italic=0 charset="" unicode=0 stretchH=100 smooth=1 aa=1 padding=1,1,1,1 spacing=-2,-2
 common lineHeight=39 base=34 scaleW=512 scaleH=512 pages=1 packed=0
-page id=0 file="card_character.png"
+page id=0 file="card_character_bmp.png"
 chars count=97
 char id=0       x=143  y=0    width=14   height=36   xoffset=1    yoffset=-1   xadvance=16   page=0    chnl=0 
 char id=10      x=0    y=0    width=0    height=0    xoffset=-1   yoffset=0    xadvance=0    page=0    chnl=0 

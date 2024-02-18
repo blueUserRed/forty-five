@@ -16,6 +16,7 @@ class AdvancedTextParser(
     val code: String,
     private val screen: OnjScreen,
     defaults: OnjObject,
+    private val isDistanceField: Boolean,
     private val changes: List<AdvancedTextEffect>
 ) {
     init {
@@ -114,7 +115,8 @@ class AdvancedTextParser(
                     curColor,
                     curFontScale,
                     screen,
-                    breakLine
+                    isDistanceField,
+                    breakLine,
                 )
             )
         }

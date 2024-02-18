@@ -1,0 +1,347 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "dialog/dialog.onj" as dialogs;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "red_wing", "red_wing_bmp", "roadgeek", "card_character",
+
+        "stats_screen_background",
+
+        "stats_screen_spacer", "stats_screen_stat_box", "stats_screen_lost_cards_background",
+        "common_button_default", "common_button_hover",
+
+        "backpack_scrollbar_background", "backpack_scrollbar",
+
+        "white_texture"
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    background: "stats_screen_background",
+    playAmbientSounds: false,
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $StatsScreenController {
+    }
+},
+
+templates: [
+
+    $Box {
+        template_name: "stat_box",
+        template_keys: {
+            "children.0.text": "stat",
+            "children.2.template": "value",
+        },
+        styles: [
+            {
+                flexDirection: flexDirection.row,
+                alignItems: align.center,
+                background: "stats_screen_stat_box",
+                width: 100#percent,
+                height: 50#points,
+                marginTop: 20#points,
+            },
+        ],
+    } children [
+
+        $Label {
+            styles: [
+                {
+                    marginLeft: 20#points
+                }
+            ],
+            font: "roadgeek",
+            fontScale: 0.9,
+            color: color.grey,
+            text: "stat"
+        },
+
+        $Box {
+            styles: [
+                {
+                    flexGrow: 1.0
+                }
+            ]
+        },
+
+        $TemplateLabel {
+            styles: [
+                {
+                    marginRight: 20#points
+                }
+            ],
+            font: "roadgeek",
+            fontScale: 0.8,
+            color: color.grey,
+            template: "value"
+        }
+    ]
+],
+
+var statsBox = $Box {
+    debug: true,
+    styles: [
+        {
+            width: (worldWidth * 0.4)#points,
+            flexDirection: flexDirection.column,
+        }
+    ],
+} children [
+
+    $Label {
+        font: "red_wing_bmp",
+        fontScale: 0.8,
+        color: color.forty_white,
+        isDistanceField: false,
+        text: "Statistics"
+    },
+
+    $Box {
+        styles: [
+            {
+                background: "stats_screen_spacer",
+                width: 100#percent,
+                aspectRatio: 1_161.0 / 6.0
+            }
+        ]
+    },
+
+    $Label {
+        font: "roadgeek",
+        fontScale: 0.8,
+        color: color.grey,
+        text: "See what you accomplished this run"
+    },
+
+    $FromTemplate {
+        generateFrom: "stat_box",
+        data: {
+            stat: "Used Reserves",
+            value: "{stat.usedReserves}"
+        }
+    },
+
+    $FromTemplate {
+        generateFrom: "stat_box",
+        data: {
+            stat: "Bullets Collected",
+            value: "{stat.bulletsCollected} of {stat.obtainableBullets}"
+        }
+    },
+
+    $FromTemplate {
+        generateFrom: "stat_box",
+        data: {
+            stat: "Total Cash Collected",
+            value: "${stat.totalCashCollected}"
+        }
+    },
+
+    $FromTemplate {
+        generateFrom: "stat_box",
+        data: {
+            stat: "Encounters Won",
+            value: "{stat.encountersWon}"
+        }
+    },
+
+    $FromTemplate {
+        generateFrom: "stat_box",
+        data: {
+            stat: "Enemies Defeated",
+            value: "{stat.enemiesDefeated}"
+        }
+    },
+
+    $FromTemplate {
+        generateFrom: "stat_box",
+        data: {
+            stat: "Bullets Shot",
+            value: "{stat.bulletsShot}"
+        }
+    },
+
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                background: "common_button_default",
+                marginTop: 40#points,
+                height: 50#points,
+                width: 140#points,
+                alignSelf: align.flexEnd,
+                alignItems: align.center,
+                justifyContent: justify.center,
+            },
+            {
+                style_priority: 2,
+                style_condition: hover(),
+                background: "common_button_hover",
+            },
+        ]
+    } children [
+
+        $Label {
+            font: "red_wing",
+            fontScale: 0.9,
+            color: color.black,
+            text: "Try Again"
+        },
+
+    ]
+
+];
+
+var cardBox = $Box {
+    debug: true,
+    styles: [
+        {
+            width: (worldWidth * 0.4)#points,
+            flexDirection: flexDirection.column,
+            paddingLeft: 10#points,
+            background: "stats_screen_lost_cards_background"
+        }
+    ],
+} children [
+
+    $Label {
+        font: "red_wing_bmp",
+        fontScale: 0.8,
+        color: color.forty_white,
+        isDistanceField: false,
+        text: "Cards Lost"
+    },
+
+    $Box {
+        styles: [
+            {
+                background: "stats_screen_spacer",
+                width: 100#percent,
+                aspectRatio: 1_161.0 / 6.0
+            }
+        ]
+    },
+
+
+    $ScrollBox {
+        debug: true,
+        name: "cards_container",
+        isScrollDirectionVertical: true,
+        scrollDistance: 60.0,
+        backgroundStretched: false,
+        scrollbarBackgroundName: "scrollbar_background",
+        scrollbarName: "scrollbar_handle",
+        scrollbarSide: "right",
+        styles: [
+            {
+                flexWrap: wrap.wrap,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.flexStart,
+                width: 94.0#percent,
+                height: 450#points,
+                paddingLeft: (3.0 * 15)#points,
+                paddingRight: (35.0)#points,
+                paddingTop: (3.0 * 10)#points,
+                paddingBottom: (4.0 * 10)#points,
+                cuttingLeft: 17.5,
+                cuttingRight: 17.5,
+                cuttingTop: 20.0,
+                cuttingBottom: 20.0,
+                scrollbarWidth: 15.0,
+                scrollbarLength: 90.0#percent,
+            }
+        ],
+    } children [
+
+        $Image {
+            name: "scrollbar_background",
+            textureName: "backpack_scrollbar_background",
+            scaleX: 1.0,
+            scaleY: 1.0,
+            reportDimensionsWithScaling: true,
+        },
+
+        $Image {
+            name: "scrollbar_handle",
+            textureName: "backpack_scrollbar",
+            scaleX: 1.0,
+            scaleY: 1.0,
+        },
+
+        $Box {
+            styles: [
+                {
+                    width: 30#percent,
+                    aspectRatio: 1.0,
+                    background: "white_texture"
+                }
+            ]
+        },
+
+        $Box {
+            styles: [
+                {
+                    width: 30#percent,
+                    aspectRatio: 1.0,
+                    background: "white_texture"
+                }
+            ]
+        },
+
+        $Box {
+            styles: [
+                {
+                    width: 30#percent,
+                    aspectRatio: 1.0,
+                    background: "white_texture"
+                }
+            ]
+        },
+
+        $Box {
+            styles: [
+                {
+                    width: 30#percent,
+                    aspectRatio: 1.0,
+                    background: "white_texture"
+                }
+            ]
+        },
+
+    ]
+
+];
+
+root: $Box {
+
+    styles: [
+        {
+            width: worldWidth#points,
+            height: worldHeight#points,
+            flexDirection: flexDirection.row,
+            alignItems: align.center,
+            justifyContent: justify.spaceAround
+        }
+    ]
+
+} children [
+
+    statsBox,
+    cardBox
+
+]

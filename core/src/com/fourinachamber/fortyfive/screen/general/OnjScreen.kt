@@ -8,6 +8,7 @@ import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
 import com.badlogic.gdx.graphics.g2d.*
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Stage
@@ -27,6 +28,7 @@ import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
@@ -44,7 +46,6 @@ import kotlin.system.measureTimeMillis
 open class OnjScreen @MainThreadOnly constructor(
     val viewport: Viewport,
     batch: Batch,
-    private val background: String?,
     private val controllerContext: Any?,
     private val useAssets: MutableList<String>,
     private val earlyRenderTasks: List<OnjScreen.() -> Unit>,
@@ -52,9 +53,11 @@ open class OnjScreen @MainThreadOnly constructor(
     styleManagers: List<StyleManager>,
     private val namedCells: Map<String, Cell<*>>,
     private val namedActors: MutableMap<String, Actor>,
-    private val printFrameRate: Boolean,
+    val printFrameRate: Boolean,
     val transitionAwayTime: Int?,
     val screenBuilder: ScreenBuilder,
+    val music: ResourceHandle?,
+    val playAmbientSounds: Boolean
 ) : ScreenAdapter(), Renderable, ResourceBorrower {
 
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
@@ -67,6 +70,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     private val createTime: Long = TimeUtils.millis()
     private val callbacks: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
+    private val callbackAddBuffer: MutableList<Pair<Long, () -> Unit>> = mutableListOf()
     private val additionalDisposables: MutableList<Disposable> = mutableListOf()
 
     private val additionalLateRenderTasks: MutableList<(Batch) -> Unit> = mutableListOf()
@@ -148,9 +152,19 @@ open class OnjScreen @MainThreadOnly constructor(
         GraphicsConfig.keySelectDrawable(this)
     }
 
-    private val backgroundDrawable: Drawable? by lazy {
-        background?.let { ResourceManager.get<Drawable>(this, it) }
-    }
+    var background: ResourceHandle? = null
+        set(value) {
+            field = value
+            backgroundDrawable = null
+        }
+
+    private var backgroundDrawable: Drawable? = null
+        get() {
+            if (field != null) return field
+            val background = background ?: return null
+            field = ResourceManager.get(this, background)
+            return field
+        }
 
     private var inputMultiplexer: InputMultiplexer = InputMultiplexer()
 
@@ -181,7 +195,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @AllThreadsAllowed
     fun afterMs(ms: Int, callback: @MainThreadOnly () -> Unit) {
-        callbacks.add((TimeUtils.millis() + ms) to callback)
+        callbackAddBuffer.add((TimeUtils.millis() + ms) to callback)
     }
 
     @AllThreadsAllowed
@@ -329,6 +343,8 @@ open class OnjScreen @MainThreadOnly constructor(
 
     private fun updateCallbacks() {
         val curTime = TimeUtils.millis()
+        callbacks.addAll(callbackAddBuffer)
+        callbackAddBuffer.clear()
         val iterator = callbacks.iterator()
         while (iterator.hasNext()) {
             val (time, callback) = iterator.next()
@@ -375,30 +391,35 @@ open class OnjScreen @MainThreadOnly constructor(
         styleManagers.add(manager)
     }
 
-    @MainThreadOnly
-    override fun render(delta: Float) = try {
-//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
+    fun update(delta: Float) {
+        if (playAmbientSounds) {
+            SoundPlayer.updateAmbientSounds(this)
+        }
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         screenController?.update()
         updateCallbacks()
+        stage.act(Gdx.graphics.deltaTime)
+        currentHoverDetail?.act(delta)
+    }
+
+    fun stageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).localToStageCoordinates(Vector2(0f, 0f))
+
+    @MainThreadOnly
+    override fun render(delta: Float) = try {
+//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
         lastRenderTime = measureTimeMillis {
             val oldStyleManagers = styleManagers.toList()
-            stage.act(Gdx.graphics.deltaTime)
-            styleManagers.filter { it !in oldStyleManagers }
-                .forEach(StyleManager::update) //all added items get updated too
-            ScreenUtils.clear(0.0f, 0.0f, 0.0f, 1.0f)
             if (stage.batch.isDrawing) stage.batch.end()
+            stage.viewport.apply()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-
+            styleManagers.filter { it !in oldStyleManagers }
+                .forEach(StyleManager::update) //all added items get updated too
             if (dragAndDrop.none { it.value.isDragging }) {
                 stage.batch.begin()
-                currentHoverDetail?.let { actor ->
-                    actor.act(delta)
-                    actor.draw(stage.batch, 1f)
-                }
+                currentHoverDetail?.draw(stage.batch, 1f)
                 stage.batch.end()
             }
         }

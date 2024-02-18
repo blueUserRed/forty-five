@@ -48,6 +48,13 @@ object ResourceManager {
         return toGet.get(type) ?: throw RuntimeException("no variant of type ${type.simpleName} for handle $handle")
     }
 
+    fun trimPrepared() {
+        resources
+            .filter { it.state != Resource.ResourceState.NOT_LOADED }
+            .filter { it.borrowedBy.isEmpty() }
+            .forEach { it.dispose() }
+    }
+
     @MainThreadOnly
     fun giveBack(borrower: ResourceBorrower, handle: ResourceHandle) {
         val toGiveBack = resources.find { it.handle == handle }
@@ -173,10 +180,27 @@ object ResourceManager {
             ))
         }
 
+        assets.get<OnjArray>("sounds").value.forEach {
+            it as OnjObject
+            resources.add(SoundResource(
+                it.get<String>("name"),
+                it.get<String>("file")
+            ))
+        }
+
+        assets.get<OnjArray>("music").value.forEach {
+            it as OnjObject
+            resources.add(MusicResource(
+                it.get<String>("name"),
+                it.get<String>("file")
+            ))
+        }
+
         val cardsFile = assets.access<String>(".cards.directory")
         Gdx.files.internal(cardsFile)
             .file()
             .walk()
+            .filter { it.isFile }
             .forEach {
                 resources.add(TextureResource(
                     "${Card.cardTexturePrefix}${it.nameWithoutExtension}",

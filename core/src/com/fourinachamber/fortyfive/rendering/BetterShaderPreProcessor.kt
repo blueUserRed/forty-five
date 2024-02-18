@@ -117,6 +117,19 @@ class BetterShaderPreProcessor(
                 arg.toLong().toString()
             }
 
+            "vec2" -> {
+                if (arg !is Collection<*> || arg.size != 2) {
+                    throw RuntimeException("expected constArg $constArg to be a collection of floats of size 2")
+                }
+                val vec = StringBuilder("vec2(")
+                arg.forEachIndexed { i, f ->
+                    vec.append(f.toString())
+                    if (i != 1) vec.append(", ")
+                }
+                vec.append(")")
+                vec.toString()
+            }
+
             "vec4" -> {
                 if (arg !is Collection<*> || arg.size != 4) {
                     throw RuntimeException("expected constArg $constArg to be a collection of floats of size 4")

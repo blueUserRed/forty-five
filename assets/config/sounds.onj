@@ -1,0 +1,97 @@
+
+situations: [
+
+    {
+        name: "revolver_shot",
+        sound: "revolver_shot_sound"
+    },
+    {
+        name: "statusbar_button_clicked",
+        sound: "button_1_sound",
+        volume: 0.5
+    },
+    {
+        name: "card_hover",
+//        sound: null,
+        sound: "card_hover_sound",
+    },
+    {
+        name: "card_drag_finished",
+        sound: "card_laydown_sound",
+    },
+    {
+        name: "card_drag_started",
+        sound: "card_pickup_sound",
+    },
+    {
+        name: "not_allowed",
+        sound: "not_allowed_sound",
+    },
+    {
+        name: "general_button_click",
+        sound: "button_2_sound",
+    },
+    {
+        name: "holster",
+        sound: "holster_sound",
+    },
+    {
+        name: "enter_parry",
+        sound: "parry_sound",
+    },
+    {
+        name: "heal",
+        sound: "heal_sound",
+    },
+    {
+        name: "card_bought",
+        sound: "money_sound",
+    },
+    {
+        name: "money_earned",
+        sound: "money_sound",
+    },
+    {
+        name: "revolver_rotation",
+        sound: "revolver_drum_sound",
+    },
+    {
+        name: "walk",
+        sound: "walk_sound",
+        volume: 0.7,
+    },
+    {
+        name: "card_drawn",
+        sound: "card_laydown_sound",
+    },
+    {
+        name: "orb_anim_playing",
+        sound: "swoosh_sound",
+    },
+],
+
+ambientSounds: [
+    {
+        name: "snake",
+        sound: "snake_sound",
+        delay: [8_000, 10_000],
+        volume: 1.5
+    },
+    {
+        name: "owl",
+        sound: "owl_sound",
+        delay: [15_000, 20_000],
+        volume: 1.5
+    },
+],
+
+biomeAmbience: [
+    {
+        biomeName: "wasteland",
+        sounds: ["snake"]
+    },
+    {
+        biomeName: "bewitched_forest",
+        sounds: ["owl"]
+    },
+],

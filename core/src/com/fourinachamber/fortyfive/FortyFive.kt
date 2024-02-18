@@ -7,15 +7,13 @@ import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
+import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
-import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceManager
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-import onj.parser.OnjParser
-import onj.value.OnjArray
-import onj.value.OnjObject
 
 /**
  * main game object
@@ -24,7 +22,9 @@ object FortyFive : Game() {
 
     const val logTag = "forty-five"
 
-    private var currentRenderable: Renderable? = null
+    var currentRenderPipeline: RenderPipeline? = null
+        private set
+
     private var currentScreen: OnjScreen? = null
 
     var currentGame: GameController? = null
@@ -32,6 +32,8 @@ object FortyFive : Game() {
     val serviceThread: ServiceThread = ServiceThread()
 
     var cleanExit: Boolean = true
+
+    private var inScreenTransition: Boolean = false
 
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
@@ -47,21 +49,27 @@ object FortyFive : Game() {
 
     override fun create() {
         init()
-        serviceThread.start()
 //        resetAll()
 //        newRun(false)
-        if (SaveState.playerCompletedFirstTutorialEncounter) {
-            MapManager.changeToMapScreen()
-        } else {
+        changeToInitialScreen()
+    }
+
+    fun changeToInitialScreen() {
+        if (!SaveState.playerCompletedFirstTutorialEncounter) {
             MapManager.changeToEncounterScreen(tutorialEncounterContext)
+        } else {
+            MapManager.changeToMapScreen()
         }
     }
 
     override fun render() {
-        currentRenderable?.render(Gdx.graphics.deltaTime)
+        currentScreen?.update(Gdx.graphics.deltaTime)
+        currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
     fun changeToScreen(screenPath: String, controllerContext: Any? = null) {
+        if (inScreenTransition) return
+        inScreenTransition = true
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
         val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
@@ -70,12 +78,18 @@ object FortyFive : Game() {
 
         fun onScreenChange() {
             FortyFiveLogger.title("changing screen to $screenPath")
+            SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
             this.currentScreen = screen
-            currentRenderable = screen
+            currentRenderPipeline?.dispose()
+            currentRenderPipeline = RenderPipeline(screen, screen).also {
+                it.showFps = currentRenderPipeline?.showFps ?: false
+            }
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
             MapManager.invalidateCachedAssets()
+            inScreenTransition = false
+            ResourceManager.trimPrepared()
         }
 
         if (currentScreen == null) {
@@ -86,23 +100,32 @@ object FortyFive : Game() {
     }
 
     @AllThreadsAllowed
-    fun useRenderPipeline(renderable: Renderable) {
-        currentRenderable = renderable
-        renderable.init()
+    fun useRenderPipeline(renderPipeline: RenderPipeline) {
+        currentRenderPipeline?.dispose()
+        currentRenderPipeline = renderPipeline.also {
+            it.showFps = currentRenderPipeline?.showFps ?: false
+        }
     }
 
-    fun newRun(forwardToTutorialScreen: Boolean) {
-        FortyFiveLogger.title("newRun called; forwardToTutorialScreen = $forwardToTutorialScreen")
+    fun newRun(forwardToLooseScreen: Boolean) {
+        FortyFiveLogger.title("newRun called; forwardToLooseScreen = $forwardToLooseScreen")
         PermaSaveState.newRun()
+        if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
         MapManager.newRunSync()
-        if (forwardToTutorialScreen) MapManager.changeToEncounterScreen(tutorialEncounterContext)
+        if (forwardToLooseScreen) changeToScreen("screens/loose_screen.onj")
+    }
+
+    override fun resize(width: Int, height: Int) {
+        super.resize(width, height)
+        currentRenderPipeline?.sizeChanged()
     }
 
     fun resetAll() {
         PermaSaveState.reset()
         SaveState.reset()
         MapManager.resetAllSync()
+        newRun(false)
     }
 
     private fun init() {
@@ -116,6 +139,7 @@ object FortyFive : Game() {
         }
         TemplateString.init()
         FortyFiveLogger.init()
+        SoundPlayer.init()
         GameDirector.init()
         MapManager.init()
 //        resetAll()
@@ -130,7 +154,10 @@ object FortyFive : Game() {
         MapManager.read()
         GraphicsConfig.init()
         ResourceManager.init()
+        serviceThread.start()
+        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
+
 //        resetAll()
 //        newRun()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
@@ -145,6 +172,7 @@ object FortyFive : Game() {
         SaveState.write()
         currentScreen?.dispose()
         serviceThread.close()
+        ResourceManager.trimPrepared()
         ResourceManager.end()
         super.dispose()
     }

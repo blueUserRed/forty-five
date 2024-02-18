@@ -53,7 +53,7 @@ people: [
 ],
 
 defaults: {
-    font: "red_wing",
+    font: "roadgeek",
     fontScale: 0.8,
     color: color.forty_white
 },

@@ -1,5 +1,6 @@
 import "imports/colors.onj" as color;
 import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
 import "dialog/dialog.onj" as dialogs;
 
 use Common;
@@ -11,7 +12,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "red_wing_cm", "red_wing", "hover_detail_background", "reserves_texture",
+        "title_screen_background", "red_wing_cm", "red_wing", "red_wing_bmp", "hover_detail_background", "reserves_texture",
         "enemy_texture",
         "dialog_name_field",
         "dialog_continue",
@@ -19,6 +20,8 @@ assets: {
         "dialog_answer_option",
         "dialog_answer_option_hover",
         "shop_npcs_default",
+        "map_theme",
+        ...(sharedComponents.ambientSoundsUsedAssets),
     ]
 },
 
@@ -28,8 +31,9 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 1.0,
     background: "title_screen_background",
+    music: "map_theme",
+    playAmbientSounds: true,
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
@@ -53,7 +57,6 @@ var dialogWidget = $Box {
             paddingTop: 30#points,
             paddingBottom: 30#points,
             touchable: touchable.enabled,
-            alpha: 0.6,
         }
     ],
 } children [

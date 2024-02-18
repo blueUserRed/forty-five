@@ -13,7 +13,7 @@ assets: {
     useAssets: [
         "shop_background_wasteland",
         "transparent_black_texture",
-        "hover_detail_background", "red_wing_cm", "red_wing",
+        "hover_detail_background", "red_wing_cm", "red_wing", "red_wing_bmp",
         "heal_or_max_accept",
         "heal_or_max_accept_hover",
         "heal_or_max_accept_invalid",
@@ -23,8 +23,12 @@ assets: {
         "heal_or_max_selector_background",
         "heal_or_max_selector_background_selected",
         "taupe_gray_rounded",
-        "map_node_heal_circle",
+        "map_node_heal",
+        "button_2_sound",
+        "heal_sound",
+        "map_theme",
         //        "max_health_background",
+        ...(sharedComponents.ambientSoundsUsedAssets),
         ...(sharedComponents.backpackAssets),
         ...(sharedComponents.navBarUsedAssets),
         ...(sharedComponents.warningLabelUsedAssets),
@@ -37,8 +41,10 @@ viewport: $FitViewport {
 },
 
 options: {
-    transitionAwayTime: 1.0,
     background: "hover_detail_background",
+    transitionAwayTime: 1.5,
+    music: "map_theme",
+    playAmbientSounds: true,
     inputMap: [
         ...(inputMaps.defaultInputMap),
         ...(inputMaps.healOrMaxInputMap),
@@ -145,7 +151,9 @@ root: $Box { //TODO biomes
             behaviours: [
                 $OnClickSelectHealOrMaxOptionBehaviour {
                     state: "valid"
-                }
+                },
+                sharedComponents.buttonSoundBehaviour,
+                sharedComponents.buttonCursorBehaviour,
             ],
             styles: [
                 {
@@ -170,7 +178,7 @@ root: $Box { //TODO biomes
         },
     ],
     $Image {
-        textureName: "map_node_heal_circle",
+        textureName: "map_node_heal",
         zIndex: 160,
         scaleX: 1.0,
         scaleY: 1.0,
