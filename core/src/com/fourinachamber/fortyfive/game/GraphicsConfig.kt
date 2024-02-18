@@ -60,8 +60,8 @@ object GraphicsConfig {
         }
     }
 
-    fun orbAnimation(source: Vector2, target: Vector2): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
-        orbTexture = "reserves_orb",
+    fun orbAnimation(source: Vector2, target: Vector2, isReserves: Boolean): RenderPipeline.OrbAnimation = RenderPipeline.OrbAnimation(
+        orbTexture = if (isReserves) "reserves_orb" else "card_orb",
         width = 10f,
         height = 10f,
         duration = 300,

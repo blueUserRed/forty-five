@@ -346,7 +346,8 @@ class Card(
     fun checkEffects(
         trigger: Trigger,
         triggerInformation: TriggerInformation,
-        controller: GameController
+        controller: GameController,
+        isOnShot: Boolean
     ): Timeline = Timeline.timeline {
         action {
             checkModifierTransformers(trigger, triggerInformation)
@@ -362,13 +363,13 @@ class Card(
             actor.inAnimation = true
         }
         includeLater(
-            { actor.animateToTriggerPosition(controller) },
+            { actor.animateToTriggerPosition(controller, isOnShot) },
             { inGame && showAnimation }
         )
         include(effects.mapNotNull { it.second }.collectTimeline())
         includeLater(
             { actor.animateBack(controller) },
-            { inGame && showAnimation }
+            { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot) }
         )
         action {
             actor.inAnimation = false
@@ -807,9 +808,13 @@ class CardActor(
         action { inDestroyAnim = false }
     }
 
-    fun animateToTriggerPosition(controller: GameController): Timeline = Timeline.timeline {
+    fun animateToTriggerPosition(controller: GameController, isOnShotTrigger: Boolean): Timeline = Timeline.timeline {
         prevPosition = Vector2(x, y)
-        val (targetX, targetY) = controller.revolver.getCardTriggerPosition()
+        val (targetX, targetY) = if (isOnShotTrigger) {
+            controller.revolver.getCardOnShotTriggerPosition()
+        } else {
+            controller.revolver.getCardTriggerPosition()
+        }
         val moveAction = MoveToAction()
         moveAction.setPosition(targetX, targetY)
         moveAction.duration = 0.3f
