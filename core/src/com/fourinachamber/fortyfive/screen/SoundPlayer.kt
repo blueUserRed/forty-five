@@ -118,6 +118,12 @@ object SoundPlayer {
         }
     }
 
+    fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
+        val music = ResourceManager.get<Music>(screen, musicHandle)
+        music.play()
+        music.volume = musicVolume
+    }
+
     private data class AmbientSound(
         val name: String,
         val sound: ResourceHandle,
