@@ -245,6 +245,7 @@ open class RenderPipeline(
             500f
         )
         shapeRenderer.end()
+        shapeRenderer.dispose()
         batch.begin()
         viewport.apply()
         batch.projectionMatrix = viewport.camera.combined

@@ -663,6 +663,7 @@ class CardActor(
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
+        screen.addDisposable(cardTexturePixmap)
         redrawPixmap(card.baseDamage)
         onClick {
             if (!inSelectionMode) return@onClick
@@ -770,6 +771,7 @@ class CardActor(
                 if (!it.isPrepared) it.prepare()
                 it.consumePixmap()
             }
+        savedPixmap?.let { screen.addDisposable(it) }
         val message = ServiceThreadMessage.DrawCardPixmap(
             pixmap,
             cardTexturePixmap,

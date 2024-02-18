@@ -131,7 +131,7 @@ class Backpack(
         val cardsOnj = OnjParser.parseFile(cardsFile)
         cardsFileSchema.assertMatches(cardsOnj)
         cardsOnj as OnjObject
-        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = {}))
+        cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
         _allCards = cardPrototypes
             .filter { it.name in SaveState.cards }
             // TODO: figure out if the card is saved or not
