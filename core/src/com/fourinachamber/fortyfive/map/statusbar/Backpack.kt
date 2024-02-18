@@ -396,7 +396,6 @@ class Backpack(
                 if (cur in savedCardsLeft) savedCardsLeft.remove(cur)
             } else i++
         }
-        println(savedCardsLeft)
         unplacedCards.forEach { name ->
             _allCards.add(cardPrototypes.find { it.name == name }!!.create(screen, savedCardsLeft.remove(name)))
         }
