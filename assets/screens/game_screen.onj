@@ -1349,7 +1349,6 @@ var encounterModifierDisplay = $Box {
 
     $Box {
         name: "encounter_modifier_parent",
-        debug: true,
         styles: [
             {
                 style_priority: 1,
