@@ -72,6 +72,7 @@ backpackAssets: [
     "backpack_direction_arrow",
     "card_character",
     "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
+    "card_symbol_saved", "card_symbol_not_saved",
     ...cardHoverDetailUsedAssetsDefinition,
 ],
 
