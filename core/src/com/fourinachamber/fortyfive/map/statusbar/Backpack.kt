@@ -25,8 +25,8 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-import java.lang.Exception
-import java.lang.IllegalStateException
+import java.lang.Integer.max
+import kotlin.math.min
 
 class Backpack(
     screen: OnjScreen,
@@ -293,20 +293,45 @@ class Backpack(
     }
 
     private fun sortBackpack(sortedCards: List<String>) {
-        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
+        var parents = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+//        backpackCardsWidget.children.filterIsInstance<CustomFlexBox>().forEach { removeChildCompletely(it) }
+
+        //TODO ugly, this for can be way more effitient, but it shouldn't matter
+        for (i in min(sortedCards.size, parents.size) until max(sortedCards.size, parents.size)) {
+            if (i >= sortedCards.size) {
+                removeChildCompletely(parents[i])
+                continue
+            }
+
+            if (i >= parents.size) {
+                screen.screenBuilder.generateFromTemplate(
+                    "backpack_slot_parent",
+                    mapOf(),
+                    backpackCardsWidget,
+                    screen,
+                ) as CustomFlexBox
+
+                continue;
+            }
+
+            val cardName = sortedCards[i]
+
+            val children = parents[i].children
+            println(children)
+            if (children.size >= 1 && children[0] is CardActor) {
+                val c = children[0] as CardActor
+                println(c.card.name + " should be:  " + cardName)
+            }
+        }
+        parents = backpackCardsWidget.children.filterIsInstance<CustomFlexBox>()
+
         for (i in sortedCards.indices) {
             val cardName = sortedCards[i]
             val curActor = getCard(cardName, true).actor
-            val parent = screen.screenBuilder.generateFromTemplate(
-                "backpack_slot_parent",
-                mapOf(),
-                backpackCardsWidget,
-                screen,
-            ) as CustomFlexBox
             screen.screenBuilder.addDataToWidgetFromTemplate(
                 "backpack_slot_card",
                 mapOf(),
-                parent,
+                parents[i],
                 screen,
                 curActor
             )
