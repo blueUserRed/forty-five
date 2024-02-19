@@ -793,6 +793,22 @@ textures: [
         file: "textures/microwave_studios.png",
         useMipMaps: true
     },
+    {
+        name: "map_extraction_background",
+        file: "textures/map/extraction/background.png"
+    },
+    {
+        name: "map_extraction_symbol",
+        file: "textures/map/extraction/symbol.png"
+    },
+    {
+        name: "map_extraction_card_background_blue",
+        file: "textures/map/extraction/card_background_blue.png"
+    },
+    {
+        name: "map_extraction_card_background_white",
+        file: "textures/map/extraction/card_background_white.png"
+    },
 ],
 
 cursors: [
