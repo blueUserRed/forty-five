@@ -213,6 +213,7 @@ open class RenderPipeline(
             press 't' to toggle this display
             fps: $fps
             15s render lagSpike: ${screen.largestRenderTimeInLast15Sec()}ms
+            15s avg. render time: ${screen.averageRenderTimeInLast15Sec()}ms
             active style managers: ${screen.styleManagerCount()}
             loaded assets: $loadedAssets/${ResourceManager.resources.size}
             version: ${FortyFiveLogger.versionTag}

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.glutils.FileTextureData
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -664,7 +665,11 @@ class CardActor(
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
-        screen.addDisposable(cardTexturePixmap)
+        // I HATE LIBGDX
+        // FileTextureData always loads a new pixmap that needs to be disposed
+        // PixmapTextureData always returns the same pixmap, that doesn't need to be disposed
+        // Which one is used is a race condition in the TextureResource class
+        if (cardTexture.textureData is FileTextureData) screen.addDisposable(cardTexturePixmap)
         redrawPixmap(card.baseDamage)
         onClick {
             if (!inSelectionMode) return@onClick
