@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.game.card.Trigger
 import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 sealed class EncounterModifier {
@@ -78,9 +79,10 @@ sealed class EncounterModifier {
                 return
             }
             val now = TimeUtils.millis()
-            val diff = 10 - ((now - baseTime).toDouble() / 1000.0).roundToInt()
+            val diff = max(10 - ((now - baseTime).toDouble() / 1000.0).roundToInt(), 0)
             TemplateString.updateGlobalParam("game.steelNerves.remainingTime", diff)
             if (now - baseTime < 10_000) return
+            if (controller.isUIFrozen) return
             baseTime = -1
             controller.shoot()
         }

@@ -124,7 +124,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val animTimelines: MutableList<Timeline> = mutableListOf()
     private val animTimelinesAddBuffer: MutableList<Timeline> = mutableListOf()
 
-    private var isUIFrozen: Boolean = false
+    var isUIFrozen: Boolean = false
+        private set
 
     private var selectedCard: Card? = null
 
