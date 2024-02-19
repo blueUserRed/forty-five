@@ -37,6 +37,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
+import kotlin.math.roundToLong
 import kotlin.system.measureTimeMillis
 
 
@@ -419,7 +420,9 @@ open class OnjScreen @MainThreadOnly constructor(
         currentHoverDetail?.act(delta)
     }
 
-    fun stageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).localToStageCoordinates(Vector2(0f, 0f))
+    fun stageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).let { actor ->
+        actor.localToStageCoordinates(Vector2(actor.width / 2, actor.height / 2))
+    }
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
@@ -449,6 +452,7 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun largestRenderTimeInLast15Sec(): Long =  lastRenderTimes.max()
+    fun averageRenderTimeInLast15Sec(): Long = lastRenderTimes.average().roundToLong()
 
     fun styleManagerCount(): Int = styleManagers.size
 

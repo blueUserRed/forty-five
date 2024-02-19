@@ -31,8 +31,8 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import onj.value.OnjString
-import java.lang.Integer.max
-import java.lang.Integer.min
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * the Controller for the main game screen
@@ -775,6 +775,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     if (cardToShoot.shouldRemoveAfterShot) {
                         if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
+                        SoundPlayer.situation("orb_anim_playing", curScreen)
                         gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
                         revolver.removeCard(cardToShoot)
                     }
