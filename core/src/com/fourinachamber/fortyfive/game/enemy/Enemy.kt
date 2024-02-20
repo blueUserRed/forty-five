@@ -433,13 +433,13 @@ class EnemyActor(
         emitter.playNumberChangeAnimation(change)
     }
 
-    fun enemyActionAnimationTimeline(action: EnemyAction): Timeline = if (action.prototype.hasSpecialAnimation) {
-        specialEnemyActionAnimationTimeline(action)
+    fun enemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = if (action.prototype.hasSpecialAnimation) {
+        specialEnemyActionAnimationTimeline(action, controller)
     } else {
         Timeline()
     }
 
-    private fun specialEnemyActionAnimationTimeline(action: EnemyAction): Timeline = Timeline.timeline {
+    private fun specialEnemyActionAnimationTimeline(action: EnemyAction, controller: GameController): Timeline = Timeline.timeline {
         val actionDescription =
             TemplateString(action.prototype.descriptionTemplate, action.descriptionParams).string.onjString()
         val data = mapOf<String, OnjValue>(
@@ -466,12 +466,21 @@ class EnemyActor(
         delay(10)
         action {
             screen.enterState("enemy_action_anim")
+            controller.dispatchAnimTimeline(Timeline.timeline {
+                repeat(4) {
+                    action {
+                        SoundPlayer.situation("enemy_action_anim", screen)
+                    }
+                    delay(200)
+                }
+            })
         }
         awaitConfirmationInput(screen, maxTime = 10_000)
 //        awaitConfirmationInput(screen, maxTime = 5_000)
         action {
             screen.leaveState("enemy_action_anim")
             parent.remove(animActor!!.styleManager!!.node)
+            screen.removeAllStyleManagers(animActor!!)
         }
     }
 

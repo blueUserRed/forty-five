@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.graphics.glutils.FileTextureData
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -346,7 +347,8 @@ class Card(
     fun checkEffects(
         trigger: Trigger,
         triggerInformation: TriggerInformation,
-        controller: GameController
+        controller: GameController,
+        isOnShot: Boolean
     ): Timeline = Timeline.timeline {
         action {
             checkModifierTransformers(trigger, triggerInformation)
@@ -362,15 +364,16 @@ class Card(
             actor.inAnimation = true
         }
         includeLater(
-            { actor.animateToTriggerPosition(controller) },
+            { actor.animateToTriggerPosition(controller, isOnShot) },
             { inGame && showAnimation }
         )
         include(effects.mapNotNull { it.second }.collectTimeline())
         includeLater(
             { actor.animateBack(controller) },
-            { inGame && showAnimation }
+            { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot) }
         )
         action {
+            actor.setScale(1f)
             actor.inAnimation = false
         }
     }
@@ -433,7 +436,9 @@ class Card(
         return additionalHoverInfos.map { info ->
             when (info) {
                 "home" -> enteredInSlot?.let {
-                    "bullet entered in slot ${Utils.convertSlotRepresentation(it)}"
+                    val slot = Utils.convertSlotRepresentation(it)
+                    val slotIcon = GraphicsConfig.revolverSlotIcon(slot)
+                    "entered in slot $slot§§$slotIcon§§"
                 } ?: ""
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
@@ -663,6 +668,11 @@ class CardActor(
         registerOnHoverDetailActor(this, screen)
         if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
         cardTexturePixmap = cardTexture.textureData.consumePixmap()
+        // I HATE LIBGDX
+        // FileTextureData always loads a new pixmap that needs to be disposed
+        // PixmapTextureData always returns the same pixmap, that doesn't need to be disposed
+        // Which one is used is a race condition in the TextureResource class
+        if (cardTexture.textureData is FileTextureData) screen.addDisposable(cardTexturePixmap)
         redrawPixmap(card.baseDamage)
         onClick {
             if (!inSelectionMode) return@onClick
@@ -705,6 +715,7 @@ class CardActor(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        validate()
         if (drawPixmapMessage?.isFinished ?: false) {
             finishPixmapDrawing()
         }
@@ -769,6 +780,7 @@ class CardActor(
                 if (!it.isPrepared) it.prepare()
                 it.consumePixmap()
             }
+        savedPixmap?.let { screen.addDisposable(it) }
         val message = ServiceThreadMessage.DrawCardPixmap(
             pixmap,
             cardTexturePixmap,
@@ -796,6 +808,7 @@ class CardActor(
     // TODO: came up with system for animations
     fun destroyAnimation(): Timeline = Timeline.timeline {
         action {
+            SoundPlayer.situation("card_destroyed", screen)
             inDestroyAnim = true
             destroyShader.resetReferenceTime()
         }
@@ -803,9 +816,13 @@ class CardActor(
         action { inDestroyAnim = false }
     }
 
-    fun animateToTriggerPosition(controller: GameController): Timeline = Timeline.timeline {
+    fun animateToTriggerPosition(controller: GameController, isOnShotTrigger: Boolean): Timeline = Timeline.timeline {
         prevPosition = Vector2(x, y)
-        val (targetX, targetY) = controller.revolver.getCardTriggerPosition()
+        val (targetX, targetY) = if (isOnShotTrigger) {
+            controller.revolver.getCardOnShotTriggerPosition()
+        } else {
+            controller.revolver.getCardTriggerPosition()
+        }
         val moveAction = MoveToAction()
         moveAction.setPosition(targetX, targetY)
         moveAction.duration = 0.3f
@@ -815,6 +832,7 @@ class CardActor(
         scaleAction.duration = 0.3f
         scaleAction.interpolation = Interpolation.pow2
         action {
+            SoundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
             addAction(moveAction)
             addAction(scaleAction)
@@ -843,6 +861,7 @@ class CardActor(
         scaleAction.duration = 0.3f
         scaleAction.interpolation = Interpolation.pow2
         action {
+            SoundPlayer.situation("card_trigger_anim_out", screen)
             addAction(moveAction)
             addAction(scaleAction)
         }

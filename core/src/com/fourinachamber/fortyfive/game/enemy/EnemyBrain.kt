@@ -146,7 +146,7 @@ class OutlawEnemyBrain(onj: OnjObject) : EnemyBrain() {
         val action = if (Utils.coinFlip(attackProb)) {
             var damage = damageValues[phase]
             if (otherChosenActions.containsAttack()) {
-                damage = damage.first..(damage.last / 2.0 + 0.5).toInt()
+                damage = (damage.first / 2.0 + 0.5).toInt()..(damage.last / 2.0 + 0.5).toInt()
             }
             damagePlayer(damage, enemy)
         } else {
@@ -216,7 +216,7 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
         val action = if (Utils.coinFlip(attackProb)) {
             var damage = damage
             if (otherChosenActions.containsAttack()) {
-                damage = damage.first..(damage.last / 2.0 + 0.5).toInt()
+                damage = (damage.first / 2.0 + 0.5).toInt()..(damage.last / 2.0 + 0.5).toInt()
             }
             damagePlayer(damage, enemy)
         } else {
@@ -328,7 +328,7 @@ class WitchEnemyBrain(onj: OnjObject) : EnemyBrain() {
         val action = if (Utils.coinFlip(attackProb)) {
             var damage = damage
             if (otherChosenActions.containsAttack()) {
-                damage = damage.first..(damage.last / 2.0 + 0.5).toInt()
+                damage = (damage.first / 2.0 + 0.5).toInt()..(damage.last / 2.0 + 0.5).toInt()
             }
             damagePlayer(damage, enemy)
         } else {

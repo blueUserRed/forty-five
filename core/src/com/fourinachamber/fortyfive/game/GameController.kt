@@ -31,8 +31,8 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import onj.value.OnjString
-import java.lang.Integer.max
-import java.lang.Integer.min
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * the Controller for the main game screen
@@ -124,7 +124,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val animTimelines: MutableList<Timeline> = mutableListOf()
     private val animTimelinesAddBuffer: MutableList<Timeline> = mutableListOf()
 
-    private var isUIFrozen: Boolean = false
+    var isUIFrozen: Boolean = false
+        private set
 
     private var selectedCard: Card? = null
 
@@ -149,7 +150,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private lateinit var defaultBullet: CardPrototype
 
-    private lateinit var gameRenderPipeline: GameRenderPipeline
+    lateinit var gameRenderPipeline: GameRenderPipeline
+        private set
 
     lateinit var encounterContext: EncounterContext
         private set
@@ -358,7 +360,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "showing tutorial popup: ${tutorialTextPart.text}")
         currentlyShowingTutorialText = true
         curScreen.enterState(showTutorialActorScreenState)
-        TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)
+        (curScreen.namedActorOrError("tutorial_info_text") as AdvancedTextWidget).setRawText(tutorialTextPart.text, listOf())
         TemplateString.updateGlobalParam("game.tutorial.confirmButtonText", tutorialTextPart.confirmationText)
         if (tutorialTextPart.focusActorName == null) {
             tutorialInfoActor.removeFocus()
@@ -572,6 +574,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true): Timeline = Timeline.timeline {
+        if (amount <= 0) return@timeline
         var remainingCardsToDraw = amount
         action {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
@@ -636,6 +639,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 @Suppress("NAME_SHADOWING") val parryCard = parryCard!!
                 action {
                     popupEvent = null
+                    FortyFiveLogger.debug(logTag, "Player parried")
+                }
+                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, true))
+                action {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
                     if (parryCard.shouldRemoveAfterShot) {
@@ -643,7 +650,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         cardStack.add(parryCard)
                     }
                     parryCard.leaveGame()
-                    FortyFiveLogger.debug(logTag, "Player parried")
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
                 if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))
@@ -762,12 +768,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     SaveState.bulletsShot++
                     cardToShoot.beforeShot()
-                    if (cardToShoot.shouldRemoveAfterShot) {
-                        revolver.removeCard(cardToShoot)
-                        if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
-                    }
-                    if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
-                    cardToShoot.afterShot()
                 }
                 targetedEnemies
                     .map { it.damage(cardToShoot.curDamage(this@GameController)) }
@@ -776,7 +776,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             cardToShoot?.let {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
-                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, true, triggerInformation))
+                action {
+                    if (cardToShoot.shouldRemoveAfterShot) {
+                        if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
+                        SoundPlayer.situation("orb_anim_playing", curScreen)
+                        gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
+                        revolver.removeCard(cardToShoot)
+                    }
+                    if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
+                    cardToShoot.afterShot()
+                }
             }
             include(rotateRevolver(rotationDirection))
             _encounterModifiers
@@ -792,6 +802,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             )
         })
     }
+
+    private fun cardOrbAnim(actor: Actor) = GraphicsConfig.orbAnimation(
+        actor.localToStageCoordinates(Vector2(0f, 0f)) +
+                Vector2(actor.width / 2, actor.height / 2),
+        curScreen.stageCoordsOfActor("deck_icon"),
+        false
+    )
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
         if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
@@ -985,14 +1002,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
+        isOnShot: Boolean = false,
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
-            include(card.checkEffects(trigger, triggerInformation, this@GameController))
+            include(card.checkEffects(trigger, triggerInformation, this@GameController, isOnShot))
             trigger
                 .cascadeTriggers
-                .map { checkEffectsSingleCard(it, card, triggerInformation) }
+                .map { checkEffectsSingleCard(it, card, isOnShot, triggerInformation) }
                 .collectTimeline()
                 .let { include(it) }
         }
@@ -1007,7 +1025,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         return Timeline.timeline {
             createdCards
                 .filter { it.inGame || it.inHand(this@GameController) }
-                .map { it.checkEffects(trigger, triggerInformation, this@GameController) }
+                .map { it.checkEffects(trigger, triggerInformation, this@GameController, false) }
                 .collectTimeline()
                 .let { include(it) }
             trigger
@@ -1122,7 +1140,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     stageCoordsOfReservesIcon(),
                     animTarget.localToStageCoordinates(Vector2(0f, 0f)) +
-                            Vector2(animTarget.width / 2, animTarget.height / 2)
+                            Vector2(animTarget.width / 2, animTarget.height / 2),
+                    true
                 ))
             }
             delay(50)
@@ -1136,7 +1155,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 gameRenderPipeline.addOrbAnimation(GraphicsConfig.orbAnimation(
                     animSource.localToStageCoordinates(Vector2(0f, 0f)) +
                             Vector2(animSource.width / 2, animSource.height / 2),
-                    stageCoordsOfReservesIcon()
+                    stageCoordsOfReservesIcon(),
+                    true
                 ))
             }
             delay(50)

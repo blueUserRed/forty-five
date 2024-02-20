@@ -40,7 +40,10 @@ class ShopCardsHandler(
         )
         cards.addAll(cardsToAdd.map { it.create(screen) })
         cards.shuffle(rnd)
-        cards.forEach { addCard(it) }
+        cards.forEach {
+            addCard(it)
+            screen.addDisposable(it)
+        }
         updateCards()
     }
 

@@ -55,7 +55,7 @@ class GameDirector(private val controller: GameController) {
         controller.activeEnemies.forEach { enemy ->
             val action = enemy.brain.resolveEnemyAction(controller, enemy, difficulty)
             action?.let {
-                include(enemy.actor.enemyActionAnimationTimeline(it))
+                include(enemy.actor.enemyActionAnimationTimeline(it, controller))
                 include(it.getTimeline())
             }
             action {

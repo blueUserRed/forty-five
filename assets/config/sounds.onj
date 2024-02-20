@@ -68,6 +68,22 @@ situations: [
         name: "orb_anim_playing",
         sound: "swoosh_sound",
     },
+    {
+        name: "card_trigger_anim_in",
+        sound: "swoosh_sound",
+    },
+    {
+        name: "card_trigger_anim_out",
+        sound: "swoosh_sound",
+    },
+    {
+        name: "enemy_action_anim",
+        sound: "swoosh_sound",
+    },
+    {
+        name: "card_destroyed",
+        sound: "card_destroy_sound",
+    },
 ],
 
 ambientSounds: [

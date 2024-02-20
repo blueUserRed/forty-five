@@ -26,7 +26,7 @@ object SoundPlayer {
     private var currentMusic: Music? = null
 
 //    var musicVolume: Float = 0f
-        var musicVolume: Float = 1f
+    var musicVolume: Float = 1f
 //    var soundEffectVolume: Float = 0f
     var soundEffectVolume: Float = 1f
 
@@ -117,6 +117,12 @@ object SoundPlayer {
             sound.setPan(id, (-1f..1f).random(), ambient.volume * soundEffectVolume)
             ambientSounds[ambient] = now + ambient.delay.random()
         }
+    }
+
+    fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
+        val music = ResourceManager.get<Music>(screen, musicHandle)
+        music.play()
+        music.volume = musicVolume
     }
 
     private data class AmbientSound(

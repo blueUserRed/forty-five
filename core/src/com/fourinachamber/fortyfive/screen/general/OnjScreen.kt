@@ -17,7 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
@@ -34,9 +33,11 @@ import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.KeySelectableActor
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
+import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
+import kotlin.math.roundToLong
 import kotlin.system.measureTimeMillis
 
 
@@ -176,6 +177,8 @@ open class OnjScreen @MainThreadOnly constructor(
 
     var currentDisplayDetailActor: DisplayDetailsOnHoverActor? = null
         private set
+
+    private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
     init {
         useAssets.forEach {
@@ -330,8 +333,22 @@ open class OnjScreen @MainThreadOnly constructor(
         // Buch schreiben
     }
 
+    fun removeAllStyleManagers(actor: StyledActor) {
+        styleManagers.remove(actor.styleManager)
+        if (actor is Group) {
+            actor.children
+                .filterIsInstance<StyledActor>()
+                .forEach { removeAllStyleManagers(it) }
+        }
+    }
+
     private fun hideHoverDetail() {
-        currentHoverDetail = null
+
+        val currentHoverDetail = currentHoverDetail
+        if (currentHoverDetail is StyledActor) {
+            removeAllStyleManagers(currentHoverDetail)
+        }
+        this.currentHoverDetail = null
         currentDisplayDetailActor?.detailActor = null
         currentDisplayDetailActor?.onDetailDisplayEnded()
     }
@@ -403,7 +420,9 @@ open class OnjScreen @MainThreadOnly constructor(
         currentHoverDetail?.act(delta)
     }
 
-    fun stageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).localToStageCoordinates(Vector2(0f, 0f))
+    fun stageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).let { actor ->
+        actor.localToStageCoordinates(Vector2(actor.width / 2, actor.height / 2))
+    }
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
@@ -423,9 +442,19 @@ open class OnjScreen @MainThreadOnly constructor(
                 stage.batch.end()
             }
         }
+        lastRenderTimes.add(lastRenderTime)
+        if (lastRenderTimes.size > 60 * 15) {
+            lastRenderTimes.removeAt(0)
+        }
+        Unit
     } catch (e: Exception) {
         FortyFiveLogger.fatal(e)
     }
+
+    fun largestRenderTimeInLast15Sec(): Long =  lastRenderTimes.max()
+    fun averageRenderTimeInLast15Sec(): Long = lastRenderTimes.average().roundToLong()
+
+    fun styleManagerCount(): Int = styleManagers.size
 
     private fun doRenderTasks(tasks: List<OnjScreen.() -> Unit>, additionalTasks: MutableList<(Batch) -> Unit>) {
         stage.batch.begin()
