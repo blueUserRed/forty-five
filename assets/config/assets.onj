@@ -111,6 +111,10 @@ textureAtlases: [
                 regionName: "reserves_orb"
             },
             {
+                handle: "card_orb",
+                regionName: "card_orb"
+            },
+            {
                 handle: "enemy_texture",
                 regionName: "enemy"
             },
@@ -201,6 +205,10 @@ textureAtlases: [
             {
                 handle: "poison_icon",
                 regionName: "poison_icon"
+            },
+            {
+                handle: "bewitched_icon",
+                regionName: "bewitched_icon"
             },
             {
                 handle: "draw_bullet",
@@ -578,7 +586,8 @@ textures: [
     },
     {
         name: "warning_label_close",
-        file: "textures/warning_label/close_btn.png"
+        file: "textures/warning_label/close_btn.png",
+        useMipMaps: true,
     },
     {
         name: "chooseCard_cardsBackground",
@@ -733,6 +742,14 @@ textures: [
         file: "textures/encounter_modifier/steel_nerves.png"
     },
     {
+        name: "encounter_modifier_bewitched_mist",
+        file: "textures/encounter_modifier/bewitched_mist.png"
+    },
+    {
+        name: "encounter_modifier_lookalike",
+        file: "textures/encounter_modifier/lookalike.png"
+    },
+    {
         name: "common_button_default",
         file: "textures/common/button/default.png"
     },
@@ -783,6 +800,52 @@ textures: [
     {
         name: "card_symbol_not_saved",
         file: "textures/cards/symbols/not_saved.png"
+    },
+    {
+        name: "microwave_studios_logo",
+        file: "textures/microwave_studios.png",
+        useMipMaps: true
+    },
+    {
+        name: "map_extraction_background",
+        file: "textures/map/extraction/background.png"
+    },
+    {
+        name: "map_extraction_symbol",
+        file: "textures/map/extraction/symbol.png"
+    },
+    {
+        name: "map_extraction_card_background_blue",
+        file: "textures/map/extraction/card_background_blue.png"
+    },
+    {
+        name: "map_extraction_card_background_white",
+        file: "textures/map/extraction/card_background_white.png"
+    },
+    {
+        name: "revolver_slot_icon_1",
+        file: "textures/revolver_slot_icons/1.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_2",
+        file: "textures/revolver_slot_icons/2.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_3",
+        file: "textures/revolver_slot_icons/3.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_4",
+        file: "textures/revolver_slot_icons/4.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_5",
+        file: "textures/revolver_slot_icons/5.png",
+        useMipMaps: true
     },
 ],
 
@@ -937,6 +1000,10 @@ colorTextures: [
     {
         name: "forty_white_texture",
         color: color.forty_white
+    },
+    {
+        name: "microwave_studios_brown_texture",
+        color: color.microwaveStudiosBrown
     }
 ],
 
@@ -1140,6 +1207,10 @@ sounds: [
         name: "swoosh_sound",
         file: "large_assets/sounds/swoosh.wav"
     },
+    {
+        name: "card_destroy_sound",
+        file: "large_assets/sounds/card_destroy.wav"
+    },
 ],
 
 music: [
@@ -1150,6 +1221,10 @@ music: [
     {
         name: "map_theme",
         file: "large_assets/music/map_theme.wav"
+    },
+    {
+        name: "microwave_theme", // Now part of the official .forty-five soundtrack
+        file: "large_assets/music/microwave.wav"
     },
 ],
 

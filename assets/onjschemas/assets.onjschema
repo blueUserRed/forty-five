@@ -6,7 +6,8 @@ textures: {
     name: string,
     file: string,
     tileable?: boolean,
-    tileScale?: float
+    tileScale?: float,
+    useMipMaps?: boolean,
 }[],
 fonts: {
     name: string,

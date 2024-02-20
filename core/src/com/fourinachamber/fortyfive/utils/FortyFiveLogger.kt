@@ -32,6 +32,9 @@ object FortyFiveLogger {
     private val messageTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
     private val detailTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS")
 
+    lateinit var versionTag: String
+        private set
+
     /**
      * initializes the logger
      */
@@ -47,12 +50,13 @@ object FortyFiveLogger {
             .map { outputOrError(it as OnjNamedObject) }
 
         logLevel = logLevelOrError(config.get<String>("logLevel"))
+        versionTag = config.get<String>("versionTag")
 
         val time = detailTimeFormatter.format(LocalDateTime.now())
 
         writeln("""
            **** forty-five log
-           **** produced by version '${config.get<String>("versionTag")}'
+           **** produced by version '$versionTag'
            **** LogLevel is $logLevel
            **** time is $time
           

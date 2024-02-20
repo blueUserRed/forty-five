@@ -20,6 +20,7 @@ class StatsScreenController : ScreenController() {
             val card = prototypes.find { it.name == cardName }?.create(onjScreen)
                 ?: throw RuntimeException("unknown card: $cardName")
             cardsContainer.add(card.actor)
+            onjScreen.addDisposable(card)
         }
         TemplateString.updateGlobalParam("stat.bulletsCollected", cards.distinct().size)
         val obtainableBullets = prototypes

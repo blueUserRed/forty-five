@@ -203,6 +203,8 @@ class Revolver(
 
     fun getCardTriggerPosition() = Vector2(slots[0].x - slots[0].width / 2f, slots[4].y + slots[0].width / 2f)
 
+    fun getCardOnShotTriggerPosition() = Vector2(slots[4].x, slots[4].y + slots[0].height * 2)
+
     override fun layout() {
         super.layout()
         updateSlotsAndCards()

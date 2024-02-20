@@ -49,6 +49,9 @@ assets: {
 
         "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound", "button_2_sound", "walk_sound",
 
+        "map_extraction_background", "map_extraction_symbol",
+        "map_extraction_card_background_blue", "map_extraction_card_background_white",
+
         "map_theme",
 
         ...(sharedComponents.ambientSoundsUsedAssets),
@@ -346,8 +349,9 @@ var mapBox = $Box {
         name: "map",
         defaultNodeTexture: "map_node_default",
         playerTexture: "map_player",
-        playerWidth: 1.83 * 3.0 * 10.0,
-        playerHeight: 3.0 * 3.0 * 10.0,
+        playerWidth: 170.0,
+        playerHeight: 170.0,
+        playerHeightOffset: 50.0,
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
         scrollMargin: 0.0,
@@ -363,6 +367,130 @@ var mapBox = $Box {
 
 ];
 
+var extractionOverlay = $Box {
+    styles: [
+        {
+            style_priority: 1,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            background: "transparent_black_texture",
+            detached: true,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("show_extraction_popup"),
+            detached: false
+        }
+    ],
+    touchable: "enabled",
+    zIndex: 3,
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: (worldWidth * 0.5)#points,
+                height: (worldHeight * 0.65)#points,
+                background: "map_extraction_background",
+                flexDirection: flexDirection.column,
+                alignItems: align.center
+            }
+        ],
+    } children [
+
+        $Box {
+            styles: [
+                {
+                    background: "map_extraction_symbol",
+                    positionType: positionType.absolute,
+                    positionTop: -80#points,
+                    width: 150#points,
+                    aspectRatio: 1.0
+                }
+            ]
+        },
+
+        $Label {
+            styles: [
+                {
+                    positionTop: 50#points,
+                }
+            ],
+            font: "red_wing",
+            text: "Bullets have been saved!",
+            fontScale: 1.3,
+            color: color.white,
+        },
+
+        $Box {
+            styles: [
+                {
+                    background: "map_extraction_card_background_blue",
+                    width: (worldWidth * 0.5)#points,
+                    height: (worldHeight * 0.6)#points,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                }
+            ]
+        } children [
+            $Box {
+                name: "extraction_cards_parent",
+                styles: [
+                    {
+                        background: "map_extraction_card_background_white",
+                        width: (worldWidth * 0.5 - 120)#points,
+                        height: (worldHeight * 0.6 - 120)#points,
+                    }
+                ],
+                //isScrollDirectionVertical: false,
+                //scrollDistance: 10.0,
+                //backgroundStretched: true
+            }
+        ],
+
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    //positionTop: 100#points,
+                    background: "common_button_default",
+                    positionType: positionType.relative,
+                    //positionType: positionType.absolute,
+                    //positionTop: 20#points,
+                    //positionTop: 620#points,
+                    width: 150#points,
+                    height: 60#points,
+                    alignItems: align.center,
+                    justifyContent: justify.center
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    background: "common_button_hover",
+                },
+            ]
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "Continue",
+                fontScale: 1.0,
+                color: color.white,
+                behaviours: [
+                    sharedComponents.buttonSoundBehaviour,
+                    sharedComponents.buttonCursorBehaviour,
+                    $CatchEventAndEmitBehaviour {
+                        catch: "ButtonClickEvent",
+                        emit: "PopupConfirmationEvent"
+                    }
+                ]
+            }
+        ]
+
+    ],
+
+];
 
 root: $Box {
     styles: [
@@ -401,7 +529,8 @@ root: $Box {
     } children [
 //        worldView,
     ],
-
+    extractionOverlay,
+/*
     $Box {
         styles: [
             {
@@ -444,7 +573,7 @@ root: $Box {
             ]
         },
     ],
-
+*/
     $Box {
         styles: [
             {

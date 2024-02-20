@@ -204,10 +204,11 @@ $Widget {
     $Map {
         detailMapProvider: $DetailMapProvider,
         defaultNodeTexture: string,
- //       background: string,
+//       background: string,
         playerTexture: string,
         playerWidth: float,
         playerHeight: float,
+        playerHeightOffset: float,
         nodeSize: float,
         lineWidth: float,
         edgeTexture: string,
@@ -391,10 +392,7 @@ $ScreenController {
         ...gameScreenControllerKeys
     }
 
-    $IntroScreenController {
-        appearActor: string,
-        nextScreen: string,
-    }
+    $IntroScreenController {}
 
     $StatsScreenController {
     }
