@@ -369,12 +369,19 @@ var mapBox = $Box {
 var extractionOverlay = $Box {
     styles: [
         {
+            style_priority: 1,
             width: worldWidth#points,
             height: worldHeight#points,
             alignItems: align.center,
             justifyContent: justify.center,
-            background: "transparent_black_texture"
+            background: "transparent_black_texture",
+            detached: true,
         },
+        {
+            style_priority: 2,
+            style_condition: state("show_extraction_popup"),
+            detached: false
+        }
     ],
     touchable: "enabled",
     zIndex: 3,
@@ -428,6 +435,7 @@ var extractionOverlay = $Box {
             ]
         } children [
             $Box {
+                name: "extraction_cards_parent",
                 styles: [
                     {
                         background: "map_extraction_card_background_white",
@@ -468,6 +476,14 @@ var extractionOverlay = $Box {
                 text: "Continue",
                 fontScale: 1.0,
                 color: color.white,
+                behaviours: [
+                    sharedComponents.buttonSoundBehaviour,
+                    sharedComponents.buttonCursorBehaviour,
+                    $CatchEventAndEmitBehaviour {
+                        catch: "ButtonClickEvent",
+                        emit: "PopupConfirmationEvent"
+                    }
+                ]
             }
         ]
 
@@ -512,7 +528,7 @@ root: $Box {
     } children [
 //        worldView,
     ],
-    //extractionOverlay,
+    extractionOverlay,
 /*
     $Box {
         styles: [

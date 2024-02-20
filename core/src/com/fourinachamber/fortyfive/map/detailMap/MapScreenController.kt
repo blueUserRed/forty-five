@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
+import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -47,7 +48,19 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
         if (!map.isArea) return
         if (PermaSaveState.hasVisitedArea(map.name)) return
         PermaSaveState.visitedNewArea(map.name)
+        val cardsBeforeExtraction = PermaSaveState.collection.toMutableList()
         SaveState.extract()
+        val cardsAfterExtraction = PermaSaveState.collection.toMutableList()
+        cardsAfterExtraction.removeAll(cardsBeforeExtraction)
+        val cardPrototypes = RandomCardSelection.allCardPrototypes
+        val cards = cardsAfterExtraction.map { name ->
+            val cardProto = cardPrototypes.find { it.name == name } ?: throw RuntimeException("unknown card $name")
+            val card = cardProto.create(screen, true)
+            screen.addDisposable(card)
+            card
+        }
+        val cardsParent = screen.namedActorOrError("extraction_cards_parent") as CustomFlexBox
+        cards.forEach { cardsParent.add(it.actor) }
         timeline.appendAction(Timeline.timeline {
             action {
                 screen.enterState(showExtractionPopupScreenState)

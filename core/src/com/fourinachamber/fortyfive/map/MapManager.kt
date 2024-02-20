@@ -162,14 +162,14 @@ object MapManager {
             Gdx.files.internal(roadMapsPath).file(),
             true
         )
-        read()
-    }
-
-    fun resetAllSync() {
         Gdx.files.internal(areaDefinitionsMapsPath).file().copyRecursively(
             Gdx.files.internal(areaMapsPath).file(),
             true
         )
+        read()
+    }
+
+    fun resetAllSync() {
         newRunSync()
 //        read()
     }
