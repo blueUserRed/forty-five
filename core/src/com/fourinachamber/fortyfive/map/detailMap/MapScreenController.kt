@@ -6,10 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.PopupConfirmationEvent
-import com.fourinachamber.fortyfive.screen.general.ScreenController
-import com.fourinachamber.fortyfive.screen.general.TutorialConfirmedEvent
+import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.Utils
@@ -88,7 +85,7 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
     private fun showTutorialPopupActor(tutorialTextPart: MapTutorialTextPart) {
         currentlyShowingTutorialText = true
         screen.enterState(showTutorialActorScreenState)
-        TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)
+        (screen.namedActorOrError("tutorial_info_text") as AdvancedTextWidget).setRawText(tutorialTextPart.text, listOf())
         TemplateString.updateGlobalParam("game.tutorial.confirmButtonText", tutorialTextPart.confirmationText)
         tutorialInfoActor.removeFocus()
         tutorialTextPart.focusActorName?.let { tutorialInfoActor.focusActor(it) }
