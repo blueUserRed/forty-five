@@ -47,14 +47,18 @@ class CardPrototype(
     val forceLoadCards: List<String>,
 ) {
 
-    var creator: ((screen: OnjScreen, isSaved: Boolean?) -> Card)? = null
+    var creator: ((screen: OnjScreen, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
 
     /**
      * creates an actual instance of this card
      */
-    fun create(screen: OnjScreen, isSaved: Boolean? = null): Card = creator!!(screen, isSaved)
+    fun create(
+        screen: OnjScreen,
+        isSaved: Boolean? = null,
+        areHoverDetailsEnabled: Boolean = false
+    ): Card = creator!!(screen, isSaved, areHoverDetailsEnabled)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -100,7 +104,8 @@ class Card(
     font: PixmapFont,
     fontScale: Float,
     screen: OnjScreen,
-    val isSaved: Boolean?
+    val isSaved: Boolean?,
+    val enableHoverDetails: Boolean
 ) : Disposable {
 
     /**
@@ -178,7 +183,8 @@ class Card(
                 font,
                 fontScale,
                 isDark,
-                screen
+                screen,
+                enableHoverDetails
             )
         }
     }
@@ -487,7 +493,9 @@ class Card(
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                         onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, isSaved -> getCardFrom(onj, screen, initializer, prototype, isSaved) }
+                    prototype.creator = { screen, isSaved, areHoverDetailsEnabled ->
+                        getCardFrom(onj, screen, initializer, prototype, isSaved, areHoverDetailsEnabled)
+                    }
                     prototypes.add(prototype)
                 }
             return prototypes
@@ -500,6 +508,7 @@ class Card(
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
             isSaved: Boolean?,
+            enableHoverDetails: Boolean
         ): Card {
             val name = onj.get<String>("name")
             val card = Card(
@@ -533,7 +542,8 @@ class Card(
                     ?.map { it.value as String }
                     ?: listOf(),
                 screen = onjScreen,
-                isSaved = isSaved
+                isSaved = isSaved,
+                enableHoverDetails = enableHoverDetails
             )
 
             for (effect in card.effects) effect.card = card
@@ -606,7 +616,8 @@ class CardActor(
     val font: PixmapFont,
     val fontScale: Float,
     val isDark: Boolean,
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    val enableHoverDetails: Boolean
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
     OffSettable, AnimationActor {
 
@@ -650,9 +661,10 @@ class CardActor(
     private val cardTexturePixmap: Pixmap
 
     override var isHoverDetailActive: Boolean
-        get() = card.shortDescription.isNotBlank() ||
+        get() = (card.shortDescription.isNotBlank() ||
                 card.flavourText.isNotBlank() ||
-                card.getAdditionalHoverDescriptions().isNotEmpty()
+                card.getAdditionalHoverDescriptions().isNotEmpty())
+                && enableHoverDetails
         set(value) {}
 
     private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null

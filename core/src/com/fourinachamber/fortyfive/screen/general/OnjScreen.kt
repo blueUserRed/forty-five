@@ -426,7 +426,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
-//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
+        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
         lastRenderTime = measureTimeMillis {
             val oldStyleManagers = styleManagers.toList()
             if (stage.batch.isDrawing) stage.batch.end()
