@@ -208,6 +208,7 @@ $Widget {
         playerTexture: string,
         playerWidth: float,
         playerHeight: float,
+        playerHeightOffset: float,
         nodeSize: float,
         lineWidth: float,
         edgeTexture: string,
