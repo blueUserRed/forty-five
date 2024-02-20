@@ -574,6 +574,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true): Timeline = Timeline.timeline {
+        if (amount <= 0) return@timeline
         var remainingCardsToDraw = amount
         action {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)

@@ -95,11 +95,15 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (batch == null || !isDistanceField) {
-            super.draw(batch, parentAlpha)
+        if (batch == null) {
+            super.draw(null, parentAlpha)
             return
         }
         drawBackground(batch, parentAlpha)
+        if (!isDistanceField) {
+            super.draw(batch, parentAlpha)
+            return
+        }
         val prevShader = batch.shader
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
