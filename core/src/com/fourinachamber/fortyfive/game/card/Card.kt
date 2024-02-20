@@ -435,7 +435,9 @@ class Card(
         return additionalHoverInfos.map { info ->
             when (info) {
                 "home" -> enteredInSlot?.let {
-                    "bullet entered in slot ${Utils.convertSlotRepresentation(it)}"
+                    val slot = Utils.convertSlotRepresentation(it)
+                    val slotIcon = GraphicsConfig.revolverSlotIcon(slot)
+                    "entered in slot $slot§§$slotIcon§§"
                 } ?: ""
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {

@@ -11,6 +11,16 @@ var buttonSoundBehaviour = $OnClickSoundSituationBehaviour {
     situation: "general_button_click",
 };
 
+var revolverSlotIconAssets = [
+    "revolver_slot_icon_1",
+    "revolver_slot_icon_2",
+    "revolver_slot_icon_3",
+    "revolver_slot_icon_4",
+    "revolver_slot_icon_5",
+];
+
+revolverSlotIconAssets: revolverSlotIconAssets,
+
 buttonSoundBehaviour: buttonSoundBehaviour,
 
 var buttonCursorBehaviour = $MouseHoverBehaviour {
@@ -42,6 +52,7 @@ var cardHoverDetailUsedAssetsDefinition = [
     "hover_detail_small_background",
     "forty_white_texture",
     "hover_detail_more_info",
+    ...revolverSlotIconAssets
 ];
 
 cardHoverDetailUsedAssets: [
@@ -1133,6 +1144,27 @@ tutorialInfoActor: $TutorialInfoActor {
     background: "tutorial_info_actor_background"
 } children [
 
+    $AdvancedText {
+        name: "tutorial_info_text",
+        styles: [
+            {
+                marginTop: 50#points,
+                width: (worldWidth * 0.4)#points,
+            }
+        ],
+        width: (worldWidth * 0.4),
+        font: "roadgeek",
+        rawText: "",
+        defaults: {
+            font: "roadgeek",
+            fontScale: 0.9,
+            color: color.forty_white
+        },
+        effects: [
+        ],
+    },
+
+    /*
     $TemplateLabel {
         styles: [
             {
@@ -1147,6 +1179,7 @@ tutorialInfoActor: $TutorialInfoActor {
         wrap: true,
         color: color.white,
     },
+    */
 
     $Box {
         styles: [

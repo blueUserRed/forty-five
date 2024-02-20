@@ -30,12 +30,12 @@ var tutorialEncounters = [
                 confirmationText: "Next",
             },
             {
-                text: "Slot 5 (the one in the front) is the slot in which bullets are shot. If you load your bullet into this slot and press ‘shoot’, the bullet will leave the revolver, deal damage and the revolver rotates to the right. After a bullet is shot, it is put at the bottom of your deck.",
+                text: "Slot 5§§revolver_slot_icon_5§§ is the slot in which bullets are shot. If you load your bullet into this slot and press ‘shoot’, the bullet will leave the revolver, deal damage and the revolver rotates to the right. After a bullet is shot, it is put at the bottom of your deck.",
                 focusActor: "revolverSlot-4",
                 confirmationText: "Next",
             },
             {
-                text: "If you shoot and slot 5 is empty, you will take damage, so be careful.",
+                text: "If you shoot and slot 5§§revolver_slot_icon_5§§ is empty, you will take damage, so be careful.",
                 focusActor: "revolverSlot-4",
                 confirmationText: "Ok",
             },
@@ -45,13 +45,13 @@ var tutorialEncounters = [
             //////////////////////////
 
             {
-                text: "When you are out of reserves, you can end your turn. As soon as it is your turn again, they will be filled up and you are allowed to draw 2 cards.",
+                text: "When you are out of reserves, you can end your turn by pressing 'holster'. As soon as it is your turn again, they will be filled up and you are allowed to draw 2 cards.",
                 focusActor: "end_turn_button",
                 confirmationText: "Next",
                 predicate: $PlayerHasRunOutOfReserves { }
             },
             {
-                text: "If the enemy has 0 or less than 0 hp left and you click ‘end turn’, the fight will end and you will get money equivalent to the negative hp of the enemy.",
+                text: "If the enemy has 0 or less than 0 hp left and you click 'holster', the fight will end and you will get money equivalent to the negative hp of the enemy.",
                 confirmationText: "Ok",
             },
         ]

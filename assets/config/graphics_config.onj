@@ -138,4 +138,12 @@ gameUsedAssets: [
     "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon", "enemy_gravestone",
     "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
     "fire_particle", "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland"
-]
+],
+
+revolverSlotIcons: {
+    "1": "revolver_slot_icon_1",
+    "2": "revolver_slot_icon_2",
+    "3": "revolver_slot_icon_3",
+    "4": "revolver_slot_icon_4",
+    "5": "revolver_slot_icon_5",
+},

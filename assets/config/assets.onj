@@ -809,6 +809,31 @@ textures: [
         name: "map_extraction_card_background_white",
         file: "textures/map/extraction/card_background_white.png"
     },
+    {
+        name: "revolver_slot_icon_1",
+        file: "textures/revolver_slot_icons/1.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_2",
+        file: "textures/revolver_slot_icons/2.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_3",
+        file: "textures/revolver_slot_icons/3.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_4",
+        file: "textures/revolver_slot_icons/4.png",
+        useMipMaps: true
+    },
+    {
+        name: "revolver_slot_icon_5",
+        file: "textures/revolver_slot_icons/5.png",
+        useMipMaps: true
+    },
 ],
 
 cursors: [
