@@ -638,6 +638,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 @Suppress("NAME_SHADOWING") val parryCard = parryCard!!
                 action {
                     popupEvent = null
+                    FortyFiveLogger.debug(logTag, "Player parried")
+                }
+                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, true))
+                action {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
                     if (parryCard.shouldRemoveAfterShot) {
@@ -645,7 +649,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         cardStack.add(parryCard)
                     }
                     parryCard.leaveGame()
-                    FortyFiveLogger.debug(logTag, "Player parried")
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
                 if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))

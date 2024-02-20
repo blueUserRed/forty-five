@@ -204,7 +204,7 @@ $Widget {
     $Map {
         detailMapProvider: $DetailMapProvider,
         defaultNodeTexture: string,
- //       background: string,
+//       background: string,
         playerTexture: string,
         playerWidth: float,
         playerHeight: float,
