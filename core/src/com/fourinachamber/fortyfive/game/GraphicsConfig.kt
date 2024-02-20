@@ -161,6 +161,8 @@ object GraphicsConfig {
     fun defeatedEnemyDrawable(screen: OnjScreen): Drawable =
         ResourceManager.get(screen, config.access(".enemyGravestone.texture"))
 
+    fun revolverSlotIcon(slot: Int): ResourceHandle = slotIcons[slot - 1]
+
     fun defeatedEnemyDrawableScale(): Float = config.access<Double>(".enemyGravestone.scale").toFloat()
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +215,11 @@ object GraphicsConfig {
         shootPostProcessor = onShootPostProcessor.get<String>("name")
         shootPostProcessorDuration = (onShootPostProcessor.get<Double>("duration") * 100).toInt()
 
+        val slotIconConfig = config.get<OnjObject>("revolverSlotIcons")
+        slotIcons = Array(5) {
+            slotIconConfig.get<String>((it + 1).toString())
+        }
+
         encounterModifierConfig = config.get<OnjObject>("encounterModifiers")
     }
 
@@ -241,6 +248,8 @@ object GraphicsConfig {
     private var yCharge by Delegates.notNull<Float>()
     private var chargeDuration by Delegates.notNull<Float>()
     private lateinit var chargeInterpolation: Interpolation
+
+    private lateinit var slotIcons: Array<ResourceHandle>
 
     private lateinit var encounterModifierConfig: OnjObject
 

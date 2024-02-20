@@ -360,7 +360,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         FortyFiveLogger.debug(logTag, "showing tutorial popup: ${tutorialTextPart.text}")
         currentlyShowingTutorialText = true
         curScreen.enterState(showTutorialActorScreenState)
-        TemplateString.updateGlobalParam("game.tutorial.text", tutorialTextPart.text)
+        (curScreen.namedActorOrError("tutorial_info_text") as AdvancedTextWidget).setRawText(tutorialTextPart.text, listOf())
         TemplateString.updateGlobalParam("game.tutorial.confirmButtonText", tutorialTextPart.confirmationText)
         if (tutorialTextPart.focusActorName == null) {
             tutorialInfoActor.removeFocus()
