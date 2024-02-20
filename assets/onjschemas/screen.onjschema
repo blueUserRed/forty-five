@@ -89,6 +89,7 @@ $Widget {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,
         enableTransform?: boolean,
+        hoverDetailActor?: string,
         ...widgetSharedKeys
     }
 
