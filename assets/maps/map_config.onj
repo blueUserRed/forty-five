@@ -4,14 +4,14 @@ use Common;
 
 var images = {
     aquaBalle: {
-        image: "location_sign_aqua_dulche",
+        image: "location_sign_salem",
         height: 200.0,
         width: 200.0
     },
     aquaBalleName: {
-        image: "location_name_aqua_dulche",
-        height: 200.0,
-        width: 200.0
+        image: "location_name_aqua_balle",
+        height: 90.0,
+        width: 90.0 * (156.0 / 326.0)
     },
     salem: {
         image: "location_sign_salem",
@@ -20,8 +20,28 @@ var images = {
     },
     salemName: {
         image: "location_name_salem",
-        width: 200.0,
+        width: 90.0,
+        height: 90.0 * (163.0 / 270.0)
+    },
+    tabuletter: {
+        image: "location_sign_salem",
+        width: 300.0,
         height: 200.0
+    },
+    tabuletterName: {
+        image: "location_name_tabuletter_outpost",
+        width: 90.0,
+        height: 90.0 * (163.0 / 625.0)
+    },
+    spire: {
+        image: "location_sign_salem",
+        width: 300.0,
+        height: 200.0
+    },
+    spireName: {
+        image: "location_name_spire_outpost",
+        width: 90.0,
+        height: 90.0 * (184.0 / 540.0)
     }
 };
 
@@ -54,7 +74,7 @@ mapImages: [
     {
         name: "spire_outpost",
         type: "sign",
-        ...(images.aquaBalle),
+        ...(images.spire),
     },
     {
         name: "aqua_balle",
@@ -64,7 +84,7 @@ mapImages: [
     {
         name: "tabu_letter_outpost",
         type: "name",
-        ...(images.aquaBalleName),
+        ...(images.tabuletterName),
     },
     {
         name: "salem",
@@ -76,7 +96,7 @@ mapImages: [
     {
         name: "spire_outpost",
         type: "name",
-        ...(images.aquaBalleName),
+        ...(images.spireName),
     }
 ],
 
