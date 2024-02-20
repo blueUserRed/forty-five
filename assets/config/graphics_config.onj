@@ -12,31 +12,31 @@ enemyChargeAnimation: {
 icons: {
     burning: {
         icon: "burning_icon",
-        scale: 0.25
+        scale: 0.6
     },
     poison: {
         icon: "poison_icon",
-        scale: 0.25
+        scale: 0.6
     },
     fireResistance: {
         icon: "burning_icon",
-        scale: 0.25
+        scale: 0.6
     },
     bewitched: {
         icon: "bewitched_icon",
-        scale: 0.25
+        scale: 0.6
     },
     wardOfTheWitch: {
         icon: "burning_icon",
-        scale: 0.25
+        scale: 0.6
     },
     wrathOfTheWitch: {
         icon: "burning_icon",
-        scale: 0.25
+        scale: 0.6
     },
     shield: {
         icon: "shield_icon",
-        scale: 0.25
+        scale: 0.6
     }
 },
 
