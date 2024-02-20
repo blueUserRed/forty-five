@@ -207,6 +207,10 @@ textureAtlases: [
                 regionName: "poison_icon"
             },
             {
+                handle: "bewitched_icon",
+                regionName: "bewitched_icon"
+            },
+            {
                 handle: "draw_bullet",
                 regionName: "draw_bullet"
             },
@@ -582,7 +586,8 @@ textures: [
     },
     {
         name: "warning_label_close",
-        file: "textures/warning_label/close_btn.png"
+        file: "textures/warning_label/close_btn.png",
+        useMipMaps: true,
     },
     {
         name: "chooseCard_cardsBackground",
@@ -735,6 +740,14 @@ textures: [
     {
         name: "encounter_modifier_steel_nerves",
         file: "textures/encounter_modifier/steel_nerves.png"
+    },
+    {
+        name: "encounter_modifier_bewitched_mist",
+        file: "textures/encounter_modifier/bewitched_mist.png"
+    },
+    {
+        name: "encounter_modifier_lookalike",
+        file: "textures/encounter_modifier/lookalike.png"
     },
     {
         name: "common_button_default",

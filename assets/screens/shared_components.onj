@@ -738,7 +738,9 @@ warningLabelTemplates: [
             {
                 style_priority: 1,
                 flexDirection: flexDirection.row,
-                width: 100#percent,
+                width: 130#percent,
+                marginTop: 40#points,
+                marginBottom: 40#points,
                 positionType: positionType.absolute,
                 padding: 10#points,
                 background: "",
@@ -799,13 +801,14 @@ warningLabelTemplates: [
         $Box {
             styles: [
                 {
-                    width: 15.0#points,
-                    height: 15.0#points,
                     background: "warning_label_close",
                     touchable: touchable.enabled,
-                }
+                    width: 15.0#points,
+                    height: 15.0#points,
+                },
             ],
             behaviours: [
+                buttonCursorBehaviour,
                 $OnClickRemoveWarningLabelBehaviour {
                 },
             ],

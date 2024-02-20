@@ -129,11 +129,9 @@ sealed class EncounterModifier {
         fun getFromName(name: String) = when (name.lowercase()) {
             "rain" -> Rain
             "frost" -> Frost
-            "bewitchedmist" -> throw RuntimeException("encounter modifier bewitchedMist is not available")
-//            "bewitchedmist" -> BewitchedMist
+            "bewitchedmist" -> BewitchedMist
             "steelnerves" -> SteelNerves()
-            "lookalike" -> throw RuntimeException("encounter modifier lookalike is not available")
-//            "lookalike" -> Lookalike
+            "lookalike" -> Lookalike
             "moist" -> Moist
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }

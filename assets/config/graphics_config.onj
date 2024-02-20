@@ -23,7 +23,7 @@ icons: {
         scale: 0.25
     },
     bewitched: {
-        icon: "burning_icon",
+        icon: "bewitched_icon",
         scale: 0.25
     },
     wardOfTheWitch: {
@@ -40,7 +40,6 @@ icons: {
     }
 },
 
-
 encounterModifiers: {
     rain: {
         icon: "encounter_modifier_rain",
@@ -53,12 +52,12 @@ encounterModifiers: {
         description: "The revolver doesn't turn"
     },
     bewitchedMist: {
-        icon: "encounter_modifier_frost",
+        icon: "encounter_modifier_bewitched_mist",
         displayName: "Bewitched Mist",
         description: "Revolver rotations are inverted"
     },
     lookalike: {
-        icon: "encounter_modifier_frost",
+        icon: "encounter_modifier_lookalike",
         displayName: "Lookalike",
         description: "Whenever you place a bullet in the revolver, you get a copy of it in your hand"
     },
@@ -75,7 +74,8 @@ encounterModifiers: {
 },
 
 encounterModifierAssets: [
-    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist", "encounter_modifier_steel_nerves"
+    "encounter_modifier_frost", "encounter_modifier_rain", "encounter_modifier_moist",
+    "encounter_modifier_steel_nerves", "encounter_modifier_lookalike", "encounter_modifier_bewitched_mist"
 ],
 
 encounterBackgrounds: [
@@ -135,7 +135,7 @@ enemyGravestone: {
 
 gameUsedAssets: [
     "earthquake_shader", "glow_shader", "red_wing", "transparent_black_texture", "white_texture",
-    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon", "enemy_gravestone",
+    "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon", "enemy_gravestone", "bewitched_icon",
     "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
     "fire_particle", "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland"
 ],
