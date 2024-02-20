@@ -648,7 +648,7 @@ var drawCardActor = $Box {
     $TemplateLabel {
         styles: [
             {
-                width: 100.0#percent
+                width: worldWidth#points
             }
         ],
         font: "red_wing",
@@ -664,7 +664,7 @@ var drawCardActor = $Box {
             {
                 flexDirection: flexDirection.row,
                 justifyContent: justify.spaceAround,
-                width: 100.0#percent
+                width: worldWidth#points
             }
         ],
     } children [
@@ -692,11 +692,15 @@ var drawCardActor = $Box {
                 color: color.white
             },
 
-            $Image {
-                textureName: "draw_bullet",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.8,
-                scaleY: 0.8,
+            $Box {
+                styles: [
+                    {
+                        background: "draw_bullet",
+                        aspectRatio: 1.0,
+                        width: (684 * 0.8)#points
+                    }
+                ],
+                touchable: "enabled",
                 behaviours: [
                     $CatchEventAndEmitBehaviour {
                         catch: "ButtonClickEvent",
@@ -773,7 +777,7 @@ var putCardsUnderDeckActor = $Box {
 var playerBar = $Box {
     styles: [
         {
-            width: 100#percent,
+            width: worldWidth#points,
             height: 220#points,
             flexDirection: flexDirection.row,
             alignItems: align.center
@@ -813,8 +817,8 @@ var playerBar = $Box {
             styles: [
                 {
                     positionType: positionType.absolute,
-                    width: 100#percent,
-                    height: 100#percent,
+                    width: 120#points,
+                    height: 120#points,
                     background: "wood_box",
                 }
             ]
@@ -1240,8 +1244,8 @@ var playerBar = $Box {
             styles: [
                 {
                     positionType: positionType.absolute,
-                    width: 100#percent,
-                    height: 100#percent,
+                    width: 120#points,
+                    height: 120#points,
                     background: "wood_box",
                 }
             ]
@@ -1434,7 +1438,7 @@ var gameScreen = $Box {
     $EnemyArea {
         styles: [
             {
-                width: 70#percent,
+                width: (worldWidth * 0.7)#points,
                 height: 100#points,
                 positionLeft: 800#points,
                 positionBottom: -300#points,
@@ -1458,7 +1462,7 @@ var gameScreen = $Box {
     $CardHand {
         styles: [
             {
-                width: 100#percent,
+                width: worldWidth#points,
                 height: 0#points,
             },
             {
