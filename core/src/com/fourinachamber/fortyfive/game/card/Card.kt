@@ -373,6 +373,7 @@ class Card(
             { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot) }
         )
         action {
+            actor.setScale(1f)
             actor.inAnimation = false
         }
     }
