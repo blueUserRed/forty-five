@@ -408,13 +408,13 @@ open class OnjScreen @MainThreadOnly constructor(
         styleManagers.add(manager)
     }
 
-    fun update(delta: Float) {
+    fun update(delta: Float, isEarly: Boolean = false) {
         if (playAmbientSounds) {
             SoundPlayer.updateAmbientSounds(this)
         }
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
-        screenController?.update()
+        if (!isEarly) screenController?.update()
         updateCallbacks()
         stage.act(Gdx.graphics.deltaTime)
         currentHoverDetail?.act(delta)
@@ -426,7 +426,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun render(delta: Float) = try {
-        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
+//        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
         lastRenderTime = measureTimeMillis {
             val oldStyleManagers = styleManagers.toList()
             if (stage.batch.isDrawing) stage.batch.end()

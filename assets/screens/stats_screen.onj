@@ -115,6 +115,7 @@ var statsBox = $Box {
         {
             width: (worldWidth * 0.4)#points,
             flexDirection: flexDirection.column,
+            height: (worldHeight * 0.8)#points,
         }
     ],
 } children [
@@ -209,7 +210,11 @@ var statsBox = $Box {
                 style_condition: hover(),
                 background: "common_button_hover",
             },
-        ]
+        ],
+        touchable: "enabled",
+        behaviours: [
+            $OnClickChangeToInitialScreenBehaviour { }
+        ],
     } children [
 
         $Label {
@@ -226,7 +231,9 @@ var statsBox = $Box {
 var cardBox = $Box {
     styles: [
         {
+            positionTop: -50#points,
             width: (worldWidth * 0.4)#points,
+            height: (worldHeight * 0.65)#points,
             flexDirection: flexDirection.column,
             paddingLeft: 10#points,
             background: "stats_screen_lost_cards_background"
@@ -235,6 +242,11 @@ var cardBox = $Box {
 } children [
 
     $Label {
+        styles: [
+            {
+                positionLeft: 10#points
+            }
+        ],
         font: "red_wing_bmp",
         fontScale: 0.8,
         color: color.forty_white,
@@ -242,15 +254,17 @@ var cardBox = $Box {
         text: "Cards Lost"
     },
 
+    /*
     $Box {
         styles: [
             {
                 background: "stats_screen_spacer",
-                width: (worldWidth * 0.4)#points,
+                width: (worldWidth * 0.3)#points,
                 aspectRatio: 1_161.0 / 6.0
             }
         ]
     },
+    */
 
     $ScrollBox {
         name: "cards_container",

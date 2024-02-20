@@ -55,7 +55,7 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun(false)
 //        changeToInitialScreen()
-        changeToScreen("screens/loose_screen.onj")
+        changeToScreen("screens/intro_screen.onj")
     }
 
     fun changeToInitialScreen() {
@@ -67,7 +67,9 @@ object FortyFive : Game() {
     }
 
     override fun render() {
+        val screen = currentScreen
         currentScreen?.update(Gdx.graphics.deltaTime)
+        if (screen !== currentScreen) currentScreen?.update(Gdx.graphics.deltaTime)
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
@@ -77,6 +79,8 @@ object FortyFive : Game() {
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
         val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
+        // Updates StyleManagers immediately, to prevent the first frame from appearing bugged
+        screen.update(Gdx.graphics.deltaTime, isEarly = true)
 
         serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
