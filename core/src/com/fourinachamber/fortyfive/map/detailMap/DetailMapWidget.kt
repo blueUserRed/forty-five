@@ -50,6 +50,7 @@ class DetailMapWidget(
     private val playerDrawableHandle: ResourceHandle,
     private val playerWidth: Float,
     private val playerHeight: Float,
+    private val playerHeightOffset: Float,
     private val nodeSize: Float,
     private val lineWidth: Float,
     private val playerMoveTime: Int,
@@ -362,7 +363,7 @@ class DetailMapWidget(
         drawNodes(batch)
         val playerX = x + playerPos.x + mapOffset.x + nodeSize / 2 - playerWidth / 2
         val playerY = y + playerPos.y + mapOffset.y + nodeSize / 2 - playerHeight / 2
-        playerDrawable.draw(batch, playerX, playerY, playerWidth, playerHeight)
+        playerDrawable.draw(batch, playerX, playerY + playerHeightOffset, playerWidth, playerHeight)
         drawDecorations(batch)
         drawAnimatedDecorations(batch)
         drawDirectionIndicator(batch)
@@ -424,7 +425,7 @@ class DetailMapWidget(
     private fun drawDirectionIndicator(batch: Batch) {
         val pointToNode = pointToNode ?: return
         val node = playerNode
-        val indicatorOffset = 100f
+        val indicatorOffset = 120f
 
         val (pointToNodeX, pointToNodeY) = scaledNodePos(pointToNode)
         val (nodeX, nodeY) = scaledNodePos(node)

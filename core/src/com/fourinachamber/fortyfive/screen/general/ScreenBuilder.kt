@@ -466,6 +466,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("playerTexture"),
             widgetOnj.get<Double>("playerWidth").toFloat(),
             widgetOnj.get<Double>("playerHeight").toFloat(),
+            widgetOnj.get<Double>("playerHeightOffset").toFloat(),
             widgetOnj.get<Double>("nodeSize").toFloat(),
             widgetOnj.get<Double>("lineWidth").toFloat(),
             (widgetOnj.get<Double>("playerMovementTime") * 1000).toInt(),
