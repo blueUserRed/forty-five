@@ -770,17 +770,16 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int) {
-        val savedPixmap = when (card.isSaved) {
+        val savedPixmapTextureData = when (card.isSaved) {
             null -> null
             true -> GraphicsConfig.cardSavedSymbol(screen)
             false -> GraphicsConfig.cardNotSavedSymbol(screen)
+        }?.textureData
+        if (savedPixmapTextureData != null && !savedPixmapTextureData.isPrepared) savedPixmapTextureData.prepare()
+        val savedPixmap = savedPixmapTextureData?.consumePixmap()
+        if (savedPixmapTextureData != null && savedPixmapTextureData is FileTextureData) {
+            screen.addDisposable(savedPixmap!!)
         }
-            ?.textureData
-            ?.let {
-                if (!it.isPrepared) it.prepare()
-                it.consumePixmap()
-            }
-        savedPixmap?.let { screen.addDisposable(it) }
         val message = ServiceThreadMessage.DrawCardPixmap(
             pixmap,
             cardTexturePixmap,

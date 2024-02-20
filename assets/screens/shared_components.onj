@@ -39,8 +39,9 @@ ambientSoundsUsedAssets: [
 ],
 
 navBarUsedAssets: [
-    "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_dulche",
-    "location_name_salem", "statusbar_option", "reserves_texture", "statusbar_background_left", "heart_texture",
+    "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_balle",
+    "location_name_salem", "location_name_tabuletter_outpost", "location_name_spire_outpost", "statusbar_option",
+    "reserves_texture", "statusbar_background_left", "heart_texture",
     "cash_symbol",
     "button_1_sound",
 ],
@@ -336,8 +337,8 @@ statusBarTemplates: [
             "textureName": "textureName"
         },
         textureName: "location_sign_salem",
-        scaleX: 0.7,
-        scaleY: 0.7,
+        scaleX: 0.3,
+        scaleY: 0.3,
         reportDimensionsWithScaling: true,
         styles: [
             {
