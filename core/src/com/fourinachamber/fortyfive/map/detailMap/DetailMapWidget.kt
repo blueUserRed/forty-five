@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
 import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.EncounterModifier
@@ -316,6 +317,10 @@ class DetailMapWidget(
     }
 
     private fun goToNode(node: MapNode) {
+        val lastMapNode = MapManager.lastMapNode
+        if (lastMapNode == null || !lastMapNode.isLinkedTo(playerNode)) {
+            FortyFiveLogger.warn(logTag, "lastMapNode is $lastMapNode; currentNode = $playerNode")
+        }
         if (!canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
@@ -328,7 +333,7 @@ class DetailMapWidget(
 
     private fun canGoTo(node: MapNode): Boolean {
         val lastNode = MapManager.lastMapNode
-        if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // make sure player does not get trapped
+        if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // trap player ? idk
         if (!playerNode.isLinkedTo(node)) return false
         if (node == lastNode) return true
         if (playerNode.event?.currentlyBlocks == true) return false
@@ -646,6 +651,7 @@ class DetailMapWidget(
         const val displayEventDetailScreenState: String = "displayEventDetail"
         const val eventCanBeStartedScreenState: String = "canStartEvent"
         const val noEncounterModifierScreenState: String = "noEncounterModifier"
+        const val logTag = "Map"
     }
 
 }

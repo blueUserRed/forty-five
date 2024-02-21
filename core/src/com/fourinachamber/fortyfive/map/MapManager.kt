@@ -147,8 +147,14 @@ object MapManager {
         currentMapFile = map
         currentDetailMap = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
-        SaveState.currentNode = currentDetailMap.uniqueNodes.filter { it.event is EnterMapMapEvent }
-            .find { (it.event as EnterMapMapEvent).targetMap == fromArea }?.index ?: 0
+        SaveState.currentNode = currentDetailMap
+            .uniqueNodes
+            .filter { it.event is EnterMapMapEvent }
+            .find { (it.event as EnterMapMapEvent).targetMap == fromArea }
+            ?.index
+            ?: 0
+        SaveState.lastNode = null
+        FortyFiveLogger.debug(logTag, "changing from $fromArea to $newMap; currentNode = $currentMapNode")
         changeToMapScreen()
     }
 
