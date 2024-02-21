@@ -25,8 +25,8 @@ object SoundPlayer {
     private var currentMusicHandle: ResourceHandle? = null
     private var currentMusic: Music? = null
 
-//    var musicVolume: Float = 0f
-    var musicVolume: Float = 1f
+    var musicVolume: Float = 0f
+//    var musicVolume: Float = 1f
 //    var soundEffectVolume: Float = 0f
     var soundEffectVolume: Float = 1f
 

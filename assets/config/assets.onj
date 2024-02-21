@@ -250,6 +250,10 @@ textureAtlases: [
                 handle: "win_screen_item_card",
                 regionName: "win_screen_item_card"
             },
+            {
+                handle: "status_effect_background",
+                regionName: "status_effect_background"
+            },
         ]
     }
 
