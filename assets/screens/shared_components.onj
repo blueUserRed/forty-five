@@ -108,7 +108,6 @@ navBar: $Box {
             }
         ],
         textureName: "heart_texture",
-        name: "player_health_icon",
         scaleX: 0.1,
         scaleY: 0.1,
         reportDimensionsWithScaling: true,

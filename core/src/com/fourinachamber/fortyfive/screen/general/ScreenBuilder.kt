@@ -562,7 +562,8 @@ class ScreenBuilder(val file: FileHandle) {
             screen,
             fontOrError(widgetOnj.get<String>("font"), screen),
             widgetOnj.get<Color>("fontColor"),
-            widgetOnj.get<Double>("fontScale").toFloat()
+            widgetOnj.get<Double>("fontScale").toFloat(),
+            widgetOnj.getOr<Double>("iconScale", 1.0).toFloat(),
         )
 
         "TextEffectEmitter" -> TextEffectEmitter(

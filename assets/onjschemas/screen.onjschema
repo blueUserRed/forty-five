@@ -293,6 +293,7 @@ $Widget {
         font: string,
         fontColor: Color,
         fontScale: float,
+        iconScale?: float,
         ...widgetSharedKeys
     }
 

@@ -20,7 +20,8 @@ class StatusEffectDisplay(
     override val screen: OnjScreen,
     private val font: BitmapFont,
     private val fontColor: Color,
-    private val fontScale: Float
+    private val fontScale: Float,
+    private val iconScale: Float = 1f,
 ) : CustomHorizontalGroup(screen), StyledActor {
 
 
@@ -45,6 +46,8 @@ class StatusEffectDisplay(
     fun displayEffect(effect: StatusEffect) {
         val remainingLabel = CustomLabel(screen, effect.getDisplayText(), Label.LabelStyle(font, fontColor), true)
         remainingLabel.setFontScale(fontScale)
+        effect.icon.scaleX *= iconScale
+        effect.icon.scaleY *= iconScale
         addActor(effect.icon)
         addActor(remainingLabel)
         effects.add(effect to remainingLabel)
