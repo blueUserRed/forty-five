@@ -1055,6 +1055,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         effect.initIcon(this)
         _playerStatusEffects.add(effect)
         statusEffectDisplay.displayEffect(effect)
+        curScreen.enterState(showStatusEffectsState)
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
@@ -1071,11 +1072,17 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         .collectTimeline()
 
     private fun updateStatusEffects() {
+        var somethingChanged = false
         _playerStatusEffects
             .filter { !it.isStillValid() }
             .forEach {
+                somethingChanged = true
                 statusEffectDisplay.removeEffect(it)
             }
+        if (somethingChanged) {
+            if (_playerStatusEffects.isEmpty()) curScreen.leaveState(showStatusEffectsState)
+            else curScreen.enterState(showStatusEffectsState)
+        }
         _playerStatusEffects.removeIf { !it.isStillValid() }
     }
 
@@ -1321,6 +1328,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val showCashItem = "showCashItem"
         const val showCardItem = "showCardItem"
         const val showSelectionPopup = "showSelectionPopup"
+        const val showStatusEffectsState = "playerHasStatusEffects"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
