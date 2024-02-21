@@ -542,7 +542,7 @@ cards: [
         name: "bull_et",
         title: "Bull et",
         flavourText: "",
-        description: "$trigger$On-Rotate:$trigger$\nDeal 5 dmg to all enemies",
+        description: "$trigger$On-Rotate:$trigger$\nDeal 5 dmg to the target enemy",
         baseDamage: 7,
         coverValue: 0,
         traitEffects: [],

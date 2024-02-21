@@ -57,7 +57,7 @@ class CardPrototype(
     fun create(
         screen: OnjScreen,
         isSaved: Boolean? = null,
-        areHoverDetailsEnabled: Boolean = false
+        areHoverDetailsEnabled: Boolean = true
     ): Card = creator!!(screen, isSaved, areHoverDetailsEnabled)
 
     fun modifyPrice(modifier: (Int) -> Int) {

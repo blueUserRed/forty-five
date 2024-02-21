@@ -43,6 +43,7 @@ assets: {
         "map_detail_encounter_modifier_background",
 
         "tutorial_info_actor_background",
+        "backpack_scrollbar_background", "backpack_scrollbar",
 
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
         "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader",
@@ -435,19 +436,52 @@ var extractionOverlay = $Box {
                 }
             ]
         } children [
-            $Box {
+            $ScrollBox {
                 name: "extraction_cards_parent",
                 styles: [
                     {
                         background: "map_extraction_card_background_white",
                         width: (worldWidth * 0.5 - 120)#points,
                         height: (worldHeight * 0.6 - 120)#points,
+                        flexWrap: wrap.wrap,
+                        flexDirection: flexDirection.row,
+                        justifyContent: justify.flexStart,
+                        paddingLeft: (3.0 * 15)#points,
+                        paddingRight: (35.0)#points,
+                        paddingTop: (3.0 * 10)#points,
+                        paddingBottom: (4.0 * 10)#points,
+                        cuttingLeft: 17.5,
+                        cuttingRight: 17.5,
+                        cuttingTop: 20.0,
+                        cuttingBottom: 20.0,
+                        scrollbarWidth: 15.0,
+                        scrollbarLength: 90.0#percent,
                     }
                 ],
-                //isScrollDirectionVertical: false,
-                //scrollDistance: 10.0,
-                //backgroundStretched: true
-            }
+                isScrollDirectionVertical: false,
+                scrollDistance: 10.0,
+                backgroundStretched: false,
+                scrollbarBackgroundName: "scrollbar_background",
+                scrollbarName: "scrollbar_handle",
+                scrollbarSide: "right",
+            } children [
+
+                  $Image {
+                    name: "scrollbar_background",
+                    textureName: "backpack_scrollbar_background",
+                    scaleX: 1.0,
+                    scaleY: 1.0,
+                    reportDimensionsWithScaling: true,
+                },
+
+                $Image {
+                    name: "scrollbar_handle",
+                    textureName: "backpack_scrollbar",
+                    scaleX: 1.0,
+                    scaleY: 1.0,
+                },
+
+            ]
         ],
 
         $Box {
@@ -620,4 +654,19 @@ templates: [
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
     encounterModifierDisplayTemplate,
+
+    $None {
+        template_name: "cardTemplate",
+        template_keys: {
+        },
+        styles: [
+            {
+                width: 20.0#percent,
+                height: 35.0#percent,
+                marginLeft: 10#points,
+                marginTop: 10#points,
+            },
+        ]
+    }
+
 ],
