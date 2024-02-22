@@ -41,9 +41,11 @@ open class CustomLabel @AllThreadsAllowed constructor(
     text: String,
     labelStyle: LabelStyle,
     private val isDistanceField: Boolean,
+    private val hasHoverDetail: Boolean = false,
+    private val hoverText: String = "",
     override val partOfHierarchy: Boolean = false
 ) : Label(text, labelStyle), ZIndexActor, DisableActor, KeySelectableActor,
-    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen {
+    StyledActor, BackgroundActor, ActorWithAnimationSpawners, HasOnjScreen, GeneralDisplayDetailOnHoverActor {
 
     override val actor: Actor = this
 
@@ -53,15 +55,10 @@ open class CustomLabel @AllThreadsAllowed constructor(
         get() = _animationSpawners
 
     override var fixedZIndex: Int = 0
-
     override var isDisabled: Boolean = false
-
     override var isSelected: Boolean = false
-
     override var isHoveredOver: Boolean = false
-
     override var isClicked: Boolean = false
-
     override var styleManager: StyleManager? = null
 
     override var backgroundHandle: String? = null
@@ -72,10 +69,18 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     private var background: Drawable? = null
 
+    override var detailActor: Actor? = null
+    override var mainHoverDetailActor: String? = null
+    override var isHoverDetailActive: Boolean = hasHoverDetail
+
     init {
-        @Suppress("LeakingThis")
         bindHoverStateListeners(this)
+        registerOnHoverDetailActor(this, screen)
     }
+
+    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
+        "hoverText" to OnjString(hoverText)
+    )
 
     private fun getBackground(): Drawable? {
         if (backgroundHandle == null) return null
@@ -156,8 +161,18 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
     private val templateString: TemplateString,
     labelStyle: LabelStyle,
     isDistanceField: Boolean,
+    hasHoverDetail: Boolean = false,
+    hoverText: String = "",
     partOfHierarchy: Boolean = false
-) : CustomLabel(screen, templateString.string, labelStyle, isDistanceField, partOfHierarchy), BackgroundActor {
+) : CustomLabel(
+    screen,
+    templateString.string,
+    labelStyle,
+    isDistanceField,
+    hasHoverDetail,
+    hoverText,
+    partOfHierarchy
+), BackgroundActor {
 
     var skipTextCheck = false
 
@@ -198,6 +213,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
+
+    override val actor: Actor = this
 
     override var backgroundHandle: String? = drawableHandle
         set(value) {
@@ -301,7 +318,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         y -= offsetY
     }
 
-    override fun setBoundsOfHoverDetailActor(actor: Actor) {
+    override fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
         val detailActor = detailActor
         if (detailActor !is Layout) return
         val prefHeight = detailActor.prefHeight
@@ -387,11 +404,14 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
 open class CustomFlexBox(
     override val screen: OnjScreen,
-    override var actorTemplate: String = "",
+    private val hasHoverDetail: Boolean = false,
+    private val hoverText: String = ""
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
-    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, DisplayDetailsOnHoverActor {
+    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, GeneralDisplayDetailOnHoverActor {
 
     override var fixedZIndex: Int = 0
+
+    override val actor: Actor = this
 
     var background: Drawable? = null
 
@@ -416,10 +436,20 @@ open class CustomFlexBox(
     override val attached: Boolean
         get() = reattachTo == null
 
+    override var detailActor: Actor? = null
+    override var mainHoverDetailActor: String? = null
+
+    override var isHoverDetailActive: Boolean = hasHoverDetail
+        set(value) {}
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
     }
+
+    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
+        "hoverText" to OnjString(hoverText)
+    )
 
     override fun detach() {
         val parent = parent
@@ -506,12 +536,6 @@ open class CustomFlexBox(
         return res
     }
 
-    override var detailActor: Actor? = null
-    override var mainHoverDetailActor: String? = null
-    override var isHoverDetailActive: Boolean = false
-        get() = actorTemplate.isNotBlank()
-
-    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf()
 }
 
 class CustomScrollableFlexBox(
@@ -522,7 +546,7 @@ class CustomScrollableFlexBox(
     private val scrollbarBackgroundName: String?,
     private val scrollbarName: String?,
     private val scrollbarSide: String?,
-) : CustomFlexBox(screen) { //TODO fix bug with children with fixed size
+) : CustomFlexBox(screen, false) { //TODO fix bug with children with fixed size
 
     private val scrollListener = object : InputListener() {
         override fun enter(event: InputEvent?, x: Float, y: Float, pointer: Int, fromActor: Actor?) {

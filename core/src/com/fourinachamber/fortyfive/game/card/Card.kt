@@ -621,6 +621,8 @@ class CardActor(
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
     OffSettable, AnimationActor {
 
+    override val actor: Actor = this
+
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
 
@@ -731,7 +733,7 @@ class CardActor(
         if (drawPixmapMessage?.isFinished ?: false) {
             finishPixmapDrawing()
         }
-        setBoundsOfHoverDetailActor(this)
+        setBoundsOfHoverDetailActor(screen)
         batch ?: return
         val texture = pixmapTextureRegion ?: return
         val shader = if (inDestroyAnim) {
@@ -906,12 +908,12 @@ class CardActor(
 
     override fun positionChanged() {
         super.positionChanged()
-        setBoundsOfHoverDetailActor(this)
+        setBoundsOfHoverDetailActor(screen)
     }
 
     override fun sizeChanged() {
         super.sizeChanged()
-        setBoundsOfHoverDetailActor(this)
+        setBoundsOfHoverDetailActor(screen)
     }
 
     override fun onDetailDisplayStarted() {

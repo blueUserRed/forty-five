@@ -19,6 +19,12 @@ var revolverSlotIconAssets = [
     "revolver_slot_icon_5",
 ];
 
+var hoverDetailStyleAnimation = {
+    delay: 0.0,
+    duration: 0.2,
+    interpolation: interpolation.linear
+};
+
 revolverSlotIconAssets: revolverSlotIconAssets,
 
 buttonSoundBehaviour: buttonSoundBehaviour,
@@ -44,6 +50,60 @@ navBarUsedAssets: [
     "reserves_texture", "statusbar_background_left", "heart_texture",
     "cash_symbol",
     "button_1_sound",
+],
+
+generalHoverDetailTemplate: $Box {
+    template_name: "general_hover_detail_template",
+    template_keys: {
+        "children.0.children.0.rawText": "hoverText"
+    },
+    height: 70.0,
+    width: 100.0,
+} children [
+    $Box {
+        styles: [
+            {
+                background: "hover_detail_big_background",
+                height: 200#points,
+                width: 200#points,
+                padding: 15#points,
+                flexDirection: flexDirection.column,
+                justifyContent: justify.spaceAround,
+            },
+            {
+                style_priority: 1,
+                alpha: 0.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("showHoverDetail"),
+                alpha: 1.0,
+                style_animation: hoverDetailStyleAnimation,
+            }
+        ],
+        //alpha: 0.0,
+        height: 200.0,
+        width: 200.0,
+
+    } children [
+        $AdvancedText {
+            styles: [
+                {
+                    width: 170#points,
+                }
+            ],
+            width: 170.0,
+            font: "roadgeek",
+            rawText: "Hallo Welt, kannst du mich hören",
+            defaults: {
+                font: "roadgeek",
+                fontScale: 0.6,
+                color: color.forty_white
+            },
+            effects: [
+            ],
+        },
+    ]
 ],
 
 var cardHoverDetailUsedAssetsDefinition = [
@@ -995,10 +1055,7 @@ var cardHoverDetail = $Box {
                 style_priority: 2,
                 style_condition: state("showHoverDetail"),
                 alpha: 1.0,
-                style_animation: {
-                    duration: 0.1,
-                    interpolation: interpolation.linear
-                }
+                style_animation: hoverDetailStyleAnimation,
             }
         ],
         width: cardHoverDetailTotalWidth,
@@ -1010,7 +1067,6 @@ var cardHoverDetail = $Box {
                 {
                     width: cardHoverDetailExtrasWidth#points,
                     flexDirection: flexDirection.column,
-
                 }
             ],
         } children [
@@ -1033,10 +1089,7 @@ var cardHoverDetail = $Box {
                 style_priority: 2,
                 style_condition: state("showHoverDetail"),
                 alpha: 1.0,
-                style_animation: {
-                    duration: 0.1,
-                    interpolation: interpolation.linear
-                }
+                style_animation: hoverDetailStyleAnimation,
             }
         ],
         width: cardHoverDetailTotalWidth,

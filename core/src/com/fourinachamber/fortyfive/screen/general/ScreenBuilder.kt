@@ -37,6 +37,7 @@ import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaEdge
+import ktx.actors.alpha
 import ktx.actors.onClick
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -95,7 +96,7 @@ class ScreenBuilder(val file: FileHandle) {
             screen.inputMap = KeyInputMap.readFromOnj(it, screen)
         }
 
-        val root = CustomFlexBox(screen)
+        val root = CustomFlexBox(screen, false)
         root.setFillParent(true)
         getWidget(onj.get<OnjNamedObject>("root"), root, screen)
 
@@ -290,7 +291,6 @@ class ScreenBuilder(val file: FileHandle) {
         screen.dragAndDrop = dragAndDrops
     }
 
-
     private fun initFlexBox(
         flexBox: CustomFlexBox,
         widgetOnj: OnjObject,
@@ -342,7 +342,11 @@ class ScreenBuilder(val file: FileHandle) {
             applyImageKeys(this, widgetOnj)
         }
 
-        "Box" -> CustomFlexBox(screen).apply {
+        "Box" -> CustomFlexBox(
+            screen,
+            widgetOnj.getOr("hasHoverDetail", false),
+            widgetOnj.getOr("hoverText", "")
+        ).apply {
             initFlexBox(this, widgetOnj, screen)
         }
 
@@ -370,7 +374,7 @@ class ScreenBuilder(val file: FileHandle) {
 
         "Label" -> CustomLabel(
             text = widgetOnj.get<String>("text"),
-            labelStyle = Label.LabelStyle().apply {
+            labelStyle = LabelStyle().apply {
                 font = fontOrError(
                     widgetOnj.get<String>("font"),
                     screen
@@ -381,6 +385,8 @@ class ScreenBuilder(val file: FileHandle) {
             },
             isDistanceField = widgetOnj.getOr("isDistanceFiled", true),
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false),
+            hasHoverDetail = widgetOnj.getOr("hasHoverDetail", false),
+            hoverText = widgetOnj.getOr("hoverText", ""),
             screen = screen
         ).apply {
             setFontScale(widgetOnj.getOr("fontScale", 1.0).toFloat())
@@ -445,11 +451,13 @@ class ScreenBuilder(val file: FileHandle) {
         "TemplateLabel" -> TemplateStringLabel(
             screen,
             templateString = TemplateString(widgetOnj.get<String>("template")),
-            labelStyle = Label.LabelStyle(
+            labelStyle = LabelStyle(
                 fontOrError(widgetOnj.get<String>("font"), screen),
                 widgetOnj.get<Color>("color")
             ),
             isDistanceField = widgetOnj.getOr("isDistanceField", true),
+            hasHoverDetail = widgetOnj.getOr("hasHoverDetail", false),
+            hoverText = widgetOnj.getOr("hoverText", ""),
             partOfHierarchy = widgetOnj.getOr("partOfSelectionHierarchy", false)
         ).apply {
             setFontScale(widgetOnj.get<Double>("fontScale").toFloat())
@@ -705,6 +713,7 @@ class ScreenBuilder(val file: FileHandle) {
             this.name = it
         }
         widgetOnj.ifHas<Boolean>("visible") { isVisible = it }
+        widgetOnj.ifHas<Float>("alpha") { alpha = it }
         widgetOnj.ifHas<String>("touchable") { touchable = Touchable.valueOf(it) }
 
         widgetOnj.ifHas<Double>("width") { width = it.toFloat() }
