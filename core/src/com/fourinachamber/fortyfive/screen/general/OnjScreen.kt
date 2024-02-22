@@ -309,6 +309,9 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
+        if (actor.name=="myCoolName"){
+            println("hii")
+        }
         if (!displayDetailActor.isHoverDetailActive) return
         if (currentHoverDetail != null) hideHoverDetail()
         val detail = screenBuilder.generateFromTemplate(
