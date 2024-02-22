@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.NPCMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -30,10 +31,8 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
             throw RuntimeException("widget with name $dialogWidgetName must be of type DialogWidget")
         }
         this.dialogWidget = dialogWidget
-        val npcs = OnjParser.parseFile(Gdx.files.internal(npcFilePath).file())
-        npcsSchema.assertMatches(npcs)
-        npcs as OnjObject
-        val npc = npcs
+        val npc = MapManager
+            .npcsOnj
             .get<OnjArray>("npcs")
             .value
             .map { it as OnjObject }
@@ -51,16 +50,6 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
            screen.stage.root.children[0] as CustomFlexBox,screen
        )
         personLeftImage?.toBack()
-    }
-
-    companion object {
-
-        const val schemaPath: String = "onjschemas/npcs.onjschema"
-
-        val npcsSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPath).file())
-        }
-
     }
 
 }

@@ -115,6 +115,7 @@ class Enemy(
     }
 
     fun applyEffect(effect: StatusEffect) {
+        if (isDefeated) return
         FortyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
         for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {
             FortyFiveLogger.debug(logTag, "stacked with $effectToTest")
