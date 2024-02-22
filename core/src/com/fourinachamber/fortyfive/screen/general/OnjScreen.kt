@@ -386,8 +386,6 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun transitionAway() {
-        screenController = null
-        inputMap = null
         enterState(transitionAwayScreenState)
     }
 

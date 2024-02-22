@@ -1,0 +1,200 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "roadgeek",
+
+        "title_screen_background",
+        "title_screen_bullet_1",
+        "title_screen_bullet_2",
+        "title_screen_bullet_3",
+        "title_screen_bullet_4",
+        "title_screen_bullet_5",
+        "title_screen_bullet_6",
+        "title_screen_bullet_7",
+        "title_screen_bullet_8",
+        "title_screen_bullet_9",
+        "title_screen_bullet_10",
+        "title_screen_bullet_11",
+        "title_screen_bullet_12",
+        "title_screen_bullet_13",
+        "title_screen_bullet_14",
+        "title_screen_bullet_15",
+
+        "swoosh_sound"
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    background: "title_screen_background",
+    playAmbientSounds: false,
+    transitionAwayTime: 1.0,
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $TitleScreenController { }
+},
+
+templates: [
+
+    $Box {
+        template_name: "bullet",
+        template_keys: {
+            "styles.0.background": "background",
+            "name": "name"
+        },
+        name: "",
+        styles: [
+            {
+                background: "",
+                positionType: positionType.absolute,
+                width: worldWidth#points,
+                height: worldHeight#points,
+                positionTop: 0#points,
+                positionLeft: 0#points,
+            }
+        ]
+    },
+
+],
+
+root: $Box {
+
+    styles: [
+        {
+            width: worldWidth#points,
+            height: worldHeight#points,
+        }
+    ]
+
+} children [
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionLeft: 120#points,
+                positionTop: 300#points,
+                flexDirection: flexDirection.column,
+            }
+        ],
+    } children [
+
+        $Label {
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "Continue",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $OnClickChangeToInitialScreenBehaviour { }
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    marginTop: 10#points,
+                }
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "Abandon Run",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    marginTop: 10#points,
+                }
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "Quit",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $OnClickExitBehaviour { }
+            ]
+        },
+
+    ],
+
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_1", name: "title_screen_bullet_1" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_2", name: "title_screen_bullet_2" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_3", name: "title_screen_bullet_3" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_4", name: "title_screen_bullet_4" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_5", name: "title_screen_bullet_5" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_6", name: "title_screen_bullet_6" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_7", name: "title_screen_bullet_7" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_8", name: "title_screen_bullet_8" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_9", name: "title_screen_bullet_9" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_10", name: "title_screen_bullet_10" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_11", name: "title_screen_bullet_11" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_12", name: "title_screen_bullet_12" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_13", name: "title_screen_bullet_13" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_14", name: "title_screen_bullet_14" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_15", name: "title_screen_bullet_15" }
+    },
+
+]

@@ -457,6 +457,8 @@ $ScreenController {
         tutorialInfoActor: string,
         mapWidgetName: string
     }
+
+    $TitleScreenController { }
 }
 
 $KeyAction {

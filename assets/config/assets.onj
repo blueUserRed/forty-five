@@ -37,6 +37,11 @@ fonts: [
         imageFile: "fonts/roadgeek_df.png",
         markupEnabled: true
     },
+    {
+        name: "roadgeek_bmp",
+        fontFile: "fonts/roadgeek_bmp.fnt",
+        imageFile: "fonts/roadgeek_bmp.png",
+    },
 
 ],
 
@@ -857,6 +862,85 @@ textures: [
     {
         name: "revolver_slot_icon_5",
         file: "textures/revolver_slot_icons/5.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_background",
+        file: "large_assets/title_screen/background.png",
+    },
+    {
+        name: "title_screen_bullet_1",
+        file: "large_assets/title_screen/b1.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_2",
+        file: "large_assets/title_screen/b2.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_3",
+        file: "large_assets/title_screen/b3.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_4",
+        file: "large_assets/title_screen/b4.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_5",
+        file: "large_assets/title_screen/b5.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_6",
+        file: "large_assets/title_screen/b6.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_7",
+        file: "large_assets/title_screen/b7.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_8",
+        file: "large_assets/title_screen/b8.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_9",
+        file: "large_assets/title_screen/b9.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_10",
+        file: "large_assets/title_screen/b10.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_11",
+        file: "large_assets/title_screen/b11.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_12",
+        file: "large_assets/title_screen/b12.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_13",
+        file: "large_assets/title_screen/b13.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_14",
+        file: "large_assets/title_screen/b14.png",
+        useMipMaps: true
+    },
+    {
+        name: "title_screen_bullet_15",
+        file: "large_assets/title_screen/b15.png",
         useMipMaps: true
     },
 ],
