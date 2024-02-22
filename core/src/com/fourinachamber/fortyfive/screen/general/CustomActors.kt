@@ -73,14 +73,18 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override var mainHoverDetailActor: String? = null
     override var isHoverDetailActive: Boolean = hasHoverDetail
 
+    override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
+    override fun getHoverDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
         "hoverText" to OnjString(hoverText)
-    )
+    ).also {
+        it.putAll(additionalHoverData)
+    }
 
     private fun getBackground(): Drawable? {
         if (backgroundHandle == null) return null
@@ -193,15 +197,21 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     drawableHandle: ResourceHandle?,
     override val screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
-    override var actorTemplate: String = "",
-    var hoverDetailDataProvider: () -> Map<String, OnjValue> = { mapOf() }
+    var hoverText: String = "",
+    var hasHoverDetail: Boolean = false
 ) : Image(), Maskable, ZIndexActor, DisableActor,
-    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, DisplayDetailsOnHoverActor, HasOnjScreen {
+    KeySelectableActor, StyledActor, BackgroundActor, OffSettable, GeneralDisplayDetailOnHoverActor, HasOnjScreen {
 
     override var fixedZIndex: Int = 0
     override var isDisabled: Boolean = false
     override var isClicked: Boolean = false
     override var mainHoverDetailActor: String? = null
+
+    override var isHoverDetailActive: Boolean
+        get() = hasHoverDetail
+        set(value) {
+            hasHoverDetail = value
+        }
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -215,6 +225,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
     override var offsetY: Float = 0F
 
     override val actor: Actor = this
+
+    override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
 
     override var backgroundHandle: String? = drawableHandle
         set(value) {
@@ -250,14 +262,18 @@ open class CustomImageActor @AllThreadsAllowed constructor(
      */
     var ignoreScalingWhenDrawing: Boolean = false
 
-    override var isHoverDetailActive: Boolean = true
     override var detailActor: Actor? = null
 
     init {
         bindHoverStateListeners(this)
+        registerOnHoverDetailActor(this, screen)
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = hoverDetailDataProvider()
+    override fun getHoverDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
+        "hoverText" to OnjString(hoverText)
+    ).also {
+        it.putAll(additionalHoverData)
+    }
 
     @MainThreadOnly
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -266,9 +282,11 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         if (programmedDrawable != null) drawable = programmedDrawable
         else if (backgroundHandle != null && loadedDrawable == null) {
             loadedDrawable = ResourceManager.get(screen, backgroundHandle)
-            drawable = loadedDrawable
             invalidateHierarchy()
+        } else if (backgroundHandle == null && loadedDrawable != null) {
+            loadedDrawable = null
         }
+        drawable = loadedDrawable
         if (batch == null || drawable == null) {
             super.draw(batch, parentAlpha)
             return
@@ -316,21 +334,6 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
         x -= offsetX
         y -= offsetY
-    }
-
-    override fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
-        val detailActor = detailActor
-        if (detailActor !is Layout) return
-        val prefHeight = detailActor.prefHeight
-        val prefWidth = detailActor.prefWidth
-        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-        detailActor.setBounds(
-            x + actor.width / 2 - detailActor.width / 2,
-            y + actor.height,
-            if (prefWidth == 0f) detailActor.width else prefWidth,
-            prefHeight
-        )
-        detailActor.invalidateHierarchy()
     }
 
     fun forceLoadDrawable() {
@@ -425,6 +428,8 @@ open class CustomFlexBox(
     override var offsetX: Float = 0F
     override var offsetY: Float = 0F
 
+    override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
+
     override var backgroundHandle: String? = null
         set(value) {
             if (field != value) background = null
@@ -447,9 +452,11 @@ open class CustomFlexBox(
         registerOnHoverDetailActor(this, screen)
     }
 
-    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf(
+    override fun getHoverDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(
         "hoverText" to OnjString(hoverText)
-    )
+    ).also {
+        it.putAll(additionalHoverData)
+    }
 
     override fun detach() {
         val parent = parent

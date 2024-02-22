@@ -279,24 +279,13 @@ interface DisplayDetailsOnHoverActor {
 
 interface GeneralDisplayDetailOnHoverActor : DisplayDetailsOnHoverActor {
 
+    val additionalHoverData: MutableMap<String, OnjValue>
+
     override var actorTemplate: String
         get() = "general_hover_detail_template"
         set(value) {}
 
     override fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
-//        val detailActor = detailActor
-//        if (detailActor !is Layout) return
-//        detailActor.validate()
-//        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
-//        println("$y ${detailActor.prefHeight} ${detailActor.height}")
-//        if (detailActor.prefHeight != 0f) detailActor.height = detailActor.prefHeight
-//        if (detailActor.prefWidth != 0f) detailActor.width = detailActor.prefWidth
-//        detailActor.setPosition(
-//            x + actor.width / 2 - detailActor.width / 2,
-//            y + actor.height + detailActor.height,
-//        )
-//        detailActor.invalidateHierarchy()
-//    }
     }
 
     override fun drawHoverDetail(screen: OnjScreen, batch: Batch) {
@@ -306,9 +295,13 @@ interface GeneralDisplayDetailOnHoverActor : DisplayDetailsOnHoverActor {
             detailActor.width = detailActor.prefWidth
             detailActor.height = detailActor.prefHeight
         }
+        var chosenY = y + actor.height
+        if (chosenY + detailActor.height > screen.viewport.worldHeight) {
+            chosenY = y - detailActor.height
+        }
         detailActor.setPosition(
             x + actor.width / 2 - detailActor.width / 2,
-            y + actor.height,
+            chosenY,
         )
         detailActor.draw(batch, 1f)
     }
