@@ -121,7 +121,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
         background?.let {
             batch.flush()
             val old = batch.color.cpy()
-            batch.setColor(old.r, old.g, old.b, parentAlpha*alpha)
+            batch.setColor(old.r, old.g, old.b, parentAlpha * alpha)
             it.draw(batch, x, y, width, height)
             batch.flush()
             batch.setColor(old.r, old.g, old.b, old.a)
@@ -386,9 +386,10 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 }
 
 open class CustomFlexBox(
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    override var actorTemplate: String = "",
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
-    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor {
+    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, DisplayDetailsOnHoverActor {
 
     override var fixedZIndex: Int = 0
 
@@ -417,6 +418,7 @@ open class CustomFlexBox(
 
     init {
         bindHoverStateListeners(this)
+        registerOnHoverDetailActor(this, screen)
     }
 
     override fun detach() {
@@ -503,6 +505,13 @@ open class CustomFlexBox(
         }
         return res
     }
+
+    override var detailActor: Actor? = null
+    override var mainHoverDetailActor: String? = null
+    override var isHoverDetailActive: Boolean = false
+        get() = actorTemplate.isNotBlank()
+
+    override fun getHoverDetailData(): Map<String, OnjValue> = mapOf()
 }
 
 class CustomScrollableFlexBox(
@@ -892,7 +901,7 @@ class CustomScrollableFlexBox(
     }
 
 
-    companion object{
+    companion object {
         fun isInsideScrollableParents(actor: Actor, x: Float, y: Float): Boolean {
             var cur: Actor? = actor
             while (cur != null) {

@@ -1,4 +1,3 @@
-
 import "config/game_config.onj" as gameConfig;
 import "config/graphics_config.onj" as graphicsConfig;
 import "imports/colors.onj" as color;
@@ -161,7 +160,8 @@ var encounterModifierDisplayTemplate = $Box {
             {
                 background: "encounter_modifier_frost",
                 aspectRatio: 1.0,
-//                marginTop: 10#points,
+                //                marginTop: 10#points,
+
                 width: 40#points,
             }
         ],
@@ -414,6 +414,57 @@ var enemyActionAnimationTemplate = $Box {
     ]
 ];
 
+
+var reservesHoverDetailTemplate = $Box {
+    template_name: "reserves_hover_detail_template",
+    template_keys: {
+    },
+    styles: [
+        {
+            height: 70#points,
+            width: 100#points,
+            padding: 15#points,
+        }
+    ],
+    height: 70.0,
+    width: 100.0,
+
+} children [
+    $Box {
+        styles: [
+            {
+                background: "hover_detail_big_background",
+                height: 70#points,
+                width: 200#points,
+                padding: 15#points,
+                flexDirection: flexDirection.column,
+                justifyContent: justify.spaceAround,
+            }
+        ],
+        height: 70.0,
+        width: 200.0,
+
+    } children [
+        $AdvancedText {
+            styles: [
+                {
+                    width: 170#points,
+                }
+            ],
+            width: 170.0,
+            font: "roadgeek",
+            rawText: "Hallo Welt, kannst du mich hören",
+            defaults: {
+                font: "roadgeek",
+                fontScale: 0.6,
+                color: color.forty_white
+            },
+            effects: [
+            ],
+        },
+    ]
+];
+
 templates: [
     ...(sharedComponents.warningLabelTemplates),
     ...(sharedComponents.cardHoverDetailTemplates),
@@ -421,6 +472,7 @@ templates: [
     ...(sharedComponents.backpackTemplates),
     encounterModifierDisplayTemplate,
     enemyActionAnimationTemplate,
+    reservesHoverDetailTemplate,
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -458,7 +510,8 @@ var cardHand = $CardHand {
     draggedCardZIndex: cardZIndicesEnd,
     opacityIfNotPlayable: 0.5,
     centerGap: 300.0,
-//    centerGap: 19.0,
+    //    centerGap: 19.0,
+
     targetWidth: worldWidth * 0.6,
 };
 
@@ -524,7 +577,8 @@ var enemyActionPopup = $Box {
             font: "red_wing",
             template: "Nice Slot you have there... Would be a real shame if somebody...",
             wrap: true,
-//            template: "{game.enemyActionPhrase}",
+            //            template: "{game.enemyActionPhrase}",
+
             fontScale: 1.8,
             color: color.black,
         },
@@ -610,8 +664,8 @@ var popupActor = $Box {
         $CircularCardSelector {
             styles: [
                 {
-                    width: (50*10)#points,
-                    height: (50*10)#points,
+                    width: (50 * 10)#points,
+                    height: (50 * 10)#points,
                 }
             ],
             name: "card_selector",
@@ -751,25 +805,25 @@ var putCardsUnderDeckActor = $Box {
         ]
     } children [
 
-            $Image {
-                textureName: "draw_bullet",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.4,
-                scaleY: 0.4,
-            },
+        $Image {
+            textureName: "draw_bullet",
+            reportDimensionsWithScaling: true,
+            scaleX: 0.4,
+            scaleY: 0.4,
+        },
 
-            $PutCardsUnderDeckWidget {
-                styles: [
-                    {
-                        width: 90#percent,
-                        height: 90#percent,
-                        background: "under_deck_background",
-                    }
-                ],
-                name: "putCardsUnderDeckWidget",
-                cardSize: cardHeight,
-                cardSpacing: 10.0
-            }
+        $PutCardsUnderDeckWidget {
+            styles: [
+                {
+                    width: 90#percent,
+                    height: 90#percent,
+                    background: "under_deck_background",
+                }
+            ],
+            name: "putCardsUnderDeckWidget",
+            cardSize: cardHeight,
+            cardSpacing: 10.0
+        }
 
     ]
 
@@ -808,10 +862,13 @@ var playerBar = $Box {
                 width: 120#points,
                 positionBottom: 180#points,
                 positionLeft: 90#points,
-                rotation: 15.0
+                rotation: 15.0,
+                touchable: touchable.enabled,
             }
         ],
         enableTransform: true,
+        name: "myCoolName",
+        hoverDetailActor: "reserves_hover_detail_template",
     } children [
 
         $Box {
@@ -822,7 +879,7 @@ var playerBar = $Box {
                     height: 120#points,
                     background: "wood_box",
                 }
-            ]
+            ],
         },
 
         $Box {
@@ -1377,7 +1434,8 @@ var encounterModifierDisplay = $Box {
                 positionTop: 100#points,
                 paddingTop: 10#points,
                 paddingBottom: 10#points,
-//                paddingLeft: 10#points,
+                //                paddingLeft: 10#points,
+
             },
             {
                 style_priority: 1,
