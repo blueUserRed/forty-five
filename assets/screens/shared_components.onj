@@ -1228,4 +1228,4 @@ tutorialInfoActor: $TutorialInfoActor {
 
 tutorialInfoActorUsedAssets: [
     "red_wing", "common_button_hover", "common_button_default", "tutorial_info_actor_background"
-]
+],
