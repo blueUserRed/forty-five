@@ -240,7 +240,7 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
         specialPanel = "enemy_pyro_action_comic_panel_hot_potato"
     }
 
-    private fun burning(rotations: Int, enemy: Enemy) = EnemyActionPrototype.GiveSelfStatusEffect(
+    private fun burning(rotations: Int, enemy: Enemy) = EnemyActionPrototype.GivePlayerStatusEffect(
         { _, _, skipFirstRotation -> Burning(rotations, 0.5f, false, skipFirstRotation) },
         enemy,
         true
@@ -254,7 +254,7 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
         specialPanel = "enemy_pyro_action_comic_panel_burning"
     }
 
-    private fun inferno(enemy: Enemy) = EnemyActionPrototype.GiveSelfStatusEffect(
+    private fun inferno(enemy: Enemy) = EnemyActionPrototype.GivePlayerStatusEffect(
         { _, _, skipFirstRotation -> Burning(0, 0.5f, true, skipFirstRotation) },
         enemy,
         true

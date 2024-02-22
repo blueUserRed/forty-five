@@ -14,6 +14,8 @@ abstract class StatusEffect(
     private val iconScale: Float
 ) {
 
+    abstract val name: String
+
     lateinit var icon: CustomImageActor
         private set
 
@@ -162,6 +164,8 @@ class Burning(
         if (continueForever) continueForever()
     }
 
+    override val name: String = "burning"
+
     override val effectType: StatusEffectType = StatusEffectType.FIRE
 
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
@@ -188,6 +192,8 @@ class Poison(
     GraphicsConfig.iconScale("poison"),
     turns
 ) {
+
+    override val name: String = "poison"
 
     override val effectType: StatusEffectType = StatusEffectType.POISON
 
@@ -218,6 +224,8 @@ class FireResistance(
     turns
 ) {
 
+    override val name: String = "fireresistance"
+
     override val effectType: StatusEffectType = StatusEffectType.BLOCKING
     override val blocksStatusEffects: List<StatusEffectType> = listOf(StatusEffectType.FIRE)
 
@@ -240,6 +248,8 @@ class Bewitched(
     GraphicsConfig.iconName("bewitched"),
     GraphicsConfig.iconScale("bewitched")
 ) {
+
+    override val name: String = "bewitched"
 
     override val effectType: StatusEffectType = StatusEffectType.WITCH
 
@@ -284,6 +294,8 @@ class Shield(
     GraphicsConfig.iconName("shield"),
     GraphicsConfig.iconScale("shield")
 ) {
+
+    override val name: String = "shield"
 
     override val effectType: StatusEffectType = StatusEffectType.OTHER
 

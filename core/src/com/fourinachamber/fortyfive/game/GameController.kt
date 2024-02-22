@@ -1078,11 +1078,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 somethingChanged = true
                 statusEffectDisplay.removeEffect(it)
             }
+        _playerStatusEffects.removeIf { !it.isStillValid() }
         if (somethingChanged) {
             if (_playerStatusEffects.isEmpty()) curScreen.leaveState(showStatusEffectsState)
             else curScreen.enterState(showStatusEffectsState)
         }
-        _playerStatusEffects.removeIf { !it.isStillValid() }
     }
 
     fun isStatusEffectApplicable(effect: StatusEffect): Boolean {

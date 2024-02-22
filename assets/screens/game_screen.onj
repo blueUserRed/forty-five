@@ -1267,7 +1267,10 @@ var playerBar = $Box {
                     height: 60#points,
                     background: "deck_icon",
                 }
-            ]
+            ],
+            touchable: "enabled",
+            hasHoverDetail: true,
+            hoverText: "You draw cards from the top of the deck. After a card was shot or parried with it is put at the bottom of the deck.",
         },
     ],
 

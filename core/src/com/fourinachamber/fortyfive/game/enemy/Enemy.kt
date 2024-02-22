@@ -284,7 +284,7 @@ class EnemyActor(
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
     private val attackIndicator = CustomHorizontalGroup(screen)
-    private val attackIcon = CustomImageActor(null, screen, false)
+    private val attackIcon = EnemyActionIcon(screen, hiddenActionIconHandle)
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
     private val coverInfoBox = CustomVerticalGroup(screen)
     private val statsBox = CustomVerticalGroup(screen)
@@ -360,7 +360,7 @@ class EnemyActor(
 
         attackIndicator.addActor(attackIcon)
         attackIndicator.addActor(attackLabel)
-        attackIndicator.isVisible = false
+//        attackIndicator.isVisible = false
 
         coverInfoBox.addActor(coverIcon)
         coverInfoBox.addActor(coverText)
@@ -384,7 +384,7 @@ class EnemyActor(
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (touchable && this.touchable != Touchable.enabled) return null
         if (!isVisible) return null
-        return if (x >= 0 && x < width && y >= 0 && y < height) this else null
+        return super.hit(x, y, touchable)
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
@@ -490,22 +490,22 @@ class EnemyActor(
     fun setupForAction(action: NextEnemyAction) = when (action) {
 
         is NextEnemyAction.None -> {
-            attackIndicator.isVisible = false
+//            attackIndicator.isVisible = false
             attackLabel.setText("")
         }
 
         is NextEnemyAction.ShownEnemyAction -> {
-            attackIcon.backgroundHandle = action.action.prototype.iconHandle
             attackLabel.setText(action.action.indicatorText)
-            attackIndicator.isVisible = true
+//            attackIndicator.isVisible = true
         }
 
         is NextEnemyAction.HiddenEnemyAction -> {
-            attackIcon.backgroundHandle = hiddenActionIconHandle
             attackLabel.setText("")
-            attackIndicator.isVisible = true
+//            attackIndicator.isVisible = true
         }
 
+    }.also {
+        attackIcon.setupForAction(action)
     }
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)

@@ -568,7 +568,7 @@ data class TriggerInformation(
     val isOnShot: Boolean = false,
 )
 
-fun GameController.TriggerInformation(multiplier: Int? = null, isOnShot: Boolean = true): TriggerInformation {
+fun GameController.TriggerInformation(multiplier: Int? = null, isOnShot: Boolean = false): TriggerInformation {
     return TriggerInformation(
         multiplier,
         listOf(this.enemyArea.getTargetedEnemy()),

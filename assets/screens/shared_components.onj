@@ -55,7 +55,8 @@ navBarUsedAssets: [
 generalHoverDetailTemplate: $Box {
     template_name: "general_hover_detail_template",
     template_keys: {
-        "children.0.children.0.rawText": "hoverText"
+        "children.0.children.0.rawText": "hoverText",
+        "children.0.children.0.effects": "effects"
     },
     height: 70.0,
     width: 100.0,
