@@ -75,20 +75,20 @@ fun interface GamePredicate {
                         " an enemy is passed into the fromOnj function")
             )
             "AliveEnemyCountIn" -> aliveEnemyCountIn(obj.get<OnjArray>("value").toIntRange())
-            "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null))
+            "AnyEnemyHasStatusEffect" -> anyEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null, false))
             "EnemyDoesNotHaveStatusEffect" -> enemyDoesNotHaveStatusEffect(
-                obj.get<StatusEffectCreator>("value")(null, null),
+                obj.get<StatusEffectCreator>("value")(null, null, false),
                 inContextOfEnemy ?: throw RuntimeException("EnemyDoesNotHaveStatusEffect Predicate can only be created" +
                         " when an enemy is passed into the fromOnj function")
             )
-            "PlayerHasStatusEffect" -> playerHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null))
+            "PlayerHasStatusEffect" -> playerHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null, false))
             "NegatePredicate" -> negatePredicate(fromOnj(obj.get<OnjNamedObject>("value"), inContextOfEnemy))
             "TargetedEnemyShieldIsAtLeast" -> targetedEnemyShieldIsAtLeast(obj.get<Long>("value").toInt())
             "TargetedEnemyHasAnyStatusEffect" -> targetedEnemyHasAnyStatusEffect
             "GameInFreePhase" -> gameInFreePhase
             "PlayerHasRunOutOfReserves" -> playerHasRunOutOfReserves
             "PlayerHasPlayedSilverBulletAndDrawnCards" -> playerHasPlayedSilverBulletAndDrawnCards
-            "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null))
+            "TargetedEnemyHasStatusEffect" -> targetedEnemyHasStatusEffect(obj.get<StatusEffectCreator>("value")(null, null, false))
             "TargetedEnemyHealthAbovePercent" -> targetedEnemyHealthAbovePercent(obj.get<Double>("value").toFloat())
 
             else -> throw RuntimeException("unknown gamePredicate ${obj.name}")

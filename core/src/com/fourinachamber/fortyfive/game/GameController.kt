@@ -641,7 +641,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     popupEvent = null
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
-                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, true))
+                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)))
                 action {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
@@ -775,8 +775,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     .let { include(it) }
             }
             cardToShoot?.let {
-                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
-                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, true, triggerInformation))
+                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true)
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
                 action {
                     if (cardToShoot.shouldRemoveAfterShot) {
                         if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
@@ -1002,15 +1002,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
-        isOnShot: Boolean = false,
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
-            include(card.checkEffects(trigger, triggerInformation, this@GameController, isOnShot))
+            include(card.checkEffects(trigger, triggerInformation, this@GameController))
             trigger
                 .cascadeTriggers
-                .map { checkEffectsSingleCard(it, card, isOnShot, triggerInformation) }
+                .map { checkEffectsSingleCard(it, card, triggerInformation) }
                 .collectTimeline()
                 .let { include(it) }
         }
@@ -1025,7 +1024,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         return Timeline.timeline {
             createdCards
                 .filter { it.inGame || it.inHand(this@GameController) }
-                .map { it.checkEffects(trigger, triggerInformation, this@GameController, false) }
+                .map { it.checkEffects(trigger, triggerInformation, this@GameController) }
                 .collectTimeline()
                 .let { include(it) }
             trigger

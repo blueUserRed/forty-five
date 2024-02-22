@@ -14,8 +14,10 @@ import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.*
+import com.fourinachamber.fortyfive.screen.gameComponents.HorizontalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
+import com.fourinachamber.fortyfive.screen.gameComponents.VerticalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.findAnimationSpawner
@@ -286,7 +288,7 @@ class EnemyActor(
     private val coverInfoBox = CustomVerticalGroup(screen)
     private val statsBox = CustomVerticalGroup(screen)
 
-    private val statusEffectDisplay = StatusEffectDisplay(
+    private val statusEffectDisplay = VerticalStatusEffectDisplay(
         screen,
         enemy.detailFont,
         fontColor,

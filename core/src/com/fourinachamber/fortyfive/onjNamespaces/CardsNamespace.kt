@@ -240,7 +240,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
-    fun poison(turns: OnjEffectValue, damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun poison(turns: OnjEffectValue, damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         Poison(
             getStatusEffectValue(turns, controller, card, 1),
             getStatusEffectValue(damage, controller, card, 1)
@@ -248,29 +248,38 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
-    fun shield(shield: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun shield(shield: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         Shield(getStatusEffectValue(shield, controller, card, 1))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float, boolean]")
-    fun burning(rotations: OnjEffectValue, percent: OnjFloat, isInfinite: OnjBoolean): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun burning(
+        rotations: OnjEffectValue,
+        percent: OnjFloat,
+        isInfinite: OnjBoolean
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
         Burning(
             getStatusEffectValue(rotations, controller, card, 1),
             percent.value.toFloat(),
-            isInfinite.value
+            isInfinite.value,
+            skipFirstRotation
         )
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
-    fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         FireResistance(getStatusEffectValue(turns, controller, card, 1))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
-    fun bewitched(turns: OnjEffectValue, rotations: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun bewitched(
+        turns: OnjEffectValue,
+        rotations: OnjEffectValue
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
         Bewitched(
             getStatusEffectValue(turns, controller, card, 1),
             getStatusEffectValue(rotations, controller, card, 1),
+            skipFirstRotation
         )
     }
 
