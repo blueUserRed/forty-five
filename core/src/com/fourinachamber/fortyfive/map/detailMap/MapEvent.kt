@@ -259,9 +259,10 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
     private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
 
     val npc: String = onj.get<String>("npc")
+    val npcDisplayName: String = MapManager.displayName(npc)
 
     override val descriptionText: String = ""
-    override val displayName: String = "Talk with $npc"
+    override val displayName: String = "Talk with $npcDisplayName"
     override val buttonText: String = "Talk"
 
     init {
