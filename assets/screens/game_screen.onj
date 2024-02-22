@@ -414,57 +414,6 @@ var enemyActionAnimationTemplate = $Box {
     ]
 ];
 
-
-var reservesHoverDetailTemplate = $Box {
-    template_name: "reserves_hover_detail_template",
-    template_keys: {
-    },
-    styles: [
-        {
-            height: 70#points,
-            width: 100#points,
-            padding: 15#points,
-        }
-    ],
-    height: 70.0,
-    width: 100.0,
-
-} children [
-    $Box {
-        styles: [
-            {
-                background: "hover_detail_big_background",
-                height: 70#points,
-                width: 200#points,
-                padding: 15#points,
-                flexDirection: flexDirection.column,
-                justifyContent: justify.spaceAround,
-            }
-        ],
-        height: 70.0,
-        width: 200.0,
-
-    } children [
-        $AdvancedText {
-            styles: [
-                {
-                    width: 170#points,
-                }
-            ],
-            width: 170.0,
-            font: "roadgeek",
-            rawText: "Hallo Welt, kannst du mich hören",
-            defaults: {
-                font: "roadgeek",
-                fontScale: 0.6,
-                color: color.forty_white
-            },
-            effects: [
-            ],
-        },
-    ]
-];
-
 templates: [
     ...(sharedComponents.warningLabelTemplates),
     ...(sharedComponents.cardHoverDetailTemplates),
@@ -472,7 +421,7 @@ templates: [
     ...(sharedComponents.backpackTemplates),
     encounterModifierDisplayTemplate,
     enemyActionAnimationTemplate,
-    reservesHoverDetailTemplate,
+    sharedComponents.generalHoverDetailTemplate
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -526,6 +475,8 @@ var reservesLabel = $TemplateLabel {
     template: "{game.curReserves}/{game.baseReserves}",
     fontScale: 1.1,
     color: color.forty_white,
+    hasHoverDetail: true,
+    hoverText: "Reserves are used to pay for bullets. They are filled back up when you press the 'holster' button.",
 };
 
 var disableStyles = [
@@ -867,8 +818,6 @@ var playerBar = $Box {
             }
         ],
         enableTransform: true,
-        name: "myCoolName",
-        hoverDetailActor: "reserves_hover_detail_template",
     } children [
 
         $Box {
