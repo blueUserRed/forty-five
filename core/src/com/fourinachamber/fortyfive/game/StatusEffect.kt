@@ -7,6 +7,7 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.utils.Timeline
 import kotlin.math.floor
+import kotlin.math.min
 
 abstract class StatusEffect(
     private val iconHandle: ResourceHandle,
@@ -59,7 +60,8 @@ abstract class StatusEffect(
 abstract class RotationBasedStatusEffect(
     iconHandle: ResourceHandle,
     iconScale: Float,
-    duration: Int
+    duration: Int,
+    private val skipFirstRotation: Boolean
 ) : StatusEffect(iconHandle, iconScale) {
 
     var duration: Int = duration
@@ -74,13 +76,14 @@ abstract class RotationBasedStatusEffect(
     override fun start(controller: GameController) {
         super.start(controller)
         rotationOnEffectStart = controller.revolverRotationCounter
+        if (skipFirstRotation) rotationOnEffectStart++
     }
 
     override fun isStillValid(): Boolean =
         continueForever || controller.revolverRotationCounter < rotationOnEffectStart + duration
 
     override fun getDisplayText(): String = if (!continueForever) {
-        "${rotationOnEffectStart + duration - controller.revolverRotationCounter} rotations"
+        "${min(rotationOnEffectStart + duration - controller.revolverRotationCounter, duration)} rotations"
     } else {
         "∞"
     }
@@ -146,11 +149,13 @@ abstract class TurnBasedStatusEffect(
 class Burning(
     rotations: Int,
     private val percent: Float,
-    continueForever: Boolean
+    continueForever: Boolean,
+    skipFirstRotation: Boolean,
 ) : RotationBasedStatusEffect(
     GraphicsConfig.iconName("burning"),
     GraphicsConfig.iconScale("burning"),
     rotations,
+    skipFirstRotation,
 ) {
 
     init {
@@ -229,7 +234,8 @@ class FireResistance(
 
 class Bewitched(
     private val turns: Int,
-    private val rotations: Int
+    private val rotations: Int,
+    private val skipFirstRotation: Boolean,
 ) : StatusEffect(
     GraphicsConfig.iconName("bewitched"),
     GraphicsConfig.iconScale("bewitched")
@@ -247,6 +253,7 @@ class Bewitched(
         super.start(controller)
         turnOnEffectStart = controller.turnCounter
         rotationOnEffectStart = controller.revolverRotationCounter
+        if (skipFirstRotation) rotationOnEffectStart++
     }
 
     override fun canStackWith(other: StatusEffect): Boolean = other is Bewitched
@@ -262,7 +269,7 @@ class Bewitched(
         controller.revolverRotationCounter < rotationOnEffectStart + rotationDuration
 
     override fun getDisplayText(): String =
-            "${rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter} rotations or " +
+            "${min(rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter, rotationDuration)} rotations or " +
             "${turnOnEffectStart + turnsDuration - controller.turnCounter} turns"
 
     override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.Left(1)
@@ -302,7 +309,7 @@ class Shield(
 
 }
 
-typealias StatusEffectCreator = (GameController?, Card?) -> StatusEffect
+typealias StatusEffectCreator = (GameController?, Card?, skipFirstRotation: Boolean) -> StatusEffect
 
 enum class StatusEffectType {
     FIRE, POISON, OTHER, BLOCKING, WITCH

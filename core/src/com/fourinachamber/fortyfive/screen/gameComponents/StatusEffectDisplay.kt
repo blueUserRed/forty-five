@@ -3,41 +3,33 @@ package com.fourinachamber.fortyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.StatusEffect
 import com.fourinachamber.fortyfive.screen.general.CustomHorizontalGroup
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
+import com.fourinachamber.fortyfive.screen.general.CustomVerticalGroup
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 
-/**
- * used for displaying status effects
- */
-class StatusEffectDisplay(
-    override val screen: OnjScreen,
-    private val font: BitmapFont,
-    private val fontColor: Color,
-    private val fontScale: Float,
-    private val iconScale: Float = 1f,
-) : CustomHorizontalGroup(screen), StyledActor {
+interface StatusEffectDisplay : StyledActor {
 
+    val font: BitmapFont
+    val fontColor: Color
+    val fontScale: Float
+    val iconScale: Float
 
-    override var isHoveredOver: Boolean = false
-    override var isClicked: Boolean = false
-    override var styleManager: StyleManager? = null
+    val actor: Group
+    val screen: OnjScreen
 
-    private val effects: MutableList<Pair<StatusEffect, CustomLabel>> = mutableListOf()
+    val effects: MutableList<Triple<StatusEffect, CustomHorizontalGroup, CustomLabel>>
 
-    init {
-        bindHoverStateListeners(this)
-    }
-
-    override fun draw(batch: Batch?, parentAlpha: Float) {
-        effects.forEach { (effect, label) -> label.setText(effect.getDisplayText()) }
-        super.draw(batch, parentAlpha)
+    fun updateStatusEffects() {
+        effects.forEach { (effect, _, label) -> label.setText(effect.getDisplayText()) }
     }
 
     /**
@@ -48,9 +40,11 @@ class StatusEffectDisplay(
         remainingLabel.setFontScale(fontScale)
         effect.icon.scaleX *= iconScale
         effect.icon.scaleY *= iconScale
-        addActor(effect.icon)
-        addActor(remainingLabel)
-        effects.add(effect to remainingLabel)
+        val group = CustomHorizontalGroup(screen)
+        group.addActor(effect.icon)
+        group.addActor(remainingLabel)
+        actor.addActor(group)
+        effects.add(Triple(effect, group, remainingLabel))
     }
 
     /**
@@ -59,12 +53,70 @@ class StatusEffectDisplay(
     fun removeEffect(effect: StatusEffect) {
         val iterator = effects.iterator()
         while (iterator.hasNext()) {
-            val (effectToTest, label) = iterator.next()
+            val (effectToTest, group) = iterator.next()
             if (effect !== effectToTest) continue
-            removeActor(effect.icon)
-            removeActor(label)
+            actor.removeActor(group)
             break
         }
+    }
+
+}
+
+class HorizontalStatusEffectDisplay(
+    screen: OnjScreen,
+    override val font: BitmapFont,
+    override val fontColor: Color,
+    override val fontScale: Float,
+    override val iconScale: Float = 1f,
+) : CustomHorizontalGroup(screen), StatusEffectDisplay {
+
+
+    override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean = false
+    override var styleManager: StyleManager? = null
+
+    override val actor: Group = this
+
+    override val effects: MutableList<Triple<StatusEffect, CustomHorizontalGroup, CustomLabel>> = mutableListOf()
+
+    init {
+        bindHoverStateListeners(this)
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateStatusEffects()
+        super.draw(batch, parentAlpha)
+    }
+
+    override fun initStyles(screen: OnjScreen) {
+        addActorStyles(screen)
+    }
+}
+
+
+class VerticalStatusEffectDisplay(
+    screen: OnjScreen,
+    override val font: BitmapFont,
+    override val fontColor: Color,
+    override val fontScale: Float,
+    override val iconScale: Float = 1f,
+) : CustomVerticalGroup(screen), StatusEffectDisplay {
+
+    override var isHoveredOver: Boolean = false
+    override var isClicked: Boolean = false
+    override var styleManager: StyleManager? = null
+
+    override val actor: Group = this
+
+    override val effects: MutableList<Triple<StatusEffect, CustomHorizontalGroup, CustomLabel>> = mutableListOf()
+
+    init {
+        bindHoverStateListeners(this)
+    }
+
+    override fun draw(batch: Batch?, parentAlpha: Float) {
+        updateStatusEffects()
+        super.draw(batch, parentAlpha)
     }
 
     override fun initStyles(screen: OnjScreen) {

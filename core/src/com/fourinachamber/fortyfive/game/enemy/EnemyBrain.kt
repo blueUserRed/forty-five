@@ -241,7 +241,7 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
     }
 
     private fun burning(rotations: Int, enemy: Enemy) = EnemyActionPrototype.GiveSelfStatusEffect(
-        { _, _ -> Burning(rotations, 0.5f, false) },
+        { _, _, skipFirstRotation -> Burning(rotations, 0.5f, false, skipFirstRotation) },
         enemy,
         true
     ).apply {
@@ -255,7 +255,7 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
     }
 
     private fun inferno(enemy: Enemy) = EnemyActionPrototype.GiveSelfStatusEffect(
-        { _, _ -> Burning(0, 0.5f, true) },
+        { _, _, skipFirstRotation -> Burning(0, 0.5f, true, skipFirstRotation) },
         enemy,
         true
     ).apply {
@@ -339,7 +339,7 @@ class WitchEnemyBrain(onj: OnjObject) : EnemyBrain() {
     }
 
     private fun bewitched(turns: Int, rotations: Int, enemy: Enemy): EnemyActionPrototype = EnemyActionPrototype.GivePlayerStatusEffect(
-        { _, _ -> Bewitched(turns, rotations) },
+        { _, _, skipFirstRotation -> Bewitched(turns, rotations, skipFirstRotation) },
         enemy,
         true
     ).apply {

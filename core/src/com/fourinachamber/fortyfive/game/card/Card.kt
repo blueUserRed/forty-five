@@ -354,8 +354,8 @@ class Card(
         trigger: Trigger,
         triggerInformation: TriggerInformation,
         controller: GameController,
-        isOnShot: Boolean
     ): Timeline = Timeline.timeline {
+        val isOnShot = triggerInformation.isOnShot
         action {
             checkModifierTransformers(trigger, triggerInformation)
         }

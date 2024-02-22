@@ -558,7 +558,7 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("cardSpacing").toFloat(),
         )
 
-        "StatusEffectDisplay" -> StatusEffectDisplay(
+        "StatusEffectDisplay" -> HorizontalStatusEffectDisplay(
             screen,
             fontOrError(widgetOnj.get<String>("font"), screen),
             widgetOnj.get<Color>("fontColor"),
