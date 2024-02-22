@@ -84,6 +84,10 @@ situations: [
         name: "card_destroyed",
         sound: "card_destroy_sound",
     },
+    {
+        name: "title_screen_card_drop",
+        sound: "swoosh_sound",
+    },
 ],
 
 ambientSounds: [
