@@ -625,7 +625,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             } else {
                 damage - parryCard!!.curDamage(this@GameController)
             }
-            TemplateString.updateGlobalParam("game.remainingParryDamage", remainingDamage)
+            TemplateString.updateGlobalParam("game.remainingParryDamage", max(remainingDamage!!, 0))
             TemplateString.updateGlobalParam("game.remainingPassDamage", max(damage, 0))
             TemplateString.updateGlobalParam("game.revolverPopupText", "Parry Bullet?")
             gameRenderPipeline.startParryEffect()
