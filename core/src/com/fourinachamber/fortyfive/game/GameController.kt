@@ -826,7 +826,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             revolver
                 .slots
                 .mapNotNull { it.card }
-                .forEach { it.onRevolverRotation(rotation) }
+                .forEach { it.onRevolverRotation(newRotation) }
         }
         _encounterModifiers
             .mapNotNull { it.executeAfterRevolverRotated(newRotation, this@GameController) }
@@ -848,6 +848,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 },
                 { true }
             )
+            includeLater(
+                {
+                    checkEffectsSingleCard(Trigger.ON_ROTATE_IN_5, revolver.getCardInSlot(5)!!)
+                },
+                { revolver.getCardInSlot(5) != null }
+            )
+            revolver.getCardInSlot(5)?.let {
+                include(checkEffectsSingleCard(Trigger.ON_ROTATE_IN_5, it))
+            }
         }
         enemyArea
             .enemies
