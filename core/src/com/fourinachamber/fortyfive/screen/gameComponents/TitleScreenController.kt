@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
@@ -23,6 +24,10 @@ class TitleScreenController : ScreenController() {
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
         timeline.startTimeline()
+        TemplateString.updateGlobalParam(
+            "title_screen.startButtonText",
+            if (SaveState.playerCompletedFirstTutorialEncounter) "Continue" else "Start you journey"
+        )
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {
@@ -48,6 +53,25 @@ class TitleScreenController : ScreenController() {
             delayUntil { isConfirmed || showConfirmationPopupScreenState !in screen.screenState }
             action {
                 if (isConfirmed) FortyFive.newRun(false)
+                isConfirmed = false
+                screen.leaveState(showConfirmationPopupScreenState)
+            }
+
+        }.asAction())
+
+        is ResetGameEvent -> timeline.appendAction(Timeline.timeline {
+            action {
+                screen.enterState(showConfirmationPopupScreenState)
+                TemplateString.updateGlobalParam("title_screen.popupText", "Are you sure you want to reset" +
+                        " the game? The game will behave as if it were freshly installed.")
+            }
+            delayUntil { isConfirmed || showConfirmationPopupScreenState !in screen.screenState }
+            action {
+                if (isConfirmed) FortyFive.resetAll()
+                TemplateString.updateGlobalParam(
+                    "title_screen.startButtonText",
+                    if (SaveState.playerCompletedFirstTutorialEncounter) "Continue" else "Start you journey"
+                )
                 isConfirmed = false
                 screen.leaveState(showConfirmationPopupScreenState)
             }
