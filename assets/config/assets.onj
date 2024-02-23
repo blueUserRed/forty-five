@@ -482,10 +482,6 @@ textures: [
         file: "textures/events/heal_or_maxhp/max_health_background.png"
     },
     {
-        name: "shop_back_button",
-        file: "textures/events/shop/back_button.png"
-    },
-    {
         name: "shop_add_to_backpack",
         file: "textures/events/shop/to_backpack.png"
     },
@@ -496,6 +492,14 @@ textures: [
     {
         name: "shop_npcs_default",
         file: "textures/events/shop/npcs/default.png",
+    },
+    {
+        name: "shop_back_button",
+        file: "textures/events/shop/leave_button.png",
+    },
+    {
+        name: "shop_back_button_hover",
+        file: "textures/events/shop/leave_button_hover.png",
     },
     {
         name: "prerendered_noise_perlin_512x512",
