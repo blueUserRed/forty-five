@@ -1323,7 +1323,12 @@ var playerBar = $Box {
             styles: [
                 {
                     style_priority: 1,
-                    visible: true
+                    visible: true,
+                    style_animation: {
+                        delay: 1.0,
+                        duration: 0.0001,
+                        interpolation: interpolation.linear
+                    }
                 },
                 {
                     style_priority: 2,
@@ -1342,7 +1347,12 @@ var playerBar = $Box {
                 {
                     style_priority: 1,
                     visible: true,
-                    marginTop: 10#points
+                    marginTop: 10#points,
+                    style_animation: {
+                        delay: 1.0,
+                        duration: 0.0001,
+                        interpolation: interpolation.linear
+                    }
                 },
                 {
                     style_priority: 2,
