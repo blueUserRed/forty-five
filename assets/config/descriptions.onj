@@ -48,6 +48,11 @@ hoverDetailDescriptions: [
         groupName: "trait",
         description: "$trait$REINFORCED$trait$\nWhen parrying with a bullet with reinforced, no dmg will come through, even if this Bullets dmg value is smaller than the attack that is being parried.",
     },
+    {
+        keyword: "DISCHARGE POISON",
+        groupName: "trait",
+        description: "$trait$DISCHARGE POISON$trait$\nIf the enemy has $status$POISON$status$, resolve x turns worth of poison dmg all at once.",
+    },
 ],
 
 hoverDetailDescriptionGroups: [
