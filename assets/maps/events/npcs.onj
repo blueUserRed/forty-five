@@ -28,7 +28,7 @@ npcs: [
         },
         image: {
             textureName: "shop_npcs_default",
-            scale: 2.48
+            scale: 0.5
         }
     },
     {
