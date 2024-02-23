@@ -629,15 +629,11 @@ root: $Box {
             options: [
                 {
                     actorName: "backpackActor",
-                    displayName: "Notebook",
-                },
-                {
-                    actorName: "backpackActor",
                     displayName: "Backpack",
                 },
                 {
-                    actorName: "backpackActor",
-                    displayName: "Settings",
+                    actionName: "toTitleScreen",
+                    displayName: "To Title Screen",
                 },
             ],
             //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out

@@ -1732,8 +1732,8 @@ var steelNervesOverlay = $Box {
     $Box {
         styles: [
             {
-                positionTop: -100#points,
-                positionLeft: 100#points,
+                positionTop: -220#points,
+                positionLeft: 90#points,
                 rotation: 45.0
             }
         ],
@@ -1742,7 +1742,7 @@ var steelNervesOverlay = $Box {
         $Box {
             styles: [
                 {
-                    width: 200#points,
+                    width: 180#points,
                     aspectRatio: 1.0,
                     background: "black_texture",
                 }
@@ -1753,13 +1753,13 @@ var steelNervesOverlay = $Box {
     $TemplateLabel {
         styles: [
             {
-                positionTop: -320#points,
-                width: 200#points
+                positionTop: -425#points,
+                width: 180#points
             }
         ],
         font: "red_wing_bmp",
         template: "{game.steelNerves.remainingTime}",
-        fontScale: 1.0,
+        fontScale: 0.9,
         align: "center",
         color: color.red
     }
@@ -1817,15 +1817,11 @@ root: $Box {
             options: [
                 {
                     actorName: "backpackActor",
-                    displayName: "Notebook",
-                },
-                {
-                    actorName: "backpackActor",
                     displayName: "Backpack",
                 },
                 {
-                    actorName: "backpackActor",
-                    displayName: "Settings",
+                    actionName: "toTitleScreen",
+                    displayName: "To Title Screen",
                 },
             ],
             zIndex: 100000,

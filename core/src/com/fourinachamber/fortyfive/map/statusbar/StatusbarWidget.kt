@@ -10,8 +10,7 @@ import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
 import com.fourinachamber.fortyfive.screen.general.customActor.InOutAnimationActor
 import com.fourinachamber.fortyfive.screen.general.onButtonClick
-import com.fourinachamber.fortyfive.utils.Timeline
-import com.fourinachamber.fortyfive.utils.toOnjYoga
+import com.fourinachamber.fortyfive.utils.*
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjObject
 import onj.value.OnjString
@@ -33,7 +32,8 @@ class StatusbarWidget(
     /**
      * all possible options to open from the statusbar
      */
-    private val optionWidgets: MutableList<Pair<CustomFlexBox, String>> = mutableListOf()
+    private val optionWidgets: MutableList<Pair<CustomFlexBox, Either<String, () -> Unit>>> = mutableListOf()
+
     override fun draw(batch: Batch?, parentAlpha: Float) {
         timeline.updateTimeline()
         super.draw(batch, parentAlpha)
@@ -68,8 +68,22 @@ class StatusbarWidget(
                 optionParent,
                 screen
             ) as CustomFlexBox
-            val actorName = i.get<String>("actorName")
-            optionWidgets.add(curBox to actorName)
+            val action = if (i.hasKey<String>("actorName")) {
+                i.get<String>("actorName").eitherLeft()
+            } else {
+                if (!i.hasKey<String>("actionName")) {
+                    throw RuntimeException("statusBar Option that has no actor must define an action")
+                }
+                when (val name = i.get<String>("actionName")) {
+                    "toTitleScreen" -> {
+                        {
+                            MapManager.changeToTitleScreen()
+                        }
+                    }
+                    else -> throw RuntimeException("unknown statusBar action $name")
+                }.eitherRight()
+            }
+            optionWidgets.add(curBox to action)
             curBox.onButtonClick {
                 buttonClicked(curBox)
                 SoundPlayer.situation("statusbar_button_clicked", screen)
@@ -82,18 +96,19 @@ class StatusbarWidget(
             val option = optionWidgets.find { it.first == clickedBox }!!
             when (displayedOptionIndex) {
                 -1 -> {
-                    screen.enterState(StatusbarWidget.OVERLAY_NAME)
-                    display(option)
+                    screen.enterState(OVERLAY_NAME)
+                    execute(option)
                 }
 
                 optionWidgets.indexOf(option) -> {
-                    hide(option)
-                    screen.leaveState(StatusbarWidget.OVERLAY_NAME)
+                    hide(option.first to (option.second as Either.Left).value)
+                    screen.leaveState(OVERLAY_NAME)
                 }
 
                 else -> {
-                    hide(optionWidgets[displayedOptionIndex])
-                    display(option)
+                    val optionToHide = optionWidgets[displayedOptionIndex]
+                    hide(optionToHide.first to (optionToHide.second as Either.Left).value)
+                    execute(option)
                 }
             }
         }
@@ -186,11 +201,20 @@ class StatusbarWidget(
         displayedOptionIndex = -1
     }
 
-    private fun display(option: Pair<CustomFlexBox, String>) {
+    private fun execute(option: Pair<CustomFlexBox, Either<String, () -> Unit>>) {
         val boxAction = getOptionTimeline(option.first, false).asAction()
-        val widgetAction = getStatusbarOption(option).display().asAction()
-        timeline.appendAction(Timeline.timeline { parallelActions(widgetAction, boxAction) }.asAction())
-        displayedOptionIndex = optionWidgets.indexOf(option)
+        when (val action = option.second) {
+
+            is Either.Left -> {
+                val widgetAction = getStatusbarOption(option.first to action.value).display().asAction()
+                timeline.appendAction(Timeline.timeline { parallelActions(widgetAction, boxAction) }.asAction())
+                displayedOptionIndex = optionWidgets.indexOf(option)
+            }
+
+            is Either.Right -> {
+                action.value()
+            }
+        }
     }
 
     private fun getStatusbarOption(option: Pair<CustomFlexBox, String>) =
