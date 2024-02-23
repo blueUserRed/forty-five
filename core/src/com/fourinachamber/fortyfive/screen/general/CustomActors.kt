@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
@@ -61,6 +62,8 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override var isClicked: Boolean = false
     override var styleManager: StyleManager? = null
 
+    var underline: Boolean = false
+
     override var backgroundHandle: String? = null
         set(value) {
             field = value
@@ -74,6 +77,12 @@ open class CustomLabel @AllThreadsAllowed constructor(
     override var isHoverDetailActive: Boolean = hasHoverDetail
 
     override val additionalHoverData: MutableMap<String, OnjValue> = mutableMapOf()
+
+    private val shapeRenderer: ShapeRenderer by lazy {
+        val renderer = ShapeRenderer()
+        screen.addDisposable(renderer)
+        renderer
+    }
 
     init {
         bindHoverStateListeners(this)
@@ -117,6 +126,19 @@ open class CustomLabel @AllThreadsAllowed constructor(
         batch.shader = fontShader
         super.draw(batch, parentAlpha)
         batch.shader = prevShader
+        if (underline) {
+            batch.end()
+            val shapeRenderer = shapeRenderer
+            screen.stage.viewport.apply()
+            shapeRenderer.projectionMatrix = screen.stage.viewport.camera.combined
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+            shapeRenderer.color = style.fontColor
+            val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
+            val width = glyphLayout.width
+            shapeRenderer.rect(x, y - 1f, width, 3f)
+            shapeRenderer.end()
+            batch.begin()
+        }
     }
 
     override fun layout() {

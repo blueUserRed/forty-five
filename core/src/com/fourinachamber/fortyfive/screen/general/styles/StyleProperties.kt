@@ -390,10 +390,31 @@ class FontScaleStyleProperty(
     override fun get(node: YogaNode): Float = target.fontScaleX
 }
 
+class UnderlineStyleProperty(
+    target: CustomLabel,
+    screen: OnjScreen
+) : StyleProperty<CustomLabel, Boolean>(
+    "underline",
+    target,
+    false,
+    Boolean::class,
+    false,
+    false,
+    screen
+) {
+
+    override fun set(data: Boolean, node: YogaNode) {
+        target.underline = data
+    }
+
+    override fun get(node: YogaNode): Boolean = target.underline
+}
+
 fun <T> T.addLabelStyles(screen: OnjScreen) where T : CustomLabel, T : StyledActor {
     addActorStyles(screen)
     val styleManager = styleManager!!
     styleManager.addStyleProperty(FontScaleStyleProperty(this, screen))
+    styleManager.addStyleProperty(UnderlineStyleProperty(this, screen))
 }
 
 ///////////////////////////////////////////////////////////////////

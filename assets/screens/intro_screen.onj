@@ -10,7 +10,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-//        "red_wing", "red_wing_bmp", "roadgeek",
+        "red_wing_bmp",
         "microwave_studios_brown_texture", "microwave_studios_logo",
         "microwave_theme",
     ]

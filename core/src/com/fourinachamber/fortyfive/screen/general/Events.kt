@@ -18,6 +18,8 @@ object EventFactory {
         "TutorialConfirmedEvent" to { TutorialConfirmedEvent() },
         "HoverEnterEvent" to { HoverEnterEvent() },
         "HoverLeaveEvent" to { HoverLeaveEvent() },
+        "QuitGameEvent" to { QuitGameEvent() },
+        "AbandonRunEvent" to { AbandonRunEvent() },
     )
 
     private val eventClasses: Map<String, KClass<out Event>> = mapOf(
@@ -30,6 +32,8 @@ object EventFactory {
         "TutorialConfirmedEvent" to TutorialConfirmedEvent::class,
         "HoverEnterEvent" to HoverEnterEvent::class,
         "HoverLeaveEvent" to HoverLeaveEvent::class,
+        "QuitGameEvent" to QuitGameEvent::class,
+        "AbandonRunEvent" to AbandonRunEvent::class,
     )
 
     fun createEvent(name: String): Event = eventCreators[name]?.invoke()
@@ -75,6 +79,9 @@ class PopupConfirmationEvent : Event()
 class ParryEvent : Event()
 
 class TutorialConfirmedEvent : Event()
+
+class QuitGameEvent : Event()
+class AbandonRunEvent : Event()
 
 /**
  * used by the [GameController][com.fourinachamber.fortyfive.game.GameController] so it knows when the player confirmed
