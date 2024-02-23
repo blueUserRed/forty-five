@@ -164,6 +164,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjEffect(Effect.BounceBullet(triggerOrError(trigger.value), bulletSelector.value, false))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun discharge(trigger: OnjString, turns: OnjEffectValue): OnjEffect {
+        return OnjEffect(Effect.DischargePoison(triggerOrError(trigger.value), turns.value, false))
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, int]")
     fun turnRevolver(trigger: OnjString, rotationDirection: OnjString, amount: OnjInt): OnjEffect {
         return OnjEffect(Effect.TurnRevolver(

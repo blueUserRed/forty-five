@@ -138,6 +138,10 @@ abstract class TurnBasedStatusEffect(
         duration += extension
     }
 
+    protected fun reduceDuration(extension: Int) {
+        duration -= extension
+    }
+
     protected fun continueForever() {
         continueForever = true
     }
@@ -200,6 +204,22 @@ class Poison(
     override fun executeOnNewTurn(target: StatusEffectTarget): Timeline {
         if (target.isBlocked(this, controller)) return Timeline()
         return target.damage(damage, controller)
+    }
+
+    fun discharge(turns: Int, target: StatusEffectTarget, controller: GameController): Timeline = Timeline.timeline {
+        var damage: Int? = null
+        var actualTurns: Int? = null
+        action {
+            actualTurns = min(turns, turnOnEffectStart + duration - controller.turnCounter)
+            damage = actualTurns!! * this@Poison.damage
+        }
+        includeLater(
+            { target.damage(damage!!, controller) },
+            { true }
+        )
+        action {
+            reduceDuration(actualTurns!!)
+        }
     }
 
     override fun canStackWith(other: StatusEffect): Boolean = other is Poison

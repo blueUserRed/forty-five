@@ -1,8 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
-import com.fourinachamber.fortyfive.game.GameController
-import com.fourinachamber.fortyfive.game.GraphicsConfig
-import com.fourinachamber.fortyfive.game.StatusEffectCreator
+import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.utils.*
 
@@ -506,6 +504,35 @@ abstract class Effect(val trigger: Trigger) {
         override fun blocks(controller: GameController): Boolean = false
 
         override fun copy(): Effect = DestroyTargetOrDestroySelf(trigger, bulletSelector, triggerInHand).also {
+            it.isHidden = isHidden
+        }
+    }
+
+    class DischargePoison(
+        trigger: Trigger,
+        private val turns: EffectValue,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            triggerInformation.targetedEnemies.forEach { enemy ->
+                includeLater(
+                    {
+                        enemy
+                            .statusEffects
+                            .filterIsInstance<Poison>()
+                            .firstOrNull()
+                            ?.discharge(turns(controller, card), StatusEffectTarget.EnemyTarget(enemy), controller)
+                            ?: Timeline()
+                    },
+                    { true }
+                )
+            }
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect = DischargePoison(trigger, turns, triggerInHand).also {
             it.isHidden = isHidden
         }
     }
