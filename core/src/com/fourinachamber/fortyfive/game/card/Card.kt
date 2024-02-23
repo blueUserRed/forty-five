@@ -247,19 +247,20 @@ class Card(
      * called by gameScreenController when the card was shot
      */
     fun afterShot() {
+        if (protectingModifiers.isNotEmpty()) {
+            val effect = protectingModifiers.first()
+            val newEffect = effect.copy(second = effect.second - 1)
+            if (newEffect.second == 0) {
+                protectingModifiers.removeFirst()
+            } else {
+                protectingModifiers[0] = newEffect
+            }
+            modifiersChanged()
+        }
         if (shouldRemoveAfterShot) leaveGame()
     }
 
     fun beforeShot() {
-        if (protectingModifiers.isEmpty()) return
-        val effect = protectingModifiers.first()
-        val newEffect = effect.copy(second = effect.second - 1)
-        if (newEffect.second == 0) {
-            protectingModifiers.removeFirst()
-        } else {
-            protectingModifiers[0] = newEffect
-        }
-        modifiersChanged()
     }
 
     fun leaveGame() {
@@ -665,6 +666,7 @@ class CardActor(
     override var isHoverDetailActive: Boolean
         get() = (card.shortDescription.isNotBlank() ||
                 card.flavourText.isNotBlank() ||
+                card.getKeyWordsForDescriptions().isNotEmpty() ||
                 card.getAdditionalHoverDescriptions().isNotEmpty())
                 && enableHoverDetails
         set(value) {}

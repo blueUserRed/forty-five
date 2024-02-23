@@ -649,7 +649,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         revolver.removeCard(parryCard)
                         cardStack.add(parryCard)
                     }
-                    parryCard.leaveGame()
+                    parryCard.afterShot()
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
                 if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))

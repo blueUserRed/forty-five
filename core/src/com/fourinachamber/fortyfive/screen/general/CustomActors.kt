@@ -217,7 +217,7 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
  */
 open class CustomImageActor @AllThreadsAllowed constructor(
     drawableHandle: ResourceHandle?,
-    override val screen: OnjScreen,
+    _screen: OnjScreen,
     override val partOfHierarchy: Boolean = false,
     var hoverText: String = "",
     var hasHoverDetail: Boolean = false
@@ -234,6 +234,8 @@ open class CustomImageActor @AllThreadsAllowed constructor(
         set(value) {
             hasHoverDetail = value
         }
+
+    override val screen: OnjScreen = _screen
 
     override var mask: Texture? = null
     override var invert: Boolean = false
@@ -288,7 +290,7 @@ open class CustomImageActor @AllThreadsAllowed constructor(
 
     init {
         bindHoverStateListeners(this)
-        registerOnHoverDetailActor(this, screen)
+        registerOnHoverDetailActor(this, _screen)
     }
 
     override fun getHoverDetailData(): Map<String, OnjValue> = mutableMapOf<String, OnjValue>(

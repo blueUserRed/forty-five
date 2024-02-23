@@ -226,7 +226,7 @@ root: $Box {
         ],
     } children [
 
-        $Label {
+        $TemplateLabel {
             styles: [
                 {
                     style_priority: 1,
@@ -241,7 +241,7 @@ root: $Box {
             font: "roadgeek",
             fontScale: 1.6,
             color: color.black,
-            text: "Continue",
+            template: "{title_screen.startButtonText}",
             behaviours: [
                 sharedComponents.buttonCursorBehaviour,
                 $OnClickChangeToInitialScreenBehaviour { }
@@ -269,6 +269,31 @@ root: $Box {
                 $CatchEventAndEmitBehaviour {
                     catch: "ButtonClickEvent",
                     emit: "AbandonRunEvent"
+                }
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                    marginTop: 10#points,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "Reset Game",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "ResetGameEvent"
                 }
             ]
         },
