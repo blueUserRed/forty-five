@@ -180,10 +180,6 @@ textureAtlases: [
                 regionName: "enemy_gravestone"
             },
             {
-                handle: "parry_popup_background",
-                regionName: "parry_popup_background"
-            },
-            {
                 handle: "heart_texture",
                 regionName: "heart"
             },
@@ -942,6 +938,10 @@ textures: [
         name: "title_screen_bullet_15",
         file: "large_assets/title_screen/b15.png",
         useMipMaps: true
+    },
+    {
+        name: "common_popup_background_black",
+        file: "textures/common/backgrounds/popup_black.png",
     },
 ],
 

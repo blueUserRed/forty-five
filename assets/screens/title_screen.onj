@@ -11,7 +11,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "roadgeek",
+        "roadgeek", "red_wing_bmp",
 
         "title_screen_background",
         "title_screen_bullet_1",
@@ -30,7 +30,10 @@ assets: {
         "title_screen_bullet_14",
         "title_screen_bullet_15",
 
-        "swoosh_sound"
+        "common_popup_background_black",
+        "common_button_default", "common_button_hover",
+
+        "swoosh_sound", "button_2_sound",
     ]
 },
 
@@ -72,6 +75,133 @@ templates: [
 
 ],
 
+var confirmationPopup = $Box {
+    zIndex: 100,
+    styles: [
+        {
+            style_priority: 1,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            positionType: positionType.absolute,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            detached: true,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("show_confirmation_popup"),
+            detached: false,
+        }
+    ],
+    touchable: "enabled"
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: 1_100#points,
+                aspectRatio: 698.0 / 390.0,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                background: "common_popup_background_black"
+            }
+        ],
+    } children [
+
+        $TemplateLabel {
+            styles: [
+                {
+                    width: 500#points
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.1,
+            color: color.forty_white,
+            wrap: true,
+            align: "center",
+            template: "{title_screen.popupText}",
+        },
+
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.row,
+                    marginTop: 30#points,
+                }
+            ]
+        } children [
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        background: "common_button_default",
+                        width: 150#points,
+                        height: 60#points,
+                        alignItems: align.center,
+                        justifyContent: justify.center
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: hover(),
+                        background: "common_button_hover",
+                    },
+                ],
+            } children [
+                $Label {
+                    font: "roadgeek",
+                    text: "Cancel",
+                    fontScale: 1.0,
+                    color: color.white,
+                    behaviours: [
+                        sharedComponents.buttonSoundBehaviour,
+                        sharedComponents.buttonCursorBehaviour,
+                        $OnClickChangeScreenStateBehaviour {
+                            state: "show_confirmation_popup",
+                            enter: false
+                        }
+                    ]
+                }
+            ],
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        background: "common_button_default",
+                        width: 150#points,
+                        height: 60#points,
+                        marginLeft: 10#points,
+                        alignItems: align.center,
+                        justifyContent: justify.center
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: hover(),
+                        background: "common_button_hover",
+                    },
+                ]
+            } children [
+                $Label {
+                    font: "roadgeek",
+                    text: "Continue",
+                    fontScale: 1.0,
+                    color: color.white,
+                    behaviours: [
+                        sharedComponents.buttonSoundBehaviour,
+                        sharedComponents.buttonCursorBehaviour,
+                        $CatchEventAndEmitBehaviour {
+                            catch: "ButtonClickEvent",
+                            emit: "PopupConfirmationEvent"
+                        }
+                    ]
+                }
+            ],
+        ]
+
+    ]
+
+];
+
 root: $Box {
 
     styles: [
@@ -83,18 +213,31 @@ root: $Box {
 
 } children [
 
+    confirmationPopup,
+
     $Box {
         styles: [
             {
                 positionType: positionType.absolute,
                 positionLeft: 120#points,
-                positionTop: 300#points,
+                positionTop: 320#points,
                 flexDirection: flexDirection.column,
             }
         ],
     } children [
 
         $Label {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
             font: "roadgeek",
             fontScale: 1.6,
             color: color.black,
@@ -107,22 +250,40 @@ root: $Box {
         $Label {
             styles: [
                 {
+                    style_priority: 1,
+                    underline: false,
                     marginTop: 10#points,
-                }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
             ],
             font: "roadgeek",
             fontScale: 1.6,
             color: color.black,
             text: "Abandon Run",
             behaviours: [
-                sharedComponents.buttonCursorBehaviour
+                sharedComponents.buttonCursorBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "AbandonRunEvent"
+                }
             ]
         },
         $Label {
             styles: [
                 {
+                    style_priority: 1,
+                    underline: false,
                     marginTop: 10#points,
-                }
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
             ],
             font: "roadgeek",
             fontScale: 1.6,
@@ -130,7 +291,10 @@ root: $Box {
             text: "Quit",
             behaviours: [
                 sharedComponents.buttonCursorBehaviour,
-                $OnClickExitBehaviour { }
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "QuitGameEvent"
+                }
             ]
         },
 
