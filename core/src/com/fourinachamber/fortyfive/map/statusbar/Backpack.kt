@@ -133,9 +133,8 @@ class Backpack(
         cardsOnj as OnjObject
         cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
         _allCards = cardPrototypes
-            .filter { it.name in SaveState.cards }
-            // TODO: figure out if the card is saved or not
-            .map { it.create(screen, it.name in PermaSaveState.collection) }
+            .filter { it.name in SaveState.cards }.filter { it.name in PermaSaveState.collection }
+            .map { it.create(screen, true) }
             .toMutableList()
     }
 
