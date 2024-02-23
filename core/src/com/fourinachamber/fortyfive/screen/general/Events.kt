@@ -19,6 +19,7 @@ object EventFactory {
         "HoverEnterEvent" to { HoverEnterEvent() },
         "HoverLeaveEvent" to { HoverLeaveEvent() },
         "QuitGameEvent" to { QuitGameEvent() },
+        "QuitGameEvenAbandonRunEvent" to { AbandonRunEvent() },
         "ResetGameEvent" to { ResetGameEvent() },
     )
 

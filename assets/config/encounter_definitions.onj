@@ -78,7 +78,7 @@ var tutorialEncounters = [
                 focusActor: "revolverSlot-4",
             },
             {
-                text: "If you parry, the bullet in slot 5 is gone. When parrying with a bullet, the damage value of the bullet is subtracted from the damage value of the enemy.",
+                text: "If you parry, the bullet in slot 5§§revolver_slot_icon_5§§ is gone. When parrying with a bullet, the damage value of the bullet is subtracted from the damage value of the enemy.",
                 confirmationText: "Next",
                 focusActor: "revolverSlot-4",
             },

@@ -35,6 +35,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     ?: 0
             }
             "rotationAmount" with OnjEffectValue { _, card -> card!!.rotationCounter }
+            "bulletInSlot2" with OnjEffectValue { controller, _ ->
+                controller.revolver.getCardInSlot(5 - 2)?.curDamage(controller) ?: 0
+            }
         }
     )
 
@@ -328,6 +331,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
         "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
         "return home" -> Trigger.ON_RETURNED_HOME
+        "rotate in 5" -> Trigger.ON_ROTATE_IN_5
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

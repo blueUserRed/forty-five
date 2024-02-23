@@ -93,7 +93,7 @@ cards: [
         title: "Rotten Bullet",
         flavourText: "might have forgotten it in my sattlebag...",
         description: "$trait$DISINTEGRATION$trait$",
-        baseDamage: 16,
+        baseDamage: 10,
         coverValue: 0,
         traitEffects: [ "rotten" ],
         rotation: $Right { amount: 1 },
@@ -147,7 +147,7 @@ cards: [
         title: "Explosive Bullet",
         flavourText: "Holds its promise. Just ask the residents of New Hemingway. Wait, you can't",
         description: "$trait$SPRAY$trait$\n\n$trigger$On-shot:$trigger$\nThe enemy gets $status$BURNING$status$ (2)",
-        baseDamage: 15,
+        baseDamage: 18,
         coverValue: 0,
         traitEffects: ["spray"],
         rotation: $Right { amount: 1 },
@@ -157,7 +157,7 @@ cards: [
         ],
         forceLoadCards: [],
         dark: false,
-        cost: 1,
+        cost: 3,
         tags: ["pool1", "rarity1"],
         price: 50,
         type: $Bullet { }
@@ -331,7 +331,7 @@ cards: [
         title: "Bullet Bullet Bullet",
         flavourText: "All good things come in threes",
         description: "$trigger$On-Placedown:$trigger$\nAll other bullets named [Bullet] get +18 dmg as long as this bullet is in the revolver",
-        baseDamage: 16,
+        baseDamage: 12,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
@@ -386,14 +386,14 @@ cards: [
         name: "poisonBullet",
         title: "Poison Bullet",
         flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
-        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (3, 4)",
+        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (8, 3)",
         baseDamage: 9,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", poison(3#val, 3#val))
+            giveStatus("shot", poison(3#val, 8#val))
         ],
         forceLoadCards: [],
         dark: false,
@@ -561,15 +561,15 @@ cards: [
     {
         name: "unpleasantGradientBullet",
         title: "Unpleasant Gradient Bullet",
-        flavourText: "This is definetly more than unpleasent. This is a hate crime",
-        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nDeal 4 dmg to all enemies",
+        flavourText: "This is definitely more than unpleasant. This is a hate crime",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nDeal 8 dmg to all enemies",
         baseDamage: 5,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            damageDirect("round start", 4#val)
+            damageDirect("round start", 8#val)
         ],
         forceLoadCards: [],
         dark: false,
@@ -602,14 +602,14 @@ cards: [
         name: "golddiggersBullet",
         title: "Golddiggers Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver:$trigger$\nWhenever you draw after a card after you have already drawn two cards this turn: This gets +5 dmg and you gain 1 reserve",
+        description: "$trigger$While in Revolver:$trigger$\nWhenever you draw a Card: +5 dmg.\nIf you have already drawn 2 cards this turn and draw a card: gain 1 reserve as well",
         baseDamage: 0,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("special card drawn", bSelects.self, 5#val),
+            buffDmg("card drawn", bSelects.self, 5#val),
             reserveGain("special card drawn", 1#val)
         ],
         forceLoadCards: [],
@@ -769,7 +769,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.self, 14#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)#hide
+            buffDmg("enter", bSelects.self, 12#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)#hide
         ],
         forceLoadCards: [],
         dark: false,
@@ -782,7 +782,7 @@ cards: [
         name: "fullLeadBullet",
         title: "Full Lead Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (8, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (8, 5)",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (8, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (9, 3)",
         baseDamage: 8,
         coverValue: 0,
         traitEffects: [],
@@ -790,7 +790,7 @@ cards: [
         highlightType: "standard",
         effects: [
             giveStatus("shot", poison(5#val, 8#val)),
-            givePlayerStatus("round start", poison(1#val, 8#val)),
+            givePlayerStatus("round start", poison(3#val, 9#val)),
         ],
         forceLoadCards: [],
         dark: false,
@@ -864,7 +864,7 @@ cards: [
         name: "gravediggersBullet",
         title: "Gravediggers Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver:$trigger$ $trigger$Whenever a bullet is destroyed:$trigger$\nDraw a card and double this bullets dmg.",
+        description: "$trigger$While in revolver:$trigger$ $trigger$Whenever a bullet is destroyed:$trigger$\nDraw a card and this bullet gets +6 dmg.",
         baseDamage: 1,
         coverValue: 0,
         traitEffects: [],
@@ -872,7 +872,7 @@ cards: [
         highlightType: "standard",
         effects: [
             draw("any card destroyed", 1#val),
-            buffDmgMultiplier("any card destroyed", bSelects.self, 2.0),
+            buffDmg("any card destroyed", bSelects.self, 6#val),
         ],
         forceLoadCards: [],
         dark: false,
@@ -896,7 +896,7 @@ cards: [
         ],
         forceLoadCards: [],
         dark: false,
-        cost: 2,
+        cost: 3,
         type: $Bullet { },
         additionalHoverInfos: ["rotations"],
         tags: ["pool1", "rarity1"],
@@ -1049,7 +1049,7 @@ cards: [
         name: "carouselBullet",
         title: "Carousel Bullet",
         flavourText: "If you think about it, a revolver is just a really deadly carusel for Bullets",
-        description: "Whenever this rotates into the slot that it was originally placed into:\nDraw two cards and all bullets in the revolver gain +5 dmg",
+        description: "Whenever this rotates into the slot that it was originally placed into:\nDraw two cards and all bullets in the revolver gain +3 dmg",
         baseDamage: 6,
         coverValue: 0,
         traitEffects: [],
@@ -1057,11 +1057,11 @@ cards: [
         highlightType: "standard",
         effects: [
             draw("return home", 2#val),
-            giftDmg("return home", bSelects.allExceptSelf, 5#val)
+            giftDmg("return home", bSelects.allExceptSelf, 3#val)
         ],
         forceLoadCards: [],
         dark: false,
-        cost: 1,
+        cost: 2,
         type: $Bullet { },
         additionalHoverInfos: ["home"],
         tags: ["pool1", "rarity1"],
@@ -1085,6 +1085,26 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
+        price: 0,
+    },
+    {
+        name: "eclipseBullet",
+        title: "Eclipse Bullet",
+        flavourText: "Sometimes, darkness will overpower the light, just as the sun is bound to be swallowed by shadow in the wake of an Eclipse. - translation of an old Onathahan saying",
+        description: "$trigger$Whenever this rotates into Slot 5$trigger$" + slot.5 + ":\nThis bullet gets plus twice as much dmg as the dmg value of the bullet in slot 2" + slot.2 + ".",
+        baseDamage: 2,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            buffDmg("rotate in 5", bSelects.self, value.bulletInSlot2 * 2.0)
+        ],
+        forceLoadCards: [],
+        dark: true,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1", "rarity1"],
         price: 0,
     },
 
