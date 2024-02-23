@@ -623,15 +623,15 @@ cards: [
         name: "finalBullet",
         title: "Final Bullet",
         flavourText: "",
-        description: "$trigger$On-Shot:$trigger$\nYou lose the game;\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +8 dmg",
+        description: "$trigger$On-Leave:$trigger$\nYou lose the game;\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +12 dmg",
         baseDamage: 20,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            killPlayer("shot"),
-            giftDmg("round start", bSelects.allExceptSelf, 7#val)
+            killPlayer("leave"),
+            giftDmg("round start", bSelects.allExceptSelf, 12#val)
         ],
         forceLoadCards: [],
         dark: false,
@@ -1105,6 +1105,26 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool1", "rarity1"],
+        price: 0,
+    },
+    {
+        name: "campersBullet",
+        title: "Campers Bullet",
+        flavourText: "This bullet is said to have once belonged to a traveller who was said to be the first person from the Old World to marry an \"Onathahan\" or witch, as we call them",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nAll other Bullets get +4 dmg",
+        baseDamage: 5,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("round start", bSelects.allExceptSelf, 4#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1", "rarity3"],
         price: 0,
     },
 
