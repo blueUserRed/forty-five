@@ -146,6 +146,10 @@ object MapManager {
         FortyFive.changeToScreen(screenPaths["changeToAddMaxHPScreen"]!!, event)
     }
 
+    fun changeToTitleScreen() {
+        FortyFive.changeToScreen(screenPaths["titleScreen"]!!)
+    }
+
     /**
      * @see DetailMap.invalidateCachedAssets
      */

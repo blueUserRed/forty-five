@@ -73,7 +73,8 @@ $Widget {
         mapIndicatorWidgetName?: string,
         optionsWidgetName: string,
         options: {
-            actorName: string,
+            actionName?: string,
+            actorName?: string,
             displayName: string,
         }[],
         partOfSelectionHierarchy?: boolean,

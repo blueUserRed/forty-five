@@ -80,6 +80,7 @@ screens: {
     chooseCardScreen: string,
     changeToHealOrMaxHPScreen: string,
     changeToAddMaxHPScreen: string,
+    titleScreen: string,
 },
 
 paths: {

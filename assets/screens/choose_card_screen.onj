@@ -250,15 +250,11 @@ root: $Box { //TODO bioms
         options: [
             {
                 actorName: "backpackActor",
-                displayName: "Notebook",
-            },
-            {
-                actorName: "backpackActor",
                 displayName: "Backpack",
             },
             {
-                actorName: "backpackActor",
-                displayName: "Settings",
+                actionName: "toTitleScreen",
+                displayName: "To Title Screen",
             },
         ],
         ...(sharedComponents.statusbarCenterDefaults)

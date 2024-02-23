@@ -31,8 +31,8 @@ object SoundPlayer {
     private var transitionStartTime: Long = -1L
     private var transitionDuration: Int = 0
 
-//    var musicVolume: Float = 0f
-    var musicVolume: Float = 1f
+    var musicVolume: Float = 0f
+//    var musicVolume: Float = 1f
 //    var soundEffectVolume: Float = 0f
     var soundEffectVolume: Float = 1f
 
@@ -109,6 +109,7 @@ object SoundPlayer {
         transitionToMusicHandle = musicHandle
         transitionDuration = duration
         music?.play()
+        music?.isLooping = true
         music?.volume = 0f
     }
 
@@ -145,7 +146,6 @@ object SoundPlayer {
             return
         }
         transitionProgress = (finishTime - now).toFloat() / transitionDuration.toFloat()
-        println(transitionProgress)
         currentMusic?.volume = transitionProgress * musicVolume
         transitionToMusic?.volume = (1f - transitionProgress) * musicVolume
     }
