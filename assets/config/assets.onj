@@ -1319,6 +1319,10 @@ music: [
         file: "large_assets/music/map_theme.wav"
     },
     {
+        name: "encounter_theme",
+        file: "large_assets/music/encounter_theme.wav"
+    },
+    {
         name: "microwave_theme", // Now part of the official .forty-five soundtrack
         file: "large_assets/music/microwave.wav"
     },

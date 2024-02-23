@@ -25,6 +25,12 @@ object SoundPlayer {
     private var currentMusicHandle: ResourceHandle? = null
     private var currentMusic: Music? = null
 
+    private var transitionToMusic: Music? = null
+    private var transitionToMusicHandle: ResourceHandle? = null
+    private var transitionProgress: Float = -1f
+    private var transitionStartTime: Long = -1L
+    private var transitionDuration: Int = 0
+
 //    var musicVolume: Float = 0f
     var musicVolume: Float = 1f
 //    var soundEffectVolume: Float = 0f
@@ -74,6 +80,11 @@ object SoundPlayer {
     }
 
     fun currentMusic(musicHandle: ResourceHandle?, screen: OnjScreen) {
+        if (transitionProgress != -1f) {
+            transitionProgress = -1f
+            transitionToMusic?.stop()
+            transitionToMusic = null
+        }
         if (currentMusicHandle == musicHandle) return
         currentMusic?.stop()
         if (musicHandle == null) {
@@ -87,6 +98,27 @@ object SoundPlayer {
         music.isLooping = true
         music.play()
         music.volume = musicVolume
+    }
+
+    fun transitionToMusic(musicHandle: ResourceHandle?, duration: Int, screen: OnjScreen) {
+        if (musicHandle == currentMusicHandle) return
+        val music = musicHandle?.let { ResourceManager.get<Music>(screen, it) }
+        transitionProgress = 1f
+        transitionToMusic = music
+        transitionStartTime = TimeUtils.millis()
+        transitionToMusicHandle = musicHandle
+        transitionDuration = duration
+        music?.play()
+        music?.volume = 0f
+    }
+
+    private fun finishTransition() {
+        currentMusic?.stop()
+        currentMusic = transitionToMusic
+        currentMusicHandle = transitionToMusicHandle
+        currentMusic?.play()
+        currentMusic?.volume = musicVolume
+        transitionProgress = -1f
     }
 
     fun situation(name: String, screen: OnjScreen) {
@@ -103,7 +135,22 @@ object SoundPlayer {
         sound.play(soundEffectVolume)
     }
 
-    fun updateAmbientSounds(screen: OnjScreen) {
+    fun update(screen: OnjScreen, playAmbientSounds: Boolean) {
+        if (playAmbientSounds) updateAmbientSounds(screen)
+        if (transitionProgress == -1f) return
+        val now = TimeUtils.millis()
+        val finishTime = transitionStartTime + transitionDuration
+        if (now >= finishTime) {
+            finishTransition()
+            return
+        }
+        transitionProgress = (finishTime - now).toFloat() / transitionDuration.toFloat()
+        println(transitionProgress)
+        currentMusic?.volume = transitionProgress * musicVolume
+        transitionToMusic?.volume = (1f - transitionProgress) * musicVolume
+    }
+
+    private fun updateAmbientSounds(screen: OnjScreen) {
         val now = TimeUtils.millis()
         val biome = MapManager.currentDetailMap.biome
         val sounds = biomeAmbience[biome] ?: run {

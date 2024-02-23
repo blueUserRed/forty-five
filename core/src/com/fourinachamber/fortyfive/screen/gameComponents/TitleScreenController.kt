@@ -103,8 +103,8 @@ class TitleScreenController : ScreenController() {
         }
         if (OnjScreen.transitionAwayScreenState in screen.screenState) {
             transitionAwayVelocity = 0f
-            repeat(15) { i ->
-                screen.afterMs(i * 10) {
+            repeat(5) { i ->
+                screen.afterMs(i * 30) {
                     SoundPlayer.situation("title_screen_card_drop", screen)
                 }
             }

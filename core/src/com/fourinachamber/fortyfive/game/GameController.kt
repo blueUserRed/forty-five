@@ -54,6 +54,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val encounterModifierDisplayTemplateName = onj.get<String>("encounterModifierDisplayTemplateName")
     private val encounterModifierParentName = onj.get<String>("encounterModifierParentName")
     private val tutorialInfoActorName = onj.get<String>("tutorialInfoActorName")
+    private val musicAfterWin = onj.get<String>("musicAfterWin")
+    private val musicBeforeWin = onj.get<String>("musicBeforeWin")
+    private val musicTransitionTime = onj.get<Long>("musicTransitionTime").toInt()
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -230,6 +233,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
         onjScreen.invalidateEverything()
         gameDirector.chooseEnemyActions()
+        SoundPlayer.transitionToMusic(musicBeforeWin, musicTransitionTime, curScreen)
     }
 
     private fun initCards() {
@@ -1205,6 +1209,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val playerGetsCard = !gameDirector.encounter.special && Utils.coinFlip(rewardChance)
         appendMainTimeline(Timeline.timeline {
             action {
+                SoundPlayer.transitionToMusic(musicAfterWin, musicTransitionTime, curScreen)
                 SaveState.encountersWon++
                 curScreen.enterState(showWinScreen)
                 if (money > 0) curScreen.enterState(showCashItem)
