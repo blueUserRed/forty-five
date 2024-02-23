@@ -407,9 +407,7 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun update(delta: Float, isEarly: Boolean = false) {
-        if (playAmbientSounds) {
-            SoundPlayer.updateAmbientSounds(this)
-        }
+        SoundPlayer.update(this, playAmbientSounds)
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
         if (!isEarly) screenController?.update()

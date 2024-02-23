@@ -67,7 +67,7 @@ assets: {
         "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound", "swoosh_sound", "button_2_sound",
         "card_destroy_sound",
 
-        "map_theme",
+        "map_theme", "encounter_theme",
 
         ...(sharedComponents.ambientSoundsUsedAssets),
         ...(graphicsConfig.keySelectUsedAssets),
@@ -126,7 +126,10 @@ var controller = $GameScreenController {
     rewardChance: gameConfig.cardDrawConfig.chooseCardRewardPercantage,
     encounterModifierDisplayTemplateName: "encounter_modifier_display",
     encounterModifierParentName: "encounter_modifier_parent",
-    tutorialInfoActorName: "tutorialInfoActor"
+    tutorialInfoActorName: "tutorialInfoActor",
+    musicAfterWin: "map_theme",
+    musicBeforeWin: "encounter_theme",
+    musicTransitionTime: 3_000
 };
 
 options: {

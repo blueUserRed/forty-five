@@ -33,6 +33,7 @@ assets: {
         "common_popup_background_black",
         "common_button_default", "common_button_hover",
 
+        "main_theme",
         "swoosh_sound", "button_2_sound",
     ]
 },
@@ -44,6 +45,7 @@ viewport: $FitViewport {
 
 options: {
     background: "title_screen_background",
+    music: "main_theme",
     playAmbientSounds: false,
     transitionAwayTime: 1.0,
     inputMap: [
