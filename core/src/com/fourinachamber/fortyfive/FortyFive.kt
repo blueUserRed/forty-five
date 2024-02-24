@@ -151,7 +151,7 @@ object FortyFive : Game() {
         MapManager.init()
 //        resetAll()
 //        MapManager.generateMapsSync()
-//        newRun()
+        newRun(false)
 
         if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
             resetAll()
@@ -162,7 +162,7 @@ object FortyFive : Game() {
         GraphicsConfig.init()
         ResourceManager.init()
         serviceThread.start()
-        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
+//        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
 
 //        resetAll()
