@@ -52,7 +52,14 @@ nodes: [
         edgesTo: [
             2, 4
         ],
-        event: $EmptyMapEvent { }
+        nodeTexture: "map_node_dialog",
+        event: $NPCMapEvent {
+            npc: "priest_of_aqua_balle",
+            canOnlyBeStartedOnce: true,
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false
+        }
     },
     {
         x: 65.0,

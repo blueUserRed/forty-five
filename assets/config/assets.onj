@@ -282,6 +282,10 @@ textures: [
         file: "textures/location_signs/salem.png"
     },
     {
+        name: "location_sign_under_construction",
+        file: "textures/location_signs/under_construction.png"
+    },
+    {
         name: "location_name_aqua_balle",
         file: "textures/location_names/aqua_balle.png"
     },

@@ -21,7 +21,7 @@ assets: {
         "map_background_wasteland_tileable","map_background_bewitched_forest_tileable",
         "location_sign_salem", "transparent_black_texture",
         "map_decoration_wasteland_cactus_1", "map_decoration_wasteland_cactus_2", "map_decoration_grass", "map_path", "dialog_continue_arrow",
-        "map_player", "location_sign_aqua_dulche", "location_sign_salem",
+        "map_player", "location_sign_aqua_dulche", "location_sign_under_construction",
         "map_node_default",
         "map_node_shop",
         "map_node_fight",
