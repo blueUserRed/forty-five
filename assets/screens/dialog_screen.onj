@@ -53,8 +53,9 @@ var dialogWidget = $Box {
         {
             positionType: positionType.absolute,
             width: 75.0#percent,
-            height: 25.0#percent,
+            height: 30.0#percent,
             positionBottom: 0#points,
+            positionLeft: 220#points,
             justifyContent: justify.center,
             background: "dialog_background",
             paddingLeft: 190#points,
@@ -70,9 +71,8 @@ var dialogWidget = $Box {
         styles: [
             {
                 width: 87.0#percent,
-
                 height: 100.0#percent,
-                alpha: 1 / 0.6,
+//                alpha: 1 / 0.6,
             }
         ],
         progressTime: 0.01,
@@ -103,7 +103,7 @@ root: $Box {
             {
                 style_priority: 1,
                 positionType: positionType.absolute,
-                positionBottom: (250)#points,
+                positionBottom: (310)#points,
                 positionRight: (300)#points,
                 //                paddingRight: 20#points,
 
@@ -154,9 +154,9 @@ root: $Box {
             align: "center",
             styles: [
                 {
+                    positionBottom: 110#points,
                     width: 180#percent,
                     height: 60#points,
-                    alpha: 0.8,
                     background: "dialog_name_field",
                 },
             ],
@@ -173,12 +173,12 @@ templates: [
         text: "",
         font: "red_wing",
         color: color.forty_white,
-        fontScale: 0.8,
+        fontScale: 1.0,
         align: "center",
         styles: [
             {
                 style_priority: 1,
-                width: 135#percent,
+                width: 145#percent,
                 height: 60#points,
                 margin: 10#points,
 //                alpha: 0.8,
@@ -193,12 +193,15 @@ templates: [
             {
                 style_priority: 2,
                 style_condition: state("displayOptionsBox"),
-                alpha:1.0,
+                alpha: 1.0,
                 style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.linear
                 }
             }
+        ],
+        behaviours: [
+            sharedComponents.buttonCursorBehaviour
         ],
     },
     $Image {

@@ -151,7 +151,7 @@ object FortyFive : Game() {
         MapManager.init()
 //        resetAll()
 //        MapManager.generateMapsSync()
-        newRun(false)
+//        newRun(false)
 
         if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
             resetAll()
