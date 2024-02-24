@@ -255,7 +255,6 @@ var infoPopup = $Box {
     ],
 
     $Box {
-        name: "start_button",
         styles: [
             {
                 style_priority: 1,
@@ -278,7 +277,6 @@ var infoPopup = $Box {
                 background: "common_button_disabled"
             }
         ],
-        touchable: "enabled",
         behaviours: [
             sharedComponents.buttonSoundBehaviour,
             sharedComponents.buttonCursorBehaviour,
@@ -286,7 +284,13 @@ var infoPopup = $Box {
     } children [
 
         $TemplateLabel {
+            styles: [
+                {
+                    width: 140#points,
+                }
+            ],
             font: "red_wing",
+            name: "start_button",
             template: "{map.cur_event.buttonText}",
             fontScale: 1.0,
             color: color.white,
