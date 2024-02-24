@@ -947,6 +947,22 @@ textures: [
         name: "common_popup_background_black",
         file: "textures/common/backgrounds/popup_black.png",
     },
+    {
+        name: "aqua_balle_lower_row",
+        file: "textures/areas/aqua_balle/lower_row.png",
+    },
+    {
+        name: "aqua_balle_upper_row",
+        file: "textures/areas/aqua_balle/upper_row.png",
+    },
+    {
+        name: "aqua_balle_sign",
+        file: "textures/areas/aqua_balle/sign.png",
+    },
+    {
+        name: "aqua_balle_background",
+        file: "textures/areas/aqua_balle/background.png",
+    },
 ],
 
 cursors: [
@@ -1274,6 +1290,10 @@ sounds: [
     {
         name: "holster_sound",
         file: "large_assets/sounds/holster.wav"
+    },
+    {
+        name: "holster_remove_sound",
+        file: "large_assets/sounds/holster_remove.wav"
     },
     {
         name: "parry_sound",

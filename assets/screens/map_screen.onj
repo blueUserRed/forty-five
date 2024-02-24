@@ -45,6 +45,8 @@ assets: {
         "tutorial_info_actor_background",
         "backpack_scrollbar_background", "backpack_scrollbar",
 
+        "aqua_balle_lower_row", "aqua_balle_upper_row", "aqua_balle_sign", "aqua_balle_background",
+
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
         "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader",
 

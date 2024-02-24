@@ -215,6 +215,10 @@ fun OnjArray.toFloatRange(): ClosedFloatingPointRange<Float> {
     return first..second
 }
 
+fun Vector2.toArray(): Array<Float> = arrayOf(x, y)
+
+fun OnjArray.toVector2(): Vector2 = Vector2(get<Double>(0).toFloat(), get<Double>(1).toFloat())
+
 fun <T> Collection<Pair<Int, T>>.weightedRandom(): T {
     val total = this.sumOf { abs(it.first) }
     val choice = (0..total).random()
