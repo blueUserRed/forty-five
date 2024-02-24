@@ -103,7 +103,7 @@ cards: [
         dark: false,
         cost: 1,
         tags: ["pool1", "rarity2"],
-        price: 50,
+        price: 40,
         type: $Bullet { }
     },
     {
@@ -195,7 +195,7 @@ cards: [
         dark: false,
         cost: 1,
         tags: ["pool0", "rarity3"],
-        price: 50,
+        price: 60,
         type: $Bullet { }
     },
     {
@@ -249,7 +249,7 @@ cards: [
         dark: true,
         cost: 5,
         tags: ["pool1", "rarity1"],
-        price: 90,
+        price: 60,
         type: $Bullet { }
     },
     {
@@ -285,7 +285,7 @@ cards: [
         dark: false,
         cost: 0,
         tags: [ "pool1", "rarity2" ],
-        price: 50,
+        price: 30,
         type: $Bullet { }
     },
     {
@@ -303,7 +303,7 @@ cards: [
         dark: false,
         cost: 0,
         tags: ["pool1", "rarity1"],
-        price: 50,
+        price: 30,
         type: $Bullet { }
     },
     {
@@ -323,7 +323,7 @@ cards: [
         dark: false,
         cost: 2,
         tags: ["pool1", "rarity2"],
-        price: 50,
+        price: 60,
         type: $Bullet { }
     },
     {
@@ -498,7 +498,7 @@ cards: [
         cost: 0,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 25,
+        price: 40,
     },
     {
         name: "cowardBullet",
@@ -516,7 +516,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 50,
+        price: 40,
     },
     {
         name: "luckyLukesBullet",
@@ -536,7 +536,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 50,
+        price: 60,
     },
     {
         name: "bull_et",
@@ -596,7 +596,7 @@ cards: [
         cost: 3,
         type: $Bullet { },
         tags: ["weight", "unobtainable"],
-        price: 0,
+        price: 50,
     },
     {
         name: "golddiggersBullet",
@@ -617,7 +617,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool1", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "finalBullet",
@@ -638,7 +638,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "miniBullet",
@@ -656,7 +656,7 @@ cards: [
         cost: 0,
         type: $Bullet { },
         tags: ["pool2", "rarity2"],
-        price: 0,
+        price: 40,
     },
     {
         name: "glassBullet",
@@ -677,7 +677,7 @@ cards: [
         type: $Bullet { },
         tags: ["pool2", "rarity2"],
         additionalHoverInfos: ["mostExpensiveBullet"],
-        price: 0,
+        price: 50,
     },
     {
         name: "shotgunshellBullet",
@@ -695,7 +695,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "hollowpointBullet",
@@ -715,7 +715,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "pppBullet",
@@ -735,7 +735,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "deputiesBullet",
@@ -756,7 +756,7 @@ cards: [
         type: $Bullet { },
         forbiddenSlots: [3],
         tags: ["pool1", "rarity3"],
-        price: 0,
+        price: 50,
     },
     {
         name: "toxicBullet",
@@ -776,7 +776,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool2", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "fullLeadBullet",
@@ -797,7 +797,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 0,
+        price: 60,
     },
     {
         name: "gasBullet",
@@ -817,7 +817,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool2", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "survivorsBullet",
@@ -837,7 +837,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "sacrificialBullet",
@@ -858,7 +858,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool2", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "gravediggersBullet",
@@ -879,7 +879,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool1", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "goldBullet",
@@ -900,7 +900,7 @@ cards: [
         type: $Bullet { },
         additionalHoverInfos: ["rotations"],
         tags: ["pool1", "rarity1"],
-        price: 0,
+        price: 70,
     },
     {
         name: "highVelocityBullet",
@@ -920,7 +920,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "softPointBullet",
@@ -940,7 +940,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity3"],
-        price: 0,
+        price: 50,
     },
     {
         name: "brickBullet",
@@ -960,7 +960,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "shieldBullet",
@@ -980,7 +980,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool1", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "birthdayBullet",
@@ -1002,7 +1002,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "turtleBullet",
@@ -1023,7 +1023,7 @@ cards: [
         type: $Bullet { },
         additionalHoverInfos: ["rotations"],
         tags: ["pool2", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "woodenBullet",
@@ -1043,7 +1043,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity2"],
-        price: 0,
+        price: 40,
     },
     {
         name: "carouselBullet",
@@ -1065,7 +1065,7 @@ cards: [
         type: $Bullet { },
         additionalHoverInfos: ["home"],
         tags: ["pool1", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "bloodcravingBullet",
@@ -1085,7 +1085,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
-        price: 0,
+        price: 50,
     },
     {
         name: "eclipseBullet",
@@ -1102,10 +1102,10 @@ cards: [
         ],
         forceLoadCards: [],
         dark: true,
-        cost: 2,
+        cost: 4,
         type: $Bullet { },
-        tags: ["pool1", "rarity1"],
-        price: 0,
+        tags: ["pool2", "rarity1"],
+        price: 50,
     },
     {
         name: "campersBullet",
@@ -1125,7 +1125,7 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool1", "rarity3"],
-        price: 0,
+        price: 50,
     },
     {
         name: "viperBullet",
@@ -1145,7 +1145,7 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool2", "rarity2"],
-        price: 0,
+        price: 50,
     },
     {
         name: "guardianAngelBullet",
@@ -1164,8 +1164,8 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1", "rarity2"],
-        price: 0,
+        tags: ["pool1", "rarity2", "unobtainable"],
+        price: 50,
     },
 
 ],

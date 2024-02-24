@@ -38,7 +38,23 @@ var default = [
         effect: $ProbabilityAddition {
             weight: 2.0
         }
-    }
+    },
+    {
+        select: $ByTag {
+            name: "rarity2"
+        },
+        effect: $PriceAddition {
+            price: 25
+        }
+    },
+    {
+        select: $ByTag {
+            name: "rarity3"
+        },
+        effect: $PriceAddition {
+            price: 50
+        }
+    },
 ];
 
 var wasteland = [ //for demo only the biome says which cards, this makes it easier
@@ -194,7 +210,6 @@ types: [
                     name: "rarity3"
                 },
                 effect: $ProbabilityAddition {
-
                     weight: 2.0
                 }
             },
