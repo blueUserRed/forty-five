@@ -963,6 +963,10 @@ textures: [
         name: "aqua_balle_background",
         file: "textures/areas/aqua_balle/background.png",
     },
+    {
+        name: "tutorial_road_weird_corner_house",
+        file: "textures/areas/tutorial_road/weird_corner_house.png",
+    },
 ],
 
 cursors: [

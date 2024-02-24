@@ -21,6 +21,8 @@ tutorialText: [
         triggerOnNodes: [],
     },
 ],
+scrollable: false,
+camPosOffset: [700.0, 110.0],
 startNode: 0,
 endNode: 9,
 biome: "wasteland",
@@ -52,7 +54,7 @@ nodes: [
     },
     {
         x: 90.0,
-        y: 70.0,
+        y: 85.0,
         edgesTo: [
             0, 3
         ],
@@ -60,7 +62,7 @@ nodes: [
         }
     },
     {
-        x: 120.0,
+        x: 110.0,
         y: 100.0,
         edgesTo: [
             1, 2, 4
@@ -76,7 +78,7 @@ nodes: [
         }
     },
     {
-        x: 120.0,
+        x: 110.0,
         y: 70.0,
         edgesTo: [
             3, 5
@@ -92,7 +94,7 @@ nodes: [
         },
     },
     {
-        x: 150.0,
+        x: 130.0,
         y: 80.0,
         edgesTo: [
             4, 6
@@ -108,7 +110,7 @@ nodes: [
         }
     },
     {
-        x: 160.0,
+        x: 130.0,
         y: 100.0,
         edgesTo: [
             5, 7,
@@ -124,7 +126,7 @@ nodes: [
         },
     },
     {
-        x: 170.0,
+        x: 135.0,
         y: 120.0,
         edgesTo: [
             6, 8
@@ -132,7 +134,6 @@ nodes: [
         nodeTexture: "map_node_fight",
         event: $EncounterMapEvent {
             currentlyBlocks: true,
-//            currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false,
             encounterIndex: 3,
@@ -140,7 +141,7 @@ nodes: [
         }
     },
     {
-        x: 190.0,
+        x: 150.0,
         y: 100.0,
         edgesTo: [
             7, 9
@@ -155,7 +156,7 @@ nodes: [
         }
     },
     {
-        x: 200.0,
+        x: 155.0,
         y: 80.0,
         edgesTo: [
             8, 10
@@ -170,8 +171,8 @@ nodes: [
         }
     },
     {
-        x: 220.0,
-        y: 100.0,
+        x: 170.0,
+        y: 80.0,
         edgesTo: [
             9
         ],
@@ -181,6 +182,42 @@ nodes: [
         }
     },
 ],
-decorations: [],
+decorations: [
+    {
+        texture: "map_decoration_wasteland_cactus_1",
+        baseWidth: 2.0,
+        baseHeight: 4.0,
+        positions: [
+            [ 75.0, 70.0, 2.2],
+            [ 65.0, 110.0, 2.4],
+            [ 85.0, 65.0, 2.2],
+            [ 115.0, 115.0, 2.4],
+            [ 105.0, 75.0, 2.2],
+            [ 140.0, 105.0, 2.4],
+            [ 137.0, 85.0, 2.4],
+            [ 127.0, 65.0, 2.4],
+            [ 147.0, 62.0, 2.4],
+            [ 162.0, 55.0, 2.4],
+            [ 172.0, 66.0, 2.4],
+            [ 182.0, 73.0, 2.4],
+            [ 192.0, 91.0, 2.4],
+            [ 185.0, 94.0, 2.4],
+            [ 183.0, 102.0, 2.4],
+            [ 169.0, 112.0, 2.4],
+            [ 169.0, 128.0, 2.4],
+            [ 177.0, 132.0, 2.4],
+            [ 180.0, 142.0, 2.4],
+            [ 164.0, 150.0, 2.4],
+        ]
+    },
+    {
+        texture: "tutorial_road_weird_corner_house",
+        baseWidth: 480.0,
+        baseHeight: 580.0,
+        positions: [
+            [ 160.0, 90.0, 0.05 ]
+        ]
+    }
+],
 animatedDecorations: [],
 isArea: false,
