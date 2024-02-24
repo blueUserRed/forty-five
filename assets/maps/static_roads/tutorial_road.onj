@@ -22,7 +22,7 @@ tutorialText: [
     },
 ],
 scrollable: false,
-camPosOffset: [700.0, 110.0],
+camPosOffset: [-600.0, -550.0],
 startNode: 0,
 endNode: 9,
 biome: "wasteland",
@@ -156,25 +156,10 @@ nodes: [
         }
     },
     {
-        x: 155.0,
-        y: 80.0,
-        edgesTo: [
-            8, 10
-        ],
-        nodeTexture: "map_node_dialog",
-        event: $NPCMapEvent {
-            npc: "mayor_of_cody",
-            canOnlyBeStartedOnce: true,
-            currentlyBlocks: true,
-            canBeStarted: true,
-            isCompleted: false
-        }
-    },
-    {
         x: 170.0,
         y: 80.0,
         edgesTo: [
-            9
+            8
         ],
         nodeTexture: "map_node_exit",
         event: $FinishTutorialMapEvent {

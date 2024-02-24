@@ -245,7 +245,9 @@ class DetailMapWidget(
         // are not initialised yet
         val nodePos = scaledNodePos(playerNode)
         val idealPos = -nodePos + Vector2(screen.viewport.worldWidth, screen.viewport.worldHeight) / 2f
-        mapOffset.set(idealPos - map.camPosOffset)
+        mapOffset.set(
+            if (map.scrollable) idealPos else map.camPosOffset
+        )
     }
 
     override fun act(delta: Float) {
