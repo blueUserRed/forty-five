@@ -19,7 +19,7 @@ npcs: [
                     }
                 },
                 {
-                    rawText: "We - $1the developers$1 - want to thank you for playing! We are $3definitly$3 going to contine developing this game, just wait a little. Till then, bye!",
+                    rawText: "We - $1the developers$1 - want to thank you for playing! We are $3definitely$3 going to continue developing this game, just wait a little. Till then, bye!",
                     effects: [
                         $Color {
                             indicator: "$1",
@@ -66,7 +66,13 @@ npcs: [
                     next: $Continue {}
                 },
                 {
-                    rawText: "Also, there is something I wanted to give you before you leave",
+                    rawText: "Also, there is $1something$1 I wanted to give you before you leave",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.blue
+                        },
+                    ],
                     next: $Continue {}
                 },
                 {
@@ -96,11 +102,27 @@ npcs: [
         dialog: {
             parts: [
                 {
-                    rawText: "Howdy, welcome in Aqua Balle, where all the scum, outlaws and gamblers of the old world come together to find their luck in the frontier.",
+                    rawText: "Howdy, welcome in $1Aqua Balle$1, where all the scum, outlaws and gamblers of the $1Old World$1 come together to find their luck in the frontier.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.orange
+                        },
+                    ],
                     next: $Continue {}
                 },
                 {
-                    rawText: "You can buy some cursed Bullets at my shop over there, coffins can be preordered.",
+                    rawText: "You can buy some $3cursed$3 Bullets at my shop over there, coffins can be preordered.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
                     next: $ChooseNextPart {
                         choices: [
                             {
@@ -142,11 +164,31 @@ npcs: [
                     next: $Continue {}
                 },
                 {
-                    rawText: "They are really powerful and also cursed, so a lot of people want them either for themselves or to turn a profit.",
+                    rawText: "They are really powerful and also $3cursed$3, so a lot of people want them either for themselves or to turn a profit.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
                     next: $Continue {}
                 },
                 {
-                    rawText: "That's where all those guys here come from. They hope to turn their life around and make try their luck in the frontier. Good business for us here in Aqua Balle though, so I won't complain.",
+                    rawText: "That's where all those guys here come from. They hope to turn their life around and make try their luck in the frontier. Good business for us here in $1Aqua Balle$1 though, so I won't complain.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.orange
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
                     next: $ChooseNextPart {
                         choices: [
                             {
@@ -193,11 +235,31 @@ npcs: [
                     next: $Continue {}
                 },
                 {
-                    rawText: "It’s dangerous out there, you should turn back. However, you probably won’t listen to me, nobody does.",
+                    rawText: "It’s $1$3dangerous$3$1 out there, you should turn back. However, you probably won’t listen to me, nobody does.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
                     next: $Continue {}
                 },
                 {
-                    rawText: "So, here take this at least. It will look over you on the way.",
+                    rawText: "So, here take $1this$1 at least. It will look over you on the way.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.blue
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
                     next: $GiftCardEnd {
                         card: "guardianAngelBullet",
                         changeToScreen: "screens/map_screen.onj"
@@ -212,7 +274,7 @@ npcs: [
         },
         image: {
             textureName: "npc_priest",
-            scale: 0.4
+            scale: 0.5
         }
     },
 
@@ -245,6 +307,128 @@ npcs: [
         image: {
             textureName: "npc_stranger",
             scale: 1.0
+        }
+    },
+
+    {
+        name: "witch",
+        displayName: "Witch",
+        dialog: {
+            parts: [
+                {
+                    rawText: "$4$1I'll warn you!$1$4",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Font {
+                            indicator: "$4",
+                            font: "red_wing_bmp"
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Not a $1single$1 step further or I $4swear to the $3Gods$3 I'll $1kill$1 you$4",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "This was $1$3$4OUR$4$3$1 home before you all came and took it.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Someday, the $2Onathans$2 will return to $5Salem$5 and reclaim it. Until then, $1$4stay away$4$1 from it if you value your $3life$3.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Color {
+                            indicator: "$2",
+                            color: color.grey
+                        },
+                        $Color {
+                            indicator: "$5",
+                            color: color.orange
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Oh and and tell the $2governor$2 that his days are $1$3limited$3$1.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Color {
+                            indicator: "$2",
+                            color: color.grey
+                        },
+                        $Color {
+                            indicator: "$5",
+                            color: color.orange
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.2,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "npc_witch",
+            scale: 0.9
         }
     },
 

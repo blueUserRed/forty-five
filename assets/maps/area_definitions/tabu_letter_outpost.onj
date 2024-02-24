@@ -70,7 +70,22 @@ nodes: [
         x: 65.0,
         y: 100.0,
         edgesTo: [
-            2, 3
+            2, 3, 5
+        ],
+        nodeTexture: "map_node_dialog",
+        event: $NPCMapEvent {
+            npc: "witch",
+            canOnlyBeStartedOnce: false,
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: true
+        }
+    },
+    {
+        x: 85.0,
+        y: 110.0,
+        edgesTo: [
+            4
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
