@@ -223,6 +223,10 @@ interface CardChange {
                     PriceMultiplier(selector, effect.get<Double>("price"))
                 }
 
+                "PriceAddition" -> {
+                    PriceAddition(selector, effect.get<Long>("price").toInt())
+                }
+
                 else -> throw Exception("Unknown card change: ${effect.name}")
             }
         }
@@ -256,6 +260,15 @@ interface CardChange {
             cards
                 .filter { selector.isPartOf(it) }
                 .forEach { it.modifyPrice { old -> (old * priceMulti).toInt() } }
+        }
+    }
+
+    class PriceAddition(override val selector: Selector, private val priceAddition: Int) : CardChange {
+
+        override fun applyEffects(cards: MutableList<CardPrototype>, chances: MutableList<Float>) {
+            cards
+                .filter { selector.isPartOf(it) }
+                .forEach { it.modifyPrice { old -> old + priceAddition } }
         }
     }
 }
