@@ -491,7 +491,7 @@ textures: [
     },
     {
         name: "shop_npcs_default",
-        file: "textures/events/shop/npcs/default.png",
+        file: "textures/npcs/merchant.png",
     },
     {
         name: "shop_back_button",
@@ -966,6 +966,22 @@ textures: [
     {
         name: "tutorial_road_weird_corner_house",
         file: "textures/areas/tutorial_road/weird_corner_house.png",
+    },
+    {
+        name: "npc_merchant",
+        file: "textures/npcs/merchant.png",
+    },
+    {
+        name: "npc_priest",
+        file: "textures/npcs/priest.png",
+    },
+    {
+        name: "npc_stranger",
+        file: "textures/npcs/stranger.png",
+    },
+    {
+        name: "npc_witch",
+        file: "textures/npcs/witch.png",
     },
 ],
 

@@ -53,7 +53,7 @@ object FortyFive : Game() {
     override fun create() {
         init()
 //        resetAll()
-        newRun(false)
+//        newRun(false)
         changeToInitialScreen()
 //        changeToScreen("screens/intro_screen.onj")
     }

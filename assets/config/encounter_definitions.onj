@@ -110,7 +110,7 @@ var tutorialEncounters = [
                 focusActor: "card-silverBullet",
             },
             {
-                text: "The two most important triggers are found on this bullet. Let's look at one of them: On-Placedown effects are activated when it is placed in the revolver.",
+                text: "The two most important triggers are found on this bullet. Let's look at one of them: On-Enter effects are activated when the bullet is placed in the revolver.",
                 confirmationText: "Next",
                 focusActor: "card-silverBullet",
             },

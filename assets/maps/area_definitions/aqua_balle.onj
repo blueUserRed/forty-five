@@ -2,7 +2,7 @@ startNode: 0,
 endNode: 2,
 biome: "wasteland",
 scrollable: false,
-camPosOffset: [720.0, 200.0],
+camPosOffset: [480.0, -790.0],
 progress: [
     0.0, 0.1
 ],
@@ -14,13 +14,21 @@ nodes: [
             1
         ],
         event: $EmptyMapEvent { }
-    },{
+    },
+    {
         x: -15.0,
         y: 115.0,
         edgesTo: [
             0, 2
         ],
-        event: $EmptyMapEvent { }
+        nodeTexture: "map_node_dialog",
+        event: $NPCMapEvent {
+            npc: "traveling_merchant",
+            canOnlyBeStartedOnce: false,
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: false
+        }
     },
     {
         x: 20.0,
