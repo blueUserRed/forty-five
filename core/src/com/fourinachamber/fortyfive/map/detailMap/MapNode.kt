@@ -159,11 +159,11 @@ data class MapNode(
     override fun equals(other: Any?): Boolean = this === other
 
     fun toStringRec(): String {
-        return "(x = $x, y = $y)"
+        return "(i = $index, x = $x, y = $y)"
     }
 
     override fun toString(): String {
-        return "MapNode(x = $x, y = $y, edgesTo = ${edgesTo.map { it.toStringRec() }})"
+        return "MapNode(i = $index, x = $x, y = $y, event = $event edgesTo = ${edgesTo.map { it.toStringRec() }})"
     }
 
     override fun hashCode(): Int {
