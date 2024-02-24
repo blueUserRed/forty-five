@@ -85,7 +85,6 @@ var tutorialEncounters = [
             {
                 text: "If you take too much damage, you die. When you die before you make it to the end of the road, all the cards you collected before reaching the next Area (Aqua Dulche) will be lost. If cards are saved once by reaching an Area, you can't lose them anymore.",
                 confirmationText: "Ok",
-                focusActor: "player_health_icon",
             },
         ]
     },

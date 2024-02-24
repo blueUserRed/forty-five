@@ -6,6 +6,7 @@ import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.AddMaxHPMapEvent
 import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.map.detailMap.HealOrMaxHPMapEvent
+import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.screen.general.ScreenController
@@ -38,6 +39,7 @@ class AddMaxHPScreenController(onj: OnjObject) : ScreenController(), Completable
      * gets called from the accept button, only if he is in the correct state ("valid")
      */
     override fun completed() {
+        SoundPlayer.situation("heal", screen)
         FortyFiveLogger.debug(
             logTag,
             "Max lives increased from ${SaveState.maxPlayerLives} to ${SaveState.maxPlayerLives + amount}!"

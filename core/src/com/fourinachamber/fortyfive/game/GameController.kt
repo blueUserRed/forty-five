@@ -884,7 +884,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         appendMainTimeline(Timeline.timeline {
             action {
-                SoundPlayer.situation("holster", curScreen)
+                SoundPlayer.situation("end_turn", curScreen)
             }
             encounterModifiers
                     .mapNotNull { it.executeOnEndTurn() }
@@ -903,6 +903,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             include(executePlayerStatusEffectsOnNewTurn())
             action {
                 gameDirector.chooseEnemyActions()
+                SoundPlayer.situation("turn_begin", curScreen)
             }
             include(bannerAnimationTimeline("player_turn_banner"))
             action {

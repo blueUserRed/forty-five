@@ -13,7 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.TimeUtils
-import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
 import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.EncounterModifier
@@ -162,6 +161,7 @@ class DetailMapWidget(
 
         override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
+            if (!map.scrollable) return
             super.dragStart(event, x, y, pointer)
             dragStartPosition = Vector2(x, y)
             mapOffsetOnDragStart = mapOffset
@@ -170,6 +170,7 @@ class DetailMapWidget(
 
         override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
+            if (!map.scrollable) return
             super.drag(event, x, y, pointer)
             val dragStartPosition = dragStartPosition ?: return
             val mapOffsetOnDragStart = mapOffsetOnDragStart ?: return
@@ -180,6 +181,7 @@ class DetailMapWidget(
 
         override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
+            if (!map.scrollable) return
             super.dragStop(event, x, y, pointer)
             dragStartPosition = null
             mapOffsetOnDragStart = null
@@ -243,7 +245,7 @@ class DetailMapWidget(
         // are not initialised yet
         val nodePos = scaledNodePos(playerNode)
         val idealPos = -nodePos + Vector2(screen.viewport.worldWidth, screen.viewport.worldHeight) / 2f
-        mapOffset.set(idealPos)
+        mapOffset.set(idealPos - map.camPosOffset)
     }
 
     override fun act(delta: Float) {
@@ -327,7 +329,7 @@ class DetailMapWidget(
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
         SoundPlayer.situation("walk", screen)
-        if (idealPos.compare(mapOffset, epsilon = 200f)) return
+        if (idealPos.compare(mapOffset, epsilon = 200f) || !map.scrollable) return
         moveScreenToPoint = idealPos
     }
 
@@ -364,9 +366,10 @@ class DetailMapWidget(
         )
         if (!ScissorStack.pushScissors(scissor)) return
         drawBackground(batch)
+        drawBackgroundDecorations(batch)
         drawEdges(batch)
         drawNodes(batch)
-        drawDecorations(batch)
+        drawForegroundDecorations(batch)
         drawAnimatedDecorations(batch)
         drawDirectionIndicator(batch)
         drawNodeImages(batch)
@@ -380,6 +383,7 @@ class DetailMapWidget(
     }
 
     private fun updateScreenMovement() {
+        if (!map.scrollable) return
         val moveScreenToPoint = moveScreenToPoint ?: return
         val movement = (moveScreenToPoint - mapOffset).withMag(screenSpeed)
         mapOffset += movement
@@ -473,19 +477,37 @@ class DetailMapWidget(
         return Rectangle(playerPos.x, playerPos.y, playerHeight, playerWidth)
     }
 
-    private fun drawDecorations(batch: Batch) {
+    private fun drawForegroundDecorations(batch: Batch) {
         val (offX, offY) = mapOffset
-        map.decorations.forEach { decoration ->
-            val drawable = decoration.getDrawable(screen)
-            val width = decoration.baseWidth
-            val height = decoration.baseHeight
-            decoration.instances.forEach { instance ->
-                drawable.draw(
-                    batch,
-                    x + offX + instance.first.x * mapScale, y + offY + instance.first.y * mapScale,
-                    width * instance.second * mapScale, height * instance.second * mapScale
-                )
-            }
+        val decorations = map.decorations.filter { !it.drawInBackground }
+        decorations.forEach { decoration ->
+            drawDecoration(decoration, batch, offX, offY)
+        }
+    }
+
+    private fun drawBackgroundDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        val decorations = map.decorations.filter { it.drawInBackground }
+        decorations.forEach { decoration ->
+            drawDecoration(decoration, batch, offX, offY)
+        }
+    }
+
+    private fun drawDecoration(
+        decoration: DetailMap.MapDecoration,
+        batch: Batch,
+        offX: Float,
+        offY: Float
+    ) {
+        val drawable = decoration.getDrawable(screen)
+        val width = decoration.baseWidth
+        val height = decoration.baseHeight
+        decoration.instances.forEach { instance ->
+            drawable.draw(
+                batch,
+                x + offX + instance.first.x * mapScale, y + offY + instance.first.y * mapScale,
+                width * instance.second * mapScale, height * instance.second * mapScale
+            )
         }
     }
 

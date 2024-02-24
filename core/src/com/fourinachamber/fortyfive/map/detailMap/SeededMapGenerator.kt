@@ -63,7 +63,9 @@ class SeededMapGenerator(
             false,
             biome,
             restrictions.progress,
-            mutableListOf()
+            mutableListOf(),
+            true,
+            Vector2()
         )
     }
 
@@ -1267,6 +1269,7 @@ sealed class DecorationDistributionFunction(
             type,
             baseWidth,
             baseHeight,
+            false,
             possiblePositions
                 .filter {
                     isPossibleToPlaceNode(
