@@ -38,6 +38,11 @@ var images = {
         width: 300.0,
         height: 200.0
     },
+    underConstruction: {
+        image: "location_sign_under_construction",
+        width: 359.0 * 0.7,
+        height: 222.0 * 0.7
+    },
     spireName: {
         image: "location_name_spire_outpost",
         width: 90.0,
@@ -75,6 +80,11 @@ mapImages: [
         name: "spire_outpost",
         type: "sign",
         ...(images.spire),
+    },
+    {
+        name: "under_construction",
+        type: "sign",
+        ...(images.underConstruction),
     },
     {
         name: "aqua_balle",

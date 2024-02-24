@@ -218,7 +218,7 @@ object SaveState {
         playerLives = if (PermaSaveState.playerHasCompletedTutorial) {
             obj.get<Long>("playerLives").toInt()
         } else {
-            5
+            6
         }
         maxPlayerLives = obj.get<Long>("maxPlayerLives").toInt()
         _playerMoney = obj.get<Long>("playerMoney").toInt()

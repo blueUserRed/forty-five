@@ -183,4 +183,69 @@ npcs: [
         }
     },
 
+    {
+        name: "priest_of_aqua_balle",
+        displayName: "Priest of Aqua Balle",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Bless you!",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "It’s dangerous out there, you should turn back. However, you probably won’t listen to me, nobody does.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "So, here take this at least. It will look over you on the way.",
+                    next: $GiftCardEnd {
+                        card: "guardianAngelBullet",
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.0,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "npc_priest",
+            scale: 0.4
+        }
+    },
+
+    {
+        name: "not_yet_implemented_npc",
+        displayName: "Stranger",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Hello!",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "This area is still under construction, so maybe check back later.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Thanks for you patience!",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.0,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "npc_stranger",
+            scale: 1.0
+        }
+    },
+
 ]

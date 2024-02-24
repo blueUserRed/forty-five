@@ -22,7 +22,7 @@ stats: {
 },
 
 position: {
-    map: "aqua_balle",  //TODO CHANGE BACK TO "aqua_balle"; PLEASE TELL ME THIS MARVIN
+    map: "tabu_letter_outpost",  //TODO CHANGE BACK TO "aqua_balle"; PLEASE TELL ME THIS MARVIN
     node: 0,
     lastNode: null
 },
