@@ -55,7 +55,7 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun(false)
         changeToInitialScreen()
-//        changeToScreen("screens/intro_screen.onj")
+//        changeToScreen("screens/credits_screen.onj")
     }
 
     fun changeToInitialScreen() {

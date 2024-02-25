@@ -1,0 +1,599 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "roadgeek", "red_wing_bmp", "red_wing",
+
+        "black_texture", "white_texture",
+        "logo_red", "microwave_studios_logo", "logo_htl3r",
+
+        "main_theme",
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    background: "black_texture",
+    music: "main_theme",
+    playAmbientSounds: false,
+    transitionAwayTime: 1.0,
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $CreditScreenController { },
+},
+
+templates: [
+],
+
+var creditOffset = 1_000;
+
+root: $Box {
+    styles: [
+        {
+            width: worldWidth#points,
+            alignItems: align.center,
+            positionTop: (worldHeight / 2.0 - worldWidth * 0.3 / (1573.0 / 371.0))#points,
+        }
+    ],
+    name: "credits_scroller"
+} children [
+
+    $Box {
+        styles: [
+            {
+                background: "logo_red",
+                width: (worldWidth * 0.5)#points,
+                aspectRatio: 1573.0 / 371.0
+            }
+        ],
+    },
+
+    $Box {
+        styles: [
+            {
+                marginTop: 800#points,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.spaceBetween,
+                width: (worldWidth * 0.7)#points,
+            }
+        ],
+    } children [
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+            font: "red_wing_bmp",
+            text: "Philip Jankovic",
+            isDistanceField: false,
+            fontScale: 0.7,
+            align: "right",
+            color: color.red,
+        },
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column,
+                    alignItems: align.flexStart,
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "Lead Game Designer",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Lead Visual Artist",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Product Owner",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+        ]
+    ],
+
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.spaceBetween,
+                width: (worldWidth * 0.7)#points,
+            }
+        ],
+    } children [
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+            font: "red_wing_bmp",
+            text: "Marvin Kurka",
+            isDistanceField: false,
+            fontScale: 0.7,
+            align: "right",
+            color: color.red,
+        },
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column,
+                    alignItems: align.flexStart,
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "Lead Software Engineer",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Game Designer",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "VFX Artist",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+        ]
+    ],
+
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.spaceBetween,
+                width: (worldWidth * 0.7)#points,
+            }
+        ],
+    } children [
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+            font: "red_wing_bmp",
+            text: "Markus Böheim",
+            isDistanceField: false,
+            fontScale: 0.7,
+            align: "right",
+            color: color.red,
+        },
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column,
+                    alignItems: align.flexStart,
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "Visual Artist",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "UI Designer",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Video Editor",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+        ]
+    ],
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.spaceBetween,
+                width: (worldWidth * 0.7)#points,
+            }
+        ],
+    } children [
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+            font: "red_wing_bmp",
+            text: "Nils Hubmann",
+            isDistanceField: false,
+            fontScale: 0.7,
+            align: "right",
+            color: color.red,
+        },
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column,
+                    alignItems: align.flexStart,
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "Project Manager",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Marketing",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Sound Designer",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Animator",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+        ]
+    ],
+
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                flexDirection: flexDirection.row,
+                justifyContent: justify.spaceBetween,
+                width: (worldWidth * 0.8)#points,
+            }
+        ],
+    } children [
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+            font: "red_wing_bmp",
+            text: "Felix Zwickelstorfer",
+            isDistanceField: false,
+            fontScale: 0.7,
+            align: "right",
+            color: color.red,
+        },
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column,
+                    alignItems: align.flexStart,
+                    width: (worldWidth * 0.3)#points
+                }
+            ],
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "Software Engineer",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+            $Label {
+                font: "roadgeek",
+                text: "Map Generation Developer",
+                isDistanceField: true,
+                fontScale: 1.6,
+                color: color.forty_white,
+            },
+        ]
+    ],
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                width: (worldWidth * 0.6)#points,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+            }
+        ]
+    } children [
+         $Label {
+            font: "red_wing_bmp",
+            text: "Music",
+            isDistanceField: false,
+            fontScale: 0.45,
+            align: "center",
+            color: color.red,
+        },
+        $Label {
+            font: "roadgeek",
+            text: "Nils Hubmann & Nils Jandrasits",
+            isDistanceField: true,
+            fontScale: 1.4,
+            color: color.forty_white,
+        },
+    ],
+
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                width: (worldWidth * 0.6)#points,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+            }
+        ]
+    } children [
+         $Label {
+            font: "red_wing_bmp",
+            text: "Past Team Members",
+            isDistanceField: false,
+            fontScale: 0.45,
+            align: "center",
+            color: color.red,
+        },
+        $Label {
+            font: "roadgeek",
+            text: "People who left the project along the way or worked on\nprevious iterations of .Forty-Five",
+            align: "center",
+            isDistanceField: true,
+            fontScale: 1.4,
+            color: color.red,
+        },
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.5)#points,
+                    marginTop: 30#points,
+                }
+            ],
+            font: "roadgeek",
+            text: "Christoph Allmer,\nDylan Calderon,\nDavid Angelo",
+            align: "center",
+            wrap: true,
+            isDistanceField: true,
+            fontScale: 1.4,
+            color: color.forty_white,
+        },
+    ],
+
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                width: (worldWidth * 0.6)#points,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+            }
+        ]
+    } children [
+         $Label {
+            font: "red_wing_bmp",
+            text: "Special Thanks",
+            isDistanceField: false,
+            fontScale: 0.45,
+            align: "center",
+            color: color.red,
+        },
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.5)#points,
+                }
+            ],
+            font: "roadgeek",
+            text: "Gitti, Dragan, Danji,\nLena, Emmi, Pippi,\nDavid Q., Anton, Lisa,\nAna, Emma, Philipp,\nCyprian, Mario,\n5BI (HTL3R 2023/24),\nScoutgroup 14 Raro,\nProf. Doppler",
+            align: "center",
+            wrap: true,
+            isDistanceField: true,
+            fontScale: 1.4,
+            color: color.forty_white,
+        },
+    ],
+
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                width: (worldWidth * 0.6)#points,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+            }
+        ]
+    } children [
+         $Label {
+            font: "red_wing_bmp",
+            text: "Thank you",
+            isDistanceField: false,
+            fontScale: 0.45,
+            align: "center",
+            color: color.red,
+        },
+        $Label {
+            font: "roadgeek",
+            text: "to the professors at HTL Rennweg who supported the project along the way",
+            align: "center",
+            isDistanceField: true,
+            fontScale: 1.4,
+            color: color.red,
+        },
+        $Label {
+            styles: [
+                {
+                    marginTop: 30#points,
+                    width: (worldWidth * 0.5)#points,
+                }
+            ],
+            font: "roadgeek",
+            text: "Florian Weiss,\nGerhard Sturm,\nVincent Nussbaumer,\nMitra Bayandor,\nRoman Jerabek",
+            align: "center",
+            wrap: true,
+            isDistanceField: true,
+            fontScale: 1.4,
+            color: color.forty_white,
+        },
+    ],
+
+    $Box {
+        styles: [
+            {
+                marginTop: creditOffset#points,
+                flexDirection: flexDirection.row,
+                width: (worldWidth * 0.8)#points,
+                justifyContent: justify.spaceBetween,
+            }
+        ]
+    } children [
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column
+                }
+            ]
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "developed by",
+                align: "center",
+                isDistanceField: true,
+                fontScale: 1.2,
+                color: color.grey,
+            },
+            $Box {
+                styles: [
+                    {
+                        marginTop: 20#points,
+                        background: "microwave_studios_logo",
+                        width: (worldWidth * 0.4)#points,
+                        aspectRatio: 2030.0 / 528.0
+                    }
+                ]
+            }
+        ],
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.column
+                }
+            ]
+        } children [
+            $Label {
+                font: "roadgeek",
+                text: "a project at",
+                align: "center",
+                isDistanceField: true,
+                fontScale: 1.2,
+                color: color.grey,
+            },
+            $Box {
+                styles: [
+                    {
+                        background: "white_texture",
+                        marginTop: 20#points,
+                        width: (worldWidth * 0.3)#points,
+                        aspectRatio: 1614.0 / 675.0
+                    }
+                ]
+            } children [
+                $Box {
+                    styles: [
+                        {
+                            background: "logo_htl3r",
+                            width: 100#percent,
+                            height: 100#percent,
+                        }
+                    ]
+                }
+            ]
+        ],
+    ],
+
+    $Label {
+        styles: [
+            {
+                style_priority: 1,
+                marginTop: 300#points,
+                width: worldWidth#points,
+                alpha: 0.0,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("finished"),
+                alpha: 1.0,
+                style_animation: {
+                    duration: 1.0,
+                    delay: 0.5,
+                    interpolation: interpolation.linear,
+                }
+            }
+        ],
+         font: "roadgeek",
+        text: "click to return to title screen",
+        align: "center",
+        isDistanceField: true,
+        fontScale: 1.5,
+        color: color.grey,
+   },
+
+]

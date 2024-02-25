@@ -460,6 +460,8 @@ $ScreenController {
     }
 
     $TitleScreenController { }
+
+    $CreditScreenController { }
 }
 
 $KeyAction {

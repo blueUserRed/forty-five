@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
+import com.fourinachamber.fortyfive.screen.gameComponents.CreditScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.TitleScreenController
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
@@ -28,6 +29,7 @@ object ScreenControllerFactory {
         "MapScreenController" to { onj -> MapScreenController(onj) },
         "StatsScreenController" to { StatsScreenController() },
         "TitleScreenController" to { TitleScreenController() },
+        "CreditScreenController" to { CreditScreenController() },
     )
 
     /**

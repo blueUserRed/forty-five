@@ -143,8 +143,10 @@ class Card(
     var isShotProtected: Boolean = false
         private set
 
-    val shouldRemoveAfterShot: Boolean
-        get() = !(isEverlasting || protectingModifiers.isNotEmpty())
+    fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
+        (isEverlasting && !controller.encounterModifiers.any { it.disableEverlasting() }) ||
+        protectingModifiers.isNotEmpty()
+    )
 
     private var lastDamageValue: Int = baseDamage
 
@@ -246,7 +248,7 @@ class Card(
     /**
      * called by gameScreenController when the card was shot
      */
-    fun afterShot() {
+    fun afterShot(controller: GameController) {
         if (protectingModifiers.isNotEmpty()) {
             val effect = protectingModifiers.first()
             val newEffect = effect.copy(second = effect.second - 1)
@@ -257,7 +259,7 @@ class Card(
             }
             modifiersChanged()
         }
-        if (shouldRemoveAfterShot) leaveGame()
+        if (shouldRemoveAfterShot(controller)) leaveGame()
     }
 
     fun beforeShot() {
@@ -377,7 +379,7 @@ class Card(
         include(effects.mapNotNull { it.second }.collectTimeline())
         includeLater(
             { actor.animateBack(controller) },
-            { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot) }
+            { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot(controller)) }
         )
         action {
             actor.setScale(1f)

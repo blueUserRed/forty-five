@@ -386,6 +386,7 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun transitionAway() {
+        inputMultiplexer.clear()
         enterState(transitionAwayScreenState)
     }
 
