@@ -167,7 +167,24 @@ object FortyFive : Game() {
 
 //        resetAll()
 //        newRun()
-//        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
+        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
+        cards
+            .get<OnjArray>("cards")
+            .value
+            .map { it as OnjObject }
+            .zip { it.get<OnjArray>("tags") }
+            .mapSecond { it.value.find { (it.value as String).startsWith("rarity") } }
+            .mapSecond { when (it?.value) {
+                "rarity1" -> 1
+                "rarity2" -> 2
+                "rarity3" -> 3
+                else -> null
+            } }
+            .filter { it.second != null }
+            .map { (card, num) -> List(num!!) { card.get<String>("name") } }
+            .flatten()
+            .joinToString(separator = ",\n", transform = { "'$it'" })
+            .let { println(it) }
 //        println(cards.get<OnjArray>("cards").value.size)
 //        println(cards.get<OnjArray>("cards").value.map {it as OnjObject}.map { it.get<String>("name") }.joinToString(separator = ",\n", transform = { "'$it'" }))
     }

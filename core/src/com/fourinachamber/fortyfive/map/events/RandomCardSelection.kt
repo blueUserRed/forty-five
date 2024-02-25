@@ -116,7 +116,6 @@ object RandomCardSelection {
         cards: List<CardPrototype> = allCardPrototypes,
     ): List<CardPrototype> {
         val newCards = doCardRarities(cards)
-        if (nbrOfCards >= newCards.size && unique) return newCards
         val (tempCards, tempChances) = getCardsWithChances(newCards.toMutableList(), typeNames, biome, occasion)
         return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, unique)
     }
