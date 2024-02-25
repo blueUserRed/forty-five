@@ -482,39 +482,46 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) = appendMainTimeline(Timeline.timeline {
-        FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
-        val cardInSlot = revolver.getCardInSlot(slot)
-
-        if (
-            card.type != Card.Type.BULLET ||
-            !card.allowsEnteringGame(this@GameController, slot) ||
-            !(cardInSlot?.isReplaceable ?: true) ||
-            !cost(card.cost, card.actor)
-        ) {
-            SoundPlayer.situation("not_allowed", curScreen)
-            return
-        }
+        var cardInSlot: Card? = null
+        var skip = false
         action {
+            FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
+            cardInSlot = revolver.getCardInSlot(slot)
+            if (
+                card.type != Card.Type.BULLET ||
+                !card.allowsEnteringGame(this@GameController, slot) ||
+                !(cardInSlot?.isReplaceable ?: true) ||
+                !cost(card.cost, card.actor)
+            ) {
+                SoundPlayer.situation("not_allowed", curScreen)
+                skip = true
+                return@action
+            }
             cardHand.removeCard(card)
             if (cardInSlot != null) revolver.preAddCard(slot, card)
         }
         includeLater(
             { destroyCardTimeline(cardInSlot!!) },
-            { cardInSlot != null }
+            { !skip && cardInSlot != null }
         )
         action {
+            if (skip) return@action
             revolver.setCard(slot, card)
             FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
             card.onEnter(this@GameController)
             checkCardMaximums()
         }
-        _encounterModifiers
-            .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
-            .collectTimeline()
-            .let { include(it) }
+        includeLater(
+            {
+                _encounterModifiers
+                    .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
+                    .collectTimeline()
+            },
+            { !skip }
+        )
         includeLater(
             { checkEffectsSingleCard(Trigger.ON_ENTER, card) },
-            { true }
+            { !skip }
         )
     })
 
@@ -783,9 +790,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
                 action {
                     if (cardToShoot.shouldRemoveAfterShot) {
-                        if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
-                        SoundPlayer.situation("orb_anim_playing", curScreen)
-                        gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
+                        if (!cardToShoot.isUndead) {
+                            cardStack.add(cardToShoot)
+                            SoundPlayer.situation("orb_anim_playing", curScreen)
+                            gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
+                        }
                         revolver.removeCard(cardToShoot)
                     }
                     if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
