@@ -119,6 +119,7 @@ screens: {
     changeToHealOrMaxHPScreen: "screens/heal_or_max_screen.onj",
     changeToAddMaxHPScreen: "screens/add_max_hp_screen.onj",
     titleScreen: "screens/title_screen.onj",
+    creditsScreen: "screens/credits_screen.onj",
 },
 
 displayNames: [

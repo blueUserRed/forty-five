@@ -315,6 +315,30 @@ root: $Box {
             font: "roadgeek",
             fontScale: 1.6,
             color: color.black,
+            text: "View Credits",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $OnClickChangeScreenBehaviour {
+                    screenPath: "screens/credits_screen.onj",
+                }
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                    marginTop: 10#points,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
             text: "Quit",
             behaviours: [
                 sharedComponents.buttonCursorBehaviour,
