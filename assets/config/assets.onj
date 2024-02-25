@@ -828,6 +828,15 @@ textures: [
         useMipMaps: true
     },
     {
+        name: "logo_red",
+        file: "textures/logo_red.png",
+    },
+    {
+        name: "logo_htl3r",
+        file: "textures/htl3r.png",
+        useMipMaps: true
+    },
+    {
         name: "map_extraction_background",
         file: "textures/map/extraction/background.png"
     },

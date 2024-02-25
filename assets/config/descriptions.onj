@@ -19,6 +19,11 @@ hoverDetailDescriptions: [
         description: "$status$SHIELD (d)$status$\nShield protects from d dmg.",
     },
     {
+        keyword: "BEWITCHED",
+        groupName: "status",
+        description: "$status$BEWITCHED (t, r)$status$\nAll bullets turn the revolver one to the left. Active for t turns or r rotations.",
+    },
+    {
         keyword: "PROTECTED",
         groupName: "trait",
         description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times.",

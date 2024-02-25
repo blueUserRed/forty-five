@@ -166,6 +166,12 @@ object SoundPlayer {
         }
     }
 
+    fun skipInMusic(amount: Float) {
+        currentMusic?.let {
+            it.position += amount
+        }
+    }
+
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
         val music = ResourceManager.get<Music>(screen, musicHandle)
         music.play()

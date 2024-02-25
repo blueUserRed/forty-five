@@ -233,6 +233,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
         onjScreen.invalidateEverything()
         gameDirector.chooseEnemyActions()
+        addEncounterModifier(EncounterModifier.Frost)
         SoundPlayer.transitionToMusic(musicBeforeWin, musicTransitionTime, curScreen)
     }
 
@@ -656,11 +657,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
-                    if (parryCard.shouldRemoveAfterShot) {
+                    if (parryCard.shouldRemoveAfterShot(this@GameController)) {
                         revolver.removeCard(parryCard)
                         cardStack.add(parryCard)
                     }
-                    parryCard.afterShot()
+                    parryCard.afterShot(this@GameController)
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
                 if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))
@@ -789,7 +790,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true)
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
                 action {
-                    if (cardToShoot.shouldRemoveAfterShot) {
+                    if (cardToShoot.shouldRemoveAfterShot(this@GameController)) {
                         if (!cardToShoot.isUndead) {
                             cardStack.add(cardToShoot)
                             SoundPlayer.situation("orb_anim_playing", curScreen)
@@ -798,7 +799,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         revolver.removeCard(cardToShoot)
                     }
                     if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
-                    cardToShoot.afterShot()
+                    cardToShoot.afterShot(this@GameController)
                 }
             }
             include(rotateRevolver(rotationDirection))
@@ -1277,7 +1278,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "player lost")
             playerLost = true
         }
-        include(gameRenderPipeline.getOnDeathPostProcessingTimeline())
+        include(gameRenderPipeline.getFadeToBlackTimeline(2000))
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
