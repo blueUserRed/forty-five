@@ -6,12 +6,12 @@ hoverDetailDescriptions: [
     {
         keyword: "BURNING",
         groupName: "status",
-        description: "$status$BURNING (t)$status$\nEnemies with burning get 50% more damage for the next t turns.",
+        description: "$status$BURNING (t)$status$\nBurning increases damage not caused by status effects by 50%.",
     },
     {
         keyword: "POISON",
         groupName: "status",
-        description: "$status$POISON (d,t)$status$\nEnemies with Poison take d dmg for t turns. d and t both stack.",
+        description: "$status$POISON (d,t)$status$\nPoison causes d damage for t turns. d and t both stack.",
     },
     {
         keyword: "SHIELD",
@@ -21,7 +21,7 @@ hoverDetailDescriptions: [
     {
         keyword: "PROTECTED",
         groupName: "trait",
-        description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won’t leave the revolver On-Shot for x times.",
+        description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times.",
     },
     {
         keyword: "DISINTEGRATION",
@@ -36,7 +36,7 @@ hoverDetailDescriptions: [
     {
         keyword: "EVERLASTING",
         groupName: "trait",
-        description: "$trait$EVERLASTING$trait$\nA bullet with everlasting won’t leave the revolver On-Shot",
+        description: "$trait$EVERLASTING$trait$\nA bullet with everlasting won't leave the revolver On-Shot",
     },
     {
         keyword: "UNDEAD",
@@ -46,7 +46,7 @@ hoverDetailDescriptions: [
     {
         keyword: "REINFORCED",
         groupName: "trait",
-        description: "$trait$REINFORCED$trait$\nWhen parrying with a bullet with reinforced, no dmg will come through, even if this Bullets dmg value is smaller than the attack that is being parried.",
+        description: "$trait$REINFORCED$trait$\nWhen parrying with a bullet that is reinforced, no dmg will come through, even if this bullets dmg value is smaller than the attack that is being parried.",
     },
     {
         keyword: "DISCHARGE POISON",
