@@ -442,7 +442,7 @@ root: $Box {
                 }
             ],
             font: "roadgeek",
-            text: "Gitti, Dragan, Danji,\nLena, Emmi, Pippi,\nDavid Q., Anton, Lisa,\nAna, Emma, Philipp,\nCyprian, Mario,\n5BI (HTL3R 2023/24),\nScoutgroup 14 Raro,\nProf. Doppler",
+            text: "Gitti, Dragan, Danji,\nLena, Emmi, Pippi,\nDavid Q., Anton, Lisa,\nAna, Emma, Philipp,\nCyprian, Mario,\nProf. Doppler,\n5BI (HTL3R 2023/24),\nScoutgroup 14 Raro,\nThe osq Team,\nThe Warden of Time Team",
             align: "center",
             wrap: true,
             isDistanceField: true,

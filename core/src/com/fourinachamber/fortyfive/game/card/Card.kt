@@ -273,6 +273,10 @@ class Card(
     }
 
     fun protect(source: String, protectedFor: Int, validityChecker: () -> Boolean) {
+        if (isUndead) {
+            FortyFiveLogger.debug(logTag, "cant protect undead bullet")
+            return
+        }
         FortyFiveLogger.debug(logTag, "$source protected $this for $protectedFor shots")
         protectingModifiers.add(Triple(source, protectedFor, validityChecker))
         modifiersChanged()

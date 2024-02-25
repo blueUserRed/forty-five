@@ -26,7 +26,7 @@ hoverDetailDescriptions: [
     {
         keyword: "PROTECTED",
         groupName: "trait",
-        description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times.",
+        description: "$trait$PROTECTED (x)$trait$\nA bullet with protected won't leave the revolver On-Shot for x times. Doesn't work on undead bullets.",
     },
     {
         keyword: "DISINTEGRATION",

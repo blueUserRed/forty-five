@@ -49,7 +49,7 @@ encounterModifiers: {
     frost: {
         icon: "encounter_modifier_frost",
         displayName: "Frost",
-        description: "The revolver doesn't turn"
+        description: "The revolver doesn't turn. Everlasting doesn't work."
     },
     bewitchedMist: {
         icon: "encounter_modifier_bewitched_mist",

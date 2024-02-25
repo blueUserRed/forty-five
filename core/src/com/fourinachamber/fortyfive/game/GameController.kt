@@ -233,7 +233,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
         onjScreen.invalidateEverything()
         gameDirector.chooseEnemyActions()
-        addEncounterModifier(EncounterModifier.Frost)
         SoundPlayer.transitionToMusic(musicBeforeWin, musicTransitionTime, curScreen)
     }
 
