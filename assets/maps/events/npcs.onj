@@ -30,9 +30,11 @@ npcs: [
                             action: shake,
                         },
                     ],
-                    next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
-                    }
+                    next: $Continue { }
+                },
+                {
+                    rawText: "Oh and also, you'll have to sit through the credits now",
+                    next: $ToCreditScreenEnd { }
                 },
             ],
             defaults: {

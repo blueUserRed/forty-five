@@ -150,6 +150,10 @@ object MapManager {
         FortyFive.changeToScreen(screenPaths["titleScreen"]!!)
     }
 
+    fun changeToCreditsScreen() {
+        FortyFive.changeToScreen(screenPaths["creditsScreen"]!!)
+    }
+
     /**
      * @see DetailMap.invalidateCachedAssets
      */

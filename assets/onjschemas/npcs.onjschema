@@ -26,6 +26,8 @@ $NextDialogPartSelector {
         changeToScreen: string
     }
 
+    $ToCreditScreenEnd { }
+
 }
 
 var dialog = {

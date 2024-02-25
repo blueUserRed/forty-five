@@ -81,6 +81,7 @@ screens: {
     changeToHealOrMaxHPScreen: string,
     changeToAddMaxHPScreen: string,
     titleScreen: string,
+    creditsScreen: string,
 },
 
 paths: {

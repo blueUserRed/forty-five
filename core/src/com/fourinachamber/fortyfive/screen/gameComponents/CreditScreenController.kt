@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.screen.gameComponents
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -19,7 +18,7 @@ class CreditScreenController : ScreenController() {
     private val timeline: Timeline = Timeline()
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        SoundPlayer.skipInMusic(18.0f)
+        SoundPlayer.skipMusicTo(18.0f)
         screen = onjScreen
         creditsScroller = onjScreen.namedActorOrError("credits_scroller") as? CustomFlexBox
             ?: throw RuntimeException("actor named credits_scroller must be a CustomFlexBox")
