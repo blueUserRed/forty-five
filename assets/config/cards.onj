@@ -55,7 +55,7 @@ cards: [
     {
         name: "workerBullet",
         title: "Worker Bullet",
-        flavourText: "backup on the way",
+        flavourText: "There are rumors that all those cursed bullets that can be found in the frontier are the work of Witches... I wonder why they would make bullets of all things...",
         description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nGain 1 reserve",
         baseDamage: 5,
         coverValue: 0,
@@ -74,7 +74,7 @@ cards: [
         name: "bigBullet",
         title: "Big Bullet",
         flavourText: "",
-        description: "Bullet but like... idk bigger",
+        description: "Don't ask me how it fits, it just does.",
         baseDamage: 16,
         coverValue: 0,
         traitEffects: [],
@@ -127,7 +127,7 @@ cards: [
     {
         name: "bewitchedBullet",
         title: "Bewitched Bullet",
-        flavourText: "A powerfull bullet, mostly used by the witches in the civil war. Its potential is often overlooked, because the outlaws coming to the Frontier get confused when using it.",
+        flavourText: "\"Be at ease little sister, support is on the way, the Onathahans will not go down without a fight. Take care TENYA. May the blessings of the gods find you. Yours, URIKA\" -Letter to Salem",
         description: "$trigger$On-Shot:$trigger$\nInstead of turning right, the revolver turns left.",
         baseDamage: 7,
         coverValue: 0,
@@ -165,7 +165,7 @@ cards: [
     {
         name: "leadersBullet",
         title: "Leaders Bullet",
-        flavourText: "",
+        flavourText: "I wonder what happened, that a bullet like Leaders Bullet exists.",
         description: "$trigger$On-Placedown:$trigger$\nAll other bullets get +5 dmg as long as Leaders Bullet is in the revolver",
         baseDamage: 15,
         coverValue: 0,
@@ -365,7 +365,7 @@ cards: [
     {
         name: "undeadBullet",
         title: "Undead Bullet",
-        flavourText: "does that happen to all ma bullets? The witch didn't mention thaat.",
+        flavourText: "Like it was alive in the first place...",
         description: "$trait$UNDEAD$trait$\n\n$trigger$On-Leave:$trigger$\nThe bullet in slot 4" + slot.4 + " gets +10 dmg",
         baseDamage: 12,
         coverValue: 0,
@@ -392,7 +392,7 @@ cards: [
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [d
+        effects: [
             giveStatus("shot", poison(3#val, 4#val))
         ],
         forceLoadCards: [],
@@ -424,7 +424,7 @@ cards: [
         name: "bossBullet",
         title: "Boss Bullet",
         flavourText: "boss Bullet",
-        description: "As long as this bullet is in the revolver, when a new round starts: create 1 card of type ‘worker Bullet’ in your hand",
+        description: "As long as this bullet is in the revolver, when a new round starts: create 1 card of type ‘worker Bullet' in your hand",
         baseDamage: 10,
         coverValue: 0,
         traitEffects: [],
@@ -443,7 +443,7 @@ cards: [
     {
         name: "protectiveBullet",
         title: "Protective Bullet",
-        flavourText: "This Bullet still can’t protect you from the truth: That you are bad at this game",
+        flavourText: "This Bullet still can't protect you from the truth: That you are bad at this game",
         description: "$trigger$On-Placedown:$trigger$\nTarget bullet gets $trait$PROTECTED$trait$ (4) as long as this bullet is in the revolver.",
         baseDamage: 6,
         coverValue: 0,
@@ -463,7 +463,7 @@ cards: [
     {
         name: "purgeBullet",
         title: "Purge Bullet",
-        flavourText: "",
+        flavourText: "\"They are on their way! Jake lead them right to us. That snake. I knew I should’t have let him marry Tenya. We have to protect our home, gather all Onathahans and give orders to start the bullet forges. May the gods be with us.\" -Letter to Salem",
         description: "$trigger$On-Placedown:$trigger$\nDestroy both bullets next to this.",
         baseDamage: 12,
         coverValue: 0,
@@ -483,7 +483,7 @@ cards: [
     {
         name: "deadBullet",
         title: "Dead Bullet",
-        flavourText: "Aaaand it’s dead",
+        flavourText: "Aaaand it's dead",
         description: "$trigger$On-Placedown:$trigger$\nThis Bullet destroys itself",
         baseDamage: 0,
         coverValue: 0,
@@ -503,7 +503,7 @@ cards: [
     {
         name: "cowardBullet",
         title: "Coward Bullet",
-        flavourText: "No, don’t chicken out this time! Come here you lil shit, don’t run from me!",
+        flavourText: "No, don't chicken out this time! Come here you lil shit, don't run from me!",
         description: "$trigger$While in revolver:$trigger$\nYou can replace this with any card out of your hand (you still have to pay for it). If you do, destroy this bullet.",
         baseDamage: 1,
         coverValue: 0,
@@ -622,7 +622,7 @@ cards: [
     {
         name: "finalBullet",
         title: "Final Bullet",
-        flavourText: "",
+        flavourText: "\"He came to our land, married on of our own and then brought war. We forged bullets to defend ourselves. But this was his plan all along. An empire, built with our bullets...\" - a forgotten note",
         description: "$trigger$On-Leave:$trigger$\nYou lose the game;\n$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nAll other bullets get +12 dmg",
         baseDamage: 20,
         coverValue: 0,
@@ -700,7 +700,7 @@ cards: [
     {
         name: "hollowpointBullet",
         title: "Hollowpoint Bullet",
-        flavourText: "",
+        flavourText: "This Bullet doesn't seem to be cursed. It rather seems to be manufactured by hand. It's almost like a normal Bullet, with the differance being that the tip is hollow... maybe this improves the damage?",
         description: "If the enemy has shield:\nThis Bullet has +6 dmg",
         baseDamage: 10,
         coverValue: 0,
@@ -720,8 +720,8 @@ cards: [
     {
         name: "pppBullet",
         title: "+P+ Bullet",
-        flavourText: "+P+ Bullet",
-        description: "If the enemy has at least 1 status effect: \nThis has +6 dmg",
+        flavourText: "This Bullet has \"Manufactured in New Hemingway\" engraved in it. The overpressured Tip guarantees maximal effectiveness",
+        description: "If the enemy has at least 1 status effect: \nThis bullet gets +6 dmg",
         baseDamage: 8,
         coverValue: 0,
         traitEffects: [],
@@ -761,7 +761,7 @@ cards: [
     {
         name: "toxicBullet",
         title: "Toxic Bullet",
-        flavourText: "",
+        flavourText: "Still not as toxic as my ex-girlfriend",
         description: "$trigger$While in revolver:$trigger$\nAs long as the enemy has $status$POISON$status$:\nThis bullet gets +8 dmg",
         baseDamage: 5,
         coverValue: 0,
@@ -925,7 +925,7 @@ cards: [
     {
         name: "softPointBullet",
         title: "Soft Point Bullet",
-        flavourText: "During the civil war, the weapon industry of the old World created their own special bullets in order to combat those of the witches. Soft Point Bullet is one of them.",
+        flavourText: "\"We can't afford to lose! Those stupid witches have the upper hand on us with their bullets. How is project New Hemingway coming along? We need those projectiles as soon as possible\" -Letter to the old World",
         description: "If a enemy has more than 50% health, this does 6 dmg more.",
         baseDamage: 7,
         coverValue: 0,
@@ -945,7 +945,7 @@ cards: [
     {
         name: "brickBullet",
         title: "Brick Bullet",
-        flavourText: "Short disclaimer: I’ve never thrown this at a homeless man! It slipped out of my hand!",
+        flavourText: "I've not thrown this at a homeless man! It slipped out of my hand!",
         description: "$trigger$On-Placedown:$trigger$\n You get $status$SHIELD$status$ (6)",
         baseDamage: 7,
         coverValue: 0,
@@ -1028,7 +1028,7 @@ cards: [
     {
         name: "woodenBullet",
         title: "Wooden Bullet",
-        flavourText: "",
+        flavourText: "Normally you would build houses or something out of wood, but I guess a bullet works too",
         description: "$trigger$On-Leave:$trigger$\nYou get $status$SHIELD$status$ (7)",
         baseDamage: 4,
         coverValue: 0,
@@ -1048,7 +1048,7 @@ cards: [
     {
         name: "carouselBullet",
         title: "Carousel Bullet",
-        flavourText: "If you think about it, a revolver is just a really deadly carusel for Bullets",
+        flavourText: "If you think about it, a revolver is just a really deadly carousel for bullets",
         description: "Whenever this rotates into the slot that it was originally placed into:\nDraw two cards and all bullets in the revolver gain +3 dmg",
         baseDamage: 6,
         coverValue: 0,
@@ -1070,7 +1070,7 @@ cards: [
     {
         name: "bloodcravingBullet",
         title: "Bloodcraving Bullet",
-        flavourText: "",
+        flavourText: "\"We lost. The bullets are lost or scattered and Salem is destroyed. The only thing left is tears and the thirst for blood\" -written on the bullet",
         description: "Can't be shot in the same turn that it entered the revolver.\n$trigger$While in Revolver:$trigger$\n$trigger$At the beginning of turn:$trigger$\nYou must destroy target bullet. If you are unable to destroy another bullet, this bullet destroys itself.",
         baseDamage: 22,
         coverValue: 0,
@@ -1110,7 +1110,7 @@ cards: [
     {
         name: "campersBullet",
         title: "Campers Bullet",
-        flavourText: "This bullet is said to have once belonged to a traveller who was said to be the first person from the Old World to marry an \"Onathahan\" or witch, as we call them",
+        flavourText: "\"Please mother, I beg you. I love him. And I know, he is from the old world. But he is a traveler, a camper, he means no harm! He is kind, loving and is here to learn more about these lands. Please… Let Jake and me marry. I beg you\" -Letter to Salem",
         description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nAll other Bullets get +4 dmg",
         baseDamage: 5,
         coverValue: 0,
