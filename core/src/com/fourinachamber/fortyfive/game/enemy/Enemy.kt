@@ -14,8 +14,6 @@ import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.*
-import com.fourinachamber.fortyfive.screen.gameComponents.HorizontalStatusEffectDisplay
-import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
 import com.fourinachamber.fortyfive.screen.gameComponents.VerticalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
@@ -384,7 +382,9 @@ class EnemyActor(
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (touchable && this.touchable != Touchable.enabled) return null
         if (!isVisible) return null
-        return super.hit(x, y, touchable)
+        val childHit = super.hit(x, y, touchable)
+        if (childHit != null) return childHit
+        return if (x >= 0 && x < width && y >= 0 && y < height) this else null
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
