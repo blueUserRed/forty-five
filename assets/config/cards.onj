@@ -386,14 +386,14 @@ cards: [
         name: "poisonBullet",
         title: "Poison Bullet",
         flavourText: "if you use this bullet, folks might call you a coward. And they would be right",
-        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (8, 3)",
+        description: "$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (4, 3)",
         baseDamage: 9,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        effects: [
-            giveStatus("shot", poison(3#val, 8#val))
+        effects: [d
+            giveStatus("shot", poison(3#val, 4#val))
         ],
         forceLoadCards: [],
         dark: false,
@@ -762,14 +762,14 @@ cards: [
         name: "toxicBullet",
         title: "Toxic Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver:$trigger$\nAs long as the enemy has $status$POISON$status$:\nThis bullet gets +12 dmg",
+        description: "$trigger$While in revolver:$trigger$\nAs long as the enemy has $status$POISON$status$:\nThis bullet gets +8 dmg",
         baseDamage: 5,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.self, 12#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)#hide
+            buffDmg("enter", bSelects.self, 8#val, $TargetedEnemyHasStatusEffect { value: poison(0#val, 0#val) }#activeChecker)#hide
         ],
         forceLoadCards: [],
         dark: false,
@@ -782,14 +782,14 @@ cards: [
         name: "fullLeadBullet",
         title: "Full Lead Bullet",
         flavourText: "",
-        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (8, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (9, 3)",
+        description: "$trigger$While in revolver: On-Turn-Begin:$trigger$\nYou get $status$POISON$status$ (9, 1);\n$trigger$On-Shot:$trigger$\nThe enemy gets $status$POISON$status$ (6, 3)",
         baseDamage: 8,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("shot", poison(5#val, 8#val)),
+            giveStatus("shot", poison(3#val, 6#val)),
             givePlayerStatus("round start", poison(3#val, 9#val)),
         ],
         forceLoadCards: [],
@@ -803,14 +803,14 @@ cards: [
         name: "gasBullet",
         title: "Gas Bullet",
         flavourText: "",
-        description: "$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (3, 6)",
+        description: "$trigger$On-Leave:$trigger$\nThe enemy gets $status$POISON$status$ (5, 4)",
         baseDamage: 1,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            giveStatus("leave", poison(3#val, 6#val)),
+            giveStatus("leave", poison(4#val, 5#val)),
         ],
         forceLoadCards: [],
         dark: false,
@@ -1091,14 +1091,14 @@ cards: [
         name: "eclipseBullet",
         title: "Eclipse Bullet",
         flavourText: "Sometimes, darkness will overpower the light, just as the sun is bound to be swallowed by shadow in the wake of an Eclipse. - translation of an old Onathahan saying",
-        description: "$trigger$Whenever this rotates into Slot 5" + slot.5 + ":$trigger$\nThis bullet gets plus twice as much dmg as the dmg value of the bullet in slot 2" + slot.2 + ".",
+        description: "$trigger$Whenever this rotates into Slot 5" + slot.5 + ":$trigger$\nThis bullet gets plus x damage, where x is the damage value of the bullet in slot 2" + slot.2 + ".",
         baseDamage: 2,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("rotate in 5", bSelects.self, value.bulletInSlot2 * 2.0)
+            buffDmg("rotate in 5", bSelects.self, value.bulletInSlot2)
         ],
         forceLoadCards: [],
         dark: true,
