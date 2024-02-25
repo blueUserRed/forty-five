@@ -162,32 +162,34 @@ object FortyFive : Game() {
         GraphicsConfig.init()
         ResourceManager.init()
         serviceThread.start()
-//        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
+        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
 
 //        resetAll()
 //        newRun()
-        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
-        cards
-            .get<OnjArray>("cards")
-            .value
-            .map { it as OnjObject }
-            .zip { it.get<OnjArray>("tags") }
-            .mapSecond { it.value.find { (it.value as String).startsWith("rarity") } }
-            .mapSecond { when (it?.value) {
-                "rarity1" -> 1
-                "rarity2" -> 2
-                "rarity3" -> 3
-                else -> null
-            } }
-            .filter { it.second != null }
-            .map { (card, num) -> List(num!!) { card.get<String>("name") } }
-            .flatten()
-            .joinToString(separator = ",\n", transform = { "'$it'" })
-            .let { println(it) }
+//        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
 //        println(cards.get<OnjArray>("cards").value.size)
 //        println(cards.get<OnjArray>("cards").value.map {it as OnjObject}.map { it.get<String>("name") }.joinToString(separator = ",\n", transform = { "'$it'" }))
     }
+
+    // this abomination prints all cards in respect to their rarities (a rarity3 card is printed three times)
+    private fun printAllCards(cards: OnjObject) = cards
+        .get<OnjArray>("cards")
+        .value
+        .map { it as OnjObject }
+        .zip { it.get<OnjArray>("tags") }
+        .mapSecond { it.value.find { (it.value as String).startsWith("rarity") } }
+        .mapSecond { when (it?.value) {
+            "rarity1" -> 1
+            "rarity2" -> 2
+            "rarity3" -> 3
+            else -> null
+        } }
+        .filter { it.second != null }
+        .map { (card, num) -> List(num!!) { card.get<String>("name") } }
+        .flatten()
+        .joinToString(separator = ",\n", transform = { "'$it'" })
+        .let { println(it) }
 
     override fun dispose() {
         FortyFiveLogger.debug(logTag, "game closing")
