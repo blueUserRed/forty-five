@@ -282,6 +282,22 @@ textures: [
         file: "textures/location_signs/salem.png"
     },
     {
+        name: "location_sign_salem",
+        file: "textures/location_signs/salem.png"
+    },
+    {
+        name: "location_sign_aqua_balle",
+        file: "textures/location_signs/aqua_balle.png"
+    },
+    {
+        name: "location_sign_spire_outpost",
+        file: "textures/location_signs/spire_outpost.png"
+    },
+    {
+        name: "location_sign_tabu_letter_outpost",
+        file: "textures/location_signs/tabu_letter_outpost.png"
+    },
+    {
         name: "location_sign_under_construction",
         file: "textures/location_signs/under_construction.png"
     },
