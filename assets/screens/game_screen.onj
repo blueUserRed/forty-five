@@ -30,10 +30,11 @@ assets: {
         "shoot_button_texture", "shoot_button_hover_texture",
         "pass_button_texture", "pass_button_hover_texture",
         "parry_button_texture", "parry_button_hover_texture",
-        "revolver_drum", "parry_popup_background", "card_orb",
+        "revolver_drum", "common_popup_background_black", "card_orb",
         "heart_texture", "reserves_texture", "hit_overlay", "draw_bullet", "draw_cover", "grey_texture",
         "player_bar", "warning_label_background_red", "under_deck_background", "encounter_modifier_background",
         "game_screen_player", "player_turn_banner", "enemy_turn_banner", "reserves_orb", "black_texture",
+        "status_effect_background",
 
         "enemy_action_damage", "enemy_action_cover",
 
@@ -64,9 +65,9 @@ assets: {
 
         "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
         "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound", "swoosh_sound", "button_2_sound",
-        "card_destroy_sound",
+        "card_destroy_sound", "holster_remove_sound",
 
-        "map_theme",
+        "map_theme", "encounter_theme",
 
         ...(sharedComponents.ambientSoundsUsedAssets),
         ...(graphicsConfig.keySelectUsedAssets),
@@ -125,7 +126,10 @@ var controller = $GameScreenController {
     rewardChance: gameConfig.cardDrawConfig.chooseCardRewardPercantage,
     encounterModifierDisplayTemplateName: "encounter_modifier_display",
     encounterModifierParentName: "encounter_modifier_parent",
-    tutorialInfoActorName: "tutorialInfoActor"
+    tutorialInfoActorName: "tutorialInfoActor",
+    musicAfterWin: "map_theme",
+    musicBeforeWin: "encounter_theme",
+    musicTransitionTime: 3_000
 };
 
 options: {
@@ -413,57 +417,6 @@ var enemyActionAnimationTemplate = $Box {
     ]
 ];
 
-
-var reservesHoverDetailTemplate = $Box {
-    template_name: "reserves_hover_detail_template",
-    template_keys: {
-    },
-    styles: [
-        {
-            height: 70#points,
-            width: 100#points,
-            padding: 15#points,
-        }
-    ],
-    height: 70.0,
-    width: 100.0,
-
-} children [
-    $Box {
-        styles: [
-            {
-                background: "hover_detail_big_background",
-                height: 70#points,
-                width: 200#points,
-                padding: 15#points,
-                flexDirection: flexDirection.column,
-                justifyContent: justify.spaceAround,
-            }
-        ],
-        height: 70.0,
-        width: 200.0,
-
-    } children [
-        $AdvancedText {
-            styles: [
-                {
-                    width: 170#points,
-                }
-            ],
-            width: 170.0,
-            font: "roadgeek",
-            rawText: "Hallo Welt, kannst du mich hören",
-            defaults: {
-                font: "roadgeek",
-                fontScale: 0.6,
-                color: color.forty_white
-            },
-            effects: [
-            ],
-        },
-    ]
-];
-
 templates: [
     ...(sharedComponents.warningLabelTemplates),
     ...(sharedComponents.cardHoverDetailTemplates),
@@ -471,7 +424,7 @@ templates: [
     ...(sharedComponents.backpackTemplates),
     encounterModifierDisplayTemplate,
     enemyActionAnimationTemplate,
-    reservesHoverDetailTemplate,
+    sharedComponents.generalHoverDetailTemplate
 ],
 
 var buttonHoverBehaviour = $MouseHoverBehaviour {
@@ -525,6 +478,8 @@ var reservesLabel = $TemplateLabel {
     template: "{game.curReserves}/{game.baseReserves}",
     fontScale: 1.1,
     color: color.forty_white,
+    hasHoverDetail: true,
+    hoverText: "Reserves are used to pay for bullets. They are filled back up when you press the 'holster' button.",
 };
 
 var disableStyles = [
@@ -702,7 +657,7 @@ var drawCardActor = $Box {
     $TemplateLabel {
         styles: [
             {
-                width: 100.0#percent
+                width: worldWidth#points
             }
         ],
         font: "red_wing",
@@ -718,7 +673,7 @@ var drawCardActor = $Box {
             {
                 flexDirection: flexDirection.row,
                 justifyContent: justify.spaceAround,
-                width: 100.0#percent
+                width: worldWidth#points
             }
         ],
     } children [
@@ -746,11 +701,15 @@ var drawCardActor = $Box {
                 color: color.white
             },
 
-            $Image {
-                textureName: "draw_bullet",
-                reportDimensionsWithScaling: true,
-                scaleX: 0.8,
-                scaleY: 0.8,
+            $Box {
+                styles: [
+                    {
+                        background: "draw_bullet",
+                        aspectRatio: 1.0,
+                        width: (684 * 0.8)#points
+                    }
+                ],
+                touchable: "enabled",
                 behaviours: [
                     $CatchEventAndEmitBehaviour {
                         catch: "ButtonClickEvent",
@@ -827,7 +786,7 @@ var putCardsUnderDeckActor = $Box {
 var playerBar = $Box {
     styles: [
         {
-            width: 100#percent,
+            width: worldWidth#points,
             height: 220#points,
             flexDirection: flexDirection.row,
             alignItems: align.center
@@ -862,16 +821,14 @@ var playerBar = $Box {
             }
         ],
         enableTransform: true,
-        name: "myCoolName",
-        hoverDetailActor: "reserves_hover_detail_template",
     } children [
 
         $Box {
             styles: [
                 {
                     positionType: positionType.absolute,
-                    width: 100#percent,
-                    height: 100#percent,
+                    width: 120#points,
+                    height: 120#points,
                     background: "wood_box",
                 }
             ],
@@ -1297,8 +1254,8 @@ var playerBar = $Box {
             styles: [
                 {
                     positionType: positionType.absolute,
-                    width: 100#percent,
-                    height: 100#percent,
+                    width: 120#points,
+                    height: 120#points,
                     background: "wood_box",
                 }
             ]
@@ -1313,7 +1270,10 @@ var playerBar = $Box {
                     height: 60#points,
                     background: "deck_icon",
                 }
-            ]
+            ],
+            touchable: "enabled",
+            hasHoverDetail: true,
+            hoverText: "You draw cards from the top of the deck. After a card was shot or parried with it is put at the bottom of the deck.",
         },
     ],
 
@@ -1321,7 +1281,7 @@ var playerBar = $Box {
         styles: [
             {
                 positionType: positionType.absolute,
-                background: "parry_popup_background",
+                background: "common_popup_background_black",
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 justifyContent: justify.center,
@@ -1366,7 +1326,12 @@ var playerBar = $Box {
             styles: [
                 {
                     style_priority: 1,
-                    visible: true
+                    visible: true,
+                    style_animation: {
+                        delay: 1.0,
+                        duration: 0.0001,
+                        interpolation: interpolation.linear
+                    }
                 },
                 {
                     style_priority: 2,
@@ -1385,7 +1350,12 @@ var playerBar = $Box {
                 {
                     style_priority: 1,
                     visible: true,
-                    marginTop: 10#points
+                    marginTop: 10#points,
+                    style_animation: {
+                        delay: 1.0,
+                        duration: 0.0001,
+                        interpolation: interpolation.linear
+                    }
                 },
                 {
                     style_priority: 2,
@@ -1492,10 +1462,10 @@ var gameScreen = $Box {
     $EnemyArea {
         styles: [
             {
-                width: 70#percent,
+                width: (worldWidth * 0.7)#points,
                 height: 100#points,
                 positionLeft: 800#points,
-                positionBottom: -300#points,
+                positionBottom: -320#points,
             }
         ],
         ...enemyArea
@@ -1516,7 +1486,7 @@ var gameScreen = $Box {
     $CardHand {
         styles: [
             {
-                width: 100#percent,
+                width: worldWidth#points,
                 height: 0#points,
             },
             {
@@ -1762,8 +1732,8 @@ var steelNervesOverlay = $Box {
     $Box {
         styles: [
             {
-                positionTop: -100#points,
-                positionLeft: 100#points,
+                positionTop: -220#points,
+                positionLeft: 90#points,
                 rotation: 45.0
             }
         ],
@@ -1772,7 +1742,7 @@ var steelNervesOverlay = $Box {
         $Box {
             styles: [
                 {
-                    width: 200#points,
+                    width: 180#points,
                     aspectRatio: 1.0,
                     background: "black_texture",
                 }
@@ -1783,13 +1753,13 @@ var steelNervesOverlay = $Box {
     $TemplateLabel {
         styles: [
             {
-                positionTop: -320#points,
-                width: 200#points
+                positionTop: -425#points,
+                width: 180#points
             }
         ],
         font: "red_wing_bmp",
         template: "{game.steelNerves.remainingTime}",
-        fontScale: 1.0,
+        fontScale: 0.9,
         align: "center",
         color: color.red
     }
@@ -1847,15 +1817,11 @@ root: $Box {
             options: [
                 {
                     actorName: "backpackActor",
-                    displayName: "Notebook",
-                },
-                {
-                    actorName: "backpackActor",
                     displayName: "Backpack",
                 },
                 {
-                    actorName: "backpackActor",
-                    displayName: "Settings",
+                    actionName: "toTitleScreen",
+                    displayName: "To Title Screen",
                 },
             ],
             zIndex: 100000,
@@ -1872,17 +1838,41 @@ root: $Box {
             }
         ],
 
-        $StatusEffectDisplay {
+        $Box {
             styles: [
                 {
-                    positionLeft: 30#percent
+                    style_priority: 1,
+                    background: "status_effect_background",
+                    positionLeft: (worldWidth * 0.4)#points,
+                    positionTop: -25#points,
+                    height: 90#points,
+                    width: (worldWidth * 0.45)#points,
+                    //width: 10#points,
+                    alignItems: align.center,
+                    justifyContent: justify.center,
+                    visible: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("playerHasStatusEffects"),
+                    visible: true
                 }
             ],
-            name: "status_effect_display",
-            font: "red_wing",
-            fontColor: color.black,
-            fontScale: 0.6,
-        },
+        } children [
+            $StatusEffectDisplay {
+                styles: [
+                    {
+                        positionTop: 5#points,
+                        height: 60#points,
+                    }
+                ],
+                name: "status_effect_display",
+                font: "red_wing",
+                fontColor: color.black,
+                fontScale: 0.6,
+                iconScale: 1.4,
+            },
+        ],
 
     ],
 

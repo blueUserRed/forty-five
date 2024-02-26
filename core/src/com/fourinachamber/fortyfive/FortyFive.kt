@@ -55,7 +55,7 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun(false)
 //        changeToInitialScreen()
-        changeToScreen("screens/map_screen.onj")
+        changeToScreen("screens/intro_screen.onj")
     }
 
     fun changeToInitialScreen() {
@@ -67,7 +67,9 @@ object FortyFive : Game() {
     }
 
     override fun render() {
+        val screen = currentScreen
         currentScreen?.update(Gdx.graphics.deltaTime)
+        if (screen !== currentScreen) currentScreen?.update(Gdx.graphics.deltaTime)
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
@@ -77,7 +79,8 @@ object FortyFive : Game() {
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
         val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
-
+        // Updates StyleManagers immediately, to prevent the first frame from appearing bugged
+        screen.update(Gdx.graphics.deltaTime, isEarly = true)
         serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
         fun onScreenChange() {
@@ -148,7 +151,7 @@ object FortyFive : Game() {
         MapManager.init()
 //        resetAll()
 //        MapManager.generateMapsSync()
-//        newRun()
+//        newRun(false)
 
         if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
             resetAll()
@@ -168,6 +171,25 @@ object FortyFive : Game() {
 //        println(cards.get<OnjArray>("cards").value.size)
 //        println(cards.get<OnjArray>("cards").value.map {it as OnjObject}.map { it.get<String>("name") }.joinToString(separator = ",\n", transform = { "'$it'" }))
     }
+
+    // this abomination prints all cards in respect to their rarities (a rarity3 card is printed three times)
+    private fun printAllCards(cards: OnjObject) = cards
+        .get<OnjArray>("cards")
+        .value
+        .map { it as OnjObject }
+        .zip { it.get<OnjArray>("tags") }
+        .mapSecond { it.value.find { (it.value as String).startsWith("rarity") } }
+        .mapSecond { when (it?.value) {
+            "rarity1" -> 1
+            "rarity2" -> 2
+            "rarity3" -> 3
+            else -> null
+        } }
+        .filter { it.second != null }
+        .map { (card, num) -> List(num!!) { card.get<String>("name") } }
+        .flatten()
+        .joinToString(separator = ",\n", transform = { "'$it'" })
+        .let { println(it) }
 
     override fun dispose() {
         FortyFiveLogger.debug(logTag, "game closing")

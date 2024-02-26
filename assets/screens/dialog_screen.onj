@@ -12,7 +12,8 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "title_screen_background", "red_wing_cm", "red_wing", "red_wing_bmp", "hover_detail_background", "reserves_texture",
+        "red_wing_cm", "red_wing", "red_wing_bmp", "hover_detail_background", "reserves_texture",
+        "game_screen_background_wasteland",
         "enemy_texture",
         "dialog_name_field",
         "dialog_continue",
@@ -20,6 +21,10 @@ assets: {
         "dialog_answer_option",
         "dialog_answer_option_hover",
         "shop_npcs_default",
+        "npc_stranger",
+        "npc_merchant",
+        "npc_witch",
+        "npc_priest",
         "map_theme",
         ...(sharedComponents.ambientSoundsUsedAssets),
     ]
@@ -31,7 +36,7 @@ viewport: $FitViewport {
 },
 
 options: {
-    background: "title_screen_background",
+    background: "game_screen_background_wasteland",
     music: "map_theme",
     playAmbientSounds: true,
     inputMap: [
@@ -48,8 +53,9 @@ var dialogWidget = $Box {
         {
             positionType: positionType.absolute,
             width: 75.0#percent,
-            height: 25.0#percent,
+            height: 30.0#percent,
             positionBottom: 0#points,
+            positionLeft: 220#points,
             justifyContent: justify.center,
             background: "dialog_background",
             paddingLeft: 190#points,
@@ -65,9 +71,8 @@ var dialogWidget = $Box {
         styles: [
             {
                 width: 87.0#percent,
-
                 height: 100.0#percent,
-                alpha: 1 / 0.6,
+//                alpha: 1 / 0.6,
             }
         ],
         progressTime: 0.01,
@@ -98,7 +103,7 @@ root: $Box {
             {
                 style_priority: 1,
                 positionType: positionType.absolute,
-                positionBottom: (250)#points,
+                positionBottom: (310)#points,
                 positionRight: (300)#points,
                 //                paddingRight: 20#points,
 
@@ -149,9 +154,10 @@ root: $Box {
             align: "center",
             styles: [
                 {
-                    width: 180#percent,
+                    positionBottom: 110#points,
+                    positionLeft: 50#points,
+                    width: 300#points,
                     height: 60#points,
-                    alpha: 0.8,
                     background: "dialog_name_field",
                 },
             ],
@@ -168,12 +174,12 @@ templates: [
         text: "",
         font: "red_wing",
         color: color.forty_white,
-        fontScale: 0.8,
+        fontScale: 1.0,
         align: "center",
         styles: [
             {
                 style_priority: 1,
-                width: 135#percent,
+                width: 145#percent,
                 height: 60#points,
                 margin: 10#points,
 //                alpha: 0.8,
@@ -188,12 +194,15 @@ templates: [
             {
                 style_priority: 2,
                 style_condition: state("displayOptionsBox"),
-                alpha:1.0,
+                alpha: 1.0,
                 style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.linear
                 }
             }
+        ],
+        behaviours: [
+            sharedComponents.buttonCursorBehaviour
         ],
     },
     $Image {

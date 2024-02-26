@@ -9,200 +9,6 @@ var shake = $ShakeTextAction {
 
 npcs: [
     {
-        name: "traveling_merchant",
-        displayName: "Traveling Merchant",
-        dialog: {
-            parts: [
-                {
-                    rawText: "Hi and bye!",
-                    next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
-                    }
-                }
-            ],
-            defaults: {
-                font: "red_wing",
-                fontScale: 0.1,
-                color: color.forty_white
-            }
-        },
-        image: {
-            textureName: "shop_npcs_default",
-            scale: 2.48
-        }
-    },
-    {
-        name: "traveling_merchan2t",
-        displayName: "Traveling Merchant2",
-        dialog: {
-            parts: [
-                {
-                    rawText: "Hi and bye!",
-                    next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
-                    }
-                }
-            ],
-            //                [
-//                    {
-//                        text: [
-//                            $Text { text: "Hello" },
-//                        ],
-//                        next: $Continue { }
-//                    },
-//                    {
-//                        text: [
-//                            $Text { text: "I just wanted to visit Aqua Dulche to buy some goods..." },
-//                        ],
-//                        next: $Continue { }
-//                    },
-//                    {
-//                        text: [
-//                            $Text { text: "when suddenly the  " },
-//                            $Text { text: "gang ", color: color.red },
-//                            $Icon { icon: "enemy_texture" },
-//                            $Text { text: " took over the entire road" },
-//                        ],
-//                        next: $Continue { }
-//                    },
-//                    {
-//                        text: [
-//                            $Text { text: "Guess I'm kinda stuck here now..." }
-//                        ],
-//                        next: $EndOfDialog { changeToScreen: "screens/map_screen.onj" }
-//                    }
-//                ],
-
-            defaults: {
-                font: "red_wing",
-                fontScale: 0.1,
-                color: color.forty_white
-            }
-        },
-        image: {
-            textureName: "shop_npcs_default",
-            scale: 2.48
-        }
-    },
-
-
-    {
-        name: "mysterious guy",
-        displayName: "Ben Dover",
-        dialog: {
-            parts: [
-                {
-                    rawText: "Hey there!",
-                    next: $Continue {
-                    }
-                },
-                {
-                    rawText: "Did ya hear about $2the merchant$2 §§enemy_texture§§ on the $1endless road$1?",
-                    effects: [
-                        $Color {
-                            indicator: "$1",
-                            color: color.red
-                        },
-                        $Color {
-                            indicator: "$2",
-                            color: color.grey
-                        },
-                        $Action {
-                            indicator: "$3",
-                            action: shake,
-                        },
-                    ],
-                    next: $ChooseNextPart {
-                        choices: [
-                            {
-                                name: "The endless road?",
-                                next: 2
-                            },
-                            {
-                                name: "The merchant?",
-                                next: 3
-                            },
-                            {
-                                name: "Goodbye",
-                                next: 5
-                            }
-                        ]
-                    }
-                },
-                {
-                    rawText: "Yes. It's called that because it is a circle. You go the entire way through, you end back up in Salem. But be careful though, it's full of $2$1gang members$1 §§enemy_texture§§$2. And somewhere among them is the merchant.",
-                    effects: [
-                        $Color {
-                            indicator: "$1",
-                            color: color.red
-                        },
-                        $Action {
-                            indicator: "$2",
-                            action: shake,
-                        },
-                    ],
-                    next: $ChooseNextPart {
-                        choices: [
-                            {
-                                name: "The merchant?",
-                                next: 3
-                            },
-                            {
-                                name: "Goodbye",
-                                next: 5
-                            }
-                        ]
-                    }
-                },
-                {
-                    rawText: "Hes a travelling merchant, just like the one you found over there. However, I heard he sells his items at a much cheaper price.",
-                    next: $Continue {
-                    }
-                },
-                {
-                    rawText: "The catch is, he is somewhere on the endless road, impossible to find. A real $1needle$1 in a $2haystack$2.",
-                    effects: [
-                        $Color {
-                            indicator: "$1",
-                            color: color.grey
-                        },
-                        $Color {
-                            indicator: "$2",
-                            color: color.yellow
-                        },
-                    ],
-                    next: $ChooseNextPart {
-                        choices: [
-                            {
-                                name: "The endless road?",
-                                next: 2
-                            },
-                            {
-                                name: "Goodbye",
-                                next: 5
-                            }
-                        ]
-                    }
-                },
-                {
-                    rawText: "Bye!",
-                    next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
-                    }
-                }
-            ],
-            defaults: {
-                font: "red_wing",
-                fontScale: 1.0,
-                color: color.forty_white
-            },
-        },
-        image: {
-            textureName: "shop_npcs_default",
-            scale: 2.48
-        }
-    },
-    {
         name: "to_be_continued_npc",
         displayName: "Developers",
         dialog: {
@@ -213,7 +19,7 @@ npcs: [
                     }
                 },
                 {
-                    rawText: "We - $1the developers$1 - want to thank you for playing! We are $3definitly$3 going to contine developing this game, just wait a little. Till then, bye!",
+                    rawText: "We - $1the developers$1 - want to thank you for playing! We are $3definitely$3 going to continue developing this game, just wait a little. Till then, bye!",
                     effects: [
                         $Color {
                             indicator: "$1",
@@ -224,9 +30,11 @@ npcs: [
                             action: shake,
                         },
                     ],
-                    next: $EndOfDialog {
-                        changeToScreen: "screens/map_screen.onj"
-                    }
+                    next: $Continue { }
+                },
+                {
+                    rawText: "Oh and also, you'll have to sit through the credits now",
+                    next: $ToCreditScreenEnd { }
                 },
             ],
             defaults: {
@@ -236,8 +44,8 @@ npcs: [
             },
         },
         image: {
-            textureName: "shop_npcs_default",
-            scale: 2.48
+            textureName: "npc_stranger",
+            scale: 1.0
         }
     },
 
@@ -252,15 +60,21 @@ npcs: [
                     next: $Continue {}
                 },
                 {
-                    rawText: "Glad I cought you before you left",
+                    rawText: "Glad I caught you before you left",
                     next: $Continue {}
                 },
                 {
-                    rawText: "I know I can't stop you from taking on this vojage, but please promise to be careful",
+                    rawText: "I know I can't stop you from taking on this voyage, but please promise to be careful",
                     next: $Continue {}
                 },
                 {
-                    rawText: "Also, there is something I wanted to give you before you leave",
+                    rawText: "Also, there is $1something$1 I wanted to give you before you leave",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.blue
+                        },
+                    ],
                     next: $Continue {}
                 },
                 {
@@ -278,32 +92,125 @@ npcs: [
             }
         },
         image: {
-            textureName: "shop_npcs_default",
-            scale: 2.48
+            textureName: "npc_stranger",
+            scale: 1.0
         }
     },
 
+
     {
-        name: "mayor_of_cody",
-        displayName: "Mayor of Cody",
+        name: "traveling_merchant",
+        displayName: "Traveling Merchant",
         dialog: {
             parts: [
                 {
-                    rawText: "Oh hello.",
+                    rawText: "Howdy, welcome in $1Aqua Balle$1, where all the scum, outlaws and gamblers of the $1Old World$1 come together to find their luck in the frontier.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.orange
+                        },
+                    ],
                     next: $Continue {}
                 },
                 {
-                    rawText: "I was just taking a walk around this beautiful town, when I found something in the sand.",
+                    rawText: "You can buy some $3cursed$3 Bullets at my shop over there, coffins can be preordered.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                              name: "The frontier?",
+                              next: 2
+                            },
+                            {
+                              name: "Bullets?",
+                              next: 4
+                            },
+                            {
+                              name: "Goodbye",
+                              next: 7
+                            }
+                        ]
+                    }
+                },
+                {
+                    rawText: "Yes, the land that was discovered here a while ago. This town serves as the entrance to it. How did you not know this? ",
                     next: $Continue {}
                 },
                 {
-                    rawText: "I don't know what it is, but maybe it could be useful for you.",
+                    rawText: "It's a lawless zone out there, although since the governor showed up here, it hasn't been the same anymore...",
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "Bullets?",
+                                next: 4
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 7
+                            }
+                        ]
+                    }
+                },
+                {
+                    rawText: "... yeah, I don't know why they are here or what they are, but they can be found all over the frontier.",
                     next: $Continue {}
                 },
                 {
-                    rawText: "As they say, one man's trash is anothers treasure",
-                    next: $GiftCardEnd {
-                        card: "leadersBullet",
+                    rawText: "They are really powerful and also $3cursed$3, so a lot of people want them either for themselves or to turn a profit.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "That's where all those guys here come from. They hope to turn their life around and make try their luck in the frontier. Good business for us here in $1Aqua Balle$1 though, so I won't complain.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.orange
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "The frontier?",
+                                next: 2
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 7
+                            }
+                        ]
+                    }
+                },
+                {
+                    rawText: "You can come visit me at my shop over there, if you want.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "But I travel the frontier with my stock most of the time, so we’ll probably see each other anyway. Until then, take care.",
+                    next: $EndOfDialog {
                         changeToScreen: "screens/map_screen.onj"
                     }
                 },
@@ -315,8 +222,215 @@ npcs: [
             }
         },
         image: {
-            textureName: "shop_npcs_default",
-            scale: 2.48
+            textureName: "npc_merchant",
+            scale: 0.58
+        }
+    },
+
+    {
+        name: "priest_of_aqua_balle",
+        displayName: "Priest of Aqua Balle",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Bless you!",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "It’s $1$3dangerous$3$1 out there, you should turn back. However, you probably won’t listen to me, nobody does.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "So, here take $1this$1 at least. It will look over you on the way.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.blue
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                    ],
+                    next: $GiftCardEnd {
+                        card: "guardianAngelBullet",
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.0,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "npc_priest",
+            scale: 0.5
+        }
+    },
+
+    {
+        name: "not_yet_implemented_npc",
+        displayName: "Stranger",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Hello!",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "This area is still under construction, so maybe check back later.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Thanks for you patience!",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.0,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "npc_stranger",
+            scale: 1.0
+        }
+    },
+
+    {
+        name: "witch",
+        displayName: "Witch",
+        dialog: {
+            parts: [
+                {
+                    rawText: "$4$1I'll warn you!$1$4",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Font {
+                            indicator: "$4",
+                            font: "red_wing_bmp"
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Not a $1single$1 step further or I $4swear to the $3Gods$3 I'll $1kill$1 you$4",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "This was $1$3$4OUR$4$3$1 home before you all came and took it.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Someday, the $2Onathans$2 will return to $5Salem$5 and reclaim it. Until then, $1$4stay away$4$1 from it if you value your $3life$3.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Color {
+                            indicator: "$2",
+                            color: color.grey
+                        },
+                        $Color {
+                            indicator: "$5",
+                            color: color.orange
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "Oh and and tell the $2governor$2 that his days are $1$3limited$3$1.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.red
+                        },
+                        $Color {
+                            indicator: "$2",
+                            color: color.grey
+                        },
+                        $Color {
+                            indicator: "$5",
+                            color: color.orange
+                        },
+                        $Action {
+                            indicator: "$3",
+                            action: shake,
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.4
+                        }
+                    ],
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.2,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "npc_witch",
+            scale: 0.9
         }
     },
 

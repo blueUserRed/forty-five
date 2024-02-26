@@ -105,10 +105,10 @@ object PermaSaveState {
     }
 
     fun reset() {
+        FortyFiveLogger.debug(logTag, "resetting perma_savefile")
         copyDefaultFile()
         read()
     }
-
 
     fun runRandom(i: Int): Long {
         val random = Random(currentRandom)
@@ -117,7 +117,7 @@ object PermaSaveState {
     }
 
     private fun copyDefaultFile() {
-        FortyFiveLogger.debug(logTag, "copying default save")
+        FortyFiveLogger.debug(logTag, "copying default perma save")
         Gdx.files.local(defaultSaveFilePath).copyTo(Gdx.files.local(saveFilePath))
     }
 

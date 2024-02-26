@@ -34,6 +34,8 @@ data class Dialog(
 
                 "Continue" -> NextDialogPartSelector.Continue
 
+                "ToCreditScreenEnd" -> NextDialogPartSelector.ToCreditScreenEnd
+
                 "EndOfDialog" -> NextDialogPartSelector.End(nextSelector.get<String>("changeToScreen"))
 
                 "FixedNextPart" -> NextDialogPartSelector.Fixed(nextSelector.get<Long>("next").toInt())
@@ -80,5 +82,7 @@ sealed class NextDialogPartSelector {
     class End(val nextScreen: String) : NextDialogPartSelector()
 
     class GiftCardEnd(val card: String, val nextScreen: String) : NextDialogPartSelector()
+
+    object ToCreditScreenEnd : NextDialogPartSelector()
 
 }

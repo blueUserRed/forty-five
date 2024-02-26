@@ -37,6 +37,7 @@ var widgetSharedKeys = {
     styles?: { ...* }[],
     dragAndDrop?: $DragAndDropBehaviour,
     setFillParent?: boolean,
+    alpha?: float,
     actorStates?: string[], //default, on creation
 };
 
@@ -72,7 +73,8 @@ $Widget {
         mapIndicatorWidgetName?: string,
         optionsWidgetName: string,
         options: {
-            actorName: string,
+            actionName?: string,
+            actorName?: string,
             displayName: string,
         }[],
         partOfSelectionHierarchy?: boolean,
@@ -89,7 +91,8 @@ $Widget {
         children?: $Widget[],
         partOfSelectionHierarchy?: boolean,
         enableTransform?: boolean,
-        hoverDetailActor?: string,
+        hasHoverDetail?: boolean,
+        hoverText?: string,
         ...widgetSharedKeys
     }
 
@@ -132,6 +135,8 @@ $Widget {
         align?: string,
         wrap?: boolean,
         isDistanceField?: boolean,
+        hasHoverDetail?: boolean,
+        hoverText?: string,
         partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
@@ -145,6 +150,8 @@ $Widget {
         align?: string,
         wrap?: boolean,
         isDistanceField?: boolean,
+        hasHoverDetail?: boolean,
+        hoverText?: string,
         partOfSelectionHierarchy?: boolean,
         ...widgetSharedKeys
     }
@@ -294,6 +301,7 @@ $Widget {
         font: string,
         fontColor: Color,
         fontScale: float,
+        iconScale?: float,
         ...widgetSharedKeys
     }
 
@@ -385,6 +393,9 @@ $Behaviour {
     $OnClickSoundSituationBehaviour {
         situation: string,
     }
+
+    $OnClickChangeToInitialScreenBehaviour { }
+
 }
 
 $ScreenController {
@@ -447,6 +458,10 @@ $ScreenController {
         tutorialInfoActor: string,
         mapWidgetName: string
     }
+
+    $TitleScreenController { }
+
+    $CreditScreenController { }
 }
 
 $KeyAction {

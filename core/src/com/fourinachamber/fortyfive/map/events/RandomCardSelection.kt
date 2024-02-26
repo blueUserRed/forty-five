@@ -116,7 +116,6 @@ object RandomCardSelection {
         cards: List<CardPrototype> = allCardPrototypes,
     ): List<CardPrototype> {
         val newCards = doCardRarities(cards)
-        if (nbrOfCards >= newCards.size && unique) return newCards
         val (tempCards, tempChances) = getCardsWithChances(newCards.toMutableList(), typeNames, biome, occasion)
         return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, unique)
     }
@@ -223,6 +222,10 @@ interface CardChange {
                     PriceMultiplier(selector, effect.get<Double>("price"))
                 }
 
+                "PriceAddition" -> {
+                    PriceAddition(selector, effect.get<Long>("price").toInt())
+                }
+
                 else -> throw Exception("Unknown card change: ${effect.name}")
             }
         }
@@ -256,6 +259,15 @@ interface CardChange {
             cards
                 .filter { selector.isPartOf(it) }
                 .forEach { it.modifyPrice { old -> (old * priceMulti).toInt() } }
+        }
+    }
+
+    class PriceAddition(override val selector: Selector, private val priceAddition: Int) : CardChange {
+
+        override fun applyEffects(cards: MutableList<CardPrototype>, chances: MutableList<Float>) {
+            cards
+                .filter { selector.isPartOf(it) }
+                .forEach { it.modifyPrice { old -> old + priceAddition } }
         }
     }
 }

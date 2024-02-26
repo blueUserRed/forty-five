@@ -221,6 +221,40 @@ root: $Box { //TODO bioms
                 },
             ],
             children: [
+                $Box {
+                    styles: [
+                        {
+                            style_priority: 1,
+                            detached: true,
+                        },
+                        {
+                            style_priority: 2,
+                            style_condition: state("no_cards_left"),
+                            detached: false,
+                        }
+                    ],
+                } children [
+                    $Label {
+                        styles: [
+                            {
+                                width: 500#points,
+                            }
+                        ],
+                        text: "You have already collected all available cards.\nClick here to return to the map.",
+                        font: "red_wing",
+                        color: color.forty_white,
+                        fontScale: 0.7,
+                        align: "center",
+                        wrap: true,
+                        behaviours: [
+                            sharedComponents.buttonCursorBehaviour,
+                            $CatchEventAndEmitBehaviour {
+                                catch: "ButtonClickEvent",
+                                emit: "PopupConfirmationEvent"
+                            }
+                        ]
+                    }
+                ]
             ],
         },
         $Label {
@@ -250,15 +284,11 @@ root: $Box { //TODO bioms
         options: [
             {
                 actorName: "backpackActor",
-                displayName: "Notebook",
-            },
-            {
-                actorName: "backpackActor",
                 displayName: "Backpack",
             },
             {
-                actorName: "backpackActor",
-                displayName: "Settings",
+                actionName: "toTitleScreen",
+                displayName: "To Title Screen",
             },
         ],
         ...(sharedComponents.statusbarCenterDefaults)

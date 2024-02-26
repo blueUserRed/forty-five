@@ -32,8 +32,12 @@ situations: [
         sound: "button_2_sound",
     },
     {
-        name: "holster",
+        name: "end_turn",
         sound: "holster_sound",
+    },
+    {
+        name: "turn_begin",
+        sound: "holster_remove_sound",
     },
     {
         name: "enter_parry",
@@ -83,6 +87,10 @@ situations: [
     {
         name: "card_destroyed",
         sound: "card_destroy_sound",
+    },
+    {
+        name: "title_screen_card_drop",
+        sound: "swoosh_sound",
     },
 ],
 

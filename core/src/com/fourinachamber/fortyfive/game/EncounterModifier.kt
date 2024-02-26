@@ -17,7 +17,10 @@ sealed class EncounterModifier {
     }
 
     object Frost : EncounterModifier() {
+
         override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.None
+
+        override fun disableEverlasting(): Boolean = true
     }
 
     object BewitchedMist : EncounterModifier() {
@@ -117,6 +120,8 @@ sealed class EncounterModifier {
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
     open fun shouldApplyStatusEffects(): Boolean = true
+
+    open fun disableEverlasting(): Boolean = false
 
     open fun executeAfterBulletWasPlacedInRevolver(card: Card, controller: GameController): Timeline? = null
 

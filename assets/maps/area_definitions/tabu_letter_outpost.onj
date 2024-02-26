@@ -20,7 +20,7 @@ nodes: [
         x: 20.0,
         y: 80.0,
         edgesTo: [
-            0,2
+            0, 2, 3
         ],
         nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
@@ -36,7 +36,24 @@ nodes: [
         x: 40.0,
         y: 110.0,
         edgesTo: [
-            1, 3
+            1, 4
+        ],
+        nodeTexture: "map_node_dialog",
+        image: "under_construction",
+        imagePos: "LEFT",
+        event: $NPCMapEvent {
+            npc: "not_yet_implemented_npc",
+            canOnlyBeStartedOnce: false,
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: true
+        }
+    },
+    {
+        x: 40.0,
+        y: 80.0,
+        edgesTo: [
+            1, 4
         ],
         nodeTexture: "map_node_heal",
         event: $AddMaxHPEvent {
@@ -53,30 +70,29 @@ nodes: [
         x: 65.0,
         y: 100.0,
         edgesTo: [
-            2
+            2, 3, 5
+        ],
+        nodeTexture: "map_node_dialog",
+        event: $NPCMapEvent {
+            npc: "witch",
+            canOnlyBeStartedOnce: false,
+            currentlyBlocks: false,
+            canBeStarted: true,
+            isCompleted: true
+        }
+    },
+    {
+        x: 85.0,
+        y: 110.0,
+        edgesTo: [
+            4
         ],
         nodeTexture: "map_node_exit",
         event: $EnterMapMapEvent {
             targetMap: "road_between_tabu_letter_outpost_and_salem",
         }
     },
-//    { //this node is for the dialog in the future, and is not currently used
-//
-//        x: 40.0,
-//        y: 50.0,
-//        edgesTo: [
-//            0
-//        ],
-//        nodeTexture: "map_node_heal_circle",
-//        event: $ShopMapEvent {
-//            seed: null,
-//            boughtIndices: [
-//            ],
-//            types: [
-//            ],
-//            person: "traveling_merchant",
-//        }
-//    },
+
 ],
 animatedDecorations: [
 ],
@@ -105,16 +121,6 @@ decorations: [
                 20.0, 55.0, 1.7
             ],
         ]
-    },
-    {
-        texture: "burning_icon",
-        baseWidth: 5.0,
-        baseHeight: 5.0,
-        positions: [
-            [
-                25.3, 55.0, 0.3
-            ]
-        ],
     },
     {
         texture: "map_decoration_wasteland_skull_1",

@@ -151,7 +151,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            val statusEffect = statusEffectCreator(controller, null)
+            val statusEffect = statusEffectCreator(controller, null, false)
             // TODO: fix this
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
@@ -171,7 +171,7 @@ sealed class EnemyActionPrototype(
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            val statusEffect = statusEffectCreator(controller, null)
+            val statusEffect = statusEffectCreator(controller, null, false)
             statusEffect.start(controller) // start effect here because start() needs to be called before getDisplayText()
             val displayText = statusEffect.getDisplayText()
             return EnemyAction(displayText, mapOf("statusEffect" to displayText),this) {

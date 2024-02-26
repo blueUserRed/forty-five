@@ -1,0 +1,415 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "roadgeek", "red_wing_bmp",
+
+        "title_screen_background",
+        "title_screen_bullet_1",
+        "title_screen_bullet_2",
+        "title_screen_bullet_3",
+        "title_screen_bullet_4",
+        "title_screen_bullet_5",
+        "title_screen_bullet_6",
+        "title_screen_bullet_7",
+        "title_screen_bullet_8",
+        "title_screen_bullet_9",
+        "title_screen_bullet_10",
+        "title_screen_bullet_11",
+        "title_screen_bullet_12",
+        "title_screen_bullet_13",
+        "title_screen_bullet_14",
+        "title_screen_bullet_15",
+
+        "common_popup_background_black",
+        "common_button_default", "common_button_hover",
+
+        "main_theme",
+        "swoosh_sound", "button_2_sound",
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    background: "title_screen_background",
+    music: "main_theme",
+    playAmbientSounds: false,
+    transitionAwayTime: 1.0,
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $TitleScreenController { }
+},
+
+templates: [
+
+    $Box {
+        template_name: "bullet",
+        template_keys: {
+            "styles.0.background": "background",
+            "name": "name"
+        },
+        name: "",
+        styles: [
+            {
+                background: "",
+                positionType: positionType.absolute,
+                width: worldWidth#points,
+                height: worldHeight#points,
+                positionTop: 0#points,
+                positionLeft: 0#points,
+            }
+        ]
+    },
+
+],
+
+var confirmationPopup = $Box {
+    zIndex: 100,
+    styles: [
+        {
+            style_priority: 1,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            positionType: positionType.absolute,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            detached: true,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("show_confirmation_popup"),
+            detached: false,
+        }
+    ],
+    touchable: "enabled"
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: 1_100#points,
+                aspectRatio: 698.0 / 390.0,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                background: "common_popup_background_black"
+            }
+        ],
+    } children [
+
+        $TemplateLabel {
+            styles: [
+                {
+                    width: 500#points
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.1,
+            color: color.forty_white,
+            wrap: true,
+            align: "center",
+            template: "{title_screen.popupText}",
+        },
+
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.row,
+                    marginTop: 30#points,
+                }
+            ]
+        } children [
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        background: "common_button_default",
+                        width: 150#points,
+                        height: 60#points,
+                        alignItems: align.center,
+                        justifyContent: justify.center
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: hover(),
+                        background: "common_button_hover",
+                    },
+                ],
+            } children [
+                $Label {
+                    font: "roadgeek",
+                    text: "Cancel",
+                    fontScale: 1.0,
+                    color: color.white,
+                    behaviours: [
+                        sharedComponents.buttonSoundBehaviour,
+                        sharedComponents.buttonCursorBehaviour,
+                        $OnClickChangeScreenStateBehaviour {
+                            state: "show_confirmation_popup",
+                            enter: false
+                        }
+                    ]
+                }
+            ],
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        background: "common_button_default",
+                        width: 150#points,
+                        height: 60#points,
+                        marginLeft: 10#points,
+                        alignItems: align.center,
+                        justifyContent: justify.center
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: hover(),
+                        background: "common_button_hover",
+                    },
+                ]
+            } children [
+                $Label {
+                    font: "roadgeek",
+                    text: "Continue",
+                    fontScale: 1.0,
+                    color: color.white,
+                    behaviours: [
+                        sharedComponents.buttonSoundBehaviour,
+                        sharedComponents.buttonCursorBehaviour,
+                        $CatchEventAndEmitBehaviour {
+                            catch: "ButtonClickEvent",
+                            emit: "PopupConfirmationEvent"
+                        }
+                    ]
+                }
+            ],
+        ]
+
+    ]
+
+];
+
+root: $Box {
+
+    styles: [
+        {
+            width: worldWidth#points,
+            height: worldHeight#points,
+        }
+    ]
+
+} children [
+
+    confirmationPopup,
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionLeft: 120#points,
+                positionTop: 320#points,
+                flexDirection: flexDirection.column,
+            }
+        ],
+    } children [
+
+        $TemplateLabel {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            template: "{title_screen.startButtonText}",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $OnClickChangeToInitialScreenBehaviour { }
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                    marginTop: 10#points,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "Abandon Run",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "AbandonRunEvent"
+                }
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                    marginTop: 10#points,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "Reset Game",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "ResetGameEvent"
+                }
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                    marginTop: 10#points,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "View Credits",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $OnClickChangeScreenBehaviour {
+                    screenPath: "screens/credits_screen.onj",
+                }
+            ]
+        },
+        $Label {
+            styles: [
+                {
+                    style_priority: 1,
+                    underline: false,
+                    marginTop: 10#points,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    underline: true,
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 1.6,
+            color: color.black,
+            text: "Quit",
+            behaviours: [
+                sharedComponents.buttonCursorBehaviour,
+                $CatchEventAndEmitBehaviour {
+                    catch: "ButtonClickEvent",
+                    emit: "QuitGameEvent"
+                }
+            ]
+        },
+
+    ],
+
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_1", name: "title_screen_bullet_1" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_2", name: "title_screen_bullet_2" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_3", name: "title_screen_bullet_3" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_4", name: "title_screen_bullet_4" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_5", name: "title_screen_bullet_5" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_6", name: "title_screen_bullet_6" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_7", name: "title_screen_bullet_7" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_8", name: "title_screen_bullet_8" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_9", name: "title_screen_bullet_9" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_10", name: "title_screen_bullet_10" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_11", name: "title_screen_bullet_11" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_12", name: "title_screen_bullet_12" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_13", name: "title_screen_bullet_13" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_14", name: "title_screen_bullet_14" }
+    },
+    $FromTemplate {
+        generateFrom: "bullet",
+        data: { background: "title_screen_bullet_15", name: "title_screen_bullet_15" }
+    },
+
+]

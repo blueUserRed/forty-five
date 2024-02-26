@@ -47,14 +47,18 @@ class CardPrototype(
     val forceLoadCards: List<String>,
 ) {
 
-    var creator: ((screen: OnjScreen, isSaved: Boolean?) -> Card)? = null
+    var creator: ((screen: OnjScreen, isSaved: Boolean?, areHoverDetailsEnabled: Boolean) -> Card)? = null
 
     private val priceModifiers: MutableList<(Int) -> Int>  = mutableListOf()
 
     /**
      * creates an actual instance of this card
      */
-    fun create(screen: OnjScreen, isSaved: Boolean? = null): Card = creator!!(screen, isSaved)
+    fun create(
+        screen: OnjScreen,
+        isSaved: Boolean? = null,
+        areHoverDetailsEnabled: Boolean = true
+    ): Card = creator!!(screen, isSaved, areHoverDetailsEnabled)
 
     fun modifyPrice(modifier: (Int) -> Int) {
         priceModifiers.add(modifier)
@@ -100,7 +104,8 @@ class Card(
     font: PixmapFont,
     fontScale: Float,
     screen: OnjScreen,
-    val isSaved: Boolean?
+    val isSaved: Boolean?,
+    val enableHoverDetails: Boolean
 ) : Disposable {
 
     /**
@@ -138,8 +143,10 @@ class Card(
     var isShotProtected: Boolean = false
         private set
 
-    val shouldRemoveAfterShot: Boolean
-        get() = !(isEverlasting || protectingModifiers.isNotEmpty())
+    fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
+        (isEverlasting && !controller.encounterModifiers.any { it.disableEverlasting() }) ||
+        protectingModifiers.isNotEmpty()
+    )
 
     private var lastDamageValue: Int = baseDamage
 
@@ -178,7 +185,8 @@ class Card(
                 font,
                 fontScale,
                 isDark,
-                screen
+                screen,
+                enableHoverDetails
             )
         }
     }
@@ -240,20 +248,21 @@ class Card(
     /**
      * called by gameScreenController when the card was shot
      */
-    fun afterShot() {
-        if (shouldRemoveAfterShot) leaveGame()
+    fun afterShot(controller: GameController) {
+        if (shouldRemoveAfterShot(controller)) leaveGame()
+        if (protectingModifiers.isNotEmpty()) {
+            val effect = protectingModifiers.first()
+            val newEffect = effect.copy(second = effect.second - 1)
+            if (newEffect.second == 0) {
+                protectingModifiers.removeFirst()
+            } else {
+                protectingModifiers[0] = newEffect
+            }
+            modifiersChanged()
+        }
     }
 
     fun beforeShot() {
-        if (protectingModifiers.isEmpty()) return
-        val effect = protectingModifiers.first()
-        val newEffect = effect.copy(second = effect.second - 1)
-        if (newEffect.second == 0) {
-            protectingModifiers.removeFirst()
-        } else {
-            protectingModifiers[0] = newEffect
-        }
-        modifiersChanged()
     }
 
     fun leaveGame() {
@@ -264,6 +273,10 @@ class Card(
     }
 
     fun protect(source: String, protectedFor: Int, validityChecker: () -> Boolean) {
+        if (isUndead) {
+            FortyFiveLogger.debug(logTag, "cant protect undead bullet")
+            return
+        }
         FortyFiveLogger.debug(logTag, "$source protected $this for $protectedFor shots")
         protectingModifiers.add(Triple(source, protectedFor, validityChecker))
         modifiersChanged()
@@ -348,8 +361,8 @@ class Card(
         trigger: Trigger,
         triggerInformation: TriggerInformation,
         controller: GameController,
-        isOnShot: Boolean
     ): Timeline = Timeline.timeline {
+        val isOnShot = triggerInformation.isOnShot
         action {
             checkModifierTransformers(trigger, triggerInformation)
         }
@@ -370,7 +383,7 @@ class Card(
         include(effects.mapNotNull { it.second }.collectTimeline())
         includeLater(
             { actor.animateBack(controller) },
-            { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot) }
+            { inGame && showAnimation && (!isOnShot || !shouldRemoveAfterShot(controller)) }
         )
         action {
             actor.setScale(1f)
@@ -487,7 +500,9 @@ class Card(
                         onj.get<OnjArray>("tags").value.map { it.value as String },
                         onj.get<OnjArray>("forceLoadCards").value.map { it.value as String },
                     )
-                    prototype.creator = { screen, isSaved -> getCardFrom(onj, screen, initializer, prototype, isSaved) }
+                    prototype.creator = { screen, isSaved, areHoverDetailsEnabled ->
+                        getCardFrom(onj, screen, initializer, prototype, isSaved, areHoverDetailsEnabled)
+                    }
                     prototypes.add(prototype)
                 }
             return prototypes
@@ -500,6 +515,7 @@ class Card(
             initializer: (Card) -> Unit,
             prototype: CardPrototype,
             isSaved: Boolean?,
+            enableHoverDetails: Boolean
         ): Card {
             val name = onj.get<String>("name")
             val card = Card(
@@ -533,7 +549,8 @@ class Card(
                     ?.map { it.value as String }
                     ?: listOf(),
                 screen = onjScreen,
-                isSaved = isSaved
+                isSaved = isSaved,
+                enableHoverDetails = enableHoverDetails
             )
 
             for (effect in card.effects) effect.card = card
@@ -606,9 +623,12 @@ class CardActor(
     val font: PixmapFont,
     val fontScale: Float,
     val isDark: Boolean,
-    override val screen: OnjScreen
+    override val screen: OnjScreen,
+    val enableHoverDetails: Boolean
 ) : Widget(), ZIndexActor, KeySelectableActor, DisplayDetailsOnHoverActor, HoverStateActor, HasOnjScreen, StyledActor,
     OffSettable, AnimationActor {
+
+    override val actor: Actor = this
 
     override var actorTemplate: String = "card_hover_detail" // TODO: fix
     override var detailActor: Actor? = null
@@ -650,9 +670,11 @@ class CardActor(
     private val cardTexturePixmap: Pixmap
 
     override var isHoverDetailActive: Boolean
-        get() = card.shortDescription.isNotBlank() ||
+        get() = (card.shortDescription.isNotBlank() ||
                 card.flavourText.isNotBlank() ||
-                card.getAdditionalHoverDescriptions().isNotEmpty()
+                card.getKeyWordsForDescriptions().isNotEmpty() ||
+                card.getAdditionalHoverDescriptions().isNotEmpty())
+                && enableHoverDetails
         set(value) {}
 
     private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
@@ -719,7 +741,7 @@ class CardActor(
         if (drawPixmapMessage?.isFinished ?: false) {
             finishPixmapDrawing()
         }
-        setBoundsOfHoverDetailActor(this)
+        setBoundsOfHoverDetailActor(screen)
         batch ?: return
         val texture = pixmapTextureRegion ?: return
         val shader = if (inDestroyAnim) {
@@ -770,17 +792,16 @@ class CardActor(
     }
 
     fun redrawPixmap(damageValue: Int) {
-        val savedPixmap = when (card.isSaved) {
+        val savedPixmapTextureData = when (card.isSaved) {
             null -> null
             true -> GraphicsConfig.cardSavedSymbol(screen)
             false -> GraphicsConfig.cardNotSavedSymbol(screen)
+        }?.textureData
+        if (savedPixmapTextureData != null && !savedPixmapTextureData.isPrepared) savedPixmapTextureData.prepare()
+        val savedPixmap = savedPixmapTextureData?.consumePixmap()
+        if (savedPixmapTextureData != null && savedPixmapTextureData is FileTextureData) {
+            screen.addDisposable(savedPixmap!!)
         }
-            ?.textureData
-            ?.let {
-                if (!it.isPrepared) it.prepare()
-                it.consumePixmap()
-            }
-        savedPixmap?.let { screen.addDisposable(it) }
         val message = ServiceThreadMessage.DrawCardPixmap(
             pixmap,
             cardTexturePixmap,
@@ -895,12 +916,12 @@ class CardActor(
 
     override fun positionChanged() {
         super.positionChanged()
-        setBoundsOfHoverDetailActor(this)
+        setBoundsOfHoverDetailActor(screen)
     }
 
     override fun sizeChanged() {
         super.sizeChanged()
-        setBoundsOfHoverDetailActor(this)
+        setBoundsOfHoverDetailActor(screen)
     }
 
     override fun onDetailDisplayStarted() {

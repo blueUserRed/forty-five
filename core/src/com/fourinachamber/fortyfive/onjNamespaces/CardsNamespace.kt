@@ -35,6 +35,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     ?: 0
             }
             "rotationAmount" with OnjEffectValue { _, card -> card!!.rotationCounter }
+            "bulletInSlot2" with OnjEffectValue { controller, _ ->
+                controller.revolver.getCardInSlot(5 - 2)?.curDamage(controller) ?: 0
+            }
         }
     )
 
@@ -117,12 +120,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         ))
     }
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int]")
-    fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector, shots: OnjInt): OnjEffect {
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int, boolean]")
+    fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector, shots: OnjInt, onlyValidWhileCardIsInGame: OnjBoolean): OnjEffect {
         return OnjEffect(Effect.Protect(
             triggerOrError(trigger.value),
             bulletSelector.value,
             shots.value.toInt(),
+            onlyValidWhileCardIsInGame.value,
             false
         ))
     }
@@ -159,6 +163,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
     fun bounce(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
         return OnjEffect(Effect.BounceBullet(triggerOrError(trigger.value), bulletSelector.value, false))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun discharge(trigger: OnjString, turns: OnjEffectValue): OnjEffect {
+        return OnjEffect(Effect.DischargePoison(triggerOrError(trigger.value), turns.value, false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, int]")
@@ -240,7 +249,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
-    fun poison(turns: OnjEffectValue, damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun poison(turns: OnjEffectValue, damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         Poison(
             getStatusEffectValue(turns, controller, card, 1),
             getStatusEffectValue(damage, controller, card, 1)
@@ -248,29 +257,38 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
-    fun shield(shield: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun shield(shield: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         Shield(getStatusEffectValue(shield, controller, card, 1))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float, boolean]")
-    fun burning(rotations: OnjEffectValue, percent: OnjFloat, isInfinite: OnjBoolean): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun burning(
+        rotations: OnjEffectValue,
+        percent: OnjFloat,
+        isInfinite: OnjBoolean
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
         Burning(
             getStatusEffectValue(rotations, controller, card, 1),
             percent.value.toFloat(),
-            isInfinite.value
+            isInfinite.value,
+            skipFirstRotation
         )
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
-    fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         FireResistance(getStatusEffectValue(turns, controller, card, 1))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
-    fun bewitched(turns: OnjEffectValue, rotations: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card ->
+    fun bewitched(
+        turns: OnjEffectValue,
+        rotations: OnjEffectValue
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
         Bewitched(
             getStatusEffectValue(turns, controller, card, 1),
             getStatusEffectValue(rotations, controller, card, 1),
+            skipFirstRotation
         )
     }
 
@@ -319,6 +337,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
         "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
         "return home" -> Trigger.ON_RETURNED_HOME
+        "rotate in 5" -> Trigger.ON_ROTATE_IN_5
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

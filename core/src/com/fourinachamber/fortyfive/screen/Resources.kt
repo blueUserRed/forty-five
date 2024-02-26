@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.Either
@@ -86,7 +87,7 @@ abstract class Resource(
     @MainThreadOnly
     open fun giveBack(borrower: ResourceBorrower) {
         if (!borrowedBy.remove(borrower)) return
-        if (borrowedBy.isEmpty()) dispose()
+        if (borrowedBy.isEmpty() && !handle.startsWith(Card.cardTexturePrefix)) dispose()
     }
 
     @MainThreadOnly

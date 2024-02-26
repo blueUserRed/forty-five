@@ -288,10 +288,11 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
+        val showHoverDetailLambda = { showHoverDetail(actor, actor, actor.actorTemplate) }
         if (actor is HoverStateActor) {
             actor.onHoverEnter {
                 if (dragAndDrop.none { it.value.isDragging }) { //TODO MARVIN has to add that this if works in a fight too
-                    showHoverDetail(actor, actor, actor.actorTemplate)
+                    Gdx.app.postRunnable(showHoverDetailLambda)
                 }
             }
             actor.onHoverLeave {
@@ -299,7 +300,7 @@ open class OnjScreen @MainThreadOnly constructor(
             }
         } else {
             actor.onEnter {
-                showHoverDetail(actor, actor, actor.actorTemplate)
+                Gdx.app.postRunnable(showHoverDetailLambda)
             }
             actor.onExit {
                 hideHoverDetail()
@@ -309,9 +310,6 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
-        if (actor.name=="myCoolName"){
-            println("hii")
-        }
         if (!displayDetailActor.isHoverDetailActive) return
         if (currentHoverDetail != null) hideHoverDetail()
         val detail = screenBuilder.generateFromTemplate(
@@ -321,19 +319,16 @@ open class OnjScreen @MainThreadOnly constructor(
             this
         )!!
         displayDetailActor.detailActor = detail
-        displayDetailActor.setBoundsOfHoverDetailActor(actor)
+
+        displayDetailActor.setBoundsOfHoverDetailActor(this)
         currentHoverDetail = detail
         currentDisplayDetailActor = displayDetailActor
         displayDetailActor.onDetailDisplayStarted()
 
         leaveState("showHoverDetail")
         afterMs(20) {
-            if (currentHoverDetail === detail)
-                enterState("showHoverDetail")
+            if (currentHoverDetail === detail) enterState("showHoverDetail")
         }
-        // actor only appear on fade, same with dialog // bis morgen abend hoffentlich
-        // events eintragen für roads und so weiter (laut notion)
-        // Buch schreiben
     }
 
     fun removeAllStyleManagers(actor: StyledActor) {
@@ -360,6 +355,8 @@ open class OnjScreen @MainThreadOnly constructor(
     fun namedActorOrError(name: String): Actor = namedActors[name] ?: throw RuntimeException(
         "no actor named $name"
     )
+
+    fun namedActorOrNull(name: String): Actor? = namedActors[name]
 
     private fun updateCallbacks() {
         val curTime = TimeUtils.millis()
@@ -389,8 +386,7 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     fun transitionAway() {
-        screenController = null
-        inputMap = null
+        inputMultiplexer.clear()
         enterState(transitionAwayScreenState)
     }
 
@@ -411,13 +407,11 @@ open class OnjScreen @MainThreadOnly constructor(
         styleManagers.add(manager)
     }
 
-    fun update(delta: Float) {
-        if (playAmbientSounds) {
-            SoundPlayer.updateAmbientSounds(this)
-        }
+    fun update(delta: Float, isEarly: Boolean = false) {
+        SoundPlayer.update(this, playAmbientSounds)
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
-        screenController?.update()
+        if (!isEarly) screenController?.update()
         updateCallbacks()
         stage.act(Gdx.graphics.deltaTime)
         currentHoverDetail?.act(delta)
@@ -437,11 +431,16 @@ open class OnjScreen @MainThreadOnly constructor(
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
-            styleManagers.filter { it !in oldStyleManagers }
+            styleManagers
+                .filter { it !in oldStyleManagers }
                 .forEach(StyleManager::update) //all added items get updated too
             if (dragAndDrop.none { it.value.isDragging }) {
                 stage.batch.begin()
-                currentHoverDetail?.draw(stage.batch, 1f)
+                currentDisplayDetailActor?.drawHoverDetail(this, stage.batch)
+//                currentHoverDetail?.draw(stage.batch, 1f)
+                if (currentHoverDetail != null) {
+                    currentHoverDetail!!.draw(stage.batch, 1f)
+                }
                 stage.batch.end()
             }
         }
