@@ -43,6 +43,12 @@ object PermaSaveState {
     val visitedAreas: Set<String>
         get() = _visitedAreas
 
+    var playerFoughtMultipleEnemies: Boolean = false
+        set(value) {
+            field = value
+            saveFileDirty = true
+        }
+
     var statTotalMoneyEarned: Int by templateParam("stat.totalCashCollected", 0)
     var statEncountersWon: Int by templateParam("stat.encountersWon", 0)
     var statBulletsShot: Int by templateParam("stat.bulletsShot", 0)
@@ -76,6 +82,7 @@ object PermaSaveState {
         currentRandom = obj.get<Long?>("lastRandom") ?: Random.nextLong()
         playerHasCompletedTutorial = obj.get<Boolean>("playerHasCompletedTutorial")
         collection = obj.get<OnjArray>("collection").value.map { it.value as String }
+        playerFoughtMultipleEnemies = obj.get<Boolean>("playerFoughtMultipleEnemies")
         _visitedAreas = obj.get<OnjArray>("visitedAreas").value.map { it.value as String }.toMutableSet()
 
         saveFileDirty = false
@@ -94,6 +101,7 @@ object PermaSaveState {
             "collection" with collection
             "playerHasCompletedTutorial" with playerHasCompletedTutorial
             "visitedAreas" with _visitedAreas
+            "playerFoughtMultipleEnemies" with playerFoughtMultipleEnemies
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
         saveFileDirty = false

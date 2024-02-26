@@ -223,6 +223,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         curReserves = baseReserves
 
+        if (enemyArea.enemies.size > 1 && !PermaSaveState.playerFoughtMultipleEnemies) {
+            // TODO: hack
+            addTutorialText(listOf(
+                GameDirector.GameTutorialTextPart(
+                "In this encounter, you will fight multiple enemies. You can choose which one to attack by clicking" +
+                        "on the enemy.",
+                "Ok",
+                null,
+                null
+            )))
+            PermaSaveState.playerFoughtMultipleEnemies = true
+        }
+
         encounterModifiers.forEach { it.onStart(this) }
         appendMainTimeline(Timeline.timeline {
             include(drawCardPopupTimeline(cardsToDrawInFirstRound))
