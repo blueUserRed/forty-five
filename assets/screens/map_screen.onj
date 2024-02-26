@@ -446,13 +446,21 @@ var extractionOverlay = $Box {
                 }
             ]
         } children [
+            $Box {
+            styles: [
+                {
+                    background: "map_extraction_card_background_white",
+                    width: (worldWidth * 0.5 - 120)#points,
+                    height: (worldHeight * 0.6 - 120)#points,
+                }
+            ],
+            children: [
             $ScrollBox {
                 name: "extraction_cards_parent",
                 styles: [
                     {
-                        background: "map_extraction_card_background_white",
-                        width: (worldWidth * 0.5 - 120)#points,
-                        height: (worldHeight * 0.6 - 120)#points,
+                        width: 94#percent,
+                        height: 100#percent,
                         flexWrap: wrap.wrap,
                         flexDirection: flexDirection.row,
                         justifyContent: justify.flexStart,
@@ -468,7 +476,7 @@ var extractionOverlay = $Box {
                         scrollbarLength: 90.0#percent,
                     }
                 ],
-                isScrollDirectionVertical: false,
+                isScrollDirectionVertical: true,
                 scrollDistance: 10.0,
                 backgroundStretched: false,
                 scrollbarBackgroundName: "scrollbar_background",
@@ -492,7 +500,7 @@ var extractionOverlay = $Box {
                 },
 
             ]
-        ],
+        ]}],
 
         $Box {
             styles: [
@@ -667,7 +675,7 @@ templates: [
         },
         styles: [
             {
-                width: 20.0#percent,
+                width: 21.65#percent,
                 height: 35.0#percent,
                 marginLeft: 10#points,
                 marginTop: 10#points,
