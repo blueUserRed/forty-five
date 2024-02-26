@@ -228,7 +228,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             addTutorialText(listOf(
                 GameDirector.GameTutorialTextPart(
                 "In this encounter, you will fight multiple enemies. You can choose which one to attack by clicking" +
-                        "on the enemy.",
+                        " on the enemy.",
                 "Ok",
                 null,
                 null

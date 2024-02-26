@@ -1042,7 +1042,7 @@ encounter: [
 
     {
         enemies: [
-            "Witch_lvl1", "Outlaw_lvl", "Witch_lvl1"
+            "Witch_lvl1", "Outlaw_lvl1", "Witch_lvl1"
         ],
         encounterModifier: [
             "BewitchedMist"

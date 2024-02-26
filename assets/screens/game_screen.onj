@@ -1464,8 +1464,8 @@ var gameScreen = $Box {
             {
                 width: (worldWidth * 0.7)#points,
                 height: 100#points,
-                positionLeft: 800#points,
-                positionBottom: -320#points,
+                positionLeft: 740#points,
+                positionBottom: -360#points,
             }
         ],
         ...enemyArea
