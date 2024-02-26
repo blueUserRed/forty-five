@@ -332,7 +332,7 @@ var uniqueEventsToUseOften = {
             event: $ChooseCardMapEvent {
                 seed: null,
                 types: [
-                    "weighted_cards_pool_3"
+                    "weighted_cards_pool_2"
                 ],
                 nbrOfCards: 3,
                 currentlyBlocks: false,

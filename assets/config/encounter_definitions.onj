@@ -560,7 +560,6 @@ encounter: [
             "Witch_lvl1"
         ],
         encounterModifier: [
-            ""
         ],
         biomes: [
             "bewitched_forest"
