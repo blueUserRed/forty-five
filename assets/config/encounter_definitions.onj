@@ -894,7 +894,7 @@ encounter: [
             "Outlaw_lvl2", "Outlaw_lvl1", "Outlaw_lvl2"
         ],
         encounterModifier: [
-            "Lookalike"
+//            "Lookalike"
         ],
         biomes: [
             "bewitched_forest"
