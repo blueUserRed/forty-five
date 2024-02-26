@@ -451,7 +451,7 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            protect("enter", bSelects.targetRequiredNotSelf, 4)
+            protect("enter", bSelects.targetRequiredNotSelf, 4, true)
         ],
         forceLoadCards: [],
         dark: false,
@@ -1151,14 +1151,14 @@ cards: [
         name: "guardianAngelBullet",
         title: "Guardian Angel Bullet",
         flavourText: "\"My husband Jake gave me this. Back at his home, he told me that this bullet is said to watch over a person, protecting them from evil. May it protect all Onathahans as well\" -Note found with the bullet",
-        description: "$trigger$On-Place-Down:$trigger$\nThe Bullet in Slot 3" + slot.3 + " gets $trait$PROTECTED$trait$ (1)",
+        description: "$trigger$On-Place-Down:$trigger$\nThe Bullet in Slot 3" + slot.3 + " gets $trait$PROTECTED$trait$ (1)\nCan't protect itself.",
         baseDamage: 4,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            protect("enter", bSelects.threeButNotSelf, 1)
+            protect("enter", bSelects.threeButNotSelf, 1, false)
         ],
         forceLoadCards: [],
         dark: false,

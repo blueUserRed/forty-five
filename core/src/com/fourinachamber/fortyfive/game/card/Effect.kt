@@ -309,6 +309,7 @@ abstract class Effect(val trigger: Trigger) {
         trigger: Trigger,
         val bulletSelector: BulletSelector,
         val shots: Int,
+        val onlyValidWhileCardIsInGame: Boolean,
         override var triggerInHand: Boolean
     ) : Effect(trigger) {
 
@@ -319,14 +320,18 @@ abstract class Effect(val trigger: Trigger) {
                     .forEach { it.protect(
                         cardDescName,
                         shots,
-                        validityChecker = { card.inGame }
+                        validityChecker = if (onlyValidWhileCardIsInGame) {
+                            { card.inGame }
+                        } else {
+                            { true }
+                        }
                     )}
             }
         }
 
         override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
 
-        override fun copy(): Effect = Protect(trigger, bulletSelector, shots, triggerInHand).also {
+        override fun copy(): Effect = Protect(trigger, bulletSelector, shots, onlyValidWhileCardIsInGame, triggerInHand).also {
             it.isHidden = isHidden
         }
 

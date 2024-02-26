@@ -120,12 +120,13 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         ))
     }
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int]")
-    fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector, shots: OnjInt): OnjEffect {
+    @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, int, boolean]")
+    fun protect(trigger: OnjString, bulletSelector: OnjBulletSelector, shots: OnjInt, onlyValidWhileCardIsInGame: OnjBoolean): OnjEffect {
         return OnjEffect(Effect.Protect(
             triggerOrError(trigger.value),
             bulletSelector.value,
             shots.value.toInt(),
+            onlyValidWhileCardIsInGame.value,
             false
         ))
     }

@@ -249,6 +249,7 @@ class Card(
      * called by gameScreenController when the card was shot
      */
     fun afterShot(controller: GameController) {
+        if (shouldRemoveAfterShot(controller)) leaveGame()
         if (protectingModifiers.isNotEmpty()) {
             val effect = protectingModifiers.first()
             val newEffect = effect.copy(second = effect.second - 1)
@@ -259,7 +260,6 @@ class Card(
             }
             modifiersChanged()
         }
-        if (shouldRemoveAfterShot(controller)) leaveGame()
     }
 
     fun beforeShot() {
