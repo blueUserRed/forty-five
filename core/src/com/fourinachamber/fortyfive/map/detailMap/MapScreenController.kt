@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Event
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
+import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.screen.gameComponents.TutorialInfoActor
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.TemplateString
@@ -51,19 +52,12 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
         val cardsBeforeExtraction = PermaSaveState.collection.toMutableList()
         SaveState.extract()
         val cardsAfterExtraction = PermaSaveState.collection.toMutableList()
-        cardsAfterExtraction.removeAll(cardsBeforeExtraction)
-        val cardPrototypes = RandomCardSelection.allCardPrototypes
-        val cards = cardsAfterExtraction.map { name ->
-            val cardProto = cardPrototypes.find { it.name == name } ?: throw RuntimeException("unknown card $name")
-            val card = cardProto.create(screen, true)
-            screen.addDisposable(card)
-            card
-        }
-        val cardsParent = screen.namedActorOrError("extraction_cards_parent") as CustomFlexBox
-        cards.forEach { cardsParent.add(it.actor) }
+        cardsBeforeExtraction.forEach { cardsAfterExtraction.remove(it) }
+        initCards(screen, cardsAfterExtraction)
         timeline.appendAction(Timeline.timeline {
             action {
                 screen.enterState(showExtractionPopupScreenState)
+//                (screen.namedActorOrError("backpackActor") as Backpack).reloadDeck()
             }
             delayUntil { popupEvent != null }
             action {
@@ -71,6 +65,27 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
                 screen.leaveState(showExtractionPopupScreenState)
             }
         }.asAction())
+    }
+
+    private fun initCards(onjScreen: OnjScreen, cards: List<String>) {
+        val prototypes = RandomCardSelection.allCardPrototypes
+        val cardsContainer = onjScreen.namedActorOrError("extraction_cards_parent") as? CustomFlexBox
+                ?: throw RuntimeException("actor named extraction_cards_parent must be a CustomFlexBox")
+//        Array(40) { "incendiaryBullet" }.forEach { cardName ->
+        cards.forEach { cardName ->
+            val card = prototypes
+                .find { it.name == cardName }
+                ?.create(onjScreen, isSaved = true)
+                ?: throw RuntimeException("unknown card: $cardName")
+            onjScreen.screenBuilder.addDataToWidgetFromTemplate(
+                "cardTemplate",
+                mapOf(),
+                cardsContainer,
+                onjScreen,
+                card.actor
+            )
+            onjScreen.addDisposable(card)
+        }
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {

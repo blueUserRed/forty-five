@@ -15,10 +15,12 @@ assets: {
     useAssets: [
         "shop_background_wasteland", "red_wing_cm", "red_wing", "red_wing_bmp", "roadgeek", "hover_detail_background", "reserves_texture",
         "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
-        "shop_back_button", "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
+        "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         "shop_add_to_backpack", "shop_add_to_deck",
 
-        "card_pickup_sound", "card_laydown_sound", "money_sound",
+        "shop_back_button_hover", "shop_back_button",
+
+        "card_pickup_sound", "card_laydown_sound", "money_sound", "button_2_sound",
 
         "map_theme",
 
@@ -141,6 +143,19 @@ root: $Box {
             }
         ],
     },
+    $Box {
+        zIndex: 20,
+        styles: [
+            {
+                positionTop: 110#points,
+                positionLeft: (worldWidth * 0.37)#points,
+                height: (worldHeight * 0.89)#points,
+                width: (worldWidth * 0.65)#points,
+                background: "shop_dark_background"
+            }
+        ]
+    },
+    /*
     $Image {
         zIndex: 20,
         textureName: "shop_dark_background",
@@ -160,27 +175,8 @@ root: $Box {
             }
         ],
     },
+    */
 
-    $Image {       //TODO biome for back (evtl)
-
-        zIndex: 20,
-        name: "back_button",
-        textureName: "shop_back_button",
-        scaleX: 0.8,
-        scaleY: 0.8,
-        reportDimensionsWithScaling: true,
-        behaviours: [
-            $OnClickChangeScreenBehaviour {
-                screenPath: "screens/map_screen.onj"
-            },
-        ],
-        styles: [
-            {
-                positionType: positionType.absolute,
-                positionBottom: (0.0 * 10)#points,
-            }
-        ],
-    },
     $Image {
         zIndex: 200,
         name: "addToDeckWidget",
@@ -286,13 +282,30 @@ root: $Box {
                 color: color.forty_white,
                 fontScale: 2.0
             },
-            $TemplateLabel {
-                align: "right",
-                template: "{stat.playerMoney}$ ",
-                font: "red_wing",
-                color: color.forty_white,
-                fontScale: 2.0
-            },
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        positionTop: 25#points,
+                        height: 60#percent,
+                        width: 230#points,
+                        background: "shop_back_button"
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: hover(),
+                        background: "shop_back_button_hover"
+                    }
+                ],
+                touchable: "enabled",
+                behaviours: [
+                    sharedComponents.buttonCursorBehaviour,
+                    sharedComponents.buttonSoundBehaviour,
+                    $OnClickChangeScreenBehaviour {
+                        screenPath: "screens/map_screen.onj"
+                    }
+                ]
+            }
         ],
 
         $Image {
@@ -339,15 +352,11 @@ root: $Box {
         options: [
             {
                 actorName: "backpackActor",
-                displayName: "Notebook",
-            },
-            {
-                actorName: "backpackActor",
                 displayName: "Backpack",
             },
             {
-                actorName: "backpackActor",
-                displayName: "Settings",
+                actionName: "toTitleScreen",
+                displayName: "To Title Screen",
             },
         ],
         //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out

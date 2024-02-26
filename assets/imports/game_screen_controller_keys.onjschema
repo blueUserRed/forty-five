@@ -34,4 +34,7 @@ hardMaxCards: int,
 reservesAtRoundBegin: int,
 shotEmptyDamage: int,
 tutorialInfoActorName: string,
-rewardChance: float
+rewardChance: float,
+musicAfterWin: string,
+musicBeforeWin: string,
+musicTransitionTime: int

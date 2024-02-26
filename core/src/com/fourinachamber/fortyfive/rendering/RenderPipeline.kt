@@ -67,9 +67,41 @@ open class RenderPipeline(
     private val isOrbAnimActive: Boolean
         get() = TimeUtils.millis() <= orbFinisesAt
 
+
+    private val shapeRenderer: ShapeRenderer = ShapeRenderer()
+
+    private var fadeDuration: Int = -1
+    private var fadeFinishesAt: Long = -1
+
+    private val fadeToBlackTask: () -> Unit = {
+        val now = TimeUtils.millis()
+        screen.viewport.apply()
+        shapeRenderer.projectionMatrix = screen.viewport.camera.combined
+        shapeRenderer.begin(ShapeType.Filled)
+        val remaining = (fadeFinishesAt - now).toFloat()
+        val alpha = 1f - remaining / fadeDuration.toFloat()
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        shapeRenderer.color = Color(0f, 0f, 0f, alpha)
+        shapeRenderer.rect(0f, 0f, screen.viewport.worldWidth, screen.viewport.worldHeight)
+        shapeRenderer.end()
+    }
+
     init {
         frameBufferManager.addPingPongFrameBuffer("orb", 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", 1f)
+    }
+
+    fun getFadeToBlackTimeline(fadeDuration: Int): Timeline = Timeline.timeline {
+        action {
+            this@RenderPipeline.fadeDuration = fadeDuration
+            fadeFinishesAt = TimeUtils.millis() + fadeDuration
+            lateTasks.add(fadeToBlackTask)
+        }
+        delayUntil { TimeUtils.millis() >= fadeFinishesAt }
+        action {
+            lateTasks.remove(fadeToBlackTask)
+        }
     }
 
     private fun updateOrbFbo(delta: Float) {
@@ -313,6 +345,7 @@ open class RenderPipeline(
     override fun dispose() {
         hasBeenDisposed = true
         frameBufferManager.dispose()
+        shapeRenderer.dispose()
         batch.dispose()
     }
 
@@ -360,25 +393,6 @@ open class RenderPipeline(
 
 class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
 
-    private val shapeRenderer: ShapeRenderer = ShapeRenderer()
-
-    private var fadeFinishesAt: Long = -1
-    private val fadeDuration: Int = 2000
-
-    private val fadeToBlackTask: () -> Unit = {
-        val now = TimeUtils.millis()
-        screen.viewport.apply()
-        shapeRenderer.projectionMatrix = screen.viewport.camera.combined
-        shapeRenderer.begin(ShapeType.Filled)
-        val remaining = (fadeFinishesAt - now).toFloat()
-        val alpha = 1f - remaining / fadeDuration.toFloat()
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-        shapeRenderer.color = Color(0f, 0f, 0f, alpha)
-        shapeRenderer.rect(0f, 0f, screen.viewport.worldWidth, screen.viewport.worldHeight)
-        shapeRenderer.end()
-    }
-
     private val shootShaderDelegate = lazy {
         GraphicsConfig.shootShader(screen)
     }
@@ -393,17 +407,6 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
     private val parryShader: BetterShader by parryShaderDelegate
     private val parryPostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(parryShader)
-    }
-
-    fun getOnDeathPostProcessingTimeline(): Timeline = Timeline.timeline {
-        action {
-            fadeFinishesAt = TimeUtils.millis() + fadeDuration
-            lateTasks.add(fadeToBlackTask)
-        }
-        delayUntil { TimeUtils.millis() >= fadeFinishesAt }
-        action {
-            lateTasks.remove(fadeToBlackTask)
-        }
     }
 
     fun getOnShotPostProcessingTimeline(): Timeline = Timeline.timeline {
@@ -424,11 +427,6 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
 
     fun stopParryEffect() {
         postPreprocessingSteps.remove(parryPostProcessingStep)
-    }
-
-    override fun dispose() {
-        super.dispose()
-        shapeRenderer.dispose()
     }
 
 }

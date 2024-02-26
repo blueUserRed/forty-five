@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.map.events.chooseCard
 
+import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -60,6 +61,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         )
 //        addListener(screen) //philip said for now not this feature bec he is indecisive
         initCards(screen, cards)
+        if (cards.isEmpty()) screen.enterState("no_cards_left")
         if (cards.size > 1) {
             TemplateString.updateGlobalParam("screen.chooseCard.text", "Choose one Bullet")
         } else {
@@ -68,6 +70,10 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         this.addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         this.addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         updateDropTargets()
+    }
+
+    override fun onUnhandledEvent(event: Event) {
+        if (event is PopupConfirmationEvent) MapManager.changeToMapScreen()
     }
 
     private fun getRandomCards(seed: Long, types: MutableList<String>, nbrOfCards: Int): List<CardPrototype> {

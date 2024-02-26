@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -221,13 +222,15 @@ interface DisplayDetailsOnHoverActor {
     var detailActor: Actor?
     var mainHoverDetailActor: String?
     var isHoverDetailActive: Boolean
+    val actor: Actor
 
     fun <T> registerOnHoverDetailActor(
         actor: T,
         screen: OnjScreen
     ) where T : DisplayDetailsOnHoverActor, T : Actor = screen.addOnHoverDetailActor(actor)
 
-    fun setBoundsOfHoverDetailActor(actor: Actor) {
+    fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
+        val actor = actor
         val detailActor = detailActor
         if (detailActor !is Layout) return
         val prefHeight = detailActor.prefHeight
@@ -263,11 +266,45 @@ interface DisplayDetailsOnHoverActor {
         detailActor.invalidateHierarchy()
     }
 
+    fun drawHoverDetail(screen: OnjScreen, batch: Batch) {
+        detailActor?.draw(batch, 1f)
+    }
+
     fun getHoverDetailData(): Map<String, OnjValue>
 
     fun onDetailDisplayStarted() {}
     fun onDetailDisplayEnded() {}
 
+}
+
+interface GeneralDisplayDetailOnHoverActor : DisplayDetailsOnHoverActor {
+
+    val additionalHoverData: MutableMap<String, OnjValue>
+
+    override var actorTemplate: String
+        get() = "general_hover_detail_template"
+        set(value) {}
+
+    override fun setBoundsOfHoverDetailActor(screen: OnjScreen) {
+    }
+
+    override fun drawHoverDetail(screen: OnjScreen, batch: Batch) {
+        val detailActor = detailActor ?: return
+        val (x, y) = actor.localToStageCoordinates(Vector2(0f, 0f))
+        if (detailActor is Layout) {
+            detailActor.width = detailActor.prefWidth
+            detailActor.height = detailActor.prefHeight
+        }
+        var chosenY = y + actor.height
+        if (chosenY + detailActor.height > screen.viewport.worldHeight) {
+            chosenY = y - detailActor.height
+        }
+        detailActor.setPosition(
+            x + actor.width / 2 - detailActor.width / 2,
+            chosenY,
+        )
+        detailActor.draw(batch, 1f)
+    }
 }
 
 interface AnimationSpawner {

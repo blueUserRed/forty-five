@@ -28,6 +28,10 @@ $CardEffect{
     $PriceMultiplier {
         price: float
     }
+
+    $PriceAddition {
+        price: int
+    }
 }
 var cardChange = {
     select: $CardSelector,

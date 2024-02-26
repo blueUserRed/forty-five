@@ -41,6 +41,7 @@ object BehaviourFactory {
         "OnClickRemoveWarningLabelBehaviour" to { onj, actor -> OnClickRemoveWarningLabelBehaviour(onj, actor) },
         "SpamPreventionBehaviour" to { onj, actor -> SpamPreventionBehaviour(onj, actor) },
         "OnClickSoundSituationBehaviour" to { onj, actor -> OnClickSoundSituationBehaviour(onj, actor) },
+        "OnClickChangeToInitialScreenBehaviour" to { onj, actor -> OnClickChangeToInitialScreenBehaviour(onj, actor) },
     )
 
     /**
@@ -287,6 +288,13 @@ class OnClickSoundSituationBehaviour(onj: OnjNamedObject, actor: Actor) : Behavi
 
     override val onCLick: BehaviourCallback = {
         SoundPlayer.situation(situation, onjScreen)
+    }
+}
+
+class OnClickChangeToInitialScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
+
+    override val onCLick: BehaviourCallback = {
+        FortyFive.changeToInitialScreen()
     }
 }
 

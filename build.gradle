@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlinVersion = '1.7.0'
+    ext.kotlinVersion = '1.9.22'
     ext.gdxVersion = '1.11.0'
     repositories {
         mavenLocal()
@@ -79,6 +79,7 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api 'io.github.libktx:ktx-actors:1.11.0-rc2'
+        implementation "org.jetbrains.kotlin:kotlin-stdlib"
         implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
         api "com.github.lyze237:gdx-FlexBox:425149b588"
         api "com.github.lyze237:gdx-FlexBox:425149b588:sources"

@@ -54,6 +54,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private val encounterModifierDisplayTemplateName = onj.get<String>("encounterModifierDisplayTemplateName")
     private val encounterModifierParentName = onj.get<String>("encounterModifierParentName")
     private val tutorialInfoActorName = onj.get<String>("tutorialInfoActorName")
+    private val musicAfterWin = onj.get<String>("musicAfterWin")
+    private val musicBeforeWin = onj.get<String>("musicBeforeWin")
+    private val musicTransitionTime = onj.get<Long>("musicTransitionTime").toInt()
 
     val cardsToDrawInFirstRound = onj.get<Long>("cardsToDrawInFirstRound").toInt()
     val cardsToDraw = onj.get<Long>("cardsToDraw").toInt()
@@ -230,6 +233,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
         onjScreen.invalidateEverything()
         gameDirector.chooseEnemyActions()
+        SoundPlayer.transitionToMusic(musicBeforeWin, musicTransitionTime, curScreen)
     }
 
     private fun initCards() {
@@ -478,39 +482,46 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun loadBulletInRevolver(card: Card, slot: Int) = appendMainTimeline(Timeline.timeline {
-        FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
-        val cardInSlot = revolver.getCardInSlot(slot)
-
-        if (
-            card.type != Card.Type.BULLET ||
-            !card.allowsEnteringGame(this@GameController, slot) ||
-            !(cardInSlot?.isReplaceable ?: true) ||
-            !cost(card.cost, card.actor)
-        ) {
-            SoundPlayer.situation("not_allowed", curScreen)
-            return
-        }
+        var cardInSlot: Card? = null
+        var skip = false
         action {
+            FortyFiveLogger.debug(logTag, "attempting to load bullet $card in revolver slot $slot")
+            cardInSlot = revolver.getCardInSlot(slot)
+            if (
+                card.type != Card.Type.BULLET ||
+                !card.allowsEnteringGame(this@GameController, slot) ||
+                !(cardInSlot?.isReplaceable ?: true) ||
+                !cost(card.cost, card.actor)
+            ) {
+                SoundPlayer.situation("not_allowed", curScreen)
+                skip = true
+                return@action
+            }
             cardHand.removeCard(card)
             if (cardInSlot != null) revolver.preAddCard(slot, card)
         }
         includeLater(
             { destroyCardTimeline(cardInSlot!!) },
-            { cardInSlot != null }
+            { !skip && cardInSlot != null }
         )
         action {
+            if (skip) return@action
             revolver.setCard(slot, card)
             FortyFiveLogger.debug(logTag, "card $card entered revolver in slot $slot")
             card.onEnter(this@GameController)
             checkCardMaximums()
         }
-        _encounterModifiers
-            .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
-            .collectTimeline()
-            .let { include(it) }
+        includeLater(
+            {
+                _encounterModifiers
+                    .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
+                    .collectTimeline()
+            },
+            { !skip }
+        )
         includeLater(
             { checkEffectsSingleCard(Trigger.ON_ENTER, card) },
-            { true }
+            { !skip }
         )
     })
 
@@ -625,7 +636,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             } else {
                 damage - parryCard!!.curDamage(this@GameController)
             }
-            TemplateString.updateGlobalParam("game.remainingParryDamage", remainingDamage)
+            TemplateString.updateGlobalParam("game.remainingParryDamage", max(remainingDamage!!, 0))
             TemplateString.updateGlobalParam("game.remainingPassDamage", max(damage, 0))
             TemplateString.updateGlobalParam("game.revolverPopupText", "Parry Bullet?")
             gameRenderPipeline.startParryEffect()
@@ -641,15 +652,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     popupEvent = null
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
-                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, true))
+                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)))
                 action {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
-                    if (parryCard.shouldRemoveAfterShot) {
+                    if (parryCard.shouldRemoveAfterShot(this@GameController)) {
                         revolver.removeCard(parryCard)
                         cardStack.add(parryCard)
                     }
-                    parryCard.leaveGame()
+                    parryCard.afterShot(this@GameController)
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
                 if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))
@@ -775,17 +786,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     .let { include(it) }
             }
             cardToShoot?.let {
-                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies)
-                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, true, triggerInformation))
+                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true)
+                include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
                 action {
-                    if (cardToShoot.shouldRemoveAfterShot) {
-                        if (!cardToShoot.isUndead) cardStack.add(cardToShoot)
-                        SoundPlayer.situation("orb_anim_playing", curScreen)
-                        gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
+                    if (cardToShoot.shouldRemoveAfterShot(this@GameController)) {
+                        if (!cardToShoot.isUndead) {
+                            cardStack.add(cardToShoot)
+                            SoundPlayer.situation("orb_anim_playing", curScreen)
+                            gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
+                        }
                         revolver.removeCard(cardToShoot)
                     }
                     if (cardToShoot.isUndead) cardHand.addCard(cardToShoot)
-                    cardToShoot.afterShot()
+                    cardToShoot.afterShot(this@GameController)
                 }
             }
             include(rotateRevolver(rotationDirection))
@@ -826,7 +839,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             revolver
                 .slots
                 .mapNotNull { it.card }
-                .forEach { it.onRevolverRotation(rotation) }
+                .forEach { it.onRevolverRotation(newRotation) }
         }
         _encounterModifiers
             .mapNotNull { it.executeAfterRevolverRotated(newRotation, this@GameController) }
@@ -848,6 +861,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 },
                 { true }
             )
+            includeLater(
+                {
+                    checkEffectsSingleCard(Trigger.ON_ROTATE_IN_5, revolver.getCardInSlot(5)!!)
+                },
+                { revolver.getCardInSlot(5) != null }
+            )
+            revolver.getCardInSlot(5)?.let {
+                include(checkEffectsSingleCard(Trigger.ON_ROTATE_IN_5, it))
+            }
         }
         enemyArea
             .enemies
@@ -871,7 +893,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         appendMainTimeline(Timeline.timeline {
             action {
-                SoundPlayer.situation("holster", curScreen)
+                SoundPlayer.situation("end_turn", curScreen)
             }
             encounterModifiers
                     .mapNotNull { it.executeOnEndTurn() }
@@ -890,6 +912,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             include(executePlayerStatusEffectsOnNewTurn())
             action {
                 gameDirector.chooseEnemyActions()
+                SoundPlayer.situation("turn_begin", curScreen)
             }
             include(bannerAnimationTimeline("player_turn_banner"))
             action {
@@ -1002,15 +1025,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
-        isOnShot: Boolean = false,
         triggerInformation: TriggerInformation = TriggerInformation()
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
-            include(card.checkEffects(trigger, triggerInformation, this@GameController, isOnShot))
+            include(card.checkEffects(trigger, triggerInformation, this@GameController))
             trigger
                 .cascadeTriggers
-                .map { checkEffectsSingleCard(it, card, isOnShot, triggerInformation) }
+                .map { checkEffectsSingleCard(it, card, triggerInformation) }
                 .collectTimeline()
                 .let { include(it) }
         }
@@ -1025,7 +1047,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         return Timeline.timeline {
             createdCards
                 .filter { it.inGame || it.inHand(this@GameController) }
-                .map { it.checkEffects(trigger, triggerInformation, this@GameController, false) }
+                .map { it.checkEffects(trigger, triggerInformation, this@GameController) }
                 .collectTimeline()
                 .let { include(it) }
             trigger
@@ -1055,6 +1077,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         effect.initIcon(this)
         _playerStatusEffects.add(effect)
         statusEffectDisplay.displayEffect(effect)
+        curScreen.enterState(showStatusEffectsState)
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
@@ -1071,12 +1094,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         .collectTimeline()
 
     private fun updateStatusEffects() {
+        var somethingChanged = false
         _playerStatusEffects
             .filter { !it.isStillValid() }
             .forEach {
+                somethingChanged = true
                 statusEffectDisplay.removeEffect(it)
             }
         _playerStatusEffects.removeIf { !it.isStillValid() }
+        if (somethingChanged) {
+            if (_playerStatusEffects.isEmpty()) curScreen.leaveState(showStatusEffectsState)
+            else curScreen.enterState(showStatusEffectsState)
+        }
     }
 
     fun isStatusEffectApplicable(effect: StatusEffect): Boolean {
@@ -1190,6 +1219,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val playerGetsCard = !gameDirector.encounter.special && Utils.coinFlip(rewardChance)
         appendMainTimeline(Timeline.timeline {
             action {
+                SoundPlayer.transitionToMusic(musicAfterWin, musicTransitionTime, curScreen)
                 SaveState.encountersWon++
                 curScreen.enterState(showWinScreen)
                 if (money > 0) curScreen.enterState(showCashItem)
@@ -1247,7 +1277,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "player lost")
             playerLost = true
         }
-        include(gameRenderPipeline.getOnDeathPostProcessingTimeline())
+        include(gameRenderPipeline.getFadeToBlackTimeline(2000))
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
@@ -1321,6 +1351,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         const val showCashItem = "showCashItem"
         const val showCardItem = "showCardItem"
         const val showSelectionPopup = "showSelectionPopup"
+        const val showStatusEffectsState = "playerHasStatusEffects"
 
         private val cardsFileSchema: OnjSchema by lazy {
             OnjSchemaParser.parseFile("onjschemas/cards.onjschema")

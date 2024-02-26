@@ -14,8 +14,8 @@ import com.fourinachamber.fortyfive.animation.createAnimation
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.*
-import com.fourinachamber.fortyfive.screen.gameComponents.StatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.gameComponents.TextEffectEmitter
+import com.fourinachamber.fortyfive.screen.gameComponents.VerticalStatusEffectDisplay
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.customActor.findAnimationSpawner
@@ -113,6 +113,7 @@ class Enemy(
     }
 
     fun applyEffect(effect: StatusEffect) {
+        if (isDefeated) return
         FortyFiveLogger.debug(logTag, "status effect $effect applied to enemy")
         for (effectToTest in _statusEffects) if (effectToTest.canStackWith(effect)) {
             FortyFiveLogger.debug(logTag, "stacked with $effectToTest")
@@ -281,12 +282,12 @@ class EnemyActor(
     private val coverIcon: CustomImageActor = CustomImageActor(enemy.coverIconHandle, screen)
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
     private val attackIndicator = CustomHorizontalGroup(screen)
-    private val attackIcon = CustomImageActor(null, screen, false)
+    private val attackIcon = EnemyActionIcon(screen, hiddenActionIconHandle)
     private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
     private val coverInfoBox = CustomVerticalGroup(screen)
     private val statsBox = CustomVerticalGroup(screen)
 
-    private val statusEffectDisplay = StatusEffectDisplay(
+    private val statusEffectDisplay = VerticalStatusEffectDisplay(
         screen,
         enemy.detailFont,
         fontColor,
@@ -357,7 +358,7 @@ class EnemyActor(
 
         attackIndicator.addActor(attackIcon)
         attackIndicator.addActor(attackLabel)
-        attackIndicator.isVisible = false
+//        attackIndicator.isVisible = false
 
         coverInfoBox.addActor(coverIcon)
         coverInfoBox.addActor(coverText)
@@ -381,6 +382,8 @@ class EnemyActor(
     override fun hit(x: Float, y: Float, touchable: Boolean): Actor? {
         if (touchable && this.touchable != Touchable.enabled) return null
         if (!isVisible) return null
+        val childHit = super.hit(x, y, touchable)
+        if (childHit != null) return childHit
         return if (x >= 0 && x < width && y >= 0 && y < height) this else null
     }
 
@@ -487,22 +490,22 @@ class EnemyActor(
     fun setupForAction(action: NextEnemyAction) = when (action) {
 
         is NextEnemyAction.None -> {
-            attackIndicator.isVisible = false
+//            attackIndicator.isVisible = false
             attackLabel.setText("")
         }
 
         is NextEnemyAction.ShownEnemyAction -> {
-            attackIcon.backgroundHandle = action.action.prototype.iconHandle
             attackLabel.setText(action.action.indicatorText)
-            attackIndicator.isVisible = true
+//            attackIndicator.isVisible = true
         }
 
         is NextEnemyAction.HiddenEnemyAction -> {
-            attackIcon.backgroundHandle = hiddenActionIconHandle
             attackLabel.setText("")
-            attackIndicator.isVisible = true
+//            attackIndicator.isVisible = true
         }
 
+    }.also {
+        attackIcon.setupForAction(action)
     }
 
     fun displayStatusEffect(effect: StatusEffect) = statusEffectDisplay.displayEffect(effect)

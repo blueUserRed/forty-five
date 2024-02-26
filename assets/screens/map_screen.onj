@@ -21,7 +21,7 @@ assets: {
         "map_background_wasteland_tileable","map_background_bewitched_forest_tileable",
         "location_sign_salem", "transparent_black_texture",
         "map_decoration_wasteland_cactus_1", "map_decoration_wasteland_cactus_2", "map_decoration_grass", "map_path", "dialog_continue_arrow",
-        "map_player", "location_sign_aqua_dulche", "location_sign_salem",
+        "map_player", "location_sign_aqua_dulche", "location_sign_under_construction",
         "map_node_default",
         "map_node_shop",
         "map_node_fight",
@@ -43,6 +43,10 @@ assets: {
         "map_detail_encounter_modifier_background",
 
         "tutorial_info_actor_background",
+        "backpack_scrollbar_background", "backpack_scrollbar",
+
+        "aqua_balle_lower_row", "aqua_balle_upper_row", "aqua_balle_sign", "aqua_balle_background",
+        "tutorial_road_weird_corner_house",
 
         "map_edge_shader", "bewitched_fog_static_noise_shader", "bewitched_fog_dynamic_noise_shader",
         "prerendered_noise_perlin_512x512", "grayscale_shader", "alpha_reduction_shader",
@@ -254,7 +258,6 @@ var infoPopup = $Box {
     ],
 
     $Box {
-        name: "start_button",
         styles: [
             {
                 style_priority: 1,
@@ -277,7 +280,6 @@ var infoPopup = $Box {
                 background: "common_button_disabled"
             }
         ],
-        touchable: "enabled",
         behaviours: [
             sharedComponents.buttonSoundBehaviour,
             sharedComponents.buttonCursorBehaviour,
@@ -285,7 +287,13 @@ var infoPopup = $Box {
     } children [
 
         $TemplateLabel {
+            styles: [
+                {
+                    width: 140#points,
+                }
+            ],
             font: "red_wing",
+            name: "start_button",
             template: "{map.cur_event.buttonText}",
             fontScale: 1.0,
             color: color.white,
@@ -435,19 +443,52 @@ var extractionOverlay = $Box {
                 }
             ]
         } children [
-            $Box {
+            $ScrollBox {
                 name: "extraction_cards_parent",
                 styles: [
                     {
                         background: "map_extraction_card_background_white",
                         width: (worldWidth * 0.5 - 120)#points,
                         height: (worldHeight * 0.6 - 120)#points,
+                        flexWrap: wrap.wrap,
+                        flexDirection: flexDirection.row,
+                        justifyContent: justify.flexStart,
+                        paddingLeft: (3.0 * 15)#points,
+                        paddingRight: (35.0)#points,
+                        paddingTop: (3.0 * 10)#points,
+                        paddingBottom: (4.0 * 10)#points,
+                        cuttingLeft: 17.5,
+                        cuttingRight: 17.5,
+                        cuttingTop: 20.0,
+                        cuttingBottom: 20.0,
+                        scrollbarWidth: 15.0,
+                        scrollbarLength: 90.0#percent,
                     }
                 ],
-                //isScrollDirectionVertical: false,
-                //scrollDistance: 10.0,
-                //backgroundStretched: true
-            }
+                isScrollDirectionVertical: false,
+                scrollDistance: 10.0,
+                backgroundStretched: false,
+                scrollbarBackgroundName: "scrollbar_background",
+                scrollbarName: "scrollbar_handle",
+                scrollbarSide: "right",
+            } children [
+
+                  $Image {
+                    name: "scrollbar_background",
+                    textureName: "backpack_scrollbar_background",
+                    scaleX: 1.0,
+                    scaleY: 1.0,
+                    reportDimensionsWithScaling: true,
+                },
+
+                $Image {
+                    name: "scrollbar_handle",
+                    textureName: "backpack_scrollbar",
+                    scaleX: 1.0,
+                    scaleY: 1.0,
+                },
+
+            ]
         ],
 
         $Box {
@@ -595,15 +636,11 @@ root: $Box {
             options: [
                 {
                     actorName: "backpackActor",
-                    displayName: "Notebook",
-                },
-                {
-                    actorName: "backpackActor",
                     displayName: "Backpack",
                 },
                 {
-                    actorName: "backpackActor",
-                    displayName: "Settings",
+                    actionName: "toTitleScreen",
+                    displayName: "To Title Screen",
                 },
             ],
             //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
@@ -620,4 +657,19 @@ templates: [
     ...(sharedComponents.backpackTemplates),
     ...(sharedComponents.warningLabelTemplates),
     encounterModifierDisplayTemplate,
+
+    $None {
+        template_name: "cardTemplate",
+        template_keys: {
+        },
+        styles: [
+            {
+                width: 20.0#percent,
+                height: 35.0#percent,
+                marginLeft: 10#points,
+                marginTop: 10#points,
+            },
+        ]
+    }
+
 ],

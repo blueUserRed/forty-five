@@ -8,9 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
-import com.fourinachamber.fortyfive.utils.asArray
-import com.fourinachamber.fortyfive.utils.toFloatRange
+import com.fourinachamber.fortyfive.utils.*
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
 import onj.parser.OnjParser
@@ -34,7 +32,9 @@ data class DetailMap(
     val isArea: Boolean,
     val biome: String,
     val progress: ClosedFloatingPointRange<Float>,
-    val tutorialText: MutableList<MapScreenController.MapTutorialTextPart>
+    val tutorialText: MutableList<MapScreenController.MapTutorialTextPart>,
+    val scrollable: Boolean,
+    val camPosOffset: Vector2
 ) {
 
     /**
@@ -82,6 +82,8 @@ data class DetailMap(
         "biome" with biome
         "progress" with progress.asArray()
         "tutorialText" with tutorialText.map { it.asOnjObject() }
+        "scrollable" with scrollable
+        "camPosOffset" with camPosOffset.toArray()
     }
 
     private fun nodesAsOnjArray(): OnjArray {
@@ -171,7 +173,13 @@ data class DetailMap(
                     ?.value
                     ?.map { MapScreenController.MapTutorialTextPart.fromOnj(it as OnjObject) }
                     ?.toMutableList()
-                    ?: mutableListOf()
+                    ?: mutableListOf(),
+                onj.getOr("scrollable", true),
+                if (onj.hasKey<OnjArray>("camPosOffset")) {
+                    onj.get<OnjArray>("camPosOffset").toVector2()
+                } else {
+                    Vector2()
+                }
             )
         }
 
@@ -193,6 +201,7 @@ data class DetailMap(
         val drawableHandle: ResourceHandle,
         val baseWidth: Float,
         val baseHeight: Float,
+        val drawInBackground: Boolean,
         val instances: List<Pair<Vector2 /* = Position */, Float /* = scale */>>
     ) {
 
@@ -217,6 +226,7 @@ data class DetailMap(
             "texture" with drawableHandle
             "baseWidth" with baseWidth
             "baseHeight" with baseHeight
+            "drawInBackground" with drawInBackground
             "positions" with instances.map { arrayOf(it.first.x, it.first.y, it.second) }
         }
 
@@ -229,6 +239,7 @@ data class DetailMap(
                 obj.get<String>("texture"),
                 obj.get<Double>("baseWidth").toFloat(),
                 obj.get<Double>("baseHeight").toFloat(),
+                obj.getOr("drawInBackground", false),
                 obj
                     .get<OnjArray>("positions")
                     .value

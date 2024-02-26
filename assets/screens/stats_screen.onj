@@ -20,6 +20,8 @@ assets: {
 
         "backpack_scrollbar_background", "backpack_scrollbar",
 
+        "card_symbol_not_saved",
+
         "white_texture"
     ]
 },
@@ -90,15 +92,30 @@ templates: [
             color: color.grey,
             template: "value"
         }
-    ]
+    ],
+
+    $None {
+        template_name: "cardTemplate",
+        template_keys: {
+        },
+        styles: [
+            {
+                width: 22.0#percent,
+                height: 30.0#percent,
+                marginLeft: 10#points,
+                marginTop: 10#points,
+            },
+        ]
+    }
+
 ],
 
 var statsBox = $Box {
-    debug: true,
     styles: [
         {
             width: (worldWidth * 0.4)#points,
             flexDirection: flexDirection.column,
+            height: (worldHeight * 0.8)#points,
         }
     ],
 } children [
@@ -115,7 +132,7 @@ var statsBox = $Box {
         styles: [
             {
                 background: "stats_screen_spacer",
-                width: 100#percent,
+                width: (worldWidth * 0.4)#points,
                 aspectRatio: 1_161.0 / 6.0
             }
         ]
@@ -193,7 +210,11 @@ var statsBox = $Box {
                 style_condition: hover(),
                 background: "common_button_hover",
             },
-        ]
+        ],
+        touchable: "enabled",
+        behaviours: [
+            $OnClickChangeToInitialScreenBehaviour { }
+        ],
     } children [
 
         $Label {
@@ -208,10 +229,11 @@ var statsBox = $Box {
 ];
 
 var cardBox = $Box {
-    debug: true,
     styles: [
         {
+            positionTop: -50#points,
             width: (worldWidth * 0.4)#points,
+            height: (worldHeight * 0.65)#points,
             flexDirection: flexDirection.column,
             paddingLeft: 10#points,
             background: "stats_screen_lost_cards_background"
@@ -220,6 +242,11 @@ var cardBox = $Box {
 } children [
 
     $Label {
+        styles: [
+            {
+                positionLeft: 10#points
+            }
+        ],
         font: "red_wing_bmp",
         fontScale: 0.8,
         color: color.forty_white,
@@ -227,19 +254,19 @@ var cardBox = $Box {
         text: "Cards Lost"
     },
 
+    /*
     $Box {
         styles: [
             {
                 background: "stats_screen_spacer",
-                width: 100#percent,
+                width: (worldWidth * 0.3)#points,
                 aspectRatio: 1_161.0 / 6.0
             }
         ]
     },
-
+    */
 
     $ScrollBox {
-        debug: true,
         name: "cards_container",
         isScrollDirectionVertical: true,
         scrollDistance: 60.0,
@@ -252,7 +279,7 @@ var cardBox = $Box {
                 flexWrap: wrap.wrap,
                 flexDirection: flexDirection.row,
                 justifyContent: justify.flexStart,
-                width: 94.0#percent,
+                width: (worldWidth * 0.4 * 0.94)#points,
                 height: 450#points,
                 paddingLeft: (3.0 * 15)#points,
                 paddingRight: (35.0)#points,
@@ -281,46 +308,6 @@ var cardBox = $Box {
             textureName: "backpack_scrollbar",
             scaleX: 1.0,
             scaleY: 1.0,
-        },
-
-        $Box {
-            styles: [
-                {
-                    width: 30#percent,
-                    aspectRatio: 1.0,
-                    background: "white_texture"
-                }
-            ]
-        },
-
-        $Box {
-            styles: [
-                {
-                    width: 30#percent,
-                    aspectRatio: 1.0,
-                    background: "white_texture"
-                }
-            ]
-        },
-
-        $Box {
-            styles: [
-                {
-                    width: 30#percent,
-                    aspectRatio: 1.0,
-                    background: "white_texture"
-                }
-            ]
-        },
-
-        $Box {
-            styles: [
-                {
-                    width: 30#percent,
-                    aspectRatio: 1.0,
-                    background: "white_texture"
-                }
-            ]
         },
 
     ]

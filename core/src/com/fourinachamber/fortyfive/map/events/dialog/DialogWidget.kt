@@ -144,6 +144,15 @@ class DialogWidget(
             includeLater({ finished() }, { true })
         }
 
+        is NextDialogPartSelector.ToCreditScreenEnd -> Timeline.timeline {
+            action { readyToAdvance = true }
+            delayUntil { !readyToAdvance }
+            action {
+                end()
+                MapManager.changeToCreditsScreen()
+            }
+        }
+
     }
 
     private fun end() {

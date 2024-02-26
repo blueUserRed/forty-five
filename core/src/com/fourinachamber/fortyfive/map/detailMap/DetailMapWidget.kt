@@ -161,6 +161,7 @@ class DetailMapWidget(
 
         override fun dragStart(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
+            if (!map.scrollable) return
             super.dragStart(event, x, y, pointer)
             dragStartPosition = Vector2(x, y)
             mapOffsetOnDragStart = mapOffset
@@ -169,6 +170,7 @@ class DetailMapWidget(
 
         override fun drag(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
+            if (!map.scrollable) return
             super.drag(event, x, y, pointer)
             val dragStartPosition = dragStartPosition ?: return
             val mapOffsetOnDragStart = mapOffsetOnDragStart ?: return
@@ -179,6 +181,7 @@ class DetailMapWidget(
 
         override fun dragStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
             if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
+            if (!map.scrollable) return
             super.dragStop(event, x, y, pointer)
             dragStartPosition = null
             mapOffsetOnDragStart = null
@@ -242,7 +245,9 @@ class DetailMapWidget(
         // are not initialised yet
         val nodePos = scaledNodePos(playerNode)
         val idealPos = -nodePos + Vector2(screen.viewport.worldWidth, screen.viewport.worldHeight) / 2f
-        mapOffset.set(idealPos)
+        mapOffset.set(
+            if (map.scrollable) idealPos else map.camPosOffset
+        )
     }
 
     override fun act(delta: Float) {
@@ -316,19 +321,23 @@ class DetailMapWidget(
     }
 
     private fun goToNode(node: MapNode) {
+        val lastMapNode = MapManager.lastMapNode
+        if (lastMapNode == null || !lastMapNode.isLinkedTo(playerNode)) {
+            FortyFiveLogger.warn(logTag, "lastMapNode is $lastMapNode; currentNode = $playerNode")
+        }
         if (!canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
         val nodePos = scaledNodePos(node)
         val idealPos = -nodePos + Vector2(width, height) / 2f
         SoundPlayer.situation("walk", screen)
-        if (idealPos.compare(mapOffset, epsilon = 200f)) return
+        if (idealPos.compare(mapOffset, epsilon = 200f) || !map.scrollable) return
         moveScreenToPoint = idealPos
     }
 
     private fun canGoTo(node: MapNode): Boolean {
         val lastNode = MapManager.lastMapNode
-        if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // make sure player does not get trapped
+        if (lastNode == null || !lastNode.isLinkedTo(playerNode)) return true // trap player ? idk
         if (!playerNode.isLinkedTo(node)) return false
         if (node == lastNode) return true
         if (playerNode.event?.currentlyBlocks == true) return false
@@ -359,9 +368,10 @@ class DetailMapWidget(
         )
         if (!ScissorStack.pushScissors(scissor)) return
         drawBackground(batch)
+        drawBackgroundDecorations(batch)
         drawEdges(batch)
         drawNodes(batch)
-        drawDecorations(batch)
+        drawForegroundDecorations(batch)
         drawAnimatedDecorations(batch)
         drawDirectionIndicator(batch)
         drawNodeImages(batch)
@@ -375,6 +385,7 @@ class DetailMapWidget(
     }
 
     private fun updateScreenMovement() {
+        if (!map.scrollable) return
         val moveScreenToPoint = moveScreenToPoint ?: return
         val movement = (moveScreenToPoint - mapOffset).withMag(screenSpeed)
         mapOffset += movement
@@ -468,19 +479,37 @@ class DetailMapWidget(
         return Rectangle(playerPos.x, playerPos.y, playerHeight, playerWidth)
     }
 
-    private fun drawDecorations(batch: Batch) {
+    private fun drawForegroundDecorations(batch: Batch) {
         val (offX, offY) = mapOffset
-        map.decorations.forEach { decoration ->
-            val drawable = decoration.getDrawable(screen)
-            val width = decoration.baseWidth
-            val height = decoration.baseHeight
-            decoration.instances.forEach { instance ->
-                drawable.draw(
-                    batch,
-                    x + offX + instance.first.x * mapScale, y + offY + instance.first.y * mapScale,
-                    width * instance.second * mapScale, height * instance.second * mapScale
-                )
-            }
+        val decorations = map.decorations.filter { !it.drawInBackground }
+        decorations.forEach { decoration ->
+            drawDecoration(decoration, batch, offX, offY)
+        }
+    }
+
+    private fun drawBackgroundDecorations(batch: Batch) {
+        val (offX, offY) = mapOffset
+        val decorations = map.decorations.filter { it.drawInBackground }
+        decorations.forEach { decoration ->
+            drawDecoration(decoration, batch, offX, offY)
+        }
+    }
+
+    private fun drawDecoration(
+        decoration: DetailMap.MapDecoration,
+        batch: Batch,
+        offX: Float,
+        offY: Float
+    ) {
+        val drawable = decoration.getDrawable(screen)
+        val width = decoration.baseWidth
+        val height = decoration.baseHeight
+        decoration.instances.forEach { instance ->
+            drawable.draw(
+                batch,
+                x + offX + instance.first.x * mapScale, y + offY + instance.first.y * mapScale,
+                width * instance.second * mapScale, height * instance.second * mapScale
+            )
         }
     }
 
@@ -646,6 +675,7 @@ class DetailMapWidget(
         const val displayEventDetailScreenState: String = "displayEventDetail"
         const val eventCanBeStartedScreenState: String = "canStartEvent"
         const val noEncounterModifierScreenState: String = "noEncounterModifier"
+        const val logTag = "Map"
     }
 
 }

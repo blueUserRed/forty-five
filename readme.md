@@ -1,9 +1,8 @@
-![logo](./assets/textures/logo.png)
-<!-- TODO: fix -->
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/textures/logo_white.png">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/textures/logo.png">
-</picture>
+![logo](./assets/textures/logo_red.png)
+
+#
+#
+#
 
 #### A perfect mix of card game, rogue-lite, and pure wild west mayhem. Explore an ever-changing map, collect interesting cards, and battle enemies.
 

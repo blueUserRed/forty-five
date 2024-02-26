@@ -11,7 +11,7 @@ class IntroScreenController(onj: OnjNamedObject) : ScreenController() {
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         Gdx.graphics.setFullscreenMode(Gdx.graphics.displayMode)
-        FortyFive.changeToInitialScreen() // screen change occurs after 5s because of the transitionAwayTime
+        FortyFive.changeToScreen("screens/title_screen.onj") // screen change occurs after 5s because of the transitionAwayTime
         onjScreen.afterMs(500) { // changeToInitialScreen causes a lagSpike, this prevents it from interrupting the sound
             SoundPlayer.playMusicOnce("microwave_theme", onjScreen)
         }

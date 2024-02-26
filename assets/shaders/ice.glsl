@@ -32,6 +32,6 @@ void main() {
 //    float noise = 1.0 - snoise(v_texCoords * 3.0 + vec2(u_time * 0.1));
 //    noise = mix(noise, 1.0 - snoise(v_texCoords * 10.0 - vec2(u_time * 0.5)), 0.3);
 //    gl_FragColor = vec4(ice + vec3(0.0, 0.0, 0.25) * noise * 10.0, 0.6 * alphaKey);
-    gl_FragColor = vec4(ice + vec3(0.0, 0.0, 0.25), 0.6 * alphaKey);
+    gl_FragColor = vec4(ice + vec3(0.0, 0.0, 0.25), 0.5 * alphaKey);
 //    gl_FragColor = vec4(ice + vec3(0.0, 0.0, 0.25), (0.6 + noise) * 0.35 * alphaKey);
 }

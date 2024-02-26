@@ -51,6 +51,7 @@ object ResourceManager {
     fun trimPrepared() {
         resources
             .filter { it.state != Resource.ResourceState.NOT_LOADED }
+            .filter { !it.handle.startsWith(Card.cardTexturePrefix) }
             .filter { it.borrowedBy.isEmpty() }
             .forEach { it.dispose() }
     }
@@ -224,6 +225,7 @@ object ResourceManager {
     fun end() {
         val message = StringBuilder()
         for (resource in resources) {
+            if (resource.handle.startsWith(Card.cardTexturePrefix)) continue
             if (resource.state == Resource.ResourceState.NOT_LOADED) continue
             message.append("resource $resource was still loaded when the Game closed!\n")
             for (borrower in resource.borrowedBy) message.append("is borrowed by: $borrower\n")

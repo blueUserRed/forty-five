@@ -5,6 +5,7 @@ import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.OnjObjectBuilderDSL
 import onj.builder.buildOnjObject
@@ -195,6 +196,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), GameController.EncounterCo
     }
 
     override fun completed() {
+        FortyFiveLogger.debug("EncounterMapEvent", "Encounter with $encounterIndex is completed")
         currentlyBlocks = false
         canBeStarted = false
         isCompleted = true
@@ -257,9 +259,10 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
     private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
 
     val npc: String = onj.get<String>("npc")
+    val npcDisplayName: String = MapManager.displayName(npc)
 
     override val descriptionText: String = ""
-    override val displayName: String = "Talk with $npc"
+    override val displayName: String = "Talk with $npcDisplayName"
     override val buttonText: String = "Talk"
 
     init {

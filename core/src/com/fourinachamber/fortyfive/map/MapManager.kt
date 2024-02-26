@@ -8,6 +8,7 @@ import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
+import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
@@ -65,6 +66,9 @@ object MapManager {
 
     private lateinit var screenPaths: Map<String, String>
 
+    lateinit var npcsOnj: OnjObject
+        private set
+
     fun init() {
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
         mapConfigSchema.assertMatches(onj)
@@ -88,15 +92,28 @@ object MapManager {
         areaDefinitionsMapsPath = paths.get<String>("areaDefinitions")
         mapScreenPath = paths.get<String>("mapScreen")
         staticRoadMapsPath = paths.get<String>("staticRoadDefinitions")
-        displayNames = onj
+        val displayNames = onj
             .get<OnjArray>("displayNames")
             .value
             .map { it as OnjObject }
             .associate { it.get<String>("name") to it.get<String>("display") }
+            .toMutableMap()
         screenPaths = onj
             .get<OnjObject>("screens")
             .value
             .mapValues { (_, value) -> value.value as String }
+        val npcs = OnjParser.parseFile(Gdx.files.internal("maps/events/npcs.onj").file())
+        val npcsSchema =  OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/npcs.onjschema").file())
+        npcsSchema.assertMatches(npcs)
+        npcs as OnjObject
+        npcsOnj = npcs
+        npcs
+            .get<OnjArray>("npcs")
+            .value
+            .map { it as OnjObject }
+            .map { it.get<String>("name") to it.get<String>("displayName") }
+            .forEach {displayNames[it.first] = it.second }
+        this.displayNames = displayNames
     }
 
     fun read() {
@@ -129,6 +146,14 @@ object MapManager {
         FortyFive.changeToScreen(screenPaths["changeToAddMaxHPScreen"]!!, event)
     }
 
+    fun changeToTitleScreen() {
+        FortyFive.changeToScreen(screenPaths["titleScreen"]!!)
+    }
+
+    fun changeToCreditsScreen() {
+        FortyFive.changeToScreen(screenPaths["creditsScreen"]!!)
+    }
+
     /**
      * @see DetailMap.invalidateCachedAssets
      */
@@ -147,8 +172,14 @@ object MapManager {
         currentMapFile = map
         currentDetailMap = DetailMap.readFromFile(map)
         SaveState.currentMap = newMap
-        SaveState.currentNode = currentDetailMap.uniqueNodes.filter { it.event is EnterMapMapEvent }
-            .find { (it.event as EnterMapMapEvent).targetMap == fromArea }?.index ?: 0
+        SaveState.currentNode = currentDetailMap
+            .uniqueNodes
+            .filter { it.event is EnterMapMapEvent }
+            .find { (it.event as EnterMapMapEvent).targetMap == fromArea }
+            ?.index
+            ?: 0
+        SaveState.lastNode = null
+        FortyFiveLogger.debug(logTag, "changing from $fromArea to $newMap; currentNode = $currentMapNode")
         changeToMapScreen()
     }
 
