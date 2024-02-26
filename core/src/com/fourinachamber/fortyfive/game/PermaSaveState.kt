@@ -54,6 +54,7 @@ object PermaSaveState {
     var statBulletsShot: Int by templateParam("stat.bulletsShot", 0)
     var statUsedReserves: Int by templateParam("stat.usedReserves", 0)
     var statEnemiesDefeated: Int by templateParam("stat.enemiesDefeated", 0)
+    var statCardsLastRun: List<String> = listOf()
 
     fun read() {
         FortyFiveLogger.debug(logTag, "reading SaveState")

@@ -21,7 +21,7 @@ class StatsScreenController : ScreenController() {
     }
 
     private fun initCards(onjScreen: OnjScreen) {
-        val cards = SaveState.cards
+        val cards = PermaSaveState.statCardsLastRun
         val lostCards = cards.toMutableList()
         val collection = PermaSaveState.collection
         collection.forEach { lostCards.remove(it) }
