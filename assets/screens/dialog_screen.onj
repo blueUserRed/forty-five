@@ -156,7 +156,7 @@ root: $Box {
                 {
                     positionBottom: 110#points,
                     positionLeft: 50#points,
-                    width: 180#percent,
+                    width: 300#points,
                     height: 60#points,
                     background: "dialog_name_field",
                 },
