@@ -94,7 +94,8 @@ class EnemyArea(
 
     override fun layout() {
         super.layout()
-        var curX = 0f
+        val neededWidth = enemies.sumOf { it.actor.width.toDouble() * 1.3 }.toFloat()
+        var curX = width / 2 - neededWidth / 2
         enemies
             .map { it.actor }
             .forEach { enemy ->

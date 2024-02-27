@@ -300,7 +300,7 @@ fun GameAnimation.asTimeline(controller: GameController): Timeline = Timeline.ti
     delayUntil { this@asTimeline.isFinished() }
 }
 
-fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"
+infix fun Int.pluralS(word: String): String = if (this == 1) "$this $word" else "$this ${word}s"
 
 fun Actor.setPosition(pos: Vector2) = setPosition(pos.x, pos.y)
 
