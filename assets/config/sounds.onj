@@ -92,6 +92,10 @@ situations: [
         name: "title_screen_card_drop",
         sound: "swoosh_sound",
     },
+    {
+        name: "enemy_attack",
+        sound: "revolver_shot_sound",
+    },
 ],
 
 ambientSounds: [

@@ -145,9 +145,9 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         ))
     }
 
-    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
-    fun damageDirect(trigger: OnjString, damage: OnjEffectValue): OnjEffect {
-        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value, false))
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue, boolean]")
+    fun damageDirect(trigger: OnjString, damage: OnjEffectValue, isSpray: OnjBoolean): OnjEffect {
+        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value, isSpray.value, false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")

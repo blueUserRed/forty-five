@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.actions.TemporalAction
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
@@ -94,6 +95,7 @@ class Revolver(
 
     init {
         bindHoverStateListeners(this)
+        touchable = Touchable.childrenOnly
     }
 
     /**

@@ -4,19 +4,19 @@ use Common;
 
 var images = {
     aquaBalle: {
-        image: "location_sign_salem",
-        height: 200.0,
-        width: 200.0
+        image: "location_sign_aqua_balle",
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0,
     },
     aquaBalleName: {
         image: "location_name_aqua_balle",
+        width: 90.0 * (156.0 / 326.0),
         height: 90.0,
-        width: 90.0 * (156.0 / 326.0)
     },
     salem: {
         image: "location_sign_salem",
-        width: 300.0,
-        height: 200.0
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0
     },
     salemName: {
         image: "location_name_salem",
@@ -24,9 +24,9 @@ var images = {
         height: 90.0 * (163.0 / 270.0)
     },
     tabuletter: {
-        image: "location_sign_salem",
-        width: 300.0,
-        height: 200.0
+        image: "location_sign_tabu_letter_outpost",
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0
     },
     tabuletterName: {
         image: "location_name_tabuletter_outpost",
@@ -34,9 +34,9 @@ var images = {
         height: 90.0 * (163.0 / 625.0)
     },
     spire: {
-        image: "location_sign_salem",
-        width: 300.0,
-        height: 200.0
+        image: "location_sign_spire_outpost",
+        width: 150.0 * (616.0 / 754.0),
+        height: 150.0
     },
     underConstruction: {
         image: "location_sign_under_construction",
@@ -67,7 +67,7 @@ mapImages: [
     {
         name: "tabu_letter_outpost",
         type: "sign",
-        ...(images.aquaBalle),
+        ...(images.tabuletter),
     },
     {
         name: "salem",
@@ -332,7 +332,7 @@ var uniqueEventsToUseOften = {
             event: $ChooseCardMapEvent {
                 seed: null,
                 types: [
-                    "weighted_cards_pool_3"
+                    "weighted_cards_pool_2"
                 ],
                 nbrOfCards: 3,
                 currentlyBlocks: false,

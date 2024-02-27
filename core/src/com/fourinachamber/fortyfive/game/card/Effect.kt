@@ -363,12 +363,17 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
-    class DamageDirectly(trigger: Trigger, val damage: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
+    class DamageDirectly(
+        trigger: Trigger,
+        val damage: EffectValue,
+        val isSpray: Boolean,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
             val damage = damage(controller, card) * (triggerInformation.multiplier ?: 1)
-            triggerInformation
-                .targetedEnemies
+            val enemies = if (isSpray) controller.enemyArea.enemies else triggerInformation.targetedEnemies
+            enemies
                 .map { it.damage(damage) }
                 .collectTimeline()
                 .let { include(it) }
@@ -376,7 +381,7 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = false
 
-        override fun copy(): Effect = DamageDirectly(trigger, damage, triggerInHand).also {
+        override fun copy(): Effect = DamageDirectly(trigger, damage, isSpray, triggerInHand).also {
             it.isHidden = isHidden
         }
     }

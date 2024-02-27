@@ -261,7 +261,7 @@ class DetailMapWidget(
         val btn = startButton ?: screen.namedActorOrError(startButtonName)
         if (btn is DisableActor && btn.isDisabled) return
         if (StatusbarWidget.OVERLAY_NAME in screen.screenState) return
-
+        if (playerNode.event?.canBeStarted?.not() ?: true) return
         playerNode.event?.start()
     }
 

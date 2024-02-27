@@ -129,7 +129,7 @@ enemies: [
         hiddenActionIcon: "enemy_action_unknown",
         coverIconScale: 0.6,
         indicatorIconScale: 0.6,
-        scale: 0.35,
+        scale: 0.31,
         detailFont: "roadgeek",
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,

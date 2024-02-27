@@ -45,7 +45,7 @@ npcs: [
         },
         image: {
             textureName: "npc_stranger",
-            scale: 1.0
+            scale: 0.4
         }
     },
 
@@ -93,7 +93,7 @@ npcs: [
         },
         image: {
             textureName: "npc_stranger",
-            scale: 1.0
+            scale: 0.4
         }
     },
 
@@ -308,7 +308,7 @@ npcs: [
         },
         image: {
             textureName: "npc_stranger",
-            scale: 1.0
+            scale: 0.4
         }
     },
 
