@@ -9,7 +9,7 @@ import com.fourinachamber.fortyfive.utils.TemplateString
 class StatsScreenController : ScreenController() {
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
-        val cards = SaveState.cards
+        val cards = PermaSaveState.statCardsLastRun
         val prototypes = RandomCardSelection.allCardPrototypes
         TemplateString.updateGlobalParam("stat.bulletsCollected", cards.distinct().size)
         val obtainableBullets = prototypes
