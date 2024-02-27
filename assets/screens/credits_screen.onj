@@ -337,7 +337,7 @@ root: $Box {
             },
             $Label {
                 font: "roadgeek",
-                text: "Map Generation Developer",
+                text: "Special-Graphics Designer",
                 isDistanceField: true,
                 fontScale: 1.6,
                 color: color.forty_white,
