@@ -17,9 +17,10 @@ import java.time.format.DateTimeFormatter;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		config.setForegroundFPS(0);
+		config.setForegroundFPS(60);
 		config.setTitle(".forty-five");
 		config.setWindowedMode(900,(900*9)/16);
+		config.setWindowIcon(com.badlogic.gdx.Files.FileType.Internal, "textures/icon.png");
 		Exception exception = null;
 
 		try {
@@ -30,7 +31,11 @@ public class DesktopLauncher {
 
 		if (exception != null) try {
 			FortyFiveLogger.INSTANCE.fatal(exception);
-		} catch (Exception ignored) { }
+		} catch (Exception ignored) {
+			// "more robust logging" failed in this case
+			//noinspection CallToPrintStackTrace
+			exception.printStackTrace();
+		}
 
 		if (FortyFive.INSTANCE.getCleanExit() && exception == null) return;
 		boolean copiedLog = copyLogFile();
