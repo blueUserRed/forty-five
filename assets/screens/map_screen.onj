@@ -90,22 +90,6 @@ options: {
     ]
 },
 
-//var worldView = $WorldView {
-//    styles: [
-//        {
-//            style_priority: 1,
-//            width: 100.0#percent,
-//            height: 100.0#percent,
-//        },
-//    ],
-//    behaviours: [
-//        $OnClickChangeScreenStateBehaviour {
-//            state: "show_world_view",
-//            enter: false
-//        }
-//    ]
-//};
-
 var encounterModifierDisplayTemplate = $Box {
     template_name: "encounter_modifier_display",
     template_keys: {
@@ -173,11 +157,11 @@ var infoPopup = $Box {
             alignItems: align.center,
             justifyContent: justify.spaceBetween,
             height: 90.0#percent,
-            width: 30.0#percent,
-            positionLeft: 100.0#percent,
+            width: 26.0#percent,
+            // positionLeft: 100.0#percent,
             paddingTop: 60#points,
             paddingBottom: 60#points,
-            paddingLeft: 130.0#points,
+            //paddingLeft: 0.0#points,
             background: "map_detail_background"
         },
         {
@@ -186,7 +170,7 @@ var infoPopup = $Box {
                 duration: 0.2,
                 interpolation: interpolation.linear
             },
-            positionLeft: (25.0 * 10)#points,
+            positionLeft: 360#points,
         },
         {
             style_priority: 3,
@@ -195,7 +179,7 @@ var infoPopup = $Box {
                 duration: 0.2,
                 interpolation: interpolation.linear
             },
-            positionLeft: (0.0 * 10)#points,
+            positionLeft: 40#points,
         },
     ],
 } children [
@@ -212,7 +196,7 @@ var infoPopup = $Box {
         $TemplateLabel {
             styles: [
                 {
-                    width: 95#percent
+                    width: 80#percent
                 }
             ],
             font: "red_wing",
@@ -232,7 +216,7 @@ var infoPopup = $Box {
             align: "center",
             styles: [
                 {
-                    width: 90#percent,
+                    width: 75#percent,
                 }
             ]
         },
@@ -243,8 +227,8 @@ var infoPopup = $Box {
                 {
                     style_priority: 1,
                     background: "map_detail_encounter_modifier_background",
-                    width: 90#percent,
-                    height: 300#points,
+                    width: 320#points,
+                    height: 340#points,
                     flexDirection: flexDirection.column,
                     justifyContent: justify.center,
                     detached: false,
