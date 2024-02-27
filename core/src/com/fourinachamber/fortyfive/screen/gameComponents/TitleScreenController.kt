@@ -26,7 +26,7 @@ class TitleScreenController : ScreenController() {
         timeline.startTimeline()
         TemplateString.updateGlobalParam(
             "title_screen.startButtonText",
-            if (SaveState.playerCompletedFirstTutorialEncounter) "Continue" else "Start you journey"
+            if (SaveState.playerCompletedFirstTutorialEncounter) "Continue" else "Start your Journey"
         )
     }
 
