@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
 import com.fourinachamber.fortyfive.animation.createAnimation
@@ -26,6 +27,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import onj.value.OnjValue
 import java.lang.Integer.max
+import kotlin.math.sin
 
 data class EnemyPrototype(
     val name: String,
@@ -309,6 +311,8 @@ class EnemyActor(
         true,
     )
 
+    private val attackIndicatorAnimTimeOffset: Int = (0..10_000).random()
+
     private val enemyActionAnimationTemplateName: String = "enemy_action_animation" // TODO: fix
     private val enemyActionAnimationParentName: String = "enemy_action_animation_parent" // TODO: fix
 
@@ -415,6 +419,9 @@ class EnemyActor(
             width / 2 - attackIndicator.prefWidth / 2, enemyDrawable.minHeight * enemy.scale + 20f,
             attackIndicator.prefWidth, attackIndicator.prefHeight
         )
+        attackIndicator.offsetY = sin(
+            (TimeUtils.millis().toDouble() + attackIndicatorAnimTimeOffset) * 0.0015
+        ).toFloat() * 1.5f
         super.draw(batch, parentAlpha)
     }
 
