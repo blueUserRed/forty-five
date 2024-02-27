@@ -560,7 +560,6 @@ encounter: [
             "Witch_lvl1"
         ],
         encounterModifier: [
-            ""
         ],
         biomes: [
             "bewitched_forest"
@@ -894,7 +893,7 @@ encounter: [
             "Outlaw_lvl2", "Outlaw_lvl1", "Outlaw_lvl2"
         ],
         encounterModifier: [
-            "Lookalike"
+//            "Lookalike"
         ],
         biomes: [
             "bewitched_forest"
@@ -1043,7 +1042,7 @@ encounter: [
 
     {
         enemies: [
-            "Witch_lvl1", "Outlaw_lvl", "Witch_lvl1"
+            "Witch_lvl1", "Outlaw_lvl1", "Witch_lvl1"
         ],
         encounterModifier: [
             "BewitchedMist"

@@ -259,6 +259,7 @@ object SaveState {
         PermaSaveState.statBulletsShot = bulletsShot
         PermaSaveState.statUsedReserves = usedReserves
         PermaSaveState.statEnemiesDefeated = enemiesDefeated
+        PermaSaveState.statCardsLastRun = cards.toMutableList()
     }
 
     /**

@@ -1120,7 +1120,10 @@ class CustomTable : Table(), ZIndexGroup, ZIndexActor {
  */
 open class CustomHorizontalGroup(
     override val screen: OnjScreen
-) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen {
+) : HorizontalGroup(), ZIndexGroup, ZIndexActor, BackgroundActor, HasOnjScreen, OffSettable {
+
+    override var offsetX: Float = 0f
+    override var offsetY: Float = 0f
 
     override var fixedZIndex: Int = 0
 
@@ -1139,10 +1142,14 @@ open class CustomHorizontalGroup(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
+        this.x += offsetX
+        this.y += offsetY
         val (x, y) = localToStageCoordinates(Vector2(0f, 0f))
         val background = getBackground()
         background?.draw(batch, x, y, width, height)
         super.draw(batch, parentAlpha)
+        this.x -= offsetX
+        this.y -= offsetY
     }
 
     override fun resortZIndices() {

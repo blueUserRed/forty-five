@@ -138,7 +138,7 @@ options: {
     playAmbientSounds: true,
     music: "map_theme",
     inputMap: [
-        ...(inputMaps.gameInputMap),
+//        ...(inputMaps.gameInputMap),
         ...(inputMaps.defaultInputMap)
     ]
 },
@@ -1462,10 +1462,10 @@ var gameScreen = $Box {
     $EnemyArea {
         styles: [
             {
-                width: (worldWidth * 0.7)#points,
+                width: (worldWidth * 0.4)#points,
                 height: 100#points,
-                positionLeft: 800#points,
-                positionBottom: -320#points,
+                positionLeft: 450#points,
+                positionBottom: -340#points,
             }
         ],
         ...enemyArea

@@ -2,7 +2,7 @@ use Screen;
 
 defaultInputMap: [
     {
-        priority: (2.0 pow 30.0)#int,
+        priority: (2.0 pow 30.0)#int - 1,
         triggers: [
             {
                 keycode: keys.F,
@@ -16,7 +16,21 @@ defaultInputMap: [
         ],
     },
     {
-        priority: (2.0 pow 30.0)#int,
+        priority: (2.0 pow 30.0)#int - 1,
+        triggers: [
+            {
+                keycode: keys.F11,
+                modifiers: [
+                ],
+                action: $ToggleFullscreenKeyAction {
+                    width: 700,
+                    height: (700 * 9) / 16
+                }
+            },
+        ],
+    },
+    {
+        priority: (2.0 pow 30.0)#int - 1,
         triggers: [
             {
                 keycode: keys.T,
@@ -28,7 +42,7 @@ defaultInputMap: [
         ],
     },
     { // block everything else, if you are in an inputfield (has no action, but a high priority)
-        priority: (2.0 pow 30.0)#int -1,
+        priority: (2.0 pow 30.0)#int,
         condition: screenState("inInputField"),
         triggers: [
             {

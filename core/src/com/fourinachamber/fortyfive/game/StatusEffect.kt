@@ -6,6 +6,7 @@ import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
 import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.pluralS
 import kotlin.math.floor
 import kotlin.math.min
 
@@ -85,10 +86,11 @@ abstract class RotationBasedStatusEffect(
         continueForever || controller.revolverRotationCounter < rotationOnEffectStart + duration
 
     override fun getDisplayText(): String = if (!continueForever) {
-        "${min(rotationOnEffectStart + duration - controller.revolverRotationCounter, duration)} rotations"
-    } else {
-        "∞"
-    }
+        val rotations = min(rotationOnEffectStart + duration - controller.revolverRotationCounter, duration)
+        rotations pluralS "rotation"
+        } else {
+            "∞"
+        }
 
     protected fun extendDuration(extension: Int) {
         duration += extension
@@ -129,7 +131,8 @@ abstract class TurnBasedStatusEffect(
         continueForever || controller.turnCounter < turnOnEffectStart + duration
 
     override fun getDisplayText(): String = if (!continueForever) {
-        "${turnOnEffectStart + duration - controller.turnCounter} turns"
+        val turns = turnOnEffectStart + duration - controller.turnCounter
+        turns pluralS "turn"
     } else {
         "∞"
     }
@@ -230,8 +233,16 @@ class Poison(
         damage += other.damage
     }
 
-    override fun getDisplayText(): String =
-        "$damage damage / ${if (continueForever) "∞" else "${turnOnEffectStart + duration - controller.turnCounter} turns"}"
+    override fun getDisplayText(): String {
+        val damageString = "damage $damage"
+        val turnsString = if (continueForever) {
+            "∞"
+        } else {
+            val turns = turnOnEffectStart + duration - controller.turnCounter
+            turns pluralS "turn"
+        }
+        return "$damageString / $turnsString"
+    }
 
     override fun equals(other: Any?): Boolean = other is Poison
 }
@@ -298,9 +309,14 @@ class Bewitched(
         controller.turnCounter < turnOnEffectStart + turnsDuration &&
         controller.revolverRotationCounter < rotationOnEffectStart + rotationDuration
 
-    override fun getDisplayText(): String =
-            "${min(rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter, rotationDuration)} rotations or " +
-            "${turnOnEffectStart + turnsDuration - controller.turnCounter} turns"
+    override fun getDisplayText(): String {
+        val rotations = min(
+            rotationOnEffectStart + rotationDuration - controller.revolverRotationCounter,
+            rotationDuration
+        )
+        val turns = turnOnEffectStart + turnsDuration - controller.turnCounter
+        return "${rotations pluralS "rotation"} or ${turns pluralS "turn"}"
+    }
 
     override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.Left(1)
 

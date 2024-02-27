@@ -11,7 +11,7 @@ playerLives: gameConfig.playerConfig.lives,
 maxPlayerLives: gameConfig.playerConfig.lives,
 playerMoney: 0,
 currentDifficulty: 1.0,
-playerCompletedFirstTutorialEncounter: true, //TODO CHANGE BACK to "false"; PLEASE TELL ME THIS MARVIN (TODO left intentionally, since this might be needed again)
+playerCompletedFirstTutorialEncounter: false, //TODO CHANGE BACK to "false"; PLEASE TELL ME THIS MARVIN (TODO left intentionally, since this might be needed again)
 
 stats: {
     usedReserves: 0,

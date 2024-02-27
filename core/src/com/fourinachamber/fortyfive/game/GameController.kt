@@ -223,6 +223,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
         curReserves = baseReserves
 
+        if (enemyArea.enemies.size > 1 && !PermaSaveState.playerFoughtMultipleEnemies) {
+            // TODO: hack
+            addTutorialText(listOf(
+                GameDirector.GameTutorialTextPart(
+                "In this encounter, you will fight multiple enemies. You can choose which one to attack by clicking" +
+                        " on the enemy.",
+                "Ok",
+                null,
+                null
+            )))
+            PermaSaveState.playerFoughtMultipleEnemies = true
+        }
+
         encounterModifiers.forEach { it.onStart(this) }
         appendMainTimeline(Timeline.timeline {
             include(drawCardPopupTimeline(cardsToDrawInFirstRound))
@@ -663,7 +676,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     parryCard.afterShot(this@GameController)
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
-                if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))
+                if (remainingDamage!! > 0) {
+                    action {
+                        SoundPlayer.situation("enemy_attack", curScreen)
+                    }
+                    include(damagePlayerTimeline(remainingDamage!!))
+                }
             } },
             { popupEvent is ParryEvent && parryCard != null }
         )
@@ -674,6 +692,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
                     FortyFiveLogger.debug(logTag, "Player didn't parry")
+                    SoundPlayer.situation("enemy_attack", curScreen)
                 }
                 include(damagePlayerTimeline(damage))
             } },

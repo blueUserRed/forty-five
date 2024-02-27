@@ -9,3 +9,4 @@ collection: [
 visitedAreas: [
 ],
 playerHasCompletedTutorial: false,
+playerFoughtMultipleEnemies: false

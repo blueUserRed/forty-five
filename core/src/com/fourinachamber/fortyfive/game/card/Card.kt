@@ -411,6 +411,7 @@ class Card(
             val allDamageEffects = activeModifiers(controller).filter { it.damage != 0 || it.damageMultiplier != 1f }
             val damageChange = curDamage(controller) - baseDamage
             val damageText = allDamageEffects
+                .distinctBy { it.source }
                 .joinToString(
                     separator = ", ",
                     prefix = "${if (damageChange > 0) "+" else ""}$damageChange by ",
