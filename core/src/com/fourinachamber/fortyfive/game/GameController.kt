@@ -676,7 +676,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     parryCard.afterShot(this@GameController)
                 }
                 include(rotateRevolver(parryCard.rotationDirection))
-                if (remainingDamage!! > 0) include(damagePlayerTimeline(remainingDamage!!))
+                if (remainingDamage!! > 0) {
+                    action {
+                        SoundPlayer.situation("enemy_attack", curScreen)
+                    }
+                    include(damagePlayerTimeline(remainingDamage!!))
+                }
             } },
             { popupEvent is ParryEvent && parryCard != null }
         )
@@ -687,6 +692,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
                     FortyFiveLogger.debug(logTag, "Player didn't parry")
+                    SoundPlayer.situation("enemy_attack", curScreen)
                 }
                 include(damagePlayerTimeline(damage))
             } },
