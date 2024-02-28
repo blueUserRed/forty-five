@@ -318,6 +318,14 @@ $Widget {
        ...widgetSharedKeys
     }
 
+    $Slider {
+        sliderBackground: string,
+        handleRadius: float,
+        handleColor: Color,
+        sliderHeight: float,
+        ...widgetSharedKeys
+    }
+
 }
 
 

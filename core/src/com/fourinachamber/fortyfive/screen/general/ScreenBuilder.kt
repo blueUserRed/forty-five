@@ -29,10 +29,7 @@ import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
-import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -587,6 +584,14 @@ class ScreenBuilder(val file: FileHandle) {
         ).apply {
             initFlexBox(this, widgetOnj, screen)
         }
+
+        "Slider" -> Slider(
+            widgetOnj.get<String>("sliderBackground"),
+            widgetOnj.get<Double>("handleRadius").toFloat(),
+            widgetOnj.get<Color>("handleColor"),
+            widgetOnj.get<Double>("sliderHeight").toFloat(),
+            screen
+        )
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
