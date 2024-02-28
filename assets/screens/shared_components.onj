@@ -44,12 +44,213 @@ ambientSoundsUsedAssets: [
     "snake_sound", "owl_sound"
 ],
 
+
+var settingsUsedAssets = [
+    "settings_background", "slider_shader", "common_slider_background", "single_setting_background", "red_wing_bmp"
+];
+
+var settingsBox = $Box {
+    styles: [
+        {
+            positionType: positionType.absolute,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            alignItems: align.center,
+            justifyContent: justify.flexEnd,
+        }
+    ],
+    zIndex: 2,
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: (worldWidth * 0.6)#points,
+                height: (worldHeight * 1.0)#points,
+                background: "settings_background",
+                alignItems: align.center,
+                justifyContent: justify.center
+            },
+            {
+                style_priority: 1,
+                positionTop: 900#points,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.pow2
+                }
+            },
+            {
+                style_priority: 2,
+                style_condition: state("show_settings"),
+                positionTop: 100#points,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.pow2
+                }
+            },
+        ],
+    } children [
+
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.45)#points,
+                }
+            ],
+            font: "red_wing",
+            text: "Audio",
+            fontScale: 1.4,
+            color: color.forty_white,
+        },
+
+        $Box {
+            styles: [
+                {
+                    height: 40#points,
+                    marginTop: 20#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    background: "single_setting_background",
+                    width: (worldWidth * 0.45)#points,
+                }
+            ]
+        } children [
+
+            $Label {
+                styles: [
+                    {
+                        positionLeft: 40#points,
+                    }
+                ],
+                font: "red_wing",
+                text: "Master Volume",
+                fontScale: 0.8,
+                color: color.forty_white,
+            },
+
+            $Slider {
+              styles: [
+                  {
+                      height: 20#points,
+                      width: 200#points,
+                      positionRight: 40#points,
+                  }
+              ],
+              max: 1.0,
+              min: 0.0,
+              bindTo: "masterVolume",
+              sliderBackground: "common_slider_background",
+              handleRadius: 10.0,
+              handleColor: color.lightBrown,
+              sliderHeight: 10.0,
+            }
+        ],
+
+        $Box {
+            styles: [
+                {
+                    height: 40#points,
+                    marginTop: 20#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    background: "single_setting_background",
+                    width: (worldWidth * 0.45)#points,
+                }
+            ]
+        } children [
+
+            $Label {
+                styles: [
+                    {
+                        positionLeft: 40#points,
+                    }
+                ],
+                font: "red_wing",
+                text: "Music",
+                fontScale: 0.8,
+                color: color.forty_white,
+            },
+
+            $Slider {
+              styles: [
+                  {
+                      height: 20#points,
+                      width: 200#points,
+                      positionRight: 40#points,
+                  }
+              ],
+              max: 1.0,
+              min: 0.0,
+              bindTo: "musicVolume",
+              sliderBackground: "common_slider_background",
+              handleRadius: 10.0,
+              handleColor: color.lightBrown,
+              sliderHeight: 10.0,
+            }
+        ],
+
+        $Box {
+            styles: [
+                {
+                    height: 40#points,
+                    marginTop: 20#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    background: "single_setting_background",
+                    width: (worldWidth * 0.45)#points,
+                }
+            ]
+        } children [
+
+            $Label {
+                styles: [
+                    {
+                        positionLeft: 40#points,
+                    }
+                ],
+                font: "red_wing",
+                text: "Sound Effects",
+                fontScale: 0.8,
+                color: color.forty_white,
+            },
+
+            $Slider {
+              styles: [
+                  {
+                      height: 20#points,
+                      width: 200#points,
+                      positionRight: 40#points,
+                  }
+              ],
+              max: 1.0,
+              min: 0.0,
+              bindTo: "soundEffectsVolume",
+              sliderBackground: "common_slider_background",
+              handleRadius: 10.0,
+              handleColor: color.lightBrown,
+              sliderHeight: 10.0,
+            }
+        ]
+    ]
+];
+
+settingsWidgets: [
+    settingsBox,
+    $SettingsWidget {
+        name: "settings_widget"
+    }
+],
+
 navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_balle",
     "location_name_salem", "location_name_tabuletter_outpost", "location_name_spire_outpost", "statusbar_option",
     "reserves_texture", "statusbar_background_left", "heart_texture",
     "cash_symbol",
     "button_1_sound",
+    ...(settingsUsedAssets),
 ],
 
 generalHoverDetailTemplate: $Box {

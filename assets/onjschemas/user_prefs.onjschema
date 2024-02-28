@@ -1,0 +1,4 @@
+
+masterVolume: float,
+musicVolume: float,
+soundEffectsVolume: float,
