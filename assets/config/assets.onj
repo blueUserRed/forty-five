@@ -1012,6 +1012,10 @@ textures: [
         name: "npc_witch",
         file: "textures/npcs/witch.png",
     },
+    {
+        name: "enemy_selector",
+        file: "textures/enemies/enemy_selector.png",
+    },
 ],
 
 cursors: [
