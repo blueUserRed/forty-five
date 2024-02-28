@@ -1164,7 +1164,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1", "rarity2", "unobtainable"],
+        tags: ["pool1", "rarity1", "unobtainable"],
         price: 50,
     },
 

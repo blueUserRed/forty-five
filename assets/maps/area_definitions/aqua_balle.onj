@@ -56,6 +56,7 @@ nodes: [
         event: $NPCMapEvent {
             npc: "priest_of_aqua_balle",
             canOnlyBeStartedOnce: true,
+            onlyIfPlayerDoesntHaveCard: "guardianAngelBullet",
             currentlyBlocks: false,
             canBeStarted: true,
             isCompleted: false

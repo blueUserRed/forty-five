@@ -188,6 +188,7 @@ object SaveState {
             ?: PermaSaveState.collection.toMutableList()
         FortyFiveLogger.debug(logTag, "cards: $_cards")
 
+        _decks.clear()
         obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck.getFromOnj(it as OnjObject)) }
         curDeckNbr = obj.get<Long>("curDeck").toInt()
 
