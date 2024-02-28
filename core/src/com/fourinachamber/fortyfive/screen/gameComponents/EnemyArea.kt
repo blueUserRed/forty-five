@@ -83,12 +83,13 @@ class EnemyArea(
         super.draw(batch, parentAlpha)
         _enemies.forEach(Enemy::update)
         val enemy = selectedEnemy ?: return
+        val selectionWidth = 30f
         enemySelectionDrawable.draw(
             batch,
-            x + enemy.actor.x,
-            y + enemy.actor.y,
-            enemy.actor.width,
-            enemy.actor.height
+            x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2,
+            y + enemy.actor.y + enemy.actor.height + 20f,
+            selectionWidth,
+            selectionWidth * (enemySelectionDrawable.minHeight / enemySelectionDrawable.minWidth)
         )
     }
 
