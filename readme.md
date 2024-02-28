@@ -1,13 +1,18 @@
 ![logo](./assets/textures/logo_red.png)
 
-#
-#
-#
+<br>
+<br>
+<br>
+<br>
 
 #### A perfect mix of card game, rogue-lite, and pure wild west mayhem. Explore an ever-changing map, collect interesting cards, and battle enemies.
 
 Check out our website:
 https://www.forty-five.at/
+
+Check out our steam page:
+https://store.steampowered.com/app/2691350/FortyFive/
+
 
 ### Explore and Collect
 
