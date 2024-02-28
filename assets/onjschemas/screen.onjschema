@@ -323,6 +323,13 @@ $Widget {
         handleRadius: float,
         handleColor: Color,
         sliderHeight: float,
+        max: float,
+        min: float,
+        bindTo?: string,
+        ...widgetSharedKeys
+    }
+
+    $SettingsWidget {
         ...widgetSharedKeys
     }
 

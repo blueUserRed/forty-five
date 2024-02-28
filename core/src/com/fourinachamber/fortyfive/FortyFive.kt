@@ -132,6 +132,7 @@ object FortyFive : Game() {
         PermaSaveState.reset()
         SaveState.reset()
         MapManager.resetAllSync()
+        UserPrefs.reset()
         newRun(false)
     }
 
@@ -164,6 +165,7 @@ object FortyFive : Game() {
         serviceThread.start()
         serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
+        UserPrefs.read()
 
 //        resetAll()
 //        newRun()
@@ -196,6 +198,7 @@ object FortyFive : Game() {
         MapManager.write()
         PermaSaveState.write()
         SaveState.write()
+        UserPrefs.write()
         currentScreen?.dispose()
         serviceThread.close()
         ResourceManager.trimPrepared()

@@ -590,8 +590,13 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<Double>("handleRadius").toFloat(),
             widgetOnj.get<Color>("handleColor"),
             widgetOnj.get<Double>("sliderHeight").toFloat(),
+            widgetOnj.get<Double>("max").toFloat(),
+            widgetOnj.get<Double>("min").toFloat(),
+            widgetOnj.getOr<String?>("bindTo", null),
             screen
         )
+
+        "SettingsWidget" -> SettingsWidget(screen)
 
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 

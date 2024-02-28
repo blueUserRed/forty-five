@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -21,6 +22,9 @@ class Slider(
     val handleRadius: Float,
     val handleColor: Color,
     val sliderHeight: Float,
+    val min: Float,
+    val max: Float,
+    bind: String?,
     val screen: OnjScreen
 ) : Widget(), StyledActor {
 
@@ -58,6 +62,29 @@ class Slider(
         }
     }
 
+    private var bindTarget: BindTarget? = when (bind) {
+
+        null -> null
+
+        "masterVolume" -> BindTarget(
+            getter = { UserPrefs.masterVolume },
+            setter = { UserPrefs.masterVolume = it }
+        )
+
+        "musicVolume" -> BindTarget(
+            getter = { UserPrefs.musicVolume },
+            setter = { UserPrefs.musicVolume = it }
+        )
+
+        "soundEffectsVolume" -> BindTarget(
+            getter = { UserPrefs.soundEffectsVolume },
+            setter = { UserPrefs.soundEffectsVolume = it }
+        )
+
+        else -> throw RuntimeException("unknown bind target: $bind")
+
+    }
+
     init {
         addListener(inputListener)
     }
@@ -65,6 +92,7 @@ class Slider(
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         if (batch == null) return
+        bindTarget?.let { cursorPos = 1 - (it.getter() - min) / (max - min) }
         batch.flush()
         val shader = sliderShader
         shader.shader.bind()
@@ -92,10 +120,16 @@ class Slider(
 
     private fun updatePos(mouseX: Float) {
         cursorPos = (mouseX / width).between(0f, 1f)
+        bindTarget?.let { it.setter(min + (1f - cursorPos) * (max - min)) }
     }
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
+
+    data class BindTarget(
+        val getter: () -> Float,
+        val setter: (Float) -> Unit
+    )
 
 }

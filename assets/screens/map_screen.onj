@@ -59,8 +59,6 @@ assets: {
         "map_extraction_background", "map_extraction_symbol",
         "map_extraction_card_background_blue", "map_extraction_card_background_white",
 
-        "settings_background", "slider_shader", "common_slider_background", "single_setting_background",
-
         "map_theme",
 
         ...(sharedComponents.ambientSoundsUsedAssets),
@@ -531,78 +529,6 @@ var extractionOverlay = $Box {
 
 ];
 
-var settingsTest = $Box {
-    styles: [
-        {
-            positionType: positionType.absolute,
-            width: worldWidth#points,
-            height: worldHeight#points,
-            alignItems: align.center,
-            justifyContent: justify.flexEnd,
-        }
-    ],
-    zIndex: 2,
-    touchable: "enabled"
-} children [
-
-    $Box {
-        styles: [
-            {
-                width: (worldWidth * 0.6)#points,
-                height: (worldHeight * 1.0)#points,
-                positionTop: 100#points,
-                background: "settings_background",
-                alignItems: align.center,
-                justifyContent: justify.center
-            }
-        ],
-    } children [
-
-        $Box {
-            styles: [
-                {
-                    height: 40#points,
-                    alignItems: align.center,
-                    flexDirection: flexDirection.row,
-                    justifyContent: justify.spaceBetween,
-                    background: "single_setting_background",
-                    width: (worldWidth * 0.45)#points,
-                }
-            ]
-        } children [
-
-            $Label {
-                styles: [
-                    {
-                        positionLeft: 40#points,
-                    }
-                ],
-                font: "red_wing",
-                text: "Master Volume",
-                fontScale: 0.8,
-                color: color.forty_white,
-            },
-
-            $Slider {
-                styles: [
-                    {
-                        height: 20#points,
-                        width: 200#points,
-                        positionRight: 40#points,
-                    }
-                ],
-                sliderBackground: "common_slider_background",
-                handleRadius: 10.0,
-                handleColor: color.lightBrown,
-                sliderHeight: 10.0,
-            }
-        ]
-
-
-    ]
-
-];
-
 root: $Box {
     styles: [
         {
@@ -638,54 +564,10 @@ root: $Box {
         ],
         zIndex: 2,
     } children [
-//        worldView,
     ],
-    settingsTest,
+
     extractionOverlay,
-/*
-    $Box {
-        styles: [
-            {
-                style_priority: 1,
-                positionType: positionType.absolute,
-                background: "transparent_black_texture",
-                alignItems: align.center,
-                justifyContent: justify.center,
-                detached: true,
-                width: 100.0#percent,
-                height: 100.0#percent,
-            },
-            {
-                style_priority: 2,
-                detached: false,
-                style_condition: state("show_extraction_popup")
-            }
-        ],
-        touchable: "enabled",
-        zIndex: 3,
-    } children [
 
-        $Label {
-            font: "red_wing",
-            text: "Cards extracted!",
-            fontScale: 0.9,
-            color: color.white,
-        },
-
-        $Label {
-            font: "red_wing",
-            text: "Ok",
-            fontScale: 0.9,
-            color: color.white,
-            behaviours: [
-                $CatchEventAndEmitBehaviour {
-                    catch: "ButtonClickEvent",
-                    emit: "PopupConfirmationEvent"
-                }
-            ]
-        },
-    ],
-*/
     $Box {
         styles: [
             {
@@ -713,12 +595,17 @@ root: $Box {
                     actionName: "toTitleScreen",
                     displayName: "To Title Screen",
                 },
+                {
+                    actorName: "settings_widget",
+                    displayName: "Settings"
+                }
             ],
             //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
 
             ...(sharedComponents.statusbarCenterDefaults)
         },
         sharedComponents.backpack,
+        ...(sharedComponents.settingsWidgets),
     ],
     sharedComponents.warningParent,
 ],
