@@ -34,6 +34,7 @@ class CustomRectangle() :
         val pixmap = Pixmap(max(width, 1), max(height, 1), Pixmap.Format.RGBA8888)
         pixmap.setColor(color)
         pixmap.fillRectangle(0, 0, width, height)
+        texture?.dispose()
         texture = Texture(pixmap)
         pixmap.dispose()
     }

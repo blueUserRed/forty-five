@@ -1016,6 +1016,19 @@ textures: [
         name: "enemy_selector",
         file: "textures/enemies/enemy_selector.png",
     },
+    {
+        name: "settings_background",
+        file: "textures/settings/background.png",
+    },
+    {
+        name: "common_slider_background",
+        file: "textures/common/slider/slider.png",
+        useMipMaps: true,
+    },
+    {
+        name: "single_setting_background",
+        file: "textures/settings/setting_background.png",
+    },
 ],
 
 cursors: [
@@ -1136,6 +1149,14 @@ shaders: [
         constantArgs: {
         }
     },
+    {
+        name: "slider_shader",
+        file: "shaders/slider.glsl",
+        constantArgs: {
+            firstColor: color("474340"),
+            secondColor: color("2d2c2a")
+        }
+    },
 ],
 
 animations: [
@@ -1202,7 +1223,7 @@ ninepatches: [
         bottom: 24,
         left: 24,
         right: 24,
-        scale: 0.1
+        scale: 0.2
     },
     {
         name: "forty_white_rounded",
