@@ -92,14 +92,14 @@ open class RenderPipeline(
         frameBufferManager.addPingPongFrameBuffer("pp", 1f)
     }
 
-    fun getFadeToBlackTimeline(fadeDuration: Int): Timeline = Timeline.timeline {
+    fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {
         action {
             this@RenderPipeline.fadeDuration = fadeDuration
             fadeFinishesAt = TimeUtils.millis() + fadeDuration
             lateTasks.add(fadeToBlackTask)
         }
         delayUntil { TimeUtils.millis() >= fadeFinishesAt }
-        action {
+        if (!stayBlack) action {
             lateTasks.remove(fadeToBlackTask)
         }
     }

@@ -17,9 +17,8 @@ void main() {
     v_color = a_color;
     v_texCoords = a_texCoord0;
     float time = u_time + ca_timeOffset;
-    float val = sin(time * ca_speed + a_position.x + a_position.y) * ca_mag;
-    val *= sin(time / 20.0) * 2.0;
-    gl_Position =  u_projTrans * a_position + vec4(0.0, val, 0.0, 0.0);
+    float value = (sin(time * ca_speed) + 1.0) * ca_mag;
+    gl_Position =  u_projTrans * a_position + vec4(value, -value, 0.0, 0.0);
 }
 
 ~~~section fragment

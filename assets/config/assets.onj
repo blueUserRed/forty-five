@@ -1030,7 +1030,7 @@ shaders: [
         constantArgs: {
             timeOffset: 1_500,
             speed: 14.0,
-            mag: 0.2,
+            mag: 0.03,
         }
     },
     {

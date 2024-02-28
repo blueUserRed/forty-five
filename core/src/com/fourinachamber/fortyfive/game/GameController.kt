@@ -1296,7 +1296,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "player lost")
             playerLost = true
         }
-        include(gameRenderPipeline.getFadeToBlackTimeline(2000))
+        include(gameRenderPipeline.getFadeToBlackTimeline(2000, stayBlack = true))
+        delay(500)
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)
