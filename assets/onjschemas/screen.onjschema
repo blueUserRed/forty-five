@@ -333,6 +333,12 @@ $Widget {
         ...widgetSharedKeys
     }
 
+    $Selector {
+        font: string,
+        fontScale: float,
+        ...widgetSharedKeys
+    }
+
 }
 
 

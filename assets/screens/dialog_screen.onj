@@ -16,7 +16,7 @@ assets: {
         "game_screen_background_wasteland",
         "enemy_texture",
         "dialog_name_field",
-        "dialog_continue",
+        "common_symbol_arrow",
         "dialog_background",
         "dialog_answer_option",
         "dialog_answer_option_hover",
@@ -76,7 +76,7 @@ var dialogWidget = $Box {
             }
         ],
         progressTime: 0.01,
-        advanceArrowDrawable: "dialog_continue",
+        advanceArrowDrawable: "common_symbol_arrow",
         advanceArrowOffset: -75.0,
         touchable: "enabled",
         optionsBox: "options_box",

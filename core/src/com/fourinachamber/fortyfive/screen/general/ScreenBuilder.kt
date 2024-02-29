@@ -598,6 +598,12 @@ class ScreenBuilder(val file: FileHandle) {
 
         "SettingsWidget" -> SettingsWidget(screen)
 
+        "Selector" -> Selector(
+            fontOrError(widgetOnj.get<String>("font"), screen),
+            widgetOnj.get<Double>("fontScale").toFloat(),
+            screen,
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor -> applyWidgetKeysFromOnj(actor, widgetOnj, parent, screen) }
