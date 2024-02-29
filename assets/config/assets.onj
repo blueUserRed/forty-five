@@ -1162,6 +1162,12 @@ shaders: [
             secondColor: color("2d2c2a")
         }
     },
+    {
+        name: "test_shader",
+        file: "shaders/test.glsl",
+        constantArgs: {
+        }
+    },
 ],
 
 animations: [
