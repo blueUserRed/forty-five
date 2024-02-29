@@ -2,3 +2,4 @@
 masterVolume: float,
 musicVolume: float,
 soundEffectsVolume: float,
+enableScreenShake: boolean,

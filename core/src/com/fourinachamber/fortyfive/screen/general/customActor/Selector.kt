@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
@@ -17,6 +18,10 @@ import com.fourinachamber.fortyfive.screen.general.styles.addActorStyles
 class Selector(
     private val font: BitmapFont,
     private val fontScale: Float,
+    private val arrowTextureHandle: ResourceHandle,
+    private val arrowWidth: Float,
+    private val arrowHeight: Float,
+    bind: String,
     private val screen: OnjScreen,
 ) : Widget(), StyledActor {
 
@@ -25,17 +30,16 @@ class Selector(
     override var isHoveredOver: Boolean = false
     override var isClicked: Boolean = false
 
-    private val options: List<String> = listOf("1", "2", "3")
+    private val options: List<Pair<String, Any>>
     private var curOptionIndex: Int = 0
 
     private val arrowTexture: Texture by lazy {
-        ResourceManager.get(screen, "common_symbol_arrow")
+        ResourceManager.get(screen, arrowTextureHandle)
     }
 
-    private val glyphLayout: GlyphLayout = GlyphLayout(font.apply { data.setScale(fontScale) }, options[curOptionIndex])
+    private val bindTarget: BindTarget<*> = BindTargetFactory.getAnyType(bind)
 
-    private val arrowWidth = 20f
-    private val arrowHeight = 20f
+    private val glyphLayout: GlyphLayout = GlyphLayout()
 
     private val clickListener = object : ClickListener() {
 
@@ -45,13 +49,21 @@ class Selector(
         }
     }
 
+    private var lastValue: Any = Unit
+
     init {
+        bindHoverStateListeners(this)
         addListener(clickListener)
+        options = bindTarget
+            .mappings
+            .map { (key, value) -> value to key }
+        checkValue()
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         super.draw(batch, parentAlpha)
         if (batch == null) return
+        checkValue()
         batch.draw(
             arrowTexture,
             x,
@@ -80,10 +92,19 @@ class Selector(
         batch.shader = null
     }
 
+    private fun checkValue() {
+        val curValue = bindTarget.getter()
+        if (curValue == lastValue) return
+        lastValue = curValue
+        curOptionIndex = options.indexOfFirst { it.second == curValue }
+        font.data.setScale(fontScale)
+        glyphLayout.setText(font, options[curOptionIndex].first)
+    }
+
     private fun switch(amount: Int) {
         curOptionIndex = (options.size + curOptionIndex + amount) % options.size
-        font.data.setScale(fontScale)
-        glyphLayout.setText(font, options[curOptionIndex])
+        @Suppress("UNCHECKED_CAST") // I hate generics
+        (bindTarget.setter as (Any) -> Unit)(options[curOptionIndex].second)
     }
 
     private fun onClick(x: Float): Unit = when {

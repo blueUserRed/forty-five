@@ -43,6 +43,12 @@ object UserPrefs {
             dirty = true
         }
 
+    var enableScreenShake: Boolean = true
+        set(value) {
+            field = value
+            dirty = true
+        }
+
     fun read() {
         val onj = OnjParser.parseFile(Gdx.files.internal(userPrefsPath).file())
         userPrefsSchema.assertMatches(onj)
@@ -50,6 +56,7 @@ object UserPrefs {
         soundEffectsVolume = onj.get<Double>("soundEffectsVolume").toFloat()
         musicVolume = onj.get<Double>("musicVolume").toFloat()
         masterVolume = onj.get<Double>("masterVolume").toFloat()
+        enableScreenShake = onj.get<Boolean>("enableScreenShake")
         dirty = false
     }
 
@@ -59,6 +66,7 @@ object UserPrefs {
             "soundEffectsVolume" with soundEffectsVolume
             "musicVolume" with musicVolume
             "masterVolume" with masterVolume
+            "enableScreenShake" with enableScreenShake
         }
         Gdx.files.internal(userPrefsPath).file().writeText(obj.toString())
         dirty = false

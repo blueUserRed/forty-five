@@ -336,6 +336,10 @@ $Widget {
     $Selector {
         font: string,
         fontScale: float,
+        arrowTexture: string,
+        arrowWidth: float,
+        arrowHeight: float,
+        bindTo: string,
         ...widgetSharedKeys
     }
 
