@@ -376,6 +376,13 @@ class Card(
         action {
             actor.inAnimation = true
         }
+        action {
+            if (isOnShot || !showAnimation || !inGame) return@action
+            controller.dispatchAnimTimeline(Timeline.timeline {
+                delay(150)
+                include(controller.gameRenderPipeline.getScreenShakeTimeline())
+            })
+        }
         includeLater(
             { actor.animateToTriggerPosition(controller, isOnShot) },
             { inGame && showAnimation }
@@ -850,7 +857,7 @@ class CardActor(
         moveAction.duration = 0.3f
         moveAction.interpolation = Interpolation.pow2
         val scaleAction = ScaleToAction()
-        scaleAction.setScale(1.3f)
+        scaleAction.setScale(1.5f)
         scaleAction.duration = 0.3f
         scaleAction.interpolation = Interpolation.pow2
         action {
