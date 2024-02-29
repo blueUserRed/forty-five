@@ -1478,6 +1478,7 @@ var gameScreen = $Box {
             }
         ],
         zIndex: 100,
+        touchable: "enabled",
         ...revolver
     },
 

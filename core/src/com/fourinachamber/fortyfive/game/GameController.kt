@@ -985,7 +985,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             newDamage = playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
         }
         includeLater(
-            { GraphicsConfig.damageOverlay(curScreen).wrap() },
+            { Timeline.timeline {
+                action {
+                    dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
+                }
+                includeAction(GraphicsConfig.damageOverlay(curScreen))
+            } },
             { !triggeredByStatusEffect && newDamage!! > 0 }
         )
         action {

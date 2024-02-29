@@ -168,7 +168,7 @@ var infoPopup = $Box {
             style_priority: 2,
             style_animation: {
                 duration: 0.2,
-                interpolation: interpolation.elastic
+                interpolation: interpolation.pow2In
             },
             positionLeft: 360#points,
         },
@@ -177,7 +177,7 @@ var infoPopup = $Box {
             style_condition: state("displayEventDetail") and not(state("transition away")),
             style_animation: {
                 duration: 0.2,
-                interpolation: interpolation.elastic
+                interpolation: interpolation.pow2In
             },
             positionLeft: 40#points,
         },
