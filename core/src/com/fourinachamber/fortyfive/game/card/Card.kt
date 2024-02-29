@@ -31,6 +31,7 @@ import ktx.actors.onClick
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
+import kotlin.math.absoluteValue
 
 /**
  * represents a type of card, e.g. there is one Prototype for an incendiary bullet, but there might be more than one
@@ -379,7 +380,7 @@ class Card(
         action {
             if (isOnShot || !showAnimation || !inGame) return@action
             controller.dispatchAnimTimeline(Timeline.timeline {
-                delay(150)
+                delay(210)
                 include(controller.gameRenderPipeline.getScreenShakeTimeline())
             })
         }
@@ -847,19 +848,20 @@ class CardActor(
 
     fun animateToTriggerPosition(controller: GameController, isOnShotTrigger: Boolean): Timeline = Timeline.timeline {
         prevPosition = Vector2(x, y)
-        val (targetX, targetY) = if (isOnShotTrigger) {
+        val target = if (isOnShotTrigger) {
             controller.revolver.getCardOnShotTriggerPosition()
         } else {
             controller.revolver.getCardTriggerPosition()
         }
         val moveAction = MoveToAction()
-        moveAction.setPosition(targetX, targetY)
-        moveAction.duration = 0.3f
-        moveAction.interpolation = Interpolation.pow2
+        moveAction.setPosition(target.x, target.y)
+        val distance = (prevPosition!! - target).len().absoluteValue
+        moveAction.duration = 0.000724637f * distance
+        moveAction.interpolation = Interpolation.pow2In
         val scaleAction = ScaleToAction()
         scaleAction.setScale(1.5f)
-        scaleAction.duration = 0.3f
-        scaleAction.interpolation = Interpolation.pow2
+        scaleAction.duration = 0.000724637f * distance
+        scaleAction.interpolation = Interpolation.pow2In
         action {
             SoundPlayer.situation("card_trigger_anim_in", screen)
             toFront()
@@ -875,19 +877,20 @@ class CardActor(
     }
 
     fun animateBack(controller: GameController): Timeline = Timeline.timeline {
-        val (targetX, targetY) = controller
+        val target = controller
             .revolver
             .slots
             .find { it.card === card }
             ?.cardPosition()
             ?: return@timeline
         val moveAction = MoveToAction()
-        moveAction.setPosition(targetX, targetY)
-        moveAction.duration = 0.3f
+        moveAction.setPosition(target.x, target.y)
+        val distance = (Vector2(x, y) - target).len().absoluteValue
+        moveAction.duration = 0.000724637f * distance
         moveAction.interpolation = Interpolation.pow2
         val scaleAction = ScaleToAction()
         scaleAction.setScale(1f)
-        scaleAction.duration = 0.3f
+        scaleAction.duration = 0.000724637f * distance
         scaleAction.interpolation = Interpolation.pow2
         action {
             SoundPlayer.situation("card_trigger_anim_out", screen)
