@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -409,7 +410,7 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
         shaderPostProcessingStep(parryShader)
     }
 
-    fun getOnShotPostProcessingTimeline(): Timeline = Timeline.timeline {
+    fun getOnShotPostProcessingTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
         val duration = GraphicsConfig.shootPostProcessingDuration()
         action {
             shootShader.resetReferenceTime()
@@ -419,7 +420,7 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
         action {
             postPreprocessingSteps.remove(shootPostProcessingStep)
         }
-    }
+    } else Timeline()
 
     fun startParryEffect() {
         postPreprocessingSteps.add(parryPostProcessingStep)
