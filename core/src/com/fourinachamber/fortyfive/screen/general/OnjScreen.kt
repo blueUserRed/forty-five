@@ -7,6 +7,7 @@ import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Cursor
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.*
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
@@ -417,7 +418,7 @@ open class OnjScreen @MainThreadOnly constructor(
         currentHoverDetail?.act(delta)
     }
 
-    fun stageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).let { actor ->
+    fun centeredStageCoordsOfActor(name: String): Vector2 = namedActorOrError(name).let { actor ->
         actor.localToStageCoordinates(Vector2(actor.width / 2, actor.height / 2))
     }
 
@@ -425,6 +426,7 @@ open class OnjScreen @MainThreadOnly constructor(
     override fun render(delta: Float) = try {
 //        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
         lastRenderTime = measureTimeMillis {
+            stage.batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
             val oldStyleManagers = styleManagers.toList()
             if (stage.batch.isDrawing) stage.batch.end()
             stage.viewport.apply()

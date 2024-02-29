@@ -1038,12 +1038,21 @@ cursors: [
 
 shaders: [
     {
-        name: "earthquake_shader",
-        file: "shaders/earthquake.glsl",
+        name: "shoot_shader",
+        file: "shaders/shoot.glsl",
         constantArgs: {
             timeOffset: 1_500,
             speed: 14.0,
-            mag: 0.03,
+            mag: 0.2,
+        }
+    },
+    {
+        name: "screen_shake_shader",
+        file: "shaders/screen_shake.glsl",
+        constantArgs: {
+            timeOffset: 1_500,
+            speed: 25.0,
+            mag: 0.0028,
         }
     },
     {

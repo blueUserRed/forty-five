@@ -841,7 +841,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun cardOrbAnim(actor: Actor) = GraphicsConfig.orbAnimation(
         actor.localToStageCoordinates(Vector2(0f, 0f)) +
                 Vector2(actor.width / 2, actor.height / 2),
-        curScreen.stageCoordsOfActor("deck_icon"),
+        curScreen.centeredStageCoordsOfActor("deck_icon"),
         false
     )
 
@@ -1214,7 +1214,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    private fun stageCoordsOfReservesIcon(): Vector2 = curScreen.stageCoordsOfActor("reserves_icon")
+    private fun stageCoordsOfReservesIcon(): Vector2 = curScreen.centeredStageCoordsOfActor("reserves_icon")
 
     override fun end() {
         createdCards.forEach { it.dispose() }
@@ -1250,8 +1250,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             delayUntil { popupEvent != null }
             action {
-                val start = curScreen.stageCoordsOfActor("win_screen_cash_symbol")
-                val end = curScreen.stageCoordsOfActor("cash_symbol")
+                val start = curScreen.centeredStageCoordsOfActor("win_screen_cash_symbol")
+                val end = curScreen.centeredStageCoordsOfActor("cash_symbol")
                 if (money > 0) {
                     SoundPlayer.situation("orb_anim_playing", curScreen)
                     gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
