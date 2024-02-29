@@ -246,16 +246,16 @@ var biomeDecorations = {
                 onlyCollidesWithNodes: false,
                 canOverlapWithOtherNodes: false,
             },
-            $RandomDistributionFunction {
-                decoration: "tree",
-                density: 0.4,
-                baseWidth: 5.0,
-                baseHeight: 10.0,
-                scaleMin: 1.0,
-                scaleMax: 2.0,
-                onlyCollidesWithNodes: true,
-                canOverlapWithOtherNodes: false,
-            },
+//            $RandomDistributionFunction {
+//                decoration: "tree",
+//                density: 0.4,
+//                baseWidth: 5.0,
+//                baseHeight: 10.0,
+//                scaleMin: 1.0,
+//                scaleMax: 2.0,
+//                onlyCollidesWithNodes: true,
+//                canOverlapWithOtherNodes: false,
+//            },
         ],
     }
 };
