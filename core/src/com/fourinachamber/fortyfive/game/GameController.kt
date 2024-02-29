@@ -680,7 +680,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     action {
                         SoundPlayer.situation("enemy_attack", curScreen)
                     }
-                    include(damagePlayerTimeline(remainingDamage!!))
+                    includeLater(
+                        { damagePlayerTimeline(remainingDamage!!) },
+                        { true }
+                    )
                 }
             } },
             { popupEvent is ParryEvent && parryCard != null }
