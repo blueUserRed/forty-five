@@ -46,7 +46,8 @@ ambientSoundsUsedAssets: [
 
 
 var settingsUsedAssets = [
-    "settings_background", "slider_shader", "common_slider_background", "single_setting_background", "red_wing_bmp"
+    "settings_background", "slider_shader", "common_slider_background", "single_setting_background",
+    "common_symbol_arrow",
 ];
 
 var settingsBox = $Box {
@@ -98,6 +99,60 @@ var settingsBox = $Box {
                 }
             ],
             font: "red_wing",
+            text: "General",
+            fontScale: 1.4,
+            color: color.forty_white,
+        },
+
+        $Box {
+            styles: [
+                {
+                    height: 40#points,
+                    marginTop: 20#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    background: "single_setting_background",
+                    width: (worldWidth * 0.45)#points,
+                }
+            ]
+        } children [
+
+            $Label {
+                styles: [
+                    {
+                        positionLeft: 40#points,
+                    }
+                ],
+                font: "red_wing",
+                text: "Show Screenshake",
+                fontScale: 0.8,
+                color: color.forty_white,
+            },
+
+            $Selector {
+              styles: [
+                  {
+                      height: 40#points,
+                      width: 250#points,
+                      positionRight: 40#points,
+                  }
+              ],
+              debug: true,
+              font: "red_wing",
+              fontScale: 0.8,
+            }
+        ],
+
+
+        $Label {
+            styles: [
+                {
+                    width: (worldWidth * 0.45)#points,
+                    marginTop: 20#points,
+                }
+            ],
+            font: "red_wing",
             text: "Audio",
             fontScale: 1.4,
             color: color.forty_white,
@@ -141,7 +196,7 @@ var settingsBox = $Box {
               min: 0.0,
               bindTo: "masterVolume",
               sliderBackground: "common_slider_background",
-              handleRadius: 10.0,
+              handleRadius: 7.0,
               handleColor: color.lightBrown,
               sliderHeight: 10.0,
             }
@@ -185,7 +240,7 @@ var settingsBox = $Box {
               min: 0.0,
               bindTo: "musicVolume",
               sliderBackground: "common_slider_background",
-              handleRadius: 10.0,
+              handleRadius: 7.0,
               handleColor: color.lightBrown,
               sliderHeight: 10.0,
             }
@@ -229,7 +284,7 @@ var settingsBox = $Box {
               min: 0.0,
               bindTo: "soundEffectsVolume",
               sliderBackground: "common_slider_background",
-              handleRadius: 10.0,
+              handleRadius: 7.0,
               handleColor: color.lightBrown,
               sliderHeight: 10.0,
             }

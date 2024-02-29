@@ -382,10 +382,6 @@ textures: [
         file: "textures/map/player.png"
     },
     {
-        name: "dialog_continue_arrow",
-        file: "textures/map/dialog_continue.png"
-    },
-    {
         name: "map_detail_fight_button",
         file: "textures/map/detail/fight_button.png",
     },
@@ -649,10 +645,6 @@ textures: [
     {
         name: "dialog_background",
         file: "textures/events/dialog/background.png"
-    },
-    {
-        name: "dialog_continue",
-        file: "textures/events/dialog/continue.png"
     },
     {
         name: "dialog_name_field",
@@ -1028,6 +1020,10 @@ textures: [
     {
         name: "single_setting_background",
         file: "textures/settings/setting_background.png",
+    },
+    {
+        name: "common_symbol_arrow",
+        file: "textures/common/symbols/arrow.png",
     },
 ],
 
