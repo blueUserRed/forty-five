@@ -62,30 +62,10 @@ class Slider(
         }
     }
 
-    private var bindTarget: BindTarget? = when (bind) {
-
-        null -> null
-
-        "masterVolume" -> BindTarget(
-            getter = { UserPrefs.masterVolume },
-            setter = { UserPrefs.masterVolume = it }
-        )
-
-        "musicVolume" -> BindTarget(
-            getter = { UserPrefs.musicVolume },
-            setter = { UserPrefs.musicVolume = it }
-        )
-
-        "soundEffectsVolume" -> BindTarget(
-            getter = { UserPrefs.soundEffectsVolume },
-            setter = { UserPrefs.soundEffectsVolume = it }
-        )
-
-        else -> throw RuntimeException("unknown bind target: $bind")
-
-    }
+    private var bindTarget: BindTarget<Float>? = bind?.let { BindTargetFactory.get<Float>(it) }
 
     init {
+        bindHoverStateListeners(this)
         addListener(inputListener)
     }
 
@@ -126,10 +106,5 @@ class Slider(
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
     }
-
-    data class BindTarget(
-        val getter: () -> Float,
-        val setter: (Float) -> Unit
-    )
 
 }

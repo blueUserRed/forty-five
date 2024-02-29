@@ -138,7 +138,10 @@ var settingsBox = $Box {
                       positionRight: 40#points,
                   }
               ],
-              debug: true,
+              arrowTexture: "common_symbol_arrow",
+              arrowWidth: 20.0,
+              arrowHeight: 20.0,
+              bindTo: "enableScreenShake",
               font: "red_wing",
               fontScale: 0.8,
             }

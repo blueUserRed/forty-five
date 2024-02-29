@@ -601,6 +601,10 @@ class ScreenBuilder(val file: FileHandle) {
         "Selector" -> Selector(
             fontOrError(widgetOnj.get<String>("font"), screen),
             widgetOnj.get<Double>("fontScale").toFloat(),
+            widgetOnj.get<String>("arrowTexture"),
+            widgetOnj.get<Double>("arrowWidth").toFloat(),
+            widgetOnj.get<Double>("arrowHeight").toFloat(),
+            widgetOnj.get<String>("bindTo"),
             screen,
         )
 
