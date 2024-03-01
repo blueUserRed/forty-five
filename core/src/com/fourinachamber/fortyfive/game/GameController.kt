@@ -332,13 +332,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         else -> { }
     }
 
-    private var updateCount = 0 // TODO: this is stupid
-
     @MainThreadOnly
     override fun update() {
-        if (updateCount < 6) curScreen.invalidateEverything() // TODO: this is stupid
-        updateCount++
-
         encounterModifiers.forEach { it.update(this) }
 
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
@@ -665,7 +660,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     popupEvent = null
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
-                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)))
+                includeLater (
+                    { checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)) },
+                    { parryCard.shouldRemoveAfterShot(this@GameController) }
+                )
                 action {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()

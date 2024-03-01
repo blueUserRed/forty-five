@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general.styles
 
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.MathUtils.sin
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
@@ -11,6 +12,7 @@ import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
+import kotlin.math.sin
 import kotlin.reflect.KClass
 
 interface StyledActor : HoverStateActor {
@@ -156,7 +158,7 @@ abstract class StyleProperty<Target, DataType>(
 
 }
 
-open class StyleInstruction<DataType>(
+open class StyleInstruction<out DataType>(
     val data: DataType,
     val priority: Int,
     val condition: StyleCondition,
@@ -167,7 +169,7 @@ open class StyleInstruction<DataType>(
         get() = data
 
 
-    open fun onControlGained(valueBefore: DataType) {}
+    open fun onControlGained(valueBefore: @UnsafeVariance DataType) {}
 
     open fun onControlLost() {}
     override fun toString(): String {
@@ -175,6 +177,20 @@ open class StyleInstruction<DataType>(
     }
 
 }
+
+class TimeSinusStyleInstruction(
+    priority: Int,
+    condition: StyleCondition,
+    private val frequency: Float,
+    private val amplitude: Float,
+    private val phase: Float,
+    private val offset: Float,
+) : StyleInstruction<Float>(0f, priority, condition, Float::class) {
+
+    override val value: Float
+        get() = (sin(TimeUtils.millis().toDouble() * frequency + phase) * amplitude).toFloat() + offset
+}
+
 
 @Suppress("UNCHECKED_CAST") // data is never actually used
 class ObservingStyleInstruction<DataType>(

@@ -124,14 +124,6 @@ textureAtlases: [
                 regionName: "enemy"
             },
             {
-                handle: "wood_box",
-                regionName: "wood_box"
-            },
-            {
-                handle: "deck_icon",
-                regionName: "deck_icon"
-            },
-            {
                 handle: "normal_bullet",
                 regionName: "normal_bullet"
             },
@@ -182,10 +174,6 @@ textureAtlases: [
             {
                 handle: "heart_texture",
                 regionName: "heart"
-            },
-            {
-                handle: "reserves_texture",
-                regionName: "reserves"
             },
             {
                 handle: "hit_overlay",
@@ -1024,6 +1012,21 @@ textures: [
     {
         name: "common_symbol_arrow",
         file: "textures/common/symbols/arrow.png",
+    },
+    {
+        name: "wood_box",
+        file: "textures/game_screen/wood_box.png",
+        useMipMaps: true,
+    },
+    {
+        name: "deck_icon",
+        file: "textures/game_screen/deck_icon.png",
+        useMipMaps: true,
+    },
+    {
+        name: "reserves_texture",
+        file: "textures/game_screen/reserves.png",
+        useMipMaps: true,
     },
 ],
 
