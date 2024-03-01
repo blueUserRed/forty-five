@@ -314,7 +314,7 @@ open class RenderPipeline(
         batch.end()
         active.end()
         batch.begin()
-        if (isOrbAnimActive) renderOrbFbo()
+//        if (isOrbAnimActive) renderOrbFbo()
         postPreprocessingSteps.forEachIndexed { index, step ->
             frameBufferManager.swapPingPongFrameBuffers("pp")
             val (@Suppress("NAME_SHADOWING") active, _) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return
@@ -327,6 +327,7 @@ open class RenderPipeline(
         batch.begin()
         screen.viewport.apply()
         batch.projectionMatrix = screen.viewport.camera.combined
+        if (isOrbAnimActive) renderOrbFbo()
         lateTasks.forEach { it() }
         batch.end()
     }
