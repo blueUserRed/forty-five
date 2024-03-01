@@ -671,7 +671,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     gameRenderPipeline.stopParryEffect()
                     if (parryCard.shouldRemoveAfterShot(this@GameController)) {
                         revolver.removeCard(parryCard)
-                        cardStack.add(parryCard)
+                        if (parryCard.isUndead) {
+                            cardHand.addCard(parryCard)
+                        } else {
+                            cardStack.add(parryCard)
+                            SoundPlayer.situation("orb_anim_playing", curScreen)
+                            gameRenderPipeline.addOrbAnimation(cardOrbAnim(parryCard.actor))
+                        }
                     }
                     parryCard.afterShot(this@GameController)
                 }
@@ -810,6 +816,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardToShoot?.let {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true)
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
+                includeLater(
+                    { checkEffectsSingleCard(Trigger.ON_LEAVE, cardToShoot, triggerInformation) },
+                    { cardToShoot.shouldRemoveAfterShot(this@GameController) }
+                )
                 action {
                     if (cardToShoot.shouldRemoveAfterShot(this@GameController)) {
                         if (!cardToShoot.isUndead) {

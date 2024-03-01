@@ -587,7 +587,7 @@ typealias EffectValue = (controller: GameController, card: Card?) -> Int
 enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
     ON_ENTER,
     ON_LEAVE,
-    ON_SHOT(listOf(ON_LEAVE)),
+    ON_SHOT,
     ON_ROUND_START,
     ON_ROUND_END,
     ON_DESTROY(listOf(ON_LEAVE)),
