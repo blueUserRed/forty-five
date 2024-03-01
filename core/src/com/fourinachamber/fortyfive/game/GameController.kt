@@ -670,13 +670,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
                     if (parryCard.shouldRemoveAfterShot(this@GameController)) {
+                        if (!parryCard.isUndead) {
+                            SoundPlayer.situation("orb_anim_playing", curScreen)
+                            gameRenderPipeline.addOrbAnimation(cardOrbAnim(parryCard.actor))
+                        }
                         revolver.removeCard(parryCard)
                         if (parryCard.isUndead) {
                             cardHand.addCard(parryCard)
                         } else {
                             cardStack.add(parryCard)
-                            SoundPlayer.situation("orb_anim_playing", curScreen)
-                            gameRenderPipeline.addOrbAnimation(cardOrbAnim(parryCard.actor))
                         }
                     }
                     parryCard.afterShot(this@GameController)
@@ -1016,7 +1018,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         )
         includeLater(
             { executePlayerStatusEffectsAfterDamage(newDamage!!) },
-            { !triggeredByStatusEffect }
+            { !triggeredByStatusEffect && newDamage!! > 0}
         )
     }
 
