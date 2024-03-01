@@ -26,6 +26,7 @@ import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
+import com.fourinachamber.fortyfive.onjNamespaces.OnjStyleInstruction
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
@@ -653,21 +654,20 @@ class ScreenBuilder(val file: FileHandle) {
                     .filter { !it.key.startsWith("style_") }
                     .forEach { (key, value) ->
                         val data = getDataForStyle(value, key)
-                        val dataClass = data::class
-                        val instruction = if (duration == null) {
-                            StyleInstruction(data, priority, condition, dataClass)
-                        } else {
-                            AnimatedStyleInstruction(
+                        val instruction: StyleInstruction<Any> = when {
+                            duration != null -> AnimatedStyleInstruction(
                                 data,
                                 priority,
                                 condition,
-                                dataClass,
+                                data::class,
                                 duration!!,
                                 interpolation!!,
                                 delay!!
                             )
+                            data is OnjStyleInstruction -> data.value(priority, condition)
+                            else -> StyleInstruction(data, priority, condition, data::class)
                         }
-                        styleManager.addInstruction(key, instruction, dataClass)
+                        styleManager.addInstruction(key, instruction, instruction.dataTypeClass)
                     }
             }
         }
@@ -692,6 +692,7 @@ class ScreenBuilder(val file: FileHandle) {
         var data = onjValue.value ?: throw RuntimeException("style instruction $keyName cannot be null")
         if (data is Double) data = data.toFloat()
         if (data is Long) data = data.toInt()
+        if (onjValue is OnjStyleInstruction) return onjValue
         return data
     }
 

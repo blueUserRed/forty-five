@@ -496,60 +496,6 @@ var disableStyles = [
     }
 ];
 
-var enemyActionPopup = $Box {
-    styles: [
-        {
-            style_priority: 1,
-            positionType: positionType.absolute,
-            background: "transparent_black_texture",
-            flexDirection: flexDirection.row,
-            alignItems: align.center,
-            justifyContent: justify.center,
-            width: worldWidth#points,
-            height: worldHeight#points,
-            detached: true
-        },
-        {
-            style_priority: 2,
-            style_condition: state(""),
-            detached: false
-        }
-    ],
-} children [
-
-    $Box {
-        styles: [
-            {
-                rotation: 4.0,
-                width: 60#percent,
-                positionLeft: 10#points
-            }
-        ],
-        enableTransform: true
-    } children [
-        $TemplateLabel {
-            font: "red_wing",
-            template: "Nice Slot you have there... Would be a real shame if somebody...",
-            wrap: true,
-            //            template: "{game.enemyActionPhrase}",
-
-            fontScale: 1.8,
-            color: color.black,
-        },
-    ],
-
-    $Box {
-    } children [
-        $Image {
-            textureName: "enemy_texture",
-            reportDimensionsWithScaling: true,
-            scaleX: 1.5,
-            scaleY: 1.5,
-        }
-    ]
-
-];
-
 var popupActor = $Box {
     styles: [
         {
@@ -816,7 +762,8 @@ var playerBar = $Box {
                 width: 120#points,
                 positionBottom: 180#points,
                 positionLeft: 90#points,
-                rotation: 15.0,
+                rotation: timeSin(0.0004, 4.0, pi, 15.0),
+                offsetY: timeSin(0.0005, 4.0, pi, 0.0),
                 touchable: touchable.enabled,
             }
         ],
@@ -1244,7 +1191,8 @@ var playerBar = $Box {
                 width: 120#points,
                 positionBottom: 200#points,
                 positionLeft: (worldWidth - 90 - 120)#points,
-                rotation: -15.0
+                rotation: timeSin(0.0004, 4.0, 0.0, -15.0),
+                offsetY: timeSin(0.0005, 4.0, 0.0, 0.0),
             }
         ],
         enableTransform: true,
@@ -1474,7 +1422,9 @@ var gameScreen = $Box {
     $Revolver {
         styles: [
             {
-                positionBottom: -260#points
+                positionBottom: -260#points,
+                width: (2.0 * 140.0 + 530.0 * 0.22 + 60.0)#points,
+                aspectRatio: 1.0
             }
         ],
         zIndex: 100,
@@ -1884,5 +1834,4 @@ root: $Box {
     drawCardActor,
     popupActor,
     putCardsUnderDeckActor,
-    enemyActionPopup
 ]

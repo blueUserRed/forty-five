@@ -2,6 +2,8 @@ package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.fourinachamber.fortyfive.screen.general.styles.StyleCondition
+import com.fourinachamber.fortyfive.screen.general.styles.StyleInstruction
+import com.fourinachamber.fortyfive.screen.general.styles.TimeSinusStyleInstruction
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
 import onj.builder.buildOnjObject
@@ -16,7 +18,8 @@ object StyleNamespace {
 
     @OnjNamespaceDatatypes
     val datatypes: Map<String, KClass<*>> = mapOf(
-        "StyleCondition" to OnjStyleCondition::class
+        "StyleCondition" to OnjStyleCondition::class,
+        "StyleInstruction" to OnjStyleInstruction::class
     )
 
     @OnjNamespaceVariables
@@ -105,6 +108,23 @@ object StyleNamespace {
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
     fun points(value: OnjInt): OnjYogaValue = OnjYogaValue(YogaValue(value.value.toFloat(), YogaUnit.POINT))
 
+    @RegisterOnjFunction(schema = "params: [float, float, float, float]")
+    fun timeSin(
+        frequency: OnjFloat,
+        amplitude: OnjFloat,
+        phase: OnjFloat,
+        offset: OnjFloat
+    ): OnjStyleInstruction = OnjStyleInstruction { priority: Int, condition: StyleCondition ->
+        TimeSinusStyleInstruction(
+            priority,
+            condition,
+            frequency.value.toFloat(),
+            amplitude.value.toFloat(),
+            phase.value.toFloat(),
+            offset.value.toFloat()
+        )
+    }
+
     @RegisterOnjFunction(schema = "params: [{styles: {...*}[], ...*}, {...*}[]]", type = OnjFunctionType.INFIX)
     fun addStyles(obj: OnjObject, additionalStyles: OnjArray): OnjObject {
         val pairs = obj.value.toMutableMap()
@@ -189,3 +209,14 @@ class OnjStyleCondition(
         info.builder.append("'--style-condition--'")
     }
 }
+
+class OnjStyleInstruction(
+    override val value: StyleInstructionCreator
+) : OnjValue() {
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--style-instruction--'")
+    }
+}
+
+typealias StyleInstructionCreator = (priority: Int, condition: StyleCondition) -> StyleInstruction<Any>
