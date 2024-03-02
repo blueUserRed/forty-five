@@ -4,3 +4,4 @@ masterVolume: 1.0,
 musicVolume: 1.0,
 soundEffectsVolume: 1.0,
 enableScreenShake: true,
+startScreen: "intro"
