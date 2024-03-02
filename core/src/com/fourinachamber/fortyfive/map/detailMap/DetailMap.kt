@@ -12,8 +12,10 @@ import com.fourinachamber.fortyfive.utils.*
 import onj.builder.buildOnjObject
 import onj.builder.toOnjArray
 import onj.parser.OnjParser
+import onj.parser.OnjParserException
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
+import onj.schema.OnjSchemaException
 import onj.value.*
 
 /**
@@ -73,6 +75,7 @@ data class DetailMap(
      * returns a representation of this map as an OnjObject
      */
     fun asOnjObject(): OnjObject = buildOnjObject {
+        "version" with mapVersion
         "nodes" with nodesAsOnjArray()
         "startNode" with startNode.index
         "endNode" with endNode.index
@@ -105,16 +108,35 @@ data class DetailMap(
             .toOnjArray()
     }
 
+    class InvalidMapFileException : RuntimeException()
 
     companion object {
+
+        const val mapVersion: Int = 0
+        const val logTag = "Map"
 
         /**
          * reads a DetailMap from an onj-file
          */
         fun readFromFile(file: FileHandle): DetailMap {
-            val onj = OnjParser.parseFile(file.file())
-            mapOnjSchema.assertMatches(onj)
+            val onj = try {
+                val onj = OnjParser.parseFile(file.file())
+                mapOnjSchema.assertMatches(onj)
+                onj
+            } catch (e: OnjParserException) {
+                FortyFiveLogger.warn(logTag, "invalid map loaded")
+                FortyFiveLogger.stackTrace(e)
+                throw InvalidMapFileException()
+            } catch (e: OnjSchemaException) {
+                FortyFiveLogger.warn(logTag, "invalid map loaded")
+                FortyFiveLogger.stackTrace(e)
+                throw InvalidMapFileException()
+            }
             onj as OnjObject
+            if (onj.get<Long>("version").toInt() != mapVersion) {
+                FortyFiveLogger.warn(logTag, "map version mismatch: found: ${onj.get<Long>("version")} expected: $mapVersion")
+                throw InvalidMapFileException()
+            }
             val nodes = mutableListOf<MapNodeBuilder>()
             val nodesOnj = onj.get<OnjArray>("nodes")
             nodesOnj

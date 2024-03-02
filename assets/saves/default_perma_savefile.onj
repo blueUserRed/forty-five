@@ -1,4 +1,5 @@
 
+version: 0,
 lastRandom: null,
 collection: [
     "bullet",
