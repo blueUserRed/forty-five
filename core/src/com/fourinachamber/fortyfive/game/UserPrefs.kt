@@ -51,6 +51,12 @@ object UserPrefs {
             dirty = true
         }
 
+    var startScreen: StartScreen = StartScreen.INTRO
+        set(value) {
+            field = value
+            dirty = true
+        }
+
     fun read() {
         FortyFiveLogger.debug(logTag, "reading user_prefs")
 
@@ -74,7 +80,7 @@ object UserPrefs {
 
         val result = userPrefsSchema.check(obj)
         if (result != null) {
-            FortyFiveLogger.debug(logTag, "Savefile invalid: $result")
+            FortyFiveLogger.debug(logTag, "Userprefs invalid: $result")
             copyDefaultFile()
             obj = OnjParser.parseFile(Gdx.files.local(userPrefsPath).file())
             userPrefsSchema.assertMatches(obj)
@@ -86,6 +92,7 @@ object UserPrefs {
         musicVolume = obj.get<Double>("musicVolume").toFloat()
         masterVolume = obj.get<Double>("masterVolume").toFloat()
         enableScreenShake = obj.get<Boolean>("enableScreenShake")
+        startScreen = StartScreen.valueOf(obj.get<String>("startScreen").uppercase())
         dirty = false
     }
 
@@ -97,6 +104,7 @@ object UserPrefs {
             "musicVolume" with musicVolume
             "masterVolume" with masterVolume
             "enableScreenShake" with enableScreenShake
+            "startScreen" with startScreen.toString()
         }
         Gdx.files.internal(userPrefsPath).file().writeText(obj.toString())
         dirty = false
@@ -110,6 +118,10 @@ object UserPrefs {
     private fun copyDefaultFile() {
         FortyFiveLogger.debug(logTag, "copying default user prefs file")
         Gdx.files.local(defaultUserPrefsPath).copyTo(Gdx.files.local(userPrefsPath))
+    }
+
+    enum class StartScreen {
+        INTRO, TITLE, MAP
     }
 
 }

@@ -29,6 +29,16 @@ object BindTargetFactory {
             getter = { UserPrefs.enableScreenShake },
             setter = { UserPrefs.enableScreenShake = it },
             mapOf(true to "on", false to "off")
+        ),
+        "startScreen" to BindTarget(
+            UserPrefs.StartScreen::class,
+            getter = { UserPrefs.startScreen },
+            setter = { UserPrefs.startScreen = it },
+            mapOf(
+                UserPrefs.StartScreen.MAP to "Map screen",
+                UserPrefs.StartScreen.TITLE to "Title screen",
+                UserPrefs.StartScreen.INTRO to "Intro screen",
+            )
         )
     )
 
