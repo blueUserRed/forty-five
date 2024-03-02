@@ -16,6 +16,9 @@ import onj.value.OnjObject
  */
 object SaveState {
 
+
+    const val saveStateVersion: Int = 0
+
     /**
      * used for logging
      */
@@ -171,6 +174,13 @@ object SaveState {
             OnjParser.parseFile(file)
         }
 
+        val version = (obj as? OnjObject)?.getOr<Long?>("version", null)?.toInt()
+        if (version?.equals(saveStateVersion)?.not() ?: true) {
+            FortyFiveLogger.warn(logTag, "incompatible savefile found: version is $version; expected: $saveStateVersion")
+            copyDefaultFile()
+            obj = OnjParser.parseFile(file)
+        }
+
         val result = savefileSchema.check(obj)
         if (result != null) {
             FortyFiveLogger.warn(logTag, "Savefile invalid: $result")
@@ -292,6 +302,7 @@ object SaveState {
         if (!savefileDirty) return
         FortyFiveLogger.debug(logTag, "writing SaveState")
         val obj = buildOnjObject {
+            "version" with saveStateVersion
             "cards" with _cards
             "playerLives" with playerLives
             "maxPlayerLives" with maxPlayerLives

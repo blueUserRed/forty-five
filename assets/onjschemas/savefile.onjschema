@@ -1,4 +1,5 @@
 
+version: int,
 cards: string[]?,
 
 stats: {

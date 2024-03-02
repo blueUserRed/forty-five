@@ -1,4 +1,5 @@
 
+version: int,
 lastRandom: int?,
 collection: string[],
 visitedAreas: string[],

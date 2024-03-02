@@ -1,5 +1,6 @@
 import "config/game_config.onj" as gameConfig;
 
+version: 0,
 cards: null,
 decks: [
     {

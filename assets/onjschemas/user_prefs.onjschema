@@ -1,4 +1,5 @@
 
+version: int,
 masterVolume: float,
 musicVolume: float,
 soundEffectsVolume: float,
