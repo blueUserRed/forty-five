@@ -1750,6 +1750,14 @@ root: $Box {
 
         $Statusbar {
             options: [
+                {
+                    actorName: "backpackActor",
+                    displayName: "Backpack",
+                },
+                {
+                    actorName: "settings_widget",
+                    displayName: "Settings"
+                }
             ],
             ...(sharedComponents.statusbarLeftDefaults)
         } addStyles [
@@ -1774,6 +1782,10 @@ root: $Box {
                     actionName: "toTitleScreen",
                     displayName: "To Title Screen",
                 },
+                {
+                    actorName: "settings_widget",
+                    displayName: "Settings"
+                }
             ],
             zIndex: 100000,
             ...(sharedComponents.statusbarCenterDefaults),
@@ -1828,6 +1840,7 @@ root: $Box {
     ],
 
     sharedComponents.backpack,
+    ...(sharedComponents.settingsWidgets),
     sharedComponents.warningParent,
     encounterModifierDisplay,
     enemyActionAnimContainer,
