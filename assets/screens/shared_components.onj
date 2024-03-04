@@ -1181,7 +1181,7 @@ warningLabelTemplates: [
 ],
 
 warningLabelUsedAssets: [
-    "forty_white_texture", "warning_label_background_red", "title_screen_background", "red_wing", "warning_label_close",
+    "forty_white_texture", "warning_label_background_red", "warning_label_background_grey", "title_screen_background", "red_wing", "warning_label_close",
 ],
 
 var cardHoverDetailExtrasWidth = 200.0;

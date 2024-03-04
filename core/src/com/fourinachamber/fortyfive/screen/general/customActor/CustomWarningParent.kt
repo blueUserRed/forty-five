@@ -99,6 +99,7 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
                 }
                 target.remove()
                 remove(target.styleManager!!.node)
+                screen.removeAllStyleManagers(target)
             }
         }.asAction())
     }
@@ -107,9 +108,9 @@ class CustomWarningParent(screen: OnjScreen) : CustomFlexBox(screen) {
         LOW {
             override fun getSymbol(): String = "i"
 
-            override fun getBackground(): String = "forty_white_texture"
+            override fun getBackground(): String = "warning_label_background_grey"
 
-            override fun getColor(screen: OnjScreen): Color = Color.valueOf("2A2424")  // dark_brown from color.onj
+            override fun getColor(screen: OnjScreen): Color = Color.valueOf("F0EADD")  // dark_brown from color.onj
         },
         MIDDLE {
             override fun getSymbol(): String = "!"
