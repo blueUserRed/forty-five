@@ -83,18 +83,20 @@ var settingsBox = $Box {
             {
                 style_priority: 2,
                 style_condition: state("show_settings"),
-                positionTop: 100#points,
+                positionTop: 175#points,
                 style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.pow2
                 }
             },
         ],
+        touchable: "enabled",
     } children [
 
         $Label {
             styles: [
                 {
+                    marginTop: -100#points,
                     width: (worldWidth * 0.45)#points,
                 }
             ],
