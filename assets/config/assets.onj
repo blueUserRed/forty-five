@@ -606,6 +606,10 @@ textures: [
         file: "textures/warning_label/background_red.png"
     },
     {
+        name: "warning_label_background_grey",
+        file: "textures/warning_label/background_grey.png"
+    },
+    {
         name: "warning_label_close",
         file: "textures/warning_label/close_btn.png",
         useMipMaps: true,

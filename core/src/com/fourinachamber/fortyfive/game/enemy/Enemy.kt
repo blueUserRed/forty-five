@@ -83,7 +83,7 @@ class Enemy(
         private set(value) {
             FortyFiveLogger.debug(logTag, "enemy lives updated: new lives = $field ")
             val oldValue = field
-            field = value
+            field = max(value, -300)
             if (oldValue > 0 && value <= 0) {
                 gameController.enemyDefeated(this)
             }
