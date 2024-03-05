@@ -282,7 +282,9 @@ able to select them.
 
 ### Scaling issues with images
 
-TODO
+There are multiple Issues with using Images. For example, because the drawable is only loaded when ``draw()`` is called
+for the first time, the layout calculations will be wrong up to that point.
+It is usually better to use a ``$Box`` with explicit width/height and a background image.
 
 ### Render Pipelines
 
@@ -363,6 +365,12 @@ class SomeClass(
 }
 ```
 
+Situations in which you have the ResourceManager like this are quite rare, because most resources have the same
+lifetime as the screen, so you can just include them in the usedAssets-Section of the screen definition.
+
+If a resource is created dynamically but lives as long as the screen does, the ``screen.addDisposable`` function can
+be used to call ``dispose()`` automatically when the screen is disposed.
+
 ### The inner workings of the ResourceManager
 
 The ResourceManager uses an approach similar to reference counting for keeping
@@ -392,12 +400,21 @@ the internal logic.
 
 ### The GameDirector
 
+> [!NOTE]
+> separating the GameController and the GameDirector made sense earlier in development, but because features like
+> enemy scaling where scrapped, the distinction is quite useless now. The GameDirector handles enemy logic, while
+> everything else is done by the GameController.
+
 While the GameController acts on the level of an individual encounter,
 the GameDirector is used to provide a good experience across multiple
 encounters. Its most important jobs include choosing the enemy or
 scaling the difficulty after an encounter.
 
 ### GameAnimations
+
+> [!NOTE]
+> GameAnimations are used quite rarely currently because there are usually better options, e.g. Using a LibGDX
+> Action in combination with a Timeline.
 
 Most animations can be implemented using the LibGdx
 [actions](https://libgdx.com/wiki/graphics/2d/scene2d/scene2d). However,
@@ -516,6 +533,9 @@ the user attempts to start an event.
 
 ### Areas and Roads
 
+> [!NOTE]
+> Areas no longer persist over multiple runs. This might change again in the future.
+
 DetailMaps are separated into two categories: areas and roads. Areas are
 defined statically and always persist over multiple runs, for the entire
 playthrough. Roads are generated dynamically, and are reset as soon as a
@@ -525,6 +545,9 @@ version of the map (where the player might have already completed events)
 is stored in maps/areas.
 
 ### WorldView
+
+> [!NOTE]
+> The Worldview was scrapped, but the logic is still mostly there. Maybe it will be added back in the future.
 
 The WorldView is a static image that shows the entire structure made up
 of areas and roads to the player. Additionally, a player icon is
@@ -538,6 +561,9 @@ TODO
 ## Utility classes
 
 ### The TextureGenerator
+
+> [!NOTE]
+> The TextureGenerator is not used right now.
 
 The TextureGenerator takes a config file and generates the textures specified
 by it. Its abilities include drawing text, other textures or simple shapes onto
@@ -684,6 +710,9 @@ It has the following features:
    Example: ``%constArg ca_speed float``
 
 ### Advanced text
+
+> [!NOTE]
+> A simple markup language was created for defining advanced text.
 
 The AdvancedTextWidget provides a more flexible way of displaying text to the
 user. This includes changing color, adding icons into the flow of the text or

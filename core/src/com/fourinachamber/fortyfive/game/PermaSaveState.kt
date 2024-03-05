@@ -14,6 +14,7 @@ import kotlin.random.Random
 
 object PermaSaveState {
 
+    const val permaSaveStateVersion: Int = 0
     const val logTag = "PermaSaveState"
     const val saveFilePath: String = "saves/perma_savefile.onj"
     const val defaultSaveFilePath: String = "saves/default_perma_savefile.onj"
@@ -70,6 +71,13 @@ object PermaSaveState {
             OnjParser.parseFile(file)
         }
 
+        val version = (obj as? OnjObject)?.getOr<Long?>("version", null)?.toInt()
+        if (version?.equals(permaSaveStateVersion)?.not() ?: true) {
+            FortyFiveLogger.warn(logTag, "incompatible perma_savefile found: version is $version; expected: $permaSaveStateVersion")
+            copyDefaultFile()
+            obj = OnjParser.parseFile(file)
+        }
+
         val result = savefileSchema.check(obj)
         if (result != null) {
             FortyFiveLogger.debug(logTag, "Savefile invalid: $result")
@@ -98,6 +106,7 @@ object PermaSaveState {
     fun write() {
         if (!saveFileDirty) return
         val obj = buildOnjObject {
+            "version" with permaSaveStateVersion
             "lastRandom" with currentRandom
             "collection" with collection
             "playerHasCompletedTutorial" with playerHasCompletedTutorial

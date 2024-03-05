@@ -119,7 +119,7 @@ object MapManager {
     fun read() {
         val map = lookupMapFile(SaveState.currentMap)
         currentMapFile = map
-        currentDetailMap = DetailMap.readFromFile(map)
+        currentDetailMap = readDetailMap(map)
     }
 
     fun changeToEncounterScreen(context: GameController.EncounterContext) {
@@ -170,7 +170,7 @@ object MapManager {
         write()
         val map = lookupMapFile(newMap)
         currentMapFile = map
-        currentDetailMap = DetailMap.readFromFile(map)
+        currentDetailMap = readDetailMap(map)
         SaveState.currentMap = newMap
         SaveState.currentNode = currentDetailMap
             .uniqueNodes
@@ -183,12 +183,28 @@ object MapManager {
         changeToMapScreen()
     }
 
+    private fun readDetailMap(map: FileHandle): DetailMap = try {
+        DetailMap.readFromFile(map)
+    } catch (e: DetailMap.InvalidMapFileException) {
+        FortyFiveLogger.warn(logTag, "Invalid map file found, reloading all maps")
+        generateMapsSync()
+        copyStaticMaps()
+        SaveState.currentNode = 0
+        SaveState.lastNode = null
+        DetailMap.readFromFile(map)
+    }
+
     fun write() {
         currentMapFile.file().writeText(currentDetailMap.asOnjObject().toMinifiedString())
     }
 
     fun newRunSync() {
         generateMapsSync()
+        copyStaticMaps()
+        read()
+    }
+
+    private fun copyStaticMaps() {
         Gdx.files.internal(staticRoadMapsPath).file().copyRecursively(
             Gdx.files.internal(roadMapsPath).file(),
             true
@@ -197,7 +213,6 @@ object MapManager {
             Gdx.files.internal(areaMapsPath).file(),
             true
         )
-        read()
     }
 
     fun resetAllSync() {
@@ -222,23 +237,6 @@ object MapManager {
             .find { it.nameWithoutExtension == mapName }
         return file?.let { FileHandle(file) }
     }
-
-//    suspend fun generateMaps(coroutineScope: CoroutineScope) = with(coroutineScope) {
-//        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
-//        mapConfigSchema.assertMatches(onj)
-//        onj as OnjObject
-//        val generatorConfig = onj.get<OnjObject>("generatorConfig")
-//        val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
-//        val jobs = generatorConfig
-//            .get<OnjArray>("maps")
-//            .value
-//            .map { map ->
-//                launch {
-//                    generateMap(map as OnjObject, outputDir)
-//                }
-//            }
-//        jobs.joinAll()
-//    }
 
     fun generateMapsSync() {
         val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())

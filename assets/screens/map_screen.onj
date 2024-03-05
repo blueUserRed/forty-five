@@ -22,8 +22,8 @@ assets: {
         "location_sign_salem", "transparent_black_texture",
         "location_sign_tabu_letter_outpost",
         "location_sign_spire_outpost",
-        "location_sign_aqua_balle",
-        "map_decoration_wasteland_cactus_1", "map_decoration_wasteland_cactus_2", "map_decoration_grass", "map_path", "dialog_continue_arrow",
+        "location_sign_aqua_balle", "common_symbol_arrow",
+        "map_decoration_wasteland_cactus_1", "map_decoration_wasteland_cactus_2", "map_decoration_grass", "map_path",
         "map_player", "location_sign_under_construction",
         "map_node_default",
         "map_node_shop",
@@ -168,7 +168,7 @@ var infoPopup = $Box {
             style_priority: 2,
             style_animation: {
                 duration: 0.2,
-                interpolation: interpolation.elastic
+                interpolation: interpolation.pow2In
             },
             positionLeft: 360#points,
         },
@@ -177,7 +177,7 @@ var infoPopup = $Box {
             style_condition: state("displayEventDetail") and not(state("transition away")),
             style_animation: {
                 duration: 0.2,
-                interpolation: interpolation.elastic
+                interpolation: interpolation.pow2In
             },
             positionLeft: 40#points,
         },
@@ -350,7 +350,7 @@ var mapBox = $Box {
         edgeTexture: "map_path",
         playerMovementTime: 0.3,
         scrollMargin: 0.0,
-        directionIndicator: "dialog_continue_arrow",
+        directionIndicator: "common_symbol_arrow",
         encounterModifierDisplayTemplateName: "encounter_modifier_display",
         encounterModifierParentName: "encounter_modifier_parent",
         screenSpeed: 25.0,
@@ -365,6 +365,7 @@ var mapBox = $Box {
 var extractionOverlay = $Box {
     styles: [
         {
+            positionType: positionType.absolute,
             style_priority: 1,
             width: worldWidth#points,
             height: worldHeight#points,
@@ -563,53 +564,10 @@ root: $Box {
         ],
         zIndex: 2,
     } children [
-//        worldView,
     ],
+
     extractionOverlay,
-/*
-    $Box {
-        styles: [
-            {
-                style_priority: 1,
-                positionType: positionType.absolute,
-                background: "transparent_black_texture",
-                alignItems: align.center,
-                justifyContent: justify.center,
-                detached: true,
-                width: 100.0#percent,
-                height: 100.0#percent,
-            },
-            {
-                style_priority: 2,
-                detached: false,
-                style_condition: state("show_extraction_popup")
-            }
-        ],
-        touchable: "enabled",
-        zIndex: 3,
-    } children [
 
-        $Label {
-            font: "red_wing",
-            text: "Cards extracted!",
-            fontScale: 0.9,
-            color: color.white,
-        },
-
-        $Label {
-            font: "red_wing",
-            text: "Ok",
-            fontScale: 0.9,
-            color: color.white,
-            behaviours: [
-                $CatchEventAndEmitBehaviour {
-                    catch: "ButtonClickEvent",
-                    emit: "PopupConfirmationEvent"
-                }
-            ]
-        },
-    ],
-*/
     $Box {
         styles: [
             {
@@ -637,12 +595,17 @@ root: $Box {
                     actionName: "toTitleScreen",
                     displayName: "To Title Screen",
                 },
+                {
+                    actorName: "settings_widget",
+                    displayName: "Settings"
+                }
             ],
             //            ...(sharedComponents.statusbarLeftDefaults) //Hint to use on left side: use this command instead of next, and comment 2/3 actors in the options out
 
             ...(sharedComponents.statusbarCenterDefaults)
         },
         sharedComponents.backpack,
+        ...(sharedComponents.settingsWidgets),
     ],
     sharedComponents.warningParent,
 ],

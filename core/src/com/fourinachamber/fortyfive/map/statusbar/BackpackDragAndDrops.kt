@@ -108,7 +108,7 @@ class BackpackDragPayload(val actor: Actor) : ExecutionPayload() {
                 CustomWarningParent.getWarning(card.screen).addWarning(
                     card.screen,
                     "Not enough cards",
-                    "The minimum decksize is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                    "The minimum decksize is ${SaveState.Deck.minDeckSize}. Because you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
                     CustomWarningParent.Severity.MIDDLE
                 )
                 SoundPlayer.situation("not_allowed", card.screen)

@@ -520,9 +520,9 @@ cards: [
     },
     {
         name: "luckyLukesBullet",
-        title: "Lucky Lukes Bullet",
-        flavourText: "Lucky Lukes Bullet",
-        description: "When this Bullet enters the Revolver: deal 6 dmg to target enemy", // TODO: desc
+        title: "Lucky Dukes Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\n: deal 6 dmg to target enemy", // TODO: desc
         baseDamage: 6,
         coverValue: 0,
         traitEffects: [],
@@ -1164,7 +1164,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1", "rarity2", "unobtainable"],
+        tags: ["pool1", "rarity1", "unobtainable"],
         price: 50,
     },
 

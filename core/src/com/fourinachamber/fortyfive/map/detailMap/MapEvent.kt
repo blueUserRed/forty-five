@@ -252,11 +252,20 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
 
     override var currentlyBlocks: Boolean = true
     override var canBeStarted: Boolean = true
-    override var isCompleted: Boolean = false
+        get() {
+            if (onlyIfPlayerDoesntHaveCard != null) {
+                val card = onlyIfPlayerDoesntHaveCard
+                return card !in SaveState.cards
+            }
+            return field
+        }
+
+    override var isCompleted: Boolean = !canBeStarted
 
     override val displayDescription: Boolean = true
 
     private val canOnlyBeStartedOnce: Boolean = onj.get<Boolean>("canOnlyBeStartedOnce")
+    private val onlyIfPlayerDoesntHaveCard: String? = onj.getOr<String?>("onlyIfPlayerDoesntHaveCard", null)
 
     val npc: String = onj.get<String>("npc")
     val npcDisplayName: String = MapManager.displayName(npc)
@@ -284,6 +293,7 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
         includeStandardConfig()
         "npc" with npc
         "canOnlyBeStartedOnce" with canOnlyBeStartedOnce
+        onlyIfPlayerDoesntHaveCard?.let { "onlyIfPlayerDoesntHaveCard" to it }
     }
 }
 

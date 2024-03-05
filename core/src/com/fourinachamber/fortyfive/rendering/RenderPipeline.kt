@@ -19,6 +19,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.TimeUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.fourinachamber.fortyfive.game.GraphicsConfig
+import com.fourinachamber.fortyfive.game.UserPrefs
 import com.fourinachamber.fortyfive.screen.Resource
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -58,6 +59,11 @@ open class RenderPipeline(
     }
     private val alphaReductionShader: BetterShader by alphaReductionShaderDelegate
 
+    private val screenShakeShaderDelegate = lazy {
+        ResourceManager.get<BetterShader>(screen, "screen_shake_shader")
+    }
+    private val screenShakeShader: BetterShader by screenShakeShaderDelegate
+
     private val gaussianBlurShaderDelegate = lazy {
         ResourceManager.get<BetterShader>(screen, "gaussian_blur_shader")
     }
@@ -72,6 +78,10 @@ open class RenderPipeline(
 
     private var fadeDuration: Int = -1
     private var fadeFinishesAt: Long = -1
+
+    private val screenShakePostProcessingStep: () -> Unit by lazy {
+        shaderPostProcessingStep(screenShakeShader)
+    }
 
     private val fadeToBlackTask: () -> Unit = {
         val now = TimeUtils.millis()
@@ -88,21 +98,28 @@ open class RenderPipeline(
     }
 
     init {
-        frameBufferManager.addPingPongFrameBuffer("orb", 0.5f)
-        frameBufferManager.addPingPongFrameBuffer("pp", 1f)
+        frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
+        frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
     }
 
-    fun getFadeToBlackTimeline(fadeDuration: Int): Timeline = Timeline.timeline {
+    fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {
         action {
             this@RenderPipeline.fadeDuration = fadeDuration
             fadeFinishesAt = TimeUtils.millis() + fadeDuration
             lateTasks.add(fadeToBlackTask)
         }
         delayUntil { TimeUtils.millis() >= fadeFinishesAt }
-        action {
+        if (!stayBlack) action {
             lateTasks.remove(fadeToBlackTask)
         }
     }
+
+    fun getScreenShakeTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+        action { screenShakeShader.resetReferenceTime() }
+        action { postPreprocessingSteps.add(screenShakePostProcessingStep) }
+        delay(200)
+        action { postPreprocessingSteps.remove(screenShakePostProcessingStep) }
+    } else Timeline()
 
     private fun updateOrbFbo(delta: Float) {
         val (active, inactive) = frameBufferManager.getPingPongFrameBuffers("orb") ?: return
@@ -297,7 +314,7 @@ open class RenderPipeline(
         batch.end()
         active.end()
         batch.begin()
-        if (isOrbAnimActive) renderOrbFbo()
+//        if (isOrbAnimActive) renderOrbFbo()
         postPreprocessingSteps.forEachIndexed { index, step ->
             frameBufferManager.swapPingPongFrameBuffers("pp")
             val (@Suppress("NAME_SHADOWING") active, _) = frameBufferManager.getPingPongFrameBuffers("pp") ?: return
@@ -310,6 +327,7 @@ open class RenderPipeline(
         batch.begin()
         screen.viewport.apply()
         batch.projectionMatrix = screen.viewport.camera.combined
+        if (isOrbAnimActive) renderOrbFbo()
         lateTasks.forEach { it() }
         batch.end()
     }
@@ -347,6 +365,9 @@ open class RenderPipeline(
         frameBufferManager.dispose()
         shapeRenderer.dispose()
         batch.dispose()
+        if (gaussianBlurShaderDelegate.isInitialized()) gaussianBlurShader.dispose()
+        if (alphaReductionShaderDelegate.isInitialized()) alphaReductionShader.dispose()
+        if (screenShakeShaderDelegate.isInitialized()) screenShakeShader.dispose()
     }
 
     data class OrbAnimation(
@@ -409,7 +430,7 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
         shaderPostProcessingStep(parryShader)
     }
 
-    fun getOnShotPostProcessingTimeline(): Timeline = Timeline.timeline {
+    fun getOnShotPostProcessingTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
         val duration = GraphicsConfig.shootPostProcessingDuration()
         action {
             shootShader.resetReferenceTime()
@@ -419,7 +440,7 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
         action {
             postPreprocessingSteps.remove(shootPostProcessingStep)
         }
-    }
+    } else Timeline()
 
     fun startParryEffect() {
         postPreprocessingSteps.add(parryPostProcessingStep)
@@ -433,25 +454,25 @@ class GameRenderPipeline(screen: OnjScreen) : RenderPipeline(screen, screen) {
 
 class FrameBufferManager : Disposable {
 
-    private val singleBuffers: MutableMap<String, Pair<Float, FrameBuffer?>> = mutableMapOf()
-    private val pingPongBuffers: MutableMap<String, Pair<Float, Pair<FrameBuffer, FrameBuffer>?>> = mutableMapOf()
+    private val singleBuffers: MutableMap<String, Triple<Float, Pixmap.Format, FrameBuffer?>> = mutableMapOf()
+    private val pingPongBuffers: MutableMap<String, Triple<Float, Pixmap.Format, Pair<FrameBuffer, FrameBuffer>?>> = mutableMapOf()
 
-    fun addFrameBuffer(name: String, sizeMultiplier: Float) {
+    fun addFrameBuffer(name: String, format: Pixmap.Format, sizeMultiplier: Float) {
         if (singleBuffers.containsKey(name)) throw RuntimeException("single FrameBuffer with name $name already exists")
-        singleBuffers[name] = sizeMultiplier to null
+        singleBuffers[name] = Triple(sizeMultiplier, format,null)
     }
 
     fun getFrameBuffer(name: String): FrameBuffer? {
-        val (sizeMultiplier, buffer) = singleBuffers[name] ?: throw RuntimeException("no single FrameBuffer with name $name")
+        val (sizeMultiplier, format, buffer) = singleBuffers[name] ?: throw RuntimeException("no single FrameBuffer with name $name")
         if (buffer != null) return buffer
-        val newBuffer = tryCreateFrameBuffer(sizeMultiplier)
-        singleBuffers[name] = sizeMultiplier to newBuffer
+        val newBuffer = tryCreateFrameBuffer(format, sizeMultiplier)
+        singleBuffers[name] = Triple(sizeMultiplier, format, newBuffer)
         return newBuffer
     }
 
-    private fun tryCreateFrameBuffer(sizeMultiplier: Float): FrameBuffer? = try {
+    private fun tryCreateFrameBuffer(format: Pixmap.Format, sizeMultiplier: Float): FrameBuffer? = try {
         val fbo = FrameBuffer(
-            Pixmap.Format.RGBA8888,
+            format,
             (Gdx.graphics.width * sizeMultiplier).toInt(),
             (Gdx.graphics.height * sizeMultiplier).toInt(),
             false
@@ -464,42 +485,45 @@ class FrameBufferManager : Disposable {
         null
     }
 
-    fun addPingPongFrameBuffer(name: String, sizeMultiplier: Float) {
+    fun addPingPongFrameBuffer(name: String, format: Pixmap.Format, sizeMultiplier: Float) {
         if (pingPongBuffers.containsKey(name)) throw RuntimeException("ping pong FrameBuffer with name $name already exists")
-        pingPongBuffers[name] = sizeMultiplier to null
+        pingPongBuffers[name] = Triple(sizeMultiplier, format, null)
     }
 
     fun getPingPongFrameBuffers(name: String): Pair<FrameBuffer, FrameBuffer>? {
-        val (sizeMultiplier, buffers) = pingPongBuffers[name] ?: throw RuntimeException("no ping pong FrameBuffer with name $name")
+        val (sizeMultiplier, format, buffers) = pingPongBuffers[name] ?: throw RuntimeException("no ping pong FrameBuffer with name $name")
         if (buffers != null) return buffers
-        val newBuffers = tryCreateFrameBuffer(sizeMultiplier)
-            ?.let { first -> tryCreateFrameBuffer(sizeMultiplier)?.let { first to it } }
-        pingPongBuffers[name] = sizeMultiplier to newBuffers
-        return newBuffers
+        val first = tryCreateFrameBuffer(format, sizeMultiplier) ?: return null
+        val second = tryCreateFrameBuffer(format, sizeMultiplier) ?: run {
+            first.dispose()
+            return null
+        }
+        pingPongBuffers[name] = Triple(sizeMultiplier, format, first to second)
+        return first to second
     }
 
     fun swapPingPongFrameBuffers(name: String) {
-        val (sizeMultiplier, buffers) = pingPongBuffers[name] ?: throw RuntimeException("no ping pong FrameBuffer with name $name")
-        pingPongBuffers[name] = sizeMultiplier to (buffers?.let { it.second to it.first })
+        val (sizeMultiplier, format, buffers) = pingPongBuffers[name] ?: throw RuntimeException("no ping pong FrameBuffer with name $name")
+        pingPongBuffers[name] = Triple(sizeMultiplier, format, (buffers?.let { it.second to it.first }))
     }
 
     fun sizeChanged() {
-        singleBuffers.replaceAll { _, (sizeMultiplier, buffer) ->
+        singleBuffers.replaceAll { _, (sizeMultiplier, format, buffer) ->
             buffer?.dispose()
-            sizeMultiplier to null
+            Triple(sizeMultiplier, format, null)
         }
-        pingPongBuffers.replaceAll { _, (sizeMultiplier, buffers) ->
+        pingPongBuffers.replaceAll { _, (sizeMultiplier,format, buffers) ->
             buffers?.let {
                 it.first.dispose()
                 it.second.dispose()
             }
-            sizeMultiplier to null
+            Triple(sizeMultiplier, format, null)
         }
     }
 
     override fun dispose() {
-        singleBuffers.values.forEach { (_, buffer) -> buffer?.dispose() }
-        pingPongBuffers.values.forEach { (_, buffers) ->
+        singleBuffers.values.forEach { (_, _, buffer) -> buffer?.dispose() }
+        pingPongBuffers.values.forEach { (_, _, buffers) ->
             buffers?.let {
                 it.first.dispose()
                 it.second.dispose()
