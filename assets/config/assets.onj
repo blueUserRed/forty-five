@@ -124,14 +124,6 @@ textureAtlases: [
                 regionName: "enemy"
             },
             {
-                handle: "wood_box",
-                regionName: "wood_box"
-            },
-            {
-                handle: "deck_icon",
-                regionName: "deck_icon"
-            },
-            {
                 handle: "normal_bullet",
                 regionName: "normal_bullet"
             },
@@ -182,10 +174,6 @@ textureAtlases: [
             {
                 handle: "heart_texture",
                 regionName: "heart"
-            },
-            {
-                handle: "reserves_texture",
-                regionName: "reserves"
             },
             {
                 handle: "hit_overlay",
@@ -380,10 +368,6 @@ textures: [
     {
         name: "map_player",
         file: "textures/map/player.png"
-    },
-    {
-        name: "dialog_continue_arrow",
-        file: "textures/map/dialog_continue.png"
     },
     {
         name: "map_detail_fight_button",
@@ -622,6 +606,10 @@ textures: [
         file: "textures/warning_label/background_red.png"
     },
     {
+        name: "warning_label_background_grey",
+        file: "textures/warning_label/background_grey.png"
+    },
+    {
         name: "warning_label_close",
         file: "textures/warning_label/close_btn.png",
         useMipMaps: true,
@@ -649,10 +637,6 @@ textures: [
     {
         name: "dialog_background",
         file: "textures/events/dialog/background.png"
-    },
-    {
-        name: "dialog_continue",
-        file: "textures/events/dialog/continue.png"
     },
     {
         name: "dialog_name_field",
@@ -1012,6 +996,42 @@ textures: [
         name: "npc_witch",
         file: "textures/npcs/witch.png",
     },
+    {
+        name: "enemy_selector",
+        file: "textures/enemies/enemy_selector.png",
+    },
+    {
+        name: "settings_background",
+        file: "textures/settings/background.png",
+    },
+    {
+        name: "common_slider_background",
+        file: "textures/common/slider/slider.png",
+        useMipMaps: true,
+    },
+    {
+        name: "single_setting_background",
+        file: "textures/settings/setting_background.png",
+    },
+    {
+        name: "common_symbol_arrow",
+        file: "textures/common/symbols/arrow.png",
+    },
+    {
+        name: "wood_box",
+        file: "textures/game_screen/wood_box.png",
+        useMipMaps: true,
+    },
+    {
+        name: "deck_icon",
+        file: "textures/game_screen/deck_icon.png",
+        useMipMaps: true,
+    },
+    {
+        name: "reserves_texture",
+        file: "textures/game_screen/reserves.png",
+        useMipMaps: true,
+    },
 ],
 
 cursors: [
@@ -1025,12 +1045,21 @@ cursors: [
 
 shaders: [
     {
-        name: "earthquake_shader",
-        file: "shaders/earthquake.glsl",
+        name: "shoot_shader",
+        file: "shaders/shoot.glsl",
         constantArgs: {
             timeOffset: 1_500,
             speed: 14.0,
             mag: 0.2,
+        }
+    },
+    {
+        name: "screen_shake_shader",
+        file: "shaders/screen_shake.glsl",
+        constantArgs: {
+            timeOffset: 1_500,
+            speed: 25.0,
+            mag: 0.0028,
         }
     },
     {
@@ -1132,6 +1161,20 @@ shaders: [
         constantArgs: {
         }
     },
+    {
+        name: "slider_shader",
+        file: "shaders/slider.glsl",
+        constantArgs: {
+            firstColor: color("474340"),
+            secondColor: color("2d2c2a")
+        }
+    },
+    {
+        name: "test_shader",
+        file: "shaders/test.glsl",
+        constantArgs: {
+        }
+    },
 ],
 
 animations: [
@@ -1198,7 +1241,7 @@ ninepatches: [
         bottom: 24,
         left: 24,
         right: 24,
-        scale: 0.1
+        scale: 0.2
     },
     {
         name: "forty_white_rounded",

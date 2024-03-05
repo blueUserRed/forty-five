@@ -1,0 +1,7 @@
+
+version: int,
+masterVolume: float,
+musicVolume: float,
+soundEffectsVolume: float,
+enableScreenShake: boolean,
+startScreen: string,

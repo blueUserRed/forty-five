@@ -299,7 +299,7 @@ class RotationStyleProperty<T>(
     0f,
     Float::class,
     false,
-    true,
+    false,
     screen
 ) where T : Actor, T : StyledActor {
 
@@ -796,7 +796,7 @@ class OffsetXStyleProperty<T>(
     target,
     0f,
     Float::class,
-    true,
+    false,
     false,
     screen
 ) where T : StyledActor, T : OffSettable, T : Actor {
@@ -816,7 +816,7 @@ class OffsetYStyleProperty<T>(
     target,
     0f,
     Float::class,
-    true,
+    false,
     false,
     screen
 ) where T : StyledActor, T : OffSettable, T : Actor {

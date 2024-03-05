@@ -318,6 +318,31 @@ $Widget {
        ...widgetSharedKeys
     }
 
+    $Slider {
+        sliderBackground: string,
+        handleRadius: float,
+        handleColor: Color,
+        sliderHeight: float,
+        max: float,
+        min: float,
+        bindTo?: string,
+        ...widgetSharedKeys
+    }
+
+    $SettingsWidget {
+        ...widgetSharedKeys
+    }
+
+    $Selector {
+        font: string,
+        fontScale: float,
+        arrowTexture: string,
+        arrowWidth: float,
+        arrowHeight: float,
+        bindTo: string,
+        ...widgetSharedKeys
+    }
+
 }
 
 

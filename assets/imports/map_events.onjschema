@@ -36,6 +36,7 @@ $MapEvent {
     $NPCMapEvent {
         npc: string,
         canOnlyBeStartedOnce: boolean,
+        onlyIfPlayerDoesntHaveCard?: string,
         ...mapEventStandardConfig
     }
 

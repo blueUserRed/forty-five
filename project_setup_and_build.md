@@ -5,7 +5,9 @@
 - Open the repository as a project in IntelliJ
 - IntelliJ will set up Gradle, create Indices, etc. which will take a while
 - open a terminal, cd into the onj directory, and clone the following repository: https://github.com/blueUserRed/Onj.git
+- create the ``assets/textures/packed`` directory
 - execute the texturePacker gradle task
+- download the current release of .Forty-Five and copy the contents of the ``large_assets`` directory to `assets/large_assets`
 - start the game
 
 ## Project Build (to .jar)
@@ -37,3 +39,26 @@
 - zip the temporary directory
 - rename it to "forty-five-" followed by the version tag
 - upload
+
+## Project Build (to .exe)
+- follow the previous instructions to create a jar file.
+- Download launch4j
+- Create a stripped down jre for the game using the following command:
+````powershell
+jlink `
+  --strip-debug `
+  --no-man-pages `
+  --no-header-files `
+  --output /jre `
+  --add-modules java.base,java.datatransfer,java.desktop,java.instrument,java.logging,java.prefs,java.xml,jdk.incubator.foreign,jdk.unsupported
+````
+- The needed modules might change when new functionality is added. The ``jdeps`` utility that is packed with the jdk
+  can be used to analyze the dependencies of an executable jar.
+- Copy the created jre to a folder named ``jre`` in the same directory as the jar.
+- open the launch4j GUI
+- set the path to the .jar file and the output path
+- Optionally, configure a path to an icon
+- Under the JRE-Tab, set "JRE paths" to "./jre"
+- click the build button
+- delete the jar
+- zip and upload

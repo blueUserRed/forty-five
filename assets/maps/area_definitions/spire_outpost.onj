@@ -1,3 +1,4 @@
+version: 0,
 startNode: 0,
 endNode: 2,
 biome: "bewitched_forest",

@@ -332,13 +332,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         else -> { }
     }
 
-    private var updateCount = 0 // TODO: this is stupid
-
     @MainThreadOnly
     override fun update() {
-        if (updateCount < 6) curScreen.invalidateEverything() // TODO: this is stupid
-        updateCount++
-
         encounterModifiers.forEach { it.update(this) }
 
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
@@ -665,13 +660,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     popupEvent = null
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
-                include(checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)))
+                includeLater (
+                    { checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)) },
+                    { parryCard.shouldRemoveAfterShot(this@GameController) }
+                )
                 action {
                     curScreen.leaveState(showEnemyAttackPopupScreenState)
                     gameRenderPipeline.stopParryEffect()
                     if (parryCard.shouldRemoveAfterShot(this@GameController)) {
+                        if (!parryCard.isUndead) {
+                            SoundPlayer.situation("orb_anim_playing", curScreen)
+                            gameRenderPipeline.addOrbAnimation(cardOrbAnim(parryCard.actor))
+                        }
                         revolver.removeCard(parryCard)
-                        cardStack.add(parryCard)
+                        if (parryCard.isUndead) {
+                            cardHand.addCard(parryCard)
+                        } else {
+                            cardStack.add(parryCard)
+                        }
                     }
                     parryCard.afterShot(this@GameController)
                 }
@@ -680,7 +686,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     action {
                         SoundPlayer.situation("enemy_attack", curScreen)
                     }
-                    include(damagePlayerTimeline(remainingDamage!!))
+                    includeLater(
+                        { damagePlayerTimeline(remainingDamage!!) },
+                        { true }
+                    )
                 }
             } },
             { popupEvent is ParryEvent && parryCard != null }
@@ -807,6 +816,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardToShoot?.let {
                 val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true)
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
+                includeLater(
+                    { checkEffectsSingleCard(Trigger.ON_LEAVE, cardToShoot, triggerInformation) },
+                    { cardToShoot.shouldRemoveAfterShot(this@GameController) }
+                )
                 action {
                     if (cardToShoot.shouldRemoveAfterShot(this@GameController)) {
                         if (!cardToShoot.isUndead) {
@@ -838,7 +851,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     private fun cardOrbAnim(actor: Actor) = GraphicsConfig.orbAnimation(
         actor.localToStageCoordinates(Vector2(0f, 0f)) +
                 Vector2(actor.width / 2, actor.height / 2),
-        curScreen.stageCoordsOfActor("deck_icon"),
+        curScreen.centeredStageCoordsOfActor("deck_icon"),
         false
     )
 
@@ -982,7 +995,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             newDamage = playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
         }
         includeLater(
-            { GraphicsConfig.damageOverlay(curScreen).wrap() },
+            { Timeline.timeline {
+                action {
+                    dispatchAnimTimeline(gameRenderPipeline.getScreenShakeTimeline())
+                }
+                includeAction(GraphicsConfig.damageOverlay(curScreen))
+            } },
             { !triggeredByStatusEffect && newDamage!! > 0 }
         )
         action {
@@ -998,7 +1016,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         )
         includeLater(
             { executePlayerStatusEffectsAfterDamage(newDamage!!) },
-            { !triggeredByStatusEffect }
+            { !triggeredByStatusEffect && newDamage!! > 0}
         )
     }
 
@@ -1211,7 +1229,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    private fun stageCoordsOfReservesIcon(): Vector2 = curScreen.stageCoordsOfActor("reserves_icon")
+    private fun stageCoordsOfReservesIcon(): Vector2 = curScreen.centeredStageCoordsOfActor("reserves_icon")
 
     override fun end() {
         createdCards.forEach { it.dispose() }
@@ -1247,8 +1265,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             delayUntil { popupEvent != null }
             action {
-                val start = curScreen.stageCoordsOfActor("win_screen_cash_symbol")
-                val end = curScreen.stageCoordsOfActor("cash_symbol")
+                val start = curScreen.centeredStageCoordsOfActor("win_screen_cash_symbol")
+                val end = curScreen.centeredStageCoordsOfActor("cash_symbol")
                 if (money > 0) {
                     SoundPlayer.situation("orb_anim_playing", curScreen)
                     gameRenderPipeline.addOrbAnimation(RenderPipeline.OrbAnimation(
@@ -1296,7 +1314,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             FortyFiveLogger.debug(logTag, "player lost")
             playerLost = true
         }
-        include(gameRenderPipeline.getFadeToBlackTimeline(2000))
+        include(gameRenderPipeline.getFadeToBlackTimeline(2000, stayBlack = true))
+        delay(500)
         action {
             mainTimeline.stopTimeline()
             animTimelines.forEach(Timeline::stopTimeline)

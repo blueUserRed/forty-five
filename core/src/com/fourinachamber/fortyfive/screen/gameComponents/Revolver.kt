@@ -208,8 +208,8 @@ class Revolver(
     fun getCardOnShotTriggerPosition() = Vector2(slots[4].x, slots[4].y + slots[0].height * 2)
 
     override fun layout() {
-        super.layout()
         updateSlotsAndCards()
+        super.layout()
     }
 
     private fun updateSlotsAndCards() {
@@ -218,8 +218,8 @@ class Revolver(
         val size = 2 * radius + slotSize + radiusExtension
         prefWidth = size
         prefHeight = size
-        width = prefWidth
-        height = prefHeight
+//        width = prefWidth
+//        height = prefHeight
         val basePos = Vector2(width / 2, height / 2)
         for (i in slots.indices) {
             val slot = slots[i]

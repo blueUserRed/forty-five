@@ -54,8 +54,11 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
-//        changeToInitialScreen()
-        changeToScreen("screens/intro_screen.onj")
+        when (UserPrefs.startScreen) {
+            UserPrefs.StartScreen.INTRO -> changeToScreen("screens/intro_screen.onj")
+            UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
+            UserPrefs.StartScreen.MAP -> changeToInitialScreen()
+        }
     }
 
     fun changeToInitialScreen() {
@@ -132,6 +135,7 @@ object FortyFive : Game() {
         PermaSaveState.reset()
         SaveState.reset()
         MapManager.resetAllSync()
+        UserPrefs.reset()
         newRun(false)
     }
 
@@ -164,6 +168,7 @@ object FortyFive : Game() {
         serviceThread.start()
         serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
+        UserPrefs.read()
 
 //        resetAll()
 //        newRun()
@@ -196,6 +201,7 @@ object FortyFive : Game() {
         MapManager.write()
         PermaSaveState.write()
         SaveState.write()
+        UserPrefs.write()
         currentScreen?.dispose()
         serviceThread.close()
         ResourceManager.trimPrepared()

@@ -167,7 +167,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
     companion object {
 
-        private val fontShader: ShaderProgram by lazy {
+        val fontShader: ShaderProgram by lazy {
             val shader = ShaderProgram(
                 Gdx.files.internal("shaders/font/font.vert"),
                 Gdx.files.internal("shaders/font/font.frag")

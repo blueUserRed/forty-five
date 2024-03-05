@@ -26,13 +26,11 @@ import com.fourinachamber.fortyfive.map.statusbar.Backpack
 import com.fourinachamber.fortyfive.map.statusbar.StatusbarWidget
 import com.fourinachamber.fortyfive.map.worldView.WorldViewWidget
 import com.fourinachamber.fortyfive.onjNamespaces.OnjColor
+import com.fourinachamber.fortyfive.onjNamespaces.OnjStyleInstruction
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.gameComponents.*
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomInputField
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
-import com.fourinachamber.fortyfive.screen.general.customActor.DisplayDetailsOnHoverActor
-import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
+import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
@@ -588,6 +586,29 @@ class ScreenBuilder(val file: FileHandle) {
             initFlexBox(this, widgetOnj, screen)
         }
 
+        "Slider" -> Slider(
+            widgetOnj.get<String>("sliderBackground"),
+            widgetOnj.get<Double>("handleRadius").toFloat(),
+            widgetOnj.get<Color>("handleColor"),
+            widgetOnj.get<Double>("sliderHeight").toFloat(),
+            widgetOnj.get<Double>("max").toFloat(),
+            widgetOnj.get<Double>("min").toFloat(),
+            widgetOnj.getOr<String?>("bindTo", null),
+            screen
+        )
+
+        "SettingsWidget" -> SettingsWidget(screen)
+
+        "Selector" -> Selector(
+            fontOrError(widgetOnj.get<String>("font"), screen),
+            widgetOnj.get<Double>("fontScale").toFloat(),
+            widgetOnj.get<String>("arrowTexture"),
+            widgetOnj.get<Double>("arrowWidth").toFloat(),
+            widgetOnj.get<Double>("arrowHeight").toFloat(),
+            widgetOnj.get<String>("bindTo"),
+            screen,
+        )
+
         else -> throw RuntimeException("Unknown widget name ${widgetOnj.name}")
 
     }.let { actor -> applyWidgetKeysFromOnj(actor, widgetOnj, parent, screen) }
@@ -633,21 +654,20 @@ class ScreenBuilder(val file: FileHandle) {
                     .filter { !it.key.startsWith("style_") }
                     .forEach { (key, value) ->
                         val data = getDataForStyle(value, key)
-                        val dataClass = data::class
-                        val instruction = if (duration == null) {
-                            StyleInstruction(data, priority, condition, dataClass)
-                        } else {
-                            AnimatedStyleInstruction(
+                        val instruction: StyleInstruction<Any> = when {
+                            duration != null -> AnimatedStyleInstruction(
                                 data,
                                 priority,
                                 condition,
-                                dataClass,
+                                data::class,
                                 duration!!,
                                 interpolation!!,
                                 delay!!
                             )
+                            data is OnjStyleInstruction -> data.value(priority, condition)
+                            else -> StyleInstruction(data, priority, condition, data::class)
                         }
-                        styleManager.addInstruction(key, instruction, dataClass)
+                        styleManager.addInstruction(key, instruction, instruction.dataTypeClass)
                     }
             }
         }
@@ -672,6 +692,7 @@ class ScreenBuilder(val file: FileHandle) {
         var data = onjValue.value ?: throw RuntimeException("style instruction $keyName cannot be null")
         if (data is Double) data = data.toFloat()
         if (data is Long) data = data.toInt()
+        if (onjValue is OnjStyleInstruction) return onjValue
         return data
     }
 

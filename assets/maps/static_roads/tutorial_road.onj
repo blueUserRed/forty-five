@@ -1,3 +1,4 @@
+version: 0,
 tutorialText: [
     {
         text: "The player icon shows where on the map you are.",

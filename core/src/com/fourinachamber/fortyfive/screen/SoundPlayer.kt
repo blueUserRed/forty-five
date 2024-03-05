@@ -31,9 +31,18 @@ object SoundPlayer {
     private var transitionStartTime: Long = -1L
     private var transitionDuration: Int = 0
 
-//    var musicVolume: Float = 0f
+    var masterVolume: Float = 1f
+        set(value) {
+            field = value
+            currentMusic?.volume = masterVolume * musicVolume
+        }
+
     var musicVolume: Float = 1f
-//    var soundEffectVolume: Float = 0f
+        set(value) {
+            field = value
+            currentMusic?.volume = masterVolume * musicVolume
+        }
+
     var soundEffectVolume: Float = 1f
 
     fun init() {
@@ -97,7 +106,7 @@ object SoundPlayer {
         currentMusicHandle = musicHandle
         music.isLooping = true
         music.play()
-        music.volume = musicVolume
+        music.volume = musicVolume * masterVolume
     }
 
     fun transitionToMusic(musicHandle: ResourceHandle?, duration: Int, screen: OnjScreen) {
@@ -118,7 +127,7 @@ object SoundPlayer {
         currentMusic = transitionToMusic
         currentMusicHandle = transitionToMusicHandle
         currentMusic?.play()
-        currentMusic?.volume = musicVolume
+        currentMusic?.volume = musicVolume * masterVolume
         transitionProgress = -1f
     }
 
@@ -128,12 +137,12 @@ object SoundPlayer {
             return
         }
         val sound = ResourceManager.get<Sound>(screen, situation.sound ?: return)
-        sound.play(situation.volume * soundEffectVolume)
+        sound.play(situation.volume * soundEffectVolume * masterVolume)
     }
 
     fun playSoundFull(soundHandle: ResourceHandle, screen: OnjScreen) {
         val sound = ResourceManager.get<Sound>(screen, soundHandle)
-        sound.play(soundEffectVolume)
+        sound.play(soundEffectVolume * masterVolume)
     }
 
     fun update(screen: OnjScreen, playAmbientSounds: Boolean) {
@@ -146,8 +155,8 @@ object SoundPlayer {
             return
         }
         transitionProgress = (finishTime - now).toFloat() / transitionDuration.toFloat()
-        currentMusic?.volume = transitionProgress * musicVolume
-        transitionToMusic?.volume = (1f - transitionProgress) * musicVolume
+        currentMusic?.volume = transitionProgress * musicVolume * masterVolume
+        transitionToMusic?.volume = (1f - transitionProgress) * musicVolume * masterVolume
     }
 
     private fun updateAmbientSounds(screen: OnjScreen) {
@@ -161,7 +170,7 @@ object SoundPlayer {
             if (nextPlayTime > now) return@forEach
             val sound = ResourceManager.get<Sound>(screen, ambient.sound)
             val id = sound.play()
-            sound.setPan(id, (-1f..1f).random(), ambient.volume * soundEffectVolume)
+            sound.setPan(id, (-1f..1f).random(), ambient.volume * soundEffectVolume * masterVolume)
             ambientSounds[ambient] = now + ambient.delay.random()
         }
     }
@@ -175,7 +184,7 @@ object SoundPlayer {
     fun playMusicOnce(musicHandle: ResourceHandle, screen: OnjScreen) {
         val music = ResourceManager.get<Music>(screen, musicHandle)
         music.play()
-        music.volume = musicVolume
+        music.volume = musicVolume * masterVolume
     }
 
     private data class AmbientSound(

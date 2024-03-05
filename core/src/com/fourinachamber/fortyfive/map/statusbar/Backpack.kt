@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -88,7 +89,7 @@ class Backpack(
             CustomWarningParent.getWarning(screen).addWarning(
                 screen,
                 "Not enough cards",
-                "The minimum deck size is ${SaveState.Deck.minDeckSize}. Since you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
+                "The minimum deck size is ${SaveState.Deck.minDeckSize}. Because you only have ${SaveState.curDeck.cardPositions.size} cards in your Deck, you can't remove a card.",
                 CustomWarningParent.Severity.MIDDLE
             )
         }
@@ -411,6 +412,12 @@ class Backpack(
 
 
     override fun display(): Timeline {
+        if (FortyFive.currentGame != null) CustomWarningParent.getWarning(screen).addWarning(
+            screen,
+            "Editing in Encounter",
+            "Your changes will only take effect after you completed the encounter",
+            CustomWarningParent.Severity.LOW,
+        )
         checkCurCards()
         changeDeckTo(SaveState.curDeck.id, true)
         return Timeline.timeline {
