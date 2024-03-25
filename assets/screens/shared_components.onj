@@ -60,7 +60,7 @@ var settingsBox = $Box {
             justifyContent: justify.flexEnd,
         }
     ],
-    zIndex: 2,
+    zIndex: 500,
 } children [
 
     $Box {
