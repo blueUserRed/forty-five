@@ -1,7 +1,43 @@
 
 ~~~section vertex
 
-%include shaders/includes/default_vertex.glsl
+attribute vec4 a_position;
+attribute vec4 a_color;
+attribute vec2 a_texCoord0;
+uniform mat4 u_projTrans;
+varying vec4 v_color;
+varying vec2 v_texCoords;
+
+%include shaders/includes/noise_utils.glsl
+
+void main() {
+    vec4 pos = u_projTrans * a_position;
+    switch (gl_VertexID) {
+        case 0:
+            v_color = vec4(0.0, 0.0, 1.0, 1.0);
+            break;
+        case 1:
+            v_color = vec4(0.0, 1.0, 0.0, 1.0);
+            break;
+        case 2:
+            v_color = vec4(1.0, 0.0, 0.0, 1.0);
+            break;
+//        case 3:
+//            v_color = vec4(1.0, 0.0, 0.0, 1.0);
+//            break;
+//        case 4:
+//            v_color = vec4(1.0, 0.0, 1.0, 1.0);
+//            break;
+        default:
+            v_color = vec4(0.0, 0.0, 0.0, 1.0);
+            break;
+    }
+//    v_color = vec4(pos.x, pos.y, 0.0, 1.0);
+//    v_color = a_color;
+    v_color.a = v_color.a * (255.0/254.0);
+    v_texCoords = a_texCoord0;
+    gl_Position =  pos;
+}
 
 ~~~section fragment
 
@@ -22,14 +58,23 @@ uniform sampler2D u_texture;
 %include shaders/includes/noise_utils.glsl
 
 void main() {
-    vec2 texCoords = v_texCoords;
-//    float noise = snoise(texCoords * 8.0 + vec2(0.0, u_time * 2.0));
-//    texCoords += vec2(0.0, noise * 0.007);
-    float noiseX = random(v_texCoords + vec2(u_time));
-    float noiseY = random(v_texCoords - vec2(u_time));
-    texCoords += vec2(noiseX * 0.003, noiseY * 0.003);
-    gl_FragColor = v_color * texture2D(u_texture, texCoords);
+    float x = v_color.r + v_color.g + v_color.b;
+    if (x > 0.999 && x < 1.001) {
+        gl_FragColor = v_color;
+    } else {
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
 }
+
+//void main() {
+//    vec2 texCoords = v_texCoords;
+////    float noise = snoise(texCoords * 8.0 + vec2(0.0, u_time * 2.0));
+////    texCoords += vec2(0.0, noise * 0.007);
+//    float noiseX = random(v_texCoords + vec2(u_time));
+//    float noiseY = random(v_texCoords - vec2(u_time));
+//    texCoords += vec2(noiseX * 0.003, noiseY * 0.003);
+//    gl_FragColor = v_color * texture2D(u_texture, texCoords);
+//}
 
 //float fbm2D(vec2 coords) {
 //    float amplitude = 1.0;
