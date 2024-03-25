@@ -32,7 +32,15 @@ class BetterShaderPreProcessor(
 
     fun compile(code: Pair<String, String>): BetterShader {
         val shader = ShaderProgram(code.first, code.second)
-        if (shader.isCompiled) return BetterShader(shader, uniformsToBind)
+        if (shader.isCompiled) {
+            if (shader.log.isNotBlank()) {
+                FortyFiveLogger.warn(logTag, "compilation of shader ${fileHandle.name()} had warnings")
+                FortyFiveLogger.dump(LogLevel.MEDIUM, shader.log, "log")
+                FortyFiveLogger.dump(LogLevel.MEDIUM, code.first, "pre-processed vertex shader")
+                FortyFiveLogger.dump(LogLevel.MEDIUM, code.second, "pre-processed fragment shader")
+            }
+            return BetterShader(shader, uniformsToBind)
+        }
         FortyFiveLogger.severe(logTag, "compilation of shader ${fileHandle.name()} failed")
         FortyFiveLogger.dump(LogLevel.SEVERE, shader.log, "log")
         FortyFiveLogger.dump(LogLevel.SEVERE, code.first, "pre-processed vertex shader")

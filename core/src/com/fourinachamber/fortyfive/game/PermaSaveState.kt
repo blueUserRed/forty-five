@@ -39,6 +39,12 @@ object PermaSaveState {
             saveFileDirty = true
         }
 
+    var hasSeenInDevPopup: Boolean = false
+        set(value) {
+            field = value
+            saveFileDirty = true
+        }
+
     private var _visitedAreas: MutableSet<String> = mutableSetOf()
 
     val visitedAreas: Set<String>
@@ -92,6 +98,7 @@ object PermaSaveState {
         playerHasCompletedTutorial = obj.get<Boolean>("playerHasCompletedTutorial")
         collection = obj.get<OnjArray>("collection").value.map { it.value as String }
         playerFoughtMultipleEnemies = obj.get<Boolean>("playerFoughtMultipleEnemies")
+        hasSeenInDevPopup = obj.getOr("hasSeenInDevPopup", false)
         _visitedAreas = obj.get<OnjArray>("visitedAreas").value.map { it.value as String }.toMutableSet()
 
         saveFileDirty = false
@@ -112,6 +119,7 @@ object PermaSaveState {
             "playerHasCompletedTutorial" with playerHasCompletedTutorial
             "visitedAreas" with _visitedAreas
             "playerFoughtMultipleEnemies" with playerFoughtMultipleEnemies
+            "hasSeenInDevPopup" with hasSeenInDevPopup
         }
         Gdx.files.local(saveFilePath).file().writeText(obj.toString())
         saveFileDirty = false

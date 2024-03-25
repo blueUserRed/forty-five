@@ -204,6 +204,101 @@ var confirmationPopup = $Box {
 
 ];
 
+var inDevelopmentPopup = $Box {
+    zIndex: 100,
+    styles: [
+        {
+            style_priority: 1,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            positionType: positionType.absolute,
+            alignItems: align.center,
+            justifyContent: justify.center,
+            detached: true,
+        },
+        {
+            style_priority: 2,
+            style_condition: state("show_in_development_reminder"),
+            detached: false,
+        }
+    ],
+    touchable: "enabled"
+} children [
+
+    $Box {
+        styles: [
+            {
+                width: 1_100#points,
+                aspectRatio: 698.0 / 390.0,
+                flexDirection: flexDirection.column,
+                alignItems: align.center,
+                justifyContent: justify.center,
+                background: "common_popup_background_black"
+            }
+        ],
+    } children [
+
+        $TemplateLabel {
+            styles: [
+                {
+                    width: 500#points
+                },
+            ],
+            font: "roadgeek",
+            fontScale: 0.8,
+            color: color.forty_white,
+            wrap: true,
+            align: "center",
+            template: "Reminder:\nThis game is still in development and some parts are not finished yet. However, we will continue developing and hopefully provide regular updates.\nAlso, press 'f' or 'f11' to exit fullscreen.",
+        },
+
+        $Box {
+            styles: [
+                {
+                    flexDirection: flexDirection.row,
+                    marginTop: 30#points,
+                }
+            ]
+        } children [
+            $Box {
+                styles: [
+                    {
+                        style_priority: 1,
+                        background: "common_button_default",
+                        width: 150#points,
+                        height: 60#points,
+                        marginLeft: 10#points,
+                        alignItems: align.center,
+                        justifyContent: justify.center
+                    },
+                    {
+                        style_priority: 2,
+                        style_condition: hover(),
+                        background: "common_button_hover",
+                    },
+                ]
+            } children [
+                $Label {
+                    font: "roadgeek",
+                    text: "Continue",
+                    fontScale: 1.0,
+                    color: color.white,
+                    behaviours: [
+                        sharedComponents.buttonSoundBehaviour,
+                        sharedComponents.buttonCursorBehaviour,
+                        $CatchEventAndEmitBehaviour {
+                            catch: "ButtonClickEvent",
+                            emit: "PopupConfirmationEvent"
+                        }
+                    ]
+                }
+            ],
+        ]
+
+    ]
+
+];
+
 root: $Box {
 
     styles: [
@@ -215,6 +310,7 @@ root: $Box {
 
 } children [
 
+    inDevelopmentPopup,
     confirmationPopup,
 
     $Box {

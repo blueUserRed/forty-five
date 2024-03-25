@@ -100,6 +100,7 @@ open class RenderPipeline(
     init {
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
+//        postPreprocessingSteps.add(shaderPostProcessingStep(ResourceManager.get(screen, "test_shader")))
     }
 
     fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.screen.general.*
@@ -28,6 +29,16 @@ class TitleScreenController : ScreenController() {
             "title_screen.startButtonText",
             if (SaveState.playerCompletedFirstTutorialEncounter) "Continue" else "Start your Journey"
         )
+        if (!PermaSaveState.hasSeenInDevPopup) timeline.appendAction(Timeline.timeline {
+            action {
+                screen.enterState(showInDevelopmentReminder)
+            }
+            delayUntil { isConfirmed }
+            action {
+                screen.leaveState(showInDevelopmentReminder)
+                PermaSaveState.hasSeenInDevPopup = true
+            }
+        }.asAction())
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {
@@ -119,6 +130,7 @@ class TitleScreenController : ScreenController() {
 
     companion object {
         const val showConfirmationPopupScreenState = "show_confirmation_popup"
+        const val showInDevelopmentReminder = "show_in_development_reminder"
     }
 
 }

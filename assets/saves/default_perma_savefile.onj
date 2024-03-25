@@ -10,4 +10,5 @@ collection: [
 visitedAreas: [
 ],
 playerHasCompletedTutorial: false,
-playerFoughtMultipleEnemies: false
+playerFoughtMultipleEnemies: false,
+hasSeenInDevPopup: false
