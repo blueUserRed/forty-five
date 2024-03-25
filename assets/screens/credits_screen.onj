@@ -365,7 +365,7 @@ root: $Box {
         },
         $Label {
             font: "roadgeek",
-            text: "Nils Hubmann & Nils Jandrasits",
+            text: "Nils Jandrasits & Nils Hubmann",
             isDistanceField: true,
             fontScale: 1.4,
             color: color.forty_white,
