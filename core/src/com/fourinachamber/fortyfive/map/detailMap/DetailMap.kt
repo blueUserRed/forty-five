@@ -108,6 +108,8 @@ data class DetailMap(
             .toOnjArray()
     }
 
+    override fun toString(): String = "Map(name = $name)"
+
     class InvalidMapFileException : RuntimeException()
 
     companion object {
