@@ -21,12 +21,9 @@ import java.lang.Float.max
 class MapScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var screen: OnjScreen
-    private val timeline: Timeline = Timeline()
 
     private var tutorialInfoActorName: String = onj.get<String>("tutorialInfoActor")
     private var mapWidgetName: String = onj.get<String>("mapWidgetName")
-
-    private var popupEvent: Event? = null
 
     private var currentlyShowingTutorialText: Boolean = false
     private var tutorialTextParts: MutableList<MapTutorialTextPart> = mutableListOf()
@@ -35,8 +32,7 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
-        timeline.startTimeline()
-        doCardExtraction()
+        PermaSaveState.visitedNewArea(MapManager.currentDetailMap.name)
         tutorialInfoActor = screen.namedActorOrError(tutorialInfoActorName) as? TutorialInfoActor
             ?: throw RuntimeException("actor named $tutorialInfoActorName must be of type TutorialInfoActor")
         mapWidget = screen.namedActorOrError(mapWidgetName) as? DetailMapWidget
@@ -44,60 +40,12 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
     }
 
-    private fun doCardExtraction() {
-        val map = MapManager.currentDetailMap
-        if (!map.isArea) return
-        if (PermaSaveState.hasVisitedArea(map.name)) return
-        PermaSaveState.visitedNewArea(map.name)
-        val cardsBeforeExtraction = PermaSaveState.collection.toMutableList()
-        SaveState.extract()
-        val cardsAfterExtraction = PermaSaveState.collection.toMutableList()
-        cardsBeforeExtraction.forEach { cardsAfterExtraction.remove(it) }
-        initCards(screen, cardsAfterExtraction)
-        timeline.appendAction(Timeline.timeline {
-            action {
-                screen.enterState(showExtractionPopupScreenState)
-//                (screen.namedActorOrError("backpackActor") as Backpack).reloadDeck()
-            }
-            delayUntil { popupEvent != null }
-            action {
-                popupEvent = null
-                screen.leaveState(showExtractionPopupScreenState)
-            }
-        }.asAction())
-    }
-
-    private fun initCards(onjScreen: OnjScreen, cards: List<String>) {
-        val prototypes = RandomCardSelection.allCardPrototypes
-        val cardsContainer = onjScreen.namedActorOrError("extraction_cards_parent") as? CustomFlexBox
-                ?: throw RuntimeException("actor named extraction_cards_parent must be a CustomFlexBox")
-//        Array(40) { "incendiaryBullet" }.forEach { cardName ->
-        cards.forEach { cardName ->
-            val card = prototypes
-                .find { it.name == cardName }
-                ?.create(onjScreen, isSaved = true)
-                ?: throw RuntimeException("unknown card: $cardName")
-            onjScreen.screenBuilder.addDataToWidgetFromTemplate(
-                "cardTemplate",
-                mapOf(),
-                cardsContainer,
-                onjScreen,
-                card.actor
-            )
-            onjScreen.addDisposable(card)
-        }
-    }
-
     override fun onUnhandledEvent(event: Event) = when (event) {
-        is PopupConfirmationEvent -> {
-            popupEvent = event
-        }
         is TutorialConfirmedEvent -> hideTutorialPopupActor()
         else -> {}
     }
 
     override fun update() {
-        timeline.updateTimeline()
         updateTutorialText()
     }
 
@@ -172,7 +120,6 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
 
     companion object {
 
-        const val showExtractionPopupScreenState = "show_extraction_popup"
         const val showTutorialActorScreenState = "showTutorial"
 
     }
