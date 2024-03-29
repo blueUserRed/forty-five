@@ -1187,6 +1187,26 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 50,
     },
+    {
+        name: "vengeanceBullet",
+        title: "Vengeance Bullet",
+        flavourText: "\"When I get my hands on you Jake… You’ll pay for what you did to my people. I swear to god the Rivers will fill with blood to balance out the tears the Onathahan cried that Night.\" - Message given to Jake",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a bullet is destroyed:$trigger$\nDeal x dmg to the enemy, where x is the dmg value of the destroyed bullet times 2",
+        baseDamage: 10,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            damageDirect("any card destroyed", value.sourceCardDamage * 2, false)
+        ],
+        forceLoadCards: [],
+        dark: true,
+        cost: 3,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 70,
+    },
 
 ],
 
