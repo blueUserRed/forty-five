@@ -17,6 +17,7 @@ import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
 import java.io.File
+import kotlin.math.log
 
 object MapManager {
 
@@ -44,9 +45,12 @@ object MapManager {
         private set
 
     var currentMapNode: MapNode
-        get() = currentDetailMap.uniqueNodes.find { it.index == SaveState.currentNode } ?: throw RuntimeException(
-            "invalid node index ${SaveState.currentNode} in map ${currentDetailMap.name}"
-        )
+        get() = currentDetailMap.uniqueNodes.find { it.index == SaveState.currentNode } ?: run {
+            FortyFiveLogger.warn(logTag, "Player was on node ${SaveState.currentNode} in map $currentDetailMap, which doesn't exist. Reset player to node 0.")
+            SaveState.currentNode = 0
+            SaveState.lastNode = null
+            currentDetailMap.uniqueNodes[0]
+        }
         set(value) {
             SaveState.currentNode = value.index
         }
