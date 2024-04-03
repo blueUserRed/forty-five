@@ -1043,8 +1043,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.onDestroy()
             FortyFiveLogger.debug(logTag, "destroyed card: $card")
         }
-        include(checkEffectsSingleCard(Trigger.ON_DESTROY, card))
-        include(checkEffectsActiveCards(Trigger.ON_ANY_CARD_DESTROY))
+        val triggerInformation = TriggerInformation(sourceCard = card)
+        include(checkEffectsSingleCard(Trigger.ON_DESTROY, card, triggerInformation))
+        include(checkEffectsActiveCards(Trigger.ON_ANY_CARD_DESTROY, triggerInformation))
     }
 
     fun bounceBullet(card: Card): Timeline = Timeline.timeline {
