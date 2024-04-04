@@ -2,10 +2,11 @@ package com.fourinachamber.fortyfive.map.detailMap
 
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.fourinachamber.fortyfive.utils.FortyFiveLogger
-import com.fourinachamber.fortyfive.utils.random
-import com.fourinachamber.fortyfive.utils.repeatingSequenceOf
+import com.fourinachamber.fortyfive.utils.*
 import onj.builder.buildOnjObject
+import onj.value.OnjArray
+import onj.value.OnjNamedObject
+import onj.value.OnjObject
 import kotlin.random.Random
 
 class NewMapGenerator {
@@ -21,56 +22,8 @@ class NewMapGenerator {
     private val nodeColliders: MutableList<Rectangle> = mutableListOf()
     private val decorationColliders: MutableList<Rectangle> = mutableListOf()
 
-    fun generate(name: String): DetailMap {
-
-        data = MapGeneratorData(
-            seed = 7892342308974093L,
-            roadLength = 400f,
-            exitNodeTexture = "map_node_exit",
-            mainLineNodes = 10,
-            altLinesPadding = 0..3,
-            altLinesOffset = 30f,
-            varianceX = 10f,
-            varianceY = 10f,
-            startArea = "aqua_balle",
-            endArea = "tabu_letter_outpost",
-            mainEvent = "map_node_fight" to { EncounterMapEvent(buildOnjObject {
-                "encounterIndex" with 0
-                "currentlyBlocks" with true
-                "canBeStarted" with true
-                "isCompleted" with false
-                "distanceToEnd" with 0
-            }) },
-            additionalEvents = listOf(
-                Triple(2..3, "map_node_heal") { HealOrMaxHPMapEvent(buildOnjObject {
-                    "encounterIndex" with 0
-                    "currentlyBlocks" with true
-                    "canBeStarted" with true
-                    "isCompleted" with false
-                    "distanceToEnd" with 0
-                    "seed" with 0
-                    "healRange" with arrayOf(1, 2)
-                    "maxHPRange" with arrayOf(1, 2)
-                }) }
-            ),
-            nodeProtectedArea = 10f,
-            decorations = listOf(
-                MapGeneratorDecoration(
-                    DecorationDistribution::random,
-                    "map_decoration_wasteland_cactus_1",
-                    baseWidth = 2.0f,
-                    baseHeight = 4.0f,
-                    scale = 2.75f..3.25f,
-                    density = 0.005f,
-                    generateDecorationCollisions = true,
-                    checkDecorationCollisions = true,
-                    onlyCheckCollisionsAtSpawnPoints = true,
-                    checkNodeCollisions = true,
-                    sortByY = true
-                )
-            )
-        )
-
+    fun generate(name: String, data: MapGeneratorData): DetailMap {
+        this.data = data
         this.name = name
         random = Random(data.seed)
         nodeColliders.clear()
@@ -81,11 +34,26 @@ class NewMapGenerator {
         startNode.imageName = data.startArea
         startNode.imagePos = MapNode.ImagePosition.LEFT
         startNode.nodeTexture = data.exitNodeTexture
+        val startSignBounds = Rectangle(
+            -data.locationSignProtectedAreaWidth,
+            -data.locationSignProtectedAreaHeight / 2,
+            data.locationSignProtectedAreaWidth,
+            data.locationSignProtectedAreaHeight,
+        )
+        nodeColliders.add(startSignBounds)
+
         val endNode = newNode(x = data.roadLength, y = 0f)
         endNode.event = EnterMapMapEvent(data.endArea)
         endNode.imageName = data.endArea
         endNode.imagePos = MapNode.ImagePosition.RIGHT
         endNode.nodeTexture = data.exitNodeTexture
+        val endSignBounds = Rectangle(
+            data.roadLength,
+            -data.locationSignProtectedAreaHeight / 2,
+            data.locationSignProtectedAreaWidth,
+            data.locationSignProtectedAreaHeight,
+        )
+        nodeColliders.add(endSignBounds)
 
         val mainLine = Line(startNode, endNode, data.mainLineNodes, 0f)
         mainLine.generate()
@@ -97,7 +65,12 @@ class NewMapGenerator {
         val maxX = allNodes.maxOf { it.x }
         val minY = allNodes.minOf { it.y }
         val maxY = allNodes.maxOf { it.y }
-        bounds = Rectangle(minX, minY, maxX - minX, maxY - minY)
+        bounds = Rectangle(
+            minX - data.horizontalExtension,
+            minY - data.verticalExtension,
+            maxX - minX + data.horizontalExtension * 2,
+            maxY - minY + data.verticalExtension * 2
+        )
 
         assignEvents(mainLine)
         assignEvents(addLine1)
@@ -105,16 +78,21 @@ class NewMapGenerator {
 
         startNode.build()
 
-        val decorations = data.decorations.map { generateDecoration(it) }
+        val (animatedDecorations, decorations) = data
+            .decorations
+            .splitInTwo { it.animated }
+
+        val genDecorations = decorations.map { generateDecoration(it) }
+        val genAnimatedDecorations = animatedDecorations.map { generateDecoration(it) }
 
         return DetailMap(
             name = name,
             startNode = startNode.asNode!!,
             endNode = endNode.asNode!!,
-            decorations = decorations,
-            animatedDecorations = mutableListOf(),
+            decorations = genDecorations,
+            animatedDecorations = genAnimatedDecorations,
             isArea = false,
-            biome = "wasteland",
+            biome = data.biome,
             progress = 0f..10f,
             tutorialText = mutableListOf(),
             scrollable = true,
@@ -128,7 +106,7 @@ class NewMapGenerator {
         val endPadding = data.altLinesPadding.random()
         val startNode = nodes[startPadding]
         val endNode = nodes[nodes.size - endPadding - 1]
-        val amountNodes = (nodes.size - endPadding) - startPadding
+        val amountNodes = (nodes.size - endPadding) - startPadding - 2
         val line = Line(
             startNode,
             endNode,
@@ -252,6 +230,7 @@ class NewMapGenerator {
 
     data class MapGeneratorData(
         val seed: Long,
+        val biome: String,
         val exitNodeTexture: String,
         val roadLength: Float,
         val mainLineNodes: Int,
@@ -261,11 +240,54 @@ class NewMapGenerator {
         val varianceY: Float,
         val startArea: String,
         val endArea: String,
+        val horizontalExtension: Float,
+        val verticalExtension: Float,
         val nodeProtectedArea: Float,
+        val locationSignProtectedAreaWidth: Float,
+        val locationSignProtectedAreaHeight: Float,
         val mainEvent: Pair<String, () -> MapEvent>,
         val additionalEvents: List<Triple<IntRange, String, () -> MapEvent>>,
         val decorations: List<MapGeneratorDecoration>,
-    )
+    ) {
+
+        companion object {
+
+            fun fromOnj(onj: OnjObject): MapGeneratorData = MapGeneratorData(
+                onj.get<Long>("seed"),
+                onj.get<String>("biome"),
+                onj.get<String>("exitNodeTexture"),
+                onj.get<Double>("roadLength").toFloat(),
+                onj.get<Long>("mainLineNodes").toInt(),
+                onj.get<OnjArray>("altLinesPadding").toIntRange(),
+                onj.get<Double>("altLinesOffset").toFloat(),
+                onj.get<Double>("varianceX").toFloat(),
+                onj.get<Double>("varianceY").toFloat(),
+                onj.get<String>("startArea"),
+                onj.get<String>("endArea"),
+                onj.get<Double>("horizontalExtension").toFloat(),
+                onj.get<Double>("verticalExtension").toFloat(),
+                onj.get<Double>("nodeProtectedArea").toFloat(),
+                onj.get<Double>("locationSignProtectedAreaWidth").toFloat(),
+                onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
+                onj.access<String>(".mainEvent.nodeTexture") to { MapEventFactory.getMapEvent(onj.access(".mainEvent.event")) },
+                onj
+                    .get<OnjArray>("additionalEvents")
+                    .value
+                    .map {
+                        it as OnjObject
+                        Triple(
+                            it.get<OnjArray>("offset").toIntRange(),
+                            it.get<String>("nodeTexture"),
+                            third = { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
+                        )
+                    },
+                onj
+                    .get<OnjArray>("decorations")
+                    .value
+                    .map { MapGeneratorDecoration.fromOnj(it as OnjObject) }
+            )
+        }
+    }
 
     data class MapGeneratorDecoration(
         val distribution: (bounds: Rectangle, random: Random) -> Sequence<Vector2>,
@@ -278,8 +300,28 @@ class NewMapGenerator {
         val generateDecorationCollisions: Boolean,
         val onlyCheckCollisionsAtSpawnPoints: Boolean,
         val scale: ClosedFloatingPointRange<Float>,
-        val sortByY: Boolean
-    )
+        val sortByY: Boolean,
+        val animated: Boolean,
+    ) {
+
+        companion object {
+
+            fun fromOnj(onj: OnjObject): MapGeneratorDecoration = MapGeneratorDecoration(
+                DecorationDistribution.fromOnj(onj.get<OnjNamedObject>("distribution")),
+                onj.get<String>("decoration"),
+                onj.get<Double>("baseWidth").toFloat(),
+                onj.get<Double>("baseHeight").toFloat(),
+                onj.get<Double>("density").toFloat(),
+                onj.get<Boolean>("checkNodeCollisions"),
+                onj.get<Boolean>("checkDecorationCollisions"),
+                onj.get<Boolean>("generateDecorationCollisions"),
+                onj.get<Boolean>("onlyCheckCollisionsAtSpawnPoints"),
+                onj.get<OnjArray>("scale").toFloatRange(),
+                onj.get<Boolean>("sortByY"),
+                onj.get<Boolean>("animated"),
+            )
+        }
+    }
 
     object DecorationDistribution {
 
@@ -287,6 +329,13 @@ class NewMapGenerator {
             (bounds.x..(bounds.x + bounds.width)).random(random),
             (bounds.y..(bounds.y + bounds.height)).random(random),
         ) }
+
+        fun fromOnj(
+            onj: OnjNamedObject
+        ): (bounds: Rectangle, random: Random) -> Sequence<Vector2> = when (val name = onj.name) {
+            "Random" -> ::random
+            else -> throw RuntimeException("unknown decoration distribution function $name")
+        }
     }
 
     companion object {
