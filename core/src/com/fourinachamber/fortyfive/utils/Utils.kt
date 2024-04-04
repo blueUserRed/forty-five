@@ -23,6 +23,7 @@ import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.value.OnjArray
 import onj.value.OnjString
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.experimental.ExperimentalTypeInference
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -59,6 +60,9 @@ fun <T> T.eitherLeft(): Either<T, Nothing> = Either.Left(this)
  * @see Either
  */
 fun <T> T.eitherRight(): Either<Nothing, T> = Either.Right(this)
+
+@OptIn(ExperimentalTypeInference::class)
+fun <T> repeatingSequenceOf(@BuilderInference value: () -> T): Sequence<T> = sequence { while (true) yield(value()) }
 
 /**
  * returns the x and y components of a vector3 as a Vector2

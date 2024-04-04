@@ -1,19 +1,32 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.random
+import com.fourinachamber.fortyfive.utils.repeatingSequenceOf
 import onj.builder.buildOnjObject
+import kotlin.random.Random
 
 class NewMapGenerator {
 
     private val allNodes: MutableList<MapNodeBuilder> = mutableListOf()
 
     private lateinit var data: MapGeneratorData
+    private lateinit var random: Random
+    private lateinit var name: String
+
+    private lateinit var bounds: Rectangle
+
+    private val nodeColliders: MutableList<Rectangle> = mutableListOf()
+    private val decorationColliders: MutableList<Rectangle> = mutableListOf()
 
     fun generate(name: String): DetailMap {
 
         data = MapGeneratorData(
+            seed = 7892342308974093L,
             roadLength = 400f,
+            exitNodeTexture = "map_node_exit",
             mainLineNodes = 10,
             altLinesPadding = 0..3,
             altLinesOffset = 30f,
@@ -39,17 +52,40 @@ class NewMapGenerator {
                     "healRange" with arrayOf(1, 2)
                     "maxHPRange" with arrayOf(1, 2)
                 }) }
+            ),
+            nodeProtectedArea = 10f,
+            decorations = listOf(
+                MapGeneratorDecoration(
+                    DecorationDistribution::random,
+                    "map_decoration_wasteland_cactus_1",
+                    baseWidth = 2.0f,
+                    baseHeight = 4.0f,
+                    scale = 2.75f..3.25f,
+                    density = 0.005f,
+                    generateDecorationCollisions = true,
+                    checkDecorationCollisions = true,
+                    onlyCheckCollisionsAtSpawnPoints = true,
+                    checkNodeCollisions = true,
+                    sortByY = true
+                )
             )
         )
+
+        this.name = name
+        random = Random(data.seed)
+        nodeColliders.clear()
+        decorationColliders.clear()
 
         val startNode = newNode(x = 0f, y = 0f)
         startNode.event = EnterMapMapEvent(data.startArea)
         startNode.imageName = data.startArea
         startNode.imagePos = MapNode.ImagePosition.LEFT
+        startNode.nodeTexture = data.exitNodeTexture
         val endNode = newNode(x = data.roadLength, y = 0f)
         endNode.event = EnterMapMapEvent(data.endArea)
         endNode.imageName = data.endArea
         endNode.imagePos = MapNode.ImagePosition.RIGHT
+        endNode.nodeTexture = data.exitNodeTexture
 
         val mainLine = Line(startNode, endNode, data.mainLineNodes, 0f)
         mainLine.generate()
@@ -57,17 +93,25 @@ class NewMapGenerator {
         val addLine1 = addAdditionalLine(mainLine, data.altLinesOffset)
         val addLine2 = addAdditionalLine(mainLine, -data.altLinesOffset)
 
+        val minX = allNodes.minOf { it.x }
+        val maxX = allNodes.maxOf { it.x }
+        val minY = allNodes.minOf { it.y }
+        val maxY = allNodes.maxOf { it.y }
+        bounds = Rectangle(minX, minY, maxX - minX, maxY - minY)
+
         assignEvents(mainLine)
         assignEvents(addLine1)
         assignEvents(addLine2)
 
         startNode.build()
 
+        val decorations = data.decorations.map { generateDecoration(it) }
+
         return DetailMap(
             name = name,
             startNode = startNode.asNode!!,
             endNode = endNode.asNode!!,
-            decorations = mutableListOf(),
+            decorations = decorations,
             animatedDecorations = mutableListOf(),
             isArea = false,
             biome = "wasteland",
@@ -113,6 +157,46 @@ class NewMapGenerator {
         }
     }
 
+    private fun generateDecoration(decoration: MapGeneratorDecoration): DetailMap.MapDecoration {
+        val dist = decoration.distribution(bounds, random).iterator()
+        val instances = mutableListOf<Pair<Vector2, Float>>()
+        val targetAmount = (decoration.density * bounds.area()).toInt()
+
+        fun checkCollision(collider: Rectangle, other: Rectangle): Boolean = if (decoration.onlyCheckCollisionsAtSpawnPoints) {
+            other.contains(Vector2(collider.x, collider.y))
+        } else {
+            other.overlaps(collider)
+        }
+
+        val maxIts = targetAmount * 3
+        var iteration = 0
+        var spawned = 0
+        while (spawned <= targetAmount) {
+            if (iteration > maxIts) {
+                FortyFiveLogger.warn(logTag, "MaxIts reached when spawning decoration ${decoration.decoration} in map $name")
+                break
+            }
+            iteration++
+            if (!dist.hasNext()) break
+            val pos = dist.next()
+            val scale = decoration.scale.random()
+            val thisCollision = Rectangle(pos.x, pos.y, decoration.baseWidth * scale, decoration.baseHeight * scale)
+            if (decoration.checkNodeCollisions && nodeColliders.any { checkCollision(thisCollision, it) }) continue
+            if (decoration.checkDecorationCollisions && decorationColliders.any { checkCollision(thisCollision, it) }) continue
+            if (decoration.generateDecorationCollisions) decorationColliders.add(thisCollision)
+            instances.add(pos to scale)
+            spawned++
+        }
+        if (decoration.sortByY) instances.sortByDescending { it.first.y }
+        return DetailMap.MapDecoration(
+            decoration.decoration,
+            decoration.baseWidth,
+            decoration.baseHeight,
+            false,
+            instances
+        )
+    }
+
     private fun newNode(
         x: Float = 0f,
         y: Float = 0f,
@@ -120,7 +204,12 @@ class NewMapGenerator {
         index = allNodes.size,
         x = x,
         y = y
-    ).also { allNodes.add(it) }
+    ).also {
+        allNodes.add(it)
+        val width = data.nodeProtectedArea
+        val halfWidth = width / 2
+        nodeColliders.add(Rectangle(x - halfWidth, y - halfWidth, width, width))
+    }
 
     private inner class Line(
         val startNode: MapNodeBuilder,
@@ -162,6 +251,8 @@ class NewMapGenerator {
     }
 
     data class MapGeneratorData(
+        val seed: Long,
+        val exitNodeTexture: String,
         val roadLength: Float,
         val mainLineNodes: Int,
         val altLinesPadding: IntRange,
@@ -170,8 +261,36 @@ class NewMapGenerator {
         val varianceY: Float,
         val startArea: String,
         val endArea: String,
+        val nodeProtectedArea: Float,
         val mainEvent: Pair<String, () -> MapEvent>,
-        val additionalEvents: List<Triple<IntRange, String, () -> MapEvent>>
+        val additionalEvents: List<Triple<IntRange, String, () -> MapEvent>>,
+        val decorations: List<MapGeneratorDecoration>,
     )
+
+    data class MapGeneratorDecoration(
+        val distribution: (bounds: Rectangle, random: Random) -> Sequence<Vector2>,
+        val decoration: String,
+        val baseWidth: Float,
+        val baseHeight: Float,
+        val density: Float,
+        val checkNodeCollisions: Boolean,
+        val checkDecorationCollisions: Boolean,
+        val generateDecorationCollisions: Boolean,
+        val onlyCheckCollisionsAtSpawnPoints: Boolean,
+        val scale: ClosedFloatingPointRange<Float>,
+        val sortByY: Boolean
+    )
+
+    object DecorationDistribution {
+
+        fun random(bounds: Rectangle, random: Random): Sequence<Vector2> = repeatingSequenceOf { Vector2(
+            (bounds.x..(bounds.x + bounds.width)).random(random),
+            (bounds.y..(bounds.y + bounds.height)).random(random),
+        ) }
+    }
+
+    companion object {
+        const val logTag = "NewMapGenerator"
+    }
 
 }
