@@ -1,6 +1,175 @@
 use Map;
 use Common;
 
+var mapSharedConfig = {
+    mainLineNodes: 6,
+    altLinesPadding: [0, 1],
+    altLinesOffset: 40.0,
+    varianceX: 5.0,
+    varianceY: 5.0,
+    roadLength: 150.0,
+    exitNodeTexture: "map_node_exit",
+    horizontalExtension: 80.0,
+    verticalExtension: 50.0,
+    locationSignProtectedAreaWidth: 25.0,
+    locationSignProtectedAreaHeight: 30.0,
+    mainEvent: {
+        nodeTexture: "map_node_fight",
+        event: $EncounterMapEvent {
+            currentlyBlocks: true,
+            canBeStarted: true,
+            isCompleted: false,
+            encounterIndex: 0,
+            distanceToEnd: -1,
+        },
+    },
+    additionalEvents: [
+        {
+            nodeTexture: "map_node_heal",
+            offset: [2, 3],
+            event: $HealOrMaxHPEvent {
+                seed: null,
+                healRange: [8, 14],
+                maxHPRange: [0, 0],
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            }
+        }
+    ],
+};
+
+var decorations = {
+    cactus1: {
+        distribution: $Random {},
+        decoration: "map_decoration_wasteland_cactus_1",
+        baseWidth: 2.0,
+        baseHeight: 4.0,
+        density: 0.0024,
+        checkNodeCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: true,
+        scale: [2.75, 3.25],
+        sortByY: true,
+        animated: false,
+    },
+    cactus2: {
+        distribution: $Random {},
+        decoration: "map_decoration_wasteland_cactus_2",
+        baseWidth: 2.0,
+        baseHeight: 4.0,
+        density: 0.0008,
+        checkNodeCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: false,
+        scale: [2.75, 3.25],
+        sortByY: false,
+        animated: false,
+    },
+    skull1: {
+        distribution: $Random {},
+        decoration: "map_decoration_wasteland_skull_1",
+        baseWidth: 3.0,
+        baseHeight: 3.0,
+        density: 0.0004,
+        checkNodeCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: false,
+        scale: [1.1, 1.7],
+        sortByY: false,
+        animated: false,
+    },
+    skull2: {
+        distribution: $Random {},
+        decoration: "map_decoration_wasteland_skull_2",
+        baseWidth: 3.0,
+        baseHeight: 3.0,
+        density: 0.0004,
+        checkNodeCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: false,
+        scale: [1.1, 1.7],
+        sortByY: false,
+        animated: false,
+    },
+    tree: {
+        distribution: $Random {},
+        decoration: "tree",
+        baseWidth: 5.0,
+        baseHeight: 10.0,
+        density: 0.024,
+        checkNodeCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: true,
+        scale: [1.0, 2.0],
+        sortByY: true,
+        animated: true,
+    },
+    sheep: {
+        distribution: $Random {},
+        decoration: "sheep",
+        baseWidth: 8.0,
+        baseHeight: 8.0,
+        density: 0.001,
+        checkNodeCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: false,
+        scale: [1.0, 1.1],
+        sortByY: false,
+        animated: true,
+    }
+};
+
+var wastelandDecorations = [ decorations.cactus2, decorations.skull1, decorations.skull2, decorations.cactus1 ];
+var bewitchedForestDecorations = [ decorations.sheep, decorations.tree ];
+
+var roadBetweenAquaBalleAndTabuLetter = {
+    name: "road_between_aqua_balle_and_tabu_letter_outpost",
+    seed: runRandom(1),
+    biome: "wasteland",
+    startArea: "aqua_balle",
+    endArea: "tabu_letter_outpost",
+    decorations: wastelandDecorations,
+    nodeProtectedArea: 10.0,
+    ...mapSharedConfig
+};
+
+var roadBetweenTabuLetterAndSalem = {
+    name: "road_between_tabu_letter_outpost_and_salem",
+    seed: runRandom(2),
+    biome: "bewitched_forest",
+    startArea: "tabu_letter_outpost",
+    endArea: "salem",
+    decorations: bewitchedForestDecorations,
+    nodeProtectedArea: 20.0,
+    ...mapSharedConfig
+};
+
+var roadBetweenSalemAndSpire = {
+    name: "road_between_salem_and_spire_outpost",
+    seed: runRandom(3),
+    biome: "bewitched_forest",
+    startArea: "salem",
+    endArea: "spire_outpost",
+    nodeProtectedArea: 20.0,
+    decorations: bewitchedForestDecorations,
+    ...mapSharedConfig
+};
+
+generatorConfig: {
+    outputDirectory: "maps/roads",
+    maps: [
+        roadBetweenAquaBalleAndTabuLetter,
+        roadBetweenTabuLetterAndSalem,
+        roadBetweenSalemAndSpire,
+    ]
+},
 
 var images = {
     aquaBalle: {
@@ -152,527 +321,6 @@ displayNames: [
         display: "Road between salem and spire outpost"
     },
 ],
-
-var biomeDecorations = {
-    wasteland: {
-        decorations: [
-            $RandomDistributionFunction {
-                decoration: "map_decoration_wasteland_skull_1",
-                density: 0.0015,
-                baseWidth: 3.0,
-                baseHeight: 3.0,
-                scaleMin: 0.6 + 0.5,
-                scaleMax: 1.2 + 0.5,
-                onlyCollidesWithNodes: true,
-                canOverlapWithOtherNodes: true,
-            },
-            $RandomDistributionFunction {
-                decoration: "map_decoration_wasteland_skull_2",
-                density: 0.0005,
-                baseWidth: 3.0,
-                baseHeight: 3.0,
-                scaleMin: 1.6 + 0.5,
-                scaleMax: 1.2 + 0.5,
-                onlyCollidesWithNodes: true,
-                canOverlapWithOtherNodes: true,
-            },
-            $RandomDistributionFunction {
-                decoration: "map_decoration_wasteland_snake_2",
-                density: 0.0005,
-                baseWidth: 3.0,
-                baseHeight: 3.0,
-                scaleMin: 1.6 + 0.5,
-                scaleMax: 1.2 + 0.5,
-                onlyCollidesWithNodes: true,
-                canOverlapWithOtherNodes: true,
-            },
-            $RandomDistributionFunction {
-                decoration: "map_decoration_wasteland_cactus_1",
-                density: 0.01,
-                baseWidth: 2.0,
-                baseHeight: 4.0,
-                scaleMin: 2.75,
-                scaleMax: 3.25,
-                onlyCollidesWithNodes: false,
-                canOverlapWithOtherNodes: true,
-            },
-            $RandomDistributionFunction {
-                decoration: "map_decoration_wasteland_cactus_2",
-                density: 0.01,
-                baseWidth: 2.0,
-                baseHeight: 4.0,
-                scaleMin: 2.75,
-                scaleMax: 3.25,
-                onlyCollidesWithNodes: false,
-                canOverlapWithOtherNodes: true,
-            },
-        ],
-        decorationPadding: 80.0,
-        animatedDecorations: [
-            //            $RandomDistributionFunction {
-//                decoration: "grass",
-//                density: 0.04,
-//                baseWidth: 1.0,
-//                baseHeight: 1.0,
-//                scaleMin: 1.8,
-//                scaleMax: 2.5,
-//                onlyCollidesWithNodes: false,
-//                canOverlapWithOtherNodes: true,
-//            },
-        ],
-    },
-    bewitchedForest: {
-        decorations: [
-        ],
-        decorationPadding: 80.0,
-        animatedDecorations: [
-            $RandomDistributionFunction {
-                decoration: "sheep",
-                density: 0.015,
-                baseWidth: 8.0,
-                baseHeight: 8.0,
-                scaleMin: 1.0,
-                scaleMax: 1.0,
-                onlyCollidesWithNodes: false,
-                canOverlapWithOtherNodes: true,
-            },
-            $RandomDistributionFunction {
-                decoration: "tree",
-                density: 1.5,
-                baseWidth: 5.0,
-                baseHeight: 10.0,
-                scaleMin: 1.0,
-                scaleMax: 2.0,
-                onlyCollidesWithNodes: false,
-                canOverlapWithOtherNodes: false,
-            },
-//            $RandomDistributionFunction {
-//                decoration: "tree",
-//                density: 0.4,
-//                baseWidth: 5.0,
-//                baseHeight: 10.0,
-//                scaleMin: 1.0,
-//                scaleMax: 2.0,
-//                onlyCollidesWithNodes: true,
-//                canOverlapWithOtherNodes: false,
-//            },
-        ],
-    }
-};
-
-var uniqueEventsToUseOften = {
-    roadBetweenAquaBalleAndTabuLetter: {
-        chooseCard: {
-            isDeadEnd: true,
-            nodeTexture: "map_node_choose_card",
-            event: $ChooseCardMapEvent {
-                seed: null,
-                types: [
-                    "weighted_cards_pool_1"
-                ],
-                nbrOfCards: 3,
-                currentlyBlocks: false,
-                canBeStarted: true,
-                isCompleted: false,
-            }
-        },
-        healEvent: {
-            isDeadEnd: false,
-            nodeTexture: "map_node_heal",
-            event: $HealOrMaxHPEvent {
-                seed: null,
-                healRange: [
-                    17, 23
-                ],
-                maxHPRange: [
-                    5, 8
-                ],
-                currentlyBlocks: false,
-                canBeStarted: true,
-                isCompleted: false,
-            },
-        }
-    },
-    roadBetweenTabuLetterAndSalem: {
-        chooseCard: {
-            isDeadEnd: true,
-            nodeTexture: "map_node_choose_card",
-            event: $ChooseCardMapEvent {
-                seed: null,
-                types: [
-                    "weighted_cards_pool_2"
-                ],
-                nbrOfCards: 3,
-                currentlyBlocks: false,
-                canBeStarted: true,
-                isCompleted: false,
-            }
-        },
-        healEvent: {
-            isDeadEnd: false,
-            nodeTexture: "map_node_heal",
-            event: $HealOrMaxHPEvent {
-                seed: null,
-                healRange: [
-                    17, 22
-                ],
-                maxHPRange: [
-                    4, 6
-                ],
-                currentlyBlocks: false,
-                canBeStarted: true,
-                isCompleted: false,
-            },
-        }
-    },
-    roadBetweenSalemAndSpireOutpost: {
-        chooseCard: {
-            isDeadEnd: false,
-            nodeTexture: "map_node_choose_card",
-            event: $ChooseCardMapEvent {
-                seed: null,
-                types: [
-                    "weighted_cards_pool_2"
-                ],
-                nbrOfCards: 3,
-                currentlyBlocks: false,
-                canBeStarted: true,
-                isCompleted: false,
-            }
-        },
-        healEvent: {
-            isDeadEnd: false,
-            nodeTexture: "map_node_heal",
-            event: $HealOrMaxHPEvent {
-                seed: null,
-                healRange: [
-                    18, 23
-                ],
-                maxHPRange: [
-                    5, 8
-                ],
-                currentlyBlocks: false,
-                canBeStarted: true,
-                isCompleted: false,
-            },
-        }
-    },
-};
-
-var aquaBalleToTabuLetterOutpost = {
-    name: "road_between_aqua_balle_and_tabu_letter_outpost",
-    biome: "wasteland",
-    seed: runRandom(1),
-    restrictions: {
-        progress: [
-            0.0, 10.0
-        ],
-        minNodes: 9,
-        maxNodes: 11,
-        maxSplits: 3,
-        splitProbability: 0.6,
-        startArea: "aqua_balle",
-        endArea: "tabu_letter_outpost",
-        scaleWidth: 1.0,
-        scaleLength: 0.7,
-        otherAreas: [
-        ],
-        rotation: 1.507,
-        avgNbrOfEncounters: 0,
-        exitNodeTexture: "map_node_exit",
-        fixedEvents: [
-            ...repeat(3, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.chooseCard),
-            ...repeat(2, uniqueEventsToUseOften.roadBetweenAquaBalleAndTabuLetter.healEvent),
-            {
-                nodeTexture: "map_node_shop",
-                event: $ShopMapEvent {
-                    seed: null,
-                    boughtIndices: [
-                    ],
-                    types: [
-                    ],
-                    person: "traveling_merchant",
-                },
-                isDeadEnd: false,
-            }
-        ],
-        optionalEvents: [
-            {
-                weight: 25,
-                nodeTexture: "map_node_fight",
-                event: $EncounterMapEvent {
-                    currentlyBlocks: true,
-                    canBeStarted: true,
-                    isCompleted: false,
-                    encounterIndex: 0,
-                    distanceToEnd: -1,
-                }
-            },
-            {
-                weight: 1,
-                nodeTexture: "map_node_choose_card",
-                event: $ChooseCardMapEvent {
-                    seed: null,
-                    types: [
-                        "weighted_cards_pool_2"
-                    ],
-                    nbrOfCards: 3,
-                    currentlyBlocks: false,
-                    canBeStarted: true,
-                    isCompleted: false,
-                }
-            },
-            {
-                weight: 1,
-                nodeTexture: "map_node_shop",
-                event: $ShopMapEvent {
-                    seed: null,
-                    boughtIndices: [
-                    ],
-                    types: [
-                    ],
-                    person: "traveling_merchant",
-                }
-            },
-        ],
-        finalEvent: {
-            nodeTexture: "map_node_fight",
-            event: $EncounterMapEvent {
-                currentlyBlocks: true,
-                canBeStarted: true,
-                isCompleted: false,
-                encounterIndex: 0,
-                distanceToEnd: -1,
-            }
-        },
-        ...(biomeDecorations.wasteland),
-        decorationSeed: 258765657,
-    },
-};
-
-var tabuLetterOutpostToSalem = {
-    name: "road_between_tabu_letter_outpost_and_salem",
-    biome: "bewitched_forest",
-    seed: runRandom(2),
-    restrictions: {
-        progress: [
-            10.0, 20.0
-        ],
-        minNodes: 9,
-        maxNodes: 11,
-        maxSplits: 6,
-        splitProbability: 0.62,
-        startArea: "tabu_letter_outpost",
-        endArea: "salem",
-        scaleWidth: 0.75,
-        scaleLength: 0.6,
-        otherAreas: [
-        ],
-        rotation: 3.14/4,
-        avgNbrOfEncounters: 0,
-        exitNodeTexture: "map_node_exit",
-        fixedEvents: [
-            ...repeat(4, uniqueEventsToUseOften.roadBetweenTabuLetterAndSalem.chooseCard),
-            ...repeat(3, uniqueEventsToUseOften.roadBetweenTabuLetterAndSalem.healEvent),
-            {
-                nodeTexture: "map_node_shop",
-                event: $ShopMapEvent {
-                    seed: null,
-                    boughtIndices: [
-                    ],
-                    types: [
-                    ],
-                    person: "traveling_merchant",
-                },
-                isDeadEnd: false,
-            }
-        ],
-        optionalEvents: [
-            {
-                weight: 25,
-                nodeTexture: "map_node_fight",
-                event: $EncounterMapEvent {
-                    currentlyBlocks: true,
-                    canBeStarted: true,
-                    isCompleted: false,
-                    encounterIndex: 0,
-                    distanceToEnd: -1,
-                }
-            },
-            {
-                weight: 1,
-                nodeTexture: "map_node_heal",
-                event: $HealOrMaxHPEvent {
-                    seed: null,
-                    healRange: [
-                        17, 22
-                    ],
-                    maxHPRange: [
-                        4, 6
-                    ],
-                    currentlyBlocks: false,
-                    canBeStarted: true,
-                    isCompleted: false,
-                }
-            },
-            {
-                weight: 1,
-                nodeTexture: "map_node_shop",
-                event: $ShopMapEvent {
-                    seed: null,
-                    boughtIndices: [
-                    ],
-                    types: [
-                    ],
-                    person: "traveling_merchant",
-                }
-            },
-            {
-                weight: 3,
-                nodeTexture: "map_node_choose_card",
-                event: $ChooseCardMapEvent {
-                    seed: null,
-                    types: [
-                        "weighted_cards_pool_2"
-                    ],
-                    nbrOfCards: 3,
-                    currentlyBlocks: false,
-                    canBeStarted: true,
-                    isCompleted: false,
-                }
-            },
-        ],
-        finalEvent: {
-            nodeTexture: "map_node_fight",
-            event: $EncounterMapEvent {
-                currentlyBlocks: true,
-                canBeStarted: true,
-                isCompleted: false,
-                encounterIndex: 0,
-                distanceToEnd: -1,
-            }
-        },
-        ...(biomeDecorations.bewitchedForest),
-        decorationSeed: 12345678,
-    },
-};
-
-var salemToSpireOutpost = {
-    name: "road_between_salem_and_spire_outpost",
-    biome: "bewitched_forest",
-    seed: runRandom(3),
-    restrictions: {
-        progress: [
-            20.0, 30.0
-        ],
-        minNodes: 9,
-        maxNodes: 11,
-        maxSplits: 6,
-        splitProbability: 0.62,
-        startArea: "salem",
-        endArea: "spire_outpost",
-        scaleWidth: 0.65,
-        scaleLength: 0.6,
-        otherAreas: [
-        ],
-        rotation: 0.0,
-        avgNbrOfEncounters: 0,
-        exitNodeTexture: "map_node_exit",
-        fixedEvents: [
-            ...repeat(4, uniqueEventsToUseOften.roadBetweenSalemAndSpireOutpost.chooseCard),
-            ...repeat(3, uniqueEventsToUseOften.roadBetweenSalemAndSpireOutpost.healEvent),
-            {
-                nodeTexture: "map_node_shop",
-                event: $ShopMapEvent {
-                    seed: null,
-                    boughtIndices: [
-                    ],
-                    types: [
-                    ],
-                    person: "traveling_merchant",
-                },
-                isDeadEnd: false,
-            }
-        ],
-        optionalEvents: [
-            {
-                weight: 25,
-                nodeTexture: "map_node_fight",
-                event: $EncounterMapEvent {
-                    currentlyBlocks: true,
-                    canBeStarted: true,
-                    isCompleted: false,
-                    encounterIndex: 0,
-                    distanceToEnd: -1,
-                }
-            },
-            {
-                weight: 1,
-                nodeTexture: "map_node_heal",
-                event: $HealOrMaxHPEvent {
-                    seed: null,
-                    healRange: [
-                        17, 22
-                    ],
-                    maxHPRange: [
-                        4, 6
-                    ],
-                    currentlyBlocks: false,
-                    canBeStarted: true,
-                    isCompleted: false,
-                }
-            },
-            {
-                weight: 1,
-                nodeTexture: "map_node_shop",
-                event: $ShopMapEvent {
-                    seed: null,
-                    boughtIndices: [
-                    ],
-                    types: [
-                    ],
-                    person: "traveling_merchant",
-                }
-            },
-            {
-                weight: 3,
-                nodeTexture: "map_node_choose_card",
-                event: $ChooseCardMapEvent {
-                    seed: null,
-                    types: [
-                        "weighted_cards_pool_2"
-                    ],
-                    nbrOfCards: 3,
-                    currentlyBlocks: false,
-                    canBeStarted: true,
-                    isCompleted: false,
-                }
-            }
-        ],
-        finalEvent: {
-            nodeTexture: "map_node_fight",
-            event: $EncounterMapEvent {
-                currentlyBlocks: true,
-                canBeStarted: true,
-                isCompleted: false,
-                encounterIndex: 0,
-                distanceToEnd: -1,
-            }
-        },
-        ...(biomeDecorations.bewitchedForest),
-        decorationSeed: 1234567890,
-    },
-};
-
-generatorConfig: {
-    outputDirectory: "maps/roads",
-    maps: [
-        aquaBalleToTabuLetterOutpost,
-        tabuLetterOutpostToSalem,
-        salemToSpireOutpost,
-    ]
-},
-
 
 var worldViewImageScale = 5.0;
 

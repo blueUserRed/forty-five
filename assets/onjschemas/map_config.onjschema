@@ -1,76 +1,60 @@
 import "imports/map_events.onjschema" as _;
 
+$DecorationDistribution {
 
-var distributionFunctionStandardConfig = {
-    decoration: string,
-    density: float,
-    baseWidth: float,
-    baseHeight: float,
-    scaleMin: float,
-    scaleMax: float,
-    onlyCollidesWithNodes: boolean,
-    canOverlapWithOtherNodes: boolean
-};
+    $Random {}
 
-$DecorationDistributionFunction {
-
-    $RandomDistributionFunction {
-        ...distributionFunctionStandardConfig,
-    }
-
-    $SingleClusterDistributionFunction{
-        ...distributionFunctionStandardConfig,
-        minCenterX?: Float,
-        maxCenterX?: Float,
-        minCenterY?: Float,
-        maxCenterY?: Float,
-        innerRadius: Float,
-        outerRadius: Float,
-        nbrOfInnerPoints: Int,
-        nbrOfOuterPoints: Int,
-    }
-
-    $MultiClusterDistributionFunction {
-        ...distributionFunctionStandardConfig,
-        blockSize: float,
-        prob: float,
-        additionalProbIfNeighbor: float,
-    }
 }
 
-var mapRestrictions = {
-    maxNodes: int,
-    minNodes: int,
-    maxSplits: int,
-    splitProbability: float,
-    decorationPadding: float,
+var decoration = {
+    distribution: $DecorationDistribution,
+    decoration: string,
+    baseWidth: float,
+    baseHeight: float,
+    density: float,
+    checkNodeCollisions: boolean,
+    checkDecorationCollisions: boolean,
+    generateDecorationCollisions: boolean,
+    onlyCheckCollisionsAtSpawnPoints: boolean,
+    scale: float[2],
+    sortByY: boolean,
+    animated: boolean,
+};
+
+var map = {
+    name: string,
+    seed: int,
+    biome: string,
     startArea: string,
     endArea: string,
-    rotation: float,
-    scaleLength?: float,
-    scaleWidth?: float,
-    otherAreas?: string[],
-    fixedEvents: {
-        isDeadEnd: boolean,
-        nodeTexture: string?,
-        event: $MapEvent
-    }[],
-    optionalEvents: {
-        weight: int,
-        nodeTexture: string?,
-        event: $MapEvent
-    }[],
-    finalEvent?: {
-        nodeTexture: string?,
-        event: $MapEvent
-    },
-    decorationSeed: int,
-    decorations: $DecorationDistributionFunction[],
-    animatedDecorations: $DecorationDistributionFunction[],
+    roadLength: float,
     exitNodeTexture: string,
-    avgNbrOfEncounters: int,
-    progress: float[2]
+    mainLineNodes: int,
+    altLinesPadding: int[2],
+    altLinesOffset: float,
+    varianceX: float,
+    varianceY: float,
+    horizontalExtension: float,
+    verticalExtension: float,
+    locationSignProtectedAreaWidth: float,
+    locationSignProtectedAreaHeight: float,
+    mainEvent: {
+        nodeTexture: string,
+        event: $MapEvent,
+    },
+    additionalEvents: {
+        nodeTexture: string,
+        event: $MapEvent,
+        offset: int[2]
+    }[],
+    nodeProtectedArea: float,
+    decorations: decoration[]
 };
+
+generatorConfig: {
+    outputDirectory: string,
+    maps: map[]
+},
 
 screens: {
     mapScreen: string,
@@ -104,16 +88,6 @@ displayNames: {
     name: string,
     display: string
 }[],
-
-generatorConfig: {
-    outputDirectory: string,
-    maps: {
-        name: string,
-        seed: int,
-        biome: string,
-        restrictions: mapRestrictions
-    }[]
-},
 
 worldView: {
     backgroundHandle: string,

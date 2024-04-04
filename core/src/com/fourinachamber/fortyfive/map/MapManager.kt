@@ -264,7 +264,8 @@ object MapManager {
 //        val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
 //        val map = generator.generate(name, biome)
 
-        val map = NewMapGenerator().generate(name)
+        val data = NewMapGenerator.MapGeneratorData.fromOnj(onj)
+        val map = NewMapGenerator().generate(name, data)
 
         GameDirector.assignEncounters(map)
         val path = "${outputDir.toPath()}/$name.onj"
