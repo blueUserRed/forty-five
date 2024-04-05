@@ -83,7 +83,7 @@ var settingsBox = $Box {
             {
                 style_priority: 2,
                 style_condition: state("show_settings"),
-                positionTop: 175#points,
+                positionTop: 130#points,
                 style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.pow2

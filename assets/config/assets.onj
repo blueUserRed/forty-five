@@ -961,6 +961,10 @@ textures: [
         file: "textures/common/backgrounds/popup_black.png",
     },
     {
+        name: "common_popup_background_black_large",
+        file: "textures/common/backgrounds/popup_black_large.png",
+    },
+    {
         name: "aqua_balle_lower_row",
         file: "textures/areas/aqua_balle/lower_row.png",
     },
