@@ -26,7 +26,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @OnjNamespaceVariables
     val variables: Map<String, OnjObject> = mapOf(
         "value" to buildOnjObject {
-            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller, _ ->
+            "mostExpensiveBulletInRevolver" with OnjEffectValue { controller, _, _ ->
                 controller
                     .revolver
                     .slots
@@ -34,9 +34,12 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .maxOfOrNull { it.cost }
                     ?: 0
             }
-            "rotationAmount" with OnjEffectValue { _, card -> card!!.rotationCounter }
-            "bulletInSlot2" with OnjEffectValue { controller, _ ->
+            "rotationAmount" with OnjEffectValue { _, card, _ -> card!!.rotationCounter }
+            "bulletInSlot2" with OnjEffectValue { controller, _, _ ->
                 controller.revolver.getCardInSlot(5 - 2)?.curDamage(controller) ?: 0
+            }
+            "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation ->
+                triggerInformation!!.sourceCard!!.curDamage(controller)
             }
         }
     )
@@ -299,11 +302,16 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     }
 
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
-    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _ -> value.value.toInt() }
+    fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _, _ -> value.value.toInt() }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float]", type = OnjFunctionType.OPERATOR)
-    fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card ->
-        (value.value(controller, card) * multiplier.value).toInt()
+    fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+        (value.value(controller, card, triggerInformation) * multiplier.value).toInt()
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.OPERATOR)
+    fun star(value: OnjEffectValue, multiplier: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+        (value.value(controller, card, triggerInformation) * multiplier.value).toInt()
     }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
@@ -320,7 +328,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
        default: Int
    ) = controller?.let { controller ->
        card?.let { card ->
-           effectValue.value(controller, card)
+           effectValue.value(controller, card, null)
        }
    } ?: default
 
