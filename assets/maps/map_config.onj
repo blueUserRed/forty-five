@@ -131,6 +131,7 @@ var bewitchedForestDecorations = [ decorations.sheep, decorations.tree ];
 
 var roadBetweenAquaBalleAndTabuLetter = {
     name: "road_between_aqua_balle_and_tabu_letter_outpost",
+    progress: [0, 10],
     seed: runRandom(1),
     biome: "wasteland",
     startArea: "aqua_balle",
@@ -142,6 +143,7 @@ var roadBetweenAquaBalleAndTabuLetter = {
 
 var roadBetweenTabuLetterAndSalem = {
     name: "road_between_tabu_letter_outpost_and_salem",
+    progress: [10, 20],
     seed: runRandom(2),
     biome: "bewitched_forest",
     startArea: "tabu_letter_outpost",
@@ -153,6 +155,7 @@ var roadBetweenTabuLetterAndSalem = {
 
 var roadBetweenSalemAndSpire = {
     name: "road_between_salem_and_spire_outpost",
+    progress: [20, 30],
     seed: runRandom(3),
     biome: "bewitched_forest",
     startArea: "salem",
