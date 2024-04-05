@@ -231,6 +231,7 @@ class NewMapGenerator {
     data class MapGeneratorData(
         val seed: Long,
         val biome: String,
+        val progress: IntRange,
         val exitNodeTexture: String,
         val roadLength: Float,
         val mainLineNodes: Int,
@@ -255,6 +256,7 @@ class NewMapGenerator {
             fun fromOnj(onj: OnjObject): MapGeneratorData = MapGeneratorData(
                 onj.get<Long>("seed"),
                 onj.get<String>("biome"),
+                onj.get<OnjArray>("progress").toIntRange(),
                 onj.get<String>("exitNodeTexture"),
                 onj.get<Double>("roadLength").toFloat(),
                 onj.get<Long>("mainLineNodes").toInt(),

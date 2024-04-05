@@ -24,6 +24,7 @@ var decoration = {
 var map = {
     name: string,
     seed: int,
+    progress: int[2],
     biome: string,
     startArea: string,
     endArea: string,
