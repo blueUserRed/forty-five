@@ -39,3 +39,16 @@ them 6 feet deep! But watch out, he won't just stand there letting you shoot him
 - **Deckbuilding,** to truly personalize your way of … shooting people.
 - **Different enemy types,** so you'll never run out of things to shoot at.
 - **Unique biomes,** each … you know what just download and find out it's free.
+
+---
+
+<br>
+<br>
+
+## Technical
+
+If you want to build the project for yourself, you can check out this [guide](./project_setup_and_build.md)
+
+For basic technical information, check out this [file](./technical_design.md) **Warning: outdated** (I'll update it when I have the time)
+
+If you need help with anything, you can ask questions in our discord: https://discord.gg/2caBPyXK9B
