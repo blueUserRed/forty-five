@@ -727,7 +727,7 @@ statusBarTemplates: [
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 justifyContent: justify.flexEnd,
-                paddingBottom: 6.5#percent,
+                paddingBottom: 18#points,
                 touchable: touchable.enabled,
             }
         ],
