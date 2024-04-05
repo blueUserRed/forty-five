@@ -318,7 +318,11 @@ class Bewitched(
         return "${rotations pluralS "rotation"} or ${turns pluralS "turn"}"
     }
 
-    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = RevolverRotation.Left(1)
+    override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = when (rotation) {
+        is RevolverRotation.Right -> RevolverRotation.Left(rotation.amount)
+        is RevolverRotation.Left -> RevolverRotation.Left(rotation.amount)
+        else -> rotation
+    }
 
     override fun equals(other: Any?): Boolean = other is Bewitched
 
