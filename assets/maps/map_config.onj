@@ -2,12 +2,12 @@ use Map;
 use Common;
 
 var mapSharedConfig = {
-    mainLineNodes: 6,
-    altLinesPadding: [0, 1],
+    mainLineNodes: 7,
+    altLinesPadding: [0, 2],
     altLinesOffset: 40.0,
     varianceX: 5.0,
     varianceY: 5.0,
-    roadLength: 150.0,
+    roadLength: 270.0,
     exitNodeTexture: "map_node_exit",
     horizontalExtension: 80.0,
     verticalExtension: 50.0,

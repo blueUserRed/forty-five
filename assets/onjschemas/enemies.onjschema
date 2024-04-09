@@ -6,8 +6,6 @@ use Common;
 use Cards; // include Card namespace for status effects
 
 var enemyActionSharedKeys = {
-    weight: int,
-    showProbability: float,
     icon: string,
     scaleFactor?: float,
     predicates?: $GamePredicate[],
@@ -66,6 +64,19 @@ $EnemyAction {
 }
 
 $EnemyBrain {
+
+    $NewEnemyBrain {
+        damageShieldWeight: float,
+        normalSpecialActionWeight: float,
+        baseDamage: int[2],
+        baseShield: int[2],
+        scaleIncreasePerTurn: float,
+        actions: {
+            weight: int,
+            showProbability: float,
+            action: $EnemyAction
+        }[]
+    }
 
     $RandomEnemyBrain {
         actions: $EnemyAction[],

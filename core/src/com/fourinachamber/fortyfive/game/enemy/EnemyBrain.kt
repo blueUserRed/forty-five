@@ -1,8 +1,7 @@
 package com.fourinachamber.fortyfive.game.enemy
 
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.utils.Utils
-import com.fourinachamber.fortyfive.utils.toIntRange
+import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -21,6 +20,8 @@ abstract class EnemyBrain {
     companion object {
 
         fun fromOnj(onj: OnjNamedObject, enemy: Enemy): EnemyBrain = when (onj.name) {
+
+            "NewEnemyBrain" -> NewEnemyBrain(onj, enemy)
 
             "ScriptedEnemyBrain" -> ScriptedEnemyBrain(
                 onj.get<OnjArray>("actions"),
@@ -53,6 +54,68 @@ abstract class EnemyBrain {
 
     protected fun List<NextEnemyAction>.containsAttack(): Boolean =
         any { it is NextEnemyAction.ShownEnemyAction && it.action.prototype is EnemyActionPrototype.DamagePlayer }
+
+}
+
+class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain() {
+
+    private val damageShieldWeight: Float = onj.get<Double>("damageShieldWeight").toFloat()
+    private val normalSpecialActionWeight: Float = onj.get<Double>("normalSpecialActionWeight").toFloat()
+    private val baseDamage: IntRange = onj.get<OnjArray>("baseDamage").toIntRange()
+    private val baseShield: IntRange = onj.get<OnjArray>("baseShield").toIntRange()
+    private val scaleIncreasePerTurn: Float = onj.get<Double>("scaleIncreasePerTurn").toFloat()
+
+    private val actions: List<Triple<Int, Float, EnemyActionPrototype>> = onj
+        .get<OnjArray>("actions")
+        .value
+        .map {
+            it as OnjObject
+            Triple(
+                it.get<Long>("weight").toInt(),
+                it.get<Double>("showProbability").toFloat(),
+                EnemyActionPrototype.fromOnj(it.get<OnjNamedObject>("action"), enemy)
+            )
+        }
+
+    private var currentScale: Float = 1.0f
+    private var nextAction: EnemyAction? = null
+
+    override fun resolveEnemyAction(controller: GameController, enemy: Enemy, difficulty: Double): EnemyAction? {
+        val action = nextAction
+        nextAction = null
+        currentScale += scaleIncreasePerTurn
+        return action
+    }
+
+    override fun chooseNewAction(
+        controller: GameController,
+        enemy: Enemy,
+        difficulty: Double,
+        otherChosenActions: List<NextEnemyAction>
+    ): NextEnemyAction {
+        val doNormalAction = Utils.coinFlip(normalSpecialActionWeight)
+        if (doNormalAction) {
+            val actionProto = if (Utils.coinFlip(damageShieldWeight)) {
+                val damage = baseDamage.scale(currentScale.toDouble())
+                damagePlayer(damage, enemy)
+            } else {
+                takeCover(baseShield.scale(currentScale.toDouble()), enemy)
+            }
+            val action = actionProto.create(controller, difficulty)
+            nextAction = action
+            return NextEnemyAction.ShownEnemyAction(action)
+        }
+        val (_, showProb, actionProto) = actions
+            .zipToFirst { it.first }
+            .weightedRandom()
+        val action = actionProto.create(controller, difficulty)
+        nextAction = action
+        return if (Utils.coinFlip(showProb)) {
+            NextEnemyAction.ShownEnemyAction(action)
+        } else {
+            NextEnemyAction.HiddenEnemyAction
+        }
+    }
 
 }
 

@@ -231,7 +231,7 @@ fun <T> Collection<Pair<Int, T>>.weightedRandom(): T {
         acc += abs(weight)
         if (choice <= acc) return value
     }
-    throw NoSuchElementException("weightedRandom called on an empty collection")
+    throw  NoSuchElementException("weightedRandom called on an empty collection")
 }
 
 fun Collection<Timeline>.collectTimeline(): Timeline {
@@ -263,6 +263,7 @@ inline fun <T> Iterable<T>.splitAt(predicate: (T) -> Boolean): List<List<T>> {
 }
 
 inline fun <T, U> Iterable<T>.zip(creator: (T) -> U): List<Pair<T, U>> = map { it to creator(it) }
+inline fun <T, U> Iterable<T>.zipToFirst(creator: (T) -> U): List<Pair<U, T>> = map { creator(it) to it }
 
 inline fun <T, U, V> Iterable<Pair<T, U>>.mapFirst(mapper: (T) -> V): List<Pair<V, U>> = map { (first, second) -> mapper(first) to second }
 inline fun <T, U, V> Iterable<Pair<T, U>>.mapSecond(mapper: (U) -> V): List<Pair<T, V>> = map { (first, second) -> first to mapper(second) }
