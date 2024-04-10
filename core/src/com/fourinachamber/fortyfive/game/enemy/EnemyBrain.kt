@@ -65,17 +65,19 @@ class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain() {
     private val baseShield: IntRange = onj.get<OnjArray>("baseShield").toIntRange()
     private val scaleIncreasePerTurn: Float = onj.get<Double>("scaleIncreasePerTurn").toFloat()
 
-    private val actions: List<Triple<Int, Float, EnemyActionPrototype>> = onj
+    private val actions: MutableList<EnemyActionConfig> = onj
         .get<OnjArray>("actions")
         .value
         .map {
             it as OnjObject
-            Triple(
+            EnemyActionConfig(
                 it.get<Long>("weight").toInt(),
                 it.get<Double>("showProbability").toFloat(),
-                EnemyActionPrototype.fromOnj(it.get<OnjNamedObject>("action"), enemy)
+                EnemyActionPrototype.fromOnj(it.get<OnjNamedObject>("action"), enemy),
+                it.getOr("maxExecutions", 0L).toInt()
             )
         }
+        .toMutableList()
 
     private var currentScale: Float = 1.0f
     private var nextAction: EnemyAction? = null
@@ -105,17 +107,30 @@ class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain() {
             nextAction = action
             return NextEnemyAction.ShownEnemyAction(action)
         }
-        val (_, showProb, actionProto) = actions
-            .zipToFirst { it.first }
+        val actionConfig = actions
+            .zipToFirst { it.weight }
             .weightedRandom()
+        val (_, showProb, actionProto) = actionConfig
         val action = actionProto.create(controller, difficulty)
         nextAction = action
+        actionConfig.executionCount++
+        if (actionConfig.maxExecutions > 0 && actionConfig.executionCount >= actionConfig.maxExecutions) {
+            actions.remove(actionConfig)
+        }
         return if (Utils.coinFlip(showProb)) {
             NextEnemyAction.ShownEnemyAction(action)
         } else {
             NextEnemyAction.HiddenEnemyAction
         }
     }
+
+    private data class EnemyActionConfig(
+        val weight: Int,
+        val showProbability: Float,
+        val prototype: EnemyActionPrototype,
+        val maxExecutions: Int,
+        var executionCount: Int = 0
+    )
 
 }
 

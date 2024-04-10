@@ -149,7 +149,7 @@ class GameDirector(private val controller: GameController) {
             val allNodes = map.uniqueNodes
             val progress = map.progress
             val roadDirection = Vector2(endNode.x, endNode.y) - Vector2(startNode.x, startNode.y)
-            val difficultyVariance = (progress.endInclusive - progress.start) * 0.1f
+            val difficultyVariance = 0f
             allNodes.forEach { node ->
                 if (node === startNode || node === endNode) return@forEach
                 if (node.event !is EncounterMapEvent) return@forEach

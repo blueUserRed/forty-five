@@ -35,9 +35,9 @@ var textEmitterConfig = [
 enemies: [
 
     {
-        name: "Outlaw_lvl1",
+        name: "Outlaw_lvl1_alone",
         title: "Outlaw",
-        baseHealth: 110,
+        baseHealth: 80,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -48,20 +48,21 @@ enemies: [
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
-            damageShieldWeight: 0.8,
+            damageShieldWeight: 0.78,
             normalSpecialActionWeight: 1.0,
-            baseDamage: [2, 4],
-            baseShield: [2, 4],
-            scaleIncreasePerTurn: 0.2,
+            baseDamage: [4, 5],
+            baseShield: [4, 5],
+            scaleIncreasePerTurn: 0.3,
             actions: [],
         },
         detailFontColor: color.black,
         detailFontColorDark: color.white,
     },
+
     {
-        name: "Outlaw_lvl2",
+        name: "Outlaw_lvl1_partner",
         title: "Outlaw",
-        baseHealth: 140,
+        baseHealth: 80,
         texture: "enemy_outlaw",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -72,11 +73,61 @@ enemies: [
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
-            damageShieldWeight: 0.8,
+            damageShieldWeight: 0.7,
             normalSpecialActionWeight: 1.0,
             baseDamage: [4, 5],
             baseShield: [4, 5],
-            scaleIncreasePerTurn: 0.2,
+            scaleIncreasePerTurn: 0.15,
+            actions: [],
+        },
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
+    },
+
+    {
+        name: "Outlaw_lvl2_alone",
+        title: "Outlaw",
+        baseHealth: 100,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.6,
+        indicatorIconScale: 0.6,
+        scale: 0.25,
+        detailFont: "roadgeek",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $NewEnemyBrain {
+            damageShieldWeight: 0.78,
+            normalSpecialActionWeight: 1.0,
+            baseDamage: [6, 7],
+            baseShield: [6, 7],
+            scaleIncreasePerTurn: 0.3,
+            actions: [],
+        },
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
+    },
+
+    {
+        name: "Outlaw_lvl2_partner",
+        title: "Outlaw",
+        baseHealth: 100,
+        texture: "enemy_outlaw",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.6,
+        indicatorIconScale: 0.6,
+        scale: 0.25,
+        detailFont: "roadgeek",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        brain: $NewEnemyBrain {
+            damageShieldWeight: 0.7,
+            normalSpecialActionWeight: 1.0,
+            baseDamage: [6, 7],
+            baseShield: [6, 7],
+            scaleIncreasePerTurn: 0.15,
             actions: [],
         },
         detailFontColor: color.black,
@@ -86,7 +137,7 @@ enemies: [
     {
         name: "Pyro_lvl1_alone",
         title: "Pyro",
-        baseHealth: 105,
+        baseHealth: 75,
         texture: "enemy_pyro",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -97,15 +148,16 @@ enemies: [
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
-            damageShieldWeight: 0.8,
+            damageShieldWeight: 0.78,
             normalSpecialActionWeight: 0.7,
-            baseDamage: [2, 3],
-            baseShield: [2, 3],
-            scaleIncreasePerTurn: 0.2,
+            baseDamage: [4, 5],
+            baseShield: [4, 5],
+            scaleIncreasePerTurn: 0.4,
             actions: [
                 {
                     weight: 10,
                     showProbability: 0.8,
+                    maxExecutions: 1,
                     action: $GivePlayerCard {
                         card: "scorchingBullet",
                         icon: "enemy_action_hot_potato",
@@ -142,7 +194,7 @@ enemies: [
     {
         name: "Pyro_lvl1_partner",
         title: "Pyro",
-        baseHealth: 105,
+        baseHealth: 75,
         texture: "enemy_pyro",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -153,15 +205,16 @@ enemies: [
         detailFontScale: 0.6,
         textEmitterConfig: textEmitterConfig,
         brain: $NewEnemyBrain {
-            damageShieldWeight: 0.8,
+            damageShieldWeight: 0.7,
             normalSpecialActionWeight: 0.4,
             baseDamage: [2, 3],
-            baseShield: [2, 3],
+            baseShield: [4, 6],
             scaleIncreasePerTurn: 0.2,
             actions: [
                 {
                     weight: 10,
                     showProbability: 0.8,
+                    maxExecutions: 1,
                     action: $GivePlayerCard {
                         card: "scorchingBullet",
                         icon: "enemy_action_hot_potato",
@@ -198,7 +251,7 @@ enemies: [
     {
         name: "Witch_lvl1_alone",
         title: "Witch",
-        baseHealth: 130,
+        baseHealth: 90,
         texture: "enemy_witch",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -211,11 +264,11 @@ enemies: [
         detailFontColor: color.black,
         detailFontColorDark: color.white,
         brain: $NewEnemyBrain {
-            damageShieldWeight: 0.8,
+            damageShieldWeight: 0.78,
             normalSpecialActionWeight: 0.8,
-            baseDamage: [2, 3],
-            baseShield: [2, 3],
-            scaleIncreasePerTurn: 0.2,
+            baseDamage: [4, 5],
+            baseShield: [4, 5],
+            scaleIncreasePerTurn: 0.4,
             actions: [
                 {
                     weight: 10,
@@ -255,7 +308,7 @@ enemies: [
     {
         name: "Witch_lvl1_partner",
         title: "Witch",
-        baseHealth: 130,
+        baseHealth: 90,
         texture: "enemy_witch",
         coverIcon: "shield_icon",
         hiddenActionIcon: "enemy_action_unknown",
@@ -268,10 +321,10 @@ enemies: [
         detailFontColor: color.black,
         detailFontColorDark: color.white,
         brain: $NewEnemyBrain {
-            damageShieldWeight: 0.8,
+            damageShieldWeight: 0.7,
             normalSpecialActionWeight: 0.4,
             baseDamage: [2, 3],
-            baseShield: [2, 3],
+            baseShield: [8, 9],
             scaleIncreasePerTurn: 0.2,
             actions: [
                 {
@@ -309,6 +362,9 @@ enemies: [
         },
     },
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
     {
         name: "tutorial_enemy_1",

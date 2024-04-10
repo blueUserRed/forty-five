@@ -306,7 +306,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _, _ -> value.value.toInt() }
 
     @RegisterOnjFunction(schema = "params: [int[2]]", type = OnjFunctionType.CONVERSION)
-    fun `val`(value: OnjArray): OnjEffectValue = OnjEffectValue { _, _, _ -> value.toIntRange().random() }
+    fun `val`(value: OnjArray): OnjEffectValue = OnjEffectValue { _, _, _ -> value.toIntRange().random().also { println("val called; result: $it") } }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float]", type = OnjFunctionType.OPERATOR)
     fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
@@ -331,9 +331,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
        card: Card?,
        default: Int
    ) = controller?.let { controller ->
-       card?.let { card ->
-           effectValue.value(controller, card, null)
-       }
+       effectValue.value(controller, card, null)
    } ?: default
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {

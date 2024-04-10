@@ -74,6 +74,7 @@ $EnemyBrain {
         actions: {
             weight: int,
             showProbability: float,
+            maxExecutions?: int,
             action: $EnemyAction
         }[]
     }
