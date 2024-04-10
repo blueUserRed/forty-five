@@ -2,7 +2,7 @@ use Map;
 use Common;
 
 var mapSharedConfig = {
-    mainLineNodes: 7,
+    mainLineNodes: 8,
     altLinesPadding: [0, 2],
     altLinesOffset: 40.0,
     varianceX: 5.0,
@@ -37,6 +37,20 @@ var mapSharedConfig = {
             }
         }
     ],
+    additionalLineEvents: [
+        {
+            nodeTexture: "map_node_choose_card",
+            offset: [2, 2],
+            event: $ChooseCardMapEvent {
+                types: [],
+                seed: null,
+                nbrOfCards: 3,
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            }
+        }
+    ]
 };
 
 var decorations = {

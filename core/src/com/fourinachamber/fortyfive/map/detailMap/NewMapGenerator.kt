@@ -72,9 +72,11 @@ class NewMapGenerator {
             maxY - minY + data.verticalExtension * 2
         )
 
-        assignEvents(mainLine)
-        assignEvents(addLine1)
-        assignEvents(addLine2)
+        assignEvents(mainLine, data.additionalEvents)
+        assignEvents(addLine1, data.additionalEvents)
+        assignEvents(addLine2, data.additionalEvents)
+        assignEvents(addLine1, data.additionalLinesEvents)
+        assignEvents(addLine2, data.additionalLinesEvents)
 
         startNode.build()
 
@@ -117,10 +119,10 @@ class NewMapGenerator {
         return line
     }
 
-    private fun assignEvents(line: Line) {
+    private fun assignEvents(line: Line, eventsToAssign: List<Triple<IntRange, String, () -> MapEvent>>) {
         val mainEvent = data.mainEvent
         val events = MutableList(line.nodes.size) { mainEvent }
-        data.additionalEvents.forEach { (nextRange, nodeTexture, event) ->
+        eventsToAssign.forEach { (nextRange, nodeTexture, event) ->
             var cur = 0
             while (true) {
                 cur += nextRange.random()
@@ -248,6 +250,7 @@ class NewMapGenerator {
         val locationSignProtectedAreaHeight: Float,
         val mainEvent: Pair<String, () -> MapEvent>,
         val additionalEvents: List<Triple<IntRange, String, () -> MapEvent>>,
+        val additionalLinesEvents: List<Triple<IntRange, String, () -> MapEvent>>,
         val decorations: List<MapGeneratorDecoration>,
     ) {
 
@@ -274,6 +277,17 @@ class NewMapGenerator {
                 onj.access<String>(".mainEvent.nodeTexture") to { MapEventFactory.getMapEvent(onj.access(".mainEvent.event")) },
                 onj
                     .get<OnjArray>("additionalEvents")
+                    .value
+                    .map {
+                        it as OnjObject
+                        Triple(
+                            it.get<OnjArray>("offset").toIntRange(),
+                            it.get<String>("nodeTexture"),
+                            third = { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
+                        )
+                    },
+                onj
+                    .get<OnjArray>("additionalLineEvents")
                     .value
                     .map {
                         it as OnjObject

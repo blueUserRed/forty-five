@@ -199,7 +199,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
         ],
@@ -207,7 +207,7 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            0.0, 1.0
+            0.0, 3.0
         ],
         weight: 10
     },
@@ -216,7 +216,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
         ],
@@ -224,7 +224,7 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            1.0, 2.0
+            0.0, 3.0
         ],
         weight: 10
     },
@@ -232,7 +232,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
         ],
@@ -240,14 +240,14 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            2.0, 3.0
+            3.0, 5.0
         ],
         weight: 3
     },
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
             "Moist"
@@ -256,14 +256,14 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            2.0, 3.0
+            3.0, 5.0
         ],
         weight: 4
     },
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
             "Rain"
@@ -272,7 +272,7 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            2.0, 3.0
+            3.0, 5.0
         ],
         weight: 2
     },
@@ -281,7 +281,7 @@ encounter: [
     //LEVEL 4
 {
         enemies: [
-            "Pyro_lvl1"
+            "Pyro_lvl1_alone"
         ],
         encounterModifier: [
         ],
@@ -289,24 +289,7 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            3.0, 4.0
-        ],
-        weight: 10
-    },
-
-
-    //LEVEL 5
-{
-        enemies: [
-            "Pyro_lvl1"
-        ],
-        encounterModifier: [
-        ],
-        biomes: [
-            "wasteland", "bewitched_forest"
-        ],
-        progress: [
-            4.0, 5.0
+            3.0, 5.0
         ],
         weight: 10
     },
@@ -316,7 +299,7 @@ encounter: [
 
     {
         enemies: [
-            "Pyro_lvl1"
+            "Pyro_lvl1_alone"
         ],
         encounterModifier: [
             "Frost"
@@ -325,14 +308,14 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            5.0, 6.0
+            5.0, 7.0
         ],
         weight: 2
     },
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
             "Frost"
@@ -341,14 +324,14 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            5.0, 6.0
+            5.0, 7.0
         ],
         weight: 2
     },
 
     {
         enemies: [
-            "Outlaw_lvl1"
+            "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
             "Rain"
@@ -357,7 +340,7 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            5.0, 6.0
+            5.0, 7.0
         ],
         weight: 1
     },
@@ -367,7 +350,7 @@ encounter: [
 
     {
         enemies: [
-            "Pyro_lvl1", "Outlaw_lvl1"
+            "Pyro_lvl1_partner", "Outlaw_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -375,7 +358,7 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            6.0, 7.0
+            5.0, 7.0
         ],
         weight: 10
     },
@@ -385,7 +368,7 @@ encounter: [
 
     {
         enemies: [
-            "Pyro_lvl1", "Outlaw_lvl1"
+            "Pyro_lvl1_partner", "Outlaw_lvl1_partner"
         ],
         encounterModifier: [
             "Moist"
@@ -394,97 +377,15 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            7.0, 8.0
+            5.0, 7.0
         ],
         weight: 2
     },
 
-    {
-        enemies: [
-            "Pyro_lvl1"
-        ],
-        encounterModifier: [
-            "SteelNerves"
-        ],
-        biomes: [
-            "wasteland", "bewitched_forest"
-        ],
-        progress: [
-            7.0, 8.0
-        ],
-        weight: 5
-    },
-
 
     {
         enemies: [
-            "Outlaw_lvl1", "Outlaw_lvl1"
-        ],
-        encounterModifier: [
-//            "MoneyForNothing"
-        ],
-        biomes: [
-            "wasteland", "bewitched_forest"
-        ],
-        progress: [
-            7.0, 10.0
-        ],
-        weight: 2
-    },
-
-    //LEVEL 9
-
-    {
-        enemies: [
-            "Outlaw_lvl1", "Outlaw_lvl1"
-        ],
-        encounterModifier: [
-            "Rain"
-        ],
-        biomes: [
-            "wasteland", "bewitched_forest"
-        ],
-        progress: [
-            8.0, 10.0
-        ],
-        weight: 1
-    },
-
-    {
-        enemies: [
-            "Outlaw_lvl1", "Pyro_lvl1"
-        ],
-        encounterModifier: [
-            "Moist"
-        ],
-        biomes: [
-            "wasteland", "bewitched_forest"
-        ],
-        progress: [
-            8.0, 10.0
-        ],
-        weight: 2
-    },
-
-    {
-        enemies: [
-            "Outlaw_lvl1", "Pyro_lvl1"
-        ],
-        encounterModifier: [
-        ],
-        biomes: [
-            "wasteland", "bewitched_forest"
-        ],
-        progress: [
-            8.0, 10.0
-        ],
-        weight: 3
-    },
-
-
-    {
-        enemies: [
-            "Outlaw_lvl1", "Pyro_lvl1"
+            "Outlaw_lvl1_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
             "SteelNerves",
@@ -494,7 +395,7 @@ encounter: [
             "wasteland", "bewitched_forest"
         ],
         progress: [
-            9.0, 10.0
+            7.0, 10.0
         ],
         weight: 6
     },
@@ -505,7 +406,7 @@ encounter: [
 
     {
         enemies: [
-            "Witch_lvl1"
+            "Witch_lvl1_alone"
         ],
         encounterModifier: [
         ],
@@ -513,7 +414,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            10.0, 11.0
+            10.0, 13.0
         ],
         weight: 10
     },
@@ -523,7 +424,7 @@ encounter: [
 
     {
         enemies: [
-            "Witch_lvl1"
+            "Witch_lvl1_alone"
         ],
         encounterModifier: [
         ],
@@ -531,7 +432,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            11.0, 12.0
+            10.0, 13.0
         ],
         weight: 10
     },
@@ -541,7 +442,7 @@ encounter: [
 
     {
         enemies: [
-            "Witch_lvl1"
+            "Witch_lvl1_alone"
         ],
         encounterModifier: [
             "Frost"
@@ -550,14 +451,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            12.0, 13.0
+            10.0, 13.0
         ],
         weight: 1
     },
 
     {
         enemies: [
-            "Witch_lvl1"
+            "Witch_lvl1_alone"
         ],
         encounterModifier: [
         ],
@@ -565,14 +466,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            12.0, 13.0
+            10.0, 13.0
         ],
         weight: 1
     },
 
     {
         enemies: [
-            "Outlaw_lvl2"
+            "Outlaw_lvl2_alone"
         ],
         encounterModifier: [
         ],
@@ -580,7 +481,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            12.0, 13.0
+            10.0, 13.0
         ],
         weight: 3
     },
@@ -589,7 +490,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2"
+            "Outlaw_lvl2_alone"
         ],
         encounterModifier: [
         ],
@@ -597,7 +498,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            13.0, 14.0
+            10.0, 13.0
         ],
         weight: 10
     },
@@ -606,7 +507,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Pyro_lvl1"
+            "Outlaw_lvl2_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -614,14 +515,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            14.0, 15.0
+            13.0, 15.0
         ],
         weight: 2
     },
 
     {
         enemies: [
-            "Outlaw_lvl2", "Witch_lvl1"
+            "Outlaw_lvl2_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -629,14 +530,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            14.0, 15.0
+            13.0, 15.0
         ],
         weight: 2
     },
 
     {
         enemies: [
-            "Witch_lvl1", "Pyro_lvl1"
+            "Witch_lvl1_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -644,7 +545,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            14.0, 15.0
+            13.0, 15.0
         ],
         weight: 2
     },
@@ -654,7 +555,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2"
+            "Outlaw_lvl2_alone"
         ],
         encounterModifier: [
 //            "BewitchedShenanigans"
@@ -663,14 +564,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            15.0, 16.0
+            13.0, 15.0
         ],
         weight: 3
     },
 
     {
         enemies: [
-            "Outlaw_lvl2", "Pyro_lvl1"
+            "Outlaw_lvl2_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
 //            "Fog"
@@ -679,7 +580,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            15.0, 16.0
+            15.0, 17.0
         ],
         weight: 3
     },
@@ -688,7 +589,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Pyro_lvl1"
+            "Outlaw_lvl2_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
             "SteelNerves"
@@ -697,13 +598,13 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            16.0, 17.0
+            15.0, 17.0
         ],
         weight: 3
     },
     {
         enemies: [
-            "Outlaw_lvl2", "Witch_lvl1"
+            "Outlaw_lvl2_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
             "BewitchedMist"
@@ -712,7 +613,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            16.0, 17.0
+            15.0, 17.0
         ],
         weight: 3
     },
@@ -721,7 +622,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Outlaw_lvl2"
+            "Outlaw_lvl2_partner", "Outlaw_lvl2_partner"
         ],
         encounterModifier: [
 //            "MoneyForNothing"
@@ -730,14 +631,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            17.0, 18.0
+            15.0, 17.0
         ],
         weight: 3
     },
 
     {
         enemies: [
-            "Outlaw_lvl2", "Witch_lvl1"
+            "Outlaw_lvl2_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
             "Frost",
@@ -747,14 +648,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            17.0, 18.0
+            15.0, 17.0
         ],
         weight: 3
     },
 
     {
         enemies: [
-            "Outlaw_lvl2", "Witch_lvl1"
+            "Outlaw_lvl2_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
             "Rain"
@@ -763,7 +664,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            17.0, 18.0
+            15.0, 17.0
         ],
         weight: 1
     },
@@ -772,7 +673,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Witch_lvl1"
+            "Outlaw_lvl2_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
             "SteelNerves"
@@ -781,14 +682,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            18.0, 20.0
+            17.0, 20.0
         ],
         weight: 3
     },
 
     {
         enemies: [
-            "Pyro_lvl1", "Witch_lvl1"
+            "Pyro_lvl1_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
 //            "Fog"
@@ -797,14 +698,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            18.0, 20.0
+            17.0, 20.0
         ],
         weight: 2
     },
 
     {
         enemies: [
-            "Outlaw_lvl2", "Outlaw_lvl2"
+            "Outlaw_lvl2_partner", "Outlaw_lvl2_partner"
         ],
         encounterModifier: [
             "Rain"
@@ -813,7 +714,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            18.0, 20.0
+            17.0, 20.0
         ],
         weight: 4
     },
@@ -825,7 +726,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Outlaw_lvl1", "Outlaw_lvl1"
+            "Outlaw_lvl1_partner", "Outlaw_lvl1_partner", "Outlaw_lvl1_partner"
         ],
         encounterModifier: [
             "Rain"
@@ -834,14 +735,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            20.0, 21.0
+            20.0, 23.0
         ],
         weight: 1
     },
 
     {
         enemies: [
-            "Outlaw_lvl1", "Outlaw_lvl1", "Outlaw_lvl1"
+            "Outlaw_lvl1_partner", "Outlaw_lvl1_partner", "Outlaw_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -849,7 +750,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            20.0, 21.0
+            20.0, 23.0
         ],
         weight: 7
     },
@@ -858,7 +759,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Pyro_lvl1", "Outlaw_lvl1"
+            "Outlaw_lvl1_partner", "Pyro_lvl1_partner", "Outlaw_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -866,7 +767,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            21.0, 22.0
+            20.0, 23.0
         ],
         weight: 7
     },
@@ -875,7 +776,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Pyro_lvl1", "Witch_lvl1"
+            "Outlaw_lvl1_partner", "Pyro_lvl1_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -883,14 +784,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            22.0, 23.0
+            20.0, 23.0
         ],
         weight: 2
     },
 
     {
         enemies: [
-            "Outlaw_lvl2", "Outlaw_lvl1", "Outlaw_lvl2"
+            "Outlaw_lvl2_partner", "Outlaw_lvl1_partner", "Outlaw_lvl2_partner"
         ],
         encounterModifier: [
 //            "Lookalike"
@@ -899,7 +800,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            22.0, 23.0
+            20.0, 23.0
         ],
         weight: 4
     },
@@ -908,7 +809,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro_lvl1"
+            "Outlaw_lvl1_partner", "Outlaw_lvl1_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
             "Frost"
@@ -917,14 +818,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            23.0, 24.0
+            20.0, 23.0
         ],
         weight: 3
     },
 
     {
         enemies: [
-            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro_lvl1"
+            "Outlaw_lvl1_partner", "Outlaw_lvl1_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
             "Rain"
@@ -933,7 +834,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            23.0, 24.0
+            20.0, 23.0
         ],
         weight: 1
     },
@@ -942,7 +843,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Outlaw_lvl1", "Outlaw_lvl1"
+            "Outlaw_lvl2_partner", "Outlaw_lvl1_partner", "Outlaw_lvl1_partner"
         ],
         encounterModifier: [
 //            "MoneyForNothing"
@@ -951,14 +852,14 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            24.0, 25.0
+            23.0, 26.0
         ],
         weight: 2
     },
 
     {
         enemies: [
-            "Outlaw_lvl1", "Outlaw_lvl1", "Pyro_lvl1"
+            "Outlaw_lvl1_partner", "Outlaw_lvl1_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
             "SteelNerves"
@@ -967,7 +868,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            24.0, 25.0
+            23.0, 26.0
         ],
         weight: 1
     },
@@ -976,7 +877,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Outlaw_lvl1", "Outlaw_lvl1"
+            "Outlaw_lvl2_partner", "Outlaw_lvl1_partner", "Outlaw_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -984,7 +885,7 @@ encounter: [
             "bewitched_forest"
         ],
         progress: [
-            25.0, 26.0
+            23.0, 26.0
         ],
         weight: 10
     },
@@ -995,7 +896,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Witch_lvl1", "Pyro_lvl1"
+            "Outlaw_lvl2_partner", "Witch_lvl1_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -1010,7 +911,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Outlaw_lvl2"
+            "Outlaw_lvl2_partner", "Outlaw_lvl2_partner"
         ],
         encounterModifier: [
             "BewitchedMist",
@@ -1027,7 +928,7 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl2", "Witch_lvl1", "Witch_lvl1"
+            "Outlaw_lvl2_partner", "Witch_lvl1_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
         ],
@@ -1042,7 +943,7 @@ encounter: [
 
     {
         enemies: [
-            "Witch_lvl1", "Outlaw_lvl1", "Witch_lvl1"
+            "Witch_lvl1_partner", "Outlaw_lvl1_partner", "Witch_lvl1_partner"
         ],
         encounterModifier: [
             "BewitchedMist"
@@ -1056,23 +957,4 @@ encounter: [
         weight: 2
     },
 
-
-    // Boss TODO
-
-//    {
-//        enemies: [
-//            "Outlaw_lvl2", "Pyro_lvl1", "Witch_lvl1"
-//        ],
-//        encounterModifier: [
-////            "BewitchedShenanigans",
-////            "SteelNerves"
-//        ],
-//        biomes: [
-//            "bewitched_forest"
-//        ],
-//        progress: [
-//            30.0, 31.0
-//        ],
-//        weight: 100
-//    },
 ]
