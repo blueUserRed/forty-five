@@ -899,9 +899,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 },
                 { revolver.getCardInSlot(5) != null }
             )
-            revolver.getCardInSlot(5)?.let {
-                include(checkEffectsSingleCard(Trigger.ON_ROTATE_IN_5, it))
-            }
         }
         enemyArea
             .enemies
