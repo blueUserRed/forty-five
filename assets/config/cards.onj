@@ -1207,6 +1207,26 @@ cards: [
         tags: ["pool2", "rarity1"],
         price: 70,
     },
+    {
+        name: "molotovBullet",
+        title: "Molotov Bullet",
+        flavourText: "The number of Bullets that can be used to set something or someone on fire is concerning",
+        description: "$trait$SPRAY$trait$\n$trigger$On-leave:$trigger$\nAll enemies get $status$BURNING$status$ (1)",
+        baseDamage: 6,
+        coverValue: 0,
+        traitEffects: [ "spray" ],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giveStatus("shot", burning(1#val, burningPercent, false)),
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool2", "rarity2"],
+        price: 50,
+    },
 
 ],
 

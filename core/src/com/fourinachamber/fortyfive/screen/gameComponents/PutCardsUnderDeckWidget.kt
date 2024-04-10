@@ -74,7 +74,7 @@ class PutCardsUnderDeckWidget(
         super.layout()
         val random = Random(237689)
         val amountCards = cards.size
-        val spacePerCard = (width - cardSize) / amountCards
+        val spacePerCard = (width - cardSize) / (amountCards + 2)
 
         var curX = cardSize / 4
         var curZIndex = 0

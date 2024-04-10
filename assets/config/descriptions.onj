@@ -6,7 +6,7 @@ hoverDetailDescriptions: [
     {
         keyword: "BURNING",
         groupName: "status",
-        description: "$status$BURNING (t)$status$\nBurning increases damage not caused by status effects by 50%.",
+        description: "$status$BURNING (r)$status$\nBurning increases damage not caused by status effects by 50% for r revolver rotations.",
     },
     {
         keyword: "POISON",
