@@ -83,7 +83,7 @@ var settingsBox = $Box {
             {
                 style_priority: 2,
                 style_condition: state("show_settings"),
-                positionTop: 175#points,
+                positionTop: 130#points,
                 style_animation: {
                     duration: 0.2,
                     interpolation: interpolation.pow2
@@ -727,7 +727,7 @@ statusBarTemplates: [
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 justifyContent: justify.flexEnd,
-                paddingBottom: 6.5#percent,
+                paddingBottom: 18#points,
                 touchable: touchable.enabled,
             }
         ],

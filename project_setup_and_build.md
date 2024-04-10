@@ -1,4 +1,7 @@
 
+> If you have any issues, questions or need help, you can join our discord:
+> https://discord.gg/2caBPyXK9B
+
 ## Project Setup
 
 - Clone this repository to your machine

@@ -697,20 +697,37 @@ var putCardsUnderDeckActor = $Box {
     $Box {
         styles: [
             {
-                width: 30#percent,
-                height: 30#percent,
+                width: 40#percent,
+                height: 40#percent,
                 flexDirection: flexDirection.row,
-                alignItems: align.flexStart
+                alignItems: align.flexStart,
+                justifyContent: justify.center,
             }
-        ]
+        ],
     } children [
 
-        $Image {
-            textureName: "draw_bullet",
-            reportDimensionsWithScaling: true,
-            scaleX: 0.4,
-            scaleY: 0.4,
-        },
+        $Box {
+            styles: [
+                {
+                    width: 300#points,
+                    aspectRatio: 1.0,
+                    rotation: -10.0,
+                    positionLeft: -10#points,
+                }
+            ],
+            zIndex: 3,
+            enableTransform: true
+        } children [
+            $Box {
+                styles: [
+                    {
+                        background: "draw_bullet",
+                        width: 100#percent,
+                        height: 100#percent,
+                    }
+                ]
+            }
+        ],
 
         $PutCardsUnderDeckWidget {
             styles: [
@@ -1433,22 +1450,6 @@ var gameScreen = $Box {
     },
 
     playerBar,
-
-    $CardHand {
-        styles: [
-            {
-                width: worldWidth#points,
-                height: 0#points,
-            },
-            {
-                style_condition: state("showPutCardsUnderDeckActor"),
-                positionTop: 314#points,
-            }
-        ],
-        zIndex: 200,
-        ...cardHand
-    },
-
 ];
 
 var playerOverlay = $Box {
@@ -1745,6 +1746,18 @@ root: $Box {
         playerOverlay,
         steelNervesOverlay,
         gameScreen,
+
+        $CardHand {
+            styles: [
+                {
+                    width: worldWidth#points,
+                    positionType: positionType.absolute,
+                    height: 0#points,
+                    positionTop: (worldHeight - 5)#points,
+                },
+            ],
+            ...cardHand
+        },
 
         winScreen,
 
