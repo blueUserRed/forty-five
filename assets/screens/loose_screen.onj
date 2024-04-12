@@ -50,7 +50,7 @@ root: $Box {
 
     $AdvancedText {
         font: "red_wing_bmp",
-        rawText: "A $TERRIBLE$ FAITH...",
+        rawText: "A $TERRIBLE$ FATE...",
         isDistanceField: false,
         defaults: {
             font: "red_wing_bmp",

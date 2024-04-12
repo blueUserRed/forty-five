@@ -30,7 +30,7 @@ assets: {
         "title_screen_bullet_14",
         "title_screen_bullet_15",
 
-        "common_popup_background_black",
+        "common_popup_background_black_large",
         "common_button_default", "common_button_hover",
 
         "main_theme",
@@ -106,7 +106,7 @@ var confirmationPopup = $Box {
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 justifyContent: justify.center,
-                background: "common_popup_background_black"
+                background: "common_popup_background_black_large"
             }
         ],
     } children [
@@ -233,7 +233,7 @@ var inDevelopmentPopup = $Box {
                 flexDirection: flexDirection.column,
                 alignItems: align.center,
                 justifyContent: justify.center,
-                background: "common_popup_background_black"
+                background: "common_popup_background_black_large"
             }
         ],
     } children [
