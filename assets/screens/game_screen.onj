@@ -1753,7 +1753,7 @@ root: $Box {
                     width: worldWidth#points,
                     positionType: positionType.absolute,
                     height: 0#points,
-                    positionTop: (worldHeight - 5)#points,
+                    positionTop: (worldHeight - 2)#points,
                 },
             ],
             ...cardHand
