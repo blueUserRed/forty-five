@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
@@ -13,6 +14,7 @@ import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -966,14 +968,23 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         1.1f
     ).asTimeline(this)
 
-    private fun shieldAnimationTimeline(): Timeline = BannerAnimation(
-        ResourceManager.get(curScreen, "shield_icon"),
-        curScreen,
-        1_500,
-        5000,
-        8.4f,
-        8.1f
-    ).asTimeline(this)
+    private fun shieldAnimationTimeline(): Timeline = Timeline.timeline {
+        val bannerAnim = BannerAnimation(
+            ResourceManager.get(curScreen, "shield_icon_large"),
+            curScreen,
+            1_000,
+            150,
+            0.3f,
+            0.5f,
+            interpolation = Interpolation.pow2In,
+            customShader = ResourceManager.get<BetterShader>(curScreen, "glow_shader_shield")
+        ).asTimeline(this@GameController).asAction()
+        val postProcessorAction = Timeline.timeline {
+            delay(150)
+            include(gameRenderPipeline.getScreenShakeTimeline())
+        }.asAction()
+        parallelActions(bannerAnim, postProcessorAction)
+    }
 
     private fun putCardsUnderDeckTimeline(): Timeline = Timeline.timeline {
         action {
