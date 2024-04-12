@@ -278,6 +278,20 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float, boolean]")
+    fun burningPlayer(
+        rotations: OnjEffectValue,
+        percent: OnjFloat,
+        isInfinite: OnjBoolean
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
+        BurningPlayer(
+            getStatusEffectValue(rotations, controller, card, 1),
+            percent.value.toFloat(),
+            isInfinite.value,
+            skipFirstRotation
+        )
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
     fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         FireResistance(getStatusEffectValue(turns, controller, card, 1))

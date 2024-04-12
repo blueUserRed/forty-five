@@ -966,6 +966,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         1.1f
     ).asTimeline(this)
 
+    private fun shieldAnimationTimeline(): Timeline = BannerAnimation(
+        ResourceManager.get(curScreen, "shield_icon"),
+        curScreen,
+        1_500,
+        5000,
+        8.4f,
+        8.1f
+    ).asTimeline(this)
+
     private fun putCardsUnderDeckTimeline(): Timeline = Timeline.timeline {
         action {
             putCardsUnderDeckWidget.targetSize = cardHand.cards.size - softMaxCards
@@ -991,6 +1000,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             newDamage = playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
         }
+        includeLater({ shieldAnimationTimeline() }, { newDamage!! < damage })
         includeLater(
             { Timeline.timeline {
                 action {
