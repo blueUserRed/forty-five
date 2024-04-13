@@ -991,8 +991,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             customShader = ResourceManager.get<BetterShader>(curScreen, "glow_shader_shield")
         ).asTimeline(this@GameController).asAction()
         val postProcessorAction = Timeline.timeline {
-            delay(150)
-            include(gameRenderPipeline.getScreenShakeTimeline())
+            delay(100)
+            include(gameRenderPipeline.getScreenShakePopoutTimeline())
         }.asAction()
         parallelActions(bannerAnim, postProcessorAction)
     }

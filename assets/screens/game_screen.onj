@@ -65,7 +65,7 @@ assets: {
 
         "revolver_shot_sound", "card_hover_sound", "card_pickup_sound", "card_laydown_sound", "not_allowed_sound",
         "holster_sound", "money_sound", "revolver_drum_sound", "parry_sound", "swoosh_sound", "button_2_sound",
-        "card_destroy_sound", "holster_remove_sound",
+        "card_destroy_sound", "holster_remove_sound", "screen_shake_popout_shader",
 
         "map_theme", "encounter_theme",
 

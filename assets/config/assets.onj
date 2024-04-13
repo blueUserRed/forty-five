@@ -1085,6 +1085,15 @@ shaders: [
         }
     },
     {
+        name: "screen_shake_popout_shader",
+        file: "shaders/screen_shake_popout.glsl",
+        constantArgs: {
+            timeOffset: 0,
+            speed: 30.0,
+            mag: 0.1,
+        }
+    },
+    {
         name: "vignette_shader", // TODO: fix
         file: "shaders/vignette.glsl",
         constantArgs: {
