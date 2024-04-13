@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Utils
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
@@ -171,6 +172,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun discharge(trigger: OnjString, turns: OnjEffectValue): OnjEffect {
         return OnjEffect(Effect.DischargePoison(triggerOrError(trigger.value), turns.value, false))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string, string]")
+    fun addEncounterModifierWhileBulletIsInGame(trigger: OnjString, encounterModifierName: OnjString): OnjEffect {
+        return OnjEffect(Effect.AddEncounterModifierWhileBulletIsInGame(
+            triggerOrError(trigger.value),
+            encounterModifierName.value,
+            false
+        ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, int]")

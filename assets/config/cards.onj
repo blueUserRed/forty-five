@@ -1227,6 +1227,26 @@ cards: [
         tags: ["pool2", "rarity2"],
         price: 50,
     },
+    {
+        name: "wealthyBullet",
+        title: "Wealthy Bullet",
+        flavourText: "",
+        description: "$trigger$While in Revolver:$trigger$\nAll cards not drawn at the beginning of your turn will be doubled.",
+        baseDamage: 8,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            addEncounterModifierWhileBulletIsInGame("enter", "doubleDrawnCards")#hide
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 3,
+        type: $Bullet { },
+        tags: ["pool1", "rarity1"],
+        price: 80,
+    },
 
 ],
 

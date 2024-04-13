@@ -547,6 +547,27 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    class AddEncounterModifierWhileBulletIsInGame(
+        trigger: Trigger,
+        private val encounterModifierName: String,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            action {
+                controller.addTemporaryEncounterModifier(
+                    modifier = EncounterModifier.getFromName(encounterModifierName),
+                    validityChecker = { card.inGame }
+                )
+            }
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect =
+            AddEncounterModifierWhileBulletIsInGame(trigger, encounterModifierName, triggerInHand)
+    }
+
 }
 
 /**
