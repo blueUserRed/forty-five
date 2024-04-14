@@ -112,6 +112,7 @@ sealed class EncounterModifier {
     object DrawOneMoreCard : EncounterModifier() {
 
         override fun additionalCardsToDrawInSpecialDraw(): Int = 1
+        override fun additionalCardsToDrawInNormalDraw(): Int = 1
     }
 
     open fun update(controller: GameController) {}
@@ -136,7 +137,11 @@ sealed class EncounterModifier {
 
     open fun cardsInSpecialDrawMultiplier(): Float = 1f
 
+    open fun cardsInNormalDrawMultiplier(): Float = 1f
+
     open fun additionalCardsToDrawInSpecialDraw(): Int = 0
+
+    open fun additionalCardsToDrawInNormalDraw(): Int = 0
 
     companion object {
 
