@@ -605,13 +605,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (amount <= 0) return@timeline
         var remainingCardsToDraw = amount
         action {
-            if (isSpecial) {
-                remainingCardsToDraw += encounterModifiers.map { it.additionalCardsToDrawInSpecialDraw() }.sum()
-                remainingCardsToDraw = floor(
-                    encounterModifiers
-                        .fold(remainingCardsToDraw.toFloat()) { acc, cur -> acc * cur.cardsInSpecialDrawMultiplier() }
-                ).toInt()
+
+            remainingCardsToDraw += encounterModifiers.sumOf {
+                if (isSpecial) it.additionalCardsToDrawInSpecialDraw() else it.additionalCardsToDrawInNormalDraw()
             }
+
+            remainingCardsToDraw = floor(
+                encounterModifiers
+                    .fold(remainingCardsToDraw.toFloat()) { acc, cur ->
+                        acc * (if (isSpecial) cur.cardsInSpecialDrawMultiplier() else cur.cardsInNormalDrawMultiplier())
+                    }
+            ).toInt()
+
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards: remainingCards = $remainingCardsToDraw; isSpecial = $isSpecial")
             if (remainingCardsToDraw != 0) curScreen.enterState(cardDrawActorScreenState)
