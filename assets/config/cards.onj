@@ -1231,14 +1231,14 @@ cards: [
         name: "wealthyBullet",
         title: "Wealthy Bullet",
         flavourText: "",
-        description: "$trigger$While in Revolver:$trigger$\nAll cards not drawn at the beginning of your turn will be doubled.",
+        description: "$trigger$While in Revolver:$trigger$\nWhen drawing cards excluding the first time in a turn, draw one extra card.",
         baseDamage: 8,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            addEncounterModifierWhileBulletIsInGame("enter", "doubleDrawnCards")#hide
+            addEncounterModifierWhileBulletIsInGame("enter", "drawonemorecard")#hide
         ],
         forceLoadCards: [],
         dark: false,
