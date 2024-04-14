@@ -565,7 +565,9 @@ abstract class Effect(val trigger: Trigger) {
         override fun blocks(controller: GameController): Boolean = false
 
         override fun copy(): Effect =
-            AddEncounterModifierWhileBulletIsInGame(trigger, encounterModifierName, triggerInHand)
+            AddEncounterModifierWhileBulletIsInGame(trigger, encounterModifierName, triggerInHand).also {
+                it.isHidden = isHidden
+            }
     }
 
 }
