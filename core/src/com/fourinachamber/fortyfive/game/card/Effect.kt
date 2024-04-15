@@ -616,6 +616,8 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
     ON_DESTROY(listOf(ON_LEAVE)),
     ON_BOUNCE(listOf(ON_LEAVE)),
     ON_CARDS_DRAWN,
+    ON_ONE_OR_MORE_CARDS_DRAWN,
+    ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN,
     ON_SPECIAL_CARDS_DRAWN,
     ON_REVOLVER_ROTATION,
     ON_ANY_CARD_DESTROY,
@@ -627,16 +629,19 @@ data class TriggerInformation(
     val multiplier: Int? = null,
     val targetedEnemies: List<Enemy>,
     val isOnShot: Boolean = false,
+    val amountOfCardsDrawn: Int = 0,
     val sourceCard: Card? = null
 )
 
 fun GameController.TriggerInformation(
     multiplier: Int? = null,
     isOnShot: Boolean = false,
+    amountOfCardsDrawn: Int = 0,
     sourceCard: Card? = null
 ): TriggerInformation = TriggerInformation(
     multiplier,
     listOf(this.enemyArea.getTargetedEnemy()),
     isOnShot,
+    amountOfCardsDrawn,
     sourceCard
 )
