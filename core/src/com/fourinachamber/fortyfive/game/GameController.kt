@@ -1001,6 +1001,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val postProcessorAction = Timeline.timeline {
             delay(100)
             include(gameRenderPipeline.getScreenShakePopoutTimeline())
+            delay(50)
+            action { SoundPlayer.situation("shield_anim", curScreen) }
         }.asAction()
         parallelActions(bannerAnim, postProcessorAction)
     }
