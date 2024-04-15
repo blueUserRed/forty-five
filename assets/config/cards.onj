@@ -616,7 +616,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["pool1", "rarity1"],
+        tags: ["pool2", "rarity1"],
         price: 50,
     },
     {
@@ -1244,7 +1244,7 @@ cards: [
         dark: false,
         cost: 3,
         type: $Bullet { },
-        tags: ["pool1", "rarity1"],
+        tags: ["pool2", "rarity1"],
         price: 80,
     },
 
