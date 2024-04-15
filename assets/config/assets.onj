@@ -1455,6 +1455,10 @@ sounds: [
         name: "card_destroy_sound",
         file: "large_assets/sounds/card_destroy.wav"
     },
+    {
+        name: "metal_on_metal_sound",
+        file: "large_assets/sounds/metal_on_metal.wav"
+    },
 ],
 
 music: [
