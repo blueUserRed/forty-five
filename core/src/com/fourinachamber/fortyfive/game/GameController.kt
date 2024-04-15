@@ -647,10 +647,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(cardDrawActorScreenState)
             checkCardMaximums()
         }
-        val triggerInfo = TriggerInformation(multiplier = remainingCardsToDraw)
-        includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, triggerInfo) }, { remainingCardsToDraw != 0 })
+        val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw)
+        val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw)
+        includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
         includeLater(
-            { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, triggerInfo) },
+            { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
+            { isSpecial && remainingCardsToDraw != 0 }
+        )
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
+            { remainingCardsToDraw != 0 }
+        )
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
             { isSpecial && remainingCardsToDraw != 0 }
         )
     }

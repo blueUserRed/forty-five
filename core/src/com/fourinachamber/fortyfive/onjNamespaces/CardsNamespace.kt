@@ -9,6 +9,7 @@ import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.*
+import kotlin.math.floor
 import kotlin.reflect.KClass
 
 @Suppress("unused") // variables and functions are read via reflection
@@ -39,6 +40,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             "bulletInSlot2" with OnjEffectValue { controller, _, _ ->
                 controller.revolver.getCardInSlot(5 - 2)?.curDamage(controller) ?: 0
             }
+            "amountOfCardsDrawn" with OnjEffectValue { _, _, triggerValue -> triggerValue!!.amountOfCardsDrawn }
             "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation ->
                 triggerInformation!!.sourceCard!!.curDamage(controller)
             }
@@ -328,14 +330,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "params: [int]", type = OnjFunctionType.CONVERSION)
     fun `val`(value: OnjInt): OnjEffectValue = OnjEffectValue { _, _, _ -> value.value.toInt() }
 
-    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float]", type = OnjFunctionType.OPERATOR)
-    fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
-        (value.value(controller, card, triggerInformation) * multiplier.value).toInt()
-    }
-
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.OPERATOR)
     fun star(value: OnjEffectValue, multiplier: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
-        (value.value(controller, card, triggerInformation) * multiplier.value).toInt()
+        floor(value.value(controller, card, triggerInformation) * multiplier.value.toFloat()).toInt()
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float]", type = OnjFunctionType.OPERATOR)
+    fun star(value: OnjEffectValue, multiplier: OnjFloat): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
+        floor(value.value(controller, card, triggerInformation) * multiplier.value.toFloat()).toInt()
     }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
@@ -370,6 +372,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
         "return home" -> Trigger.ON_RETURNED_HOME
         "rotate in 5" -> Trigger.ON_ROTATE_IN_5
+        "one or more cards drawn" -> Trigger.ON_ONE_OR_MORE_CARDS_DRAWN
+        "special one or more cards drawn" -> Trigger.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 
