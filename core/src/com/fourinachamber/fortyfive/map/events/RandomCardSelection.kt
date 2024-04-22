@@ -115,12 +115,12 @@ object RandomCardSelection {
         unique: Boolean = false,
         cards: List<CardPrototype> = allCardPrototypes,
     ): List<CardPrototype> {
-        val newCards = doCardRarities(cards)
+        val newCards = availableCards(cards)
         val (tempCards, tempChances) = getCardsWithChances(newCards.toMutableList(), typeNames, biome, occasion)
         return getCardsFromChances(nbrOfCards, tempCards, tempChances, rnd, unique)
     }
 
-    private fun doCardRarities(cards: List<CardPrototype>): List<CardPrototype> {
+    fun availableCards(cards: List<CardPrototype>): List<CardPrototype> {
         val newCards = mutableListOf<CardPrototype>()
         // .toSet() to eliminate duplicate cards
         cards.toSet().forEach { card ->

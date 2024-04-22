@@ -3,12 +3,17 @@ package com.fourinachamber.fortyfive.map.events.shop
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.fourinachamber.fortyfive.game.SaveState
+import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
+import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import com.fourinachamber.fortyfive.utils.TemplateString
+import com.fourinachamber.fortyfive.utils.toIntRange
 import com.fourinachamber.fortyfive.utils.toOnjYoga
+import dev.lyze.flexbox.FlexBox
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
@@ -34,10 +39,13 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var cardsParentWidget: CustomScrollableFlexBox
 
-    private lateinit var shopCardsHandler: ShopCardsHandler
-
     private lateinit var addToDeckWidget: CustomImageActor
     private lateinit var addToBackpackWidget: CustomImageActor
+
+    private val cardWidgets: MutableList<CardActor> = mutableListOf()
+    private val labels: MutableList<CustomLabel> = mutableListOf()
+
+    private lateinit var random: Random
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         //TODO fix bug with cards when being on the edge of other cards when drag and dropping
@@ -72,17 +80,10 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val text = personData.get<OnjArray>("texts").value
         val defaults = shopFile.get<OnjObject>("defaults")
 
-        val rnd = Random(context.seed)
-        shopCardsHandler = ShopCardsHandler(
-            screen,
-            cardsParentWidget,
-            context.boughtIndices,
-            cardHoverDetailTemplateName
-        )
-        // TODO: defaultShopParameter ????
-        shopCardsHandler.addItems(rnd, context.types, personData.get<String>("defaultShopParameter"))
+        random = Random(context.seed)
+        addCards(context.types)
 
-        val textToShow = text[(rnd.nextDouble() * text.size).toInt()] as OnjObject
+        val textToShow = text[(random.nextDouble() * text.size).toInt()] as OnjObject
 
         messageWidget.setRawText(
             textToShow.get<String>("rawText"),
@@ -93,6 +94,103 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
                 )
             } ?: listOf()
         )
+    }
+
+    private fun addCards(contextTypes: Set<String>) {
+        if (context.selectedCards.isEmpty()) {
+            val amount = context.amountCards.random(random)
+            val cards = RandomCardSelection.getRandomCards(
+                screen,
+                contextTypes.toList(),
+                amount,
+                random,
+                MapManager.currentDetailMap.biome,
+                "shop",
+                unique = true
+            )
+            context.selectedCards.addAll(cards.map { it.name })
+        }
+        val allPrototypes = RandomCardSelection.allCardPrototypes
+        val availableCards = RandomCardSelection.availableCards(allPrototypes).toMutableList()
+        val cardsToAdd = context
+            .selectedCards
+            .map { name -> allPrototypes.find { it.name == name }!! }
+        println("available $availableCards")
+        cardsToAdd.forEach { cardProto ->
+            println(cardProto.name)
+            val card = cardProto.create(screen)
+            screen.addDisposable(card)
+            addCard(card)
+            println(cardProto in availableCards)
+            if (cardProto !in availableCards) updateStateOfCard(card, setSoldOut = true)
+            availableCards.remove(cardProto)
+        }
+        context.boughtIndices.forEach {
+            val cardActor = cardWidgets[it]
+            val label = labels[it]
+            updateStateOfCard(cardActor.card, setBought = true, label = label)
+        }
+    }
+
+    private fun addCard(card: Card) {
+        val curParent = screen.screenBuilder.generateFromTemplate(
+            "cardsWidgetParent",
+            mapOf(),
+            cardsParentWidget,
+            screen
+        ) as FlexBox
+
+        val tempMap: MutableMap<String, OnjValue> = mutableMapOf()
+        tempMap["name"] = OnjString("Card_${curParent.children.size}")
+        screen.screenBuilder.addDataToWidgetFromTemplate(
+            "cardsWidgetImage",
+            tempMap,
+            curParent,
+            screen,
+            card.actor
+        )
+        val tempMap2: MutableMap<String, OnjValue> = mutableMapOf()
+        tempMap2["name"] = OnjString("CardLabel" + cardsParentWidget.children.size)
+        tempMap2["text"] = OnjString("" + card.price + "$")
+        val label = screen.screenBuilder.generateFromTemplate(
+            "cardsWidgetPrice",
+            tempMap2,
+            curParent,
+            screen
+        ) as CustomLabel
+        cardWidgets.add(card.actor)
+        labels.add(label)
+    }
+
+    private fun updateStatesOfUnboughtCards() {
+        cardWidgets.forEachIndexed { index, cardActor ->
+            if (cardActor.inActorState("bought") || cardActor.inActorState("sold out")) return@forEachIndexed
+            updateStateOfCard(cardActor.card, label = labels[index])
+        }
+    }
+
+    private fun updateStateOfCard(
+        card: Card,
+        setBought: Boolean = false,
+        setSoldOut: Boolean = false,
+        label: CustomLabel = labels[cardWidgets.indexOf(card.actor)]
+    ) {
+        label.leaveActorState("bought")
+        label.leaveActorState("poor")
+        card.actor.leaveActorState("unbuyable")
+        if (!setBought && !setSoldOut && card.price > SaveState.playerMoney) {
+            label.enterActorState("poor")
+            card.actor.enterActorState("unbuyable")
+            return
+        }
+        if (setBought) {
+            label.enterActorState("bought")
+            card.actor.enterActorState("unbuyable")
+        }
+        if (setSoldOut) {
+            label.enterActorState("sold out")
+            card.actor.enterActorState("unbuyable")
+        }
     }
 
     private fun initWidgets(onjScreen: OnjScreen, imgData: OnjObject) {
@@ -125,7 +223,13 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
     }
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
-        shopCardsHandler.buyCard(actor as CardActor, addToDeck)
+        actor as CardActor
+        if (actor.inActorState("bought") || actor.inActorState("sold out")) return
+        if (actor.card.price > SaveState.playerMoney) return
+        SaveState.payMoney(actor.card.price)
+        SaveState.buyCard(actor.card.name)
+        if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), actor.card.name)
+        updateStatesOfUnboughtCards()
     }
 
     fun displayBuyPopups() {

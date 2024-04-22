@@ -7,6 +7,8 @@ import com.fourinachamber.fortyfive.map.detailMap.DetailMapWidget
 import com.fourinachamber.fortyfive.map.detailMap.Direction
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.*
+import com.fourinachamber.fortyfive.utils.TemplateString
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Template
 import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.*
@@ -415,6 +417,33 @@ fun <T> T.addLabelStyles(screen: OnjScreen) where T : CustomLabel, T : StyledAct
     val styleManager = styleManager!!
     styleManager.addStyleProperty(FontScaleStyleProperty(this, screen))
     styleManager.addStyleProperty(UnderlineStyleProperty(this, screen))
+}
+
+
+class TemplateStyleProperty(
+    target: TemplateStringLabel,
+    screen: OnjScreen
+) : StyleProperty<TemplateStringLabel, String>(
+    "template",
+    target,
+    "",
+    String::class,
+    false,
+    false,
+    screen
+) {
+
+    override fun set(data: String, node: YogaNode) {
+        target.templateString = TemplateString(data)
+    }
+
+    override fun get(node: YogaNode): String = target.templateString.rawString
+}
+
+fun <T> T.addTemplateLabelStyles(screen: OnjScreen) where T : TemplateStringLabel, T : StyledActor {
+    addLabelStyles(screen)
+    val styleManager = styleManager!!
+    styleManager.addStyleProperty(TemplateStyleProperty(this, screen))
 }
 
 ///////////////////////////////////////////////////////////////////

@@ -27,6 +27,8 @@ object MapEventFactory {
                 onjObject.get<String>("person"),
                 onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
                 onjObject.get<List<OnjInt>>("boughtIndices").map { it.value.toInt() }.toMutableSet(),
+                onjObject.get<OnjArray>("amountCards").toIntRange(),
+                onjObject.get<OnjArray>("selectedCards").value.map { it.value as String }.toMutableList()
             )
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
@@ -305,7 +307,9 @@ class ShopMapEvent(
     val types: Set<String>,
     val person: String,
     val seed: Long,
-    val boughtIndices: MutableSet<Int>
+    val boughtIndices: MutableSet<Int>,
+    val amountCards: IntRange,
+    val selectedCards: MutableList<String>
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -324,10 +328,12 @@ class ShopMapEvent(
 
     override fun asOnjObject(): OnjObject = buildOnjObject {
         name("ShopMapEvent")
-        ("types" with types)
-        ("person" with person)
-        ("seed" with seed)
-        ("boughtIndices" with boughtIndices)
+        "types" with types
+        "person" with person
+        "seed" with seed
+        "amountCards" with arrayOf(amountCards.first, amountCards.last)
+        "boughtIndices" with boughtIndices
+        "selectedCards" with selectedCards
     }
 }
 

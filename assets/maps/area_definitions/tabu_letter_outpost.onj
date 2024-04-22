@@ -26,6 +26,8 @@ nodes: [
         nodeTexture: "map_node_shop",
         event: $ShopMapEvent {
             seed: null,
+            selectedCards: [],
+            amountCards: [3, 5],
             boughtIndices: [
             ],
             types: [
