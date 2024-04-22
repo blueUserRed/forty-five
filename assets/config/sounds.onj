@@ -12,7 +12,6 @@ situations: [
     },
     {
         name: "card_hover",
-//        sound: null,
         sound: "card_hover_sound",
     },
     {
@@ -95,6 +94,10 @@ situations: [
     {
         name: "enemy_attack",
         sound: "revolver_shot_sound",
+    },
+    {
+        name: "shield_anim",
+        sound: "metal_on_metal_sound",
     },
 ],
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.AnimationDrawable
@@ -64,8 +65,7 @@ class Enemy(
 
     val logTag = "enemy-$name-${++instanceCounter}"
 
-    var brain: EnemyBrain = NoOpEnemyBrain
-        private set
+    private var brain: EnemyBrain = NoOpEnemyBrain
 
     /**
      * the actor that represents this enemy on the screen
@@ -104,8 +104,42 @@ class Enemy(
     val statusEffects: List<StatusEffect>
         get() = _statusEffects
 
+    var additionalDamage: Int = 0
+        private set
+    var additionDamageEffect: StatusEffect? = null
+        private set
+
     init {
         actor = EnemyActor(this, textEmitterConfig, hiddenActionIconHandle, screen)
+    }
+
+    fun chooseNewAction(controller: GameController, difficulty: Double, otherActions: List<NextEnemyAction>): NextEnemyAction {
+        additionalDamage = 0
+        additionDamageEffect = null
+        val nextAction = brain.chooseNewAction(controller, this, difficulty, otherActions)
+        if (
+            nextAction !is NextEnemyAction.ShownEnemyAction ||
+            nextAction.action.prototype !is EnemyActionPrototype.DamagePlayer
+        ) {
+            return nextAction
+        }
+        val additionalDmgActions = controller
+            .playerStatusEffects
+            .zip { it.additionalEnemyDamage(nextAction.action.directDamageDealt, StatusEffectTarget.PlayerTarget) }
+            .filter { it.second != 0 }
+        if (additionalDmgActions.isEmpty()) return nextAction
+        if (additionalDmgActions.size > 1) {
+            FortyFiveLogger.warn(logTag, "Having more than one status effect that increases enemy damage is currently not supported")
+        }
+        val (action, additionalDamage) = additionalDmgActions.first()
+        this.additionalDamage = additionalDamage
+        this.additionDamageEffect = action
+        return nextAction
+    }
+
+    fun resolveAction(controller: GameController, difficulty: Double): EnemyAction? {
+        val action = brain.resolveEnemyAction(controller, this, difficulty)
+        return action
     }
 
     fun onDefeat() {
@@ -285,7 +319,13 @@ class EnemyActor(
     val coverText: CustomLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
     private val attackIndicator = CustomHorizontalGroup(screen)
     private val attackIcon = EnemyActionIcon(screen, hiddenActionIconHandle)
-    private val attackLabel = CustomLabel(screen, "", Label.LabelStyle(enemy.detailFont, fontColor), true)
+
+    private val attackLabel = AdvancedTextWidget(
+        Triple(enemy.detailFont, fontColor, enemy.detailFontScale * 1.5f),
+        screen,
+        true
+    )
+
     private val coverInfoBox = CustomVerticalGroup(screen)
     private val statsBox = CustomVerticalGroup(screen)
 
@@ -347,7 +387,6 @@ class EnemyActor(
         coverText.addAnimationSpawner(coverTextEmitter)
         healthLabel.setFontScale(enemy.detailFontScale)
         coverText.setFontScale(enemy.detailFontScale)
-        attackLabel.setFontScale(enemy.detailFontScale)
 
         // When multiple enemies are in an encounter, the last attackIndicator will override the previous ones,
         // but because the name is only used for the tutorial, this should not be an issue
@@ -415,6 +454,8 @@ class EnemyActor(
         statsBox.width = statsBox.prefWidth
         statsBox.height = statsBox.prefHeight
         statsBox.setPosition(width / 2 - statsBox.width / 2,  -statsBox.height)
+        attackLabel.width = width
+        attackLabel.y = attackLabel.height / 2f
         attackIndicator.setBounds(
             width / 2 - attackIndicator.prefWidth / 2, enemyDrawable.minHeight * enemy.scale + 20f,
             attackIndicator.prefWidth, attackIndicator.prefHeight
@@ -497,18 +538,25 @@ class EnemyActor(
     fun setupForAction(action: NextEnemyAction) = when (action) {
 
         is NextEnemyAction.None -> {
-//            attackIndicator.isVisible = false
-            attackLabel.setText("")
+            attackLabel.advancedText = AdvancedText.EMPTY
         }
 
         is NextEnemyAction.ShownEnemyAction -> {
-            attackLabel.setText(action.action.indicatorText)
-//            attackIndicator.isVisible = true
+            var text = action.action.indicatorText ?: ""
+            val effects = mutableListOf<AdvancedTextParser.AdvancedTextEffect>()
+            if (enemy.additionalDamage != 0) {
+                val iconHandle = enemy.additionDamageEffect!!.icon.backgroundHandle ?: ""
+                val effect = AdvancedTextParser.AdvancedTextEffect.AdvancedColorTextEffect(
+                    "%1%", enemy.additionDamageEffect!!.additionalDamageColor()
+                )
+                effects.add(effect)
+                text += "%1% + ${enemy.additionalDamage}%1% §§$iconHandle§§"
+            }
+            attackLabel.setRawText(text, effects)
         }
 
         is NextEnemyAction.HiddenEnemyAction -> {
-            attackLabel.setText("")
-//            attackIndicator.isVisible = true
+            attackLabel.advancedText = AdvancedText.EMPTY
         }
 
     }.also {
