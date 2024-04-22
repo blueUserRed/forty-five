@@ -15,7 +15,7 @@ var tutorialEncounters = [
             //////////////////////////
 
             {
-                text: "These are your reserves. They are used to pay for cards. The cost of the Card is displayed in the top right corner.",
+                text: "These are your reserves. They are used to pay for cards. The cost of the card is displayed in the top right corner.",
                 confirmationText: "Next",
                 focusActor: "reserves_icon",
                 predicate:  $GameInFreePhase { }
@@ -67,23 +67,23 @@ var tutorialEncounters = [
         forceCards: [ "bullet", "bigBullet", "bullet", "bullet" ],
         tutorialText: [
             {
-                text: "The symbol over the enemy's head indicates the action that the enemy will take on their next turn (after you press ‘end turn’). In this case, it is dealing 6 damage.",
+                text: "The symbol over the enemy's head indicates the action that the enemy will take on their next turn (after you press 'end turn'). In this case, it is dealing 6 damage.",
                 confirmationText: "Next",
                 focusActor: "attackIndicator",
                 predicate:  $GameInFreePhase { }
             },
             {
-                text: "You can parry using a bullet in your revolver. If you have a bullet in slot 5 when the enemy's turn starts, you can either parry or choose not to.",
+                text: "You can parry using a bullet in your revolver. If you have a bullet in slot 5 when the enemy's turn starts, you can choose to parry.",
                 confirmationText: "Next",
                 focusActor: "revolverSlot-4",
             },
             {
-                text: "If you parry, the bullet in slot 5§§revolver_slot_icon_5§§ is gone. When parrying with a bullet, the damage value of the bullet is subtracted from the damage value of the enemy.",
+                text: "If you parry, the bullet in slot 5§§revolver_slot_icon_5§§ is put at the bottom of your deck. When parrying with a bullet, the damage value of the bullet is subtracted from the damage value of the attack.",
                 confirmationText: "Next",
                 focusActor: "revolverSlot-4",
             },
             {
-                text: "If you take too much damage, you die. When you die before you make it to the end of the road, all the cards you collected before reaching the next Area (Aqua Dulche) will be lost. If cards are saved once by reaching an Area, you can't lose them anymore.",
+                text: "If you take too much damage, you die. When you die before you make it to the end of the road, all the cards you collected will be lost. After reaching an Area, your cards are saved and you can't lose them anymore.",
                 confirmationText: "Ok",
             },
         ]
@@ -105,7 +105,7 @@ var tutorialEncounters = [
                 predicate:  $GameInFreePhase { }
             },
             {
-                text: "Each bullet can have a unique effect. There are different ways a bullet's effect can be activated, called triggers.",
+                text: "Each bullet can has an unique effect. There are different ways a bullet's effect can be activated, called triggers.",
                 confirmationText: "Next",
                 focusActor: "card-silverBullet",
             },
@@ -139,13 +139,13 @@ var tutorialEncounters = [
         ],
         tutorialText: [
             {
-                text: "You have drawn your newly obtained card. You can hover over it to see its effect.",
+                text: "You have drawn a newly obtained card. You can hover over it to see its effect.",
                 confirmationText: "Next",
                 focusActor: "card-workerBullet",
                 predicate:  $GameInFreePhase { }
             },
             {
-                text: "Workers Bullet has the trigger: \"While in revolver; at the beginning of your turn:\" This trigger activates as always when you start your turn, under the condition that workers bullet is in the revolver.",
+                text: "Workers Bullet has the trigger: \"While in revolver; at the beginning of your turn:\" This trigger activates when you start your turn, under the condition that Workers Bullet is in the revolver.",
                 confirmationText: "Ok",
                 focusActor: "card-workerBullet",
             },

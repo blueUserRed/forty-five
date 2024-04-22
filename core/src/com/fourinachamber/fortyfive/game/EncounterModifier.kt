@@ -109,6 +109,12 @@ sealed class EncounterModifier {
         }
     }
 
+    object DrawOneMoreCard : EncounterModifier() {
+
+        override fun additionalCardsToDrawInSpecialDraw(): Int = 1
+        override fun additionalCardsToDrawInNormalDraw(): Int = 1
+    }
+
     open fun update(controller: GameController) {}
 
     open fun onStart(controller: GameController) {}
@@ -129,6 +135,14 @@ sealed class EncounterModifier {
 
     open fun executeAfterRevolverRotated(rotation: RevolverRotation, controller: GameController): Timeline? = null
 
+    open fun cardsInSpecialDrawMultiplier(): Float = 1f
+
+    open fun cardsInNormalDrawMultiplier(): Float = 1f
+
+    open fun additionalCardsToDrawInSpecialDraw(): Int = 0
+
+    open fun additionalCardsToDrawInNormalDraw(): Int = 0
+
     companion object {
 
         fun getFromName(name: String) = when (name.lowercase()) {
@@ -138,6 +152,7 @@ sealed class EncounterModifier {
             "steelnerves" -> SteelNerves()
             "lookalike" -> Lookalike
             "moist" -> Moist
+            "drawonemorecard" -> DrawOneMoreCard
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
     }

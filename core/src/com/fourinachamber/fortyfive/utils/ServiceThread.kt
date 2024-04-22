@@ -12,6 +12,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.trySendBlocking
+import kotlin.math.log
 
 class ServiceThread : Thread("ServiceThread") {
 
@@ -28,14 +29,30 @@ class ServiceThread : Thread("ServiceThread") {
     private fun CoroutineScope.launchChannelListener() = launch {
         for (message in channel) {
             FortyFiveLogger.debug(logTag, "received message $message")
-            when (message) {
-
-                is ServiceThreadMessage.PrepareResources -> prepareResources()
-                is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
-                is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
-                is ServiceThreadMessage.PrepareCards -> prepareCards(message)
-
+            try {
+                handleMessage(message)
+            } catch (e: Exception) {
+                FortyFiveLogger.severe(logTag, "encountered exception during processing of message $message")
+                FortyFiveLogger.stackTrace(e)
+                // Retry
+                try {
+                    handleMessage(message)
+                    FortyFiveLogger.debug(logTag, "Retry of message $message worked")
+                } catch (_: Exception) {
+                    FortyFiveLogger.debug(logTag, "Retry failed as well")
+                }
             }
+        }
+    }
+
+    private fun CoroutineScope.handleMessage(message: ServiceThreadMessage) {
+        when (message) {
+
+            is ServiceThreadMessage.PrepareResources -> prepareResources()
+            is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
+            is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
+            is ServiceThreadMessage.PrepareCards -> prepareCards(message)
+
         }
     }
 

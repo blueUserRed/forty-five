@@ -181,23 +181,28 @@ textureAtlases: [
             },
             {
                 handle: "burning_icon",
-                regionName: "burning_icon"
+                regionName: "burning_icon",
+//                useMipMaps: true
             },
             {
                 handle: "insult_icon",
-                regionName: "insult_icon"
+                regionName: "insult_icon",
+//                useMipMaps: true
             },
             {
                 handle: "shield_icon",
-                regionName: "shield_icon"
+                regionName: "shield_icon",
+//                useMipMaps: true
             },
             {
                 handle: "poison_icon",
-                regionName: "poison_icon"
+                regionName: "poison_icon",
+//                useMipMaps: true
             },
             {
                 handle: "bewitched_icon",
-                regionName: "bewitched_icon"
+                regionName: "bewitched_icon",
+//                useMipMaps: true
             },
             {
                 handle: "draw_bullet",
@@ -644,39 +649,48 @@ textures: [
     },
     {
         name: "enemy_action_burning",
-        file: "textures/enemies/action_symbols/burning.png"
+        file: "textures/enemies/action_symbols/burning.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_cover",
-        file: "textures/enemies/action_symbols/cover.png"
+        file: "textures/enemies/action_symbols/cover.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_damage",
-        file: "textures/enemies/action_symbols/damage.png"
+        file: "textures/enemies/action_symbols/damage.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_fire_resistance",
-        file: "textures/enemies/action_symbols/fire_resistance.png"
+        file: "textures/enemies/action_symbols/fire_resistance.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_hot_potato",
-        file: "textures/enemies/action_symbols/hot_potato.png"
+        file: "textures/enemies/action_symbols/hot_potato.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_inferno",
-        file: "textures/enemies/action_symbols/inferno.png"
+        file: "textures/enemies/action_symbols/inferno.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_bewitched",
-        file: "textures/enemies/action_symbols/bewitched.png"
+        file: "textures/enemies/action_symbols/bewitched.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_left_turn",
-        file: "textures/enemies/action_symbols/left_turn.png"
+        file: "textures/enemies/action_symbols/left_turn.png",
+        useMipMaps: true
     },
     {
         name: "enemy_action_unknown",
-        file: "textures/enemies/action_symbols/unknown.png"
+        file: "textures/enemies/action_symbols/unknown.png",
+        useMipMaps: true
     },
     {
         name: "enemy_pyro_action_comic_common_panel_1",
@@ -1022,6 +1036,10 @@ textures: [
         file: "textures/common/symbols/arrow.png",
     },
     {
+        name: "shield_icon_large",
+        file: "textures/game_screen/shield_large.png",
+    },
+    {
         name: "wood_box",
         file: "textures/game_screen/wood_box.png",
         useMipMaps: true,
@@ -1064,6 +1082,15 @@ shaders: [
             timeOffset: 1_500,
             speed: 25.0,
             mag: 0.0028,
+        }
+    },
+    {
+        name: "screen_shake_popout_shader",
+        file: "shaders/screen_shake_popout.glsl",
+        constantArgs: {
+            timeOffset: 0,
+            speed: 30.0,
+            mag: 0.1,
         }
     },
     {
@@ -1115,11 +1142,12 @@ shaders: [
         }
     },
     {
-        name: "glow_shader",
+        name: "glow_shader_shield",
         file: "shaders/glow.glsl",
         constantArgs: {
-            texSize: 569.0,
-            cardSize: 569.0
+            timeOffset: 200.0,
+            texSize: [636.0, 758.0],
+            cardSize: [636.0, 758.0]
         }
     },
     {
@@ -1426,6 +1454,10 @@ sounds: [
     {
         name: "card_destroy_sound",
         file: "large_assets/sounds/card_destroy.wav"
+    },
+    {
+        name: "metal_on_metal_sound",
+        file: "large_assets/sounds/metal_on_metal.wav"
     },
 ],
 

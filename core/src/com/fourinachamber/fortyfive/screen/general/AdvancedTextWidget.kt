@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.screen.ResourceHandle
+import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.HoverStateActor
 import com.fourinachamber.fortyfive.screen.general.customActor.OffSettable
 import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
@@ -24,7 +25,7 @@ import onj.value.OnjObject
 import kotlin.math.sin
 
 open class AdvancedTextWidget(
-    private val defaults: OnjObject,
+    private val defaults: Triple<BitmapFont, Color, Float>,
     val screen: OnjScreen,
     private val isDistanceField: Boolean,
 ) : WidgetGroup(), ZIndexActor, HoverStateActor, StyledActor {
@@ -37,9 +38,8 @@ open class AdvancedTextWidget(
 
     open var advancedText: AdvancedText = AdvancedText.EMPTY
         set(value) {
-            if (field != AdvancedText.EMPTY) clearText() //to reset before, not after assigning
+            if (field != AdvancedText.EMPTY) clearText() // to reset before, not after assigning
             field = value
-//            clearText()
             initText(value)
         }
 
@@ -51,6 +51,12 @@ open class AdvancedTextWidget(
         @Suppress("LeakingThis")
         initText(advancedText)
     }
+
+    constructor(
+        defaults: OnjObject,
+        screen: OnjScreen,
+        isDistanceFiled: Boolean
+    ) : this(AdvancedText.defaultsFromOnj(defaults, screen), screen, isDistanceFiled)
 
     fun setRawText(text: String, effects: List<AdvancedTextParser.AdvancedTextEffect>?) {
         advancedText = AdvancedTextParser(text, screen, defaults, isDistanceField, effects ?: listOf()).parse()
@@ -108,8 +114,12 @@ open class AdvancedTextWidget(
     }
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
-        if (!initialisedStyleInstruction) {
-            styleManager!!.addInstruction(
+        if (!initialisedStyleInstruction) run initStyleInstruction@{
+            val styleManager = styleManager ?: run {
+                initialisedStyleInstruction = true
+                return@initStyleInstruction
+            }
+            styleManager.addInstruction(
                 "height",
                 ObservingStyleInstruction(
                     Integer.MAX_VALUE,
@@ -160,13 +170,19 @@ data class AdvancedText(
             return AdvancedTextParser(
                 rawText,
                 screen,
-                defaults,
+                defaultsFromOnj(defaults, screen),
                 isDistanceField,
                 effects
                 ?.value
                 ?.map { AdvancedTextParser.AdvancedTextEffect.getFromOnj(screen, it as OnjNamedObject) }
                     ?: listOf()).parse()
         }
+
+        fun defaultsFromOnj(onj: OnjObject, screen: OnjScreen): Triple<BitmapFont, Color, Float> = Triple(
+            ResourceManager.get(screen, onj.get<String>("font")) as BitmapFont,
+            onj.get<Color>("color"),
+            onj.get<Double>("fontScale").toFloat()
+        )
     }
 
 }

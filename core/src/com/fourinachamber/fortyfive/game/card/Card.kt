@@ -373,7 +373,7 @@ class Card(
             .zip { it.checkTrigger(trigger, triggerInformation, controller) }
             .filter { it.second != null }
         if (effects.isEmpty()) return@timeline
-        val showAnimation = effects.any { !it.first.isHidden }
+        val showAnimation = !effects.all { it.first.isHidden }
         action {
             actor.inAnimation = true
         }
