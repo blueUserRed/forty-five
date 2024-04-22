@@ -37,14 +37,7 @@ nodes: [
         edgesTo: [
             1, 3
         ],
-        nodeTexture: "map_node_shop",
-        event: $ShopMapEvent {
-            seed: null,
-            boughtIndices: [
-            ],
-            types: [
-            ],
-            person: "traveling_merchant",
+        event: $EmptyMapEvent {
         }
     },
     {

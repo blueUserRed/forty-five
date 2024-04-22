@@ -24,7 +24,8 @@ var decoration = {
 var additionalEventDefinition = {
     nodeTexture: string,
     event: $MapEvent,
-    offset: int[2]
+    offset: int[2],
+    line: int,
 };
 
 var map = {
@@ -49,8 +50,7 @@ var map = {
         nodeTexture: string,
         event: $MapEvent,
     },
-    additionalEvents: additionalEventDefinition[],
-    additionalLineEvents: additionalEventDefinition[],
+    events: additionalEventDefinition[],
     nodeProtectedArea: float,
     decorations: decoration[]
 };

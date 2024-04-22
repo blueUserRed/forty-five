@@ -23,10 +23,11 @@ var mapSharedConfig = {
             distanceToEnd: -1,
         },
     },
-    additionalEvents: [
+    events: [
         {
             nodeTexture: "map_node_heal",
             offset: [2, 3],
+            line: 1,
             event: $HealOrMaxHPEvent {
                 seed: null,
                 healRange: [8, 14],
@@ -35,12 +36,24 @@ var mapSharedConfig = {
                 canBeStarted: true,
                 isCompleted: false,
             }
-        }
-    ],
-    additionalLineEvents: [
+        },
+        {
+            nodeTexture: "map_node_heal",
+            offset: [3, 4],
+            line: 0,
+            event: $HealOrMaxHPEvent {
+                seed: null,
+                healRange: [8, 14],
+                maxHPRange: [0, 0],
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            }
+        },
         {
             nodeTexture: "map_node_choose_card",
             offset: [2, 2],
+            line: 2,
             event: $ChooseCardMapEvent {
                 types: [],
                 seed: null,
@@ -49,8 +62,23 @@ var mapSharedConfig = {
                 canBeStarted: true,
                 isCompleted: false,
             }
+        },
+        {
+            nodeTexture: "map_node_shop",
+            offset: [4, 4],
+            line: 0,
+            event: $ShopMapEvent {
+                seed: null,
+                selectedCards: [],
+                amountCards: [3, 5],
+                boughtIndices: [
+                ],
+                types: [
+                ],
+                person: "traveling_merchant",
+            }
         }
-    ]
+    ],
 };
 
 var decorations = {

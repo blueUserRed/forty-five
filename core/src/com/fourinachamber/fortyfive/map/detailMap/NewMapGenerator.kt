@@ -72,11 +72,16 @@ class NewMapGenerator {
             maxY - minY + data.verticalExtension * 2
         )
 
-        assignEvents(mainLine, data.additionalEvents)
-        assignEvents(addLine1, data.additionalEvents)
-        assignEvents(addLine2, data.additionalEvents)
-        assignEvents(addLine1, data.additionalLinesEvents)
-        assignEvents(addLine2, data.additionalLinesEvents)
+        val sharedEvents = data.events.filter { it.line == -1 }
+        assignEvents(mainLine, sharedEvents)
+        assignEvents(addLine1, sharedEvents)
+        assignEvents(addLine2, sharedEvents)
+        val eventsMainLine = data.events.filter { it.line == 0 }
+        assignEvents(mainLine, eventsMainLine)
+        val eventsLine1 = data.events.filter { it.line == 1 }
+        assignEvents(addLine1, eventsLine1)
+        val eventsLine2 = data.events.filter { it.line == 2 }
+        assignEvents(addLine2, eventsLine2)
 
         startNode.build()
 
@@ -119,15 +124,15 @@ class NewMapGenerator {
         return line
     }
 
-    private fun assignEvents(line: Line, eventsToAssign: List<Triple<IntRange, String, () -> MapEvent>>) {
+    private fun assignEvents(line: Line, eventsToAssign: List<MapGeneratorEventSpawner>) {
         val mainEvent = data.mainEvent
         val events = MutableList(line.nodes.size) { mainEvent }
-        eventsToAssign.forEach { (nextRange, nodeTexture, event) ->
+        eventsToAssign.forEach { (eventCreator, offset, nodeTexture) ->
             var cur = 0
             while (true) {
-                cur += nextRange.random()
+                cur += offset.random()
                 if (cur >= events.size) break
-                events[cur] = nodeTexture to event
+                events[cur] = nodeTexture to eventCreator
             }
         }
         events.forEachIndexed { index, (texture, eventCreator) ->
@@ -249,8 +254,7 @@ class NewMapGenerator {
         val locationSignProtectedAreaWidth: Float,
         val locationSignProtectedAreaHeight: Float,
         val mainEvent: Pair<String, () -> MapEvent>,
-        val additionalEvents: List<Triple<IntRange, String, () -> MapEvent>>,
-        val additionalLinesEvents: List<Triple<IntRange, String, () -> MapEvent>>,
+        val events: List<MapGeneratorEventSpawner>,
         val decorations: List<MapGeneratorDecoration>,
     ) {
 
@@ -276,31 +280,29 @@ class NewMapGenerator {
                 onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
                 onj.access<String>(".mainEvent.nodeTexture") to { MapEventFactory.getMapEvent(onj.access(".mainEvent.event")) },
                 onj
-                    .get<OnjArray>("additionalEvents")
+                    .get<OnjArray>("events")
                     .value
-                    .map {
-                        it as OnjObject
-                        Triple(
-                            it.get<OnjArray>("offset").toIntRange(),
-                            it.get<String>("nodeTexture"),
-                            third = { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
-                        )
-                    },
-                onj
-                    .get<OnjArray>("additionalLineEvents")
-                    .value
-                    .map {
-                        it as OnjObject
-                        Triple(
-                            it.get<OnjArray>("offset").toIntRange(),
-                            it.get<String>("nodeTexture"),
-                            third = { MapEventFactory.getMapEvent(it.get<OnjNamedObject>("event")) }
-                        )
-                    },
+                    .map { MapGeneratorEventSpawner.fromOnj(it as OnjObject) },
                 onj
                     .get<OnjArray>("decorations")
                     .value
                     .map { MapGeneratorDecoration.fromOnj(it as OnjObject) }
+            )
+        }
+    }
+
+    data class MapGeneratorEventSpawner(
+        val eventCreator: () -> MapEvent,
+        val offset: IntRange,
+        val nodeTexture: String,
+        val line: Int,
+    ) {
+        companion object {
+            fun fromOnj(onj: OnjObject): MapGeneratorEventSpawner = MapGeneratorEventSpawner(
+                eventCreator = { MapEventFactory.getMapEvent(onj.get<OnjNamedObject>("event")) },
+                offset = onj.get<OnjArray>("offset").toIntRange(),
+                nodeTexture = onj.get<String>("nodeTexture"),
+                line = onj.get<Long>("line").toInt()
             )
         }
     }

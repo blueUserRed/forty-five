@@ -43,6 +43,8 @@ $MapEvent {
     $ShopMapEvent {
         types: string[],
         person: string,
+        amountCards: int[2],
+        selectedCards: string[],
         seed: int?,
         boughtIndices: int[],
     }

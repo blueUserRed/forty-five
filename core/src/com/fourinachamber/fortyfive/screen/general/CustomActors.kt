@@ -184,7 +184,7 @@ open class CustomLabel @AllThreadsAllowed constructor(
 
 open class TemplateStringLabel @AllThreadsAllowed constructor(
     screen: OnjScreen,
-    private val templateString: TemplateString,
+    var templateString: TemplateString,
     labelStyle: LabelStyle,
     isDistanceField: Boolean,
     hasHoverDetail: Boolean = false,
@@ -209,6 +209,10 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
             setText(newString)
         }
         super.draw(batch, parentAlpha)
+    }
+
+    override fun initStyles(screen: OnjScreen) {
+        addTemplateLabelStyles(screen)
     }
 }
 
