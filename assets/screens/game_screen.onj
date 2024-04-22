@@ -609,7 +609,7 @@ var drawCardActor = $Box {
             }
         ],
         font: "red_wing",
-        template: "draw {game.remainingCardsToDraw} card{game.remainingCardsToDrawPluralS}",
+        template: "{game.drawCardText}",
         fontScale: 1.8,
         align: "center",
         wrap: true,
