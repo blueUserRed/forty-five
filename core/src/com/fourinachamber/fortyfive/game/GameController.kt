@@ -601,7 +601,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         selectedCard = card
     }
 
-    fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true): Timeline = Timeline.timeline {
+    fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true, fromBottom: Boolean = false): Timeline = Timeline.timeline {
         if (amount <= 0) return@timeline
         var remainingCardsToDraw = amount
         action {
@@ -620,10 +620,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards: remainingCards = $remainingCardsToDraw; isSpecial = $isSpecial")
             if (remainingCardsToDraw != 0) curScreen.enterState(cardDrawActorScreenState)
-            TemplateString.updateGlobalParam("game.remainingCardsToDraw", remainingCardsToDraw)
             TemplateString.updateGlobalParam(
-                "game.remainingCardsToDrawPluralS",
-                if (remainingCardsToDraw == 1) "" else "s"
+                "game.drawCardText",
+                "draw ${remainingCardsToDraw pluralS "card"} ${if (fromBottom) "from the bottom of your deck" else ""}"
             )
         }
         includeLater({ maxCardsPopupTimeline() }, { remainingCardsToDraw == 0 })
@@ -633,11 +632,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     SoundPlayer.situation("card_drawn", curScreen)
                     popupEvent = null
-                    drawCard()
-                    TemplateString.updateGlobalParam("game.remainingCardsToDraw", remainingCardsToDraw - cur - 1)
+                    drawCard(fromBottom)
                     TemplateString.updateGlobalParam(
-                        "game.remainingCardsToDrawPluralS",
-                        if (remainingCardsToDraw - cur - 1 == 1) "" else "s"
+                        "game.drawCardText",
+                        "draw ${(remainingCardsToDraw - cur - 1) pluralS "card"} ${if (fromBottom) "from the bottom of your deck" else ""}"
                     )
                 }
             }
@@ -1225,8 +1223,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * draws a bullet from the stack
      */
     @AllThreadsAllowed
-    fun drawCard() {
-        val card = cardStack.removeFirstOrNull() ?: defaultBullet.create(curScreen)
+    fun drawCard(fromBottom: Boolean = false) {
+        val card = (if (!fromBottom) cardStack.removeFirstOrNull() else cardStack.removeLastOrNull())
+            ?: defaultBullet.create(curScreen)
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++
