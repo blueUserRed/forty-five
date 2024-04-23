@@ -206,14 +206,13 @@ class TextAdvancedTextPart(
 
     override val actor: Actor = this
 
-    private val templateString: TemplateString = TemplateString(rawText)
-
     var progress: Int = templateString.string.length
         private set
 
     private val actions: MutableList<AdvancedTextPart.() -> Unit> = mutableListOf()
 
     init {
+        templateString = TemplateString(rawText)
         setFontScale(fontScale)
         skipTextCheck = true
     }

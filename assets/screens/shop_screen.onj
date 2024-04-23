@@ -415,6 +415,7 @@ templates: [
         template_name: "cardsWidgetPrice",
         template_keys: {
             "name": "name",
+            "text": "text",
         },
         name: "",
         text: "bought",

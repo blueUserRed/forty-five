@@ -158,13 +158,14 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             curParent,
             screen
         ) as CustomLabel
+        label.setText("${card.price}$")
         cardWidgets.add(card.actor)
         labels.add(label)
     }
 
     private fun updateStatesOfUnboughtCards() {
         cardWidgets.forEachIndexed { index, cardActor ->
-            if (cardActor.inActorState("bought") || cardActor.inActorState("sold out")) return@forEachIndexed
+            if (cardActor.inActorState("unbuyable")) return@forEachIndexed
             updateStateOfCard(cardActor.card, label = labels[index])
         }
     }
@@ -185,10 +186,12 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         }
         if (setBought) {
             label.enterActorState("bought")
+            label.setText("bought")
             card.actor.enterActorState("unbuyable")
         }
         if (setSoldOut) {
             label.enterActorState("sold out")
+            label.setText("sold out")
             card.actor.enterActorState("unbuyable")
         }
     }
@@ -224,11 +227,13 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     fun buyCard(actor: Actor, addToDeck: Boolean) {
         actor as CardActor
-        if (actor.inActorState("bought") || actor.inActorState("sold out")) return
+        if (actor.inActorState("unbuyable")) return
         if (actor.card.price > SaveState.playerMoney) return
         SaveState.payMoney(actor.card.price)
         SaveState.buyCard(actor.card.name)
+        context.boughtIndices.add(cardWidgets.indexOf(actor))
         if (addToDeck) SaveState.curDeck.addToDeck(SaveState.curDeck.nextFreeSlot(), actor.card.name)
+        updateStateOfCard(actor.card, setBought = true)
         updateStatesOfUnboughtCards()
     }
 
