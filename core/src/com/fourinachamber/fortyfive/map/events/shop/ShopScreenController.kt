@@ -98,6 +98,10 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
 
     @EventHandler
     fun rerollShop(event: ButtonClickEvent, actor: CustomLabel) {
+        val rerollPrice = context.currentRerollPrice
+        if (SaveState.playerMoney < rerollPrice) return
+        SaveState.payMoney(rerollPrice)
+        context.amountOfRerolls++
         context.boughtIndices.clear()
         context.selectedCards.clear()
         context.seed = Random(context.seed).nextLong()
@@ -140,6 +144,7 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
             val label = labels[it]
             updateStateOfCard(cardActor.card, setBought = true, label = label)
         }
+        TemplateString.updateGlobalParam("shop.currentRerollPrice", context.currentRerollPrice)
     }
 
     private fun addCard(card: Card) {

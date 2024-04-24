@@ -28,7 +28,10 @@ object MapEventFactory {
                 onjObject.get<Long?>("seed") ?: (Math.random() * 1000).toLong(),
                 onjObject.get<List<OnjInt>>("boughtIndices").map { it.value.toInt() }.toMutableSet(),
                 onjObject.get<OnjArray>("amountCards").toIntRange(),
-                onjObject.get<OnjArray>("selectedCards").value.map { it.value as String }.toMutableList()
+                onjObject.get<OnjArray>("selectedCards").value.map { it.value as String }.toMutableList(),
+                onjObject.get<Long>("amountOfRerolls").toInt(),
+                onjObject.get<Long>("rerollPriceIncrease").toInt(),
+                onjObject.get<Long>("rerollBasePrice").toInt(),
             )
         },
         "ChooseCardMapEvent" to { ChooseCardMapEvent(it) },
@@ -309,7 +312,10 @@ class ShopMapEvent(
     var seed: Long,
     val boughtIndices: MutableSet<Int>,
     val amountCards: IntRange,
-    val selectedCards: MutableList<String>
+    val selectedCards: MutableList<String>,
+    var amountOfRerolls: Int,
+    val rerollPriceIncrease: Int,
+    val rerollBasePrice: Int,
 ) : MapEvent() {
 
     override var currentlyBlocks: Boolean = false
@@ -321,6 +327,9 @@ class ShopMapEvent(
     override val descriptionText: String = ""
     override val displayName: String = "Shop"
     override val buttonText: String = "Enter"
+
+    val currentRerollPrice: Int
+        get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
     override fun start() {
         MapManager.changeToShopScreen(this)
@@ -334,6 +343,9 @@ class ShopMapEvent(
         "amountCards" with arrayOf(amountCards.first, amountCards.last)
         "boughtIndices" with boughtIndices
         "selectedCards" with selectedCards
+        "amountOfRerolls" with amountOfRerolls
+        "rerollPriceIncrease" with rerollPriceIncrease
+        "rerollBasePrice" with rerollBasePrice
     }
 }
 

@@ -346,8 +346,8 @@ root: $Box {
             fontScale: 0.7,
             align: "center",
         },
-        $Label {
-            text: "reroll Shop",
+        $TemplateLabel {
+            template: "reroll Shop: {shop.currentRerollPrice}",
             debug: true,
             onClick: "rerollShop",
             font: "red_wing_cm",

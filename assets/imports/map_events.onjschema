@@ -46,6 +46,9 @@ $MapEvent {
         amountCards: int[2],
         selectedCards: string[],
         seed: int?,
+        amountOfRerolls: int,
+        rerollPriceIncrease: int,
+        rerollBasePrice: int,
         boughtIndices: int[],
     }
 

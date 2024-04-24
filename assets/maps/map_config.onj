@@ -71,6 +71,9 @@ var mapSharedConfig = {
                 seed: null,
                 selectedCards: [],
                 amountCards: [3, 5],
+                amountOfRerolls: 0,
+                rerollPriceIncrease: 30,
+                rerollBasePrice: 30,
                 boughtIndices: [
                 ],
                 types: [
