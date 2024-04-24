@@ -1116,6 +1116,24 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
+    fun putBulletFromRevolverUnderTheDeck(slot: Int): Timeline = Timeline.timeline {
+        var card: Card? = null
+        action {
+            card = revolver.getCardInSlot(slot)
+        }
+        includeLater(
+            { checkEffectsSingleCard(Trigger.ON_LEAVE, card!!) },
+            { card != null }
+        )
+        action {
+            @Suppress("NAME_SHADOWING")
+            val card = card ?: return@action
+            revolver.removeCard(slot)
+            card.leaveGame()
+            cardStack.add(card)
+        }
+    }
+
     fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
