@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fortyfive.game.enemy.Enemy
+import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
 import com.fourinachamber.fortyfive.map.detailMap.DetailMap
 import com.fourinachamber.fortyfive.map.detailMap.EncounterMapEvent
@@ -45,7 +46,7 @@ class GameDirector(private val controller: GameController) {
 
     fun chooseEnemyActions() {
         controller.activeEnemies.forEach { enemy ->
-            val nextAction = enemy.brain.chooseNewAction(controller, enemy, difficulty, listOf())
+            val nextAction = enemy.chooseNewAction(controller, difficulty, listOf())
             enemy.actor.setupForAction(NextEnemyAction.None) // make sure current action is cleared
             enemy.actor.setupForAction(nextAction)
         }
@@ -53,10 +54,11 @@ class GameDirector(private val controller: GameController) {
 
     fun checkActions(): Timeline = Timeline.timeline {
         controller.activeEnemies.forEach { enemy ->
-            val action = enemy.brain.resolveEnemyAction(controller, enemy, difficulty)
+            val action = enemy.resolveAction(controller, difficulty)
             action?.let {
                 include(enemy.actor.enemyActionAnimationTimeline(it, controller))
-                include(it.getTimeline())
+                val data = EnemyAction.ExecutionData(newDamage = it.directDamageDealt + enemy.additionalDamage)
+                include(it.getTimeline(data))
             }
             action {
                 enemy.actor.setupForAction(NextEnemyAction.None)

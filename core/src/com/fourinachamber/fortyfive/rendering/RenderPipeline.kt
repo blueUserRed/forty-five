@@ -64,6 +64,11 @@ open class RenderPipeline(
     }
     private val screenShakeShader: BetterShader by screenShakeShaderDelegate
 
+    private val screenShakePopoutShaderDelegate = lazy {
+        ResourceManager.get<BetterShader>(screen, "screen_shake_popout_shader")
+    }
+    private val screenShakePopoutShader: BetterShader by screenShakePopoutShaderDelegate
+
     private val gaussianBlurShaderDelegate = lazy {
         ResourceManager.get<BetterShader>(screen, "gaussian_blur_shader")
     }
@@ -81,6 +86,10 @@ open class RenderPipeline(
 
     private val screenShakePostProcessingStep: () -> Unit by lazy {
         shaderPostProcessingStep(screenShakeShader)
+    }
+
+    private val screenShakePopoutPostProcessingStep: () -> Unit by lazy {
+        shaderPostProcessingStep(screenShakePopoutShader)
     }
 
     private val fadeToBlackTask: () -> Unit = {
@@ -120,6 +129,13 @@ open class RenderPipeline(
         action { postPreprocessingSteps.add(screenShakePostProcessingStep) }
         delay(200)
         action { postPreprocessingSteps.remove(screenShakePostProcessingStep) }
+    } else Timeline()
+
+    fun getScreenShakePopoutTimeline(): Timeline = if (UserPrefs.enableScreenShake) Timeline.timeline {
+        action { screenShakePopoutShader.resetReferenceTime() }
+        action { postPreprocessingSteps.add(screenShakePopoutPostProcessingStep) }
+        delay(((1f / 30f) * 1000f).toInt())
+        action { postPreprocessingSteps.remove(screenShakePopoutPostProcessingStep) }
     } else Timeline()
 
     private fun updateOrbFbo(delta: Float) {
@@ -369,6 +385,7 @@ open class RenderPipeline(
         if (gaussianBlurShaderDelegate.isInitialized()) gaussianBlurShader.dispose()
         if (alphaReductionShaderDelegate.isInitialized()) alphaReductionShader.dispose()
         if (screenShakeShaderDelegate.isInitialized()) screenShakeShader.dispose()
+        if (screenShakePopoutShaderDelegate.isInitialized()) screenShakePopoutShader.dispose()
     }
 
     data class OrbAnimation(

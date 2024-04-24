@@ -17,8 +17,9 @@ varying vec2 v_texCoords;
 varying vec4 v_position;
 uniform sampler2D u_texture;
 
-%constArg ca_texSize float
-%constArg ca_cardSize float
+%constArg ca_texSize vec2
+%constArg ca_cardSize vec2
+%constArg ca_timeOffset float
 
 %uniform u_time
 
@@ -39,12 +40,12 @@ void main() {
     vec4 baseColor = v_color * texture2D(u_texture, v_texCoords);
 
     float intervall = 1.0;
-    float time = u_time;
+    float time = u_time + ca_timeOffset;
     time = mod(time, intervall) / intervall;
     time = time * 4.0 - 2.0;
 
-    vec2 texCoords = v_texCoords * ca_texSize;
-    vec2 inCard = mod(texCoords, ca_cardSize);
+    vec2 texCoords = vec2(v_texCoords.x * ca_texSize.x, v_texCoords.y * ca_texSize.y);
+    vec2 inCard = vec2(mod(texCoords.x, ca_cardSize.x), mod(texCoords.y, ca_cardSize.y));
     vec2 pos = inCard / ca_cardSize;
 
     float dist = distanceFromGlow(time, pos);

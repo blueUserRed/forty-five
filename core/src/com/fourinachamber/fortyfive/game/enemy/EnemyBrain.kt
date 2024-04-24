@@ -319,7 +319,7 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
     }
 
     private fun burning(rotations: Int, enemy: Enemy) = EnemyActionPrototype.GivePlayerStatusEffect(
-        { _, _, skipFirstRotation -> Burning(rotations, 0.5f, false, skipFirstRotation) },
+        { _, _, skipFirstRotation -> BurningPlayer(rotations, 0.5f, false, skipFirstRotation) },
         enemy,
         true
     ).apply {
@@ -333,7 +333,7 @@ class PyroEnemyBrain(onj: OnjObject) : EnemyBrain() {
     }
 
     private fun inferno(enemy: Enemy) = EnemyActionPrototype.GivePlayerStatusEffect(
-        { _, _, skipFirstRotation -> Burning(0, 0.5f, true, skipFirstRotation) },
+        { _, _, skipFirstRotation -> BurningPlayer(0, 0.5f, true, skipFirstRotation) },
         enemy,
         true
     ).apply {

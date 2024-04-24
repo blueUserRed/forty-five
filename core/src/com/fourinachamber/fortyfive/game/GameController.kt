@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
@@ -13,6 +14,7 @@ import com.fourinachamber.fortyfive.game.card.TriggerInformation
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.GameRenderPipeline
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -31,6 +33,7 @@ import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import onj.value.OnjString
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
@@ -161,9 +164,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var encounterContext: EncounterContext
         private set
 
-    private val _encounterModifiers: MutableList<EncounterModifier> = mutableListOf()
+    private val _encounterModifiers: MutableList<Pair<((GameController) -> Boolean)?, EncounterModifier>> = mutableListOf()
+
     val encounterModifiers: List<EncounterModifier>
-        get() = _encounterModifiers
+        get() = _encounterModifiers.map { it.second }
 
     var reservesSpent: Int = 0
         private set
@@ -336,6 +340,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
+        _encounterModifiers.removeIf { it.first?.invoke(this)?.not() ?: false }
         encounterModifiers.forEach { it.update(this) }
 
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
@@ -471,7 +476,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun addEncounterModifier(modifier: EncounterModifier) {
-        _encounterModifiers.add(modifier)
+        _encounterModifiers.add(null to modifier)
         val parent = (curScreen.namedActorOrError(encounterModifierParentName) as? FlexBox
                 ?: throw RuntimeException("actor named $encounterModifierParentName must be a FlexBox"))
         curScreen.screenBuilder.generateFromTemplate(
@@ -485,6 +490,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen
         )!!
         parent.invalidateHierarchy()
+    }
+
+    fun addTemporaryEncounterModifier(modifier: EncounterModifier, validityChecker: (GameController) -> Boolean) {
+        _encounterModifiers.add(validityChecker to modifier)
     }
 
     /**
@@ -523,7 +532,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         includeLater(
             {
-                _encounterModifiers
+                encounterModifiers
                     .mapNotNull { it.executeAfterBulletWasPlacedInRevolver(card, this@GameController) }
                     .collectTimeline()
             },
@@ -594,17 +603,28 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         selectedCard = card
     }
 
-    fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true): Timeline = Timeline.timeline {
+    fun drawCardPopupTimeline(amount: Int, isSpecial: Boolean = true, fromBottom: Boolean = false): Timeline = Timeline.timeline {
         if (amount <= 0) return@timeline
         var remainingCardsToDraw = amount
         action {
+
+            remainingCardsToDraw += encounterModifiers.sumOf {
+                if (isSpecial) it.additionalCardsToDrawInSpecialDraw() else it.additionalCardsToDrawInNormalDraw()
+            }
+
+            remainingCardsToDraw = floor(
+                encounterModifiers
+                    .fold(remainingCardsToDraw.toFloat()) { acc, cur ->
+                        acc * (if (isSpecial) cur.cardsInSpecialDrawMultiplier() else cur.cardsInNormalDrawMultiplier())
+                    }
+            ).toInt()
+
             remainingCardsToDraw = remainingCardsToDraw.coerceAtMost(hardMaxCards - cardHand.cards.size)
             FortyFiveLogger.debug(logTag, "drawing cards: remainingCards = $remainingCardsToDraw; isSpecial = $isSpecial")
             if (remainingCardsToDraw != 0) curScreen.enterState(cardDrawActorScreenState)
-            TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount)
             TemplateString.updateGlobalParam(
-                "game.remainingCardsToDrawPluralS",
-                if (amount == 1) "" else "s"
+                "game.drawCardText",
+                "draw ${remainingCardsToDraw pluralS "card"} ${if (fromBottom) "from the bottom of your deck" else ""}"
             )
         }
         includeLater({ maxCardsPopupTimeline() }, { remainingCardsToDraw == 0 })
@@ -614,11 +634,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     SoundPlayer.situation("card_drawn", curScreen)
                     popupEvent = null
-                    drawCard()
-                    TemplateString.updateGlobalParam("game.remainingCardsToDraw", amount - cur - 1)
+                    drawCard(fromBottom)
                     TemplateString.updateGlobalParam(
-                        "game.remainingCardsToDrawPluralS",
-                        if (amount - cur - 1 == 1) "" else "s"
+                        "game.drawCardText",
+                        "draw ${(remainingCardsToDraw - cur - 1) pluralS "card"} ${if (fromBottom) "from the bottom of your deck" else ""}"
                     )
                 }
             }
@@ -628,10 +647,19 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(cardDrawActorScreenState)
             checkCardMaximums()
         }
-        val triggerInfo = TriggerInformation(multiplier = remainingCardsToDraw)
-        includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, triggerInfo) }, { remainingCardsToDraw != 0 })
+        val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw)
+        val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw)
+        includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
         includeLater(
-            { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, triggerInfo) },
+            { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
+            { isSpecial && remainingCardsToDraw != 0 }
+        )
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
+            { remainingCardsToDraw != 0 }
+        )
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN, oneOrMoreDrawnTriggerInfo) },
             { isSpecial && remainingCardsToDraw != 0 }
         )
     }
@@ -836,7 +864,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 }
             }
             include(rotateRevolver(rotationDirection))
-            _encounterModifiers
+            encounterModifiers
                 .mapNotNull { it.executeAfterRevolverWasShot(cardToShoot, this@GameController) }
                 .collectTimeline()
                 .let { include(it) }
@@ -858,7 +886,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     )
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
-        if (_encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
+        if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
         action {
             enemy.applyEffect(statusEffect)
         }
@@ -875,7 +903,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 .mapNotNull { it.card }
                 .forEach { it.onRevolverRotation(newRotation) }
         }
-        _encounterModifiers
+        encounterModifiers
             .mapNotNull { it.executeAfterRevolverRotated(newRotation, this@GameController) }
             .collectTimeline()
             .let { include(it) }
@@ -901,9 +929,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 },
                 { revolver.getCardInSlot(5) != null }
             )
-            revolver.getCardInSlot(5)?.let {
-                include(checkEffectsSingleCard(Trigger.ON_ROTATE_IN_5, it))
-            }
         }
         enemyArea
             .enemies
@@ -915,7 +940,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private fun <T> modifiers(initial: T, transformer: (modifier: EncounterModifier, cur: T) -> T): T {
         var cur = initial
-        _encounterModifiers.forEach { cur = transformer(it, cur) }
+        encounterModifiers.forEach { cur = transformer(it, cur) }
         return cur
     }
 
@@ -971,6 +996,26 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         1.1f
     ).asTimeline(this)
 
+    private fun shieldAnimationTimeline(): Timeline = Timeline.timeline {
+        val bannerAnim = BannerAnimation(
+            ResourceManager.get(curScreen, "shield_icon_large"),
+            curScreen,
+            1_000,
+            150,
+            0.3f,
+            0.5f,
+            interpolation = Interpolation.pow2In,
+            customShader = ResourceManager.get<BetterShader>(curScreen, "glow_shader_shield")
+        ).asTimeline(this@GameController).asAction()
+        val postProcessorAction = Timeline.timeline {
+            delay(100)
+            include(gameRenderPipeline.getScreenShakePopoutTimeline())
+            delay(50)
+            action { SoundPlayer.situation("shield_anim", curScreen) }
+        }.asAction()
+        parallelActions(bannerAnim, postProcessorAction)
+    }
+
     private fun putCardsUnderDeckTimeline(): Timeline = Timeline.timeline {
         action {
             putCardsUnderDeckWidget.targetSize = cardHand.cards.size - softMaxCards
@@ -996,6 +1041,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             newDamage = playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
         }
+        includeLater({ shieldAnimationTimeline() }, { newDamage!! < damage })
         includeLater(
             { Timeline.timeline {
                 action {
@@ -1179,8 +1225,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * draws a bullet from the stack
      */
     @AllThreadsAllowed
-    fun drawCard() {
-        val card = cardStack.removeFirstOrNull() ?: defaultBullet.create(curScreen)
+    fun drawCard(fromBottom: Boolean = false) {
+        val card = (if (!fromBottom) cardStack.removeFirstOrNull() else cardStack.removeLastOrNull())
+            ?: defaultBullet.create(curScreen)
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++

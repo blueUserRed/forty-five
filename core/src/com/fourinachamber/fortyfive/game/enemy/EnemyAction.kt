@@ -16,10 +16,15 @@ class EnemyAction(
     val indicatorText: String?,
     val descriptionParams: Map<String, Any>,
     val prototype: EnemyActionPrototype,
-    private val timelineCreator: Timeline.TimelineBuilderDSL.() -> Unit
+    val directDamageDealt: Int = 0,
+    private val timelineCreator: Timeline.TimelineBuilderDSL.(data: ExecutionData) -> Unit
 ) {
 
-    fun getTimeline(): Timeline = Timeline.timeline { timelineCreator(this) }
+    fun getTimeline(data: ExecutionData): Timeline = Timeline.timeline { timelineCreator(this, data) }
+
+    data class ExecutionData(
+        val newDamage: Int = 0
+    )
 
 }
 
@@ -50,8 +55,8 @@ sealed class EnemyActionPrototype(
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
             val damage = damage.scale(scale * scaleFactor).random()
-            return EnemyAction(damage.toString(), mapOf("damage" to damage), this) {
-                include(controller.enemyAttackTimeline(damage))
+            return EnemyAction(damage.toString(), mapOf("damage" to damage), this, damage) { data ->
+                include(controller.enemyAttackTimeline(data.newDamage))
             }
         }
     }
