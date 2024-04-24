@@ -1116,6 +1116,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
+    fun putBulletFromRevolverUnderTheDeck(card: Card): Timeline = Timeline.timeline {
+        var slot: Int = -1
+        action {
+            if (card !in revolver.slots.mapNotNull { it.card }) {
+                throw RuntimeException("cant put card $card back because it isn't in the revolver")
+            }
+            slot = revolver.slots.indexOfFirst { it.card === card }
+        }
+        includeLater(
+            { putBulletFromRevolverUnderTheDeck(slot) },
+            { true }
+        )
+    }
+
     fun putBulletFromRevolverUnderTheDeck(slot: Int): Timeline = Timeline.timeline {
         var card: Card? = null
         action {
@@ -1130,6 +1144,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val card = card ?: return@action
             revolver.removeCard(slot)
             card.leaveGame()
+            cardStack.add(card)
+        }
+    }
+
+    fun putBulletFromHandBackUnderTheDeck(card: Card): Timeline = Timeline.timeline {
+        action {
+            if (card !in cardHand.cards) return@action
+            cardHand.removeCard(card)
             cardStack.add(card)
         }
     }

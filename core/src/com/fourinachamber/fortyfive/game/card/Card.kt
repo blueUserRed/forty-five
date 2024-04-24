@@ -13,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable
+import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
@@ -178,6 +180,13 @@ class Card(
 
     var rotationCounter: Int = 0
         private set
+
+    var isMarked: Boolean
+        set(value) {
+            actor.isMarked = value
+        }
+        get() = actor.isMarked
+
 
     init {
         screen.borrowResource(cardTexturePrefix + name)
@@ -672,6 +681,10 @@ class CardActor(
         ResourceManager.get(screen, "dissolve_shader") // TODO: fix
     }
 
+    private val markedSymbol: TransformDrawable by lazy {
+        ResourceManager.get(screen, "card_symbol_marked")
+    }
+
     private val cardTexture: Texture = ResourceManager.get(screen, card.drawableHandle)
 
     private val pixmap: Pixmap = Pixmap(cardTexture.width, cardTexture.height, Pixmap.Format.RGBA8888)
@@ -696,6 +709,8 @@ class CardActor(
     private var inSelectionMode: Boolean = false
 
     var playSoundsOnHover: Boolean = false
+
+    var isMarked: Boolean = false
 
     init {
         bindHoverStateListeners(this)
@@ -795,6 +810,15 @@ class CardActor(
         batch.color = c
         batch.flush()
         shader?.let { batch.shader = null }
+        if (!isMarked) return
+        markedSymbol.draw(
+            batch,
+            x + offsetX, y + offsetY,
+            width / 2, height / 2,
+            width, height,
+            scaleX, scaleY,
+            rotation
+        )
     }
 
     fun disposeTexture() {
@@ -994,9 +1018,6 @@ class CardActor(
 
     override fun initStyles(screen: OnjScreen) {
         addActorStyles(screen)
-//        addBackgroundStyles(screen) //Maybe these are needed, probably not
-//        addDisableStyles(screen)
-//        addOffsetableStyles(screen)
     }
 
 }

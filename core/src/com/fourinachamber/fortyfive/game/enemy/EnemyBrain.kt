@@ -157,7 +157,7 @@ class SniperEnemyBrain(
 
     override fun onActionResolution(action: EnemyAction?) {
         action ?: return
-        justExecutedHeadsUp = action.prototype is EnemyActionPrototype.HeadsUpOrRatherDown
+        justExecutedHeadsUp = action.prototype is EnemyActionPrototype.MarkCards
     }
 }
 
