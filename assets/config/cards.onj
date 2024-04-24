@@ -1247,6 +1247,26 @@ cards: [
         tags: ["pool2", "rarity1"],
         price: 80,
     },
+    {
+        name: "shovelBullet",
+        title: "Shovel Bullet",
+        flavourText: "",
+        description: "$trigger$On-Placedown:$trigger$\nDraw a card from the bottom of the deck",
+        baseDamage: 9,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            drawFromBottomOfDeck("enter", 1#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 40,
+    },
 
 ],
 
