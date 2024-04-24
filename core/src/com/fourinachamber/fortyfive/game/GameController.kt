@@ -664,7 +664,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         )
     }
 
-    fun enemyAttackTimeline(damage: Int): Timeline = Timeline.timeline {
+    fun enemyAttackTimeline(damage: Int, isPiercing: Boolean = false): Timeline = Timeline.timeline {
         var parryCard: Card? = null
         var remainingDamage: Int? = null
         action {
@@ -717,7 +717,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         SoundPlayer.situation("enemy_attack", curScreen)
                     }
                     includeLater(
-                        { damagePlayerTimeline(remainingDamage!!) },
+                        { damagePlayerTimeline(remainingDamage!!, isPiercing = isPiercing) },
                         { true }
                     )
                 }
@@ -1036,10 +1036,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * damages the player
      */
     @AllThreadsAllowed
-    fun damagePlayerTimeline(damage: Int, triggeredByStatusEffect: Boolean = false): Timeline = Timeline.timeline {
+    fun damagePlayerTimeline(
+        damage: Int,
+        triggeredByStatusEffect: Boolean = false,
+        isPiercing: Boolean = false
+    ): Timeline = Timeline.timeline {
         var newDamage: Int? = null
         action {
-            newDamage = playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
+            newDamage = if (isPiercing) {
+                damage
+            } else {
+                playerStatusEffects.fold(damage) { acc, cur -> cur.modifyDamage(acc) }
+            }
         }
         includeLater({ shieldAnimationTimeline() }, { newDamage!! < damage })
         includeLater(

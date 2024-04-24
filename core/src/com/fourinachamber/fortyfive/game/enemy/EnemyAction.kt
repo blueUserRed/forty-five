@@ -203,6 +203,30 @@ sealed class EnemyActionPrototype(
 
     }
 
+    class HeadsUpOrRatherDown(
+        enemy: Enemy,
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
+
+        override fun create(controller: GameController, scale: Double): EnemyAction {
+            TODO("Not yet implemented")
+        }
+    }
+
+    class PiercingDamage(
+        private val damage: IntRange,
+        enemy: Enemy,
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
+
+        override fun create(controller: GameController, scale: Double): EnemyAction {
+            val damage = damage.scale(scale * scaleFactor).random()
+            return EnemyAction(damage.toString(), mapOf("damage" to damage), this, damage) { data ->
+                include(controller.enemyAttackTimeline(data.newDamage, isPiercing = true))
+            }
+        }
+    }
+
     companion object {
 
         fun fromOnj(obj: OnjNamedObject, forEnemy: Enemy): EnemyActionPrototype = when (obj.name) {
@@ -248,6 +272,11 @@ sealed class EnemyActionPrototype(
             )
             "GivePlayerCard" -> GivePlayerCard(
                 obj.get<String>("card"),
+                forEnemy,
+                obj.get<Boolean>("hasSpecialAnimation")
+            )
+            "PiercingDamage" -> PiercingDamage(
+                obj.get<OnjArray>("damage").toIntRange(),
                 forEnemy,
                 obj.get<Boolean>("hasSpecialAnimation")
             )
