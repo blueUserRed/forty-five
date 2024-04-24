@@ -95,10 +95,10 @@ class PopupSelectionEvent(val cardNum: Int) : Event()
 /**
  * binds a listener for the [ButtonClickEvent] to this actor
  */
-inline fun Actor.onButtonClick(crossinline block: @MainThreadOnly () -> Unit) {
+inline fun Actor.onButtonClick(crossinline block: @MainThreadOnly (Event) -> Unit) {
     this.addListener { event ->
         if (event !is ButtonClickEvent) return@addListener false
-        block()
+        block(event)
         true
     }
 }

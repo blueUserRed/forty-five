@@ -8,10 +8,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
-import com.badlogic.gdx.scenes.scene2d.utils.DragListener
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
@@ -244,6 +242,7 @@ class ScreenBuilder(val file: FileHandle) {
         playAmbientSounds = options.get<Boolean>("playAmbientSounds")
         options.ifHas<OnjNamedObject>("screenController") {
             screenController = ScreenControllerFactory.controllerOrError(it.name, it)
+            screenController?.initEventHandler()
         }
         options.ifHas<Double>("transitionAwayTime") {
             transitionAwayTime = (it * 1000).toInt()
@@ -741,6 +740,10 @@ class ScreenBuilder(val file: FileHandle) {
 
         if (widgetOnj.getOr("setFillParent", false)) {
             if (this is Layout) setFillParent(true)
+        }
+
+        widgetOnj.ifHas<String>("onClick") { name -> // TODO: support more of these
+            this.onButtonClick { event -> screenController?.handleEventListener(name, event) }
         }
 
         onClick { fire(ButtonClickEvent()) }

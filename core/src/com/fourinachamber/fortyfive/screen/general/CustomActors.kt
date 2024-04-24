@@ -20,7 +20,6 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
-import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -30,6 +29,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.*
 import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import dev.lyze.flexbox.FlexBox
+import io.github.orioncraftmc.meditate.YogaNode
 import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import ktx.actors.*
@@ -484,6 +484,25 @@ open class CustomFlexBox(
         "hoverText" to OnjString(hoverText)
     ).also {
         it.putAll(additionalHoverData)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun getAllChildren(): List<Pair<YogaNode, Actor>> {
+        val field = FlexBox::class.java.getDeclaredField("nodes")
+        field.isAccessible = true
+        val result: com.badlogic.gdx.utils.Array<Any> = field.get(this) as com.badlogic.gdx.utils.Array<Any>
+        val innerClass = FlexBox::class.java.declaredClasses.find { it.simpleName == "YogaActor" }!!
+        val getNode = innerClass.getDeclaredMethod("getNode")
+        val getActor = innerClass.getDeclaredMethod("getActor")
+        getNode.isAccessible = true
+        getActor.isAccessible = true
+        return result.map {
+            getNode.invoke(it) as YogaNode to getActor.invoke(it) as Actor
+        }
+    }
+
+    override fun clear() {
+        getAllChildren().forEach { remove(it.first) }
     }
 
     override fun detach() {
