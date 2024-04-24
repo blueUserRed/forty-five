@@ -91,6 +91,10 @@ nodes: [
             nbrOfCards: 1,
             currentlyBlocks: true,
             canBeStarted: true,
+            amountOfRerolls: 0,
+            rerollPriceIncrease: 30,
+            rerollBasePrice: 30,
+            enableRerolls: false,
             isCompleted: false
         },
     },
@@ -123,6 +127,10 @@ nodes: [
             nbrOfCards: 1,
             currentlyBlocks: true,
             canBeStarted: true,
+            amountOfRerolls: 0,
+            rerollPriceIncrease: 30,
+            rerollBasePrice: 30,
+            enableRerolls: false,
             isCompleted: false
         },
     },

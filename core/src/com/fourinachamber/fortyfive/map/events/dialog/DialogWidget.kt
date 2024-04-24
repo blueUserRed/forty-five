@@ -118,9 +118,13 @@ class DialogWidget(
             action {
                 val context = object : ChooseCardScreenContext {
                     override val forwardToScreen: String = part.nextScreen
-                    override val seed: Long = -1
+                    override var seed: Long = -1
                     override val nbrOfCards: Int = 1
                     override val types: List<String> = listOf()
+                    override val enableRerolls: Boolean = false
+                    override var amountOfRerolls: Int = 0
+                    override val rerollPriceIncrease: Int = 0
+                    override val rerollBasePrice: Int = 0
                     override val forceCards: List<String> = listOf(part.card)
                     override fun completed() {}
                 }

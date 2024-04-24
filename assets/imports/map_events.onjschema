@@ -59,6 +59,7 @@ $MapEvent {
         amountOfRerolls: int,
         rerollPriceIncrease: int,
         rerollBasePrice: int,
+        enableRerolls: boolean,
         ...mapEventStandardConfig
     }
 
