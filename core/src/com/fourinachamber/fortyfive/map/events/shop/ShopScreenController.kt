@@ -96,6 +96,19 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         )
     }
 
+    @EventHandler
+    fun rerollShop(event: ButtonClickEvent, actor: CustomLabel) {
+        context.boughtIndices.clear()
+        context.selectedCards.clear()
+        context.seed = Random(context.seed).nextLong()
+        screen.removeAllStyleManagersOfChildren(cardsParentWidget)
+        cardsParentWidget.clear()
+        cardWidgets.clear()
+        labels.forEach { (it.parent as FlexBox).remove(it.styleManager!!.node) }
+        labels.clear()
+        addCards(context.types)
+    }
+
     private fun addCards(contextTypes: Set<String>) {
         if (context.selectedCards.isEmpty()) {
             val amount = context.amountCards.random(random)
@@ -115,13 +128,10 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         val cardsToAdd = context
             .selectedCards
             .map { name -> allPrototypes.find { it.name == name }!! }
-        println("available $availableCards")
         cardsToAdd.forEach { cardProto ->
-            println(cardProto.name)
             val card = cardProto.create(screen)
             screen.addDisposable(card)
             addCard(card)
-            println(cardProto in availableCards)
             if (cardProto !in availableCards) updateStateOfCard(card, setSoldOut = true)
             availableCards.remove(cardProto)
         }

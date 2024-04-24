@@ -345,6 +345,15 @@ root: $Box {
             color: color.forty_white,
             fontScale: 0.7,
             align: "center",
+        },
+        $Label {
+            text: "reroll Shop",
+            debug: true,
+            onClick: "rerollShop",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.7,
+            align: "center",
         }
     ],
     $Statusbar {

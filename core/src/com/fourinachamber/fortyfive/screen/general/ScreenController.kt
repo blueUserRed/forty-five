@@ -13,6 +13,7 @@ import com.fourinachamber.fortyfive.screen.gameComponents.CreditScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.TitleScreenController
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
 import onj.value.OnjNamedObject
 
@@ -49,6 +50,8 @@ object ScreenControllerFactory {
  */
 abstract class ScreenController {
 
+    private val eventHandlers: MutableMap<String, (Event) -> Unit> = mutableMapOf()
+
     /**
      * called when this is set as a controller for a screen
      */
@@ -73,4 +76,23 @@ abstract class ScreenController {
     @MainThreadOnly
     open fun onUnhandledEvent(event: Event) { }
 
+    fun initEventHandler() {
+        val eventHandlers: Map<String, (Event) -> Unit> = this::class
+            .java
+            .methods
+            .filter { it.isAnnotationPresent(EventHandler::class.java) }
+            .associate { it.name to { event -> it.invoke(this, event, event.target) } }
+        this.eventHandlers.putAll(eventHandlers)
+    }
+
+    fun handleEventListener(name: String, event: Event) {
+        val handler = eventHandlers[name] ?: run {
+            FortyFiveLogger.warn("screen", "No event handler named $name in class ${this::class.simpleName}")
+            return
+        }
+        handler(event)
+    }
+
 }
+
+annotation class EventHandler

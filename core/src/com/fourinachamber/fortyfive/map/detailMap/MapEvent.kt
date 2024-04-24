@@ -306,7 +306,7 @@ class NPCMapEvent(onj: OnjObject) : MapEvent() {
 class ShopMapEvent(
     val types: Set<String>,
     val person: String,
-    val seed: Long,
+    var seed: Long,
     val boughtIndices: MutableSet<Int>,
     val amountCards: IntRange,
     val selectedCards: MutableList<String>

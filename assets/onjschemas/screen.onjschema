@@ -38,6 +38,7 @@ var widgetSharedKeys = {
     dragAndDrop?: $DragAndDropBehaviour,
     setFillParent?: boolean,
     alpha?: float,
+    onClick?: string,
     actorStates?: string[], //default, on creation
 };
 

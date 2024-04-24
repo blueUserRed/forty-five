@@ -341,6 +341,11 @@ open class OnjScreen @MainThreadOnly constructor(
         }
     }
 
+    fun removeAllStyleManagersOfChildren(group: Group) = group
+        .children
+        .filter { it is StyledActor }
+        .forEach { removeAllStyleManagers(it as StyledActor) }
+
     private fun hideHoverDetail() {
 
         val currentHoverDetail = currentHoverDetail
