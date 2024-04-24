@@ -5,10 +5,7 @@ import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.GamePredicate
 import com.fourinachamber.fortyfive.game.StatusEffectCreator
 import com.fourinachamber.fortyfive.screen.ResourceHandle
-import com.fourinachamber.fortyfive.utils.Timeline
-import com.fourinachamber.fortyfive.utils.Utils
-import com.fourinachamber.fortyfive.utils.scale
-import com.fourinachamber.fortyfive.utils.toIntRange
+import com.fourinachamber.fortyfive.utils.*
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import kotlin.random.Random
@@ -204,13 +201,54 @@ sealed class EnemyActionPrototype(
 
     }
 
-    class HeadsUpOrRatherDown(
+    class MarkCards(
+        private val amountToMark: IntRange,
         enemy: Enemy,
         hasSpecialAnimation: Boolean
     ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
 
         override fun create(controller: GameController, scale: Double): EnemyAction {
-            TODO("Not yet implemented")
+            val amount = amountToMark.random()
+            return EnemyAction(null, mapOf("amount" to amount), this) {
+                action {
+                    controller.cardHand.cards.take(amount).forEach { it.isMarked = true }
+                }
+            }
+        }
+    }
+
+    class PutMarkedCardsUnderDeck(
+        enemy: Enemy,
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
+
+        override fun create(
+            controller: GameController,
+            scale: Double
+        ): EnemyAction = EnemyAction(null, mapOf(), this) {
+            includeLater(
+                {
+                    controller
+                        .revolver
+                        .slots
+                        .mapNotNull { it.card }
+                        .filter { it.isMarked }
+                        .map { controller.putBulletFromRevolverUnderTheDeck(it) }
+                        .collectTimeline()
+                },
+                { true }
+            )
+            includeLater(
+                {
+                    controller
+                        .cardHand
+                        .cards
+                        .filter { it.isMarked }
+                        .map { controller.putBulletFromHandBackUnderTheDeck(it) }
+                        .collectTimeline()
+                },
+                { true }
+            )
         }
     }
 
@@ -301,6 +339,15 @@ sealed class EnemyActionPrototype(
             )
             "PutBulletFromRevolverUnderDeck" -> PutBulletFromRevolverUnderDeck(
                 obj.get<OnjArray>("possibleSlots").value.map { (it.value as Long).toInt() },
+                forEnemy,
+                obj.get<Boolean>("hasSpecialAnimation")
+            )
+            "MarkCards" -> MarkCards(
+                obj.get<OnjArray>("amountToMark").toIntRange(),
+                forEnemy,
+                obj.get<Boolean>("hasSpecialAnimation")
+            )
+            "PutMarkedCardsUnderDeck" -> PutMarkedCardsUnderDeck(
                 forEnemy,
                 obj.get<Boolean>("hasSpecialAnimation")
             )

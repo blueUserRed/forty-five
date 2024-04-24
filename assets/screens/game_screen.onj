@@ -54,6 +54,8 @@ assets: {
         "enemy_witch_action_comic_panel_bewitched", "enemy_witch_action_comic_panel_wrath_of_the_witch",
         "enemy_witch_action_comic_panel_ward_of_the_witch",
 
+        "card_symbol_marked",
+
         "tutorial_actor_shader",
 
         "enemy_outlaw",

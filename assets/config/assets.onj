@@ -881,6 +881,11 @@ textures: [
         file: "textures/cards/symbols/not_saved.png"
     },
     {
+        name: "card_symbol_marked",
+        file: "textures/cards/symbols/marked.png",
+        useMipMaps: true,
+    },
+    {
         name: "microwave_studios_logo",
         file: "textures/microwave_studios.png",
         useMipMaps: true

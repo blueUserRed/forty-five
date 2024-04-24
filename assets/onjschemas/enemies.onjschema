@@ -66,6 +66,15 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
+    $MarkCards {
+        amountToMark: int[2],
+       ...enemyActionSharedKeys
+    }
+
+    $PutMarkedCardsUnderDeck {
+       ...enemyActionSharedKeys
+    }
+
 }
 
 $EnemyBrain {
