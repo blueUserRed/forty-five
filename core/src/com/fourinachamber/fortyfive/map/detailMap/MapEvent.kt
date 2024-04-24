@@ -365,6 +365,7 @@ class ChooseCardMapEvent(
 
     override val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
 
+    override val enableRerolls: Boolean = onj.get<Boolean>("enableRerolls")
     override var amountOfRerolls: Int = onj.get<Long>("amountOfRerolls").toInt()
     override val rerollPriceIncrease: Int = onj.get<Long>("rerollPriceIncrease").toInt()
     override val rerollBasePrice: Int = onj.get<Long>("rerollBasePrice").toInt()
@@ -398,6 +399,7 @@ class ChooseCardMapEvent(
         ("types" with types)
         ("seed" with seed)
         ("nbrOfCards" with nbrOfCards)
+        "enableRerolls" with enableRerolls
         "amountOfRerolls" with amountOfRerolls
         "rerollPriceIncrease" with rerollPriceIncrease
         "rerollBasePrice" with rerollBasePrice

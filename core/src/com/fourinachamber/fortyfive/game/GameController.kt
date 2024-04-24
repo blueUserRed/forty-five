@@ -1298,6 +1298,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     override var seed: Long = TimeUtils.millis()
                     override val nbrOfCards: Int = 3
                     override val types: List<String> = listOf()
+                    override val enableRerolls: Boolean = true
                     override var amountOfRerolls: Int = 0
                     override val rerollPriceIncrease: Int = rewardRerollPriceIncrease
                     override val rerollBasePrice: Int = rewardRerollBasePrice

@@ -40,6 +40,7 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         this.context = context
         addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
+        if (!context.enableRerolls) screen.enterState("disable rerolls")
         initCards()
     }
 
@@ -184,6 +185,7 @@ interface ChooseCardScreenContext {
     val nbrOfCards: Int
     val types: List<String>
 
+    val enableRerolls: Boolean
     var amountOfRerolls: Int
     val rerollPriceIncrease: Int
     val rerollBasePrice: Int

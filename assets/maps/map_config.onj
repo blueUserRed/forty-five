@@ -61,6 +61,7 @@ var mapSharedConfig = {
                 amountOfRerolls: 0,
                 rerollPriceIncrease: 30,
                 rerollBasePrice: 30,
+                enableRerolls: true,
                 currentlyBlocks: false,
                 canBeStarted: true,
                 isCompleted: false,

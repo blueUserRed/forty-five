@@ -264,27 +264,28 @@ root: $Box { //TODO bioms
             fontScale: 0.7,
             align: "center",
         },
-        $TemplateLabel {
-            template: "reroll: {screen.chooseCard.currentRerollPrice}$",
-            font: "red_wing_cm",
-            color: color.forty_white,
-            fontScale: 0.7,
-            align: "center",
-            onClick: "reroll",
-        },
-        //        $Label {   //this one not used because of phillip beeing indesicive
-//            name: "leaveLabel",
-//            text: "Take no Bullet",
-//            font: "red_wing_cm",
-//            color: color.red,
-//            fontScale: 0.7,
-//            align: "center",
-//            behaviours: [
-//                $OnClickChangeScreenBehaviour {
-//                    screenPath: "screens/map_screen.onj"
-//                },
-//            ],
-//        },
+        $Box {
+            styles: [
+                {
+                    style_priority: 1,
+                    detached: false
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("disable rerolls"),
+                    detached: true
+                }
+            ],
+        } children [
+            $TemplateLabel {
+                template: "reroll: {screen.chooseCard.currentRerollPrice}$",
+                font: "red_wing_cm",
+                color: color.forty_white,
+                fontScale: 0.7,
+                align: "center",
+                onClick: "reroll",
+            },
+        ]
 
     ],
     $Statusbar {
