@@ -264,6 +264,14 @@ root: $Box { //TODO bioms
             fontScale: 0.7,
             align: "center",
         },
+        $TemplateLabel {
+            template: "reroll: {screen.chooseCard.currentRerollPrice}$",
+            font: "red_wing_cm",
+            color: color.forty_white,
+            fontScale: 0.7,
+            align: "center",
+            onClick: "reroll",
+        },
         //        $Label {   //this one not used because of phillip beeing indesicive
 //            name: "leaveLabel",
 //            text: "Take no Bullet",

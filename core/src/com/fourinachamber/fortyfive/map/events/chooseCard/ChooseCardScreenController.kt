@@ -1,20 +1,16 @@
 package com.fourinachamber.fortyfive.map.events.chooseCard
 
 import com.badlogic.gdx.scenes.scene2d.Event
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.detailMap.ChooseCardMapEvent
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.TemplateString
 import com.fourinachamber.fortyfive.utils.toOnjYoga
 import io.github.orioncraftmc.meditate.enums.YogaUnit
-import onj.parser.OnjParser
-import onj.value.OnjArray
 import onj.value.OnjFloat
 import onj.value.OnjObject
 import onj.value.OnjString
@@ -42,24 +38,23 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         }
         this.screen = onjScreen
         this.context = context
-        init(onjScreen, context.seed, context.types.toMutableList(), context.nbrOfCards, context.forceCards)
+        addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
+        addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
+        initCards()
     }
 
-    private fun init(
-        screen: OnjScreen,
-        seed: Long,
-        types: MutableList<String>,
-        nbrOfCards: Int,
-        forceCards: List<String>?
-    ) {
+    private fun initCards(newCards: Boolean = false) = with(context) {
 
-        val cards = forceCards?.let { getFixedCards(it) } ?: getRandomCards(seed, types, nbrOfCards)
+        val cards = if (newCards) {
+            getRandomCards(seed, types, nbrOfCards)
+        } else {
+            forceCards?.let { getFixedCards(it) } ?: getRandomCards(seed, types, nbrOfCards)
+        }
 
         FortyFiveLogger.debug(
             logTag,
             "Generated with seed $seed and the types $types the following cards: ${cards.map { it.name }}"
         )
-//        addListener(screen) //philip said for now not this feature bec he is indecisive
         initCards(screen, cards)
         if (cards.isEmpty()) screen.enterState("no_cards_left")
         if (cards.size > 1) {
@@ -67,16 +62,28 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         } else {
             TemplateString.updateGlobalParam("screen.chooseCard.text", "You get one Bullet")
         }
-        this.addToDeckWidget = screen.namedActorOrError(addToDeckWidgetName) as CustomImageActor
-        this.addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
+        TemplateString.updateGlobalParam("screen.chooseCard.currentRerollPrice", currentRerollPrice)
         updateDropTargets()
+    }
+
+    @EventHandler
+    fun reroll(event: ButtonClickEvent, actor: CustomLabel) {
+        val price = context.currentRerollPrice
+        if (SaveState.playerMoney < price) return
+        SaveState.payMoney(price)
+        context.amountOfRerolls++
+        val parent = screen.namedActorOrError(cardsParentName) as CustomFlexBox
+        screen.removeAllStyleManagersOfChildren(parent)
+        parent.clear()
+        context.seed = Random(context.seed).nextLong()
+        initCards(newCards = true)
     }
 
     override fun onUnhandledEvent(event: Event) {
         if (event is PopupConfirmationEvent) MapManager.changeToMapScreen()
     }
 
-    private fun getRandomCards(seed: Long, types: MutableList<String>, nbrOfCards: Int): List<CardPrototype> {
+    private fun getRandomCards(seed: Long, types: List<String>, nbrOfCards: Int): List<CardPrototype> {
         val rnd = Random(seed)
         return RandomCardSelection.getRandomCards(
             screen,
@@ -148,10 +155,6 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
         return points
     }
 
-    private fun addListener(screen: OnjScreen) {
-        (screen.namedActorOrError(leaveButtonName) as CustomLabel).onButtonClick { context?.completed() }
-    }
-
     private fun updateDropTargets() {
         if (!SaveState.curDeck.canAddCards()) addToDeckWidget.enterActorState("disabled")
         else addToDeckWidget.leaveActorState("disabled")
@@ -177,9 +180,16 @@ class ChooseCardScreenController(onj: OnjObject) : ScreenController() {
 interface ChooseCardScreenContext {
 
     val forwardToScreen: String
-    val seed: Long
+    var seed: Long
     val nbrOfCards: Int
     val types: List<String>
+
+    var amountOfRerolls: Int
+    val rerollPriceIncrease: Int
+    val rerollBasePrice: Int
+
+    val currentRerollPrice: Int
+        get() = rerollBasePrice + rerollPriceIncrease * amountOfRerolls
 
     val forceCards: List<String>?
         get() = null

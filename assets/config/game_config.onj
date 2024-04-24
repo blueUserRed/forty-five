@@ -7,7 +7,12 @@ cardDrawConfig: {
     roundStart: 2,
     softMaxCards: 12,
     hardMaxCards: 20,
-    chooseCardRewardPercantage: 1.0
+},
+
+rewardConfig: {
+    percentage: 1.0,
+    rerollBasePrice: 30,
+    rerollPriceIncrease: 30,
 },
 
 playerConfig: {

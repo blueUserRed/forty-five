@@ -69,6 +69,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     val hardMaxCards = onj.get<Long>("hardMaxCards").toInt()
 
     private val rewardChance = onj.get<Double>("rewardChance").toFloat()
+    private val rewardRerollBasePrice = onj.get<Long>("rewardRerollBasePrice").toInt()
+    private val rewardRerollPriceIncrease = onj.get<Long>("rewardRerollPriceIncrease").toInt()
 
     private val shotEmptyDamage = onj.get<Long>("shotEmptyDamage").toInt()
 
@@ -1293,9 +1295,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
                 val chooseCardContext = object : ChooseCardScreenContext {
                     override val forwardToScreen: String = encounterContext.forwardToScreen
-                    override val seed: Long = TimeUtils.millis()
+                    override var seed: Long = TimeUtils.millis()
                     override val nbrOfCards: Int = 3
                     override val types: List<String> = listOf()
+                    override var amountOfRerolls: Int = 0
+                    override val rerollPriceIncrease: Int = rewardRerollPriceIncrease
+                    override val rerollBasePrice: Int = rewardRerollBasePrice
+
                     override fun completed() { }
                 }
 
