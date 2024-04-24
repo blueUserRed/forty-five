@@ -6,6 +6,7 @@ import com.fourinachamber.fortyfive.game.GamePredicate
 import com.fourinachamber.fortyfive.game.StatusEffectCreator
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.Timeline
+import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.scale
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.value.OnjArray
@@ -227,6 +228,24 @@ sealed class EnemyActionPrototype(
         }
     }
 
+    class PutBulletFromRevolverUnderDeck(
+        private val possibleSlots: List<Int>,
+        enemy: Enemy,
+        hasSpecialAnimation: Boolean
+    ) : EnemyActionPrototype(enemy, hasSpecialAnimation) {
+
+        override fun create(controller: GameController, scale: Double): EnemyAction {
+            val slot = possibleSlots.random()
+            return EnemyAction(
+                null,
+                mapOf("slot" to Utils.convertSlotRepresentation(slot)),
+                this,
+            ) {
+                include(controller.putBulletFromRevolverUnderTheDeck(slot))
+            }
+        }
+    }
+
     companion object {
 
         fun fromOnj(obj: OnjNamedObject, forEnemy: Enemy): EnemyActionPrototype = when (obj.name) {
@@ -277,6 +296,11 @@ sealed class EnemyActionPrototype(
             )
             "PiercingDamage" -> PiercingDamage(
                 obj.get<OnjArray>("damage").toIntRange(),
+                forEnemy,
+                obj.get<Boolean>("hasSpecialAnimation")
+            )
+            "PutBulletFromRevolverUnderDeck" -> PutBulletFromRevolverUnderDeck(
+                obj.get<OnjArray>("possibleSlots").value.map { (it.value as Long).toInt() },
                 forEnemy,
                 obj.get<Boolean>("hasSpecialAnimation")
             )
