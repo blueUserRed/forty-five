@@ -1,10 +1,12 @@
 package com.fourinachamber.fortyfive.game
 
+import com.badlogic.gdx.graphics.Color
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.general.CustomImageActor
+import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.pluralS
 import kotlin.math.floor
@@ -49,6 +51,10 @@ abstract class StatusEffect(
     open fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline? = null
 
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
+
+    open fun additionalEnemyDamage(damage: Int, target: StatusEffectTarget): Int = 0
+
+    open fun additionalDamageColor(): Color = Color.RED
 
     abstract fun canStackWith(other: StatusEffect): Boolean
 
@@ -176,6 +182,9 @@ class Burning(
     override val effectType: StatusEffectType = StatusEffectType.FIRE
 
     override fun executeAfterDamage(damage: Int, target: StatusEffectTarget): Timeline = Timeline.timeline {
+        if (target is StatusEffectTarget.PlayerTarget) {
+            FortyFiveLogger.warn("BurningStatus", "Burning should only be used on the enemy, consider using BurningPlayer instead")
+        }
         if (target.isBlocked(this@Burning, controller)) return Timeline()
         val additionalDamage = floor(damage * percent).toInt()
         include(target.damage(additionalDamage, controller))
@@ -189,6 +198,38 @@ class Burning(
     }
 
     override fun equals(other: Any?): Boolean = other is Burning
+}
+
+class BurningPlayer(
+    rotations: Int,
+    private val percent: Float,
+    continueForever: Boolean,
+    skipFirstRotation: Boolean,
+) : RotationBasedStatusEffect(
+    GraphicsConfig.iconName("burning"),
+    GraphicsConfig.iconScale("burning"),
+    rotations,
+    skipFirstRotation,
+) {
+
+    init {
+        if (continueForever) continueForever()
+    }
+
+    override val name: String = "burning"
+
+    override val effectType: StatusEffectType = StatusEffectType.FIRE
+
+    override fun canStackWith(other: StatusEffect): Boolean = other is BurningPlayer && other.percent == percent
+
+    override fun additionalEnemyDamage(damage: Int, target: StatusEffectTarget): Int = floor(damage * percent).toInt()
+
+    override fun stack(other: StatusEffect) {
+        other as BurningPlayer
+        stackRotationEffect(other)
+    }
+
+    override fun equals(other: Any?): Boolean = other is BurningPlayer
 }
 
 class Poison(

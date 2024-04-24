@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Utils
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.builder.buildOnjObject
@@ -9,6 +10,7 @@ import onj.customization.Namespace.*
 import onj.customization.OnjFunction.RegisterOnjFunction
 import onj.customization.OnjFunction.RegisterOnjFunction.OnjFunctionType
 import onj.value.*
+import kotlin.math.floor
 import kotlin.reflect.KClass
 
 @Suppress("unused") // variables and functions are read via reflection
@@ -39,6 +41,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             "bulletInSlot2" with OnjEffectValue { controller, _, _ ->
                 controller.revolver.getCardInSlot(5 - 2)?.curDamage(controller) ?: 0
             }
+            "amountOfCardsDrawn" with OnjEffectValue { _, _, triggerValue -> triggerValue!!.amountOfCardsDrawn }
             "sourceCardDamage" with OnjEffectValue { controller, _, triggerInformation ->
                 triggerInformation!!.sourceCard!!.curDamage(controller)
             }
@@ -101,6 +104,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun draw(trigger: OnjString, amount: OnjEffectValue): OnjEffect {
         return OnjEffect(Effect.Draw(triggerOrError(trigger.value), amount.value, false))
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
+    fun drawFromBottomOfDeck(trigger: OnjString, amount: OnjEffectValue): OnjEffect {
+        return OnjEffect(Effect.DrawFromBottomOfDeck(triggerOrError(trigger.value), amount.value, false))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
@@ -172,6 +180,15 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun discharge(trigger: OnjString, turns: OnjEffectValue): OnjEffect {
         return OnjEffect(Effect.DischargePoison(triggerOrError(trigger.value), turns.value, false))
+    }
+
+    @RegisterOnjFunction(schema = "params: [string, string]")
+    fun addEncounterModifierWhileBulletIsInGame(trigger: OnjString, encounterModifierName: OnjString): OnjEffect {
+        return OnjEffect(Effect.AddEncounterModifierWhileBulletIsInGame(
+            triggerOrError(trigger.value),
+            encounterModifierName.value,
+            false
+        ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, int]")
@@ -279,6 +296,20 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         )
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, float, boolean]")
+    fun burningPlayer(
+        rotations: OnjEffectValue,
+        percent: OnjFloat,
+        isInfinite: OnjBoolean
+    ): OnjStatusEffect = OnjStatusEffect { controller, card, skipFirstRotation ->
+        BurningPlayer(
+            getStatusEffectValue(rotations, controller, card, 1),
+            percent.value.toFloat(),
+            isInfinite.value,
+            skipFirstRotation
+        )
+    }
+
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue]")
     fun fireResistance(turns: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
         FireResistance(getStatusEffectValue(turns, controller, card, 1))
@@ -315,7 +346,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, int]", type = OnjFunctionType.OPERATOR)
     fun star(value: OnjEffectValue, multiplier: OnjInt): OnjEffectValue = OnjEffectValue { controller, card, triggerInformation ->
-        (value.value(controller, card, triggerInformation) * multiplier.value).toInt()
+        floor(value.value(controller, card, triggerInformation) * multiplier.value.toFloat()).toInt()
     }
 
     @RegisterOnjFunction(schema = "params: [{...*}]", type = OnjFunctionType.CONVERSION)
@@ -348,6 +379,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
         "return home" -> Trigger.ON_RETURNED_HOME
         "rotate in 5" -> Trigger.ON_ROTATE_IN_5
+        "one or more cards drawn" -> Trigger.ON_ONE_OR_MORE_CARDS_DRAWN
+        "special one or more cards drawn" -> Trigger.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

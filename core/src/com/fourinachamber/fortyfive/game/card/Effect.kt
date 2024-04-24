@@ -547,6 +547,48 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    class AddEncounterModifierWhileBulletIsInGame(
+        trigger: Trigger,
+        private val encounterModifierName: String,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            action {
+                controller.addTemporaryEncounterModifier(
+                    modifier = EncounterModifier.getFromName(encounterModifierName),
+                    validityChecker = { card.inGame }
+                )
+            }
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun copy(): Effect =
+            AddEncounterModifierWhileBulletIsInGame(trigger, encounterModifierName, triggerInHand).also {
+                it.isHidden = isHidden
+            }
+    }
+
+    class DrawFromBottomOfDeck(trigger: Trigger, val amount: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
+
+        override fun copy(): Effect = DrawFromBottomOfDeck(trigger, amount, triggerInHand).also {
+            it.isHidden = isHidden
+        }
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            delay(GraphicsConfig.bufferTime)
+            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            include(controller.drawCardPopupTimeline(amount, fromBottom = true))
+        }
+
+        override fun blocks(controller: GameController) = false
+
+        override fun toString(): String {
+            return "Draw(trigger=$trigger, card=$card, amount=$amount)"
+        }
+    }
+
 }
 
 /**
@@ -593,6 +635,8 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
     ON_DESTROY(listOf(ON_LEAVE)),
     ON_BOUNCE(listOf(ON_LEAVE)),
     ON_CARDS_DRAWN,
+    ON_ONE_OR_MORE_CARDS_DRAWN,
+    ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN,
     ON_SPECIAL_CARDS_DRAWN,
     ON_REVOLVER_ROTATION,
     ON_ANY_CARD_DESTROY,
@@ -604,16 +648,19 @@ data class TriggerInformation(
     val multiplier: Int? = null,
     val targetedEnemies: List<Enemy>,
     val isOnShot: Boolean = false,
+    val amountOfCardsDrawn: Int = 0,
     val sourceCard: Card? = null
 )
 
 fun GameController.TriggerInformation(
     multiplier: Int? = null,
     isOnShot: Boolean = false,
+    amountOfCardsDrawn: Int = 0,
     sourceCard: Card? = null
 ): TriggerInformation = TriggerInformation(
     multiplier,
     listOf(this.enemyArea.getTargetedEnemy()),
     isOnShot,
+    amountOfCardsDrawn,
     sourceCard
 )

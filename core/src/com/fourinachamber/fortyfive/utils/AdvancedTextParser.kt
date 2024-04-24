@@ -15,7 +15,7 @@ import java.lang.Exception
 class AdvancedTextParser(
     val code: String,
     private val screen: OnjScreen,
-    defaults: OnjObject,
+    private val defaultSettings: Triple<BitmapFont, Color, Float>,
     private val isDistanceField: Boolean,
     private val changes: List<AdvancedTextEffect>
 ) {
@@ -33,11 +33,11 @@ class AdvancedTextParser(
     private val currentText: StringBuilder = StringBuilder()
     private val parts: MutableList<AdvancedTextPart> = mutableListOf()
 
-    private val defaultSettings = Triple(
-        ResourceManager.get(screen, defaults.get<String>("font")) as BitmapFont,
-        defaults.get<Color>("color"),
-        defaults.get<Double>("fontScale").toFloat()
-    )
+//    private val defaultSettings = Triple(
+//        ResourceManager.get(screen, defaults.get<String>("font")) as BitmapFont,
+//        defaults.get<Color>("color"),
+//        defaults.get<Double>("fontScale").toFloat()
+//    )
 
     private val activeTextEffects: MutableList<AdvancedTextEffect> = mutableListOf()
 

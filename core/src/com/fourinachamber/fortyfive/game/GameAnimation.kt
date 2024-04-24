@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.game
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Label
@@ -10,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Widget
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.general.CustomLabel
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
@@ -57,11 +59,13 @@ abstract class GameAnimation {
  */
 class BannerAnimation(
     val banner: Drawable,
-    private val onjScreen: OnjScreen,
+    private val screen: OnjScreen,
     private val duration: Int,
     private val animationDuration: Int,
     private val beginScale: Float,
-    private val endScale: Float
+    private val endScale: Float,
+    private val interpolation: Interpolation = Interpolation.linear,
+    private val customShader: BetterShader? = null,
 ) : GameAnimation() {
 
     private var startTime = 0L
@@ -69,12 +73,19 @@ class BannerAnimation(
 
     private val renderTask = { batch: Batch ->
         val timeDiff = TimeUtils.millis() - startTime
-        val percent = min(timeDiff.toFloat() / animationDuration.toFloat(), 1f)
+        var percent = min(timeDiff.toFloat() / animationDuration.toFloat(), 1f)
+        percent = interpolation.apply(percent)
         val scale = beginScale + (endScale - beginScale) * percent
 
-        val viewport = onjScreen.stage.viewport
+        val viewport = screen.stage.viewport
         val worldWidth = viewport.worldWidth
         val worldHeight = viewport.worldHeight
+
+        customShader?.let {
+            batch.flush()
+            batch.shader = it.shader
+            it.prepare(screen)
+        }
 
         banner.draw(
             batch,
@@ -83,12 +94,18 @@ class BannerAnimation(
             banner.minWidth * scale,
             banner.minHeight * scale,
         )
+
+        customShader.let {
+            batch.flush()
+            batch.shader = null
+        }
     }
 
     override fun start() {
         startTime = TimeUtils.millis()
         runUntil = startTime + duration
-        onjScreen.addLateRenderTask(renderTask)
+        screen.addLateRenderTask(renderTask)
+        customShader?.resetReferenceTime()
     }
 
     override fun update() { }
@@ -96,7 +113,7 @@ class BannerAnimation(
     override fun isFinished(): Boolean = TimeUtils.millis() >= runUntil
 
     override fun end() {
-        onjScreen.removeLateRenderTask(renderTask)
+        screen.removeLateRenderTask(renderTask)
     }
 
     override fun toString(): String = "BannerAnimation"
