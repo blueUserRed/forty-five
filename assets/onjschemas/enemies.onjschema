@@ -61,6 +61,11 @@ $EnemyAction {
         ...enemyActionSharedKeys
     }
 
+    $PiercingDamage {
+        damage: int[2],
+        ...enemyActionSharedKeys
+    }
+
 }
 
 $EnemyBrain {
@@ -82,44 +87,6 @@ $EnemyBrain {
     $RandomEnemyBrain {
         actions: $EnemyAction[],
         actionProbability: float,
-    }
-
-    $OutlawBrain {
-        phase1End: int,
-        phase2End: int,
-        damagePhase1: int[2],
-        damagePhase2: int[2],
-        damagePhase3: int[2],
-        coverPhase1: int[2],
-        coverPhase2: int[2],
-        coverPhase3: int[2],
-        actionProbability: float,
-        attackProbability: float,
-    }
-
-    $PyroBrain {
-        possibleBurningTurns: int[2],
-        burningRotations: int[2],
-        hideBurningProbability: float,
-        hotPotatoProbability: float,
-        hideHotPotatoProbability: float,
-        infernoHealthPercentage: float,
-        damage: int[2],
-        cover: int[2],
-        actionProbability: float,
-        attackProbability: float,
-    }
-
-    $WitchBrain {
-        bewitchedProbability: float,
-        bewitchedTurns: int[2],
-        bewitchedRotations: int[2],
-        hideBewitchedProbability: float,
-        leftTurnProbability: float,
-        damage: int[2],
-        cover: int[2],
-        actionProbability: float,
-        attackProbability: float,
     }
 
     $ScriptedEnemyBrain {

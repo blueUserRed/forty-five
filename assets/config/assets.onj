@@ -688,6 +688,26 @@ textures: [
         useMipMaps: true
     },
     {
+        name: "enemy_action_and_its_gone",
+        file: "textures/enemies/action_symbols/and_its_gone.png",
+        useMipMaps: true
+    },
+    {
+        name: "enemy_action_goodbyes",
+        file: "textures/enemies/action_symbols/goodbyes.png",
+        useMipMaps: true
+    },
+    {
+        name: "enemy_action_heads_up",
+        file: "textures/enemies/action_symbols/heads_up.png",
+        useMipMaps: true
+    },
+    {
+        name: "enemy_action_piercing",
+        file: "textures/enemies/action_symbols/piercing.png",
+        useMipMaps: true
+    },
+    {
         name: "enemy_action_unknown",
         file: "textures/enemies/action_symbols/unknown.png",
         useMipMaps: true
@@ -723,6 +743,30 @@ textures: [
     {
         name: "enemy_pyro",
         file: "textures/enemies/pyro/pyro.png"
+    },
+    {
+        name: "enemy_sniper_action_comic_common_panel_1",
+        file: "textures/enemies/sniper/action_comic_common_panel_1.png"
+    },
+    {
+        name: "enemy_sniper_action_comic_common_panel_2",
+        file: "textures/enemies/sniper/action_comic_common_panel_2.png"
+    },
+    {
+        name: "enemy_sniper_action_comic_common_panel_3",
+        file: "textures/enemies/sniper/action_comic_common_panel_3.png"
+    },
+    {
+        name: "enemy_sniper_action_comic_panel_and_its_gone",
+        file: "textures/enemies/sniper/action_comic_panel_and_its_gone.png"
+    },
+    {
+        name: "enemy_sniper_action_comic_panel_goodbyes",
+        file: "textures/enemies/sniper/action_comic_panel_goodbyes.png"
+    },
+    {
+        name: "enemy_sniper_action_comic_panel_heads_up",
+        file: "textures/enemies/sniper/action_comic_panel_heads_up.png"
     },
     {
         name: "enemy_witch",
