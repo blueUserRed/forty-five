@@ -37,4 +37,6 @@ tutorialInfoActorName: string,
 rewardChance: float,
 musicAfterWin: string,
 musicBeforeWin: string,
-musicTransitionTime: int
+musicTransitionTime: int,
+rewardRerollBasePrice: int,
+rewardRerollPriceIncrease: int,

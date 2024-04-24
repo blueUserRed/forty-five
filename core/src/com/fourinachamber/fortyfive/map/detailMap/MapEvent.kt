@@ -364,7 +364,12 @@ class ChooseCardMapEvent(
     override val displayDescription: Boolean = true
 
     override val types: List<String> = onj.get<OnjArray>("types").value.map { (it as OnjString).value }
-    override val seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
+
+    override var amountOfRerolls: Int = onj.get<Long>("amountOfRerolls").toInt()
+    override val rerollPriceIncrease: Int = onj.get<Long>("rerollPriceIncrease").toInt()
+    override val rerollBasePrice: Int = onj.get<Long>("rerollBasePrice").toInt()
+
+    override var seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     override val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
 
     override val forwardToScreen: String = MapManager.mapScreenPath
@@ -393,6 +398,9 @@ class ChooseCardMapEvent(
         ("types" with types)
         ("seed" with seed)
         ("nbrOfCards" with nbrOfCards)
+        "amountOfRerolls" with amountOfRerolls
+        "rerollPriceIncrease" with rerollPriceIncrease
+        "rerollBasePrice" with rerollBasePrice
     }
 }
 
