@@ -570,6 +570,25 @@ abstract class Effect(val trigger: Trigger) {
             }
     }
 
+    class DrawFromBottomOfDeck(trigger: Trigger, val amount: EffectValue, override var triggerInHand: Boolean) : Effect(trigger) {
+
+        override fun copy(): Effect = DrawFromBottomOfDeck(trigger, amount, triggerInHand).also {
+            it.isHidden = isHidden
+        }
+
+        override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
+            delay(GraphicsConfig.bufferTime)
+            val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
+            include(controller.drawCardPopupTimeline(amount, fromBottom = true))
+        }
+
+        override fun blocks(controller: GameController) = false
+
+        override fun toString(): String {
+            return "Draw(trigger=$trigger, card=$card, amount=$amount)"
+        }
+    }
+
 }
 
 /**

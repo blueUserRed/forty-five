@@ -225,7 +225,7 @@ class BurningPlayer(
     override fun additionalEnemyDamage(damage: Int, target: StatusEffectTarget): Int = floor(damage * percent).toInt()
 
     override fun stack(other: StatusEffect) {
-        other as Burning
+        other as BurningPlayer
         stackRotationEffect(other)
     }
 
