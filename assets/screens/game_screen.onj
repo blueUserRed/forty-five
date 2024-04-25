@@ -256,7 +256,7 @@ var enemyActionAnimationTemplate = $Box {
                     style_priority: 1,
                     offsetX: 400.0,
                     background: "enemy_pyro_action_comic_common_panel_3",
-                    width: 50#points,
+                    width: 200#points,
                     aspectRatio: 1.0,
                 },
                 {
@@ -276,7 +276,7 @@ var enemyActionAnimationTemplate = $Box {
                     style_priority: 1,
                     offsetX: 400.0,
                     background: "enemy_pyro_action_comic_common_panel_2",
-                    width: 50#points,
+                    width: 200#points,
                     aspectRatio: 1.0,
                 },
                 {
@@ -297,7 +297,7 @@ var enemyActionAnimationTemplate = $Box {
                     style_priority: 1,
                     offsetX: 400.0,
                     background: "enemy_pyro_action_comic_common_panel_3",
-                    width: 50#points,
+                    width: 200#points,
                     aspectRatio: 1.0,
                 },
                 {
@@ -321,8 +321,8 @@ var enemyActionAnimationTemplate = $Box {
                 style_priority: 1,
                 offsetX: 700.0,
                 background: "enemy_pyro_action_comic_panel_burning",
-                width: 150#points,
-                aspectRatio: 1.0,
+                width: (200.0 * 3.0 + 100.0)#points,
+                aspectRatio: (834.0 / 324.0),
             },
             {
                 style_priority: 2,
