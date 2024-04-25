@@ -362,6 +362,87 @@ enemies: [
         },
     },
 
+    {
+        name: "Sniper_lvl1_alone",
+        title: "Sniper",
+        baseHealth: 90,
+        texture: "enemy_sniper",
+        coverIcon: "shield_icon",
+        hiddenActionIcon: "enemy_action_unknown",
+        coverIconScale: 0.6,
+        indicatorIconScale: 0.6,
+        scale: 0.22,
+        detailFont: "roadgeek",
+        detailFontScale: 0.6,
+        textEmitterConfig: textEmitterConfig,
+        detailFontColor: color.black,
+        detailFontColorDark: color.white,
+        headOffset: 10.0,
+        brain: $SniperEnemyBrain {
+            damageShieldWeight: 0.8,
+            normalSpecialActionWeight: 0.5,
+            baseDamage: [4, 6],
+            baseShield: [8, 9],
+            scaleIncreasePerTurn: 0.2,
+            goodbyesAction: $PutMarkedCardsUnderDeck {
+                icon: "enemy_action_goodbyes",
+                hasSpecialAnimation: true,
+                commonPanel1: "enemy_sniper_action_comic_common_panel_1",
+                commonPanel2: "enemy_sniper_action_comic_common_panel_2",
+                commonPanel3: "enemy_sniper_action_comic_common_panel_3",
+                specialPanel: "enemy_sniper_action_comic_panel_goodbyes",
+                title: "Hope you said your goodbyes",
+                descriptionTemplate: "All marked cards in the hand get put underneath your deck",
+            },
+            actions: [
+                {
+                    weight: 5,
+                    showProbability: 1.0,
+                    action: $PiercingDamage {
+                        damage: [3, 5],
+                        scaleFactor: 0.8,
+                        icon: "enemy_action_piercing",
+                        hasSpecialAnimation: false,
+                        title: "Piercing Damage",
+                        descriptionTemplate: "This attack cannot be blocked by shield, only parried",
+                    }
+                },
+                {
+                    weight: 15,
+                    showProbability: 1.0,
+                    maxExecutions: 2,
+                    action: $MarkCards {
+                        amountToMark: [4, 6],
+                        icon: "enemy_action_heads_up",
+                        hasSpecialAnimation: true,
+                        commonPanel1: "enemy_sniper_action_comic_common_panel_1",
+                        commonPanel2: "enemy_sniper_action_comic_common_panel_2",
+                        commonPanel3: "enemy_sniper_action_comic_common_panel_3",
+                        specialPanel: "enemy_sniper_action_comic_panel_heads_up",
+                        title: "Heads up - or rather down",
+                        descriptionTemplate: "{amount} cards in your hand are marked and will be put under your deck the next turn. Loading them in the revolver unmarks them.",
+                    }
+                },
+                {
+                    weight: 10,
+                    showProbability: 1.0,
+                    maxExecutions: 2,
+                    action: $PutBulletFromRevolverUnderDeck {
+                        possibleSlots: [4],
+                        icon: "enemy_action_and_its_gone",
+                        hasSpecialAnimation: true,
+                        commonPanel1: "enemy_sniper_action_comic_common_panel_1",
+                        commonPanel2: "enemy_sniper_action_comic_common_panel_2",
+                        commonPanel3: "enemy_sniper_action_comic_common_panel_3",
+                        specialPanel: "enemy_sniper_action_comic_panel_and_its_gone",
+                        title: "Aaaand it's gone",
+                        descriptionTemplate: "The bullet in slot {slot} will be put under you deck.",
+                    }
+                },
+            ],
+        },
+    },
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////

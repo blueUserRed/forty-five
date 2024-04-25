@@ -86,7 +86,7 @@ class EnemyArea(
         val selectionWidth = 30f
         enemySelectionDrawable.draw(
             batch,
-            x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2,
+            x + enemy.actor.x + enemy.actor.width / 2 - selectionWidth / 2 + enemy.headOffset,
             y + enemy.actor.y + enemy.actor.height + 20f,
             selectionWidth,
             selectionWidth * (enemySelectionDrawable.minHeight / enemySelectionDrawable.minWidth)

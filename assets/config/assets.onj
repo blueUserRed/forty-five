@@ -769,6 +769,10 @@ textures: [
         file: "textures/enemies/sniper/action_comic_panel_heads_up.png"
     },
     {
+        name: "enemy_sniper",
+        file: "textures/enemies/sniper/sniper.png",
+    },
+    {
         name: "enemy_witch",
         file: "textures/enemies/witch/witch.png"
     },

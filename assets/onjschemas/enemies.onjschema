@@ -75,6 +75,10 @@ $EnemyAction {
        ...enemyActionSharedKeys
     }
 
+    $PutBulletFromRevolverUnderDeck {
+        possibleSlots: int[],
+       ...enemyActionSharedKeys
+    }
 }
 
 $EnemyBrain {
@@ -85,6 +89,21 @@ $EnemyBrain {
         baseDamage: int[2],
         baseShield: int[2],
         scaleIncreasePerTurn: float,
+        actions: {
+            weight: int,
+            showProbability: float,
+            maxExecutions?: int,
+            action: $EnemyAction
+        }[]
+    }
+
+    $SniperEnemyBrain {
+        damageShieldWeight: float,
+        normalSpecialActionWeight: float,
+        baseDamage: int[2],
+        baseShield: int[2],
+        scaleIncreasePerTurn: float,
+        goodbyesAction: $EnemyAction,
         actions: {
             weight: int,
             showProbability: float,
@@ -124,6 +143,7 @@ var enemy = {
     brain: $EnemyBrain,
     detailFontColor: Color,
     detailFontColorDark: Color,
+    headOffset?: float,
 };
 
 enemies: enemy[]

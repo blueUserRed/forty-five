@@ -1152,6 +1152,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         action {
             if (card !in cardHand.cards) return@action
             cardHand.removeCard(card)
+            card.isMarked = false
             cardStack.add(card)
         }
     }

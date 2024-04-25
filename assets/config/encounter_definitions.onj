@@ -385,10 +385,13 @@ encounter: [
 
     {
         enemies: [
-            "Outlaw_lvl1_partner", "Pyro_lvl1_partner"
+            "Sniper_lvl1_alone",
+            "tutorial_enemy_1",
+            "tutorial_enemy_1",
+//            "Outlaw_lvl1_partner", "Pyro_lvl1_partner"
         ],
         encounterModifier: [
-            "SteelNerves",
+//            "SteelNerves",
 //            "MoneyForNothing"
         ],
         biomes: [

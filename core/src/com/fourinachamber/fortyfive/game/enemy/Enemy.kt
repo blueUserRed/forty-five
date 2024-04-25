@@ -59,6 +59,7 @@ class Enemy(
     val detailFontScale: Float,
     val detailFontColor: Color,
     val detailFontColorDark: Color,
+    val headOffset: Float,
     textEmitterConfig: OnjArray,
     private val screen: OnjScreen
 ) {
@@ -286,6 +287,7 @@ class Enemy(
                 onj.get<Double>("detailFontScale").toFloat(),
                 onj.get<Color>("detailFontColor"),
                 onj.get<Color>("detailFontColorDark"),
+                onj.getOr("headOffset", 1.0).toFloat(),
                 onj.get<OnjArray>("textEmitterConfig"),
                 curScreen
             )
@@ -457,7 +459,8 @@ class EnemyActor(
         attackLabel.width = width
         attackLabel.y = attackLabel.height / 2f
         attackIndicator.setBounds(
-            width / 2 - attackIndicator.prefWidth / 2, enemyDrawable.minHeight * enemy.scale + 20f,
+            width / 2 - attackIndicator.prefWidth / 2 + enemy.headOffset,
+            enemyDrawable.minHeight * enemy.scale + 20f,
             attackIndicator.prefWidth, attackIndicator.prefHeight
         )
         attackIndicator.offsetY = sin(

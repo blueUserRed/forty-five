@@ -54,6 +54,12 @@ assets: {
         "enemy_witch_action_comic_panel_bewitched", "enemy_witch_action_comic_panel_wrath_of_the_witch",
         "enemy_witch_action_comic_panel_ward_of_the_witch",
 
+        "enemy_sniper", "enemy_action_piercing", "enemy_action_heads_up", "enemy_action_goodbyes",
+        "enemy_action_and_its_gone", "enemy_sniper_action_comic_common_panel_1",
+        "enemy_sniper_action_comic_common_panel_2", "enemy_sniper_action_comic_common_panel_3",
+        "enemy_sniper_action_comic_panel_goodbyes", "enemy_sniper_action_comic_panel_heads_up",
+        "enemy_sniper_action_comic_panel_and_its_gone",
+
         "card_symbol_marked",
 
         "tutorial_actor_shader",
@@ -212,10 +218,10 @@ var encounterModifierDisplayTemplate = $Box {
 var enemyActionAnimationTemplate = $Box {
     template_name: "enemy_action_animation",
     template_keys: {
-        "children.0.children.0.textureName": "commonPanel3",
-        "children.0.children.1.textureName": "commonPanel2",
-        "children.0.children.2.textureName": "commonPanel1",
-        "children.1.textureName": "actionPanel",
+        "children.0.children.0.styles.0.background": "commonPanel3",
+        "children.0.children.1.styles.0.background": "commonPanel2",
+        "children.0.children.2.styles.0.background": "commonPanel1",
+        "children.1.styles.0.background": "actionPanel",
         "children.2.children.0.children.0.text": "actionName",
         "children.2.children.0.children.2.text": "actionDescription",
         "children.2.children.1.styles.0.background": "actionIcon",
@@ -244,12 +250,14 @@ var enemyActionAnimationTemplate = $Box {
         ],
     } children [
 
-        $Image {
+        $Box {
             styles: [
                 {
                     style_priority: 1,
                     offsetX: 400.0,
-                    width: 50#points
+                    background: "enemy_pyro_action_comic_common_panel_3",
+                    width: 50#points,
+                    aspectRatio: 1.0,
                 },
                 {
                     style_priority: 2,
@@ -261,16 +269,15 @@ var enemyActionAnimationTemplate = $Box {
                     }
                 }
             ],
-            textureName: "enemy_pyro_action_comic_common_panel_3",
-            reportDimensionsWithScaling: true,
-            scaleX: 0.8,
-            scaleY: 0.8,
         },
-        $Image {
+        $Box {
             styles: [
                 {
                     style_priority: 1,
-                    offsetX: 400.0
+                    offsetX: 400.0,
+                    background: "enemy_pyro_action_comic_common_panel_2",
+                    width: 50#points,
+                    aspectRatio: 1.0,
                 },
                 {
                     style_priority: 2,
@@ -283,16 +290,15 @@ var enemyActionAnimationTemplate = $Box {
                     }
                 }
             ],
-            textureName: "enemy_pyro_action_comic_common_panel_2",
-            reportDimensionsWithScaling: true,
-            scaleX: 0.8,
-            scaleY: 0.8,
         },
-        $Image {
+        $Box {
             styles: [
                 {
                     style_priority: 1,
-                    offsetX: 400.0
+                    offsetX: 400.0,
+                    background: "enemy_pyro_action_comic_common_panel_3",
+                    width: 50#points,
+                    aspectRatio: 1.0,
                 },
                 {
                     style_priority: 2,
@@ -304,20 +310,19 @@ var enemyActionAnimationTemplate = $Box {
                         interpolation: interpolation.elastic_out
                     }
                 }
-            ],
-            textureName: "enemy_pyro_action_comic_common_panel_1",
-            reportDimensionsWithScaling: true,
-            scaleX: 0.8,
-            scaleY: 0.8,
+            ]
         },
 
     ],
 
-    $Image {
+    $Box {
         styles: [
             {
                 style_priority: 1,
-                offsetX: 700.0
+                offsetX: 700.0,
+                background: "enemy_pyro_action_comic_panel_burning",
+                width: 150#points,
+                aspectRatio: 1.0,
             },
             {
                 style_priority: 2,
@@ -329,11 +334,7 @@ var enemyActionAnimationTemplate = $Box {
                     interpolation: interpolation.elastic_out
                 }
             }
-        ],
-        textureName: "enemy_pyro_action_comic_panel_burning",
-        reportDimensionsWithScaling: true,
-        scaleX: 0.8,
-        scaleY: 0.8,
+        ]
     },
 
     $Box {

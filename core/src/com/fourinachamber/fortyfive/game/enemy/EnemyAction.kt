@@ -211,7 +211,12 @@ sealed class EnemyActionPrototype(
             val amount = amountToMark.random()
             return EnemyAction(null, mapOf("amount" to amount), this) {
                 action {
-                    controller.cardHand.cards.take(amount).forEach { it.isMarked = true }
+                    controller
+                        .cardHand
+                        .cards
+                        .shuffled()
+                        .take(amount)
+                        .forEach { it.isMarked = true }
                 }
             }
         }
@@ -226,18 +231,6 @@ sealed class EnemyActionPrototype(
             controller: GameController,
             scale: Double
         ): EnemyAction = EnemyAction(null, mapOf(), this) {
-            includeLater(
-                {
-                    controller
-                        .revolver
-                        .slots
-                        .mapNotNull { it.card }
-                        .filter { it.isMarked }
-                        .map { controller.putBulletFromRevolverUnderTheDeck(it) }
-                        .collectTimeline()
-                },
-                { true }
-            )
             includeLater(
                 {
                     controller
@@ -338,7 +331,11 @@ sealed class EnemyActionPrototype(
                 obj.get<Boolean>("hasSpecialAnimation")
             )
             "PutBulletFromRevolverUnderDeck" -> PutBulletFromRevolverUnderDeck(
-                obj.get<OnjArray>("possibleSlots").value.map { (it.value as Long).toInt() },
+                obj
+                    .get<OnjArray>("possibleSlots")
+                    .value
+                    .map { (it.value as Long).toInt() }
+                    .map { Utils.convertSlotRepresentation(it) },
                 forEnemy,
                 obj.get<Boolean>("hasSpecialAnimation")
             )
@@ -358,6 +355,7 @@ sealed class EnemyActionPrototype(
             iconHandle = obj.get<String>("icon")
             title = obj.get<String>("title")
             descriptionTemplate = obj.get<String>("descriptionTemplate")
+            scaleFactor = obj.getOr("scaleFactor", 1f)
             if (!hasSpecialAnimation) return@apply
             commonPanel1 = obj.get<String>("commonPanel1")
             commonPanel2 = obj.get<String>("commonPanel2")

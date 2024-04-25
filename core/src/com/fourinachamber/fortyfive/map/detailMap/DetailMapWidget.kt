@@ -576,7 +576,8 @@ class DetailMapWidget(
             "map.cur_event.description",
             if (event.isCompleted) event.completedDescriptionText else event.descriptionText
         )
-        encounterModifierParent.clearChildren()
+        screen.removeAllStyleManagersOfChildren(encounterModifierParent)
+        encounterModifierParent.clear()
         screen.enterState(noEncounterModifierScreenState)
         if (event !is EncounterMapEvent) return
         val encounter = GameDirector.encounters[event.encounterIndex]
