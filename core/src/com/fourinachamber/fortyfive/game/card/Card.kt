@@ -279,6 +279,7 @@ class Card(
     }
 
     fun leaveGame() {
+        isMarked = false
         inGame = false
         _modifiers.clear()
         rotationCounter = 0
@@ -353,6 +354,7 @@ class Card(
         inGame = true
         enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
         enteredOnTurn = controller.turnCounter
+        isMarked = false
         if (isRotten) addRottenModifier()
     }
 

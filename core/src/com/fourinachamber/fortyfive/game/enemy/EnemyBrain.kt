@@ -29,6 +29,11 @@ abstract class EnemyBrain {
                 enemy
             )
 
+            "SniperEnemyBrain" -> SniperEnemyBrain(
+                onj,
+                enemy
+            )
+
             else -> throw RuntimeException("unknown EnemyBrain ${onj.name}")
         }
     }
@@ -96,19 +101,18 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
         difficulty: Double,
         otherChosenActions: List<NextEnemyAction>
     ): NextEnemyAction {
-        prioritizeAction(controller, difficulty)?.let { (action, show) ->
+        prioritizeAction(controller, difficulty * currentScale)?.let { (action, show) ->
             nextAction = action
             return if (show) NextEnemyAction.ShownEnemyAction(action) else NextEnemyAction.HiddenEnemyAction
         }
         val doNormalAction = Utils.coinFlip(normalSpecialActionWeight)
         if (doNormalAction) {
             val actionProto = if (Utils.coinFlip(damageShieldWeight)) {
-                val damage = baseDamage.scale(currentScale.toDouble())
-                damagePlayer(damage, enemy)
+                damagePlayer(baseDamage, enemy)
             } else {
-                takeCover(baseShield.scale(currentScale.toDouble()), enemy)
+                takeCover(baseShield, enemy)
             }
-            val action = actionProto.create(controller, difficulty)
+            val action = actionProto.create(controller, difficulty * currentScale)
             nextAction = action
             return NextEnemyAction.ShownEnemyAction(action)
         }
@@ -116,7 +120,7 @@ open class NewEnemyBrain(onj: OnjObject, private val enemy: Enemy) : EnemyBrain(
             .zipToFirst { it.weight }
             .weightedRandom()
         val (_, showProb, actionProto) = actionConfig
-        val action = actionProto.create(controller, difficulty)
+        val action = actionProto.create(controller, difficulty * currentScale)
         nextAction = action
         actionConfig.executionCount++
         if (actionConfig.maxExecutions > 0 && actionConfig.executionCount >= actionConfig.maxExecutions) {
