@@ -325,7 +325,7 @@ class DetailMapWidget(
         if (lastMapNode == null || !lastMapNode.isLinkedTo(playerNode)) {
             FortyFiveLogger.warn(logTag, "lastMapNode is $lastMapNode; currentNode = $playerNode")
         }
-//        if (!canGoTo(node)) return
+        if (!canGoTo(node)) return
         movePlayerTo = node
         playerMovementStartTime = TimeUtils.millis()
         val nodePos = scaledNodePos(node)

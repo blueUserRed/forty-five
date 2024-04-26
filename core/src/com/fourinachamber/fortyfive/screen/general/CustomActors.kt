@@ -212,6 +212,7 @@ open class TemplateStringLabel @AllThreadsAllowed constructor(
     }
 
     override fun initStyles(screen: OnjScreen) {
+        super.initStyles(screen)
         addTemplateLabelStyles(screen)
     }
 }
