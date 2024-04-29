@@ -28,6 +28,8 @@ abstract class Effect(val trigger: Trigger) {
 
     abstract fun blocks(controller: GameController): Boolean
 
+    abstract fun useAlternateOnShotTriggerPosition(): Boolean
+
     /**
      * checks if this effect is triggered by [triggerToCheck] and returns a timeline containing the actions of this
      * effect if it was
@@ -61,13 +63,26 @@ abstract class Effect(val trigger: Trigger) {
             }
 
             is BulletSelector.ByPopup -> {
-                include(controller.cardSelectionPopupTimeline(
-                    "Select Target Bullet",
-                    if (bulletSelector.includeSelf) null else self
-                ))
-                action {
-                    store("selectedCards", listOf(get<Card>("selectedCard")))
-                }
+                includeLater(
+                    { Timeline.timeline {
+                        include(controller.cardSelectionPopupTimeline(
+                            "Select Target Bullet",
+                            if (bulletSelector.includeSelf) null else self
+                        ))
+                        action {
+                            store("selectedCards", listOf(get<Card>("selectedCard")))
+                        }
+                    } },
+                    { !bulletSelector.blocks(controller, self) }
+                )
+                includeLater(
+                    { Timeline.timeline {
+                       action {
+                           store("selectedCards", listOf<Card>())
+                       }
+                    } },
+                    { bulletSelector.blocks(controller, self) }
+                )
             }
 
         }
@@ -97,6 +112,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController) = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun toString(): String {
             return "ReserveGain(trigger=$trigger, amount=$amount)"
         }
@@ -119,6 +136,8 @@ abstract class Effect(val trigger: Trigger) {
         override fun copy(): Effect = BuffDamage(trigger, amount, bulletSelector, triggerInHand, activeChecker).also {
             it.isHidden = isHidden
         }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline {
             val amount = amount(controller, card, triggerInformation) * (triggerInformation.multiplier ?: 1)
@@ -177,6 +196,9 @@ abstract class Effect(val trigger: Trigger) {
             }
         }
 
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
         override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
 
     }
@@ -212,6 +234,9 @@ abstract class Effect(val trigger: Trigger) {
             }
         }
 
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
         override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
 
         override fun toString(): String {
@@ -237,6 +262,9 @@ abstract class Effect(val trigger: Trigger) {
         }
 
         override fun blocks(controller: GameController) = false
+
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun toString(): String {
             return "Draw(trigger=$trigger, card=$card, amount=$amount)"
@@ -273,6 +301,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController) = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun toString(): String {
             return "GiveStatus(trigger=$trigger)"
         }
@@ -299,6 +329,8 @@ abstract class Effect(val trigger: Trigger) {
         }
 
         override fun blocks(controller: GameController) = false
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun toString(): String {
             return "PutCardInHand(trigger=$trigger, card=$card, amount=$amount)"
@@ -331,6 +363,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController) = bulletSelector.blocks(controller, card)
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
         override fun copy(): Effect = Protect(trigger, bulletSelector, shots, onlyValidWhileCardIsInGame, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -358,6 +392,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = bulletSelector.blocks(controller, card)
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
         override fun copy(): Effect = Destroy(trigger, bulletSelector, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -381,6 +417,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun copy(): Effect = DamageDirectly(trigger, damage, isSpray, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -394,6 +432,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun copy(): Effect = DamagePlayer(trigger, damage, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -405,6 +445,8 @@ abstract class Effect(val trigger: Trigger) {
             controller.playerDeathTimeline()
 
         override fun blocks(controller: GameController): Boolean = false
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun copy(): Effect = KillPlayer(trigger, triggerInHand).also {
             it.isHidden = isHidden
@@ -432,6 +474,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = bulletSelector.blocks(controller, card)
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
         override fun copy(): Effect = BounceBullet(trigger, bulletSelector, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -455,6 +499,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun copy(): Effect = GivePlayerStatus(trigger, statusEffectCreator, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -471,6 +517,8 @@ abstract class Effect(val trigger: Trigger) {
         }
 
         override fun blocks(controller: GameController): Boolean = false
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
 
         override fun copy(): Effect = TurnRevolver(trigger, rotation, triggerInHand).also {
             it.isHidden = isHidden
@@ -513,6 +561,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = bulletSelector.useAlternateOnShotTriggerPosition()
+
         override fun copy(): Effect = DestroyTargetOrDestroySelf(trigger, bulletSelector, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -542,6 +592,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun copy(): Effect = DischargePoison(trigger, turns, triggerInHand).also {
             it.isHidden = isHidden
         }
@@ -564,6 +616,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController): Boolean = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun copy(): Effect =
             AddEncounterModifierWhileBulletIsInGame(trigger, encounterModifierName, triggerInHand).also {
                 it.isHidden = isHidden
@@ -584,6 +638,8 @@ abstract class Effect(val trigger: Trigger) {
 
         override fun blocks(controller: GameController) = false
 
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
         override fun toString(): String {
             return "Draw(trigger=$trigger, card=$card, amount=$amount)"
         }
@@ -601,6 +657,7 @@ sealed class BulletSelector {
     ) : BulletSelector() {
 
         override fun blocks(controller: GameController, self: Card): Boolean = false
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
     }
 
     class ByPopup(val includeSelf: Boolean, val optional: Boolean) : BulletSelector() {
@@ -616,9 +673,13 @@ sealed class BulletSelector {
             if (!includeSelf && bulletsInRevolver[0] === self) return true
             return false
         }
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = true
     }
 
     abstract fun blocks(controller: GameController, self: Card): Boolean
+
+    abstract fun useAlternateOnShotTriggerPosition(): Boolean
 }
 
 typealias EffectValue = (controller: GameController, card: Card?, triggerInformation: TriggerInformation?) -> Int

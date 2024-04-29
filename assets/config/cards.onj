@@ -1267,6 +1267,26 @@ cards: [
         tags: ["pool2", "rarity1"],
         price: 40,
     },
+    {
+        name: "carnageBullet",
+        title: "Carnage Bullet",
+        flavourText: "",
+        description: "$trigger$On-Shot:$trigger$\nDestroy target Bullet",
+        baseDamage: 11,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            destroy("shot", bSelects.targetRequiredNotSelf)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
 
 ],
 
