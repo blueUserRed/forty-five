@@ -300,7 +300,10 @@ class Card(
      * checks whether this card can currently enter the game
      */
     fun allowsEnteringGame(controller: GameController, slot: Int): Boolean =
-        slot !in forbiddenSlots && effects.none { it.blocks(controller) }
+        slot !in forbiddenSlots &&
+                effects
+                    .filter { it.trigger == Trigger.ON_ENTER }
+                    .none { it.blocks(controller) }
 
     /**
      * called when this card was destroyed by the destroy effect
@@ -398,8 +401,9 @@ class Card(
                 include(controller.gameRenderPipeline.getScreenShakeTimeline())
             })
         }
+        val forceNonOnShotTrigger = effects.any { it.first.useAlternateOnShotTriggerPosition() }
         includeLater(
-            { actor.animateToTriggerPosition(controller, isOnShot) },
+            { actor.animateToTriggerPosition(controller, isOnShot && !forceNonOnShotTrigger) },
             { inGame && showAnimation }
         )
         include(effects.mapNotNull { it.second }.collectTimeline())
@@ -871,7 +875,7 @@ class CardActor(
             inDestroyAnim = true
             destroyShader.resetReferenceTime()
         }
-        delay(2000)
+        delay(1200)
         action { inDestroyAnim = false }
     }
 
