@@ -1160,7 +1160,7 @@ shaders: [
         name: "dissolve_shader",
         file: "shaders/dissolve.glsl",
         constantArgs: {
-            duration: 2.0,
+            duration: 1.2,
             border: 0.1,
             borderColor: color.black,
             noiseTexScale: 0.5
