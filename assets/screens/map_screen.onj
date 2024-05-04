@@ -81,8 +81,6 @@ options: {
     music: "map_theme",
     playAmbientSounds: true,
     screenController: $MapScreenController {
-        tutorialInfoActor: "tutorialInfoActor",
-        mapWidgetName: "map"
     },
     inputMap: [
         ...(inputMaps.defaultInputMap),
