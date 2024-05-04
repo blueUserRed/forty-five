@@ -99,7 +99,10 @@ open class OnjScreen @MainThreadOnly constructor(
         @MainThreadOnly set(value) {
             field?.end()
             field = value
-            if (isVisible) value?.init(this, controllerContext)
+            if (isVisible) {
+                value?.injectActors(this)
+                value?.init(this, controllerContext)
+            }
         }
 
     var selectedActor: KeySelectableActor? = null
@@ -380,6 +383,7 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun show() {
+        screenController?.injectActors(this)
         screenController?.init(this, controllerContext)
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
