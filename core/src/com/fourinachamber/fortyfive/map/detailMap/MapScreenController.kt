@@ -18,7 +18,7 @@ import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.lang.Float.max
 
-class MapScreenController(onj: OnjObject) : ScreenController() {
+class MapScreenController : ScreenController() {
 
     private lateinit var screen: OnjScreen
 

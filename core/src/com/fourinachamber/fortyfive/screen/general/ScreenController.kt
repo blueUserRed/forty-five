@@ -27,7 +27,7 @@ object ScreenControllerFactory {
         "ChooseCardScreenController" to { onj -> ChooseCardScreenController(onj) },
         "HealOrMaxHPScreenController" to { onj -> HealOrMaxHPScreenController(onj) },
         "AddMaxHPScreenController" to {onj -> AddMaxHPScreenController(onj) },
-        "MapScreenController" to { onj -> MapScreenController(onj) },
+        "MapScreenController" to { MapScreenController() },
         "StatsScreenController" to { StatsScreenController() },
         "TitleScreenController" to { TitleScreenController() },
         "CreditScreenController" to { CreditScreenController() },
