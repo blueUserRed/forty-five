@@ -1323,30 +1323,6 @@ ninepatches: [
 ],
 
 particles: [
-    {
-        name: "dust_particle",
-        file: "particles/dust.particle",
-        textureDir: "textures/particles",
-        scale: 0.1
-    },
-    {
-        name: "dust_explosion_particle",
-        file: "particles/dust_explosion.particle",
-        textureDir: "textures/particles",
-        scale: 0.1
-    },
-    {
-        name: "bubble_particle",
-        file: "particles/bubble.particle",
-        textureDir: "textures/particles",
-        scale: 0.1
-    },
-    {
-        name: "fire_particle",
-        file: "particles/fire.particle",
-        textureDir: "textures/particles",
-        scale: 0.07
-    }
 ],
 
 frameAnimations: [
