@@ -85,6 +85,31 @@ abstract class ScreenController {
         this.eventHandlers.putAll(eventHandlers)
     }
 
+    fun injectActors(screen: OnjScreen) {
+        this::class
+            .java
+            .declaredFields
+            .filter { it.isAnnotationPresent(Inject::class.java) }
+            .forEach { field ->
+                val annotation = field.getAnnotation(Inject::class.java)
+                val name = annotation.name.ifBlank { field.name }
+                val actor = screen.namedActorOrNull(name) ?:
+                    throw RuntimeException(
+                        "tried to inject actor with name $name into field of ${this::class.simpleName} " +
+                                "but no actor with that name was found"
+                    )
+                if (!field.type.isInstance(actor)) {
+                    throw RuntimeException(
+                        "tried to inject actor with name $name into field of ${this::class.simpleName}" +
+                        "but type of field '${field.type.simpleName}' is not compatible with type of actor" +
+                        " '${actor::class.simpleName}'"
+                    )
+                }
+                field.isAccessible = true
+                field.set(this, actor)
+            }
+    }
+
     fun handleEventListener(name: String, event: Event) {
         val handler = eventHandlers[name] ?: run {
             FortyFiveLogger.warn("screen", "No event handler named $name in class ${this::class.simpleName}")
@@ -95,4 +120,10 @@ abstract class ScreenController {
 
 }
 
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
 annotation class EventHandler
+
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FIELD)
+annotation class Inject(val name: String = "")

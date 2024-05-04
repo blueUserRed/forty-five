@@ -22,21 +22,18 @@ class MapScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var screen: OnjScreen
 
-    private var tutorialInfoActorName: String = onj.get<String>("tutorialInfoActor")
-    private var mapWidgetName: String = onj.get<String>("mapWidgetName")
-
     private var currentlyShowingTutorialText: Boolean = false
     private var tutorialTextParts: MutableList<MapTutorialTextPart> = mutableListOf()
+
+    @Inject
     private lateinit var tutorialInfoActor: TutorialInfoActor
+
+    @Inject(name = "map")
     private lateinit var mapWidget: DetailMapWidget
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
         PermaSaveState.visitedNewArea(MapManager.currentDetailMap.name)
-        tutorialInfoActor = screen.namedActorOrError(tutorialInfoActorName) as? TutorialInfoActor
-            ?: throw RuntimeException("actor named $tutorialInfoActorName must be of type TutorialInfoActor")
-        mapWidget = screen.namedActorOrError(mapWidgetName) as? DetailMapWidget
-            ?: throw RuntimeException("actor named $mapWidgetName must be of type DetailMapWidget")
         tutorialTextParts = MapManager.currentDetailMap.tutorialText
     }
 
