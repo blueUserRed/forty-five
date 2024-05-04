@@ -39,6 +39,12 @@ object BindTargetFactory {
                 UserPrefs.StartScreen.TITLE to "Title screen",
                 UserPrefs.StartScreen.INTRO to "Intro screen",
             )
+        ),
+        "disableRt" to BindTarget(
+            Boolean::class,
+            getter = { UserPrefs.disableRtMechanics },
+            setter = { UserPrefs.disableRtMechanics = it },
+            mapOf(true to "disabled", false to "enabled")
         )
     )
 
