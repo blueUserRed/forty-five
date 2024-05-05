@@ -23,6 +23,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "Effect" to OnjEffect::class,
         "EffectValue" to OnjEffectValue::class,
         "ActiveChecker" to OnjActiveChecker::class,
+        "PassiveEffect" to OnjPassiveEffect::class
     )
 
     @OnjNamespaceVariables
@@ -351,6 +352,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjActiveChecker { controller -> predicate.check(controller) }
     }
 
+    @RegisterOnjFunction(schema = "params: [{...*}]")
+    fun bottomToTopCard(value: OnjNamedObject): OnjPassiveEffect {
+        val predicate = GamePredicate.fromOnj(value)
+        return OnjPassiveEffect(PassiveEffectPrototype {
+            PassiveEffect.BottomToTopCard(predicate)
+        })
+    }
+
    @Suppress("NAME_SHADOWING")
    private fun getStatusEffectValue(
        effectValue: OnjEffectValue,
@@ -438,5 +447,14 @@ class OnjActiveChecker(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--active-checker--'")
+    }
+}
+
+class OnjPassiveEffect(
+    override val value: PassiveEffectPrototype
+) : OnjValue() {
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--passive-effect--'")
     }
 }
