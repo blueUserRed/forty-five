@@ -40,6 +40,7 @@ var card = {
     tags: string[],
     additionalHoverInfos?: string[],
     forbiddenSlots?: int[],
+    passiveEffects?: PassiveEffect[],
 };
 
 cards: card[],

@@ -286,6 +286,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
 
         if (gameDirector.encounter.shuffleCards) cardStack.shuffle()
+        validateCardStack()
 
         FortyFiveLogger.debug(logTag, "card stack: $cardStack")
 
@@ -358,6 +359,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             if (cur.isFinished) iterator.remove()
         }
 
+        createdCards.flatMap { it.passiveEffects }.forEach { it.checkActive(this) }
         createdCards.forEach { it.update(this) }
         updateStatusEffects()
         updateGameAnimations()
@@ -704,7 +706,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         if (parryCard.isUndead) {
                             cardHand.addCard(parryCard)
                         } else {
-                            cardStack.add(parryCard)
+                            putCardAtBottomOfStack(parryCard)
                         }
                     }
                     parryCard.afterShot(this@GameController)
@@ -851,7 +853,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     if (cardToShoot.shouldRemoveAfterShot(this@GameController)) {
                         if (!cardToShoot.isUndead) {
-                            cardStack.add(cardToShoot)
+                            putCardAtBottomOfStack(cardToShoot)
                             SoundPlayer.situation("orb_anim_playing", curScreen)
                             gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
                         }
@@ -1026,7 +1028,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(showPutCardsUnderDeckActorScreenState)
             cardHand.reattachToOriginalParent()
             val cards = putCardsUnderDeckWidget.complete()
-            cards.forEach { cardStack.add(it) }
+            putCardsAtBottomOfStack(cards)
         }
     }
 
@@ -1224,11 +1226,44 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @AllThreadsAllowed
     fun drawCard(fromBottom: Boolean = false) {
+        validateCardStack()
         val card = (if (!fromBottom) cardStack.removeFirstOrNull() else cardStack.removeLastOrNull())
             ?: defaultBullet.create(curScreen)
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
         cardsDrawn++
+    }
+
+    fun putCardAtBottomOfStack(card: Card) {
+        cardStack.add(card)
+        validateCardStack()
+    }
+
+    fun putCardsAtBottomOfStack(cards: List<Card>) {
+        cardStack.addAll(cards)
+        validateCardStack()
+    }
+
+    private fun validateCardStack() {
+        var index = 0
+        while (index < cardStack.size) {
+            val card = cardStack[index]
+            if (card.isAlwaysAtBottom) {
+                cardStack.removeAt(index)
+                cardStack.add(card)
+            }
+            index++
+        }
+        index = cardStack.size - 1
+        while (index >= 0) {
+            val card = cardStack[index]
+            if (card.isAlwaysAtTop) {
+                cardStack.removeAt(index)
+                cardStack.add(0, card)
+                continue
+            }
+            index--
+        }
     }
 
     private fun cost(cost: Int, animTarget: Actor? = null): Boolean {
