@@ -339,6 +339,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
+        println(cardStack)
         _encounterModifiers.removeIf { it.first?.invoke(this)?.not() ?: false }
         encounterModifiers.forEach { it.update(this) }
 
@@ -1256,6 +1257,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         index = cardStack.size - 1
         while (index >= 0) {
+            if (cardStack.take(index).all { it.isAlwaysAtTop }) break
             val card = cardStack[index]
             if (card.isAlwaysAtTop) {
                 cardStack.removeAt(index)

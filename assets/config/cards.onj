@@ -3,6 +3,7 @@ use Cards;
 use Common;
 
 import "config/graphics_config.onj" as graphicsConfig;
+import "config/game_config.onj" as gameConfig;
 
 var burningPercent = 0.5;
 
@@ -1283,6 +1284,29 @@ cards: [
         forceLoadCards: [],
         dark: false,
         cost: 1,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "backupBullet",
+        title: "Backup Bullet",
+        flavourText: "Here to safe your ass",
+        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.",
+        baseDamage: 20,
+        coverValue: 0,
+        traitEffects: ["alwaysAtBottom"],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [],
+        passiveEffects: [bottomToTopCard(
+            $PlayerHealthLowerThan {
+                value: (gameConfig.playerConfig.lives * 0.1)#int
+            }
+        )],
+        forceLoadCards: [],
+        dark: false,
+        cost: 0,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
         price: 50,
