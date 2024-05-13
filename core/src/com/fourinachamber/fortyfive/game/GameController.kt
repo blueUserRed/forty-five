@@ -339,7 +339,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     @MainThreadOnly
     override fun update() {
-        println(cardStack)
         _encounterModifiers.removeIf { it.first?.invoke(this)?.not() ?: false }
         encounterModifiers.forEach { it.update(this) }
 
@@ -539,8 +538,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             },
             { !skip }
         )
+        val triggerInfo = TriggerInformation(sourceCard = card, controller = this@GameController)
         includeLater(
-            { checkEffectsSingleCard(Trigger.ON_ENTER, card) },
+            { checkEffectsSingleCard(Trigger.ON_ENTER, card, triggerInfo) },
+            { !skip }
+        )
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_ANY_CARD_ENTER, triggerInfo) },
             { !skip }
         )
     })
@@ -648,8 +652,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(cardDrawActorScreenState)
             checkCardMaximums()
         }
-        val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw)
-        val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw)
+        val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw, controller = this@GameController)
+        val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw, controller = this@GameController)
         includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
         includeLater(
             { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
@@ -692,7 +696,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
                 includeLater (
-                    { checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)) },
+                    { checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true, controller = this@GameController)) },
                     { parryCard.shouldRemoveAfterShot(this@GameController) }
                 )
                 action {
@@ -845,7 +849,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     .let { include(it) }
             }
             cardToShoot?.let {
-                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true)
+                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true, controller = this@GameController)
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
                 includeLater(
                     { checkEffectsSingleCard(Trigger.ON_LEAVE, cardToShoot, triggerInformation) },
@@ -909,7 +913,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .collectTimeline()
             .let { include(it) }
         if (newRotation.amount != 0) {
-            val info = TriggerInformation(multiplier = newRotation.amount)
+            val info = TriggerInformation(multiplier = newRotation.amount, controller = this@GameController)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
             includeLater(
                 {
@@ -1092,7 +1096,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.onDestroy()
             FortyFiveLogger.debug(logTag, "destroyed card: $card")
         }
-        val triggerInformation = TriggerInformation(sourceCard = card)
+        val triggerInformation = TriggerInformation(sourceCard = card, controller = this@GameController)
         include(checkEffectsSingleCard(Trigger.ON_DESTROY, card, triggerInformation))
         include(checkEffectsActiveCards(Trigger.ON_ANY_CARD_DESTROY, triggerInformation))
     }
@@ -1112,7 +1116,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
-        triggerInformation: TriggerInformation = TriggerInformation()
+        triggerInformation: TriggerInformation = TriggerInformation(controller = this)
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
@@ -1128,12 +1132,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun checkEffectsActiveCards(
         trigger: Trigger,
-        triggerInformation: TriggerInformation = TriggerInformation()
+        triggerInformation: TriggerInformation = TriggerInformation(controller = this),
+        exclude: Card? = triggerInformation.sourceCard
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         return Timeline.timeline {
             createdCards
                 .filter { it.inGame || it.inHand(this@GameController) }
+                .filter { it !== exclude }
                 .map { it.checkEffects(trigger, triggerInformation, this@GameController) }
                 .collectTimeline()
                 .let { include(it) }
@@ -1257,7 +1263,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         index = cardStack.size - 1
         while (index >= 0) {
-            if (cardStack.take(index).all { it.isAlwaysAtTop }) break
+            if (cardStack.take(index + 1).all { it.isAlwaysAtTop }) break
             val card = cardStack[index]
             if (card.isAlwaysAtTop) {
                 cardStack.removeAt(index)
