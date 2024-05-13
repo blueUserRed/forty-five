@@ -57,6 +57,12 @@ object UserPrefs {
             dirty = true
         }
 
+    var disableRtMechanics: Boolean = false
+        set(value) {
+            field = value
+            dirty = true
+        }
+
     fun read() {
         FortyFiveLogger.debug(logTag, "reading user_prefs")
 
@@ -93,6 +99,7 @@ object UserPrefs {
         masterVolume = obj.get<Double>("masterVolume").toFloat()
         enableScreenShake = obj.get<Boolean>("enableScreenShake")
         startScreen = StartScreen.valueOf(obj.get<String>("startScreen").uppercase())
+        disableRtMechanics = obj.getOr("disableRtMechanics", false)
         dirty = false
     }
 
@@ -105,6 +112,7 @@ object UserPrefs {
             "masterVolume" with masterVolume
             "enableScreenShake" with enableScreenShake
             "startScreen" with startScreen.toString()
+            "disableRtMechanics" with disableRtMechanics
         }
         Gdx.files.internal(userPrefsPath).file().writeText(obj.toString())
         dirty = false

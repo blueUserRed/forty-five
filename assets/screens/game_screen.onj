@@ -58,8 +58,6 @@ assets: {
 
         "enemy_outlaw",
 
-        "revolver_cursor",
-
         "dissolve_shader", "prerendered_noise_perlin_512x512", "ice_shader", "ice_texture", "glow_shader_shield",
         "parry_shader", "alpha_reduction_shader", "gaussian_blur_shader", "screen_shake_shader",
 
