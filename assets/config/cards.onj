@@ -1374,6 +1374,26 @@ cards: [
         tags: ["pool1", "rarity2", "unobtainable", "not used"],
         price: 50,
     },
+    {
+        name: "sheriffsBullet",
+        title: "Sheriffs Bullet",
+        flavourText: "",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$On-Turn-Begin:$trigger$\nReturn target bullet to your hand",
+        baseDamage: 10,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            bounce("round start", bSelects.targetRequiredNotSelf)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1", "unobtainable", "not used"],
+        price: 50,
+    },
 
 ],
 
