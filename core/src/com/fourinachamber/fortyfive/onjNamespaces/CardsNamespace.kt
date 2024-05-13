@@ -22,7 +22,8 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "Effect" to OnjEffect::class,
         "EffectValue" to OnjEffectValue::class,
         "ActiveChecker" to OnjActiveChecker::class,
-        "PassiveEffect" to OnjPassiveEffect::class
+        "PassiveEffect" to OnjPassiveEffect::class,
+        "CardPredicate" to OnjCardPredicate::class,
     )
 
     @OnjNamespaceVariables
@@ -204,6 +205,16 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         ))
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [string, int, CardPredicate]")
+    fun search(trigger: OnjString, amount: OnjInt, predicate: OnjCardPredicate) = OnjEffect(
+        Effect.Search(
+            triggerOrError(trigger.value),
+            predicate.value,
+            amount.value.toInt(),
+            false
+        )
+    )
+
     @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
     fun canTriggerInHand(effect: OnjEffect): OnjEffect {
         return OnjEffect(effect.value.copy().apply { triggerInHand = true })
@@ -364,17 +375,20 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         })
     }
 
-   @Suppress("NAME_SHADOWING")
-   private fun getStatusEffectValue(
+    @Suppress("NAME_SHADOWING")
+    private fun getStatusEffectValue(
        effectValue: OnjEffectValue,
        controller: GameController?,
        card: Card?,
        default: Int
-   ) = controller?.let { controller ->
+    ) = controller?.let { controller ->
        card?.let { card ->
            effectValue.value(controller, card, null)
        }
-   } ?: default
+    } ?: default
+
+    @RegisterOnjFunction(schema = "params: [int]")
+    fun cardsWithCost(cost: OnjInt) = OnjCardPredicate(CardPredicate.cost(cost.value.toInt()))
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER
@@ -461,5 +475,14 @@ class OnjPassiveEffect(
 
     override fun stringify(info: ToStringInformation) {
         info.builder.append("'--passive-effect--'")
+    }
+}
+
+class OnjCardPredicate(
+    override val value: CardPredicate
+) : OnjValue() {
+
+    override fun stringify(info: ToStringInformation) {
+        info.builder.append("'--card-predicate--'")
     }
 }
