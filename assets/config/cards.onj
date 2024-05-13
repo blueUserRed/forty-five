@@ -16,7 +16,8 @@ var bSelects = {
     targetOptionalNotSelf: bSelectTarget(false, true),
     neighbors: bSelectNeighbors(),
     self: bSelectSelf(),
-    sourceBullet: bSelectSourceBullet()
+    sourceBullet: bSelectSourceBullet(),
+    cachedBullets: bSelectCachedBullets(),
 };
 
 var iconPrefix = "§§";
@@ -1363,13 +1364,14 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            search("enter", 1, cardsWithCost(0))
+            search("enter", 1, cardsWithCost(0))#cacheAffectedCards,
+            giftDmg("enter", bSelects.cachedBullets, 7#val)
         ],
         forceLoadCards: [],
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1", "rarity2"],
+        tags: ["pool1", "rarity2", "unobtainable", "not used"],
         price: 50,
     },
 
