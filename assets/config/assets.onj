@@ -1054,6 +1054,21 @@ textures: [
         file: "textures/game_screen/reserves.png",
         useMipMaps: true,
     },
+    {
+        name: "card_symbol_text_a_equals",
+        file: "textures/cards/symbols/text/a_equals.png",
+        useMipMaps: true,
+    },
+    {
+        name: "card_symbol_text_i_equals",
+        file: "textures/cards/symbols/text/a_equals.png",
+        useMipMaps: true,
+    },
+    {
+        name: "card_symbol_text_t_equals",
+        file: "textures/cards/symbols/text/a_equals.png",
+        useMipMaps: true,
+    },
 ],
 
 cursors: [
