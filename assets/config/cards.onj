@@ -543,9 +543,9 @@ cards: [
     {
         name: "bull_et",
         title: "Bull et",
-        flavourText: "",
+        flavourText: "§§card_symbol_text_i_equals§§",
         description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
-        baseDamage: 7,
+        baseDamage: 5,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
@@ -583,7 +583,7 @@ cards: [
     {
         name: "scorchingBullet",
         title: "Scorching Bullet",
-        flavourText: "scorching Bullet",
+        flavourText: "§§card_symbol_text_t_equals§§",
         description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 10 dmg",
         baseDamage: 0,
         coverValue: 0,
@@ -844,7 +844,7 @@ cards: [
     {
         name: "sacrificialBullet",
         title: "Sacrificial Bullet",
-        flavourText: "",
+        flavourText: "§§card_symbol_text_a_equals§§",
         description: "$trigger$On-Destroy:$trigger$\nTarget bullet gets +8 dmg, then, return this bullet to your hand.",
         baseDamage: 7,
         coverValue: 0,

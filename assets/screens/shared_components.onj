@@ -461,6 +461,7 @@ var cardHoverDetailUsedAssetsDefinition = [
     "hover_detail_small_background",
     "forty_white_texture",
     "hover_detail_more_info",
+    "card_symbol_text_a_equals", "card_symbol_text_i_equals", "card_symbol_text_t_equals",
     ...revolverSlotIconAssets
 ];
 
