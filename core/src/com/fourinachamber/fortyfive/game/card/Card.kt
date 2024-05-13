@@ -182,6 +182,8 @@ class Card(
     var rotationCounter: Int = 0
         private set
 
+    var lastEffectAffectedCardsCache: List<Card> = listOf()
+
     init {
         screen.borrowResource(cardTexturePrefix + name)
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the

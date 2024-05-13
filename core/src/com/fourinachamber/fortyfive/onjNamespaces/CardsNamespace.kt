@@ -50,7 +50,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun reserveGain(trigger: OnjString, amount: OnjEffectValue): OnjEffect {
-        return OnjEffect(Effect.ReserveGain(triggerOrError(trigger.value), amount.value, false))
+        return OnjEffect(Effect.ReserveGain(triggerOrError(trigger.value), amount.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector, EffectValue]")
@@ -60,7 +60,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             triggerOrError(trigger.value),
             amount.value,
             bulletSelector.value,
-            false
         ))
     }
 
@@ -75,7 +74,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             triggerOrError(trigger.value),
             amount.value,
             bulletSelector.value,
-            false,
             activeChecker.value,
         ))
     }
@@ -86,7 +84,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             triggerOrError(trigger.value),
             amount.value.toFloat(),
             bulletSelector.value,
-            false
         ))
     }
 
@@ -97,28 +94,27 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             triggerOrError(trigger.value),
             amount.value,
             bulletSelector.value,
-            false
         ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun draw(trigger: OnjString, amount: OnjEffectValue): OnjEffect {
-        return OnjEffect(Effect.Draw(triggerOrError(trigger.value), amount.value, false))
+        return OnjEffect(Effect.Draw(triggerOrError(trigger.value), amount.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun drawFromBottomOfDeck(trigger: OnjString, amount: OnjEffectValue): OnjEffect {
-        return OnjEffect(Effect.DrawFromBottomOfDeck(triggerOrError(trigger.value), amount.value, false))
+        return OnjEffect(Effect.DrawFromBottomOfDeck(triggerOrError(trigger.value), amount.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
     fun giveStatus(trigger: OnjString, effect: OnjStatusEffect): OnjEffect {
-        return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value, false))
+        return OnjEffect(Effect.GiveStatus(triggerOrError(trigger.value), effect.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, StatusEffect]")
     fun givePlayerStatus(trigger: OnjString, effect: OnjStatusEffect): OnjEffect {
-        return OnjEffect(Effect.GivePlayerStatus(triggerOrError(trigger.value), effect.value, false))
+        return OnjEffect(Effect.GivePlayerStatus(triggerOrError(trigger.value), effect.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, string, EffectValue]")
@@ -128,7 +124,6 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             triggerOrError(trigger.value),
             name.value,
             amount.value,
-            false
         ))
     }
 
@@ -139,55 +134,52 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             bulletSelector.value,
             shots.value.toInt(),
             onlyValidWhileCardIsInGame.value,
-            false
         ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
     fun destroy(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
-        return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value, false))
+        return OnjEffect(Effect.Destroy(triggerOrError(trigger.value), bulletSelector.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
     fun destroyTargetOrDestroySelf(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
         return OnjEffect(Effect.DestroyTargetOrDestroySelf(
             triggerOrError(trigger.value),
-            bulletSelector.value,
-            false
+            bulletSelector.value
         ))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue, boolean]")
     fun damageDirect(trigger: OnjString, damage: OnjEffectValue, isSpray: OnjBoolean): OnjEffect {
-        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value, isSpray.value, false))
+        return OnjEffect(Effect.DamageDirectly(triggerOrError(trigger.value), damage.value, isSpray.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun damagePlayer(trigger: OnjString, damage: OnjEffectValue): OnjEffect {
-        return OnjEffect(Effect.DamagePlayer(triggerOrError(trigger.value), damage.value, false))
+        return OnjEffect(Effect.DamagePlayer(triggerOrError(trigger.value), damage.value))
     }
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun killPlayer(trigger: OnjString): OnjEffect {
-        return OnjEffect(Effect.KillPlayer(triggerOrError(trigger.value), false))
+        return OnjEffect(Effect.KillPlayer(triggerOrError(trigger.value)))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, BulletSelector]")
     fun bounce(trigger: OnjString, bulletSelector: OnjBulletSelector): OnjEffect {
-        return OnjEffect(Effect.BounceBullet(triggerOrError(trigger.value), bulletSelector.value, false))
+        return OnjEffect(Effect.BounceBullet(triggerOrError(trigger.value), bulletSelector.value))
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [string, EffectValue]")
     fun discharge(trigger: OnjString, turns: OnjEffectValue): OnjEffect {
-        return OnjEffect(Effect.DischargePoison(triggerOrError(trigger.value), turns.value, false))
+        return OnjEffect(Effect.DischargePoison(triggerOrError(trigger.value), turns.value))
     }
 
     @RegisterOnjFunction(schema = "params: [string, string]")
     fun addEncounterModifierWhileBulletIsInGame(trigger: OnjString, encounterModifierName: OnjString): OnjEffect {
         return OnjEffect(Effect.AddEncounterModifierWhileBulletIsInGame(
             triggerOrError(trigger.value),
-            encounterModifierName.value,
-            false
+            encounterModifierName.value
         ))
     }
 
@@ -200,8 +192,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                 "right" -> GameController.RevolverRotation.Right(amount.value.toInt())
                 "none" -> GameController.RevolverRotation.None
                 else -> throw RuntimeException("unknown rotation direction: ${rotationDirection.value}")
-            },
-            false
+            }
         ))
     }
 
@@ -210,8 +201,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         Effect.Search(
             triggerOrError(trigger.value),
             predicate.value,
-            amount.value.toInt(),
-            false
+            amount.value.toInt()
         )
     )
 
@@ -223,6 +213,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
     fun hide(effect: OnjEffect): OnjEffect {
         return OnjEffect(effect.value.copy().apply { isHidden = true })
+    }
+
+    @RegisterOnjFunction(schema = "use Cards; params: [Effect]", type = OnjFunctionType.CONVERSION)
+    fun cacheAffectedCards(effect: OnjEffect): OnjEffect {
+        return OnjEffect(effect.value.copy().apply { cacheAffectedCards = true })
     }
 
     @RegisterOnjFunction(schema = "params: [*[]]")
@@ -264,7 +259,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: []")
     fun bSelectSourceBullet(): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByLambda { info -> listOf(info.sourceCard!!) })
+        return OnjBulletSelector(BulletSelector.ByLambda { info, _ -> listOf(info.sourceCard!!) })
     }
 
     @RegisterOnjFunction("params: []")
@@ -283,6 +278,11 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
     fun bSelectSelf(): OnjBulletSelector {
         return OnjBulletSelector(BulletSelector.ByPredicate { self, other, _, _ -> self === other })
     }
+
+    @RegisterOnjFunction("params: []")
+    fun bSelectCachedBullets() = OnjBulletSelector(
+        BulletSelector.ByLambda { _, card -> card.lastEffectAffectedCardsCache }
+    )
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
     fun poison(turns: OnjEffectValue, damage: OnjEffectValue): OnjStatusEffect = OnjStatusEffect { controller, card, _ ->
