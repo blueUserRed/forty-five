@@ -47,19 +47,24 @@ abstract class Effect(val trigger: Trigger) {
         bulletSelector: BulletSelector,
         controller: GameController,
         self: Card,
+        triggerInformation: TriggerInformation,
     ): Timeline = Timeline.timeline {
 
         when (bulletSelector) {
 
-            is BulletSelector.ByLambda -> action {
+            is BulletSelector.ByPredicate -> action {
                 val cards = controller
                     .revolver
                     .slots
                     .mapIndexed { index, revolverSlot -> index to revolverSlot }
                     .filter { it.second.card != null }
-                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index, controller) }
+                    .filter { (index, slot) -> bulletSelector.lambda(self, slot.card!!, index, triggerInformation) }
                     .map { it.second.card!! }
                 store("selectedCards", cards)
+            }
+
+            is BulletSelector.ByLambda -> action {
+                store("selectedCards", bulletSelector.lambda(triggerInformation))
             }
 
             is BulletSelector.ByPopup -> {
@@ -149,7 +154,7 @@ abstract class Effect(val trigger: Trigger) {
             )
 
             return Timeline.timeline {
-                include(getSelectedBullets(bulletSelector, controller, this@BuffDamage.card))
+                include(getSelectedBullets(bulletSelector, controller, this@BuffDamage.card, triggerInformation))
                 action {
                     get<List<Card>>("selectedCards")
                         .forEach { it.addModifier(modifier) }
@@ -188,7 +193,7 @@ abstract class Effect(val trigger: Trigger) {
             )
 
             return Timeline.timeline {
-                include(getSelectedBullets(bulletSelector, controller, this@BuffDamageMultiplier.card))
+                include(getSelectedBullets(bulletSelector, controller, this@BuffDamageMultiplier.card, triggerInformation))
                 action {
                     get<List<Card>>("selectedCards")
                         .forEach { it.addModifier(modifier) }
@@ -226,7 +231,7 @@ abstract class Effect(val trigger: Trigger) {
                 source = cardDescName
             )
             return Timeline.timeline {
-                include(getSelectedBullets(bulletSelector, controller, this@GiftDamage.card))
+                include(getSelectedBullets(bulletSelector, controller, this@GiftDamage.card, triggerInformation))
                 action {
                     get<List<Card>>("selectedCards")
                         .forEach { it.addModifier(modifier) }
@@ -346,7 +351,7 @@ abstract class Effect(val trigger: Trigger) {
     ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(getSelectedBullets(bulletSelector, controller, card))
+            include(getSelectedBullets(bulletSelector, controller, card, triggerInformation))
             action {
                 get<List<Card>>("selectedCards")
                     .forEach { it.protect(
@@ -379,7 +384,7 @@ abstract class Effect(val trigger: Trigger) {
     ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(getSelectedBullets(bulletSelector, controller, this@Destroy.card))
+            include(getSelectedBullets(bulletSelector, controller, this@Destroy.card, triggerInformation))
             includeLater(
                 {
                     get<List<Card>>("selectedCards")
@@ -461,7 +466,7 @@ abstract class Effect(val trigger: Trigger) {
     ) : Effect(trigger) {
 
         override fun onTrigger(triggerInformation: TriggerInformation, controller: GameController): Timeline = Timeline.timeline {
-            include(getSelectedBullets(bulletSelector, controller, this@BounceBullet.card))
+            include(getSelectedBullets(bulletSelector, controller, this@BounceBullet.card, triggerInformation))
             includeLater(
                 {
                     get<List<Card>>("selectedCards")
@@ -542,7 +547,7 @@ abstract class Effect(val trigger: Trigger) {
                     .size < 2
             }
             includeLater(
-                { getSelectedBullets(bulletSelector, controller, card) },
+                { getSelectedBullets(bulletSelector, controller, card ,triggerInformation) },
                 { !destroySelf }
             )
             includeLater(
@@ -652,9 +657,15 @@ abstract class Effect(val trigger: Trigger) {
  */
 sealed class BulletSelector {
 
-    class ByLambda(
-        val lambda: (self: Card, other: Card, slot: Int, controller: GameController) -> Boolean
+    class ByPredicate(
+        val lambda: (self: Card, other: Card, slot: Int, triggerInformation: TriggerInformation) -> Boolean
     ) : BulletSelector() {
+
+        override fun blocks(controller: GameController, self: Card): Boolean = false
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+    }
+
+    class ByLambda(val lambda: (triggerInformation: TriggerInformation) -> List<Card>) : BulletSelector() {
 
         override fun blocks(controller: GameController, self: Card): Boolean = false
         override fun useAlternateOnShotTriggerPosition(): Boolean = false
@@ -693,6 +704,7 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
     ON_SHOT,
     ON_ROUND_START,
     ON_ROUND_END,
+    ON_ANY_CARD_ENTER,
     ON_DESTROY(listOf(ON_LEAVE)),
     ON_BOUNCE(listOf(ON_LEAVE)),
     ON_CARDS_DRAWN,
@@ -707,21 +719,9 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
 
 data class TriggerInformation(
     val multiplier: Int? = null,
-    val targetedEnemies: List<Enemy>,
+    val controller: GameController,
+    val targetedEnemies: List<Enemy> = listOf(controller.enemyArea.getTargetedEnemy()),
     val isOnShot: Boolean = false,
     val amountOfCardsDrawn: Int = 0,
-    val sourceCard: Card? = null
-)
-
-fun GameController.TriggerInformation(
-    multiplier: Int? = null,
-    isOnShot: Boolean = false,
-    amountOfCardsDrawn: Int = 0,
-    sourceCard: Card? = null
-): TriggerInformation = TriggerInformation(
-    multiplier,
-    listOf(this.enemyArea.getTargetedEnemy()),
-    isOnShot,
-    amountOfCardsDrawn,
-    sourceCard
+    val sourceCard: Card? = null,
 )

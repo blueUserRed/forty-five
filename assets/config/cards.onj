@@ -3,6 +3,7 @@ use Cards;
 use Common;
 
 import "config/graphics_config.onj" as graphicsConfig;
+import "config/game_config.onj" as gameConfig;
 
 var burningPercent = 0.5;
 
@@ -14,7 +15,8 @@ var bSelects = {
     targetRequiredNotSelf: bSelectTarget(false, false),
     targetOptionalNotSelf: bSelectTarget(false, true),
     neighbors: bSelectNeighbors(),
-    self: bSelectSelf()
+    self: bSelectSelf(),
+    sourceBullet: bSelectSourceBullet()
 };
 
 var iconPrefix = "§§";
@@ -541,9 +543,9 @@ cards: [
     {
         name: "bull_et",
         title: "Bull et",
-        flavourText: "",
+        flavourText: "§§card_symbol_text_i_equals§§",
         description: "$trigger$On-Rotate:$trigger$\nDeal 4 dmg to the target enemy",
-        baseDamage: 7,
+        baseDamage: 5,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
@@ -581,7 +583,7 @@ cards: [
     {
         name: "scorchingBullet",
         title: "Scorching Bullet",
-        flavourText: "scorching Bullet",
+        flavourText: "§§card_symbol_text_t_equals§§",
         description: "$trigger$While in hand or revolver:$trigger$\n$trigger$On-End-Turn:$trigger$ Take 10 dmg",
         baseDamage: 0,
         coverValue: 0,
@@ -842,7 +844,7 @@ cards: [
     {
         name: "sacrificialBullet",
         title: "Sacrificial Bullet",
-        flavourText: "",
+        flavourText: "§§card_symbol_text_a_equals§§",
         description: "$trigger$On-Destroy:$trigger$\nTarget bullet gets +8 dmg, then, return this bullet to your hand.",
         baseDamage: 7,
         coverValue: 0,
@@ -1285,6 +1287,49 @@ cards: [
         cost: 1,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "backupBullet",
+        title: "Backup Bullet",
+        flavourText: "Here to safe your ass",
+        description: "This bullet is always at the bottom of your deck. You automatically draw it once you have less than 10% health.",
+        baseDamage: 20,
+        coverValue: 0,
+        traitEffects: ["alwaysAtBottom"],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [],
+        passiveEffects: [bottomToTopCard(
+            $PlayerHealthLowerThan {
+                value: (gameConfig.playerConfig.lives * 0.1)#int
+            }
+        )],
+        forceLoadCards: [],
+        dark: false,
+        cost: 0,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "bulletPointBullet",
+        title: "Bullet Point Bullet",
+        flavourText: "",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a Bullet enters the revolver:$trigger$\nThe Bullet that entered gets +4 dmg",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("any card entered", bSelects.sourceBullet, 4#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1", "rarity1"],
         price: 50,
     },
 

@@ -12,6 +12,19 @@ import kotlin.math.roundToInt
 
 sealed class EncounterModifier {
 
+    private val _types: MutableList<Type> = mutableListOf()
+
+    val types: List<Type>
+        get() = _types
+
+    val isRtBased: Boolean
+        get() = Type.RT_BASED in _types
+
+    init {
+        @Suppress("LeakingThis")
+        _types.addAll(getModifierTypes())
+    }
+
     object Rain : EncounterModifier() {
         override fun shouldApplyStatusEffects(): Boolean = false
     }
@@ -70,6 +83,8 @@ sealed class EncounterModifier {
 
         private var baseTime: Long = -1
 
+        override fun getModifierTypes(): List<Type> = listOf(Type.RT_BASED)
+
         override fun onStart(controller: GameController) {
             controller.curScreen.enterState("steel_nerves")
         }
@@ -115,6 +130,8 @@ sealed class EncounterModifier {
         override fun additionalCardsToDrawInNormalDraw(): Int = 1
     }
 
+    open fun getModifierTypes(): List<Type> = listOf()
+
     open fun update(controller: GameController) {}
 
     open fun onStart(controller: GameController) {}
@@ -155,5 +172,9 @@ sealed class EncounterModifier {
             "drawonemorecard" -> DrawOneMoreCard
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
+    }
+
+    enum class Type {
+        RT_BASED
     }
 }
