@@ -650,6 +650,40 @@ abstract class Effect(val trigger: Trigger) {
         }
     }
 
+    class Search(
+        trigger: Trigger,
+        private val cardPredicate: CardPredicate,
+        private val amount: Int,
+        override var triggerInHand: Boolean
+    ) : Effect(trigger) {
+
+        override fun onTrigger(
+            triggerInformation: TriggerInformation,
+            controller: GameController
+        ): Timeline = Timeline.timeline {
+            var timeline: Timeline? = null
+            action {
+                timeline = controller
+                    .cardHand
+                    .cards
+                    .filter { cardPredicate.check(it, controller) }
+                    .take(amount)
+                    .map { controller.putCardFromStackInHandTimeline(it) }
+                    .collectTimeline()
+            }
+            includeLater(
+                { timeline!! },
+                { true }
+            )
+        }
+
+        override fun blocks(controller: GameController): Boolean = false
+
+        override fun useAlternateOnShotTriggerPosition(): Boolean = false
+
+        override fun copy(): Effect = Search(trigger, cardPredicate, amount, triggerInHand)
+    }
+
 }
 
 /**

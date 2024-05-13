@@ -883,12 +883,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
-    private fun cardOrbAnim(actor: Actor) = GraphicsConfig.orbAnimation(
-        actor.localToStageCoordinates(Vector2(0f, 0f)) +
-                Vector2(actor.width / 2, actor.height / 2),
-        curScreen.centeredStageCoordsOfActor("deck_icon"),
-        false
-    )
+    private fun cardOrbAnim(actor: Actor, reverse: Boolean = false): RenderPipeline.OrbAnimation {
+        val actorCoords = actor.localToStageCoordinates(Vector2(0f, 0f)) +
+                Vector2(actor.width / 2, actor.height / 2)
+        val deckCoords = curScreen.centeredStageCoordsOfActor("deck_icon")
+        val source = if (reverse) deckCoords else actorCoords
+        val target = if (reverse) actorCoords else deckCoords
+        return GraphicsConfig.orbAnimation(source, target, false)
+    }
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
         if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
@@ -1171,6 +1173,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         _playerStatusEffects.add(effect)
         statusEffectDisplay.displayEffect(effect)
         curScreen.enterState(showStatusEffectsState)
+    }
+
+    fun putCardFromStackInHandTimeline(card: Card): Timeline = Timeline.timeline {
+        action {
+            if (card !in cardStack) {
+                FortyFiveLogger.warn(logTag, "could not put card $card from Stack in Hand because it is not in the stack")
+                return@action
+            }
+            cardStack.remove(card)
+            cardHand.addCard(card)
+            checkCardMaximums()
+            validateCardStack()
+            cardOrbAnim(card.actor, reverse = true)
+        }
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
