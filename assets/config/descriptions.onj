@@ -55,8 +55,13 @@ hoverDetailDescriptions: [
     },
     {
         keyword: "DISCHARGE POISON",
-        groupName: "trait",
+        groupName: "keyword",
         description: "$trait$DISCHARGE POISON (x)$trait$\nIf the enemy has $status$POISON$status$, resolve x turns worth of poison dmg all at once.",
+    },
+    {
+        keyword: "SEARCH",
+        groupName: "trait",
+        description: "$trait$SEARCH$trait$\n",
     },
 ],
 
