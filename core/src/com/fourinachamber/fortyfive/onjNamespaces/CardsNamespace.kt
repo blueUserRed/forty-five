@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.onjNamespaces
 
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.card.*
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.Utils
 import onj.builder.buildOnjObject
 import onj.customization.Namespace.*
@@ -235,7 +234,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
             else -> throw RuntimeException("bNum only allows ints or strings!")
         }
 
-        return OnjBulletSelector(BulletSelector.ByLambda { self, other, slot, _ ->
+        return OnjBulletSelector(BulletSelector.ByPredicate { self, other, slot, _ ->
             // when self === other allowSelf must be true, even if the slot is correct
             if (self === other) allowSelf
             else nums.contains(slot)
@@ -244,7 +243,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction(schema = "params: [string]")
     fun bSelectByName(name: OnjString): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByLambda { _, other, _, _ -> other.name == name.value })
+        return OnjBulletSelector(BulletSelector.ByPredicate { _, other, _, _ -> other.name == name.value })
     }
 
     @RegisterOnjFunction(schema = "params: [boolean, boolean]")
@@ -252,21 +251,26 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjBulletSelector(BulletSelector.ByPopup(includeSelf.value, optional.value))
     }
 
+    @RegisterOnjFunction(schema = "params: []")
+    fun bSelectSourceBullet(): OnjBulletSelector {
+        return OnjBulletSelector(BulletSelector.ByLambda { info -> listOf(info.sourceCard!!) })
+    }
+
     @RegisterOnjFunction("params: []")
     fun bSelectNeighbors(): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByLambda { self, _, slot, controller ->
-            val thisSlot = controller.revolver.slots.indexOfFirst { it.card === self }
+        return OnjBulletSelector(BulletSelector.ByPredicate { self, _, slot, triggerInformation ->
+            val thisSlot = triggerInformation.controller.revolver.slots.indexOfFirst { it.card === self }
             val neighbors = arrayOf(
                 if (thisSlot == 4) 0 else thisSlot + 1,
                 if (thisSlot == 0) 4 else thisSlot - 1
             )
-            return@ByLambda slot in neighbors
+            return@ByPredicate slot in neighbors
         })
     }
 
     @RegisterOnjFunction("params: []")
     fun bSelectSelf(): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByLambda { self, other, _, _ -> self === other })
+        return OnjBulletSelector(BulletSelector.ByPredicate { self, other, _, _ -> self === other })
     }
 
     @RegisterOnjFunction(schema = "use Cards; params: [EffectValue, EffectValue]")
@@ -374,6 +378,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     private fun triggerOrError(trigger: String): Trigger = when (trigger) {
         "enter" -> Trigger.ON_ENTER
+        "any card entered" -> Trigger.ON_ANY_CARD_ENTER
         "shot" -> Trigger.ON_SHOT
         "bounce" -> Trigger.ON_BOUNCE
         "leave" -> Trigger.ON_LEAVE

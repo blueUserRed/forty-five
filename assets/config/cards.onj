@@ -15,7 +15,8 @@ var bSelects = {
     targetRequiredNotSelf: bSelectTarget(false, false),
     targetOptionalNotSelf: bSelectTarget(false, true),
     neighbors: bSelectNeighbors(),
-    self: bSelectSelf()
+    self: bSelectSelf(),
+    sourceBullet: bSelectSourceBullet()
 };
 
 var iconPrefix = "§§";
@@ -1309,6 +1310,26 @@ cards: [
         cost: 0,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "bulletPointBullet",
+        title: "Bullet Point Bullet",
+        flavourText: "",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$Whenever a Bullet enters the revolver:$trigger$\nThe Bullet that entered gets +4 dmg",
+        baseDamage: 7,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("any card entered", bSelects.sourceBullet, 4#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool1", "rarity1"],
         price: 50,
     },
 
