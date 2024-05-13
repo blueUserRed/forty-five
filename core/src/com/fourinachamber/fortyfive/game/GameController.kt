@@ -100,7 +100,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private var cardPrototypes: List<CardPrototype> = listOf()
     val createdCards: MutableList<Card> = mutableListOf()
-    private var cardStack: MutableList<Card> = mutableListOf()
+
+    private var _cardStack: MutableList<Card> = mutableListOf()
+    val cardStack: List<Card>
+        get() = _cardStack
+
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     private var _remainingCards: Int by multipleTemplateParam(
@@ -282,13 +286,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            cardStack.add(card.create(curScreen))
+            _cardStack.add(card.create(curScreen))
         }
 
-        if (gameDirector.encounter.shuffleCards) cardStack.shuffle()
+        if (gameDirector.encounter.shuffleCards) _cardStack.shuffle()
         validateCardStack()
 
-        FortyFiveLogger.debug(logTag, "card stack: $cardStack")
+        FortyFiveLogger.debug(logTag, "card stack: $_cardStack")
 
         val defaultBulletName = onj.get<String>("defaultBullet")
 
@@ -345,7 +349,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
         if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
 
-        _remainingCards = cardStack.size
+        _remainingCards = _cardStack.size
 
         mainTimeline.updateTimeline()
 
@@ -1177,11 +1181,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     fun putCardFromStackInHandTimeline(card: Card): Timeline = Timeline.timeline {
         action {
-            if (card !in cardStack) {
+            if (card !in _cardStack) {
                 FortyFiveLogger.warn(logTag, "could not put card $card from Stack in Hand because it is not in the stack")
                 return@action
             }
-            cardStack.remove(card)
+            _cardStack.remove(card)
             cardHand.addCard(card)
             checkCardMaximums()
             validateCardStack()
@@ -1250,7 +1254,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @AllThreadsAllowed
     fun drawCard(fromBottom: Boolean = false) {
         validateCardStack()
-        val card = (if (!fromBottom) cardStack.removeFirstOrNull() else cardStack.removeLastOrNull())
+        val card = (if (!fromBottom) _cardStack.removeFirstOrNull() else _cardStack.removeLastOrNull())
             ?: defaultBullet.create(curScreen)
         cardHand.addCard(card)
         FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
@@ -1258,32 +1262,32 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     fun putCardAtBottomOfStack(card: Card) {
-        cardStack.add(card)
+        _cardStack.add(card)
         validateCardStack()
     }
 
     fun putCardsAtBottomOfStack(cards: List<Card>) {
-        cardStack.addAll(cards)
+        _cardStack.addAll(cards)
         validateCardStack()
     }
 
     private fun validateCardStack() {
         var index = 0
-        while (index < cardStack.size) {
-            val card = cardStack[index]
+        while (index < _cardStack.size) {
+            val card = _cardStack[index]
             if (card.isAlwaysAtBottom) {
-                cardStack.removeAt(index)
-                cardStack.add(card)
+                _cardStack.removeAt(index)
+                _cardStack.add(card)
             }
             index++
         }
-        index = cardStack.size - 1
+        index = _cardStack.size - 1
         while (index >= 0) {
-            if (cardStack.take(index + 1).all { it.isAlwaysAtTop }) break
-            val card = cardStack[index]
+            if (_cardStack.take(index + 1).all { it.isAlwaysAtTop }) break
+            val card = _cardStack[index]
             if (card.isAlwaysAtTop) {
-                cardStack.removeAt(index)
-                cardStack.add(0, card)
+                _cardStack.removeAt(index)
+                _cardStack.add(0, card)
                 continue
             }
             index--

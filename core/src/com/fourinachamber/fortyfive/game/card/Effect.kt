@@ -664,9 +664,9 @@ abstract class Effect(val trigger: Trigger) {
             var timeline: Timeline? = null
             action {
                 timeline = controller
-                    .cardHand
-                    .cards
+                    .cardStack
                     .filter { cardPredicate.check(it, controller) }
+                    .shuffled()
                     .take(amount)
                     .map { controller.putCardFromStackInHandTimeline(it) }
                     .collectTimeline()

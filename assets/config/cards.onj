@@ -1133,7 +1133,7 @@ cards: [
         name: "viperBullet",
         title: "Viper Bullet",
         flavourText: "",
-        description: "$trigger$On-Leave:$trigger$\n$trait$DISCHARGE POISON$trait$ (2)",
+        description: "$trigger$On-Leave:$trigger$\n$keyword$DISCHARGE POISON$keyword$ (2)",
         baseDamage: 0,
         coverValue: 0,
         traitEffects: [],
@@ -1343,13 +1343,33 @@ cards: [
         rotation: $Right { amount: 1 },
         highlightType: "standard",
         effects: [
-            buffDmg("enter", bSelects.requiredNotSelf, 10#val)
+            buffDmg("enter", bSelects.targetRequiredNotSelf, 10#val)
         ],
         forceLoadCards: [],
         dark: false,
         cost: 1,
         type: $Bullet { },
         tags: ["pool1", "rarity2", "unobtainable", "not used"],
+        price: 50,
+    },
+    {
+        name: "doodleBullet",
+        title: "Doodle Bullet",
+        flavourText: "A great activity when taking breaks from shooting people! Doodling!",
+        description: "$trigger$On-Placedown:$trigger$\n$keyword$SEARCH$keyword$ for a 0 cost bullet in your deck. It gets +7 dmg.",
+        baseDamage: 4,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            search("enter", 1, cardsWithCost(0))
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
 
