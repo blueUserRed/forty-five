@@ -276,7 +276,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
 
     @RegisterOnjFunction("params: []")
     fun bSelectSelf(): OnjBulletSelector {
-        return OnjBulletSelector(BulletSelector.ByPredicate { self, other, _, _ -> self === other })
+        return OnjBulletSelector(BulletSelector.ByLambda { _, card -> listOf(card) })
     }
 
     @RegisterOnjFunction("params: []")

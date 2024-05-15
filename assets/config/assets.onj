@@ -1061,12 +1061,12 @@ textures: [
     },
     {
         name: "card_symbol_text_i_equals",
-        file: "textures/cards/symbols/text/a_equals.png",
+        file: "textures/cards/symbols/text/i_equals.png",
         useMipMaps: true,
     },
     {
         name: "card_symbol_text_t_equals",
-        file: "textures/cards/symbols/text/a_equals.png",
+        file: "textures/cards/symbols/text/t_equals.png",
         useMipMaps: true,
     },
 ],
