@@ -174,7 +174,7 @@ class GameDirector(private val controller: GameController) {
                 FortyFiveLogger.warn(logTag, "No encounter found for biome $biome; choosing a random one")
                 return encounters.randomIndex()
             }
-            val encountersInRoad = encountersInBiome.filter { progress intersects it.progress }
+            val encountersInRoad = encountersInBiome.filter { progress intersection it.progress }
             if (encountersInRoad.isEmpty()) {
                 FortyFiveLogger.warn(logTag, "No encounter found for progress $progress; choosing a random one")
                 return encountersInBiome.randomIndex()

@@ -263,6 +263,10 @@ textures: [
         file: "textures/game_screen_backgrounds/bewitched_forest.png"
     },
     {
+        name: "game_screen_background_magenta_mountains",
+        file: "textures/game_screen_backgrounds/magenta_mountains.png"
+    },
+    {
         name: "revolver_drum",
         file: "textures/game_screen/revolver_drum.png"
     },
@@ -333,6 +337,10 @@ textures: [
     {
         name: "map_background_bewitched_forest_tileable",
         file: "textures/map/backgrounds/bewitched_forest.png",
+    },
+    {
+        name: "map_background_magenta_mountains_tileable",
+        file: "textures/map/backgrounds/magenta_mountains.png",
     },
     {
         name: "map_path",
@@ -441,6 +449,10 @@ textures: [
     {
         name: "map_decoration_bewitched_forest_tree1",
         file: "textures/map/decorations/bewitched_forest_tree1.png"
+    },
+    {
+        name: "map_decoration_magenta_mountains_mountain",
+        file: "textures/map/decorations/magenta_mountains_mountain.png"
     },
     {
         name: "shop_dark_background",

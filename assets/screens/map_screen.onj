@@ -18,7 +18,8 @@ assets: {
         "normal_bullet", "grey_texture", "heart_texture", "burning_icon", "white_rounded", "reserves_texture",
         "black_texture", "world_view_background", "map_background_snow_tileable", "map_detail_background",
         "map_detail_fight_button_hover", "map_detail_fight_button", "map_background_grass_tileable",
-        "map_background_wasteland_tileable","map_background_bewitched_forest_tileable",
+        "map_background_wasteland_tileable", "map_background_bewitched_forest_tileable",
+        "map_background_magenta_mountains_tileable",
         "location_sign_salem", "transparent_black_texture",
         "location_sign_tabu_letter_outpost",
         "location_sign_spire_outpost",
@@ -37,6 +38,7 @@ assets: {
         "map_decoration_wasteland_dune_1", "map_decoration_wasteland_dune_2",
         "map_decoration_wasteland_dune_3", "map_decoration_wasteland_dune_4",
         "map_decoration_wasteland_skull_1", "map_decoration_wasteland_skull_2",
+        "map_decoration_magenta_mountains_mountain",
         "common_button_default", "common_button_hover", "common_button_disabled",
         "map_decoration_bewitched_forest_sheep_1","map_decoration_bewitched_forest_sheep_2",
         "map_decoration_bewitched_forest_tree1",
@@ -316,23 +318,16 @@ var mapBox = $Box {
             },
             {
                 style_priority: 2,
-                style_condition: biome("snow"),
-                backgroundScale: 2.5,
-                background: "map_background_snow_tileable",
-                // i hope its okay to abuse this, if not, then please say
-            },
-            {
-                style_priority: 2,
-                style_condition: biome("dunkelwald"),
-                backgroundScale: 0.5,
-                background: "map_background_grass_tileable",
-            },
-            {
-                style_priority: 2,
                 style_condition: biome("bewitched_forest"),
                 backgroundScale: 0.5,
                 background: "map_background_bewitched_forest_tileable",
-            }
+            },
+            {
+                style_priority: 2,
+                style_condition: biome("magenta_mountains"),
+                backgroundScale: 0.5,
+                background: "map_background_magenta_mountains_tileable",
+            },
         ],
         detailMapProvider: $CurrentMapProvider {
         },

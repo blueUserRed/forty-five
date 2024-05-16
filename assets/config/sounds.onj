@@ -125,4 +125,8 @@ biomeAmbience: [
         biomeName: "bewitched_forest",
         sounds: ["owl"]
     },
+    {
+        biomeName: "magenta_mountains",
+        sounds: []
+    },
 ],
