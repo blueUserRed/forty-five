@@ -21,6 +21,7 @@ class NewMapGenerator {
 
     private val nodeColliders: MutableList<Rectangle> = mutableListOf()
     private val decorationColliders: MutableList<Rectangle> = mutableListOf()
+    private val lineColliders: MutableList<Line2D> = mutableListOf()
 
     fun generate(name: String, data: MapGeneratorData): DetailMap {
         this.data = data
@@ -153,6 +154,12 @@ class NewMapGenerator {
             other.overlaps(collider)
         }
 
+        fun checkCollision(collider: Rectangle, other: Line2D): Boolean = if (decoration.onlyCheckCollisionsAtSpawnPoints) {
+            false
+        } else {
+            other.intersects(collider)
+        }
+
         val maxIts = targetAmount * 3
         var iteration = 0
         var spawned = 0
@@ -165,9 +172,17 @@ class NewMapGenerator {
             if (!dist.hasNext()) break
             val pos = dist.next()
             val scale = decoration.scale.random()
-            val thisCollision = Rectangle(pos.x, pos.y, decoration.baseWidth * scale, decoration.baseHeight * scale)
+            val shrinkWidth = decoration.baseWidth * scale * decoration.shrinkBoundsWidth
+            val shrinkHeight = decoration.baseHeight * scale * decoration.shrinkBoundsHeight
+            val thisCollision = Rectangle(
+                pos.x + shrinkWidth / 2,
+                pos.y + shrinkHeight / 2,
+                decoration.baseWidth * scale - shrinkWidth,
+                decoration.baseHeight * scale - shrinkHeight
+            )
             if (decoration.checkNodeCollisions && nodeColliders.any { checkCollision(thisCollision, it) }) continue
             if (decoration.checkDecorationCollisions && decorationColliders.any { checkCollision(thisCollision, it) }) continue
+            if (decoration.checkLineCollisions && lineColliders.any { checkCollision(thisCollision, it) })
             if (decoration.generateDecorationCollisions) decorationColliders.add(thisCollision)
             instances.add(pos to scale)
             spawned++
@@ -196,6 +211,11 @@ class NewMapGenerator {
         nodeColliders.add(Rectangle(x - halfWidth, y - halfWidth, width, width))
     }
 
+    private fun connectNodes(node1: MapNodeBuilder, node2: MapNodeBuilder) {
+        node1.connect(node2)
+        lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))
+    }
+
     private inner class Line(
         val startNode: MapNodeBuilder,
         val endNode: MapNodeBuilder,
@@ -220,16 +240,13 @@ class NewMapGenerator {
                 )
                 curX += distancePerNode
                 lastNode?.let {
-                    it.edgesTo.add(node)
-                    node.edgesTo.add(it)
+                    connectNodes(it, node)
                 }
                 lastNode = node
                 node
             }
-            nodes.first().edgesTo.add(startNode)
-            startNode.edgesTo.add(nodes.first())
-            nodes.last().edgesTo.add(endNode)
-            endNode.edgesTo.add(nodes.last())
+            connectNodes(nodes.first(), startNode)
+            connectNodes(nodes.last(), endNode)
             this.nodes = nodes
         }
 
@@ -314,10 +331,13 @@ class NewMapGenerator {
         val baseHeight: Float,
         val density: Float,
         val checkNodeCollisions: Boolean,
+        val checkLineCollisions: Boolean,
         val checkDecorationCollisions: Boolean,
         val generateDecorationCollisions: Boolean,
         val onlyCheckCollisionsAtSpawnPoints: Boolean,
         val scale: ClosedFloatingPointRange<Float>,
+        val shrinkBoundsWidth: Float,
+        val shrinkBoundsHeight: Float,
         val sortByY: Boolean,
         val animated: Boolean,
     ) {
@@ -331,10 +351,13 @@ class NewMapGenerator {
                 onj.get<Double>("baseHeight").toFloat(),
                 onj.get<Double>("density").toFloat(),
                 onj.get<Boolean>("checkNodeCollisions"),
+                onj.get<Boolean>("checkLineCollisions"),
                 onj.get<Boolean>("checkDecorationCollisions"),
                 onj.get<Boolean>("generateDecorationCollisions"),
                 onj.get<Boolean>("onlyCheckCollisionsAtSpawnPoints"),
                 onj.get<OnjArray>("scale").toFloatRange(),
+                onj.getOr<Double>("shrinkBoundsWidth", 0.0).toFloat(),
+                onj.getOr<Double>("shrinkBoundsHeight", 0.0).toFloat(),
                 onj.get<Boolean>("sortByY"),
                 onj.get<Boolean>("animated"),
             )

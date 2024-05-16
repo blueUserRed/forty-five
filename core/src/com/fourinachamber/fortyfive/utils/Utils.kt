@@ -87,6 +87,7 @@ operator fun Vector2.plus(other: Vector2) = Vector2(x + other.x, y + other.y)
 operator fun Vector2.times(other: Float): Vector2 = Vector2(this.x * other, this.y * other)
 operator fun Vector2.div(other: Float): Vector2 = Vector2(this.x / other, this.y / other)
 infix fun Vector2.dot(other: Vector2) = this.dot(other)
+infix fun Vector2.cross(other: Vector2): Float = this.crs(other)
 operator fun Vector2.unaryMinus(): Vector2 = Vector2(-this.x, -this.y)
 infix fun Vector2.multIndividual(other: Vector2) = Vector2(x * other.x, y * other.y)
 fun Vector2.withMag(mag: Float): Vector2 = this.unit * mag
@@ -175,7 +176,7 @@ fun <T> Collection<T>.splitInTwo(predicate: (T) -> Boolean): Pair<List<T>, List<
     return ifTrue to ifFalse
 }
 
-infix fun <T> ClosedFloatingPointRange<T>.intersects(
+infix fun <T> ClosedFloatingPointRange<T>.intersection(
     other: ClosedFloatingPointRange<T>
 ): Boolean where T : Comparable<T> = this.start in other || other.start in this
 

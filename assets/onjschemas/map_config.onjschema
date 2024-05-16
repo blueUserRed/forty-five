@@ -13,10 +13,13 @@ var decoration = {
     baseHeight: float,
     density: float,
     checkNodeCollisions: boolean,
+    checkLineCollisions: boolean,
     checkDecorationCollisions: boolean,
     generateDecorationCollisions: boolean,
     onlyCheckCollisionsAtSpawnPoints: boolean,
     scale: float[2],
+    shrinkBoundsWidth?: float,
+    shrinkBoundsHeight?: float,
     sortByY: boolean,
     animated: boolean,
 };

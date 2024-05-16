@@ -89,6 +89,11 @@ encounterBackgrounds: [
         isDark: true,
         background: "game_screen_background_bewitched_forest"
     },
+    {
+        biome: "magenta_mountains",
+        isDark: false,
+        background: "game_screen_background_magenta_mountains"
+    },
 ],
 
 damageOverlay: {
@@ -137,7 +142,8 @@ gameUsedAssets: [
     "shoot_shader", "red_wing", "transparent_black_texture", "white_texture",
     "red_wing", "vignette_shader", "hit_overlay", "burning_icon", "poison_icon", "enemy_gravestone", "bewitched_icon",
     "player_turn_banner", "enemy_turn_banner", "normal_bullet", "shield_icon", "insult_icon", "enemy_texture",
-    "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland"
+    "card_character", "game_screen_background_bewitched_forest", "game_screen_background_wasteland",
+    "game_screen_background_magenta_mountains",
 ],
 
 revolverSlotIcons: {

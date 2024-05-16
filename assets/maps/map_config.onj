@@ -4,7 +4,6 @@ use Common;
 var mapSharedConfig = {
     mainLineNodes: 8,
     altLinesPadding: [0, 2],
-    altLinesOffset: 40.0,
     varianceX: 15.0,
     varianceY: 15.0,
     roadLength: 270.0,
@@ -96,6 +95,7 @@ var decorations = {
         baseHeight: 4.0,
         density: 0.0024,
         checkNodeCollisions: true,
+        checkLineCollisions: false,
         checkDecorationCollisions: true,
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: true,
@@ -110,6 +110,7 @@ var decorations = {
         baseHeight: 4.0,
         density: 0.0008,
         checkNodeCollisions: true,
+        checkLineCollisions: false,
         checkDecorationCollisions: true,
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: false,
@@ -124,6 +125,7 @@ var decorations = {
         baseHeight: 3.0,
         density: 0.0004,
         checkNodeCollisions: true,
+        checkLineCollisions: false,
         checkDecorationCollisions: true,
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: false,
@@ -138,6 +140,7 @@ var decorations = {
         baseHeight: 3.0,
         density: 0.0004,
         checkNodeCollisions: true,
+        checkLineCollisions: false,
         checkDecorationCollisions: true,
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: false,
@@ -152,6 +155,7 @@ var decorations = {
         baseHeight: 10.0,
         density: 0.024,
         checkNodeCollisions: true,
+        checkLineCollisions: false,
         checkDecorationCollisions: true,
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: true,
@@ -166,17 +170,36 @@ var decorations = {
         baseHeight: 8.0,
         density: 0.001,
         checkNodeCollisions: true,
+        checkLineCollisions: false,
         checkDecorationCollisions: true,
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: false,
         scale: [1.0, 1.1],
         sortByY: false,
         animated: true,
+    },
+    magentaMountain: {
+        distribution: $Random {},
+        decoration: "map_decoration_magenta_mountains_mountain",
+        baseWidth: 80.0,
+        baseHeight: 80.0 * (1080.0 / 1610.0),
+        density: 0.0001,
+        checkNodeCollisions: true,
+        checkLineCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: false,
+        scale: [1.0, 1.4],
+        shrinkBoundsWidth: 0.4,
+        shrinkBoundsHeight: 0.5,
+        sortByY: false,
+        animated: false,
     }
 };
 
 var wastelandDecorations = [ decorations.cactus2, decorations.skull1, decorations.skull2, decorations.cactus1 ];
 var bewitchedForestDecorations = [ decorations.sheep, decorations.tree ];
+var magentaMountainsDecorations = [ decorations.magentaMountain ];
 
 var roadBetweenAquaBalleAndTabuLetter = {
     name: "road_between_aqua_balle_and_tabu_letter_outpost",
@@ -187,6 +210,7 @@ var roadBetweenAquaBalleAndTabuLetter = {
     endArea: "tabu_letter_outpost",
     decorations: wastelandDecorations,
     nodeProtectedArea: 10.0,
+    altLinesOffset: 40.0,
     ...mapSharedConfig
 };
 
@@ -199,18 +223,33 @@ var roadBetweenTabuLetterAndSalem = {
     endArea: "salem",
     decorations: bewitchedForestDecorations,
     nodeProtectedArea: 20.0,
+    altLinesOffset: 40.0,
     ...mapSharedConfig
 };
+
+//var roadBetweenSalemAndSpire = {
+//    name: "road_between_salem_and_spire_outpost",
+//    progress: [20, 30],
+//    seed: runRandom(3),
+//    biome: "bewitched_forest",
+//    startArea: "salem",
+//    endArea: "spire_outpost",
+//    nodeProtectedArea: 20.0,
+//    altLinesOffset: 40.0,
+//    decorations: bewitchedForestDecorations,
+//    ...mapSharedConfig
+//};
 
 var roadBetweenSalemAndSpire = {
     name: "road_between_salem_and_spire_outpost",
     progress: [20, 30],
     seed: runRandom(3),
-    biome: "bewitched_forest",
+    biome: "magenta_mountains",
     startArea: "salem",
     endArea: "spire_outpost",
     nodeProtectedArea: 20.0,
-    decorations: bewitchedForestDecorations,
+    altLinesOffset: 60.0,
+    decorations: magentaMountainsDecorations,
     ...mapSharedConfig
 };
 
