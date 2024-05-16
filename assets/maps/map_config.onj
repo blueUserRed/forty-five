@@ -179,27 +179,68 @@ var decorations = {
         animated: true,
     },
     magentaMountain: {
-        distribution: $Random {},
+        distribution: $FadeX {
+            start: 50.0,
+            end: 300.0,
+            interpolation: interpolation.pow2InInverse
+        },
         decoration: "map_decoration_magenta_mountains_mountain",
         baseWidth: 80.0,
         baseHeight: 80.0 * (1080.0 / 1610.0),
-        density: 0.0001,
+        density: 0.0008,
         checkNodeCollisions: true,
         checkLineCollisions: true,
         checkDecorationCollisions: true,
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: false,
-        scale: [1.0, 1.4],
+        scale: [0.8, 1.5],
+        shrinkBoundsWidth: 0.3,
+        shrinkBoundsHeight: 0.4,
+        sortByY: true,
+        animated: false,
+    },
+    magentaFog: {
+        distribution: $Random {},
+        decoration: "map_decoration_magenta_mountains_fog",
+        baseWidth: 80.0,
+        baseHeight: 80.0 * (867.0 / 1309.0),
+        density: 0.0008,
+        checkNodeCollisions: false,
+        checkLineCollisions: false,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: false,
+        onlyCheckCollisionsAtSpawnPoints: true,
+        scale: [0.8, 1.4],
         shrinkBoundsWidth: 0.4,
-        shrinkBoundsHeight: 0.5,
+        shrinkBoundsHeight: 0.4,
         sortByY: false,
+        animated: false,
+    },
+    magentaTree: {
+        distribution: $FadeX {
+            start: -100.0,
+            end: 100.0,
+            interpolation: interpolation.pow4In
+        },
+        decoration: "map_decoration_magenta_mountains_tree",
+        baseWidth: 20.0,
+        baseHeight: 20.0,
+        density: 0.005,
+        checkNodeCollisions: true,
+        checkLineCollisions: false,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: true,
+        scale: [0.5, 1.0],
+        sortByY: true,
         animated: false,
     }
 };
 
 var wastelandDecorations = [ decorations.cactus2, decorations.skull1, decorations.skull2, decorations.cactus1 ];
 var bewitchedForestDecorations = [ decorations.sheep, decorations.tree ];
-var magentaMountainsDecorations = [ decorations.magentaMountain ];
+//var magentaMountainsDecorations = [ decorations.magentaMountain, decorations.magentaTree ];
+var magentaMountainsDecorations = [ decorations.magentaMountain, decorations.magentaTree, decorations.magentaFog ];
 
 var roadBetweenAquaBalleAndTabuLetter = {
     name: "road_between_aqua_balle_and_tabu_letter_outpost",
@@ -247,8 +288,8 @@ var roadBetweenSalemAndSpire = {
     biome: "magenta_mountains",
     startArea: "salem",
     endArea: "spire_outpost",
-    nodeProtectedArea: 20.0,
-    altLinesOffset: 60.0,
+    nodeProtectedArea: 10.0,
+    altLinesOffset: 80.0,
     decorations: magentaMountainsDecorations,
     ...mapSharedConfig
 };

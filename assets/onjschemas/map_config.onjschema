@@ -1,8 +1,16 @@
 import "imports/map_events.onjschema" as _;
 
+use Common;
+
 $DecorationDistribution {
 
     $Random {}
+
+    $FadeX {
+        start: float,
+        end: float,
+        interpolation: Interpolation,
+    }
 
 }
 
