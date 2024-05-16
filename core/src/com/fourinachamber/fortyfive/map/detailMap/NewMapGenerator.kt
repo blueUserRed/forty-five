@@ -1,9 +1,9 @@
 package com.fourinachamber.fortyfive.map.detailMap
 
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fortyfive.utils.*
-import onj.builder.buildOnjObject
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
 import onj.value.OnjObject
@@ -371,10 +371,28 @@ class NewMapGenerator {
             (bounds.y..(bounds.y + bounds.height)).random(random),
         ) }
 
+        fun fadeX(
+            bounds: Rectangle,
+            random: Random,
+            start: Float,
+            end: Float,
+            interpolation: Interpolation
+        ): Sequence<Vector2> = repeatingSequenceOf {
+            val x = interpolation.apply(start, end, random.nextFloat())
+            val y = (bounds.y..(bounds.y + bounds.height)).random(random)
+            Vector2(x, y)
+        }
+
         fun fromOnj(
             onj: OnjNamedObject
         ): (bounds: Rectangle, random: Random) -> Sequence<Vector2> = when (val name = onj.name) {
             "Random" -> ::random
+            "FadeX" -> { bounds, random -> fadeX(
+                bounds, random,
+                onj.get<Double>("start").toFloat(),
+                onj.get<Double>("end").toFloat(),
+                onj.get<Interpolation>("interpolation")
+            ) }
             else -> throw RuntimeException("unknown decoration distribution function $name")
         }
     }
