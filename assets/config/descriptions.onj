@@ -60,8 +60,8 @@ hoverDetailDescriptions: [
     },
     {
         keyword: "SEARCH",
-        groupName: "trait",
-        description: "$trait$SEARCH$trait$\n",
+        groupName: "keyword",
+        description: "$trait$SEARCH$trait$\nPuts a random card from the deck into the players hand, that matches the requirement.",
     },
 ],
 
