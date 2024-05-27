@@ -1394,6 +1394,27 @@ cards: [
         tags: ["pool2", "rarity1"],
         price: 50,
     },
+    {
+        name: "longLostBullet",
+        title: "Long Lost Bullet",
+        flavourText: "I guess we should rename it now since the name dosen’t really fit anymore. Finally Found Bullet or something like that.",
+        description: "$trigger$While in Revolver:$trigger$\nAs long as the enemy has the Statuseffekt $status$POISON$status$:\n$trigger$On-Turn-Begin:$trigger$\nYou gain 1 reserve and draw 1 card",
+        baseDamage: 3,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            effectWithCondition(reserveGain("round start", 1#val), $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) }),
+            effectWithCondition(draw("round start", 1#val), $AnyEnemyHasStatusEffect { value: poison(0#val, 0#val) }),
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1", "rarity2"],
+        price: 50,
+    },
 
 ],
 

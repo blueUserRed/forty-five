@@ -1179,10 +1179,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         curScreen.enterState(showStatusEffectsState)
     }
 
-    fun putCardFromStackInHandTimeline(card: Card): Timeline = Timeline.timeline {
+    fun putCardFromStackInHandTimeline(card: Card, source: Card? = null): Timeline = Timeline.timeline {
+        var skip = false
         action {
             if (card !in _cardStack) {
                 FortyFiveLogger.warn(logTag, "could not put card $card from Stack in Hand because it is not in the stack")
+                skip = true
                 return@action
             }
             _cardStack.remove(card)
@@ -1191,6 +1193,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             validateCardStack()
             cardOrbAnim(card.actor, reverse = true)
         }
+        includeLater(
+            { checkEffectsSingleCard(
+                Trigger.ON_SPECIAL_SELF_DRAWN,
+                card,
+                TriggerInformation(sourceCard = source, controller = this@GameController)
+            ) },
+            { !skip }
+        )
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
