@@ -386,6 +386,7 @@ class Card(
         val inHand = inHand(controller)
         val effects = effects
             .filter { inGame || (inHand && it.triggerInHand) }
+            .filter { it.condition?.check(controller) ?: true }
             .zip { it.checkTrigger(trigger, triggerInformation, controller) }
             .filter { it.second != null }
         if (effects.isEmpty()) return@timeline

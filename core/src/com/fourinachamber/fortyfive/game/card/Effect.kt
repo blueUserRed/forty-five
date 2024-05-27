@@ -15,6 +15,7 @@ abstract class Effect(val trigger: Trigger) {
     var triggerInHand: Boolean = false
     var isHidden: Boolean = false
     var cacheAffectedCards: Boolean = false
+    var condition: GamePredicate? = null
 
     protected val cardDescName: String
         get() = "[${card.title}]"
@@ -34,6 +35,7 @@ abstract class Effect(val trigger: Trigger) {
         to.triggerInHand = triggerInHand
         to.isHidden = isHidden
         to.cacheAffectedCards = cacheAffectedCards
+        to.condition = condition
     }
 
     protected fun cardsAffected(cards: List<Card>) {
@@ -669,7 +671,7 @@ abstract class Effect(val trigger: Trigger) {
                     .shuffled()
                     .take(amount)
                     .also { cardsAffected(it) }
-                    .map { controller.putCardFromStackInHandTimeline(it) }
+                    .map { controller.putCardFromStackInHandTimeline(it, card) }
                     .collectTimeline()
             }
             includeLater(
@@ -744,6 +746,7 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
     ON_ANY_CARD_ENTER,
     ON_DESTROY(listOf(ON_LEAVE)),
     ON_BOUNCE(listOf(ON_LEAVE)),
+    ON_SPECIAL_SELF_DRAWN,
     ON_CARDS_DRAWN,
     ON_ONE_OR_MORE_CARDS_DRAWN,
     ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN,

@@ -367,6 +367,14 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         return OnjActiveChecker { controller -> predicate.check(controller) }
     }
 
+    @RegisterOnjFunction(schema = "use Cards; params: [Effect, { ...* }]")
+    fun effectWithCondition(effect: OnjEffect, condition: OnjNamedObject): OnjEffect {
+        val predicate = GamePredicate.fromOnj(condition)
+        val newEffect = effect.value.copy()
+        newEffect.condition = predicate
+        return OnjEffect(newEffect)
+    }
+
     @RegisterOnjFunction(schema = "params: [{...*}]")
     fun bottomToTopCard(value: OnjNamedObject): OnjPassiveEffect {
         val predicate = GamePredicate.fromOnj(value)
