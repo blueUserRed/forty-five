@@ -411,6 +411,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "card drawn" -> Trigger.ON_CARDS_DRAWN
         "special card drawn" -> Trigger.ON_SPECIAL_CARDS_DRAWN
         "special self drawn" -> Trigger.ON_SPECIAL_SELF_DRAWN
+        "special self drawn not from bottom" -> Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM
         "any card destroyed" -> Trigger.ON_ANY_CARD_DESTROY
         "return home" -> Trigger.ON_RETURNED_HOME
         "rotate in 5" -> Trigger.ON_ROTATE_IN_5
