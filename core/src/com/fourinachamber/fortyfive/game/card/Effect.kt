@@ -747,6 +747,7 @@ enum class Trigger(val cascadeTriggers: List<Trigger> = listOf()) {
     ON_DESTROY(listOf(ON_LEAVE)),
     ON_BOUNCE(listOf(ON_LEAVE)),
     ON_SPECIAL_SELF_DRAWN,
+    ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM, // these triggers are getting oddly specific
     ON_CARDS_DRAWN,
     ON_ONE_OR_MORE_CARDS_DRAWN,
     ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN,

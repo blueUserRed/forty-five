@@ -1117,6 +1117,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
         include(checkEffectsSingleCard(Trigger.ON_BOUNCE, card))
         include(checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN, card))
+        include(checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM, card))
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
@@ -1195,11 +1196,18 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             cardOrbAnim(card.actor, reverse = true)
         }
         includeLater(
-            { checkEffectsSingleCard(
-                Trigger.ON_SPECIAL_SELF_DRAWN,
-                card,
-                TriggerInformation(sourceCard = source, controller = this@GameController)
-            ) },
+            { Timeline.timeline {
+                include(checkEffectsSingleCard(
+                    Trigger.ON_SPECIAL_SELF_DRAWN,
+                    card,
+                    TriggerInformation(sourceCard = source, controller = this@GameController)
+                ))
+                include(checkEffectsSingleCard(
+                    Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM,
+                    card,
+                    TriggerInformation(sourceCard = source, controller = this@GameController)
+                ))
+            } },
             { !skip }
         )
     }

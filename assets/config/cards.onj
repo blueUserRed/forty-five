@@ -1432,7 +1432,27 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool2", "rarity1"],
+        tags: ["pool2", "rarity1", "not used", "unobtainable"],
+        price: 50,
+    },
+    {
+        name: "watercolorBullet",
+        title: "Watercolored Bullet",
+        flavourText: "",
+        description: "If this bullet enters your hand except through drawing cards:\nGain 1 reserve",
+        baseDamage: 2,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            reserveGain("special self drawn not from bottom", 1#val)#canTriggerInHand
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 0,
+        type: $Bullet { },
+        tags: ["pool2", "rarity2", "not used", "unobtainable"],
         price: 50,
     },
 
