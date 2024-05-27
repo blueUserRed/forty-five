@@ -417,6 +417,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
         "rotate in 5" -> Trigger.ON_ROTATE_IN_5
         "one or more cards drawn" -> Trigger.ON_ONE_OR_MORE_CARDS_DRAWN
         "special one or more cards drawn" -> Trigger.ON_SPECIAL_ONE_OR_MORE_CARDS_DRAWN
+        "right clicked" -> Trigger.ON_RIGHT_CLICK
         else -> throw RuntimeException("unknown trigger: $trigger")
     }
 

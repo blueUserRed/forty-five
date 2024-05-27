@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -29,6 +30,8 @@ import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import ktx.actors.onClick
+import ktx.actors.onClickEvent
+import ktx.actors.onTouchEvent
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -96,6 +99,7 @@ class Card(
     val type: Type,
     val baseDamage: Int,
     val cost: Int,
+    val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
     val passiveEffects: List<PassiveEffect>,
@@ -554,6 +558,7 @@ class Card(
                 type = cardTypeOrError(onj),
                 baseDamage = onj.get<Long>("baseDamage").toInt(),
                 cost = onj.get<Long>("cost").toInt(),
+                rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
                 effects = onj.get<OnjArray>("effects")
                     .value
@@ -737,6 +742,10 @@ class CardActor(
         onHoverEnter {
             if (!playSoundsOnHover) return@onHoverEnter
             SoundPlayer.situation("card_hover", screen)
+        }
+        onTouchEvent { event, _, _ ->
+            if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
+            FortyFive.currentGame!!.cardRightClicked(card)
         }
     }
 

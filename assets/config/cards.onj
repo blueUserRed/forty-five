@@ -1455,6 +1455,27 @@ cards: [
         tags: ["pool2", "rarity2", "not used", "unobtainable"],
         price: 50,
     },
+    {
+        name: "poisonDartBullet",
+        title: "Poison Dart Bullet",
+        flavourText: "Look how cute it is! Don’t pet it tho.",
+        description: "$trigger$While in revolver:$trigger$\n$trigger$On-Right-Click:$trigger$\nPay 1 reserve and $keyword$DISCHARGE POISON$keyword$ (1)",
+        baseDamage: 4,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        rightClickCost: 1,
+        effects: [
+            discharge("right clicked", 1#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1", "rarity1", "not used", "unobtainable"],
+        price: 50,
+    },
 
 ],
 
