@@ -1267,6 +1267,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         curScreen.leaveState(freezeUIScreenState)
     }
 
+    fun cardRightClicked(card: Card) {
+        if (isUIFrozen) return
+        if (!card.inGame) return
+        val cost = card.rightClickCost ?: return
+        if (!cost(cost, card.actor)) return
+        appendMainTimeline(checkEffectsSingleCard(Trigger.ON_RIGHT_CLICK, card))
+    }
+
     /**
      * draws a bullet from the stack
      */
