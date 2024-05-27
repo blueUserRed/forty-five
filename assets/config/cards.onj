@@ -1415,6 +1415,26 @@ cards: [
         tags: ["pool1", "rarity2"],
         price: 50,
     },
+    {
+        name: "heirloomBullet",
+        title: "Heirloom Bullet",
+        flavourText: "",
+        description: "If this card enters your hand in any other way than drawing cards from top of your deck:\nThis Bullet gets +9",
+        baseDamage: 2,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("special self drawn", bSelects.self, 9#val)#canTriggerInHand
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
 
 ],
 

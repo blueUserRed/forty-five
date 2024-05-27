@@ -643,12 +643,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     SoundPlayer.situation("card_drawn", curScreen)
                     popupEvent = null
-                    drawCard(fromBottom)
                     TemplateString.updateGlobalParam(
                         "game.drawCardText",
                         "draw ${(remainingCardsToDraw - cur - 1) pluralS "card"} ${if (fromBottom) "from the bottom of your deck" else ""}"
                     )
                 }
+                include(drawCard(fromBottom))
             }
         }}, { remainingCardsToDraw != 0 })
         action {
@@ -1116,6 +1116,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.leaveGame()
         }
         include(checkEffectsSingleCard(Trigger.ON_BOUNCE, card))
+        include(checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN, card))
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
@@ -1262,13 +1263,20 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      * draws a bullet from the stack
      */
     @AllThreadsAllowed
-    fun drawCard(fromBottom: Boolean = false) {
-        validateCardStack()
-        val card = (if (!fromBottom) _cardStack.removeFirstOrNull() else _cardStack.removeLastOrNull())
-            ?: defaultBullet.create(curScreen)
-        cardHand.addCard(card)
-        FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
-        cardsDrawn++
+    fun drawCard(fromBottom: Boolean = false): Timeline = Timeline.timeline {
+        var card: Card? = null
+        action {
+            validateCardStack()
+            card = (if (!fromBottom) _cardStack.removeFirstOrNull() else _cardStack.removeLastOrNull())
+                ?: defaultBullet.create(curScreen)
+            cardHand.addCard(card!!)
+            FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
+            cardsDrawn++
+        }
+        includeLater(
+            { checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN, card!!) },
+            { fromBottom }
+        )
     }
 
     fun putCardAtBottomOfStack(card: Card) {
