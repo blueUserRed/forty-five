@@ -1458,7 +1458,7 @@ cards: [
     {
         name: "poisonDartBullet",
         title: "Poison Dart Bullet",
-        flavourText: "Look how cute it is! Don’t pet it tho.",
+        flavourText: "Look how cute it is! Don't pet it tho.",
         description: "$trigger$While in revolver:$trigger$\n$trigger$On-Right-Click:$trigger$\nPay 1 reserve and $keyword$DISCHARGE POISON$keyword$ (1)",
         baseDamage: 4,
         coverValue: 0,

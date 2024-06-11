@@ -1015,6 +1015,10 @@ textures: [
         file: "textures/npcs/witch.png",
     },
     {
+        name: "npc_traveler",
+        file: "textures/npcs/traveler.png",
+    },
+    {
         name: "enemy_selector",
         file: "textures/enemies/enemy_selector.png",
     },
