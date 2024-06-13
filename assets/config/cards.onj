@@ -1486,7 +1486,6 @@ cards: [
         traitEffects: [ "rotten", "everlasting" ],
         rotation: $Right { amount: 1 },
         highlightType: "standard",
-        rightClickCost: 1,
         effects: [
         ],
         forceLoadCards: [],
@@ -1494,6 +1493,26 @@ cards: [
         cost: 2,
         type: $Bullet { },
         tags: ["pool2", "rarity1"],
+        price: 50,
+    },
+    {
+        name: "propellerBullet",
+        title: "Propeller Bullet",
+        flavourText: "Try hard enough and the damn gun might just fly away",
+        description: "$trigger$On-Rotate:$trigger$\nEvery other bullet in the revolver gets +1 dmg",
+        baseDamage: 4,
+        coverValue: 0,
+        traitEffects: [],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        effects: [
+            giftDmg("rotation", bSelects.allExceptSelf, 1#val)
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 1,
+        type: $Bullet { },
+        tags: ["pool1", "rarity2"],
         price: 50,
     },
 
