@@ -251,6 +251,7 @@ class Card(
                 lastDamageValue = newDamage
             }
             modifierValuesDirty = false
+            if (isRotten && newDamage == 0) controller.appendMainTimeline(controller.destroyCardTimeline(this))
         }
     }
 
@@ -334,10 +335,11 @@ class Card(
         modifiersChanged()
     }
 
-    private fun addRottenModifier() {
+    private fun addRottenModifier(controller: GameController) {
         val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation ->
+            val newDamage = (oldModifier.damage - (triggerInformation.multiplier ?: 1))
             CardModifier(
-                damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
+                damage = newDamage,
                 source = oldModifier.source,
                 validityChecker = oldModifier.validityChecker,
                 transformers = oldModifier.transformers
@@ -361,7 +363,7 @@ class Card(
         inGame = true
         enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
         enteredOnTurn = controller.turnCounter
-        if (isRotten) addRottenModifier()
+        if (isRotten) addRottenModifier(controller)
     }
 
     /**

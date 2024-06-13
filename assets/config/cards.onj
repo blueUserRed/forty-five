@@ -1476,6 +1476,26 @@ cards: [
         tags: ["pool1", "rarity1", "not used", "unobtainable"],
         price: 50,
     },
+    {
+        name: "brokenArrow",
+        title: "Broken Arrow",
+        flavourText: "Maybe loading an arrow into a revolver wasn't that good of an idea after all...",
+        description: "$trait$DISINTEGRATION$trait$\n$trait$EVERLASTING$trait$",
+        baseDamage: 8,
+        coverValue: 0,
+        traitEffects: [ "rotten", "everlasting" ],
+        rotation: $Right { amount: 1 },
+        highlightType: "standard",
+        rightClickCost: 1,
+        effects: [
+        ],
+        forceLoadCards: [],
+        dark: false,
+        cost: 2,
+        type: $Bullet { },
+        tags: ["pool2", "rarity1"],
+        price: 50,
+    },
 
 ],
 
