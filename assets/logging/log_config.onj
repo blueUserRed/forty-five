@@ -7,5 +7,5 @@ logTargets: [
         path: "logging/forty-five.log"
     }
 ],
-versionTag: "dev",
+versionTag: "--dev--",
 logLevel: "debug"
