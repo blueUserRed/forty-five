@@ -150,6 +150,7 @@ object FortyFive : Game() {
         }
         TemplateString.init()
         FortyFiveLogger.init()
+        UserPrefs.read()
         SoundPlayer.init()
         GameDirector.init()
         MapManager.init()
@@ -168,7 +169,6 @@ object FortyFive : Game() {
         serviceThread.start()
         serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
-        UserPrefs.read()
 
 //        resetAll()
 //        newRun()

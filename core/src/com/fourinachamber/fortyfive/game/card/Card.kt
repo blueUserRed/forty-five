@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -20,6 +21,7 @@ import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.onjNamespaces.OnjEffect
+import com.fourinachamber.fortyfive.onjNamespaces.OnjPassiveEffect
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
@@ -30,6 +32,8 @@ import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import ktx.actors.onClick
+import ktx.actors.onClickEvent
+import ktx.actors.onTouchEvent
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -100,8 +104,10 @@ class Card(
     val type: Type,
     val baseDamage: Int,
     val cost: Int,
+    val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
+    val passiveEffects: List<PassiveEffect>,
     val rotationDirection: RevolverRotation,
     val tags: List<String>,
     isDark: Boolean,
@@ -148,6 +154,10 @@ class Card(
         private set
     var isShotProtected: Boolean = false
         private set
+    var isAlwaysAtBottom: Boolean = false
+        private set
+    var isAlwaysAtTop: Boolean = false
+        private set
 
     fun shouldRemoveAfterShot(controller: GameController): Boolean = !(
         (isEverlasting && !controller.encounterModifiers.any { it.disableEverlasting() }) ||
@@ -187,6 +197,7 @@ class Card(
         }
         get() = actor.isMarked
 
+    var lastEffectAffectedCardsCache: List<Card> = listOf()
 
     init {
         screen.borrowResource(cardTexturePrefix + name)
@@ -202,6 +213,11 @@ class Card(
                 enableHoverDetails
             )
         }
+    }
+
+    fun bottomCardToTopCard() {
+        isAlwaysAtBottom = false
+        isAlwaysAtTop = true
     }
 
     /**
@@ -246,6 +262,7 @@ class Card(
                 lastDamageValue = newDamage
             }
             modifierValuesDirty = false
+            if (isRotten && newDamage == 0) controller.appendMainTimeline(controller.destroyCardTimeline(this))
         }
     }
 
@@ -330,10 +347,11 @@ class Card(
         modifiersChanged()
     }
 
-    private fun addRottenModifier() {
+    private fun addRottenModifier(controller: GameController) {
         val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation ->
+            val newDamage = (oldModifier.damage - (triggerInformation.multiplier ?: 1))
             CardModifier(
-                damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
+                damage = newDamage,
                 source = oldModifier.source,
                 validityChecker = oldModifier.validityChecker,
                 transformers = oldModifier.transformers
@@ -357,8 +375,7 @@ class Card(
         inGame = true
         enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
         enteredOnTurn = controller.turnCounter
-        isMarked = false
-        if (isRotten) addRottenModifier()
+        if (isRotten) addRottenModifier(controller)
     }
 
     /**
@@ -387,6 +404,7 @@ class Card(
         val inHand = inHand(controller)
         val effects = effects
             .filter { inGame || (inHand && it.triggerInHand) }
+            .filter { it.condition?.check(controller) ?: true }
             .zip { it.checkTrigger(trigger, triggerInformation, controller) }
             .filter { it.second != null }
         if (effects.isEmpty()) return@timeline
@@ -554,10 +572,14 @@ class Card(
                 type = cardTypeOrError(onj),
                 baseDamage = onj.get<Long>("baseDamage").toInt(),
                 cost = onj.get<Long>("cost").toInt(),
+                rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
                 effects = onj.get<OnjArray>("effects")
                     .value
                     .map { (it as OnjEffect).value.copy() }, //TODO: find a better solution
+                passiveEffects = onj.getOr<List<OnjPassiveEffect>>("passiveEffects", listOf())
+                    .map { it.value }
+                    .map { it.creator() },
                 rotationDirection = RevolverRotation.fromOnj(onj.get<OnjNamedObject>("rotation")),
                 tags = onj.get<OnjArray>("tags").value.map { it.value as String },
                 forbiddenSlots = onj
@@ -580,7 +602,8 @@ class Card(
                 enableHoverDetails = enableHoverDetails
             )
 
-            for (effect in card.effects) effect.card = card
+            card.effects.forEach { it.card = card }
+            card.passiveEffects.forEach { it.card = card }
             applyTraitEffects(card, onj)
             initializer(card)
             return card
@@ -608,6 +631,8 @@ class Card(
                 "reinforced" -> card.isReinforced = true
                 "shotProtected" -> card.isShotProtected = true
                 "rotten" -> card.isRotten = true
+                "alwaysAtBottom" -> card.isAlwaysAtBottom = true
+                "alwaysAtTop" -> card.isAlwaysAtTop = true
 
                 else -> throw RuntimeException("unknown trait effect $effect")
             }
@@ -737,6 +762,10 @@ class CardActor(
         onHoverEnter {
             if (!playSoundsOnHover) return@onHoverEnter
             SoundPlayer.situation("card_hover", screen)
+        }
+        onTouchEvent { event, _, _ ->
+            if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
+            FortyFive.currentGame!!.cardRightClicked(card)
         }
     }
 

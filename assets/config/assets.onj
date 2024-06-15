@@ -1088,6 +1088,10 @@ textures: [
         file: "textures/npcs/witch.png",
     },
     {
+        name: "npc_traveler",
+        file: "textures/npcs/traveler.png",
+    },
+    {
         name: "enemy_selector",
         file: "textures/enemies/enemy_selector.png",
     },
@@ -1125,6 +1129,21 @@ textures: [
     {
         name: "reserves_texture",
         file: "textures/game_screen/reserves.png",
+        useMipMaps: true,
+    },
+    {
+        name: "card_symbol_text_a_equals",
+        file: "textures/cards/symbols/text/a_equals.png",
+        useMipMaps: true,
+    },
+    {
+        name: "card_symbol_text_i_equals",
+        file: "textures/cards/symbols/text/i_equals.png",
+        useMipMaps: true,
+    },
+    {
+        name: "card_symbol_text_t_equals",
+        file: "textures/cards/symbols/text/t_equals.png",
         useMipMaps: true,
     },
 ],
@@ -1396,30 +1415,6 @@ ninepatches: [
 ],
 
 particles: [
-    {
-        name: "dust_particle",
-        file: "particles/dust.particle",
-        textureDir: "textures/particles",
-        scale: 0.1
-    },
-    {
-        name: "dust_explosion_particle",
-        file: "particles/dust_explosion.particle",
-        textureDir: "textures/particles",
-        scale: 0.1
-    },
-    {
-        name: "bubble_particle",
-        file: "particles/bubble.particle",
-        textureDir: "textures/particles",
-        scale: 0.1
-    },
-    {
-        name: "fire_particle",
-        file: "particles/fire.particle",
-        textureDir: "textures/particles",
-        scale: 0.07
-    }
 ],
 
 frameAnimations: [

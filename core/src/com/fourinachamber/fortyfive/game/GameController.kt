@@ -102,7 +102,11 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
     private var cardPrototypes: List<CardPrototype> = listOf()
     val createdCards: MutableList<Card> = mutableListOf()
-    private var cardStack: MutableList<Card> = mutableListOf()
+
+    private var _cardStack: MutableList<Card> = mutableListOf()
+    val cardStack: List<Card>
+        get() = _cardStack
+
     private val cardDragAndDrop: DragAndDrop = DragAndDrop()
 
     private var _remainingCards: Int by multipleTemplateParam(
@@ -284,12 +288,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val card = cardPrototypes.firstOrNull { it.name == cardName }
                 ?: throw RuntimeException("unknown card name in saveState: $cardName")
 
-            cardStack.add(card.create(curScreen))
+            _cardStack.add(card.create(curScreen))
         }
 
-        if (gameDirector.encounter.shuffleCards) cardStack.shuffle()
+        if (gameDirector.encounter.shuffleCards) _cardStack.shuffle()
+        validateCardStack()
 
-        FortyFiveLogger.debug(logTag, "card stack: $cardStack")
+        FortyFiveLogger.debug(logTag, "card stack: $_cardStack")
 
         val defaultBulletName = onj.get<String>("defaultBullet")
 
@@ -346,7 +351,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         if (mainTimeline.isFinished && isUIFrozen) unfreezeUI()
         if (!mainTimeline.isFinished && !isUIFrozen) freezeUI()
 
-        _remainingCards = cardStack.size
+        _remainingCards = _cardStack.size
 
         mainTimeline.updateTimeline()
 
@@ -360,6 +365,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             if (cur.isFinished) iterator.remove()
         }
 
+        createdCards.flatMap { it.passiveEffects }.forEach { it.checkActive(this) }
         createdCards.forEach { it.update(this) }
         updateStatusEffects()
         updateGameAnimations()
@@ -538,8 +544,13 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             },
             { !skip }
         )
+        val triggerInfo = TriggerInformation(sourceCard = card, controller = this@GameController)
         includeLater(
-            { checkEffectsSingleCard(Trigger.ON_ENTER, card) },
+            { checkEffectsSingleCard(Trigger.ON_ENTER, card, triggerInfo) },
+            { !skip }
+        )
+        includeLater(
+            { checkEffectsActiveCards(Trigger.ON_ANY_CARD_ENTER, triggerInfo) },
             { !skip }
         )
     })
@@ -634,12 +645,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     SoundPlayer.situation("card_drawn", curScreen)
                     popupEvent = null
-                    drawCard(fromBottom)
                     TemplateString.updateGlobalParam(
                         "game.drawCardText",
                         "draw ${(remainingCardsToDraw - cur - 1) pluralS "card"} ${if (fromBottom) "from the bottom of your deck" else ""}"
                     )
                 }
+                include(drawCard(fromBottom))
             }
         }}, { remainingCardsToDraw != 0 })
         action {
@@ -647,8 +658,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(cardDrawActorScreenState)
             checkCardMaximums()
         }
-        val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw)
-        val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw)
+        val cardsDrawnTriggerInfo = TriggerInformation(multiplier = remainingCardsToDraw, amountOfCardsDrawn = remainingCardsToDraw, controller = this@GameController)
+        val oneOrMoreDrawnTriggerInfo = TriggerInformation(amountOfCardsDrawn = remainingCardsToDraw, controller = this@GameController)
         includeLater({ checkEffectsActiveCards(Trigger.ON_CARDS_DRAWN, cardsDrawnTriggerInfo) }, { remainingCardsToDraw != 0 })
         includeLater(
             { checkEffectsActiveCards(Trigger.ON_SPECIAL_CARDS_DRAWN, cardsDrawnTriggerInfo) },
@@ -691,7 +702,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     FortyFiveLogger.debug(logTag, "Player parried")
                 }
                 includeLater (
-                    { checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true)) },
+                    { checkEffectsSingleCard(Trigger.ON_LEAVE, parryCard, TriggerInformation(isOnShot = true, controller = this@GameController)) },
                     { parryCard.shouldRemoveAfterShot(this@GameController) }
                 )
                 action {
@@ -706,7 +717,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                         if (parryCard.isUndead) {
                             cardHand.addCard(parryCard)
                         } else {
-                            cardStack.add(parryCard)
+                            putCardAtBottomOfStack(parryCard)
                         }
                     }
                     parryCard.afterShot(this@GameController)
@@ -844,7 +855,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                     .let { include(it) }
             }
             cardToShoot?.let {
-                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true)
+                val triggerInformation = TriggerInformation(targetedEnemies = targetedEnemies, isOnShot = true, controller = this@GameController)
                 include(checkEffectsSingleCard(Trigger.ON_SHOT, cardToShoot, triggerInformation))
                 includeLater(
                     { checkEffectsSingleCard(Trigger.ON_LEAVE, cardToShoot, triggerInformation) },
@@ -853,7 +864,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 action {
                     if (cardToShoot.shouldRemoveAfterShot(this@GameController)) {
                         if (!cardToShoot.isUndead) {
-                            cardStack.add(cardToShoot)
+                            putCardAtBottomOfStack(cardToShoot)
                             SoundPlayer.situation("orb_anim_playing", curScreen)
                             gameRenderPipeline.addOrbAnimation(cardOrbAnim(cardToShoot.actor))
                         }
@@ -878,12 +889,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         })
     }
 
-    private fun cardOrbAnim(actor: Actor) = GraphicsConfig.orbAnimation(
-        actor.localToStageCoordinates(Vector2(0f, 0f)) +
-                Vector2(actor.width / 2, actor.height / 2),
-        curScreen.centeredStageCoordsOfActor("deck_icon"),
-        false
-    )
+    private fun cardOrbAnim(actor: Actor, reverse: Boolean = false): RenderPipeline.OrbAnimation {
+        val actorCoords = actor.localToStageCoordinates(Vector2(0f, 0f)) +
+                Vector2(actor.width / 2, actor.height / 2)
+        val deckCoords = curScreen.centeredStageCoordsOfActor("deck_icon")
+        val source = if (reverse) deckCoords else actorCoords
+        val target = if (reverse) actorCoords else deckCoords
+        return GraphicsConfig.orbAnimation(source, target, false)
+    }
 
     fun tryApplyStatusEffectToEnemy(statusEffect: StatusEffect, enemy: Enemy): Timeline = Timeline.timeline {
         if (encounterModifiers.any { !it.shouldApplyStatusEffects() }) return Timeline()
@@ -908,7 +921,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             .collectTimeline()
             .let { include(it) }
         if (newRotation.amount != 0) {
-            val info = TriggerInformation(multiplier = newRotation.amount)
+            val info = TriggerInformation(multiplier = newRotation.amount, controller = this@GameController)
             include(checkEffectsActiveCards(Trigger.ON_REVOLVER_ROTATION, info))
             includeLater(
                 {
@@ -1028,7 +1041,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             curScreen.leaveState(showPutCardsUnderDeckActorScreenState)
             cardHand.reattachToOriginalParent()
             val cards = putCardsUnderDeckWidget.complete()
-            cards.forEach { cardStack.add(it) }
+            putCardsAtBottomOfStack(cards)
         }
     }
 
@@ -1099,7 +1112,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.onDestroy()
             FortyFiveLogger.debug(logTag, "destroyed card: $card")
         }
-        val triggerInformation = TriggerInformation(sourceCard = card)
+        val triggerInformation = TriggerInformation(sourceCard = card, controller = this@GameController)
         include(checkEffectsSingleCard(Trigger.ON_DESTROY, card, triggerInformation))
         include(checkEffectsActiveCards(Trigger.ON_ANY_CARD_DESTROY, triggerInformation))
     }
@@ -1113,6 +1126,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             card.leaveGame()
         }
         include(checkEffectsSingleCard(Trigger.ON_BOUNCE, card))
+        include(checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN, card))
+        include(checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM, card))
         include(tryToPutCardsInHandTimeline(card.name))
     }
 
@@ -1160,7 +1175,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     fun checkEffectsSingleCard(
         trigger: Trigger,
         card: Card,
-        triggerInformation: TriggerInformation = TriggerInformation()
+        triggerInformation: TriggerInformation = TriggerInformation(controller = this)
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking effects for card $card, trigger $trigger")
         return Timeline.timeline {
@@ -1176,12 +1191,14 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     @MainThreadOnly
     fun checkEffectsActiveCards(
         trigger: Trigger,
-        triggerInformation: TriggerInformation = TriggerInformation()
+        triggerInformation: TriggerInformation = TriggerInformation(controller = this),
+        exclude: Card? = triggerInformation.sourceCard
     ): Timeline {
         FortyFiveLogger.debug(logTag, "checking all active cards for trigger $trigger")
         return Timeline.timeline {
             createdCards
                 .filter { it.inGame || it.inHand(this@GameController) }
+                .filter { it !== exclude }
                 .map { it.checkEffects(trigger, triggerInformation, this@GameController) }
                 .collectTimeline()
                 .let { include(it) }
@@ -1213,6 +1230,37 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         _playerStatusEffects.add(effect)
         statusEffectDisplay.displayEffect(effect)
         curScreen.enterState(showStatusEffectsState)
+    }
+
+    fun putCardFromStackInHandTimeline(card: Card, source: Card? = null): Timeline = Timeline.timeline {
+        var skip = false
+        action {
+            if (card !in _cardStack) {
+                FortyFiveLogger.warn(logTag, "could not put card $card from Stack in Hand because it is not in the stack")
+                skip = true
+                return@action
+            }
+            _cardStack.remove(card)
+            cardHand.addCard(card)
+            checkCardMaximums()
+            validateCardStack()
+            cardOrbAnim(card.actor, reverse = true)
+        }
+        includeLater(
+            { Timeline.timeline {
+                include(checkEffectsSingleCard(
+                    Trigger.ON_SPECIAL_SELF_DRAWN,
+                    card,
+                    TriggerInformation(sourceCard = source, controller = this@GameController)
+                ))
+                include(checkEffectsSingleCard(
+                    Trigger.ON_SPECIAL_SELF_DRAWN_NO_FROM_BOTTOM,
+                    card,
+                    TriggerInformation(sourceCard = source, controller = this@GameController)
+                ))
+            } },
+            { !skip }
+        )
     }
 
     private fun executePlayerStatusEffectsAfterRevolverRotation(rotation: RevolverRotation): Timeline =
@@ -1270,16 +1318,65 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         curScreen.leaveState(freezeUIScreenState)
     }
 
+    fun cardRightClicked(card: Card) {
+        if (isUIFrozen) return
+        if (!card.inGame) return
+        val cost = card.rightClickCost ?: return
+        if (!cost(cost, card.actor)) return
+        appendMainTimeline(checkEffectsSingleCard(Trigger.ON_RIGHT_CLICK, card))
+    }
+
     /**
      * draws a bullet from the stack
      */
     @AllThreadsAllowed
-    fun drawCard(fromBottom: Boolean = false) {
-        val card = (if (!fromBottom) cardStack.removeFirstOrNull() else cardStack.removeLastOrNull())
-            ?: defaultBullet.create(curScreen)
-        cardHand.addCard(card)
-        FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
-        cardsDrawn++
+    fun drawCard(fromBottom: Boolean = false): Timeline = Timeline.timeline {
+        var card: Card? = null
+        action {
+            validateCardStack()
+            card = (if (!fromBottom) _cardStack.removeFirstOrNull() else _cardStack.removeLastOrNull())
+                ?: defaultBullet.create(curScreen)
+            cardHand.addCard(card!!)
+            FortyFiveLogger.debug(logTag, "card was drawn; card = $card; cardsToDraw = $cardsToDraw")
+            cardsDrawn++
+        }
+        includeLater(
+            { checkEffectsSingleCard(Trigger.ON_SPECIAL_SELF_DRAWN, card!!) },
+            { fromBottom }
+        )
+    }
+
+    fun putCardAtBottomOfStack(card: Card) {
+        _cardStack.add(card)
+        validateCardStack()
+    }
+
+    fun putCardsAtBottomOfStack(cards: List<Card>) {
+        _cardStack.addAll(cards)
+        validateCardStack()
+    }
+
+    private fun validateCardStack() {
+        var index = 0
+        while (index < _cardStack.size) {
+            val card = _cardStack[index]
+            if (card.isAlwaysAtBottom) {
+                _cardStack.removeAt(index)
+                _cardStack.add(card)
+            }
+            index++
+        }
+        index = _cardStack.size - 1
+        while (index >= 0) {
+            if (_cardStack.take(index + 1).all { it.isAlwaysAtTop }) break
+            val card = _cardStack[index]
+            if (card.isAlwaysAtTop) {
+                _cardStack.removeAt(index)
+                _cardStack.add(0, card)
+                continue
+            }
+            index--
+        }
     }
 
     private fun cost(cost: Int, animTarget: Actor? = null): Boolean {

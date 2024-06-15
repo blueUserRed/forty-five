@@ -37,8 +37,8 @@ class GameDirector(private val controller: GameController) {
             .map { enemy -> enemyPrototypes.find { it.name == enemy } ?: throw RuntimeException("unknown enemy $enemy") }
             .map { it.create(it.baseHealth) }
         encounter
-            .encounterModifiers
-            .forEach { controller.addEncounterModifier(EncounterModifier.getFromName(it)) }
+            .encounterModifier
+            .forEach { controller.addEncounterModifier(it) }
         this.encounter = encounter
         controller.addTutorialText(encounter.tutorialTextParts)
         controller.initEnemyArea(enemies)
@@ -78,7 +78,7 @@ class GameDirector(private val controller: GameController) {
 
     data class Encounter(
         val enemies: List<String>,
-        val encounterModifiers: Set<String>,
+        val encounterModifierNames: Set<String>,
         val biomes: Set<String>,
         val progress: ClosedFloatingPointRange<Float>,
         val weight: Int,
@@ -86,7 +86,13 @@ class GameDirector(private val controller: GameController) {
         val shuffleCards: Boolean,
         val special: Boolean,
         val tutorialTextParts: List<GameTutorialTextPart>
-    )
+    ) {
+
+        val encounterModifier: List<EncounterModifier>
+            get() = encounterModifierNames
+                .map { EncounterModifier.getFromName(it) }
+                .filter { !UserPrefs.disableRtMechanics || !it.isRtBased }
+    }
 
     data class GameTutorialTextPart(
         val text: String,
