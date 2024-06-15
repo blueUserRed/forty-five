@@ -9,10 +9,7 @@ import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
-import com.fourinachamber.fortyfive.screen.gameComponents.BiomeBackgroundScreenController
-import com.fourinachamber.fortyfive.screen.gameComponents.CreditScreenController
-import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
-import com.fourinachamber.fortyfive.screen.gameComponents.TitleScreenController
+import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
@@ -33,6 +30,7 @@ object ScreenControllerFactory {
         "TitleScreenController" to { TitleScreenController() },
         "CreditScreenController" to { CreditScreenController() },
         "BiomeBackgroundScreenController" to { onj -> BiomeBackgroundScreenController(onj) },
+        "DraftScreenController" to { DraftScreenController() },
     )
 
     /**

@@ -491,6 +491,8 @@ $ScreenController {
         useSecondary: boolean,
     }
 
+    $DraftScreenController { }
+
 }
 
 $KeyAction {

@@ -553,7 +553,12 @@ open class CustomFlexBox(
             if (parentAlpha * alpha < 1f) batch.flush()
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
 
-            background?.draw(batch, x, y, width, height)
+            val background = background
+            if (background is TransformDrawable) {
+                background.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
+            } else {
+                background?.draw(batch, x, y, width, height)
+            }
             if (parentAlpha * alpha < 1f) batch.flush()
 
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, old)
