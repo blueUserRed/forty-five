@@ -434,4 +434,168 @@ npcs: [
         }
     },
 
+    {
+        name: "traveler_in_salem_npc",
+        displayName: "Traveler",
+        dialog: {
+            parts: [
+                {
+                    rawText: "Mornin'. Good seein' someone who doesn't want to kill me at first sight.",
+                    next: $Continue {}
+                },
+                {
+                    rawText: "I traveled around here a lot, so if there is any question you wanna ask feel free. I study the culture and history of the $1Onathahans$1, so i might know a few things...",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.magenta
+                        },
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "Onathahans?",
+                                next: 2
+                            },
+                            {
+                                name: "What's beyond the forest?",
+                                next: 4
+                            },
+                            {
+                                name: "Who are you?",
+                                next: 6
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 7
+                            },
+                        ]
+                    }
+                },
+                {
+                    rawText: "Yes, the tribe of people who inhabited this land before we came here from the Old World. People often call them $1witches$1. But they are people, like you and me, no different.",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.magenta
+                        },
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "$1$4If you even are a person. Who knows? I might have been conversing with a tree $5§§map_decoration_bewitched_forest_tree1§§$5$4 this whole time...$4$1",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.grey
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 0.6
+                        },
+                        $FontScale {
+                            indicator: "$5",
+                            fontScale: 1.1
+                        }
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "What's beyond the forest?",
+                                next: 4
+                            },
+                            {
+                                name: "Who are you?",
+                                next: 6
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 7
+                            },
+                        ]
+                    }
+                },
+                {
+                    rawText: "Hm? oh yes, beyond the forest... I've read stories from the Onathahans. There is said to be a sacred place beyond the forest...",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.magenta
+                        },
+                    ],
+                    next: $Continue {}
+                },
+                {
+                    rawText: "How did they call it? Was it ... oh yes, $1$4The Magenta Mountains$4$1. Soon, we will be able to see what the stories are about...",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.magenta
+                        },
+                        $FontScale {
+                            indicator: "$4",
+                            fontScale: 1.2
+                        }
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "Onathahans?",
+                                next: 2
+                            },
+                            {
+                                name: "Who are you?",
+                                next: 6
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 7
+                            },
+                        ]
+                    }
+                },
+                {
+                    rawText: "Me? I'm just a traveler. I travel... learn as much as I can as long as I have time... I think the frontier is fascinating... so many stories and places to discover... ",
+                    effects: [
+                        $Color {
+                            indicator: "$1",
+                            color: color.magenta
+                        },
+                    ],
+                    next: $ChooseNextPart {
+                        choices: [
+                            {
+                                name: "Onathahans?",
+                                next: 2
+                            },
+                            {
+                                name: "What's beyond the forest?",
+                                next: 4
+                            },
+                            {
+                                name: "Goodbye",
+                                next: 7
+                            },
+                        ]
+                    }
+                },
+                {
+                    rawText: "Bye",
+                    next: $EndOfDialog {
+                        changeToScreen: "screens/map_screen.onj"
+                    }
+                },
+            ],
+            defaults: {
+                font: "red_wing",
+                fontScale: 1.0,
+                color: color.forty_white
+            }
+        },
+        image: {
+            textureName: "npc_traveler",
+            scale: 0.4
+        }
+    },
+
 ]
