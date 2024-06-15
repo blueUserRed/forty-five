@@ -150,6 +150,14 @@ object GraphicsConfig {
         ?.get<String>("background")
         ?: throw RuntimeException("no background for biome $biome")
 
+    fun secondaryBackgroundFor(biome: String): ResourceHandle = config
+        .get<OnjArray>("encounterBackgrounds")
+        .value
+        .map { it as OnjObject }
+        .find { it.get<String>("biome") == biome }
+        ?.get<String>("secondaryBackground")
+        ?: throw RuntimeException("no secondary background for biome $biome")
+
     fun isEncounterBackgroundDark(biome: String): Boolean = config
         .get<OnjArray>("encounterBackgrounds")
         .value

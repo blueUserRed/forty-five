@@ -83,8 +83,7 @@ options: {
     background: "black_texture",
     music: "map_theme",
     playAmbientSounds: true,
-    screenController: $MapScreenController {
-    },
+    screenControllers: [$MapScreenController { }],
     inputMap: [
         ...(inputMaps.defaultInputMap),
         ...(inputMaps.detailMapInputMap),

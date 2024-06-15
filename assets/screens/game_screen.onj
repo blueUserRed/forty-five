@@ -144,7 +144,12 @@ var controller = $GameScreenController {
 
 options: {
     background: "game_screen_background_wasteland",
-    screenController: controller,
+    screenControllers: [
+        controller,
+        $BiomeBackgroundScreenController {
+            useSecondary: false,
+        }
+    ],
     playAmbientSounds: true,
     music: "map_theme",
     inputMap: [

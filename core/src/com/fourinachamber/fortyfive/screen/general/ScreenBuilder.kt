@@ -53,7 +53,7 @@ class ScreenBuilder(val file: FileHandle) {
 
     private val namedActors: MutableMap<String, Actor> = mutableMapOf()
 
-    private var screenController: ScreenController? = null
+    private var screenControllers: List<ScreenController> = listOf()
     private var background: String? = null
     private var music: ResourceHandle? = null
     private var playAmbientSounds: Boolean = false
@@ -99,14 +99,14 @@ class ScreenBuilder(val file: FileHandle) {
         screen.addActorToRoot(root)
         screen.buildKeySelectHierarchy()
 
-        screen.screenController = screenController
+        screenControllers.forEach { screen.addScreenController(it) }
 
         doDragAndDrop(screen)
 
         for (behaviour in behavioursToBind) behaviour.bindCallbacks(screen)
 
         root.addListener { event ->
-            screen.screenController?.onUnhandledEvent(event)
+            screen.screenControllers.forEach { it.onUnhandledEvent(event) }
             false
         }
 
@@ -240,10 +240,15 @@ class ScreenBuilder(val file: FileHandle) {
             music = it
         }
         playAmbientSounds = options.get<Boolean>("playAmbientSounds")
-        options.ifHas<OnjNamedObject>("screenController") {
-            screenController = ScreenControllerFactory.controllerOrError(it.name, it)
-            screenController?.initEventHandler()
-        }
+        screenControllers = options
+            .getOr<OnjArray?>("screenControllers", null)
+            ?.value
+            ?.map { obj ->
+                obj as OnjNamedObject
+                ScreenControllerFactory.controllerOrError(obj.name, obj).also { it.initEventHandler() }
+            }
+            ?: listOf()
+
         options.ifHas<Double>("transitionAwayTime") {
             transitionAwayTime = (it * 1000).toInt()
         }
@@ -743,7 +748,15 @@ class ScreenBuilder(val file: FileHandle) {
         }
 
         widgetOnj.ifHas<String>("onClick") { name -> // TODO: support more of these
-            this.onButtonClick { event -> screenController?.handleEventListener(name, event) }
+            this.onButtonClick { event ->
+                val noMatch = screenControllers
+                    .map { it.handleEventListener(name, event) }
+                    .all { !it }
+                if (noMatch) {
+                    FortyFiveLogger.warn("screen", "No match found for event $name")
+                }
+                screenControllers.forEach { it.handleEventListener(name, event) }
+            }
         }
 
         onClick { fire(ButtonClickEvent()) }

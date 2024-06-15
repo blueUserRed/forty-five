@@ -74,7 +74,7 @@ class ChooseCardDragPayload(val actor: Actor) : ExecutionPayload() {
      * called when the drag is stopped
      */
     fun onDrop(addToDeck: Boolean) = tasks.add {
-        val scr = (FortyFive.screen as OnjScreen).screenController as ChooseCardScreenController
+        val scr = (FortyFive.screen as OnjScreen).findController<ChooseCardScreenController>()!!
         val cardActor = actor as CardActor
         scr.getCard(cardActor.name!!, addToDeck)
         SoundPlayer.situation("card_drag_finished", cardActor.screen)

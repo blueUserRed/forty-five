@@ -500,7 +500,7 @@ class Card(
                 } ?: ""
                 "rotations" -> "bullet rotated ${rotationCounter.pluralS("time")}"
                 "mostExpensiveBullet" -> {
-                    val mostExpensive = (actor.screen.screenController as GameController)
+                    val mostExpensive = FortyFive.currentGame!!
                         .revolver
                         .slots
                         .mapNotNull { it.card }

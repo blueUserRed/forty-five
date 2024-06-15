@@ -1,0 +1,214 @@
+import "imports/colors.onj" as color;
+import "screens/input_maps.onj" as inputMaps;
+import "screens/shared_components.onj" as sharedComponents;
+import "dialog/dialog.onj" as dialogs;
+
+use Common;
+use Screen;
+use Style;
+
+var worldWidth = 1600.0;
+var worldHeight = 900.0;
+
+assets: {
+    useAssets: [
+        "red_wing", "red_wing_bmp", "hover_detail_background", "reserves_texture",
+        ...(sharedComponents.ambientSoundsUsedAssets),
+    ]
+},
+
+viewport: $FitViewport {
+    worldWidth: worldWidth,
+    worldHeight: worldHeight
+},
+
+options: {
+    background: "game_screen_background_wasteland",
+    music: "map_theme",
+    playAmbientSounds: true,
+    inputMap: [
+        ...(inputMaps.defaultInputMap)
+    ],
+    screenController: $DialogScreenController {
+        npcsFile: "maps/events/npcs.onj",
+        dialogWidgetName: "dialog_widget"
+    }
+},
+
+var dialogWidget = $Box {
+    styles: [
+        {
+            positionType: positionType.absolute,
+            width: 75.0#percent,
+            height: 30.0#percent,
+            positionBottom: 0#points,
+            positionLeft: 220#points,
+            justifyContent: justify.center,
+            background: "dialog_background",
+            paddingLeft: 190#points,
+            paddingRight: 70#points,
+            paddingTop: 30#points,
+            paddingBottom: 30#points,
+            touchable: touchable.enabled,
+        }
+    ],
+} children [
+
+    $DialogWidget {
+        styles: [
+            {
+                width: 87.0#percent,
+                height: 100.0#percent,
+//                alpha: 1 / 0.6,
+            }
+        ],
+        progressTime: 0.01,
+        advanceArrowDrawable: "common_symbol_arrow",
+        advanceArrowOffset: -75.0,
+        touchable: "enabled",
+        optionsBox: "options_box",
+        speakingPersonLabel: "person_label",
+        defaults: {
+            font: "red_wing",
+            fontScale: 50.0,
+            color: color.forty_white
+        },
+        name: "dialog_widget"
+    }
+];
+
+root: $Box {
+    styles: [
+        {
+            width: 100.0#percent,
+            height: 100.0#percent,
+        }
+    ]
+} children [
+    $Box {
+        styles: [
+            {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionBottom: (310)#points,
+                positionRight: (300)#points,
+                //                paddingRight: 20#points,
+
+                flexDirection: flexDirection.column,
+                detached: true,
+            },
+            {
+                style_priority: 2,
+                style_condition: state("displayOptionsBox"),
+                detached: false,
+            },
+        ],
+        name: "options_box"
+    },
+
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionTop: 0#points,
+                positionRight: 0#points,
+                width: 100.0#percent,
+                height: 100.0#percent,
+                flexDirection: flexDirection.row,
+                alignItems: align.flexEnd,
+                justifyContent: justify.center
+            }
+        ],
+    } children [
+        dialogWidget
+    ],
+    $Box {
+        styles: [
+            {
+                positionType: positionType.absolute,
+                flexDirection: flexDirection.column,
+                positionBottom: (180)#points,
+                positionLeft: (280)#points,
+            },
+        ],
+    } children [
+        $TemplateLabel {
+            name: "person_label",
+            template: "{map.cur_event.person.displayName}",
+            font: "red_wing",
+            color: color.dark_brown,
+            fontScale: 0.9,
+            align: "center",
+            styles: [
+                {
+                    positionBottom: 110#points,
+                    positionLeft: 50#points,
+                    width: 300#points,
+                    height: 60#points,
+                    background: "dialog_name_field",
+                },
+            ],
+        }
+    ]
+],
+
+templates: [
+    $Label {
+        template_name: "optionsItem", //TODO make only background transparent, not text itself
+        template_keys: {
+            "text": "text",
+        },
+        text: "",
+        font: "red_wing",
+        color: color.forty_white,
+        fontScale: 1.0,
+        align: "center",
+        styles: [
+            {
+                style_priority: 1,
+                width: 145#percent,
+                height: 60#points,
+                margin: 10#points,
+//                alpha: 0.8,
+                alpha: 0.0,
+                background: "dialog_answer_option",
+            },
+            {
+                style_priority: 2,
+                background: "dialog_answer_option_hover",
+                style_condition: hover(),
+            },
+            {
+                style_priority: 2,
+                style_condition: state("displayOptionsBox"),
+                alpha: 1.0,
+                style_animation: {
+                    duration: 0.2,
+                    interpolation: interpolation.linear
+                }
+            }
+        ],
+        behaviours: [
+            sharedComponents.buttonCursorBehaviour
+        ],
+    },
+    $Image {
+        template_name: "personImageLeft",
+        template_keys: {
+            "textureName": "textureName",
+            "scaleX": "scale",
+            "scaleY": "scale",
+        },
+        textureName: "",
+        scaleX: 1.0,
+        scaleY: 1.0,
+        //reportDimensionsWithScaling?: boolean,
+        styles: [
+            {
+                positionType: positionType.absolute,
+                positionBottom: (0)#points,
+                positionLeft: (30)#points,
+            }
+        ],
+    },
+]

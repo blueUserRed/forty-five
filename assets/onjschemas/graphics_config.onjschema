@@ -46,6 +46,7 @@ encounterBackgrounds: {
     biome: string,
     isDark: boolean,
     background: string,
+    secondaryBackground: string,
 }[],
 
 damageOverlay: {

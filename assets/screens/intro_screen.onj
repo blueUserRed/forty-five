@@ -25,7 +25,7 @@ options: {
     transitionAwayTime: 5.0,
     background: "microwave_studios_brown_texture",
     playAmbientSounds: false,
-    screenController: $IntroScreenController {},
+    screenControllers: [$IntroScreenController {}],
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],

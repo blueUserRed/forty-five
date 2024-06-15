@@ -51,7 +51,7 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenController: $TitleScreenController { }
+    screenControllers: [$TitleScreenController { }]
 },
 
 templates: [

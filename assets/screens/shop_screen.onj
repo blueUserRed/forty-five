@@ -44,16 +44,18 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenController: $ShopScreenController {
-        shopsFile: "maps/events/shops.onj",
-        npcsFile: "maps/events/npcs.onj",
-        cardsFile: "config/cards.onj",
-        messageWidgetName: "shopMessage",
-        cardsParentName: "cardsWidget",
-        addToBackpackWidgetName: "addToBackpackWidget",
-        addToDeckWidgetName: "addToDeckWidget",
-        hoverDetailActorTemplateName: sharedComponents.cardHoverDetailTemplates.0.template_name
-    }
+    screenControllers: [
+        $ShopScreenController {
+            shopsFile: "maps/events/shops.onj",
+            npcsFile: "maps/events/npcs.onj",
+            cardsFile: "config/cards.onj",
+            messageWidgetName: "shopMessage",
+            cardsParentName: "cardsWidget",
+            addToBackpackWidgetName: "addToBackpackWidget",
+            addToDeckWidgetName: "addToDeckWidget",
+            hoverDetailActorTemplateName: sharedComponents.cardHoverDetailTemplates.0.template_name
+        }
+    ]
 },
 
 

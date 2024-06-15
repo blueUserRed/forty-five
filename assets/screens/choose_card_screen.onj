@@ -17,6 +17,8 @@ assets: {
         "chooseCard_cardsBackground",
         "transparent_black_texture",
 
+        "secondary_background_wasteland",
+
         "card_pickup_sound", "card_laydown_sound",
         "map_theme",
 
@@ -70,7 +72,6 @@ root: $Box { //TODO bioms
         {
             width: 100.0#percent,
             height: 100.0#percent,
-            background: "shop_background_wasteland",
         }
     ]
 } children [
