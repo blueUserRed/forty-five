@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -29,6 +30,8 @@ import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import ktx.actors.onClick
+import ktx.actors.onClickEvent
+import ktx.actors.onTouchEvent
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
@@ -96,6 +99,7 @@ class Card(
     val type: Type,
     val baseDamage: Int,
     val cost: Int,
+    val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
     val passiveEffects: List<PassiveEffect>,
@@ -182,6 +186,8 @@ class Card(
     var rotationCounter: Int = 0
         private set
 
+    var lastEffectAffectedCardsCache: List<Card> = listOf()
+
     init {
         screen.borrowResource(cardTexturePrefix + name)
         // there is a weird race condition where the ServiceThread attempts to access card.actor for drawing the
@@ -245,6 +251,7 @@ class Card(
                 lastDamageValue = newDamage
             }
             modifierValuesDirty = false
+            if (isRotten && newDamage == 0) controller.appendMainTimeline(controller.destroyCardTimeline(this))
         }
     }
 
@@ -328,10 +335,11 @@ class Card(
         modifiersChanged()
     }
 
-    private fun addRottenModifier() {
+    private fun addRottenModifier(controller: GameController) {
         val rotationTransformer = { oldModifier: CardModifier, triggerInformation: TriggerInformation ->
+            val newDamage = (oldModifier.damage - (triggerInformation.multiplier ?: 1))
             CardModifier(
-                damage = oldModifier.damage - (triggerInformation.multiplier ?: 1),
+                damage = newDamage,
                 source = oldModifier.source,
                 validityChecker = oldModifier.validityChecker,
                 transformers = oldModifier.transformers
@@ -355,7 +363,7 @@ class Card(
         inGame = true
         enteredInSlot = controller.revolver.slots.find { it.card === this }!!.num
         enteredOnTurn = controller.turnCounter
-        if (isRotten) addRottenModifier()
+        if (isRotten) addRottenModifier(controller)
     }
 
     /**
@@ -384,6 +392,7 @@ class Card(
         val inHand = inHand(controller)
         val effects = effects
             .filter { inGame || (inHand && it.triggerInHand) }
+            .filter { it.condition?.check(controller) ?: true }
             .zip { it.checkTrigger(trigger, triggerInformation, controller) }
             .filter { it.second != null }
         if (effects.isEmpty()) return@timeline
@@ -551,6 +560,7 @@ class Card(
                 type = cardTypeOrError(onj),
                 baseDamage = onj.get<Long>("baseDamage").toInt(),
                 cost = onj.get<Long>("cost").toInt(),
+                rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
                 effects = onj.get<OnjArray>("effects")
                     .value
@@ -734,6 +744,10 @@ class CardActor(
         onHoverEnter {
             if (!playSoundsOnHover) return@onHoverEnter
             SoundPlayer.situation("card_hover", screen)
+        }
+        onTouchEvent { event, _, _ ->
+            if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
+            FortyFive.currentGame!!.cardRightClicked(card)
         }
     }
 

@@ -13,6 +13,13 @@
 - download the current release of .Forty-Five and copy the contents of the ``large_assets`` directory to `assets/large_assets`
 - start the game
 
+## Project Build (automatically using build script)
+
+- Forty-Five now includes a script that performs the build process automatically.
+- make sure you have 7zip and launch4j installed and that their executables are in your Path-Variable (try running ``7z`` and ``launch4jc`` in the console)
+- make sure you have a jre in your ``assets/large_assets`` folder. You can copy the jre from the steam release or follow the instructions below to create one yourself. (If you only build to .jar you don't need one)
+- Execute the build.main.kts script, either by using the IntelliJ UI or by running ``kontlinc scripts/build.main.kts``. (make sure you running it in the root directory of the project)
+
 ## Project Build (to .jar)
 
 - run the forty_five [dist] gradle task
