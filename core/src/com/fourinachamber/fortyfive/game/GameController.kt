@@ -1159,7 +1159,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             val card = card ?: return@action
             revolver.removeCard(slot)
             card.leaveGame()
-            cardStack.add(card)
+            _cardStack.add(card)
         }
     }
 
@@ -1168,7 +1168,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             if (card !in cardHand.cards) return@action
             cardHand.removeCard(card)
             card.isMarked = false
-            cardStack.add(card)
+            _cardStack.add(card)
         }
     }
 
