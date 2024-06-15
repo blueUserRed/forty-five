@@ -244,6 +244,15 @@ fun Collection<Timeline>.collectTimeline(): Timeline {
     return Timeline(actions)
 }
 
+fun Collection<Timeline>.collectParallelTimeline(): Timeline {
+    val actions = mutableListOf<Timeline.TimelineAction>()
+    forEach {
+        if (it.hasBeenStarted) throw RuntimeException("cannot collect a timeline that has been started already")
+        actions.add(it.asAction())
+    }
+    return ParallelTimelineAction(actions).wrap()
+}
+
 fun <T> Collection<T>.randomIndex(): Int = (0..this.size).random()
 
 fun String.lowerCaseFirstChar(): String = this.replaceFirstChar { it.lowercaseChar() }

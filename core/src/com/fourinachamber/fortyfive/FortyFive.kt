@@ -54,6 +54,8 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
+        changeToScreen("screens/draft_screen.onj")
+        return
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen("screens/intro_screen.onj")
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
@@ -155,7 +157,7 @@ object FortyFive : Game() {
         GameDirector.init()
         MapManager.init()
 //        resetAll()
-        MapManager.generateMapsSync()
+//        MapManager.generateMapsSync()
 //        newRun(false)
 
         if (!Gdx.files.internal("saves/perma_savefile.onj").file().exists()) {
