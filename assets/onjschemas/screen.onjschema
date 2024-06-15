@@ -486,6 +486,11 @@ $ScreenController {
     $TitleScreenController { }
 
     $CreditScreenController { }
+
+    $BiomeBackgroundScreenController {
+        useSecondary: boolean,
+    }
+
 }
 
 $KeyAction {
@@ -543,7 +548,7 @@ assets: {
 
 options: {
     background?: string,
-    screenController?: $ScreenController,
+    screenControllers?: $ScreenController[],
     music?: string,
     playAmbientSounds: boolean,
     inputMap?: {

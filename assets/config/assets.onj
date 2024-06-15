@@ -471,8 +471,8 @@ textures: [
         file: "textures/events/shop/items_background.png"
     },
     {
-        name: "shop_background_wasteland",
-        file: "textures/events/shop/biomeBackgrounds/wasteland.png"
+        name: "secondary_background_wasteland",
+        file: "textures/game_screen_backgrounds/wasteland_secondary.png"
     },
     {
         name: "heal_or_max_accept",

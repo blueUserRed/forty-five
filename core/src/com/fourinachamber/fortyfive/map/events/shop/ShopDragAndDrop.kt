@@ -33,7 +33,7 @@ class ShopDragSource(
         val obj = ShopDragPayload(actor)
         payload.obj = obj
         obj.resetTo(actor, Vector2(actor.x, actor.y))
-        val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
+        val controller = (FortyFive.screen as OnjScreen).findController<ShopScreenController>()!!
         controller.displayBuyPopups()
         obj.closePopups(controller)
         startReal()
@@ -63,13 +63,13 @@ class ShopDragSource(
 
         (actor.parent.parent as CustomScrollableFlexBox).currentlyDraggedChild = actor
         actor.toFront()
-        val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
+        val controller = ((FortyFive.screen as OnjScreen).findController<ShopScreenController>()!!)
         controller.displayBuyPopups()
         return true
     }
 
     override fun fakeStop(event: InputEvent?, x: Float, y: Float, pointer: Int) {
-        val controller = ((FortyFive.screen as OnjScreen).screenController as ShopScreenController)
+        val controller = ((FortyFive.screen as OnjScreen).findController<ShopScreenController>()!!)
         controller.closeBuyPopups()
         val tempParent = actor.parent.parent
         if (tempParent is CustomScrollableFlexBox) tempParent.currentlyDraggedChild = null
@@ -81,7 +81,7 @@ class ShopDragPayload(val actor: Actor) : ExecutionPayload() {
      * called when the drag is stopped
      */
     fun onBuy(addToDeck: Boolean) = tasks.add {
-        val scr = (FortyFive.screen as OnjScreen).screenController as ShopScreenController
+        val scr = (FortyFive.screen as OnjScreen).findController<ShopScreenController>()!!
         scr.buyCard(actor, addToDeck)
         SoundPlayer.situation("card_drag_finished", (actor as CardActor).screen)
     }

@@ -37,8 +37,7 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenController: $StatsScreenController {
-    }
+    screenControllers: [$StatsScreenController { }]
 },
 
 templates: [

@@ -233,8 +233,10 @@ class OnClickSelectHealOrMaxOptionBehaviour(onj: OnjNamedObject, actor: Actor) :
     val state = onj.get<String>("state")
     override val onCLick: BehaviourCallback = {
         if (this is StyledActor && inActorState(state)) {
-            val scrCont = onjScreen.screenController
-            if (scrCont is Completable) scrCont.completed()
+            onjScreen
+                .screenControllers
+                .filterIsInstance<Completable>()
+                .forEach { it.completed() }
         }
     }
 

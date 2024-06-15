@@ -43,6 +43,9 @@ nodes: [
             seed: null,
             amountCards: [3, 5],
             selectedCards: [],
+            amountOfRerolls: 0,
+            rerollPriceIncrease: 10,
+            rerollBasePrice: 10,
             boughtIndices: [
             ],
             types: [

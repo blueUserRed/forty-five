@@ -95,15 +95,10 @@ open class OnjScreen @MainThreadOnly constructor(
 
     val stage: Stage = Stage(viewport, batch)
 
-    var screenController: ScreenController? = null
-        @MainThreadOnly set(value) {
-            field?.end()
-            field = value
-            if (isVisible) {
-                value?.injectActors(this)
-                value?.init(this, controllerContext)
-            }
-        }
+    private val _screenControllers: MutableList<ScreenController> = mutableListOf()
+
+    val screenControllers: List<ScreenController>
+        get() = _screenControllers
 
     var selectedActor: KeySelectableActor? = null
         @AllThreadsAllowed set(value) {
@@ -199,6 +194,15 @@ open class OnjScreen @MainThreadOnly constructor(
         inputMultiplexer.addProcessor(screenInputProcessor)
         inputMultiplexer.addProcessor(stage)
     }
+
+    fun addScreenController(controller: ScreenController) {
+        _screenControllers.add(controller)
+        if (!isVisible) return
+        controller.injectActors(this)
+        controller.init(this, controllerContext)
+    }
+
+    inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
 
     @AllThreadsAllowed
     fun afterMs(ms: Int, callback: @MainThreadOnly () -> Unit) {
@@ -383,8 +387,10 @@ open class OnjScreen @MainThreadOnly constructor(
 
     @MainThreadOnly
     override fun show() {
-        screenController?.injectActors(this)
-        screenController?.init(this, controllerContext)
+        screenControllers.forEach {
+            it.injectActors(this)
+            it.init(this, controllerContext)
+        }
         Gdx.input.inputProcessor = inputMultiplexer
         Utils.setCursor(defaultCursor)
         isVisible = true
@@ -421,7 +427,7 @@ open class OnjScreen @MainThreadOnly constructor(
         SoundPlayer.update(this, playAmbientSounds)
         styleManagers.forEach(StyleManager::update)
         if (printFrameRate) FortyFiveLogger.fps()
-        if (!isEarly) screenController?.update()
+        if (!isEarly) screenControllers.forEach(ScreenController::update)
         updateCallbacks()
         stage.act(Gdx.graphics.deltaTime)
         currentHoverDetail?.act(delta)
@@ -510,7 +516,7 @@ open class OnjScreen @MainThreadOnly constructor(
     @MainThreadOnly
     override fun dispose() {
         hide()
-        screenController?.end()
+        screenControllers.forEach(ScreenController::end)
         stage.dispose()
 //        toDispose.forEach(Disposable::dispose)
         useAssets.forEach {

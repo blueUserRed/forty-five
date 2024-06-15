@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
+import com.fourinachamber.fortyfive.screen.gameComponents.BiomeBackgroundScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.CreditScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.IntroScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.TitleScreenController
@@ -31,6 +32,7 @@ object ScreenControllerFactory {
         "StatsScreenController" to { StatsScreenController() },
         "TitleScreenController" to { TitleScreenController() },
         "CreditScreenController" to { CreditScreenController() },
+        "BiomeBackgroundScreenController" to { onj -> BiomeBackgroundScreenController(onj) },
     )
 
     /**
@@ -110,12 +112,10 @@ abstract class ScreenController {
             }
     }
 
-    fun handleEventListener(name: String, event: Event) {
-        val handler = eventHandlers[name] ?: run {
-            FortyFiveLogger.warn("screen", "No event handler named $name in class ${this::class.simpleName}")
-            return
-        }
+    fun handleEventListener(name: String, event: Event): Boolean {
+        val handler = eventHandlers[name] ?: return false
         handler(event)
+        return true
     }
 
 }
