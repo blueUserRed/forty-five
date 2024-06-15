@@ -192,6 +192,49 @@ var settingsBox = $Box {
             }
         ],
 
+        $Box {
+            styles: [
+                {
+                    height: 40#points,
+                    marginTop: 20#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    background: "single_setting_background",
+                    width: (worldWidth * 0.45)#points,
+                }
+            ]
+        } children [
+
+            $Label {
+                styles: [
+                    {
+                        positionLeft: 40#points,
+                    }
+                ],
+                font: "red_wing",
+                text: "Realtime based mechanics: ",
+                fontScale: 0.8,
+                color: color.forty_white,
+            },
+
+            $Selector {
+              styles: [
+                  {
+                      height: 40#points,
+                      width: 250#points,
+                      positionRight: 40#points,
+                  }
+              ],
+              arrowTexture: "common_symbol_arrow",
+              arrowWidth: 20.0,
+              arrowHeight: 20.0,
+              bindTo: "disableRt",
+              font: "red_wing",
+              fontScale: 0.8,
+            }
+        ],
+
 
         $Label {
             styles: [
@@ -418,6 +461,7 @@ var cardHoverDetailUsedAssetsDefinition = [
     "hover_detail_small_background",
     "forty_white_texture",
     "hover_detail_more_info",
+    "card_symbol_text_a_equals", "card_symbol_text_i_equals", "card_symbol_text_t_equals",
     ...revolverSlotIconAssets
 ];
 

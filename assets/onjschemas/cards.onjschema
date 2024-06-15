@@ -32,6 +32,7 @@ var card = {
     rotation: $Rotation,
     highlightType: string,
     cost: int,
+    rightClickCost?: int?,
     price: int,
     dark: boolean,
     type: $CardType,
@@ -40,6 +41,7 @@ var card = {
     tags: string[],
     additionalHoverInfos?: string[],
     forbiddenSlots?: int[],
+    passiveEffects?: PassiveEffect[],
 };
 
 cards: card[],

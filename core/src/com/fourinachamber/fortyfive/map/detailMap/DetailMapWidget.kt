@@ -581,10 +581,9 @@ class DetailMapWidget(
         screen.enterState(noEncounterModifierScreenState)
         if (event !is EncounterMapEvent) return
         val encounter = GameDirector.encounters[event.encounterIndex]
-        val encounterModifiers = encounter.encounterModifiers
+        val encounterModifiers = encounter.encounterModifier
         if (encounterModifiers.isNotEmpty()) screen.leaveState(noEncounterModifierScreenState)
-        encounterModifiers.forEach { modifierName ->
-            val modifier = EncounterModifier.getFromName(modifierName)
+        encounterModifiers.forEach { modifier ->
             screen.screenBuilder.generateFromTemplate(
                 encounterModifierDisplayTemplateName,
                 mapOf(
