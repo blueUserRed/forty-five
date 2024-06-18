@@ -3,12 +3,14 @@ package com.fourinachamber.fortyfive.screen.gameComponents
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.actions.ColorAction
+import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.BounceOutAction
 import com.fourinachamber.fortyfive.utils.Timeline
 import com.fourinachamber.fortyfive.utils.collectParallelTimeline
 import com.fourinachamber.fortyfive.utils.random
+import kotlin.math.max
 
 class DraftScreenController : ScreenController() {
 
@@ -34,6 +36,12 @@ class DraftScreenController : ScreenController() {
         this.screen = onjScreen
         cards = arrayOf(card1, card2, card3)
         timeline.startTimeline()
+        timeline.appendAction(Timeline.timeline {
+//            delay(100)
+            action {
+                newCards()
+            }
+        }.asAction())
     }
 
     override fun update() {
@@ -48,9 +56,17 @@ class DraftScreenController : ScreenController() {
 
     private fun newCards() {
         val allCards = RandomCardSelection.allCardPrototypes
-        repeat(3) {
+        repeat(cards.size) { i ->
             val cardProto = allCards.random()
             val card = cardProto.create(screen, areHoverDetailsEnabled = true)
+            val previous = cards[i].children.find { it is CardActor }
+            previous as CardActor?
+            previous?.card?.dispose()
+            screen.removeAllStyleManagersOfChildren(cards[i])
+            cards[i].clear()
+            cards[i].add(card.actor)
+                .setWidthPercent(100f)
+                .setHeightPercent(100f)
         }
     }
 
@@ -61,8 +77,6 @@ class DraftScreenController : ScreenController() {
             .map { getDiscardAction(it) }
             .collectParallelTimeline()
         val timeline = Timeline.timeline {
-            action {
-            }
             include(animateOutTimeline)
             action {
                 inDiscardAnim = false

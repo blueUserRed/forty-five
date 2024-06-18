@@ -457,6 +457,7 @@ generalHoverDetailTemplate: $Box {
 var cardHoverDetailUsedAssetsDefinition = [
     "red_wing",
     "roadgeek",
+    "roadgeek_bmp",
     "hover_detail_big_background",
     "hover_detail_small_background",
     "forty_white_texture",

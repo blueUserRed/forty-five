@@ -818,7 +818,7 @@ class CardActor(
             batch.shader = it.shader
         }
         val c = batch.color.cpy()
-        batch.setColor(c.r, c.g, c.b, alpha)
+        batch.setColor(c.r, c.g, c.b, alpha * parentAlpha)
         val width: Float
         val height: Float
         val x: Float
