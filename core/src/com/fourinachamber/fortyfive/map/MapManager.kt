@@ -126,8 +126,17 @@ object MapManager {
         currentDetailMap = readDetailMap(map)
     }
 
-    fun changeToEncounterScreen(context: GameController.EncounterContext) {
-        FortyFive.changeToScreen(screenPaths["encounterScreen"]!!, context)
+    fun changeToEncounterScreen(context: GameController.EncounterContext, immediate: Boolean = false) {
+        val encounter = GameDirector.encounters[context.encounterIndex]
+        val intermediate = encounter
+            .encounterModifier
+            .map { it.intermediateScreen() }
+            .find { it != null }
+        if (intermediate != null && !immediate) {
+            FortyFive.changeToScreen(intermediate, context)
+        } else {
+            FortyFive.changeToScreen(screenPaths["encounterScreen"]!!, context)
+        }
     }
 
     fun changeToDialogScreen(event: MapEvent) {

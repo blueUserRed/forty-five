@@ -13,8 +13,7 @@ class StatsScreenController : ScreenController() {
         val prototypes = RandomCardSelection.allCardPrototypes
         TemplateString.updateGlobalParam("stat.bulletsCollected", cards.distinct().size)
         val obtainableBullets = prototypes
-            .filter { "unobtainable" !in it.tags }
-            .filter { "not used" !in it.tags }
+            .filter { "not in collection" !in it.tags }
             .size
         TemplateString.updateGlobalParam("stat.obtainableBullets", obtainableBullets)
         initCards(onjScreen)

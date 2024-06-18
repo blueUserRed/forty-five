@@ -38,6 +38,7 @@ encounterModifiers: {
     lookalike: encounterModifierConfig,
     moist: encounterModifierConfig,
     steelNerves: encounterModifierConfig,
+    draft: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],

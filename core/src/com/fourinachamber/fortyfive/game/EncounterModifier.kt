@@ -130,6 +130,11 @@ sealed class EncounterModifier {
         override fun additionalCardsToDrawInNormalDraw(): Int = 1
     }
 
+    object Draft : EncounterModifier() {
+
+        override fun intermediateScreen(): String = "screens/draft_screen.onj"
+    }
+
     open fun getModifierTypes(): List<Type> = listOf()
 
     open fun update(controller: GameController) {}
@@ -160,6 +165,8 @@ sealed class EncounterModifier {
 
     open fun additionalCardsToDrawInNormalDraw(): Int = 0
 
+    open fun intermediateScreen(): String? = null
+
     companion object {
 
         fun getFromName(name: String) = when (name.lowercase()) {
@@ -170,6 +177,7 @@ sealed class EncounterModifier {
             "lookalike" -> Lookalike
             "moist" -> Moist
             "drawonemorecard" -> DrawOneMoreCard
+            "draft" -> Draft
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
     }

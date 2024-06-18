@@ -440,7 +440,7 @@ cards: [
         dark: false,
         cost: 2,
         type: $Bullet { },
-        tags: ["not used"],
+        tags: ["not used", "unobtainable", "not in collection"],
         price: 50,
     },
     {
@@ -598,7 +598,7 @@ cards: [
         dark: true,
         cost: 3,
         type: $Bullet { },
-        tags: ["weight", "unobtainable"],
+        tags: ["weight", "unobtainable", "not in collection"],
         price: 50,
     },
     {
@@ -1350,7 +1350,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1", "rarity2", "unobtainable", "not used"],
+        tags: ["pool1", "rarity2", "unobtainable", "not used", "not in collection"],
         price: 50,
     },
     {
@@ -1432,7 +1432,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool2", "rarity1", "not used", "unobtainable"],
+        tags: ["pool2", "rarity1", "not used", "unobtainable", "not in collection"],
         price: 50,
     },
     {
@@ -1452,7 +1452,7 @@ cards: [
         dark: false,
         cost: 0,
         type: $Bullet { },
-        tags: ["pool2", "rarity2", "not used", "unobtainable"],
+        tags: ["pool2", "rarity2", "not used", "unobtainable", "not in collection"],
         price: 50,
     },
     {
@@ -1473,7 +1473,7 @@ cards: [
         dark: false,
         cost: 1,
         type: $Bullet { },
-        tags: ["pool1", "rarity1", "not used", "unobtainable"],
+        tags: ["pool1", "rarity1", "not used", "unobtainable", "not in collection"],
         price: 50,
     },
     {

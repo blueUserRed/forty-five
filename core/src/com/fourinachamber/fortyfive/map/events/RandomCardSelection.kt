@@ -53,6 +53,10 @@ object RandomCardSelection {
             .getFrom(onj.get<OnjArray>("cards"), initializer = {})
     }
 
+    val allAvailableCardPrototypes: List<CardPrototype> by lazy {
+        allCardPrototypes.filter { "not in collection" !in it.tags }
+    }
+
     fun init() {
         val file = OnjParser.parseFile(Gdx.files.internal(TYPES_FILE_PATH).file())
         cardSelectionSchema.assertMatches(file)

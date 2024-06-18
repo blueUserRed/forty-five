@@ -70,6 +70,11 @@ encounterModifiers: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Steel Nerves",
         description: "The revolver shoots automatically every ten seconds"
+    },
+    draft: {
+        icon: "encounter_modifier_steel_nerves",
+        displayName: "Draft",
+        description: "You draft your deck from random cards before the encounter"
     }
 },
 
