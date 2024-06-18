@@ -325,7 +325,7 @@ open class OnjScreen @MainThreadOnly constructor(
             displayDetailActor.getHoverDetailData(),
             null,
             this
-        )!!
+        ) ?: throw RuntimeException("hover template '$detailTemplate' is missing")
         displayDetailActor.detailActor = detail
 
         displayDetailActor.setBoundsOfHoverDetailActor(this)

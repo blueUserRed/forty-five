@@ -12,13 +12,14 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "red_wing", "red_wing_bmp", "hover_detail_background",
+        "red_wing", "red_wing_bmp", "card_character", "hover_detail_background",
 
         "map_theme",
 
         "game_screen_background_bewitched_forest", "game_screen_background_wasteland", "secondary_background_wasteland",
 
         "chooseCard_cardsBackground", "white_texture",
+        ...(sharedComponents.cardHoverDetailUsedAssets),
         ...(sharedComponents.ambientSoundsUsedAssets),
     ]
 },
@@ -70,7 +71,7 @@ root: $Box {
         $Box {
             styles: [
                 {
-                    width: 1000#points,
+                    width: 800#points,
                     height: 200#points,
                     flexDirection: flexDirection.row,
                     alignItems: align.center,
@@ -82,13 +83,16 @@ root: $Box {
             $Box {
                 styles: [
                     {
-                        background: "white_texture",
+                        positionType: positionType.relative,
+                        positionBottom: -40#points,
                         aspectRatio: 1.0,
                         width: 200#points,
                         rotation: 20.0
                     }
                 ],
+                debug: true,
                 touchable: "enabled",
+                enableTransform: true,
                 onClick: "cardChosen",
                 name: "card1"
             },
@@ -97,13 +101,14 @@ root: $Box {
                 styles: [
                     {
                         positionType: positionType.relative,
-                        background: "white_texture",
+                        positionBottom: 40#points,
                         aspectRatio: 1.0,
                         width: 200#points,
-                        positionBottom: 40#points
                     }
                 ],
+                debug: true,
                 touchable: "enabled",
+                enableTransform: true,
                 onClick: "cardChosen",
                 name: "card2"
             },
@@ -111,13 +116,16 @@ root: $Box {
             $Box {
                 styles: [
                     {
-                        background: "white_texture",
+                        positionType: positionType.relative,
+                        positionBottom: 20#points,
                         aspectRatio: 1.0,
                         width: 200#points,
                         rotation: -20.0
                     }
                 ],
+                debug: true,
                 touchable: "enabled",
+                enableTransform: true,
                 onClick: "cardChosen",
                 name: "card3"
             },
@@ -129,5 +137,5 @@ root: $Box {
 ],
 
 templates: [
-
+    ...(sharedComponents.cardHoverDetailTemplates),
 ]
