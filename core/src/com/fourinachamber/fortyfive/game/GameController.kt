@@ -263,7 +263,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardsFileSchema.assertMatches(onj)
         onj as OnjObject
 
-        val cards = gameDirector.encounter.forceCards ?: SaveState.curDeck.cards
+        val cards = gameDirector.encounter.forceCards
+            ?: encounterContext.forceCards
+            ?: SaveState.curDeck.cards
 
         val cardsArray = onj.get<OnjArray>("cards")
 
@@ -1569,6 +1571,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val encounterIndex: Int
 
         val forwardToScreen: String
+
+        val forceCards: List<String>?
+            get() = null
 
         fun completed()
     }

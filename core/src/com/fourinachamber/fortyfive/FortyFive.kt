@@ -54,8 +54,6 @@ object FortyFive : Game() {
         init()
 //        resetAll()
 //        newRun(false)
-        changeToScreen("screens/draft_screen.onj")
-        return
         when (UserPrefs.startScreen) {
             UserPrefs.StartScreen.INTRO -> changeToScreen("screens/intro_screen.onj")
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()

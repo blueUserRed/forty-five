@@ -55,11 +55,26 @@ root: $Box {
     ]
 } children [
 
+    $TemplateLabel {
+        styles: [
+            {
+                positionTop: 100#points
+//                marginTop: 100#points
+            }
+        ],
+        font: "red_wing",
+        template: "Draft you Deck! {draft.current}/{draft.target}",
+        fontScale: 1.2,
+        zIndex: 100,
+        color: color.forty_white,
+    },
+
     $Box {
         styles: [
             {
+                positionTop: 30#points,
                 aspectRatio: 640.0 / 431.0,
-                width: (worldWidth * 0.4)#points,
+                width: (worldWidth * 0.45)#points,
                 background: "chooseCard_cardsBackground",
                 flexDirection: flexDirection.row,
                 alignItems: align.center,
