@@ -108,6 +108,12 @@ class DraftScreenController : ScreenController() {
     }
 
     private fun finished() {
+        cards.forEach { actor ->
+            val cardActor = actor.children.find { it is CardActor } as CardActor
+            cardActor.card.dispose()
+            screen.removeAllStyleManagersOfChildren(actor)
+            actor.clear()
+        }
         val context = object : GameController.EncounterContext {
 
             override val encounterIndex: Int = context.encounterIndex

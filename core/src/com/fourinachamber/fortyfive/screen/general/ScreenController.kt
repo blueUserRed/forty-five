@@ -31,6 +31,7 @@ object ScreenControllerFactory {
         "CreditScreenController" to { CreditScreenController() },
         "BiomeBackgroundScreenController" to { onj -> BiomeBackgroundScreenController(onj) },
         "DraftScreenController" to { DraftScreenController() },
+        "FadeToBlackScreenController" to { onj -> FadeToBlackScreenController(onj) },
     )
 
     /**
@@ -75,6 +76,8 @@ abstract class ScreenController {
      */
     @MainThreadOnly
     open fun onUnhandledEvent(event: Event) { }
+
+    open fun onTransitionAway() { }
 
     fun initEventHandler() {
         val eventHandlers: Map<String, (Event) -> Unit> = this::class
