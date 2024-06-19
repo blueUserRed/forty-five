@@ -493,6 +493,10 @@ $ScreenController {
 
     $DraftScreenController { }
 
+    $FadeToBlackScreenController {
+        duration: int
+    }
+
 }
 
 $KeyAction {

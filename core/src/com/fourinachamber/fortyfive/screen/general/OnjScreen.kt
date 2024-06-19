@@ -404,6 +404,7 @@ open class OnjScreen @MainThreadOnly constructor(
     fun transitionAway() {
         inputMultiplexer.clear()
         enterState(transitionAwayScreenState)
+        _screenControllers.forEach(ScreenController::onTransitionAway)
     }
 
     @MainThreadOnly
