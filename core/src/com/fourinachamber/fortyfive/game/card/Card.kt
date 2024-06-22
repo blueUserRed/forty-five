@@ -747,7 +747,7 @@ class CardActor(
         }
         onTouchEvent { event, _, _ ->
             if (event.button != Input.Buttons.RIGHT) return@onTouchEvent
-            FortyFive.currentGame!!.cardRightClicked(card)
+            FortyFive.currentGame?.cardRightClicked(card)
         }
     }
 
