@@ -455,6 +455,14 @@ textures: [
         file: "textures/map/decorations/magenta_mountains_mountain.png"
     },
     {
+        name: "map_decoration_magenta_mountains_mountain_small_1",
+        file: "textures/map/decorations/magenta_mountains_mountain_small_1.png"
+    },
+    {
+        name: "map_decoration_magenta_mountains_mountain_small_2",
+        file: "textures/map/decorations/magenta_mountains_mountain_small_2.png"
+    },
+    {
         name: "map_decoration_magenta_mountains_fog",
         file: "textures/map/decorations/magenta_mountains_fog.png"
     },
