@@ -180,7 +180,7 @@ var decorations = {
     },
     magentaMountain: {
         distribution: $FadeX {
-            start: 50.0,
+            start: 100.0,
             end: 300.0,
             interpolation: interpolation.pow2InInverse
         },
@@ -194,6 +194,48 @@ var decorations = {
         generateDecorationCollisions: true,
         onlyCheckCollisionsAtSpawnPoints: false,
         scale: [0.8, 1.5],
+        shrinkBoundsWidth: 0.3,
+        shrinkBoundsHeight: 0.4,
+        sortByY: true,
+        animated: false,
+    },
+    magentaMountainSmall1: {
+        distribution: $FadeX {
+            start: 50.0,
+            end: 300.0,
+            interpolation: interpolation.pow2InInverse
+        },
+        decoration: "map_decoration_magenta_mountains_mountain_small_1",
+        baseWidth: 60.0,
+        baseHeight: 60.0 * (837.0 / 967.0),
+        density: 0.0008,
+        checkNodeCollisions: true,
+        checkLineCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: false,
+        scale: [0.5, 1.5],
+        shrinkBoundsWidth: 0.3,
+        shrinkBoundsHeight: 0.4,
+        sortByY: true,
+        animated: false,
+    },
+    magentaMountainSmall2: {
+        distribution: $FadeX {
+            start: 50.0,
+            end: 300.0,
+            interpolation: interpolation.pow2InInverse
+        },
+        decoration: "map_decoration_magenta_mountains_mountain_small_2",
+        baseWidth: 60.0,
+        baseHeight: 60.0 * (1033.0 / 1453.0),
+        density: 0.0008,
+        checkNodeCollisions: true,
+        checkLineCollisions: true,
+        checkDecorationCollisions: true,
+        generateDecorationCollisions: true,
+        onlyCheckCollisionsAtSpawnPoints: false,
+        scale: [0.5, 1.5],
         shrinkBoundsWidth: 0.3,
         shrinkBoundsHeight: 0.4,
         sortByY: true,
@@ -240,7 +282,10 @@ var decorations = {
 var wastelandDecorations = [ decorations.cactus2, decorations.skull1, decorations.skull2, decorations.cactus1 ];
 var bewitchedForestDecorations = [ decorations.sheep, decorations.tree ];
 //var magentaMountainsDecorations = [ decorations.magentaMountain, decorations.magentaTree ];
-var magentaMountainsDecorations = [ decorations.magentaMountain, decorations.magentaTree, decorations.magentaFog ];
+var magentaMountainsDecorations = [
+    decorations.magentaMountainSmall1, decorations.magentaMountainSmall2, decorations.magentaMountain,
+    decorations.magentaTree, decorations.magentaFog
+];
 
 var roadBetweenAquaBalleAndTabuLetter = {
     name: "road_between_aqua_balle_and_tabu_letter_outpost",
