@@ -80,7 +80,7 @@ hoverDetailDescriptionGroups: [
     }
 ],
 
-defaultTextEffects:[
+defaultTextEffects: [
     $Color {
         indicator:"$trigger$",
         color: color.hemoglobin_red,
@@ -99,5 +99,15 @@ defaultTextEffects:[
     $Color {
         indicator:"$dmgNerf$",
         color: color.red,
+    },
+
+    $Color {
+        indicator:"$costIncrease$",
+        color: color.red,
+    },
+
+    $Color {
+        indicator:"$costDecrease$",
+        color: color.green,
     },
 ]

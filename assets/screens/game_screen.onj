@@ -825,6 +825,7 @@ var playerBar = $Box {
 
     // shoot button ---------------------------------------
     $Box {
+        name: "shootButton",
         styles: [
             {
                 style_priority: 1,

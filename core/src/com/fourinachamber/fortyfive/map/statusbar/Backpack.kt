@@ -26,7 +26,6 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
-import java.lang.Integer.max
 import kotlin.math.min
 
 class Backpack(
@@ -527,7 +526,7 @@ class Backpack(
 
         class Reserves(override var isReverse: Boolean = false) : BackpackSorting {
             override fun compare(a: Card, b: Card): Int {
-                return a.cost.compareTo(b.cost)
+                return a.baseCost.compareTo(b.baseCost)
             }
         }
 
