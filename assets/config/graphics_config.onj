@@ -75,6 +75,11 @@ encounterModifiers: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Draft",
         description: "You draft your deck from random cards before the encounter"
+    },
+    anOfferYouCantRefuse: {
+        icon: "encounter_modifier_steel_nerves",
+        displayName: "An Offer you can't refuse",
+        description: "All bullets cost 1 less, but shooting the revolver costs 1 reserve"
     }
 },
 

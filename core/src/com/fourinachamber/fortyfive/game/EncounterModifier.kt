@@ -1,5 +1,6 @@
 package com.fourinachamber.fortyfive.game
 
+import com.badlogic.gdx.Game
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.game.GameController.RevolverRotation
 import com.fourinachamber.fortyfive.game.card.Card
@@ -135,6 +136,25 @@ sealed class EncounterModifier {
         override fun intermediateScreen(): String = "screens/draft_screen.onj"
     }
 
+    object AnOfferYouCantRefuse : EncounterModifier() {
+
+        override fun initBullet(card: Card) {
+            card.addModifier(
+                Card.CardModifier(
+                source = "An offer you cant refuse",
+                costChange = -1,
+            ))
+        }
+
+        override fun canShootRevolver(controller: GameController): Boolean {
+            return controller.curReserves >= 1
+        }
+
+        override fun executeAfterRevolverWasShot(card: Card?, controller: GameController): Timeline = Timeline.timeline {
+            controller.cost(1, controller.shootButton)
+        }
+    }
+
     open fun getModifierTypes(): List<Type> = listOf()
 
     open fun update(controller: GameController) {}
@@ -167,6 +187,10 @@ sealed class EncounterModifier {
 
     open fun intermediateScreen(): String? = null
 
+    open fun initBullet(card: Card) {}
+
+    open fun canShootRevolver(controller: GameController): Boolean = true
+
     companion object {
 
         fun getFromName(name: String) = when (name.lowercase()) {
@@ -178,6 +202,7 @@ sealed class EncounterModifier {
             "moist" -> Moist
             "drawonemorecard" -> DrawOneMoreCard
             "draft" -> Draft
+            "anofferyoucantrefuse" -> AnOfferYouCantRefuse
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
     }

@@ -83,6 +83,8 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var curScreen: OnjScreen
         private set
 
+    // TODO: Change to @Inject
+
     lateinit var cardHand: CardHand
         private set
     lateinit var revolver: Revolver
@@ -98,6 +100,10 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     lateinit var statusEffectDisplay: StatusEffectDisplay
         private set
     lateinit var tutorialInfoActor: TutorialInfoActor
+        private set
+
+    @Inject
+    lateinit var shootButton: CustomFlexBox
         private set
 
     private var cardPrototypes: List<CardPrototype> = listOf()
@@ -326,6 +332,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         cardDragAndDrop.addSource(dragBehaviour)
         cardDragAndDrop.addTarget(dropBehaviour)
         createdCards.add(card)
+        encounterModifiers.forEach { it.initBullet(card) }
     }
 
     override fun onUnhandledEvent(event: Event) = when (event) {
@@ -517,7 +524,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 card.type != Card.Type.BULLET ||
                 !card.allowsEnteringGame(this@GameController, slot) ||
                 !(cardInSlot?.isReplaceable ?: true) ||
-                !cost(card.cost, card.actor)
+                !cost(card.curCost(this@GameController), card.actor)
             ) {
                 SoundPlayer.situation("not_allowed", curScreen)
                 skip = true
@@ -814,6 +821,9 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
      */
     @MainThreadOnly
     fun shoot() {
+
+        if (encounterModifiers.any { !it.canShootRevolver(this) }) return
+
         val cardToShoot = revolver.getCardInSlot(5)
         val rotationDirection = cardToShoot?.rotationDirection ?: RevolverRotation.Right(1)
 
@@ -1380,7 +1390,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    private fun cost(cost: Int, animTarget: Actor? = null): Boolean {
+    fun cost(cost: Int, animTarget: Actor? = null): Boolean {
         if (cost > curReserves) return false
         curReserves -= cost
         SaveState.usedReserves += cost

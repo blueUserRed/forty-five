@@ -13,8 +13,6 @@ import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction
 import com.badlogic.gdx.scenes.scene2d.ui.Widget
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.Disposable
 import com.fourinachamber.fortyfive.FortyFive
@@ -32,7 +30,6 @@ import com.fourinachamber.fortyfive.screen.general.styles.*
 import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.alpha
 import ktx.actors.onClick
-import ktx.actors.onClickEvent
 import ktx.actors.onTouchEvent
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
@@ -92,7 +89,7 @@ class CardPrototype(
  * @param type the type of card (bullet or cover)
  * @param baseDamage the damage value of the card before modifiers are applied (typically 0 when this is a cover)
  * @param coverValue the cover this card provides (typically 0 when this is a bullet)
- * @param cost the cost of this card in reserves
+ * @param baseCost the cost of this card in reserves
  * @param effects the effects of this card
  */
 class Card(
@@ -103,7 +100,7 @@ class Card(
     val shortDescription: String,
     val type: Type,
     val baseDamage: Int,
-    val cost: Int,
+    val baseCost: Int,
     val rightClickCost: Int?,
     val price: Int,
     val effects: List<Effect>,
@@ -165,6 +162,7 @@ class Card(
     )
 
     private var lastDamageValue: Int = baseDamage
+    private var lastCostValue: Int = baseCost
 
     private var modifierCounter: Int = 0
     private val _modifiers: MutableList<Pair<Int, CardModifier>> = mutableListOf()
@@ -257,9 +255,11 @@ class Card(
         if (modifierValuesDirty) {
             updateText(controller)
             val newDamage = curDamage(controller)
-            if (newDamage != lastDamageValue) {
+            val newCost = curCost(controller)
+            if (newDamage != lastDamageValue || newCost != lastCostValue) {
                 updateTexture(controller)
                 lastDamageValue = newDamage
+                lastCostValue = newCost
             }
             modifierValuesDirty = false
             if (isRotten && newDamage == 0) controller.appendMainTimeline(controller.destroyCardTimeline(this))
@@ -273,6 +273,11 @@ class Card(
         .filter { (_, modifier) -> modifier.activeChecker(controller) }
         .sortedBy { it.first }
         .fold(baseDamage) { acc, (_, modifier) -> ((acc + modifier.damage) * modifier.damageMultiplier).toInt() }
+        .coerceAtLeast(0)
+
+    fun curCost(controller: GameController): Int = _modifiers
+        .filter { (_, modifier) -> modifier.activeChecker(controller) }
+        .fold(baseCost) { acc, (_, modifier) -> acc + modifier.costChange }
         .coerceAtLeast(0)
 
     /**
@@ -298,7 +303,6 @@ class Card(
     fun leaveGame() {
         isMarked = false
         inGame = false
-        _modifiers.clear()
         rotationCounter = 0
         modifiersChanged()
     }
@@ -458,10 +462,23 @@ class Card(
                 .distinctBy { it.source }
                 .joinToString(
                     separator = ", ",
-                    prefix = "${if (damageChange > 0) "+" else ""}$damageChange by ",
+                    prefix = "${if (damageChange > 0) "+" else ""}$damageChange dmg by ",
                     transform = { it.source })
             val keyWord = if (damageChange > 0) "\$dmgBuff\$" else "\$dmgNerf\$"
             currentEffects.add("dmgBuff" to "$keyWord$damageText$keyWord")
+        }
+        if (activeModifiers(controller).any { it.costChange != 0 }) {
+            val costChange = curCost(controller) - baseCost
+            val costText = activeModifiers(controller)
+                .filter { it.costChange != 0 }
+                .distinctBy { it.source }
+                .joinToString(
+                    separator = ", ",
+                    "${if (costChange > 0) "+" else ""}$costChange cost by ",
+                    transform = { it.source }
+                )
+            val keyword = if (costChange > 0) "\$costIncrease\$" else "\$costDecrease\$"
+            if (costChange != 0) currentEffects.add("costChange" to "$keyword$costText$keyword")
         }
 
         if (protectingModifiers.isNotEmpty()) {
@@ -475,7 +492,7 @@ class Card(
         actor.updateDetailStates(detailActor)
     }
 
-    private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller))
+    private fun updateTexture(controller: GameController) = actor.redrawPixmap(curDamage(controller), curCost(controller))
 
     override fun dispose() = actor.disposeTexture()
 
@@ -504,7 +521,7 @@ class Card(
                         .revolver
                         .slots
                         .mapNotNull { it.card }
-                        .maxOfOrNull { it.cost }
+                        .maxOfOrNull { it.lastCostValue }
                         ?: 0
                     "most expensive bullet costs $mostExpensive"
                 }
@@ -571,7 +588,7 @@ class Card(
                 shortDescription = onj.get<String>("description"),
                 type = cardTypeOrError(onj),
                 baseDamage = onj.get<Long>("baseDamage").toInt(),
-                cost = onj.get<Long>("cost").toInt(),
+                baseCost = onj.get<Long>("cost").toInt(),
                 rightClickCost = onj.getOr<Long?>("rightClickCost", null)?.toInt(),
                 price = prototype.getPriceWithModifications(onj.get<Long>("price").toInt()),
                 effects = onj.get<OnjArray>("effects")
@@ -659,6 +676,7 @@ class Card(
         val damage: Int = 0,
         val damageMultiplier: Float = 1f,
         val source: String,
+        val costChange: Int = 0,
         val validityChecker: () -> Boolean = { true },
         val activeChecker: (controller: GameController) -> Boolean = { true },
         var wasActive: Boolean = true,
@@ -753,7 +771,7 @@ class CardActor(
         // PixmapTextureData always returns the same pixmap, that doesn't need to be disposed
         // Which one is used is a race condition in the TextureResource class
         if (cardTexture.textureData is FileTextureData) screen.addDisposable(cardTexturePixmap)
-        redrawPixmap(card.baseDamage)
+        redrawPixmap(card.baseDamage, card.baseCost)
         onClick {
             if (!inSelectionMode) return@onClick
             // UGGGGGLLLLLLYYYYY
@@ -862,7 +880,7 @@ class CardActor(
         pixmapTextureRegion = null
     }
 
-    fun redrawPixmap(damageValue: Int) {
+    fun redrawPixmap(damageValue: Int, costValue: Int) {
         val savedPixmapTextureData = when (card.isSaved) {
             null -> null
             true -> GraphicsConfig.cardSavedSymbol(screen)
@@ -878,6 +896,7 @@ class CardActor(
             cardTexturePixmap,
             card,
             damageValue,
+            costValue,
             savedPixmap
         )
         FortyFive.serviceThread.sendMessage(message)

@@ -35,7 +35,7 @@ object CardsNamespace { // TODO: something like GameNamespace would be a more ac
                     .revolver
                     .slots
                     .mapNotNull { it.card }
-                    .maxOfOrNull { it.cost }
+                    .maxOfOrNull { it.baseCost }
                     ?: 0
             }
             "rotationAmount" with OnjEffectValue { _, card, _ -> card!!.rotationCounter }

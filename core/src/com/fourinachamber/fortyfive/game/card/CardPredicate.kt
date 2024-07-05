@@ -8,7 +8,7 @@ fun interface CardPredicate {
 
     companion object {
 
-        fun cost(cost: Int) = CardPredicate { card, _ -> card.cost == cost }
+        fun cost(cost: Int) = CardPredicate { card, _ -> card.baseCost == cost }
 
     }
 

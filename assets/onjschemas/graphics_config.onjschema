@@ -39,6 +39,7 @@ encounterModifiers: {
     moist: encounterModifierConfig,
     steelNerves: encounterModifierConfig,
     draft: encounterModifierConfig,
+    anOfferYouCantRefuse: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],

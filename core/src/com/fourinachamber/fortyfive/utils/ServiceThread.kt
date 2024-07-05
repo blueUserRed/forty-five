@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData
 import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.game.SaveState
@@ -12,7 +11,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ChannelResult
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlin.math.log
 
 class ServiceThread : Thread("ServiceThread") {
 
@@ -86,6 +84,7 @@ class ServiceThread : Thread("ServiceThread") {
             val cardTexturePixmap = message.cardTexturePixmap
             val card = message.card
             val damageValue = message.damageValue
+            val costValue = message.costValue
             val baseDamage = card.baseDamage
             val font = card.actor.font
             val isDark = card.actor.isDark
@@ -100,7 +99,7 @@ class ServiceThread : Thread("ServiceThread") {
             val damageFontColor = GraphicsConfig.cardFontColor(isDark, situation)
             val reserveFontColor = GraphicsConfig.cardFontColor(isDark, "normal")
             font.write(pixmap, damageValue.toString(), 35, 480, fontScale, damageFontColor)
-            font.write(pixmap, card.cost.toString(), 490, 28, fontScale, reserveFontColor)
+            font.write(pixmap, costValue.toString(), 490, 28, fontScale, reserveFontColor)
             if (savedSymbol != null) {
                 pixmap.drawPixmap(
                     savedSymbol,
@@ -162,6 +161,7 @@ sealed class ServiceThreadMessage {
         val cardTexturePixmap: Pixmap,
         val card: Card,
         val damageValue: Int,
+        val costValue: Int,
         val savedPixmap: Pixmap?,
         var isFinished: Boolean = false
     ) : ServiceThreadMessage()
