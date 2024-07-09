@@ -155,6 +155,12 @@ sealed class EncounterModifier {
         }
     }
 
+    object BulletSkipping : EncounterModifier() {
+
+        override fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation =
+            rotation.withAmount(rotation.amount * 2)
+    }
+
     open fun getModifierTypes(): List<Type> = listOf()
 
     open fun update(controller: GameController) {}
@@ -203,6 +209,7 @@ sealed class EncounterModifier {
             "drawonemorecard" -> DrawOneMoreCard
             "draft" -> Draft
             "anofferyoucantrefuse" -> AnOfferYouCantRefuse
+            "bulletskipping" -> BulletSkipping
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
     }
