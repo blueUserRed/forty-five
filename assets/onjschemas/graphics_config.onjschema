@@ -40,6 +40,7 @@ encounterModifiers: {
     steelNerves: encounterModifierConfig,
     draft: encounterModifierConfig,
     anOfferYouCantRefuse: encounterModifierConfig,
+    bulletSkipping: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],

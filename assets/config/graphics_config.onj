@@ -80,7 +80,12 @@ encounterModifiers: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "An Offer you can't refuse",
         description: "All bullets cost 1 less, but shooting the revolver costs 1 reserve"
-    }
+    },
+    bulletSkipping: {
+        icon: "encounter_modifier_steel_nerves",
+        displayName: "Bullet Skipping",
+        description: "when a bullet shoots, it turns twice, skipping the slot inbetween"
+    },
 },
 
 encounterModifierAssets: [

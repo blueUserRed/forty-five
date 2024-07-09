@@ -1545,11 +1545,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             override val directionString: String = "right"
 
+            override fun withAmount(amount: Int): RevolverRotation = Right(amount)
+
             override fun toString(): String = "Right($amount)"
         }
         class Left(override val amount: Int) : RevolverRotation() {
 
             override val directionString: String = "left"
+
+            override fun withAmount(amount: Int): RevolverRotation = Left(amount)
 
             override fun toString(): String = "Left($amount)"
         }
@@ -1559,9 +1563,12 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
 
             override val directionString: String = "none"
 
+            override fun withAmount(amount: Int): RevolverRotation = None
+
             override fun toString(): String = "None"
         }
 
+        abstract fun withAmount(amount: Int): RevolverRotation
 
         companion object {
 
