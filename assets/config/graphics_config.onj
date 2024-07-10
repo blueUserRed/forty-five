@@ -86,6 +86,11 @@ encounterModifiers: {
         displayName: "Bullet Skipping",
         description: "when a bullet shoots, it turns twice, skipping the slot inbetween"
     },
+    sacrifice: {
+        icon: "encounter_modifier_steel_nerves",
+        displayName: "Sacrifice",
+        description: "At the beginning of every turn, destroy target bullet"
+    },
 },
 
 encounterModifierAssets: [

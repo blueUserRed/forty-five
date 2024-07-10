@@ -255,7 +255,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         appendMainTimeline(Timeline.timeline {
             include(drawCardPopupTimeline(cardsToDrawInFirstRound))
             encounterModifiers
-                    .mapNotNull { it.executeOnPlayerTurnStart() }
+                    .mapNotNull { it.executeOnPlayerTurnStart(this@GameController) }
                     .collectTimeline()
                     .let { include(it) }
         })
@@ -1003,7 +1003,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
             }
             include(drawCardPopupTimeline(cardsToDraw, false))
             encounterModifiers
-                    .mapNotNull { it.executeOnPlayerTurnStart() }
+                    .mapNotNull { it.executeOnPlayerTurnStart(this@GameController) }
                     .collectTimeline()
                     .let { include(it) }
             includeLater({ checkStatusEffectsAfterTurn() }, { true })
