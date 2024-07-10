@@ -41,6 +41,7 @@ encounterModifiers: {
     draft: encounterModifierConfig,
     anOfferYouCantRefuse: encounterModifierConfig,
     bulletSkipping: encounterModifierConfig,
+    sacrifice: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],

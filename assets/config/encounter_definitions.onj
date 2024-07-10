@@ -250,7 +250,7 @@ encounter: [
             "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
-            "Moist", "BulletSkipping"
+            "Moist", "Sacrifice"
         ],
         biomes: [
             "wasteland", "bewitched_forest"

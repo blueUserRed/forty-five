@@ -118,7 +118,7 @@ sealed class EncounterModifier {
             }
         }
 
-        override fun executeOnPlayerTurnStart(): Timeline = Timeline.timeline {
+        override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
             action {
                 baseTime = TimeUtils.millis()
             }
@@ -161,6 +161,22 @@ sealed class EncounterModifier {
             rotation.withAmount(rotation.amount * 2)
     }
 
+    object Sacrifice : EncounterModifier() {
+
+        override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
+            includeLater(
+                { Timeline.timeline {
+                    include(controller.cardSelectionPopupTimeline("Select bullet to destroy"))
+                    includeLater(
+                        { controller.destroyCardTimeline(get<Card>("selectedCard")) },
+                        { true }
+                    )
+                } },
+                { controller.revolver.slots.mapNotNull { it.card }.isNotEmpty() }
+            )
+        }
+    }
+
     open fun getModifierTypes(): List<Type> = listOf()
 
     open fun update(controller: GameController) {}
@@ -169,7 +185,7 @@ sealed class EncounterModifier {
 
     open fun executeOnEndTurn(): Timeline? = null
 
-    open fun executeOnPlayerTurnStart(): Timeline? = null
+    open fun executeOnPlayerTurnStart(controller: GameController): Timeline? = null
 
     open fun modifyRevolverRotation(rotation: RevolverRotation): RevolverRotation = rotation
 
@@ -210,6 +226,7 @@ sealed class EncounterModifier {
             "draft" -> Draft
             "anofferyoucantrefuse" -> AnOfferYouCantRefuse
             "bulletskipping" -> BulletSkipping
+            "sacrifice" -> Sacrifice
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
     }
