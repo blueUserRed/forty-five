@@ -91,6 +91,11 @@ encounterModifiers: {
         displayName: "Sacrifice",
         description: "At the beginning of every turn, destroy target bullet"
     },
+    sorryNotSorry: {
+        icon: "encounter_modifier_steel_nerves",
+        displayName: "Sorry Not Sorry",
+        description: "At the beginning of every turn, return a random Bullet back to your hand."
+    }
 },
 
 encounterModifierAssets: [
