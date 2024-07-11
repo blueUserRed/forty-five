@@ -39,36 +39,40 @@ var additionalEventDefinition = {
     line: int,
 };
 
-var map = {
-    name: string,
-    seed: int,
-    progress: int[2],
-    biome: string,
-    startArea: string,
-    endArea: string,
-    roadLength: float,
-    exitNodeTexture: string,
-    mainLineNodes: int,
-    altLinesPadding: int[2],
-    altLinesOffset: float,
-    varianceX: float,
-    varianceY: float,
-    horizontalExtension: float,
-    verticalExtension: float,
-    locationSignProtectedAreaWidth: float,
-    locationSignProtectedAreaHeight: float,
-    mainEvent: {
-        nodeTexture: string,
-        event: $MapEvent,
-    },
-    events: additionalEventDefinition[],
-    nodeProtectedArea: float,
-    decorations: decoration[]
-};
+$MapGenerator {
+
+    $ThreeLine {
+        name: string,
+        seed: int,
+        progress: int[2],
+        biome: string,
+        startArea: string,
+        endArea: string,
+        roadLength: float,
+        exitNodeTexture: string,
+        mainLineNodes: int,
+        altLinesPadding: int[2],
+        altLinesOffset: float,
+        varianceX: float,
+        varianceY: float,
+        horizontalExtension: float,
+        verticalExtension: float,
+        locationSignProtectedAreaWidth: float,
+        locationSignProtectedAreaHeight: float,
+        mainEvent: {
+            nodeTexture: string,
+            event: $MapEvent,
+        },
+        events: additionalEventDefinition[],
+        nodeProtectedArea: float,
+        decorations: decoration[]
+    }
+
+}
 
 generatorConfig: {
     outputDirectory: string,
-    maps: map[]
+    maps: $MapGenerator[]
 },
 
 screens: {
