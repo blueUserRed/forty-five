@@ -177,6 +177,21 @@ sealed class EncounterModifier {
         }
     }
 
+    object SorryNotSorry : EncounterModifier() {
+
+        override fun executeOnPlayerTurnStart(controller: GameController): Timeline = Timeline.timeline {
+            var card: Card? = null
+            action {
+                card = controller.revolver.slots.mapNotNull { it.card }.randomOrNull()
+            }
+            includeLater(
+                { controller.bounceBullet(card!!) },
+                { card != null }
+            )
+        }
+
+    }
+
     open fun getModifierTypes(): List<Type> = listOf()
 
     open fun update(controller: GameController) {}
@@ -227,6 +242,7 @@ sealed class EncounterModifier {
             "anofferyoucantrefuse" -> AnOfferYouCantRefuse
             "bulletskipping" -> BulletSkipping
             "sacrifice" -> Sacrifice
+            "sorrynotsorry" -> SorryNotSorry
             else -> throw RuntimeException("Unknown Encounter Modifier: $name")
         }
     }
