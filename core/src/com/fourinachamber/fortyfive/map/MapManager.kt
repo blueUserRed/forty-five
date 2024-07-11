@@ -7,17 +7,17 @@ import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.*
+import com.fourinachamber.fortyfive.map.detailMap.generation.BaseMapGenerator
 import com.fourinachamber.fortyfive.map.events.chooseCard.ChooseCardScreenContext
-import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
+import onj.value.OnjNamedObject
 import onj.value.OnjObject
 import java.io.File
-import kotlin.math.log
 
 object MapManager {
 
@@ -261,20 +261,15 @@ object MapManager {
             .get<OnjArray>("maps")
             .value
             .forEach { map ->
-                generateMap(map as OnjObject, outputDir)
+                generateMap(map as OnjNamedObject, outputDir)
             }
     }
 
-    private fun generateMap(onj: OnjObject, outputDir: File) {
+    private fun generateMap(onj: OnjNamedObject, outputDir: File) {
         val name = onj.get<String>("name")
 
-//        val biome = onj.get<String>("biome")
-//        val mapRestriction = MapRestriction.fromOnj(onj.get<OnjObject>("restrictions"))
-//        val generator = SeededMapGenerator(onj.get<Long>("seed"), mapRestriction)
-//        val map = generator.generate(name, biome)
-
-        val data = NewMapGenerator.MapGeneratorData.fromOnj(onj)
-        val map = NewMapGenerator().generate(name, data)
+        val generator = BaseMapGenerator.fromOnj(onj)
+        val map = generator.generate(name)
 
         GameDirector.assignEncounters(map)
         val path = "${outputDir.toPath()}/$name.onj"

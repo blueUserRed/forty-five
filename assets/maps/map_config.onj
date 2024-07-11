@@ -287,7 +287,7 @@ var magentaMountainsDecorations = [
     decorations.magentaTree, decorations.magentaFog
 ];
 
-var roadBetweenAquaBalleAndTabuLetter = {
+var roadBetweenAquaBalleAndTabuLetter = $ThreeLine {
     name: "road_between_aqua_balle_and_tabu_letter_outpost",
     progress: [0, 10],
     seed: runRandom(1),
@@ -300,7 +300,7 @@ var roadBetweenAquaBalleAndTabuLetter = {
     ...mapSharedConfig
 };
 
-var roadBetweenTabuLetterAndSalem = {
+var roadBetweenTabuLetterAndSalem = $ThreeLine {
     name: "road_between_tabu_letter_outpost_and_salem",
     progress: [10, 20],
     seed: runRandom(2),
@@ -313,20 +313,7 @@ var roadBetweenTabuLetterAndSalem = {
     ...mapSharedConfig
 };
 
-//var roadBetweenSalemAndSpire = {
-//    name: "road_between_salem_and_spire_outpost",
-//    progress: [20, 30],
-//    seed: runRandom(3),
-//    biome: "bewitched_forest",
-//    startArea: "salem",
-//    endArea: "spire_outpost",
-//    nodeProtectedArea: 20.0,
-//    altLinesOffset: 40.0,
-//    decorations: bewitchedForestDecorations,
-//    ...mapSharedConfig
-//};
-
-var roadBetweenSalemAndSpire = {
+var roadBetweenSalemAndSpire = $ThreeLine {
     name: "road_between_salem_and_spire_outpost",
     progress: [20, 30],
     seed: runRandom(3),
