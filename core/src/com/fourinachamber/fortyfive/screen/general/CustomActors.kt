@@ -439,7 +439,8 @@ open class CustomFlexBox(
     private val hasHoverDetail: Boolean = false,
     private val hoverText: String = ""
 ) : FlexBox(), ZIndexActor, ZIndexGroup, StyledActor, BackgroundActor,
-    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, GeneralDisplayDetailOnHoverActor {
+    Detachable, OffSettable, HasOnjScreen, DisableActor, BoundedActor, GeneralDisplayDetailOnHoverActor,
+    InOutAnimationActor {
 
     override var fixedZIndex: Int = 0
 
@@ -475,6 +476,23 @@ open class CustomFlexBox(
 
     override var isHoverDetailActive: Boolean = hasHoverDetail
         set(value) {}
+
+    var onDisplay: () -> Timeline = {
+        Timeline.timeline {
+            action {
+                this@CustomFlexBox.isVisible = true;
+            }
+        }
+    }
+
+    var onHide: () -> Timeline = {
+        Timeline.timeline {
+            action {
+                this@CustomFlexBox.isVisible = false;
+            }
+        }
+    }
+
 
     init {
         bindHoverStateListeners(this)
@@ -595,6 +613,9 @@ open class CustomFlexBox(
         }
         return res
     }
+    override fun display(): Timeline = onDisplay()
+
+    override fun hide(): Timeline = onHide()
 
 }
 

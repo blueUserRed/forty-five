@@ -217,7 +217,7 @@ cards: [
         cost: 1,
         tags: ["pool0", "unobtainable"],
         price: 50,
-        type: $Bullet { }
+        type: $Bullet { },
     },
     {
         name: "arrow",
@@ -235,7 +235,9 @@ cards: [
         cost: 1,
         tags: ["pool1", "rarity1"],
         price: 50,
-        type: $Bullet { }
+        type: $Bullet { },
+//        unlockConditions: [],
+        lockedDescription: "THIS TEXT IST ONLY FOR TESTING AND WILL PROBABLY BE REMOVED, hihi",
     },
     {
         name: "BFB",
