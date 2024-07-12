@@ -471,6 +471,22 @@ cardHoverDetailUsedAssets: [
     ...cardHoverDetailUsedAssetsDefinition,
 ],
 
+var cardCollectionCardSlot = $Box {
+    //    debug: true,
+
+    styles: [
+        {
+            width: (worldWidth * 0.116)#points,
+            height: (worldWidth * 0.116)#points,
+            //            justifyContent: justify.flexEnd,
+//            marginTop:
+
+            marginTop: (worldHeight * 0.02)#points,
+            background: "forty_white_texture",
+        }
+    ]
+};
+
 
 cardCollection: $Box {
     name: "card_collection_widget",
@@ -481,9 +497,6 @@ cardCollection: $Box {
             width: worldWidth#points,
             height: worldHeight#points,
             alignItems: align.center,
-            //            justifyContent: justify.flexEnd,
-//            marginTop:
-
         }
     ],
     zIndex: 500,
@@ -518,7 +531,7 @@ cardCollection: $Box {
                 {
                     background: "nav_bar_background",
                     width: (worldWidth * 0.7)#points,
-                    height: (worldHeight * (0.925-0.1361))#points,
+                    height: (worldHeight * (0.925 - 0.1361 / 2))#points,
                     flexDirection: flexDirection.column,
                     justifyContent: justify.spaceAround,
                     alignItems: align.center,
@@ -526,18 +539,19 @@ cardCollection: $Box {
             ],
         } children [
             $Box {
-                debug: true,
+//                                debug: true,
+
                 styles: [
                     {
-                        background: "nav_bar_background",
-                        width: (worldWidth * 0.6)#points,
+                        //                        background: "nav_bar_background",
+                        width: (worldWidth * 0.65)#points,
                         height: (worldHeight * 0.1)#points,
                         flexDirection: flexDirection.row,
                         justifyContent: justify.spaceBetween,
                         alignItems: align.center,
                     }
                 ],
-            } children[
+            } children [
                 $Box {
                     styles: [
                         {
@@ -548,12 +562,13 @@ cardCollection: $Box {
                             alignItems: align.center,
                         }
                     ]
-                } children[
-                    $Box {
-                        debug: true,
+                } children [
+                    $Box { //icon
+//                        debug: true,
+
                         styles: [
                             {
-                                background: "nav_bar_background",
+                                background: "forty_white_texture",
                                 width: (worldHeight * 0.1)#points,
                                 height: (worldHeight * 0.1)#points,
                             }
@@ -579,21 +594,31 @@ cardCollection: $Box {
                 styles: [
                     {
                         background: "forty_white_texture",
-                        width: (worldWidth * 0.6)#points,
+                        width: (worldWidth * 0.65)#points,
                         height: 3#points,
                     }
                 ]
             }, //white line in between
             $Box {
-                debug: true,
+                //                debug: true,
+
                 styles: [
                     {
                         background: "nav_bar_background",
-                        width: (worldWidth * 0.6)#points,
-                        height: (worldHeight * 0.6)#points,
+                        width: (worldWidth * 0.64)#points,
+                        height: ( worldWidth * 0.36 + worldHeight * 0.1)#points,
+                        justifyContent: justify.spaceBetween,
+                        flexDirection: flexDirection.row,
+                        flexWrap: wrap.wrap,
                     }
                 ],
-            } children[
+            } children [
+                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
+                cardCollectionCardSlot,
+                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
+                cardCollectionCardSlot,
+                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
+                cardCollectionCardSlot,
 
             ],
         ],
