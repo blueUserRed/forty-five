@@ -42,6 +42,8 @@ var card = {
     additionalHoverInfos?: string[],
     forbiddenSlots?: int[],
     passiveEffects?: PassiveEffect[],
+    unlockConditions?: string[], //TODO this locked system, maybe with namespaces and stuff idk, the cards don't have anything either about it
+    lockedDescription?: string,
 };
 
 cards: card[],

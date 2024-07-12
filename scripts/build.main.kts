@@ -191,7 +191,7 @@ fun askYesNoQuestion(question: String, default: Boolean): Boolean {
     return when (answer.trim().lowercase()) {
         "yes", "y", "j", "ja", "jo", "sure", "why not", "yay" -> true
         "no", "n", "nein", "na", "nah", "i dont think so" -> false
-        "idk" -> Random.nextBoolean()
+        "idk" -> Random.nextBoolean().also { println("'${if (it) "yes" else "no"}' was chosen")}
         else -> {
             println("answer 'y' or 'n'")
             askYesNoQuestion(question, default)

@@ -148,6 +148,9 @@ options: {
         controller,
         $BiomeBackgroundScreenController {
             useSecondary: false,
+        },
+        $CardCollectionScreenController {
+            cardsFile: "config/cards.onj",
         }
     ],
     playAmbientSounds: true,
@@ -1779,6 +1782,10 @@ root: $Box {
                     displayName: "Backpack",
                 },
                 {
+                    actorName: "card_collection_widget",
+                    displayName: "Collection"
+                },
+                {
                     actorName: "settings_widget",
                     displayName: "Settings"
                 }
@@ -1863,6 +1870,8 @@ root: $Box {
 
     ],
 
+
+    sharedComponents.cardCollection,
     sharedComponents.backpack,
     ...(sharedComponents.settingsWidgets),
     sharedComponents.warningParent,

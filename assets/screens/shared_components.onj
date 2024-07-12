@@ -133,19 +133,19 @@ var settingsBox = $Box {
             },
 
             $Selector {
-              styles: [
-                  {
-                      height: 40#points,
-                      width: 250#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              arrowTexture: "common_symbol_arrow",
-              arrowWidth: 20.0,
-              arrowHeight: 20.0,
-              bindTo: "enableScreenShake",
-              font: "red_wing",
-              fontScale: 0.8,
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "enableScreenShake",
+                font: "red_wing",
+                fontScale: 0.8,
             }
         ],
 
@@ -176,19 +176,19 @@ var settingsBox = $Box {
             },
 
             $Selector {
-              styles: [
-                  {
-                      height: 40#points,
-                      width: 250#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              arrowTexture: "common_symbol_arrow",
-              arrowWidth: 20.0,
-              arrowHeight: 20.0,
-              bindTo: "startScreen",
-              font: "red_wing",
-              fontScale: 0.8,
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "startScreen",
+                font: "red_wing",
+                fontScale: 0.8,
             }
         ],
 
@@ -219,19 +219,19 @@ var settingsBox = $Box {
             },
 
             $Selector {
-              styles: [
-                  {
-                      height: 40#points,
-                      width: 250#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              arrowTexture: "common_symbol_arrow",
-              arrowWidth: 20.0,
-              arrowHeight: 20.0,
-              bindTo: "disableRt",
-              font: "red_wing",
-              fontScale: 0.8,
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "disableRt",
+                font: "red_wing",
+                fontScale: 0.8,
             }
         ],
 
@@ -276,20 +276,20 @@ var settingsBox = $Box {
             },
 
             $Slider {
-              styles: [
-                  {
-                      height: 20#points,
-                      width: 200#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              max: 1.0,
-              min: 0.0,
-              bindTo: "masterVolume",
-              sliderBackground: "common_slider_background",
-              handleRadius: 7.0,
-              handleColor: color.lightBrown,
-              sliderHeight: 10.0,
+                styles: [
+                    {
+                        height: 20#points,
+                        width: 200#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                max: 1.0,
+                min: 0.0,
+                bindTo: "masterVolume",
+                sliderBackground: "common_slider_background",
+                handleRadius: 7.0,
+                handleColor: color.lightBrown,
+                sliderHeight: 10.0,
             }
         ],
 
@@ -320,20 +320,20 @@ var settingsBox = $Box {
             },
 
             $Slider {
-              styles: [
-                  {
-                      height: 20#points,
-                      width: 200#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              max: 1.0,
-              min: 0.0,
-              bindTo: "musicVolume",
-              sliderBackground: "common_slider_background",
-              handleRadius: 7.0,
-              handleColor: color.lightBrown,
-              sliderHeight: 10.0,
+                styles: [
+                    {
+                        height: 20#points,
+                        width: 200#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                max: 1.0,
+                min: 0.0,
+                bindTo: "musicVolume",
+                sliderBackground: "common_slider_background",
+                handleRadius: 7.0,
+                handleColor: color.lightBrown,
+                sliderHeight: 10.0,
             }
         ],
 
@@ -364,20 +364,20 @@ var settingsBox = $Box {
             },
 
             $Slider {
-              styles: [
-                  {
-                      height: 20#points,
-                      width: 200#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              max: 1.0,
-              min: 0.0,
-              bindTo: "soundEffectsVolume",
-              sliderBackground: "common_slider_background",
-              handleRadius: 7.0,
-              handleColor: color.lightBrown,
-              sliderHeight: 10.0,
+                styles: [
+                    {
+                        height: 20#points,
+                        width: 200#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                max: 1.0,
+                min: 0.0,
+                bindTo: "soundEffectsVolume",
+                sliderBackground: "common_slider_background",
+                handleRadius: 7.0,
+                handleColor: color.lightBrown,
+                sliderHeight: 10.0,
             }
         ]
     ]
@@ -430,6 +430,7 @@ generalHoverDetailTemplate: $Box {
             }
         ],
         //alpha: 0.0,
+
         height: 200.0,
         width: 200.0,
 
@@ -469,6 +470,152 @@ var cardHoverDetailUsedAssetsDefinition = [
 cardHoverDetailUsedAssets: [
     ...cardHoverDetailUsedAssetsDefinition,
 ],
+
+
+cardCollection: $Box {
+    name: "card_collection_widget",
+    visible: false,
+    styles: [
+        {
+            positionType: positionType.absolute,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            alignItems: align.center,
+            //            justifyContent: justify.flexEnd,
+//            marginTop:
+
+        }
+    ],
+    zIndex: 500,
+} children [
+    $Box {
+        styles: [
+            {
+                background: "settings_background",
+                flexDirection: flexDirection.row,
+                justifyContent: justify.center,
+                alignItems: align.center,
+                width: (worldWidth * 0.8)#points,
+                height: (worldHeight * 0.925)#points,
+                positionTop: (worldHeight * 0.1361)#points, //TODO check this after correct background
+
+            }
+        ],
+    } children [
+        $Box {//TODO change image to arrow
+
+            debug: true,
+            styles: [
+                {
+                    background: "nav_bar_background",
+                    width: (worldWidth * 0.05)#points,
+                    height: (worldHeight * 0.25)#points,
+                }
+            ],
+        },
+        $Box {
+            styles: [
+                {
+                    background: "nav_bar_background",
+                    width: (worldWidth * 0.7)#points,
+                    height: (worldHeight * (0.925-0.1361))#points,
+                    flexDirection: flexDirection.column,
+                    justifyContent: justify.spaceAround,
+                    alignItems: align.center,
+                }
+            ],
+        } children [
+            $Box {
+                debug: true,
+                styles: [
+                    {
+                        background: "nav_bar_background",
+                        width: (worldWidth * 0.6)#points,
+                        height: (worldHeight * 0.1)#points,
+                        flexDirection: flexDirection.row,
+                        justifyContent: justify.spaceBetween,
+                        alignItems: align.center,
+                    }
+                ],
+            } children[
+                $Box {
+                    styles: [
+                        {
+                            width: (worldWidth * 0.22)#points,
+                            height: (worldHeight * 0.1)#points,
+                            flexDirection: flexDirection.row,
+                            justifyContent: justify.spaceBetween,
+                            alignItems: align.center,
+                        }
+                    ]
+                } children[
+                    $Box {
+                        debug: true,
+                        styles: [
+                            {
+                                background: "nav_bar_background",
+                                width: (worldHeight * 0.1)#points,
+                                height: (worldHeight * 0.1)#points,
+                            }
+                        ],
+                    },
+                    $Label {
+                        font: "red_wing",
+                        text: "Collection",
+                        fontScale: 2.0,
+                        color: color.forty_white,
+                        align: "center",
+                    }
+                ],
+                $TemplateLabel {
+                    font: "red_wing",
+                    template: "Page {overlay.cardCollection.curPage}/{overlay.cardCollection.totalPages}",
+                    fontScale: 1.5,
+                    color: color.forty_white,
+                    align: "center",
+                }
+            ],
+            $Box {
+                styles: [
+                    {
+                        background: "forty_white_texture",
+                        width: (worldWidth * 0.6)#points,
+                        height: 3#points,
+                    }
+                ]
+            }, //white line in between
+            $Box {
+                debug: true,
+                styles: [
+                    {
+                        background: "nav_bar_background",
+                        width: (worldWidth * 0.6)#points,
+                        height: (worldHeight * 0.6)#points,
+                    }
+                ],
+            } children[
+
+            ],
+        ],
+        $Box { //TODO change image to arrow
+
+            debug: true,
+            styles: [
+                {
+                    background: "nav_bar_background",
+                    width: (worldWidth * 0.05)#points,
+                    height: (worldHeight * 0.25)#points,
+                }
+            ],
+        },
+    ]
+],
+
+//                width: (worldWidth * 0.6)#points,
+//                height: (worldHeight * 1.0)#points,
+//                background: "settings_background",
+//                alignItems: align.center,
+//                justifyContent: justify.center
 
 backpackAssets: [
     "roadgeek_bmp",
@@ -1228,7 +1375,8 @@ warningLabelTemplates: [
 ],
 
 warningLabelUsedAssets: [
-    "forty_white_texture", "warning_label_background_red", "warning_label_background_grey", "title_screen_background", "red_wing", "warning_label_close",
+    "forty_white_texture", "warning_label_background_red", "warning_label_background_grey", "title_screen_background",
+    "red_wing", "warning_label_close",
 ],
 
 var cardHoverDetailExtrasWidth = 200.0;
@@ -1375,6 +1523,7 @@ var mainCardHoverDetailBox = $Box {
                     font: "roadgeek_bmp",
                     isDistanceField: false,
                     rawText: "\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"", //Text for testing
+
                     defaults: {
                         font: "roadgeek_bmp",
                         fontScale: 0.5,
