@@ -471,63 +471,52 @@ cardHoverDetailUsedAssets: [
     ...cardHoverDetailUsedAssetsDefinition,
 ],
 
-var cardCollectionCardSlot = $Box {
-    //    debug: true,
-
-    name: "tempParent",
-    styles: [
-        {
-            style_priority: 1,
-            width: (worldWidth * 0.116)#points,
-            height: (worldWidth * 0.116)#points,
-            marginTop: (worldHeight * 0.015)#points,
+cardCollectionTemplates:[
+    $Box {
+        template_keys: {
+            "styles.0.background": "background",
+            "hoverText": "hoverText",
         },
-        {
-            style_priority: 2,
-            background: "collection_slot_empty",
-            style_condition: not(actorState("locked")),
-        }
-    ],
-//    actorStates: [ //TODO this by program
-//        "locked"
-//    ],
-    children: [
-        $Box {
-            name: "tempChild",
-            styles: [
-                {
-                    background: "collection_slot_glow",
-                    positionType: positionType.absolute,
-                    positionTop: (-8)#percent,
-                    positionLeft: (-8)#percent,
-                    width: 116.0#percent,
-                    height: 116.0#percent,
-                    visible: false,
-                },
-                {
-                    style_priority: 2,
-                    visible: true,
-                    style_condition: parent(actorState("locked")),
-                }
-            ]
+        template_name: "card_collection_slot",
+        hasHoverDetail:true,
+//        hoverDetailActor:"card_hover_detail",
+        hoverText: "Testing random shit aus hihihi",
+        styles: [
+            {
+                background: "",
+                positionType: positionType.absolute,
+                width: 100.0#percent,
+                height: 100.0#percent,
+            }
+        ]
+    },
+    $Box {
+        template_keys: {
         },
-        $Box {
-            name: "tempChild2",
-            //            debug:true,
-
-            styles: [
-                {
-                    //                    background: "collection_slot_locked",
-
-                    positionType: positionType.absolute,
-                    width: 100.0#percent,
-                    height: 100.0#percent,
-                }
-            ]
-        },
-    ],
-};
-
+        template_name: "card_collection_slot_card",
+        styles: [
+            {
+                positionType: positionType.absolute,
+                width: 100.0#percent,
+                height: 100.0#percent,
+            }
+        ]
+    },
+    $Box {
+        template_keys: { },
+        template_name: "card_collection_slot_glow_background",
+        styles: [
+            {
+                background: "collection_slot_glow",
+                positionType: positionType.absolute,
+                positionTop: (-8)#percent,
+                positionLeft: (-8)#percent,
+                width: 116.0#percent,
+                height: 116.0#percent,
+            }
+        ]
+    },
+],
 
 cardCollection: $Box {
     name: "card_collection_widget",
@@ -540,7 +529,7 @@ cardCollection: $Box {
             alignItems: align.center,
         }
     ],
-    zIndex: 500,
+    zIndex: 99,
 } children [
     $Box {
         styles: [
@@ -551,6 +540,7 @@ cardCollection: $Box {
                 width: (worldWidth * 0.8)#points,
                 height: (worldHeight * 0.925)#points,
                 positionTop: (worldHeight * 0.1361)#points,
+                touchable:touchable.enabled,
             }
         ],
     } children [
@@ -651,6 +641,7 @@ cardCollection: $Box {
                 ]
             },
             $Box {
+                name:"card_collection_cards_parent",
                 styles: [
                     {
                         width: (worldWidth * 0.61)#points,
@@ -661,16 +652,18 @@ cardCollection: $Box {
                         marginTop: (worldHeight * 0.015)#points,
                     }
                 ],
-            } children [
-                //                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
-
-                cardCollectionCardSlot,
-                //                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
-//                cardCollectionCardSlot,
-//                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
-//                cardCollectionCardSlot,
-
-            ],
+                children: repeat(15, $Box {
+                        styles: [
+                            {
+                                width: (worldWidth * 0.116)#points,
+                                height: (worldWidth * 0.116)#points,
+                                marginTop: (worldHeight * 0.015)#points,
+                                background: "collection_slot_empty",
+                            }
+                        ],
+                    }
+                ),
+            },
         ],
         $Box {
             styles: [
@@ -966,7 +959,7 @@ statusbarLeftDefaults: {
                 }
             ],
         },
-    ]
+    ],
 },
 
 statusBarTemplates: [
