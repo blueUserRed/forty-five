@@ -1,33 +1,22 @@
 package com.fourinachamber.fortyfive.map.statusbar
 
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.fourinachamber.fortyfive.FortyFive
-import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
-import com.fourinachamber.fortyfive.game.card.CardActor
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.game.card.DetailDescriptionHandler
-import com.fourinachamber.fortyfive.map.MapManager
-import com.fourinachamber.fortyfive.map.detailMap.ShopMapEvent
-import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.screen.general.*
 import com.fourinachamber.fortyfive.screen.general.customActor.CustomMoveByAction
-import com.fourinachamber.fortyfive.screen.general.customActor.CustomWarningParent
 import com.fourinachamber.fortyfive.utils.*
-import dev.lyze.flexbox.FlexBox
-import io.github.orioncraftmc.meditate.enums.YogaUnit
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
 import kotlin.math.ceil
 import kotlin.math.min
-import kotlin.random.Random
 
 class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
 
@@ -43,6 +32,7 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
     private val curPageGlobalStringName: String = "overlay.cardCollection.curPage"
 
     private var curPage = 0
+    private var nbrOfPages = -1
 
     @Inject(name = "card_collection_widget")
     private lateinit var cardCollectionWidget: CustomFlexBox
@@ -61,24 +51,46 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
         _allCards = cardPrototypes
             .map { it.create(screen, true) }
             .toMutableList()
-//        _allCards.forEach { it.actor.actorTemplate = "card_hover_detail_glow" } //TODO comment back in
-        fun format(a: Number): String = a.toInt().toString().padStart(2, '0')
-        TemplateString.updateGlobalParam(totalPagesGlobalStringName, format(ceil(cardPrototypes.size / 15.0)))
-        TemplateString.updateGlobalParam(curPageGlobalStringName, format(curPage + 1))
+        //        _allCards.forEach { it.actor.actorTemplate = "card_hover_detail_glow" } //TODO comment back in once it exists
+        nbrOfPages = ceil(cardPrototypes.size / 15.0).toInt()
+        TemplateString.updateGlobalParam(totalPagesGlobalStringName, formatToTwoDigits(nbrOfPages))
 
         cardCollectionWidget.onDisplay = { getInOutTimeLine(isGoingIn = true, cardCollectionWidget) }
         cardCollectionWidget.onHide = { getInOutTimeLine(isGoingIn = false, cardCollectionWidget) }
         loadCollection()
     }
 
+    private fun formatToTwoDigits(a: Number): String = a.toInt().toString().padStart(2, '0')
+
+    private var lastEvent: ButtonClickEvent? = null
+
+    @EventHandler
+    fun nextPage(event: ButtonClickEvent, actor: Actor) {
+        if (lastEvent==event) return
+        if ((++curPage) == nbrOfPages) curPage = 0
+        reloadCollection()
+        lastEvent=event //TODO VERY UGLY, marvin idk why this happens, but it needs to be fixed (this method is always called twice for one buttonpress, idk why)
+    }
+
+    @EventHandler
+    fun prevPage(event: ButtonClickEvent, actor: Actor) {
+        if (lastEvent==event) return
+        if ((--curPage) < 0) curPage += nbrOfPages
+        reloadCollection()
+        lastEvent=event
+    }
 
     private fun reloadCollection() {
-        cardsParentWidget.children.filterIsInstance<Group>()
-            .forEach { it.children.forEach { it2 -> screen.removeActorFromScreen(it2) } }
+        cardsParentWidget.children.filterIsInstance<Group>().forEach {
+            while (it.children.size > 0) screen.removeActorFromScreen(it.children[0])
+        }
         loadCollection()
     }
 
     private fun loadCollection() {
+        TemplateString.updateGlobalParam(curPageGlobalStringName, formatToTwoDigits(curPage + 1))
+
+
         val parents = cardsParentWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in (0 until (min(parents.size, _allCards.size - curPage * parents.size)))) {
             val c = _allCards[i + curPage * parents.size]
@@ -108,7 +120,6 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
                 ) as CustomFlexBox
                 curActor.touchable = Touchable.enabled
                 curActor.additionalHoverData["effects"] = DetailDescriptionHandler.allTextEffects
-                println(DetailDescriptionHandler.allTextEffects)
             } else {
                 screen.screenBuilder.generateFromTemplate(
                     "card_collection_slot",

@@ -545,6 +545,7 @@ cardCollection: $Box {
         ],
     } children [
         $Box {
+            onClick: "prevPage",
             styles: [
                 {
                     style_priority: 1,
@@ -666,6 +667,7 @@ cardCollection: $Box {
             },
         ],
         $Box {
+            onClick: "nextPage",
             styles: [
                 {
                     style_priority: 1,
