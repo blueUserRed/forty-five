@@ -237,7 +237,7 @@ cards: [
         price: 50,
         type: $Bullet { },
 //        unlockConditions: [],
-        lockedDescription: "THIS TEXT IST ONLY FOR TESTING AND WILL PROBABLY BE REMOVED, hihi",
+        lockedDescription: "$trigger$$trait$Locked$trait$$trigger$$trait$$trait$ \n  \nYou need to do something in order to unlock this card, but i will not tell you what. Good luck!",
     },
     {
         name: "BFB",

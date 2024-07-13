@@ -192,7 +192,7 @@ class ScreenBuilder(val file: FileHandle) {
         original: OnjValue,
         combinedData: Map<String, OnjValue>,
         name: String
-    ): OnjValue = when (original) {
+    ): OnjValue = when (original) { //"styles.0.background" in combinedData.keys && combinedData.get("styles.0.background").value =="collection_slot_locked"
 
         is OnjObject -> {
             val new = original.value.mapValues { (key, value) ->

@@ -94,6 +94,7 @@ $Widget {
         enableTransform?: boolean,
         hasHoverDetail?: boolean,
         hoverText?: string,
+        hoverDetailActor?: string,
         ...widgetSharedKeys
     }
 

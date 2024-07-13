@@ -432,6 +432,7 @@ var enemyActionAnimationTemplate = $Box {
 ];
 
 templates: [
+    ...(sharedComponents.cardCollectionTemplates),
     ...(sharedComponents.warningLabelTemplates),
     ...(sharedComponents.cardHoverDetailTemplates),
     ...(sharedComponents.statusBarTemplates),
