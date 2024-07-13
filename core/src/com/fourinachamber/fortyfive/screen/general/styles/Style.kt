@@ -1,8 +1,8 @@
 package com.fourinachamber.fortyfive.screen.general.styles
 
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.MathUtils.sin
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
@@ -263,6 +263,17 @@ sealed class StyleCondition {
     object IsHoveredOver : StyleCondition() {
         override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
             actor.isHoveredOver
+    }
+
+    class CheckForParent(val condition: StyleCondition) : StyleCondition() {
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor {
+            val par:Group? = actor.parent
+            if (par == null || par !is StyledActor) {
+                FortyFiveLogger.warn("StyleCondition","Parent does not fullfill requirements")
+                return false
+            }
+            return condition.check(par, screen)
+        }
     }
 
     class IsActorHoveredOver(val actorName: String) : StyleCondition() {

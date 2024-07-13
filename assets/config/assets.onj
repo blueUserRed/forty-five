@@ -648,6 +648,51 @@ textures: [
         useMipMaps: true,
     },
     {
+        name: "collection_icon",
+        file: "textures/card_collection/collection_icon.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_next",
+        file: "textures/card_collection/collection_next.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_next_hover",
+        file: "textures/card_collection/collection_next_hover.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_prev",
+        file: "textures/card_collection/collection_prev.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_prev_hover",
+        file: "textures/card_collection/collection_prev_hover.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_slot_empty",
+        file: "textures/card_collection/collection_slot_empty.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_slot_glow",
+        file: "textures/card_collection/collection_slot_glow.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_slot_locked",
+        file: "textures/card_collection/collection_slot_locked.png",
+        useMipMaps: true,
+    },
+    {
+        name: "collection_slot_missing",
+        file: "textures/card_collection/collection_slot_missing.png",
+        useMipMaps: true,
+    },
+    {
         name: "chooseCard_cardsBackground",
         file: "textures/events/choose_card/cards_background.png"
     },
