@@ -86,6 +86,7 @@ assets: {
         ...(sharedComponents.cardHoverDetailUsedAssets),
         ...(sharedComponents.tutorialInfoActorUsedAssets),
         ...(sharedComponents.backpackAssets),
+        ...(sharedComponents.cardCollectionAssets),
     ]
 },
 

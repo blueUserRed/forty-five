@@ -474,17 +474,58 @@ cardHoverDetailUsedAssets: [
 var cardCollectionCardSlot = $Box {
     //    debug: true,
 
+    name: "tempParent",
     styles: [
         {
+            style_priority: 1,
             width: (worldWidth * 0.116)#points,
             height: (worldWidth * 0.116)#points,
-            //            justifyContent: justify.flexEnd,
-//            marginTop:
-
-            marginTop: (worldHeight * 0.02)#points,
-            background: "forty_white_texture",
+            marginTop: (worldHeight * 0.015)#points,
+        },
+        {
+            style_priority: 2,
+            background: "collection_slot_empty",
+            style_condition: not(actorState("locked")),
         }
-    ]
+    ],
+//    actorStates: [ //TODO this by program
+//        "locked"
+//    ],
+    children: [
+        $Box {
+            name: "tempChild",
+            styles: [
+                {
+                    background: "collection_slot_glow",
+                    positionType: positionType.absolute,
+                    positionTop: (-8)#percent,
+                    positionLeft: (-8)#percent,
+                    width: 116.0#percent,
+                    height: 116.0#percent,
+                    visible: false,
+                },
+                {
+                    style_priority: 2,
+                    visible: true,
+                    style_condition: parent(actorState("locked")),
+                }
+            ]
+        },
+        $Box {
+            name: "tempChild2",
+            //            debug:true,
+
+            styles: [
+                {
+                    //                    background: "collection_slot_locked",
+
+                    positionType: positionType.absolute,
+                    width: 100.0#percent,
+                    height: 100.0#percent,
+                }
+            ]
+        },
+    ],
 };
 
 
@@ -504,25 +545,29 @@ cardCollection: $Box {
     $Box {
         styles: [
             {
-                background: "settings_background",
                 flexDirection: flexDirection.row,
                 justifyContent: justify.center,
                 alignItems: align.center,
                 width: (worldWidth * 0.8)#points,
                 height: (worldHeight * 0.925)#points,
-                positionTop: (worldHeight * 0.1361)#points, //TODO check this after correct background
-
+                positionTop: (worldHeight * 0.1361)#points,
             }
         ],
     } children [
-        $Box {//TODO change image to arrow
-
-            debug: true,
+        $Box {
             styles: [
                 {
-                    background: "nav_bar_background",
+                    style_priority: 1,
+                    background: "collection_prev",
                     width: (worldWidth * 0.05)#points,
                     height: (worldHeight * 0.25)#points,
+                    touchable: touchable.enabled, //TODO offsetX after correct background
+
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    background: "collection_prev_hover",
                 }
             ],
         },
@@ -531,24 +576,30 @@ cardCollection: $Box {
                 {
                     background: "nav_bar_background",
                     width: (worldWidth * 0.7)#points,
-                    height: (worldHeight * (0.925 - 0.1361 / 2))#points,
+                    //                    height: (worldHeight * (0.925 - 0.1361 / 2))#points,
+
+                    height: (worldHeight * 0.925)#points,
                     flexDirection: flexDirection.column,
                     justifyContent: justify.spaceAround,
                     alignItems: align.center,
+                    //                    paddingTop: (worldHeight*0.08)#points,
+
                 }
             ],
         } children [
             $Box {
-//                                debug: true,
+                //                                debug: true,
 
                 styles: [
                     {
                         //                        background: "nav_bar_background",
-                        width: (worldWidth * 0.65)#points,
+
+                        width: (worldWidth * 0.61)#points,
                         height: (worldHeight * 0.1)#points,
                         flexDirection: flexDirection.row,
                         justifyContent: justify.spaceBetween,
                         alignItems: align.center,
+                        offsetY: -worldHeight * 0.03,
                     }
                 ],
             } children [
@@ -563,12 +614,10 @@ cardCollection: $Box {
                         }
                     ]
                 } children [
-                    $Box { //icon
-//                        debug: true,
-
+                    $Box {
                         styles: [
                             {
-                                background: "forty_white_texture",
+                                background: "collection_icon",
                                 width: (worldHeight * 0.1)#points,
                                 height: (worldHeight * 0.1)#points,
                             }
@@ -590,46 +639,53 @@ cardCollection: $Box {
                     align: "center",
                 }
             ],
-            $Box {
+            $Box {//white line in between
+
                 styles: [
                     {
                         background: "forty_white_texture",
-                        width: (worldWidth * 0.65)#points,
+                        width: (worldWidth * 0.61)#points,
                         height: 3#points,
+                        offsetY: -worldHeight * 0.03,
                     }
                 ]
-            }, //white line in between
+            },
             $Box {
-                //                debug: true,
-
                 styles: [
                     {
-                        background: "nav_bar_background",
-                        width: (worldWidth * 0.64)#points,
-                        height: ( worldWidth * 0.36 + worldHeight * 0.1)#points,
+                        width: (worldWidth * 0.61)#points,
+                        height: (worldWidth * 0.36 + worldHeight * 0.1)#points,
                         justifyContent: justify.spaceBetween,
                         flexDirection: flexDirection.row,
                         flexWrap: wrap.wrap,
+                        marginTop: (worldHeight * 0.015)#points,
                     }
                 ],
             } children [
-                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
+                //                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
+
                 cardCollectionCardSlot,
-                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
-                cardCollectionCardSlot,
-                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
-                cardCollectionCardSlot,
+                //                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
+//                cardCollectionCardSlot,
+//                cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot, cardCollectionCardSlot,
+//                cardCollectionCardSlot,
 
             ],
         ],
-        $Box { //TODO change image to arrow
-
-            debug: true,
+        $Box {
             styles: [
                 {
-                    background: "nav_bar_background",
+                    style_priority: 1,
+                    background: "collection_next",
                     width: (worldWidth * 0.05)#points,
                     height: (worldHeight * 0.25)#points,
+                    touchable: touchable.enabled, //TODO offsetX after correct background
+
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    background: "collection_next_hover",
                 }
             ],
         },
@@ -641,6 +697,19 @@ cardCollection: $Box {
 //                background: "settings_background",
 //                alignItems: align.center,
 //                justifyContent: justify.center
+
+cardCollectionAssets: [
+    "collection_icon",
+    "collection_next",
+    "collection_next_hover",
+    "collection_prev",
+    "collection_prev_hover",
+    "collection_slot_empty",
+    "collection_slot_glow",
+    "collection_slot_locked",
+    "collection_slot_missing"
+],
+
 
 backpackAssets: [
     "roadgeek_bmp",
