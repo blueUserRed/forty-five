@@ -16,7 +16,8 @@ abstract class BaseMapGenerator {
     protected val allNodes: List<MapNodeBuilder>
         get() = _allNodes
 
-    private lateinit var random: Random
+    protected lateinit var random: Random
+        private set
     private lateinit var data: BaseMapGeneratorData
     private lateinit var name: String
 
@@ -93,7 +94,7 @@ abstract class BaseMapGenerator {
             )
             if (decoration.checkNodeCollisions && nodeColliders.any { checkCollision(thisCollision, it) }) continue
             if (decoration.checkDecorationCollisions && decorationColliders.any { checkCollision(thisCollision, it) }) continue
-            if (decoration.checkLineCollisions && lineColliders.any { checkCollision(thisCollision, it) })
+            if (decoration.checkLineCollisions && lineColliders.any { checkCollision(thisCollision, it) }) continue
             if (decoration.generateDecorationCollisions) decorationColliders.add(thisCollision)
             instances.add(pos to scale)
             spawned++
@@ -211,6 +212,7 @@ abstract class BaseMapGenerator {
 
         fun fromOnj(onj: OnjNamedObject): BaseMapGenerator = when (val name = onj.name) {
             "ThreeLine" -> ThreeLineMapGenerator(ThreeLineMapGenerator.ThreeLineMapGeneratorData.fromOnj(onj))
+            "Radial" -> RadialMapGenerator(RadialMapGenerator.RadialMapGeneratorData.fromOnj(onj))
             else -> throw RuntimeException("unknown MapGenerator: $name")
         }
 

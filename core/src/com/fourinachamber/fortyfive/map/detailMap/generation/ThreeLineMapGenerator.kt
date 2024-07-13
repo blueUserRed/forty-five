@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2
 import com.fourinachamber.fortyfive.map.detailMap.*
 import com.fourinachamber.fortyfive.utils.random
 import com.fourinachamber.fortyfive.utils.splitInTwo
+import com.fourinachamber.fortyfive.utils.toFloatRange
 import com.fourinachamber.fortyfive.utils.toIntRange
 import onj.value.OnjArray
 import onj.value.OnjNamedObject
@@ -77,7 +78,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
             animatedDecorations = genAnimatedDecorations,
             isArea = false,
             biome = data.biome,
-            progress = 0f..10f,
+            progress = data.progress,
             tutorialText = mutableListOf(),
             scrollable = true,
             camPosOffset = Vector2(0f, 0f)
@@ -86,8 +87,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
 
     private fun addAdditionalLine(mainLine: Line, offsetY: Float): Line {
         val nodes = mainLine.nodes
-        val startPadding = data.altLinesPadding.random()
-        val endPadding = data.altLinesPadding.random()
+        val startPadding = data.altLinesPadding.random(random)
+        val endPadding = data.altLinesPadding.random(random)
         val startNode = nodes[startPadding]
         val endNode = nodes[nodes.size - endPadding - 1]
         val amountNodes = (nodes.size - endPadding) - startPadding - 2
@@ -107,7 +108,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         eventsToAssign.forEach { (eventCreator, offset, nodeTexture) ->
             var cur = 0
             while (true) {
-                cur += offset.random()
+                cur += offset.random(random)
                 if (cur >= events.size) break
                 events[cur] = nodeTexture to eventCreator
             }
@@ -138,8 +139,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
             val varianceY = data.varianceY
             val nodes = MutableList(numNodes) {
                 val node = newNode(
-                    x = curX + (-varianceX..varianceX).random(),
-                    y = avgY + (-varianceY..varianceY).random() + offsetY
+                    x = curX + (-varianceX..varianceX).random(random),
+                    y = avgY + (-varianceY..varianceY).random(random) + offsetY
                 )
                 curX += distancePerNode
                 lastNode?.let {
@@ -159,7 +160,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
     data class ThreeLineMapGeneratorData(
         override val seed: Long,
         val biome: String,
-        val progress: IntRange,
+        val progress: ClosedFloatingPointRange<Float>,
         val exitNodeTexture: String,
         val roadLength: Float,
         val mainLineNodes: Int,
@@ -184,7 +185,7 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
             fun fromOnj(onj: OnjObject): ThreeLineMapGeneratorData = ThreeLineMapGeneratorData(
                 onj.get<Long>("seed"),
                 onj.get<String>("biome"),
-                onj.get<OnjArray>("progress").toIntRange(),
+                onj.get<OnjArray>("progress").toFloatRange(),
                 onj.get<String>("exitNodeTexture"),
                 onj.get<Double>("roadLength").toFloat(),
                 onj.get<Long>("mainLineNodes").toInt(),
