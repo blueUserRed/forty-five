@@ -289,7 +289,7 @@ var magentaMountainsDecorations = [
 
 var roadBetweenAquaBalleAndTabuLetter = $ThreeLine {
     name: "road_between_aqua_balle_and_tabu_letter_outpost",
-    progress: [0, 10],
+    progress: [0.0, 10.0],
     seed: runRandom(1),
     biome: "wasteland",
     startArea: "aqua_balle",
@@ -302,7 +302,7 @@ var roadBetweenAquaBalleAndTabuLetter = $ThreeLine {
 
 var roadBetweenTabuLetterAndSalem = $ThreeLine {
     name: "road_between_tabu_letter_outpost_and_salem",
-    progress: [10, 20],
+    progress: [10.0, 20.0],
     seed: runRandom(2),
     biome: "bewitched_forest",
     startArea: "tabu_letter_outpost",
@@ -313,17 +313,30 @@ var roadBetweenTabuLetterAndSalem = $ThreeLine {
     ...mapSharedConfig
 };
 
-var roadBetweenSalemAndSpire = $ThreeLine {
+//var roadBetweenSalemAndSpire = $ThreeLine {
+//    name: "road_between_salem_and_spire_outpost",
+//    progress: [20.0, 30.0],
+//    seed: runRandom(3),
+//    biome: "magenta_mountains",
+//    startArea: "salem",
+//    endArea: "spire_outpost",
+//    nodeProtectedArea: 10.0,
+//    altLinesOffset: 80.0,
+//    decorations: magentaMountainsDecorations,
+//    ...mapSharedConfig
+//};
+
+var roadBetweenSalemAndSpire = $Radial {
     name: "road_between_salem_and_spire_outpost",
-    progress: [20, 30],
+//    progress: [20.0, 30.0],
     seed: runRandom(3),
     biome: "magenta_mountains",
-    startArea: "salem",
-    endArea: "spire_outpost",
+//    startArea: "salem",
+//    endArea: "spire_outpost",
     nodeProtectedArea: 10.0,
-    altLinesOffset: 80.0,
-    decorations: magentaMountainsDecorations,
-    ...mapSharedConfig
+//    altLinesOffset: 80.0,
+//    decorations: magentaMountainsDecorations,
+//    ...mapSharedConfig
 };
 
 generatorConfig: {

@@ -44,7 +44,7 @@ $MapGenerator {
     $ThreeLine {
         name: string,
         seed: int,
-        progress: int[2],
+        progress: float[2],
         biome: string,
         startArea: string,
         endArea: string,
@@ -66,6 +66,13 @@ $MapGenerator {
         events: additionalEventDefinition[],
         nodeProtectedArea: float,
         decorations: decoration[]
+    }
+
+    $Radial {
+        name: string,
+        seed: int,
+        biome: string,
+        nodeProtectedArea: float,
     }
 
 }
