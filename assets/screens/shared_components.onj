@@ -545,15 +545,18 @@ cardCollection: $Box {
         ],
     } children [
         $Box {
+            zIndex:200,
+            debug:true,
             onClick: "prevPage",
             styles: [
                 {
                     style_priority: 1,
                     background: "collection_prev",
                     width: (worldWidth * 0.05)#points,
-                    height: (worldHeight * 0.25)#points,
+                    height: (worldHeight * 0.31)#points,
                     touchable: touchable.enabled, //TODO offsetX after correct background
-
+                    offsetX: (worldWidth * 0.01),
+                    offsetY: (worldHeight * -0.02),
                 },
                 {
                     style_priority: 2,
@@ -563,28 +566,21 @@ cardCollection: $Box {
             ],
         },
         $Box {
+            zIndex:100,
             styles: [
                 {
-                    background: "nav_bar_background",
+                    background: "collection_background",
                     width: (worldWidth * 0.7)#points,
-                    //                    height: (worldHeight * (0.925 - 0.1361 / 2))#points,
-
                     height: (worldHeight * 0.925)#points,
                     flexDirection: flexDirection.column,
                     justifyContent: justify.spaceAround,
                     alignItems: align.center,
-                    //                    paddingTop: (worldHeight*0.08)#points,
-
                 }
             ],
         } children [
             $Box {
-                //                                debug: true,
-
                 styles: [
                     {
-                        //                        background: "nav_bar_background",
-
                         width: (worldWidth * 0.61)#points,
                         height: (worldHeight * 0.1)#points,
                         flexDirection: flexDirection.row,
@@ -667,15 +663,18 @@ cardCollection: $Box {
             },
         ],
         $Box {
+            debug:true,
+            zIndex:200,
             onClick: "nextPage",
             styles: [
                 {
                     style_priority: 1,
                     background: "collection_next",
                     width: (worldWidth * 0.05)#points,
-                    height: (worldHeight * 0.25)#points,
+                    height: (worldHeight * 0.31)#points,
                     touchable: touchable.enabled, //TODO offsetX after correct background
-
+                    offsetX: (worldWidth * -0.013),
+                    offsetY: (worldHeight * -0.02),
                 },
                 {
                     style_priority: 2,
@@ -702,7 +701,8 @@ cardCollectionAssets: [
     "collection_slot_empty",
     "collection_slot_glow",
     "collection_slot_locked",
-    "collection_slot_missing"
+    "collection_slot_missing",
+    "collection_background",
 ],
 
 
