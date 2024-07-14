@@ -62,7 +62,7 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
             .find { it.name == propertyName && dataTypeClass == it.dataTypeClass }
         if (property == null){
             //TODO ask marvin if this should log something or not... :)
-//            FortyFiveLogger.warn("StyleInitialization","no style property $propertyName with type ${dataTypeClass.simpleName} for ${actor.javaClass.simpleName}")
+            FortyFiveLogger.warn("StyleInitialization","no style property $propertyName with type ${dataTypeClass.simpleName} for ${actor.javaClass.simpleName}")
             return
         }
         @Suppress("UNCHECKED_CAST") // this should be safe (I hope)
