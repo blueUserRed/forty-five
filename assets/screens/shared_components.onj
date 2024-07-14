@@ -1527,6 +1527,7 @@ var cardHoverDetailExtra = $Box {
         $Box {
             styles: [
                 {
+                    positionType: positionType.absolute,
                     background: "hover_detail_small_background",
                     height: 110#percent,
                     width: 100#percent,
@@ -1556,7 +1557,28 @@ var cardHoverDetailExtra = $Box {
                     ],
                 },
             ]
-        }
+        },
+        $Box {
+            zIndex:-10,
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    background: "hover_detail_small_background_glow",
+                    height: (110 * 1.6)#percent, //TODO test if this really always works, because i don't think so
+                    width: (100 * 1.25)#percent,
+                    positionLeft:(100 * -0.15)#percent,
+                    positionTop:(110 * -0.3)#percent,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.column,
+                    visible:false,
+                },
+                    {
+                    style_priority: 2,
+                    style_condition: state("showHoverDetailGlow"),
+                    visible:true,
+                }
+            ],
+        },
     ],
 };
 var mainCardHoverDetailBox = $Box {
