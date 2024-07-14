@@ -581,7 +581,7 @@ cardCollection: $Box {
                 {
                     style_priority: 1,
                     background: "collection_prev",
-                    width: (worldWidth * 0.05)#points,
+                    width: (worldWidth * 0.06)#points,
                     height: (worldHeight * 0.31)#points,
                     touchable: touchable.enabled,
                 },
@@ -706,7 +706,7 @@ cardCollection: $Box {
                 {
                     style_priority: 1,
                     background: "collection_next",
-                    width: (worldWidth * 0.05)#points,
+                    width: (worldWidth * 0.06)#points,
                     height: (worldHeight * 0.31)#points,
                     touchable: touchable.enabled,
                 },
@@ -1564,9 +1564,9 @@ var cardHoverDetailExtra = $Box {
                 {
                     positionType: positionType.absolute,
                     background: "hover_detail_small_background_glow",
-                    height: (110 * 1.6)#percent, //TODO test if this really always works, because i don't think so
-                    width: (100 * 1.25)#percent,
-                    positionLeft:(100 * -0.15)#percent,
+                    height: (110 * 1.6)#percent,
+                    width: (100 * 1.225)#percent,
+                    positionLeft:(100 * -0.1)#percent,
                     positionTop:(110 * -0.3)#percent,
                     alignItems: align.center,
                     flexDirection: flexDirection.column,

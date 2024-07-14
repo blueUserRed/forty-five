@@ -94,7 +94,7 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
         val parents = cardsParentWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in (0 until (min(parents.size, _allCards.size - curPage * parents.size)))) {
             val c = _allCards[i + curPage * parents.size]
-            if (c.name in SaveState.cards)
+            if (c.name in SaveState.cards)      //TODO this if condition when the cards are correctly saved
                 screen.screenBuilder.addDataToWidgetFromTemplate(
                     "card_collection_slot_card",
                     mapOf(),
