@@ -935,6 +935,14 @@ textures: [
         file: "textures/cards/hover_detail/hover_detail_more_info.png"
     },
     {
+        name: "hover_detail_big_background_glow",
+        file: "textures/cards/hover_detail/hover_detail_big_glow.png"
+    },
+    {
+        name: "hover_detail_small_background_glow",
+        file: "textures/cards/hover_detail/hover_detail_small_glow.png"
+    },
+    {
         name: "loose_screen_background",
         file: "textures/loose_screen/background.png"
     },

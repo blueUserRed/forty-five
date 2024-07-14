@@ -135,8 +135,11 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
         val amount = screen.stage.viewport.worldHeight
         action {
             if (isGoingIn) {
+                screen.enterState("showHoverDetailGlow")
                 cardCollectionWidget.isVisible = true
                 target.offsetY = -amount
+            }else{
+                screen.leaveState("showHoverDetailGlow")
             }
         }
         val action = CustomMoveByAction(

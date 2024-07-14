@@ -411,6 +411,32 @@ generalHoverDetailTemplate: $Box {
     $Box {
         styles: [
             {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionTop: (200 * -0.15)#points,
+                positionLeft: (200 * -0.15)#points,
+                width: (200 * 1.3)#points,
+                height: (200 * 1.3)#points,
+                background: "hover_detail_big_background_glow",
+                visible: false,
+                alpha: 0.0,
+            },
+            {
+                visible: true,
+                style_priority: 2,
+                style_condition: state("showHoverDetailGlow"),
+            },
+            {
+                style_priority: 3,
+                style_condition: state("showHoverDetail"),
+                alpha: 1.0,
+                style_animation: hoverDetailStyleAnimation,
+            }
+        ]
+    },
+    $Box {
+        styles: [
+            {
                 background: "hover_detail_big_background",
                 height: 200#points,
                 width: 200#points,
@@ -463,6 +489,8 @@ var cardHoverDetailUsedAssetsDefinition = [
     "hover_detail_small_background",
     "forty_white_texture",
     "hover_detail_more_info",
+    "hover_detail_big_background_glow",
+    "hover_detail_small_background_glow",
     "card_symbol_text_a_equals", "card_symbol_text_i_equals", "card_symbol_text_t_equals",
     ...revolverSlotIconAssets
 ];
@@ -471,15 +499,16 @@ cardHoverDetailUsedAssets: [
     ...cardHoverDetailUsedAssetsDefinition,
 ],
 
-cardCollectionTemplates:[
+cardCollectionTemplates: [
     $Box {
         template_keys: {
             "styles.0.background": "background",
             "hoverText": "hoverText",
         },
         template_name: "card_collection_slot",
-        hasHoverDetail:true,
-//        hoverDetailActor:"card_hover_detail",
+        hasHoverDetail: true,
+        //        hoverDetailActor:"card_hover_detail",
+
         hoverText: "Testing random shit aus hihihi",
         styles: [
             {
@@ -503,7 +532,8 @@ cardCollectionTemplates:[
         ]
     },
     $Box {
-        template_keys: { },
+        template_keys: {
+        },
         template_name: "card_collection_slot_glow_background",
         styles: [
             {
@@ -540,12 +570,12 @@ cardCollection: $Box {
                 width: (worldWidth * 0.8)#points,
                 height: (worldHeight * 0.925)#points,
                 positionTop: (worldHeight * 0.1361)#points,
-                touchable:touchable.enabled,
+                touchable: touchable.enabled,
             }
         ],
     } children [
         $Box {
-            zIndex:200,
+            zIndex: 200,
             onClick: "prevPage",
             styles: [
                 {
@@ -554,8 +584,6 @@ cardCollection: $Box {
                     width: (worldWidth * 0.05)#points,
                     height: (worldHeight * 0.31)#points,
                     touchable: touchable.enabled,
-//                    offsetX: (worldWidth * 0.01),
-//                    offsetY: (worldHeight * -0.02),
                 },
                 {
                     style_priority: 2,
@@ -565,7 +593,7 @@ cardCollection: $Box {
             ],
         },
         $Box {
-            zIndex:1,
+            zIndex: 1,
             styles: [
                 {
                     width: (worldWidth * 0.7)#points,
@@ -577,6 +605,7 @@ cardCollection: $Box {
             ],
         } children [
             $Box { //background needs to be different because the images are cut terribly
+
                 styles: [
                     {
                         background: "collection_background",
@@ -646,7 +675,7 @@ cardCollection: $Box {
                 ]
             },
             $Box {
-                name:"card_collection_cards_parent",
+                name: "card_collection_cards_parent",
                 styles: [
                     {
                         width: (worldWidth * 0.61)#points,
@@ -658,20 +687,20 @@ cardCollection: $Box {
                     }
                 ],
                 children: repeat(15, $Box {
-                        styles: [
-                            {
-                                width: (worldWidth * 0.116)#points,
-                                height: (worldWidth * 0.116)#points,
-                                marginTop: (worldHeight * 0.015)#points,
-                                background: "collection_slot_empty",
-                            }
-                        ],
-                    }
+                    styles: [
+                        {
+                            width: (worldWidth * 0.116)#points,
+                            height: (worldWidth * 0.116)#points,
+                            marginTop: (worldHeight * 0.015)#points,
+                            background: "collection_slot_empty",
+                        }
+                    ],
+                }
                 ),
             },
         ],
         $Box {
-            zIndex:200,
+            zIndex: 200,
             onClick: "nextPage",
             styles: [
                 {
@@ -680,8 +709,6 @@ cardCollection: $Box {
                     width: (worldWidth * 0.05)#points,
                     height: (worldHeight * 0.31)#points,
                     touchable: touchable.enabled,
-//                    offsetX: (worldWidth * -0.013),
-//                    offsetY: (worldHeight * -0.02),
                 },
                 {
                     style_priority: 2,
@@ -1637,6 +1664,8 @@ var cardHoverDetail = $Box {
         "children.1.children.1.children.0.rawText": "description",
         "children.1.children.1.children.0.effects": "effects",
         "children.1.children.1.children.1.children.1.children.0.rawText": "flavorText",
+        //maybe add a template for all actors that need the glow effect
+
     },
     width: cardHoverDetailTotalWidth,
 } children [
@@ -1720,6 +1749,27 @@ var cardHoverDetail = $Box {
 //                tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
 //            ],
 
+        },
+        $Box {
+            zIndex: -10,
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    background: "hover_detail_big_background_glow",
+                    height: (cardHoverDetailMainWidth / 1.2 * 1.3)#points,
+                    width: (cardHoverDetailMainWidth * 1.3)#points,
+                    offsetX: (cardHoverDetailExtrasWidth - cardHoverDetailMainWidth * (0.15)),
+                    offsetY: (cardHoverDetailMainWidth / 1.2 * (0.15)),
+                    visible: false,
+                    touchable: touchable.disabled,
+                },
+                {
+                    visible: true,
+                    style_priority: 2,
+                    style_condition: state("showHoverDetailGlow"),
+                }
+            ],
         },
     ]
 ];
