@@ -693,6 +693,11 @@ textures: [
         useMipMaps: true,
     },
     {
+        name: "collection_background",
+        file: "textures/card_collection/collection_bg.png",
+        useMipMaps: true,
+    },
+    {
         name: "chooseCard_cardsBackground",
         file: "textures/events/choose_card/cards_background.png"
     },
