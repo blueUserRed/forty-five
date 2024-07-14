@@ -546,7 +546,6 @@ cardCollection: $Box {
     } children [
         $Box {
             zIndex:200,
-            debug:true,
             onClick: "prevPage",
             styles: [
                 {
@@ -554,9 +553,9 @@ cardCollection: $Box {
                     background: "collection_prev",
                     width: (worldWidth * 0.05)#points,
                     height: (worldHeight * 0.31)#points,
-                    touchable: touchable.enabled, //TODO offsetX after correct background
-                    offsetX: (worldWidth * 0.01),
-                    offsetY: (worldHeight * -0.02),
+                    touchable: touchable.enabled,
+//                    offsetX: (worldWidth * 0.01),
+//                    offsetY: (worldHeight * -0.02),
                 },
                 {
                     style_priority: 2,
@@ -566,10 +565,9 @@ cardCollection: $Box {
             ],
         },
         $Box {
-            zIndex:100,
+            zIndex:1,
             styles: [
                 {
-                    background: "collection_background",
                     width: (worldWidth * 0.7)#points,
                     height: (worldHeight * 0.925)#points,
                     flexDirection: flexDirection.column,
@@ -578,6 +576,16 @@ cardCollection: $Box {
                 }
             ],
         } children [
+            $Box { //background needs to be different because the images are cut terribly
+                styles: [
+                    {
+                        background: "collection_background",
+                        positionType: positionType.absolute,
+                        width: (103.5)#percent,
+                        height: (94.5)#percent,
+                    }
+                ],
+            },
             $Box {
                 styles: [
                     {
@@ -663,7 +671,6 @@ cardCollection: $Box {
             },
         ],
         $Box {
-            debug:true,
             zIndex:200,
             onClick: "nextPage",
             styles: [
@@ -672,9 +679,9 @@ cardCollection: $Box {
                     background: "collection_next",
                     width: (worldWidth * 0.05)#points,
                     height: (worldHeight * 0.31)#points,
-                    touchable: touchable.enabled, //TODO offsetX after correct background
-                    offsetX: (worldWidth * -0.013),
-                    offsetY: (worldHeight * -0.02),
+                    touchable: touchable.enabled,
+//                    offsetX: (worldWidth * -0.013),
+//                    offsetY: (worldHeight * -0.02),
                 },
                 {
                     style_priority: 2,
