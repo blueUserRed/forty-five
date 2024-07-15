@@ -27,11 +27,14 @@ object PermaSaveState {
 
     private var currentRandom: Long = 0
 
-    var collection: List<String> = mutableListOf()
+    private var _collection: MutableSet<String> = mutableSetOf()
         set(value) {
             field = value
             saveFileDirty = true
         }
+
+    val collection: Set<String>
+        get() = _collection.toList().toSet()
 
     var playerHasCompletedTutorial: Boolean = false
         set(value) {
@@ -79,7 +82,10 @@ object PermaSaveState {
 
         val version = (obj as? OnjObject)?.getOr<Long?>("version", null)?.toInt()
         if (version?.equals(permaSaveStateVersion)?.not() ?: true) {
-            FortyFiveLogger.warn(logTag, "incompatible perma_savefile found: version is $version; expected: $permaSaveStateVersion")
+            FortyFiveLogger.warn(
+                logTag,
+                "incompatible perma_savefile found: version is $version; expected: $permaSaveStateVersion"
+            )
             copyDefaultFile()
             obj = OnjParser.parseFile(file)
         }
@@ -96,7 +102,7 @@ object PermaSaveState {
 
         currentRandom = obj.get<Long?>("lastRandom") ?: Random.nextLong()
         playerHasCompletedTutorial = obj.get<Boolean>("playerHasCompletedTutorial")
-        collection = obj.get<OnjArray>("collection").value.map { it.value as String }
+        _collection = obj.get<OnjArray>("collection").value.map { it.value as String }.toMutableSet()
         playerFoughtMultipleEnemies = obj.get<Boolean>("playerFoughtMultipleEnemies")
         hasSeenInDevPopup = obj.getOr("hasSeenInDevPopup", false)
         _visitedAreas = obj.get<OnjArray>("visitedAreas").value.map { it.value as String }.toMutableSet()
@@ -110,12 +116,16 @@ object PermaSaveState {
         _visitedAreas.add(area)
     }
 
+    fun addCard(cardName: String) {
+        if (_collection.add(cardName)) saveFileDirty = true
+    }
+
     fun write() {
         if (!saveFileDirty) return
         val obj = buildOnjObject {
             "version" with permaSaveStateVersion
             "lastRandom" with currentRandom
-            "collection" with collection
+            "collection" with _collection
             "playerHasCompletedTutorial" with playerHasCompletedTutorial
             "visitedAreas" with _visitedAreas
             "playerFoughtMultipleEnemies" with playerFoughtMultipleEnemies
