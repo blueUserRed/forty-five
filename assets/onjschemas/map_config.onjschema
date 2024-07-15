@@ -32,13 +32,6 @@ var decoration = {
     animated: boolean,
 };
 
-var additionalEventDefinition = {
-    nodeTexture: string,
-    event: $MapEvent,
-    offset: int[2],
-    line: int,
-};
-
 $MapGenerator {
 
     $ThreeLine {
@@ -63,7 +56,12 @@ $MapGenerator {
             nodeTexture: string,
             event: $MapEvent,
         },
-        events: additionalEventDefinition[],
+        events: {
+            nodeTexture: string,
+            event: $MapEvent,
+            offset: int[2],
+            line: int,
+        }[],
         nodeProtectedArea: float,
         decorations: decoration[]
     }
@@ -73,6 +71,21 @@ $MapGenerator {
         seed: int,
         biome: string,
         nodeProtectedArea: float,
+        decorations: decoration[],
+        circles: {
+            radius: float,
+            numNodes: int,
+            angleVariance: float,
+        }[],
+        horizontalExtension: float,
+        verticalExtension: float,
+        events: {
+            event: $MapEvent,
+            nodeTexture: string,
+            circle?: int?,
+            weight: int,
+            fixedAmount?: int?,
+        }[]
     }
 
 }

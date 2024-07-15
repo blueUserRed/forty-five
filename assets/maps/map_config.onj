@@ -334,9 +334,52 @@ var roadBetweenSalemAndSpire = $Radial {
 //    startArea: "salem",
 //    endArea: "spire_outpost",
     nodeProtectedArea: 10.0,
-//    altLinesOffset: 80.0,
-//    decorations: magentaMountainsDecorations,
-//    ...mapSharedConfig
+    decorations: [],
+    circles: [
+        {
+            radius: 20.0,
+            numNodes: 3,
+            angleVariance: 0.002,
+        },
+        {
+            radius: 40.0,
+            numNodes: 6,
+            angleVariance: 0.002,
+        },
+        {
+            radius: 60.0,
+            numNodes: 9,
+            angleVariance: 0.002,
+        },
+    ],
+    horizontalExtension: 80.0,
+    verticalExtension: 50.0,
+    events: [
+        {
+            event: $EncounterMapEvent {
+                currentlyBlocks: true,
+                canBeStarted: true,
+                isCompleted: false,
+                encounterIndex: 0,
+                distanceToEnd: -1,
+            },
+            nodeTexture: "map_node_fight",
+            weight: 100,
+        },
+        {
+            event: $HealOrMaxHPEvent {
+                seed: null,
+                healRange: [8, 14],
+                maxHPRange: [0, 0],
+                currentlyBlocks: false,
+                canBeStarted: true,
+                isCompleted: false,
+            },
+            circle: 2,
+            nodeTexture: "map_node_heal",
+            weight: 150
+        }
+    ]
 };
 
 generatorConfig: {
