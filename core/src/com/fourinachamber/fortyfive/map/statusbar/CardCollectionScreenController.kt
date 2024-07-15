@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
@@ -94,7 +95,7 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
         val parents = cardsParentWidget.children.filterIsInstance<CustomFlexBox>()
         for (i in (0 until (min(parents.size, _allCards.size - curPage * parents.size)))) {
             val c = _allCards[i + curPage * parents.size]
-            if (c.name in SaveState.cards)      //TODO this if condition when the cards are correctly saved
+            if (c.name in PermaSaveState.collection)
                 screen.screenBuilder.addDataToWidgetFromTemplate(
                     "card_collection_slot_card",
                     mapOf(),
