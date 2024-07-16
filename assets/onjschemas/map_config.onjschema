@@ -32,26 +32,29 @@ var decoration = {
     animated: boolean,
 };
 
+var mapGeneratorSharedKeys = {
+    name: string,
+    seed: int,
+    progress: float[2],
+    biome: string,
+    startArea: string,
+    exitNodeTexture: string,
+    horizontalExtension: float,
+    verticalExtension: float,
+    locationSignProtectedAreaWidth: float,
+    locationSignProtectedAreaHeight: float,
+};
+
 $MapGenerator {
 
     $ThreeLine {
-        name: string,
-        seed: int,
-        progress: float[2],
-        biome: string,
-        startArea: string,
         endArea: string,
         roadLength: float,
-        exitNodeTexture: string,
         mainLineNodes: int,
         altLinesPadding: int[2],
         altLinesOffset: float,
         varianceX: float,
         varianceY: float,
-        horizontalExtension: float,
-        verticalExtension: float,
-        locationSignProtectedAreaWidth: float,
-        locationSignProtectedAreaHeight: float,
         mainEvent: {
             nodeTexture: string,
             event: $MapEvent,
@@ -62,30 +65,25 @@ $MapGenerator {
             offset: int[2],
             line: int,
         }[],
-        nodeProtectedArea: float,
-        decorations: decoration[]
+        decorations: decoration[],
+        ...mapGeneratorSharedKeys
     }
 
     $Radial {
-        name: string,
-        seed: int,
-        biome: string,
-        nodeProtectedArea: float,
         decorations: decoration[],
         circles: {
             radius: float,
             numNodes: int,
             angleVariance: float,
         }[],
-        horizontalExtension: float,
-        verticalExtension: float,
         events: {
             event: $MapEvent,
             nodeTexture: string,
             circle?: int?,
             weight: int,
             fixedAmount?: int?,
-        }[]
+        }[],
+        ...mapGeneratorSharedKeys
     }
 
 }

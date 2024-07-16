@@ -123,6 +123,12 @@ abstract class BaseMapGenerator {
         nodeColliders.add(Rectangle(x - halfWidth, y - halfWidth, width, width))
     }
 
+    protected fun setupExitNode(node: MapNodeBuilder, area: String) {
+        node.event = EnterMapMapEvent(area)
+        node.imageName = area
+        node.nodeTexture = data.exitNodeTexture
+    }
+
     protected fun connectNodes(node1: MapNodeBuilder, node2: MapNodeBuilder) {
         node1.connect(node2)
         lineColliders.add(Line2D(Vector2(node1.x, node1.y), Vector2(node2.x, node2.y)))
@@ -131,6 +137,11 @@ abstract class BaseMapGenerator {
     interface BaseMapGeneratorData {
         val seed: Long
         val nodeProtectedArea: Float
+        val locationSignProtectedAreaWidth: Float
+        val locationSignProtectedAreaHeight: Float
+        val startArea: String
+        val exitNodeTexture: String
+        val progress: ClosedFloatingPointRange<Float>
     }
 
     data class MapGeneratorDecoration(

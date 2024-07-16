@@ -39,7 +39,7 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
             animatedDecorations = genAnimatedDecorations,
             isArea = false,
             biome = data.biome,
-            progress = 0f..10f,
+            progress = data.progress,
             tutorialText = mutableListOf(),
             scrollable = true,
             camPosOffset = Vector2(0f, 0f)
@@ -155,6 +155,11 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
         val verticalExtension: Float,
         val decorations: List<MapGeneratorDecoration>,
         val events: List<RadialMapGeneratorEventSpawner>,
+        override val locationSignProtectedAreaWidth: Float,
+        override val locationSignProtectedAreaHeight: Float,
+        override val startArea: String,
+        override val exitNodeTexture: String,
+        override val progress: ClosedFloatingPointRange<Float>,
     ) : BaseMapGeneratorData {
 
         companion object {
@@ -165,6 +170,11 @@ class RadialMapGenerator(val data: RadialMapGeneratorData) : BaseMapGenerator() 
                 biome = onj.get<String>("biome"),
                 horizontalExtension = onj.get<Double>("horizontalExtension").toFloat(),
                 verticalExtension = onj.get<Double>("verticalExtension").toFloat(),
+                locationSignProtectedAreaWidth = onj.get<Double>("locationSignProtectedAreaWidth").toFloat(),
+                locationSignProtectedAreaHeight = onj.get<Double>("locationSignProtectedAreaHeight").toFloat(),
+                startArea = onj.get<String>("startArea"),
+                exitNodeTexture = onj.get<String>("exitNodeTexture"),
+                progress = onj.get<OnjArray>("progress").toFloatRange(),
                 circles = onj
                     .get<OnjArray>("circles")
                     .value

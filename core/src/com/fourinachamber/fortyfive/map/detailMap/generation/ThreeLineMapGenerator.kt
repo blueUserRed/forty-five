@@ -17,10 +17,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         setup(name, data)
 
         val startNode = newNode(x = 0f, y = 0f)
-        startNode.event = EnterMapMapEvent(data.startArea)
-        startNode.imageName = data.startArea
+        setupExitNode(startNode, data.startArea)
         startNode.imagePos = MapNode.ImagePosition.LEFT
-        startNode.nodeTexture = data.exitNodeTexture
         val startSignBounds = Rectangle(
             -data.locationSignProtectedAreaWidth,
             -data.locationSignProtectedAreaHeight / 2,
@@ -30,10 +28,8 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
         addNodeCollider(startSignBounds)
 
         val endNode = newNode(x = data.roadLength, y = 0f)
-        endNode.event = EnterMapMapEvent(data.endArea)
-        endNode.imageName = data.endArea
+        setupExitNode(endNode, data.endArea)
         endNode.imagePos = MapNode.ImagePosition.RIGHT
-        endNode.nodeTexture = data.exitNodeTexture
         val endSignBounds = Rectangle(
             data.roadLength,
             -data.locationSignProtectedAreaHeight / 2,
@@ -160,21 +156,21 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
     data class ThreeLineMapGeneratorData(
         override val seed: Long,
         val biome: String,
-        val progress: ClosedFloatingPointRange<Float>,
-        val exitNodeTexture: String,
+        override val progress: ClosedFloatingPointRange<Float>,
+        override val exitNodeTexture: String,
         val roadLength: Float,
         val mainLineNodes: Int,
         val altLinesPadding: IntRange,
         val altLinesOffset: Float,
         val varianceX: Float,
         val varianceY: Float,
-        val startArea: String,
+        override val startArea: String,
         val endArea: String,
         val horizontalExtension: Float,
         val verticalExtension: Float,
         override val nodeProtectedArea: Float,
-        val locationSignProtectedAreaWidth: Float,
-        val locationSignProtectedAreaHeight: Float,
+        override val locationSignProtectedAreaWidth: Float,
+        override val locationSignProtectedAreaHeight: Float,
         val mainEvent: Pair<String, () -> MapEvent>,
         val events: List<ThreeLineMapGeneratorEventSpawner>,
         val decorations: List<MapGeneratorDecoration>,
