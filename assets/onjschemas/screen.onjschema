@@ -94,6 +94,7 @@ $Widget {
         enableTransform?: boolean,
         hasHoverDetail?: boolean,
         hoverText?: string,
+        hoverDetailActor?: string,
         ...widgetSharedKeys
     }
 
@@ -489,6 +490,10 @@ $ScreenController {
 
     $BiomeBackgroundScreenController {
         useSecondary: boolean,
+    }
+
+    $CardCollectionScreenController {
+        cardsFile: string,
     }
 
     $DraftScreenController { }
