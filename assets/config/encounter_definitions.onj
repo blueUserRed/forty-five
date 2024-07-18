@@ -250,7 +250,7 @@ encounter: [
             "Outlaw_lvl1_alone"
         ],
         encounterModifier: [
-            "Moist", "Sacrifice"
+            "Moist", "Confused"
         ],
         biomes: [
             "wasteland", "bewitched_forest"
