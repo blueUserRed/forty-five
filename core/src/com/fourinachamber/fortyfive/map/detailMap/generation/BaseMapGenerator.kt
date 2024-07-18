@@ -21,7 +21,8 @@ abstract class BaseMapGenerator {
     private lateinit var data: BaseMapGeneratorData
     private lateinit var name: String
 
-    private lateinit var bounds: Rectangle
+    protected lateinit var bounds: Rectangle
+        private set
 
     private val nodeColliders: MutableList<Rectangle> = mutableListOf()
     private val decorationColliders: MutableList<Rectangle> = mutableListOf()
@@ -107,6 +108,35 @@ abstract class BaseMapGenerator {
             false,
             instances
         )
+    }
+
+    protected fun doNodeImage(node: MapNodeBuilder, imagePosition: MapNode.ImagePosition) {
+        node.imagePos = imagePosition
+        val width = data.locationSignProtectedAreaWidth
+        val height = data.locationSignProtectedAreaHeight
+        val bounds = when (imagePosition) {
+            MapNode.ImagePosition.LEFT -> Rectangle(
+                node.x - width,
+                node.y - height / 2f,
+                width, height
+            )
+            MapNode.ImagePosition.RIGHT -> Rectangle(
+                node.x,
+                node.y - height / 2f,
+                width, height
+            )
+            MapNode.ImagePosition.UP -> Rectangle(
+                node.x - width / 2f,
+                node.y,
+                width, height
+            )
+            MapNode.ImagePosition.DOWN -> Rectangle(
+                node.x - width / 2f,
+                node.y - height,
+                width, height
+            )
+        }
+        addNodeCollider(bounds)
     }
 
     protected fun newNode(
