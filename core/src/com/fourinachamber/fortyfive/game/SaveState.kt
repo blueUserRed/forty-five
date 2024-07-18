@@ -10,6 +10,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.OnjArray
 import onj.value.OnjObject
+import kotlin.math.log
 
 /**
  * stores data about the current run and can read/write it to a file
@@ -195,8 +196,13 @@ object SaveState {
             ?.value
             ?.map { it.value as String }
             ?.toMutableList()
-            ?: PermaSaveState.collection.toMutableList()
+            ?: run {
+                FortyFiveLogger.warn(logTag, "no cards array in savefile, falling back to some default bullets")
+                mutableListOf("bullet", "bullet", "bullet", "bigBullet") //this should NEVER happen
+            }
         FortyFiveLogger.debug(logTag, "cards: $_cards")
+
+        _cards.forEach {PermaSaveState.addCard(it)}
 
         _decks.clear()
         obj.get<OnjArray>("decks").value.forEach { _decks.add(Deck.getFromOnj(it as OnjObject)) }
@@ -282,12 +288,13 @@ object SaveState {
     }
 
     fun buyCard(card: String) {
+        PermaSaveState.addCard(card)
         _cards.add(card)
         savefileDirty = true
     }
 
     fun extract() {
-        PermaSaveState.collection = _cards.toMutableList()
+//        PermaSaveState.collection = _cards.toMutableList()
     }
 
     private fun copyDefaultFile() {

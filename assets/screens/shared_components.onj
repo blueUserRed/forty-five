@@ -133,19 +133,19 @@ var settingsBox = $Box {
             },
 
             $Selector {
-              styles: [
-                  {
-                      height: 40#points,
-                      width: 250#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              arrowTexture: "common_symbol_arrow",
-              arrowWidth: 20.0,
-              arrowHeight: 20.0,
-              bindTo: "enableScreenShake",
-              font: "red_wing",
-              fontScale: 0.8,
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "enableScreenShake",
+                font: "red_wing",
+                fontScale: 0.8,
             }
         ],
 
@@ -176,19 +176,19 @@ var settingsBox = $Box {
             },
 
             $Selector {
-              styles: [
-                  {
-                      height: 40#points,
-                      width: 250#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              arrowTexture: "common_symbol_arrow",
-              arrowWidth: 20.0,
-              arrowHeight: 20.0,
-              bindTo: "startScreen",
-              font: "red_wing",
-              fontScale: 0.8,
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "startScreen",
+                font: "red_wing",
+                fontScale: 0.8,
             }
         ],
 
@@ -219,19 +219,19 @@ var settingsBox = $Box {
             },
 
             $Selector {
-              styles: [
-                  {
-                      height: 40#points,
-                      width: 250#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              arrowTexture: "common_symbol_arrow",
-              arrowWidth: 20.0,
-              arrowHeight: 20.0,
-              bindTo: "disableRt",
-              font: "red_wing",
-              fontScale: 0.8,
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "disableRt",
+                font: "red_wing",
+                fontScale: 0.8,
             }
         ],
 
@@ -276,20 +276,20 @@ var settingsBox = $Box {
             },
 
             $Slider {
-              styles: [
-                  {
-                      height: 20#points,
-                      width: 200#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              max: 1.0,
-              min: 0.0,
-              bindTo: "masterVolume",
-              sliderBackground: "common_slider_background",
-              handleRadius: 7.0,
-              handleColor: color.lightBrown,
-              sliderHeight: 10.0,
+                styles: [
+                    {
+                        height: 20#points,
+                        width: 200#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                max: 1.0,
+                min: 0.0,
+                bindTo: "masterVolume",
+                sliderBackground: "common_slider_background",
+                handleRadius: 7.0,
+                handleColor: color.lightBrown,
+                sliderHeight: 10.0,
             }
         ],
 
@@ -320,20 +320,20 @@ var settingsBox = $Box {
             },
 
             $Slider {
-              styles: [
-                  {
-                      height: 20#points,
-                      width: 200#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              max: 1.0,
-              min: 0.0,
-              bindTo: "musicVolume",
-              sliderBackground: "common_slider_background",
-              handleRadius: 7.0,
-              handleColor: color.lightBrown,
-              sliderHeight: 10.0,
+                styles: [
+                    {
+                        height: 20#points,
+                        width: 200#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                max: 1.0,
+                min: 0.0,
+                bindTo: "musicVolume",
+                sliderBackground: "common_slider_background",
+                handleRadius: 7.0,
+                handleColor: color.lightBrown,
+                sliderHeight: 10.0,
             }
         ],
 
@@ -364,20 +364,20 @@ var settingsBox = $Box {
             },
 
             $Slider {
-              styles: [
-                  {
-                      height: 20#points,
-                      width: 200#points,
-                      positionRight: 40#points,
-                  }
-              ],
-              max: 1.0,
-              min: 0.0,
-              bindTo: "soundEffectsVolume",
-              sliderBackground: "common_slider_background",
-              handleRadius: 7.0,
-              handleColor: color.lightBrown,
-              sliderHeight: 10.0,
+                styles: [
+                    {
+                        height: 20#points,
+                        width: 200#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                max: 1.0,
+                min: 0.0,
+                bindTo: "soundEffectsVolume",
+                sliderBackground: "common_slider_background",
+                handleRadius: 7.0,
+                handleColor: color.lightBrown,
+                sliderHeight: 10.0,
             }
         ]
     ]
@@ -411,6 +411,32 @@ generalHoverDetailTemplate: $Box {
     $Box {
         styles: [
             {
+                style_priority: 1,
+                positionType: positionType.absolute,
+                positionTop: (200 * -0.15)#points,
+                positionLeft: (200 * -0.15)#points,
+                width: (200 * 1.3)#points,
+                height: (200 * 1.3)#points,
+                background: "hover_detail_big_background_glow",
+                visible: false,
+                alpha: 0.0,
+            },
+            {
+                visible: true,
+                style_priority: 2,
+                style_condition: state("showHoverDetailGlow"),
+            },
+            {
+                style_priority: 3,
+                style_condition: state("showHoverDetail"),
+                alpha: 1.0,
+                style_animation: hoverDetailStyleAnimation,
+            }
+        ]
+    },
+    $Box {
+        styles: [
+            {
                 background: "hover_detail_big_background",
                 height: 200#points,
                 width: 200#points,
@@ -430,6 +456,7 @@ generalHoverDetailTemplate: $Box {
             }
         ],
         //alpha: 0.0,
+
         height: 200.0,
         width: 200.0,
 
@@ -462,6 +489,8 @@ var cardHoverDetailUsedAssetsDefinition = [
     "hover_detail_small_background",
     "forty_white_texture",
     "hover_detail_more_info",
+    "hover_detail_big_background_glow",
+    "hover_detail_small_background_glow",
     "card_symbol_text_a_equals", "card_symbol_text_i_equals", "card_symbol_text_t_equals",
     ...revolverSlotIconAssets
 ];
@@ -469,6 +498,247 @@ var cardHoverDetailUsedAssetsDefinition = [
 cardHoverDetailUsedAssets: [
     ...cardHoverDetailUsedAssetsDefinition,
 ],
+
+cardCollectionTemplates: [
+    $Box {
+        template_keys: {
+            "styles.0.background": "background",
+            "hoverText": "hoverText",
+        },
+        template_name: "card_collection_slot",
+        hasHoverDetail: true,
+        //        hoverDetailActor:"card_hover_detail",
+
+        hoverText: "Testing random shit aus hihihi",
+        styles: [
+            {
+                background: "",
+                positionType: positionType.absolute,
+                width: 100.0#percent,
+                height: 100.0#percent,
+            }
+        ]
+    },
+    $Box {
+        template_keys: {
+        },
+        template_name: "card_collection_slot_card",
+        styles: [
+            {
+                positionType: positionType.absolute,
+                width: 100.0#percent,
+                height: 100.0#percent,
+            }
+        ]
+    },
+    $Box {
+        template_keys: {
+        },
+        template_name: "card_collection_slot_glow_background",
+        styles: [
+            {
+                background: "collection_slot_glow",
+                positionType: positionType.absolute,
+                positionTop: (-8)#percent,
+                positionLeft: (-8)#percent,
+                width: 116.0#percent,
+                height: 116.0#percent,
+            }
+        ]
+    },
+],
+
+cardCollection: $Box {
+    name: "card_collection_widget",
+    visible: false,
+    styles: [
+        {
+            positionType: positionType.absolute,
+            width: worldWidth#points,
+            height: worldHeight#points,
+            alignItems: align.center,
+        }
+    ],
+    zIndex: 99,
+} children [
+    $Box {
+        styles: [
+            {
+                flexDirection: flexDirection.row,
+                justifyContent: justify.center,
+                alignItems: align.center,
+                width: (worldWidth * 0.8)#points,
+                height: (worldHeight * 0.925)#points,
+                positionTop: (worldHeight * 0.1361)#points,
+                touchable: touchable.enabled,
+            }
+        ],
+    } children [
+        $Box {
+            zIndex: 200,
+            onClick: "prevPage",
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "collection_prev",
+                    width: (worldWidth * 0.06)#points,
+                    height: (worldHeight * 0.31)#points,
+                    touchable: touchable.enabled,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    background: "collection_prev_hover",
+                }
+            ],
+        },
+        $Box {
+            zIndex: 1,
+            styles: [
+                {
+                    width: (worldWidth * 0.7)#points,
+                    height: (worldHeight * 0.925)#points,
+                    flexDirection: flexDirection.column,
+                    justifyContent: justify.spaceAround,
+                    alignItems: align.center,
+                }
+            ],
+        } children [
+            $Box { //background needs to be different because the images are cut terribly
+
+                styles: [
+                    {
+                        background: "collection_background",
+                        positionType: positionType.absolute,
+                        width: (103.5)#percent,
+                        height: (94.5)#percent,
+                    }
+                ],
+            },
+            $Box {
+                styles: [
+                    {
+                        width: (worldWidth * 0.61)#points,
+                        height: (worldHeight * 0.1)#points,
+                        flexDirection: flexDirection.row,
+                        justifyContent: justify.spaceBetween,
+                        alignItems: align.center,
+                        offsetY: -worldHeight * 0.03,
+                    }
+                ],
+            } children [
+                $Box {
+                    styles: [
+                        {
+                            width: (worldWidth * 0.22)#points,
+                            height: (worldHeight * 0.1)#points,
+                            flexDirection: flexDirection.row,
+                            justifyContent: justify.spaceBetween,
+                            alignItems: align.center,
+                        }
+                    ]
+                } children [
+                    $Box {
+                        styles: [
+                            {
+                                background: "collection_icon",
+                                width: (worldHeight * 0.1)#points,
+                                height: (worldHeight * 0.1)#points,
+                            }
+                        ],
+                    },
+                    $Label {
+                        font: "red_wing",
+                        text: "Collection",
+                        fontScale: 2.0,
+                        color: color.forty_white,
+                        align: "center",
+                    }
+                ],
+                $TemplateLabel {
+                    font: "red_wing",
+                    template: "Page {overlay.cardCollection.curPage}/{overlay.cardCollection.totalPages}",
+                    fontScale: 1.5,
+                    color: color.forty_white,
+                    align: "center",
+                }
+            ],
+            $Box {//white line in between
+
+                styles: [
+                    {
+                        background: "forty_white_texture",
+                        width: (worldWidth * 0.61)#points,
+                        height: 3#points,
+                        offsetY: -worldHeight * 0.03,
+                    }
+                ]
+            },
+            $Box {
+                name: "card_collection_cards_parent",
+                styles: [
+                    {
+                        width: (worldWidth * 0.61)#points,
+                        height: (worldWidth * 0.36 + worldHeight * 0.1)#points,
+                        justifyContent: justify.spaceBetween,
+                        flexDirection: flexDirection.row,
+                        flexWrap: wrap.wrap,
+                        marginTop: (worldHeight * 0.015)#points,
+                    }
+                ],
+                children: repeat(15, $Box {
+                    styles: [
+                        {
+                            width: (worldWidth * 0.116)#points,
+                            height: (worldWidth * 0.116)#points,
+                            marginTop: (worldHeight * 0.015)#points,
+                            background: "collection_slot_empty",
+                        }
+                    ],
+                }
+                ),
+            },
+        ],
+        $Box {
+            zIndex: 200,
+            onClick: "nextPage",
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "collection_next",
+                    width: (worldWidth * 0.06)#points,
+                    height: (worldHeight * 0.31)#points,
+                    touchable: touchable.enabled,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: hover(),
+                    background: "collection_next_hover",
+                }
+            ],
+        },
+    ]
+],
+
+//                width: (worldWidth * 0.6)#points,
+//                height: (worldHeight * 1.0)#points,
+//                background: "settings_background",
+//                alignItems: align.center,
+//                justifyContent: justify.center
+
+cardCollectionAssets: [
+    "collection_icon",
+    "collection_next",
+    "collection_next_hover",
+    "collection_prev",
+    "collection_prev_hover",
+    "collection_slot_empty",
+    "collection_slot_glow",
+    "collection_slot_locked",
+    "collection_slot_missing",
+    "collection_background",
+],
+
 
 backpackAssets: [
     "roadgeek_bmp",
@@ -725,7 +995,7 @@ statusbarLeftDefaults: {
                 }
             ],
         },
-    ]
+    ],
 },
 
 statusBarTemplates: [
@@ -1228,7 +1498,8 @@ warningLabelTemplates: [
 ],
 
 warningLabelUsedAssets: [
-    "forty_white_texture", "warning_label_background_red", "warning_label_background_grey", "title_screen_background", "red_wing", "warning_label_close",
+    "forty_white_texture", "warning_label_background_red", "warning_label_background_grey", "title_screen_background",
+    "red_wing", "warning_label_close",
 ],
 
 var cardHoverDetailExtrasWidth = 200.0;
@@ -1256,6 +1527,7 @@ var cardHoverDetailExtra = $Box {
         $Box {
             styles: [
                 {
+                    positionType: positionType.absolute,
                     background: "hover_detail_small_background",
                     height: 110#percent,
                     width: 100#percent,
@@ -1285,7 +1557,28 @@ var cardHoverDetailExtra = $Box {
                     ],
                 },
             ]
-        }
+        },
+        $Box {
+            zIndex:-10,
+            styles: [
+                {
+                    positionType: positionType.absolute,
+                    background: "hover_detail_small_background_glow",
+                    height: (110 * 1.6)#percent,
+                    width: (100 * 1.225)#percent,
+                    positionLeft:(100 * -0.1)#percent,
+                    positionTop:(110 * -0.3)#percent,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.column,
+                    visible:false,
+                },
+                    {
+                    style_priority: 2,
+                    style_condition: state("showHoverDetailGlow"),
+                    visible:true,
+                }
+            ],
+        },
     ],
 };
 var mainCardHoverDetailBox = $Box {
@@ -1375,6 +1668,7 @@ var mainCardHoverDetailBox = $Box {
                     font: "roadgeek_bmp",
                     isDistanceField: false,
                     rawText: "\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"\"I\'m pretty sure this is a Warcrime\"", //Text for testing
+
                     defaults: {
                         font: "roadgeek_bmp",
                         fontScale: 0.5,
@@ -1392,6 +1686,8 @@ var cardHoverDetail = $Box {
         "children.1.children.1.children.0.rawText": "description",
         "children.1.children.1.children.0.effects": "effects",
         "children.1.children.1.children.1.children.1.children.0.rawText": "flavorText",
+        //maybe add a template for all actors that need the glow effect
+
     },
     width: cardHoverDetailTotalWidth,
 } children [
@@ -1475,6 +1771,27 @@ var cardHoverDetail = $Box {
 //                tempCardHoverDetailExtraChild, //TODO fix bug with height if there are too many
 //            ],
 
+        },
+        $Box {
+            zIndex: -10,
+            styles: [
+                {
+                    style_priority: 1,
+                    positionType: positionType.absolute,
+                    background: "hover_detail_big_background_glow",
+                    height: (cardHoverDetailMainWidth / 1.2 * 1.3)#points,
+                    width: (cardHoverDetailMainWidth * 1.3)#points,
+                    offsetX: (cardHoverDetailExtrasWidth - cardHoverDetailMainWidth * (0.15)),
+                    offsetY: (cardHoverDetailMainWidth / 1.2 * (0.15)),
+                    visible: false,
+                    touchable: touchable.disabled,
+                },
+                {
+                    visible: true,
+                    style_priority: 2,
+                    style_condition: state("showHoverDetailGlow"),
+                }
+            ],
         },
     ]
 ];

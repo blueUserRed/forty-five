@@ -36,6 +36,7 @@ import com.fourinachamber.fortyfive.screen.general.customActor.ZIndexActor
 import com.fourinachamber.fortyfive.screen.general.styles.StyleManager
 import com.fourinachamber.fortyfive.screen.general.styles.StyledActor
 import com.fourinachamber.fortyfive.utils.*
+import dev.lyze.flexbox.FlexBox
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import kotlin.math.roundToLong
@@ -295,6 +296,24 @@ open class OnjScreen @MainThreadOnly constructor(
         namedActors.remove(name)
     }
 
+    @MainThreadOnly //I am not sure if it is only main thread, but this is the safer way I guess
+    fun removeActorFromScreen(actor: Actor) {
+        if (actor is Group) {
+            actor.children.forEach { removeActorFromScreen(it) }
+        }
+        if (actor is StyledActor) {
+            actor.styleManager?.let { styleManager ->
+                styleManagers.remove(styleManager)
+                val parent = actor.parent
+                if (parent is FlexBox) {
+                    parent.remove(styleManager.node)
+                }
+            }
+        }
+        actor.remove()
+        //TODO remove from behaviour and dragAndDrop and so on
+    }
+
     fun <T> addOnHoverDetailActor(actor: T) where T : Actor, T : DisplayDetailsOnHoverActor {
         val showHoverDetailLambda = { showHoverDetail(actor, actor, actor.actorTemplate) }
         if (actor is HoverStateActor) {
@@ -319,13 +338,14 @@ open class OnjScreen @MainThreadOnly constructor(
 
     private fun showHoverDetail(actor: Actor, displayDetailActor: DisplayDetailsOnHoverActor, detailTemplate: String) {
         if (!displayDetailActor.isHoverDetailActive) return
+        if (detailTemplate.isBlank()) return
         if (currentHoverDetail != null) hideHoverDetail()
         val detail = screenBuilder.generateFromTemplate(
             detailTemplate,
             displayDetailActor.getHoverDetailData(),
             null,
             this
-        ) ?: throw RuntimeException("hover template '$detailTemplate' is missing")
+        ) ?: throw RuntimeException("hover template '$detailTemplate' does not exist")
         displayDetailActor.detailActor = detail
 
         displayDetailActor.setBoundsOfHoverDetailActor(this)
@@ -471,7 +491,7 @@ open class OnjScreen @MainThreadOnly constructor(
         FortyFiveLogger.fatal(e)
     }
 
-    fun largestRenderTimeInLast15Sec(): Long =  lastRenderTimes.max()
+    fun largestRenderTimeInLast15Sec(): Long = lastRenderTimes.max()
     fun averageRenderTimeInLast15Sec(): Long = lastRenderTimes.average().roundToLong()
 
     fun styleManagerCount(): Int = styleManagers.size
