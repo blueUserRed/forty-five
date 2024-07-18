@@ -916,8 +916,15 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         }
     }
 
-    fun rotateRevolver(rotation: RevolverRotation): Timeline = Timeline.timeline {
-        var newRotation = modifiers(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
+    fun rotateRevolver(
+        rotation: RevolverRotation,
+        ignoreEncounterModifiers: Boolean = false
+    ): Timeline = Timeline.timeline {
+        var newRotation = if (ignoreEncounterModifiers) {
+            rotation
+        } else {
+            modifiers(rotation) { modifier, cur -> modifier.modifyRevolverRotation(cur) }
+        }
         playerStatusEffects.forEach { newRotation = it.modifyRevolverRotation(newRotation) }
         include(revolver.rotate(newRotation))
         action {
