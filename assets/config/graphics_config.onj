@@ -95,7 +95,12 @@ encounterModifiers: {
         icon: "encounter_modifier_steel_nerves",
         displayName: "Sorry Not Sorry",
         description: "At the beginning of every turn, return a random Bullet back to your hand."
-    }
+    },
+    confused: {
+        icon: "encounter_modifier_steel_nerves",
+        displayName: "Confused",
+        description: "The revolver rotates when a card is placed down, not when it is shot"
+    },
 },
 
 encounterModifierAssets: [

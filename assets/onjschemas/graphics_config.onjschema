@@ -43,6 +43,7 @@ encounterModifiers: {
     bulletSkipping: encounterModifierConfig,
     sacrifice: encounterModifierConfig,
     sorryNotSorry: encounterModifierConfig,
+    confused: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],
