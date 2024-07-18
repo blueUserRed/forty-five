@@ -9,6 +9,7 @@ import com.fourinachamber.fortyfive.map.events.dialog.DialogScreenController
 import com.fourinachamber.fortyfive.map.events.heals.AddMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.heals.HealOrMaxHPScreenController
 import com.fourinachamber.fortyfive.map.events.shop.ShopScreenController
+import com.fourinachamber.fortyfive.map.statusbar.CardCollectionScreenController
 import com.fourinachamber.fortyfive.screen.gameComponents.*
 import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
@@ -32,6 +33,7 @@ object ScreenControllerFactory {
         "BiomeBackgroundScreenController" to { onj -> BiomeBackgroundScreenController(onj) },
         "DraftScreenController" to { DraftScreenController() },
         "FadeToBlackScreenController" to { onj -> FadeToBlackScreenController(onj) },
+        "CardCollectionScreenController" to { onj -> CardCollectionScreenController(onj) },
     )
 
     /**

@@ -107,6 +107,7 @@ class Card(
     val passiveEffects: List<PassiveEffect>,
     val rotationDirection: RevolverRotation,
     val tags: List<String>,
+    val lockedDescription: String?,
     isDark: Boolean,
     val forbiddenSlots: List<Int>,
     val additionalHoverInfos: List<String>,
@@ -616,7 +617,8 @@ class Card(
                     ?: listOf(),
                 screen = onjScreen,
                 isSaved = isSaved,
-                enableHoverDetails = enableHoverDetails
+                enableHoverDetails = enableHoverDetails,
+                lockedDescription = onj.get<String?>("lockedDescription")
             )
 
             card.effects.forEach { it.card = card }
