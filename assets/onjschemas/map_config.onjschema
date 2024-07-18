@@ -43,6 +43,7 @@ var mapGeneratorSharedKeys = {
     verticalExtension: float,
     locationSignProtectedAreaWidth: float,
     locationSignProtectedAreaHeight: float,
+    nodeProtectedArea: float,
 };
 
 $MapGenerator {
@@ -71,6 +72,8 @@ $MapGenerator {
 
     $Radial {
         decorations: decoration[],
+        endArea: string,
+        exitNodeCircle: int,
         circles: {
             radius: float,
             numNodes: int,

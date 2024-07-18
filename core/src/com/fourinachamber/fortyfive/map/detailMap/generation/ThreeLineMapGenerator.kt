@@ -18,25 +18,11 @@ class ThreeLineMapGenerator(private val data: ThreeLineMapGeneratorData) : BaseM
 
         val startNode = newNode(x = 0f, y = 0f)
         setupExitNode(startNode, data.startArea)
-        startNode.imagePos = MapNode.ImagePosition.LEFT
-        val startSignBounds = Rectangle(
-            -data.locationSignProtectedAreaWidth,
-            -data.locationSignProtectedAreaHeight / 2,
-            data.locationSignProtectedAreaWidth,
-            data.locationSignProtectedAreaHeight,
-        )
-        addNodeCollider(startSignBounds)
+        doNodeImage(startNode, MapNode.ImagePosition.LEFT)
 
         val endNode = newNode(x = data.roadLength, y = 0f)
         setupExitNode(endNode, data.endArea)
-        endNode.imagePos = MapNode.ImagePosition.RIGHT
-        val endSignBounds = Rectangle(
-            data.roadLength,
-            -data.locationSignProtectedAreaHeight / 2,
-            data.locationSignProtectedAreaWidth,
-            data.locationSignProtectedAreaHeight,
-        )
-        addNodeCollider(endSignBounds)
+        doNodeImage(endNode, MapNode.ImagePosition.RIGHT)
 
         val mainLine = Line(startNode, endNode, data.mainLineNodes, 0f)
         mainLine.generate()
