@@ -41,6 +41,7 @@ import kotlin.math.min
  * the Controller for the main game screen
  */
 class GameController(onj: OnjNamedObject) : ScreenController() {
+    //TODO marvin, check for screen state "inStatusbarOverlay" (StatusbarWidget.OVERLAY_NAME)
 
     val gameDirector = GameDirector(this)
 

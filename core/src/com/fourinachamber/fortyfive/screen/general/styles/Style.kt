@@ -1,8 +1,8 @@
 package com.fourinachamber.fortyfive.screen.general.styles
 
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.MathUtils.sin
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
@@ -14,6 +14,7 @@ import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import kotlin.math.sin
 import kotlin.reflect.KClass
+import kotlin.time.measureTime
 
 interface StyledActor : HoverStateActor {
 
@@ -59,7 +60,11 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
     fun addInstruction(propertyName: String, instruction: StyleInstruction<Any>, dataTypeClass: KClass<*>) {
         val property = styleProperties
             .find { it.name == propertyName && dataTypeClass == it.dataTypeClass }
-            ?: throw RuntimeException("no style property $propertyName with type ${dataTypeClass.simpleName}")
+        if (property == null){
+            //TODO ask marvin if this should log something or not... :)
+            FortyFiveLogger.warn("StyleInitialization","no style property $propertyName with type ${dataTypeClass.simpleName} for ${actor.javaClass.simpleName}")
+            return
+        }
         @Suppress("UNCHECKED_CAST") // this should be safe (I hope)
         property as StyleProperty<*, Any>
         property.addInstruction(instruction)
