@@ -224,9 +224,9 @@ fun Vector2.toArray(): Array<Float> = arrayOf(x, y)
 
 fun OnjArray.toVector2(): Vector2 = Vector2(get<Double>(0).toFloat(), get<Double>(1).toFloat())
 
-fun <T> Collection<Pair<Int, T>>.weightedRandom(): T {
+fun <T> Collection<Pair<Int, T>>.weightedRandom(random: Random = Random): T {
     val total = this.sumOf { abs(it.first) }
-    val choice = (0..total).random()
+    val choice = (0..total).random(random)
     var acc = 0
     this.forEach { (weight, value) ->
         acc += abs(weight)

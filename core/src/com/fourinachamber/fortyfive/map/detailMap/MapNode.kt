@@ -262,7 +262,7 @@ data class MapNodeBuilder(
 
     fun connect(other: MapNodeBuilder, dir: Direction = Direction.LEFT, addAsNext: Boolean = true): Boolean {
         if (other == this || edgesTo.contains(other)) return false
-        if (edgesTo.size > 3 || other.edgesTo.size > 3) throw IllegalArgumentException("Already to 4 Nodes connect, not anymore possible!")
+//        if (edgesTo.size > 3 || other.edgesTo.size > 3) throw IllegalArgumentException("Already to 4 Nodes connect, not anymore possible!")
         edgesTo.add(other)
         other.edgesTo.add(this)
         if (addAsNext) {
