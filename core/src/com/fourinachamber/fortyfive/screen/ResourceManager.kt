@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.screen
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.MainThreadOnly
@@ -63,18 +64,10 @@ object ResourceManager {
         toGiveBack.giveBack(borrower)
     }
 
-    private const val assetsFile: String = "config/assets.onj"
-
-    private val assetsSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/assets.onjschema").file())
-    }
-
     @MainThreadOnly
     fun init() {
         val resources = mutableListOf<Resource>()
-        val assets = OnjParser.parseFile(Gdx.files.internal(assetsFile).file())
-        assetsSchema.assertMatches(assets)
-        assets as OnjObject
+        val assets = ConfigFileManager.getConfigFile("assets")
 
         assets.get<OnjArray>("textures").value.forEach {
             it as OnjObject

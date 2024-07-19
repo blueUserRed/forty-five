@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardPrototype
 import com.fourinachamber.fortyfive.game.card.Trigger
@@ -266,9 +267,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun initCards() {
-        val onj = OnjParser.parseFile(cardConfigFile)
-        cardsFileSchema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("cardsConfig")
 
         val cards = gameDirector.encounter.forceCards
             ?: encounterContext.forceCards

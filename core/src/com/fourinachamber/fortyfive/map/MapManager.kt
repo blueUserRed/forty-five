@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive.map
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.files.FileHandle
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.GameController
 import com.fourinachamber.fortyfive.game.GameDirector
 import com.fourinachamber.fortyfive.game.SaveState
@@ -70,13 +71,8 @@ object MapManager {
 
     private lateinit var screenPaths: Map<String, String>
 
-    lateinit var npcsOnj: OnjObject
-        private set
-
     fun init() {
-        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
-        mapConfigSchema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("mapConfig")
         mapImages = onj
             .get<OnjArray>("mapImages")
             .value
@@ -106,11 +102,7 @@ object MapManager {
             .get<OnjObject>("screens")
             .value
             .mapValues { (_, value) -> value.value as String }
-        val npcs = OnjParser.parseFile(Gdx.files.internal("maps/events/npcs.onj").file())
-        val npcsSchema =  OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/npcs.onjschema").file())
-        npcsSchema.assertMatches(npcs)
-        npcs as OnjObject
-        npcsOnj = npcs
+        val npcs = ConfigFileManager.getConfigFile("npcConfig")
         npcs
             .get<OnjArray>("npcs")
             .value
@@ -252,9 +244,7 @@ object MapManager {
     }
 
     fun generateMapsSync() {
-        val onj = OnjParser.parseFile(Gdx.files.internal(mapConfigFilePath).file())
-        mapConfigSchema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("mapConfig")
         val generatorConfig = onj.get<OnjObject>("generatorConfig")
         val outputDir = Gdx.files.local(generatorConfig.get<String>("outputDirectory")).file()
         generatorConfig
@@ -277,10 +267,6 @@ object MapManager {
         if (!File(file.parent).exists()) File(file.parent).mkdirs()
         file.createNewFile()
         file.writeText(map.asOnjObject().toMinifiedString())
-    }
-
-    private val mapConfigSchema: OnjSchema by lazy {
-        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/map_config.onjschema").file())
     }
 
     data class MapImageData(

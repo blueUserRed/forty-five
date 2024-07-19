@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.audio.Music
 import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.TimeUtils
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.*
@@ -14,9 +15,6 @@ import onj.value.OnjObject
 import onj.value.OnjValue
 
 object SoundPlayer {
-
-    const val soundsFile: String = "config/sounds.onj"
-    const val soundsSchemaFile: String = "onjschemas/sounds.onjschema"
 
     private lateinit var situations: List<Situation>
     private lateinit var ambientSounds: MutableMap<AmbientSound, Long>
@@ -46,10 +44,7 @@ object SoundPlayer {
     var soundEffectVolume: Float = 1f
 
     fun init() {
-        val onj = OnjParser.parseFile(Gdx.files.internal(soundsFile).file())
-        val schema = OnjSchemaParser.parseFile(Gdx.files.internal(soundsSchemaFile).file())
-        schema.assertMatches(onj)
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("soundConfig")
         situations = onj
             .get<OnjArray>("situations")
             .value

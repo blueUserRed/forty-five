@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.utils
 
 import com.badlogic.gdx.Gdx
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import onj.parser.OnjParser
 import onj.parser.OnjSchemaParser
 import onj.value.OnjArray
@@ -16,16 +17,6 @@ import java.time.format.DateTimeFormatter
  */
 object FortyFiveLogger {
 
-    /**
-     * file containing the config for this logger
-     */
-    const val configFilePath = "logging/log_config.onj"
-
-    /**
-     * file containing the schema for the config file
-     */
-    const val schemaFilePath = "onjschemas/log_config.onjschema"
-
     private lateinit var outputs: List<Pair<PrintStream, Boolean>>
     private var logLevel: LogLevel = LogLevel.DEBUG
 
@@ -39,10 +30,7 @@ object FortyFiveLogger {
      * initializes the logger
      */
     fun init() {
-        val config = OnjParser.parseFile(Gdx.files.internal(configFilePath).file())
-        val schema = OnjSchemaParser.parseFile(Gdx.files.internal(schemaFilePath).file())
-        schema.assertMatches(config)
-        config as OnjObject
+        val config = ConfigFileManager.getConfigFile("logConfig")
 
         outputs = config
             .get<OnjArray>("logTargets")

@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.enemy.Enemy
 import com.fourinachamber.fortyfive.game.enemy.EnemyAction
 import com.fourinachamber.fortyfive.game.enemy.NextEnemyAction
@@ -24,9 +25,7 @@ class GameDirector(private val controller: GameController) {
     lateinit var encounter: Encounter
 
     fun init() {
-        val enemiesOnj = OnjParser.parseFile(Gdx.files.internal("config/enemies.onj").file()) // TODO: read in companion
-        enemiesFileSchema.assertMatches(enemiesOnj)
-        enemiesOnj as OnjObject
+        val enemiesOnj = ConfigFileManager.getConfigFile("enemies")
 
         val enemyPrototypes = Enemy.readEnemies(enemiesOnj.get<OnjArray>("enemies"))
         difficulty = SaveState.currentDifficulty
@@ -119,18 +118,8 @@ class GameDirector(private val controller: GameController) {
         lateinit var encounters: List<Encounter>
             private set
 
-        private val enemiesFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/enemies.onjschema").file())
-        }
-
-        private val encounterDefinitionsSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/encounter_definitions.onjschema").file())
-        }
-
         fun init() {
-            val onj = OnjParser.parseFile(Gdx.files.internal("config/encounter_definitions.onj").file())
-            encounterDefinitionsSchema.assertMatches(onj)
-            onj as OnjObject
+            val onj = ConfigFileManager.getConfigFile("encounterDefinitions")
             encounters = onj
                 .get<OnjArray>("encounter")
                 .value

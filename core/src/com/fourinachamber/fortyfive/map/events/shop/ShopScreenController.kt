@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive.map.events.shop
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Actor
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.game.card.CardActor
@@ -54,13 +55,8 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         addToBackpackWidget = screen.namedActorOrError(addToBackpackWidgetName) as CustomImageActor
         if (context !is ShopMapEvent) throw RuntimeException("context for shopScreenController must be a shopMapEvent")
         this.context = context
-        val shopFile = OnjParser.parseFile(Gdx.files.internal(shopFilePath).file())
-        shopsSchema.assertMatches(shopFile)
-        shopFile as OnjObject
-        val npcsFile = OnjParser.parseFile(Gdx.files.internal(npcsFilePath).file())
-        npcsSchema.assertMatches(npcsFile)
-        npcsFile as OnjObject
-
+        val shopFile = ConfigFileManager.getConfigFile("shopConfig")
+        val npcsFile = ConfigFileManager.getConfigFile("npcConfig")
         val personData = shopFile
             .get<OnjArray>("people")
             .value
@@ -263,16 +259,4 @@ class ShopScreenController(onj: OnjObject) : ScreenController() {
         addToBackpackWidget.leaveActorState("display")
     }
 
-    companion object {
-
-        private const val schemaPathShop: String = "onjschemas/shops.onjschema"
-        private const val schemaPathNpcs: String = "onjschemas/npcs.onjschema"
-
-        val shopsSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPathShop).file())
-        }
-        val npcsSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal(schemaPathNpcs).file())
-        }
-    }
 }

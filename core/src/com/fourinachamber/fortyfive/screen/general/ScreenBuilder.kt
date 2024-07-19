@@ -40,7 +40,7 @@ import onj.parser.OnjSchemaParser
 import onj.schema.OnjSchema
 import onj.value.*
 
-class ScreenBuilder(val file: FileHandle) {
+class ScreenBuilder(val screenName: String, val onj: OnjObject) {
 
     private var borrowed: List<String> = listOf()
 
@@ -62,9 +62,13 @@ class ScreenBuilder(val file: FileHandle) {
 
     @MainThreadOnly
     fun build(controllerContext: Any? = null): OnjScreen {
-        val onj = OnjParser.parseFile(file.file())
-        screenSchema.assertMatches(onj)
-        onj as OnjObject
+
+        earlyRenderTasks.clear()
+        lateRenderTasks.clear()
+        behavioursToBind.clear()
+        actorsWithDragAndDrop.clear()
+        addedActorsDragAndDrops.clear()
+        namedActors.clear()
 
         readAssets(onj)
         doOptions(onj)
@@ -512,11 +516,6 @@ class ScreenBuilder(val file: FileHandle) {
             widgetOnj.get<String>("optionsBox"),
             widgetOnj.get<String>("speakingPersonLabel"),
             widgetOnj.get<OnjObject>("defaults"),
-            screen
-        )
-
-        "WorldView" -> WorldViewWidget(
-            OnjParser.parseFile(Gdx.files.internal(MapManager.mapConfigFilePath).file()) as OnjObject, // TODO: schema?
             screen
         )
 
