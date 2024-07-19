@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
@@ -24,14 +25,8 @@ import kotlin.properties.Delegates
 
 object GraphicsConfig {
 
-    const val graphicsConfigFile: String = "config/graphics_config.onj"
-    const val graphicsConfigSchemaFile: String = "onjschemas/graphics_config.onjschema"
-
     fun init() {
-        val config = OnjParser.parseFile(Gdx.files.internal(graphicsConfigFile).file())
-        val schema = OnjSchemaParser.parseFile(Gdx.files.internal(graphicsConfigSchemaFile).file())
-        schema.assertMatches(config)
-        config as OnjObject
+        val config = ConfigFileManager.getConfigFile("graphicsConfig")
         this.config = config
         readConstants(config)
     }

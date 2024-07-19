@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -120,17 +121,13 @@ class Backpack(
 //         3. (done) automatic add to deck if deck doesn't have enough cards
 //         4. (done) stop cards from moving if you don't have enough cards
 //         5. sorting system (ui missing)
-        val backpackOnj = OnjParser.parseFile(backpackFile)
-        backpackFileSchema.assertMatches(backpackOnj)
-        backpackOnj as OnjObject
+        val backpackOnj = ConfigFileManager.getConfigFile("backpackConfig")
 
         val nameOnj = backpackOnj.get<OnjObject>("deckNameDef")
         minNameSize = nameOnj.get<Long>("minLength").toInt()
         maxNameSize = nameOnj.get<Long>("maxLength").toInt()
 
-        val cardsOnj = OnjParser.parseFile(cardsFile)
-        cardsFileSchema.assertMatches(cardsOnj)
-        cardsOnj as OnjObject
+        val cardsOnj = ConfigFileManager.getConfigFile("cards")
         cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
         _allCards = cardPrototypes
             .filter { it.name in SaveState.cards }.filter { it.name in PermaSaveState.collection }
@@ -481,13 +478,6 @@ class Backpack(
 
     companion object {
         const val NAME_SEPARATOR_STRING = "_-_"
-
-        private val backpackFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/backpack.onjschema").file())
-        }
-        private val cardsFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
-        }
         const val LOG_TAG: String = "Backpack"
     }
 

@@ -76,18 +76,18 @@ object FortyFive : Game() {
         currentRenderPipeline?.render(Gdx.graphics.deltaTime)
     }
 
-    fun changeToScreen(screenPath: String, controllerContext: Any? = null) = Gdx.app.postRunnable {
+    fun changeToScreen(screenBuilder: ScreenBuilder, controllerContext: Any? = null) = Gdx.app.postRunnable {
         if (inScreenTransition) return@postRunnable
         inScreenTransition = true
         val currentScreen = currentScreen
         if (currentScreen?.transitionAwayTime != null) currentScreen.transitionAway()
-        val screen = ScreenBuilder(Gdx.files.internal(screenPath)).build(controllerContext)
+        val screen = screenBuilder.build(controllerContext)
         // Updates StyleManagers immediately, to prevent the first frame from appearing bugged
         screen.update(Gdx.graphics.deltaTime, isEarly = true)
         serviceThread.sendMessage(ServiceThreadMessage.PrepareResources)
 
         fun onScreenChange() {
-            FortyFiveLogger.title("changing screen to $screenPath")
+            FortyFiveLogger.title("changing screen to ${screenBuilder.screenName}")
             SoundPlayer.currentMusic(screen.music, screen)
             currentScreen?.dispose()
             this.currentScreen = screen

@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.PermaSaveState
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.game.card.Card
@@ -22,7 +23,6 @@ import kotlin.math.min
 class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
 
     private lateinit var screen: OnjScreen
-    private val cardsFile: String = onj.get<String>("cardsFile")
     //    private val lockedCardTextureName: String,  //TODO locked cards
 
     //TODO ugly, could be "val"
@@ -44,9 +44,7 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
 
     override fun init(onjScreen: OnjScreen, context: Any?) {
         screen = onjScreen
-        val cardsOnj = OnjParser.parseFile(cardsFile)
-        cardsFileSchema.assertMatches(cardsOnj)
-        cardsOnj as OnjObject
+        val cardsOnj = ConfigFileManager.getConfigFile("cards")
         cardPrototypes = (Card.getFrom(cardsOnj.get<OnjArray>("cards"), initializer = { screen.addDisposable(it) }))
             .filter { "not in collection" !in it.tags }
         _allCards = cardPrototypes
@@ -159,11 +157,4 @@ class CardCollectionScreenController(onj: OnjObject) : ScreenController() {
         }
     }
 
-    companion object {
-
-        private val cardsFileSchema: OnjSchema by lazy {
-            OnjSchemaParser.parseFile("onjschemas/cards.onjschema")
-        }
-        const val LOG_TAG: String = "CardCollection"
-    }
 }

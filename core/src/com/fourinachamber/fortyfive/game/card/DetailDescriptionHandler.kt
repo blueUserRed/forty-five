@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.badlogic.gdx.graphics.Color
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.utils.AdvancedTextParser
 import onj.parser.OnjParser
 import onj.value.OnjArray
@@ -13,18 +14,8 @@ object DetailDescriptionHandler {
     val allTextEffects: OnjArray
     val descriptions: Map<String, Pair<String, String>>  // keyword   then    group with description
 
-    /**
-     * the path to the file from which the data is read from
-     */
-    private const val FILE_PATH: String = "config/descriptions.onj"
-
-    //    private val cardSelectionSchema: OnjSchema by lazy {
-//        OnjSchemaParser.parseFile(Gdx.files.internal("onjschemas/card_selection_types.onjschema").file())
-//    }
     init {
-        val onj = OnjParser.parseFile(FILE_PATH)
-//        Card.cardsFileSchema.assertMatches(onj) //TODO this path
-        onj as OnjObject
+        val onj = ConfigFileManager.getConfigFile("descriptions")
         groups = onj
             .get<OnjArray>("hoverDetailDescriptionGroups")
             .value
