@@ -449,7 +449,6 @@ paths: {
     areas: "maps/areas",
     areaDefinitions: "maps/area_definitions",
     staticRoadDefinitions: "maps/static_roads",
-    mapScreen: "screens/map_screen.onj",
 },
 
 mapImages: [
@@ -503,18 +502,6 @@ mapImages: [
         ...(images.spireName),
     }
 ],
-
-screens: {
-    mapScreen: "screens/map_screen.onj",
-    dialogScreen: "screens/dialog_screen.onj",
-    encounterScreen: "screens/game_screen.onj",
-    shopScreen: "screens/shop_screen.onj",
-    chooseCardScreen: "screens/choose_card_screen.onj",
-    changeToHealOrMaxHPScreen: "screens/heal_or_max_screen.onj",
-    changeToAddMaxHPScreen: "screens/add_max_hp_screen.onj",
-    titleScreen: "screens/title_screen.onj",
-    creditsScreen: "screens/credits_screen.onj",
-},
 
 displayNames: [
     {

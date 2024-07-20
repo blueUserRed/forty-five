@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Event
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.map.detailMap.Completable
 import com.fourinachamber.fortyfive.screen.SoundPlayer
@@ -17,10 +18,8 @@ import com.fourinachamber.fortyfive.utils.*
 import ktx.actors.onEnter
 import ktx.actors.onExit
 import onj.value.OnjNamedObject
-import onj.value.OnjNull
 import onj.value.OnjObject
 import kotlin.reflect.KClass
-import kotlin.system.measureTimeMillis
 
 
 /**
@@ -177,14 +176,14 @@ class MouseHoverBehaviour(
  */
 class OnClickChangeScreenBehaviour(onj: OnjNamedObject, actor: Actor) : Behaviour(actor) {
 
-    private val screenPath = onj.get<String>("screenPath")
+    private val screen = onj.get<String>("screen")
 
     private var changedScreen: Boolean = false
 
     override val onCLick: BehaviourCallback = lambda@{
         if (changedScreen) return@lambda
         changedScreen = true
-        FortyFive.changeToScreen(screenPath)
+        FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(screen))
     }
 }
 

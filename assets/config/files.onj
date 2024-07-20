@@ -1,59 +1,62 @@
-assets: {
-    file: "config/assets.onj",
-    validatedBy: "onjschemas/assets.onjschema",
+
+configFiles: {
+    assets: {
+        file: "config/assets.onj",
+        validatedBy: "onjschemas/assets.onjschema",
+    },
+    cards: {
+        file: "config/cards.onj",
+        validatedBy: "onjschemas/cards.onjschema",
+    },
+    descriptions: {
+        file: "config/descriptions.onj",
+        validatedBy: null,
+    },
+    encounterDefinitions: {
+        file: "config/encounter_definitions.onj",
+        validatedBy: "onjschemas/encounter_definitions.onjschema",
+    },
+    enemies: {
+        file: "config/enemies.onj",
+        validatedBy: "onjschemas/enemies.onjschema",
+    },
+    gameConfig: {
+        file: "config/game_config.onj",
+        validatedBy: null,
+    },
+    graphicsConfig: {
+        file: "config/graphics_config.onj",
+        validatedBy: "onjschemas/graphics_config.onjschema",
+    },
+    soundConfig: {
+        file: "config/sounds.onj",
+        validatedBy: "onjschemas/sounds.onjschema",
+    },
+    logConfig: {
+        file: "logging/log_config.onj",
+        validatedBy: "onjschemas/log_config.onjschema",
+    },
+    cardSelectionTypeConfig: {
+        file: "config/card_selection_types.onj",
+        validatedBy: "onjschemas/card_selection_types.onjschema",
+    },
+    npcConfig: {
+        file: "config/npcs.onj",
+        validatedBy: "onjschemas/npcs.onjschema",
+    },
+    shopConfig: {
+        file: "config/shops.onj",
+        validatedBy: "onjschemas/sounds.onjschema",
+    },
+    backpackConfig: {
+        file: "config/backpack_config.onj",
+        validatedBy: "onjschemas/backpack.onjschema",
+    },
+    mapConfig: {
+        file: "config/map_config.onj",
+        validatedBy: "onjschemas/map_config.onjschema",
+    }
 },
-cards: {
-    file: "config/cards.onj",
-    validatedBy: "onjschemas/cards.onjschema",
-},
-descriptions: {
-    file: "config/descriptions.onj",
-    validatedBy: null,
-},
-encounterDefinitions: {
-    file: "config/encounter_definitions.onj",
-    validatedBy: "onjschemas/encounter_definitions.onjschema",
-},
-enemies: {
-    file: "config/enemies.onj",
-    validatedBy: "onjschemas/enemies.onjschema",
-},
-gameConfig: {
-    file: "config/game_config.onj",
-    validatedBy: null,
-},
-graphicsConfig: {
-    file: "config/graphics_config.onj",
-    validatedBy: "onjschemas/graphics_config.onjschema",
-},
-soundConfig: {
-    file: "config/sounds.onj",
-    validatedBy: "onjschemas/sounds.onjschema",
-},
-logConfig: {
-    file: "logging/log_config.onj",
-    validatedBy: "onjschemas/log_config.onjschema",
-},
-cardSelectionTypeConfig: {
-    file: "config/card_selection_types.onj",
-    validatedBy: "onjschemas/card_selection_types.onjschema",
-},
-npcConfig: {
-    file: "config/npcs.onj",
-    validatedBy: "onjschemas/npcs.onjschema",
-},
-shopConfig: {
-    file: "config/shops.onj",
-    validatedBy: "onjschemas/sounds.onjschema",
-},
-backpackConfig: {
-    file: "config/backpack_config.onj",
-    validatedBy: "onjschemas/backpack.onjschema",
-},
-mapConfig: {
-    file: "config/map_config.onj",
-    validatedBy: "onjschemas/map_config.onjschema",
-}
 
 screens: [
     {
@@ -67,5 +70,45 @@ screens: [
     {
         name: "chooseCardScreen",
         file: "screens/choose_card_screen.onj"
+    },
+    {
+        name: "creditsScreen",
+        file: "screens/credits_screen.onj"
+    },
+    {
+        name: "dialogScreen",
+        file: "screens/dialog_screen.onj"
+    },
+    {
+        name: "draftScreen",
+        file: "screens/draft_screen.onj"
+    },
+    {
+        name: "healOrMaxScreen",
+        file: "screens/heal_or_max_screen.onj"
+    },
+    {
+        name: "introScreen",
+        file: "screens/intro_screen.onj"
+    },
+    {
+        name: "looseScreen",
+        file: "screens/loose_screen.onj"
+    },
+    {
+        name: "mapScreen",
+        file: "screens/map_screen.onj"
+    },
+    {
+        name: "shopScreen",
+        file: "screens/shop_screen.onj"
+    },
+    {
+        name: "statsScreen",
+        file: "screens/stats_screen.onj"
+    },
+    {
+        name: "titleScreen",
+        file: "screens/title_screen.onj"
     },
 ]

@@ -96,24 +96,11 @@ generatorConfig: {
     maps: $MapGenerator[]
 },
 
-screens: {
-    mapScreen: string,
-    dialogScreen: string,
-    encounterScreen: string,
-    shopScreen: string,
-    chooseCardScreen: string,
-    changeToHealOrMaxHPScreen: string,
-    changeToAddMaxHPScreen: string,
-    titleScreen: string,
-    creditsScreen: string,
-},
-
 paths: {
     roads: string,
     areas: string,
     areaDefinitions: string,
     staticRoadDefinitions: string,
-    mapScreen: string,
 },
 
 mapImages: {

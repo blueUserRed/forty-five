@@ -53,7 +53,7 @@ object RandomCardSelection {
     }
 
     fun init() {
-        val file = ConfigFileManager.getConfigFile("cardSelectionTypesConfig")
+        val file = ConfigFileManager.getConfigFile("cardSelectionTypeConfig")
         val allTypes: MutableMap<String, List<CardChange>> = mutableMapOf()
         val allTypesOnj = file.get<OnjArray>("types").value.map { it as OnjObject }
         allTypesOnj.forEach {

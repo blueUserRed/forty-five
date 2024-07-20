@@ -3,6 +3,7 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
@@ -43,7 +44,7 @@ object FortyFive : Game() {
         override val encounterIndex: Int = 0 // = first tutorial encounter
 
         override val forwardToScreen: String
-            get() = MapManager.mapScreenPath
+            get() = "mapScreen"
 
         override fun completed() {
             SaveState.playerCompletedFirstTutorialEncounter = true
@@ -55,7 +56,7 @@ object FortyFive : Game() {
 //        resetAll()
 //        newRun(false)
         when (UserPrefs.startScreen) {
-            UserPrefs.StartScreen.INTRO -> changeToScreen("screens/intro_screen.onj")
+            UserPrefs.StartScreen.INTRO -> changeToScreen(ConfigFileManager.screenBuilderFor("intro_screen"))
             UserPrefs.StartScreen.TITLE -> MapManager.changeToTitleScreen()
             UserPrefs.StartScreen.MAP -> changeToInitialScreen()
         }
@@ -123,7 +124,7 @@ object FortyFive : Game() {
         if (forwardToLooseScreen) SaveState.copyStats()
         SaveState.reset()
         MapManager.newRunSync()
-        if (forwardToLooseScreen) changeToScreen("screens/loose_screen.onj")
+        if (forwardToLooseScreen) changeToScreen(ConfigFileManager.screenBuilderFor("loose_screen"))
     }
 
     override fun resize(width: Int, height: Int) {
@@ -148,6 +149,7 @@ object FortyFive : Game() {
             registerNameSpace("Screen", ScreenNamespace)
             registerNameSpace("Map", MapNamespace)
         }
+        ConfigFileManager.init()
         TemplateString.init()
         FortyFiveLogger.init()
         UserPrefs.read()

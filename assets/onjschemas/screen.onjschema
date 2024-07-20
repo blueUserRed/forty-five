@@ -384,7 +384,7 @@ $Behaviour {
     $OnClickExitBehaviour { }
 
     $OnClickChangeScreenBehaviour {
-        screenPath: string,
+        screen: string,
     }
 
     $OnClickAbandonRunBehaviour { }
