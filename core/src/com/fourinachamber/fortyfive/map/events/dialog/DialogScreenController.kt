@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.map.events.dialog
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.detailMap.NPCMapEvent
 import com.fourinachamber.fortyfive.screen.general.CustomFlexBox
@@ -31,8 +32,8 @@ class DialogScreenController(onj: OnjObject) : ScreenController() {
             throw RuntimeException("widget with name $dialogWidgetName must be of type DialogWidget")
         }
         this.dialogWidget = dialogWidget
-        val npc = MapManager
-            .npcsOnj
+        val npc = ConfigFileManager
+            .getConfigFile("npcConfig")
             .get<OnjArray>("npcs")
             .value
             .map { it as OnjObject }

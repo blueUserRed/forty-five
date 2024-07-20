@@ -133,7 +133,7 @@ sealed class EncounterModifier {
 
     object Draft : EncounterModifier() {
 
-        override fun intermediateScreen(): String = "screens/draft_screen.onj"
+        override fun intermediateScreen(): String = "draft_screen"
     }
 
     object AnOfferYouCantRefuse : EncounterModifier() {

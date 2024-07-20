@@ -1520,7 +1520,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
                 if (playerGetsCard) {
                     MapManager.changeToChooseCardScreen(chooseCardContext)
                 } else {
-                    FortyFive.changeToScreen(encounterContext.forwardToScreen)
+                    FortyFive.changeToScreen(ConfigFileManager.screenBuilderFor(encounterContext.forwardToScreen))
                 }
 
             }

@@ -187,7 +187,7 @@ class EncounterMapEvent(obj: OnjObject) : MapEvent(), GameController.EncounterCo
     override val completedDescriptionText: String = "All enemies gone already!"
     override val displayName: String = "Encounter"
 
-    override val forwardToScreen: String = MapManager.mapScreenPath
+    override val forwardToScreen: String = "mapScreen"
 
     override val buttonText: String = "Fight!"
 
@@ -373,7 +373,7 @@ class ChooseCardMapEvent(
     override var seed: Long = onj.get<Long?>("seed") ?: (Math.random() * 1000).toLong()
     override val nbrOfCards: Int = onj.get<Long>("nbrOfCards").toInt()
 
-    override val forwardToScreen: String = MapManager.mapScreenPath
+    override val forwardToScreen: String = "mapScreen"
 
     override val descriptionText: String =
         if (nbrOfCards > 1) "You can choose one of $nbrOfCards cards." else "You get a card."
