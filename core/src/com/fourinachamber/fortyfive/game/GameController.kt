@@ -267,7 +267,7 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
     }
 
     private fun initCards() {
-        val onj = ConfigFileManager.getConfigFile("cardsConfig")
+        val onj = ConfigFileManager.getConfigFile("cards")
 
         val cards = gameDirector.encounter.forceCards
             ?: encounterContext.forceCards

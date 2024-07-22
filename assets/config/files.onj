@@ -60,7 +60,7 @@ configFiles: {
 
 screens: [
     {
-        name: "gameScreen",
+        name: "encounterScreen",
         file: "screens/game_screen.onj"
     },
     {

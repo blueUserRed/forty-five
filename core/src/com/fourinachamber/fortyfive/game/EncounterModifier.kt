@@ -202,6 +202,8 @@ sealed class EncounterModifier {
         ): Timeline = Timeline.timeline {
             include(controller.rotateRevolver(card.rotationDirection, ignoreEncounterModifiers = true))
         }
+
+        override fun disableEverlasting(): Boolean = true
     }
 
     open fun getModifierTypes(): List<Type> = listOf()
