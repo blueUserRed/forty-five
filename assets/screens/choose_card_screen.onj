@@ -43,13 +43,15 @@ options: {
     inputMap: [
         ...(inputMaps.defaultInputMap)
     ],
-    screenController: $ChooseCardScreenController {
-        cardsFile: "config/cards.onj",
-        leaveButtonName: "leaveLabel",
-        cardsParentName: "cardsParent",
-        addToBackpackWidgetName: "addToBackpackWidget",
-        addToDeckWidgetName: "addToDeckWidget",
-    }
+    screenControllers: [
+        $ChooseCardScreenController {
+            cardsFile: "config/cards.onj",
+            leaveButtonName: "leaveLabel",
+            cardsParentName: "cardsParent",
+            addToBackpackWidgetName: "addToBackpackWidget",
+            addToDeckWidgetName: "addToDeckWidget",
+        }
+    ],
 },
 
 
