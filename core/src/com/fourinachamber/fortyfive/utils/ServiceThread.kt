@@ -109,7 +109,7 @@ class ServiceThread : Thread("ServiceThread") {
                     100, 100
                 )
             }
-            message.isFinished = true
+            message.promise.resolve(pixmap)
         } }
     }
 
@@ -163,7 +163,7 @@ sealed class ServiceThreadMessage {
         val damageValue: Int,
         val costValue: Int,
         val savedPixmap: Pixmap?,
-        var isFinished: Boolean = false
+        val promise: Promise<Pixmap> = Promise()
     ) : ServiceThreadMessage()
 
     class LoadAnimationResource(

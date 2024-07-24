@@ -39,6 +39,10 @@ object FortyFive : Game() {
 
     private var inScreenTransition: Boolean = false
 
+    private val mainThreadTasks: MutableList<() -> Unit> = mutableListOf()
+
+    private val mainThreadTaskAddBuffer: MutableList<() -> Unit> = mutableListOf()
+
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
         override val encounterIndex: Int = 0 // = first tutorial encounter
@@ -70,7 +74,15 @@ object FortyFive : Game() {
         }
     }
 
+    fun mainThreadTask(task: () -> Unit) {
+        mainThreadTaskAddBuffer.add(task)
+    }
+
     override fun render() {
+        mainThreadTasks.addAll(mainThreadTaskAddBuffer)
+        mainThreadTaskAddBuffer.clear()
+        mainThreadTasks.forEach { it() }
+        mainThreadTasks.clear()
         val screen = currentScreen
         currentScreen?.update(Gdx.graphics.deltaTime)
         if (screen !== currentScreen) currentScreen?.update(Gdx.graphics.deltaTime)

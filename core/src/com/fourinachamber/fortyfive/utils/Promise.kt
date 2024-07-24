@@ -29,3 +29,5 @@ class Promise<T> {
     fun getOr(default: T): T = if (isResolved) result as T else default
 
 }
+
+fun <T> T.asPromise(): Promise<T> = Promise<T>().also { it.resolve(this) }
