@@ -3,20 +3,23 @@ package com.fourinachamber.fortyfive
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
+import com.codedisaster.steamworks.SteamAPI
+import com.codedisaster.steamworks.SteamException
 import com.fourinachamber.fortyfive.game.*
-import com.fourinachamber.fortyfive.map.*
+import com.fourinachamber.fortyfive.map.MapManager
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
 import com.fourinachamber.fortyfive.rendering.RenderPipeline
-import com.fourinachamber.fortyfive.screen.general.OnjScreen
-import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
+import com.fourinachamber.fortyfive.screen.general.ScreenBuilder
+import com.fourinachamber.fortyfive.steam.AchievementHandler
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-import onj.parser.OnjParser
 import onj.value.OnjArray
 import onj.value.OnjObject
+
 
 /**
  * main game object
@@ -169,7 +172,7 @@ object FortyFive : Game() {
         serviceThread.start()
         serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         RandomCardSelection.init()
-
+        AchievementHandler.init()
 //        resetAll()
 //        newRun()
 //        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
