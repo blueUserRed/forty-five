@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.steam
 
 import com.codedisaster.steamworks.*
+import com.codedisaster.steamworks.SteamAuth.AuthSessionResponse
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
 
@@ -19,20 +20,49 @@ object AchievementHandler {
     }
 
     private fun printUserStats() {
-        userStats = SteamUserStats(callback)
+//        https://code-disaster.github.io/steamworks4j/getting-started.html
+//        user = SteamUser(userCallback);
+        userStats = SteamUserStats(statsCallback)
+        userStats.requestGlobalStats(0)
+//        userStats.setStatF() //check this and so on
+//        userStats.setStatI() //check this and so on
+        SteamAPI.runCallbacks() //This method needs to be called every few frames
+
+//        userStats.getGlobalStat()
     }
 
     private lateinit var userStats: SteamUserStats
 
+    private var user: SteamUser? = null
 
-    private val callback: SteamUserStatsCallback = object : SteamUserStatsCallback {
+/*
+    private val userCallback: SteamUserCallback = object : SteamUserCallback {
+        override fun onAuthSessionTicket(authTicket: SteamAuthTicket, result: SteamResult) {}
+        override fun onValidateAuthTicket(
+            steamID: SteamID,
+            authSessionResponse: AuthSessionResponse,
+            ownerSteamID: SteamID
+        ) {
+        }
+
+        override fun onMicroTxnAuthorization(appID: Int, orderID: Long, authorized: Boolean) {}
+        override fun onEncryptedAppTicket(result: SteamResult) {}
+        fun onGetTicketForWebApi(authTicket: SteamAuthTicket?, result: SteamResult, ticketData: ByteArray) {
+            println(
+                "auth ticket for web API: " + ticketData.size + " bytes" +
+                        ", result=" + result.toString()
+            )
+        }
+    }*/
+
+    private val statsCallback: SteamUserStatsCallback = object : SteamUserStatsCallback {
         override fun onUserStatsReceived(gameId: Long, steamIDUser: SteamID?, result: SteamResult?) {
-            System.out.println(
-                (("User stats received: gameId=$gameId").toString() + ", userId=" + steamIDUser!!.accountID).toString() +
+            println(
+                (("User stats received: gameId=$gameId").toString() + ", userId=" + steamIDUser!!.accountID) +
                         ", result=" + result.toString()
             )
 
-            val numAchievements: Int = userStats.getNumAchievements()
+            val numAchievements: Int = userStats.numAchievements
             println("Num of achievements: $numAchievements")
 
             for (i in 0 until numAchievements) {
@@ -43,12 +73,12 @@ object AchievementHandler {
         }
 
         override fun onUserStatsStored(gameId: Long, result: SteamResult) {
-            System.out.println("User stats stored: gameId=" + gameId +
+            println("User stats stored: gameId=" + gameId +
                     ", result=" + result.toString());
         }
 
         override fun onUserStatsUnloaded(steamIDUser: SteamID) {
-            System.out.println("User stats unloaded: userId=" + steamIDUser.accountID);
+            println("User stats unloaded: userId=" + steamIDUser.accountID);
         }
 
         override fun onUserAchievementStored(
