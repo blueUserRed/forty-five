@@ -83,6 +83,7 @@ project(":core") {
         implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
         api "com.github.lyze237:gdx-FlexBox:425149b588"
         api "com.github.lyze237:gdx-FlexBox:425149b588:sources"
+        implementation "com.code-disaster.steamworks4j:steamworks4j:1.9.0"
     }
 }
 
