@@ -1,7 +1,6 @@
 package com.fourinachamber.fortyfive.game.card
 
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -736,15 +735,6 @@ class CardActor(
         ResourceManager.get(screen, "card_symbol_marked")
     }
 
-    private val cardTexture: Texture = ResourceManager.get(screen, card.drawableHandle)
-
-    private val pixmap: Pixmap = Pixmap(cardTexture.width, cardTexture.height, Pixmap.Format.RGBA8888)
-
-    var pixmapTextureRegion: TextureRegion? = null
-        private set
-
-    private val cardTexturePixmap: Pixmap
-
     override var isHoverDetailActive: Boolean
         get() = (card.shortDescription.isNotBlank() ||
                 card.flavourText.isNotBlank() ||
@@ -752,8 +742,6 @@ class CardActor(
                 card.getAdditionalHoverDescriptions().isNotEmpty())
                 && enableHoverDetails
         set(value) {}
-
-    private var drawPixmapMessage: ServiceThreadMessage.DrawCardPixmap? = null
 
     private var prevPosition: Vector2? = null
 
@@ -763,17 +751,14 @@ class CardActor(
 
     var isMarked: Boolean = false
 
+    private var cardTexturePromise: Promise<Texture>
+
     init {
         bindHoverStateListeners(this)
         registerOnHoverDetailActor(this, screen)
-        if (!cardTexture.textureData.isPrepared) cardTexture.textureData.prepare()
-        cardTexturePixmap = cardTexture.textureData.consumePixmap()
-        // I HATE LIBGDX
-        // FileTextureData always loads a new pixmap that needs to be disposed
-        // PixmapTextureData always returns the same pixmap, that doesn't need to be disposed
-        // Which one is used is a race condition in the TextureResource class
-        if (cardTexture.textureData is FileTextureData) screen.addDisposable(cardTexturePixmap)
-        redrawPixmap(card.baseDamage, card.baseCost)
+
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, card.baseCost, card.baseDamage)
+
         onClick {
             if (!inSelectionMode) return@onClick
             // UGGGGGLLLLLLYYYYY
@@ -820,12 +805,10 @@ class CardActor(
 
     override fun draw(batch: Batch?, parentAlpha: Float) {
         validate()
-        if (drawPixmapMessage?.isFinished ?: false) {
-            finishPixmapDrawing()
-        }
         setBoundsOfHoverDetailActor(screen)
         batch ?: return
-        val texture = pixmapTextureRegion ?: return
+        val texture = cardTexturePromise.getOrNull() ?: return
+        val textureRegion = TextureRegion(texture)
         val shader = if (inDestroyAnim) {
             destroyShader
         } else {
@@ -855,7 +838,7 @@ class CardActor(
             y = this.y
         }
         batch.draw(
-            texture,
+            textureRegion,
             x + offsetX, y + offsetY,
             width / 2, height / 2,
             width, height,
@@ -877,40 +860,12 @@ class CardActor(
     }
 
     fun disposeTexture() {
-        pixmapTextureRegion?.texture?.dispose()
-        pixmap.dispose()
-        pixmapTextureRegion = null
+        FortyFive.cardTextureManager.giveTextureBack(cardTexturePromise.getOrNull() ?: return)
     }
 
     fun redrawPixmap(damageValue: Int, costValue: Int) {
-        val savedPixmapTextureData = when (card.isSaved) {
-            null -> null
-            true -> GraphicsConfig.cardSavedSymbol(screen)
-            false -> GraphicsConfig.cardNotSavedSymbol(screen)
-        }?.textureData
-        if (savedPixmapTextureData != null && !savedPixmapTextureData.isPrepared) savedPixmapTextureData.prepare()
-        val savedPixmap = savedPixmapTextureData?.consumePixmap()
-        if (savedPixmapTextureData != null && savedPixmapTextureData is FileTextureData) {
-            screen.addDisposable(savedPixmap!!)
-        }
-        val message = ServiceThreadMessage.DrawCardPixmap(
-            pixmap,
-            cardTexturePixmap,
-            card,
-            damageValue,
-            costValue,
-            savedPixmap
-        )
-        FortyFive.serviceThread.sendMessage(message)
-        drawPixmapMessage = message
-    }
-
-    private fun finishPixmapDrawing() {
-        pixmapTextureRegion?.texture?.dispose()
-        val texture = Texture(pixmap, true)
-        texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
-        pixmapTextureRegion = TextureRegion(texture)
-        drawPixmapMessage = null
+        cardTexturePromise.getOrNull()?.let { FortyFive.cardTextureManager.giveTextureBack(it) }
+        cardTexturePromise = FortyFive.cardTextureManager.cardTextureFor(card, costValue, damageValue)
     }
 
     override fun getBounds(): Rectangle {

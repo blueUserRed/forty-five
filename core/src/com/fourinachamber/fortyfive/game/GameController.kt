@@ -93,8 +93,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         private set
     lateinit var enemyArea: EnemyArea
         private set
-    lateinit var cardSelector: CircularCardSelector
-        private set
     lateinit var warningParent: CustomWarningParent
         private set
     lateinit var putCardsUnderDeckWidget: PutCardsUnderDeckWidget
@@ -234,7 +232,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         initCards()
         initCardHand()
         initRevolver()
-        initCardSelector()
         initPutCardsUnderDeckWidget()
         // enemy area is initialised by the GameDirector
 
@@ -460,16 +457,6 @@ class GameController(onj: OnjNamedObject) : ScreenController() {
         val dropOnj = putCardsUnderDeckWidgetOnj.get<OnjNamedObject>("dropBehaviour")
         actor.initDragAndDrop(cardDragAndDrop, dropOnj)
         this.putCardsUnderDeckWidget = actor
-    }
-
-    private fun initCardSelector() {
-        val curScreen = curScreen
-        val cardSelectorName = cardSelectorOnj.get<String>("actorName")
-        val cardSelector = curScreen.namedActorOrError(cardSelectorName)
-        if (cardSelector !is CircularCardSelector) {
-            throw RuntimeException("actor named $cardSelectorName must be a CircularCardSelector")
-        }
-        this.cardSelector = cardSelector
     }
 
     fun initEnemyArea(enemies: List<Enemy>) {
