@@ -42,6 +42,8 @@ encounterModifiers: {
     anOfferYouCantRefuse: encounterModifierConfig,
     bulletSkipping: encounterModifierConfig,
     sacrifice: encounterModifierConfig,
+    sorryNotSorry: encounterModifierConfig,
+    confused: encounterModifierConfig,
 },
 
 encounterModifierAssets: string[],
