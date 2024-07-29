@@ -32,43 +32,68 @@ var decoration = {
     animated: boolean,
 };
 
-var additionalEventDefinition = {
-    nodeTexture: string,
-    event: $MapEvent,
-    offset: int[2],
-    line: int,
-};
-
-var map = {
+var mapGeneratorSharedKeys = {
     name: string,
     seed: int,
-    progress: int[2],
+    progress: float[2],
     biome: string,
     startArea: string,
-    endArea: string,
-    roadLength: float,
     exitNodeTexture: string,
-    mainLineNodes: int,
-    altLinesPadding: int[2],
-    altLinesOffset: float,
-    varianceX: float,
-    varianceY: float,
     horizontalExtension: float,
     verticalExtension: float,
     locationSignProtectedAreaWidth: float,
     locationSignProtectedAreaHeight: float,
-    mainEvent: {
-        nodeTexture: string,
-        event: $MapEvent,
-    },
-    events: additionalEventDefinition[],
     nodeProtectedArea: float,
-    decorations: decoration[]
 };
+
+$MapGenerator {
+
+    $ThreeLine {
+        endArea: string,
+        roadLength: float,
+        mainLineNodes: int,
+        altLinesPadding: int[2],
+        altLinesOffset: float,
+        varianceX: float,
+        varianceY: float,
+        mainEvent: {
+            nodeTexture: string,
+            event: $MapEvent,
+        },
+        events: {
+            nodeTexture: string,
+            event: $MapEvent,
+            offset: int[2],
+            line: int,
+        }[],
+        decorations: decoration[],
+        ...mapGeneratorSharedKeys
+    }
+
+    $Radial {
+        decorations: decoration[],
+        endArea: string,
+        exitNodeCircle: int,
+        circles: {
+            radius: float,
+            numNodes: int,
+            angleVariance: float,
+        }[],
+        events: {
+            event: $MapEvent,
+            nodeTexture: string,
+            circle?: int?,
+            weight: int,
+            fixedAmount?: int?,
+        }[],
+        ...mapGeneratorSharedKeys
+    }
+
+}
 
 generatorConfig: {
     outputDirectory: string,
-    maps: map[]
+    maps: $MapGenerator[]
 },
 
 screens: {
