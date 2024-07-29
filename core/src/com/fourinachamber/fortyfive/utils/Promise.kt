@@ -31,3 +31,18 @@ class Promise<T> {
 }
 
 fun <T> T.asPromise(): Promise<T> = Promise<T>().also { it.resolve(this) }
+
+fun <T, U> Promise<T>.map(mapper: (T) -> U): Promise<U> {
+    val promise = Promise<U>()
+    this.onResolve { promise.resolve(mapper(it)) }
+    return promise
+}
+
+fun <T, U> Promise<T>.chain(next: (T) -> Promise<U>): Promise<U> {
+    val promise = Promise<U>()
+    this.onResolve { first ->
+        val chained = next(first)
+        chained.onResolve { promise.resolve(it) }
+    }
+    return promise
+}

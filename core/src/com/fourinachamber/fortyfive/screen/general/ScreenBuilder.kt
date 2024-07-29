@@ -519,14 +519,6 @@ class ScreenBuilder(val screenName: String, val onj: OnjObject) {
             screen
         )
 
-        "CircularCardSelector" -> CircularCardSelector(
-            widgetOnj.get<Double>("radius").toFloat(),
-            widgetOnj.get<Double>("size").toFloat(),
-            widgetOnj.get<String>("emptySlotTexture"),
-            widgetOnj.get<Double>("disabledAlpha").toFloat(),
-            screen
-        )
-
         "PersonWidget" -> PersonWidget(
             widgetOnj.get<Double>("offsetX").toFloat(),
             widgetOnj.get<Double>("offsetY").toFloat(),

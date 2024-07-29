@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
+import com.fourinachamber.fortyfive.game.card.CardTextureManager
 import com.fourinachamber.fortyfive.map.*
 import com.fourinachamber.fortyfive.map.events.RandomCardSelection
 import com.fourinachamber.fortyfive.onjNamespaces.*
@@ -28,6 +29,8 @@ object FortyFive : Game() {
 
     var currentRenderPipeline: RenderPipeline? = null
         private set
+
+    val cardTextureManager: CardTextureManager = CardTextureManager()
 
     private var currentScreen: OnjScreen? = null
 
@@ -182,6 +185,7 @@ object FortyFive : Game() {
         ResourceManager.init()
         serviceThread.start()
         serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
+        cardTextureManager.init()
         RandomCardSelection.init()
 
 //        resetAll()

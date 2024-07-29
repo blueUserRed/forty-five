@@ -563,34 +563,6 @@ var popupActor = $Box {
         ]
     },
 
-    $Box {
-        styles: [
-            {
-                style_priority: 1,
-                detached: true,
-            },
-            {
-                style_priority: 2,
-                style_condition: state("showPopupCardSelector"),
-                detached: false
-            }
-        ],
-    } children [
-        $CircularCardSelector {
-            styles: [
-                {
-                    width: (50 * 10)#points,
-                    height: (50 * 10)#points,
-                }
-            ],
-            name: "card_selector",
-            emptySlotTexture: "grey_texture",
-            disabledAlpha: 0.6,
-            radius: 200.0,
-            size: 3570.0 * 0.04
-        }
-    ],
-
 ];
 
 var drawCardActor = $Box {
