@@ -100,13 +100,13 @@ class SteamHandler {
             SteamAPI.loadLibraries()
             if (!SteamAPI.init()) {
                 FortyFiveLogger.severe(LOGTAG, "Couldn't load Steam API")
+            }else{
+                userStats = SteamUserStats(statsCallback)
+//                loadUserStats()
             }
         } catch (e: SteamException) {
             FortyFiveLogger.severe(LOGTAG, "Couldn't load Steam Librarys")
         }
-        userStats = SteamUserStats(statsCallback)
-//        loadUserStats()
-
     }
 
     private fun loadUserStats() {
@@ -128,13 +128,11 @@ class SteamHandler {
 
     private var countFrames = 0
     fun update() {
-        if (SteamAPI.isSteamRunning()) {
-            if ((countFrames++ and 4) == 0) SteamAPI.runCallbacks()
-        }
+        if (SteamAPI.isSteamRunning() && (countFrames++ and 4) == 0) SteamAPI.runCallbacks()
     }
 
     fun updateStats(stat: UserStat, value: Number = 1) {
-        println("${stat.name}: $value")
+        if (!SteamAPI.isSteamRunning()) return
         when (stat.progressType) {
             ProgressType.INSTANT -> {
                 if (value == 1) userStats.setAchievement(stat.name)
