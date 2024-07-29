@@ -34,7 +34,7 @@ object PermaSaveState {
         }
 
     val collection: Set<String>
-        get() = _collection.toList().toSet()
+        get() = _collection
 
     var playerHasCompletedTutorial: Boolean = false
         set(value) {
