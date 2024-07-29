@@ -10,7 +10,6 @@ class SteamHandler {
 
     private val statsCallback: SteamUserStatsCallback = object : SteamUserStatsCallback {
         override fun onUserStatsReceived(gameId: Long, steamIDUser: SteamID, result: SteamResult) {
-            println()
             println(
                 (("User stats received: gameId=$gameId").toString() + ", userId=" + steamIDUser.accountID) +
                         ", result=" + result.toString()
@@ -53,17 +52,17 @@ class SteamHandler {
         }
 
         override fun onLeaderboardFindResult(leaderboard: SteamLeaderboardHandle, found: Boolean) {
-            println(
-                "Leaderboard find result: handle=$leaderboard, found=" + if (found) "yes" else "no"
-            )
-
-            if (found) {
-                println(
-                    ("Leaderboard: name=" + userStats.getLeaderboardName(leaderboard) +
-                            ", entries=" + userStats.getLeaderboardEntryCount(leaderboard))
-                )
-//                currentLeaderboard = leaderboard
-            }
+//            println(
+//                "Leaderboard find result: handle=$leaderboard, found=" + if (found) "yes" else "no"
+//            )
+//
+//            if (found) {
+//                println(
+//                    ("Leaderboard: name=" + userStats.getLeaderboardName(leaderboard) +
+//                            ", entries=" + userStats.getLeaderboardEntryCount(leaderboard))
+//                )
+////                currentLeaderboard = leaderboard
+//            }
         }
 
         override fun onLeaderboardScoresDownloaded(
@@ -105,8 +104,15 @@ class SteamHandler {
         } catch (e: SteamException) {
             FortyFiveLogger.severe(LOGTAG, "Couldn't load Steam Librarys")
         }
-        loadUserStats()
+        userStats = SteamUserStats(statsCallback)
+//        loadUserStats()
 
+    }
+
+    private fun loadUserStats() {
+        userStats.resetAllStats(true) //TODO remove after done testing
+        userStats.requestGlobalStats(10)
+        userStats.requestCurrentStats()
 
 //        Thread() {
 //            Thread.sleep(5000)
@@ -118,13 +124,6 @@ class SteamHandler {
 //            println("Hallo welt")
 //            userStats.requestCurrentStats()
 //        }.start()
-    }
-
-    private fun loadUserStats() {
-        userStats = SteamUserStats(statsCallback)
-//        userStats.resetAllStats(true) //TODO remove after done testing
-        userStats.requestGlobalStats(10)
-        userStats.requestCurrentStats()
     }
 
     private var countFrames = 0
