@@ -1,6 +1,8 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.steam.UserStat
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.builder.buildOnjObject
@@ -31,6 +33,7 @@ object PermaSaveState {
         set(value) {
             field = value
             saveFileDirty = true
+            FortyFive.steamHandler.updateStats(UserStat.CollectionCardAmount, value.size)
         }
 
     val collection: Set<String>
@@ -117,7 +120,10 @@ object PermaSaveState {
     }
 
     fun addCard(cardName: String) {
-        if (_collection.add(cardName)) saveFileDirty = true
+        if (_collection.add(cardName)) {
+            saveFileDirty = true
+            FortyFive.steamHandler.updateStats(UserStat.CollectionCardAmount, _collection.size)
+        }
     }
 
     fun write() {

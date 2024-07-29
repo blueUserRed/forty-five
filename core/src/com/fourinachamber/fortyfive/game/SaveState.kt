@@ -1,6 +1,8 @@
 package com.fourinachamber.fortyfive.game
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.FortyFive
+import com.fourinachamber.fortyfive.steam.UserStat
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 import com.fourinachamber.fortyfive.utils.templateParam
 import onj.builder.buildOnjObject
@@ -127,6 +129,10 @@ object SaveState {
 
     private var _playerMoney: Int by templateParam("stat.playerMoney", 0) {
         savefileDirty = true
+        if (it >=1000){
+            println("now achievement")
+            FortyFive.steamHandler.updateStats(UserStat.Cash1000InHand)
+        }
     }
 
     var totalMoneyEarned: Int = 0
