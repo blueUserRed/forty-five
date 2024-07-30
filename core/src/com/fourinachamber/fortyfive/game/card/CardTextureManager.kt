@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.config.ConfigFileManager
+import com.fourinachamber.fortyfive.game.SaveState
 import com.fourinachamber.fortyfive.utils.Promise
 import com.fourinachamber.fortyfive.utils.ServiceThreadMessage
 import com.fourinachamber.fortyfive.utils.asPromise
@@ -26,6 +27,8 @@ class CardTextureManager {
                 CardTextureData(
                     card.get<String>("name"),
                     mutableListOf(),
+                    card.get<Long>("cost").toInt(),
+                    card.get<Long>("damage").toInt(),
                 )
             }
             .forEach { cardTextures.add(it) }
@@ -34,6 +37,7 @@ class CardTextureManager {
     fun cardTextureFor(card: Card, cost: Int, damage: Int): Promise<Texture> {
         val data = cardTextureDataFor(card)
         val variant = data.findVariant(cost, damage) ?: return createVariant(data, card, cost, damage)
+        variant.rc++
         return variant.texture.asPromise()
     }
 
@@ -74,12 +78,37 @@ class CardTextureManager {
                 texture.setFilter(Texture.TextureFilter.MipMapLinearLinear, Texture.TextureFilter.MipMapLinearLinear)
                 val variant = CardTextureVariant(cost, damage, pixmap, texture)
                 data.variants.add(variant)
+                variant.rc++
                 texture
             }
         }
 
     fun giveTextureBack(texture: Texture) {
+        cardTextures.forEach { data ->
+            val variant = data.variants.find { it.texture === texture } ?: return@forEach
+            variant.rc--
+            if (variant.rc > 0) return
+            disposeVariant(variant, data)
+        }
     }
+
+    private fun disposeVariant(
+        variant: CardTextureVariant,
+        data: CardTextureData
+    ) {
+        val preventCompleteUnload = preventUnloadingOfCard(data)
+        if (preventCompleteUnload && data.isStandardVariant(variant)) return
+        variant.pixmap.dispose()
+        variant.texture.dispose()
+        data.variants.remove(variant)
+        if (data.variants.isNotEmpty()) return
+        if (preventCompleteUnload) return
+        data.cardPixmap?.dispose()
+        data.cardPixmap = null
+    }
+
+    private fun preventUnloadingOfCard(data: CardTextureData): Boolean =
+        FortyFive.currentGame != null && data.cardName in SaveState.curDeck.cards
 
     private fun cardTextureDataFor(card: Card): CardTextureData = cardTextures
         .find { it.cardName == card.name }
@@ -88,11 +117,16 @@ class CardTextureManager {
     private data class CardTextureData(
         val cardName: String,
         val variants: MutableList<CardTextureVariant>,
+        val baseCost: Int,
+        val baseDamage: Int,
         var cardPixmap: Pixmap? = null,
     ) {
 
         fun findVariant(cost: Int, damage: Int): CardTextureVariant? =
             variants.find { it.cost == cost && it.damage == damage }
+
+        fun isStandardVariant(variant: CardTextureVariant): Boolean =
+            variant.cost == baseCost && variant.damage == baseDamage
     }
 
     private data class CardTextureVariant(
@@ -100,6 +134,7 @@ class CardTextureManager {
         val damage: Int,
         val pixmap: Pixmap,
         val texture: Texture,
+        var rc: Int = 0
     )
 
 }
