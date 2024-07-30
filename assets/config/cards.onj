@@ -1422,7 +1422,7 @@ cards: [
         title: "Heirloom Bullet",
         flavourText: "",
         description: "If this card enters your hand in any other way than drawing cards from top of your deck:\nThis Bullet gets +9",
-        baseDamage: 2,
+        baseDamage: 5,
         coverValue: 0,
         traitEffects: [],
         rotation: $Right { amount: 1 },
