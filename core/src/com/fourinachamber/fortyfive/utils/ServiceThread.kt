@@ -50,8 +50,15 @@ class ServiceThread : Thread("ServiceThread") {
             is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
             is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
             is ServiceThreadMessage.PrepareCards -> prepareCards(message)
+            is ServiceThreadMessage.LoadCardPixmap -> loadCardPixmap(message)
 
         }
+    }
+
+    private fun CoroutineScope.loadCardPixmap(message: ServiceThreadMessage.LoadCardPixmap) = launch {
+        val pixmap = Pixmap(Gdx.files.internal("textures/cards/${message.name}.png"))
+        println("loaded ${message.name}")
+        message.promise.resolve(pixmap)
     }
 
     private fun CoroutineScope.prepareCards(message: ServiceThreadMessage.PrepareCards) {
@@ -163,6 +170,11 @@ sealed class ServiceThreadMessage {
         val damageValue: Int,
         val costValue: Int,
         val savedPixmap: Pixmap?,
+        val promise: Promise<Pixmap> = Promise()
+    ) : ServiceThreadMessage()
+
+    class LoadCardPixmap(
+        val name: String,
         val promise: Promise<Pixmap> = Promise()
     ) : ServiceThreadMessage()
 

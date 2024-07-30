@@ -42,9 +42,8 @@ object FortyFive : Game() {
 
     private var inScreenTransition: Boolean = false
 
-    private val mainThreadTasks: MutableList<() -> Unit> = mutableListOf()
-
-    private val mainThreadTaskAddBuffer: MutableList<() -> Unit> = mutableListOf()
+    private val mainThreadTasks: MutableList<Pair<() -> Any?, Promise<*>>> = mutableListOf()
+    private val mainThreadTaskAddBuffer: MutableList<Pair<() -> Any?, Promise<*>>> = mutableListOf()
 
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
@@ -77,14 +76,20 @@ object FortyFive : Game() {
         }
     }
 
-    fun mainThreadTask(task: () -> Unit) {
-        mainThreadTaskAddBuffer.add(task)
+    fun <T> mainThreadTask(task: () -> T): Promise<T> {
+        val promise = Promise<T>()
+        mainThreadTaskAddBuffer.add(task to promise)
+        return promise
     }
 
     override fun render() {
         mainThreadTasks.addAll(mainThreadTaskAddBuffer)
         mainThreadTaskAddBuffer.clear()
-        mainThreadTasks.forEach { it() }
+        mainThreadTasks.forEach { (task, promise) ->
+            val result = task()
+            @Suppress("UNCHECKED_CAST")
+            (promise as Promise<Any?>).resolve(result)
+        }
         mainThreadTasks.clear()
         val screen = currentScreen
         currentScreen?.update(Gdx.graphics.deltaTime)
@@ -184,7 +189,6 @@ object FortyFive : Game() {
         GraphicsConfig.init()
         ResourceManager.init()
         serviceThread.start()
-        serviceThread.sendMessage(ServiceThreadMessage.PrepareCards(true))
         cardTextureManager.init()
         RandomCardSelection.init()
 
