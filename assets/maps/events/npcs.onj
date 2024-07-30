@@ -180,7 +180,7 @@ npcs: [
                     next: $Continue {}
                 },
                 {
-                    rawText: "That's where all those guys here come from. They hope to turn their life around and make try their luck in the frontier. Good business for us here in $1Aqua Balle$1 though, so I won't complain.",
+                    rawText: "That's where all those guys here come from. They hope to turn their life around and try their luck in the frontier. Good business for us here in $1Aqua Balle$1 though, so I won't complain.",
                     effects: [
                         $Color {
                             indicator: "$1",
