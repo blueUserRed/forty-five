@@ -105,7 +105,7 @@ var tutorialEncounters = [
                 predicate:  $GameInFreePhase { }
             },
             {
-                text: "Each bullet can has an unique effect. There are different ways a bullet's effect can be activated, called triggers.",
+                text: "Each bullet can have an unique effect. There are different ways a bullet's effect can be activated, called triggers.",
                 confirmationText: "Next",
                 focusActor: "card-silverBullet",
             },
