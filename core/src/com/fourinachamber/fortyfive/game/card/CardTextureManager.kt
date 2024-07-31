@@ -17,6 +17,8 @@ class CardTextureManager {
 
     private val cardTextures: MutableList<CardTextureData> = mutableListOf()
 
+    val statistics: Statistics = Statistics()
+
     fun init() {
         val cards = ConfigFileManager.getConfigFile("cards")
         cards
@@ -35,9 +37,11 @@ class CardTextureManager {
     }
 
     fun cardTextureFor(card: Card, cost: Int, damage: Int): Promise<Texture> {
+        statistics.lastLoadedCard = card.name
         val data = cardTextureDataFor(card)
         val variant = data.findVariant(cost, damage) ?: return createVariant(data, card, cost, damage)
         variant.rc++
+        statistics.cachedGets++
         return variant.texture.asPromise()
     }
 
@@ -50,6 +54,7 @@ class CardTextureManager {
         val message = ServiceThreadMessage.LoadCardPixmap(card.name)
         FortyFive.serviceThread.sendMessage(message)
         message.promise.onResolve { data.cardPixmap = it }
+        statistics.pixmapLoads++
         return message.promise
     }
 
@@ -79,6 +84,7 @@ class CardTextureManager {
                 val variant = CardTextureVariant(cost, damage, pixmap, texture)
                 data.variants.add(variant)
                 variant.rc++
+                statistics.textureDraws++
                 texture
             }
         }
@@ -136,5 +142,21 @@ class CardTextureManager {
         val texture: Texture,
         var rc: Int = 0
     )
+
+    inner class Statistics {
+
+        var cachedGets: Int = 0
+        var textureDraws: Int = 0
+        var pixmapLoads: Int = 0
+
+        var lastLoadedCard: String? = null
+
+        val loadedTextures: Int
+            get() = cardTextures.flatMap { it.variants }.count()
+
+        val textureUsages: Int
+            get() = cardTextures.flatMap { it.variants }.sumOf { it.rc }
+
+    }
 
 }

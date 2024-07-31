@@ -1,16 +1,17 @@
 package com.fourinachamber.fortyfive.rendering
 
 import com.badlogic.gdx.Gdx
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.FortyFiveLogger
 
-abstract class DebugMenuPage {
+abstract class DebugMenuPage(val name: String) {
 
     abstract fun getText(screen: OnjScreen): String
 
 }
 
-class StandardDebugMenuPage : DebugMenuPage() {
+class StandardDebugMenuPage : DebugMenuPage("Performance infos") {
 
     override fun getText(screen: OnjScreen) = """
         fps: ${Gdx.graphics.framesPerSecond}
@@ -19,4 +20,21 @@ class StandardDebugMenuPage : DebugMenuPage() {
         active style managers: ${screen.styleManagerCount()}
         version: ${FortyFiveLogger.versionTag}
     """.trimIndent()
+}
+
+class CardTextureDebugMenuPage : DebugMenuPage("Card Textures") {
+
+    override fun getText(screen: OnjScreen): String {
+        val statistics = FortyFive.cardTextureManager.statistics
+        return """
+            loaded textures: ${statistics.loadedTextures}
+            texture usages: ${statistics.textureUsages}
+            
+            cached texture gets: ${statistics.cachedGets}
+            texture draws: ${statistics.textureDraws}
+            card pixmap loads: ${statistics.pixmapLoads}
+            
+            last card get: ${statistics.lastLoadedCard}
+        """.trimIndent()
+    }
 }

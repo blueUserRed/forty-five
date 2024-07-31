@@ -113,6 +113,7 @@ open class RenderPipeline(
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
         addDebugMenuPage(StandardDebugMenuPage())
+        addDebugMenuPage(CardTextureDebugMenuPage())
     }
 
     fun nextDebugPage() {
@@ -291,9 +292,13 @@ open class RenderPipeline(
         val font = ResourceManager.get<BitmapFont>(screen, "red_wing_bmp")
         font.data.setScale(0.2f)
 
-        val pageText = debugMenuPages[currentDebugMenuPage].getText(screen)
-        var text = "Press 't' to toggle the debug menu.\nUse the arrow keys to change page\n"
-        text += "page: ${currentDebugMenuPage + 1}/${debugMenuPages.size}\n"
+        val page = debugMenuPages[currentDebugMenuPage]
+        val pageText = page.getText(screen)
+        var text = ""
+        text += "* ---${page.name}---\n"
+        text += "* Press 't' to toggle the debug menu.\n"
+        text += "* Use the arrow keys to change page\n"
+        text += "* page: ${currentDebugMenuPage + 1}/${debugMenuPages.size}\n\n"
         text += pageText
 
         val layout = GlyphLayout(
@@ -315,8 +320,8 @@ open class RenderPipeline(
         shapeRenderer.rect(
             viewport.worldWidth - 50f - layout.width,
             880f - layout.height - 50f,
-            500f,
-            500f
+            layout.width + 100f,
+            layout.height + 100f
         )
         shapeRenderer.end()
         shapeRenderer.dispose()

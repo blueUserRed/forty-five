@@ -17,6 +17,7 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
+import onj.parser.OnjParser
 import onj.value.OnjArray
 import onj.value.OnjObject
 
@@ -44,6 +45,8 @@ object FortyFive : Game() {
 
     private val mainThreadTasks: MutableList<Pair<() -> Any?, Promise<*>>> = mutableListOf()
     private val mainThreadTaskAddBuffer: MutableList<Pair<() -> Any?, Promise<*>>> = mutableListOf()
+
+    private val screenChangeCallbacks: MutableList<() -> Unit> = mutableListOf()
 
     private val tutorialEncounterContext = object : GameController.EncounterContext {
 
@@ -80,6 +83,10 @@ object FortyFive : Game() {
         val promise = Promise<T>()
         mainThreadTaskAddBuffer.add(task to promise)
         return promise
+    }
+
+    fun onScreenChange(callback: () -> Unit) {
+        screenChangeCallbacks.add(callback)
     }
 
     override fun render() {
@@ -121,6 +128,7 @@ object FortyFive : Game() {
             MapManager.invalidateCachedAssets()
             inScreenTransition = false
             ResourceManager.trimPrepared()
+            screenChangeCallbacks.forEach { it() }
         }
 
         if (currentScreen == null) {
@@ -194,8 +202,8 @@ object FortyFive : Game() {
 
 //        resetAll()
 //        newRun()
-//        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
-//        printAllCards(cards)
+        val cards = OnjParser.parseFile(Gdx.files.internal("config/cards.onj").file()) as OnjObject
+        printAllCards(cards)
 //        println(cards.get<OnjArray>("cards").value.size)
 //        println(cards.get<OnjArray>("cards").value.map {it as OnjObject}.map { it.get<String>("name") }.joinToString(separator = ",\n", transform = { "'$it'" }))
     }
