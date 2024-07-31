@@ -1,6 +1,7 @@
 package com.fourinachamber.fortyfive.screen.general.customActor
 
 import com.fourinachamber.fortyfive.game.UserPrefs
+import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import kotlin.reflect.KClass
 
 object BindTargetFactory {
@@ -45,6 +46,15 @@ object BindTargetFactory {
             getter = { UserPrefs.disableRtMechanics },
             setter = { UserPrefs.disableRtMechanics = it },
             mapOf(true to "disabled", false to "enabled")
+        ),
+        "fullScreenMode" to BindTarget(
+            Boolean::class,
+            getter = { UserPrefs.useNormalFullScreenMode },
+            setter = {
+                UserPrefs.useNormalFullScreenMode = it
+                OnjScreen.toggleFullScreen()
+                     },
+            mapOf(true to "normal", false to "borderless window")
         )
     )
 
