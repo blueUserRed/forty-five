@@ -2,7 +2,6 @@ package com.fourinachamber.fortyfive.screen.general.styles
 
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.scenes.scene2d.Actor
-import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.utils.Layout
 import com.badlogic.gdx.utils.TimeUtils
 import com.fourinachamber.fortyfive.map.MapManager
@@ -14,7 +13,6 @@ import io.github.orioncraftmc.meditate.YogaValue
 import io.github.orioncraftmc.meditate.enums.YogaUnit
 import kotlin.math.sin
 import kotlin.reflect.KClass
-import kotlin.time.measureTime
 
 interface StyledActor : HoverStateActor {
 
@@ -60,9 +58,12 @@ class StyleManager(val actor: Actor, val node: YogaNode) {
     fun addInstruction(propertyName: String, instruction: StyleInstruction<Any>, dataTypeClass: KClass<*>) {
         val property = styleProperties
             .find { it.name == propertyName && dataTypeClass == it.dataTypeClass }
-        if (property == null){
+        if (property == null) {
             //TODO ask marvin if this should log something or not... :)
-            FortyFiveLogger.warn("StyleInitialization","no style property $propertyName with type ${dataTypeClass.simpleName} for ${actor.javaClass.simpleName}")
+            FortyFiveLogger.warn(
+                "StyleInitialization",
+                "no style property $propertyName with type ${dataTypeClass.simpleName} for ${actor.javaClass.simpleName}"
+            )
             return
         }
         @Suppress("UNCHECKED_CAST") // this should be safe (I hope)
@@ -274,9 +275,9 @@ sealed class StyleCondition {
 
         override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor =
             (
-                (screen.namedActorOrError(actorName) as? HoverStateActor)
-                ?: throw RuntimeException("actor $actorName must be a HoverStateActor")
-            ).isHoveredOver
+                    (screen.namedActorOrError(actorName) as? HoverStateActor)
+                        ?: throw RuntimeException("actor $actorName must be a HoverStateActor")
+                    ).isHoveredOver
     }
 
     class ScreenState(val state: String) : StyleCondition() {
@@ -292,6 +293,13 @@ sealed class StyleCondition {
     class ActorState(val state: String) : StyleCondition() {
         override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor {
             return actor.inActorState(state)
+        }
+    }
+
+    class Parent(val condition: StyleCondition) : StyleCondition() {
+        override fun <T> check(actor: T, screen: OnjScreen): Boolean where T : Actor, T : StyledActor {
+            val parent = actor.parent
+            return parent is Actor && parent is StyledActor && condition.check(parent, screen)
         }
     }
 

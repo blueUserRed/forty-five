@@ -85,6 +85,9 @@ object StyleNamespace {
     @RegisterOnjFunction(schema = "params: [string]")
     fun actorState(state: OnjString): OnjStyleCondition = OnjStyleCondition(StyleCondition.ActorState(state.value))
 
+    @RegisterOnjFunction(schema = "use Style; params: [StyleCondition]")
+    fun parent(condition: OnjStyleCondition): OnjStyleCondition = OnjStyleCondition(StyleCondition.Parent(condition.value))
+
     @RegisterOnjFunction(schema = "use Style; params: [StyleCondition, StyleCondition]", type = OnjFunctionType.INFIX)
     fun or(first: OnjStyleCondition, second: OnjStyleCondition): OnjStyleCondition =
         OnjStyleCondition(StyleCondition.Or(first.value, second.value))
