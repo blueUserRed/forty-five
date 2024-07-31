@@ -56,7 +56,7 @@ object KeyActionFactory {
         "PreviousDebugMenuPage" to {
             {
                 _, _ ->
-                FortyFive.currentRenderPipeline?.nextDebugPage()
+                FortyFive.currentRenderPipeline?.previousDebugPage()
                 true
             }
         },
