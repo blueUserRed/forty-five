@@ -13,7 +13,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "shop_background_wasteland", "red_wing_cm", "red_wing", "red_wing_bmp", "roadgeek", "hover_detail_background", "reserves_texture",
+        "secondary_background_wasteland", "red_wing_cm", "red_wing", "red_wing_bmp", "roadgeek", "hover_detail_background", "reserves_texture",
         "heart_texture", "shop_dark_background", "forty_white_rounded", "shop_items_background",
         "backpack_scrollbar_background", "backpack_scrollbar", "card_character",
         "shop_add_to_backpack", "shop_add_to_deck",
@@ -131,7 +131,7 @@ root: $Box {
     $Image {       //TODO biome for background
 
         name: "background_img",
-        textureName: "shop_background_wasteland",
+        textureName: "secondary_background_wasteland",
         scaleX: 0.0,
         scaleY: 0.0,
         width: worldWidth,

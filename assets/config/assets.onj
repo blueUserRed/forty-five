@@ -383,12 +383,16 @@ textures: [
         file: "textures/map/player.png"
     },
     {
-        name: "map_detail_fight_button",
-        file: "textures/map/detail/fight_button.png",
+        name: "map_detail_encounter_button",
+        file: "textures/map/detail/encounter_button.png",
     },
     {
-        name: "map_detail_fight_button_hover",
-        file: "textures/map/detail/fight_button_hover.png",
+        name: "map_detail_encounter_button_hover",
+        file: "textures/map/detail/encounter_button_hover.png",
+    },
+    {
+        name: "map_detail_encounter_button_disabled",
+        file: "textures/map/detail/encounter_button_disabled.png",
     },
     {
         name: "nav_bar_background",
@@ -557,6 +561,10 @@ textures: [
     {
         name: "statusbar_option",
         file: "textures/statusbar/option.png"
+    },
+    {
+        name: "statusbar_lives",
+        file: "textures/statusbar/statusbar_lives.png"
     },
     {
         name: "backpack_1",

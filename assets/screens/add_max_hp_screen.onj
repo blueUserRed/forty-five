@@ -11,7 +11,7 @@ var worldHeight = 900.0;
 
 assets: {
     useAssets: [
-        "shop_background_wasteland",
+        "secondary_background_wasteland",
         "transparent_black_texture",
         "hover_detail_background", "red_wing_cm", "red_wing", "red_wing_bmp",
         "heal_or_max_accept",
@@ -45,8 +45,8 @@ options: {
         ...(inputMaps.defaultInputMap),
         ...(inputMaps.addMaxHPInputMap),
     ],
-    screenController: $AddMaxHPScreenController {
-    }
+    screenControllers: [$AddMaxHPScreenController {
+    }]
 },
 
 root: $Box { //TODO biomes
@@ -55,7 +55,7 @@ root: $Box { //TODO biomes
         {
             width: 100.0#percent,
             height: 100.0#percent,
-            background: "shop_background_wasteland",
+            background: "secondary_background_wasteland",
         }
     ]
 } children [
