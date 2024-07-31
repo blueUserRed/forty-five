@@ -2,6 +2,7 @@ package com.fourinachamber.fortyfive
 
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.fourinachamber.fortyfive.config.ConfigFileManager
 import com.fourinachamber.fortyfive.game.*
@@ -16,7 +17,6 @@ import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.SoundPlayer
 import com.fourinachamber.fortyfive.utils.*
 import onj.customization.OnjConfig
-import onj.parser.OnjParser
 import onj.value.OnjArray
 import onj.value.OnjObject
 
@@ -114,7 +114,7 @@ object FortyFive : Game() {
             this.currentScreen = screen
             currentRenderPipeline?.dispose()
             currentRenderPipeline = RenderPipeline(screen, screen).also {
-                it.showFps = currentRenderPipeline?.showFps ?: false
+                it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
             }
             setScreen(screen)
             // TODO: not 100% clean, this function is sometimes called when it isn't necessary
@@ -134,7 +134,7 @@ object FortyFive : Game() {
     fun useRenderPipeline(renderPipeline: RenderPipeline) {
         currentRenderPipeline?.dispose()
         currentRenderPipeline = renderPipeline.also {
-            it.showFps = currentRenderPipeline?.showFps ?: false
+            it.showDebugMenu = currentRenderPipeline?.showDebugMenu ?: false
         }
     }
 

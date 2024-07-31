@@ -529,7 +529,11 @@ $KeyAction {
 
     $DeselectAllKeyAction { }
 
-    $ToggleFpsKeyAction { }
+    $ToggleDebugMenuKeyAction { }
+
+    $NextDebugMenuPageKeyAction { }
+
+    $PreviousDebugMenuPageKeyAction { }
 
     $NextInHierarchyKeyAction { }
 

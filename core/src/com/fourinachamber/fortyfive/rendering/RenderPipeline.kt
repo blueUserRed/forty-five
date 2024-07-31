@@ -25,6 +25,7 @@ import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.OnjScreen
 import com.fourinachamber.fortyfive.utils.*
+import java.lang.Integer.min
 import java.lang.Long.max
 import kotlin.math.absoluteValue
 
@@ -38,7 +39,9 @@ open class RenderPipeline(
     private val baseRenderable: Renderable
 ) : Disposable {
 
-    var showFps: Boolean = false
+    var showDebugMenu: Boolean = false
+    private val debugMenuPages: MutableList<DebugMenuPage> = mutableListOf()
+    private var currentDebugMenuPage: Int = 0
 
     protected val frameBufferManager: FrameBufferManager = FrameBufferManager()
 
@@ -109,7 +112,26 @@ open class RenderPipeline(
     init {
         frameBufferManager.addPingPongFrameBuffer("orb",  Pixmap.Format.RGBA8888, 0.5f)
         frameBufferManager.addPingPongFrameBuffer("pp", Pixmap.Format.RGB888, 1f)
-//        postPreprocessingSteps.add(shaderPostProcessingStep(ResourceManager.get(screen, "test_shader")))
+        addDebugMenuPage(StandardDebugMenuPage())
+    }
+
+    fun nextDebugPage() {
+        currentDebugMenuPage++
+        if (currentDebugMenuPage >= debugMenuPages.size) currentDebugMenuPage = 0
+    }
+
+    fun previousDebugPage() {
+        currentDebugMenuPage--
+        if (currentDebugMenuPage < 0) currentDebugMenuPage = debugMenuPages.size - 1
+    }
+
+    fun addDebugMenuPage(page: DebugMenuPage) {
+        debugMenuPages.add(page)
+    }
+
+    fun removeDebugMenuPage(page: DebugMenuPage) {
+        debugMenuPages.remove(page)
+        currentDebugMenuPage = min(currentDebugMenuPage, debugMenuPages.size - 1)
     }
 
     fun getFadeToBlackTimeline(fadeDuration: Int, stayBlack: Boolean = false): Timeline = Timeline.timeline {
@@ -261,39 +283,24 @@ open class RenderPipeline(
         } else {
             renderWithPostProcessors(delta)
         }
-        if (!showFps) return
+        if (!showDebugMenu) return
         showPerformanceInfo()
     }
 
     private fun showPerformanceInfo() {
         val font = ResourceManager.get<BitmapFont>(screen, "red_wing_bmp")
         font.data.setScale(0.2f)
-        val fps = Gdx.graphics.framesPerSecond
-        val loadedAssets = ResourceManager
-            .resources
-            .filter { it.state == Resource.ResourceState.LOADED || it.state == Resource.ResourceState.PREPARED }
-            .size
-        val javaHeap = String.format("%.3f", Gdx.app.javaHeap.toDouble() / (1000 * 1000))
-        val nativeHeap = String.format("%.3f", Gdx.app.nativeHeap.toDouble() / (1000 * 1000))
-        var text = """
-            press 't' to toggle this display
-            fps: $fps
-            15s render lagSpike: ${screen.largestRenderTimeInLast15Sec()}ms
-            15s avg. render time: ${screen.averageRenderTimeInLast15Sec()}ms
-            active style managers: ${screen.styleManagerCount()}
-            loaded assets: $loadedAssets/${ResourceManager.resources.size}
-            version: ${FortyFiveLogger.versionTag}
-        """.trimIndent()
-//        text += """
-//
-//            javaHeap: $javaHeap
-//            nativeHeap: $nativeHeap
-//        """.trimIndent()
+
+        val pageText = debugMenuPages[currentDebugMenuPage].getText(screen)
+        var text = "Press 't' to toggle the debug menu.\nUse the arrow keys to change page\n"
+        text += "page: ${currentDebugMenuPage + 1}/${debugMenuPages.size}\n"
+        text += pageText
+
         val layout = GlyphLayout(
             font,
             text,
             Color.WHITE,
-            200f,
+            400f,
             Align.topLeft,
             false
         )
@@ -304,7 +311,7 @@ open class RenderPipeline(
         viewport.apply()
         shapeRenderer.projectionMatrix = viewport.camera.combined
         Gdx.gl.glEnable(GL20.GL_BLEND);
-        shapeRenderer.setColor(0f, 0f, 0f, 0.6f)
+        shapeRenderer.setColor(0f, 0f, 0f, 0.8f)
         shapeRenderer.rect(
             viewport.worldWidth - 50f - layout.width,
             880f - layout.height - 50f,
@@ -316,7 +323,7 @@ open class RenderPipeline(
         batch.begin()
         viewport.apply()
         batch.projectionMatrix = viewport.camera.combined
-        font.draw(batch, layout, viewport.worldWidth - 300f, 880f)
+        font.draw(batch, layout, viewport.worldWidth - layout.width - 30, 880f)
         batch.end()
     }
 
