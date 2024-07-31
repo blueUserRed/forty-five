@@ -203,7 +203,21 @@ object SaveState {
             ?.toMutableList()
             ?: run {
                 FortyFiveLogger.warn(logTag, "no cards array in savefile, falling back to some default bullets")
-                mutableListOf("bullet", "bullet", "bullet", "bigBullet") //this should NEVER happen
+                mutableListOf("bullet", "bullet", "bullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet", //TODO remove after finished testing
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+//                    "bullet", "bullet", "bigBullet",
+                ) //this should NEVER happen
             }
         FortyFiveLogger.debug(logTag, "cards: $_cards")
 
@@ -262,6 +276,7 @@ object SaveState {
         )
 
         savefileDirty = false
+//        playerLives=3 //TODO remove
     }
 
     fun earnMoney(amount: Int) {
