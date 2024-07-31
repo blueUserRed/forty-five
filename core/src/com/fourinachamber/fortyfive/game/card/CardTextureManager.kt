@@ -28,7 +28,7 @@ class CardTextureManager {
                     card.get<String>("name"),
                     mutableListOf(),
                     card.get<Long>("cost").toInt(),
-                    card.get<Long>("damage").toInt(),
+                    card.get<Long>("baseDamage").toInt(),
                 )
             }
             .forEach { cardTextures.add(it) }
