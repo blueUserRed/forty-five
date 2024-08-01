@@ -23,6 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.scenes.scene2d.utils.TransformDrawable
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.screen.ResourceHandle
 import com.fourinachamber.fortyfive.screen.ResourceManager
 import com.fourinachamber.fortyfive.screen.general.customActor.*
@@ -448,6 +449,11 @@ open class CustomFlexBox(
 
     var background: Drawable? = null
 
+    private val dropShadowShader: BetterShader? by lazy {
+        ResourceManager.get(screen, "drop_shadow_shader")
+//        ResourceManager.get(screen, "gaussian_blur_shader")
+    }
+
     override var isDisabled: Boolean = false
 
     override var isHoveredOver: Boolean = false
@@ -570,8 +576,21 @@ open class CustomFlexBox(
             val old = batch.color.a
             if (parentAlpha * alpha < 1f) batch.flush()
             batch.setColor(batch.color.r, batch.color.g, batch.color.b, parentAlpha * alpha)
-
             val background = background
+            if(name=="drop_shadow_testing_name"){
+                dropShadowShader?.let {
+                    batch.flush()
+                    it.shader.bind()
+                    it.prepare(screen)
+                    val oldShader=batch.shader
+                    val extraDist = 0.1F
+                    batch.shader = it.shader
+                    it.shader.setUniformf("u_multiplier", extraDist)
+                    background?.draw(batch, x-width*extraDist, y-height*extraDist, width*(1+extraDist*2), height*(1+extraDist*2))
+                    batch.flush()
+                    batch.shader=oldShader
+                }
+            } //else //TODO remove this else
             if (background is TransformDrawable) {
                 background.draw(batch, x, y, width / 2, height / 2, width, height, 1f, 1f, rotation)
             } else {
