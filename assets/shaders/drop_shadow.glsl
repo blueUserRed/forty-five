@@ -49,11 +49,11 @@ void main() {
             alpha += texture(u_texture, vec2(v_texCoords.x+i*stepDist,v_texCoords.y+j*stepDist)*(1.0+u_multiplier*2.0)-u_multiplier).a * curMulti;
         }
     }
-    float alphaNew=alpha/totalSum*3;
+    float alphaNew=alpha/totalSum*1;
     if (alphaNew>=1.0){
         alphaNew=1.0;
     }
-    gl_FragColor = vec4(1.0, 0.0, 0.0, alphaNew*0.8);
+    gl_FragColor = vec4(1.0, 0.0, 0.0, alphaNew*0.6);
 //    gl_FragColor = vec4(alphaNew*0.5, 0.0, 0.0, 1.0);
 
     /*else{
