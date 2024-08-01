@@ -583,12 +583,19 @@ open class CustomFlexBox(
                     it.shader.bind()
                     it.prepare(screen)
                     val oldShader=batch.shader
-                    val extraDist = 0.1F
+                    val glowDist = 0.3F
+//                    val glowDist = 0.015F
+                    val extraWidth = 1F
+                    val extraHeight = 1F
                     batch.shader = it.shader
-                    it.shader.setUniformf("u_multiplier", extraDist)
-                    background?.draw(batch, x-width*extraDist, y-height*extraDist, width*(1+extraDist*2), height*(1+extraDist*2))
+                    it.shader.setUniformf("u_multiplier", glowDist)
+                    background?.draw(batch,
+                        x-width*glowDist*extraWidth,
+                        y-height*glowDist*extraHeight,
+                        width*(1+glowDist*2*extraWidth),
+                        height*(1+glowDist*2*extraHeight))
                     batch.flush()
-                    batch.shader=oldShader
+                    batch.shader = oldShader
                 }
             } //else //TODO remove this else
             if (background is TransformDrawable) {
