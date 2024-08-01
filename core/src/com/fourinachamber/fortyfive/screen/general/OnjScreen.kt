@@ -46,7 +46,7 @@ import kotlin.system.measureTimeMillis
 /**
  * a screen that was build from an onj file.
  */
-open class OnjScreen @MainThreadOnly constructor(
+open class OnjScreen(
     val viewport: Viewport,
     batch: Batch,
     private val controllerContext: Any?,
@@ -61,7 +61,7 @@ open class OnjScreen @MainThreadOnly constructor(
     val screenBuilder: ScreenBuilder,
     val music: ResourceHandle?,
     val playAmbientSounds: Boolean
-) : ScreenAdapter(), Renderable, ResourceBorrower {
+) : ScreenAdapter(), Renderable, Lifetime, ResourceBorrower {
 
     var styleManagers: MutableList<StyleManager> = styleManagers.toMutableList()
         private set
@@ -180,10 +180,9 @@ open class OnjScreen @MainThreadOnly constructor(
 
     private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
+    private val lifetimeEndCallbacks: MutableList<() -> Unit> = mutableListOf()
+
     init {
-        useAssets.forEach {
-            ResourceManager.borrow(this, it)
-        }
         addEarlyRenderTask {
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
@@ -204,6 +203,10 @@ open class OnjScreen @MainThreadOnly constructor(
     }
 
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
+
+    override fun onEnd(callback: () -> Unit) {
+        lifetimeEndCallbacks.add(callback)
+    }
 
     @AllThreadsAllowed
     fun afterMs(ms: Int, callback: @MainThreadOnly () -> Unit) {
@@ -416,11 +419,6 @@ open class OnjScreen @MainThreadOnly constructor(
         isVisible = true
     }
 
-    fun borrowResource(handle: ResourceHandle) {
-        useAssets.add(handle)
-        ResourceManager.borrow(this, handle)
-    }
-
     fun transitionAway() {
         inputMultiplexer.clear()
         enterState(transitionAwayScreenState)
@@ -539,11 +537,8 @@ open class OnjScreen @MainThreadOnly constructor(
         hide()
         screenControllers.forEach(ScreenController::end)
         stage.dispose()
-//        toDispose.forEach(Disposable::dispose)
-        useAssets.forEach {
-            ResourceManager.giveBack(this, it)
-        }
         additionalDisposables.forEach(Disposable::dispose)
+        lifetimeEndCallbacks.forEach { it() }
     }
 
     companion object {

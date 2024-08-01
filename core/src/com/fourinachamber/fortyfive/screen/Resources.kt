@@ -14,14 +14,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable
 import com.badlogic.gdx.utils.Disposable
+import com.fourinachamber.fortyfive.FortyFive
 import com.fourinachamber.fortyfive.animation.DeferredFrameAnimation
 import com.fourinachamber.fortyfive.game.card.Card
 import com.fourinachamber.fortyfive.rendering.BetterShaderPreProcessor
-import com.fourinachamber.fortyfive.utils.AllThreadsAllowed
-import com.fourinachamber.fortyfive.utils.Either
-import com.fourinachamber.fortyfive.utils.MainThreadOnly
-import com.fourinachamber.fortyfive.utils.PixmapFont
-import kotlinx.coroutines.runBlocking
+import com.fourinachamber.fortyfive.utils.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.reflect.KClass
@@ -40,36 +37,57 @@ abstract class Resource(
 
     private val mutex = Mutex()
 
+    private var promise: Promise<Resource>? = null
+
     @MainThreadOnly
     protected abstract fun loadDirectMainThread()
 
     @AllThreadsAllowed
-    protected abstract fun prepareLoadingAllThreads()
+    abstract fun prepareLoadingAllThreads()
 
     @MainThreadOnly
-    protected abstract fun finishLoadingMainThread()
+    abstract fun finishLoadingMainThread()
 
+//    @MainThreadOnly
+//    fun <T> get(variantType: KClass<T>): T? where T : Any {
+//        if (state != ResourceState.LOADED) {
+//            runBlocking {
+//                mutex.withLock { load() }
+//            }
+//        }
+//        for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
+//        return null
+//    }
 
-    @MainThreadOnly
-    fun <T> get(variantType: KClass<T>): T? where T : Any {
-        if (state != ResourceState.LOADED) {
-            runBlocking {
-                mutex.withLock { load() }
+    fun <T : Any> request(borrower: ResourceBorrower, lifetime: Lifetime, variantType: KClass<T>): Promise<T> {
+        borrow(borrower, lifetime)
+        if (promise != null) return promise!!.map { getVariant(variantType) }
+        val message = ServiceThreadMessage.PrepareResource(this)
+        FortyFive.serviceThread.sendMessage(message)
+        promise = message.promise.chain {
+            FortyFive.mainThreadTask {
+                finishLoadingMainThread()
+                this
             }
         }
-        for (variant in variants) if (variantType.isInstance(variant)) return variantType.cast(variant)
-        return null
+        return promise!!.map { getVariant(variantType) }
     }
 
-    @MainThreadOnly
-    private fun load() {
-        if (state == ResourceState.NOT_LOADED) {
-            loadDirectMainThread()
-        } else if (state == ResourceState.PREPARED) {
-            finishLoadingMainThread()
-        }
-        state = ResourceState.LOADED
+    private fun <T : Any> getVariant(variantType: KClass<T>): T {
+        val variant = variants.find { variantType.isInstance(it) }
+            ?: throw RuntimeException("no variant of type ${variantType.simpleName} for resource $handle")
+        return variantType.cast(variant)
     }
+
+//    @MainThreadOnly
+//    private fun load() {
+//        if (state == ResourceState.NOT_LOADED) {
+//            loadDirectMainThread()
+//        } else if (state == ResourceState.PREPARED) {
+//            finishLoadingMainThread()
+//        }
+//        state = ResourceState.LOADED
+//    }
 
     @AllThreadsAllowed
     suspend fun prepare() = mutex.withLock {
@@ -78,16 +96,15 @@ abstract class Resource(
         state = ResourceState.PREPARED
     }
 
-    @MainThreadOnly
-    fun borrow(borrower: ResourceBorrower): Resource {
-        borrowedBy.add(borrower)
-        return this
+    private fun borrow(borrower: ResourceBorrower, lifetime: Lifetime) {
+        val added = borrowedBy.add(borrower)
+        if (!added) return
+        lifetime.onEnd { giveBack(borrower) }
     }
 
-    @MainThreadOnly
-    open fun giveBack(borrower: ResourceBorrower) {
+    private fun giveBack(borrower: ResourceBorrower) {
         if (!borrowedBy.remove(borrower)) return
-        if (borrowedBy.isEmpty() && !handle.startsWith(Card.cardTexturePrefix)) dispose()
+        if (borrowedBy.isEmpty()) dispose()
     }
 
     @MainThreadOnly
@@ -250,24 +267,24 @@ class AtlasRegionResource(
     }
 
     override fun finishLoadingMainThread() {
-        ResourceManager.borrow(this, atlasResourceHandle)
-        val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
-        val region = atlas.findRegion(regionName)
-        variants = listOf(region, TextureRegionDrawable(region))
+//        ResourceManager.borrow(this, atlasResourceHandle)
+//        val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
+//        val region = atlas.findRegion(regionName)
+//        variants = listOf(region, TextureRegionDrawable(region))
     }
 
     override fun loadDirectMainThread() {
-        ResourceManager.borrow(this, atlasResourceHandle)
-        val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
-        val region = atlas.findRegion(regionName)
-        variants = listOf(region, TextureRegionDrawable(region))
+//        ResourceManager.borrow(this, atlasResourceHandle)
+//        val atlas = ResourceManager.get<TextureAtlas>(this, atlasResourceHandle)
+//        val region = atlas.findRegion(regionName)
+//        variants = listOf(region, TextureRegionDrawable(region))
     }
 
     @MainThreadOnly
     override fun dispose() {
-        val atlas = ResourceManager.resources.find { it.handle == atlasResourceHandle }!!
-        if (this in atlas.borrowedBy) ResourceManager.giveBack(this, atlasResourceHandle)
-        super.dispose()
+//        val atlas = ResourceManager.resources.find { it.handle == atlasResourceHandle }!!
+//        if (this in atlas.borrowedBy) ResourceManager.giveBack(this, atlasResourceHandle)
+//        super.dispose()
     }
 
 }
