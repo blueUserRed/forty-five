@@ -46,43 +46,23 @@ class ServiceThread : Thread("ServiceThread") {
     private fun CoroutineScope.handleMessage(message: ServiceThreadMessage) {
         when (message) {
 
-            is ServiceThreadMessage.PrepareResources -> prepareResources()
             is ServiceThreadMessage.DrawCardPixmap -> drawCardPixmap(message)
             is ServiceThreadMessage.LoadAnimationResource -> loadAnimationResource(message)
-            is ServiceThreadMessage.PrepareCards -> prepareCards(message)
             is ServiceThreadMessage.LoadCardPixmap -> loadCardPixmap(message)
+            is ServiceThreadMessage.PrepareResource -> prepareResource(message)
 
         }
+    }
+
+    private fun CoroutineScope.prepareResource(message: ServiceThreadMessage.PrepareResource) = launch {
+        message.resource.prepare()
+        message.promise.resolve(message.resource)
     }
 
     private fun CoroutineScope.loadCardPixmap(message: ServiceThreadMessage.LoadCardPixmap) = launch {
         val pixmap = Pixmap(Gdx.files.internal("textures/cards/${message.name}.png"))
         println("loaded ${message.name}")
         message.promise.resolve(pixmap)
-    }
-
-    private fun CoroutineScope.prepareCards(message: ServiceThreadMessage.PrepareCards) {
-        var cards = ResourceManager
-            .resources
-            .filter { it.state == Resource.ResourceState.NOT_LOADED }
-            .filter { it.handle.startsWith(Card.cardTexturePrefix) }
-
-        if (!message.all) {
-            cards = cards.filter { it.handle.removePrefix(Card.cardTexturePrefix) in SaveState.curDeck.cards }
-        }
-
-        cards.forEach {
-            launch(Dispatchers.IO) { it.prepare() }
-        }
-    }
-
-    private fun CoroutineScope.prepareResources() {
-        ResourceManager
-            .resources
-            .filter { it.state == Resource.ResourceState.NOT_LOADED && it.borrowedBy.isNotEmpty() }
-            .forEach {
-                launch(Dispatchers.IO) { it.prepare() }
-            }
     }
 
     private fun CoroutineScope.drawCardPixmap(message: ServiceThreadMessage.DrawCardPixmap) = launch {
@@ -161,8 +141,6 @@ class ServiceThread : Thread("ServiceThread") {
 
 sealed class ServiceThreadMessage {
 
-    object PrepareResources : ServiceThreadMessage()
-
     class DrawCardPixmap(
         val pixmap: Pixmap,
         val cardTexturePixmap: Pixmap,
@@ -186,7 +164,10 @@ sealed class ServiceThreadMessage {
         var cancelled: Boolean = false
     ) : ServiceThreadMessage()
 
-    class PrepareCards(val all: Boolean) : ServiceThreadMessage()
+    class PrepareResource(
+        val resource: Resource,
+        val promise: Promise<Resource> = Promise()
+    ) : ServiceThreadMessage()
 
     override fun toString(): String = this::class.simpleName ?: ""
 

@@ -37,7 +37,7 @@ import onj.value.*
 import kotlin.math.abs
 import kotlin.math.max
 
-open class CustomLabel @AllThreadsAllowed constructor(
+open class CustomLabel(
     override val screen: OnjScreen,
     text: String,
     labelStyle: LabelStyle,
