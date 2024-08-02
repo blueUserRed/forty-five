@@ -35,7 +35,6 @@ assets: {
 
         "main_theme",
         "swoosh_sound", "button_2_sound",
-        "warp_shader",
     ]
 },
 
