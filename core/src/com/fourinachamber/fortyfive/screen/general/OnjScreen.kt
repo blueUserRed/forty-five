@@ -180,9 +180,10 @@ open class OnjScreen(
 
     private val lastRenderTimes: MutableList<Long> = mutableListOf()
 
-    private val lifetimeEndCallbacks: MutableList<() -> Unit> = mutableListOf()
+    private val lifetime: EndableLifetime = EndableLifetime()
 
     init {
+        useAssets.forEach { ResourceManager.borrow(this, it) }
         addEarlyRenderTask {
             val drawable = backgroundDrawable ?: return@addEarlyRenderTask
             drawable.draw(it, 0f, 0f, stage.viewport.worldWidth, stage.viewport.worldHeight)
@@ -205,7 +206,7 @@ open class OnjScreen(
     inline fun <reified T : ScreenController> findController(): T? = screenControllers.find { it is T } as T?
 
     override fun onEnd(callback: () -> Unit) {
-        lifetimeEndCallbacks.add(callback)
+       lifetime.onEnd(callback)
     }
 
     @AllThreadsAllowed
@@ -236,6 +237,11 @@ open class OnjScreen(
         }
 
         invalidateGroup(stage.root)
+    }
+
+    fun borrowResource(handle: ResourceHandle) {
+        useAssets.add(handle)
+        ResourceManager.borrow(this, handle)
     }
 
     @AllThreadsAllowed
@@ -538,7 +544,7 @@ open class OnjScreen(
         screenControllers.forEach(ScreenController::end)
         stage.dispose()
         additionalDisposables.forEach(Disposable::dispose)
-        lifetimeEndCallbacks.forEach { it() }
+        lifetime.die()
     }
 
     companion object {
