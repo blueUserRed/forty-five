@@ -846,6 +846,7 @@ navBar: $Box {
 statusbarCenterDefaults: {
     mapIndicatorWidgetName: "map_indicator_parent",
     optionsWidgetName: "options_parent_center",
+    backgroundWidgetName: "statusbar_overlay_background",
     styles: [
         {
             width: 100#percent,
@@ -858,6 +859,25 @@ statusbarCenterDefaults: {
         }
     ],
     children: [
+        $Box {
+            name: "statusbar_overlay_background",
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "transparent_black_texture",
+                    width: 100#percent,
+                    height: (100 / 0.14)#percent,
+                    positionType: positionType.absolute,
+                    touchable: touchable.enabled,
+                    visible: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("inStatusbarOverlay"),
+                    visible: true
+                }
+            ],
+        },
         $Box {
             zIndex: 4,
             styles: [
@@ -896,7 +916,7 @@ statusbarCenterDefaults: {
                         }
                     ],
                 },
-//                $Box {
+                //                $Box {
 //                    debug:true,
 //                    styles: [
 //                        {
@@ -979,6 +999,7 @@ statusbarCenterDefaults: {
 
 statusbarLeftDefaults: {
     optionsWidgetName: "options_parent_left",
+    backgroundWidgetName: "statusbar_overlay_background_left",
     styles: [
         {
             width: 100#percent,
@@ -991,6 +1012,25 @@ statusbarLeftDefaults: {
         }
     ],
     children: [
+        $Box {
+            name: "statusbar_overlay_background_left",
+            styles: [
+                {
+                    style_priority: 1,
+                    background: "transparent_black_texture",
+                    width: 100#percent,
+                    height: (100 / 0.14)#percent,
+                    positionType: positionType.absolute,
+                    touchable: touchable.enabled,
+                    visible: false,
+                },
+                {
+                    style_priority: 2,
+                    style_condition: state("inStatusbarOverlay"),
+                    visible: true
+                }
+            ],
+        },
         $Box {
             zIndex: 4,
             styles: [
@@ -1615,23 +1655,23 @@ var cardHoverDetailExtra = $Box {
             ]
         },
         $Box {
-            zIndex:-10,
+            zIndex: -10,
             styles: [
                 {
                     positionType: positionType.absolute,
                     background: "hover_detail_small_background_glow",
                     height: (110 * 1.6)#percent,
                     width: (100 * 1.225)#percent,
-                    positionLeft:(100 * -0.1)#percent,
-                    positionTop:(110 * -0.3)#percent,
+                    positionLeft: (100 * -0.1)#percent,
+                    positionTop: (110 * -0.3)#percent,
                     alignItems: align.center,
                     flexDirection: flexDirection.column,
-                    visible:false,
+                    visible: false,
                 },
-                    {
+                {
                     style_priority: 2,
                     style_condition: state("showHoverDetailGlow"),
-                    visible:true,
+                    visible: true,
                 }
             ],
         },
