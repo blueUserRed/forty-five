@@ -24,6 +24,7 @@ import com.fourinachamber.fortyfive.game.GraphicsConfig
 import com.fourinachamber.fortyfive.keyInput.KeyInputMap
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyBuilder
 import com.fourinachamber.fortyfive.keyInput.KeySelectionHierarchyNode
+import com.fourinachamber.fortyfive.rendering.BetterShader
 import com.fourinachamber.fortyfive.rendering.Renderable
 import com.fourinachamber.fortyfive.screen.ResourceBorrower
 import com.fourinachamber.fortyfive.screen.ResourceHandle
@@ -422,6 +423,11 @@ open class OnjScreen @MainThreadOnly constructor(
         actor.localToStageCoordinates(Vector2(actor.width / 2, actor.height / 2))
     }
 
+
+    private val warpShader : BetterShader by lazy {
+        ResourceManager.get<BetterShader>(this, "warp_shader")
+    }
+
     @MainThreadOnly
     override fun render(delta: Float) = try {
 //        Thread.sleep(800) //TODO remove // (please don't, its great to find this method)
@@ -431,6 +437,14 @@ open class OnjScreen @MainThreadOnly constructor(
             if (stage.batch.isDrawing) stage.batch.end()
             stage.viewport.apply()
             doRenderTasks(earlyRenderTasks, additionalEarlyRenderTasks)
+            if (namedActorOrNull("myTestScreenForWarp") != null){
+                warpShader.let {
+                    stage.batch.flush()
+                    it.shader.bind()
+                    it.prepare(this)
+                    stage.batch.shader = it.shader
+                }
+            }
             stage.draw()
             doRenderTasks(lateRenderTasks, additionalLateRenderTasks)
             styleManagers

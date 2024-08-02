@@ -1213,6 +1213,12 @@ shaders: [
         }
     },
     {
+        name: "warp_shader",
+        file: "shaders/warp.glsl",
+        constantArgs: {
+        }
+    },
+    {
         name: "slider_shader",
         file: "shaders/slider.glsl",
         constantArgs: {

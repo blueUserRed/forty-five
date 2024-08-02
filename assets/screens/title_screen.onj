@@ -35,6 +35,7 @@ assets: {
 
         "main_theme",
         "swoosh_sound", "button_2_sound",
+        "warp_shader",
     ]
 },
 
@@ -99,6 +100,7 @@ var confirmationPopup = $Box {
 } children [
 
     $Box {
+        name:"myTestScreenForWarp",
         styles: [
             {
                 width: 1_100#points,
