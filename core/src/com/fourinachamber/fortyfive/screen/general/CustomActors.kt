@@ -583,17 +583,33 @@ open class CustomFlexBox(
                     it.shader.bind()
                     it.prepare(screen)
                     val oldShader=batch.shader
-                    val glowDist = 0.3F
+                    val glowDist = 0.05F                  //drop shadow config
 //                    val glowDist = 0.015F
-                    val extraWidth = 1F
-                    val extraHeight = 1F
+                    val extraWidth = 1F/1.2F
+                    val extraHeight = 1F/1.2F
+                    val offset= Vector2(0.02F,0.1F)
+//                    val glowDist = 0.05F                    //glow config
+////                    val glowDist = 0.015F
+//                    val extraWidth = 1F
+//                    val extraHeight = 1F
+//                    val offset= Vector2(0.0F,0.0F)
                     batch.shader = it.shader
                     it.shader.setUniformf("u_multiplier", glowDist)
+                    it.shader.setUniformf("u_color", Color.GREEN)
+                    it.shader.setUniformf("u_offset", offset)
                     background?.draw(batch,
                         x-width*glowDist*extraWidth,
                         y-height*glowDist*extraHeight,
                         width*(1+glowDist*2*extraWidth),
                         height*(1+glowDist*2*extraHeight))
+
+//                    it.shader.setUniformf("u_radius", 30F)
+//                    it.shader.setUniformf("u_dir", Vector2(0F,0.001F))
+//                    background?.draw(batch, x, y+height*2, width, height)
+//                    batch.flush()
+//                    it.shader.setUniformf("u_radius", 30F)
+//                    it.shader.setUniformf("u_dir", Vector2(0.001F,0F))
+//                    background?.draw(batch, x, y+height*2, width, height)
                     batch.flush()
                     batch.shader = oldShader
                 }
