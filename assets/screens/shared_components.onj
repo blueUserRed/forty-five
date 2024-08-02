@@ -235,6 +235,48 @@ var settingsBox = $Box {
             }
         ],
 
+        $Box {
+            styles: [
+                {
+                    height: 40#points,
+                    marginTop: 20#points,
+                    alignItems: align.center,
+                    flexDirection: flexDirection.row,
+                    justifyContent: justify.spaceBetween,
+                    background: "single_setting_background",
+                    width: (worldWidth * 0.45)#points,
+                }
+            ]
+        } children [
+            $Label {
+                styles: [
+                    {
+                        positionLeft: 40#points,
+                    }
+                ],
+                font: "red_wing",
+                text: "Fullscreen type: ",
+                fontScale: 0.8,
+                color: color.forty_white,
+            },
+
+            $Selector {
+                styles: [
+                    {
+                        height: 40#points,
+                        width: 250#points,
+                        positionRight: 40#points,
+                    }
+                ],
+                arrowTexture: "common_symbol_arrow",
+                arrowWidth: 20.0,
+                arrowHeight: 20.0,
+                bindTo: "fullScreenMode",
+                font: "red_wing",
+                fontScale: 0.8,
+            }
+        ],
+
 
         $Label {
             styles: [
@@ -394,7 +436,7 @@ navBarUsedAssets: [
     "red_wing_cm", "location_sign_salem", "statusbar_background", "nav_bar_background", "location_name_aqua_balle",
     "location_name_salem", "location_name_tabuletter_outpost", "location_name_spire_outpost", "statusbar_option",
     "reserves_texture", "statusbar_background_left", "heart_texture",
-    "cash_symbol",
+    "cash_symbol", "statusbar_lives",
     "button_1_sound",
     ...(settingsUsedAssets),
 ],
@@ -842,25 +884,39 @@ statusbarCenterDefaults: {
                 ],
             } children [
                 $Image {
-                    textureName: "heart_texture",
+                    textureName: "statusbar_lives",
                     name: "player_health_icon",
                     scaleX: 0.1,
                     scaleY: 0.1,
                     reportDimensionsWithScaling: true,
                     styles: [
                         {
-                            height: 70#percent,
-                            aspectRatio: 1.0
+                            height: 60#percent,
+                            aspectRatio: 1.2121
                         }
                     ],
                 },
+//                $Box {
+//                    debug:true,
+//                    styles: [
+//                        {
+//                            width: 10#percent,
+//                            height: 1#percent,
+//                        }
+//                    ],
+//                },
                 $TemplateLabel {
                     template: "{stat.playerLives}/{stat.maxPlayerLives}",
 
                     font: "red_wing_cm",
                     color: color.forty_white,
                     fontScale: 0.9,
-                    align: "center",
+                    align: "right",
+                    styles: [
+                        {
+                            marginLeft: 10#points,
+                        }
+                    ],
                 }
             ],
             $Box {
@@ -885,24 +941,24 @@ statusbarCenterDefaults: {
                     }
                 ],
             } children [
-                $TemplateLabel {
-                    template: "{stat.playerMoney} ",
-                    font: "red_wing_cm",
-                    color: color.forty_white,
-                    fontScale: 0.9,
-                    align: "center",
-                },
                 $Box {
                     name: "cash_symbol",
                     styles: [
                         {
                             background: "cash_symbol",
-                            width: 30#points,
-                            aspectRatio: 1.0,
+                            width: 40#points,
+                            aspectRatio: 1.4,
                             marginLeft: 10#points
                         }
                     ]
-                }
+                },
+                $TemplateLabel {
+                    template: "  ${stat.playerMoney}",
+                    font: "red_wing_cm",
+                    color: color.forty_white,
+                    fontScale: 0.9,
+                    align: "center",
+                },
             ],
         ],
         $Box {
