@@ -97,9 +97,7 @@ var confirmationPopup = $Box {
     ],
     touchable: "enabled"
 } children [
-
     $Box {
-        name:"myTestScreenForWarp",
         styles: [
             {
                 width: 1_100#points,
